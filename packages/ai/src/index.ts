@@ -263,6 +263,24 @@ export type AiMatchProgressionMetrics = {
   scoreActionTakeRate: number;
   scoreOrStealActions: number;
   scoreOrStealActionsPerMatch: number;
+  actionLedToProgressWithin1: number;
+  actionLedToProgressWithin2: number;
+  actionLedToProgressWithin3: number;
+  planIntentConverted: number;
+  planIntentAbandoned: number;
+  samePlanRepeatedWithoutProgress: number;
+  setupActionConvertedToRun: number;
+  economyActionConvertedToRun: number;
+  rigActionConvertedToRun: number;
+  remoteBuildConvertedToAdvanceOrScore: number;
+  advanceConvertedToScore: number;
+  remoteContestConvertedToStealOrTrash: number;
+  centralPressureConvertedToSteal: number;
+  noProgressActionChainLength: number;
+  longestNoProgressChain: number;
+  turnsWithNoProgress: number;
+  actionsUntilNextScoreOrSteal: number;
+  actionsUntilNextMeaningfulBoardProgress: number;
   advancedAgendaSteals: number;
   advancedAgendaStealsFromRemote: number;
   advancedAgendaStealsFromCentral: number;
@@ -294,9 +312,53 @@ export type AiMatchProgressionMetrics = {
   repeatedLowValueCentralRuns: number;
   centralRunStreakWithoutValue: number;
   centralRunStartedWithInsufficientPostRunReserve: number;
+  trueCentralCloseoutOpportunities: number;
+  centralCloseoutOpportunitiesRaw: number;
+  centralCloseoutOpportunitiesDeduped: number;
   centralCloseoutOpportunities: number;
   centralCloseoutRunsTaken: number;
   centralCloseoutSuccesses: number;
+  centralCloseoutFalsePositiveRate: number;
+  centralCloseoutSkippedWithGoodReason: number;
+  centralCloseoutSkippedWithoutReason: number;
+  centralRunRepeatWindowsRaw: number;
+  centralRunRepeatWindowsDeduped: number;
+  repeatedCentralRunsWithFreshValue: number;
+  repeatedCentralRunsWithoutFreshValue: number;
+  centralRunInsteadUnjustified: number;
+  centralRunJustifiedByMultiaccess: number;
+  centralRunJustifiedByInterface: number;
+  centralRunJustifiedByCloseout: number;
+  centralRunJustifiedByRemoteUncontestable: number;
+  centralRunJustifiedByHqPressure: number;
+  centralRunJustifiedByRndFreshness: number;
+  centralRunStalePenaltyApplied: number;
+  centralPressureNoopDecisions: number;
+  noFreshCentralWindows: number;
+  noFreshCentralRunsTaken: number;
+  noFreshCentralSubstitutions: number;
+  noFreshCentralSubstitutionRate: number;
+  noFreshCentralSubstitutionEconomy: number;
+  noFreshCentralSubstitutionRigUnlock: number;
+  noFreshCentralSubstitutionRemoteContest: number;
+  noFreshCentralSubstitutionPressureInstall: number;
+  noFreshCentralSubstitutionSetupSearch: number;
+  noFreshCentralSubstitutionEndTurn: number;
+  noFreshCentralWithBetterAlternative: number;
+  noFreshCentralWithoutBetterAlternative: number;
+  staleCentralChosenDespiteEconomy: number;
+  staleCentralChosenDespiteRigUnlock: number;
+  staleCentralChosenDespiteRemoteContest: number;
+  staleCentralChosenDespitePressureInstall: number;
+  staleCentralAllowedWithReason: number;
+  staleCentralAllowedCloseout: number;
+  staleCentralAllowedInterface: number;
+  staleCentralAllowedMultiaccess: number;
+  staleCentralAllowedRemoteUncontestable: number;
+  staleCentralAllowedCentralOpen: number;
+  staleCentralAllowedNoBetterAction: number;
+  alternativeChosenAfterStaleCentralPenalty: number;
+  substitutionLedToProgression: number;
   interfaceInstallOpportunities: number;
   interfaceInstallsTaken: number;
   interfaceInstalledButUnusedTurns: number;
@@ -1023,9 +1085,31 @@ export type AiSimulationSummary = {
     runnerRepeatedLowValueCentralRun?: boolean;
     runnerCentralRunStreakWithoutValue?: number;
     runnerCentralRunStartedWithInsufficientPostRunReserve?: boolean;
+    runnerTrueCentralCloseoutOpportunity?: boolean;
+    runnerCentralCloseoutOpportunityRaw?: boolean;
+    runnerCentralCloseoutSkippedWithGoodReason?: boolean;
+    runnerCentralCloseoutSkippedWithoutReason?: boolean;
     runnerCentralCloseoutOpportunity?: boolean;
     runnerCentralCloseoutRunTaken?: boolean;
     runnerCentralCloseoutSuccess?: boolean;
+    runnerCentralCloseoutReason?: string;
+    runnerCentralRunRepeatWindow?: boolean;
+    runnerRepeatedCentralRunWithFreshValue?: boolean;
+    runnerRepeatedCentralRunWithoutFreshValue?: boolean;
+    runnerCentralRunStalePenaltyApplied?: boolean;
+    runnerCentralPressureNoopDecision?: boolean;
+    runnerCentralRunJustificationReason?: string;
+    runnerNoFreshCentralServerIds?: string[];
+    runnerNoFreshCentralRunTaken?: boolean;
+    runnerNoFreshCentralSubstitutionType?:
+      | "economy"
+      | "rig_unlock"
+      | "remote_contest"
+      | "pressure_install"
+      | "setup_search"
+      | "end_turn";
+    runnerNoFreshCentralBetterAlternativeTypes?: string[];
+    runnerStaleCentralAllowedReason?: string;
     runnerInterfaceInstallOpportunity?: boolean;
     runnerInterfaceInstallTaken?: boolean;
     runnerInterfaceInstalledButUnusedTurn?: boolean;
@@ -2665,6 +2749,48 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.delta.scoreOrStealActionsPerMatch,
     ],
     [
+      "actionLedToProgressWithin3",
+      benchmark.baseline.actionLedToProgressWithin3,
+      benchmark.candidate.actionLedToProgressWithin3,
+      benchmark.delta.actionLedToProgressWithin3,
+    ],
+    [
+      "planIntentConverted",
+      benchmark.baseline.planIntentConverted,
+      benchmark.candidate.planIntentConverted,
+      benchmark.delta.planIntentConverted,
+    ],
+    [
+      "planIntentAbandoned",
+      benchmark.baseline.planIntentAbandoned,
+      benchmark.candidate.planIntentAbandoned,
+      benchmark.delta.planIntentAbandoned,
+    ],
+    [
+      "samePlanRepeatedWithoutProgress",
+      benchmark.baseline.samePlanRepeatedWithoutProgress,
+      benchmark.candidate.samePlanRepeatedWithoutProgress,
+      benchmark.delta.samePlanRepeatedWithoutProgress,
+    ],
+    [
+      "longestNoProgressChain",
+      benchmark.baseline.longestNoProgressChain,
+      benchmark.candidate.longestNoProgressChain,
+      benchmark.delta.longestNoProgressChain,
+    ],
+    [
+      "actionsUntilNextScoreOrSteal",
+      benchmark.baseline.actionsUntilNextScoreOrSteal,
+      benchmark.candidate.actionsUntilNextScoreOrSteal,
+      benchmark.delta.actionsUntilNextScoreOrSteal,
+    ],
+    [
+      "actionsUntilNextMeaningfulBoardProgress",
+      benchmark.baseline.actionsUntilNextMeaningfulBoardProgress,
+      benchmark.candidate.actionsUntilNextMeaningfulBoardProgress,
+      benchmark.delta.actionsUntilNextMeaningfulBoardProgress,
+    ],
+    [
       "advancedAgendaSteals",
       benchmark.baseline.advancedAgendaSteals,
       benchmark.candidate.advancedAgendaSteals,
@@ -2809,6 +2935,24 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.delta.centralRunStreakWithoutValue,
     ],
     [
+      "trueCentralCloseoutOpportunities",
+      benchmark.baseline.trueCentralCloseoutOpportunities,
+      benchmark.candidate.trueCentralCloseoutOpportunities,
+      benchmark.delta.trueCentralCloseoutOpportunities,
+    ],
+    [
+      "centralCloseoutOpportunitiesRaw",
+      benchmark.baseline.centralCloseoutOpportunitiesRaw,
+      benchmark.candidate.centralCloseoutOpportunitiesRaw,
+      benchmark.delta.centralCloseoutOpportunitiesRaw,
+    ],
+    [
+      "centralCloseoutOpportunitiesDeduped",
+      benchmark.baseline.centralCloseoutOpportunitiesDeduped,
+      benchmark.candidate.centralCloseoutOpportunitiesDeduped,
+      benchmark.delta.centralCloseoutOpportunitiesDeduped,
+    ],
+    [
       "centralCloseoutOpportunities",
       benchmark.baseline.centralCloseoutOpportunities,
       benchmark.candidate.centralCloseoutOpportunities,
@@ -2825,6 +2969,30 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.baseline.centralCloseoutSuccesses,
       benchmark.candidate.centralCloseoutSuccesses,
       benchmark.delta.centralCloseoutSuccesses,
+    ],
+    [
+      "centralCloseoutFalsePositiveRate",
+      benchmark.baseline.centralCloseoutFalsePositiveRate,
+      benchmark.candidate.centralCloseoutFalsePositiveRate,
+      benchmark.delta.centralCloseoutFalsePositiveRate,
+    ],
+    [
+      "repeatedCentralRunsWithFreshValue",
+      benchmark.baseline.repeatedCentralRunsWithFreshValue,
+      benchmark.candidate.repeatedCentralRunsWithFreshValue,
+      benchmark.delta.repeatedCentralRunsWithFreshValue,
+    ],
+    [
+      "centralRunInsteadUnjustified",
+      benchmark.baseline.centralRunInsteadUnjustified,
+      benchmark.candidate.centralRunInsteadUnjustified,
+      benchmark.delta.centralRunInsteadUnjustified,
+    ],
+    [
+      "centralRunStalePenaltyApplied",
+      benchmark.baseline.centralRunStalePenaltyApplied,
+      benchmark.candidate.centralRunStalePenaltyApplied,
+      benchmark.delta.centralRunStalePenaltyApplied,
     ],
     [
       "successfulRemoteRuns",
@@ -5011,8 +5179,8 @@ function isSearchChoice(
 ): boolean {
   return Boolean(
     choice.cardSearchPresentation ||
-      choice.stackSearchResolution ||
-      /search|stack/i.test(choice.source),
+    choice.stackSearchResolution ||
+    /search|stack/i.test(choice.source),
   );
 }
 
@@ -6466,6 +6634,24 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "scoreActionTakeRate",
   "scoreOrStealActions",
   "scoreOrStealActionsPerMatch",
+  "actionLedToProgressWithin1",
+  "actionLedToProgressWithin2",
+  "actionLedToProgressWithin3",
+  "planIntentConverted",
+  "planIntentAbandoned",
+  "samePlanRepeatedWithoutProgress",
+  "setupActionConvertedToRun",
+  "economyActionConvertedToRun",
+  "rigActionConvertedToRun",
+  "remoteBuildConvertedToAdvanceOrScore",
+  "advanceConvertedToScore",
+  "remoteContestConvertedToStealOrTrash",
+  "centralPressureConvertedToSteal",
+  "noProgressActionChainLength",
+  "longestNoProgressChain",
+  "turnsWithNoProgress",
+  "actionsUntilNextScoreOrSteal",
+  "actionsUntilNextMeaningfulBoardProgress",
   "advancedAgendaSteals",
   "advancedAgendaStealsFromRemote",
   "advancedAgendaStealsFromCentral",
@@ -6497,9 +6683,53 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "repeatedLowValueCentralRuns",
   "centralRunStreakWithoutValue",
   "centralRunStartedWithInsufficientPostRunReserve",
+  "trueCentralCloseoutOpportunities",
+  "centralCloseoutOpportunitiesRaw",
+  "centralCloseoutOpportunitiesDeduped",
   "centralCloseoutOpportunities",
   "centralCloseoutRunsTaken",
   "centralCloseoutSuccesses",
+  "centralCloseoutFalsePositiveRate",
+  "centralCloseoutSkippedWithGoodReason",
+  "centralCloseoutSkippedWithoutReason",
+  "centralRunRepeatWindowsRaw",
+  "centralRunRepeatWindowsDeduped",
+  "repeatedCentralRunsWithFreshValue",
+  "repeatedCentralRunsWithoutFreshValue",
+  "centralRunInsteadUnjustified",
+  "centralRunJustifiedByMultiaccess",
+  "centralRunJustifiedByInterface",
+  "centralRunJustifiedByCloseout",
+  "centralRunJustifiedByRemoteUncontestable",
+  "centralRunJustifiedByHqPressure",
+  "centralRunJustifiedByRndFreshness",
+  "centralRunStalePenaltyApplied",
+  "centralPressureNoopDecisions",
+  "noFreshCentralWindows",
+  "noFreshCentralRunsTaken",
+  "noFreshCentralSubstitutions",
+  "noFreshCentralSubstitutionRate",
+  "noFreshCentralSubstitutionEconomy",
+  "noFreshCentralSubstitutionRigUnlock",
+  "noFreshCentralSubstitutionRemoteContest",
+  "noFreshCentralSubstitutionPressureInstall",
+  "noFreshCentralSubstitutionSetupSearch",
+  "noFreshCentralSubstitutionEndTurn",
+  "noFreshCentralWithBetterAlternative",
+  "noFreshCentralWithoutBetterAlternative",
+  "staleCentralChosenDespiteEconomy",
+  "staleCentralChosenDespiteRigUnlock",
+  "staleCentralChosenDespiteRemoteContest",
+  "staleCentralChosenDespitePressureInstall",
+  "staleCentralAllowedWithReason",
+  "staleCentralAllowedCloseout",
+  "staleCentralAllowedInterface",
+  "staleCentralAllowedMultiaccess",
+  "staleCentralAllowedRemoteUncontestable",
+  "staleCentralAllowedCentralOpen",
+  "staleCentralAllowedNoBetterAction",
+  "alternativeChosenAfterStaleCentralPenalty",
+  "substitutionLedToProgression",
   "interfaceInstallOpportunities",
   "interfaceInstallsTaken",
   "interfaceInstalledButUnusedTurns",
@@ -6836,6 +7066,9 @@ export function summarizeMatchProgressionMetrics(
   );
   const advancedRemoteThreatMetrics =
     summarizeAdvancedRemoteThreatMetrics(summaries);
+  const centralCloseoutRepeatMetrics =
+    summarizeCentralCloseoutRepeatMetrics(summaries);
+  const planConversionMetrics = summarizePlanConversionMetrics(summaries);
   const runnerHandUseOpportunityWindows = actionSequence.filter(
     (entry) => entry.runnerHandUseOpportunity === true,
   ).length;
@@ -6844,8 +7077,7 @@ export function summarizeMatchProgressionMetrics(
   ).length;
   const runnerCreditEntries = actionSequence.filter(
     (entry) =>
-      entry.side === "runner" &&
-      typeof entry.runnerCreditsBefore === "number",
+      entry.side === "runner" && typeof entry.runnerCreditsBefore === "number",
   );
   const runnerEndTurnCreditEntries = actionSequence.filter(
     (entry) =>
@@ -6895,6 +7127,7 @@ export function summarizeMatchProgressionMetrics(
     scoreOrStealActionsPerMatch: round(
       (runnerSteals + corpScores) / Math.max(games, 1),
     ),
+    ...planConversionMetrics,
     advancedAgendaSteals,
     advancedAgendaStealsFromRemote,
     advancedAgendaStealsFromCentral,
@@ -6978,21 +7211,15 @@ export function summarizeMatchProgressionMetrics(
     ).length,
     centralRunStreakWithoutValue: Math.max(
       0,
-      ...runnerRuns.map((entry) => entry.runnerCentralRunStreakWithoutValue ?? 0),
+      ...runnerRuns.map(
+        (entry) => entry.runnerCentralRunStreakWithoutValue ?? 0,
+      ),
     ),
     centralRunStartedWithInsufficientPostRunReserve: runnerRuns.filter(
       (entry) =>
         entry.runnerCentralRunStartedWithInsufficientPostRunReserve === true,
     ).length,
-    centralCloseoutOpportunities: actionSequence.filter(
-      (entry) => entry.runnerCentralCloseoutOpportunity === true,
-    ).length,
-    centralCloseoutRunsTaken: runnerRuns.filter(
-      (entry) => entry.runnerCentralCloseoutRunTaken === true,
-    ).length,
-    centralCloseoutSuccesses: actionSequence.filter(
-      (entry) => entry.runnerCentralCloseoutSuccess === true,
-    ).length,
+    ...centralCloseoutRepeatMetrics,
     interfaceInstallOpportunities: actionSequence.filter(
       (entry) => entry.runnerInterfaceInstallOpportunity === true,
     ).length,
@@ -7475,6 +7702,757 @@ function averageRunnerContestRisk(
   return round(values.reduce((sum, value) => sum + value, 0) / values.length);
 }
 
+type PlanConversionActionEntry = AiSimulationSummary["actionSequence"][number];
+
+function summarizePlanConversionMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "actionLedToProgressWithin1"
+  | "actionLedToProgressWithin2"
+  | "actionLedToProgressWithin3"
+  | "planIntentConverted"
+  | "planIntentAbandoned"
+  | "samePlanRepeatedWithoutProgress"
+  | "setupActionConvertedToRun"
+  | "economyActionConvertedToRun"
+  | "rigActionConvertedToRun"
+  | "remoteBuildConvertedToAdvanceOrScore"
+  | "advanceConvertedToScore"
+  | "remoteContestConvertedToStealOrTrash"
+  | "centralPressureConvertedToSteal"
+  | "noProgressActionChainLength"
+  | "longestNoProgressChain"
+  | "turnsWithNoProgress"
+  | "actionsUntilNextScoreOrSteal"
+  | "actionsUntilNextMeaningfulBoardProgress"
+> {
+  let actionLedToProgressWithin1 = 0;
+  let actionLedToProgressWithin2 = 0;
+  let actionLedToProgressWithin3 = 0;
+  let planIntentConverted = 0;
+  let planIntentAbandoned = 0;
+  let samePlanRepeatedWithoutProgress = 0;
+  let setupActionConvertedToRun = 0;
+  let economyActionConvertedToRun = 0;
+  let rigActionConvertedToRun = 0;
+  let remoteBuildConvertedToAdvanceOrScore = 0;
+  let advanceConvertedToScore = 0;
+  let remoteContestConvertedToStealOrTrash = 0;
+  let centralPressureConvertedToSteal = 0;
+  let longestNoProgressChain = 0;
+
+  const noProgressChains: number[] = [];
+  const scoreOrStealDistances: number[] = [];
+  const boardProgressDistances: number[] = [];
+  const turnsWithActions = new Set<string>();
+  const turnsWithProgress = new Set<string>();
+
+  for (const summary of summaries) {
+    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
+    const lastPlanBySide: Partial<
+      Record<Side, { planKind: string; progressSince: boolean }>
+    > = {};
+    let noProgressChain = 0;
+
+    sequence.forEach((entry, index) => {
+      const turnKey = `${summary.seed}|${entry.turnNumber ?? 0}`;
+      turnsWithActions.add(turnKey);
+      const hasProgress = isMeaningfulBoardProgress(entry);
+      if (hasProgress) turnsWithProgress.add(turnKey);
+
+      if (hasProgress) {
+        if (noProgressChain > 0) noProgressChains.push(noProgressChain);
+        longestNoProgressChain = Math.max(
+          longestNoProgressChain,
+          noProgressChain,
+        );
+        noProgressChain = 0;
+      } else {
+        noProgressChain += 1;
+      }
+
+      if (hasMeaningfulProgressWithin(sequence, index, 1))
+        actionLedToProgressWithin1 += 1;
+      if (hasMeaningfulProgressWithin(sequence, index, 2))
+        actionLedToProgressWithin2 += 1;
+      if (hasMeaningfulProgressWithin(sequence, index, 3))
+        actionLedToProgressWithin3 += 1;
+
+      const planKind = planKindForConversion(entry);
+      if (planKind) {
+        const lastPlan = lastPlanBySide[entry.side];
+        if (
+          lastPlan?.planKind === planKind &&
+          lastPlan.progressSince === false
+        ) {
+          samePlanRepeatedWithoutProgress += 1;
+        }
+        const converted = planIntentConvertedWithin(sequence, index, planKind);
+        if (converted) planIntentConverted += 1;
+        else if (!hasMeaningfulProgressWithin(sequence, index, 3))
+          planIntentAbandoned += 1;
+        lastPlanBySide[entry.side] = { planKind, progressSince: false };
+      }
+
+      if (setupActionConvertsToRun(sequence, index))
+        setupActionConvertedToRun += 1;
+      if (economyActionConvertsToRun(sequence, index))
+        economyActionConvertedToRun += 1;
+      if (rigActionConvertsToRun(sequence, index)) rigActionConvertedToRun += 1;
+      if (remoteBuildConvertsToAdvanceOrScore(sequence, index))
+        remoteBuildConvertedToAdvanceOrScore += 1;
+      if (advanceConvertsToScore(sequence, index)) advanceConvertedToScore += 1;
+      if (remoteContestConvertsToStealOrTrash(sequence, index))
+        remoteContestConvertedToStealOrTrash += 1;
+      if (centralPressureConvertsToSteal(sequence, index))
+        centralPressureConvertedToSteal += 1;
+
+      const scoreOrStealDistance = actionsUntil(
+        sequence,
+        index,
+        (candidate) =>
+          candidate.actionType === "score_agenda" ||
+          candidate.actionType === "steal_agenda",
+      );
+      if (scoreOrStealDistance !== undefined)
+        scoreOrStealDistances.push(scoreOrStealDistance);
+      const boardProgressDistance = actionsUntil(
+        sequence,
+        index,
+        isMeaningfulBoardProgress,
+      );
+      if (boardProgressDistance !== undefined)
+        boardProgressDistances.push(boardProgressDistance);
+
+      if (hasProgress) {
+        for (const side of Object.keys(lastPlanBySide) as Side[]) {
+          const lastPlan = lastPlanBySide[side];
+          if (lastPlan) lastPlan.progressSince = true;
+        }
+      }
+    });
+
+    if (noProgressChain > 0) {
+      noProgressChains.push(noProgressChain);
+      longestNoProgressChain = Math.max(
+        longestNoProgressChain,
+        noProgressChain,
+      );
+    }
+  }
+
+  return {
+    actionLedToProgressWithin1,
+    actionLedToProgressWithin2,
+    actionLedToProgressWithin3,
+    planIntentConverted,
+    planIntentAbandoned,
+    samePlanRepeatedWithoutProgress,
+    setupActionConvertedToRun,
+    economyActionConvertedToRun,
+    rigActionConvertedToRun,
+    remoteBuildConvertedToAdvanceOrScore,
+    advanceConvertedToScore,
+    remoteContestConvertedToStealOrTrash,
+    centralPressureConvertedToSteal,
+    noProgressActionChainLength: averageNumber(noProgressChains),
+    longestNoProgressChain,
+    turnsWithNoProgress: [...turnsWithActions].filter(
+      (turnKey) => !turnsWithProgress.has(turnKey),
+    ).length,
+    actionsUntilNextScoreOrSteal: averageNumber(scoreOrStealDistances),
+    actionsUntilNextMeaningfulBoardProgress: averageNumber(
+      boardProgressDistances,
+    ),
+  };
+}
+
+function hasMeaningfulProgressWithin(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  windowActions: number,
+): boolean {
+  return sequence
+    .slice(index, index + windowActions + 1)
+    .some(isMeaningfulBoardProgress);
+}
+
+function actionsUntil(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  predicate: (entry: PlanConversionActionEntry) => boolean,
+): number | undefined {
+  for (
+    let candidateIndex = index;
+    candidateIndex < sequence.length;
+    candidateIndex += 1
+  ) {
+    if (predicate(sequence[candidateIndex]!)) return candidateIndex - index;
+  }
+  return undefined;
+}
+
+function nextEntries(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  windowActions = 3,
+): PlanConversionActionEntry[] {
+  return sequence.slice(index + 1, index + windowActions + 1);
+}
+
+function planKindForConversion(
+  entry: PlanConversionActionEntry,
+): string | undefined {
+  const explicitPlan = entry.reasonCode?.match(
+    /^(?:runner|corp)\.plan\.([a-z0-9_]+)/i,
+  )?.[1];
+  if (explicitPlan) return explicitPlan;
+  if (isRunnerSetupAction(entry)) return "setup";
+  if (isRunnerEconomyProgressAction(entry)) return "economy";
+  if (isRunnerRigProgressAction(entry)) return "rig";
+  if (isCorpRemoteBuildAction(entry)) return "remote_build";
+  if (isCorpRemoteAdvancementProgress(entry)) return "advance";
+  if (isRunnerRemoteContestRun(entry)) return "remote_contest";
+  if (isRunnerCentralPressureAction(entry)) return "central_pressure";
+  return undefined;
+}
+
+function planIntentConvertedWithin(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  planKind: string,
+): boolean {
+  if (planKind.includes("setup") || planKind.includes("draw"))
+    return setupActionConvertsToRun(sequence, index);
+  if (planKind.includes("economy"))
+    return economyActionConvertsToRun(sequence, index);
+  if (planKind.includes("rig") || planKind.includes("breaker"))
+    return (
+      rigActionConvertsToRun(sequence, index) ||
+      isMeaningfulBoardProgress(sequence[index]!)
+    );
+  if (planKind.includes("remote_build") || planKind.includes("protect"))
+    return remoteBuildConvertsToAdvanceOrScore(sequence, index);
+  if (planKind.includes("advance"))
+    return advanceConvertsToScore(sequence, index);
+  if (planKind.includes("remote_contest"))
+    return remoteContestConvertsToStealOrTrash(sequence, index);
+  if (planKind.includes("central") || planKind.includes("pressure"))
+    return centralPressureConvertsToSteal(sequence, index);
+  return hasMeaningfulProgressWithin(sequence, index, 3);
+}
+
+function setupActionConvertsToRun(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  if (!isRunnerSetupAction(sequence[index]!)) return false;
+  return nextEntries(sequence, index).some(
+    (entry, offset) =>
+      entry.side === "runner" &&
+      entry.actionType === "start_run" &&
+      runnerRunHasFollowupValue(sequence, index + offset + 1),
+  );
+}
+
+function economyActionConvertsToRun(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  if (!isRunnerEconomyProgressAction(sequence[index]!)) return false;
+  return nextEntries(sequence, index).some(
+    (entry, offset) =>
+      entry.side === "runner" &&
+      entry.actionType === "start_run" &&
+      runnerRunHasFollowupValue(sequence, index + offset + 1),
+  );
+}
+
+function rigActionConvertsToRun(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  if (!isRunnerRigProgressAction(sequence[index]!)) return false;
+  return nextEntries(sequence, index).some(
+    (entry, offset) =>
+      entry.side === "runner" &&
+      entry.actionType === "start_run" &&
+      runnerRunHasFollowupValue(sequence, index + offset + 1),
+  );
+}
+
+function remoteBuildConvertsToAdvanceOrScore(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  const entry = sequence[index]!;
+  if (!isCorpRemoteBuildAction(entry)) return false;
+  return nextEntries(sequence, index).some(
+    (later) =>
+      later.side === "corp" &&
+      remoteTargetsMatch(entry, later) &&
+      (isCorpRemoteAdvancementProgress(later) ||
+        later.actionType === "score_agenda"),
+  );
+}
+
+function advanceConvertsToScore(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  const entry = sequence[index]!;
+  if (!isCorpRemoteAdvancementProgress(entry)) return false;
+  return nextEntries(sequence, index).some(
+    (later) =>
+      later.side === "corp" &&
+      later.actionType === "score_agenda" &&
+      remoteTargetsMatch(entry, later),
+  );
+}
+
+function remoteContestConvertsToStealOrTrash(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  const entry = sequence[index]!;
+  if (!isRunnerRemoteContestRun(entry)) return false;
+  return nextEntries(sequence, index).some(
+    (later) =>
+      later.side === "runner" &&
+      remoteTargetsMatch(entry, later) &&
+      (later.actionType === "steal_agenda" ||
+        later.runnerRelevantRemoteTrashTaken === true ||
+        later.actionType === "trash_accessed_card"),
+  );
+}
+
+function centralPressureConvertsToSteal(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  const entry = sequence[index]!;
+  if (!isRunnerCentralPressureAction(entry)) return false;
+  return nextEntries(sequence, index).some(
+    (later) =>
+      later.side === "runner" &&
+      later.actionType === "steal_agenda" &&
+      centralServerId(later.targetServerId) !== undefined &&
+      serverTargetsMatch(entry, later),
+  );
+}
+
+function runnerRunHasFollowupValue(
+  sequence: PlanConversionActionEntry[],
+  runIndex: number,
+): boolean {
+  const run = sequence[runIndex]!;
+  if (isMeaningfulBoardProgress(run)) return true;
+  return nextEntries(sequence, runIndex).some(
+    (later) =>
+      serverTargetsMatch(run, later) &&
+      (later.actionType === "steal_agenda" ||
+        later.runnerRelevantRemoteTrashTaken === true ||
+        later.actionType === "trash_accessed_card" ||
+        later.runnerRemoteTrashTaken === true ||
+        (later.actionType === "access_card" &&
+          (isRemoteServerTarget(later.targetServerId) ||
+            centralServerId(later.targetServerId) !== undefined))),
+  );
+}
+
+function isMeaningfulBoardProgress(entry: PlanConversionActionEntry): boolean {
+  if (
+    entry.actionType === "score_agenda" ||
+    entry.actionType === "steal_agenda"
+  )
+    return true;
+  if (
+    entry.side === "runner" &&
+    (entry.runnerRelevantRemoteTrashTaken === true ||
+      (entry.actionType === "trash_accessed_card" &&
+        isRemoteServerTarget(entry.targetServerId)))
+  )
+    return true;
+  if (isRunnerRigProgressAction(entry)) return true;
+  if (isRunnerEconomyProgressAction(entry)) return true;
+  if (isCorpRemoteAdvancementProgress(entry)) return true;
+  if (
+    entry.side === "corp" &&
+    isRemoteServerTarget(entry.targetServerId) &&
+    (entry.protectBeforeAdvance === true ||
+      entry.protectedFinalAdvance === true ||
+      (entry.actionType === "install_card" && entry.installPlacement === "ice"))
+  )
+    return true;
+  if (entry.side === "corp" && entry.actionType === "rez_ice")
+    return isRemoteServerTarget(entry.targetServerId);
+  if (isRunnerCentralPressureAction(entry)) {
+    return (
+      entry.runnerCentralRunWithMultiaccess === true ||
+      entry.runnerCentralRunWithInterfaceInstalled === true ||
+      entry.runnerCentralRunEventWithGoodTarget === true ||
+      entry.runnerRepeatedCentralRunWithFreshValue === true ||
+      entry.runnerCentralCloseoutRunTaken === true
+    );
+  }
+  return false;
+}
+
+function isRunnerSetupAction(entry: PlanConversionActionEntry): boolean {
+  if (entry.side !== "runner") return false;
+  return (
+    entry.runnerDrawAction === true ||
+    entry.actionType === "draw_card" ||
+    entry.reasonCode?.includes("setup") === true ||
+    entry.reasonCode?.includes("search") === true
+  );
+}
+
+function isRunnerEconomyProgressAction(
+  entry: PlanConversionActionEntry,
+): boolean {
+  if (entry.side !== "runner" || entry.runnerEconomyActionTaken !== true)
+    return false;
+  const before = entry.runnerCreditsBefore;
+  const after = entry.runnerCreditsAfter;
+  if (typeof before !== "number" || typeof after !== "number") return false;
+  if (after <= before) return false;
+  const reserve = entry.runnerReserveTarget;
+  if (entry.runnerReservePreservingEconomy === true) return true;
+  if (typeof reserve === "number" && before < reserve && after >= reserve)
+    return true;
+  return after - before >= 3;
+}
+
+function isRunnerRigProgressAction(entry: PlanConversionActionEntry): boolean {
+  return (
+    entry.side === "runner" &&
+    entry.runnerRigInstallAction === true &&
+    entry.runnerLowValueDuplicateInstallAction !== true
+  );
+}
+
+function isCorpRemoteBuildAction(entry: PlanConversionActionEntry): boolean {
+  return (
+    entry.side === "corp" &&
+    isRemoteServerTarget(entry.targetServerId) &&
+    (entry.actionType === "install_card" || entry.actionType === "rez_ice")
+  );
+}
+
+function isRunnerRemoteContestRun(entry: PlanConversionActionEntry): boolean {
+  return (
+    entry.side === "runner" &&
+    entry.actionType === "start_run" &&
+    isRemoteServerTarget(entry.targetServerId)
+  );
+}
+
+function isRunnerCentralPressureAction(
+  entry: PlanConversionActionEntry,
+): boolean {
+  return (
+    entry.side === "runner" &&
+    entry.actionType === "start_run" &&
+    centralServerId(entry.targetServerId) !== undefined
+  );
+}
+
+function remoteTargetsMatch(
+  first: PlanConversionActionEntry,
+  second: PlanConversionActionEntry,
+): boolean {
+  if (!isRemoteServerTarget(first.targetServerId)) return false;
+  return serverTargetsMatch(first, second);
+}
+
+function serverTargetsMatch(
+  first: PlanConversionActionEntry,
+  second: PlanConversionActionEntry,
+): boolean {
+  if (!first.targetServerId || !second.targetServerId) return true;
+  return first.targetServerId === second.targetServerId;
+}
+
+function summarizeCentralCloseoutRepeatMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "trueCentralCloseoutOpportunities"
+  | "centralCloseoutOpportunitiesRaw"
+  | "centralCloseoutOpportunitiesDeduped"
+  | "centralCloseoutOpportunities"
+  | "centralCloseoutRunsTaken"
+  | "centralCloseoutSuccesses"
+  | "centralCloseoutFalsePositiveRate"
+  | "centralCloseoutSkippedWithGoodReason"
+  | "centralCloseoutSkippedWithoutReason"
+  | "centralRunRepeatWindowsRaw"
+  | "centralRunRepeatWindowsDeduped"
+  | "repeatedCentralRunsWithFreshValue"
+  | "repeatedCentralRunsWithoutFreshValue"
+  | "centralRunInsteadUnjustified"
+  | "centralRunJustifiedByMultiaccess"
+  | "centralRunJustifiedByInterface"
+  | "centralRunJustifiedByCloseout"
+  | "centralRunJustifiedByRemoteUncontestable"
+  | "centralRunJustifiedByHqPressure"
+  | "centralRunJustifiedByRndFreshness"
+  | "centralRunStalePenaltyApplied"
+  | "centralPressureNoopDecisions"
+  | "noFreshCentralWindows"
+  | "noFreshCentralRunsTaken"
+  | "noFreshCentralSubstitutions"
+  | "noFreshCentralSubstitutionRate"
+  | "noFreshCentralSubstitutionEconomy"
+  | "noFreshCentralSubstitutionRigUnlock"
+  | "noFreshCentralSubstitutionRemoteContest"
+  | "noFreshCentralSubstitutionPressureInstall"
+  | "noFreshCentralSubstitutionSetupSearch"
+  | "noFreshCentralSubstitutionEndTurn"
+  | "noFreshCentralWithBetterAlternative"
+  | "noFreshCentralWithoutBetterAlternative"
+  | "staleCentralChosenDespiteEconomy"
+  | "staleCentralChosenDespiteRigUnlock"
+  | "staleCentralChosenDespiteRemoteContest"
+  | "staleCentralChosenDespitePressureInstall"
+  | "staleCentralAllowedWithReason"
+  | "staleCentralAllowedCloseout"
+  | "staleCentralAllowedInterface"
+  | "staleCentralAllowedMultiaccess"
+  | "staleCentralAllowedRemoteUncontestable"
+  | "staleCentralAllowedCentralOpen"
+  | "staleCentralAllowedNoBetterAction"
+  | "alternativeChosenAfterStaleCentralPenalty"
+  | "substitutionLedToProgression"
+> {
+  const rawCloseoutKeys = new Set<string>();
+  const trueCloseoutKeys = new Set<string>();
+  const closeoutRunsTakenKeys = new Set<string>();
+  const closeoutSuccessKeys = new Set<string>();
+  const skippedGoodReasonKeys = new Set<string>();
+  const skippedWithoutReasonKeys = new Set<string>();
+  const repeatRawKeys = new Set<string>();
+  const repeatDedupedKeys = new Set<string>();
+  const repeatFreshKeys = new Set<string>();
+  const repeatWithoutFreshKeys = new Set<string>();
+  const stalePenaltyKeys = new Set<string>();
+  const noopKeys = new Set<string>();
+  const centralInsteadUnjustifiedKeys = new Set<string>();
+  const noFreshKeys = new Set<string>();
+  const noFreshRunKeys = new Set<string>();
+  const noFreshSubstitutionKeys = new Set<string>();
+  const noFreshWithBetterKeys = new Set<string>();
+  const noFreshWithoutBetterKeys = new Set<string>();
+  const staleDespite = {
+    economy: new Set<string>(),
+    rig_unlock: new Set<string>(),
+    remote_contest: new Set<string>(),
+    pressure_install: new Set<string>(),
+  };
+  const allowedStale = {
+    any: new Set<string>(),
+    closeout: new Set<string>(),
+    interface: new Set<string>(),
+    multiaccess: new Set<string>(),
+    remote_uncontestable: new Set<string>(),
+    central_open: new Set<string>(),
+    no_better_action: new Set<string>(),
+  };
+  const substitutionByType = {
+    economy: new Set<string>(),
+    rig_unlock: new Set<string>(),
+    remote_contest: new Set<string>(),
+    pressure_install: new Set<string>(),
+    setup_search: new Set<string>(),
+    end_turn: new Set<string>(),
+  };
+  const substitutionProgressionKeys = new Set<string>();
+  const reasonKeys = {
+    multiaccess: new Set<string>(),
+    interface: new Set<string>(),
+    closeout: new Set<string>(),
+    remote_uncontestable: new Set<string>(),
+    hq_pressure: new Set<string>(),
+    rnd_freshness: new Set<string>(),
+  };
+
+  for (const summary of summaries) {
+    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
+    for (const entry of sequence) {
+      const turn = entry.turnNumber ?? 0;
+      const target = centralServerId(entry.targetServerId);
+      const closeoutTarget = target ?? "central";
+      const closeoutKey = `${summary.seed}|${turn}|${closeoutTarget}`;
+      if (entry.runnerCentralCloseoutOpportunityRaw)
+        rawCloseoutKeys.add(closeoutKey);
+      if (entry.runnerTrueCentralCloseoutOpportunity)
+        trueCloseoutKeys.add(closeoutKey);
+      if (entry.runnerCentralCloseoutRunTaken)
+        closeoutRunsTakenKeys.add(closeoutKey);
+      if (entry.runnerCentralCloseoutSuccess)
+        closeoutSuccessKeys.add(closeoutKey);
+      if (entry.runnerCentralCloseoutSkippedWithGoodReason)
+        skippedGoodReasonKeys.add(closeoutKey);
+      if (entry.runnerCentralCloseoutSkippedWithoutReason)
+        skippedWithoutReasonKeys.add(closeoutKey);
+      if (entry.runnerCentralPressureNoopDecision) noopKeys.add(closeoutKey);
+
+      if (target && entry.runnerCentralRunRepeatWindow) {
+        const repeatRawKey = `${summary.seed}|${entry.stateVersionBefore}|${target}`;
+        const repeatKey = `${summary.seed}|${turn}|${target}`;
+        repeatRawKeys.add(repeatRawKey);
+        repeatDedupedKeys.add(repeatKey);
+        if (entry.runnerRepeatedCentralRunWithFreshValue)
+          repeatFreshKeys.add(repeatKey);
+        if (entry.runnerRepeatedCentralRunWithoutFreshValue)
+          repeatWithoutFreshKeys.add(repeatKey);
+        if (entry.runnerCentralRunStalePenaltyApplied)
+          stalePenaltyKeys.add(repeatKey);
+      }
+
+      if (
+        entry.runnerCentralRunInsteadOfContestableAdvancedRemote &&
+        !entry.runnerCentralRunInsteadWasJustified
+      ) {
+        for (const serverId of entry.runnerContestableAdvancedRemoteThreatServerIds ??
+          []) {
+          centralInsteadUnjustifiedKeys.add(
+            `${summary.seed}|${turn}|${serverId}`,
+          );
+        }
+      }
+
+      const reason = entry.runnerCentralRunJustificationReason;
+      if (reason && target) {
+        const reasonKey = `${summary.seed}|${turn}|${target}`;
+        if (reason.includes("multiaccess"))
+          reasonKeys.multiaccess.add(reasonKey);
+        if (reason.includes("interface")) reasonKeys.interface.add(reasonKey);
+        if (reason.includes("closeout")) reasonKeys.closeout.add(reasonKey);
+        if (reason.includes("remote_uncontestable"))
+          reasonKeys.remote_uncontestable.add(reasonKey);
+        if (reason.includes("hq_pressure"))
+          reasonKeys.hq_pressure.add(reasonKey);
+        if (reason.includes("rnd_freshness"))
+          reasonKeys.rnd_freshness.add(reasonKey);
+      }
+
+      const noFreshTargets = entry.runnerNoFreshCentralServerIds ?? [];
+      for (const noFreshTarget of noFreshTargets) {
+        const key = `${summary.seed}|${turn}|${noFreshTarget}`;
+        noFreshKeys.add(key);
+        const alternatives =
+          entry.runnerNoFreshCentralBetterAlternativeTypes ?? [];
+        if (alternatives.length > 0) noFreshWithBetterKeys.add(key);
+        else noFreshWithoutBetterKeys.add(key);
+        if (entry.runnerNoFreshCentralRunTaken) {
+          noFreshRunKeys.add(key);
+          if (alternatives.includes("economy")) staleDespite.economy.add(key);
+          if (alternatives.includes("rig_unlock"))
+            staleDespite.rig_unlock.add(key);
+          if (alternatives.includes("remote_contest"))
+            staleDespite.remote_contest.add(key);
+          if (alternatives.includes("pressure_install"))
+            staleDespite.pressure_install.add(key);
+          const allowed = entry.runnerStaleCentralAllowedReason;
+          if (allowed) {
+            allowedStale.any.add(key);
+            if (allowed in allowedStale)
+              allowedStale[allowed as keyof typeof allowedStale].add(key);
+          }
+        }
+        const substitutionType = entry.runnerNoFreshCentralSubstitutionType;
+        if (substitutionType) {
+          noFreshSubstitutionKeys.add(key);
+          substitutionByType[substitutionType].add(key);
+          if (
+            sequence
+              .filter((later) => (later.turnNumber ?? 0) >= turn)
+              .some(
+                (later) =>
+                  later.actionType === "steal_agenda" ||
+                  later.actionType === "trash_accessed_card" ||
+                  later.runnerRemoteRunAgainstAdvancedRemote === true ||
+                  later.runnerRigInstallAction === true ||
+                  (typeof later.runnerCreditsAfter === "number" &&
+                    typeof later.runnerReserveTarget === "number" &&
+                    later.runnerCreditsAfter >= later.runnerReserveTarget),
+              )
+          ) {
+            substitutionProgressionKeys.add(key);
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    trueCentralCloseoutOpportunities: trueCloseoutKeys.size,
+    centralCloseoutOpportunitiesRaw: rawCloseoutKeys.size,
+    centralCloseoutOpportunitiesDeduped: trueCloseoutKeys.size,
+    centralCloseoutOpportunities: trueCloseoutKeys.size,
+    centralCloseoutRunsTaken: closeoutRunsTakenKeys.size,
+    centralCloseoutSuccesses: closeoutSuccessKeys.size,
+    centralCloseoutFalsePositiveRate:
+      rawCloseoutKeys.size > 0
+        ? round(
+            (rawCloseoutKeys.size - trueCloseoutKeys.size) /
+              rawCloseoutKeys.size,
+          )
+        : 0,
+    centralCloseoutSkippedWithGoodReason: skippedGoodReasonKeys.size,
+    centralCloseoutSkippedWithoutReason: skippedWithoutReasonKeys.size,
+    centralRunRepeatWindowsRaw: repeatRawKeys.size,
+    centralRunRepeatWindowsDeduped: repeatDedupedKeys.size,
+    repeatedCentralRunsWithFreshValue: repeatFreshKeys.size,
+    repeatedCentralRunsWithoutFreshValue: repeatWithoutFreshKeys.size,
+    centralRunInsteadUnjustified: centralInsteadUnjustifiedKeys.size,
+    centralRunJustifiedByMultiaccess: reasonKeys.multiaccess.size,
+    centralRunJustifiedByInterface: reasonKeys.interface.size,
+    centralRunJustifiedByCloseout: reasonKeys.closeout.size,
+    centralRunJustifiedByRemoteUncontestable:
+      reasonKeys.remote_uncontestable.size,
+    centralRunJustifiedByHqPressure: reasonKeys.hq_pressure.size,
+    centralRunJustifiedByRndFreshness: reasonKeys.rnd_freshness.size,
+    centralRunStalePenaltyApplied: stalePenaltyKeys.size,
+    centralPressureNoopDecisions: noopKeys.size,
+    noFreshCentralWindows: noFreshKeys.size,
+    noFreshCentralRunsTaken: noFreshRunKeys.size,
+    noFreshCentralSubstitutions: noFreshSubstitutionKeys.size,
+    noFreshCentralSubstitutionRate:
+      noFreshKeys.size > 0
+        ? round(noFreshSubstitutionKeys.size / noFreshKeys.size)
+        : 0,
+    noFreshCentralSubstitutionEconomy: substitutionByType.economy.size,
+    noFreshCentralSubstitutionRigUnlock: substitutionByType.rig_unlock.size,
+    noFreshCentralSubstitutionRemoteContest:
+      substitutionByType.remote_contest.size,
+    noFreshCentralSubstitutionPressureInstall:
+      substitutionByType.pressure_install.size,
+    noFreshCentralSubstitutionSetupSearch: substitutionByType.setup_search.size,
+    noFreshCentralSubstitutionEndTurn: substitutionByType.end_turn.size,
+    noFreshCentralWithBetterAlternative: noFreshWithBetterKeys.size,
+    noFreshCentralWithoutBetterAlternative: noFreshWithoutBetterKeys.size,
+    staleCentralChosenDespiteEconomy: staleDespite.economy.size,
+    staleCentralChosenDespiteRigUnlock: staleDespite.rig_unlock.size,
+    staleCentralChosenDespiteRemoteContest: staleDespite.remote_contest.size,
+    staleCentralChosenDespitePressureInstall:
+      staleDespite.pressure_install.size,
+    staleCentralAllowedWithReason: allowedStale.any.size,
+    staleCentralAllowedCloseout: allowedStale.closeout.size,
+    staleCentralAllowedInterface: allowedStale.interface.size,
+    staleCentralAllowedMultiaccess: allowedStale.multiaccess.size,
+    staleCentralAllowedRemoteUncontestable:
+      allowedStale.remote_uncontestable.size,
+    staleCentralAllowedCentralOpen: allowedStale.central_open.size,
+    staleCentralAllowedNoBetterAction: allowedStale.no_better_action.size,
+    alternativeChosenAfterStaleCentralPenalty: noFreshSubstitutionKeys.size,
+    substitutionLedToProgression: substitutionProgressionKeys.size,
+  };
+}
+
 function summarizeAdvancedRemoteThreatMetrics(
   summaries: AiSimulationSummary[],
 ): Pick<
@@ -7528,10 +8506,12 @@ function summarizeAdvancedRemoteThreatMetrics(
           threatFirstTurn.set(persistentKey, turn);
         }
       }
-      for (const serverId of entry.runnerContestableAdvancedRemoteThreatServerIds ?? []) {
+      for (const serverId of entry.runnerContestableAdvancedRemoteThreatServerIds ??
+        []) {
         const key = `${summary.seed}|${turn}|${serverId}`;
         contestableKeys.add(key);
-        if (entry.runnerRemoteContestBlockedByCredits) blockedCreditKeys.add(key);
+        if (entry.runnerRemoteContestBlockedByCredits)
+          blockedCreditKeys.add(key);
         if (entry.runnerRemoteContestBlockedByPostRunReserve)
           blockedPostRunKeys.add(key);
         if (entry.runnerRemoteContestBlockedByBreakerCoverage)
@@ -7542,7 +8522,8 @@ function summarizeAdvancedRemoteThreatMetrics(
           baitLowValueKeys.add(key);
         if (entry.runnerCentralRunInsteadOfContestableAdvancedRemote)
           centralInsteadKeys.add(key);
-        if (entry.runnerCentralRunInsteadWasJustified) centralJustifiedKeys.add(key);
+        if (entry.runnerCentralRunInsteadWasJustified)
+          centralJustifiedKeys.add(key);
         if (entry.runnerCentralRunBurnedRemoteContestReserve)
           centralBurnedKeys.add(key);
         if (entry.runnerRepeatedCentralRunWhileSameRemoteThreat)
@@ -7562,7 +8543,8 @@ function summarizeAdvancedRemoteThreatMetrics(
         const serverId = entry.targetServerId;
         if (serverId) {
           const first = threatFirstTurn.get(`${summary.seed}|${serverId}`);
-          if (first !== undefined) resolveDeltas.push(Math.max(0, turn - first));
+          if (first !== undefined)
+            resolveDeltas.push(Math.max(0, turn - first));
         }
       }
       if (entry.runnerRemoteRunStartedWithInsufficientPostRunReserve)
@@ -7580,7 +8562,9 @@ function summarizeAdvancedRemoteThreatMetrics(
     contestableAdvancedRemoteThreats: contestableKeys.size,
     advancedRemoteThreatsContested: contestedKeys.size,
     advancedRemoteThreatContestRate:
-      contestableKeys.size > 0 ? round(contestedKeys.size / contestableKeys.size) : 0,
+      contestableKeys.size > 0
+        ? round(contestedKeys.size / contestableKeys.size)
+        : 0,
     skippedContestableAdvancedRemoteThreats: skippedContestable,
     centralRunInsteadOfContestableAdvancedRemote: centralInsteadKeys.size,
     centralRunInsteadWasJustified: centralJustifiedKeys.size,
@@ -7736,7 +8720,10 @@ function runnerHandUseDiagnosticsForSimulationAction(
 ): Partial<AiSimulationSummary["actionSequence"][number]> {
   if (input.side !== "runner" || action.side !== "runner") return {};
   const draw = runnerDrawKindForSimulationAction(input, action);
-  const playableEconomy = hasRunnerPlayableEconomyAction(input, action.actionId);
+  const playableEconomy = hasRunnerPlayableEconomyAction(
+    input,
+    action.actionId,
+  );
   const installableBreaker = hasRunnerInstallableBreakerAction(
     input,
     action.actionId,
@@ -7748,25 +8735,35 @@ function runnerHandUseDiagnosticsForSimulationAction(
   const remoteTrashAvailable = hasRunnerRemoteTrashAction(input);
   const discardRoles = runnerDiscardChoiceRoles(input, decision);
   const installAction = action.type === "install_card";
-  const duplicateInstall = installAction && isRunnerDuplicateInstall(input, action);
+  const duplicateInstall =
+    installAction && isRunnerDuplicateInstall(input, action);
   const lowValueDuplicate =
     duplicateInstall && isRunnerLowValueDuplicateInstall(input, action);
   const economyActionTaken = isRunnerEconomyAction(input, action);
-  const rigInstallAction = installAction && isRunnerRigInstallAction(input, action);
+  const rigInstallAction =
+    installAction && isRunnerRigInstallAction(input, action);
   const pressureActionTaken = isRunnerPressureAction(input, action);
   const remoteTrashTaken =
     action.type === "trash_accessed_card" &&
-    isRemoteServerTarget(targetServerId ?? input.playerView.run?.attackedServerId);
+    isRemoteServerTarget(
+      targetServerId ?? input.playerView.run?.attackedServerId,
+    );
   const remoteTrash = runnerRemoteTrashAccessContext(input, action);
-  const advancedRemoteContest =
-    runnerAdvancedRemoteContestContext(input, action, targetServerId);
+  const advancedRemoteContest = runnerAdvancedRemoteContestContext(
+    input,
+    action,
+    targetServerId,
+  );
   const handUseOpportunity =
     playableEconomy ||
     installableBreaker ||
     runnablePressure ||
     remoteTrashAvailable;
   const handUseActionTaken =
-    economyActionTaken || rigInstallAction || pressureActionTaken || remoteTrashTaken;
+    economyActionTaken ||
+    rigInstallAction ||
+    pressureActionTaken ||
+    remoteTrashTaken;
 
   return {
     ...(draw.draw ? { runnerDrawAction: true } : {}),
@@ -7796,7 +8793,9 @@ function runnerHandUseDiagnosticsForSimulationAction(
       : {}),
     ...(installAction ? { runnerInstallAction: true } : {}),
     ...(duplicateInstall ? { runnerDuplicateInstallAction: true } : {}),
-    ...(lowValueDuplicate ? { runnerLowValueDuplicateInstallAction: true } : {}),
+    ...(lowValueDuplicate
+      ? { runnerLowValueDuplicateInstallAction: true }
+      : {}),
     ...(duplicateInstall &&
     sourceDefinitionIdForSimulationAction(input, action) ===
       "onr_v1_165_junkyard-bbs"
@@ -7816,7 +8815,9 @@ function runnerHandUseDiagnosticsForSimulationAction(
     ...(remoteTrash.affordableRelevant
       ? { runnerAffordableRelevantRemoteTrashOpportunity: true }
       : {}),
-    ...(remoteTrash.relevantTaken ? { runnerRelevantRemoteTrashTaken: true } : {}),
+    ...(remoteTrash.relevantTaken
+      ? { runnerRelevantRemoteTrashTaken: true }
+      : {}),
     ...(remoteTrash.skippedAffordableRelevant
       ? { runnerSkippedAffordableRelevantRemoteTrash: true }
       : {}),
@@ -7858,11 +8859,16 @@ function runnerCentralPressureDiagnosticsForSimulationAction(
   );
   const installedInterfaceTargets = new Set(
     (input.playerView.own.rig ?? [])
-      .filter((card) => isCentralPressureCardForMetrics(card.definitionId, true))
+      .filter((card) =>
+        isCentralPressureCardForMetrics(card.definitionId, true),
+      )
       .flatMap((card) => centralPressureTargetsForCard(card.definitionId)),
   );
   const hasAnyInstalledInterface = installedInterfaceTargets.size > 0;
-  const sourceDefinitionId = sourceDefinitionIdForSimulationAction(input, action);
+  const sourceDefinitionId = sourceDefinitionIdForSimulationAction(
+    input,
+    action,
+  );
   const eventTargets =
     action.type === "play_event"
       ? centralPressureTargetsForCard(sourceDefinitionId)
@@ -7872,48 +8878,88 @@ function runnerCentralPressureDiagnosticsForSimulationAction(
   );
   const interfaceInstallOpportunity = input.legalActions.some((candidate) => {
     if (candidate.type !== "install_card") return false;
-    const definitionId = sourceDefinitionIdForSimulationAction(input, candidate);
+    const definitionId = sourceDefinitionIdForSimulationAction(
+      input,
+      candidate,
+    );
     return isCentralPressureCardForMetrics(definitionId, true);
   });
   const interfaceInstallTaken =
     action.type === "install_card" &&
     isCentralPressureCardForMetrics(sourceDefinitionId, true);
-  const closeoutOpportunity =
-    input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints <= 2 &&
+  const closeoutOpportunityRaw =
+    input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints <=
+      2 &&
     (centralTarget !== undefined ||
       (["hq", "rd"] as const).some((target) =>
         centralPressureTargetIsGoodForMetrics(input, target),
       ));
-  const centralRun =
-    action.type === "start_run" && centralTarget !== undefined;
+  const trueCloseout = centralTarget
+    ? trueCentralCloseoutProfileForMetrics(input, centralTarget)
+    : bestTrueCentralCloseoutProfileForMetrics(input);
+  const centralRun = action.type === "start_run" && centralTarget !== undefined;
   const matchingInterface =
     centralTarget !== undefined && installedInterfaceTargets.has(centralTarget);
-  const anyMultiaccessInstalled = (input.playerView.own.rig ?? []).some((card) =>
-    rolesForCardId(card.definitionId).some((role) => role.includes("multiaccess")),
+  const anyMultiaccessInstalled = (input.playerView.own.rig ?? []).some(
+    (card) =>
+      rolesForCardId(card.definitionId).some((role) =>
+        role.includes("multiaccess"),
+      ),
   );
   const repeatedLowValue =
     centralTarget !== undefined &&
     centralRun &&
     isRepeatedLowValueCentralRunForMetrics(input, centralTarget) &&
-    !matchingInterface;
+    !centralRepeatHasFreshValueForMetrics(input, centralTarget, {
+      matchingInterface,
+      anyMultiaccessInstalled,
+      eventGoodTarget,
+      trueCloseout: trueCloseout.opportunity,
+    });
+  const repeatWindow =
+    centralTarget !== undefined &&
+    centralRun &&
+    centralRunStreakWithoutValueForMetrics(input, centralTarget) > 0;
+  const repeatWithFreshValue =
+    centralTarget !== undefined &&
+    centralRun &&
+    repeatWindow &&
+    centralRepeatHasFreshValueForMetrics(input, centralTarget, {
+      matchingInterface,
+      anyMultiaccessInstalled,
+      eventGoodTarget,
+      trueCloseout: trueCloseout.opportunity,
+    });
+  const noFresh = runnerNoFreshCentralContextForMetrics(input);
+  const noFreshRunTaken =
+    centralRun &&
+    centralTarget !== undefined &&
+    noFresh.targets.includes(centralTarget);
+  const substitutionType =
+    noFresh.targets.length > 0 && !noFreshRunTaken
+      ? noFreshCentralSubstitutionTypeForAction(input, action)
+      : undefined;
   const streakWithoutValue =
     centralTarget !== undefined && centralRun
       ? centralRunStreakWithoutValueForMetrics(input, centralTarget)
       : 0;
   const reserveTarget = runnerCreditReserveTargetForInput(input);
   const server = centralTarget
-    ? input.playerView.servers.find((candidate) => candidate.id === centralTarget)
+    ? input.playerView.servers.find(
+        (candidate) => candidate.id === centralTarget,
+      )
     : undefined;
   const visibleBreakCost =
     centralTarget && server
-      ? assessKnownRezzedIcePath(
+      ? (assessKnownRezzedIcePath(
           server.ice,
           input.playerView.own.rig ?? [],
           input.playerView.own.credits,
-        ).visibleBreakCost ?? 0
+        ).visibleBreakCost ?? 0)
       : 0;
   const insufficientReserve =
-    centralRun && input.playerView.own.credits - visibleBreakCost < reserveTarget;
+    centralRun &&
+    input.playerView.own.credits - visibleBreakCost < reserveTarget;
   return {
     ...(centralRun && (matchingInterface || anyMultiaccessInstalled)
       ? { runnerCentralRunWithMultiaccess: true }
@@ -7921,10 +8967,14 @@ function runnerCentralPressureDiagnosticsForSimulationAction(
     ...(centralRun && hasAnyInstalledInterface
       ? { runnerCentralRunWithInterfaceInstalled: true }
       : {}),
-    ...(centralRun && centralTarget === "hq" && installedInterfaceTargets.has("hq")
+    ...(centralRun &&
+    centralTarget === "hq" &&
+    installedInterfaceTargets.has("hq")
       ? { runnerHqRunWithHqInterface: true }
       : {}),
-    ...(centralRun && centralTarget === "rd" && installedInterfaceTargets.has("rd")
+    ...(centralRun &&
+    centralTarget === "rd" &&
+    installedInterfaceTargets.has("rd")
       ? { runnerRndRunWithRndInterface: true }
       : {}),
     ...(action.type === "play_event" && eventTargets.length > 0
@@ -7934,18 +8984,66 @@ function runnerCentralPressureDiagnosticsForSimulationAction(
       ? { runnerCentralRunEventWithGoodTarget: true }
       : {}),
     ...(repeatedLowValue ? { runnerRepeatedLowValueCentralRun: true } : {}),
+    ...(repeatWindow ? { runnerCentralRunRepeatWindow: true } : {}),
+    ...(repeatWithFreshValue
+      ? { runnerRepeatedCentralRunWithFreshValue: true }
+      : {}),
+    ...(repeatWindow && !repeatWithFreshValue
+      ? { runnerRepeatedCentralRunWithoutFreshValue: true }
+      : {}),
+    ...(repeatedLowValue ? { runnerCentralRunStalePenaltyApplied: true } : {}),
     ...(streakWithoutValue > 0
       ? { runnerCentralRunStreakWithoutValue: streakWithoutValue }
       : {}),
     ...(insufficientReserve
       ? { runnerCentralRunStartedWithInsufficientPostRunReserve: true }
       : {}),
-    ...(closeoutOpportunity ? { runnerCentralCloseoutOpportunity: true } : {}),
-    ...(centralRun && closeoutOpportunity
+    ...(closeoutOpportunityRaw
+      ? { runnerCentralCloseoutOpportunityRaw: true }
+      : {}),
+    ...(trueCloseout.opportunity
+      ? {
+          runnerTrueCentralCloseoutOpportunity: true,
+          runnerCentralCloseoutOpportunity: true,
+          runnerCentralCloseoutReason: trueCloseout.reasons[0],
+        }
+      : {}),
+    ...(closeoutOpportunityRaw && !trueCloseout.opportunity && !centralRun
+      ? { runnerCentralCloseoutSkippedWithGoodReason: true }
+      : {}),
+    ...(closeoutOpportunityRaw && trueCloseout.opportunity && !centralRun
+      ? { runnerCentralCloseoutSkippedWithoutReason: true }
+      : {}),
+    ...(centralRun && trueCloseout.opportunity
       ? { runnerCentralCloseoutRunTaken: true }
       : {}),
-    ...(action.type === "steal_agenda" && centralTarget && closeoutOpportunity
+    ...(action.type === "steal_agenda" &&
+    centralTarget &&
+    trueCloseout.opportunity
       ? { runnerCentralCloseoutSuccess: true }
+      : {}),
+    ...(input.playerView.activeSide === "runner" &&
+    input.playerView.phase === "runner_action_phase" &&
+    !centralRun &&
+    closeoutOpportunityRaw &&
+    !trueCloseout.opportunity
+      ? { runnerCentralPressureNoopDecision: true }
+      : {}),
+    ...(noFresh.targets.length > 0
+      ? { runnerNoFreshCentralServerIds: noFresh.targets }
+      : {}),
+    ...(noFresh.betterAlternatives.length > 0
+      ? {
+          runnerNoFreshCentralBetterAlternativeTypes:
+            noFresh.betterAlternatives,
+        }
+      : {}),
+    ...(noFreshRunTaken ? { runnerNoFreshCentralRunTaken: true } : {}),
+    ...(substitutionType
+      ? { runnerNoFreshCentralSubstitutionType: substitutionType }
+      : {}),
+    ...(noFreshRunTaken && noFresh.allowedReasons[0]
+      ? { runnerStaleCentralAllowedReason: noFresh.allowedReasons[0] }
       : {}),
     ...(interfaceInstallOpportunity
       ? { runnerInterfaceInstallOpportunity: true }
@@ -7977,7 +9075,8 @@ function isCentralPressureCardForMetrics(
   const roles = rolesForCardId(definitionId);
   if (!roles.some(isRunnerPressureRole)) return false;
   if (!installedOnly) return true;
-  const type = DEMO_CARDS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type;
+  const type =
+    DEMO_CARDS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type;
   return type === "hardware" || type === "program" || type === "resource";
 }
 
@@ -8017,7 +9116,9 @@ function centralPressureTargetIsGoodForMetrics(
   input: AiDecisionInput,
   target: "hq" | "rd" | "archives",
 ): boolean {
-  const server = input.playerView.servers.find((candidate) => candidate.id === target);
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === target,
+  );
   if (!server) return false;
   const assessment = assessKnownRezzedIcePath(
     server.ice,
@@ -8025,14 +9126,108 @@ function centralPressureTargetIsGoodForMetrics(
     input.playerView.own.credits,
   );
   if (assessment.blocked) return false;
-  const cheap = (assessment.visibleBreakCost ?? 0) <= 1 || server.ice.length === 0;
+  const cheap =
+    (assessment.visibleBreakCost ?? 0) <= 1 || server.ice.length === 0;
   if (!cheap) return false;
   if (target === "archives")
     return server.root.some((card) => card.known && card.type === "agenda");
-  if (input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints <= 2)
+  if (
+    input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints <=
+    2
+  )
     return true;
   if (target === "hq") return input.playerView.opponent.handCount >= 3;
   return true;
+}
+
+function bestTrueCentralCloseoutProfileForMetrics(input: AiDecisionInput): {
+  opportunity: boolean;
+  reasons: string[];
+  target?: "hq" | "rd" | "archives";
+} {
+  const profiles = (["rd", "hq", "archives"] as const)
+    .map((target) => ({
+      target,
+      ...trueCentralCloseoutProfileForMetrics(input, target),
+    }))
+    .filter((profile) => profile.opportunity)
+    .sort(
+      (left, right) =>
+        right.reasons.length - left.reasons.length ||
+        left.target.localeCompare(right.target),
+    );
+  return profiles[0] ?? { opportunity: false, reasons: [] };
+}
+
+function trueCentralCloseoutProfileForMetrics(
+  input: AiDecisionInput,
+  target: "hq" | "rd" | "archives",
+): { opportunity: boolean; reasons: string[] } {
+  const pointsNeeded =
+    input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints;
+  if (pointsNeeded > 2) return { opportunity: false, reasons: [] };
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === target,
+  );
+  if (!server) return { opportunity: false, reasons: [] };
+  const assessment = assessKnownRezzedIcePath(
+    server.ice,
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+  );
+  if (assessment.blocked) return { opportunity: false, reasons: [] };
+  const visibleBreakCost = assessment.visibleBreakCost ?? 0;
+  const openOrCheap = visibleBreakCost <= 1 || server.ice.length === 0;
+  if (!openOrCheap) return { opportunity: false, reasons: [] };
+  if (target === "archives") {
+    const visibleAgenda = server.root.some(
+      (card) => card.known && card.type === "agenda",
+    );
+    return {
+      opportunity: visibleAgenda,
+      reasons: visibleAgenda ? ["archives_visible_agenda"] : [],
+    };
+  }
+  const installedTargets = new Set(
+    (input.playerView.own.rig ?? [])
+      .filter((card) =>
+        isCentralPressureCardForMetrics(card.definitionId, true),
+      )
+      .flatMap((card) => centralPressureTargetsForCard(card.definitionId)),
+  );
+  const matchingInterface = installedTargets.has(target);
+  const anyMultiaccess = (input.playerView.own.rig ?? []).some((card) =>
+    rolesForCardId(card.definitionId).some((role) =>
+      role.includes("multiaccess"),
+    ),
+  );
+  const hasRunEvent = input.legalActions.some((action) => {
+    if (action.side !== "runner" || action.type !== "play_event") return false;
+    return centralPressureTargetsForCard(
+      sourceDefinitionIdForSimulationAction(input, action),
+    ).includes(target);
+  });
+  const hqPressure =
+    target === "hq" && input.playerView.opponent.handCount >= 5;
+  const rndFreshness = false;
+  const reasons = [
+    "near_win",
+    ...(matchingInterface ? ["interface"] : []),
+    ...(anyMultiaccess ? ["multiaccess"] : []),
+    ...(hasRunEvent ? ["run_event"] : []),
+    ...(hqPressure ? ["hq_pressure"] : []),
+    ...(rndFreshness ? ["rnd_freshness"] : []),
+  ];
+  const hasSpecificPressure =
+    matchingInterface ||
+    anyMultiaccess ||
+    hasRunEvent ||
+    hqPressure ||
+    rndFreshness;
+  return {
+    opportunity: hasSpecificPressure,
+    reasons,
+  };
 }
 
 function isRepeatedLowValueCentralRunForMetrics(
@@ -8042,12 +9237,287 @@ function isRepeatedLowValueCentralRunForMetrics(
   return centralRunStreakWithoutValueForMetrics(input, target) > 0;
 }
 
+function centralRepeatHasFreshValueForMetrics(
+  input: AiDecisionInput,
+  target: "hq" | "rd" | "archives",
+  context: {
+    matchingInterface: boolean;
+    anyMultiaccessInstalled: boolean;
+    eventGoodTarget: boolean;
+    trueCloseout: boolean;
+  },
+): boolean {
+  if (
+    context.matchingInterface ||
+    context.anyMultiaccessInstalled ||
+    context.eventGoodTarget ||
+    context.trueCloseout
+  )
+    return true;
+  return !recentCentralRunSameTargetWithoutRefresh(input, target);
+}
+
+function runnerNoFreshCentralContextForMetrics(input: AiDecisionInput): {
+  targets: Array<"hq" | "rd" | "archives">;
+  betterAlternatives: string[];
+  allowedReasons: string[];
+} {
+  const targets = (["rd", "hq", "archives"] as const).filter((target) => {
+    const hasRun = input.legalActions.some(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === target,
+    );
+    if (!hasRun) return false;
+    const closeout = trueCentralCloseoutProfileForMetrics(
+      input,
+      target,
+    ).opportunity;
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === target,
+    );
+    const matchingInterface = (input.playerView.own.rig ?? []).some((card) =>
+      centralPressureTargetsForCard(card.definitionId).includes(target),
+    );
+    const anyMultiaccess = (input.playerView.own.rig ?? []).some((card) =>
+      rolesForCardId(card.definitionId).some((role) =>
+        role.includes("multiaccess"),
+      ),
+    );
+    return (
+      centralRunStreakWithoutValueForMetrics(input, target) > 0 &&
+      !matchingInterface &&
+      !anyMultiaccess &&
+      !closeout &&
+      !centralRunEventGoodForTarget(input, target) &&
+      server !== undefined
+    );
+  });
+  if (targets.length === 0)
+    return { targets: [], betterAlternatives: [], allowedReasons: [] };
+
+  const better = new Set<string>();
+  const reserveTarget = runnerCreditReserveTargetForInput(input);
+  if (
+    input.playerView.own.credits <= reserveTarget &&
+    input.legalActions.some((action) => isRunnerEconomyAction(input, action))
+  )
+    better.add("economy");
+  if (
+    input.legalActions.some(
+      (action) =>
+        action.type === "start_run" &&
+        typeof action.payload?.serverId === "string" &&
+        isRemoteServerTarget(action.payload.serverId) &&
+        runnerRemoteThreatProfile(input, action.payload.serverId).contestable,
+    )
+  )
+    better.add("remote_contest");
+  if (
+    input.legalActions.some(
+      (action) =>
+        action.type === "install_card" &&
+        rolesForAction(input, action).some((role) =>
+          role.startsWith("breaker_"),
+        ),
+    )
+  )
+    better.add("rig_unlock");
+  if (
+    input.legalActions.some((action) => {
+      if (action.type !== "install_card") return false;
+      const definitionId = sourceDefinitionIdForSimulationAction(input, action);
+      return isCentralPressureCardForMetrics(definitionId, true);
+    })
+  )
+    better.add("pressure_install");
+  if (
+    input.legalActions.some((action) => {
+      if (
+        action.type === "draw_card" &&
+        input.playerView.own.gripOrHq.length <= 2
+      )
+        return true;
+      if (action.type !== "play_event" && action.type !== "resolve_choice")
+        return false;
+      return rolesForAction(input, action).some(
+        (role) =>
+          role === "draw" ||
+          role === "setup" ||
+          role.includes("search") ||
+          role.includes("tutor"),
+      );
+    })
+  )
+    better.add("setup_search");
+
+  const allowed = new Set<string>();
+  for (const target of targets) {
+    const profile = trueCentralCloseoutProfileForMetrics(input, target);
+    if (profile.opportunity) allowed.add("closeout");
+    const installed = input.playerView.own.rig ?? [];
+    if (
+      installed.some((card) =>
+        centralPressureTargetsForCard(card.definitionId).includes(target),
+      )
+    )
+      allowed.add("interface");
+    if (
+      installed.some((card) =>
+        rolesForCardId(card.definitionId).some((role) =>
+          role.includes("multiaccess"),
+        ),
+      )
+    )
+      allowed.add("multiaccess");
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === target,
+    );
+    const assessment = assessKnownRezzedIcePath(
+      server?.ice ?? [],
+      input.playerView.own.rig ?? [],
+      input.playerView.own.credits,
+    );
+    if (
+      !assessment.blocked &&
+      ((assessment.visibleBreakCost ?? 0) <= 0 ||
+        (server?.ice.length ?? 0) === 0)
+    )
+      allowed.add("central_open");
+  }
+  const remoteContestable = input.legalActions.some(
+    (action) =>
+      action.type === "start_run" &&
+      typeof action.payload?.serverId === "string" &&
+      isRemoteServerTarget(action.payload.serverId) &&
+      runnerRemoteThreatProfile(input, action.payload.serverId).contestable,
+  );
+  if (!remoteContestable) allowed.add("remote_uncontestable");
+  if (better.size === 0) allowed.add("no_better_action");
+  return {
+    targets,
+    betterAlternatives: [...better].sort(),
+    allowedReasons: [...allowed].sort(),
+  };
+}
+
+function centralRunEventGoodForTarget(
+  input: AiDecisionInput,
+  target: "hq" | "rd" | "archives",
+): boolean {
+  return input.legalActions.some((action) => {
+    if (action.side !== "runner" || action.type !== "play_event") return false;
+    return centralPressureTargetsForCard(
+      sourceDefinitionIdForSimulationAction(input, action),
+    ).includes(target);
+  });
+}
+
+function noFreshCentralSubstitutionTypeForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+):
+  | "economy"
+  | "rig_unlock"
+  | "remote_contest"
+  | "pressure_install"
+  | "setup_search"
+  | "end_turn"
+  | undefined {
+  if (isRunnerEconomyAction(input, action)) return "economy";
+  if (
+    action.type === "start_run" &&
+    typeof action.payload?.serverId === "string" &&
+    isRemoteServerTarget(action.payload.serverId)
+  )
+    return "remote_contest";
+  if (action.type === "install_card") {
+    const definitionId = sourceDefinitionIdForSimulationAction(input, action);
+    if (isCentralPressureCardForMetrics(definitionId, true))
+      return "pressure_install";
+    if (
+      rolesForAction(input, action).some((role) => role.startsWith("breaker_"))
+    )
+      return "rig_unlock";
+  }
+  if (
+    action.type === "draw_card" ||
+    (action.type === "play_event" &&
+      rolesForAction(input, action).some(
+        (role) =>
+          role === "draw" || role === "setup" || role.includes("search"),
+      )) ||
+    action.type === "resolve_choice"
+  )
+    return "setup_search";
+  if (action.type === "end_turn") return "end_turn";
+  return undefined;
+}
+
+function recentCentralRunSameTargetWithoutRefresh(
+  input: AiDecisionInput,
+  target: "hq" | "rd" | "archives",
+): boolean {
+  const history = [...input.playerView.publicEvents, ...input.eventTail].sort(
+    (left, right) =>
+      (left.stateVersionAfter ?? 0) - (right.stateVersionAfter ?? 0),
+  );
+  let lastSameRun = -1;
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    if (
+      aiServerIdFromEvent(event) === target &&
+      (event.publicPayload.actionType === "start_run" ||
+        event.type === "run_started")
+    ) {
+      lastSameRun = index;
+      break;
+    }
+  }
+  if (lastSameRun < 0) return false;
+  const last = history[lastSameRun];
+  if (
+    !last ||
+    input.playerView.stateVersion - (last.stateVersionAfter ?? 0) > 8
+  )
+    return false;
+  const after = history.slice(lastSameRun + 1);
+  return !after.some((event) => centralRefreshEventForTarget(event, target));
+}
+
+function centralRefreshEventForTarget(
+  event: PublicGameEvent,
+  target: "hq" | "rd" | "archives",
+): boolean {
+  const actionType =
+    typeof event.publicPayload.actionType === "string"
+      ? event.publicPayload.actionType
+      : event.type;
+  if (actionType === "steal_agenda" || actionType === "trash_accessed_card")
+    return true;
+  if (target === "hq")
+    return (
+      actionType === "draw_card" ||
+      actionType === "mandatory_draw" ||
+      actionType === "install_card" ||
+      actionType === "play_operation"
+    );
+  if (target === "rd")
+    return (
+      actionType === "draw_card" ||
+      actionType === "mandatory_draw" ||
+      actionType === "shuffle_stack" ||
+      actionType === "reorder_cards"
+    );
+  return actionType === "trash_card";
+}
+
 function centralRunStreakWithoutValueForMetrics(
   input: AiDecisionInput,
   target: "hq" | "rd" | "archives",
 ): number {
   const history = [...input.playerView.publicEvents, ...input.eventTail].sort(
-    (left, right) => (left.stateVersionAfter ?? 0) - (right.stateVersionAfter ?? 0),
+    (left, right) =>
+      (left.stateVersionAfter ?? 0) - (right.stateVersionAfter ?? 0),
   );
   let streak = 0;
   for (let index = history.length - 1; index >= 0; index -= 1) {
@@ -8067,8 +9537,12 @@ function centralRunStreakWithoutValueForMetrics(
       continue;
     }
     if (
-      (target === "hq" && (actionType === "draw_card" || actionType === "mandatory_draw")) ||
-      (target === "rd" && (actionType === "draw_card" || actionType === "mandatory_draw" || actionType === "shuffle_stack")) ||
+      (target === "hq" &&
+        (actionType === "draw_card" || actionType === "mandatory_draw")) ||
+      (target === "rd" &&
+        (actionType === "draw_card" ||
+          actionType === "mandatory_draw" ||
+          actionType === "shuffle_stack")) ||
       actionType === "install_card"
     )
       break;
@@ -8091,7 +9565,8 @@ function runnerReserveDiagnosticsForSimulationAction(
   const belowAfter = creditsAfter < reserveTarget;
   const economyAction = isRunnerEconomyAction(input, action);
   const economyGain = economyAction && creditDelta > 0 ? creditDelta : 0;
-  const economySpend = economyAction && creditDelta < 0 ? Math.abs(creditDelta) : 0;
+  const economySpend =
+    economyAction && creditDelta < 0 ? Math.abs(creditDelta) : 0;
   const runDiagnostics = runnerKnownPathDiagnosticsForAction(
     input,
     action,
@@ -8104,8 +9579,11 @@ function runnerReserveDiagnosticsForSimulationAction(
     targetServerId,
   );
   const spendBelowReserve =
-    creditDelta < 0 && belowAfter && !runDiagnostics.probeRunWithPositiveInfoValue;
-  const installCost = action.type === "install_card" ? actionCreditCost(action) : 0;
+    creditDelta < 0 &&
+    belowAfter &&
+    !runDiagnostics.probeRunWithPositiveInfoValue;
+  const installCost =
+    action.type === "install_card" ? actionCreditCost(action) : 0;
   const lowValueSpendBelowReserve =
     spendBelowReserve &&
     (isRunnerLowValueDuplicateInstall(input, action) ||
@@ -8118,16 +9596,21 @@ function runnerReserveDiagnosticsForSimulationAction(
   const expensiveInstallBelowReserve =
     action.type === "install_card" && installCost >= 3 && belowAfter;
   const trashBlockedByCredits = runnerTrashBlockedByCredits(input);
-  const stealBlockedByCredits = runnerStealBlockedByCredits(input, reserveTarget);
+  const stealBlockedByCredits = runnerStealBlockedByCredits(
+    input,
+    reserveTarget,
+  );
   const contestBlockedByCredits =
     runnerContestBlockedByCredits(input, reserveTarget) ||
     runDiagnostics.runStartedAgainstKnownUnaffordablePath === true;
-  const reserveAfterAccess =
-    ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(
-      action.type,
-    )
-      ? creditsAfter - reserveTarget
-      : undefined;
+  const reserveAfterAccess = [
+    "access_card",
+    "steal_agenda",
+    "trash_accessed_card",
+    "decline_trash",
+  ].includes(action.type)
+    ? creditsAfter - reserveTarget
+    : undefined;
   const accessTarget = targetServerId ?? input.playerView.run?.attackedServerId;
 
   return {
@@ -8146,7 +9629,9 @@ function runnerReserveDiagnosticsForSimulationAction(
     ...(trashBlockedByCredits ? { runnerTrashBlockedByCredits: true } : {}),
     ...(stealBlockedByCredits ? { runnerStealBlockedByCredits: true } : {}),
     ...(spendBelowReserve ? { runnerSpendBelowReserve: true } : {}),
-    ...(lowValueSpendBelowReserve ? { runnerLowValueSpendBelowReserve: true } : {}),
+    ...(lowValueSpendBelowReserve
+      ? { runnerLowValueSpendBelowReserve: true }
+      : {}),
     ...(expensiveInstallBelowReserve
       ? { runnerExpensiveInstallBelowReserve: true }
       : {}),
@@ -8157,7 +9642,9 @@ function runnerReserveDiagnosticsForSimulationAction(
       ? { runnerReserveAfterRemoteAccess: reserveAfterAccess }
       : {}),
     ...(reserveAfterAccess !== undefined &&
-    (accessTarget === "hq" || accessTarget === "rd" || accessTarget === "archives")
+    (accessTarget === "hq" ||
+      accessTarget === "rd" ||
+      accessTarget === "archives")
       ? { runnerReserveAfterCentralRun: reserveAfterAccess }
       : {}),
     ...runDiagnostics,
@@ -8216,6 +9703,14 @@ function runnerRemoteThreatTargetingDiagnosticsForAction(
           contestableProfiles.length > 0,
         )
       : false;
+  const centralJustificationReasons =
+    centralRun && targetServerId
+      ? runnerCentralRunPressureJustificationReasonsForInput(
+          input,
+          targetServerId,
+          contestableProfiles.length > 0,
+        )
+      : [];
   const centralBurnedReserve =
     centralRun &&
     targetServerId !== undefined &&
@@ -8259,6 +9754,9 @@ function runnerRemoteThreatTargetingDiagnosticsForAction(
       ? { runnerCentralRunInsteadOfContestableAdvancedRemote: true }
       : {}),
     ...(centralJustified ? { runnerCentralRunInsteadWasJustified: true } : {}),
+    ...(centralRun && centralJustificationReasons[0]
+      ? { runnerCentralRunJustificationReason: centralJustificationReasons[0] }
+      : {}),
     ...(centralBurnedReserve
       ? { runnerCentralRunBurnedRemoteContestReserve: true }
       : {}),
@@ -8303,7 +9801,10 @@ function runnerRemoteThreatProfile(
     serverId,
   );
   const advanced = remoteServerHasScoreThreat(input, serverId);
-  const relevantTrash = runnerRemoteHasKnownRelevantTrashTarget(input, serverId);
+  const relevantTrash = runnerRemoteHasKnownRelevantTrashTarget(
+    input,
+    serverId,
+  );
   const blockedByKnownIceCost = visibleBreakCost > input.playerView.own.credits;
   const blockedByBreakerCoverage =
     assessment.blocked === true && !blockedByKnownIceCost;
@@ -8370,12 +9871,26 @@ function runnerCentralRunHasClearPressureJustificationForInput(
   targetServerId: string,
   contestableRemoteThreatVisible: boolean,
 ): boolean {
+  return (
+    runnerCentralRunPressureJustificationReasonsForInput(
+      input,
+      targetServerId,
+      contestableRemoteThreatVisible,
+    ).length > 0
+  );
+}
+
+function runnerCentralRunPressureJustificationReasonsForInput(
+  input: AiDecisionInput,
+  targetServerId: string,
+  contestableRemoteThreatVisible: boolean,
+): string[] {
   if (
     targetServerId !== "hq" &&
     targetServerId !== "rd" &&
     targetServerId !== "archives"
   )
-    return false;
+    return [];
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === targetServerId,
   );
@@ -8384,30 +9899,60 @@ function runnerCentralRunHasClearPressureJustificationForInput(
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
   );
-  if (assessment.blocked) return false;
+  if (assessment.blocked) return [];
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
-  const pressureRoles = [
-    ...input.playerView.own.gripOrHq,
-    ...(input.playerView.own.rig ?? []),
-  ].flatMap((card) => rolesForCardId(card.definitionId));
-  const hasCentralPressure = pressureRoles.some(
-    (role) =>
-      role === "run_pressure" ||
-      role === "access" ||
-      role.includes("pressure") ||
-      role.includes("interface") ||
+  const installedTargets = new Set(
+    (input.playerView.own.rig ?? [])
+      .filter((card) =>
+        isCentralPressureCardForMetrics(card.definitionId, true),
+      )
+      .flatMap((card) => centralPressureTargetsForCard(card.definitionId)),
+  );
+  const matchingInterface = installedTargets.has(
+    targetServerId as "hq" | "rd" | "archives",
+  );
+  const hasAnyInterface = installedTargets.size > 0;
+  const hasMultiaccess = (input.playerView.own.rig ?? []).some((card) =>
+    rolesForCardId(card.definitionId).some((role) =>
       role.includes("multiaccess"),
+    ),
   );
   const openOrCheap = visibleBreakCost <= 1 || (server?.ice.length ?? 0) === 0;
   const preservesReserve =
     input.playerView.own.credits - visibleBreakCost >=
     runnerCreditReserveTargetForInput(input);
-  return (
-    hasCentralPressure &&
-    openOrCheap &&
-    preservesReserve &&
-    (!contestableRemoteThreatVisible || visibleBreakCost === 0)
-  );
+  if (!openOrCheap || !preservesReserve) return [];
+  const closeout = trueCentralCloseoutProfileForMetrics(
+    input,
+    targetServerId as "hq" | "rd" | "archives",
+  ).opportunity;
+  const hqPressure =
+    targetServerId === "hq" && input.playerView.opponent.handCount >= 5;
+  const rndFreshness =
+    targetServerId === "rd" &&
+    !recentCentralRunSameTargetWithoutRefresh(input, "rd");
+  const remoteUncontestable = !contestableRemoteThreatVisible;
+  const reasons = [
+    ...(matchingInterface ? ["interface"] : []),
+    ...(hasMultiaccess ? ["multiaccess"] : []),
+    ...(closeout ? ["closeout"] : []),
+    ...(remoteUncontestable ? ["remote_uncontestable"] : []),
+    ...(hqPressure ? ["hq_pressure"] : []),
+    ...(rndFreshness ? ["rnd_freshness"] : []),
+    ...(!matchingInterface && hasAnyInterface ? ["generic_interface"] : []),
+  ];
+  if (contestableRemoteThreatVisible) {
+    return reasons.filter((reason) =>
+      [
+        "interface",
+        "multiaccess",
+        "closeout",
+        "hq_pressure",
+        "rnd_freshness",
+      ].includes(reason),
+    );
+  }
+  return reasons;
 }
 
 function runnerCentralRunBurnsRemoteContestReserveForInput(
@@ -8489,7 +10034,9 @@ function runnerKnownPathDiagnosticsForAction(
       (candidate) => candidate.id === run?.attackedServerId,
     );
     const currentIce =
-      run?.position?.kind === "ice" ? server?.ice[run.position.iceIndex] : undefined;
+      run?.position?.kind === "ice"
+        ? server?.ice[run.position.iceIndex]
+        : undefined;
     if (
       currentIce?.known &&
       currentIce.rezzed === true &&
@@ -8515,7 +10062,10 @@ function runnerKnownPathDiagnosticsForAction(
   );
   const knownPathCost = assessment.visibleBreakCost ?? 0;
   const creditsAfterPath = input.playerView.own.credits - knownPathCost;
-  const creditsMissing = Math.max(0, knownPathCost - input.playerView.own.credits);
+  const creditsMissing = Math.max(
+    0,
+    knownPathCost - input.playerView.own.credits,
+  );
   const remote = isRemoteServerTarget(targetServerId);
   const central =
     targetServerId === "hq" ||
@@ -8536,7 +10086,8 @@ function runnerKnownPathDiagnosticsForAction(
   const insufficientReserve =
     !insufficientPath &&
     creditsAfterPath < reserveTarget &&
-    (remoteThreat || runnerRemoteHasKnownRelevantTrashTarget(input, targetServerId));
+    (remoteThreat ||
+      runnerRemoteHasKnownRelevantTrashTarget(input, targetServerId));
   return {
     runKnownPathCostAtStart: knownPathCost,
     runCreditsAfterKnownPathEstimate: creditsAfterPath,
@@ -8556,7 +10107,9 @@ function runnerKnownPathDiagnosticsForAction(
             input.playerView.own.credits - reserveTarget,
         }
       : {}),
-    ...(insufficientPath ? { runStartedAgainstKnownUnaffordablePath: true } : {}),
+    ...(insufficientPath
+      ? { runStartedAgainstKnownUnaffordablePath: true }
+      : {}),
     ...(insufficientPath && remote
       ? { remoteRunStartedAgainstKnownUnaffordablePath: true }
       : {}),
@@ -8633,7 +10186,9 @@ function runnerStealBlockedByCredits(
 
 function runnerHasVisibleRemoteScoreThreat(input: AiDecisionInput): boolean {
   return input.playerView.servers.some(
-    (server) => isRemoteServerTarget(server.id) && remoteServerHasScoreThreat(input, server.id),
+    (server) =>
+      isRemoteServerTarget(server.id) &&
+      remoteServerHasScoreThreat(input, server.id),
   );
 }
 
@@ -8679,12 +10234,16 @@ function runnerRemoteTrashAccessContext(
   const targetType = remoteTrashTargetTypeForVisibleCard(accessed);
   const role = remoteTrashRoleForVisibleCard(accessed);
   const trashable =
-    targetType !== "unknown" && remoteTrashCostForVisibleCard(accessed) !== undefined;
+    targetType !== "unknown" &&
+    remoteTrashCostForVisibleCard(accessed) !== undefined;
   const relevant = trashable && role !== "low_value" && role !== "unknown";
   const affordableRelevant =
     relevant &&
-    input.legalActions.some((candidate) => candidate.type === "trash_accessed_card");
-  const relevantTaken = affordableRelevant && action.type === "trash_accessed_card";
+    input.legalActions.some(
+      (candidate) => candidate.type === "trash_accessed_card",
+    );
+  const relevantTaken =
+    affordableRelevant && action.type === "trash_accessed_card";
   return {
     trashable,
     relevant,
@@ -8758,13 +10317,16 @@ function runnerDrawKindForSimulationAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): { draw: boolean; click: boolean; cardEffect: boolean } {
-  if (action.type === "draw_card") return { draw: true, click: true, cardEffect: false };
+  if (action.type === "draw_card")
+    return { draw: true, click: true, cardEffect: false };
   const roles = rolesForAction(input, action);
   const cardEffect =
     (action.type === "play_event" ||
       action.type === "trigger_ability" ||
       action.type === "activated_card_ability") &&
-    roles.some((role) => role === "draw" || role === "setup" || role.includes("search"));
+    roles.some(
+      (role) => role === "draw" || role === "setup" || role.includes("search"),
+    );
   const searchChoice =
     action.type === "resolve_choice" &&
     input.playerView.pendingChoice !== undefined &&
@@ -8813,7 +10375,9 @@ function hasRunnerRunnablePressureAction(
     if (isRunnerPressureAction(input, action)) return true;
     if (action.type !== "start_run") return false;
     const serverId =
-      typeof action.payload?.serverId === "string" ? action.payload.serverId : "";
+      typeof action.payload?.serverId === "string"
+        ? action.payload.serverId
+        : "";
     if (!serverId) return false;
     const server = input.playerView.servers.find(
       (candidate) => candidate.id === serverId,
@@ -8920,7 +10484,9 @@ function isRunnerEconomyAction(
     action.type !== "activated_card_ability"
   )
     return false;
-  return rolesForAction(input, action).some((role) => isRunnerEconomyRole(role));
+  return rolesForAction(input, action).some((role) =>
+    isRunnerEconomyRole(role),
+  );
 }
 
 function isRunnerRigInstallAction(
