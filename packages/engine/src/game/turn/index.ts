@@ -34,5 +34,10 @@ export {
   buildRunnerResourceInstallAction,
 } from "./runner-install-actions";
 export {
+  buildRunnerHostedProgramInstallAction,
+  buildRunnerZetatechOverlayInstallAction,
+  type RunnerInstallToHostActionInput,
+} from "./runner-hosted-install-actions";
+export {
   buildRunnerProgramTrashBeforeInstallAction,
 } from "./runner-program-trash-install-actions";

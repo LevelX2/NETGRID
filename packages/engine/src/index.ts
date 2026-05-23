@@ -112,6 +112,10 @@ import {
   buildRunnerResourceInstallAction,
 } from "./game/turn/runner-install-actions";
 import {
+  buildRunnerHostedProgramInstallAction,
+  buildRunnerZetatechOverlayInstallAction,
+} from "./game/turn/runner-hosted-install-actions";
+import {
   buildRunnerProgramTrashBeforeInstallAction,
 } from "./game/turn/runner-program-trash-install-actions";
 export { quoteCorpRezCost } from "./game/payment";
@@ -3610,28 +3614,13 @@ function runnerMainActions(state: GameState): LegalAction[] {
         if (canOverlayProgramOnZetatechSoftwareInstaller(state, hostId, definition)) {
           const hostDefinition = definitionFor(state, hostId);
           actions.push(
-            action(
+            buildRunnerZetatechOverlayInstallAction(
               state,
-              "runner",
-              "install_card",
-              `${definition.title} über ${hostDefinition.title} installieren`,
-              id,
-              [{ clicks: 1, credits: definition.installCost ?? 0 }],
               {
                 cardId: id,
-                hostOnCardId: hostId,
-                v1922ZetatechOverlayInstall: true,
-              },
-              {
-                targetRequirements: [
-                  {
-                    id: "zetatechOverlayHost",
-                    kind: "card",
-                    side: "runner",
-                    zoneScope: ["runner.rig.programs"],
-                    visibility: "public",
-                  },
-                ],
+                definition,
+                hostCardId: hostId,
+                hostTitle: hostDefinition.title,
               },
             ),
           );
@@ -3640,24 +3629,13 @@ function runnerMainActions(state: GameState): LegalAction[] {
         if (!canHostProgramOnDaemon(state, hostId, definition)) continue;
         const hostDefinition = definitionFor(state, hostId);
         actions.push(
-          action(
+          buildRunnerHostedProgramInstallAction(
             state,
-            "runner",
-            "install_card",
-            `${definition.title} in ${hostDefinition.title} hosten`,
-            id,
-            [{ clicks: 1, credits: definition.installCost ?? 0 }],
-            { cardId: id, hostOnCardId: hostId },
             {
-              targetRequirements: [
-                {
-                  id: "hostProgram",
-                  kind: "card",
-                  side: "runner",
-                  zoneScope: ["runner.rig.programs"],
-                  visibility: "public",
-                },
-              ],
+              cardId: id,
+              definition,
+              hostCardId: hostId,
+              hostTitle: hostDefinition.title,
             },
           ),
         );
