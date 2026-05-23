@@ -152,6 +152,7 @@ import {
   resolveSelfModifyingCodeSearchInstallSelection,
   resolveSneakPreviewSearchInstallSelection,
 } from "./game/hidden-zone/search-choice-resolvers";
+import { applyResolvedSearchToGripMove } from "./game/hidden-zone/search-choice-move-intents";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -23684,48 +23685,20 @@ function resolveCardImplementationSearchToGripChoice(
         ? searchTrashToGripTargets(state, filter)
         : searchStackToGripTargets(state, filter),
   });
-  const sourceDefinition = definitionFor(state, selection.sourceCardId);
-  if (sourceDefinition.id !== selection.sourceDefinitionId)
-    throw new Error("Die Search-Quelle ist nicht mehr gueltig.");
-  if (
-    sourceDefinition.type === "resource" &&
-    !state.runner.rig.resources.includes(selection.sourceCardId)
-  )
-    throw new Error("Die Search-Quelle ist nicht mehr installiert.");
-  const cardId = selection.selectedCardId;
-  const definition = definitionFor(state, cardId);
-  removeFromAllZones(state, cardId);
-  state.runner.grip.push(cardId);
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    zone: { side: "runner", zone: "grip" },
-  };
-  if (selection.shuffleNeeded)
+  const move = applyResolvedSearchToGripMove({
+    selection,
+    sourceCardIds: selection.sourceZone === "heap" ? state.runner.heap : state.runner.stack,
+    sourceDefinition: definitionFor(state, selection.sourceCardId),
+    selectedCardDefinitionId: definitionFor(state, selection.selectedCardId).id,
+    installedRunnerResourceIds: state.runner.rig.resources,
+    cardInstances: state.cardInstances,
+    removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+    addToGrip: (cardId) => state.runner.grip.push(cardId),
+  });
+  if (move.result.shuffleNeeded)
     shuffleRunnerStack(state, `p3_37_search_stack_to_grip:${choice.choiceId}:shuffle`);
   delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction:
-      selection.sourceZone === "heap"
-        ? "p3_37_search_trash_to_grip"
-        : "p3_37_search_stack_to_grip",
-    sourceDefinitionId: selection.sourceDefinitionId,
-    searchedZone: selection.sourceZone === "heap" ? "runner_heap" : "runner_stack",
-    selectedCount: 1,
-    movedCardCount: 1,
-    searchDestination: "runner_grip",
-    shufflePerformed: selection.shuffleNeeded,
-    shuffled: selection.shuffleNeeded,
-    ...(selection.sourceZone === "heap" || selection.revealToCorp
-      ? {
-          cardDefinitionId: definition.id,
-          publicRevealKind: "reveal",
-          publicRevealDefinitionId: definition.id,
-          revealedCardDefinitionIds: definition.id,
-        }
-      : {}),
-  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), ...move.payload };
 }
 
 function resolveCardImplementationSearchStackInstallChoice(
