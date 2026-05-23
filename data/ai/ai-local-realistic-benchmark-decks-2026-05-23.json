@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "ai-local-realistic-benchmark-decks-v1",
+  "storage": {
+    "kind": "appdata_netgrid_decks",
+    "relativeDirectory": "NetGrid/Decks",
+    "overrideEnv": "NETGRID_LOCAL_DECKS_DIR",
+    "format": "netgrid-editable-deck-v1",
+    "cardReference": "cardId"
+  },
+  "frozenSnapshotsFile": "data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json",
+  "decks": [
+    {
+      "localDeckId": "local_runner_blink_pressure_rig",
+      "snapshotId": "local_realistic_runner_blink_pressure_rig_snapshot_v1",
+      "expectedName": "Blink Pressure Rig",
+      "side": "runner",
+      "fileName": "local_runner_blink_pressure_rig.json",
+      "classification": "runnable_ai_benchmark",
+      "role": "standard_runner_rig_economy_pressure"
+    },
+    {
+      "localDeckId": "local_corp_ivory_bastion",
+      "snapshotId": "local_realistic_corp_ivory_bastion_snapshot_v1",
+      "expectedName": "Ivory Bastion",
+      "side": "corp",
+      "fileName": "local_corp_ivory_bastion.json",
+      "classification": "runnable_ai_benchmark",
+      "role": "standard_corp_glacier_remote_scoring"
+    },
+    {
+      "localDeckId": "local_runner_rnd_interface_dig",
+      "snapshotId": "local_realistic_runner_rnd_interface_dig_snapshot_v1",
+      "expectedName": "R&D Interface Dig",
+      "side": "runner",
+      "fileName": "local_runner_rnd_interface_dig.json",
+      "classification": "runnable_ai_benchmark",
+      "role": "runner_rnd_interface_pressure"
+    },
+    {
+      "localDeckId": "local_corp_shadoe_tag_bag",
+      "snapshotId": "local_realistic_corp_shadoe_tag_bag_snapshot_v1",
+      "expectedName": "Shadoe Tag & Bag",
+      "side": "corp",
+      "fileName": "local_corp_shadoe_tag_bag.json",
+      "classification": "runnable_ai_benchmark",
+      "role": "corp_tag_punish_pressure"
+    }
+  ],
+  "slots": [
+    {
+      "slotId": "local_realistic_pair_1",
+      "label": "Local Realistic Holdout 1",
+      "slotType": "local_realistic_holdout",
+      "status": "runnable",
+      "runnerLocalDeckId": "local_runner_blink_pressure_rig",
+      "corpLocalDeckId": "local_corp_ivory_bastion",
+      "tuningUse": "holdout_only"
+    },
+    {
+      "slotId": "local_realistic_pair_2",
+      "label": "Local Realistic Holdout 2",
+      "slotType": "local_realistic_holdout",
+      "status": "runnable",
+      "runnerLocalDeckId": "local_runner_rnd_interface_dig",
+      "corpLocalDeckId": "local_corp_shadoe_tag_bag",
+      "tuningUse": "holdout_only"
+    }
+  ]
+}

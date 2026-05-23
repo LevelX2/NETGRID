@@ -94,6 +94,9 @@ importers:
       '@netgrid/catalog':
         specifier: workspace:*
         version: link:../catalog
+      '@netgrid/decks':
+        specifier: workspace:*
+        version: link:../decks
       '@netgrid/engine':
         specifier: workspace:*
         version: link:../engine

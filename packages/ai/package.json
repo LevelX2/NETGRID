@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@netgrid/catalog": "workspace:*",
+    "@netgrid/decks": "workspace:*",
     "@netgrid/engine": "workspace:*",
     "@netgrid/shared": "workspace:*"
   }
