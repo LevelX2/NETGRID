@@ -11292,8 +11292,28 @@ function rezCard(
   if (rootRez && startSpeedTrapRezInterruptChoice(state, cardId, legalAction))
     return;
   if (rootRez && resolveCorpRootRezEffect(state, cardId, legalAction)) return;
-  if (rootRez) return;
+  if (rootRez) {
+    continueAfterCorpRootRezIfWindowIsComplete(state, legalAction);
+    return;
+  }
   beginEncounter(state, cardId as CardInstanceId, legalAction);
+}
+
+function continueAfterCorpRootRezIfWindowIsComplete(
+  state: GameState,
+  legalAction?: LegalAction,
+): void {
+  const run = state.run;
+  if (
+    state.timingPoint !== "run.approach_ice" ||
+    run?.phase !== "approach_ice" ||
+    !run.approachedIceId ||
+    corpRunRootRezActions(state).length > 0
+  )
+    return;
+  const approachedIce = mustInstance(state.cardInstances, run.approachedIceId);
+  if (!approachedIce.rezzed) return;
+  beginEncounter(state, run.approachedIceId, legalAction);
 }
 
 function proteusVariableIceStateForRezAction(
@@ -12059,6 +12079,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     }
   }
   for (const index of payOrEndRunIndexesForThisContinue) {
+    if (ended) break;
     if (paidPayOrEndRunIndexes.has(index)) continue;
     const alreadyResolved = (legalAction?.resolvedEffects ?? []).some(
       (effect) =>

@@ -7910,6 +7910,7 @@ function runnerCentralPressureDiagnosticsForSimulationAction(
           server.ice,
           input.playerView.own.rig ?? [],
           input.playerView.own.credits,
+          server.root,
         ).visibleBreakCost ?? 0
       : 0;
   const insufficientReserve =
@@ -8023,6 +8024,7 @@ function centralPressureTargetIsGoodForMetrics(
     server.ice,
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
+    server.root,
   );
   if (assessment.blocked) return false;
   const cheap = (assessment.visibleBreakCost ?? 0) <= 1 || server.ice.length === 0;
@@ -8295,6 +8297,7 @@ function runnerRemoteThreatProfile(
     server?.ice ?? [],
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
+    server?.root ?? [],
   );
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
   const creditsAfterPath = input.playerView.own.credits - visibleBreakCost;
@@ -8383,6 +8386,7 @@ function runnerCentralRunHasClearPressureJustificationForInput(
     server?.ice ?? [],
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
+    server?.root ?? [],
   );
   if (assessment.blocked) return false;
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
@@ -8422,6 +8426,7 @@ function runnerCentralRunBurnsRemoteContestReserveForInput(
     server?.ice ?? [],
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
+    server?.root ?? [],
   );
   if (assessment.blocked || contestableProfiles.length === 0) return false;
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
@@ -8442,6 +8447,7 @@ function runnerCreditReserveTargetForInput(input: AiDecisionInput): number {
         server.ice,
         input.playerView.own.rig ?? [],
         input.playerView.own.credits,
+        server.root,
       ).visibleBreakCost ?? 0;
     const hasThreat = server.root.some(
       (card) =>
@@ -8498,6 +8504,7 @@ function runnerKnownPathDiagnosticsForAction(
         [currentIce],
         input.playerView.own.rig ?? [],
         input.playerView.own.credits,
+        server?.root ?? [],
       ).blocked
     )
       return { runEndedAfterFirstIceDueToCredits: true };
@@ -8512,6 +8519,7 @@ function runnerKnownPathDiagnosticsForAction(
     server.ice,
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
+    server.root,
   );
   const knownPathCost = assessment.visibleBreakCost ?? 0;
   const creditsAfterPath = input.playerView.own.credits - knownPathCost;
@@ -8595,6 +8603,7 @@ function runnerContestBlockedByCredits(
         server.ice,
         input.playerView.own.rig ?? [],
         input.playerView.own.credits,
+        server.root,
       ).visibleBreakCost ?? 0;
     return (
       input.playerView.own.credits < path ||

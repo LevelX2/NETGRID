@@ -4702,16 +4702,6 @@ describe("MVP 0.1 runs, access and scoring", () => {
         action.payload?.rootRez === true,
     );
     expect(state.cardInstances[drDreffId]?.rezzed).toBe(true);
-    expect(state.timingPoint).toBe("run.approach_ice");
-    expect(state.activeSide).toBe("corp");
-
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "decline_rez" &&
-        action.payload?.runRootRezPass !== true,
-    );
     expect(state.timingPoint).toBe("run.encounter_ice");
     expect(state.activeSide).toBe("runner");
     expect(state.run).toMatchObject({
@@ -4720,6 +4710,90 @@ describe("MVP 0.1 runs, access and scoring", () => {
     });
     expect(validateGameState(state).ok).toBe(true);
 
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("continues directly into a rezzed ICE encounter after the last run root rez", () => {
+    let state = createGameAfterSetup({
+      seed: "root-rez-tesseract-before-rezzed-crystal-wall",
+      runnerDeck: ONR_V1_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_CORP_DECK,
+        cards: [
+          { id: "onr_v1_232_crystal-wall", quantity: 1 },
+          { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+          { id: "onr_v1_370_tesseract-fort-construction", quantity: 1 },
+          ...ONR_V1_CORP_DECK.cards.filter(
+            (card) =>
+              card.id !== "onr_v1_232_crystal-wall" &&
+              card.id !== "onr_v1_355_crystal-palace-station-grid" &&
+              card.id !== "onr_v1_370_tesseract-fort-construction",
+          ),
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    const tesseractId = putCorpRootInRemote(
+      state,
+      "onr_v1_370_tesseract-fort-construction",
+    );
+    const crystalPalaceId = putCorpRootInRemote(
+      state,
+      "onr_v1_355_crystal-palace-station-grid",
+    );
+    state.cardInstances[crystalPalaceId] = {
+      ...state.cardInstances[crystalPalaceId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const crystalWallId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_232_crystal-wall",
+    );
+    state.cardInstances[crystalWallId] = {
+      ...state.cardInstances[crystalWallId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state = toRunnerTurnFromCorpMain(state);
+    state.runner.credits = 10;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === tesseractId &&
+        action.payload?.rootRez === true,
+    );
+
+    expect(state.cardInstances[tesseractId]?.rezzed).toBe(true);
+    expect(state.timingPoint).toBe("run.encounter_ice");
+    expect(state.activeSide).toBe("runner");
+    expect(state.run).toMatchObject({
+      phase: "encounter_ice",
+      encounteredIceId: crystalWallId,
+    });
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "continue_run",
+      ),
+    ).toBe(true);
+    expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
@@ -10887,6 +10961,85 @@ describe("V1.6.2 Mechanikpaket B", () => {
         idempotencyKey: "p310-tesseract-stale",
       }).ok,
     ).toBe(false);
+  });
+
+  it("does not resolve Tesseract after Crystal Wall has already ended the run", () => {
+    let state = createGameAfterSetup({
+      seed: "p310-tesseract-crystal-wall-single-etr-log",
+      runnerDeck: ONR_V1_6_2_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_6_2_CORP_DECK,
+        cards: [
+          { id: "onr_v1_232_crystal-wall", quantity: 1 },
+          { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+          { id: "onr_v1_370_tesseract-fort-construction", quantity: 1 },
+          ...ONR_V1_6_2_CORP_DECK.cards.filter(
+            (card) =>
+              card.id !== "onr_v1_232_crystal-wall" &&
+              card.id !== "onr_v1_355_crystal-palace-station-grid" &&
+              card.id !== "onr_v1_370_tesseract-fort-construction",
+          ),
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 30;
+    state.runner.credits = 10;
+    for (const upgradeId of [
+      putCorpRootInRemote(state, "onr_v1_355_crystal-palace-station-grid"),
+      putCorpRootInRemote(state, "onr_v1_370_tesseract-fort-construction"),
+    ]) {
+      state.cardInstances[upgradeId] = {
+        ...state.cardInstances[upgradeId]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    const crystalWallId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_232_crystal-wall",
+    );
+    state.cardInstances[crystalWallId] = {
+      ...state.cardInstances[crystalWallId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state = toRunnerTurnFromCorpMain(state);
+    state.runner.credits = 10;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(state.timingPoint).toBe("run.encounter_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.run).toBeUndefined();
+    const resolvedEffects = state.eventLog.at(-1)?.publicPayload
+      .resolvedEffects;
+    expect(resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        sourceDefinitionId: "onr_v1_232_crystal-wall",
+        sourceTitle: "Crystal Wall",
+        subroutineIndex: 0,
+        subroutineType: "end_the_run",
+        endedRun: true,
+      }),
+    ]);
+    expect(JSON.stringify(resolvedEffects)).not.toContain(
+      "Tesseract Fort Construction",
+    );
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 });
 

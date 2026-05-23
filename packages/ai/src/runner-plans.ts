@@ -1173,6 +1173,7 @@ function runnerKnownPathEstimate(
     server.ice,
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
+    server.root,
   );
   const visibleBreakCost =
     assessment.visibleBreakCost ?? features.visibleRunBreakCosts.get(serverId) ?? 0;
@@ -2444,7 +2445,12 @@ function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
   const blockedRunServers = new Set<string>();
   const visibleRunBreakCosts = new Map<string, number>();
   for (const server of input.playerView.servers) {
-    const assessment = assessKnownRezzedIcePath(server.ice, rigCards, input.playerView.own.credits);
+    const assessment = assessKnownRezzedIcePath(
+      server.ice,
+      rigCards,
+      input.playerView.own.credits,
+      server.root,
+    );
     if (assessment.visibleBreakCost !== undefined) visibleRunBreakCosts.set(server.id, assessment.visibleBreakCost);
     if (assessment.blocked) blockedRunServers.add(server.id);
   }
@@ -3128,6 +3134,7 @@ function remoteServerHasKnownRelevantTrashTarget(
       server.ice,
       input.playerView.own.rig ?? [],
       input.playerView.own.credits,
+      server.root,
     ).visibleBreakCost ?? 0;
   const creditsAfterIce = input.playerView.own.credits - visibleBreakCost;
   return server.root.some(
@@ -3262,7 +3269,12 @@ function assessVisibleBreakerPressure(input: AiDecisionInput): VisibleBreakerPre
   const blockedServerIds = new Set<string>();
   for (const server of input.playerView.servers) {
     if (!isStrategicBreakerTarget(server)) continue;
-    const assessment = assessKnownRezzedIcePath(server.ice, rigCards, input.playerView.own.credits);
+    const assessment = assessKnownRezzedIcePath(
+      server.ice,
+      rigCards,
+      input.playerView.own.credits,
+      server.root,
+    );
     if (!assessment.blocked) continue;
     const missingDefinitions = server.ice
       .filter((ice) => ice.known && ice.rezzed === true && ice.definitionId && iceHasEndTheRun(ice.definitionId))
