@@ -11,6 +11,7 @@ import {
   type AiDecisionScoreComponent,
   type AiDifficulty,
   type LegalAction,
+  type PublicGameEvent,
   type Side,
   type VisibleCard,
 } from "@netgrid/shared";
@@ -183,6 +184,16 @@ type RemoteIntentMemory = {
   remoteAdvanceSignals: number;
   remoteScoreSignals: number;
   centralRunSignals: Record<"hq" | "rd", number>;
+  evidence: string[];
+};
+
+type CorpPlanContinuationIntent = {
+  planKind: CorpPlanKind;
+  targetServerId?: string | undefined;
+  ownStrategicDecisionCount: number;
+  samePlanRepeatsWithoutProgress: number;
+  expired: boolean;
+  abortReasons: string[];
   evidence: string[];
 };
 
@@ -570,6 +581,11 @@ export function evaluateCorpPlan(
     candidate,
     context,
   );
+  const planContinuation = evaluateCorpPlanContinuationAbort(
+    input,
+    candidate,
+    context,
+  );
   const base = baseScoreForPlan(candidate.kind);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const score =
@@ -588,6 +604,7 @@ export function evaluateCorpPlan(
     advanceProtection.score +
     installedEconomy.score +
     extraActions.score +
+    planContinuation.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
     remoteRootExposurePenalty(
@@ -613,6 +630,7 @@ export function evaluateCorpPlan(
     ...candidate.expectedBenefits,
     ...installedEconomy.evidence,
     ...extraActions.evidence,
+    ...planContinuation.evidence,
     ...agendaRisk.evidence,
     ...serverThreat.evidence,
     ...economyReserve.evidence,
@@ -734,6 +752,13 @@ export function evaluateCorpPlan(
         firstReason(extraActions.reasons),
       ],
       [
+        "planContinuation",
+        "Planfortsetzung/-abbruch",
+        planContinuation.score,
+        1,
+        firstReason(planContinuation.reasons),
+      ],
+      [
         "remoteIntent",
         "Remote-Intent-Memory",
         remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
@@ -763,6 +788,7 @@ export function evaluateCorpPlan(
       ...advanceProtection.reasons,
       ...installedEconomy.reasons,
       ...extraActions.reasons,
+      ...planContinuation.reasons,
     ]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence),
   };
@@ -1078,6 +1104,86 @@ function evaluateCorpExtraActionOperations(
       `overtime_net_value:${best.netValue}`,
       `score_window_after_extra_actions:${best.scoreWindowAfterExtraActions}`,
       `basic_credit_followup_only:${best.basicCreditFollowupOnly}`,
+    ],
+  };
+}
+
+function evaluateCorpPlanContinuationAbort(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+  context: CorpEvaluationContext,
+): CorpPlanEvaluatorResult {
+  if (!input.profileId.includes("v1.4.2")) {
+    return {
+      score: 0,
+      reasons: [],
+      evidence: ["plan_continuation_profile:false"],
+    };
+  }
+  const intent = reconstructCorpPlanContinuationIntent(input, context);
+  if (!intent) {
+    return {
+      score: 0,
+      reasons: [],
+      evidence: ["plan_continuation_opportunity:false"],
+    };
+  }
+  const features = extractCorpPlanFeatures(input);
+  const samePlan = candidate.kind === intent.planKind;
+  const abortNeeded = intent.expired || intent.abortReasons.length > 0;
+  const continuation = corpContinuationPlanMatches(
+    input,
+    candidate,
+    intent,
+    context,
+    features,
+  );
+  const abort = corpAbortPlanMatches(candidate, intent, features);
+  let score = 0;
+  const reasons: string[] = [];
+
+  if (!abortNeeded && continuation) {
+    score += 120;
+    reasons.push("continue_short_horizon_plan");
+  }
+  if (abortNeeded && abort) {
+    score += 140;
+    reasons.push("abort_or_pivot_stale_plan");
+  }
+  if (abortNeeded && samePlan && !continuation) {
+    score -= intent.expired ? 330 : 250;
+    reasons.push("do_not_repeat_aborted_plan");
+  }
+  if (intent.samePlanRepeatsWithoutProgress > 0 && samePlan && !continuation) {
+    score -= 150 + intent.samePlanRepeatsWithoutProgress * 75;
+    reasons.push("avoid_same_plan_repeat_without_progress");
+  }
+  if (
+    intent.planKind === "recover_economy" &&
+    candidate.kind === "recover_economy" &&
+    features.credits >= 6
+  ) {
+    score -= 180;
+    reasons.push("corp_economy_reserve_reached");
+  }
+
+  return {
+    score,
+    reasons,
+    evidence: [
+      "plan_continuation_opportunity:true",
+      "plan_intent_side:corp",
+      `plan_intent_kind:${intent.planKind}`,
+      `plan_intent_target:${intent.targetServerId ?? "none"}`,
+      `plan_intent_own_decisions:${intent.ownStrategicDecisionCount}`,
+      `plan_intent_same_repeats:${intent.samePlanRepeatsWithoutProgress}`,
+      `plan_intent_expired:${intent.expired}`,
+      `plan_abort_opportunity:${abortNeeded}`,
+      `plan_abort_reason:${intent.abortReasons.join("|") || "none"}`,
+      `plan_continuation_taken:${!abortNeeded && continuation}`,
+      `plan_abort_taken:${abortNeeded && abort}`,
+      `plan_candidate_kind:${candidate.kind}`,
+      ...intent.evidence,
     ],
   };
 }
@@ -2616,6 +2722,223 @@ export function evaluateRemoteIntentMemory(
       `runner_remote_contest_probability:${round(beliefState.corpOpponentModel?.remoteContestProbability ?? 0)}`,
     ],
   };
+}
+
+function reconstructCorpPlanContinuationIntent(
+  input: AiDecisionInput,
+  context: CorpEvaluationContext,
+): CorpPlanContinuationIntent | undefined {
+  const history = mergedPublicHistory(input);
+  const lastProgressIndex = findLastIndex(history, corpPublicEventConvertsPlan);
+  const ownStrategicEvents = history
+    .slice(lastProgressIndex + 1)
+    .filter(
+      (event) =>
+        event.publicPayload.actor === "corp" &&
+        corpPlanKindFromPublicEvent(event) !== undefined,
+    );
+  if (ownStrategicEvents.length === 0) return undefined;
+  const first = ownStrategicEvents[0]!;
+  const planKind = corpPlanKindFromPublicEvent(first);
+  if (!planKind) return undefined;
+  const targetServerId = serverIdFromEvent(first);
+  const ownStrategicDecisionCount = ownStrategicEvents.length;
+  const samePlanRepeatsWithoutProgress = Math.max(
+    0,
+    ownStrategicEvents.filter(
+      (event) =>
+        corpPlanKindFromPublicEvent(event) === planKind &&
+        serverIdFromEvent(event) === targetServerId,
+    ).length - 1,
+  );
+  const expired = ownStrategicDecisionCount > 3;
+  const intent: CorpPlanContinuationIntent = {
+    planKind,
+    targetServerId,
+    ownStrategicDecisionCount,
+    samePlanRepeatsWithoutProgress,
+    expired,
+    abortReasons: [],
+    evidence: [
+      `plan_intent_source_version:${eventVersion(first)}`,
+      `plan_intent_latest_own_version:${eventVersion(ownStrategicEvents.at(-1)!)}`,
+    ],
+  };
+  return {
+    ...intent,
+    abortReasons: corpPlanAbortReasons(input, intent, context),
+  };
+}
+
+function corpPlanKindFromPublicEvent(
+  event: PublicGameEvent,
+): CorpPlanKind | undefined {
+  const actionType =
+    typeof event.publicPayload.actionType === "string"
+      ? event.publicPayload.actionType
+      : event.type;
+  const serverId = serverIdFromEvent(event);
+  const placement = event.publicPayload.placement;
+  if (actionType === "score_agenda") return "score_now";
+  if (actionType === "advance_card") return "score_next_turn";
+  if (actionType === "install_card") {
+    if (serverId === "hq" && placement === "ice") return "protect_hq";
+    if (serverId === "rd" && placement === "ice") return "protect_rnd";
+    if (isRemoteServerId(serverId)) return "build_scoring_remote";
+  }
+  if (actionType === "rez_ice" && isRemoteServerId(serverId))
+    return "build_scoring_remote";
+  if (
+    actionType === "gain_credit" ||
+    actionType === "draw_card" ||
+    actionType === "play_operation" ||
+    actionType === "activated_card_ability" ||
+    actionType === "trigger_ability"
+  )
+    return "recover_economy";
+  return undefined;
+}
+
+function corpPublicEventConvertsPlan(event: PublicGameEvent): boolean {
+  const actionType =
+    typeof event.publicPayload.actionType === "string"
+      ? event.publicPayload.actionType
+      : event.type;
+  return actionType === "score_agenda" || actionType === "steal_agenda";
+}
+
+function corpPlanAbortReasons(
+  input: AiDecisionInput,
+  intent: CorpPlanContinuationIntent,
+  context: CorpEvaluationContext,
+): string[] {
+  const features = extractCorpPlanFeatures(input);
+  const reasons: string[] = [];
+  if (intent.expired) reasons.push("ttl_expired");
+  if (intent.planKind === "recover_economy" && features.credits >= 6)
+    reasons.push("reserve_reached");
+  if (
+    (intent.planKind === "protect_hq" || intent.planKind === "protect_rnd") &&
+    intent.samePlanRepeatsWithoutProgress > 0
+  ) {
+    const serverId = intent.planKind === "protect_hq" ? "hq" : "rd";
+    const server = features.serverFeatures.get(serverId);
+    if ((server?.iceCount ?? 0) >= 2)
+      reasons.push("central_protection_sufficient");
+  }
+  if (intent.planKind === "build_scoring_remote") {
+    const target = intent.targetServerId;
+    if (
+      target &&
+      isRemoteServerId(target) &&
+      context.runnerContestByServerId.get(target)?.capacity === "high"
+    )
+      reasons.push("remote_contest_risk_high");
+  }
+  return sortedUnique(reasons);
+}
+
+function corpContinuationPlanMatches(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+  intent: CorpPlanContinuationIntent,
+  context: CorpEvaluationContext,
+  features: CorpPlanFeatures,
+): boolean {
+  switch (intent.planKind) {
+    case "build_scoring_remote":
+      return (
+        candidate.kind === "score_next_turn" ||
+        candidate.kind === "score_now" ||
+        (candidate.kind === "build_scoring_remote" &&
+          candidateBuildsRemoteProtection(
+            input,
+            candidate,
+            intent.targetServerId,
+          ))
+      );
+    case "score_next_turn":
+      return (
+        candidate.kind === "score_now" ||
+        candidate.kind === "score_next_turn" ||
+        candidateBuildsRemoteProtection(input, candidate, intent.targetServerId)
+      );
+    case "recover_economy":
+      if (features.credits < 6) return candidate.kind === "recover_economy";
+      return (
+        candidate.kind === "build_scoring_remote" ||
+        candidate.kind === "score_next_turn" ||
+        candidate.kind === "score_now" ||
+        candidate.kind === "protect_hq" ||
+        candidate.kind === "protect_rnd"
+      );
+    case "protect_hq":
+    case "protect_rnd":
+      return (
+        candidate.kind === "build_scoring_remote" ||
+        candidate.kind === "score_next_turn"
+      );
+    default:
+      return candidate.kind !== "bait_runner";
+  }
+}
+
+function corpAbortPlanMatches(
+  candidate: CorpPlanCandidate,
+  intent: CorpPlanContinuationIntent,
+  features: CorpPlanFeatures,
+): boolean {
+  if (intent.expired) return candidate.kind !== intent.planKind;
+  if (intent.abortReasons.includes("reserve_reached"))
+    return candidate.kind !== "recover_economy";
+  if (intent.abortReasons.includes("central_protection_sufficient"))
+    return candidate.kind !== intent.planKind;
+  if (intent.abortReasons.includes("remote_contest_risk_high"))
+    return (
+      candidate.kind === "build_scoring_remote" ||
+      candidate.kind === "recover_economy"
+    );
+  return features.credits >= 0 && candidate.kind !== intent.planKind;
+}
+
+function candidateBuildsRemoteProtection(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+  targetServerId: string | undefined,
+): boolean {
+  return actionsForCandidate(input, candidate).some(
+    (action) =>
+      action.type === "install_card" &&
+      action.payload?.placement === "ice" &&
+      isRemoteServerId(action.payload?.serverId) &&
+      (!targetServerId || action.payload?.serverId === targetServerId),
+  );
+}
+
+function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
+  const byId = new Map<string, PublicGameEvent>();
+  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
+    byId.set(event.eventId, event);
+  }
+  return [...byId.values()].sort(
+    (left, right) => eventVersion(left) - eventVersion(right),
+  );
+}
+
+function findLastIndex<T>(
+  values: T[],
+  predicate: (value: T) => boolean,
+): number {
+  for (let index = values.length - 1; index >= 0; index -= 1) {
+    if (predicate(values[index]!)) return index;
+  }
+  return -1;
+}
+
+function eventVersion(event: PublicGameEvent): number {
+  return typeof event.stateVersionAfter === "number"
+    ? event.stateVersionAfter
+    : 0;
 }
 
 export function corpPlanUsesOnlyAiSupportedCards(

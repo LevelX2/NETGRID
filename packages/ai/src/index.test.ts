@@ -4812,6 +4812,62 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
+  it("continues Corp remote-build intent into advance or score instead of loose economy", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-plan-continuation-remote-build",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain) throw new Error("Missing corp continuation actions");
+    const scopedInput = {
+      ...input,
+      profileId: "corp-ai-v1.4.2-normal",
+      eventTail: [
+        syntheticPlanActionEvent(
+          "corp-prior-remote-build",
+          1,
+          "corp",
+          "advance_card",
+          "remote_1",
+        ),
+      ],
+      legalActions: [advance, gain],
+    };
+    const scoreCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_next_turn",
+    );
+    const economyCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(scoreCandidate).toBeDefined();
+    expect(economyCandidate).toBeDefined();
+    if (!scoreCandidate || !economyCandidate)
+      throw new Error("Missing corp continuation candidates");
+    const score = evaluateCorpPlan(scopedInput, scoreCandidate);
+    const economy = evaluateCorpPlan(scopedInput, economyCandidate);
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(score.score).toBeGreaterThan(economy.score);
+    expect(JSON.stringify(score.scoreBreakdown)).toContain(
+      "continue_short_horizon_plan",
+    );
+    expect(decision.debug.planKind).toBe("score_next_turn");
+  });
+
   it("evaluates Corp mulligan choices from opening hand and deck doctrine", () => {
     const baseInput = corpActionPhaseInput("ai-doctrine-mulligan", (state) => {
       state.corp.credits = 5;
@@ -6443,6 +6499,63 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(debugText).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,
     );
+  });
+
+  it("pivots Runner economy intent into a reachable contest instead of repeating economy", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-plan-continuation-economy",
+      (state) => {
+        state.runner.credits = 8;
+        state.corp.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        moveRunnerProgramToRig(state, "simple_fracter");
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing economy-continuation actions");
+    const scopedInput = {
+      ...input,
+      profileId: "runner-ai-v1.4.2-normal",
+      eventTail: [
+        syntheticPlanActionEvent(
+          "runner-prior-economy",
+          1,
+          "runner",
+          "gain_credit",
+        ),
+      ],
+      legalActions: [remoteRun, gain],
+    };
+    const contestCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    const economyCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(contestCandidate).toBeDefined();
+    expect(economyCandidate).toBeDefined();
+    if (!contestCandidate || !economyCandidate)
+      throw new Error("Missing economy-continuation candidates");
+    const contestScore = evaluateRunnerPlan(scopedInput, contestCandidate);
+    const economyScore = evaluateRunnerPlan(scopedInput, economyCandidate);
+    const decision = chooseRunnerPlanDecision(scopedInput);
+
+    expect(contestScore.score).toBeGreaterThan(economyScore.score);
+    expect(contestScore.evidence).toContain(
+      "plan_abort_reason:reserve_reached",
+    );
+    expect(contestScore.evidence).toContain("plan_abort_taken:true");
+    expect(decision.debug.planKind).toBe("contest_remote");
   });
 
   it("keeps known remote contest viable when Krash can still afford BBS trash after Data Wall", () => {
@@ -11604,6 +11717,28 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.turnsWithNoProgress).toBe(2);
   });
 
+  it("keeps run and forced micro-actions out of strategic no-progress chains", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("runner", 1, "start_run", "rd", 1, {
+            reasonCode: "runner.plan.pressure_rnd",
+          }),
+          progressionAction("runner", 2, "continue_run", undefined, 1),
+          progressionAction("runner", 3, "access_card", undefined, 1),
+          progressionAction("corp", 4, "mandatory_draw", undefined, 2),
+          progressionAction("runner", 5, "end_turn", undefined, 2),
+        ],
+        "strategic-micro-chain-fixture",
+      ),
+    ]);
+
+    expect(metrics.longestNoProgressChain).toBe(5);
+    expect(metrics.strategicLongestNoProgressChain).toBe(2);
+    expect(metrics.microActionNoProgressContribution).toBe(3);
+    expect(metrics.planIntentAbandonedWithoutReason).toBeGreaterThan(0);
+  });
+
   it("keeps remote builds unconverted without advance score or protection progress", () => {
     const metrics = summarizeMatchProgressionMetrics([
       progressionSummary(
@@ -13307,6 +13442,30 @@ function syntheticRunStartedEvent(
       actor: "runner",
       actionType: "start_run",
       serverId,
+    },
+  };
+}
+
+function syntheticPlanActionEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  side: Side,
+  actionType: LegalAction["type"],
+  serverId?: string,
+  extra: Record<string, unknown> = {},
+): PublicGameEvent {
+  return {
+    eventId,
+    type: actionType,
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload: {
+      actor: side,
+      actionType,
+      ...(serverId ? { serverId } : {}),
+      ...extra,
     },
   };
 }

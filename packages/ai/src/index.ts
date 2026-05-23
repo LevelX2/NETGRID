@@ -281,6 +281,30 @@ export type AiMatchProgressionMetrics = {
   turnsWithNoProgress: number;
   actionsUntilNextScoreOrSteal: number;
   actionsUntilNextMeaningfulBoardProgress: number;
+  strategicNoProgressActionChainLength: number;
+  strategicLongestNoProgressChain: number;
+  microActionNoProgressContribution: number;
+  planContinuationOpportunities: number;
+  planContinuationTaken: number;
+  planContinuationRate: number;
+  planAbortOpportunities: number;
+  planAbortTaken: number;
+  planAbortWithReason: number;
+  planIntentConvertedWithin1OwnDecision: number;
+  planIntentConvertedWithin2OwnDecisions: number;
+  planIntentConvertedWithin3OwnDecisions: number;
+  planIntentExpired: number;
+  planIntentAbandonedWithoutReason: number;
+  sameStrategicPlanRepeatedWithoutProgress: number;
+  runnerEconomyConvertedToRunOrRig: number;
+  runnerRigConvertedToRun: number;
+  runnerProbeConvertedToUsefulInfoOrPivot: number;
+  runnerCentralPressureConvertedToStealOrFreshValue: number;
+  runnerRemoteContestConvertedToStealTrashOrCorrectAbort: number;
+  corpRemoteBuildConvertedToAdvanceProtectOrScore: number;
+  corpAdvanceConvertedToScoreOrProtectedWindow: number;
+  corpEconomyConvertedToRezInstallScore: number;
+  corpProtectionConvertedToScoreSafety: number;
   advancedAgendaSteals: number;
   advancedAgendaStealsFromRemote: number;
   advancedAgendaStealsFromCentral: number;
@@ -2777,6 +2801,42 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.baseline.longestNoProgressChain,
       benchmark.candidate.longestNoProgressChain,
       benchmark.delta.longestNoProgressChain,
+    ],
+    [
+      "strategicLongestNoProgressChain",
+      benchmark.baseline.strategicLongestNoProgressChain,
+      benchmark.candidate.strategicLongestNoProgressChain,
+      benchmark.delta.strategicLongestNoProgressChain,
+    ],
+    [
+      "microActionNoProgressContribution",
+      benchmark.baseline.microActionNoProgressContribution,
+      benchmark.candidate.microActionNoProgressContribution,
+      benchmark.delta.microActionNoProgressContribution,
+    ],
+    [
+      "planContinuationRate",
+      benchmark.baseline.planContinuationRate,
+      benchmark.candidate.planContinuationRate,
+      benchmark.delta.planContinuationRate,
+    ],
+    [
+      "planIntentConvertedWithin3OwnDecisions",
+      benchmark.baseline.planIntentConvertedWithin3OwnDecisions,
+      benchmark.candidate.planIntentConvertedWithin3OwnDecisions,
+      benchmark.delta.planIntentConvertedWithin3OwnDecisions,
+    ],
+    [
+      "planIntentAbandonedWithoutReason",
+      benchmark.baseline.planIntentAbandonedWithoutReason,
+      benchmark.candidate.planIntentAbandonedWithoutReason,
+      benchmark.delta.planIntentAbandonedWithoutReason,
+    ],
+    [
+      "sameStrategicPlanRepeatedWithoutProgress",
+      benchmark.baseline.sameStrategicPlanRepeatedWithoutProgress,
+      benchmark.candidate.sameStrategicPlanRepeatedWithoutProgress,
+      benchmark.delta.sameStrategicPlanRepeatedWithoutProgress,
     ],
     [
       "actionsUntilNextScoreOrSteal",
@@ -6652,6 +6712,30 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "turnsWithNoProgress",
   "actionsUntilNextScoreOrSteal",
   "actionsUntilNextMeaningfulBoardProgress",
+  "strategicNoProgressActionChainLength",
+  "strategicLongestNoProgressChain",
+  "microActionNoProgressContribution",
+  "planContinuationOpportunities",
+  "planContinuationTaken",
+  "planContinuationRate",
+  "planAbortOpportunities",
+  "planAbortTaken",
+  "planAbortWithReason",
+  "planIntentConvertedWithin1OwnDecision",
+  "planIntentConvertedWithin2OwnDecisions",
+  "planIntentConvertedWithin3OwnDecisions",
+  "planIntentExpired",
+  "planIntentAbandonedWithoutReason",
+  "sameStrategicPlanRepeatedWithoutProgress",
+  "runnerEconomyConvertedToRunOrRig",
+  "runnerRigConvertedToRun",
+  "runnerProbeConvertedToUsefulInfoOrPivot",
+  "runnerCentralPressureConvertedToStealOrFreshValue",
+  "runnerRemoteContestConvertedToStealTrashOrCorrectAbort",
+  "corpRemoteBuildConvertedToAdvanceProtectOrScore",
+  "corpAdvanceConvertedToScoreOrProtectedWindow",
+  "corpEconomyConvertedToRezInstallScore",
+  "corpProtectionConvertedToScoreSafety",
   "advancedAgendaSteals",
   "advancedAgendaStealsFromRemote",
   "advancedAgendaStealsFromCentral",
@@ -7726,6 +7810,30 @@ function summarizePlanConversionMetrics(
   | "turnsWithNoProgress"
   | "actionsUntilNextScoreOrSteal"
   | "actionsUntilNextMeaningfulBoardProgress"
+  | "strategicNoProgressActionChainLength"
+  | "strategicLongestNoProgressChain"
+  | "microActionNoProgressContribution"
+  | "planContinuationOpportunities"
+  | "planContinuationTaken"
+  | "planContinuationRate"
+  | "planAbortOpportunities"
+  | "planAbortTaken"
+  | "planAbortWithReason"
+  | "planIntentConvertedWithin1OwnDecision"
+  | "planIntentConvertedWithin2OwnDecisions"
+  | "planIntentConvertedWithin3OwnDecisions"
+  | "planIntentExpired"
+  | "planIntentAbandonedWithoutReason"
+  | "sameStrategicPlanRepeatedWithoutProgress"
+  | "runnerEconomyConvertedToRunOrRig"
+  | "runnerRigConvertedToRun"
+  | "runnerProbeConvertedToUsefulInfoOrPivot"
+  | "runnerCentralPressureConvertedToStealOrFreshValue"
+  | "runnerRemoteContestConvertedToStealTrashOrCorrectAbort"
+  | "corpRemoteBuildConvertedToAdvanceProtectOrScore"
+  | "corpAdvanceConvertedToScoreOrProtectedWindow"
+  | "corpEconomyConvertedToRezInstallScore"
+  | "corpProtectionConvertedToScoreSafety"
 > {
   let actionLedToProgressWithin1 = 0;
   let actionLedToProgressWithin2 = 0;
@@ -7865,6 +7973,223 @@ function summarizePlanConversionMetrics(
     actionsUntilNextMeaningfulBoardProgress: averageNumber(
       boardProgressDistances,
     ),
+    ...summarizeStrategicPlanConversionMetrics(summaries),
+  };
+}
+
+function summarizeStrategicPlanConversionMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "strategicNoProgressActionChainLength"
+  | "strategicLongestNoProgressChain"
+  | "microActionNoProgressContribution"
+  | "planContinuationOpportunities"
+  | "planContinuationTaken"
+  | "planContinuationRate"
+  | "planAbortOpportunities"
+  | "planAbortTaken"
+  | "planAbortWithReason"
+  | "planIntentConvertedWithin1OwnDecision"
+  | "planIntentConvertedWithin2OwnDecisions"
+  | "planIntentConvertedWithin3OwnDecisions"
+  | "planIntentExpired"
+  | "planIntentAbandonedWithoutReason"
+  | "sameStrategicPlanRepeatedWithoutProgress"
+  | "runnerEconomyConvertedToRunOrRig"
+  | "runnerRigConvertedToRun"
+  | "runnerProbeConvertedToUsefulInfoOrPivot"
+  | "runnerCentralPressureConvertedToStealOrFreshValue"
+  | "runnerRemoteContestConvertedToStealTrashOrCorrectAbort"
+  | "corpRemoteBuildConvertedToAdvanceProtectOrScore"
+  | "corpAdvanceConvertedToScoreOrProtectedWindow"
+  | "corpEconomyConvertedToRezInstallScore"
+  | "corpProtectionConvertedToScoreSafety"
+> {
+  let strategicLongestNoProgressChain = 0;
+  let microActionNoProgressContribution = 0;
+  let planContinuationOpportunities = 0;
+  let planContinuationTaken = 0;
+  let planAbortOpportunities = 0;
+  let planAbortTaken = 0;
+  let planAbortWithReason = 0;
+  let planIntentConvertedWithin1OwnDecision = 0;
+  let planIntentConvertedWithin2OwnDecisions = 0;
+  let planIntentConvertedWithin3OwnDecisions = 0;
+  let planIntentExpired = 0;
+  let planIntentAbandonedWithoutReason = 0;
+  let sameStrategicPlanRepeatedWithoutProgress = 0;
+  let runnerEconomyConvertedToRunOrRig = 0;
+  let runnerRigConvertedToRun = 0;
+  let runnerProbeConvertedToUsefulInfoOrPivot = 0;
+  let runnerCentralPressureConvertedToStealOrFreshValue = 0;
+  let runnerRemoteContestConvertedToStealTrashOrCorrectAbort = 0;
+  let corpRemoteBuildConvertedToAdvanceProtectOrScore = 0;
+  let corpAdvanceConvertedToScoreOrProtectedWindow = 0;
+  let corpEconomyConvertedToRezInstallScore = 0;
+  let corpProtectionConvertedToScoreSafety = 0;
+  const strategicChains: number[] = [];
+
+  for (const summary of summaries) {
+    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
+    let strategicChain = 0;
+    for (const entry of sequence) {
+      const hasProgress = isMeaningfulBoardProgress(entry);
+      if (!isStrategicPlanDecision(entry)) {
+        if (!hasProgress) microActionNoProgressContribution += 1;
+        continue;
+      }
+      if (hasProgress) {
+        if (strategicChain > 0) strategicChains.push(strategicChain);
+        strategicLongestNoProgressChain = Math.max(
+          strategicLongestNoProgressChain,
+          strategicChain,
+        );
+        strategicChain = 0;
+      } else {
+        strategicChain += 1;
+      }
+      if (hasEvidenceFlag(entry, "plan_continuation_opportunity:true"))
+        planContinuationOpportunities += 1;
+      if (hasEvidenceFlag(entry, "plan_continuation_taken:true"))
+        planContinuationTaken += 1;
+      if (hasEvidenceFlag(entry, "plan_abort_opportunity:true"))
+        planAbortOpportunities += 1;
+      if (hasEvidenceFlag(entry, "plan_abort_taken:true")) planAbortTaken += 1;
+      if (
+        hasEvidenceFlag(entry, "plan_abort_taken:true") &&
+        entry.evidence.some((value) => value.startsWith("plan_abort_reason:"))
+      )
+        planAbortWithReason += 1;
+      if (hasEvidenceFlag(entry, "plan_intent_expired:true"))
+        planIntentExpired += 1;
+    }
+    if (strategicChain > 0) {
+      strategicChains.push(strategicChain);
+      strategicLongestNoProgressChain = Math.max(
+        strategicLongestNoProgressChain,
+        strategicChain,
+      );
+    }
+
+    const strategicEntries = sequence.filter(isStrategicPlanDecision);
+    const lastPlanBySide: Partial<
+      Record<Side, { planKind: string; progressSince: boolean }>
+    > = {};
+    strategicEntries.forEach((entry, index) => {
+      const planKind = planKindForConversion(entry);
+      if (!planKind) return;
+      const lastPlan = lastPlanBySide[entry.side];
+      if (lastPlan?.planKind === planKind && !lastPlan.progressSince) {
+        sameStrategicPlanRepeatedWithoutProgress += 1;
+      }
+      if (strategicPlanConvertsWithinOwnDecisions(strategicEntries, index, 1))
+        planIntentConvertedWithin1OwnDecision += 1;
+      if (strategicPlanConvertsWithinOwnDecisions(strategicEntries, index, 2))
+        planIntentConvertedWithin2OwnDecisions += 1;
+      if (strategicPlanConvertsWithinOwnDecisions(strategicEntries, index, 3))
+        planIntentConvertedWithin3OwnDecisions += 1;
+      else if (
+        !hasEvidenceFlag(entry, "plan_abort_taken:true") &&
+        !hasEvidenceFlag(entry, "plan_intent_expired:true")
+      )
+        planIntentAbandonedWithoutReason += 1;
+
+      if (entry.side === "runner" && planKind.includes("recover_economy")) {
+        if (runnerEconomyConvertsToRunOrRig(strategicEntries, index))
+          runnerEconomyConvertedToRunOrRig += 1;
+      }
+      if (entry.side === "runner" && planKind.includes("rig")) {
+        if (runnerRigConvertsToRun(strategicEntries, index))
+          runnerRigConvertedToRun += 1;
+      }
+      if (entry.side === "runner" && planKind.includes("safe_probe")) {
+        if (runnerProbeConvertsToUsefulInfoOrPivot(strategicEntries, index))
+          runnerProbeConvertedToUsefulInfoOrPivot += 1;
+      }
+      if (entry.side === "runner" && planKind.includes("pressure")) {
+        if (
+          runnerCentralPressureConvertsToStealOrFreshValue(
+            strategicEntries,
+            index,
+          )
+        )
+          runnerCentralPressureConvertedToStealOrFreshValue += 1;
+      }
+      if (entry.side === "runner" && planKind.includes("contest_remote")) {
+        if (
+          runnerRemoteContestConvertsToStealTrashOrAbort(
+            strategicEntries,
+            index,
+          )
+        )
+          runnerRemoteContestConvertedToStealTrashOrCorrectAbort += 1;
+      }
+      if (entry.side === "corp" && planKind.includes("remote_build")) {
+        if (
+          corpRemoteBuildConvertsToAdvanceProtectOrScore(
+            strategicEntries,
+            index,
+          )
+        )
+          corpRemoteBuildConvertedToAdvanceProtectOrScore += 1;
+      }
+      if (entry.side === "corp" && planKind.includes("advance")) {
+        if (
+          corpAdvanceConvertsToScoreOrProtectedWindow(strategicEntries, index)
+        )
+          corpAdvanceConvertedToScoreOrProtectedWindow += 1;
+      }
+      if (entry.side === "corp" && planKind.includes("economy")) {
+        if (corpEconomyConvertsToRezInstallScore(strategicEntries, index))
+          corpEconomyConvertedToRezInstallScore += 1;
+      }
+      if (
+        entry.side === "corp" &&
+        (planKind.includes("protect_hq") || planKind.includes("protect_rnd"))
+      ) {
+        if (corpProtectionConvertsToScoreSafety(strategicEntries, index))
+          corpProtectionConvertedToScoreSafety += 1;
+      }
+
+      lastPlanBySide[entry.side] = { planKind, progressSince: false };
+      if (isMeaningfulBoardProgress(entry)) {
+        for (const side of Object.keys(lastPlanBySide) as Side[]) {
+          const last = lastPlanBySide[side];
+          if (last) last.progressSince = true;
+        }
+      }
+    });
+  }
+
+  return {
+    strategicNoProgressActionChainLength: averageNumber(strategicChains),
+    strategicLongestNoProgressChain,
+    microActionNoProgressContribution,
+    planContinuationOpportunities,
+    planContinuationTaken,
+    planContinuationRate:
+      planContinuationOpportunities > 0
+        ? round(planContinuationTaken / planContinuationOpportunities)
+        : 0,
+    planAbortOpportunities,
+    planAbortTaken,
+    planAbortWithReason,
+    planIntentConvertedWithin1OwnDecision,
+    planIntentConvertedWithin2OwnDecisions,
+    planIntentConvertedWithin3OwnDecisions,
+    planIntentExpired,
+    planIntentAbandonedWithoutReason,
+    sameStrategicPlanRepeatedWithoutProgress,
+    runnerEconomyConvertedToRunOrRig,
+    runnerRigConvertedToRun,
+    runnerProbeConvertedToUsefulInfoOrPivot,
+    runnerCentralPressureConvertedToStealOrFreshValue,
+    runnerRemoteContestConvertedToStealTrashOrCorrectAbort,
+    corpRemoteBuildConvertedToAdvanceProtectOrScore,
+    corpAdvanceConvertedToScoreOrProtectedWindow,
+    corpEconomyConvertedToRezInstallScore,
+    corpProtectionConvertedToScoreSafety,
   };
 }
 
@@ -7899,6 +8224,231 @@ function nextEntries(
   windowActions = 3,
 ): PlanConversionActionEntry[] {
   return sequence.slice(index + 1, index + windowActions + 1);
+}
+
+function hasEvidenceFlag(
+  entry: PlanConversionActionEntry,
+  flag: string,
+): boolean {
+  return entry.evidence.includes(flag);
+}
+
+function isStrategicPlanDecision(entry: PlanConversionActionEntry): boolean {
+  if (
+    [
+      "continue_run",
+      "access_card",
+      "mandatory_draw",
+      "pump_breaker",
+      "break_subroutine",
+      "decline_rez",
+      "approach_ice",
+      "encounter_ice",
+    ].includes(entry.actionType)
+  )
+    return false;
+  if (entry.actionType === "resolve_choice")
+    return (
+      entry.advancementCountersAdded !== undefined ||
+      entry.runnerRelevantRemoteTrashTaken === true ||
+      entry.runnerHandUseActionTaken === true
+    );
+  if (entry.side === "runner") {
+    return [
+      "install_card",
+      "play_event",
+      "start_run",
+      "gain_credit",
+      "draw_card",
+      "trash_accessed_card",
+      "jack_out",
+      "activated_card_ability",
+      "trigger_ability",
+      "end_turn",
+    ].includes(entry.actionType);
+  }
+  return [
+    "score_agenda",
+    "advance_card",
+    "install_card",
+    "play_operation",
+    "gain_credit",
+    "draw_card",
+    "rez_ice",
+    "activated_card_ability",
+    "trigger_ability",
+    "end_turn",
+  ].includes(entry.actionType);
+}
+
+function ownStrategicWindow(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  ownDecisions: number,
+): PlanConversionActionEntry[] {
+  const side = sequence[index]?.side;
+  if (!side) return [];
+  const window: PlanConversionActionEntry[] = [];
+  for (let cursor = index + 1; cursor < sequence.length; cursor += 1) {
+    const entry = sequence[cursor]!;
+    if (entry.side !== side) continue;
+    if (!isStrategicPlanDecision(entry)) continue;
+    window.push(entry);
+    if (window.length >= ownDecisions) break;
+  }
+  return window;
+}
+
+function strategicPlanConvertsWithinOwnDecisions(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  ownDecisions: number,
+): boolean {
+  const entry = sequence[index]!;
+  if (isMeaningfulBoardProgress(entry)) return true;
+  return ownStrategicWindow(sequence, index, ownDecisions).some(
+    isMeaningfulBoardProgress,
+  );
+}
+
+function runnerEconomyConvertsToRunOrRig(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  return ownStrategicWindow(sequence, index, 3).some(
+    (entry) =>
+      entry.side === "runner" &&
+      ((entry.actionType === "start_run" &&
+        runnerRunHasFollowupValue(sequence, sequence.indexOf(entry))) ||
+        isRunnerRigProgressAction(entry)),
+  );
+}
+
+function runnerRigConvertsToRun(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  return ownStrategicWindow(sequence, index, 3).some(
+    (entry) =>
+      entry.side === "runner" &&
+      entry.actionType === "start_run" &&
+      runnerRunHasFollowupValue(sequence, sequence.indexOf(entry)),
+  );
+}
+
+function runnerProbeConvertsToUsefulInfoOrPivot(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  const entry = sequence[index]!;
+  const target = entry.targetServerId;
+  const window = ownStrategicWindow(sequence, index, 3);
+  return window.some(
+    (later) =>
+      isMeaningfulBoardProgress(later) ||
+      later.targetServerId !== target ||
+      ["recover_economy", "rig", "remote_contest"].some((needle) =>
+        planKindForConversion(later)?.includes(needle),
+      ),
+  );
+}
+
+function runnerCentralPressureConvertsToStealOrFreshValue(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  const entry = sequence[index]!;
+  if (isMeaningfulBoardProgress(entry)) return true;
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      (later.actionType === "steal_agenda" &&
+        centralServerId(later.targetServerId) !== undefined) ||
+      later.runnerCentralRunWithMultiaccess === true ||
+      later.runnerCentralRunWithInterfaceInstalled === true ||
+      later.runnerRepeatedCentralRunWithFreshValue === true ||
+      hasEvidenceFlag(later, "plan_abort_taken:true"),
+  );
+}
+
+function runnerRemoteContestConvertsToStealTrashOrAbort(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  const entry = sequence[index]!;
+  if (isMeaningfulBoardProgress(entry)) return true;
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      (serverTargetsMatch(entry, later) &&
+        (later.actionType === "steal_agenda" ||
+          later.runnerRelevantRemoteTrashTaken === true ||
+          later.actionType === "trash_accessed_card")) ||
+      hasEvidenceFlag(later, "plan_abort_taken:true"),
+  );
+}
+
+function corpRemoteBuildConvertsToAdvanceProtectOrScore(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  const entry = sequence[index]!;
+  if (isMeaningfulBoardProgress(entry)) return true;
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      later.side === "corp" &&
+      (remoteTargetsMatch(entry, later) || !later.targetServerId) &&
+      (isCorpRemoteAdvancementProgress(later) ||
+        later.actionType === "score_agenda" ||
+        later.protectBeforeAdvance === true ||
+        later.protectedFinalAdvance === true),
+  );
+}
+
+function corpAdvanceConvertsToScoreOrProtectedWindow(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  const entry = sequence[index]!;
+  if (
+    entry.protectedFinalAdvance === true ||
+    entry.actionType === "score_agenda"
+  )
+    return true;
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      later.side === "corp" &&
+      (later.actionType === "score_agenda" ||
+        later.protectedFinalAdvance === true ||
+        later.protectBeforeAdvance === true) &&
+      (remoteTargetsMatch(entry, later) || !later.targetServerId),
+  );
+}
+
+function corpEconomyConvertsToRezInstallScore(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      later.side === "corp" &&
+      ["rez_ice", "install_card", "advance_card", "score_agenda"].includes(
+        later.actionType,
+      ),
+  );
+}
+
+function corpProtectionConvertsToScoreSafety(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  return ownStrategicWindow(sequence, index, 3).some(
+    (later) =>
+      later.side === "corp" &&
+      (later.actionType === "score_agenda" ||
+        later.actionType === "advance_card" ||
+        later.protectedFinalAdvance === true ||
+        later.protectBeforeAdvance === true ||
+        planKindForConversion(later)?.includes("remote_build") === true),
+  );
 }
 
 function planKindForConversion(
@@ -8956,7 +9506,7 @@ function runnerCentralPressureDiagnosticsForSimulationAction(
           input.playerView.own.rig ?? [],
           input.playerView.own.credits,
           server.root,
-        ).visibleBreakCost ?? 0
+        ).visibleBreakCost ?? 0)
       : 0;
   const insufficientReserve =
     centralRun &&
@@ -9176,6 +9726,7 @@ function trueCentralCloseoutProfileForMetrics(
     server.ice,
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
+    server.root,
   );
   if (assessment.blocked) return { opportunity: false, reasons: [] };
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
@@ -9378,6 +9929,7 @@ function runnerNoFreshCentralContextForMetrics(input: AiDecisionInput): {
       server?.ice ?? [],
       input.playerView.own.rig ?? [],
       input.playerView.own.credits,
+      server?.root ?? [],
     );
     if (
       !assessment.blocked &&
