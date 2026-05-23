@@ -14,7 +14,7 @@ export function localCardImageUrl(cardId: string | undefined | null): string | u
   if (!cardId) return undefined;
   const encodedCardId = encodeURIComponent(cardId);
   if (isGeneratedCardImageId(cardId)) return `/api/card-images/${encodedCardId}?v=${LOCAL_CARD_IMAGE_VERSION}`;
-  if (isLocalOnrCardId(cardId)) return `/api/card-images/${encodedCardId}`;
+  if (isLocalOnrCardId(cardId)) return `/api/card-images/${encodedCardId}?v=${LOCAL_CARD_IMAGE_VERSION}`;
   return undefined;
 }
 
