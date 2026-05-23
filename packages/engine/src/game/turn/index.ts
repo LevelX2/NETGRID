@@ -33,3 +33,6 @@ export {
   buildRunnerProgramInstallAction,
   buildRunnerResourceInstallAction,
 } from "./runner-install-actions";
+export {
+  buildRunnerProgramTrashBeforeInstallAction,
+} from "./runner-program-trash-install-actions";

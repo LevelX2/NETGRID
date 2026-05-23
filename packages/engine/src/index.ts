@@ -111,6 +111,9 @@ import {
   buildRunnerProgramInstallAction,
   buildRunnerResourceInstallAction,
 } from "./game/turn/runner-install-actions";
+import {
+  buildRunnerProgramTrashBeforeInstallAction,
+} from "./game/turn/runner-program-trash-install-actions";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -3593,15 +3596,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       shouldOfferRunnerProgramTrashBeforeInstall(state, definition)
     ) {
       actions.push(
-        action(
-          state,
-          "runner",
-          "install_card",
-          `${definition.title} mit Programmtrash installieren`,
-          id,
-          [{ clicks: 1, credits: definition.installCost ?? 0 }],
-          { cardId: id, runnerProgramTrashBeforeInstall: true },
-        ),
+        buildRunnerProgramTrashBeforeInstallAction(state, id, definition),
       );
     }
     if (
