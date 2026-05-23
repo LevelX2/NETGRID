@@ -198,7 +198,7 @@ import {
 import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
-import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultOutcomeText, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, seriesResultHeadline, type ResultWinnerMotifKind } from "./result-modal-ui";
+import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultOutcomeHeadline, resultOutcomeText, resultPlayerLabel, resultPlayerRoleLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, seriesResultHeadline, type ResultWinnerMotifKind } from "./result-modal-ui";
 import {
   CATALOG_RARITY_FILTERS,
   catalogCardMatchesTypeFilters,
@@ -5894,6 +5894,7 @@ export default function Page() {
         <GameOverModal
           result={resultSummary}
           side={session.side}
+          playerName={session.displayName}
           onDismiss={() => {
             if (resultKey) setDismissedResultKey(resultKey);
           }}
@@ -6396,6 +6397,7 @@ function GameOverModal({
   onNewMatch,
   onNextSeriesGame,
   opponentName,
+  playerName,
   retentionProtected,
   onRetentionProtection,
   nextSeriesPending = false
@@ -6406,20 +6408,27 @@ function GameOverModal({
   onNewMatch(): void;
   onNextSeriesGame?: () => void;
   opponentName?: string;
+  playerName?: string;
   retentionProtected: boolean;
   onRetentionProtection(protectedValue: boolean): void;
   nextSeriesPending?: boolean;
 }) {
-  const outcomeText = resultOutcomeText(result.winner);
-  const seriesHeadline = result.series ? seriesResultHeadline(result.series, opponentName) : null;
+  const outcomeText = resultOutcomeHeadline(result.winner, side, playerName, opponentName);
+  const seriesHeadline = result.series ? seriesResultHeadline(result.series, opponentName, playerName) : null;
   const headlineText = seriesHeadline ?? outcomeText;
+  const lastGameOutcomeText = resultOutcomeText(result.winner);
   const reasonText = seriesHeadline
-    ? `Letztes Spiel: ${outcomeText} ${resultReasonLabel(result.reason)}`
+    ? `Letztes Spiel: ${lastGameOutcomeText} ${resultReasonLabel(result.reason)}`
     : resultReasonLabel(result.reason);
-  const seriesText = result.series ? seriesStatusText(result.series) : null;
-  const gameStanding = gameStandingForResult(result, side);
+  const gameStanding = gameStandingForResult(result, side, playerName, opponentName);
   const winnerMotif = resultWinnerMotifFor(result.winner);
   const winnerMotifUi = resultWinnerMotifUi(winnerMotif);
+  const opponentSideLabel = opponentSide(side);
+  const playerSeriesLabel = resultPlayerLabel(side, side, playerName, opponentName);
+  const opponentSeriesLabel = resultPlayerLabel(opponentSideLabel, side, playerName, opponentName);
+  const playerStandingLabel = resultPlayerRoleLabel(side, side, playerName, opponentName);
+  const opponentStandingLabel = resultPlayerRoleLabel(opponentSideLabel, side, playerName, opponentName);
+  const seriesText = result.series ? seriesStatusText(result.series, playerSeriesLabel, opponentSeriesLabel) : null;
   const retentionUi = retentionProtectionUi(retentionProtected);
   const exitUi = resultExitButtonUi(Boolean(onNextSeriesGame));
   const handleNewMatch = () => {
@@ -6450,8 +6459,8 @@ function GameOverModal({
               <small>{gameStanding.summary}</small>
             </div>
             <div className="gameStandingScore">
-              <span>Du {gameStanding.viewerMatchPoints} MP</span>
-              <span>Gegenseite {gameStanding.opponentMatchPoints} MP</span>
+              <span>{playerStandingLabel} {gameStanding.viewerMatchPoints} MP · {gameStanding.viewerAgendaPoints} Agenda</span>
+              <span>{opponentStandingLabel} {gameStanding.opponentMatchPoints} MP · {gameStanding.opponentAgendaPoints} Agenda</span>
             </div>
           </div>
         ) : null}
@@ -6472,13 +6481,13 @@ function GameOverModal({
               <small>{seriesText}</small>
             </div>
             <div className="seriesScore">
-              <span>Matchpunkte Du {result.series.viewerMatchPoints}</span>
-              <span>Matchpunkte Gegenseite {result.series.opponentMatchPoints}</span>
-              <span>Siege Du {result.series.viewerWins}</span>
-              <span>Siege Gegenseite {result.series.opponentWins}</span>
+              <span>Matchpunkte {playerStandingLabel} {result.series.viewerMatchPoints}</span>
+              <span>Matchpunkte {opponentStandingLabel} {result.series.opponentMatchPoints}</span>
+              <span>Siege {playerStandingLabel} {result.series.viewerWins}</span>
+              <span>Siege {opponentStandingLabel} {result.series.opponentWins}</span>
               <span>Draws {result.series.draws}</span>
-              <span>Agenda Du {result.series.viewerAgendaPoints}</span>
-              <span>Agenda Gegenseite {result.series.opponentAgendaPoints}</span>
+              <span>Agenda {playerStandingLabel} {result.series.viewerAgendaPoints}</span>
+              <span>Agenda {opponentStandingLabel} {result.series.opponentAgendaPoints}</span>
             </div>
           </div>
         ) : null}
@@ -6629,10 +6638,10 @@ function shouldForgetRecoveryStatus(status: MatchStatus): boolean {
   return status === "cancelled" || status === "abandoned" || status === "finished" || status === "forfeited";
 }
 
-function seriesStatusText(series: SeriesResultSummary): string {
+function seriesStatusText(series: SeriesResultSummary, viewerLabel = "Du", opponentLabel = "Gegenseite"): string {
   if (series.status === "finished") {
-    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "match_points" ? "Matchserie nach Matchpunkten entschieden: Du vorne." : "Matchserie abgeschlossen: Du vorne.";
-    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "match_points" ? "Matchserie nach Matchpunkten entschieden: Gegenseite vorne." : "Matchserie abgeschlossen: Gegenseite vorne.";
+    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "match_points" ? `Matchserie nach Matchpunkten entschieden: ${viewerLabel} vorne.` : `Matchserie abgeschlossen: ${viewerLabel} vorne.`;
+    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "match_points" ? `Matchserie nach Matchpunkten entschieden: ${opponentLabel} vorne.` : `Matchserie abgeschlossen: ${opponentLabel} vorne.`;
     return "Die Matchserie endet unentschieden.";
   }
   return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";

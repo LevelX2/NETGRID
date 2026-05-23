@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultOutcomeText, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, seriesResultHeadline } from "./result-modal-ui";
+import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultOutcomeHeadline, resultOutcomeText, resultPlayerRoleLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, seriesResultHeadline } from "./result-modal-ui";
 
 describe("result modal UI helpers", () => {
   it("selects winner motifs for runner, corp and draw results", () => {
@@ -33,10 +33,24 @@ describe("result modal UI helpers", () => {
 
   it("uses the finished series winner as the primary result headline", () => {
     expect(seriesResultHeadline(series("won"), "Korp-KI")).toBe("Du hast die Match-Serie gewonnen.");
+    expect(seriesResultHeadline(series("won"), "Korp-KI", "Ludwig")).toBe("Ludwig hat die Match-Serie gewonnen.");
     expect(seriesResultHeadline(series("lost"), "Korp-KI")).toBe("Korp-KI hat die Match-Serie gewonnen.");
     expect(seriesResultHeadline(series("draw"), "Korp-KI")).toBe("Die Match-Serie endet unentschieden.");
     expect(seriesResultHeadline({ ...series("won"), status: "between_games" }, "Korp-KI")).toBeNull();
     expect(resultOutcomeText("runner")).toBe("Runner gewinnt.");
+  });
+
+  it("uses player names and sides for single-game result headlines", () => {
+    expect(resultOutcomeHeadline("corp", "runner", "Ludwig", "Korp-KI")).toBe("Korp-KI gewinnt als Korp.");
+    expect(resultOutcomeHeadline("runner", "runner", "Ludwig", "Korp-KI")).toBe("Ludwig gewinnt als Runner.");
+    expect(resultOutcomeHeadline("runner", "runner")).toBe("Du gewinnst als Runner.");
+    expect(resultOutcomeHeadline("draw", "runner", "Ludwig", "Korp-KI")).toBe("Das Spiel endet unentschieden.");
+  });
+
+  it("formats player labels with side context", () => {
+    expect(resultPlayerRoleLabel("runner", "runner", "Ludwig", "Korp-KI")).toBe("Ludwig (Runner)");
+    expect(resultPlayerRoleLabel("corp", "runner", "Ludwig", "Korp-KI")).toBe("Korp-KI (Korp)");
+    expect(resultPlayerRoleLabel("corp", "runner")).toBe("Gegenseite (Korp)");
   });
 
   it("uses replay-safe retention labels without the old aufheben wording", () => {
@@ -65,12 +79,16 @@ describe("result modal UI helpers", () => {
           runnerAgendaPoints: 7,
           corpAgendaPoints: 2
         },
-        "runner"
+        "runner",
+        "Ludwig",
+        "Korp-KI"
       )
     ).toEqual({
-      summary: "Du: 10 Matchpunkte. Gegenseite: 2 Agenda-Punkte aus gescorten Agendas.",
+      summary: "Ludwig (Runner): 10 Matchpunkte. Korp-KI (Korp): 2 Agenda-Punkte aus gescorten Agendas.",
       viewerMatchPoints: 10,
-      opponentMatchPoints: 2
+      opponentMatchPoints: 2,
+      viewerAgendaPoints: 7,
+      opponentAgendaPoints: 2
     });
   });
 
@@ -82,12 +100,16 @@ describe("result modal UI helpers", () => {
           runnerAgendaPoints: 0,
           corpAgendaPoints: 4
         },
-        "runner"
+        "runner",
+        "Ludwig",
+        "Korp-KI"
       )
     ).toEqual({
-      summary: "Gegenseite: 10 Matchpunkte. Du: 0 Agenda-Punkte aus gestohlenen Agendas.",
+      summary: "Korp-KI (Korp): 10 Matchpunkte. Ludwig (Runner): 0 Agenda-Punkte aus gestohlenen Agendas.",
       viewerMatchPoints: 0,
-      opponentMatchPoints: 10
+      opponentMatchPoints: 10,
+      viewerAgendaPoints: 0,
+      opponentAgendaPoints: 4
     });
   });
 
@@ -104,7 +126,9 @@ describe("result modal UI helpers", () => {
     ).toEqual({
       summary: "Draw: beide Seiten erhalten ihre Agenda-Punkte.",
       viewerMatchPoints: 3,
-      opponentMatchPoints: 4
+      opponentMatchPoints: 4,
+      viewerAgendaPoints: 3,
+      opponentAgendaPoints: 4
     });
   });
 });
