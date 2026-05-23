@@ -1011,7 +1011,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed helper: reveal the top card of the Runner stack through a side-safe reveal action.",
+      "text": "[T]: Put a Spy counter in a data fort. A Spy counter exposes all cards installed inside or on a fort containing it. The Corp may remove a Spy counter by taking an action to pay 4. Use this ability only immediately after a successful run on that fort.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -1577,7 +1577,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Provides +1 MU. Put 9 from the bank on Microcyb Owl when it is installed. Use these bits only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use any of these bits, replace them at the start of your next turn. You may place only one deck can be in play at a time. Trash any older decks.",
+      "text": "A: Make a run on R&D, but instead of accessing cards, look at the top five cards of R&D.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -2581,7 +2581,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Play only if the Runner liberated a Research agenda this turn. Put a Militech counter on each installed icebreaker.",
+      "text": "Play only if you liberated any Research agendas this turn. Put a Militech counter on each of your icebreakers. A Militech counter gives the icebreaker it is on +1 strength.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -2643,7 +2643,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Make a run on HQ. If run is successful, do not access cards from HQ; instead, the Corp loses 1, Runner gains 1 tag and the Corp draws 1 card.",
+      "text": "Make a run on HQ. If run is successful, and the Corp has any credits when you would access HQ, do not access cards from HQ; instead, the Corp loses 1 credit and gives you a tag, and you gain 10 credits.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -2859,7 +2859,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Expose up to three installed Corp cards through a side-safe target choice.",
+      "text": "Expose up to three installed cards.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -3163,7 +3163,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Shuffle your grip, heap and stack together, draw five cards, then remove MIT West Tier from the game.",
+      "text": "Shuffle your hand, trash, and stack together, and then draw five cards. When you play MIT West Tier, remove it from the game instead of trashing it.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -3318,7 +3318,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Make a run on HQ. If run is successful, treat it as a successful run on R&D instead of accessing HQ.",
+      "text": "Make a run on HQ. If run is successful, do not access cards from HQ; instead, treat run as a successful run on R&D.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -3564,7 +3564,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Search your stack for a program, reveal it and bring it into your hand. Shuffle your stack afterwards.",
+      "text": "Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Shuffle your stack afterwards.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4348,7 +4348,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed access tool: access 1 additional card whenever you access R&D.",
+      "text": "Whenever you access cards from R&D, access an additional card from R&D.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4857,7 +4857,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Play only after a successful HQ run this turn. When the Corp purges Virus counters, choose up to two counters that are not removed. The Corp may take an action and pay 5 to trash Code Viral Cache.",
+      "text": "Play only if you made a successful run on HQ this turn. If the Corp forgoes actions to lose Virus counters, two counters of your choice are not removed. The Corp may trash Code Viral Cache by taking an action to pay 5.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5425,7 +5425,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 1, in addition to the normal cost, to install ice on that fort.",
+      "text": "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 2, in addition to the normal cost, to install ice on that fort.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5455,7 +5455,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "2 recurring credits for run costs. Used counters refresh at the start of each Runner turn without accumulation.",
+      "text": "Put 12 credits on Rigged Investments when it is installed. At the start of each of your turns, take 1 credit from Rigged Investments. When all credits have been removed, trash Rigged Investments.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5770,7 +5770,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Gain 3 at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
+      "text": "Gain 2 credits at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",

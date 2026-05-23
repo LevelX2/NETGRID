@@ -2452,12 +2452,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 0,
     memoryCost: 1,
     rulesText:
-      "Installed helper: reveal the top card of the Runner stack through a side-safe reveal action.",
+      "[T]: Put a Spy counter in a data fort. A Spy counter exposes all cards installed inside or on a fort containing it. The Corp may remove a Spy counter by taking an action to pay 4. Use this ability only immediately after a successful run on that fort.",
     mechanics: [
       "install_program",
       "memory",
       "counter",
-      "reveal",
+      "spy_counter",
+      "expose",
+      "successful_run_trigger",
       "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -3172,7 +3174,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 4,
     rulesText:
-      "Install with 6 Bits. At the start of each Runner turn, take 1 Bit from Rigged Investments as 1 credit. Trash Rigged Investments when the last Bit is removed.",
+      "Put 12 credits on Rigged Investments when it is installed. At the start of each of your turns, take 1 credit from Rigged Investments. When all credits have been removed, trash Rigged Investments.",
     mechanics: [
       "install_resource",
       "counter",
@@ -3264,7 +3266,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     rulesText:
-      "Gain 3 at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
+      "Gain 2 credits at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
     mechanics: [
       "install_resource",
       "start_of_turn_credit_gain",
@@ -3436,7 +3438,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     cost: 1,
     rulesText:
-      "Search your stack for a program, reveal it and bring it into your hand. Shuffle your stack afterwards.",
+      "Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Shuffle your stack afterwards.",
     mechanics: ["play_event", "search_stack", "shuffle", ONR_V1_LOCAL_PRIVATE],
   },
   {
@@ -8886,18 +8888,19 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "R&D-Protocol Files",
     side: "runner",
     type: "program",
-    subtypes: ["stealth"],
+    subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 0,
     memoryCost: 1,
-    recurringCredits: 1,
-    rulesText: "Stealth program with recurring run credits.",
+    rulesText:
+      "A: Make a run on R&D, but instead of accessing cards, look at the top five cards of R&D.",
     mechanics: [
       "install_program",
       "memory",
-      "subtype_stealth",
-      "recurring_credit",
-      "recurring_start_turn",
+      "start_run",
+      "rd_run",
+      "access_replacement",
+      "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

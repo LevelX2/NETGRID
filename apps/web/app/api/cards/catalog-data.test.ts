@@ -606,6 +606,140 @@ describe("catalog API filters", () => {
     });
   });
 
+  it("serves corrected Runner run, access and resource catalog and shared text", () => {
+    const expectations = [
+      {
+        cardId: "onr_v1_032_i-spy",
+        catalogContains: ["Spy counter", "successful run on that fort"],
+        sharedContains: ["Spy counter", "successful run on that fort"],
+        notContains: ["top card of the Runner stack"],
+      },
+      {
+        cardId: "onr_v1_050_r-and-d-protocol-files",
+        catalogContains: ["look at the top five cards of R&D"],
+        sharedContains: ["look at the top five cards of R&D"],
+        notContains: ["Microcyb Owl", "Stealth program"],
+      },
+      {
+        cardId: "onr_v1_082_deal-with-militech",
+        catalogContains: ["Militech counter", "+1 strength"],
+        sharedContains: ["Militech counter", "+1 strength"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_084_edited-shipping-manifests",
+        catalogContains: ["Corp loses 1 credit", "you gain 10 credits"],
+        sharedContains: ["Corp loses 1", "you gain 10"],
+        notContains: ["Corp draws 1 card"],
+      },
+      {
+        cardId: "onr_v1_091_hunt-club-bbs",
+        catalogContains: ["Expose up to three installed cards."],
+        sharedContains: ["Expose up to three installed Corp cards."],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_101_mit-west-tier",
+        catalogContains: ["remove it from the game instead of trashing it"],
+        sharedContains: ["remove MIT West Tier from the game"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_106_private-ldl-access",
+        catalogContains: ["treat run as a successful run on R&D"],
+        sharedContains: ["treat run as a successful run on R&D"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_114_temple-microcode-outlet",
+        catalogContains: ["Show that program to the Corp"],
+        sharedContains: ["Show that program to the Corp"],
+        notContains: ["reveal it"],
+      },
+      {
+        cardId: "onr_v1_139_r-and-d-interface",
+        catalogContains: ["access an additional card from R&D"],
+        sharedContains: ["access 1 additional card whenever you access R&D"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_155_code-viral-cache",
+        catalogContains: ["two counters of your choice are not removed"],
+        sharedContains: ["choose up to two Virus counters that are not removed"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_173_restrictive-net-zoning",
+        catalogContains: ["must pay 2"],
+        sharedContains: ["must pay 2"],
+        notContains: ["must pay 1"],
+      },
+      {
+        cardId: "onr_v1_174_rigged-investments",
+        catalogContains: ["Put 12 credits", "take 1 credit"],
+        sharedContains: ["Put 12 credits", "take 1 credit"],
+        notContains: ["2 recurring credits", "Install with 6 Bits"],
+      },
+      {
+        cardId: "onr_v1_184_top-runners-conference",
+        catalogContains: ["Gain 2 credits"],
+        sharedContains: ["Gain 2 credits"],
+        notContains: ["Gain 3"],
+      },
+    ];
+
+    for (const expectation of expectations) {
+      const response = catalogDetailResponse(expectation.cardId);
+      expect(response.status, expectation.cardId).toBe(200);
+      const body = response.body as { card: { text: string } };
+      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+
+      for (const snippet of expectation.catalogContains) {
+        expect(body.card.text, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.sharedContains) {
+        expect(sharedText, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.notContains) {
+        expect(body.card.text, expectation.cardId).not.toContain(snippet);
+        expect(sharedText, expectation.cardId).not.toContain(snippet);
+      }
+    }
+  });
+
+  it("exposes corrected Runner run, access and resource AI hints", () => {
+    expectCatalogAiHints({
+      title: "I Spy fort counter",
+      cardId: "onr_v1_032_i-spy",
+      roles: ["spy_counter"],
+      requiredMechanics: ["spy_counter", "expose_fort_cards"],
+    });
+    expectCatalogAiHints({
+      title: "R&D Protocol top-card replacement",
+      cardId: "onr_v1_050_r-and-d-protocol-files",
+      roles: ["rd_run", "access_replacement"],
+      requiredMechanics: ["top_rd_look"],
+    });
+    expectCatalogAiHints({
+      title: "Edited Shipping Manifests payout",
+      cardId: "onr_v1_084_edited-shipping-manifests",
+      roles: ["tag_self"],
+      requiredMechanics: ["runner_gain_credits", "runner_gain_tag"],
+    });
+    expectCatalogAiHints({
+      title: "Rigged Investments bit pool",
+      cardId: "onr_v1_174_rigged-investments",
+      roles: ["economy", "counter"],
+      requiredMechanics: ["bit_counter_pool_12", "trash_when_empty"],
+    });
+    expectCatalogAiHints({
+      title: "Top Runners Conference economy",
+      cardId: "onr_v1_184_top-runners-conference",
+      roles: ["run_drawback"],
+      requiredMechanics: ["start_turn_gain_2", "trash_on_run"],
+    });
+  });
+
   it("shows promoted longtail card details in the web catalog API", () => {
     for (const cardId of [
       "onr_v1_026_false-echo",

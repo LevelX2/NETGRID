@@ -1053,23 +1053,28 @@
       "cardType": "program",
       "roles": [
         "program",
-        "counter",
-        "hidden_zone_tool"
+        "spy_counter",
+        "expose",
+        "successful_run_reward"
       ],
       "planRoles": [
-        "build_rig",
-        "safe_probe_run"
+        "information",
+        "pressure_remote"
       ],
       "requiredMechanics": [
         "install_program",
-        "reveal_stack_top",
-        "legal_action_only"
+        "memory",
+        "spy_counter",
+        "successful_run_trigger",
+        "expose_fort_cards",
+        "corp_paid_counter_removal"
       ],
       "valueHints": {
         "information": 2
       },
       "riskTags": [
-        "public_reveal"
+        "hidden_zone_projection",
+        "successful_run_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1604,20 +1609,27 @@
       "cardType": "program",
       "roles": [
         "program",
-        "access"
+        "rd_run",
+        "access_replacement",
+        "hidden_zone_tool"
       ],
       "planRoles": [
-        "build_rig",
-        "run_pressure"
+        "pressure_rnd",
+        "information"
       ],
       "requiredMechanics": [
-        "install_program"
+        "install_program",
+        "memory",
+        "rd_run",
+        "access_replacement",
+        "top_rd_look"
       ],
       "valueHints": {
         "access": 1
       },
       "riskTags": [
-        "display_only_access_text"
+        "hidden_zone_projection",
+        "access_replacement"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2590,17 +2602,16 @@
       "cardType": "event",
       "roles": [
         "event",
-        "counter",
-        "icebreaker_strength_modifier"
+        "agenda_reward",
+        "icebreaker_support"
       ],
       "planRoles": [
         "agenda_reward",
         "build_rig"
       ],
       "requiredMechanics": [
-        "play_event",
-        "agenda_subtype_condition",
-        "counter",
+        "research_agenda_liberated_condition",
+        "militech_counter",
         "icebreaker_strength_modifier"
       ],
       "valueHints": {
@@ -2652,27 +2663,29 @@
       "cardType": "event",
       "roles": [
         "event",
-        "hq_pressure",
-        "run_event",
-        "tag_cost_event"
+        "hq_run",
+        "access_replacement",
+        "economy",
+        "tag_self"
       ],
       "planRoles": [
         "contest_remote",
         "pressure_hq"
       ],
       "requiredMechanics": [
-        "add_tag",
-        "corp_draw",
-        "play_event",
-        "run",
-        "successful_run"
+        "hq_run",
+        "access_replacement",
+        "corp_credit_loss",
+        "runner_gain_credits",
+        "runner_gain_tag"
       ],
       "valueHints": {
         "runPressure": 2,
         "utility": 2
       },
       "riskTags": [
-        "tag"
+        "access_replacement",
+        "tag_self"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2876,10 +2889,8 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [
-        "play_event",
-        "expose",
-        "target_choice",
-        "hidden_info_barrier"
+        "expose_installed_cards",
+        "side_safe_targeting"
       ],
       "valueHints": {
         "information": 2
@@ -3169,22 +3180,23 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "draw",
-        "event"
+        "event",
+        "draw_cards",
+        "recycle_zones"
       ],
       "planRoles": [
         "draw_for_answers"
       ],
       "requiredMechanics": [
-        "draw",
-        "play_event",
-        "shuffle"
+        "shuffle_grip_heap_stack",
+        "draw_cards",
+        "remove_from_game"
       ],
       "valueHints": {
         "cardFlow": 3
       },
       "riskTags": [
-        "hidden_zone_change"
+        "hidden_zone_projection"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3317,25 +3329,23 @@
       "cardType": "event",
       "roles": [
         "event",
-        "rd_pressure",
-        "run_event",
-        "server_redirect"
+        "hq_run",
+        "rd_success_replacement"
       ],
       "planRoles": [
         "pressure_hq",
         "pressure_rnd"
       ],
       "requiredMechanics": [
-        "access_server_override",
-        "play_event",
-        "run",
-        "successful_run"
+        "hq_run",
+        "access_replacement",
+        "successful_rd_run"
       ],
       "valueHints": {
         "runPressure": 3
       },
       "riskTags": [
-        "encounter"
+        "access_replacement"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3569,25 +3579,24 @@
       "cardType": "event",
       "roles": [
         "event",
-        "program_setup",
-        "tutor"
+        "program_search",
+        "hidden_zone_tool"
       ],
       "planRoles": [
         "build_rig",
         "draw_for_answers"
       ],
       "requiredMechanics": [
-        "play_event",
-        "reveal_card",
         "search_stack",
-        "shuffle"
+        "show_to_corp",
+        "shuffle_stack"
       ],
       "valueHints": {
         "rigCoverage": 2,
         "cardFlow": 2
       },
       "riskTags": [
-        "hidden_zone_change"
+        "hidden_zone_projection"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4324,8 +4333,7 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "access",
-        "multiaccess"
+        "rd_multiaccess"
       ],
       "planRoles": [
         "build_rig",
@@ -4333,9 +4341,7 @@
       ],
       "requiredMechanics": [
         "install_hardware",
-        "access",
-        "breach",
-        "multiaccess"
+        "rd_additional_access"
       ],
       "valueHints": {
         "run": 2
@@ -4792,8 +4798,7 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "virus_counter",
-        "purge_replacement"
+        "virus_counter_protection"
       ],
       "planRoles": [
         "build_rig",
@@ -4801,10 +4806,9 @@
         "successful_hq_run_payoff"
       ],
       "requiredMechanics": [
-        "install_resource",
         "successful_hq_run_condition",
         "virus_counter_purge_replacement",
-        "corp_trash_action"
+        "corp_paid_trash_action"
       ],
       "valueHints": {
         "virus": 2
@@ -5334,18 +5338,16 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "remote_tax",
         "resource",
-        "server_pressure"
+        "install_cost_modifier"
       ],
       "planRoles": [
         "contest_remote",
         "recover_economy"
       ],
       "requiredMechanics": [
-        "choose_server",
-        "install_resource",
-        "persistent_modifier"
+        "choose_data_fort_on_install",
+        "ice_install_extra_cost_2"
       ],
       "valueHints": {
         "utility": 2,
@@ -5365,17 +5367,17 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "bit_depot",
-        "economy"
+        "economy",
+        "counter"
       ],
       "planRoles": [
         "build_economy"
       ],
       "requiredMechanics": [
         "install_resource",
-        "bit_counter_depot",
-        "runner_start_turn_credit",
-        "auto_trash"
+        "bit_counter_pool_12",
+        "start_turn_take_credit",
+        "trash_when_empty"
       ],
       "valueHints": {
         "economy": 2
@@ -5677,17 +5679,15 @@
       "roles": [
         "resource",
         "economy",
-        "run_linked_resource"
+        "run_drawback"
       ],
       "planRoles": [
         "recover_economy",
         "contest_remote"
       ],
       "requiredMechanics": [
-        "install_resource",
-        "run_start_trigger",
-        "start_of_turn_trigger",
-        "trash_self"
+        "start_turn_gain_2",
+        "trash_on_run"
       ],
       "valueHints": {
         "economy": 2,

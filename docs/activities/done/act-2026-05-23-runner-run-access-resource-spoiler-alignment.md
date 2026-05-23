@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-05-23-runner-run-access-resource-spoiler-alignment
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-23
-startedAt:
-completedAt:
+startedAt: 2026-05-23
+completedAt: 2026-05-23
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - data/cards/originalset-v1-cards.json
+  - data/ai/ai-card-hints-active.json
+  - packages/shared/src/index.ts
+  - apps/web/app/api/cards/catalog-data.test.ts
+checks:
+  - node -e "JSON.parse(require('fs').readFileSync('data/cards/originalset-v1-cards.json','utf8')); JSON.parse(require('fs').readFileSync('data/ai/ai-card-hints-active.json','utf8')); console.log('json ok')"
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/web test app/api/cards/catalog-data.test.ts
+  - corepack pnpm --filter @netgrid/engine test src/index.test.ts -t "I Spy|R&D-Protocol Files|R&D Protocol|R&D Interface|Rigged Investments|Top Runners|MIT West Tier|Temple Microcode Outlet|Private LDL Access|Restrictive Net Zoning|Code Viral Cache|Deal with Militech|Edited Shipping Manifests|Hunt Club BBS"
 ---
 
 # Runner-Run-, Access- und Resource-Karten gegen Spoiler abgleichen
@@ -69,4 +77,8 @@ Mehrere Runner-Karten aus Run-/Access-/Resource-Familien zeigen entweder falsche
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-05-23.
+
+- Katalogtexte, Shared-`rulesText` und AI-Hints der genannten Run-/Access-/Resource-Karten gegen `docs/source/Runnerspoiler 1.0.txt` korrigiert.
+- Bestehende CardImplementations und fokussierte Engine-Regressionen fuer I Spy, R&D-Protocol Files, R&D Interface, Rigged Investments, Top Runners' Conference, MIT West Tier, Temple Microcode Outlet, Private LDL Access, Restrictive Net Zoning, Code Viral Cache, Deal with Militech, Edited Shipping Manifests und Hunt Club BBS verifiziert.
+- Alte Platzhaltertexte wie Microcyb-Owl-Stealthtext, falsche Manifests-Auszahlung, falsche Restrictive-Net-Zoning-Kosten, falsche Rigged-Investments-Counter und Top-Runners-`Gain 3` entfernt.
