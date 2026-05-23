@@ -11,6 +11,15 @@ export {
   buildCorpPurgeVirusAction,
 } from "./corp-basic-actions";
 export {
+  buildCorpNewRemoteIceInstallAction,
+  buildCorpNewRemoteRootInstallAction,
+  buildCorpServerIceInstallAction,
+  buildCorpServerRootInstallAction,
+  type CorpIceInstallCostDetails,
+  type CorpInstallServerRef,
+  type CorpRootInstallOptions,
+} from "./corp-install-actions";
+export {
   buildRunnerEndTurnAction,
   buildRunnerGainCreditAction,
   buildRunnerRemoveTagAction,

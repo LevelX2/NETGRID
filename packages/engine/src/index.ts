@@ -92,6 +92,12 @@ import {
   buildCorpPurgeVirusAction,
 } from "./game/turn/corp-basic-actions";
 import {
+  buildCorpNewRemoteIceInstallAction,
+  buildCorpNewRemoteRootInstallAction,
+  buildCorpServerIceInstallAction,
+  buildCorpServerRootInstallAction,
+} from "./game/turn/corp-install-actions";
+import {
   buildRunnerEndTurnAction,
   buildRunnerGainCreditAction,
   buildRunnerRemoveTagAction,
@@ -2615,17 +2621,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
     if (definition.type === "ice") {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "install_card",
-          `ICE vor neuem Remote installieren`,
-          id,
-          [{ clicks: 1 }],
-          { cardId: id, serverId: "new_remote", placement: "ice" },
-        ),
-      );
+      actions.push(buildCorpNewRemoteIceInstallAction(state, id));
       for (const server of state.corp.servers) {
         const {
           baseCost,
@@ -2638,33 +2634,21 @@ function corpMainActions(state: GameState): LegalAction[] {
           corpIceInstallTotalCost(state, id, server);
         if (state.corp.credits < totalCost) continue;
         actions.push(
-          action(
+          buildCorpServerIceInstallAction(
             state,
-            "corp",
-            "install_card",
-            `ICE vor ${server.label} installieren`,
             id,
-            [{ clicks: 1, ...(totalCost > 0 ? { credits: totalCost } : {}) }],
+            server,
             {
-              cardId: id,
-              serverId: server.id,
-              placement: "ice",
-              iceInstallBaseCost: baseCost,
-              iceInstallAdditionalCost: additionalCost,
-              iceInstallReduction: reduction,
+              baseCost,
+              additionalCost,
+              reduction,
               ...(reductionSourceDefinitionIds
-                ? {
-                    iceInstallReductionSourceDefinitionIds:
-                      reductionSourceDefinitionIds,
-                  }
+                ? { reductionSourceDefinitionIds }
                 : {}),
               ...(increaseSourceDefinitionIds
-                ? {
-                    iceInstallIncreaseSourceDefinitionIds:
-                      increaseSourceDefinitionIds,
-                  }
+                ? { increaseSourceDefinitionIds }
                 : {}),
-              iceInstallTotalCost: totalCost,
+              totalCost,
             },
           ),
         );
@@ -2686,22 +2670,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         : 0;
       if (state.corp.credits >= regionInstallCost) {
         actions.push(
-          action(
-            state,
-            "corp",
-            "install_card",
-            `Karte in neuem Remote installieren`,
-            id,
-            [
-              {
-                clicks: 1,
-                ...(regionInstallCost > 0
-                  ? { credits: regionInstallCost }
-                  : {}),
-              },
-            ],
-            { cardId: id, serverId: "new_remote", placement: "root" },
-          ),
+          buildCorpNewRemoteRootInstallAction(state, id, regionInstallCost),
         );
       }
       for (const server of state.corp.servers) {
@@ -2718,31 +2687,12 @@ function corpMainActions(state: GameState): LegalAction[] {
             corpRootAssetIdsInServer(state, server).length > 0 &&
             corpRootMainCardIdsInServer(state, server).length >= rootCapacity;
           actions.push(
-            action(
+            buildCorpServerRootInstallAction(
               state,
-              "corp",
-              "install_card",
-              `Karte in ${server.label} installieren`,
               id,
-              [
-                {
-                  clicks: 1,
-                  ...(regionInstallCost > 0
-                    ? { credits: regionInstallCost }
-                    : {}),
-                },
-              ],
-              {
-                cardId: id,
-                serverId: server.id,
-                placement: "root",
-                ...(replacesRootAsset
-                  ? { rootReplacement: "asset_to_agenda" }
-                  : {}),
-                ...(replacesRegion
-                  ? { regionReplacementWarning: true }
-                  : {}),
-              },
+              server,
+              regionInstallCost,
+              { replacesRootAsset, replacesRegion },
             ),
           );
         }
