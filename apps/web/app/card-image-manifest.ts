@@ -47,5 +47,5 @@ export function isGeneratedCardImageId(cardId: string | undefined | null): cardI
 }
 
 export function isLocalOnrCardId(cardId: string | undefined | null): cardId is string {
-  return typeof cardId === "string" && cardId.startsWith("onr_v1_");
+  return typeof cardId === "string" && (cardId.startsWith("onr_v1_") || cardId.startsWith("onr_proteus_"));
 }
