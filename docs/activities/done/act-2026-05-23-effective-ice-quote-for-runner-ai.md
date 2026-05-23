@@ -1,19 +1,31 @@
 ---
 activityId: act-2026-05-23-effective-ice-quote-for-runner-ai
-status: inbox
+status: done
 kind: architecture
 area: ai
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-23
-startedAt:
-completedAt:
+startedAt: 2026-05-23
+completedAt: 2026-05-23
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/engine/src/game/view/visible-run-quote.ts
+  - packages/engine/src/game/view/player-view-projection.ts
+  - packages/ai/src/input-dto.ts
+  - packages/ai/src/visible-run-analysis.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai test -- src/index.test.ts -t "effective run quote|Crystal Wall remote|visible ICE and breakers"
+  - corepack pnpm --filter @netgrid/engine test -- src/index.test.ts -t "adds Encoder|adds Tesseract|Crystal Palace"
+  - git diff --check
 ---
 
 # Effektive ICE-/Run-Pfad-Projektion für Runner-KI
@@ -61,13 +73,13 @@ Nach dem Paket soll die KI bei sichtbaren, wirksamen Modifikatoren wie `Crystal 
 
 ## Akzeptanzkriterien
 
-- [ ] Die KI-Kostenbewertung für sichtbare Run-Pfade nutzt keine konkreten Karten-IDs für `Crystal Palace Station Grid` oder `Tesseract Fort Construction`.
-- [ ] Eine Engine-nahe Projektion bildet die aktuell öffentlichen wirksamen ICE-/Run-Pfad-Modifikatoren ab und bleibt side-sicher.
-- [ ] Die Projektion wird aus vorhandenen Engine-/Modifier-Informationen abgeleitet, nicht aus getrennt gepflegten AI-Hardcodings.
-- [ ] `Crystal Wall` im Fort mit rezzed `Tesseract Fort Construction` und rezzed `Crystal Palace Station Grid` wird für die Runner-KI mit den korrekten sichtbaren Kosten bewertet.
-- [ ] Unrezzed oder verdeckte Quellen verändern die Runner-KI-Projektion nicht und leaken keine Identität.
-- [ ] Mindestens ein generischer weiterer Modifier-Fall bestätigt, dass der Mechanismus nicht nur für die zwei Ausgangskarten funktioniert.
-- [ ] Bestehende Engine-, AI-, Replay-/StateHash- und Hidden-Info-Regressionen bleiben grün.
+- [x] Die KI-Kostenbewertung für sichtbare Run-Pfade nutzt keine konkreten Karten-IDs für `Crystal Palace Station Grid` oder `Tesseract Fort Construction`.
+- [x] Eine Engine-nahe Projektion bildet die aktuell öffentlichen wirksamen ICE-/Run-Pfad-Modifikatoren ab und bleibt side-sicher.
+- [x] Die Projektion wird aus vorhandenen Engine-/Modifier-Informationen abgeleitet, nicht aus getrennt gepflegten AI-Hardcodings.
+- [x] `Crystal Wall` im Fort mit rezzed `Tesseract Fort Construction` und rezzed `Crystal Palace Station Grid` wird für die Runner-KI mit den korrekten sichtbaren Kosten bewertet.
+- [x] Unrezzed oder verdeckte Quellen verändern die Runner-KI-Projektion nicht und leaken keine Identität.
+- [x] Mindestens ein generischer weiterer Modifier-Fall bestätigt, dass der Mechanismus nicht nur für die zwei Ausgangskarten funktioniert.
+- [x] Bestehende Engine-, AI-, Replay-/StateHash- und Hidden-Info-Regressionen bleiben grün.
 
 ## Umsetzungshinweise
 
@@ -79,4 +91,6 @@ Nach dem Paket soll die KI bei sichtbaren, wirksamen Modifikatoren wie `Crystal 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-05-23: Sichtbar bekannte, gerezzte ICE tragen im PlayerView jetzt eine Engine-nahe `effectiveRunQuote` mit effektiver Stärke, effektiven Subroutinen, öffentlichen dynamischen Quellen und Breakkostenmodifikatoren. Die Quote wird aus den vorhandenen Engine-Pfaden für `additional_subroutine`, run-duration Zusatzsubroutinen und `break_subroutine_cost` erzeugt und über den AI-Input-Sanitizer positiv erlaubt. `assessKnownRezzedIcePath` nutzt diese Projektion für normale ETR-Subroutinen und Pay-or-End-the-Run-Subroutinen; die bisherigen KI-Sonderfälle für `Crystal Palace Station Grid` und `Tesseract Fort Construction` sind entfernt. Regressionen decken den Ausgangsfall `Crystal Wall`/`Dwarf` plus Tesseract/Crystal Palace, einen generischen `Encoder, Inc.`-Zusatzsubroutinenfall und einen unrezzed/hidden Negativfall ohne Root-Identitätsleck ab.
+
+Checks: `corepack pnpm --filter @netgrid/shared typecheck`, `corepack pnpm --filter @netgrid/engine typecheck`, `corepack pnpm --filter @netgrid/ai typecheck`, `corepack pnpm --filter @netgrid/ai test -- src/index.test.ts -t "effective run quote|Crystal Wall remote|visible ICE and breakers"`, `corepack pnpm --filter @netgrid/engine test -- src/index.test.ts -t "adds Encoder|adds Tesseract|Crystal Palace"`, `git diff --check` (Exit 0; nur bestehende CRLF-Warnungen in den vorgefundenen Web-Dateien `apps/web/app/globals.css` und `apps/web/app/page.tsx`).

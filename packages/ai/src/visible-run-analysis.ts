@@ -3,10 +3,18 @@ import {
   type CardDefinition,
   type PublicGameEvent,
   type VisibleCard,
+  type VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
 
-type IceCardLike = { definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[]; strength?: number };
+type IceCardLike = {
+  definitionId?: string;
+  rezzed?: boolean;
+  known: boolean;
+  subtypes?: string[];
+  strength?: number;
+  effectiveRunQuote?: VisibleEffectiveIceRunQuote;
+};
 type RootCardLike = { definitionId?: string; rezzed?: boolean; known: boolean };
 type BreakAssessment = { cost: number; breakerInstanceId: string; endingStrength: number; carriesStrengthAcrossIce: boolean };
 
@@ -14,8 +22,6 @@ const RUN_REMAINDER_STRENGTH_BREAKER_IDS = new Set([
   "onr_v1_030_grubb",
   "onr_v1_039_krash",
 ]);
-const CRYSTAL_PALACE_STATION_GRID_ID = "onr_v1_355_crystal-palace-station-grid";
-const TESSERACT_FORT_CONSTRUCTION_ID = "onr_v1_370_tesseract-fort-construction";
 
 export function serverIdFromEvent(event: PublicGameEvent): string | undefined {
   const candidate = event.publicPayload.serverId ?? event.publicPayload.attackedServerId ?? event.publicPayload.server ?? event.publicPayload.targetServerId;
@@ -38,28 +44,72 @@ export function assessKnownRezzedIcePath(
 ): { blocked: boolean; visibleBreakCost?: number } {
   let visibleBreakCost = 0;
   const breakerStrengths = new Map(rigCards.map((card) => [card.instanceId, card.strength ?? 0]));
-  const crystalPalaceBreakCost = hasKnownRezzedRoot(rootCards, CRYSTAL_PALACE_STATION_GRID_ID) ? 1 : 0;
-  const hasTesseract = hasKnownRezzedRoot(rootCards, TESSERACT_FORT_CONSTRUCTION_ID);
+  void rootCards;
   for (const ice of iceCards.slice().reverse()) {
     if (!ice.definitionId || !ice.known || ice.rezzed !== true) continue;
-    const endTheRunCount = endTheRunSubroutineCount(ice.definitionId);
+    const quote = effectiveRunQuoteForIce(ice);
+    const endTheRunCount = quote
+      ? quote.subroutines.filter((subroutine) => subroutine.type === "end_the_run").length
+      : endTheRunSubroutineCount(ice.definitionId);
+    const additionalBreakCostPerSubroutine =
+      quote?.breakSubroutineAdditionalCostPerSubroutine ?? 0;
     if (endTheRunCount > 0) {
-      const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(ice, rigCards, endTheRunCount, breakerStrengths, crystalPalaceBreakCost);
+      const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(
+        effectiveIceForQuote(ice, quote),
+        rigCards,
+        endTheRunCount,
+        breakerStrengths,
+        additionalBreakCostPerSubroutine,
+      );
       if (!breakAssessment) return { blocked: true, ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}) };
       visibleBreakCost += breakAssessment.cost;
       if (breakAssessment.carriesStrengthAcrossIce) {
         breakerStrengths.set(breakAssessment.breakerInstanceId, breakAssessment.endingStrength);
       }
     }
-    if (!hasTesseract) continue;
-    const tesseractBreakAssessment = minimumCreditsToBreakEndTheRunSubroutines(ice, rigCards, 1, breakerStrengths, crystalPalaceBreakCost);
-    const tesseractCost = Math.min(1, tesseractBreakAssessment?.cost ?? 1);
-    visibleBreakCost += tesseractCost;
-    if (tesseractBreakAssessment && tesseractCost === tesseractBreakAssessment.cost && tesseractBreakAssessment.carriesStrengthAcrossIce) {
-      breakerStrengths.set(tesseractBreakAssessment.breakerInstanceId, tesseractBreakAssessment.endingStrength);
+    const payOrEndSubroutines =
+      quote?.subroutines.filter(
+        (subroutine) => subroutine.type === "end_the_run_unless_runner_pays",
+      ) ?? [];
+    for (const subroutine of payOrEndSubroutines) {
+      const payCost = Math.max(0, Math.floor(subroutine.amount ?? 0));
+      const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(
+        effectiveIceForQuote(ice, quote),
+        rigCards,
+        1,
+        breakerStrengths,
+        additionalBreakCostPerSubroutine,
+      );
+      const handlingCost = Math.min(payCost, breakAssessment?.cost ?? payCost);
+      visibleBreakCost += handlingCost;
+      if (
+        breakAssessment &&
+        handlingCost === breakAssessment.cost &&
+        breakAssessment.carriesStrengthAcrossIce
+      ) {
+        breakerStrengths.set(
+          breakAssessment.breakerInstanceId,
+          breakAssessment.endingStrength,
+        );
+      }
     }
   }
   return visibleBreakCost > 0 ? { blocked: visibleBreakCost > runnerCredits, visibleBreakCost } : { blocked: false };
+}
+
+function effectiveRunQuoteForIce(
+  ice: IceCardLike,
+): VisibleEffectiveIceRunQuote | undefined {
+  const quote = ice.effectiveRunQuote;
+  if (!quote || quote.iceDefinitionId !== ice.definitionId) return undefined;
+  return quote;
+}
+
+function effectiveIceForQuote(
+  ice: IceCardLike,
+  quote: VisibleEffectiveIceRunQuote | undefined,
+): IceCardLike {
+  return quote ? { ...ice, strength: quote.effectiveStrength } : ice;
 }
 
 export function minimumCreditsToBreakEndTheRunSubroutines(
@@ -112,15 +162,6 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
     endingStrength,
     carriesStrengthAcrossIce: breakerCarriesStrengthAcrossIce(breakerDefinition),
   };
-}
-
-function hasKnownRezzedRoot(rootCards: RootCardLike[], definitionId: string): boolean {
-  return rootCards.some(
-    (card) =>
-      card.known &&
-      card.rezzed === true &&
-      card.definitionId === definitionId,
-  );
 }
 
 export function endTheRunSubroutineCount(iceDefinitionId: string): number {
