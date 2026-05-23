@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-05-23-runner-prevention-tag-protection-spoiler-alignment
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-23
-startedAt:
-completedAt:
+startedAt: 2026-05-23
+completedAt: 2026-05-23
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - data/cards/originalset-v1-cards.json
+  - data/ai/ai-card-hints-active.json
+  - packages/shared/src/index.ts
+  - apps/web/app/api/cards/catalog-data.test.ts
+checks:
+  - node -e "JSON.parse(require('fs').readFileSync('data/cards/originalset-v1-cards.json','utf8')); JSON.parse(require('fs').readFileSync('data/ai/ai-card-hints-active.json','utf8')); console.log('json ok')"
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/web test app/api/cards/catalog-data.test.ts
+  - corepack pnpm --filter @netgrid/engine test src/index.test.ts -t "Armored Fridge|Green Knight|Techtronica|Fall Guy|Nomad Allies|Trauma Team|Umbrella Policy|Wilson|Joan of Arc|Lifesaver|Nasuko"
 ---
 
 # Runner-Prevention und Tag-Schutz: falsche Platzhalterfunktionen bereinigen
@@ -65,4 +73,8 @@ Runner-Hardware/-Resources/-Programme aus der Prevention-/Tag-Schutz-Familie sol
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-05-23.
+
+- Katalogtexte, Shared-`rulesText` und AI-Hints der genannten Prevention-/Tag-Schutz-Karten gegen `docs/source/Runnerspoiler 1.0.txt` korrigiert.
+- Runtime-CardImplementations fuer Joan of Arc, Armored Fridge, Green Knight, Lifesaver, Nasuko Cycle, Techtronica Utility Suit, Fall Guy, Nomad Allies, Trauma Team, Umbrella Policy und Wilson waren vorhanden und wurden ueber bestehende fokussierte Engine-Regressionen verifiziert.
+- Alte generische Damage-Prevention-Platzhalter aus Katalog/Shared/Hints fuer die betroffenen Karten entfernt.

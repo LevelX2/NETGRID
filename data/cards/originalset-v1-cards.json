@@ -1203,7 +1203,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 net or core damage.",
+      "text": "[T]: Prevent one or more of your other installed programs from being trashed.\n1 credit: Prevent one or more of your other installed programs from being trashed, and bring Joan of Arc into your hand.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -3780,7 +3780,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 2 meat damage.",
+      "text": "Put seven Ablative counters on Armored Fridge when it is installed. When the last Ablative counter has been removed, trash Armored Fridge.\nAblative counter: Prevent 1 meat damage.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4002,7 +4002,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 2 net damage.",
+      "text": "Prevents 1 net damage each turn.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4064,7 +4064,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 core damage.",
+      "text": "A: Draw two cards. Use this ability only if you were damaged during any of your last three actions.\n[T]: Prevent 1 brain damage.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4222,7 +4222,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 net or meat damage.",
+      "text": "3 credits: Avoid receiving a tag.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4475,7 +4475,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
+      "text": "Provides +1 MU. Prevents 1 meat damage each turn. Put 5 credits on Techtronica Utility Suit when it is installed. Use these credits only to pay for increasing your link. If you use any of these credits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5047,7 +5047,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
+      "text": "[T]: Avoid receiving a tag.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5331,7 +5331,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 net or meat damage.",
+      "text": "A, 1 credit: Remove a tag, at no cost.\n[T]: Avoid receiving a tag.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5800,7 +5800,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 2 meat damage.",
+      "text": "Put two Trauma counters on Trauma Team when it is installed.\nTrauma counter: Prevent 1 meat damage.\nA: Put one Trauma counter on Trauma Team.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5830,7 +5830,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 net, meat or core damage.",
+      "text": "[T]: Prevent an installed program or hardware card from being trashed.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5860,7 +5860,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 meat damage.",
+      "text": "Each of your turns, you may choose to gain an action, which you may use only to make a run. You cannot spend more than 3 credits during that run to pay for using icebreakers or increasing your link. Use this ability only once per turn and only during your turn.\n[T]: Avoid receiving a tag.\n[T]: Prevent any amount of meat damage.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",

@@ -1234,21 +1234,23 @@
       "cardType": "program",
       "roles": [
         "program",
-        "damage_prevention"
+        "trash_prevention"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "protect_rig"
       ],
       "requiredMechanics": [
         "install_program",
-        "damage_prevention"
+        "memory",
+        "program_trash_prevention",
+        "return_to_hand"
       ],
       "valueHints": {
         "survival": 2
       },
       "riskTags": [
-        "damage_window"
+        "trash_prevention_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3785,7 +3787,8 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "damage_prevention"
+        "damage_prevention",
+        "counter"
       ],
       "planRoles": [
         "build_rig",
@@ -3794,7 +3797,8 @@
       "requiredMechanics": [
         "install_hardware",
         "meat_damage",
-        "damage_prevention"
+        "damage_prevention",
+        "ablative_counter"
       ],
       "valueHints": {
         "survival": 2
@@ -4003,7 +4007,8 @@
       "requiredMechanics": [
         "install_hardware",
         "net_damage",
-        "damage_prevention"
+        "damage_prevention",
+        "damage_prevention_turn_limit"
       ],
       "valueHints": {
         "survival": 2
@@ -4052,16 +4057,20 @@
       "roles": [
         "hardware",
         "damage_prevention",
-        "core_damage"
+        "core_damage",
+        "draw_cards"
       ],
       "planRoles": [
         "build_rig",
-        "survive_core_damage"
+        "survive_core_damage",
+        "recover_cards"
       ],
       "requiredMechanics": [
         "install_hardware",
         "core_damage",
-        "damage_prevention"
+        "damage_prevention",
+        "recent_damage_gate",
+        "draw_cards"
       ],
       "valueHints": {
         "survival": 2
@@ -4194,21 +4203,22 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "damage_prevention"
+        "tag_avoid"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "avoid_tags"
       ],
       "requiredMechanics": [
         "install_hardware",
-        "damage_prevention"
+        "tag_avoid",
+        "credit_cost"
       ],
       "valueHints": {
         "survival": 1
       },
       "riskTags": [
-        "damage_window"
+        "tag_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4422,15 +4432,23 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "damage_prevention"
+        "damage_prevention",
+        "memory",
+        "link",
+        "deck"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "survive_meat_damage",
+        "increase_link"
       ],
       "requiredMechanics": [
         "install_hardware",
-        "damage_prevention"
+        "memory",
+        "meat_damage",
+        "damage_prevention",
+        "link_bits",
+        "deck_unique_replacement"
       ],
       "valueHints": {
         "survival": 1
@@ -4955,21 +4973,21 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "tag_avoid"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "avoid_tags"
       ],
       "requiredMechanics": [
         "install_resource",
-        "damage_prevention"
+        "tag_avoid"
       ],
       "valueHints": {
         "survival": 1
       },
       "riskTags": [
-        "damage_window"
+        "tag_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5221,21 +5239,26 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "tag_avoid",
+        "remove_tag"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "avoid_tags",
+        "remove_tags"
       ],
       "requiredMechanics": [
         "install_resource",
-        "damage_prevention"
+        "tag_avoid",
+        "remove_tag",
+        "action_cost",
+        "credit_cost"
       ],
       "valueHints": {
         "survival": 1
       },
       "riskTags": [
-        "damage_window"
+        "tag_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5685,7 +5708,8 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "damage_prevention",
+        "counter"
       ],
       "planRoles": [
         "build_rig",
@@ -5694,7 +5718,9 @@
       "requiredMechanics": [
         "install_resource",
         "meat_damage",
-        "damage_prevention"
+        "damage_prevention",
+        "trauma_counter",
+        "action_counter"
       ],
       "valueHints": {
         "survival": 2
@@ -5713,22 +5739,22 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "trash_prevention"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "protect_rig"
       ],
       "requiredMechanics": [
         "install_resource",
-        "damage_prevention",
-        "core_damage"
+        "program_trash_prevention",
+        "hardware_trash_prevention"
       ],
       "valueHints": {
         "survival": 2
       },
       "riskTags": [
-        "damage_window"
+        "trash_prevention_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5741,14 +5767,22 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "tag_avoid",
+        "damage_prevention",
+        "run_action"
       ],
       "planRoles": [
         "build_rig",
+        "safe_probe_run",
+        "avoid_tags",
         "survive_meat_damage"
       ],
       "requiredMechanics": [
         "install_resource",
+        "unique_card",
+        "run_action_gain",
+        "run_spending_cap",
+        "tag_avoid",
         "meat_damage",
         "damage_prevention"
       ],
@@ -5756,7 +5790,9 @@
         "survival": 1
       },
       "riskTags": [
-        "damage_window"
+        "tag_window",
+        "damage_window",
+        "run_spending_cap"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [

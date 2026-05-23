@@ -481,6 +481,131 @@ describe("catalog API filters", () => {
     });
   });
 
+  it("serves corrected Runner prevention and tag-protection catalog and shared text", () => {
+    const expectations = [
+      {
+        cardId: "onr_v1_038_joan-of-arc",
+        catalogContains: ["other installed programs", "bring Joan of Arc"],
+        sharedContains: ["other installed programs", "bring Joan of Arc"],
+        notContains: ["prevent 1 net or core damage"],
+      },
+      {
+        cardId: "onr_v1_121_armored-fridge",
+        catalogContains: ["seven Ablative counters", "Prevent 1 meat damage"],
+        sharedContains: ["7 Ablative counters", "prevent 1 meat damage"],
+        notContains: ["prevent 2 meat damage"],
+      },
+      {
+        cardId: "onr_v1_128_green-knight-surge-buffers",
+        catalogContains: ["Prevents 1 net damage each turn."],
+        sharedContains: ["Prevents 1 net damage each turn."],
+        notContains: ["prevent 2 net damage"],
+      },
+      {
+        cardId: "onr_v1_130_lifesaver-nanosurgeons",
+        catalogContains: ["Draw two cards", "Prevent 1 brain damage"],
+        sharedContains: ["Draw two cards", "Prevent 1 brain damage"],
+        notContains: ["prevent 1 core damage."],
+      },
+      {
+        cardId: "onr_v1_135_nasuko-cycle",
+        catalogContains: ["Avoid receiving a tag"],
+        sharedContains: ["Avoid receiving a tag"],
+        notContains: ["prevent 1 net or meat damage"],
+      },
+      {
+        cardId: "onr_v1_143_techtronica-utility-suit",
+        catalogContains: ["Provides +1 MU", "increasing your link"],
+        sharedContains: ["Provides +1 MU", "increasing your link"],
+        notContains: ["prevent 1 meat or net damage"],
+      },
+      {
+        cardId: "onr_v1_161_fall-guy",
+        catalogContains: ["Avoid receiving a tag"],
+        sharedContains: ["Avoid receiving a tag"],
+        notContains: ["prevent 1 meat or net damage"],
+      },
+      {
+        cardId: "onr_v1_170_nomad-allies",
+        catalogContains: ["Remove a tag", "Avoid receiving a tag"],
+        sharedContains: ["Remove a tag", "Avoid receiving a tag"],
+        notContains: ["prevent 1 net or meat damage"],
+      },
+      {
+        cardId: "onr_v1_185_trauma-team",
+        catalogContains: ["two Trauma counters", "Put one Trauma counter"],
+        sharedContains: ["2 Trauma counters", "Put 1 Trauma counter"],
+        notContains: ["prevent 2 meat damage"],
+      },
+      {
+        cardId: "onr_v1_186_umbrella-policy",
+        catalogContains: ["program or hardware card from being trashed"],
+        sharedContains: ["program or hardware card from being trashed"],
+        notContains: ["prevent 1 net, meat or core damage"],
+      },
+      {
+        cardId: "onr_v1_187_wilson-weeflerunner-apprentice",
+        catalogContains: ["gain an action", "Prevent any amount of meat damage"],
+        sharedContains: ["gain an action", "Prevent any amount of meat damage"],
+        notContains: ["prevent 1 meat damage"],
+      },
+    ];
+
+    for (const expectation of expectations) {
+      const response = catalogDetailResponse(expectation.cardId);
+      expect(response.status, expectation.cardId).toBe(200);
+      const body = response.body as { card: { text: string } };
+      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+
+      for (const snippet of expectation.catalogContains) {
+        expect(body.card.text, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.sharedContains) {
+        expect(sharedText, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.notContains) {
+        expect(body.card.text, expectation.cardId).not.toContain(snippet);
+        expect(sharedText, expectation.cardId).not.toContain(snippet);
+      }
+    }
+  });
+
+  it("exposes corrected Runner prevention and tag-protection AI hints", () => {
+    expectCatalogAiHints({
+      title: "Joan trash prevention",
+      cardId: "onr_v1_038_joan-of-arc",
+      roles: ["trash_prevention"],
+      requiredMechanics: ["program_trash_prevention", "return_to_hand"],
+    });
+    expectCatalogAiHints({
+      title: "Nasuko tag avoid",
+      cardId: "onr_v1_135_nasuko-cycle",
+      roles: ["tag_avoid"],
+      requiredMechanics: ["tag_avoid", "credit_cost"],
+    });
+    expectCatalogAiHints({
+      title: "Techtronica deck link package",
+      cardId: "onr_v1_143_techtronica-utility-suit",
+      roles: ["memory", "link", "deck"],
+      requiredMechanics: ["link_bits", "deck_unique_replacement"],
+    });
+    expectCatalogAiHints({
+      title: "Umbrella trash prevention",
+      cardId: "onr_v1_186_umbrella-policy",
+      roles: ["trash_prevention"],
+      requiredMechanics: [
+        "program_trash_prevention",
+        "hardware_trash_prevention",
+      ],
+    });
+    expectCatalogAiHints({
+      title: "Wilson run action and tag protection",
+      cardId: "onr_v1_187_wilson-weeflerunner-apprentice",
+      roles: ["run_action", "tag_avoid"],
+      requiredMechanics: ["run_action_gain", "run_spending_cap"],
+    });
+  });
+
   it("shows promoted longtail card details in the web catalog API", () => {
     for (const cardId of [
       "onr_v1_026_false-echo",
