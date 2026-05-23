@@ -3961,11 +3961,24 @@ select {
 }
 
 .turnActionHeader {
+  --turn-action-header-accent: var(--runner-zone-accent);
   display: grid;
   gap: 5px;
-  padding-bottom: 8px;
+  padding: 8px 10px 9px;
   margin: 0 0 8px;
-  border-bottom: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--turn-action-header-accent), var(--line) 42%);
+  border-radius: 8px;
+  background:
+    linear-gradient(color-mix(in srgb, var(--turn-action-header-accent), transparent 84%), color-mix(in srgb, var(--turn-action-header-accent), transparent 84%)),
+    var(--section-bg);
+}
+
+.turnActionHeader.side-corp {
+  --turn-action-header-accent: var(--corp-status-accent);
+}
+
+.turnActionHeader.side-runner {
+  --turn-action-header-accent: var(--runner-zone-accent);
 }
 
 .turnActionHeader h2 {

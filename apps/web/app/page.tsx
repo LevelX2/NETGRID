@@ -6203,6 +6203,7 @@ function AccessRevealModal({
                 <button className={`button primary ${action.type === "trash_accessed_card" || action.type === "trash_resource" ? "dangerButton" : ""}`} key={action.actionId} onClick={() => runAction(action)} disabled={disabled}>
                   {action.type === "trash_accessed_card" || action.type === "trash_resource" ? <Trash2 size={15} /> : <AgendaIcon size={15} />}
                   {accessDecisionLabel(action)}
+                  <CostChips action={action} />
                 </button>
               ))}
               {declineAction ? (
@@ -8099,7 +8100,7 @@ function LegalActionsPanel({
   const currentTurnDisplay = actionSlotDisplay(currentTurnSide, currentTurnClicks, currentTurnCapacity, true);
   return (
     <section className={`section ${highlighted ? "cueHighlight" : ""}`} data-testid="legal-actions">
-      <div className="turnActionHeader">
+      <div className={`turnActionHeader side-${currentTurnSide}`}>
         <h2>{turnActionHeaderLabel(view, currentTurnSide, activeAiSide)}</h2>
         <div className={`actionAvailability side-${currentTurnSide}`} data-testid="action-availability">
           <span className="actionAvailabilityCount">{`noch ${currentTurnDisplay.available}`}</span>
