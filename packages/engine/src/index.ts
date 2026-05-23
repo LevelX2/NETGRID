@@ -96,6 +96,10 @@ import {
   buildRunnerGainCreditAction,
   buildRunnerRemoveTagAction,
 } from "./game/turn/runner-basic-actions";
+import {
+  buildRunnerDrawCardActions,
+  type RunnerDrawActionContext,
+} from "./game/turn/runner-draw-actions";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -3494,7 +3498,9 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
     actions.push(buildRunnerGainCreditAction(state));
     if (state.runner.stack.length > 0)
-      actions.push(...runnerDrawCardActions(state));
+      actions.push(
+        ...buildRunnerDrawCardActions(state, runnerDrawActionContext(state)),
+      );
     if (state.runner.tags > 0 && availableRunnerTagRemovalCredits(state) >= 2) {
       actions.push(buildRunnerRemoveTagAction(state));
     }
@@ -4452,63 +4458,11 @@ function runnerMainActions(state: GameState): LegalAction[] {
   return actions;
 }
 
-function runnerDrawCardActions(state: GameState): LegalAction[] {
-  const citySurveillanceSourceCount = citySurveillanceSourceIds(state).length;
-  const projectedDrawCount = activeCrashEverettSourceId(state) ? 2 : 1;
-  if (citySurveillanceSourceCount <= 0) {
-    return [
-      action(state, "runner", "draw_card", "Karte ziehen", "basic_action", [
-        { clicks: 1 },
-      ]),
-    ];
-  }
-
-  const actions: LegalAction[] = [];
-  const projectedCitySurveillanceCost =
-    citySurveillanceSourceCount * projectedDrawCount;
-  if (state.runner.credits >= projectedCitySurveillanceCost) {
-    actions.push(
-      action(
-        state,
-        "runner",
-        "draw_card",
-        projectedCitySurveillanceCost === 1
-          ? "Karte ziehen (City Surveillance: 1 Credit zahlen)"
-          : `Karte ziehen (City Surveillance: ${projectedCitySurveillanceCost} Credits zahlen)`,
-        "basic_action",
-        [{ clicks: 1, credits: projectedCitySurveillanceCost }],
-        {
-          citySurveillanceSourceCount,
-          citySurveillanceProjectedDrawCount: projectedDrawCount,
-          citySurveillanceDrawDecision: "pay",
-          citySurveillanceProjectedCreditsPaid: projectedCitySurveillanceCost,
-          citySurveillanceProjectedTagsAdded: 0,
-        },
-      ),
-    );
-  }
-
-  actions.push(
-    action(
-      state,
-      "runner",
-      "draw_card",
-      citySurveillanceSourceCount === 1
-        ? "Karte ziehen (City Surveillance: 1 Tag nehmen)"
-        : `Karte ziehen (City Surveillance: ${citySurveillanceSourceCount} Tags nehmen)`,
-      "basic_action",
-      [{ clicks: 1 }],
-      {
-        citySurveillanceSourceCount,
-        citySurveillanceProjectedDrawCount: projectedDrawCount,
-        citySurveillanceDrawDecision: "tag",
-        citySurveillanceProjectedCreditsPaid: 0,
-        citySurveillanceProjectedTagsAdded:
-          citySurveillanceSourceCount * projectedDrawCount,
-      },
-    ),
-  );
-  return actions;
+function runnerDrawActionContext(state: GameState): RunnerDrawActionContext {
+  return {
+    citySurveillanceSourceCount: citySurveillanceSourceIds(state).length,
+    projectedDrawCount: activeCrashEverettSourceId(state) ? 2 : 1,
+  };
 }
 
 function normalizeSubtypeLabel(subtype: string): string {
