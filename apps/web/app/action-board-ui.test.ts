@@ -525,11 +525,20 @@ describe("V1.0.5 action board UI helpers", () => {
         showNonMatchingCards: true
       }
     };
+    const offSiteBackupsChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...exactSingleChoice,
+      choiceId: "v1922_corp_archives_to_hq_7",
+      side: "corp",
+      source: "v1922.corp_archives_to_hq:onr_v1_296_off-site-backups_1:7",
+      prompt: "Archives-Karte nach HQ nehmen",
+      options: [{ id: "card_archives_1", label: "Archived Agenda", value: "corp_archives_1" }]
+    };
 
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
     expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(heapSearchChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(offSiteBackupsChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(organDonorChoice)).toBe(false);
     expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(heapSearchChoice)).toBe(true);
@@ -586,6 +595,22 @@ describe("V1.0.5 action board UI helpers", () => {
       minSelections: 1,
       maxSelections: 1
     };
+    const offSiteArchiveChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...fieldChoice,
+      choiceId: "v1922_corp_archives_to_hq_7",
+      side: "corp",
+      source: "v1922.corp_archives_to_hq:onr_v1_296_off-site-backups_1:7",
+      prompt: "Archives-Karte nach HQ nehmen",
+      options: [{ id: "card_archived_agenda", label: "Archived Agenda", value: "corp_archive_1" }],
+      minSelections: 1,
+      maxSelections: 1
+    };
+    const corpArchivesBoard = view("corp", {
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "archives", label: "Archive", ice: [], root: [card("corp_archive_1", "Archived Agenda", "agenda", false)] }
+      ]
+    });
 
     expect(shouldUseFieldCardChoice(fieldChoice, board)).toBe(true);
     expect(shouldUseFieldCardChoice(runnerRigChoice, board)).toBe(true);
@@ -602,6 +627,8 @@ describe("V1.0.5 action board UI helpers", () => {
     });
     expect(shouldUseFieldCardChoice(handChoice, board)).toBe(false);
     expect(shouldUseFieldCardChoice(stackChoice, board)).toBe(false);
+    expect(shouldUseFieldCardChoice(offSiteArchiveChoice, corpArchivesBoard)).toBe(false);
+    expect(shouldUseCardChoicePanel(offSiteArchiveChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(stackChoice)).toBe(true);
   });
 
