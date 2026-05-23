@@ -511,12 +511,28 @@ describe("V1.0.5 action board UI helpers", () => {
       source: "v1911.search_stack:7",
       prompt: "Stack durchsuchen"
     };
+    const heapSearchChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...exactSingleChoice,
+      choiceId: "p3_37_search_trash_to_grip_7",
+      source: "p3_37.search_trash_to_grip:source:onr_v1_087_forgotten-backup-chip:program:7",
+      prompt: "Heap durchsuchen",
+      cardSearchPresentation: {
+        sourceZone: "heap",
+        selectableFilter: "program",
+        reveal: "hidden",
+        destination: "grip",
+        shuffleAfter: false,
+        showNonMatchingCards: true
+      }
+    };
 
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
     expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(heapSearchChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(organDonorChoice)).toBe(false);
     expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(heapSearchChoice)).toBe(true);
   });
 
   it("detects field-card choices for installed board cards only", () => {

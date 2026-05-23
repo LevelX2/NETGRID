@@ -8292,9 +8292,18 @@ function CardChoicePanel({
                         <span className="actionButtonLabel">{option.label}</span>
                       </button>
                     )}
-                    <button className={`button cardChoiceSelectButton ${active ? "primary" : ""}`} onClick={() => toggleOption(option.id)} disabled={disabled || !selectable} type="button" aria-pressed={active} data-testid="card-choice-option">
-                      {active ? <Check size={14} /> : <Plus size={14} />}
-                      <span>{selectable ? active ? "Gewählt" : "Wählen" : "Nur ansehen"}</span>
+                    <button
+                      className={`button cardChoiceSelectButton ${active ? "primary" : ""}`}
+                      onClick={() => toggleOption(option.id)}
+                      disabled={disabled || !selectable}
+                      type="button"
+                      aria-label={selectable ? active ? "Auswahl entfernen" : "Karte auswählen" : "Nur ansehen"}
+                      title={selectable ? active ? "Auswahl entfernen" : "Karte auswählen" : "Nur ansehen"}
+                      aria-pressed={active}
+                      data-testid="card-choice-option"
+                    >
+                      {selectable ? active ? <Check size={14} /> : <Plus size={14} /> : <Eye size={14} />}
+                      <span className="srOnly">{selectable ? active ? "Gewählt" : "Wählen" : "Nur ansehen"}</span>
                     </button>
                   </div>
                 );
@@ -8333,6 +8342,8 @@ function cardChoiceRows(options: VisibleChoiceOption[]): VisibleChoiceOption[][]
 }
 
 function cardChoiceTitle(choice: VisibleChoice): string {
+  if (choice.cardSearchPresentation?.sourceZone === "heap") return "Heap durchsuchen";
+  if (choice.cardSearchPresentation?.sourceZone === "stack") return "Stack durchsuchen";
   if (choice.source.includes("self_modifying_code_free_mu")) return "MU freimachen";
   if (choice.source.includes("sneak_preview_source")) return "Quelle wählen";
   if (choice.source.includes("sneak_preview_heap_install")) return "Heap durchsuchen";
@@ -8350,7 +8361,7 @@ function choiceSelectionRangeLabel(minSelections: number, maxSelections: number)
 function cardChoiceQuestion(choice: VisibleChoice, selectedOptions: VisibleChoiceOption[]): string {
   if (selectedOptions.length === 0) return choice.source.includes("sneak_preview_source") ? "Noch keine Quelle gewählt." : "Noch keine Karte gewählt.";
   if (choice.source.includes("sneak_preview_source")) return "Diese Quelle für Sneak Preview verwenden?";
-  if (choice.source.includes("search_stack")) {
+  if (choice.cardSearchPresentation || choice.source.includes("search_stack")) {
     return selectedOptions.length === 1 ? "Diese Auswahl für den Sucheffekt übernehmen?" : `${selectedOptions.length} Karten für den Sucheffekt übernehmen?`;
   }
   return selectedOptions.length === 1 ? "Diese Auswahl übernehmen?" : `${selectedOptions.length} Karten übernehmen?`;
@@ -8362,7 +8373,8 @@ function cardChoiceSubmitLabel(selectedCount: number): string {
 }
 
 function cardChoiceEffectHint(choice: VisibleChoice): string | null {
-  const resolution = choice.stackSearchResolution;
+  const presentation = choice.cardSearchPresentation;
+  const resolution = presentation ?? choice.stackSearchResolution;
   if (choice.source.includes("self_modifying_code_free_mu")) {
     return "Die gewählten installierten Programme werden getrasht; danach wird das vorgezeigte Programm installiert.";
   }
@@ -8372,7 +8384,7 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
     return "Die gewählten installierten Programme werden getrasht; danach wird das Sneak-Preview-Programm kostenlos installiert.";
   }
   if (resolution?.destination === "install_program") {
-    return `Die gewählte Programmkarte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}direkt installiert${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}${choice.source.includes("sneak_preview") ? "; am Zugende kehrt sie in den Grip zurück, falls sie noch installiert ist" : ""}.`;
+    return `Die gewählte Programmkarte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}direkt installiert${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}${presentation?.temporaryReturnAtEndOfTurn || choice.source.includes("sneak_preview") ? "; am Zugende kehrt sie in den Grip zurück, falls sie noch installiert ist" : ""}.`;
   }
   if (resolution?.destination === "grip") {
     return `Die gewählte Karte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}in den Grip genommen${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}.`;

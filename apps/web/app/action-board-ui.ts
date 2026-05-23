@@ -804,7 +804,7 @@ export function hasLegalAction(actions: LegalAction[], type: LegalAction["type"]
 
 export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
   if (choice.kind !== "select_cards") return false;
-  if (choice.stackSearchResolution || choice.source.includes("search_stack")) return true;
+  if (choice.cardSearchPresentation || choice.stackSearchResolution || choice.source.includes("search_stack")) return true;
   if (choice.options.some((option) => option.card)) return true;
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
   const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
@@ -812,7 +812,7 @@ export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pending
 }
 
 export function cardChoiceUsesReadableCards(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
-  return choice.kind === "select_cards" && Boolean(choice.stackSearchResolution || choice.source.includes("search_stack"));
+  return choice.kind === "select_cards" && Boolean(choice.cardSearchPresentation || choice.stackSearchResolution || choice.source.includes("search_stack"));
 }
 
 export function shouldUseFieldCardChoice(
@@ -821,7 +821,7 @@ export function shouldUseFieldCardChoice(
 ): boolean {
   if (choice.kind !== "select_cards") return false;
   if (choice.source === "discard_phase") return false;
-  if (choice.stackSearchResolution || choice.source.includes("search_stack")) return false;
+  if (choice.cardSearchPresentation || choice.stackSearchResolution || choice.source.includes("search_stack")) return false;
   const selectableOptions = choice.options.filter((option) => option.selectable !== false);
   if (selectableOptions.length === 0) return false;
   const fieldCardIds = visibleFieldCardIds(view);

@@ -2,6 +2,7 @@
 // Keine State-Mutation, keine LegalAction-Erzeugung, kein Import aus index.ts,
 // keine PublicPayload-Vertragsaenderung.
 import {
+  type CardSearchPresentation,
   type CardInstanceId,
   type ChoiceRequest,
   type GameState,
@@ -16,6 +17,9 @@ export function visibleChoice(
 ): NonNullable<PlayerView["pendingChoice"]> {
   const stackSearchResolution =
     choice.stackSearchResolution ?? stackSearchResolutionForChoice(choice);
+  const cardSearchPresentation =
+    choice.cardSearchPresentation ??
+    cardSearchPresentationForChoice(choice, stackSearchResolution);
   return {
     choiceId: choice.choiceId,
     side: choice.side,
@@ -46,6 +50,7 @@ export function visibleChoice(
     stateVersion: choice.stateVersion,
     visibility: choice.visibility,
     ...(stackSearchResolution ? { stackSearchResolution } : {}),
+    ...(cardSearchPresentation ? { cardSearchPresentation } : {}),
   };
 }
 
@@ -97,6 +102,56 @@ function stackSearchResolutionForChoice(
   };
 }
 
+function cardSearchPresentationForChoice(
+  choice: ChoiceRequest,
+  stackSearchResolution: ChoiceRequest["stackSearchResolution"] | undefined,
+): CardSearchPresentation | undefined {
+  if (choice.kind !== "select_cards") return undefined;
+  if (stackSearchResolution) {
+    return {
+      ...stackSearchResolution,
+      sourceZone: "stack",
+      selectableFilter: stackSearchSelectableFilter(choice),
+      showNonMatchingCards: true,
+      ...(choice.source.includes("sneak_preview") ||
+      choice.source.startsWith("p3_38.stack_or_trash_program_install")
+        ? { temporaryReturnAtEndOfTurn: true }
+        : {}),
+    };
+  }
+  if (
+    choice.source.startsWith("p3_37.search_trash_to_grip") ||
+    choice.source.startsWith("v1911.sneak_preview_heap_install") ||
+    (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
+      choice.source.includes(":heap:"))
+  ) {
+    const temporaryInstall =
+      choice.source.includes("sneak_preview") ||
+      choice.source.startsWith("p3_38.stack_or_trash_program_install");
+    return {
+      sourceZone: "heap",
+      selectableFilter: choice.source.includes(":any_card:")
+        ? "any_card"
+        : "program",
+      reveal: "hidden",
+      destination: temporaryInstall ? "install_program" : "grip",
+      shuffleAfter: false,
+      showNonMatchingCards: true,
+      ...(temporaryInstall ? { temporaryReturnAtEndOfTurn: true } : {}),
+    };
+  }
+  return undefined;
+}
+
+function stackSearchSelectableFilter(
+  choice: ChoiceRequest,
+): CardSearchPresentation["selectableFilter"] {
+  if (choice.source.includes(":any_card:")) return "any_card";
+  if (choice.source.startsWith("p3_37.look_top_stack_take_matching"))
+    return "matching_cards";
+  return "program";
+}
+
 export function visibleChoiceCardForOption(
   state: GameState,
   choice: ChoiceRequest,
@@ -104,6 +159,12 @@ export function visibleChoiceCardForOption(
 ): VisibleCard | undefined {
   if (typeof option.value !== "string") return undefined;
   const cardId = option.value as CardInstanceId;
+  const cardSearchPresentation =
+    choice.cardSearchPresentation ??
+    cardSearchPresentationForChoice(
+      choice,
+      choice.stackSearchResolution ?? stackSearchResolutionForChoice(choice),
+    );
   const isStackChoice = isRunnerStackSearchChoice(choice);
   const isSneakHeapChoice =
     choice.source.startsWith("v1911.sneak_preview_heap_install") ||
@@ -116,6 +177,7 @@ export function visibleChoiceCardForOption(
     "p3_33.private_look",
   );
   if (
+    !cardSearchPresentation &&
     !isStackChoice &&
     !isSneakHeapChoice &&
     !isPriorityRequisitionChoice &&
@@ -140,11 +202,23 @@ export function visibleChoiceCardForOption(
       return undefined;
     return visibleOwnCard(state, cardId);
   }
-  if (isStackChoice && !state.runner.stack.includes(cardId)) return undefined;
-  if (isSneakHeapChoice && !state.runner.heap.includes(cardId)) return undefined;
+  if (
+    (cardSearchPresentation?.sourceZone === "stack" || isStackChoice) &&
+    !state.runner.stack.includes(cardId)
+  )
+    return undefined;
+  if (
+    (cardSearchPresentation?.sourceZone === "heap" || isSneakHeapChoice) &&
+    !state.runner.heap.includes(cardId)
+  )
+    return undefined;
   const instance = state.cardInstances[cardId];
   if (!instance || instance.owner !== "runner") return undefined;
-  if (!isStackChoice && definitionFor(state, cardId).type !== "program")
+  if (
+    !cardSearchPresentation &&
+    !isStackChoice &&
+    definitionFor(state, cardId).type !== "program"
+  )
     return undefined;
   return visibleOwnCard(state, cardId);
 }

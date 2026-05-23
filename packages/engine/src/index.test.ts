@@ -19112,13 +19112,19 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
     expect(state.pendingChoice?.source).toContain("p3_37.search_trash_to_grip");
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(runnerChoice?.cardSearchPresentation).toMatchObject({
+      sourceZone: "heap",
+      selectableFilter: "program",
+      destination: "grip",
+      showNonMatchingCards: true,
+    });
     expect(
       runnerChoice?.options.some((option) => option.label === "Simple Decoder"),
     ).toBe(true);
     expect(
       runnerChoice?.options.find((option) => option.value === targetProgramId)
         ?.card,
-    ).toBeUndefined();
+    ).toMatchObject({ title: "Simple Decoder" });
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
 
     const optionId = runnerChoice?.options.find(
@@ -19172,12 +19178,21 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
 
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(runnerChoice?.cardSearchPresentation).toMatchObject({
+      sourceZone: "heap",
+      selectableFilter: "program",
+      destination: "grip",
+      showNonMatchingCards: true,
+    });
     const programOption = runnerChoice?.options.find(
       (option) => option.value === targetProgramId,
     );
     const eventOption = runnerChoice?.options.find(
       (option) => option.value === displayOnlyEventId,
     );
+    expect(eventOption?.card).toMatchObject({
+      title: "Simple Economy Event",
+    });
 
     expect(programOption).toMatchObject({
       label: "Simple Decoder",
@@ -19218,6 +19233,12 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     const eventOption = runnerChoice?.options.find(
       (option) => option.value === targetEventId,
     );
+    expect(runnerChoice?.cardSearchPresentation).toMatchObject({
+      sourceZone: "stack",
+      selectableFilter: "any_card",
+      destination: "grip",
+      showNonMatchingCards: true,
+    });
     expect(eventOption).toMatchObject({
       label: "Simple Economy Event",
     });
@@ -19354,6 +19375,10 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-reveal"));
     state.runner.credits = 20;
     const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
+    const displayOnlyEventId = putRunnerCardOnTopOfStack(
+      state,
+      "simple_economy_event",
+    );
     const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -19377,6 +19402,22 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       reveal: "public",
       destination: "install_program",
       shuffleAfter: true,
+    });
+    expect(getPlayerView(state, "runner").pendingChoice?.cardSearchPresentation).toMatchObject({
+      sourceZone: "stack",
+      selectableFilter: "program",
+      destination: "install_program",
+      showNonMatchingCards: true,
+      temporaryReturnAtEndOfTurn: true,
+    });
+    expect(
+      getPlayerView(state, "runner").pendingChoice?.options.find(
+        (option) => option.value === displayOnlyEventId,
+      ),
+    ).toMatchObject({
+      label: "Simple Economy Event",
+      selectable: false,
+      card: { title: "Simple Economy Event" },
     });
     const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
       (option) => option.value === targetProgramId,

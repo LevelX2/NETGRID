@@ -488,6 +488,19 @@ export type StackSearchResolution = {
   publicRevealKind?: string;
 };
 
+export type CardSearchPresentation = StackSearchResolution & {
+  sourceZone: "stack" | "heap";
+  selectableFilter:
+    | "program"
+    | "any_card"
+    | "event"
+    | "resource"
+    | "hardware"
+    | "matching_cards";
+  showNonMatchingCards: boolean;
+  temporaryReturnAtEndOfTurn?: boolean;
+};
+
 export type SneakPreviewTemporaryInstall = {
   cardId: CardInstanceId;
   sourceCardDefinitionId: CardDefinitionId;
@@ -509,6 +522,7 @@ export type ChoiceRequest = {
   stateVersion: number;
   visibility: EventVisibilityClass;
   stackSearchResolution?: StackSearchResolution;
+  cardSearchPresentation?: CardSearchPresentation;
 };
 
 export type PendingChoice = ChoiceRequest;
