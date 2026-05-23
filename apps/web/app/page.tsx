@@ -53,7 +53,7 @@ import {
   Zap,
   ZoomIn
 } from "lucide-react";
-import { createContext, Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, Fragment, useContext, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ButtonHTMLAttributes, CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type {
@@ -285,6 +285,7 @@ const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASS
 const CARD_TOOLTIP_HOVER_DELAY_OPTIONS = [300, 500, 750, 1000, 1250, 1500] as const;
 const CARD_TOOLTIP_HOVER_OPEN_DELAY_MS = 1000;
 const CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS = 120;
+const CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS = 450;
 const CARD_TOOLTIP_PIN_EVENT = "netgrid:card-tooltip-pin";
 const CARD_SCALE_PERCENT_MIN = 50;
 const CARD_SCALE_PERCENT_MAX = 170;
@@ -12503,11 +12504,15 @@ function CardView({
 }) {
   const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
   const { tooltipPercent } = useCardScaleSettings();
+  const tooltipViewId = useId();
   const cardRef = useRef<HTMLButtonElement | null>(null);
   const tooltipOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tooltipCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipOutsideCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTouchTapRef = useRef(0);
   const lastTouchTooltipPinRef = useRef(0);
+  const tooltipPinnedVisibleRef = useRef(false);
+  const tooltipRef = useRef<HTMLSpanElement | null>(null);
   const [tooltipPositionStyle, setTooltipPositionStyle] = useState<CSSProperties>({});
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
   const [actionMenuPlacement, setActionMenuPlacement] = useState<"above" | "below">("below");
@@ -12537,8 +12542,9 @@ function CardView({
   const canPinTooltip = tooltipAvailable && !onSelect;
   const tooltipEnabled = tooltipAvailable && (!suppressCardTooltip || tooltipPinnedVisible);
   const showTooltip = tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible || tooltipPinnedVisible);
-  const tooltipId = tooltipEnabled ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
-  const tooltipOwnerId = `card-tooltip-owner-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}`;
+  const tooltipDomId = `${card.instanceId}-${tooltipViewId}`.replace(/[^A-Za-z0-9_-]/g, "-");
+  const tooltipId = tooltipEnabled ? `card-tooltip-${tooltipDomId}` : undefined;
+  const tooltipOwnerId = `card-tooltip-owner-${tooltipDomId}`;
   const nativeTitle = tooltipEnabled || showCardActions || suppressCardTooltip ? undefined : tooltipText;
   const tooltipStats = card.known
     ? [
@@ -12605,6 +12611,18 @@ function CardView({
       clearTimeout(tooltipCloseTimerRef.current);
       tooltipCloseTimerRef.current = null;
     }
+  };
+
+  const clearTooltipOutsideCloseTimer = () => {
+    if (tooltipOutsideCloseTimerRef.current !== null) {
+      clearTimeout(tooltipOutsideCloseTimerRef.current);
+      tooltipOutsideCloseTimerRef.current = null;
+    }
+  };
+
+  const setPinnedTooltipVisible = (visible: boolean) => {
+    tooltipPinnedVisibleRef.current = visible;
+    setTooltipPinnedVisible(visible);
   };
 
   const updateOverlayPlacement = () => {
@@ -12674,12 +12692,17 @@ function CardView({
   };
 
   useEffect(() => {
+    tooltipPinnedVisibleRef.current = tooltipPinnedVisible;
+  }, [tooltipPinnedVisible]);
+
+  useEffect(() => {
     if (tooltipAvailable) return;
     clearTooltipOpenTimer();
     clearTooltipCloseTimer();
+    clearTooltipOutsideCloseTimer();
     setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
-    setTooltipPinnedVisible(false);
+    setPinnedTooltipVisible(false);
     setTooltipPositionStyle({});
   }, [tooltipAvailable]);
 
@@ -12687,25 +12710,25 @@ function CardView({
     if (!canPinTooltip) return;
     clearTooltipOpenTimer();
     clearTooltipCloseTimer();
+    clearTooltipOutsideCloseTimer();
     setSuppressCardTooltip(false);
     setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
-    setTooltipPinnedVisible((visible) => {
-      const nextVisible = !visible;
-      if (nextVisible) {
-        window.dispatchEvent(new CustomEvent(CARD_TOOLTIP_PIN_EVENT, { detail: { ownerId: tooltipOwnerId } }));
-      }
-      return nextVisible;
-    });
+    const nextVisible = !tooltipPinnedVisibleRef.current;
+    setPinnedTooltipVisible(nextVisible);
+    if (nextVisible) {
+      window.dispatchEvent(new CustomEvent(CARD_TOOLTIP_PIN_EVENT, { detail: { ownerId: tooltipOwnerId } }));
+    }
     updateOverlayPlacement();
   };
 
   const closePinnedTooltip = () => {
     clearTooltipOpenTimer();
     clearTooltipCloseTimer();
+    clearTooltipOutsideCloseTimer();
     setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
-    setTooltipPinnedVisible(false);
+    setPinnedTooltipVisible(false);
   };
 
   useEffect(() => {
@@ -12717,13 +12740,46 @@ function CardView({
     const closeWhenOtherTooltipPins = (event: Event) => {
       const ownerId = event instanceof CustomEvent ? (event.detail as { ownerId?: unknown } | null)?.ownerId : undefined;
       if (ownerId === tooltipOwnerId) return;
-      setTooltipPinnedVisible(false);
+      clearTooltipOpenTimer();
+      clearTooltipCloseTimer();
+      clearTooltipOutsideCloseTimer();
+      setPinnedTooltipVisible(false);
       setTooltipHoverVisible(false);
       setTooltipFocusVisible(false);
     };
     window.addEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipPins);
     return () => window.removeEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipPins);
   }, [tooltipOwnerId]);
+
+  useEffect(() => {
+    if (!tooltipPinnedVisible) return;
+    const closePinnedTooltipOnOutsideClick = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      const cardElement = cardRef.current;
+      const tooltipElement = tooltipRef.current;
+      if (cardElement?.contains(target) || tooltipElement?.contains(target)) return;
+      clearTooltipOutsideCloseTimer();
+      const targetElement = target instanceof Element ? target : target.parentElement;
+      const clickedCard = targetElement?.closest(
+        'button[data-testid="known-card"], button[data-testid="hidden-card"], button[data-testid="card-choice-card"]',
+      );
+      if (clickedCard) {
+        if (event.detail > 1) return;
+        tooltipOutsideCloseTimerRef.current = setTimeout(() => {
+          tooltipOutsideCloseTimerRef.current = null;
+          if (tooltipPinnedVisibleRef.current) closePinnedTooltip();
+        }, CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS);
+        return;
+      }
+      closePinnedTooltip();
+    };
+    window.addEventListener("click", closePinnedTooltipOnOutsideClick, true);
+    return () => {
+      window.removeEventListener("click", closePinnedTooltipOnOutsideClick, true);
+      clearTooltipOutsideCloseTimer();
+    };
+  }, [tooltipPinnedVisible]);
 
   useEffect(() => {
     if (!showCardActions) {
@@ -12737,12 +12793,14 @@ function CardView({
     () => () => {
       clearTooltipOpenTimer();
       clearTooltipCloseTimer();
+      clearTooltipOutsideCloseTimer();
     },
     []
   );
 
   const tooltipElement = showTooltip && tooltipId ? (
     <span
+      ref={tooltipRef}
       className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
       id={tooltipId}
       role="tooltip"
