@@ -490,6 +490,24 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Core Command", "Trash", `${rezCostPaid} ${creditLabel(rezCostPaid)}`, ...(targetServerLabel ? [targetServerLabel] : []));
         break;
       }
+      if (abilityId === "successful_hq_run_corp_pay_to_retain_hq") {
+        const retainedCount = numberValue(payload.retainedCount) ?? 0;
+        const discardedCount = numberValue(payload.discardedCount) ?? 0;
+        const creditsPaid = retainedCount * 2;
+        const isYou = subject === "Du";
+        category = "hidden";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId ?? "onr_v1_113_synchronized-attack-on-hq";
+        title = `${subject} ${isYou ? "behältst" : "behält"} mit Synchronized Attack on HQ ${hqCardCountText(retainedCount)}, ${isYou ? "wirfst" : "wirft"} ${hqCardCountText(discardedCount)} verdeckt ab und ${isYou ? "bezahlst" : "bezahlt"} dafür ${creditText(creditsPaid)}.`;
+        chips.push(
+          "Synchronized Attack",
+          `${retainedCount} behalten`,
+          `${discardedCount} verdeckt abgeworfen`,
+          `${creditsPaid} ${creditLabel(creditsPaid)}`,
+        );
+        break;
+      }
       if (hiddenZoneAction === "search_stack") {
         const destinationLabel = searchDestinationLabel(searchDestination);
         const installFailed = searchDestination === "install_program" && payload.installSucceeded === false;
@@ -1885,6 +1903,10 @@ function creditText(amount: number): string {
 
 function creditLabel(amount: number): string {
   return amount === 1 ? "Credit" : "Credits";
+}
+
+function hqCardCountText(amount: number): string {
+  return `${amount} HQ-Karte${amount === 1 ? "" : "n"}`;
 }
 
 function breakSubroutineLabel(payload: Record<string, unknown>, fallbackCount: number): string {
