@@ -153,6 +153,12 @@ import {
   resolveSneakPreviewSearchInstallSelection,
 } from "./game/hidden-zone/search-choice-resolvers";
 import { applyResolvedSearchToGripMove } from "./game/hidden-zone/search-choice-move-intents";
+import {
+  applyTopNTakeMatchingMoveIntent,
+  buildTopNTakeMatchingResolvedPayload,
+  createTopNTakeMatchingMoveIntent,
+  toTopNSelectedCardMove,
+} from "./game/hidden-zone/topn-move-intents";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -23846,60 +23852,31 @@ function resolveCardImplementationLookTopStackTakeMatchingChoice(
       lookTopStackTakeMatchingTargets(state, count, allowedTypes),
     runnerCredits: state.runner.credits,
   });
-  if (
-    !state.cardInstances[selection.sourceCardId] ||
-    definitionFor(state, selection.sourceCardId).id !== selection.sourceDefinitionId
-  )
-    throw new Error("Die Stack-Look-Quelle ist nicht mehr gueltig.");
-  const sourceDefinition = definitionFor(state, selection.sourceCardId);
-  if (
-    sourceDefinition.type === "resource" &&
-    !state.runner.rig.resources.includes(selection.sourceCardId)
-  )
-    throw new Error("Die Stack-Look-Quelle ist nicht mehr installiert.");
   const topCards = state.runner.stack.slice(0, selection.count);
-  const selectedIds = selection.selectedCardIds;
   const cost = selection.paidCredits;
+  const moveIntent = createTopNTakeMatchingMoveIntent({
+    selection,
+    topCardIds: topCards,
+    sourceDefinition: definitionFor(state, selection.sourceCardId),
+    installedRunnerResourceIds: state.runner.rig.resources,
+    selectedCards: selection.selectedCardIds.map((cardId) =>
+      toTopNSelectedCardMove(cardId, definitionFor(state, cardId)),
+    ),
+  });
   spendCredits(state, "runner", cost);
-  const definitions = selectedIds.map((cardId) => definitionFor(state, cardId));
-  for (const cardId of selectedIds) {
-    removeFromAllZones(state, cardId);
-    state.runner.grip.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      zone: { side: "runner", zone: "grip" },
-    };
-  }
-  if (selection.shuffleNeeded)
+  const moveResult = applyTopNTakeMatchingMoveIntent(moveIntent, {
+    cardInstances: state.cardInstances,
+    removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+    addToGrip: (cardId) => state.runner.grip.push(cardId),
+  });
+  if (moveResult.shuffleNeeded)
     shuffleRunnerStack(state, `p3_37_look_top_stack_take_matching:${choice.choiceId}:shuffle`);
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_37_look_top_stack_take_matching",
-    sourceDefinitionId: selection.sourceDefinitionId,
-    privateLookCount: topCards.length,
-    searchedZone: "runner_stack",
-    takenCardCount: selectedIds.length,
-    movedCardCount: selectedIds.length,
-    paidCredits: cost,
-    runnerCreditsAfter: state.runner.credits,
-    shufflePerformed: true,
-    shuffled: true,
-    ...(definitions.length > 0
-      ? {
-          publicRevealKind: "reveal",
-          publicRevealDefinitionIds: definitions
-            .map((definition) => definition.id)
-            .join(","),
-          publicRevealTitles: definitions
-            .map((definition) => definition.title)
-            .join("||"),
-          revealedCardDefinitionIds: definitions
-            .map((definition) => definition.id)
-            .join(","),
-        }
-      : {}),
+    ...buildTopNTakeMatchingResolvedPayload(moveResult, {
+      runnerCreditsAfter: state.runner.credits,
+    }),
   };
 }
 
