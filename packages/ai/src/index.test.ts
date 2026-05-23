@@ -1,4 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { tmpdir } from "node:os";
 import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
 import selfplayExploitLeagueData from "../../../data/ai/ai-selfplay-exploit-league-2026-05-17.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
@@ -56,6 +59,11 @@ import {
   evaluateRunnerRig,
   evaluateServerAccessValue,
   evaluateV143TuningGate,
+  benchmarkDeckFromFrozenLocalSnapshot,
+  benchmarkDeckFromSnapshot,
+  benchmarkDeckFromLocalEditableDeck,
+  formatMatchProgressionBenchmarkSuiteReport,
+  listMatchProgressionBenchmarkDeckSlots,
   listV143BenchmarkProfiles,
   listV143ExploitFixtures,
   createBeliefSimulationWorld,
@@ -63,6 +71,7 @@ import {
   runV143SimulationLeague,
   runDoctrineQualityBenchmark,
   runMatchProgressionBenchmark,
+  runMatchProgressionBenchmarkSuite,
   formatDoctrineQualityBenchmarkReport,
   formatDoctrineQualityCaseAnalysisReport,
   formatMatchProgressionBenchmarkReport,
@@ -75,6 +84,8 @@ import {
   simulateAiGame,
   simulateAiSoak,
   summarizeDoctrineQualityMetrics,
+  summarizeMatchProgressionMetrics,
+  type AiSimulationSummary,
 } from "./index";
 import {
   assessKnownRezzedIcePath,
@@ -97,7 +108,12 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, DEMO_CARDS_BY_ID, sanitizeAiDecisionDebug } from "@netgrid/shared";
+import {
+  AI_DECISION_DEBUG_SCHEMA_VERSION,
+  CURRENT_RULES_BASELINE,
+  DEMO_CARDS_BY_ID,
+  sanitizeAiDecisionDebug,
+} from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
   afterEach(() => {
@@ -225,24 +241,33 @@ describe("MVP 0.3 AI controller contract", () => {
 
   it("constructs AI inputs from positive DTO fields for both perspectives", () => {
     const state = createGameAfterSetup({ seed: "ai-positive-dto" });
-    const runnerPlayerView = structuredClone(getPlayerView(state, "runner")) as ReturnType<
-      typeof getPlayerView
-    > & { secretRunnerHandIds?: string[] };
+    const runnerPlayerView = structuredClone(
+      getPlayerView(state, "runner"),
+    ) as ReturnType<typeof getPlayerView> & { secretRunnerHandIds?: string[] };
     runnerPlayerView.secretRunnerHandIds = ["hidden-runner-card-id"];
-    (runnerPlayerView.own as typeof runnerPlayerView.own & { secretGripIds?: string[] }).secretGripIds = [
-      "hidden-grip-id",
-    ];
-    (runnerPlayerView.own.identity as VisibleCard & { secretIdentityToken?: string }).secretIdentityToken =
-      "hidden-identity-token";
+    (
+      runnerPlayerView.own as typeof runnerPlayerView.own & {
+        secretGripIds?: string[];
+      }
+    ).secretGripIds = ["hidden-grip-id"];
+    (
+      runnerPlayerView.own.identity as VisibleCard & {
+        secretIdentityToken?: string;
+      }
+    ).secretIdentityToken = "hidden-identity-token";
     const runnerEvents = runnerPlayerView.publicEvents.map((event) => ({
       ...event,
       secretEventIds: ["hidden-event-id"],
-      privatePayload: { runner: { secretRunnerHandIds: ["hidden-event-card-id"] } },
+      privatePayload: {
+        runner: { secretRunnerHandIds: ["hidden-event-card-id"] },
+      },
     }));
-    const runnerLegalActions = getLegalActions(state, "runner").map((action) => ({
-      ...action,
-      secretPaymentToken: "hidden-action-token",
-    }));
+    const runnerLegalActions = getLegalActions(state, "runner").map(
+      (action) => ({
+        ...action,
+        secretPaymentToken: "hidden-action-token",
+      }),
+    );
 
     const runnerInput = buildAiDecisionInputDto({
       side: "runner",
@@ -265,8 +290,12 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(serializedRunner).not.toContain("hidden-identity-token");
     expect(serializedRunner).not.toContain("hidden-event-id");
     expect(serializedRunner).not.toContain("hidden-action-token");
-    expect(runnerInput.eventTail.some((event) => "privatePayload" in event)).toBe(false);
-    expect(runnerInput.legalActions.some((action) => "secretPaymentToken" in action)).toBe(false);
+    expect(
+      runnerInput.eventTail.some((event) => "privatePayload" in event),
+    ).toBe(false);
+    expect(
+      runnerInput.legalActions.some((action) => "secretPaymentToken" in action),
+    ).toBe(false);
     expect(Object.keys(corpInput).sort()).toEqual(
       AI_DECISION_INPUT_TOP_LEVEL_FIELDS.filter(
         (field) => field !== "ownDeckDoctrine",
@@ -280,7 +309,9 @@ describe("MVP 0.3 AI controller contract", () => {
     for (const side of ["runner", "corp"] as const) {
       const state =
         side === "runner"
-          ? toRunnerTurn(createGameAfterSetup({ seed: `ai-nested-dto-${side}` }))
+          ? toRunnerTurn(
+              createGameAfterSetup({ seed: `ai-nested-dto-${side}` }),
+            )
           : createGameAfterSetup({ seed: `ai-nested-dto-${side}` });
       const playerView = structuredClone(getPlayerView(state, side));
       const baseAction = getLegalActions(state, side)[0];
@@ -309,7 +340,9 @@ describe("MVP 0.3 AI controller contract", () => {
               privateTitle: "Hidden Priority Agenda",
             } as VisibleCard & { privateTitle: string },
             privatePayload: { sessionToken: "hidden-session-token" },
-          } as NonNullable<typeof playerView.pendingChoice>["options"][number] & {
+          } as NonNullable<
+            typeof playerView.pendingChoice
+          >["options"][number] & {
             privatePayload: Record<string, unknown>;
           },
         ],
@@ -323,7 +356,9 @@ describe("MVP 0.3 AI controller contract", () => {
           shuffleAfter: true,
           publicRevealKind: "safe_reveal",
           privatePayload: { decklist: ["hidden-deck-card"] },
-        } as NonNullable<typeof playerView.pendingChoice>["stackSearchResolution"] & {
+        } as NonNullable<
+          typeof playerView.pendingChoice
+        >["stackSearchResolution"] & {
           privatePayload: Record<string, unknown>;
         },
       };
@@ -439,7 +474,9 @@ describe("MVP 0.3 AI controller contract", () => {
     for (const side of ["runner", "corp"] as const) {
       const state =
         side === "runner"
-          ? toRunnerTurn(createGameAfterSetup({ seed: `ai-nested-choice-${side}` }))
+          ? toRunnerTurn(
+              createGameAfterSetup({ seed: `ai-nested-choice-${side}` }),
+            )
           : createGameAfterSetup({ seed: `ai-nested-choice-${side}` });
       const cleanInput = buildAiDecisionInput(state, side, {
         difficulty: "normal",
@@ -523,12 +560,20 @@ describe("MVP 0.3 AI controller contract", () => {
         cardId: card.catalogCardId,
         engineCardId: card.engineCardId ?? card.catalogCardId,
         role: card.type === "ice" ? "ice" : "breaker",
-        resolved: Boolean(DEMO_CARDS_BY_ID[card.engineCardId ?? card.catalogCardId]),
+        resolved: Boolean(
+          DEMO_CARDS_BY_ID[card.engineCardId ?? card.catalogCardId],
+        ),
         etrSubroutines:
-          card.type === "ice" ? endTheRunSubroutineCount(card.catalogCardId) : 0,
+          card.type === "ice"
+            ? endTheRunSubroutineCount(card.catalogCardId)
+            : 0,
         strength: cardDefinitionStrength(card.catalogCardId),
       }))
-      .sort((left, right) => left.role.localeCompare(right.role) || left.cardId.localeCompare(right.cardId));
+      .sort(
+        (left, right) =>
+          left.role.localeCompare(right.role) ||
+          left.cardId.localeCompare(right.cardId),
+      );
     const iceRows = coverageRows.filter((row) => row.role === "ice");
     const breakerRows = coverageRows.filter((row) => row.role === "breaker");
 
@@ -578,7 +623,11 @@ describe("MVP 0.3 AI controller contract", () => {
         endTheRunCount,
         new Map(),
       );
-      const affordable = assessKnownRezzedIcePath([ice], [breaker], pair.expectedCost);
+      const affordable = assessKnownRezzedIcePath(
+        [ice],
+        [breaker],
+        pair.expectedCost,
+      );
       const unaffordable = assessKnownRezzedIcePath(
         [ice],
         [breaker],
@@ -614,9 +663,9 @@ describe("MVP 0.3 AI controller contract", () => {
       privatePayload: { runner: ["hidden-stack-card"] },
     } as VisibleCard;
 
-    expect(assessKnownRezzedIcePath([hiddenIceVariant], [hiddenBreakerVariant], 2)).toEqual(
-      assessKnownRezzedIcePath([ice], [breaker], 2),
-    );
+    expect(
+      assessKnownRezzedIcePath([hiddenIceVariant], [hiddenBreakerVariant], 2),
+    ).toEqual(assessKnownRezzedIcePath([ice], [breaker], 2));
   });
 
   it("keeps decisions deterministic and always chooses legal action ids", () => {
@@ -691,8 +740,17 @@ describe("MVP 0.3 AI controller contract", () => {
       prompt: "Programm aus dem Stack installieren",
       kind: "select_cards",
       options: [
-        { id: "display_event", label: "Simple Economy Event", value: "event_1", selectable: false },
-        { id: "expensive_program", label: "Expensive Program", value: "expensive_1" },
+        {
+          id: "display_event",
+          label: "Simple Economy Event",
+          value: "event_1",
+          selectable: false,
+        },
+        {
+          id: "expensive_program",
+          label: "Expensive Program",
+          value: "expensive_1",
+        },
         { id: "simple_decoder", label: "Simple Decoder", value: "decoder_1" },
       ],
       minSelections: 1,
@@ -726,19 +784,43 @@ describe("MVP 0.3 AI controller contract", () => {
               label: "Simple Economy Event",
               value: "event_1",
               selectable: false,
-              card: { instanceId: "event_1", known: true, title: "Simple Economy Event", definitionId: "simple_economy_event", type: "event" as const, cost: 0 },
+              card: {
+                instanceId: "event_1",
+                known: true,
+                title: "Simple Economy Event",
+                definitionId: "simple_economy_event",
+                type: "event" as const,
+                cost: 0,
+              },
             },
             {
               id: "expensive_program",
               label: "Expensive Program",
               value: "expensive_1",
-              card: { instanceId: "expensive_1", known: true, title: "Expensive Program", definitionId: "expensive_program", type: "program" as const, installCost: 8, memoryCost: 6 },
+              card: {
+                instanceId: "expensive_1",
+                known: true,
+                title: "Expensive Program",
+                definitionId: "expensive_program",
+                type: "program" as const,
+                installCost: 8,
+                memoryCost: 6,
+              },
             },
             {
               id: "simple_decoder",
               label: "Simple Decoder",
               value: "decoder_1",
-              card: { instanceId: "decoder_1", known: true, title: "Simple Decoder", definitionId: "simple_decoder", type: "program" as const, subtypes: ["Icebreaker", "Decoder"], installCost: 2, memoryCost: 1 },
+              card: {
+                instanceId: "decoder_1",
+                known: true,
+                title: "Simple Decoder",
+                definitionId: "simple_decoder",
+                type: "program" as const,
+                subtypes: ["Icebreaker", "Decoder"],
+                installCost: 2,
+                memoryCost: 1,
+              },
             },
           ],
         },
@@ -776,7 +858,9 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(decision.evidence).toContain(
       "choice_source:runner_program_trash_before_install",
     );
-    expect(JSON.stringify(decision)).not.toMatch(/cardInstances|privatePayload/);
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
   });
 
   it("protects the only visible installed breaker during runner program install MU trash", () => {
@@ -911,14 +995,17 @@ describe("MVP 0.3 AI controller contract", () => {
   });
 
   it("plans installed The Shell Traders as build-rig progress before basic economy", () => {
-    const input = runnerShellTradersInput("ai-shell-traders-build-rig", (state) => {
-      moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
-      moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 1);
-      moveRunnerCardToGrip(state, "simple_fracter");
-      moveRunnerCardToGrip(state, "simple_setup_hardware");
-      state.runner.credits = 0;
-      state.runner.clicks = 3;
-    });
+    const input = runnerShellTradersInput(
+      "ai-shell-traders-build-rig",
+      (state) => {
+        moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
+        moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 1);
+        moveRunnerCardToGrip(state, "simple_fracter");
+        moveRunnerCardToGrip(state, "simple_setup_hardware");
+        state.runner.credits = 0;
+        state.runner.clicks = 3;
+      },
+    );
     const prepare = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
@@ -929,7 +1016,8 @@ describe("MVP 0.3 AI controller contract", () => {
     );
     expect(prepare).toBeDefined();
     expect(gainCredit).toBeDefined();
-    if (!prepare || !gainCredit) throw new Error("Missing Shell Traders fixture actions");
+    if (!prepare || !gainCredit)
+      throw new Error("Missing Shell Traders fixture actions");
 
     const buildCandidate = generateRunnerPlanCandidates(input).find(
       (candidate) => candidate.kind === "build_rig",
@@ -977,7 +1065,8 @@ describe("MVP 0.3 AI controller contract", () => {
     );
     expect(remove).toBeDefined();
     expect(gainCredit).toBeDefined();
-    if (!remove || !gainCredit) throw new Error("Missing Shell-counter removal actions");
+    if (!remove || !gainCredit)
+      throw new Error("Missing Shell-counter removal actions");
 
     const decision = chooseRunnerAction({
       ...input,
@@ -1058,16 +1147,21 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(debugText).toContain("shell_traders_backlog:2");
     expect(debugText).toContain("shell_traders_prepare_backlog_penalty:");
     expect(debugText).toContain("shell_traders_immediate_install:true");
-    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
   });
 
   it("installs urgent Shell Traders targets directly when affordable", () => {
-    const input = runnerShellTradersInput("ai-shell-traders-direct-urgent", (state) => {
-      moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
-      moveRunnerCardToGrip(state, "simple_fracter");
-      state.runner.credits = 5;
-      state.runner.clicks = 3;
-    });
+    const input = runnerShellTradersInput(
+      "ai-shell-traders-direct-urgent",
+      (state) => {
+        moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
+        moveRunnerCardToGrip(state, "simple_fracter");
+        state.runner.credits = 5;
+        state.runner.clicks = 3;
+      },
+    );
     const prepare = input.legalActions.find(
       (action) =>
         action.type === "trigger_ability" &&
@@ -1098,7 +1192,9 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(decision.reasonCode).toBe("runner.plan.build_rig");
     expect(debugText).toContain("shell_traders_direct_install_available:true");
     expect(debugText).toContain("shell_traders_direct_install_urgency:");
-    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
   });
 
   it("resolves V1.9.9 Aardvark and Chimera choices through side-safe LegalActions", () => {
@@ -1259,7 +1355,8 @@ describe("MVP 0.3 AI controller contract", () => {
 
     const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
     const decision = chooseCorpAction(input);
-    const selectableOptionIds = input.playerView.pendingChoice?.options.map((option) => option.id) ?? [];
+    const selectableOptionIds =
+      input.playerView.pendingChoice?.options.map((option) => option.id) ?? [];
     const serializedRunner = JSON.stringify(
       buildAiDecisionInput(state, "runner", { difficulty: "normal" }),
     );
@@ -1275,7 +1372,8 @@ describe("MVP 0.3 AI controller contract", () => {
     const selectedDiscardChoices = decision.selectedChoices as
       | { selectedOptionIds: string[] }
       | undefined;
-    const selectedDiscardOptionId = selectedDiscardChoices?.selectedOptionIds[0];
+    const selectedDiscardOptionId =
+      selectedDiscardChoices?.selectedOptionIds[0];
     expect(typeof selectedDiscardOptionId).toBe("string");
     expect(selectableOptionIds).toContain(selectedDiscardOptionId);
     expect(decision.evidence).toContain("discard_selection:keep_value");
@@ -1289,11 +1387,7 @@ describe("MVP 0.3 AI controller contract", () => {
   it("uses discard keep values for Runner breaker and economy preservation", () => {
     const breakerInput = discardDecisionInputForTest("runner", {
       credits: 5,
-      cards: [
-        "simple_fracter",
-        "simple_run_event",
-        "simple_run_event",
-      ],
+      cards: ["simple_fracter", "simple_run_event", "simple_run_event"],
     });
     const breakerDecision = chooseRunnerAction(breakerInput);
     const breakerSelectedChoices = breakerDecision.selectedChoices as
@@ -1464,14 +1558,18 @@ describe("MVP 0.3 AI controller contract", () => {
       rulesText: "Discard doctrine fixture with no AI roles.",
       mechanics: ["test_fixture"],
     } satisfies CardDefinition;
-    const doctrine = corpDoctrineForTest(
-      "discard-glacier",
-      ["glacier"],
-      { score_next_turn: 18, build_scoring_remote: 24 },
-    );
+    const doctrine = corpDoctrineForTest("discard-glacier", ["glacier"], {
+      score_next_turn: 18,
+      build_scoring_remote: 24,
+    });
     const input = discardDecisionInputForTest("corp", {
       credits: 4,
-      cards: ["simple_agenda", "simple_barrier_ice", "simple_upgrade", "test_planless_corp_operation"],
+      cards: [
+        "simple_agenda",
+        "simple_barrier_ice",
+        "simple_upgrade",
+        "test_planless_corp_operation",
+      ],
       ownDeckDoctrine: doctrine,
     });
     const decision = chooseCorpAction(input);
@@ -2455,7 +2553,9 @@ describe("MVP 0.3 Runner AI", () => {
     expect(debugText).toContain(
       "two_turn_run_intent_invalidates_on:target_credits_visible_ice_breakers",
     );
-    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
   });
 
   it("switches from the Runner two-turn economy intent to the target run after the visible threshold is met", () => {
@@ -2510,7 +2610,9 @@ describe("MVP 0.3 Runner AI", () => {
     expect(debugText).toContain("two_turn_run_intent_target:hq");
     expect(debugText).toContain("two_turn_run_intent_ready:true");
     expect(debugText).toContain("two_turn_run_intent_credits_needed:0");
-    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
   });
 
   it("hard Runner backs off from visibly unreachable protected remote roots", () => {
@@ -2707,11 +2809,7 @@ describe("MVP 0.3 Runner AI", () => {
       }),
     );
     state.runner.credits = 5;
-    const assetId = moveCorpCardToArchives(
-      state,
-      "simple_economy_asset",
-      true,
-    );
+    const assetId = moveCorpCardToArchives(state, "simple_economy_asset", true);
     keepOnlyCorpArchivesCards(state, [assetId]);
 
     const input = buildAiDecisionInput(state, "runner", {
@@ -2928,14 +3026,12 @@ describe("MVP 0.3 Runner AI", () => {
     const pump = input.legalActions.find(
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinitionFromInput(input, action) ===
-          "onr_v1_039_krash",
+        sourceDefinitionFromInput(input, action) === "onr_v1_039_krash",
     );
     const breakAction = input.legalActions.find(
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinitionFromInput(input, action) ===
-          "onr_v1_039_krash",
+        sourceDefinitionFromInput(input, action) === "onr_v1_039_krash",
     );
     const continueRun = input.legalActions.find(
       (action) =>
@@ -2951,7 +3047,8 @@ describe("MVP 0.3 Runner AI", () => {
     expect(breakAction).toBeUndefined();
     expect(selected?.type).not.toBe("pump_breaker");
     expect(continueRun).toBeDefined();
-    if (!pump || !continueRun) throw new Error("Missing Krash/Keeper fixture actions");
+    if (!pump || !continueRun)
+      throw new Error("Missing Krash/Keeper fixture actions");
 
     const baselineDecision = chooseRunnerBaselineAction({
       ...input,
@@ -3020,13 +3117,17 @@ describe("MVP 0.3 Runner AI", () => {
       (action) => action.actionId === accessDecision.actionId,
     );
 
-    expect(accessInput.legalActions.some((action) => action.type === "jack_out")).toBe(false);
+    expect(
+      accessInput.legalActions.some((action) => action.type === "jack_out"),
+    ).toBe(false);
     expect(accessSelected?.type).toBe("access_card");
     expect(accessDecision.reasonCode).toBe("runner.access.open_card");
   });
 
   it("runs the Krash/Filter R&D path through sequential Runner AI decisions without hidden access assumptions", () => {
-    let state = krashFilterEncounterState("ai-krash-filter-sequenced-rd-access");
+    let state = krashFilterEncounterState(
+      "ai-krash-filter-sequenced-rd-access",
+    );
     const actionTypes: string[] = [];
     const reasonCodes: string[] = [];
 
@@ -3051,11 +3152,17 @@ describe("MVP 0.3 Runner AI", () => {
         reasonCode: decision.reasonCode,
       });
       expect(selected.type).not.toBe("jack_out");
-      expect(serializedDecision).not.toMatch(/ambush|simple_economy_operation/i);
+      expect(serializedDecision).not.toMatch(
+        /ambush|simple_economy_operation/i,
+      );
 
       actionTypes.push(selected.type);
       reasonCodes.push(decision.reasonCode);
-      state = apply(state, "runner", (action) => action.actionId === selected.actionId);
+      state = apply(
+        state,
+        "runner",
+        (action) => action.actionId === selected.actionId,
+      );
       if (selected.type === "access_card") break;
     }
 
@@ -3068,7 +3175,9 @@ describe("MVP 0.3 Runner AI", () => {
     expect(reasonCodes[0]).toBe("runner.encounter.break_etr");
     expect(reasonCodes).toContain("runner.plan.safe_probe_run");
     expect(reasonCodes.at(-1)).toBe("runner.access.open_card");
-    expect(state.eventLog.map((event) => event.publicPayload.actionType)).not.toContain("jack_out");
+    expect(
+      state.eventLog.map((event) => event.publicPayload.actionType),
+    ).not.toContain("jack_out");
   });
 
   it("still pumps when strength is the missing requirement for a useful break", () => {
@@ -3252,7 +3361,8 @@ describe("V1.4.0 plan-based Corp AI", () => {
           "onr_v1_309_bbs-whispering-campaign",
     );
     const basicCredit = input.legalActions.find(
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
 
     expect(bbsTake).toBeDefined();
@@ -3288,23 +3398,26 @@ describe("V1.4.0 plan-based Corp AI", () => {
           "onr_v1_309_bbs-whispering-campaign",
     );
     const basicCredit = input.legalActions.find(
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
 
     expect(bbsActions).toHaveLength(2);
     expect(new Set(bbsActions.map((action) => action.actionId)).size).toBe(2);
-    expect(new Set(bbsActions.map((action) => String(action.source))).size).toBe(2);
     expect(
-      bbsActions.every(
-        (action) => action.label.includes("2 Credits nehmen"),
-      ),
+      new Set(bbsActions.map((action) => String(action.source))).size,
+    ).toBe(2);
+    expect(
+      bbsActions.every((action) => action.label.includes("2 Credits nehmen")),
     ).toBe(true);
     expect(basicCredit).toBeDefined();
 
     const decision = chooseCorpAction(input);
     const debugText = JSON.stringify(decision.decisionDebug);
 
-    expect(bbsActions.map((action) => action.actionId)).toContain(decision.actionId);
+    expect(bbsActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
     expect(decision.actionId).not.toBe(basicCredit?.actionId);
     expect(decision.reasonCode).toBe("corp.plan.recover_economy");
     expect(debugText).toContain("installed_corp_economy:true");
@@ -3614,29 +3727,41 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
-  it("weights near-term remote score horizons before generic economy", () => {
+  it("weights near-term remote score horizons before generic economy and further remote build", () => {
     const input = corpActionPhaseInput("ai-corp-score-horizon", (state) => {
       state.corp.credits = 7;
       state.runner.credits = 0;
       ensureRemoteServer(state, "remote_1");
       putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
       putCorpRootInRemote(state, "simple_agenda", 2);
+      moveCorpCardToHq(state, "simple_code_gate_ice");
     });
     const advance = input.legalActions.find(
       (action) =>
         action.type === "advance_card" &&
         sourceDefinitionFromInput(input, action) === "simple_agenda",
     );
+    const remoteIceInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
     const gain = input.legalActions.find(
       (action) => action.type === "gain_credit",
     );
 
     expect(advance).toBeDefined();
+    expect(remoteIceInstall).toBeDefined();
     expect(gain).toBeDefined();
-    if (!advance || !gain)
+    if (!advance || !remoteIceInstall || !gain)
       throw new Error("Missing Corp score-horizon fixture actions");
 
-    const scopedInput = { ...input, legalActions: [advance, gain] };
+    const scopedInput = {
+      ...input,
+      legalActions: [advance, remoteIceInstall, gain],
+    };
     const candidate = generateCorpPlanCandidates(scopedInput).find(
       (plan) => plan.kind === "score_next_turn",
     );
@@ -3656,6 +3781,647 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.selectedActionId).toBe(advance.actionId);
     expect(JSON.stringify(decision.score.evidence)).not.toMatch(
       /cardInstances|privatePayload|simple_agenda/,
+    );
+  });
+
+  it("treats legal Corp advancement-counter operations as score-horizon setup", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-advancement-operation-horizon",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 1);
+      },
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(gain).toBeDefined();
+    if (!gain) throw new Error("Missing Corp gain fixture action");
+
+    const operationCard = visibleCard(
+      "onr_v1_304_systematic-layoffs",
+      "systematic_layoffs_fixture",
+    );
+    const advancementOperation: LegalAction = {
+      ...gain,
+      actionId: "corp.fixture.play_systematic_layoffs",
+      type: "play_operation",
+      source: operationCard.instanceId,
+      payload: {
+        cost: 2,
+        addedAdvancementCounters: 2,
+      },
+    };
+    const scopedInput = {
+      ...input,
+      legalActions: [advancementOperation, gain],
+      playerView: {
+        ...input.playerView,
+        own: {
+          ...input.playerView.own,
+          gripOrHq: [operationCard, ...input.playerView.own.gripOrHq],
+        },
+      },
+    };
+    const candidate = generateCorpPlanCandidates(scopedInput).find(
+      (plan) => plan.kind === "score_next_turn",
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(candidate?.legalActionIds).toContain(advancementOperation.actionId);
+    expect(
+      evaluateRemoteScoreHorizon(scopedInput, candidate!).evidence,
+    ).toEqual(
+      expect.arrayContaining([
+        "score_horizon_counters_added:2",
+        "score_horizon_advances_remaining_after_action:0",
+      ]),
+    );
+    expect(decision.debug.planKind).toBe("score_next_turn");
+    expect(decision.selectedActionId).toBe(advancementOperation.actionId);
+    expect(JSON.stringify(decision.score.evidence)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda/,
+    );
+  });
+
+  it("converts legal Corp score windows before economy, draw, remote build, or further advances", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-score-conversion-over-passive-actions",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        ensureRemoteServer(state, "remote_2");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 3);
+        moveCorpCardToHq(state, "simple_code_gate_ice");
+      },
+    );
+    const score = input.legalActions.find(
+      (action) => action.type === "score_agenda",
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const remoteIceInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(score).toBeDefined();
+    expect(advance).toBeDefined();
+    expect(remoteIceInstall).toBeDefined();
+    expect(draw).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!score || !advance || !remoteIceInstall || !draw || !gain)
+      throw new Error("Missing score-conversion fixture actions");
+
+    const scopedInput = {
+      ...input,
+      legalActions: [score, advance, remoteIceInstall, draw, gain],
+    };
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(decision.debug.planKind).toBe("score_now");
+    expect(decision.selectedActionId).toBe(score.actionId);
+    expect(decision.selectedActionType).toBe("score_agenda");
+  });
+
+  it("chooses the best visible legal Corp score target when multiple agendas can score", () => {
+    const baseInput = corpActionPhaseInput(
+      "ai-corp-best-score-target",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+      },
+    );
+    const gain = baseInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(gain).toBeDefined();
+    if (!gain) throw new Error("Missing gain action for score target fixture");
+
+    const hostile = {
+      ...visibleCard("onr_v1_203_hostile-takeover", "score_hostile"),
+      advancementCounters: 3,
+      advancementRequirement: 3,
+    };
+    const tycho = {
+      ...visibleCard("onr_v1_220_tycho-extension", "score_tycho"),
+      advancementCounters: 4,
+      advancementRequirement: 4,
+    };
+    const hostileScore: LegalAction = {
+      ...gain,
+      actionId: "corp.fixture.score_hostile",
+      type: "score_agenda",
+      source: hostile.instanceId,
+      payload: { cardId: hostile.instanceId },
+    };
+    const tychoScore: LegalAction = {
+      ...gain,
+      actionId: "corp.fixture.score_tycho",
+      type: "score_agenda",
+      source: tycho.instanceId,
+      payload: { cardId: tycho.instanceId },
+    };
+    const scopedInput = {
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        own: { ...baseInput.playerView.own, agendaPoints: 3 },
+        servers: [
+          ...baseInput.playerView.servers,
+          {
+            id: "remote_1" as const,
+            label: "Remote 1",
+            ice: [visibleCard("simple_barrier_ice", "score_remote_ice")],
+            root: [hostile],
+          },
+          {
+            id: "remote_2" as const,
+            label: "Remote 2",
+            ice: [visibleCard("simple_barrier_ice", "score_remote_ice_2")],
+            root: [tycho],
+          },
+        ],
+      },
+      legalActions: [hostileScore, tychoScore, gain],
+    };
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(decision.debug.planKind).toBe("score_now");
+    expect(decision.selectedActionId).toBe(tychoScore.actionId);
+  });
+
+  it("keeps visible agenda advances ahead of weaker non-agenda advancement targets", () => {
+    const baseInput = corpActionPhaseInput(
+      "ai-corp-advance-agenda-over-asset",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+      },
+    );
+    const gain = baseInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(gain).toBeDefined();
+    if (!gain)
+      throw new Error("Missing gain action for advance target fixture");
+
+    const agenda = {
+      ...visibleCard("simple_agenda", "advance_agenda_target"),
+      advancementCounters: 2,
+      advancementRequirement: 3,
+    };
+    const asset = {
+      ...visibleCard(
+        "onr_v1_328_information-laundering",
+        "advance_asset_target",
+      ),
+      advancementCounters: 0,
+      advancementRequirement: 0,
+    };
+    const advanceAgenda: LegalAction = {
+      ...gain,
+      actionId: "corp.fixture.advance_agenda",
+      type: "advance_card",
+      source: agenda.instanceId,
+      payload: { cardId: agenda.instanceId },
+    };
+    const advanceAsset: LegalAction = {
+      ...gain,
+      actionId: "corp.fixture.advance_asset",
+      type: "advance_card",
+      source: asset.instanceId,
+      payload: { cardId: asset.instanceId },
+    };
+    const scopedInput = {
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        servers: [
+          ...baseInput.playerView.servers,
+          {
+            id: "remote_1" as const,
+            label: "Remote 1",
+            ice: [visibleCard("simple_barrier_ice", "advance_remote_ice")],
+            root: [agenda, asset],
+          },
+        ],
+      },
+      legalActions: [advanceAsset, advanceAgenda, gain],
+    };
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(decision.debug.planKind).toBe("score_next_turn");
+    expect(decision.selectedActionId).toBe(advanceAgenda.actionId);
+  });
+
+  it("protects a leaky remote before a risky near-final agenda advance", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-protect-before-risky-final-advance",
+      (state) => {
+        state.corp.credits = 7;
+        state.runner.credits = 10;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 1);
+        moveCorpCardToHq(state, "simple_barrier_ice");
+        moveRunnerProgramToRig(state, "simple_fracter");
+      },
+    );
+    const riskyAdvance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const remoteIceInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_barrier_ice",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(riskyAdvance).toBeDefined();
+    expect(remoteIceInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!riskyAdvance || !remoteIceInstall || !gain)
+      throw new Error("Missing protect-before-advance fixture actions");
+
+    const scopedInput = {
+      ...input,
+      legalActions: [riskyAdvance, remoteIceInstall, gain],
+    };
+    const advanceCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_next_turn",
+    );
+    const protectCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "build_scoring_remote",
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(advanceCandidate).toBeDefined();
+    expect(protectCandidate).toBeDefined();
+    if (!advanceCandidate || !protectCandidate)
+      throw new Error("Missing protect-before-advance plan candidates");
+    expect(evaluateCorpPlan(scopedInput, advanceCandidate).evidence).toContain(
+      "advance_protection_contains_risky_advance:true",
+    );
+    expect(evaluateCorpPlan(scopedInput, protectCandidate).reasons).toContain(
+      "protect_before_advance",
+    );
+    expect(decision.debug.planKind).toBe("build_scoring_remote");
+    expect(decision.selectedActionId).toBe(remoteIceInstall.actionId);
+  });
+
+  it("continues a protected near-final advance line when the remote is hard to contest", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-safe-near-final-advance",
+      (state) => {
+        state.corp.credits = 7;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        putCorpRootInRemote(state, "simple_agenda", 1);
+        moveCorpCardToHq(state, "simple_code_gate_ice");
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const remoteIceInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(advance).toBeDefined();
+    expect(remoteIceInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !remoteIceInstall || !gain)
+      throw new Error("Missing safe advance fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [advance, remoteIceInstall, gain],
+    });
+
+    expect(decision.debug.planKind).toBe("score_next_turn");
+    expect(decision.selectedActionId).toBe(advance.actionId);
+  });
+
+  it("allows aggressive final advance when same-turn scoring is opened", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-final-advance-score-same-turn",
+      (state) => {
+        state.corp.credits = 7;
+        state.runner.credits = 10;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        moveCorpCardToHq(state, "simple_barrier_ice");
+        moveRunnerProgramToRig(state, "simple_fracter");
+      },
+    );
+    const finalAdvance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const remoteIceInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(finalAdvance).toBeDefined();
+    expect(remoteIceInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!finalAdvance || !remoteIceInstall || !gain)
+      throw new Error("Missing same-turn final advance fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [finalAdvance, remoteIceInstall, gain],
+    });
+
+    expect(decision.debug.planKind).toBe("score_next_turn");
+    expect(decision.selectedActionId).toBe(finalAdvance.actionId);
+  });
+
+  it("builds rez reserve before a near-final advance when protection would become unrezzable", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-rez-reserve-before-risky-advance",
+      (state) => {
+        state.corp.credits = 1;
+        state.runner.credits = 10;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 1);
+        moveRunnerProgramToRig(state, "simple_fracter");
+      },
+    );
+    const riskyAdvance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(riskyAdvance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!riskyAdvance || !gain)
+      throw new Error("Missing rez-reserve before advance fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [riskyAdvance, gain],
+    });
+
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(gain.actionId);
+  });
+
+  it("selects visible remote agenda targets for Corp advancement-counter choices", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-advancement-choice-target",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        const agendaId = putCorpRootInRemote(state, "simple_agenda", 1);
+        const assetId = putCorpRootInRemote(state, "simple_economy_asset", 0);
+        state.pendingChoice = {
+          choiceId: "corp_advancement_fixture",
+          side: "corp",
+          source: "p3_34.distribute_advancement.fixture",
+          prompt: "Distribute advancement counters",
+          kind: "select_option",
+          options: [
+            {
+              id: "asset",
+              label: "Asset",
+              value: `${assetId}:2`,
+            },
+            {
+              id: "agenda",
+              label: "Agenda",
+              value: `${agendaId}:2`,
+            },
+          ],
+          minSelections: 1,
+          maxSelections: 1,
+          stateVersion: state.stateVersion,
+          visibility: "private_to_side",
+        };
+      },
+    );
+    const resolveChoice = input.legalActions.find(
+      (action) => action.type === "resolve_choice",
+    );
+
+    expect(resolveChoice).toBeDefined();
+    if (!resolveChoice) throw new Error("Missing advancement choice action");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [resolveChoice],
+    });
+
+    expect(decision.selectedChoices).toMatchObject({
+      choiceId: "corp_advancement_fixture",
+      selectedOptionIds: ["agenda"],
+    });
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda/,
+    );
+  });
+
+  it("keeps Corp remote advance choices invariant to hidden Runner grip contents", () => {
+    const buildInput = (seed: string, hiddenRunnerCard: string) =>
+      corpActionPhaseInput(seed, (state) => {
+        state.corp.credits = 7;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        moveRunnerCardToGrip(state, hiddenRunnerCard);
+      });
+    const inputA = buildInput(
+      "ai-corp-hidden-runner-invariance",
+      "simple_fracter",
+    );
+    const inputB = buildInput(
+      "ai-corp-hidden-runner-invariance",
+      "simple_decoder",
+    );
+    const scoped = (input: typeof inputA) => {
+      const advance = input.legalActions.find(
+        (action) =>
+          action.type === "advance_card" &&
+          sourceDefinitionFromInput(input, action) === "simple_agenda",
+      );
+      const gain = input.legalActions.find(
+        (action) => action.type === "gain_credit",
+      );
+      expect(advance).toBeDefined();
+      expect(gain).toBeDefined();
+      if (!advance || !gain)
+        throw new Error("Missing hidden-invariance fixture actions");
+      return { ...input, legalActions: [advance, gain] };
+    };
+    const decisionA = chooseCorpPlanDecision(scoped(inputA));
+    const decisionB = chooseCorpPlanDecision(scoped(inputB));
+
+    expect(decisionA.debug.planKind).toBe("score_next_turn");
+    expect(decisionB.debug.planKind).toBe("score_next_turn");
+    expect(decisionA.selectedActionType).toBe("advance_card");
+    expect(decisionB.selectedActionType).toBe("advance_card");
+    expect(decisionA.score.planId.split(":")[0]).toBe(
+      decisionB.score.planId.split(":")[0],
+    );
+    expect(JSON.stringify([decisionA, decisionB])).not.toMatch(
+      /cardInstances|privatePayload|simple_fracter|simple_decoder/,
+    );
+  });
+
+  it("keeps Corp protect-before-advance decisions invariant to hidden Runner grip contents", () => {
+    const buildInput = (seed: string, hiddenRunnerCard: string) =>
+      corpActionPhaseInput(seed, (state) => {
+        state.corp.credits = 7;
+        state.runner.credits = 10;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 1);
+        moveCorpCardToHq(state, "simple_barrier_ice");
+        moveRunnerProgramToRig(state, "simple_fracter");
+        moveRunnerCardToGrip(state, hiddenRunnerCard);
+      });
+    const inputA = buildInput(
+      "ai-corp-hidden-protect-before-advance",
+      "simple_decoder",
+    );
+    const inputB = buildInput(
+      "ai-corp-hidden-protect-before-advance",
+      "simple_run_event",
+    );
+    const scoped = (input: typeof inputA) => {
+      const advance = input.legalActions.find(
+        (action) =>
+          action.type === "advance_card" &&
+          sourceDefinitionFromInput(input, action) === "simple_agenda",
+      );
+      const remoteIceInstall = input.legalActions.find(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.placement === "ice" &&
+          action.payload?.serverId === "remote_1" &&
+          sourceDefinitionFromInput(input, action) === "simple_barrier_ice",
+      );
+      expect(advance).toBeDefined();
+      expect(remoteIceInstall).toBeDefined();
+      if (!advance || !remoteIceInstall)
+        throw new Error("Missing hidden protect fixture actions");
+      return { ...input, legalActions: [advance, remoteIceInstall] };
+    };
+    const decisionA = chooseCorpPlanDecision(scoped(inputA));
+    const decisionB = chooseCorpPlanDecision(scoped(inputB));
+
+    expect(decisionA.debug.planKind).toBe("build_scoring_remote");
+    expect(decisionB.debug.planKind).toBe("build_scoring_remote");
+    expect(decisionA.selectedActionType).toBe("install_card");
+    expect(decisionB.selectedActionType).toBe("install_card");
+    expect(decisionA.score.planId.split(":")[0]).toBe(
+      decisionB.score.planId.split(":")[0],
+    );
+    expect(JSON.stringify([decisionA, decisionB])).not.toMatch(
+      /cardInstances|privatePayload|simple_decoder|simple_run_event/,
+    );
+  });
+
+  it("keeps Corp score decisions invariant to hidden Runner grip contents", () => {
+    const buildInput = (seed: string, hiddenRunnerCard: string) =>
+      corpActionPhaseInput(seed, (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 3);
+        moveRunnerCardToGrip(state, hiddenRunnerCard);
+      });
+    const inputA = buildInput(
+      "ai-corp-hidden-runner-score-invariance",
+      "simple_fracter",
+    );
+    const inputB = buildInput(
+      "ai-corp-hidden-runner-score-invariance",
+      "simple_decoder",
+    );
+    const scoped = (input: typeof inputA) => {
+      const score = input.legalActions.find(
+        (action) => action.type === "score_agenda",
+      );
+      const gain = input.legalActions.find(
+        (action) => action.type === "gain_credit",
+      );
+      expect(score).toBeDefined();
+      expect(gain).toBeDefined();
+      if (!score || !gain)
+        throw new Error("Missing hidden score-invariance fixture actions");
+      return { ...input, legalActions: [score, gain] };
+    };
+    const decisionA = chooseCorpPlanDecision(scoped(inputA));
+    const decisionB = chooseCorpPlanDecision(scoped(inputB));
+
+    expect(decisionA.debug.planKind).toBe("score_now");
+    expect(decisionB.debug.planKind).toBe("score_now");
+    expect(decisionA.selectedActionType).toBe("score_agenda");
+    expect(decisionB.selectedActionType).toBe("score_agenda");
+    expect(decisionA.score.planId.split(":")[0]).toBe(
+      decisionB.score.planId.split(":")[0],
+    );
+    expect(JSON.stringify([decisionA, decisionB])).not.toMatch(
+      /cardInstances|privatePayload|simple_fracter|simple_decoder/,
     );
   });
 
@@ -4401,7 +5167,9 @@ describe("V1.4.0 plan-based Corp AI", () => {
   });
 
   it("rezzes affordable remote ICE before an advanced root agenda access", () => {
-    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-corp-rez-advanced-remote-root" }));
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-corp-rez-advanced-remote-root" }),
+    );
     state.corp.credits = 3;
     state.runner.credits = 5;
     ensureRemoteServer(state, "remote_1");
@@ -4681,7 +5449,8 @@ describe("V1.4.0 plan-based Corp AI", () => {
           "onr_v1_297_overtime-incentives",
     );
     const basicCredit = input.legalActions.find(
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
 
     expect(overtime).toBeDefined();
@@ -4698,7 +5467,9 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.reasonCode).toBe("corp.plan.recover_economy");
     expect(debugText).toContain("basic_credit_followup_only:true");
     expect(debugText).toContain("overtime_net_value:-2");
-    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
   });
 
   it("can play Overtime Incentives when the extra actions open an immediate score window", () => {
@@ -4740,7 +5511,8 @@ describe("V1.4.0 plan-based Corp AI", () => {
         sourceDefinitionFromInput(input, action) === "simple_agenda",
     );
     const basicCredit = input.legalActions.find(
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
 
     expect(overtime).toBeDefined();
@@ -4758,7 +5530,9 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.reasonCode).toBe("corp.plan.score_next_turn");
     expect(debugText).toContain("score_window_after_extra_actions:true");
     expect(debugText).toContain("basic_credit_followup_only:false");
-    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
   });
 
   it("uses tag-enabling ICE pressure without hidden-info leakage", () => {
@@ -5445,7 +6219,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(decision.actionId).toBe(gain.actionId);
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
     expect(assertAiInputIsSideSafe(input)).toBe(true);
-    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
   });
 
   it("keeps known remote contest viable when Krash can still afford BBS trash after Data Wall", () => {
@@ -5555,10 +6331,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
         agendaPointsToWin: 7,
       }),
     );
-    moveRunnerProgramToRig(
-      state,
-      "onr_v1_005_bartmoss-memorial-icebreaker",
-    );
+    moveRunnerProgramToRig(state, "onr_v1_005_bartmoss-memorial-icebreaker");
     ensureRemoteServer(state, "remote_1");
     const innerWall = putCorpIceOnServer(
       state,
@@ -5632,7 +6405,11 @@ describe("V1.4.1 plan-based Runner AI", () => {
       if (!selected) throw new Error("Missing Bartmoss run sequence action");
       selectedTypes.push(selected.type);
       if (selected.type === "access_card") break;
-      state = apply(state, "runner", (action) => action.actionId === selected.actionId);
+      state = apply(
+        state,
+        "runner",
+        (action) => action.actionId === selected.actionId,
+      );
     }
 
     expect(selectedTypes).toEqual([
@@ -5700,10 +6477,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const repeatedBaselineSelected = repeatedInput.legalActions.find(
       (action) => action.actionId === repeatedBaselineDecision.actionId,
     );
-    const repeatedContestCandidate =
-      generateRunnerPlanCandidates(repeatedInput).find(
-        (candidate) => candidate.kind === "contest_remote",
-      );
+    const repeatedContestCandidate = generateRunnerPlanCandidates(
+      repeatedInput,
+    ).find((candidate) => candidate.kind === "contest_remote");
 
     expect(repeatedPlanSelected?.type).toBe("gain_credit");
     expect(repeatedPlanDecision.reasonCode).toBe("runner.plan.recover_economy");
@@ -5712,9 +6488,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
       throw new Error("Missing repeated Bartmoss contest candidate");
     expect(
       evaluateRemoteThreat(repeatedInput, repeatedContestCandidate).reasons,
-    ).toContain(
-      "recent_remote_contest_repeated",
-    );
+    ).toContain("recent_remote_contest_repeated");
     expect(repeatedBaselineSelected?.type).toBe("gain_credit");
     expect(repeatedBaselineDecision.reasonCode).toBe(
       "runner.economy.basic_credit",
@@ -5894,7 +6668,11 @@ describe("V1.4.1 plan-based Runner AI", () => {
         state.runner.credits = 5;
         ensureRemoteServer(state, "remote_1");
         putCorpRootInRemote(state, "simple_agenda", 2);
-        const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
         state.cardInstances[iceId] = {
           ...state.cardInstances[iceId]!,
           faceup: true,
@@ -5945,7 +6723,11 @@ describe("V1.4.1 plan-based Runner AI", () => {
         state.runner.credits = 1;
         ensureRemoteServer(state, "remote_1");
         putCorpRootInRemote(state, "simple_agenda", 2);
-        const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
         state.cardInstances[iceId] = {
           ...state.cardInstances[iceId]!,
           faceup: true,
@@ -5977,7 +6759,11 @@ describe("V1.4.1 plan-based Runner AI", () => {
         state.runner.credits = 5;
         ensureRemoteServer(state, "remote_1");
         putCorpRootInRemote(state, "simple_agenda", 2);
-        const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
         state.cardInstances[iceId] = {
           ...state.cardInstances[iceId]!,
           faceup: true,
@@ -6464,9 +7250,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(stableDecision.evidence).toContain(
       "broker_horizon:installed_economy_pool_build_horizon_value",
     );
-    expect(stableDecision.evidence).toContain(
-      "broker_horizon_clicks:3",
-    );
+    expect(stableDecision.evidence).toContain("broker_horizon_clicks:3");
     expect(stableDecision.evidence).toContain(
       "broker_horizon_visible_threshold:false",
     );
@@ -6534,6 +7318,1287 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|Simple Agenda|v08_project_agenda/,
     );
+  });
+
+  it("uses playable Runner economy before generic draw", () => {
+    const input = runnerActionPhaseInput("ai-v141-hand-economy-before-draw", (state) => {
+      state.runner.credits = 2;
+      moveRunnerCardToGrip(state, "simple_economy_event");
+    });
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+
+    expect(economy).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!economy || !draw) throw new Error("Missing economy/draw actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [economy, draw],
+    });
+
+    expect(decision.actionId).toBe(economy.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(decision.evidence).toContain("hand_use_playable_economy:1");
+  });
+
+  it("installs a relevant missing breaker before generic draw", () => {
+    const input = runnerActionPhaseInput("ai-v141-hand-breaker-before-draw", (state) => {
+      moveRunnerCardToGrip(state, "simple_fracter");
+      const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+      state.cardInstances[iceId] = {
+        ...state.cardInstances[iceId]!,
+        faceup: true,
+        rezzed: true,
+      };
+    });
+    const breakerInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_fracter",
+    );
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+
+    expect(breakerInstall).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!breakerInstall || !draw)
+      throw new Error("Missing breaker/draw actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [breakerInstall, draw],
+    });
+
+    expect(decision.actionId).toBe(breakerInstall.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(decision.evidence).toContain("hand_use_installable_breaker:1");
+  });
+
+  it("uses a visible pressure event before additional draw", () => {
+    const input = runnerActionPhaseInput("ai-v141-hand-pressure-before-draw", (state) => {
+      state.runner.credits = 5;
+      moveRunnerCardToGrip(state, "simple_run_event");
+    });
+    const pressureEvent = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_run_event",
+    );
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+
+    expect(pressureEvent).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!pressureEvent || !draw)
+      throw new Error("Missing pressure-event/draw actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [pressureEvent, draw],
+    });
+
+    expect(decision.actionId).toBe(pressureEvent.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.safe_probe_run");
+    expect(decision.evidence).toContain("hand_use_pressure:1");
+  });
+
+  it("avoids draw into discard pressure when useful hand actions exist", () => {
+    const input = runnerActionPhaseInput("ai-v141-hand-avoid-discard-draw", (state) => {
+      state.runner.maxHandSize = 5;
+      state.runner.credits = 3;
+      moveRunnerCardToGrip(state, "simple_economy_event");
+      moveRunnerCardToGrip(state, "simple_run_event");
+      moveRunnerCardToGrip(state, "simple_fracter");
+      moveRunnerCardToGrip(state, "simple_decoder");
+      moveRunnerCardToGrip(state, "simple_killer");
+    });
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+
+    expect(input.playerView.own.gripOrHq.length).toBeGreaterThanOrEqual(
+      input.playerView.own.maxHandSize,
+    );
+    expect(economy).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!economy || !draw) throw new Error("Missing discard-pressure fixture");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [economy, draw],
+    });
+
+    expect(decision.actionId).toBe(economy.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(decision.evidence).toContain("hand_use_draw_discard_pressure:true");
+  });
+
+  it("does not install a second Junkyard BBS over better visible actions", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-hand-junkyard-duplicate",
+      (state) => {
+        state.runner.credits = 4;
+        const installed = moveRunnerResourceToRig(
+          state,
+          "onr_v1_165_junkyard-bbs",
+        );
+        moveRunnerCardCopyToGrip(state, "onr_v1_165_junkyard-bbs", [installed]);
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+      {
+        runnerDeck: {
+          id: "ai_junkyard_duplicate_runner",
+          name: "AI Junkyard Duplicate Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_165_junkyard-bbs", quantity: 2 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const junkyardInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
+    );
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+
+    expect(junkyardInstall).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!junkyardInstall || !economy)
+      throw new Error("Missing Junkyard duplicate fixture");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [junkyardInstall, economy],
+    });
+
+    expect(decision.actionId).toBe(economy.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
+  it("allows a stackable pressure duplicate when no better hand plan exists", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-hand-pressure-duplicate-ok",
+      (state) => {
+        state.runner.credits = 7;
+        const installed = moveRunnerProgramToRig(
+          state,
+          "onr_v1_041_microtech-ai-interface",
+        );
+        moveRunnerCardCopyToGrip(state, "onr_v1_041_microtech-ai-interface", [
+          installed,
+        ]);
+      },
+      {
+        runnerDeck: {
+          id: "ai_pressure_duplicate_runner",
+          name: "AI Pressure Duplicate Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_041_microtech-ai-interface", quantity: 2 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const interfaceInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_041_microtech-ai-interface",
+    );
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+
+    expect(interfaceInstall).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!interfaceInstall || !draw)
+      throw new Error("Missing pressure duplicate fixture");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [interfaceInstall, draw],
+    });
+
+    expect(decision.actionId).toBe(interfaceInstall.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+  });
+
+  it("keeps draw and duplicate discipline invariant to hidden Corp cards", () => {
+    const stateA = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-v141-hand-hidden-invariance",
+        runnerDeck: {
+          id: "ai_hidden_invariance_runner",
+          name: "AI Hidden Invariance Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "simple_economy_event", quantity: 8 },
+            { id: "simple_draw_event", quantity: 4 },
+          ],
+        },
+        corpDeck: {
+          id: "ai_hidden_invariance_corp",
+          name: "AI Hidden Invariance Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 4 },
+            { id: "simple_barrier_ice", quantity: 2 },
+          ],
+        },
+      }),
+    );
+    stateA.runner.credits = 2;
+    moveRunnerCardToGrip(stateA, "simple_economy_event");
+    const stateB = structuredClone(stateA);
+    const hiddenCorpCard = stateB.corp.hq[0] ?? stateB.corp.rd[0];
+    if (hiddenCorpCard) {
+      stateB.cardInstances[hiddenCorpCard] = {
+        ...stateB.cardInstances[hiddenCorpCard]!,
+        definitionId: "simple_barrier_ice",
+      };
+    }
+    const inputA = buildAiDecisionInput(stateA, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const inputB = buildAiDecisionInput(stateB, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+
+    expect(chooseRunnerAction(inputA)).toEqual(chooseRunnerAction(inputB));
+    expect(assertAiInputIsSideSafe(inputA)).toBe(true);
+    expect(assertAiInputIsSideSafe(inputB)).toBe(true);
+  });
+
+  it("trashes a relevant affordable remote economy asset after access", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-v141-remote-trash-economy" }),
+    );
+    state.runner.credits = 6;
+    putCorpRootInRemote(state, "simple_economy_asset", 0);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(input.playerView.run?.accessedCard?.definitionId).toBe(
+      "simple_economy_asset",
+    );
+    expect(
+      input.legalActions.some((action) => action.type === "trash_accessed_card"),
+    ).toBe(true);
+    expect(decision.reasonCode).toBe("runner.plan.trash_asset");
+    expect(
+      input.legalActions.find((action) => action.actionId === decision.actionId)
+        ?.type,
+    ).toBe("trash_accessed_card");
+  });
+
+  it("trashes an affordable scoring-protection upgrade after remote access", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-v141-remote-trash-red-herrings",
+        corpDeck: {
+          id: "ai_remote_trash_red_herrings_corp",
+          name: "AI Remote Trash Red Herrings Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_366_red-herrings", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 5;
+    putCorpRootInRemote(state, "onr_v1_366_red-herrings", 0);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(input.playerView.run?.accessedCard?.definitionId).toBe(
+      "onr_v1_366_red-herrings",
+    );
+    expect(decision.reasonCode).toBe("runner.plan.trash_asset");
+    expect(
+      input.legalActions.find((action) => action.actionId === decision.actionId)
+        ?.type,
+    ).toBe("trash_accessed_card");
+  });
+
+  it("declines a low-value remote trash when credits are better preserved", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-v141-remote-low-value-trash",
+        corpDeck: {
+          id: "ai_remote_low_value_upgrade_corp",
+          name: "AI Remote Low Value Upgrade Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_upgrade", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 4;
+    putCorpRootInRemote(state, "simple_upgrade", 0);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(input.playerView.run?.accessedCard?.definitionId).toBe(
+      "simple_upgrade",
+    );
+    expect(
+      input.legalActions.some((action) => action.type === "trash_accessed_card"),
+    ).toBe(true);
+    expect(decision.reasonCode).toBe("runner.access.decline_trash");
+  });
+
+  it("prefers advanced remote contest over central pressure when contestable", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-remote-contest-before-central",
+      (state) => {
+        state.runner.credits = 5;
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    if (!remoteRun || !rdRun)
+      throw new Error("Missing remote/central contest fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, rdRun],
+    });
+
+    expect(decision.actionId).toBe(remoteRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.contest_remote");
+    expect(decision.evidence).toContain("remote_contest_selected_advanced:true");
+    expect(decision.evidence).toContain("remote_contest_selected_contestable:true");
+    expect(decision.evidence).toContain(
+      "remote_contest_selected_post_run_reserve_sufficient:true",
+    );
+  });
+
+  it("avoids a remote run when post-run steal or trash reserve is visibly missing", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-post-run-reserve-missing",
+      (state) => {
+        state.runner.credits = 4;
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        const redHerrings = putCorpRootInRemote(
+          state,
+          "onr_v1_366_red-herrings",
+          0,
+        );
+        state.cardInstances[redHerrings] = {
+          ...state.cardInstances[redHerrings]!,
+          faceup: true,
+          rezzed: true,
+        };
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+      {
+        corpDeck: {
+          id: "ai_post_run_reserve_red_herrings_corp",
+          name: "AI Post-Run Reserve Red Herrings Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 3 },
+            { id: "onr_v1_366_red-herrings", quantity: 1 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!remoteRun || !economy)
+      throw new Error("Missing post-run reserve fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, economy],
+    });
+
+    expect(decision.actionId).toBe(economy.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    const contestCandidate = generateRunnerPlanCandidates({
+      ...input,
+      legalActions: [remoteRun, economy],
+    }).find((candidate) => candidate.kind === "contest_remote");
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate)
+      throw new Error("Missing post-run reserve contest candidate");
+    const contestScore = evaluateRunnerPlan(input, contestCandidate);
+    expect(contestScore.reasons).toContain("preserve_credits_for_steal_or_trash");
+    expect(contestScore.evidence).toContain(
+      "remote_contest_selected_post_run_reserve_sufficient:false",
+    );
+  });
+
+  it("brakes central pressure that would burn reserve for a contestable advanced remote", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-central-burns-remote-reserve",
+      (state) => {
+        state.runner.credits = 7;
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        const redHerrings = putCorpRootInRemote(
+          state,
+          "onr_v1_366_red-herrings",
+          0,
+        );
+        state.cardInstances[redHerrings] = {
+          ...state.cardInstances[redHerrings]!,
+          faceup: true,
+          rezzed: true,
+        };
+        const rdIce = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[rdIce] = {
+          ...state.cardInstances[rdIce]!,
+          faceup: true,
+          rezzed: true,
+        };
+        moveRunnerProgramToRig(state, "simple_fracter");
+      },
+      {
+        corpDeck: {
+          id: "ai_central_burns_remote_reserve_corp",
+          name: "AI Central Burns Remote Reserve Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 3 },
+            { id: "onr_v1_366_red-herrings", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 4 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    if (!remoteRun || !rdRun)
+      throw new Error("Missing central burn fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, rdRun],
+    });
+
+    expect(decision.actionId).toBe(remoteRun.actionId);
+    const centralCandidate = generateRunnerPlanCandidates({
+      ...input,
+      legalActions: [remoteRun, rdRun],
+    }).find((candidate) => candidate.kind === "pressure_rnd");
+    expect(centralCandidate).toBeDefined();
+    if (!centralCandidate)
+      throw new Error("Missing central burn candidate");
+    const centralScore = evaluateRunnerPlan(input, centralCandidate);
+    expect(centralScore.evidence).toContain(
+      "central_run_burns_contest_reserve:true",
+    );
+  });
+
+  it("keeps central pressure when remote contest is visibly bad", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-remote-contest-bad-central-ok",
+      (state) => {
+        state.runner.credits = 1;
+        putCorpRootInRemote(state, "simple_upgrade", 0);
+        const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      {
+        corpDeck: {
+          id: "ai_bad_remote_central_ok_corp",
+          name: "AI Bad Remote Central OK Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_upgrade", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 2 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    if (!remoteRun || !rdRun)
+      throw new Error("Missing bad-remote central fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, rdRun],
+    });
+
+    expect(decision.actionId).toBe(rdRun.actionId);
+    expect(decision.reasonCode).not.toBe("runner.plan.contest_remote");
+  });
+
+  it("keeps remote contest and trash decisions invariant to hidden Corp zones", () => {
+    const gameA = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-v141-remote-contest-hidden-invariance",
+      }),
+    );
+    gameA.runner.credits = 5;
+    putCorpRootInRemote(gameA, "simple_agenda", 2);
+    const gameB = structuredClone(gameA);
+    const hiddenCard = gameB.corp.hq[0] ?? gameB.corp.rd[0];
+    if (hiddenCard) {
+      gameB.cardInstances[hiddenCard] = {
+        ...gameB.cardInstances[hiddenCard]!,
+        definitionId: "simple_economy_asset",
+        faceup: false,
+        rezzed: false,
+      };
+    }
+    const inputA = buildAiDecisionInput(gameA, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const inputB = buildAiDecisionInput(gameB, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const remoteRunA = inputA.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const rdRunA = inputA.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const remoteRunB = inputB.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const rdRunB = inputB.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(remoteRunA && rdRunA && remoteRunB && rdRunB).toBeTruthy();
+    if (!remoteRunA || !rdRunA || !remoteRunB || !rdRunB)
+      throw new Error("Missing hidden-invariance contest actions");
+
+    const decisionA = chooseRunnerAction({
+      ...inputA,
+      legalActions: [remoteRunA, rdRunA],
+    });
+    const decisionB = chooseRunnerAction({
+      ...inputB,
+      legalActions: [remoteRunB, rdRunB],
+    });
+
+    expect(decisionA.reasonCode).toBe(decisionB.reasonCode);
+    expect(
+      inputA.legalActions.find((action) => action.actionId === decisionA.actionId)
+        ?.type,
+    ).toBe(
+      inputB.legalActions.find((action) => action.actionId === decisionB.actionId)
+        ?.type,
+    );
+    expect(assertAiInputIsSideSafe(inputA)).toBe(true);
+    expect(assertAiInputIsSideSafe(inputB)).toBe(true);
+  });
+
+  it("prefers economy while below visible remote-contest reserve", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-reserve-economy-before-contest",
+      (state) => {
+        state.runner.credits = 1;
+        moveRunnerProgramToRig(state, "simple_fracter");
+        ensureRemoteServer(state, "remote_1");
+        const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        const assetId = putCorpRootInRemote(state, "simple_economy_asset", 0);
+        state.cardInstances[assetId] = {
+          ...state.cardInstances[assetId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+      {
+        corpDeck: {
+          id: "ai_reserve_remote_asset_corp",
+          name: "AI Reserve Remote Asset Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_economy_asset", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 2 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+
+    expect(economy).toBeDefined();
+    expect(remoteRun).toBeDefined();
+    if (!economy || !remoteRun)
+      throw new Error("Missing reserve economy fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [economy, remoteRun],
+    });
+
+    expect(decision.actionId).toBe(economy.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(decision.evidence).toContain("runner_below_reserve:true");
+    expect(decision.evidence).toContain("affordable_remote_contest:false");
+  });
+
+  it("avoids low-value central pressure that would destroy remote-contest reserve", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-reserve-avoid-central",
+      (state) => {
+        state.runner.credits = 3;
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+    );
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+
+    expect(economy).toBeDefined();
+    expect(rdRun).toBeDefined();
+    if (!economy || !rdRun)
+      throw new Error("Missing central reserve fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [economy, rdRun],
+    });
+
+    expect(decision.actionId).toBe(economy.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    const centralCandidate = generateRunnerPlanCandidates({
+      ...input,
+      legalActions: [economy, rdRun],
+    }).find((candidate) => candidate.kind === "pressure_rnd");
+    expect(centralCandidate).toBeDefined();
+    if (!centralCandidate) throw new Error("Missing central reserve candidate");
+    expect(evaluateRunnerPlan(input, centralCandidate).reasons).toContain(
+      "delay_low_value_central_run",
+    );
+  });
+
+  it("prefers R&D pressure when R&D Interface is installed and no stronger remote threat exists", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v142-central-rd-interface-pressure",
+      (state) => {
+        state.runner.credits = 7;
+        moveRunnerHardwareToRig(state, "onr_v1_139_r-and-d-interface");
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+      runnerCentralPressureDeckConfig("rd-interface"),
+    );
+    const rdRun = input.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+    expect(rdRun).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!rdRun || !economy) throw new Error("Missing R&D interface fixture");
+
+    const decision = chooseRunnerAction({ ...input, legalActions: [rdRun, economy] });
+
+    expect(decision.actionId).toBe(rdRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.pressure_rnd");
+    expect(decision.evidence).toContain(
+      "central_pressure_matching_interface_installed:true",
+    );
+  });
+
+  it("prefers HQ pressure when HQ Interface is installed and HQ pressure is plausible", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v142-central-hq-interface-pressure",
+      (state) => {
+        state.runner.credits = 7;
+        moveRunnerHardwareToRig(state, "onr_v1_129_hq-interface");
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+      runnerCentralPressureDeckConfig("hq-interface"),
+    );
+    const hqRun = input.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+    expect(hqRun).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!hqRun || !economy) throw new Error("Missing HQ interface fixture");
+
+    const decision = chooseRunnerAction({ ...input, legalActions: [hqRun, economy] });
+
+    expect(decision.actionId).toBe(hqRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.pressure_hq");
+    expect(decision.evidence).toContain(
+      "central_pressure_matching_interface_installed:true",
+    );
+  });
+
+  it("installs a central interface when it creates a near-term pressure line", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v142-central-install-interface-before-pressure",
+      (state) => {
+        state.runner.credits = 6;
+        moveRunnerCardToGrip(state, "onr_v1_139_r-and-d-interface");
+      },
+      runnerCentralPressureDeckConfig("install-interface"),
+    );
+    const interfaceInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_139_r-and-d-interface",
+    );
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    expect(interfaceInstall).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!interfaceInstall || !draw)
+      throw new Error("Missing interface install fixture");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [interfaceInstall, draw],
+    });
+
+    expect(decision.actionId).toBe(interfaceInstall.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    const buildCandidate = generateRunnerPlanCandidates({
+      ...input,
+      legalActions: [interfaceInstall, draw],
+    }).find((candidate) => candidate.kind === "build_rig");
+    expect(buildCandidate).toBeDefined();
+    if (!buildCandidate) throw new Error("Missing interface build candidate");
+    expect(evaluateRunnerPlan(input, buildCandidate).reasons).toContain(
+      "install_interface_before_repeated_central",
+    );
+  });
+
+  it("plays a central multiaccess event only when the target is useful", () => {
+    const goodInput = runnerActionPhaseInput(
+      "ai-v142-central-run-event-good",
+      (state) => {
+        state.runner.credits = 5;
+        moveRunnerCardToGrip(state, "onr_v1_081_custodial-position");
+      },
+      runnerCentralPressureDeckConfig("run-event-good"),
+    );
+    const goodEvent = goodInput.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(goodInput, action) ===
+          "onr_v1_081_custodial-position",
+    );
+    const goodDraw = goodInput.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    expect(goodEvent).toBeDefined();
+    expect(goodDraw).toBeDefined();
+    if (!goodEvent || !goodDraw)
+      throw new Error("Missing good run-event fixture");
+
+    const goodDecision = chooseRunnerAction({
+      ...goodInput,
+      legalActions: [goodEvent, goodDraw],
+    });
+    expect(goodDecision.actionId).toBe(goodEvent.actionId);
+    expect(goodDecision.evidence).toContain(
+      "central_pressure_run_event_good_target:true",
+    );
+
+    const badInput = runnerActionPhaseInput(
+      "ai-v142-central-run-event-bad",
+      (state) => {
+        state.runner.credits = 2;
+        const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        moveRunnerCardToGrip(state, "onr_v1_081_custodial-position");
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+      runnerCentralPressureDeckConfig("run-event-bad"),
+    );
+    const badEvent = badInput.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(badInput, action) ===
+          "onr_v1_081_custodial-position",
+    );
+    const economy = badInput.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(badInput, action) === "simple_economy_event",
+    );
+    expect(badEvent).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!badEvent || !economy) throw new Error("Missing bad run-event fixture");
+
+    const badDecision = chooseRunnerAction({
+      ...badInput,
+      legalActions: [badEvent, economy],
+    });
+    expect(badDecision.actionId).toBe(economy.actionId);
+    expect(badDecision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
+  it("avoids repeated low-value central runs unless new pressure value appears", () => {
+    const baseInput = runnerActionPhaseInput(
+      "ai-v142-central-repeat-low-value",
+      (state) => {
+        state.runner.credits = 5;
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const economy = baseInput.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(baseInput, action) === "simple_economy_event",
+    );
+    expect(rdRun).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!rdRun || !economy) throw new Error("Missing central repeat fixture");
+    const repeatedInput = {
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticRunStartedEvent(
+          "ai-v142-central-repeat-run",
+          baseInput.playerView.stateVersion + 1,
+          "rd",
+        ),
+      ],
+      legalActions: [rdRun, economy],
+    };
+
+    const decision = chooseRunnerAction(repeatedInput);
+    const centralCandidate = generateRunnerPlanCandidates(repeatedInput).find(
+      (candidate) => candidate.kind === "pressure_rnd",
+    );
+
+    expect(centralCandidate).toBeDefined();
+    if (!centralCandidate) throw new Error("Missing repeated central candidate");
+    expect(decision.actionId).toBe(economy.actionId);
+    expect(evaluateRunnerPlan(repeatedInput, centralCandidate).reasons).toContain(
+      "avoid_repeated_low_value_central",
+    );
+  });
+
+  it("uses a central closeout line near victory without reading hidden zones", () => {
+    const stateA = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-v142-central-closeout-hidden-a",
+        ...runnerCentralPressureDeckConfig("closeout"),
+      }),
+    );
+    stateA.runner.credits = 5;
+    scoreRunnerAgendaForTest(stateA, "simple_agenda", 0);
+    scoreRunnerAgendaForTest(stateA, "simple_agenda", 1);
+    scoreRunnerAgendaForTest(stateA, "simple_agenda", 2);
+    const stateB = structuredClone(stateA);
+    const hiddenCorpCard = stateB.corp.hq[0] ?? stateB.corp.rd[0];
+    if (hiddenCorpCard) {
+      stateB.cardInstances[hiddenCorpCard] = {
+        ...stateB.cardInstances[hiddenCorpCard]!,
+        definitionId: "simple_economy_operation",
+      };
+    }
+    const inputA = buildAiDecisionInput(stateA, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const inputB = buildAiDecisionInput(stateB, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const rdRunA = inputA.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gainA = inputA.legalActions.find((action) => action.type === "gain_credit");
+    const rdRunB = inputB.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gainB = inputB.legalActions.find((action) => action.type === "gain_credit");
+    expect(rdRunA && gainA && rdRunB && gainB).toBeTruthy();
+    if (!rdRunA || !gainA || !rdRunB || !gainB)
+      throw new Error("Missing closeout hidden-invariance actions");
+
+    const decisionA = chooseRunnerAction({
+      ...inputA,
+      legalActions: [rdRunA, gainA],
+    });
+    const decisionB = chooseRunnerAction({
+      ...inputB,
+      legalActions: [rdRunB, gainB],
+    });
+
+    expect(decisionA.reasonCode).toBe("runner.plan.pressure_rnd");
+    expect(decisionB.reasonCode).toBe(decisionA.reasonCode);
+    expect(decisionA.evidence).toContain("central_closeout_opportunity:true");
+    expect(JSON.stringify({ inputA, inputB, decisionA, decisionB })).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("still installs an important breaker when it unlocks visible run paths", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-reserve-breaker-unlocks-run",
+      (state) => {
+        state.runner.credits = 4;
+        const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        moveRunnerCardToGrip(state, "simple_fracter");
+      },
+    );
+    const breakerInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_fracter",
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(breakerInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!breakerInstall || !gain)
+      throw new Error("Missing reserve breaker fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [breakerInstall, gain],
+    });
+
+    expect(decision.actionId).toBe(breakerInstall.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    const buildCandidate = generateRunnerPlanCandidates({
+      ...input,
+      legalActions: [breakerInstall, gain],
+    }).find((candidate) => candidate.kind === "build_rig");
+    expect(buildCandidate).toBeDefined();
+    if (!buildCandidate) throw new Error("Missing reserve breaker candidate");
+    expect(evaluateRunnerPlan(input, buildCandidate).reasons).toContain(
+      "install_breaker_if_it_unlocks_runs",
+    );
+  });
+
+  it("delays redundant installs when they spend below contest reserve", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-reserve-delay-redundant-install",
+      (state) => {
+        state.runner.credits = 3;
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        const installed = moveRunnerResourceToRig(
+          state,
+          "onr_v1_165_junkyard-bbs",
+        );
+        moveRunnerCardCopyToGrip(state, "onr_v1_165_junkyard-bbs", [installed]);
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+      {
+        runnerDeck: {
+          id: "ai_reserve_duplicate_runner",
+          name: "AI Reserve Duplicate Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_165_junkyard-bbs", quantity: 2 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const duplicateInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
+    );
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+
+    expect(duplicateInstall).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!duplicateInstall || !economy)
+      throw new Error("Missing reserve duplicate fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [duplicateInstall, economy],
+    });
+
+    expect(decision.actionId).toBe(economy.actionId);
+    const buildCandidate = generateRunnerPlanCandidates({
+      ...input,
+      legalActions: [duplicateInstall, economy],
+    }).find((candidate) => candidate.kind === "build_rig");
+    expect(buildCandidate).toBeDefined();
+    if (!buildCandidate) throw new Error("Missing reserve duplicate candidate");
+    expect(JSON.stringify(evaluateRunnerPlan(input, buildCandidate))).toContain(
+      "delay_low_value_install",
+    );
+  });
+
+  it("avoids starting a run against a known unaffordable rezzed ICE path", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-known-path-unaffordable",
+      (state) => {
+        state.runner.credits = 1;
+        moveRunnerProgramToRig(state, "simple_fracter");
+        putCorpRootInRemote(state, "simple_upgrade", 0);
+        for (const _ of [0, 1]) {
+          const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+          state.cardInstances[iceId] = {
+            ...state.cardInstances[iceId]!,
+            faceup: true,
+            rezzed: true,
+          };
+        }
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+      {
+        corpDeck: {
+          id: "ai_known_path_unaffordable_corp",
+          name: "AI Known Path Unaffordable Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_upgrade", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 4 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+
+    expect(remoteRun).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!remoteRun || !economy)
+      throw new Error("Missing known-path affordability fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, economy],
+    });
+
+    expect(decision.actionId).toBe(economy.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    const contestCandidate = generateRunnerPlanCandidates({
+      ...input,
+      legalActions: [remoteRun, economy],
+    }).find((candidate) => candidate.kind === "contest_remote");
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate)
+      throw new Error("Missing known-path contest candidate");
+    const contestScore = evaluateRunnerPlan(input, contestCandidate);
+    expect(contestScore.evidence).toContain("known_path_blocked:true");
+    expect(contestScore.reasons).toContain("known_path_unaffordable");
+  });
+
+  it("contests an advanced remote immediately when reserve is sufficient", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v141-reserve-contest-now",
+      (state) => {
+        state.runner.credits = 8;
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing sufficient reserve contest fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, gain],
+    });
+
+    expect(decision.actionId).toBe(remoteRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.contest_remote");
+  });
+
+  it("keeps economy reserve decisions invariant to hidden Corp zones", () => {
+    const stateA = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-v141-reserve-hidden-invariance",
+      }),
+    );
+    stateA.runner.credits = 2;
+    putCorpRootInRemote(stateA, "simple_agenda", 2);
+    moveRunnerCardToGrip(stateA, "simple_economy_event");
+    const stateB = structuredClone(stateA);
+    const hiddenCard = stateB.corp.hq[0] ?? stateB.corp.rd[0];
+    if (hiddenCard) {
+      stateB.cardInstances[hiddenCard] = {
+        ...stateB.cardInstances[hiddenCard]!,
+        definitionId: "simple_economy_asset",
+        faceup: false,
+        rezzed: false,
+      };
+    }
+    const inputA = buildAiDecisionInput(stateA, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const inputB = buildAiDecisionInput(stateB, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+
+    expect(JSON.stringify(inputA.playerView)).toBe(
+      JSON.stringify(inputB.playerView),
+    );
+    expect(chooseRunnerAction(inputA)).toEqual(chooseRunnerAction(inputB));
+    expect(assertAiInputIsSideSafe(inputA)).toBe(true);
+    expect(assertAiInputIsSideSafe(inputB)).toBe(true);
   });
 
   it("runs King of the Road side-safe smokes with legal Runner plans", () => {
@@ -7647,19 +9712,31 @@ describe("V1.4.2 belief state and opponent model", () => {
   });
 
   it("snapshots the versioned DecisionDebug contract for Runner and Korp outputs", () => {
-    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-decision-debug-contract" }));
-    const runnerDecision = chooseRunnerAction(buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" }));
-    const corpDecision = chooseCorpAction(buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v1.4.2-normal" }));
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-decision-debug-contract" }),
+    );
+    const runnerDecision = chooseRunnerAction(
+      buildAiDecisionInput(state, "runner", {
+        difficulty: "normal",
+        profileId: "runner-ai-v1.4.2-normal",
+      }),
+    );
+    const corpDecision = chooseCorpAction(
+      buildAiDecisionInput(state, "corp", {
+        difficulty: "normal",
+        profileId: "corp-ai-v1.4.2-normal",
+      }),
+    );
 
     const snapshot = {
       runner: {
         schemaVersion: runnerDecision.decisionDebug?.schemaVersion,
-        keys: Object.keys(runnerDecision.decisionDebug ?? {}).sort()
+        keys: Object.keys(runnerDecision.decisionDebug ?? {}).sort(),
       },
       corp: {
         schemaVersion: corpDecision.decisionDebug?.schemaVersion,
-        keys: Object.keys(corpDecision.decisionDebug ?? {}).sort()
-      }
+        keys: Object.keys(corpDecision.decisionDebug ?? {}).sort(),
+      },
     };
 
     expect(snapshot).toMatchInlineSnapshot(`
@@ -7713,27 +9790,38 @@ describe("V1.4.2 belief state and opponent model", () => {
         },
       }
     `);
-    expect(snapshot.runner.schemaVersion).toBe(AI_DECISION_DEBUG_SCHEMA_VERSION);
+    expect(snapshot.runner.schemaVersion).toBe(
+      AI_DECISION_DEBUG_SCHEMA_VERSION,
+    );
     expect(snapshot.corp.schemaVersion).toBe(AI_DECISION_DEBUG_SCHEMA_VERSION);
-    expect(JSON.stringify(snapshot)).not.toMatch(/privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist/i);
+    expect(JSON.stringify(snapshot)).not.toMatch(
+      /privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist/i,
+    );
   });
 
   it("adds side-safe ranked alternatives and score components to Runner DecisionDebug", () => {
-    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-decision-debug-alternatives" }));
-    const decision = chooseRunnerAction(buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" }));
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-decision-debug-alternatives" }),
+    );
+    const decision = chooseRunnerAction(
+      buildAiDecisionInput(state, "runner", {
+        difficulty: "normal",
+        profileId: "runner-ai-v1.4.2-normal",
+      }),
+    );
     const debug = decision.decisionDebug;
 
     expect(debug).toMatchObject({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       aiLevel: 2,
       summary: expect.any(String),
-      planKind: expect.any(String)
+      planKind: expect.any(String),
     });
     expect(debug?.rankedAlternatives?.[0]).toMatchObject({
       rank: 1,
       planKind: debug?.planKind,
       scoreBreakdown: expect.any(Array),
-      whyNot: ["selected_plan"]
+      whyNot: ["selected_plan"],
     });
     expect(debug?.rankedAlternatives?.length).toBeGreaterThan(1);
     expect(debug?.actionAlternatives?.[0]).toMatchObject({
@@ -7741,11 +9829,19 @@ describe("V1.4.2 belief state and opponent model", () => {
       actionId: expect.any(String),
       actionType: expect.any(String),
       selected: true,
-      priority: expect.any(Number)
+      priority: expect.any(Number),
     });
-    expect(debug?.scoreBreakdown?.some((component) => component.key === "base")).toBe(true);
-    expect(debug?.detailSections?.some((section) => section.id === "visible_reasons")).toBe(true);
-    expect(JSON.stringify(debug)).not.toMatch(/privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist|Hidden Priority Agenda|hidden-card/i);
+    expect(
+      debug?.scoreBreakdown?.some((component) => component.key === "base"),
+    ).toBe(true);
+    expect(
+      debug?.detailSections?.some(
+        (section) => section.id === "visible_reasons",
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(debug)).not.toMatch(
+      /privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist|Hidden Priority Agenda|hidden-card/i,
+    );
   });
 
   it("redacts forbidden DecisionDebug key and value patterns deterministically", () => {
@@ -7762,9 +9858,16 @@ describe("V1.4.2 belief state and opponent model", () => {
           score: 10,
           confidence: 0.5,
           visibleReasons: ["safe_reason"],
-          scoreBreakdown: [{ key: "decklist", label: "Decklist", value: 12, reason: "hidden-card" }],
-          whyNot: ["privatePayload"]
-        }
+          scoreBreakdown: [
+            {
+              key: "decklist",
+              label: "Decklist",
+              value: 12,
+              reason: "hidden-card",
+            },
+          ],
+          whyNot: ["privatePayload"],
+        },
       ],
       actionAlternatives: [
         {
@@ -7784,19 +9887,23 @@ describe("V1.4.2 belief state and opponent model", () => {
             netCredits: -1,
             storedCredits: 0,
             futurePoolAfter: 3,
-            economyNeed: "hidden-card"
-          }
-        }
+            economyNeed: "hidden-card",
+          },
+        },
       ],
-      scoreBreakdown: [{ key: "economy", label: "Economy", value: 4, reason: "public" }],
-      detailSections: [{ id: "details", title: "Details", items: ["safe", "hidden-card"] }],
+      scoreBreakdown: [
+        { key: "economy", label: "Economy", value: 4, reason: "public" },
+      ],
+      detailSections: [
+        { id: "details", title: "Details", items: ["safe", "hidden-card"] },
+      ],
       opponentHqContents: ["Hidden Priority Agenda"],
       privatePayload: { FullState: true },
       opponentModel: {
         visibleSignal: "safe",
         rdContents: ["hidden-deck-card"],
-        sessionToken: "runner-session-secret"
-      }
+        sessionToken: "runner-session-secret",
+      },
     });
 
     expect(sanitized).toMatchInlineSnapshot(`
@@ -7880,7 +9987,9 @@ describe("V1.4.2 belief state and opponent model", () => {
         ],
       }
     `);
-    expect(JSON.stringify(sanitized)).not.toMatch(/runner-session-secret|privatePayload|FullState|hidden-deck-card|decklist/i);
+    expect(JSON.stringify(sanitized)).not.toMatch(
+      /runner-session-secret|privatePayload|FullState|hidden-deck-card|decklist/i,
+    );
   });
 
   it("does not mutate real game state hash while building belief state and choosing actions", () => {
@@ -7963,7 +10072,9 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
         fixtureRefs?: string[];
         suggestedActivityId?: string;
       }>;
-      reportSchema: { sections: Array<{ sectionId: string; regressionClass: string }> };
+      reportSchema: {
+        sections: Array<{ sectionId: string; regressionClass: string }>;
+      };
       noCheatGate: {
         allowedDecisionInputs: string[];
         forbiddenDecisionInputs: string[];
@@ -7982,7 +10093,9 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
 
     const tuningSeeds = new Set(config.seedSets.tuning.seeds);
     expect(config.seedSets.smoke.seeds.length).toBeGreaterThanOrEqual(3);
-    expect(config.seedSets.holdout.seeds.every((seed) => !tuningSeeds.has(seed))).toBe(true);
+    expect(
+      config.seedSets.holdout.seeds.every((seed) => !tuningSeeds.has(seed)),
+    ).toBe(true);
 
     expect(config.deckProfiles).toEqual(
       expect.arrayContaining([
@@ -8026,7 +10139,11 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     );
     expect(
       config.exploitClasses.filter((entry) =>
-        ["implemented_fixture", "league_metric", "followup_activity_required"].includes(entry.fixtureStatus),
+        [
+          "implemented_fixture",
+          "league_metric",
+          "followup_activity_required",
+        ].includes(entry.fixtureStatus),
       ).length,
     ).toBeGreaterThanOrEqual(3);
     expect(
@@ -8035,14 +10152,12 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
         .every((entry) => entry.suggestedActivityId),
     ).toBe(true);
 
-    expect(config.reportSchema.sections.map((section) => section.sectionId)).toEqual([
-      "safety",
-      "progression",
-      "exploit",
-      "variance",
-      "runtime",
-    ]);
-    expect(config.reportSchema.sections.map((section) => section.regressionClass)).toEqual(
+    expect(
+      config.reportSchema.sections.map((section) => section.sectionId),
+    ).toEqual(["safety", "progression", "exploit", "variance", "runtime"]);
+    expect(
+      config.reportSchema.sections.map((section) => section.regressionClass),
+    ).toEqual(
       expect.arrayContaining([
         "safety_regression",
         "progression_regression",
@@ -8067,7 +10182,9 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
         "decklists",
       ]),
     );
-    expect(config.noCheatGate.evidence.join(" ")).toContain("buildAiDecisionInput");
+    expect(config.noCheatGate.evidence.join(" ")).toContain(
+      "buildAiDecisionInput",
+    );
   });
 
   it("builds a redaction-safe belief simulation world", () => {
@@ -8238,6 +10355,16 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(benchmark.delta.actionLimitRate).toBe(
       benchmark.candidate.actionLimitRate - benchmark.baseline.actionLimitRate,
     );
+    expect(benchmark.candidate.averageTurns).toBeGreaterThanOrEqual(0);
+    expect(
+      benchmark.candidate.scoreOrStealActionsPerMatch,
+    ).toBeGreaterThanOrEqual(0);
+    expect(benchmark.profileComparisons.map((entry) => entry.profile)).toEqual([
+      "basic_corp_ai",
+      "basic_runner_ai",
+      "belief_ai_v1_4_2",
+      "current_candidate",
+    ]);
     expect(
       benchmark.candidate.centralPressureRuns +
         benchmark.candidate.remotePressureRuns,
@@ -8246,12 +10373,571 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(benchmark.candidate.replayFailures).toBe(0);
     expect(report).toContain("# AI Match Progression Benchmark Report");
     expect(report).toContain("## Progression Metrics");
+    expect(report).toContain("successfulCentralRuns");
+    expect(report).toContain("scoringRemoteDevelopmentActions");
+    expect(report).toContain("## Profile Comparison");
     expect(report).toContain("## Safety Metrics");
     expect(report).toContain("Gate: diagnostic_only");
     expect(JSON.stringify({ benchmark, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
   }, 30_000);
+
+  it("loads benchmark snapshot decks through the adapter without using demo deck ids", () => {
+    const runner = benchmarkDeckFromSnapshot(
+      "onr_origin_runner_ai_snapshot_v1",
+    );
+    const corp = benchmarkDeckFromSnapshot("onr_origin_corp_ai_snapshot_v1");
+
+    expect(runner.deck.id).toBe("onr_origin_runner_ai_snapshot_v1");
+    expect(runner.deck.side).toBe("runner");
+    expect(runner.metadata.deckName).toBe("Runner Origins AI - Probe Pressure");
+    expect(corp.deck.id).toBe("onr_origin_corp_ai_snapshot_v1");
+    expect(corp.deck.side).toBe("corp");
+    expect(corp.metadata.deckName).toBe("Corp Origins AI - Tax & Punish");
+    expect(runner.deck.id).not.toBe("demo_runner_008");
+    expect(corp.deck.id).not.toBe("demo_corp_008");
+  });
+
+  it("loads frozen local realistic holdout snapshots without reading Deck-Editor storage", () => {
+    const runner = benchmarkDeckFromFrozenLocalSnapshot(
+      "local_realistic_runner_blink_pressure_rig_snapshot_v1",
+    );
+    const corp = benchmarkDeckFromFrozenLocalSnapshot(
+      "local_realistic_corp_ivory_bastion_snapshot_v1",
+    );
+
+    expect(runner.deck.id).toBe(
+      "local_realistic_runner_blink_pressure_rig_snapshot_v1",
+    );
+    expect(runner.sourceDeckId).toBe("local_runner_blink_pressure_rig");
+    expect(runner.deck.name).toBe("Blink Pressure Rig");
+    expect(runner.deck.side).toBe("runner");
+    expect(runner.metadata.deckHash).toBe("fnv1a:39d02d0b");
+    expect(corp.deck.id).toBe("local_realistic_corp_ivory_bastion_snapshot_v1");
+    expect(corp.sourceDeckId).toBe("local_corp_ivory_bastion");
+    expect(corp.deck.name).toBe("Ivory Bastion");
+    expect(corp.deck.side).toBe("corp");
+    expect(corp.metadata.deckHash).toBe("fnv1a:c5c32339");
+    expect(runner.deck.id).not.toBe("demo_runner_008");
+    expect(corp.deck.id).not.toBe("demo_corp_008");
+    expect(runner.metadata).not.toHaveProperty("cards");
+    expect(corp.metadata).not.toHaveProperty("cards");
+  });
+
+  it("loads local Deck-Editor decks through the benchmark adapter without demo fallback", () => {
+    const tempDir = mkdtempSync(path.join(tmpdir(), "netgrid-local-deck-"));
+    try {
+      writeFileSync(
+        path.join(tempDir, "local_runner_adapter_fixture.json"),
+        `${JSON.stringify(
+          {
+            schemaVersion: "netgrid-editable-deck-v1",
+            deck: {
+              deckId: "local_runner_adapter_fixture",
+              deckVersion: "1.3.0-test",
+              name: "Local Runner Adapter Fixture",
+              side: "runner",
+              identityCardId: "runner_identity_001",
+              cardPoolSnapshotId: "card-snapshot-0.8",
+              cardPoolVersion: "private-local-onr-v1",
+              formatProfileId: "netgrid_private_local_v1",
+              formatProfileVersion: "1.3.0",
+              validationStatus: "valid",
+              cards: [
+                { cardId: "onr_v1_021_dwarf", quantity: 1 },
+                { cardId: "onr_v1_039_krash", quantity: 1 },
+                { cardId: "onr_v1_066_snowball", quantity: 1 },
+                { cardId: "onr_v1_074_worm", quantity: 1 },
+                { cardId: "onr_v1_081_custodial-position", quantity: 1 },
+                { cardId: "onr_v1_085_executive-wiretaps", quantity: 1 },
+                { cardId: "onr_v1_095_jack-n-joe", quantity: 1 },
+                { cardId: "onr_v1_097_livewires-contacts", quantity: 1 },
+                { cardId: "onr_v1_101_mit-west-tier", quantity: 1 },
+                { cardId: "onr_v1_108_score", quantity: 1 },
+                { cardId: "onr_v1_144_tycho-mem-chip", quantity: 1 },
+                { cardId: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
+              ],
+              createdAt: "2026-05-23T12:00:00.000Z",
+              updatedAt: "2026-05-23T12:00:00.000Z",
+            },
+          },
+          null,
+          2,
+        )}\n`,
+        "utf8",
+      );
+
+      const loaded = benchmarkDeckFromLocalEditableDeck({
+        kind: "local_editable_deck",
+        localDeckId: "local_runner_adapter_fixture",
+        expectedName: "Local Runner Adapter Fixture",
+        fileName: "local_runner_adapter_fixture.json",
+        baseDir: tempDir,
+      });
+
+      expect(loaded.ok).toBe(true);
+      if (loaded.ok !== true) throw new Error(loaded.reason);
+      expect(loaded.classification).toBe("runnable_ai_benchmark");
+      expect(loaded.deck.id).toBe(
+        "local_runner_adapter_fixture_local_benchmark_snapshot_v1",
+      );
+      expect(loaded.deck.id).not.toBe("demo_runner_008");
+      expect(loaded.metadata.deckName).toBe("Local Runner Adapter Fixture");
+      expect(loaded.metadata).not.toHaveProperty("cards");
+      expect(loaded.missingCards).toEqual([]);
+      expect(loaded.unsupportedCards).toEqual([]);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("blocks local Deck-Editor benchmark decks with unsupported cards explicitly", () => {
+    const tempDir = mkdtempSync(
+      path.join(tmpdir(), "netgrid-local-deck-blocked-"),
+    );
+    try {
+      writeFileSync(
+        path.join(tempDir, "local_runner_blocked_fixture.json"),
+        `${JSON.stringify(
+          {
+            schemaVersion: "netgrid-editable-deck-v1",
+            deck: {
+              deckId: "local_runner_blocked_fixture",
+              deckVersion: "1.3.0-test",
+              name: "Local Runner Blocked Fixture",
+              side: "runner",
+              identityCardId: "runner_identity_001",
+              cardPoolSnapshotId: "card-snapshot-0.8",
+              cardPoolVersion: "private-local-onr-v1",
+              formatProfileId: "netgrid_private_local_v1",
+              formatProfileVersion: "1.3.0",
+              validationStatus: "invalid",
+              cards: [{ cardId: "catalog_preview_resource_001", quantity: 1 }],
+              createdAt: "2026-05-23T12:00:00.000Z",
+              updatedAt: "2026-05-23T12:00:00.000Z",
+            },
+          },
+          null,
+          2,
+        )}\n`,
+        "utf8",
+      );
+
+      const blocked = benchmarkDeckFromLocalEditableDeck({
+        kind: "local_editable_deck",
+        localDeckId: "local_runner_blocked_fixture",
+        expectedName: "Local Runner Blocked Fixture",
+        fileName: "local_runner_blocked_fixture.json",
+        baseDir: tempDir,
+      });
+
+      expect(blocked.ok).toBe(false);
+      if (blocked.ok !== false)
+        throw new Error("blocked fixture unexpectedly loaded");
+      expect(blocked.classification).toBe("blocked_by_unsupported_cards");
+      expect(blocked.unsupportedCards).toContain(
+        "catalog_preview_resource_001",
+      );
+      expect(blocked.reason).toContain("unsupported_cards");
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("runs a snapshot match progression smoke without falling back to demo decks", () => {
+    const runner = benchmarkDeckFromSnapshot(
+      "onr_origin_runner_ai_snapshot_v1",
+    );
+    const corp = benchmarkDeckFromSnapshot("onr_origin_corp_ai_snapshot_v1");
+    const benchmark = runMatchProgressionBenchmark({
+      includeHoldout: false,
+      runnerDeck: runner.deck,
+      corpDeck: corp.deck,
+      runnerDeckMetadata: runner.metadata,
+      corpDeckMetadata: corp.metadata,
+      maxActions: 12,
+      baselineProfile: "belief_ai_v1_4_2",
+      candidateProfile: "current_candidate",
+      comparisonProfiles: ["belief_ai_v1_4_2", "current_candidate"],
+    });
+
+    expect(benchmark.runnerDeckId).toBe("onr_origin_runner_ai_snapshot_v1");
+    expect(benchmark.corpDeckId).toBe("onr_origin_corp_ai_snapshot_v1");
+    expect(benchmark.runnerDeckId).not.toBe("demo_runner_008");
+    expect(benchmark.corpDeckId).not.toBe("demo_corp_008");
+    expect(benchmark.candidate.games).toBeGreaterThan(0);
+    expect(benchmark.candidate.illegalActions).toBe(0);
+    expect(benchmark.candidate.replayFailures).toBe(0);
+  }, 30_000);
+
+  it("reports a deck-separated match progression suite with pending real-scene slots", () => {
+    const suite = runMatchProgressionBenchmarkSuite({
+      includeHoldout: false,
+      maxActions: 10,
+      baselineProfile: "belief_ai_v1_4_2",
+      candidateProfile: "current_candidate",
+      comparisonProfiles: [
+        "basic_corp_ai",
+        "belief_ai_v1_4_2",
+        "current_candidate",
+      ],
+    });
+    const report = formatMatchProgressionBenchmarkSuiteReport(suite);
+    const slots = listMatchProgressionBenchmarkDeckSlots();
+    const smoke = suite.slots.find(
+      (slot) => slot.slotId === "safety_smoke_demo_008",
+    );
+    const snapshot = suite.slots.find(
+      (slot) => slot.slotId === "progression_tuning_origin_rig_vs_tax",
+    );
+    const localRealisticSlots = suite.slots.filter(
+      (slot) => slot.slotType === "local_realistic_holdout",
+    );
+    const realSceneSlots = suite.slots.filter(
+      (slot) => slot.slotType === "real_scene_holdout",
+    );
+
+    expect(slots.some((slot) => slot.slotType === "smoke")).toBe(true);
+    expect(
+      slots.filter((slot) => slot.slotType === "snapshot_tuning"),
+    ).toHaveLength(2);
+    expect(
+      slots.filter((slot) => slot.slotType === "local_realistic_holdout"),
+    ).toHaveLength(2);
+    expect(smoke?.status).toBe("runnable");
+    expect(smoke?.runnerDeckRef).toBe("demo_runner_008");
+    expect(snapshot?.status).toBe("runnable");
+    expect(snapshot?.benchmark?.runnerDeckId).toBe(
+      "onr_origin_runner_ai_snapshot_v1",
+    );
+    expect(snapshot?.benchmark?.corpDeckId).toBe(
+      "onr_origin_corp_ai_snapshot_v1",
+    );
+    expect(snapshot?.benchmark?.runnerDeckId).not.toBe("demo_runner_008");
+    expect(snapshot?.benchmark?.candidate.illegalActions).toBe(0);
+    expect(snapshot?.benchmark?.candidate.replayFailures).toBe(0);
+    expect(localRealisticSlots).toHaveLength(2);
+    expect(
+      localRealisticSlots.every((slot) => slot.status === "runnable"),
+    ).toBe(true);
+    expect(
+      localRealisticSlots.every(
+        (slot) => !slot.runnerDeckRef.includes("demo_008"),
+      ),
+    ).toBe(true);
+    for (const slot of localRealisticSlots) {
+      expect(slot.runnerDeckRef).toContain("local_realistic_");
+      expect(slot.benchmark?.runnerDeckId).toContain("local_realistic_");
+      expect(slot.benchmark?.corpDeckId).toContain("local_realistic_");
+      expect(slot.benchmark?.runnerDeckId).not.toBe("demo_runner_008");
+      expect(slot.benchmark?.corpDeckId).not.toBe("demo_corp_008");
+      expect(slot.benchmark?.candidate.illegalActions).toBe(0);
+      expect(slot.benchmark?.candidate.replayFailures).toBe(0);
+    }
+    expect(realSceneSlots).toHaveLength(2);
+    expect(realSceneSlots.every((slot) => slot.status === "pending")).toBe(
+      true,
+    );
+    expect(
+      realSceneSlots.every((slot) => !slot.runnerDeckRef.includes("demo_008")),
+    ).toBe(true);
+    expect(report).toContain("## Demo Smoke");
+    expect(report).toContain("## Snapshot Progression");
+    expect(report).toContain("## Local Realistic Holdout");
+    expect(report).toContain("## Real Scene Holdout");
+    expect(report).toContain("remoteBuildActions");
+    expect(JSON.stringify({ suite, report })).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
+    );
+  }, 45_000);
+
+  it("summarizes expanded match progression metrics from redaction-safe action traces", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      {
+        seed: "progression-metric-fixture",
+        winner: "corp",
+        actions: 14,
+        turns: 4,
+        finalAgendaPoints: { runner: 2, corp: 3 },
+        finalStateHash: "fnv1a:progression",
+        eventLogLength: 11,
+        replayOk: true,
+        replayErrors: [],
+        actionSequence: [
+          progressionAction("runner", 1, "start_run", "rd", 1, {
+            runnerRemoteRunOpportunityAgainstAdvancedRemote: true,
+            runnerSkippedAdvancedRemoteContest: true,
+            runnerCentralRunWhileRemoteScoreThreatVisible: true,
+            runnerCreditsBefore: 3,
+            runnerCreditsAfter: 3,
+            runnerCreditDelta: 0,
+            runnerReserveTarget: 5,
+            runnerBelowReserveBefore: true,
+            runnerRunStartedBelowReserve: true,
+            runnerCentralRunStartedBelowReserve: true,
+            runnerContestBlockedByCredits: true,
+            runnerAdvancedRemoteThreatServerIds: ["remote_1"],
+            runnerContestableAdvancedRemoteThreatServerIds: ["remote_1"],
+            runnerCentralRunInsteadOfContestableAdvancedRemote: true,
+            runnerCentralRunBurnedRemoteContestReserve: true,
+            runnerRemoteContestBlockedByCredits: true,
+            runKnownPathCostAtStart: 4,
+            runCreditsAfterKnownPathEstimate: -1,
+            runCreditsMissingForKnownPath: 1,
+            runStartedAgainstKnownUnaffordablePath: true,
+            centralRunStartedAgainstKnownUnaffordablePath: true,
+            lowValueUnaffordableRun: true,
+          }),
+          progressionAction("runner", 2, "draw_card", undefined, 1, {
+            runnerDrawAction: true,
+            runnerClickDrawAction: true,
+            runnerDrawWhileHoldingPlayableEconomy: true,
+            runnerHandUseOpportunity: true,
+            runnerAdvancedRemoteThreatServerIds: ["remote_1"],
+            runnerContestableAdvancedRemoteThreatServerIds: ["remote_1"],
+          }),
+          progressionAction("runner", 3, "resolve_choice", undefined, 1, {
+            runnerDiscardChoice: true,
+            runnerDiscardedPlayableEconomy: true,
+          }),
+          progressionAction("runner", 4, "install_card", undefined, 1, {
+            runnerInstallAction: true,
+            runnerDuplicateInstallAction: true,
+            runnerLowValueDuplicateInstallAction: true,
+            runnerJunkyardBbsDuplicateInstall: true,
+            runnerRigInstallAction: true,
+            runnerHandUseOpportunity: true,
+            runnerHandUseActionTaken: true,
+            runnerCreditsBefore: 5,
+            runnerCreditsAfter: 1,
+            runnerCreditDelta: -4,
+            runnerReserveTarget: 5,
+            runnerBelowReserveAfter: true,
+            runnerSpendBelowReserve: true,
+            runnerLowValueSpendBelowReserve: true,
+            runnerExpensiveInstallBelowReserve: true,
+          }),
+          progressionAction("runner", 5, "access_card", undefined, 1),
+          progressionAction("corp", 3, "install_card", "remote_1", 2, {
+            installPlacement: "root",
+            targetCardType: "agenda",
+          }),
+          progressionAction("corp", 4, "install_card", "remote_1", 2, {
+            installPlacement: "ice",
+            protectBeforeAdvance: true,
+          }),
+          progressionAction("corp", 5, "advance_card", "remote_1", 2, {
+            targetCardType: "agenda",
+            advancementTargetTypes: ["agenda"],
+            finalAdvance: true,
+            unsafeFinalAdvance: true,
+            remoteProtectionScore: 40,
+            runnerContestRisk: "high",
+            advancesRemainingAfterAction: 1,
+          }),
+          progressionAction("runner", 6, "start_run", "remote_1", 3, {
+            runnerRemoteRunOpportunityAgainstAdvancedRemote: true,
+            runnerRemoteRunAgainstAdvancedRemote: true,
+            runnerRemoteContestCreditReserveAfterRun: 4,
+            runnerAdvancedRemoteThreatServerIds: ["remote_1"],
+            runnerContestableAdvancedRemoteThreatServerIds: ["remote_1"],
+            runnerContestedAdvancedRemoteServerId: "remote_1",
+            runnerRemoteRunStartedWithSufficientPostRunReserve: true,
+          }),
+          progressionAction("corp", 7, "rez_ice", "remote_1", 3, {
+            timingPoint: "run.approach_ice",
+          }),
+          progressionAction("runner", 8, "trash_accessed_card", undefined, 3, {
+            runnerRemoteTrashOpportunity: true,
+            runnerRemoteTrashTaken: true,
+            runnerRemoteAccessWithTrashableCard: true,
+            runnerRemoteAccessWithRelevantTrashableCard: true,
+            runnerAffordableRelevantRemoteTrashOpportunity: true,
+            runnerRelevantRemoteTrashTaken: true,
+            runnerRemoteTrashTargetType: "asset_node",
+            runnerRemoteTrashRole: "economy",
+            runnerHandUseOpportunity: true,
+            runnerHandUseActionTaken: true,
+          }),
+          progressionAction("runner", 9, "steal_agenda", undefined, 3, {
+            advancedAgendaStolen: true,
+            advancedAgendaStealSource: "remote",
+          }),
+          progressionAction("corp", 10, "resolve_choice", "remote_1", 4, {
+            advancementCountersAdded: 2,
+            advancementTargetTypes: ["agenda"],
+            scoreActionsAvailable: 1,
+          }),
+          progressionAction("corp", 11, "score_agenda", "remote_1", 4, {
+            scoreActionsAvailable: 1,
+            targetCardType: "agenda",
+          }),
+        ],
+        errors: [],
+        cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
+        metrics: {
+          illegalActions: 0,
+          fallbackRate: 0,
+          timeoutRate: 0,
+          reasonCodeCoverage: [],
+          actionTypeCoverage: [],
+          roleCoverage: [],
+          progressScore: 20,
+          holdout: false,
+          doctrine: {
+            nakedAgendaInstalls: 0,
+            agendaFloodExposure: 0,
+            scoreWindowMissed: 0,
+            remoteOverbuild: 0,
+            economyStall: 0,
+            repeatedLowValueCentralRun: 0,
+            rigStall: 0,
+            assetTrashNeglect: 0,
+          },
+        },
+      },
+    ]);
+
+    expect(metrics).toMatchObject({
+      games: 1,
+      actionLimitRate: 0,
+      averageActions: 14,
+      averageTurns: 4,
+      runnerSteals: 1,
+      corpScores: 1,
+      scoreActionsAvailable: 2,
+      scoreActionsTaken: 1,
+      missedScoreWindows: 1,
+      scoreActionTakeRate: 0.5,
+      scoreOrStealActions: 2,
+      scoreOrStealActionsPerMatch: 2,
+      advancedAgendaSteals: 1,
+      advancedAgendaStealsFromRemote: 1,
+      advancedAgendaStealsFromCentral: 0,
+      finalAdvanceActions: 1,
+      unsafeFinalAdvanceActions: 1,
+      protectedFinalAdvanceActions: 0,
+      protectBeforeAdvanceActions: 1,
+      advanceThenScoreSameTurn: 0,
+      advanceThenRunnerStealBeforeNextCorpScore: 1,
+      remoteProtectionScoreAtFinalAdvance: 40,
+      runnerContestRiskAtFinalAdvance: 1,
+      centralPressureRuns: 1,
+      remotePressureRuns: 1,
+      successfulCentralRuns: 1,
+      successfulRemoteRuns: 2,
+      successfulRemoteAccesses: 2,
+      remoteTrashActions: 1,
+      remoteAccessesWithTrashableCards: 1,
+      remoteAccessesWithRelevantTrashableCards: 1,
+      affordableRelevantRemoteTrashOpportunities: 1,
+      relevantRemoteTrashTaken: 1,
+      relevantRemoteTrashTakeRate: 1,
+      skippedAffordableRelevantRemoteTrash: 0,
+      remoteTrashTargetsAssetNode: 1,
+      remoteTrashTargetsUpgrade: 0,
+      remoteTrashTargetsIce: 0,
+      remoteTrashTargetsUnknown: 0,
+      remoteTrashRoleEconomy: 1,
+      remoteTrashRoleScoringProtection: 0,
+      remoteTrashRoleTagPunish: 0,
+      remoteTrashRoleAmbush: 0,
+      remoteTrashRoleLowValue: 0,
+      remoteRunOpportunitiesAgainstAdvancedRemote: 2,
+      remoteRunsAgainstAdvancedRemote: 1,
+      skippedAdvancedRemoteContest: 1,
+      centralRunWhileRemoteScoreThreatVisible: 1,
+      remoteContestCreditReserveAfterRun: 4,
+      remoteContestActions: 2,
+      remoteInstalls: 2,
+      remoteRootInstalls: 1,
+      remoteIceInstalls: 1,
+      remoteAdvances: 2,
+      advancedAgendaInstalledInRemote: 2,
+      advancementActionsOnAgendas: 2,
+      advancementActionsOnAssets: 0,
+      advancementActionsOnUpgrades: 0,
+      advancementActionsOnUnknown: 0,
+      remoteBuildActions: 3,
+      remoteAdvanceActions: 2,
+      scoreWindowActions: 1,
+      scoringRemoteDevelopmentActions: 5,
+      rezIceDuringRun: 1,
+      turnsToFirstCorpScore: 4,
+      turnsToFirstAgendaSteal: 3,
+      turnsFromFirstAdvanceToScore: 2,
+      turnsFromFinalAdvanceToScoreOrSteal: 1,
+      runnerDrawActions: 1,
+      runnerDrawActionShare: 0.125,
+      clickDrawActions: 1,
+      cardEffectDrawActions: 0,
+      drawWhileHoldingPlayableEconomy: 1,
+      drawWhileHoldingInstallableBreaker: 0,
+      drawWhileHoldingRunnablePressureCard: 0,
+      drawWhileRemoteTrashAvailable: 0,
+      drawThenDiscardSameTurn: 1,
+      discardedPlayableEconomy: 1,
+      discardedInstallableBreaker: 0,
+      discardedRunPressureCard: 0,
+      runnerInstallActions: 1,
+      runnerDuplicateInstallActions: 1,
+      runnerLowValueDuplicateInstallActions: 1,
+      runnerJunkyardBbsDuplicateInstalls: 1,
+      runnerEconomyActionsTaken: 0,
+      runnerRigInstallActions: 1,
+      runnerRemoteTrashOpportunities: 1,
+      runnerRemoteTrashTaken: 1,
+      handUseRate: 0.667,
+      runnerAverageCredits: 4,
+      runnerMedianCredits: 4,
+      runnerEndTurnAverageCredits: 0,
+      runnerEndTurnCreditsBelowReserve: 0,
+      runnerCreditReserveTargetAverage: 5,
+      runnerTurnsBelowContestReserve: 1,
+      runnerEconomyCreditsGained: 0,
+      runnerEconomyCreditsSpent: 0,
+      runnerNetCreditDeltaPerTurn: -1,
+      runnerRunsStartedBelowReserve: 1,
+      runnerRemoteRunsStartedBelowReserve: 0,
+      runnerCentralRunsStartedBelowReserve: 1,
+      runnerContestBlockedByCredits: 1,
+      runnerTrashBlockedByCredits: 0,
+      runnerStealBlockedByCredits: 0,
+      runnerSpendBelowReserveActions: 1,
+      runnerLowValueSpendBelowReserve: 1,
+      runnerExpensiveInstallBelowReserve: 1,
+      runnerReservePreservingEconomyActions: 0,
+      runsStartedAgainstKnownUnaffordablePath: 1,
+      remoteRunsStartedAgainstKnownUnaffordablePath: 0,
+      centralRunsStartedAgainstKnownUnaffordablePath: 1,
+      runsEndedAfterFirstIceDueToCredits: 0,
+      creditsMissingForKnownPath: 1,
+      knownPathCostAtRunStart: 4,
+      creditsAfterKnownPathEstimate: -1,
+      runStartedWithInsufficientStealOrTrashReserve: 0,
+      probeRunsWithPositiveInfoValue: 0,
+      lowValueUnaffordableRuns: 1,
+      uniqueAdvancedRemoteThreats: 2,
+      contestableAdvancedRemoteThreats: 2,
+      advancedRemoteThreatsContested: 1,
+      advancedRemoteThreatContestRate: 0.5,
+      skippedContestableAdvancedRemoteThreats: 1,
+      centralRunInsteadOfContestableAdvancedRemote: 1,
+      centralRunInsteadWasJustified: 0,
+      centralRunBurnedRemoteContestReserve: 1,
+      remoteContestBlockedByCredits: 1,
+      remoteContestBlockedByPostRunReserve: 0,
+      remoteContestBlockedByBreakerCoverage: 0,
+      remoteContestBlockedByKnownIceCost: 0,
+      remoteContestDeclinedAsBaitOrLowValue: 0,
+      repeatedCentralRunsWhileSameRemoteThreat: 0,
+      remoteRunStartedWithInsufficientPostRunReserve: 0,
+      remoteRunStartedWithSufficientPostRunReserve: 1,
+      turnsFromRemoteThreatCreatedToContest: 2,
+      turnsFromRemoteThreatCreatedToScoreOrSteal: 2.5,
+    });
+  });
 
   it("analyzes doctrine quality case examples without private state", () => {
     const benchmark = runDoctrineQualityBenchmark({
@@ -8439,7 +11125,9 @@ describe("MVP 0.3 AI simulation harness", () => {
     expect(state.timingPoint).toBe("run.jack_out_window");
     expect(getLegalActions(state, "runner")).toEqual([]);
     expect(
-      getLegalActions(state, "corp").map((action) => action.type).sort(),
+      getLegalActions(state, "corp")
+        .map((action) => action.type)
+        .sort(),
     ).toEqual(["decline_rez", "rez_ice"]);
 
     const selection = selectAiDecisionSideForState(state);
@@ -9367,7 +12055,9 @@ function putInstalledCorpBbsInRemote(
   bitCount: number,
 ): CardInstanceId {
   ensureRemoteServer(state, serverId);
-  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) throw new Error(`Missing ${serverId}`);
   const bbsEntry = Object.entries(state.cardInstances).find(
     ([id, card]) =>
@@ -9402,6 +12092,35 @@ function runnerActionPhaseInput(
     difficulty: "normal",
     profileId: "runner-ai-v1.4.1-normal",
   });
+}
+
+function runnerCentralPressureDeckConfig(idSuffix: string): CreateGameConfig {
+  return {
+    runnerDeck: {
+      id: `ai_central_pressure_runner_${idSuffix}`,
+      name: "AI Central Pressure Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_139_r-and-d-interface", quantity: 3 },
+        { id: "onr_v1_129_hq-interface", quantity: 3 },
+        { id: "onr_v1_081_custodial-position", quantity: 3 },
+        { id: "onr_v1_085_executive-wiretaps", quantity: 3 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    },
+    corpDeck: {
+      id: `ai_central_pressure_corp_${idSuffix}`,
+      name: "AI Central Pressure Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "simple_agenda", quantity: 6 },
+        { id: "simple_barrier_ice", quantity: 4 },
+        { id: "simple_economy_operation", quantity: 8 },
+      ],
+    },
+  };
 }
 
 function runnerProgramTrashChoiceInput(
@@ -9459,7 +12178,8 @@ function runnerProgramTrashChoiceInput(
     prompt: "Programme vor Installation trashen",
     kind: "select_cards",
     options: installedCardIds.map((cardId) => {
-      const definition = DEMO_CARDS_BY_ID[state.cardInstances[cardId]!.definitionId]!;
+      const definition =
+        DEMO_CARDS_BY_ID[state.cardInstances[cardId]!.definitionId]!;
       return {
         id: `card_${cardId}`,
         label: definition.title,
@@ -9639,6 +12359,34 @@ function withPublicServerEventTail(
   return { ...input, eventTail };
 }
 
+function progressionAction(
+  side: Side,
+  stateVersionBefore: number,
+  actionType: LegalAction["type"],
+  targetServerId: string | undefined,
+  turnNumber: number,
+  extra: Partial<AiSimulationSummary["actionSequence"][number]> = {},
+): AiSimulationSummary["actionSequence"][number] {
+  return {
+    side,
+    stateVersionBefore,
+    actionType,
+    eventType: actionType,
+    timingPoint: "main",
+    turnNumber,
+    reasonCode: `${side}.fixture.${actionType}`,
+    explanation: "progression metric fixture",
+    confidence: 0.8,
+    evidence: [],
+    fallbackUsed: false,
+    timeoutUsed: false,
+    ...(targetServerId ? { targetServerId } : {}),
+    qualityTags: [],
+    stateHashAfter: `fnv1a:progression${stateVersionBefore}`,
+    ...extra,
+  };
+}
+
 function syntheticCentralAccessEvent(
   eventId: string,
   stateVersionBefore: number,
@@ -9660,6 +12408,26 @@ function syntheticCentralAccessEvent(
       serverId,
       serverLabel,
       cardDefinitionId,
+    },
+  };
+}
+
+function syntheticRunStartedEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  serverId: "rd" | "hq" | "archives" | "remote_1",
+): PublicGameEvent {
+  return {
+    eventId,
+    type: "run_started",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload: {
+      actor: "runner",
+      actionType: "start_run",
+      serverId,
     },
   };
 }
@@ -9817,7 +12585,8 @@ function krashFilterEncounterState(seed: string): GameState {
   state = apply(
     state,
     "runner",
-    (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "rd",
   );
   return apply(
     state,
@@ -9862,7 +12631,8 @@ function krashKeeperHqEncounterState(seed: string): GameState {
   state = apply(
     state,
     "runner",
-    (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "hq",
   );
   return apply(
     state,
@@ -10030,7 +12800,8 @@ function weakFracterBarrierEncounterState(seed: string): GameState {
   state = apply(
     state,
     "runner",
-    (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "rd",
   );
   return apply(
     state,
@@ -10346,6 +13117,22 @@ function moveRunnerProgramToRig(
   return id;
 }
 
+function moveRunnerHardwareToRig(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.rig.hardware.unshift(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "runner", zone: "rig" },
+    faceup: true,
+    rezzed: true,
+  };
+  return id;
+}
+
 function moveRunnerResourceToRig(
   state: GameState,
   definitionId: string,
@@ -10356,6 +13143,30 @@ function moveRunnerResourceToRig(
   state.cardInstances[id] = {
     ...state.cardInstances[id]!,
     zone: { side: "runner", zone: "rig" },
+    faceup: true,
+    rezzed: true,
+  };
+  return id;
+}
+
+function scoreRunnerAgendaForTest(
+  state: GameState,
+  definitionId: string,
+  copyIndex: number,
+): CardInstanceId {
+  const ids = Object.entries(state.cardInstances)
+    .filter(([, card]) => card.definitionId === definitionId)
+    .map(([id]) => id as CardInstanceId)
+    .filter((id) => !state.runner.scoreArea.includes(id))
+    .sort();
+  const id = ids[copyIndex] ?? ids[0];
+  expect(id).toBeDefined();
+  if (!id) throw new Error(`Missing agenda ${definitionId}`);
+  removeEverywhere(state, id);
+  state.runner.scoreArea.push(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "runner", zone: "scoreArea" },
     faceup: true,
     rezzed: true,
   };
@@ -10544,7 +13355,9 @@ function runtimeVisibleIce(card: CatalogCard | undefined): {
     known: true,
     rezzed: true,
     subtypes: card.subtypes,
-    ...(card.numeric.strength !== null ? { strength: card.numeric.strength } : {}),
+    ...(card.numeric.strength !== null
+      ? { strength: card.numeric.strength }
+      : {}),
   };
 }
 
@@ -10557,12 +13370,16 @@ function runtimeVisibleBreaker(card: CatalogCard | undefined): VisibleCard {
     known: true,
     type: "program",
     subtypes: card.subtypes,
-    strength: card.numeric.strength ?? cardDefinitionStrength(card.catalogCardId),
+    strength:
+      card.numeric.strength ?? cardDefinitionStrength(card.catalogCardId),
   };
 }
 
 function subtypeKeyForTest(subtype: string): string {
-  return subtype.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return subtype
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 function visibleCard(definitionId: string, instanceId: string): VisibleCard {
@@ -10637,7 +13454,9 @@ function discardDecisionInputForTest(
       pendingChoice: choice,
     },
     legalActions: [resolveChoice],
-    ...(config.ownDeckDoctrine ? { ownDeckDoctrine: config.ownDeckDoctrine } : {}),
+    ...(config.ownDeckDoctrine
+      ? { ownDeckDoctrine: config.ownDeckDoctrine }
+      : {}),
   };
 }
 
@@ -10656,9 +13475,15 @@ function discardVisibleCardForTest(
     type: definition.type,
     subtypes: definition.subtypes,
     ...(definition.cost !== undefined ? { cost: definition.cost } : {}),
-    ...(definition.installCost !== undefined ? { installCost: definition.installCost } : {}),
-    ...(definition.rezCost !== undefined ? { rezCost: definition.rezCost } : {}),
-    ...(definition.memoryCost !== undefined ? { memoryCost: definition.memoryCost } : {}),
+    ...(definition.installCost !== undefined
+      ? { installCost: definition.installCost }
+      : {}),
+    ...(definition.rezCost !== undefined
+      ? { rezCost: definition.rezCost }
+      : {}),
+    ...(definition.memoryCost !== undefined
+      ? { memoryCost: definition.memoryCost }
+      : {}),
   };
 }
 

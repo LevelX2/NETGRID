@@ -167,6 +167,64 @@ type ShellTradersBacklog = {
   totalShellCounters: number;
 };
 
+type RunnerHandUseOpportunity = {
+  playableEconomyActionCount: number;
+  installableBreakerActionCount: number;
+  runnablePressureActionCount: number;
+  remoteTrashActionCount: number;
+  drawDiscardPressure: boolean;
+  lowValueDuplicateInstallCount: number;
+};
+
+type RunnerRemoteContestOpportunity = {
+  advancedRemoteTargetCount: number;
+  contestableAdvancedRemoteTargetCount: number;
+  relevantTrashRemoteTargetCount: number;
+  selectedTargetAdvanced: boolean;
+  selectedTargetContestable: boolean;
+  selectedTargetPostRunReserveSufficient: boolean;
+  selectedTargetPostRunReserve: number;
+  selectedTargetRelevantTrash: boolean;
+  centralRunWhileRemoteThreat: boolean;
+  centralRunWhileContestableThreat: boolean;
+  centralRunJustified: boolean;
+  centralRunBurnsContestReserve: boolean;
+};
+
+type RunnerRemoteContestProfile = {
+  serverId: string;
+  advanced: boolean;
+  relevantTrash: boolean;
+  blockedByBreakerCoverage: boolean;
+  blockedByKnownIceCost: boolean;
+  blockedByPostRunReserve: boolean;
+  visibleBreakCost: number;
+  creditsAfterPath: number;
+  postRunReserveTarget: number;
+  contestable: boolean;
+};
+
+type RunnerCentralPressureOpportunity = {
+  targetServerId?: "hq" | "rd" | "archives";
+  pathBlocked: boolean;
+  visibleBreakCost: number;
+  creditsAfterPath: number;
+  reserveTarget: number;
+  preservesReserve: boolean;
+  openOrCheap: boolean;
+  matchingInterfaceInstalled: boolean;
+  anyInterfaceInstalled: boolean;
+  multiaccessInstalled: boolean;
+  matchingPressureInstallActions: number;
+  matchingRunEvents: number;
+  runEventHasGoodTarget: boolean;
+  repeatedLowValue: boolean;
+  closeoutOpportunity: boolean;
+  centralPressureClear: boolean;
+  remoteContestableThreat: boolean;
+  remoteThreatLessValuable: boolean;
+};
+
 type BrokerPoolBuildHorizon = {
   score: number;
   priority: number;
@@ -292,7 +350,7 @@ export function generateRunnerPlanCandidates(input: AiDecisionInput): RunnerPlan
       "build_rig",
       actions.filter(
         (action) =>
-          (action.type === "install_card" && rolesForAction(input, action).some((role) => role.startsWith("breaker_") || role === "memory" || role === "setup" || role === "build_rig")) ||
+          (action.type === "install_card" && rolesForAction(input, action).some((role) => role.startsWith("breaker_") || role === "memory" || role === "setup" || role === "build_rig" || isRunnerPressureRole(role))) ||
           Boolean(classifyShellTradersAction(input, action))
       )
     ),
@@ -319,6 +377,7 @@ export function generateRunnerPlanCandidates(input: AiDecisionInput): RunnerPlan
         (action) =>
           action.type === "jack_out" ||
           action.type === "continue_run" ||
+          (action.type === "play_event" && rolesForAction(input, action).some(isRunnerPressureRole)) ||
           (action.type === "start_run" && (action.payload?.serverId === "archives" || isLowInformationRunTarget(features, String(action.payload?.serverId ?? ""))))
       )
     )
@@ -341,6 +400,24 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
   );
   const installedEconomy = evaluateInstalledEconomyActions(input, candidate);
   const shellTraders = evaluateShellTradersActions(input, candidate);
+  const handUse = evaluateRunnerHandUseDiscipline(input, candidate);
+  const duplicateInstall = evaluateRunnerDuplicateInstallDiscipline(
+    input,
+    candidate,
+  );
+  const remoteContest = evaluateRunnerRemoteContestAndTrashDiscipline(
+    input,
+    candidate,
+  );
+  const centralPressure = evaluateRunnerCentralPressureDiscipline(
+    input,
+    candidate,
+    beliefState,
+  );
+  const economyReserve = evaluateRunnerEconomyReserveDiscipline(
+    input,
+    candidate,
+  );
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const easyRunPenalty = input.difficulty === "easy" && isRunPlan(candidate.kind) ? 260 : 0;
   const score =
@@ -356,14 +433,19 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     twoTurnIntent.score +
     citySurveillanceDrawRisk.score +
     installedEconomy.score +
-    shellTraders.score -
+    shellTraders.score +
+    handUse.score +
+    duplicateInstall.score +
+    remoteContest.score +
+    centralPressure.score +
+    economyReserve.score -
     visibleRiskPenalty(candidate, profile.riskTolerance) -
     easyRunPenalty;
   return {
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons, ...citySurveillanceDrawRisk.reasons, ...installedEconomy.reasons, ...shellTraders.reasons]).slice(0, 6),
+    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons, ...citySurveillanceDrawRisk.reasons, ...installedEconomy.reasons, ...shellTraders.reasons, ...handUse.reasons, ...duplicateInstall.reasons, ...remoteContest.reasons, ...centralPressure.reasons, ...economyReserve.reasons]).slice(0, 6),
     scoreBreakdown: scoreComponents([
       ["base", "Grundplan", baseScoreForPlan(candidate.kind), 1, `plan:${candidate.kind}`],
       ["doctrine", "Deck-Doctrine", doctrinePlanWeight, 1, "doctrine_plan_weight"],
@@ -378,6 +460,11 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
       ["citySurveillance", "City-Surveillance-Risiko", citySurveillanceDrawRisk.score, 1, firstReason(citySurveillanceDrawRisk.reasons)],
       ["installedEconomy", "Installierte Economy", installedEconomy.score, 1, firstReason(installedEconomy.reasons)],
       ["shellTraders", "Shell Traders", shellTraders.score, 1, firstReason(shellTraders.reasons)],
+      ["handUse", "Handnutzung", handUse.score, 1, firstReason(handUse.reasons)],
+      ["duplicateInstall", "Duplikat-Installation", duplicateInstall.score, 1, firstReason(duplicateInstall.reasons)],
+      ["remoteContestTrash", "Remote-Contest/Trash", remoteContest.score, 1, firstReason(remoteContest.reasons)],
+      ["centralPressure", "Central Pressure", centralPressure.score, 1, firstReason(centralPressure.reasons)],
+      ["economyReserve", "Credit-Reserve", economyReserve.score, 1, firstReason(economyReserve.reasons)],
       ["visibleRisk", "Sichtbares Risiko", -visibleRiskPenalty(candidate, profile.riskTolerance), 1, firstReason(candidate.visibleRisks)],
       ["easyRunPenalty", "Easy-Run-Bremse", -easyRunPenalty, 1, easyRunPenalty > 0 ? "easy_run_penalty" : undefined]
     ]),
@@ -389,6 +476,11 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
       ...candidate.visibleBenefits,
       ...installedEconomy.evidence,
       ...shellTraders.evidence,
+      ...handUse.evidence,
+      ...duplicateInstall.evidence,
+      ...remoteContest.evidence,
+      ...centralPressure.evidence,
+      ...economyReserve.evidence,
       ...twoTurnIntent.evidence,
       ...citySurveillanceDrawRisk.evidence,
       ...rig.evidence,
@@ -481,6 +573,671 @@ function evaluateCitySurveillanceDrawRisk(
       `credits:${input.playerView.own.credits}`,
     ],
   };
+}
+
+function evaluateRunnerHandUseDiscipline(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): RunnerPlanEvaluatorResult {
+  const opportunity = runnerHandUseOpportunity(input);
+  const goodHandActionCount =
+    opportunity.playableEconomyActionCount +
+    opportunity.installableBreakerActionCount +
+    opportunity.runnablePressureActionCount +
+    opportunity.remoteTrashActionCount;
+  let score = 0;
+  const reasons: string[] = [];
+
+  if (candidate.kind === "draw_for_answers") {
+    if (opportunity.playableEconomyActionCount > 0) {
+      score -= 190;
+      reasons.push("economy_before_draw");
+    }
+    if (opportunity.installableBreakerActionCount > 0) {
+      score -= 260;
+      reasons.push("install_breaker_before_draw");
+    }
+    if (opportunity.runnablePressureActionCount > 0) {
+      score -= 170;
+      reasons.push("pressure_card_before_draw");
+    }
+    if (opportunity.remoteTrashActionCount > 0) {
+      score -= 320;
+      reasons.push("remote_trash_before_draw");
+    }
+    if (opportunity.drawDiscardPressure && goodHandActionCount > 0) {
+      score -= 180;
+      reasons.push("avoid_draw_to_discard");
+    }
+    if (goodHandActionCount === 0) {
+      score += input.playerView.own.gripOrHq.length < 3 ? 120 : 45;
+      reasons.push("draw_for_answers_only_when_needed");
+    } else {
+      reasons.push("use_hand_before_draw");
+    }
+  }
+
+  if (candidate.kind === "recover_economy" && opportunity.playableEconomyActionCount > 0) {
+    score += input.playerView.own.credits < 5 ? 185 : 80;
+    reasons.push("use_playable_economy");
+  }
+  if (candidate.kind === "build_rig") {
+    if (opportunity.installableBreakerActionCount > 0) {
+      const bestBreakerInstallReserve = bestRemainingCreditsForCandidateActions(
+        input,
+        candidate,
+        (action) => isRunnerInstallableRelevantBreaker(input, action),
+      );
+      if (bestBreakerInstallReserve >= 2) {
+        score += 210;
+        reasons.push("install_relevant_breaker");
+      }
+    }
+    if (opportunity.runnablePressureActionCount > 0) {
+      score += 80;
+      reasons.push("install_pressure_card_before_draw");
+    }
+  }
+  if (candidate.kind === "trash_asset" && opportunity.remoteTrashActionCount > 0) {
+    score += 180;
+    reasons.push("take_remote_trash_opportunity");
+  }
+  if (isRunPlan(candidate.kind) && opportunity.runnablePressureActionCount > 0) {
+    score += 55;
+    reasons.push("use_runnable_pressure_before_draw");
+  }
+
+  return {
+    score,
+    reasons,
+    evidence: [
+      `hand_use_playable_economy:${opportunity.playableEconomyActionCount}`,
+      `hand_use_installable_breaker:${opportunity.installableBreakerActionCount}`,
+      `hand_use_pressure:${opportunity.runnablePressureActionCount}`,
+      `hand_use_remote_trash:${opportunity.remoteTrashActionCount}`,
+      `hand_use_draw_discard_pressure:${opportunity.drawDiscardPressure}`,
+    ],
+  };
+}
+
+function evaluateRunnerDuplicateInstallDiscipline(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): RunnerPlanEvaluatorResult {
+  if (candidate.kind !== "build_rig")
+    return { score: 0, reasons: [], evidence: [] };
+  const installActions = candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .filter((action): action is LegalAction => action?.type === "install_card");
+  const duplicateActions = installActions.filter((action) =>
+    isRunnerDuplicateInstall(input, action),
+  );
+  const lowValueDuplicateActions = duplicateActions.filter((action) =>
+    isRunnerLowValueDuplicateInstall(input, action),
+  );
+  if (duplicateActions.length === 0) {
+    return {
+      score: 0,
+      reasons: [],
+      evidence: ["duplicate_install:false"],
+    };
+  }
+  const allInstallChoicesAreLowValue =
+    installActions.length > 0 &&
+    lowValueDuplicateActions.length === installActions.length;
+  const score = allInstallChoicesAreLowValue
+    ? -360
+    : -Math.min(220, lowValueDuplicateActions.length * 120);
+  return {
+    score,
+    reasons:
+      lowValueDuplicateActions.length > 0
+        ? ["avoid_low_value_duplicate_install"]
+        : ["duplicate_install_limited_extra_value"],
+    evidence: [
+      "duplicate_install:true",
+      `duplicate_install_count:${duplicateActions.length}`,
+      `low_value_duplicate_install_count:${lowValueDuplicateActions.length}`,
+      `junkyard_bbs_duplicate_install:${lowValueDuplicateActions.some(
+        (action) => sourceDefinitionIdForAction(input, action) === "onr_v1_165_junkyard-bbs",
+      )}`,
+    ],
+  };
+}
+
+function evaluateRunnerRemoteContestAndTrashDiscipline(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): RunnerPlanEvaluatorResult {
+  const opportunity = runnerRemoteContestOpportunity(input, candidate);
+  let score = 0;
+  const reasons: string[] = [];
+
+  if (candidate.kind === "trash_asset") {
+    const context = currentRemoteTrashAccessContext(input);
+    if (context.affordableRelevant) {
+      score += context.role === "scoring_protection" ? 260 : 210;
+      reasons.push(
+        context.role === "scoring_protection"
+          ? "trash_scoring_protection_upgrade"
+          : context.role === "economy"
+            ? "trash_economy_node"
+            : "trash_high_value_remote_asset",
+      );
+    } else if (context.trashable && context.role === "low_value") {
+      score -= 260;
+      reasons.push("do_not_trash_low_value_card");
+    }
+  }
+
+  if (candidate.kind === "contest_remote") {
+    if (opportunity.selectedTargetAdvanced) {
+      score += opportunity.selectedTargetContestable ? 360 : 80;
+      reasons.push(
+        opportunity.selectedTargetContestable
+          ? "contest_advanced_remote_now"
+          : "contest_advanced_remote",
+      );
+      if (opportunity.selectedTargetPostRunReserveSufficient) {
+        score += 120;
+        reasons.push("remote_run_if_post_run_reserve_sufficient");
+      } else if (opportunity.selectedTargetPostRunReserve > 0) {
+        score -= 520;
+        reasons.push("preserve_credits_for_steal_or_trash");
+      }
+    }
+    if (opportunity.selectedTargetRelevantTrash) {
+      score += 170;
+      reasons.push("contest_relevant_remote_trash_target");
+    }
+  } else if (
+    (candidate.kind === "pressure_rnd" ||
+      candidate.kind === "pressure_hq" ||
+      candidate.kind === "safe_probe_run") &&
+    opportunity.centralRunWhileRemoteThreat
+  ) {
+    const pressurePenalty =
+      opportunity.centralRunWhileContestableThreat &&
+      !opportunity.centralRunJustified
+        ? 340
+        : 180;
+    score -= pressurePenalty;
+    reasons.push(
+      opportunity.centralRunWhileContestableThreat
+        ? "contest_score_threat_before_central_pressure"
+        : "remote_run_before_central_if_score_threat",
+    );
+    if (opportunity.centralRunBurnsContestReserve) {
+      score -= 220;
+      reasons.push("avoid_central_run_that_burns_remote_contest_reserve");
+    }
+    if (opportunity.centralRunJustified) {
+      score += 120;
+      reasons.push("central_pressure_if_remote_unreachable");
+    }
+  }
+
+  return {
+    score,
+    reasons,
+    evidence: [
+      `remote_contest_advanced_targets:${opportunity.advancedRemoteTargetCount}`,
+      ...(opportunity.contestableAdvancedRemoteTargetCount > 0
+        ? [
+            `remote_contest_contestable_advanced_targets:${opportunity.contestableAdvancedRemoteTargetCount}`,
+          ]
+        : []),
+      `remote_contest_relevant_trash_targets:${opportunity.relevantTrashRemoteTargetCount}`,
+      `remote_contest_selected_advanced:${opportunity.selectedTargetAdvanced}`,
+      ...(opportunity.selectedTargetAdvanced
+        ? [
+            `remote_contest_selected_contestable:${opportunity.selectedTargetContestable}`,
+            `remote_contest_selected_post_run_reserve:${opportunity.selectedTargetPostRunReserve}`,
+            `remote_contest_selected_post_run_reserve_sufficient:${opportunity.selectedTargetPostRunReserveSufficient}`,
+          ]
+        : []),
+      `remote_contest_selected_relevant_trash:${opportunity.selectedTargetRelevantTrash}`,
+      `central_run_while_remote_threat:${opportunity.centralRunWhileRemoteThreat}`,
+      ...(opportunity.centralRunWhileContestableThreat
+        ? [
+            `central_run_while_contestable_remote_threat:${opportunity.centralRunWhileContestableThreat}`,
+            `central_run_justified:${opportunity.centralRunJustified}`,
+            `central_run_burns_contest_reserve:${opportunity.centralRunBurnsContestReserve}`,
+          ]
+        : []),
+    ],
+  };
+}
+
+function evaluateRunnerCentralPressureDiscipline(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+  beliefState: BeliefState,
+): RunnerPlanEvaluatorResult {
+  const opportunity = runnerCentralPressureOpportunity(
+    input,
+    candidate,
+    beliefState,
+  );
+  const reasons: string[] = [];
+  let score = 0;
+
+  if (candidate.kind === "pressure_rnd" || candidate.kind === "pressure_hq") {
+    if (!opportunity.targetServerId) {
+      return { score: 0, reasons: [], evidence: ["central_pressure_target:none"] };
+    }
+    if (opportunity.pathBlocked) {
+      score -= 360;
+      reasons.push("central_pressure_path_blocked");
+    }
+    if (opportunity.matchingInterfaceInstalled && opportunity.preservesReserve) {
+      score += opportunity.targetServerId === "rd" ? 300 : 280;
+      reasons.push(
+        opportunity.targetServerId === "rd"
+          ? "pressure_rnd_with_multiaccess"
+          : "pressure_hq_with_multiaccess",
+      );
+    } else if (opportunity.anyInterfaceInstalled && opportunity.preservesReserve) {
+      score += 110;
+      reasons.push("central_pressure_with_generic_multiaccess");
+    }
+    if (opportunity.closeoutOpportunity && opportunity.centralPressureClear) {
+      score += 210;
+      reasons.push("central_closeout_run");
+    }
+    if (
+      opportunity.centralPressureClear &&
+      opportunity.remoteThreatLessValuable &&
+      (opportunity.matchingInterfaceInstalled ||
+        opportunity.anyInterfaceInstalled ||
+        opportunity.matchingRunEvents > 0 ||
+        opportunity.closeoutOpportunity)
+    ) {
+      score += 120;
+      reasons.push("central_pressure_if_remote_low_threat");
+    }
+    if (opportunity.repeatedLowValue) {
+      score -= opportunity.matchingInterfaceInstalled ? 120 : 1200;
+      reasons.push("avoid_repeated_low_value_central");
+    }
+    if (!opportunity.preservesReserve && !opportunity.closeoutOpportunity) {
+      score -= opportunity.remoteContestableThreat ? 260 : 120;
+      reasons.push("preserve_reserve_after_central");
+    }
+    if (
+      opportunity.remoteContestableThreat &&
+      !opportunity.centralPressureClear &&
+      !opportunity.closeoutOpportunity
+    ) {
+      score -= 240;
+      reasons.push("remote_before_central_if_score_threat");
+    }
+  }
+
+  if (candidate.kind === "build_rig") {
+    if (opportunity.matchingPressureInstallActions > 0) {
+      if (opportunity.remoteContestableThreat && !opportunity.remoteThreatLessValuable) {
+        score -= 190;
+        reasons.push("remote_before_interface_install_if_score_threat");
+      } else if (opportunity.centralPressureClear || opportunity.openOrCheap) {
+        score += opportunity.closeoutOpportunity ? 260 : 190;
+        reasons.push("install_interface_before_repeated_central");
+      }
+    }
+  }
+
+  if (
+    candidate.kind === "safe_probe_run" &&
+    opportunity.matchingRunEvents > 0
+  ) {
+    if (opportunity.runEventHasGoodTarget) {
+      score += 150;
+      reasons.push("use_run_event_when_target_good");
+    } else {
+      score -= 260;
+      reasons.push("pivot_to_economy_or_rig_if_central_low_value");
+    }
+  }
+  if (
+    candidate.kind === "safe_probe_run" &&
+    opportunity.targetServerId &&
+    opportunity.repeatedLowValue
+  ) {
+    score -= 700;
+    reasons.push("avoid_repeated_low_value_central");
+  }
+
+  return {
+    score,
+    reasons,
+    evidence: [
+      `central_pressure_target:${opportunity.targetServerId ?? "none"}`,
+      `central_pressure_path_blocked:${opportunity.pathBlocked}`,
+      `central_pressure_break_cost:${opportunity.visibleBreakCost}`,
+      `central_pressure_credits_after_path:${opportunity.creditsAfterPath}`,
+      `central_pressure_reserve_target:${opportunity.reserveTarget}`,
+      `central_pressure_preserves_reserve:${opportunity.preservesReserve}`,
+      `central_pressure_open_or_cheap:${opportunity.openOrCheap}`,
+      `central_pressure_interface_installed:${opportunity.anyInterfaceInstalled}`,
+      `central_pressure_matching_interface_installed:${opportunity.matchingInterfaceInstalled}`,
+      `central_pressure_multiaccess_installed:${opportunity.multiaccessInstalled}`,
+      `central_pressure_install_opportunities:${opportunity.matchingPressureInstallActions}`,
+      `central_pressure_run_events:${opportunity.matchingRunEvents}`,
+      `central_pressure_run_event_good_target:${opportunity.runEventHasGoodTarget}`,
+      `central_pressure_repeated_low_value:${opportunity.repeatedLowValue}`,
+      `central_closeout_opportunity:${opportunity.closeoutOpportunity}`,
+      `central_pressure_clear:${opportunity.centralPressureClear}`,
+      `central_pressure_remote_contestable:${opportunity.remoteContestableThreat}`,
+      `central_pressure_remote_low_threat:${opportunity.remoteThreatLessValuable}`,
+    ],
+  };
+}
+
+function evaluateRunnerEconomyReserveDiscipline(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): RunnerPlanEvaluatorResult {
+  const features = extractRunnerFeatures(input);
+  const reserveTarget = runnerCreditReserveTargetForPlanInput(input, features);
+  const belowReserve = features.credits < reserveTarget;
+  const remoteThreatVisible = runnerHasVisibleRemoteScoreThreat(input);
+  const immediateOpenRemoteThreat = runnerHasImmediateOpenRemoteScoreThreat(
+    input,
+    features,
+  );
+  const affordableRemoteContest = runnerHasAffordableRemoteContest(
+    input,
+    features,
+  );
+  const runTarget = targetServerId(input, candidate);
+  const runPath = runTarget
+    ? runnerKnownPathEstimate(input, runTarget, features)
+    : undefined;
+  let score = 0;
+  const reasons: string[] = [];
+
+  if (candidate.kind === "recover_economy" && belowReserve) {
+    score += immediateOpenRemoteThreat
+      ? 60
+      : affordableRemoteContest
+        ? -60
+      : remoteThreatVisible
+        ? 320
+        : 210;
+    reasons.push(
+      remoteThreatVisible
+        ? "economy_before_remote_contest"
+        : "build_cash_reserve",
+    );
+  }
+
+  if (isRunPlan(candidate.kind) && runPath) {
+    if (runPath.blocked) {
+      if (runPath.remoteScoreThreat) {
+        score -= 220;
+        reasons.push("emergency_run_known_path_unaffordable");
+      } else {
+        score -= 760;
+        reasons.push("known_path_unaffordable");
+      }
+    } else if (
+      runPath.creditsAfterPath < reserveTarget &&
+      !(runPath.remoteScoreThreat && runPath.visibleBreakCost === 0)
+    ) {
+      const centralRun =
+        runTarget === "hq" || runTarget === "rd" || runTarget === "archives";
+      if (runPath.remoteScoreThreat) {
+        score -= 170;
+        reasons.push("save_for_steal_or_trash");
+      } else if (
+        centralRun &&
+        !remoteThreatVisible &&
+        runnerTwoTurnIntentReadyForCandidate(input, candidate)
+      ) {
+        score += 45;
+        reasons.push("two_turn_central_run_ready");
+      } else if (centralRun && remoteThreatVisible) {
+        score -= 300;
+        reasons.push("delay_low_value_central_run");
+      } else {
+        score -= 100;
+        reasons.push("preserve_contest_reserve");
+      }
+    } else if (runPath.remoteScoreThreat) {
+      score += runPath.visibleBreakCost === 0 ? 240 : 115;
+      reasons.push(
+        runPath.visibleBreakCost === 0
+          ? "contest_immediate_score_threat"
+          : "run_when_reserve_sufficient",
+      );
+    }
+    if (
+      runTarget !== undefined &&
+      runTarget.startsWith("remote_") &&
+      runPath.remoteScoreThreat
+    ) {
+      const postRunTarget = runnerPostRunReserveTargetForRemote(
+        input,
+        runTarget,
+        features,
+      );
+      if (!runPath.blocked && runPath.creditsAfterPath < postRunTarget) {
+        score -= 520;
+        reasons.push("preserve_credits_for_steal_or_trash");
+      } else if (!runPath.blocked) {
+        score += 120;
+        reasons.push("remote_run_if_post_run_reserve_sufficient");
+      }
+    }
+  }
+
+  if (candidate.kind === "build_rig") {
+    const bestInstallRemaining = bestRemainingCreditsForCandidateActions(
+      input,
+      candidate,
+      (action) => action.type === "install_card",
+    );
+    const unlocksKnownRun = candidate.legalActionIds
+      .map((actionId) =>
+        input.legalActions.find((action) => action.actionId === actionId),
+      )
+      .some(
+        (action) =>
+          action?.type === "install_card" &&
+          rolesForAction(input, action).some((role) =>
+            role.startsWith("breaker_"),
+          ) &&
+          features.blockedRunServers.size > 0,
+      );
+    const redundantLowValue = candidate.legalActionIds
+      .map((actionId) =>
+        input.legalActions.find((action) => action.actionId === actionId),
+      )
+      .some((action): action is LegalAction =>
+        Boolean(action && isRunnerLowValueDuplicateInstall(input, action)),
+      );
+    if (unlocksKnownRun) {
+      score += 150;
+      reasons.push("install_breaker_if_it_unlocks_runs");
+    }
+    if (
+      Number.isFinite(bestInstallRemaining) &&
+      bestInstallRemaining < reserveTarget &&
+      belowReserve &&
+      !unlocksKnownRun
+    ) {
+      score -= redundantLowValue ? 360 : 210;
+      reasons.push(
+        redundantLowValue
+          ? "delay_low_value_install"
+          : "avoid_spending_below_contest_floor",
+      );
+    }
+  }
+
+  if (candidate.kind === "trash_asset") {
+    const remainingCredits = bestRemainingCreditsForCandidateActions(
+      input,
+      candidate,
+      (action) => action.type === "trash_accessed_card",
+    );
+    const context = currentRemoteTrashAccessContext(input);
+    if (
+      remainingCredits < Math.max(1, reserveTarget - 3) &&
+      context.role === "low_value"
+    ) {
+      score -= 240;
+      reasons.push("do_not_trash_low_value_card");
+    }
+  }
+
+  return {
+    score,
+    reasons,
+    evidence: [
+      `runner_credit_reserve_target:${reserveTarget}`,
+      `runner_credits:${features.credits}`,
+      `runner_below_reserve:${belowReserve}`,
+      `remote_score_threat_visible:${remoteThreatVisible}`,
+      `immediate_open_remote_threat:${immediateOpenRemoteThreat}`,
+      `affordable_remote_contest:${affordableRemoteContest}`,
+      `known_path_target:${runTarget ?? "none"}`,
+      `known_path_cost:${runPath?.visibleBreakCost ?? "none"}`,
+      `known_path_blocked:${runPath?.blocked ?? false}`,
+      `known_path_credits_after:${runPath?.creditsAfterPath ?? "none"}`,
+    ],
+  };
+}
+
+function runnerTwoTurnIntentReadyForCandidate(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): boolean {
+  const intent = evaluateRunnerTwoTurnRunIntent(input, candidate);
+  return intent.evidence.includes("two_turn_run_intent_ready:true");
+}
+
+function runnerCreditReserveTargetForPlanInput(
+  input: AiDecisionInput,
+  features: RunnerFeatures = extractRunnerFeatures(input),
+): number {
+  let target = 4;
+  for (const server of input.playerView.servers) {
+    if (!server.id.startsWith("remote_")) continue;
+    const visibleBreakCost = features.visibleRunBreakCosts.get(server.id) ?? 0;
+    const hasScoreThreat = remoteServerHasVisibleScoreThreat(input, server.id);
+    const relevantTrashCosts = server.root
+      .filter((card) => card.known)
+      .filter((card) => {
+        const role = remoteTrashRoleForCard(card);
+        return role !== "low_value" && role !== "unknown";
+      })
+      .map((card) => remoteRootTrashCost(card))
+      .filter((cost): cost is number => typeof cost === "number");
+    const cheapestRelevantTrash =
+      relevantTrashCosts.length > 0 ? Math.min(...relevantTrashCosts) : 0;
+    const visibleStealTax = server.root.some(
+      (card) =>
+        card.known &&
+        rolesForCardId(card.definitionId).some(
+          (role) =>
+            role.includes("agenda_steal_tax") ||
+            role.includes("remote_upgrade_tax") ||
+            role.includes("access_tax"),
+        ),
+    )
+      ? 5
+      : 0;
+    if (hasScoreThreat) target = Math.max(target, visibleBreakCost + 3 + visibleStealTax);
+    if (cheapestRelevantTrash > 0)
+      target = Math.max(target, visibleBreakCost + cheapestRelevantTrash + 1);
+  }
+  return Math.min(12, Math.max(2, Math.ceil(target)));
+}
+
+function runnerKnownPathEstimate(
+  input: AiDecisionInput,
+  serverId: string,
+  features: RunnerFeatures = extractRunnerFeatures(input),
+): {
+  visibleBreakCost: number;
+  creditsAfterPath: number;
+  blocked: boolean;
+  remoteScoreThreat: boolean;
+} | undefined {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) return undefined;
+  const assessment = assessKnownRezzedIcePath(
+    server.ice,
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+  );
+  const visibleBreakCost =
+    assessment.visibleBreakCost ?? features.visibleRunBreakCosts.get(serverId) ?? 0;
+  return {
+    visibleBreakCost,
+    creditsAfterPath: input.playerView.own.credits - visibleBreakCost,
+    blocked: assessment.blocked || features.blockedRunServers.has(serverId),
+    remoteScoreThreat:
+      serverId.startsWith("remote_") &&
+      remoteServerHasVisibleScoreThreat(input, serverId),
+  };
+}
+
+function runnerHasVisibleRemoteScoreThreat(input: AiDecisionInput): boolean {
+  return input.playerView.servers.some(
+    (server) =>
+      server.id.startsWith("remote_") &&
+      remoteServerHasVisibleScoreThreat(input, server.id),
+  );
+}
+
+function runnerHasImmediateOpenRemoteScoreThreat(
+  input: AiDecisionInput,
+  features: RunnerFeatures = extractRunnerFeatures(input),
+): boolean {
+  return input.legalActions.some((action) => {
+    if (
+      action.type !== "start_run" ||
+      typeof action.payload?.serverId !== "string" ||
+      !action.payload.serverId.startsWith("remote_") ||
+      !remoteServerHasVisibleScoreThreat(input, action.payload.serverId)
+    )
+      return false;
+    const estimate = runnerKnownPathEstimate(
+      input,
+      action.payload.serverId,
+      features,
+    );
+    return estimate !== undefined && !estimate.blocked && estimate.visibleBreakCost === 0;
+  });
+}
+
+function runnerHasAffordableRemoteContest(
+  input: AiDecisionInput,
+  features: RunnerFeatures = extractRunnerFeatures(input),
+): boolean {
+  if (features.credits < 3) return false;
+  return input.legalActions.some((action) => {
+    if (
+      action.type !== "start_run" ||
+      typeof action.payload?.serverId !== "string" ||
+      !action.payload.serverId.startsWith("remote_")
+    )
+      return false;
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === action.payload?.serverId,
+    );
+    if (!server || server.root.length === 0) return false;
+    const estimate = runnerKnownPathEstimate(
+      input,
+      action.payload.serverId,
+      features,
+    );
+    return estimate !== undefined && !estimate.blocked;
+  });
 }
 
 function bestCitySurveillanceDrawProjection(
@@ -1580,9 +2337,61 @@ function actionPriority(kind: RunnerPlanKind, action: LegalAction, input: AiDeci
   const reachedAccessMovement = runnerReachedAccessMovement(input);
   const affordableMovement = runnerCanAffordCurrentMovementIce(input);
   if (kind === "trash_asset" && action.type === "trash_accessed_card") return 100;
-  if ((kind === "pressure_rnd" || kind === "pressure_hq" || kind === "contest_remote" || kind === "safe_probe_run") && action.type === "start_run") return 90;
+  if (kind === "contest_remote" && action.type === "start_run") {
+    const serverId =
+      typeof action.payload?.serverId === "string" ? action.payload.serverId : "";
+    if (serverId.startsWith("remote_")) {
+      const profile = runnerRemoteContestProfile(input, serverId);
+      return (
+        90 +
+        (profile.contestable ? 80 : 0) +
+        (profile.advanced ? 30 : 0) +
+        (profile.relevantTrash ? 18 : 0) -
+        (profile.blockedByPostRunReserve ? 45 : 0) -
+        (profile.blockedByKnownIceCost || profile.blockedByBreakerCoverage
+          ? 80
+          : 0)
+      );
+    }
+    return 90;
+  }
+  if ((kind === "pressure_rnd" || kind === "pressure_hq" || kind === "safe_probe_run") && action.type === "start_run") {
+    const target =
+      typeof action.payload?.serverId === "string" ? action.payload.serverId : "";
+    if (target === "hq" || target === "rd" || target === "archives") {
+      const beliefState = reconstructBeliefState(input);
+      const features = extractRunnerFeatures(input);
+      const goodTarget = centralPressureTargetIsGood(
+        input,
+        target,
+        features,
+        beliefState,
+      );
+      const installedInterface = (input.playerView.own.rig ?? []).some((card) =>
+        centralPressureCardSupportsTarget(card.definitionId, target, true),
+      );
+      return 90 + (goodTarget ? 24 : -12) + (installedInterface ? 34 : 0);
+    }
+    return 90;
+  }
   if (kind === "safe_probe_run" && action.type === "continue_run") return reachedAccessMovement || affordableMovement ? 92 : 70;
   if (kind === "safe_probe_run" && action.type === "jack_out") return reachedAccessMovement || affordableMovement ? 30 : 88;
+  if (kind === "safe_probe_run" && action.type === "play_event") {
+    const eventTarget = centralPressureTargetForAction(input, action);
+    const goodTarget = eventTarget
+      ? centralPressureTargetIsGood(
+          input,
+          eventTarget,
+          extractRunnerFeatures(input),
+          reconstructBeliefState(input),
+        )
+      : false;
+    return rolesForAction(input, action).some(isRunnerPressureRole)
+      ? goodTarget
+        ? 104
+        : 38
+      : 45;
+  }
   if (kind === "build_rig" && action.type === "install_card") return runnerInstallPriority(input, action);
   if (kind === "build_rig" && (action.type === "trigger_ability" || action.type === "activated_card_ability")) return runnerShellTradersPriority(input, action);
   if (kind === "recover_economy" && action.type === "play_event") return 80;
@@ -1701,21 +2510,728 @@ function lowReserveInstallPenalty(input: AiDecisionInput, candidate: RunnerPlanC
   return bestRemainingCredits < 2 ? 460 : 0;
 }
 
+function bestRemainingCreditsForCandidateActions(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+  predicate: (action: LegalAction) => boolean,
+): number {
+  const remainingCredits = candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .filter((action): action is LegalAction => Boolean(action))
+    .filter((action) => predicate(action))
+    .map((action) => input.playerView.own.credits - actionCreditCost(action));
+  return remainingCredits.length > 0
+    ? Math.max(...remainingCredits)
+    : Number.NEGATIVE_INFINITY;
+}
+
+function runnerHandUseOpportunity(input: AiDecisionInput): RunnerHandUseOpportunity {
+  const actions = input.legalActions.filter((action) => action.side === "runner");
+  const features = extractRunnerFeatures(input);
+  return {
+    playableEconomyActionCount: actions.filter((action) =>
+      isRunnerPlayableEconomyAction(input, action),
+    ).length,
+    installableBreakerActionCount: actions.filter((action) =>
+      isRunnerInstallableRelevantBreaker(input, action),
+    ).length,
+    runnablePressureActionCount: actions.filter((action) =>
+      isRunnerRunnablePressureAction(input, action, features),
+    ).length,
+    remoteTrashActionCount: actions.filter((action) =>
+      isRunnerRemoteTrashAction(input, action),
+    ).length,
+    drawDiscardPressure:
+      input.playerView.own.gripOrHq.length + 1 >= input.playerView.own.maxHandSize,
+    lowValueDuplicateInstallCount: actions.filter((action) =>
+      isRunnerLowValueDuplicateInstall(input, action),
+    ).length,
+  };
+}
+
+function isRunnerPlayableEconomyAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.side !== "runner") return false;
+  if (action.type === "gain_credit") return input.playerView.own.credits < 4;
+  if (
+    action.type !== "play_event" &&
+    action.type !== "install_card" &&
+    action.type !== "trigger_ability" &&
+    action.type !== "activated_card_ability"
+  )
+    return false;
+  return rolesForAction(input, action).some(isRunnerEconomyRole);
+}
+
+function isRunnerInstallableRelevantBreaker(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.type !== "install_card") return false;
+  const roles = rolesForAction(input, action).filter((role) =>
+    role.startsWith("breaker_"),
+  );
+  if (roles.length === 0) return false;
+  const features = extractRunnerFeatures(input);
+  return roles.some((role) => !features.rigRoles.has(role));
+}
+
+function isRunnerRunnablePressureAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  features: RunnerFeatures = extractRunnerFeatures(input),
+): boolean {
+  if (action.side !== "runner") return false;
+  const roles = rolesForAction(input, action);
+  if (
+    (action.type === "play_event" || action.type === "install_card") &&
+    roles.some(isRunnerPressureRole)
+  )
+    return true;
+  if (action.type !== "start_run") return false;
+  const serverId =
+    typeof action.payload?.serverId === "string" ? action.payload.serverId : "";
+  if (!serverId || features.blockedRunServers.has(serverId)) return false;
+  const server = features.serverFeatures.get(serverId);
+  if (serverId.startsWith("remote_") && (server?.rootCount ?? 0) === 0)
+    return false;
+  return features.credits >= 3 || (server?.iceCount ?? 0) === 0;
+}
+
+function isRunnerRemoteTrashAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  return (
+    action.side === "runner" &&
+    action.type === "trash_accessed_card" &&
+    input.playerView.run?.attackedServerId.startsWith("remote_") === true
+  );
+}
+
+function runnerCentralPressureOpportunity(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+  beliefState: BeliefState,
+): RunnerCentralPressureOpportunity {
+  const features = extractRunnerFeatures(input);
+  const candidateTarget = centralTargetForCandidate(input, candidate);
+  const fallbackTarget =
+    candidateTarget ??
+    bestCentralPressureTargetForVisibleBoard(input, features, beliefState);
+  const target = fallbackTarget;
+  const estimate = target
+    ? runnerKnownPathEstimate(input, target, features)
+    : undefined;
+  const server = target
+    ? input.playerView.servers.find((candidateServer) => candidateServer.id === target)
+    : undefined;
+  const visibleBreakCost = estimate?.visibleBreakCost ?? 0;
+  const creditsAfterPath =
+    estimate?.creditsAfterPath ?? input.playerView.own.credits - visibleBreakCost;
+  const reserveTarget = runnerCreditReserveTargetForPlanInput(input, features);
+  const installedCards = input.playerView.own.rig ?? [];
+  const matchingInterfaceInstalled =
+    target !== undefined &&
+    installedCards.some((card) =>
+      centralPressureCardSupportsTarget(card.definitionId, target, true),
+    );
+  const anyInterfaceInstalled = installedCards.some((card) =>
+    isCentralPressureCard(card.definitionId, true),
+  );
+  const multiaccessInstalled = installedCards.some((card) =>
+    rolesForCardId(card.definitionId).some((role) => role.includes("multiaccess")),
+  );
+  const installActions = input.legalActions.filter(
+    (action) => action.type === "install_card" && action.side === "runner",
+  );
+  const matchingPressureInstallActions = installActions.filter((action) => {
+    const definitionId = sourceDefinitionIdForAction(input, action);
+    return (
+      definitionId !== undefined &&
+      (target
+        ? centralPressureCardSupportsTarget(definitionId, target, true)
+        : isCentralPressureCard(definitionId, true))
+    );
+  }).length;
+  const runEvents = input.legalActions.filter(
+    (action) =>
+      action.side === "runner" &&
+      action.type === "play_event" &&
+      rolesForAction(input, action).some(isRunnerPressureRole),
+  );
+  const matchingRunEvents = runEvents.filter((action) => {
+    const eventTarget = centralPressureTargetForAction(input, action);
+    return eventTarget !== undefined && (!target || eventTarget === target);
+  }).length;
+  const runEventHasGoodTarget = runEvents.some((action) => {
+    const eventTarget = centralPressureTargetForAction(input, action);
+    return (
+      eventTarget !== undefined &&
+      centralPressureTargetIsGood(input, eventTarget, features, beliefState)
+    );
+  });
+  const repeatedLowValue =
+    target !== undefined &&
+    isRepeatedLowValueCentralPressure(input, target, beliefState) &&
+    !matchingInterfaceInstalled &&
+    !runEventHasGoodTarget;
+  const closeoutOpportunity =
+    target !== undefined && runnerCentralCloseoutOpportunity(input, target);
+  const openOrCheap = Boolean(
+    target && (visibleBreakCost <= 1 || (server?.ice.length ?? 0) === 0),
+  );
+  const preservesReserve = creditsAfterPath >= reserveTarget;
+  const remoteProfiles = input.legalActions
+    .filter(
+      (action) =>
+        action.type === "start_run" &&
+        typeof action.payload?.serverId === "string" &&
+        action.payload.serverId.startsWith("remote_"),
+    )
+    .map((action) =>
+      runnerRemoteContestProfile(input, String(action.payload?.serverId), features),
+    );
+  const contestableRemoteProfiles = remoteProfiles.filter(
+    (profile) => profile.advanced && profile.contestable,
+  );
+  const remoteThreatLessValuable =
+    contestableRemoteProfiles.length === 0 ||
+    remoteProfiles.every(
+      (profile) =>
+        !profile.advanced ||
+        profile.blockedByBreakerCoverage ||
+        profile.blockedByKnownIceCost ||
+        profile.blockedByPostRunReserve,
+    );
+  const centralPressureClear =
+    target !== undefined &&
+    !estimate?.blocked &&
+    openOrCheap &&
+    preservesReserve &&
+    centralPressureTargetIsGood(input, target, features, beliefState);
+  return {
+    ...(target ? { targetServerId: target } : {}),
+    pathBlocked: estimate?.blocked === true,
+    visibleBreakCost,
+    creditsAfterPath,
+    reserveTarget,
+    preservesReserve,
+    openOrCheap,
+    matchingInterfaceInstalled,
+    anyInterfaceInstalled,
+    multiaccessInstalled,
+    matchingPressureInstallActions,
+    matchingRunEvents,
+    runEventHasGoodTarget,
+    repeatedLowValue,
+    closeoutOpportunity,
+    centralPressureClear,
+    remoteContestableThreat: contestableRemoteProfiles.length > 0,
+    remoteThreatLessValuable,
+  };
+}
+
+function centralTargetForCandidate(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): "hq" | "rd" | "archives" | undefined {
+  const target = targetServerId(input, candidate);
+  if (target === "hq" || target === "rd" || target === "archives") return target;
+  if (candidate.kind === "pressure_hq") return "hq";
+  if (candidate.kind === "pressure_rnd") return "rd";
+  if (candidate.kind === "safe_probe_run") {
+    return candidate.legalActionIds
+      .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+      .map((action) => (action ? centralPressureTargetForAction(input, action) : undefined))
+      .find((serverId): serverId is "hq" | "rd" | "archives" => Boolean(serverId));
+  }
+  return undefined;
+}
+
+function bestCentralPressureTargetForVisibleBoard(
+  input: AiDecisionInput,
+  features: RunnerFeatures,
+  beliefState: BeliefState,
+): "hq" | "rd" | "archives" | undefined {
+  const targets = (["rd", "hq", "archives"] as const)
+    .map((target) => ({
+      target,
+      score:
+        (centralPressureTargetIsGood(input, target, features, beliefState) ? 100 : 0) +
+        (features.blockedRunServers.has(target) ? -200 : 0) +
+        ((features.visibleRunBreakCosts.get(target) ?? 0) <= 1 ? 30 : 0),
+    }))
+    .sort((left, right) => right.score - left.score || left.target.localeCompare(right.target));
+  return targets[0]?.score && targets[0].score > 0 ? targets[0].target : undefined;
+}
+
+function centralPressureTargetForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): "hq" | "rd" | "archives" | undefined {
+  if (typeof action.payload?.serverId === "string") {
+    const serverId = action.payload.serverId;
+    if (serverId === "hq" || serverId === "rd" || serverId === "archives")
+      return serverId;
+  }
+  const definitionId = sourceDefinitionIdForAction(input, action);
+  if (!definitionId) return undefined;
+  if (centralPressureCardSupportsTarget(definitionId, "rd", false)) return "rd";
+  if (centralPressureCardSupportsTarget(definitionId, "hq", false)) return "hq";
+  if (centralPressureCardSupportsTarget(definitionId, "archives", false))
+    return "archives";
+  return undefined;
+}
+
+function isCentralPressureCard(
+  definitionId: string | undefined,
+  installedOnly: boolean,
+): boolean {
+  if (!definitionId) return false;
+  const roles = rolesForCardId(definitionId);
+  if (!roles.some(isRunnerPressureRole)) return false;
+  if (!installedOnly) return true;
+  const type = RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type;
+  return type === "hardware" || type === "program" || type === "resource";
+}
+
+function centralPressureCardSupportsTarget(
+  definitionId: string | undefined,
+  target: "hq" | "rd" | "archives",
+  installedOnly: boolean,
+): boolean {
+  if (!isCentralPressureCard(definitionId, installedOnly)) return false;
+  const roles = rolesForCardId(definitionId);
+  if (target === "rd") {
+    if (definitionId === "onr_v1_139_r-and-d-interface") return true;
+    if (roles.includes("pressure_rnd") || roles.includes("rnd_pressure")) return true;
+  }
+  if (target === "hq") {
+    if (definitionId === "onr_v1_129_hq-interface") return true;
+    if (roles.includes("pressure_hq") || roles.includes("hq_pressure")) return true;
+  }
+  if (target === "archives" && roles.includes("archives_pressure")) return true;
+  return roles.some((role) => role.includes("multiaccess")) &&
+    (definitionId === "onr_v1_024_expert-schedule-analyzer" ||
+      definitionId === "onr_v1_041_microtech-ai-interface" ||
+      definitionId === "onr_v1_105_priority-wreck");
+}
+
+function centralPressureTargetIsGood(
+  input: AiDecisionInput,
+  target: "hq" | "rd" | "archives",
+  features: RunnerFeatures,
+  beliefState: BeliefState,
+): boolean {
+  const estimate = runnerKnownPathEstimate(input, target, features);
+  if (!estimate || estimate.blocked) return false;
+  const server = input.playerView.servers.find((candidate) => candidate.id === target);
+  const cheap = estimate.visibleBreakCost <= 1 || (server?.ice.length ?? 0) === 0;
+  const closeout = runnerCentralCloseoutOpportunity(input, target);
+  if (target === "rd") {
+    const freshness = beliefState.runnerOpponentModel?.rndTopFreshness?.freshness;
+    return cheap && (closeout || freshness !== "stale_known_same_top");
+  }
+  if (target === "hq") {
+    const handCount = input.playerView.opponent.handCount;
+    const known = beliefState.runnerOpponentModel?.hqHandMemory;
+    const lowKnownValue = isKnownLowValueHqHand(input, "hq", known);
+    return cheap && (closeout || handCount >= 4 || !lowKnownValue);
+  }
+  const archives = input.playerView.servers.find((candidate) => candidate.id === "archives");
+  return cheap && (archives?.root.some((card) => card.type === "agenda") === true);
+}
+
+function isRepeatedLowValueCentralPressure(
+  input: AiDecisionInput,
+  target: "hq" | "rd" | "archives",
+  beliefState: BeliefState,
+): boolean {
+  const recentPenalty =
+    target === "rd"
+      ? staleKnownRndPlanPenalty(
+          { kind: "pressure_rnd" } as RunnerPlanCandidate,
+          target,
+          beliefState.runnerOpponentModel?.rndTopFreshness,
+        )
+      : 0;
+  if (recentPenalty > 0) return true;
+  const history = mergedPublicHistory(input);
+  const lastSameCentralRun = findLastIndex(
+    history,
+    (event) =>
+      serverIdFromEvent(event) === target &&
+      (event.publicPayload.actionType === "start_run" ||
+        event.type === "run_started"),
+  );
+  if (lastSameCentralRun < 0) return false;
+  const last = history[lastSameCentralRun];
+  if (!last || input.playerView.stateVersion - eventVersion(last) > 8) return false;
+  const after = history.slice(lastSameCentralRun + 1);
+  if (target === "hq" && after.some(eventMayChangeHqPressure)) return false;
+  if (target === "rd" && after.some(eventMayChangeRndPressure)) return false;
+  if (after.some((event) => event.type === "steal_agenda" || event.publicPayload.actionType === "steal_agenda")) return false;
+  return true;
+}
+
+function eventMayChangeHqPressure(event: PublicGameEvent): boolean {
+  const actionType =
+    typeof event.publicPayload.actionType === "string"
+      ? event.publicPayload.actionType
+      : event.type;
+  return actionType === "draw_card" || actionType === "mandatory_draw" || actionType === "install_card" || actionType === "play_operation";
+}
+
+function eventMayChangeRndPressure(event: PublicGameEvent): boolean {
+  const actionType =
+    typeof event.publicPayload.actionType === "string"
+      ? event.publicPayload.actionType
+      : event.type;
+  return actionType === "draw_card" || actionType === "mandatory_draw" || actionType === "reorder_cards" || actionType === "shuffle_stack";
+}
+
+function runnerCentralCloseoutOpportunity(
+  input: AiDecisionInput,
+  target: "hq" | "rd" | "archives",
+): boolean {
+  const pointsNeeded = input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints;
+  if (pointsNeeded > 2) return false;
+  if (target === "archives") {
+    const archives = input.playerView.servers.find((server) => server.id === "archives");
+    return archives?.root.some((card) => card.known && card.type === "agenda") === true;
+  }
+  return target === "hq" || target === "rd";
+}
+
+function runnerRemoteContestOpportunity(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): RunnerRemoteContestOpportunity {
+  const target = targetServerId(input, candidate);
+  const features = extractRunnerFeatures(input);
+  const legalRemoteRunTargets = new Set(
+    input.legalActions
+      .filter(
+        (action) =>
+          action.type === "start_run" &&
+          typeof action.payload?.serverId === "string" &&
+          action.payload.serverId.startsWith("remote_"),
+      )
+      .map((action) => String(action.payload?.serverId)),
+  );
+  const profiles = [...legalRemoteRunTargets].map((serverId) =>
+    runnerRemoteContestProfile(input, serverId, features),
+  );
+  const advancedTargets = profiles.filter((profile) => profile.advanced);
+  const contestableAdvancedTargets = advancedTargets.filter(
+    (profile) => profile.contestable,
+  );
+  const relevantTrashTargets = profiles.filter((profile) => profile.relevantTrash);
+  const selectedProfile = profiles.find((profile) => profile.serverId === target);
+  const centralRun =
+    target === "hq" || target === "rd" || target === "archives";
+  const centralJustified =
+    centralRun && target
+      ? runnerCentralRunHasClearPressureJustification(
+          input,
+          target,
+          contestableAdvancedTargets.length > 0,
+          features,
+        )
+      : false;
+  const centralRunBurnsContestReserve =
+    centralRun &&
+    target !== undefined &&
+    contestableAdvancedTargets.length > 0 &&
+    runnerCentralRunBurnsRemoteContestReserve(
+      input,
+      target,
+      contestableAdvancedTargets,
+      features,
+    );
+  return {
+    advancedRemoteTargetCount: advancedTargets.length,
+    contestableAdvancedRemoteTargetCount: contestableAdvancedTargets.length,
+    relevantTrashRemoteTargetCount: relevantTrashTargets.length,
+    selectedTargetAdvanced: selectedProfile?.advanced === true,
+    selectedTargetContestable: selectedProfile?.contestable === true,
+    selectedTargetPostRunReserveSufficient:
+      selectedProfile !== undefined &&
+      !selectedProfile.blockedByBreakerCoverage &&
+      !selectedProfile.blockedByKnownIceCost &&
+      !selectedProfile.blockedByPostRunReserve,
+    selectedTargetPostRunReserve: selectedProfile?.postRunReserveTarget ?? 0,
+    selectedTargetRelevantTrash: selectedProfile?.relevantTrash === true,
+    centralRunWhileRemoteThreat:
+      centralRun &&
+      (advancedTargets.length > 0 || relevantTrashTargets.length > 0),
+    centralRunWhileContestableThreat:
+      centralRun && contestableAdvancedTargets.length > 0,
+    centralRunJustified: centralJustified,
+    centralRunBurnsContestReserve,
+  };
+}
+
+function runnerRemoteContestProfile(
+  input: AiDecisionInput,
+  serverId: string,
+  features: RunnerFeatures = extractRunnerFeatures(input),
+): RunnerRemoteContestProfile {
+  const estimate = runnerKnownPathEstimate(input, serverId, features);
+  const visibleBreakCost = estimate?.visibleBreakCost ?? 0;
+  const creditsAfterPath =
+    estimate?.creditsAfterPath ?? input.playerView.own.credits - visibleBreakCost;
+  const postRunReserveTarget = runnerPostRunReserveTargetForRemote(
+    input,
+    serverId,
+    features,
+  );
+  const advanced = remoteServerHasVisibleScoreThreat(input, serverId);
+  const relevantTrash = remoteServerHasKnownRelevantTrashTarget(input, serverId);
+  const blockedByKnownIceCost = visibleBreakCost > input.playerView.own.credits;
+  const blockedByBreakerCoverage =
+    estimate?.blocked === true && !blockedByKnownIceCost;
+  const blockedByPostRunReserve =
+    !blockedByBreakerCoverage &&
+    !blockedByKnownIceCost &&
+    creditsAfterPath < postRunReserveTarget;
+  return {
+    serverId,
+    advanced,
+    relevantTrash,
+    blockedByBreakerCoverage,
+    blockedByKnownIceCost,
+    blockedByPostRunReserve,
+    visibleBreakCost,
+    creditsAfterPath,
+    postRunReserveTarget,
+    contestable:
+      advanced &&
+      !blockedByBreakerCoverage &&
+      !blockedByKnownIceCost &&
+      !blockedByPostRunReserve,
+  };
+}
+
+function runnerPostRunReserveTargetForRemote(
+  input: AiDecisionInput,
+  serverId: string,
+  features: RunnerFeatures = extractRunnerFeatures(input),
+): number {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) return 3;
+  let target = remoteServerHasVisibleScoreThreat(input, serverId) ? 1 : 2;
+  const visibleStealTax = server.root.some(
+    (card) =>
+      card.known &&
+      rolesForCardId(card.definitionId).some(
+        (role) =>
+          role.includes("agenda_steal_tax") ||
+          role.includes("remote_upgrade_tax") ||
+          role.includes("access_tax") ||
+          role.includes("remote_agenda_protection") ||
+          role.includes("scoring_protection") ||
+          role.includes("protect_remote"),
+      ),
+  );
+  if (visibleStealTax) target = Math.max(target, 6);
+  const relevantTrashCosts = server.root
+    .filter((card) => card.known)
+    .filter((card) => {
+      const role = remoteTrashRoleForCard(card);
+      return role !== "low_value" && role !== "unknown";
+    })
+    .map((card) => remoteRootTrashCost(card))
+    .filter((cost): cost is number => typeof cost === "number");
+  if (relevantTrashCosts.length > 0) {
+    target = Math.max(target, Math.min(...relevantTrashCosts) + 1);
+  }
+  const pathCost = features.visibleRunBreakCosts.get(serverId) ?? 0;
+  if (pathCost > 0) target = Math.max(target, 2);
+  return Math.min(10, Math.max(1, Math.ceil(target)));
+}
+
+function runnerCentralRunHasClearPressureJustification(
+  input: AiDecisionInput,
+  target: string,
+  contestableRemoteThreatVisible: boolean,
+  features: RunnerFeatures = extractRunnerFeatures(input),
+): boolean {
+  if (target !== "hq" && target !== "rd" && target !== "archives") return false;
+  const estimate = runnerKnownPathEstimate(input, target, features);
+  if (!estimate || estimate.blocked) return false;
+  const pressureRoles = [
+    ...input.playerView.own.gripOrHq,
+    ...(input.playerView.own.rig ?? []),
+  ].flatMap((card) => rolesForCardId(card.definitionId));
+  const hasCentralPressure = pressureRoles.some(isRunnerPressureRole);
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === target,
+  );
+  const openOrCheap =
+    estimate.visibleBreakCost <= 1 || (server?.ice.length ?? 0) === 0;
+  const reserveTarget = runnerCreditReserveTargetForPlanInput(input, features);
+  const preservesReserve = estimate.creditsAfterPath >= reserveTarget;
+  return (
+    hasCentralPressure &&
+    openOrCheap &&
+    preservesReserve &&
+    (!contestableRemoteThreatVisible || estimate.visibleBreakCost === 0)
+  );
+}
+
+function runnerCentralRunBurnsRemoteContestReserve(
+  input: AiDecisionInput,
+  target: string,
+  contestableProfiles: RunnerRemoteContestProfile[],
+  features: RunnerFeatures = extractRunnerFeatures(input),
+): boolean {
+  const estimate = runnerKnownPathEstimate(input, target, features);
+  if (!estimate || estimate.blocked || contestableProfiles.length === 0) return false;
+  const requiredReserve = Math.max(
+    ...contestableProfiles.map((profile) => profile.postRunReserveTarget),
+  );
+  return estimate.creditsAfterPath < requiredReserve;
+}
+
+function remoteServerHasVisibleScoreThreat(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  return (
+    server?.root.some(
+      (card) =>
+        (card.advancementCounters ?? 0) > 0 ||
+        (card.known && card.type === "agenda"),
+    ) === true
+  );
+}
+
+function remoteServerHasKnownRelevantTrashTarget(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) return false;
+  const visibleBreakCost =
+    assessKnownRezzedIcePath(
+      server.ice,
+      input.playerView.own.rig ?? [],
+      input.playerView.own.credits,
+    ).visibleBreakCost ?? 0;
+  const creditsAfterIce = input.playerView.own.credits - visibleBreakCost;
+  return server.root.some(
+    (card) => {
+      if (!card.known) return false;
+      const trashCost = remoteRootTrashCost(card);
+      if (trashCost === undefined || creditsAfterIce < trashCost) return false;
+      const role = remoteTrashRoleForCard(card);
+      return role !== "low_value" && role !== "unknown";
+    },
+  );
+}
+
+function currentRemoteTrashAccessContext(input: AiDecisionInput): {
+  trashable: boolean;
+  affordableRelevant: boolean;
+  role: "economy" | "scoring_protection" | "tag_punish" | "ambush" | "low_value" | "unknown";
+} {
+  const run = input.playerView.run;
+  const accessed = run?.accessedCard;
+  if (!run || !run.attackedServerId.startsWith("remote_") || !accessed?.known) {
+    return { trashable: false, affordableRelevant: false, role: "unknown" };
+  }
+  const trashable = remoteRootTrashCost(accessed) !== undefined;
+  const role = remoteTrashRoleForCard(accessed);
+  const relevant = role !== "low_value" && role !== "unknown";
+  const affordableRelevant =
+    trashable &&
+    relevant &&
+    input.legalActions.some((action) => action.type === "trash_accessed_card");
+  return { trashable, affordableRelevant, role };
+}
+
+function remoteTrashRoleForCard(
+  card: VisibleCard,
+): "economy" | "scoring_protection" | "tag_punish" | "ambush" | "low_value" | "unknown" {
+  if (card.definitionId === "simple_upgrade") return "low_value";
+  const roles = rolesForCardId(card.definitionId);
+  if (
+    roles.some(
+      (role) =>
+        role.includes("agenda_steal_tax") ||
+        role.includes("access_tax") ||
+        role.includes("remote_agenda_protection") ||
+        role.includes("scoring") ||
+        role.includes("protect_remote") ||
+        role.includes("remote_upgrade_tax"),
+    )
+  )
+    return "scoring_protection";
+  if (roles.some((role) => role.includes("economy"))) return "economy";
+  if (
+    roles.some(
+      (role) =>
+        role.includes("tag") ||
+        role.includes("trace") ||
+        role.includes("punish") ||
+        role.includes("damage"),
+    )
+  )
+    return "tag_punish";
+  if (roles.some((role) => role.includes("ambush") || role.includes("trap")))
+    return "ambush";
+  return "unknown";
+}
+
 function runnerInstallPriority(input: AiDecisionInput, action: LegalAction): number {
   const features = extractRunnerFeatures(input);
   const breakerPressure = assessVisibleBreakerPressure(input);
   const roles = rolesForAction(input, action);
   const remainingCredits = features.credits - actionCreditCost(action);
   let priority = 85;
+  priority -= runnerDuplicateInstallPriorityPenalty(input, action);
   if (breakerPressure.matchingInstallActionIds.has(action.actionId)) priority += 120;
   if (roles.some((role) => role.startsWith("breaker_") && !features.rigRoles.has(role))) priority += 45;
   if (roles.includes("memory") || roles.includes("memory_support")) priority += features.memoryRemaining <= 1 ? 70 : 20;
+  if (roles.some(isRunnerPressureRole)) {
+    const definitionId = sourceDefinitionIdForAction(input, action);
+    const target =
+      definitionId && centralPressureCardSupportsTarget(definitionId, "rd", true)
+        ? "rd"
+        : definitionId && centralPressureCardSupportsTarget(definitionId, "hq", true)
+          ? "hq"
+          : bestCentralPressureTargetForVisibleBoard(
+              input,
+              features,
+              reconstructBeliefState(input),
+            );
+    priority += target ? 42 : 12;
+  }
   if (roles.includes("efficient_breaker")) priority += 12;
   if (roles.includes("flex_breaker")) priority += 10;
   if (remainingCredits >= 2) priority += 15;
   if (remainingCredits < 2) priority -= 55;
   if (roles.some((role) => role.startsWith("breaker_") && features.rigRoles.has(role))) priority -= 18;
   return priority;
+}
+
+function runnerDuplicateInstallPriorityPenalty(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  if (!isRunnerDuplicateInstall(input, action)) return 0;
+  return isRunnerLowValueDuplicateInstall(input, action) ? 220 : 70;
 }
 
 function runnerInstalledEconomyPriority(input: AiDecisionInput, action: LegalAction): number {
@@ -1780,6 +3296,66 @@ function isStrategicBreakerTarget(server: AiDecisionInput["playerView"]["servers
 
 function actionCreditCost(action: LegalAction): number {
   return action.costs.reduce((sum, cost) => sum + (Number.isFinite(cost.credits) ? cost.credits ?? 0 : 0), 0);
+}
+
+function isRunnerDuplicateInstall(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.type !== "install_card") return false;
+  const definitionId = sourceDefinitionIdForAction(input, action);
+  if (!definitionId) return false;
+  return (
+    input.playerView.own.rig?.some(
+      (card) => card.known && card.definitionId === definitionId,
+    ) === true
+  );
+}
+
+function isRunnerLowValueDuplicateInstall(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (!isRunnerDuplicateInstall(input, action)) return false;
+  const definitionId = sourceDefinitionIdForAction(input, action);
+  if (!definitionId) return false;
+  const roles = rolesForCardId(definitionId);
+  if (definitionId === "onr_v1_165_junkyard-bbs") return true;
+  if (roles.some((role) => role === "memory" || role === "memory_support"))
+    return false;
+  if (roles.some(isRunnerPressureRole)) return false;
+  if (roles.some((role) => role.startsWith("breaker_"))) return true;
+  return roles.some(
+    (role) =>
+      role === "resource" ||
+      role === "setup" ||
+      role === "draw" ||
+      role === "tag_risk" ||
+      isRunnerEconomyRole(role),
+  );
+}
+
+function sourceDefinitionIdForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string | undefined {
+  if (action.source === "basic_action" || action.source === "game_rule")
+    return undefined;
+  return findVisibleCard(input, action.source)?.definitionId;
+}
+
+function isRunnerEconomyRole(role: string): boolean {
+  return role === "economy" || role === "tempo" || role.includes("economy");
+}
+
+function isRunnerPressureRole(role: string): boolean {
+  return (
+    role === "run_pressure" ||
+    role === "access" ||
+    role.includes("pressure") ||
+    role.includes("interface") ||
+    role.includes("multiaccess")
+  );
 }
 
 function numberPayload(action: LegalAction, key: string): number {
@@ -2068,7 +3644,7 @@ function explanationForPlan(kind: RunnerPlanDebug["planKind"]): string {
 
 function scrubPlanEvidence(evidence: string[]): string[] {
   const forbidden = ["cardInstances", "privatePayload", "sessionToken", "reconnectToken", "joinToken", "tokenHash", "fullGameState", "FullState", "corp_simple_"];
-  return evidence.filter((entry) => !forbidden.some((needle) => entry.includes(needle))).slice(0, 18);
+  return evidence.filter((entry) => !forbidden.some((needle) => entry.includes(needle))).slice(0, 80);
 }
 
 function confidence(score: number, actionCount: number): number {
