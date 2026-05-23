@@ -381,6 +381,45 @@ describe("MVP 0.1 engine foundation", () => {
     expect(validateGameState(first).ok).toBe(true);
   });
 
+  it("lets the Corp rez non-ICE root cards, but not score agendas, between Runner actions", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "runner-action-paid-window-rez",
+        runnerDeck: ONR_V1_6_3_RUNNER_DECK,
+        corpDeck: ONR_V1_6_3_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.corp.credits = 10;
+    const upgradeId = putCorpRootInRemote(
+      state,
+      "onr_v1_350_antiquated-interface-routines",
+    );
+    const agendaId = putCorpRootInRemote(state, "onr_v1_203_hostile-takeover");
+    state.cardInstances[agendaId] = {
+      ...state.cardInstances[agendaId]!,
+      advancementCounters: 99,
+    };
+
+    const corpActions = getLegalActions(state, "corp");
+    expect(corpActions.some((action) => action.type === "score_agenda")).toBe(
+      false,
+    );
+    const rezAction = corpActions.find(
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === upgradeId &&
+        action.payload?.runnerActionPaidWindowRez === true,
+    );
+    expect(rezAction).toBeDefined();
+    expect(getLegalActions(state, "runner").length).toBeGreaterThan(0);
+
+    state = apply(state, "corp", (action) => action.actionId === rezAction?.actionId);
+    expect(state.timingPoint).toBe("runner_action.main");
+    expect(state.activeSide).toBe("runner");
+    expect(state.cardInstances[upgradeId]?.rezzed).toBe(true);
+  });
+
   it("shuffles sorted Corp agenda blocks without preserving the editor order bias", () => {
     const corpMasterDeck: DeckDefinition = {
       id: "local_corp_master_shuffle_regression",
