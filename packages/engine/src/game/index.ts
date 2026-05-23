@@ -7,6 +7,12 @@ export { buildPlayerViewProjection, playerViewFor } from "./player-view";
 export { hashGameState, hashState } from "./hash";
 export { replayGameEvents } from "./replay";
 export { validateGameState, validateGameStateForDebug } from "./validation";
+export {
+  buildLegalAction,
+  makeActionId,
+  stableLegalActionPayload,
+  type LegalActionMetadata,
+} from "./turn";
 export type {
   CorpInstallCostOptions,
   CorpRezCostOptions,
