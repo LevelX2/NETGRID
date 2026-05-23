@@ -317,16 +317,17 @@
       "roles": [
         "program",
         "virus",
-        "recurring"
+        "hq_run_reward",
+        "economy"
       ],
       "planRoles": [
         "build_rig"
       ],
       "requiredMechanics": [
-        "install_program",
-        "virus",
-        "purge",
-        "recurring_credit"
+        "successful_hq_run_counter",
+        "butcher_boy_counter",
+        "start_turn_credit_from_counter_pairs",
+        "virus_purge"
       ],
       "valueHints": {
         "tempo": 1,
@@ -347,23 +348,25 @@
       "roles": [
         "program",
         "virus",
-        "recurring"
+        "rd_run_reward",
+        "corp_start_turn_pressure"
       ],
       "planRoles": [
         "build_rig"
       ],
       "requiredMechanics": [
-        "install_program",
-        "virus",
-        "purge",
-        "recurring_credit"
+        "successful_rd_run_counter",
+        "cascade_counter",
+        "corp_start_turn_trash_faceup_rd",
+        "virus_purge"
       ],
       "valueHints": {
         "tempo": 1,
         "economy": 1
       },
       "riskTags": [
-        "counter_state"
+        "counter_state",
+        "hidden_zone_projection"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -578,23 +581,25 @@
       "roles": [
         "program",
         "virus",
-        "recurring"
+        "rd_run_reward",
+        "hidden_zone_tool"
       ],
       "planRoles": [
         "build_rig"
       ],
       "requiredMechanics": [
-        "install_program",
-        "virus",
-        "purge",
-        "recurring_credit"
+        "successful_rd_run_counter",
+        "thought_counter",
+        "top_rd_look_threshold_3",
+        "virus_purge"
       ],
       "valueHints": {
         "tempo": 1,
         "economy": 1
       },
       "riskTags": [
-        "counter_state"
+        "counter_state",
+        "hidden_zone_projection"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2047,26 +2052,25 @@
       "roles": [
         "program",
         "virus",
-        "rd_pressure"
+        "rd_run_reward",
+        "corp_draw_pressure"
       ],
       "planRoles": [
         "build_rig",
         "pressure_rnd"
       ],
       "requiredMechanics": [
-        "install_program",
         "successful_rd_run_counter",
-        "corp_start_turn_draw",
-        "virus",
-        "purge"
+        "skivviss_counter",
+        "corp_start_turn_extra_draw",
+        "virus_purge"
       ],
       "valueHints": {
         "tempo": 1,
         "pressure": 2
       },
       "riskTags": [
-        "counter_state",
-        "start_turn_trigger"
+        "counter_state"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [

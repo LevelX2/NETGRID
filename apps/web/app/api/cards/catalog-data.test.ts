@@ -740,6 +740,78 @@ describe("catalog API filters", () => {
     });
   });
 
+  it("serves corrected Runner virus-counter catalog and shared text", () => {
+    const expectations = [
+      {
+        cardId: "onr_v1_009_butcher-boy",
+        catalogContains: ["Butcher Boy counter", "start of each of your turns"],
+        sharedContains: ["Butcher Boy counter", "start of each of your turns"],
+      },
+      {
+        cardId: "onr_v1_010_cascade",
+        catalogContains: ["Cascade counter", "trash faceup one card stored in R&D"],
+        sharedContains: ["Cascade counter", "trash faceup one card stored in R&D"],
+      },
+      {
+        cardId: "onr_v1_017_deep-thought",
+        catalogContains: ["Thought counter", "look at the top card of R&D"],
+        sharedContains: ["Thought counter", "look at the top card of R&D"],
+      },
+      {
+        cardId: "onr_v1_064_skivviss",
+        catalogContains: ["Skivviss counter", "draw one extra card"],
+        sharedContains: ["Skivviss counter", "draw one extra card"],
+      },
+    ];
+
+    for (const expectation of expectations) {
+      const response = catalogDetailResponse(expectation.cardId);
+      expect(response.status, expectation.cardId).toBe(200);
+      const body = response.body as { card: { text: string } };
+      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+
+      for (const snippet of expectation.catalogContains) {
+        expect(body.card.text, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.sharedContains) {
+        expect(sharedText, expectation.cardId).toContain(snippet);
+      }
+      expect(body.card.text, expectation.cardId).not.toContain(
+        "recurring credit for run costs",
+      );
+      expect(sharedText, expectation.cardId).not.toContain(
+        "recurring credit for run costs",
+      );
+    }
+  });
+
+  it("exposes corrected Runner virus-counter AI hints", () => {
+    expectCatalogAiHints({
+      title: "Butcher Boy counter economy",
+      cardId: "onr_v1_009_butcher-boy",
+      roles: ["hq_run_reward", "economy"],
+      requiredMechanics: ["butcher_boy_counter"],
+    });
+    expectCatalogAiHints({
+      title: "Cascade start-turn trash",
+      cardId: "onr_v1_010_cascade",
+      roles: ["corp_start_turn_pressure"],
+      requiredMechanics: ["cascade_counter", "corp_start_turn_trash_faceup_rd"],
+    });
+    expectCatalogAiHints({
+      title: "Deep Thought hidden look",
+      cardId: "onr_v1_017_deep-thought",
+      roles: ["hidden_zone_tool"],
+      requiredMechanics: ["thought_counter", "top_rd_look_threshold_3"],
+    });
+    expectCatalogAiHints({
+      title: "Skivviss draw pressure",
+      cardId: "onr_v1_064_skivviss",
+      roles: ["corp_draw_pressure"],
+      requiredMechanics: ["skivviss_counter", "corp_start_turn_extra_draw"],
+    });
+  });
+
   it("shows promoted longtail card details in the web catalog API", () => {
     for (const cardId of [
       "onr_v1_026_false-echo",

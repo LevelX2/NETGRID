@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-05-23-runner-virus-counter-display-runtime-alignment
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-23
-startedAt:
-completedAt:
+startedAt: 2026-05-23
+completedAt: 2026-05-23
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - data/cards/originalset-v1-cards.json
+  - data/ai/ai-card-hints-active.json
+  - packages/shared/src/index.ts
+  - apps/web/app/api/cards/catalog-data.test.ts
+checks:
+  - node -e "JSON.parse(require('fs').readFileSync('data/cards/originalset-v1-cards.json','utf8')); JSON.parse(require('fs').readFileSync('data/ai/ai-card-hints-active.json','utf8')); console.log('json ok')"
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/web test app/api/cards/catalog-data.test.ts
+  - corepack pnpm --filter @netgrid/engine test src/index.test.ts -t "Butcher Boy|Cascade|Deep Thought|Skivviss|virus CardImplementations"
 ---
 
 # Runner-Viruskarten: Katalogtexte und Counter-Funktion gegen Spoiler prüfen
@@ -61,4 +69,8 @@ Runner-Viruskarten mit falschen generischen Recurring-/Virus-Platzhaltern sollen
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-05-23.
+
+- Katalogtexte, Shared-`rulesText` und AI-Hints fuer Butcher Boy, Cascade, Deep Thought und Skivviss gegen `docs/source/Runnerspoiler 1.0.txt` korrigiert.
+- Recurring-Credit-Platzhalter aus Cascade, Deep Thought und allen vier Katalogeintraegen entfernt.
+- Bestehende CardImplementations und fokussierte Engine-Regressionen fuer Counter, Start-of-turn-Folgen, Hidden-Zone-Schutz und Purge-nahe Viruspfade verifiziert.
