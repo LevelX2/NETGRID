@@ -2040,7 +2040,13 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   const sharedRunWindow =
     state.timingPoint === "run.approach_ice" ||
     state.timingPoint === "run.jack_out_window";
-  if (side !== state.activeSide && !sharedRunWindow)
+  const inactiveCorpRunnerActionPaidWindow =
+    state.timingPoint === "runner_action.main" && side === "corp";
+  if (
+    side !== state.activeSide &&
+    !sharedRunWindow &&
+    !inactiveCorpRunnerActionPaidWindow
+  )
     return [];
 
   if (state.timingPoint === "corp_draw.mandatory_draw") {
@@ -2059,8 +2065,10 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
 
   if (state.timingPoint === "corp_action.main")
     return side === "corp" ? corpMainActions(state) : [];
-  if (state.timingPoint === "runner_action.main")
-    return side === "runner" ? runnerMainActions(state) : [];
+  if (state.timingPoint === "runner_action.main") {
+    if (side === "runner") return runnerMainActions(state);
+    return side === "corp" ? corpRunnerActionPaidWindowActions(state) : [];
+  }
   if (state.timingPoint === "run.approach_ice") {
     if (isApproachIceExposeViewingWindowOpen(state))
       return side === "runner" ? runnerApproachIceExposeViewingActions(state) : [];
@@ -2418,6 +2426,62 @@ export function isHiddenInfoBarrierEvent(event: GameEvent): boolean {
     "trash_accessed_card",
     "play_operation",
   ].includes(event.type);
+}
+
+function corpRunnerActionPaidWindowActions(state: GameState): LegalAction[] {
+  const actions: LegalAction[] = [];
+  for (const server of state.corp.servers) {
+    for (const id of server.root) {
+      const definition = definitionFor(state, id);
+      const instance = mustInstance(state.cardInstances, id);
+      if (
+        (definition.type !== "asset" && definition.type !== "upgrade") ||
+        instance.rezzed
+      )
+        continue;
+      const rezCost = rezCostForCard(state, id);
+      if (state.corp.credits < rezCost) continue;
+      if (
+        isAcmeSavingsAndLoanDefinition(definition.id) &&
+        corpAgendaPointTotal(state) < 1
+      )
+        continue;
+      const rezCostReductionSourceDefinitionIds =
+        rezCostReductionSourceDefinitionIdsFor(state, id, definition);
+      const acmeRezCost = isAcmeSavingsAndLoanDefinition(definition.id)
+        ? {
+            agendaPointCost: 1,
+            acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
+          }
+        : {};
+      actions.push(
+        action(
+          state,
+          "corp",
+          "rez_ice",
+          `${definition.title} in ${server.label} rezzen`,
+          id,
+          [{ credits: rezCost }],
+          {
+            cardId: id,
+            rootRez: true,
+            runnerActionPaidWindowRez: true,
+            serverId: server.id,
+            ...acmeRezCost,
+            ...(rezCostReductionSourceDefinitionIds.length > 0
+              ? {
+                  rezCostReductionSourceDefinitionIds:
+                    rezCostReductionSourceDefinitionIds.join(","),
+                  rezCostReductionAmount: (definition.rezCost ?? 0) - rezCost,
+                  rezCostPaid: rezCost,
+                }
+              : {}),
+          },
+        ),
+      );
+    }
+  }
+  return actions;
 }
 
 function corpMainActions(state: GameState): LegalAction[] {
@@ -11076,8 +11140,28 @@ function rezCard(
   if (rootRez && startSpeedTrapRezInterruptChoice(state, cardId, legalAction))
     return;
   if (rootRez && resolveCorpRootRezEffect(state, cardId, legalAction)) return;
-  if (rootRez) return;
+  if (rootRez) {
+    continueAfterCorpRootRezIfWindowIsComplete(state, legalAction);
+    return;
+  }
   beginEncounter(state, cardId as CardInstanceId, legalAction);
+}
+
+function continueAfterCorpRootRezIfWindowIsComplete(
+  state: GameState,
+  legalAction?: LegalAction,
+): void {
+  const run = state.run;
+  if (
+    state.timingPoint !== "run.approach_ice" ||
+    run?.phase !== "approach_ice" ||
+    !run.approachedIceId ||
+    corpRunRootRezActions(state).length > 0
+  )
+    return;
+  const approachedIce = mustInstance(state.cardInstances, run.approachedIceId);
+  if (!approachedIce.rezzed) return;
+  beginEncounter(state, run.approachedIceId, legalAction);
 }
 
 function proteusVariableIceStateForRezAction(
@@ -11843,6 +11927,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     }
   }
   for (const index of payOrEndRunIndexesForThisContinue) {
+    if (ended) break;
     if (paidPayOrEndRunIndexes.has(index)) continue;
     const alreadyResolved = (legalAction?.resolvedEffects ?? []).some(
       (effect) =>

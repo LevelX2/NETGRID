@@ -72,6 +72,8 @@
   --z-card-choice-overlay: 240;
   --z-access-reveal-overlay: 320;
   --z-card-tooltip-overlay: 1001;
+  --z-active-match-resource-strip: 165;
+  --z-active-match-topbar: 170;
   --accent-mix-bg: #0b1117;
   --accent-mix-text: #ffffff;
   --access-modal-bg: #101820;
@@ -132,7 +134,7 @@ select {
 .app.activeMatch > .topbar {
   position: sticky;
   top: 0;
-  z-index: 80;
+  z-index: var(--z-active-match-topbar);
 }
 
 .app.activeMatch.topbarStickyDisabled > .topbar {
@@ -4015,11 +4017,66 @@ select {
   --turn-action-header-accent: var(--runner-zone-accent);
 }
 
+.turnActionHeaderTop {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
 .turnActionHeader h2 {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
   font-size: 14px;
   line-height: 1.2;
   white-space: pre-wrap;
+}
+
+.priorityHoldToggle {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--turn-action-header-accent), var(--line) 36%);
+  border-radius: 6px;
+  color: color-mix(in srgb, var(--turn-action-header-accent), var(--text) 22%);
+  background: color-mix(in srgb, var(--turn-action-header-accent), transparent 90%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
+  cursor: pointer;
+}
+
+.priorityHoldToggle:hover,
+.priorityHoldToggle:focus-visible {
+  border-color: color-mix(in srgb, var(--turn-action-header-accent), white 18%);
+  background: color-mix(in srgb, var(--turn-action-header-accent), transparent 82%);
+  outline: none;
+}
+
+.priorityHoldToggle.active {
+  border-color: color-mix(in srgb, var(--turn-action-header-accent), white 28%);
+  color: var(--text);
+  background: color-mix(in srgb, var(--turn-action-header-accent), var(--panel) 42%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.12),
+    0 0 0 2px color-mix(in srgb, var(--turn-action-header-accent), transparent 72%);
+}
+
+.priorityHoldTooltip {
+  position: fixed;
+  z-index: 4000;
+  pointer-events: none;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--text), var(--line) 72%);
+  border-radius: 8px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel), black 12%);
+  box-shadow: 0 14px 36px rgb(0 0 0 / 0.34);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
 }
 
 .actionAvailability {
@@ -8402,6 +8459,22 @@ select,
   accent-color: var(--runner);
 }
 
+.resourceStripSettings {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) minmax(190px, auto);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--settings-bg);
+}
+
+.resourceStripModeSelector {
+  grid-template-columns: repeat(3, minmax(50px, 1fr));
+}
+
 .audioSettings {
   grid-column: 1 / -1;
   display: grid;
@@ -8627,6 +8700,130 @@ select,
 .matchStrip {
   background: var(--match-strip-bg);
   color: var(--match-strip-text);
+}
+
+.matchResourceStrip {
+  display: none;
+  position: fixed;
+  top: var(--resource-strip-top, 0px);
+  left: 0;
+  right: 0;
+  z-index: var(--z-active-match-resource-strip);
+  box-sizing: border-box;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel), var(--bg) 8%);
+  box-shadow: 0 10px 18px rgb(0 0 0 / 0.18);
+}
+
+.app.resourceStrip-on .matchResourceStrip {
+  display: grid;
+}
+
+.resourceStripSide,
+.resourceStripTurn,
+.resourceStripMetric {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.resourceStripSide {
+  gap: 7px;
+  padding: 4px 7px;
+  border: 1px solid color-mix(in srgb, var(--side-status-accent, var(--line)), var(--line) 52%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--side-status-accent, var(--section-bg)), var(--section-bg) 86%);
+}
+
+.resourceStripSide.side-corp,
+.resourceStripTurn.side-corp {
+  --side-status-accent: var(--corp-status-accent);
+}
+
+.resourceStripSide.side-runner,
+.resourceStripTurn.side-runner {
+  --side-status-accent: var(--chronicle-run);
+}
+
+.resourceStripSide:last-child {
+  justify-content: flex-end;
+}
+
+.resourceStripSideLabel {
+  flex: 0 1 auto;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resourceStripMetric {
+  flex: 0 0 auto;
+  gap: 3px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.resourceStripMetric svg {
+  color: var(--agenda);
+}
+
+.resourceStripMetric .creditCoin {
+  width: 13px;
+  height: 13px;
+  border-width: 1px;
+}
+
+.resourceStripMetric.quiet {
+  color: var(--muted);
+}
+
+.resourceStripTurn {
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--side-status-accent, var(--line)), var(--line) 42%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--side-status-accent, var(--section-bg)), var(--section-bg) 80%);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.resourceStripTurnLabel {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.resourceStripTurn strong,
+.resourceStripMetric strong {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.resourceStripTurn .actionSlotsInline {
+  display: inline-flex;
+  min-width: 0;
+}
+
+.resourceStripTurn .actionSlots {
+  min-height: 13px;
+  gap: 3px;
+}
+
+.resourceStripTurn .actionSlot {
+  width: 11px;
+  height: 11px;
 }
 
 .main {
@@ -10225,6 +10422,10 @@ select,
 }
 
 @media (max-width: 1180px) {
+  .app.resourceStrip-auto.resourceStripVisible .matchResourceStrip {
+    display: grid;
+  }
+
   .main {
     grid-template-columns: 1fr;
   }
@@ -10349,6 +10550,31 @@ select,
 }
 
 @media (max-width: 720px) {
+  .matchResourceStrip {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 5px;
+    padding: 5px 7px;
+  }
+
+  .resourceStripTurn {
+    grid-column: 1 / -1;
+    order: 3;
+    justify-content: center;
+  }
+
+  .resourceStripSide {
+    gap: 5px;
+    padding-inline: 6px;
+  }
+
+  .resourceStripSideLabel {
+    max-width: 9ch;
+  }
+
+  .resourceStripMetric {
+    font-size: 11px;
+  }
+
   .runnerGripHeapLayout {
     grid-template-columns: minmax(0, 1fr);
   }

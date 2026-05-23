@@ -1226,6 +1226,26 @@ export type CounterDisplay = {
   usageHint?: CounterUsageHint;
 };
 
+export type VisibleEffectiveSubroutine = {
+  id: string;
+  type: SubroutineType;
+  amount?: number;
+  breakTags?: string[];
+  sourceDefinitionId?: CardDefinitionId;
+  sourceTitle?: string;
+  dynamicSourceKind?: "additional_subroutine" | "run_duration_additional_subroutine";
+};
+
+export type VisibleEffectiveIceRunQuote = {
+  iceInstanceId: CardInstanceId;
+  iceDefinitionId: CardDefinitionId;
+  effectiveStrength: number;
+  subroutines: VisibleEffectiveSubroutine[];
+  breakSubroutineAdditionalCostPerSubroutine?: number;
+  breakSubroutineCostSourceDefinitionIds?: CardDefinitionId[];
+  breakSubroutineCostSourceTitles?: string[];
+};
+
 export type VisibleCard = {
   instanceId: CardInstanceId;
   known: boolean;
@@ -1254,6 +1274,7 @@ export type VisibleCard = {
   selectedServerLabel?: string;
   owner?: Side;
   controller?: Side;
+  effectiveRunQuote?: VisibleEffectiveIceRunQuote;
 };
 
 export type PlayerView = {
