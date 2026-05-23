@@ -1741,6 +1741,36 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     expect(retainedAccessRevealEvent([redactedRdAccess], null)).toBeNull();
   });
+
+  it("explains Red Herrings steal costs when the agenda can be stolen", () => {
+    const steal = {
+      ...legalAction("runner", "steal_agenda", "agenda_1", "Priority Requisition stehlen", {
+        cardId: "agenda_1",
+        stealAdditionalCost: 5,
+        stealCost: 5,
+        stealCostSourceTitles: "Red Herrings"
+      }),
+      costs: [{ credits: 5 }]
+    };
+
+    expect(accessRevealStatusLabel({ type: "agenda" }, [steal], "runner", "runner", "Remote 1")).toBe(
+      "Red Herrings: 5 Credits zusätzliche Stehlkosten. Diese Agenda kann jetzt gestohlen werden."
+    );
+  });
+
+  it("explains Red Herrings when the Runner cannot pay the steal cost", () => {
+    const decline = legalAction("runner", "decline_trash", "game_rule", "Priority Requisition nicht stehlen", {
+      cardId: "agenda_1",
+      stealAdditionalCost: 5,
+      stealCost: 5,
+      stealCostSourceTitles: "Red Herrings",
+      stealBlockedByCost: true
+    });
+
+    expect(accessRevealStatusLabel({ type: "agenda" }, [decline], "runner", "runner", "Remote 1")).toBe(
+      "Red Herrings: 5 Credits zusätzliche Stehlkosten. Du hast nicht genug Credits, um diese Agenda zu stehlen."
+    );
+  });
 });
 
 function legalAction(side: Side, type: LegalAction["type"], source: LegalAction["source"], label: string, payload?: LegalAction["payload"], timingPoint: LegalAction["timingPoint"] = "corp_action.main"): LegalAction {

@@ -702,6 +702,8 @@ export function serverDisplayLabel(serverIdOrLabel: string): string {
 export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actions: LegalAction[], actorSide: Side, viewerSide: Side, serverLabel: string): string {
   const fromArchives = serverDisplayLabel(serverLabel) === "Archive";
   if (actorSide !== viewerSide) return observedAccessStatusLabel(card, actorSide, fromArchives);
+  const stealCostStatus = accessRevealStealCostStatus(actions);
+  if (stealCostStatus) return stealCostStatus;
   if (actions.some((action) => action.type === "steal_agenda")) return "Diese Agenda kann jetzt gestohlen werden.";
   if (fromArchives && (card.type === "asset" || card.type === "upgrade")) {
     return "Du hast diese Karte im Archiv gesehen. Du kannst weiter zugreifen oder den Zugriff abschließen.";
@@ -711,6 +713,33 @@ export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashC
   if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
   if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
   return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
+}
+
+function accessRevealStealCostStatus(actions: LegalAction[]): string | null {
+  const stealAction = actions.find((action) => action.type === "steal_agenda");
+  const blockedAction = actions.find(
+    (action) => action.type === "decline_trash" && action.payload?.stealBlockedByCost === true,
+  );
+  const sourceAction = stealAction ?? blockedAction;
+  if (!sourceAction) return null;
+  const additionalCost = positiveInteger(sourceAction.payload?.stealAdditionalCost) || positiveInteger(sourceAction.payload?.stealCost);
+  if (additionalCost <= 0) return null;
+  const sourceLabel = stealCostSourceLabel(sourceAction.payload?.stealCostSourceTitles);
+  const costSummary = `${sourceLabel}: ${additionalCost} ${additionalCost === 1 ? "Credit" : "Credits"} zusätzliche Stehlkosten.`;
+  if (blockedAction && !stealAction)
+    return `${costSummary} Du hast nicht genug Credits, um diese Agenda zu stehlen.`;
+  return `${costSummary} Diese Agenda kann jetzt gestohlen werden.`;
+}
+
+function stealCostSourceLabel(value: unknown): string {
+  if (typeof value !== "string") return "Stehlkosten";
+  const titles = value
+    .split(",")
+    .map((title) => normalizeVisibleTerms(title.trim()))
+    .filter(Boolean);
+  if (titles.length === 0) return "Stehlkosten";
+  if (titles.length === 1) return titles[0]!;
+  return titles.slice(0, -1).join(", ") + " und " + titles.at(-1);
 }
 
 export function retainedAccessRevealEvent(events: PublicGameEvent[], dismissedEventId: string | null): PublicGameEvent | null {
