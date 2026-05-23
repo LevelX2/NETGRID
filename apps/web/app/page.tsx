@@ -183,6 +183,8 @@ import {
   deriveMatchStart,
   humanAiSideLabel,
   matchFormatCardLabel,
+  matchStartLobbyBlocksSetup,
+  matchStartPlayerClockLabel,
   matchStartSummary,
   parseJoinLinkInput,
   playModeCardLabel,
@@ -4304,7 +4306,7 @@ export default function Page() {
     if (connection === "connecting") return "Verbindet";
     return "Offline";
   }, [connection, session]);
-  const showingStartLobby = Boolean(session && lobby);
+  const startLobbyBlocksSetup = Boolean(session && lobby && matchStartLobbyBlocksSetup(lobby.matchStatus));
   const showingSessionRecovery = Boolean(session && !payload && !lobby);
   const hasRecoveryStartTab = Boolean(showingSessionRecovery || recentSession);
   const activeStartTab = recoveryTabSelected && hasRecoveryStartTab ? "resume" : mode;
@@ -4390,7 +4392,7 @@ export default function Page() {
           ) : null}
           <div className={`entryContent ${entryTab === "decks" ? "deckEntryContent" : ""}`}>
           {notice ? <p className="notice entryNotice">{notice}</p> : null}
-          {entryTab === "play" && !showingStartLobby ? (
+          {entryTab === "play" && !startLobbyBlocksSetup ? (
           <section className="setupPanel">
             <div className={`tabs ${hasRecoveryStartTab ? "threeTabs" : ""}`}>
               <button className={`tab ${activeStartTab === "host" ? "active" : ""}`} onClick={() => selectStartTab("host")}>
@@ -6063,6 +6065,7 @@ function StartLobbyPanel({
           <div className="lobbyFacts">
             <span>{matchFormatLabel(start.matchFormat)}</span>
             <span title="Agenda-Punkte, die für den Spielsieg erreicht werden müssen.">Zielwert {start.agendaPointsToWin} Agenda-Punkte</span>
+            <span title="Spielerzeit-Einstellung für dieses Match.">{matchStartPlayerClockLabel(lobby.playerClock)}</span>
             <span>Countdown {start.countdownSeconds}s</span>
           </div>
           <div className="lobbyParticipants">
@@ -13273,6 +13276,7 @@ function lobbyFromInitialResponse(response: CreateMatchResponse, side: Side): Lo
     side,
     eventTail: [],
     opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: false },
+    ...(response.playerClock ? { playerClock: response.playerClock } : {}),
     ...(response.pendingDeckHandshake ? { pendingDeckHandshake: { required: true, message: "Die Lobby wartet auf die Deckauswahl von Teilnehmer B." } } : {}),
     ...(response.lobby ? { startLobby: response.lobby } : {})
   };
@@ -13286,6 +13290,7 @@ function lobbyFromJoinedResponse(response: JoinMatchResponse): LobbyClientPayloa
     side: response.side,
     eventTail: response.eventTail ?? [],
     opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false },
+    ...(response.playerClock ? { playerClock: response.playerClock } : {}),
     ...(response.lobby ? { startLobby: response.lobby } : {})
   };
 }
