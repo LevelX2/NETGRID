@@ -784,6 +784,156 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(assertAiInputIsSideSafe(hiddenInput)).toBe(true);
   });
 
+  it("counts Tutor's active run-duration subroutine in runner visible path costs", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-visible-run-quote-tutor",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "ai_visible_run_quote_tutor_runner",
+          name: "AI Visible Run Quote Tutor Runner",
+          cards: [
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "ai_visible_run_quote_tutor_corp",
+          name: "AI Visible Run Quote Tutor Corp",
+          cards: [
+            { id: "onr_v1_274_tutor", quantity: 1 },
+            { id: "onr_v1_279_wall-of-static", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 10;
+    moveRunnerProgramToRig(state, "onr_v1_031_hammer");
+    const innerWallId = putCorpIceOnServer(
+      state,
+      "rd",
+      "onr_v1_279_wall-of-static",
+    );
+    const tutorId = putCorpIceOnServer(state, "rd", "onr_v1_274_tutor");
+    for (const id of [innerWallId, tutorId]) {
+      state.cardInstances[id] = {
+        ...state.cardInstances[id]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+    });
+    const rdServer = input.playerView.servers.find(
+      (server) => server.id === "rd",
+    );
+    const innerWallQuote = rdServer?.ice.find(
+      (ice) => ice.instanceId === innerWallId,
+    )?.effectiveRunQuote;
+
+    expect(innerWallQuote?.subroutines.map((subroutine) => subroutine.type)).toEqual([
+      "end_the_run",
+      "end_the_run",
+    ]);
+    expect(innerWallQuote?.subroutines[1]).toMatchObject({
+      sourceDefinitionId: "onr_v1_274_tutor",
+      sourceTitle: "Tutor",
+      dynamicSourceKind: "run_duration_additional_subroutine",
+    });
+    expect(
+      assessKnownRezzedIcePath(
+        rdServer?.ice ?? [],
+        input.playerView.own.rig ?? [],
+        1,
+        rdServer?.root ?? [],
+      ),
+    ).toEqual({ blocked: true, visibleBreakCost: 2 });
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
+  it("counts Virizz's active run-duration break tax in runner visible path costs", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-visible-run-quote-virizz",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "ai_visible_run_quote_virizz_runner",
+          name: "AI Visible Run Quote Virizz Runner",
+          cards: [
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "ai_visible_run_quote_virizz_corp",
+          name: "AI Visible Run Quote Virizz Corp",
+          cards: [
+            { id: "onr_v1_277_virizz", quantity: 1 },
+            { id: "onr_v1_279_wall-of-static", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 10;
+    moveRunnerProgramToRig(state, "onr_v1_031_hammer");
+    const innerWallId = putCorpIceOnServer(
+      state,
+      "rd",
+      "onr_v1_279_wall-of-static",
+    );
+    const virizzId = putCorpIceOnServer(state, "rd", "onr_v1_277_virizz");
+    for (const id of [innerWallId, virizzId]) {
+      state.cardInstances[id] = {
+        ...state.cardInstances[id]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+    });
+    const rdServer = input.playerView.servers.find(
+      (server) => server.id === "rd",
+    );
+    const innerWallQuote = rdServer?.ice.find(
+      (ice) => ice.instanceId === innerWallId,
+    )?.effectiveRunQuote;
+
+    expect(innerWallQuote).toMatchObject({
+      breakSubroutineAdditionalCostPerSubroutine: 1,
+    });
+    expect(
+      assessKnownRezzedIcePath(
+        rdServer?.ice ?? [],
+        input.playerView.own.rig ?? [],
+        1,
+        rdServer?.root ?? [],
+      ),
+    ).toEqual({ blocked: true, visibleBreakCost: 2 });
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
   it("keeps visible run analysis invariant across hidden-info variants", () => {
     const cardsById = createRuntimeCardsById();
     const ice = runtimeVisibleIce(cardsById["onr_v1_261_quandary"]);
