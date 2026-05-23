@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-05-23-runner-icebreaker-spoiler-alignment
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-23
-startedAt:
-completedAt:
+startedAt: 2026-05-23
+completedAt: 2026-05-23
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - data/cards/originalset-v1-cards.json
+  - data/ai/ai-card-hints-active.json
+  - packages/shared/src/index.ts
+  - packages/engine/src/index.test.ts
+  - apps/web/app/api/cards/catalog-data.test.ts
+checks:
+  - node -e "JSON.parse(require('fs').readFileSync('data/cards/originalset-v1-cards.json','utf8')); JSON.parse(require('fs').readFileSync('data/ai/ai-card-hints-active.json','utf8')); console.log('json ok')"
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/web test app/api/cards/catalog-data.test.ts
+  - corepack pnpm --filter @netgrid/engine test src/index.test.ts -t "P3.44|P3.45|Ramming Piston|Jackhammer|core runner breakers"
 ---
 
 # Runner-Icebreaker: Spoilertexte, Kosten und Sonderregeln abgleichen
@@ -68,4 +77,9 @@ Die aktiven Runner-Icebreaker-Texte und ihre Runtime-Funktion sollen gegen `docs
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-05-23.
+
+- Katalog- und Shared-Texte fuer Codeslinger, Dogcatcher, Dropp, Jackhammer, Raffles, Ramming Piston und Snowball gegen `docs/source/Runnerspoiler 1.0.txt` korrigiert.
+- Shared-Definitionen fuer Codeslinger/Raffles-Kosten, Dropp-Kosten, Dogcatcher-Zieltext, Jackhammer-/Ramming-Stealth-Verlusttext, Ramming-`Noisy`-Subtype und Snowball-Run-Staerke angeglichen.
+- AI-Hints fuer die geaenderten Runner-Icebreaker nachgezogen, insbesondere Dogcatcher-Restriktion, Dropp-Ende-des-Runs und Snowball-Run-Staerke.
+- Bestehende Engine-CardImplementations fuer Dogcatcher, Dropp, Jackhammer, Ramming Piston und Snowball waren funktional bereits spoilerkonform; der Ramming-Test wurde auf den jetzt korrekt sichtbaren `Noisy`-Subtype angepasst.

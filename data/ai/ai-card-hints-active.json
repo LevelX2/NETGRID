@@ -524,7 +524,9 @@
         "install_program",
         "memory",
         "subtype_icebreaker",
-        "subtype_killer"
+        "subtype_killer",
+        "break_subroutine",
+        "encounter_ice"
       ],
       "valueHints": {
         "rigCoverage": 2,
@@ -606,7 +608,7 @@
       "roles": [
         "program",
         "icebreaker",
-        "generic_breaker",
+        "restricted_breaker",
         "run_pressure"
       ],
       "planRoles": [
@@ -619,7 +621,8 @@
         "memory",
         "pump_breaker",
         "break_subroutine",
-        "encounter_ice"
+        "encounter_ice",
+        "restricted_breaker_targets"
       ],
       "valueHints": {
         "runPressure": 2,
@@ -654,7 +657,8 @@
         "memory",
         "pump_breaker",
         "break_subroutine",
-        "encounter_ice"
+        "encounter_ice",
+        "end_run_after_breaker_use"
       ],
       "valueHints": {
         "runPressure": 2,
@@ -1177,7 +1181,8 @@
         "memory",
         "pump_breaker",
         "break_subroutine",
-        "subtype_noisy"
+        "subtype_noisy",
+        "stealth_loss"
       ],
       "valueHints": {
         "runPressure": 2,
@@ -1663,7 +1668,9 @@
         "install_program",
         "memory",
         "subtype_decoder",
-        "subtype_icebreaker"
+        "subtype_icebreaker",
+        "break_subroutine",
+        "encounter_ice"
       ],
       "valueHints": {
         "runPressure": 2,
@@ -2098,7 +2105,11 @@
         "install_program",
         "memory",
         "subtype_icebreaker",
-        "subtype_killer"
+        "subtype_killer",
+        "pump_breaker",
+        "break_subroutine",
+        "encounter_ice",
+        "run_strength_modifier"
       ],
       "valueHints": {
         "rigCoverage": 2,

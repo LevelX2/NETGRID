@@ -1715,6 +1715,7 @@ function onrBreaker(params: {
   pumpCost?: number;
   iceSubtype: string;
   iceLabel: string;
+  rulesText?: string;
   extraMechanics?: string[];
 }): CardDefinition {
   const pumpText =
@@ -1739,7 +1740,9 @@ function onrBreaker(params: {
     installCost: params.installCost,
     memoryCost: params.memoryCost,
     strength: params.strength,
-    rulesText: `${params.breakCost} Credits: Break 1 ${params.iceLabel} subroutine.${pumpText}`,
+    rulesText:
+      params.rulesText ??
+      `${params.breakCost} Credits: Break 1 ${params.iceLabel} subroutine.${pumpText}`,
     abilities: [
       ...(params.pumpCost === undefined
         ? []
@@ -1774,6 +1777,7 @@ function onrUniversalBreaker(params: {
   strength: number;
   breakCost: number;
   pumpCost: number;
+  rulesText?: string;
 }): CardDefinition {
   return {
     id: params.id,
@@ -1785,7 +1789,9 @@ function onrUniversalBreaker(params: {
     installCost: params.installCost,
     memoryCost: params.memoryCost,
     strength: params.strength,
-    rulesText: `${params.breakCost} Credits: Break 1 ice subroutine. ${params.pumpCost} Credits: +1 strength.`,
+    rulesText:
+      params.rulesText ??
+      `${params.breakCost} Credits: Break 1 ice subroutine. ${params.pumpCost} Credits: +1 strength.`,
     abilities: [
       {
         id: `${params.id}_pump`,
@@ -2172,7 +2178,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 7,
     memoryCost: 1,
     strength: 3,
-    breakCost: 0,
+    breakCost: 1,
     iceSubtype: "sentry",
     iceLabel: "sentry",
   }),
@@ -2185,6 +2191,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 3,
     breakCost: 1,
     pumpCost: 1,
+    rulesText:
+      "1 Credits: Break 1 Pit Bull, Hellhound, Bloodhound, or Watchdog subroutine. 1 Credits: +1 strength.",
   }),
   onrUniversalBreaker({
     id: "onr_v1_019_dropp",
@@ -2193,8 +2201,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 3,
     memoryCost: 1,
     strength: 4,
-    breakCost: 1,
-    pumpCost: 2,
+    breakCost: 0,
+    pumpCost: 1,
+    rulesText:
+      "0 Credits: Break 1 ice subroutine. 1 Credits: +1 strength. Using Dropp ends your run.",
   }),
   onrBreaker({
     id: "onr_v1_052_raffles",
@@ -2203,7 +2213,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 7,
     memoryCost: 1,
     strength: 4,
-    breakCost: 0,
+    breakCost: 1,
     pumpCost: 2,
     iceSubtype: "code_gate",
     iceLabel: "code gate",
@@ -2463,6 +2473,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     pumpCost: 1,
     iceSubtype: "wall",
     iceLabel: "wall",
+    rulesText:
+      "0 Credits: Break 1 wall subroutine. 1 Credits: +1 strength. Whenever you break a wall subroutine with Jackhammer, lose 1 from a Stealth card, if you can.",
     extraMechanics: ["subtype_noisy"],
   }),
   onrUniversalBreaker({
@@ -2637,6 +2649,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     pumpCost: 1,
     iceSubtype: "sentry",
     iceLabel: "sentry",
+    rulesText:
+      "Snowball has +1 strength for each subroutine it has broken during a run, until the end of that run. 1 Credits: Break 1 sentry subroutine. 1 Credits: +1 strength.",
   }),
   onrBreaker({
     id: "onr_v1_072_wild-card",
@@ -7904,7 +7918,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Ramming Piston",
     side: "runner",
     type: "program",
-    subtypes: ["icebreaker"],
+    subtypes: ["icebreaker", "noisy"],
     implementationStatus: "playable_mvp",
     installCost: 4,
     memoryCost: 1,
@@ -7935,6 +7949,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "wall_breaker",
       "pump_strength",
       "stealth_loss",
+      "subtype_noisy",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

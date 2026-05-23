@@ -36994,7 +36994,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         action.type === "break_subroutine" &&
         sourceDefinition(state, action) === "onr_v1_053_ramming-piston",
     );
-    expect(cardCounterAmount(state, cloakId, "bit")).toBe(1);
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
       cardDefinitionId: "onr_v1_053_ramming-piston",

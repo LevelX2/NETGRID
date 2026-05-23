@@ -3,6 +3,7 @@ import {
   activeAiApprovedCardIds,
   PROTEUS_VISIBLE_BASELINE_CARD_IDS,
 } from "@netgrid/catalog";
+import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
 
 type CatalogAiHintExpectation = {
@@ -376,6 +377,108 @@ describe("catalog API filters", () => {
         expect(body.card.text, expectation.cardId).not.toContain(snippet);
       }
     }
+  });
+
+  it("serves corrected Runner icebreaker spoiler-aligned catalog and shared text", () => {
+    const expectations = [
+      {
+        cardId: "onr_v1_015_codeslinger",
+        catalogContains: ["1 credit: Break sentry subroutine."],
+        sharedContains: ["1 Credits: Break 1 sentry subroutine."],
+        notContains: ["0 credits: Break sentry subroutine."],
+      },
+      {
+        cardId: "onr_v1_018_dogcatcher",
+        catalogContains: ["pit bull, hellhound, bloodhound, or watchdog"],
+        sharedContains: ["Pit Bull, Hellhound, Bloodhound, or Watchdog"],
+        notContains: ["Break ice subroutine"],
+      },
+      {
+        cardId: "onr_v1_019_dropp",
+        catalogContains: [
+          "0 credits: Break ice subroutine.",
+          "1 credit: +1 strength.",
+          "Using Dropp ends your run.",
+        ],
+        sharedContains: [
+          "0 Credits: Break 1 ice subroutine.",
+          "Using Dropp ends your run.",
+        ],
+        notContains: ["2 credits: +1 strength."],
+      },
+      {
+        cardId: "onr_v1_036_jackhammer",
+        catalogContains: ["lose 1 credit, if you can, from a stealth card"],
+        sharedContains: ["lose 1 from a Stealth card, if you can"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_052_raffles",
+        catalogContains: ["1 credit: Break code gate subroutine."],
+        sharedContains: ["1 Credits: Break 1 code gate subroutine."],
+        notContains: ["0 credits: Break code gate subroutine."],
+      },
+      {
+        cardId: "onr_v1_053_ramming-piston",
+        catalogContains: [
+          "2 credits: Break wall subroutine.",
+          "lose a total of 2 credits from stealth cards",
+        ],
+        sharedContains: [
+          "[2]: Break wall subroutine.",
+          "lose a total of 2 credits from Stealth cards",
+        ],
+        notContains: ["trace limit reduced"],
+      },
+      {
+        cardId: "onr_v1_066_snowball",
+        catalogContains: [
+          "Snowball has +1 strength for each subroutine it has broken during a run",
+        ],
+        sharedContains: [
+          "Snowball has +1 strength for each subroutine it has broken during a run",
+        ],
+        notContains: [],
+      },
+    ];
+
+    for (const expectation of expectations) {
+      const response = catalogDetailResponse(expectation.cardId);
+      expect(response.status, expectation.cardId).toBe(200);
+      const body = response.body as { card: { text: string } };
+      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+
+      for (const snippet of expectation.catalogContains) {
+        expect(body.card.text, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.sharedContains) {
+        expect(sharedText, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.notContains) {
+        expect(body.card.text, expectation.cardId).not.toContain(snippet);
+        expect(sharedText, expectation.cardId).not.toContain(snippet);
+      }
+    }
+  });
+
+  it("exposes corrected Runner icebreaker AI hints", () => {
+    expectCatalogAiHints({
+      title: "Dogcatcher restriction",
+      cardId: "onr_v1_018_dogcatcher",
+      roles: ["restricted_breaker"],
+      requiredMechanics: ["restricted_breaker_targets"],
+    });
+    expectCatalogAiHints({
+      title: "Dropp end-run drawback",
+      cardId: "onr_v1_019_dropp",
+      roles: ["breaker_end_run"],
+      requiredMechanics: ["end_run_after_breaker_use"],
+    });
+    expectCatalogAiHints({
+      title: "Snowball run strength",
+      cardId: "onr_v1_066_snowball",
+      requiredMechanics: ["run_strength_modifier"],
+    });
   });
 
   it("shows promoted longtail card details in the web catalog API", () => {

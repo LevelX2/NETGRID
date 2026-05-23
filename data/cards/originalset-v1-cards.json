@@ -473,7 +473,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "0 credits: Break sentry subroutine.",
+      "text": "1 credit: Break sentry subroutine.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -569,7 +569,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "1 credit: Break ice subroutine.\n1 credit: +1 strength.",
+      "text": "1 credit: Break pit bull, hellhound, bloodhound, or watchdog subroutine.\n1 credit: +1 strength.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -601,7 +601,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "1 credit: Break ice subroutine.\n2 credits: +1 strength.",
+      "text": "0 credits: Break ice subroutine.\n1 credit: +1 strength.\nUsing Dropp ends your run.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -1141,7 +1141,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "0 credits: Break wall subroutine.\n1 credit: +1 strength.",
+      "text": "0 credits: Break wall subroutine.\n1 credit: +1 strength.\nWhenever you break a wall subroutine with Jackhammer, lose 1 credit, if you can, from a stealth card.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -1639,7 +1639,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "0 credits: Break code gate subroutine.\n2 credits: +1 strength.",
+      "text": "1 credit: Break code gate subroutine.\n2 credits: +1 strength.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -1672,7 +1672,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Ice that attempts to trace you has its trace limit reduced by 1.",
+      "text": "2 credits: Break wall subroutine.\n1 credit: +1 strength.\nWhenever you break a wall subroutine with Ramming Piston, lose a total of 2 credits from stealth cards.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -2081,7 +2081,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "1 credit: Break sentry subroutine.\n1 credit: +1 strength.",
+      "text": "Snowball has +1 strength for each subroutine it has broken during a run, until the end of that run.\n1 credit: Break sentry subroutine.\n1 credit: +1 strength.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
