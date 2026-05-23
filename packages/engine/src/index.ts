@@ -100,6 +100,11 @@ import {
   buildRunnerDrawCardActions,
   type RunnerDrawActionContext,
 } from "./game/turn/runner-draw-actions";
+import {
+  buildRunnerHardwareInstallAction,
+  buildRunnerProgramInstallAction,
+  buildRunnerResourceInstallAction,
+} from "./game/turn/runner-install-actions";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -3563,17 +3568,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
         runnerMemoryLimit(state)
     ) {
-      actions.push(
-        action(
-          state,
-          "runner",
-          "install_card",
-          `${definition.title} installieren`,
-          id,
-          [{ clicks: 1, credits: definition.installCost ?? 0 }],
-          { cardId: id },
-        ),
-      );
+      actions.push(buildRunnerProgramInstallAction(state, id, definition));
     }
     if (
       hasClicks &&
@@ -3699,17 +3694,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         );
         continue;
       }
-      actions.push(
-        action(
-          state,
-          "runner",
-          "install_card",
-          `${definition.title} installieren`,
-          id,
-          [{ clicks: 1, credits: definition.installCost ?? 0 }],
-          { cardId: id },
-        ),
-      );
+      actions.push(buildRunnerHardwareInstallAction(state, id, definition));
     }
     if (
       hasClicks &&
@@ -3785,28 +3770,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         }
         continue;
       }
-      actions.push(
-        action(
-          state,
-          "runner",
-          "install_card",
-          `${definition.title} installieren`,
-          id,
-          [{ clicks: 1, credits: definition.installCost ?? 0 }],
-          { cardId: id },
-          {
-            targetRequirements: [
-              {
-                id: "resourceCard",
-                kind: "card",
-                side: "runner",
-                zoneScope: ["runner.grip"],
-                visibility: "known_to_actor",
-              },
-            ],
-          },
-        ),
-      );
+      actions.push(buildRunnerResourceInstallAction(state, id, definition));
     }
     if (
       hasClicks &&
