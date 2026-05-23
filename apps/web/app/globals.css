@@ -4015,11 +4015,66 @@ select {
   --turn-action-header-accent: var(--runner-zone-accent);
 }
 
+.turnActionHeaderTop {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
 .turnActionHeader h2 {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
   font-size: 14px;
   line-height: 1.2;
   white-space: pre-wrap;
+}
+
+.priorityHoldToggle {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--turn-action-header-accent), var(--line) 36%);
+  border-radius: 6px;
+  color: color-mix(in srgb, var(--turn-action-header-accent), var(--text) 22%);
+  background: color-mix(in srgb, var(--turn-action-header-accent), transparent 90%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
+  cursor: pointer;
+}
+
+.priorityHoldToggle:hover,
+.priorityHoldToggle:focus-visible {
+  border-color: color-mix(in srgb, var(--turn-action-header-accent), white 18%);
+  background: color-mix(in srgb, var(--turn-action-header-accent), transparent 82%);
+  outline: none;
+}
+
+.priorityHoldToggle.active {
+  border-color: color-mix(in srgb, var(--turn-action-header-accent), white 28%);
+  color: var(--text);
+  background: color-mix(in srgb, var(--turn-action-header-accent), var(--panel) 42%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.12),
+    0 0 0 2px color-mix(in srgb, var(--turn-action-header-accent), transparent 72%);
+}
+
+.priorityHoldTooltip {
+  position: fixed;
+  z-index: 4000;
+  pointer-events: none;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--text), var(--line) 72%);
+  border-radius: 8px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel), black 12%);
+  box-shadow: 0 14px 36px rgb(0 0 0 / 0.34);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
 }
 
 .actionAvailability {

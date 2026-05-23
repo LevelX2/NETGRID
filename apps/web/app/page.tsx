@@ -32,6 +32,7 @@ import {
   PanelRightOpen,
   PanelTopClose,
   PanelTopOpen,
+  Pause,
   Play,
   Plus,
   Route,
@@ -2000,6 +2001,7 @@ export default function Page() {
   const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(false);
   const [autoCorpMandatoryDrawEnabled, setAutoCorpMandatoryDrawEnabled] = useState(false);
   const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(false);
+  const [priorityWindowHoldEnabled, setPriorityWindowHoldEnabled] = useState(false);
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
   const [discardChoiceSelection, setDiscardChoiceSelection] = useState<{ choiceId: string; selectedOptionIds: string[] } | null>(null);
@@ -2343,10 +2345,11 @@ export default function Page() {
     const stored = readLocalStorageWithLegacy(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { autoCorpMandatoryDrawEnabled?: unknown; autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; topbarStickyEnabled?: unknown };
+        const parsed = JSON.parse(stored) as { autoCorpMandatoryDrawEnabled?: unknown; autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; priorityWindowHoldEnabled?: unknown; topbarStickyEnabled?: unknown };
         if (typeof parsed.autoCorpMandatoryDrawEnabled === "boolean") setAutoCorpMandatoryDrawEnabled(parsed.autoCorpMandatoryDrawEnabled);
         if (typeof parsed.autoEndTurnEnabled === "boolean") setAutoEndTurnEnabled(parsed.autoEndTurnEnabled);
         if (typeof parsed.autoDiscardEnabled === "boolean") setAutoDiscardEnabled(parsed.autoDiscardEnabled);
+        if (typeof parsed.priorityWindowHoldEnabled === "boolean") setPriorityWindowHoldEnabled(parsed.priorityWindowHoldEnabled);
         if (typeof parsed.topbarStickyEnabled === "boolean") setTopbarStickyEnabled(parsed.topbarStickyEnabled);
       } catch {
         removeLocalStorageKeys(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
@@ -2357,8 +2360,8 @@ export default function Page() {
 
   useEffect(() => {
     if (!gameplaySettingsLoaded) return;
-    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled }));
-  }, [gameplaySettingsLoaded, autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled]);
+    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled }));
+  }, [gameplaySettingsLoaded, autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
@@ -3075,7 +3078,7 @@ export default function Page() {
   }, [actionCueAutoDismissMs, aiTurnPresentation?.canAdvanceAi, audioEnabled, audioVolume, currentActionCue, localAiPacingMode]);
 
   useEffect(() => {
-    if (!payload || !aiTurnPresentation?.canAdvanceAi || payload.winner || connection !== "online") return;
+    if (!payload || !aiTurnPresentation?.canAdvanceAi || payload.winner || connection !== "online" || priorityWindowHoldEnabled) return;
     const delayMs = aiPacingDelayMs(localAiPacingMode, Boolean(currentActionCue) || actionCueQueue.length > 0, actionCueAutoDismissMs);
     if (delayMs === null) return;
     const advanceKey = `${payload.matchId}:${payload.matchVersion}:${payload.playerView.stateVersion}:${localAiPacingMode}`;
@@ -3098,7 +3101,7 @@ export default function Page() {
       window.clearTimeout(retryTimeout);
       if (pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
     };
-  }, [actionCueAutoDismissMs, actionCueQueue.length, aiTurnPresentation?.canAdvanceAi, connection, currentActionCue, localAiPacingMode, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner]);
+  }, [actionCueAutoDismissMs, actionCueQueue.length, aiTurnPresentation?.canAdvanceAi, connection, currentActionCue, localAiPacingMode, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner, priorityWindowHoldEnabled]);
 
   useEffect(() => {
     if (!aiTurnPresentation?.canAdvanceAi || payload?.winner || aiPacingFallbackDelay === null) {
@@ -5166,6 +5169,7 @@ export default function Page() {
             cardContextActive={selectedActionContext?.kind === "card"}
             hiddenContextHint={hiddenContextHint}
             actionCapacities={actionSlotCapacities}
+            priorityWindowHoldEnabled={priorityWindowHoldEnabled}
             {...(aiTurnPresentation?.activeAiSide ? { activeAiSide: aiTurnPresentation.activeAiSide } : {})}
             disabled={Boolean(payload.winner) || connection !== "online"}
             highlighted={hasDecisionCue}
@@ -5176,6 +5180,7 @@ export default function Page() {
             onChoiceOptions={submitChoiceOptions}
             onDiscardChoiceToggle={toggleDiscardOption}
             onFieldCardChoiceClear={clearFieldCardChoiceSelection}
+            onPriorityWindowHoldEnabled={setPriorityWindowHoldEnabled}
             enrichCard={enrichCard}
             connection={connection}
             onClearContext={() => setSelectedActionContext(null)}
@@ -7994,6 +7999,7 @@ function LegalActionsPanel({
   cardContextActive = false,
   hiddenContextHint = null,
   actionCapacities,
+  priorityWindowHoldEnabled,
   activeAiSide,
   disabled,
   highlighted = false,
@@ -8004,6 +8010,7 @@ function LegalActionsPanel({
   onChoiceOptions,
   onDiscardChoiceToggle,
   onFieldCardChoiceClear,
+  onPriorityWindowHoldEnabled,
   enrichCard,
   connection,
   onClearContext
@@ -8016,6 +8023,7 @@ function LegalActionsPanel({
   cardContextActive?: boolean;
   hiddenContextHint?: string | null;
   actionCapacities: Record<Side, number>;
+  priorityWindowHoldEnabled: boolean;
   activeAiSide?: Side;
   disabled: boolean;
   highlighted?: boolean;
@@ -8026,6 +8034,7 @@ function LegalActionsPanel({
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
   onDiscardChoiceToggle(optionId: string): void;
   onFieldCardChoiceClear(): void;
+  onPriorityWindowHoldEnabled(enabled: boolean): void;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
   connection: "offline" | "connecting" | "online";
   onClearContext(): void;
@@ -8121,7 +8130,10 @@ function LegalActionsPanel({
   return (
     <section className={`section ${highlighted ? "cueHighlight" : ""}`} data-testid="legal-actions">
       <div className={`turnActionHeader side-${currentTurnSide}`}>
-        <h2>{turnActionHeaderLabel(view, currentTurnSide, activeAiSide)}</h2>
+        <div className="turnActionHeaderTop">
+          <h2>{turnActionHeaderLabel(view, currentTurnSide, activeAiSide)}</h2>
+          <PriorityWindowHoldToggle enabled={priorityWindowHoldEnabled} onToggle={onPriorityWindowHoldEnabled} />
+        </div>
         <div className={`actionAvailability side-${currentTurnSide}`} data-testid="action-availability">
           <span className="actionAvailabilityCount">{`noch ${currentTurnDisplay.available}`}</span>
           <ActionSlotMeter side={currentTurnSide} currentClicks={currentTurnClicks} displayCapacity={currentTurnCapacity} active compact slotsOnly />
@@ -8174,6 +8186,49 @@ function LegalActionsPanel({
         {primaryActions.length === 0 && !selectedContext && !cardContextActive ? <p className="meta">Keine Aktion in diesem Fenster.</p> : null}
       </div>
     </section>
+  );
+}
+
+function PriorityWindowHoldToggle({ enabled, onToggle }: { enabled: boolean; onToggle(enabled: boolean): void }) {
+  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | null>(null);
+  const tooltipText = "Bei deinem nächsten legalen Reaktions- oder Rez-Fenster anhalten. Bleibt aktiv, bis du es ausschaltest.";
+  const label = enabled ? "Fensterhalt ausschalten" : "Fensterhalt einschalten";
+  const showTooltip = (element: HTMLElement) => {
+    const rect = element.getBoundingClientRect();
+    const margin = 10;
+    const width = 276;
+    const left = Math.min(Math.max(margin, rect.right - width), window.innerWidth - width - margin);
+    const belowTop = rect.bottom + 8;
+    const top = belowTop + 64 < window.innerHeight ? belowTop : Math.max(margin, rect.top - 72);
+    setTooltipStyle({ left, top, width });
+  };
+  const tooltip =
+    tooltipStyle && typeof document !== "undefined"
+      ? createPortal(
+          <span className="priorityHoldTooltip" role="tooltip" style={tooltipStyle}>
+            {tooltipText}
+          </span>,
+          document.body
+        )
+      : null;
+
+  return (
+    <>
+      <button
+        className={`priorityHoldToggle ${enabled ? "active" : ""}`}
+        type="button"
+        aria-label={label}
+        aria-pressed={enabled}
+        onClick={() => onToggle(!enabled)}
+        onPointerEnter={(event) => showTooltip(event.currentTarget)}
+        onPointerLeave={() => setTooltipStyle(null)}
+        onFocus={(event) => showTooltip(event.currentTarget)}
+        onBlur={() => setTooltipStyle(null)}
+      >
+        <Pause size={15} />
+      </button>
+      {tooltip}
+    </>
   );
 }
 
