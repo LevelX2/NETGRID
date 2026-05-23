@@ -8,6 +8,10 @@ export { hashGameState, hashState } from "./hash";
 export { replayGameEvents } from "./replay";
 export { validateGameState, validateGameStateForDebug } from "./validation";
 export {
+  buildCorpDrawAction,
+  buildCorpEndTurnAction,
+  buildCorpGainCreditAction,
+  buildCorpPurgeVirusAction,
   buildLegalAction,
   makeActionId,
   stableLegalActionPayload,

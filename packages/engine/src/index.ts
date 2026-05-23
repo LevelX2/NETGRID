@@ -85,6 +85,12 @@ import {
   buildLegalAction as action,
   makeActionId,
 } from "./game/turn/action-builders";
+import {
+  buildCorpDrawAction,
+  buildCorpEndTurnAction,
+  buildCorpGainCreditAction,
+  buildCorpPurgeVirusAction,
+} from "./game/turn/corp-basic-actions";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -2441,22 +2447,11 @@ function corpMainActions(state: GameState): LegalAction[] {
     }
   }
   if (state.corp.clicks <= 0) {
-    actions.push(action(state, "corp", "end_turn", "Zug beenden", "game_rule"));
+    actions.push(buildCorpEndTurnAction(state));
     return actions;
   }
   if (state.corp.clicks >= 3 && totalCounters(state, "virus") > 0) {
-    actions.push(
-      action(
-        state,
-        "corp",
-        "purge_virus_counters",
-        "Virus-Counter purgen",
-        "basic_action",
-        [{ clicks: 3 }],
-        { purgedCounterType: "virus" },
-        { targetRequirements: [] },
-      ),
-    );
+    actions.push(buildCorpPurgeVirusAction(state));
   }
   if (state.corp.credits >= 4) {
     for (const server of state.corp.servers) {
@@ -2480,11 +2475,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
   }
-  actions.push(
-    action(state, "corp", "gain_credit", "1 Credit nehmen", "basic_action", [
-      { clicks: 1 },
-    ]),
-  );
+  actions.push(buildCorpGainCreditAction(state));
   if (acmeSavingsAndLoanObligationCount(state) > 0 && state.corp.credits >= 12) {
     actions.push(
       action(
@@ -2505,11 +2496,7 @@ function corpMainActions(state: GameState): LegalAction[] {
     );
   }
   if (state.corp.rd.length > 0)
-    actions.push(
-      action(state, "corp", "draw_card", "Karte ziehen", "basic_action", [
-        { clicks: 1 },
-      ]),
-    );
+    actions.push(buildCorpDrawAction(state));
   if (state.runner.tags > 0 && state.corp.credits >= 2) {
     for (const id of state.runner.rig.resources) {
       const hiddenResource = isConcealedRunnerResource(state, id);
@@ -3215,7 +3202,7 @@ function corpMainActions(state: GameState): LegalAction[] {
     }
   }
   actions.push(...specialZoneHarnessActions(state, "corp"));
-  actions.push(action(state, "corp", "end_turn", "Zug beenden", "game_rule"));
+  actions.push(buildCorpEndTurnAction(state));
   if (edgerunnerTempsInstallActionsRemaining(state) > 0) {
     return actions
       .filter(
