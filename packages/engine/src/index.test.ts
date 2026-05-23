@@ -10164,7 +10164,11 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(DEMO_CARDS_BY_ID["onr_v1_320_encoder-inc"]).toMatchObject({
       rezCost: 0,
       trashCost: 1,
+      rulesText: expect.stringContaining("cost 1 less to rez"),
     });
+    expect(DEMO_CARDS_BY_ID["onr_v1_320_encoder-inc"]?.rulesText).toContain(
+      "additional",
+    );
     expect(
       DEMO_CARDS_BY_ID["onr_v1_341_skalderviken-sa-beta-test-site"],
     ).toMatchObject({ rezCost: 0, trashCost: 2 });
@@ -18652,6 +18656,9 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_352_chester-mix"]?.mechanics.join(" "),
     ).toMatch(/ice_install_cost_mod_server/);
+    expect(DEMO_CARDS_BY_ID["onr_v1_352_chester-mix"]?.rulesText).toContain(
+      "reduced by 2",
+    );
     expect(DEMO_CARDS_BY_ID["onr_v1_353_chimera"]?.mechanics.join(" ")).toMatch(
       /daemon_trash_choice/,
     );

@@ -6917,7 +6917,7 @@
         "advancementRequirement": 4,
         "agendaPoints": 4
       },
-      "text": "No additional Regeltext.",
+      "text": "No additional ability.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -6982,7 +6982,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "[Subroutine] For the remainder of the run, Runner must pay 1 when encountering a piece of ice, in addition to any other costs, or end the run.",
+      "text": "[Subroutine] For the remainder of the run, Runner must pay 2 when encountering a piece of ice, in addition to any other costs, or end the run.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -7386,7 +7386,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "[Subroutine] Do 1 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.\n[Subroutine] End the run.",
+      "text": "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -7451,7 +7451,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and put a Data Raven counter on Data Raven. Each Data Raven counter gives Runner a tag at the start of each Runner turn.\n[Subroutine] End the run.",
+      "text": "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and a Data Raven counter. Each Data Raven counter gives Runner a tag at the start of each Runner turn. Runner may remove a Data Raven counter by taking an action to pay 1.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -10130,7 +10130,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Code gates cost 2 less to rez while Encoder, Inc. is rezzed.",
+      "text": "Code gates cost 1 less to rez while Encoder, Inc. is rezzed. All code gates have an additional \"End the run\" subroutine after all other subroutines.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -11045,7 +11045,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "When Runner uses a Worm icebreaker during a run on this fort, Corp may rez Aardvark. If rezzed this way, trash that Worm. Worm icebreakers cannot be used during runs on this fort while Aardvark is rezzed.",
+      "text": "Runner cannot use worms during runs on this fort. If Runner uses a worm during a run on this fort before Aardvark is rezzed, you may rez Aardvark to trash that worm, and any bits spent using that worm on the current piece of ice are lost to no effect. Runner may then use further icebreakers to break the ice.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -11105,7 +11105,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "If Runner accesses an agenda from this fort, Runner does not score it immediately. Leave the agenda installed; Runner scores it at the start of the next Runner turn if it is still installed here.",
+      "text": "Runner does not score any agenda or agendas on a run during which Bizarre Encryption Scheme is accessed; return that agenda to the fort instead. Runner scores the agenda at the start of his or her next turn, if neither you nor Runner has scored it by then. This does not affect any further runs.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -11137,7 +11137,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "The cost to install ice on this fort is reduced by 1.",
+      "text": "The cost to install ice on this fort is reduced by 2.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -11169,7 +11169,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "When accessed, Runner trashes one installed daemon program.",
+      "text": "When Runner accesses Chimera, trash a daemon.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",

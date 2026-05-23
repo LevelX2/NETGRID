@@ -7324,8 +7324,7 @@
         "encounter_ice",
         "trace",
         "counter",
-        "runner_counter_removal",
-        "end_the_run"
+        "runner_counter_removal"
       ],
       "valueHints": {
         "defense": 4,
@@ -9935,6 +9934,7 @@
         "install_remote",
         "rez_card",
         "global_ice_rez_cost_modifier",
+        "subroutine_modifier_resolver",
         "persistent_modifier"
       ],
       "valueHints": {

@@ -304,6 +304,80 @@ describe("catalog API filters", () => {
     expect(body.card.text).not.toContain("recurring credit");
   });
 
+  it("serves corrected Corp spoiler-aligned catalog text for active V1 cards", () => {
+    const expectations = [
+      {
+        cardId: "onr_v1_220_tycho-extension",
+        contains: ["No additional ability."],
+        notContains: ["Regeltext"],
+      },
+      {
+        cardId: "onr_v1_222_ball-and-chain",
+        contains: ["Runner must pay 2"],
+        notContains: ["Runner must pay 1"],
+      },
+      {
+        cardId: "onr_v1_234_data-darts",
+        contains: [
+          "Do 3 net damage",
+          "cannot break any subroutines of the next piece of ice",
+        ],
+        notContains: ["Do 1 net damage", "End the run"],
+      },
+      {
+        cardId: "onr_v1_236_data-raven",
+        contains: [
+          "give Runner a tag and a Data Raven counter",
+          "taking an action to pay 1",
+        ],
+        notContains: ["counter on Data Raven", "End the run"],
+      },
+      {
+        cardId: "onr_v1_320_encoder-inc",
+        contains: [
+          "cost 1 less to rez",
+          'additional "End the run" subroutine',
+        ],
+        notContains: ["cost 2 less to rez"],
+      },
+      {
+        cardId: "onr_v1_349_aardvark",
+        contains: ["any bits spent using that worm", "further icebreakers"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_351_bizarre-encryption-scheme",
+        contains: [
+          "return that agenda to the fort",
+          "This does not affect any further runs",
+        ],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_352_chester-mix",
+        contains: ["reduced by 2"],
+        notContains: ["reduced by 1"],
+      },
+      {
+        cardId: "onr_v1_353_chimera",
+        contains: ["When Runner accesses Chimera, trash a daemon."],
+        notContains: ["installed daemon program"],
+      },
+    ];
+
+    for (const expectation of expectations) {
+      const response = catalogDetailResponse(expectation.cardId);
+      expect(response.status, expectation.cardId).toBe(200);
+      const body = response.body as { card: { text: string } };
+      for (const snippet of expectation.contains) {
+        expect(body.card.text, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.notContains) {
+        expect(body.card.text, expectation.cardId).not.toContain(snippet);
+      }
+    }
+  });
+
   it("shows promoted longtail card details in the web catalog API", () => {
     for (const cardId of [
       "onr_v1_026_false-echo",

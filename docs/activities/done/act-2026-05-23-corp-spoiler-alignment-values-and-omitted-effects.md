@@ -1,19 +1,32 @@
 ---
 activityId: act-2026-05-23-corp-spoiler-alignment-values-and-omitted-effects
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-23
-startedAt:
-completedAt:
+startedAt: 2026-05-23
+completedAt: 2026-05-23
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - data/cards/originalset-v1-cards.json
+  - packages/shared/src/index.ts
+  - data/ai/ai-card-hints-active.json
+  - apps/web/app/api/cards/catalog-data.test.ts
+  - packages/engine/src/index.test.ts
+checks:
+  - node JSON parse for data/cards/originalset-v1-cards.json and data/ai/ai-card-hints-active.json
+  - corepack pnpm --filter @netgrid/web test app/api/cards/catalog-data.test.ts -t "Corp spoiler-aligned|The Shell Traders|catalog API filters"
+  - corepack pnpm --filter @netgrid/engine test src/index.test.ts -t "reduces code-gate and black-ice rez costs|adds Encoder|reduces ICE install costs|keeps Chester|Ball and Chain|Data Darts|Data Raven|Aardvark|Bizarre Encryption|Chimera"
+  - corepack pnpm --filter @netgrid/catalog test
+  - corepack pnpm --filter @netgrid/catalog typecheck
+  - git diff --check
+  - corepack pnpm --filter @netgrid/engine typecheck blocked by parallel cardSearchPresentation changes in packages/engine/src/index.ts
+  - corepack pnpm --filter @netgrid/web typecheck blocked by the same parallel engine errors
 ---
 
 # Corp-Karten: Zahlenwerte und ausgelassene Spoilereffekte korrigieren
@@ -68,4 +81,6 @@ Corp-Karten mit Zahlenabweichungen oder ausgelassenen Spoilereffekten sollen geg
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen: Die Anzeige-/Katalogtexte für Tycho Extension, Ball and Chain, Data Darts, Data Raven, Encoder, Inc., Aardvark, Bizarre Encryption Scheme, Chester Mix und Chimera wurden gegen `docs/source/Corpspoiler 1.0.txt` synchronisiert. `packages/shared` beschreibt Encoder jetzt mit Code-Gate-Rezreduktion 1 plus zusätzlicher ETR-Subroutine und Chester Mix mit ICE-Installreduktion 2; Data Raven und Encoder wurden in den AI-Hints korrigiert. Data Masons und Skälderviken waren bereits spoilerkonform. Die bestehenden Engine-Regressionen decken die funktionalen Pfade ab; neu ergänzt ist eine Katalogtext-Regression.
+
+Offen außerhalb dieses Pakets: Engine- und Web-Typecheck schlagen im aktuellen Arbeitsbaum wegen parallel vorhandener `cardSearchPresentation`/Hidden-Zone-Änderungen in `packages/engine/src/index.ts` fehl (`filter`, `revealToCorp`, `shuffleAfterwards` nicht definiert). Diese Hunks gehören nicht zum Corp-Spoiler-Paket.

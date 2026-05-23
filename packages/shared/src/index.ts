@@ -6730,12 +6730,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     rezCost: 0,
     trashCost: 1,
-    rulesText: "Code gates cost 2 less to rez while Encoder, Inc. is rezzed.",
+    rulesText:
+      'Code gates cost 1 less to rez while Encoder, Inc. is rezzed. All code gates have an additional "*End the run" subroutine after all other subroutines.',
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
       "global_ice_rez_cost_modifier",
+      "subroutine_modifier",
       "persistent_modifier",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -6827,7 +6829,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     rezCost: 0,
     trashCost: 3,
-    rulesText: "Cost to install ice on this fort is reduced by 1.",
+    rulesText: "Cost to install ice on this fort is reduced by 2.",
     mechanics: [
       "install_remote",
       "rez_upgrade",
@@ -7420,7 +7422,6 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "bid_amount",
       "counter",
       "persistent_tag_counter",
-      "end_the_run",
     ],
   }),
   onrIce({
