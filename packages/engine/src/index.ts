@@ -129,6 +129,21 @@ import {
   buildRunnerValuPakInstallAction,
   buildRunnerValuPakSequenceEndAction,
 } from "./game/turn/runner-special-zone-install-actions";
+import {
+  buildLookTopStackTakeMatchingChoice,
+  buildLookTopStackTakeMatchingPayload,
+  buildMysteryBoxInstallChoice,
+  buildSearchStackInstallChoice,
+  buildSearchStackInstallPayload,
+  buildSearchStackToGripChoice,
+  buildSearchStackToGripPayload,
+  buildSearchTrashToGripChoice,
+  buildSearchTrashToGripPayload,
+  buildSelfModifyingCodeSearchInstallChoice,
+  buildSneakPreviewProgramChoice,
+  buildSneakPreviewSourceChoice,
+  buildSneakPreviewSourceChoicePayload,
+} from "./game/hidden-zone/search-choice-builders";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -9274,12 +9289,10 @@ function startMysteryBoxProgramChoice(
   programIds: CardInstanceId[],
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  state.pendingChoice = {
-    choiceId: `v1915_mystery_box_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `v1915.mystery_box:${sourceCardId}:${topCards.join(",")}:${state.stateVersion + 1}`,
-    prompt: "Mystery-Box-Programm installieren",
-    kind: "select_cards",
+  state.pendingChoice = buildMysteryBoxInstallChoice({
+    stateVersion: state.stateVersion,
+    sourceCardId,
+    topCards,
     options: programIds.map((cardId) => {
       const definition = definitionFor(state, cardId);
       return {
@@ -9289,11 +9302,7 @@ function startMysteryBoxProgramChoice(
         value: cardId,
       };
     }),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
+  });
 }
 
 function resolveMysteryBoxChoice(
@@ -22778,12 +22787,11 @@ function startCardImplementationSearchTrashToGripChoice(
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const targets = searchTrashToGripTargets(state, filter);
   if (targets.length === 0) throw new Error("Im Trash liegt keine suchbare Karte.");
-  state.pendingChoice = {
-    choiceId: `p3_37_search_trash_to_grip_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_37.search_trash_to_grip:${sourceCardId}:${sourceDefinitionId}:${filter}:${state.stateVersion + 1}`,
-    prompt: "Heap durchsuchen",
-    kind: "select_cards",
+  state.pendingChoice = buildSearchTrashToGripChoice({
+    stateVersion: state.stateVersion,
+    sourceCardId,
+    sourceDefinitionId,
+    filter,
     options: state.runner.heap.slice().sort().map((cardId) => {
       const definition = definitionFor(state, cardId);
       const selectable = targets.includes(cardId);
@@ -22795,26 +22803,11 @@ function startCardImplementationSearchTrashToGripChoice(
         ...(!selectable ? { selectable: false } : {}),
       };
     }),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-    cardSearchPresentation: {
-      sourceZone: "heap",
-      selectableFilter: filter,
-      reveal: "hidden",
-      destination: "grip",
-      shuffleAfter: false,
-      showNonMatchingCards: true,
-    },
-  };
-  const payload = {
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_37_search_trash_to_grip",
+  });
+  const payload = buildSearchTrashToGripPayload({
     sourceDefinitionId,
-    searchedZone: "runner_heap",
-    searchFilter: filter,
-  };
+    filter,
+  });
   legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
   return { publicPayload: payload };
 }
@@ -22831,12 +22824,13 @@ function startCardImplementationSearchStackToGripChoice(
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const targets = searchStackToGripTargets(state, filter);
   if (targets.length === 0) throw new Error("Im Stack liegt keine suchbare Karte.");
-  state.pendingChoice = {
-    choiceId: `p3_37_search_stack_to_grip_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_37.search_stack_to_grip:${sourceCardId}:${sourceDefinitionId}:${filter}:${revealToCorp ? "reveal" : "private"}:${shuffleAfterwards ? "shuffle" : "no_shuffle"}:${state.stateVersion + 1}`,
-    prompt: "Stack durchsuchen",
-    kind: "select_cards",
+  state.pendingChoice = buildSearchStackToGripChoice({
+    stateVersion: state.stateVersion,
+    sourceCardId,
+    sourceDefinitionId,
+    filter,
+    revealToCorp,
+    shuffleAfterwards,
     options: state.runner.stack.map((cardId) => {
       const definition = definitionFor(state, cardId);
       const selectable = targets.includes(cardId);
@@ -22847,29 +22841,12 @@ function startCardImplementationSearchStackToGripChoice(
         ...(!selectable ? { selectable: false } : {}),
       };
     }),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-    cardSearchPresentation: {
-      sourceZone: "stack",
-      selectableFilter: filter,
-      reveal: revealToCorp ? "public" : "hidden",
-      destination: "grip",
-      shuffleAfter: shuffleAfterwards,
-      showNonMatchingCards: true,
-      ...(revealToCorp ? { publicRevealKind: "reveal" } : {}),
-    },
-  };
-  const payload = {
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_37_search_stack_to_grip",
+  });
+  const payload = buildSearchStackToGripPayload({
     sourceDefinitionId,
-    searchedZone: "runner_stack",
-    searchFilter: filter,
-    searchRevealToCorp: revealToCorp,
-    shufflePerformed: false,
-  };
+    filter,
+    revealToCorp,
+  });
   legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
   return { publicPayload: payload };
 }
@@ -22891,12 +22868,15 @@ function startCardImplementationLookTopStackTakeMatchingChoice(
   const allowed = new Set(allowedTypes);
   const maxAffordable =
     costPerTaken <= 0 ? topCards.length : Math.floor(state.runner.credits / costPerTaken);
-  state.pendingChoice = {
-    choiceId: `p3_37_look_top_stack_take_matching_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_37.look_top_stack_take_matching:${sourceCardId}:${sourceDefinitionId}:${count}:${allowedTypes.join(",")}:${costPerTaken}:${revealTakenToCorp ? "reveal" : "private"}:${shuffleRemainder ? "shuffle" : "no_shuffle"}:${state.stateVersion + 1}`,
-    prompt: "Stack-Spitze ansehen und Karten nehmen",
-    kind: "select_cards",
+  state.pendingChoice = buildLookTopStackTakeMatchingChoice({
+    stateVersion: state.stateVersion,
+    sourceCardId,
+    sourceDefinitionId,
+    count,
+    allowedTypes,
+    costPerTaken,
+    revealTakenToCorp,
+    shuffleRemainder,
     options: topCards.map((cardId) => {
       const definition = definitionFor(state, cardId);
       const selectable = cardTypeMatchesSearchTypes(definition.type, allowed);
@@ -22907,37 +22887,16 @@ function startCardImplementationLookTopStackTakeMatchingChoice(
         ...(!selectable ? { selectable: false } : {}),
       };
     }),
-    minSelections: 0,
     maxSelections: Math.min(
       lookTopStackTakeMatchingTargets(state, count, allowedTypes).length,
       maxAffordable,
     ),
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-    stackSearchResolution: {
-      reveal: "public",
-      destination: "grip",
-      shuffleAfter: true,
-      publicRevealKind: "reveal",
-    },
-    cardSearchPresentation: {
-      sourceZone: "stack",
-      selectableFilter: "matching_cards",
-      reveal: "public",
-      destination: "grip",
-      shuffleAfter: true,
-      publicRevealKind: "reveal",
-      showNonMatchingCards: true,
-    },
-  };
-  const payload = {
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_37_look_top_stack_take_matching",
+  });
+  const payload = buildLookTopStackTakeMatchingPayload({
     sourceDefinitionId,
     privateLookCount: topCards.length,
-    searchedZone: "runner_stack",
     costPerTaken,
-  };
+  });
   legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
   return { publicPayload: payload };
 }
@@ -23012,12 +22971,13 @@ function startCardImplementationSearchStackInstallChoice(
   const targets = searchStackInstallTargets(state, filter, installCost);
   if (targets.length === 0)
     throw new Error("Im Stack liegt kein legal installierbares Programm.");
-  state.pendingChoice = {
-    choiceId: `p3_38_search_stack_install_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_38.search_stack_install:${sourceCardId}:${sourceDefinitionId}:${filter}:${installCost}:${shuffleAfterwards ? "shuffle" : "no_shuffle"}:${state.stateVersion + 1}`,
-    prompt: "Stack durchsuchen und Programm installieren",
-    kind: "select_cards",
+  state.pendingChoice = buildSearchStackInstallChoice({
+    stateVersion: state.stateVersion,
+    sourceCardId,
+    sourceDefinitionId,
+    filter,
+    installCost,
+    shuffleAfterwards,
     options: state.runner.stack.map((cardId) => {
       const definition = definitionFor(state, cardId);
       const selectable = targets.includes(cardId);
@@ -23028,35 +22988,11 @@ function startCardImplementationSearchStackInstallChoice(
         ...(!selectable ? { selectable: false } : {}),
       };
     }),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-    stackSearchResolution: {
-      reveal: "public",
-      destination: "install_program",
-      shuffleAfter: true,
-      publicRevealKind: "reveal",
-    },
-    cardSearchPresentation: {
-      sourceZone: "stack",
-      selectableFilter: filter,
-      reveal: "public",
-      destination: "install_program",
-      shuffleAfter: true,
-      publicRevealKind: "reveal",
-      showNonMatchingCards: true,
-    },
-  };
-  const payload = {
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_38_search_stack_install",
+  });
+  const payload = buildSearchStackInstallPayload({
     sourceDefinitionId,
-    searchedZone: "runner_stack",
-    searchFilter: filter,
-    searchDestination: "install_program",
-    shufflePerformed: false,
-  };
+    filter,
+  });
   legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
   return { publicPayload: payload };
 }
@@ -23251,28 +23187,30 @@ function startSelfModifyingCodeStackChoice(
   state: GameState,
   sourceCardId: CardInstanceId,
 ): void {
-  startRunnerStackSearchChoice(
-    state,
-    `v1911.self_modifying_code_install_program:${sourceCardId}`,
-    "v1911_self_modifying_code_install_program",
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const hasSearchableCard = state.runner.stack.some((cardId) =>
+    runnerStackSearchCardMatchesFilter(state, cardId, "program"),
   );
-  if (state.pendingChoice) {
-    state.pendingChoice.stackSearchResolution = {
-      reveal: "public",
-      destination: "install_program",
-      shuffleAfter: true,
-      publicRevealKind: "reveal",
-    };
-    state.pendingChoice.cardSearchPresentation = {
-      sourceZone: "stack",
-      selectableFilter: "program",
-      reveal: "public",
-      destination: "install_program",
-      shuffleAfter: true,
-      publicRevealKind: "reveal",
-      showNonMatchingCards: true,
-    };
-  }
+  if (!hasSearchableCard)
+    throw new Error("Keine suchbare Programmkarte im Stack.");
+  state.pendingChoice = buildSelfModifyingCodeSearchInstallChoice({
+    stateVersion: state.stateVersion,
+    sourceCardId,
+    options: state.runner.stack.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      const selectable = runnerStackSearchCardMatchesFilter(
+        state,
+        cardId,
+        "program",
+      );
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        value: cardId,
+        ...(!selectable ? { selectable: false } : {}),
+      };
+    }),
+  });
 }
 
 function resolveSelfModifyingCodeAbility(
@@ -24071,26 +24009,16 @@ function startSneakPreviewSourceChoice(
   const options = sneakPreviewSourceOptions(state);
   if (options.length === 0)
     throw new Error("Sneak Preview findet kein legal installierbares Programm.");
-  state.pendingChoice = {
-    choiceId: `v1911_sneak_preview_source_${state.stateVersion + 1}`,
-    side: "runner",
-    source:
-      sourcePrefix === "v1911.sneak_preview"
-        ? `v1911.sneak_preview_source:${state.stateVersion + 1}`
-        : `${sourcePrefix}_source:${sourceCardId ?? ""}:${sourceDefinitionId}:${state.stateVersion + 1}`,
-    prompt: "Sneak-Preview-Quelle wählen",
-    kind: "select_cards",
+  state.pendingChoice = buildSneakPreviewSourceChoice({
+    stateVersion: state.stateVersion,
+    sourcePrefix,
+    sourceCardId,
+    sourceDefinitionId,
     options,
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
+  });
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "sneak_preview_source_choice",
-    choiceVisibility: "runner_private",
+    ...buildSneakPreviewSourceChoicePayload(),
   };
 }
 
@@ -24163,34 +24091,14 @@ function startSneakPreviewProgramChoice(
     });
   if (targets.length === 0)
     throw new Error("In dieser Sneak-Preview-Quelle liegt kein legales Programm.");
-  state.pendingChoice = {
-    choiceId: `v1911_sneak_preview_${sourceZone}_install_${state.stateVersion + 1}`,
-    side: "runner",
-    source:
-      sourcePrefix === "v1911.sneak_preview"
-        ? `v1911.sneak_preview_${sourceZone}_install:${state.stateVersion + 1}`
-        : `${sourcePrefix}:${sourceCardId ?? ""}:${sourceDefinitionId}:${sourceZone}:${state.stateVersion + 1}`,
-    prompt:
-      sourceZone === "heap"
-        ? "Programm aus dem Heap installieren"
-        : "Programm aus dem Stack installieren",
-    kind: "select_cards",
+  state.pendingChoice = buildSneakPreviewProgramChoice({
+    stateVersion: state.stateVersion,
+    sourceZone,
+    sourcePrefix,
+    sourceCardId,
+    sourceDefinitionId,
     options,
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-    cardSearchPresentation: {
-      sourceZone,
-      selectableFilter: "program",
-      reveal: sourceZone === "stack" ? "public" : "hidden",
-      destination: "install_program",
-      shuffleAfter: sourceZone === "stack",
-      ...(sourceZone === "stack" ? { publicRevealKind: "reveal" } : {}),
-      showNonMatchingCards: true,
-      temporaryReturnAtEndOfTurn: true,
-    },
-  };
+  });
 }
 
 function resolveSneakPreviewProgramChoice(
