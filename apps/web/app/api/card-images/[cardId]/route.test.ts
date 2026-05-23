@@ -4,8 +4,8 @@ import { cacheControlForCardImage, clientHasFreshImage } from "./route";
 describe("card image route cache contract", () => {
   it("uses immutable private caching only for versioned generated images", () => {
     expect(cacheControlForCardImage({ kind: "generated", versioned: true })).toBe("private, max-age=31536000, immutable");
-    expect(cacheControlForCardImage({ kind: "generated", versioned: false })).toBe("private, max-age=3600, must-revalidate");
-    expect(cacheControlForCardImage({ kind: "local_onr", versioned: false })).toBe("private, max-age=3600, must-revalidate");
+    expect(cacheControlForCardImage({ kind: "generated", versioned: false })).toBe("private, max-age=0, must-revalidate");
+    expect(cacheControlForCardImage({ kind: "local_onr", versioned: false })).toBe("private, max-age=0, must-revalidate");
   });
 
   it("honors ETag and Last-Modified revalidation without exposing file paths", () => {

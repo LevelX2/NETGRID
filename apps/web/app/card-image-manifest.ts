@@ -1,4 +1,4 @@
-export const LOCAL_CARD_IMAGE_VERSION = "2026-05-04-generated-card-art-1";
+export const LOCAL_CARD_IMAGE_VERSION = "2026-05-23-local-onr-assets-2";
 
 export const GENERATED_CARD_IMAGES: Record<string, string> = {
   corp_identity_001: "generated-identities/corp_identity_001.png",
