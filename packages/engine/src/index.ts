@@ -112,6 +112,10 @@ import {
   buildRunnerResourceInstallAction,
 } from "./game/turn/runner-install-actions";
 import {
+  buildRunnerAgendaPointInstallAction,
+  buildRunnerSelectedServerInstallAction,
+} from "./game/turn/runner-install-context-actions";
+import {
   buildRunnerHostedProgramInstallAction,
   buildRunnerZetatechOverlayInstallAction,
 } from "./game/turn/runner-hosted-install-actions";
@@ -3653,31 +3657,13 @@ function runnerMainActions(state: GameState): LegalAction[] {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (!forfeitAgendaId) continue;
         actions.push(
-          action(
-            state,
-            "runner",
-            "install_card",
-            `${definition.title} installieren`,
-            id,
-            [{ clicks: 1, credits: definition.installCost ?? 0 }],
-            {
-              cardId: id,
-              installAgendaPointCost,
-              forfeitAgendaCardId: forfeitAgendaId,
-              installCostReason: "card_implementation_agenda_point_cost",
-            },
-            {
-              targetRequirements: [
-                {
-                  id: "hardwareCard",
-                  kind: "card",
-                  side: "runner",
-                  zoneScope: ["runner.grip"],
-                  visibility: "known_to_actor",
-                },
-              ],
-            },
-          ),
+          buildRunnerAgendaPointInstallAction(state, {
+            cardId: id,
+            definition,
+            installAgendaPointCost,
+            forfeitAgendaCardId: forfeitAgendaId,
+            targetRequirementId: "hardwareCard",
+          }),
         );
         continue;
       }
@@ -3701,31 +3687,13 @@ function runnerMainActions(state: GameState): LegalAction[] {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (!forfeitAgendaId) continue;
         actions.push(
-          action(
-            state,
-            "runner",
-            "install_card",
-            `${definition.title} installieren`,
-            id,
-            [{ clicks: 1, credits: definition.installCost ?? 0 }],
-            {
-              cardId: id,
-              installAgendaPointCost,
-              forfeitAgendaCardId: forfeitAgendaId,
-              installCostReason: "card_implementation_agenda_point_cost",
-            },
-            {
-              targetRequirements: [
-                {
-                  id: "resourceCard",
-                  kind: "card",
-                  side: "runner",
-                  zoneScope: ["runner.grip"],
-                  visibility: "known_to_actor",
-                },
-              ],
-            },
-          ),
+          buildRunnerAgendaPointInstallAction(state, {
+            cardId: id,
+            definition,
+            installAgendaPointCost,
+            forfeitAgendaCardId: forfeitAgendaId,
+            targetRequirementId: "resourceCard",
+          }),
         );
         continue;
       }
@@ -3733,26 +3701,12 @@ function runnerMainActions(state: GameState): LegalAction[] {
         for (const server of state.corp.servers) {
           const serverLabel = serverChoiceDisplayLabel(state, server.id);
           actions.push(
-            action(
-              state,
-              "runner",
-              "install_card",
-              `${definition.title} auf ${serverLabel} ausrichten`,
-              id,
-              [{ clicks: 1, credits: definition.installCost ?? 0 }],
-              { cardId: id, selectedServerId: server.id, selectedServerLabel: serverLabel },
-              {
-                targetRequirements: [
-                  {
-                    id: "resourceCard",
-                    kind: "card",
-                    side: "runner",
-                    zoneScope: ["runner.grip"],
-                    visibility: "known_to_actor",
-                  },
-                ],
-              },
-            ),
+            buildRunnerSelectedServerInstallAction(state, {
+              cardId: id,
+              definition,
+              selectedServerId: server.id,
+              selectedServerLabel: serverLabel,
+            }),
           );
         }
         continue;

@@ -34,6 +34,13 @@ export {
   buildRunnerResourceInstallAction,
 } from "./runner-install-actions";
 export {
+  buildRunnerAgendaPointInstallAction,
+  buildRunnerSelectedServerInstallAction,
+  type RunnerAgendaPointInstallActionInput,
+  type RunnerInstallGripTargetId,
+  type RunnerSelectedServerInstallActionInput,
+} from "./runner-install-context-actions";
+export {
   buildRunnerHostedProgramInstallAction,
   buildRunnerZetatechOverlayInstallAction,
   type RunnerInstallToHostActionInput,
