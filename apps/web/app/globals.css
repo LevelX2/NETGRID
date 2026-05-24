@@ -8704,7 +8704,7 @@ select,
 
 .matchResourceStrip {
   display: none;
-  position: fixed;
+  position: sticky;
   top: var(--resource-strip-top, 0px);
   left: 0;
   right: 0;
