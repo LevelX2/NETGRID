@@ -28177,6 +28177,82 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("does not offer Japanese Water Torture pump actions against non-Wall ICE", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-japanese-water-torture-quandary-no-pump",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "onr_v1_runner_v1922_japanese_water_torture_quandary",
+          name: "O:NR V1.9.22 Japanese Water Torture Quandary",
+          cards: [
+            { id: "onr_v1_037_japanese-water-torture", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "onr_v1_corp_v1922_japanese_water_torture_quandary",
+          name: "O:NR V1.9.22 Japanese Water Torture Quandary Corp",
+          cards: [
+            { id: "onr_v1_261_quandary", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.runner.memoryLimit = 4;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_037_japanese-water-torture");
+    const iceId = putCorpIceOnServer(state, "hq", "onr_v1_261_quandary");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_037_japanese-water-torture",
+    );
+    const tortureId = state.runner.rig.programs.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_037_japanese-water-torture",
+    );
+    expect(tortureId).toBeDefined();
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+
+    const runnerActions = getLegalActions(state, "runner");
+    expect(
+      runnerActions.some(
+        (action) =>
+          action.type === "pump_breaker" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_037_japanese-water-torture",
+      ),
+    ).toBe(false);
+    expect(
+      runnerActions.some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_037_japanese-water-torture",
+      ),
+    ).toBe(false);
+  });
+
   it("installs Hammer and applies ordered Stealth loss after breaking Wall subroutines without release promotion", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
