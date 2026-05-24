@@ -156,6 +156,19 @@ import {
   type HiddenZoneSearchActivationHandlerHost,
   type HiddenZoneSearchChoiceHandlerHost,
 } from "./game/hidden-zone/search-choice-handlers";
+import {
+  handleHiddenZoneArrangeChoice,
+  moveTopTrashToGripForCardImplementation,
+  resolveNewBloodConcealAndReorder,
+  startCardImplementationLookTopStackTakeOneArrangeRestChoice,
+  startCorpAssetRdTopReorderChoice,
+  startCorpRdArrangeChoice,
+  startCorpRdTopReorderChoice,
+  startFortressRespecificationReorderChoice,
+  startRunnerStackArrangeChoice,
+  startRunnerStackTop5Choice,
+  type HiddenZoneArrangeChoiceHandlerHost,
+} from "./game/hidden-zone/arrange-choice-handlers";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -307,9 +320,7 @@ import {
   legacyAbilityPayloadEntries,
 } from "./mechanics/public-payload-schema";
 import {
-  isP358FortressRespecificationChoiceSource,
   isP358HiddenReplacementCompatibilityChoiceSource,
-  isP358NewBloodReorderChoiceSource,
   isP358SocialEngineeringChoiceSource,
   isReplayCompatibilityActionPayload,
 } from "./compatibility/payload-compatibility";
@@ -786,10 +797,8 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     sourceDefinitionId,
   ) =>
     moveTopTrashToGripForCardImplementation(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
+      hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+      { sourceDefinitionId },
     ),
   startSearchStackInstallChoice: (
     state,
@@ -883,11 +892,8 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     count,
   ) =>
     startCardImplementationLookTopStackTakeOneArrangeRestChoice(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
-      count,
+      hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+      { sourceCardId, sourceDefinitionId, count },
     ),
   trashOwnInstalledCardTargetCount: (state) => runnerInstalledCardIds(state).length,
   trashGripCardTargetCount: (state) => state.runner.grip.length,
@@ -1295,9 +1301,8 @@ function cardImplementationRunnerEventResolver(
             "Fortress Respecification benoetigt einen erfolgreichen Run in diesem Zug.",
           );
         startFortressRespecificationReorderChoice(
-          state,
+          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
           String(legalAction.payload?.cardId ?? ""),
-          legalAction,
         );
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -1463,7 +1468,9 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "runner_event_arrange_stack_top_2",
     canPlay: (state) => state.runner.stack.length >= 2,
     resolve: (state, legalAction) => {
-      startRunnerStackArrangeChoice(state);
+      startRunnerStackArrangeChoice(
+        hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+      );
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         hiddenZoneBarrier: true,
@@ -1548,8 +1555,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     canPlay: (state) => state.runner.stack.length > 0,
     resolve: (state, legalAction) => {
       startRunnerStackTop5Choice(
-        state,
-        String(legalAction.payload?.cardId ?? ""),
+        hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+        { sourceCardId: String(legalAction.payload?.cardId ?? "") },
       );
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -1897,7 +1904,10 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
         definitionFor(state, sourceCardId).id !== CORP_RD_TOP5_REORDER_OPERATION_CARD_ID
       )
         throw new Error("Planning Consultants fehlt als Quelle.");
-      startCorpRdTopReorderChoice(state, sourceCardId, legalAction);
+      startCorpRdTopReorderChoice(
+        hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+        sourceCardId,
+      );
     },
   },
   [EDGERUNNER_TEMPS_INSTALL_OPERATION_ID]: {
@@ -7459,7 +7469,10 @@ function performAction(
           throw new Error(
             "Die V1.9.17-Hidden-Zone-Reorder-Faehigkeit passt nicht zur Karte.",
           );
-        startCorpAssetRdTopReorderChoice(state, sourceCardId, legalAction);
+        startCorpAssetRdTopReorderChoice(
+          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+          sourceCardId,
+        );
         return;
       }
       if (
@@ -11620,7 +11633,16 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
           run.resolvedSubroutineIndexes.push(index);
         continue;
       }
-      startCorpRdArrangeChoice(state, run.encounteredIceId, index, legalAction);
+      if (!legalAction)
+        throw new Error("Continue-Run LegalAction fehlt fuer R&D-Reorder.");
+      startCorpRdArrangeChoice(
+        hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+        {
+          sourceIceId: run.encounteredIceId,
+          subroutineIndex: index,
+          updatePayload: true,
+        },
+      );
       if (!run.resolvedSubroutineIndexes.includes(index))
         run.resolvedSubroutineIndexes.push(index);
       return;
@@ -21950,6 +21972,53 @@ function hiddenZoneSearchActivationHandlerHost(
   return hiddenZoneSearchHandlerHostBase(state, legalAction);
 }
 
+function hiddenZoneArrangeChoiceHandlerHost(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction?: PlayerAction,
+): HiddenZoneArrangeChoiceHandlerHost {
+  return {
+    state,
+    legalAction,
+    ...(playerAction ? { playerAction } : {}),
+    constants: {
+      corpRdTop5ReorderOperationCardId: CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
+      roninAroundId: RONIN_AROUND_ID,
+      tooManyDoorsId: TOO_MANY_DOORS_ID,
+    },
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      hiddenReplacementLongtailKind: (definitionId) =>
+        cardImplementationForDefinitionId(definitionId)
+          ?.hiddenReplacementLongtail?.kind,
+      isHiddenZoneReorderAssetDefinition: (definitionId) =>
+        HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(definitionId),
+      hasCorpUtilityKind: (cardId, kind) =>
+        hasCorpUtilityKind(
+          state,
+          cardId,
+          kind as Parameters<typeof hasCorpUtilityKind>[2],
+        ),
+      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
+    },
+    zones: {
+      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+      rezzedCorpRootCardIds: () => rezzedCorpRootCardIds(state),
+    },
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
+    },
+    choices: {
+      iceChoiceLabelForSide: (cardId, visibleTo, fallback) =>
+        iceChoiceLabelForSide(state, cardId, visibleTo, fallback),
+    },
+    callbacks: {
+      runnerTurnFlags: () => ensureRunnerTurnFlags(state),
+    },
+  };
+}
+
 function resolvePendingChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -21990,6 +22059,10 @@ function resolvePendingChoice(
     resolveTraceRunnerBid(state, legalAction, playerAction);
     return;
   }
+  const hiddenZoneArrangeChoice = handleHiddenZoneArrangeChoice(
+    hiddenZoneArrangeChoiceHandlerHost(state, legalAction, playerAction),
+  );
+  if (hiddenZoneArrangeChoice.handled) return;
   if (
     isP358HiddenReplacementCompatibilityChoiceSource(
       state.pendingChoice.source,
@@ -22023,17 +22096,6 @@ function resolvePendingChoice(
     resolveExposeInstalledCorpCardsChoice(state, legalAction, playerAction);
     return;
   }
-  if (
-    state.pendingChoice.source.startsWith("v098.arrange_stack_top2") ||
-    state.pendingChoice.source.startsWith("v1911.arrange_stack_top2")
-  ) {
-    resolveRunnerStackArrangeChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1911.corp_rd_arrange_top2")) {
-    resolveCorpRdArrangeChoice(state, legalAction, playerAction);
-    return;
-  }
   if (state.pendingChoice.source.startsWith("v162.priority_requisition")) {
     resolvePriorityRequisitionChoice(state, legalAction, playerAction);
     return;
@@ -22044,10 +22106,6 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1912.employee_empowerment_start_draw")) {
     resolveEmployeeEmpowermentStartDrawChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1917.corp_rd_arrange_top2")) {
-    resolveCorpAssetRdTopReorderChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1917.corp_negotiating_center")) {
@@ -22096,10 +22154,6 @@ function resolvePendingChoice(
     resolveSingaporeCityGridSwapChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1922.corp_rd_arrange_top5")) {
-    resolveCorpRdTopReorderChoice(state, legalAction, playerAction);
-    return;
-  }
   if (state.pendingChoice.source.startsWith("v1922.corp_archives_to_hq")) {
     resolveCorpArchivesToHqChoice(state, legalAction, playerAction);
     return;
@@ -22146,17 +22200,6 @@ function resolvePendingChoice(
     state.pendingChoice.source.startsWith("v1922.synchronized_attack_on_hq")
   ) {
     resolveSynchronizedAttackOnHqRetainChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith(
-      "v1922.runner_stack_top5_choose_one_arrange_rest",
-    ) ||
-    state.pendingChoice.source.startsWith(
-      "p3_37.runner_stack_top5_choose_one_arrange_rest",
-    )
-  ) {
-    resolveRunnerStackTop5Choice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -22563,63 +22606,6 @@ function takeSetupMulligan(
   recordStateRandomMarkers(state, "setup.draw.corp.mulligan_hand", hq.length);
 }
 
-function startCardImplementationLookTopStackTakeOneArrangeRestChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  sourceCardId: CardInstanceId,
-  sourceDefinitionId: CardDefinition["id"],
-  count: 5,
-): { publicPayload: Record<string, string | number | boolean> } {
-  startRunnerStackTop5Choice(state, sourceCardId, "p3_37", count);
-  const payload = {
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_runner_stack_top5_choose_one_arrange_rest",
-    sourceDefinitionId,
-    privateLookCount: Math.min(count, state.runner.stack.length),
-  };
-  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
-  return { publicPayload: payload };
-}
-
-function moveTopTrashToGripForCardImplementation(
-  state: GameState,
-  legalAction: LegalAction,
-  _sourceCardId: CardInstanceId,
-  sourceDefinitionId: CardDefinition["id"],
-): { publicPayload: Record<string, string | number | boolean> } {
-  const targetCardId = topRunnerHeapCardId(state);
-  if (!targetCardId) throw new Error("Der Runner-Trash ist leer.");
-  const boundTargetId = String(
-    legalAction.payload?.cardImplementationTopTrashTargetId ?? "",
-  );
-  if (boundTargetId && boundTargetId !== targetCardId)
-    throw new Error("Die oberste Trash-Karte hat sich geaendert.");
-  const targetDefinition = definitionFor(state, targetCardId);
-  removeFromAllZones(state, targetCardId);
-  state.runner.grip.unshift(targetCardId);
-  state.cardInstances[targetCardId] = {
-    ...mustInstance(state.cardInstances, targetCardId),
-    zone: { side: "runner", zone: "grip" },
-    faceup: true,
-    rezzed: true,
-  };
-  const payload = {
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_38_move_top_trash_to_grip",
-    sourceDefinitionId,
-    returnedCardDefinitionId: targetDefinition.id,
-    returnedCount: 1,
-    movedCardCount: 1,
-    sourceZone: "heap",
-    searchedZone: "runner_heap",
-    destinationZone: "grip",
-    returnedToGrip: true,
-    runnerCreditsAfter: state.runner.credits,
-  };
-  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
-  return { publicPayload: payload };
-}
-
 function resolveSelfModifyingCodeAbility(
   state: GameState,
   legalAction: LegalAction,
@@ -22865,105 +22851,6 @@ function installRunnerProgramForFree(
     "on_install",
   );
   return cardId;
-}
-
-function startRunnerStackArrangeChoice(
-  state: GameState,
-  sourcePrefix = "v098.arrange_stack_top2",
-  choiceIdPrefix = "v098_arrange_stack_top2",
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const topCards = state.runner.stack.slice(0, 2);
-  if (topCards.length < 2) throw new Error("Nicht genug Karten fuer Arrange.");
-  state.pendingChoice = {
-    choiceId: `${choiceIdPrefix}_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `${sourcePrefix}:${state.stateVersion + 1}`,
-    prompt: "Top 2 Karten anordnen",
-    kind: "select_cards",
-    options: topCards.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    }),
-    minSelections: topCards.length,
-    maxSelections: topCards.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-}
-
-function resolveRunnerStackArrangeChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice) throw new Error("Es ist keine Arrange-Choice offen.");
-  if (choice.source.startsWith("v1911.arrange_stack_top2:")) {
-    const sourceCardId = choice.source.split(":")[1] as
-      | CardInstanceId
-      | undefined;
-    if (
-      !sourceCardId ||
-      !state.runner.rig.resources.includes(sourceCardId) ||
-      definitionFor(state, sourceCardId).id !== RONIN_AROUND_ID
-    ) {
-      throw new Error("Die Ronin-Around-Reorder-Quelle ist nicht mehr installiert.");
-    }
-  }
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  const topCards = state.runner.stack.slice(0, choice.options.length);
-  if (selectedIds.length !== topCards.length)
-    throw new Error("Die Arrange-Auswahl ist unvollstaendig.");
-  const selectedSet = new Set(selectedIds);
-  if (
-    selectedSet.size !== selectedIds.length ||
-    topCards.some((cardId) => !selectedSet.has(cardId))
-  )
-    throw new Error("Die Arrange-Auswahl enthaelt ungueltige Karten.");
-  state.runner.stack = [
-    ...selectedIds,
-    ...state.runner.stack.slice(topCards.length),
-  ];
-  for (const cardId of selectedIds) {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      zone: { side: "runner", zone: "stack" },
-    };
-  }
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "arrange_stack",
-    arrangedCount: selectedIds.length,
-  };
-}
-
-function startRunnerStackTop5Choice(
-  state: GameState,
-  sourceCardId: string,
-  sourcePrefix = "v1922",
-  count = 5,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const topCards = state.runner.stack.slice(0, count);
-  if (topCards.length === 0) throw new Error("Der Stack ist leer.");
-  state.pendingChoice = {
-    choiceId: `${sourcePrefix}_runner_stack_top5_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `${sourcePrefix}.runner_stack_top5_choose_one_arrange_rest:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Stack-Spitze wählen und anordnen",
-    kind: "select_cards",
-    options: topCards.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    }),
-    minSelections: topCards.length,
-    maxSelections: topCards.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
 }
 
 function startAnonymousTipDerezBlackIceChoice(
@@ -23439,52 +23326,6 @@ function resolveSynchronizedAttackOnHqRetainChoice(
   };
 }
 
-function resolveRunnerStackTop5Choice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice) throw new Error("Es ist keine V1.9.22-Stack-Choice offen.");
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  const topCards = state.runner.stack.slice(0, choice.options.length);
-  if (selectedIds.length !== topCards.length)
-    throw new Error("Die Stack-Auswahl ist unvollstaendig.");
-  const selectedSet = new Set(selectedIds);
-  if (
-    selectedSet.size !== selectedIds.length ||
-    topCards.some((cardId) => !selectedSet.has(cardId))
-  )
-    throw new Error("Die Stack-Auswahl enthaelt ungueltige Karten.");
-  const chosenCard = selectedIds[0];
-  if (!chosenCard)
-    throw new Error("Es wurde keine Karte fuer die Grip gewaehlt.");
-  const arrangedRest = selectedIds.slice(1);
-  state.runner.stack = [
-    ...arrangedRest,
-    ...state.runner.stack.slice(topCards.length),
-  ];
-  state.runner.grip.push(chosenCard);
-  state.cardInstances[chosenCard] = {
-    ...mustInstance(state.cardInstances, chosenCard),
-    zone: { side: "runner", zone: "grip" },
-  };
-  for (const cardId of arrangedRest) {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      zone: { side: "runner", zone: "stack" },
-    };
-  }
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_runner_stack_top5_choose_one_arrange_rest",
-    selectedCount: 1,
-    arrangedCount: arrangedRest.length,
-  };
-}
-
 function startRunnerGripTrashForCreditsChoice(
   state: GameState,
   sourceCardId: string,
@@ -23803,175 +23644,6 @@ function resolveOpenEndedMileageProgramReturnChoice(
     returnedToGrip: selectedOptionId === "pay_1_return_to_grip",
     paidCredits: selectedOptionId === "pay_1_return_to_grip" ? 1 : 0,
     runnerCreditsAfter: state.runner.credits,
-  };
-}
-
-function startCorpRdArrangeChoice(
-  state: GameState,
-  sourceIceId: CardInstanceId,
-  subroutineIndex: number,
-  legalAction?: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const topCards = state.corp.rd.slice(0, 2);
-  if (topCards.length < 2)
-    throw new Error("Nicht genug Karten fuer R&D-Arrange.");
-  state.pendingChoice = {
-    choiceId: `v1911_corp_rd_arrange_top2_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1911.corp_rd_arrange_top2:${sourceIceId}:${subroutineIndex}:${state.stateVersion + 1}`,
-    prompt: "R&D-Spitze anordnen",
-    kind: "select_cards",
-    options: topCards.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    }),
-    minSelections: topCards.length,
-    maxSelections: topCards.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1911_corp_reorder_rd_top2",
-      arrangedCount: topCards.length,
-    };
-  }
-}
-
-function resolveCorpRdArrangeChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1911.corp_rd_arrange_top2"))
-    throw new Error("Es ist keine R&D-Arrange-Choice offen.");
-  const [, sourceIceId, subroutineIndexRaw] = choice.source.split(":");
-  if (
-    !sourceIceId ||
-    definitionFor(state, sourceIceId).id !== TOO_MANY_DOORS_ID
-  )
-    throw new Error("Die R&D-Arrange-Choice gehoert nicht zu Too Many Doors.");
-  const subroutineIndex = Number(subroutineIndexRaw);
-  if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
-    throw new Error("Die R&D-Arrange-Subroutine ist ungueltig.");
-  const run = mustRun(state);
-  if (run.encounteredIceId !== sourceIceId)
-    throw new Error(
-      "Die R&D-Arrange-Choice gehoert nicht mehr zum aktuellen Encounter.",
-    );
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  const topCards = state.corp.rd.slice(0, choice.options.length);
-  if (selectedIds.length !== topCards.length)
-    throw new Error("Die R&D-Arrange-Auswahl ist unvollstaendig.");
-  const selectedSet = new Set(selectedIds);
-  if (
-    selectedSet.size !== selectedIds.length ||
-    topCards.some((cardId) => !selectedSet.has(cardId))
-  )
-    throw new Error("Die R&D-Arrange-Auswahl enthaelt ungueltige Karten.");
-  state.corp.rd = [...selectedIds, ...state.corp.rd.slice(topCards.length)];
-  for (const cardId of selectedIds) {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      zone: { side: "corp", zone: "rd" },
-    };
-  }
-  if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
-    run.resolvedSubroutineIndexes.push(subroutineIndex);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1911_corp_reorder_rd_top2",
-    arrangedCount: selectedIds.length,
-  };
-}
-
-function startCorpAssetRdTopReorderChoice(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const sourceDefinition = definitionFor(state, sourceCardId);
-  if (!HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(sourceDefinition.id))
-    throw new Error(
-      "Diese Karte darf keine V1.9.17-R&D-Reorder-Choice oeffnen.",
-    );
-  const topCards = state.corp.rd.slice(0, 2);
-  if (topCards.length < 2)
-    throw new Error("Nicht genug Karten fuer R&D-Reorder.");
-  state.pendingChoice = {
-    choiceId: `v1917_corp_rd_arrange_top2_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1917.corp_rd_arrange_top2:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "R&D-Spitze anordnen",
-    kind: "select_cards",
-    options: topCards.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    }),
-    minSelections: topCards.length,
-    maxSelections: topCards.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1917_corp_reorder_rd_top2",
-    arrangedCount: topCards.length,
-  };
-}
-
-function resolveCorpAssetRdTopReorderChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1917.corp_rd_arrange_top2"))
-    throw new Error("Es ist keine V1.9.17-R&D-Reorder-Choice offen.");
-  const [, sourceCardId] = choice.source.split(":");
-  if (!sourceCardId || !rezzedCorpRootCardIds(state).includes(sourceCardId))
-    throw new Error(
-      "Die V1.9.17-R&D-Reorder-Quelle ist nicht mehr rezzed installiert.",
-    );
-  if (
-    !HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(definitionFor(state, sourceCardId).id)
-  )
-    throw new Error(
-      "Die V1.9.17-R&D-Reorder-Choice gehoert nicht zur passenden Karte.",
-    );
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  const topCards = state.corp.rd.slice(0, choice.options.length);
-  if (selectedIds.length !== topCards.length)
-    throw new Error("Die V1.9.17-R&D-Reorder-Auswahl ist unvollstaendig.");
-  const selectedSet = new Set(selectedIds);
-  if (
-    selectedSet.size !== selectedIds.length ||
-    topCards.some((cardId) => !selectedSet.has(cardId))
-  )
-    throw new Error(
-      "Die V1.9.17-R&D-Reorder-Auswahl enthaelt ungueltige Karten.",
-    );
-  state.corp.rd = [...selectedIds, ...state.corp.rd.slice(topCards.length)];
-  for (const cardId of selectedIds) {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      zone: { side: "corp", zone: "rd" },
-    };
-  }
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1917_corp_reorder_rd_top2",
-    arrangedCount: selectedIds.length,
   };
 }
 
@@ -24672,88 +24344,6 @@ function resolveSingaporeCityGridSwapChoice(
   };
 }
 
-function startCorpRdTopReorderChoice(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  if (
-    definitionFor(state, sourceCardId).id !== CORP_RD_TOP5_REORDER_OPERATION_CARD_ID &&
-    !hasCorpUtilityKind(state, sourceCardId, "corp_rd_top_reorder")
-  )
-    throw new Error("Die R&D-Reorder-Quelle ist nicht Planning Consultants.");
-  const topCards = state.corp.rd.slice(0, 5);
-  if (topCards.length < 2)
-    throw new Error("Nicht genug Karten fuer Planning Consultants.");
-  state.pendingChoice = {
-    choiceId: `v1922_corp_rd_arrange_top5_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1922.corp_rd_arrange_top5:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "R&D-Spitze anordnen",
-    kind: "select_cards",
-    options: topCards.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    }),
-    minSelections: topCards.length,
-    maxSelections: topCards.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_corp_rd_reorder_top5",
-    arrangedCount: topCards.length,
-  };
-}
-
-function resolveCorpRdTopReorderChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.corp_rd_arrange_top5"))
-    throw new Error("Es ist keine V1.9.22-R&D-Reorder-Choice offen.");
-  const [, sourceCardId] = choice.source.split(":");
-  if (
-    !sourceCardId ||
-    (definitionFor(state, sourceCardId).id !== CORP_RD_TOP5_REORDER_OPERATION_CARD_ID &&
-      !hasCorpUtilityKind(state, sourceCardId, "corp_rd_top_reorder"))
-  )
-    throw new Error(
-      "Die V1.9.22-R&D-Reorder-Choice gehoert nicht zu Planning Consultants.",
-    );
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  const topCards = state.corp.rd.slice(0, choice.options.length);
-  if (selectedIds.length !== topCards.length)
-    throw new Error("Die V1.9.22-R&D-Reorder-Auswahl ist unvollstaendig.");
-  const selectedSet = new Set(selectedIds);
-  if (
-    selectedSet.size !== selectedIds.length ||
-    topCards.some((cardId) => !selectedSet.has(cardId))
-  )
-    throw new Error(
-      "Die V1.9.22-R&D-Reorder-Auswahl enthaelt ungueltige Karten.",
-    );
-  state.corp.rd = [...selectedIds, ...state.corp.rd.slice(topCards.length)];
-  for (const cardId of selectedIds) {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      zone: { side: "corp", zone: "rd" },
-    };
-  }
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_corp_rd_reorder_top5",
-    arrangedCount: selectedIds.length,
-  };
-}
-
 function startCorpArchivesToHqChoice(
   state: GameState,
   sourceCardId: CardInstanceId,
@@ -25440,111 +25030,6 @@ function iceChoiceLabelForSide(
   return { label: fallback, publicLabel: fallback };
 }
 
-function p358ValidateReorderSelection(
-  currentIds: readonly CardInstanceId[],
-  selectedIds: readonly CardInstanceId[],
-  message: string,
-): void {
-  if (selectedIds.length !== currentIds.length) throw new Error(message);
-  const current = [...currentIds].sort();
-  const selected = [...selectedIds].sort();
-  if (current.some((cardId, index) => cardId !== selected[index]))
-    throw new Error(message);
-}
-
-function startFortressRespecificationReorderChoice(
-  state: GameState,
-  sourceCardId: string,
-  legalAction: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const flags = ensureRunnerTurnFlags(state);
-  if (!flags.successfulRunThisTurn)
-    throw new Error(
-      "Fortress Respecification benoetigt einen erfolgreichen Run in diesem Zug.",
-    );
-  const serverId = flags.lastSuccessfulRunServerId;
-  if (!serverId)
-    throw new Error("Kein letzter erfolgreicher Fort fuer Fortress Respecification.");
-  const server = mustServer(state, serverId);
-  if (server.ice.length < 2) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_58_fortress_respecification_reorder",
-      serverId,
-      reorderedIceCount: server.ice.length,
-      concealedIceCount: concealedIceCountForCardIds(state, server.ice),
-    };
-    return;
-  }
-  state.pendingChoice = {
-    choiceId: `p3_58_fortress_respecification_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_58.fortress_respecification:${sourceCardId}:${serverId}:${state.stateVersion + 1}`,
-    prompt: "ICE auf dem letzten erfolgreichen Fort neu anordnen.",
-    kind: "select_cards",
-    options: server.ice.map((cardId, index) => {
-      const fallback = `ICE Position ${index + 1}`;
-      const labels = iceChoiceLabelForSide(state, cardId, "runner", fallback);
-      return {
-        id: `card_${cardId}`,
-        label: labels.label,
-        publicLabel: labels.publicLabel,
-        value: cardId,
-      };
-    }),
-    minSelections: server.ice.length,
-    maxSelections: server.ice.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-}
-
-function resolveFortressRespecificationReorderChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !isP358FortressRespecificationChoiceSource(choice.source))
-    throw new Error("Es ist keine Fortress-Respecification-Choice offen.");
-  const [, sourceCardId = "", serverId = ""] = choice.source.split(":");
-  const sourceDefinition = definitionFor(state, sourceCardId);
-  if (
-    cardImplementationForDefinitionId(sourceDefinition.id)
-      ?.hiddenReplacementLongtail?.kind !==
-    "fortress_respecification_ice_reorder"
-  )
-    throw new Error("Die Fortress-Respecification-Quelle passt nicht zur Karte.");
-  const server = mustServer(state, serverId);
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  p358ValidateReorderSelection(
-    server.ice,
-    selectedIds,
-    "Die Fortress-Respecification-Reihenfolge ist nicht legal.",
-  );
-  server.ice = [...selectedIds];
-  server.ice.forEach((cardId) => {
-    const instance = mustInstance(state.cardInstances, cardId);
-    state.cardInstances[cardId] = {
-      ...instance,
-      zone: { side: "corp", zone: "serverIce", serverId: server.id },
-    };
-  });
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenOrderChoice: true,
-    hiddenZoneAction: "p3_58_fortress_respecification_reorder",
-    sourceDefinitionId: sourceDefinition.id,
-    serverId: server.id,
-    reorderedIceCount: selectedIds.length,
-    concealedIceCount: concealedIceCountForCardIds(state, selectedIds),
-  };
-}
-
 function startSocialEngineeringHideChoice(
   state: GameState,
   sourceCardId: string,
@@ -25733,123 +25218,18 @@ function resolveSocialEngineeringChoice(
   throw new Error("Unbekannte Social-Engineering-Choice.");
 }
 
-function resolveNewBloodConcealAndReorder(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  let concealedCount = 0;
-  for (const slot of installedIceSlots(state)) {
-    const instance = mustInstance(state.cardInstances, slot.cardId);
-    if (!instance.rezzed && instance.faceup) {
-      state.cardInstances[slot.cardId] = { ...instance, faceup: false };
-      concealedCount += 1;
-    }
-  }
-  const slots = installedIceSlots(state);
-  if (slots.length < 2) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
-      concealedIceCount: concealedCount,
-      reorderedIceCount: slots.length,
-    };
-    return;
-  }
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  state.pendingChoice = {
-    choiceId: `p3_58_new_blood_reorder_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `p3_58.new_blood_reorder:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Installierte ICE neu anordnen.",
-    kind: "select_cards",
-    options: slots.map((slot) => {
-      const serverLabel = publicServerLabel(state, slot.serverId) ?? slot.serverId;
-      return {
-        id: `card_${slot.cardId}`,
-        label: `${definitionFor(state, slot.cardId).title} (${serverLabel} ${slot.index + 1})`,
-        publicLabel: `${serverLabel} ICE ${slot.index + 1}`,
-        value: slot.cardId,
-      };
-    }),
-    minSelections: slots.length,
-    maxSelections: slots.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  state.activeSide = "corp";
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenOrderChoice: true,
-    hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
-    concealedIceCount: concealedCount,
-    reorderedIceCount: slots.length,
-  };
-}
-
-function resolveNewBloodReorderChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !isP358NewBloodReorderChoiceSource(choice.source))
-    throw new Error("Es ist keine New-Blood-Reorder-Choice offen.");
-  const [, sourceCardId = ""] = choice.source.split(":");
-  const sourceDefinition = definitionFor(state, sourceCardId);
-  if (
-    cardImplementationForDefinitionId(sourceDefinition.id)
-      ?.hiddenReplacementLongtail?.kind !==
-    "new_blood_conceal_reorder_installed_ice"
-  )
-    throw new Error("Die New-Blood-Quelle passt nicht zur Karte.");
-  const slots = installedIceSlots(state);
-  const currentIds = slots.map((slot) => slot.cardId);
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  p358ValidateReorderSelection(
-    currentIds,
-    selectedIds,
-    "Die New-Blood-Reihenfolge ist nicht legal.",
-  );
-  slots.forEach((slot, index) => {
-    const cardId = selectedIds[index]!;
-    slot.server.ice[slot.index] = cardId;
-    const instance = mustInstance(state.cardInstances, cardId);
-    state.cardInstances[cardId] = {
-      ...instance,
-      zone: { side: "corp", zone: "serverIce", serverId: slot.serverId },
-    };
-  });
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenOrderChoice: true,
-    hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
-    sourceDefinitionId: sourceDefinition.id,
-    reorderedIceCount: selectedIds.length,
-    concealedIceCount: concealedIceCountForCardIds(state, selectedIds),
-  };
-}
-
 function resolveP358HiddenReplacementChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
   const source = state.pendingChoice?.source ?? "";
-  if (isP358FortressRespecificationChoiceSource(source)) {
-    resolveFortressRespecificationReorderChoice(state, legalAction, playerAction);
-    return;
-  }
+  const hiddenZoneArrangeChoice = handleHiddenZoneArrangeChoice(
+    hiddenZoneArrangeChoiceHandlerHost(state, legalAction, playerAction),
+  );
+  if (hiddenZoneArrangeChoice.handled) return;
   if (isP358SocialEngineeringChoiceSource(source)) {
     resolveSocialEngineeringChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (isP358NewBloodReorderChoiceSource(source)) {
-    resolveNewBloodReorderChoice(state, legalAction, playerAction);
     return;
   }
   throw new Error("Unbekannte P3.58-Choice.");
@@ -26271,9 +25651,11 @@ function resolveV1911RunnerHiddenZoneAbility(
     if (sourceDefinition.id !== STACK_TOP_REORDER_RESOURCE_CARD_ID)
       throw new Error("Diese Karte darf keine Stack-Reorder-Ability nutzen.");
     startRunnerStackArrangeChoice(
-      state,
-      `v1911.arrange_stack_top2:${sourceCardId}`,
-      "v1911_arrange_stack_top2",
+      hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+      {
+        sourcePrefix: `v1911.arrange_stack_top2:${sourceCardId}`,
+        choiceIdPrefix: "v1911_arrange_stack_top2",
+      },
     );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -29615,7 +28997,9 @@ function cardImplementationCorpOperationResolver(
     return {
       name: "card_implementation_corp_operation_new_blood_conceal_reorder_installed_ice",
       resolve: (state, legalAction) => {
-        resolveNewBloodConcealAndReorder(state, legalAction);
+        resolveNewBloodConcealAndReorder(
+          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+        );
       },
     };
   }
@@ -29770,7 +29154,10 @@ function resolveCorpUtilityOperation(
       const sourceCardId = String(legalAction.payload?.cardId ?? "");
       if (!sourceCardId || definitionFor(state, sourceCardId).id !== definition.id)
         throw new Error("Planning Consultants fehlt als Quelle.");
-      startCorpRdTopReorderChoice(state, sourceCardId, legalAction);
+      startCorpRdTopReorderChoice(
+        hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+        sourceCardId,
+      );
       return;
     }
     case "trojan_horse_tag": {
