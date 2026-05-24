@@ -764,8 +764,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/ice/riddler.ts",
   "onr_proteus_041_toughoniumtm-wall":
     "packages/engine/src/card-implementations/proteus/corp/ice/toughonium-wall.ts",
+  "onr_proteus_062_lesley-major":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/lesley-major.ts",
   "onr_proteus_065_networked-center":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/networked-center.ts",
+  "onr_proteus_070_rasmin-bridger":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/rasmin-bridger.ts",
   "onr_proteus_072_research-bunker":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/research-bunker.ts",
   "onr_proteus_077_weapons-depot":

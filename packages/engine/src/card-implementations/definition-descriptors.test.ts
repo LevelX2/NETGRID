@@ -1341,6 +1341,41 @@ describe("CardImplementation definition descriptors", () => {
     });
   });
 
+  it("describes Proteus Phase 1d public fort pass window implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_062_lesley-major"),
+    ).toMatchObject({
+      installCapabilities: [
+        {
+          kind: "install_only_inside_subsidiary_data_fort",
+          visibility: "public",
+        },
+      ],
+      fortRunWindows: [
+        {
+          kind: "add_advancement_counters_after_passing_last_ice_on_this_fort",
+          timing: "pass_last_ice_on_this_fort",
+          cost: { kind: "credit", amount: 5 },
+          target: "advanceable_installed_card_in_this_fort",
+          amount: 2,
+          limit: "once_per_run_per_source",
+          visibility: "public",
+        },
+      ],
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_070_rasmin-bridger")
+        ?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+        timing: "pass_ice_on_this_fort",
+        amount: 1,
+        visibility: "public",
+      }),
+    );
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

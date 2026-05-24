@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "scenario-pack-v1",
+  "scenarioId": "proteus-phase-1d-public-fort-pass-windows-smoke-2026-05-24",
+  "release": "Proteus Phase 1d Public Fort Pass Windows",
+  "coversCards": [
+    "onr_proteus_062_lesley-major",
+    "onr_proteus_070_rasmin-bridger"
+  ],
+  "assertions": [
+    "Each target card has an engine-local per-card CardImplementation file.",
+    "Lesley Major uses a generic public pass-last-ICE fort window, is installable only in subsidiary data forts, and adds exactly two advancement counters to a same-fort advanceable card once per run for [5].",
+    "Rasmin Bridger uses a generic public post-pass pay-or-end-run fort window after each passed ICE on the same fort.",
+    "LegalActions revalidate side, timing, source, target, costs and stale stateVersion.",
+    "Public payloads expose public fort, ICE and definition metadata without hidden zones or unrezzed card identities.",
+    "No target card becomes deck_legal, format_legal or ai_supported."
+  ],
+  "checks": [
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/coverage.test.ts -t \"Proteus Phase 1d\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts -t \"Proteus Phase 1d\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t \"Proteus Public Fort Pass Windows\"",
+    "corepack pnpm --filter @netgrid/catalog exec vitest run src/index.test.ts -t \"Proteus\"",
+    "corepack pnpm --filter @netgrid/web exec vitest run app/api/cards/catalog-data.test.ts -t \"Proteus\""
+  ]
+}

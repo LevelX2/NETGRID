@@ -1618,20 +1618,32 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_062_lesley-major",
+        "coverage": [
+          "card_implementation",
+          "fort_run_window",
+          "legal_action",
+          "public_event_redaction",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-1d-public-fort-pass-windows-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 1d: public pass-last-ICE fort window adds advancement counters to an advanceable card in the same fort once per run."
       },
       "blockReasons": [
         "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
@@ -1833,20 +1845,32 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_070_rasmin-bridger",
+        "coverage": [
+          "card_implementation",
+          "fort_run_window",
+          "legal_action",
+          "public_event_redaction",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-1d-public-fort-pass-windows-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 1d: public post-pass pay-or-end-run fort window after each passed ICE on the same fort."
       },
       "blockReasons": [
         "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."

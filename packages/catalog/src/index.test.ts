@@ -187,7 +187,9 @@ describe("card set support catalog source", () => {
       "onr_proteus_031_minotaur",
       "onr_proteus_034_riddler",
       "onr_proteus_041_toughoniumtm-wall",
+      "onr_proteus_062_lesley-major",
       "onr_proteus_065_networked-center",
+      "onr_proteus_070_rasmin-bridger",
       "onr_proteus_072_research-bunker",
       "onr_proteus_077_weapons-depot",
       "onr_proteus_150_streetware-distributor",
@@ -206,7 +208,7 @@ describe("card set support catalog source", () => {
         card.catalogCardId.startsWith("onr_proteus_") &&
         !PROTEUS_VISIBLE_BASELINE_CARD_IDS.includes(card.catalogCardId),
     );
-    expect(blockedProteus).toHaveLength(147);
+    expect(blockedProteus).toHaveLength(145);
     expect(blockedProteus.every((card) => card.statuses.blocked)).toBe(true);
   });
 

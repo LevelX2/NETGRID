@@ -2297,6 +2297,8 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
     return side === state.pendingChoice.side
       ? [choiceAction(state, state.pendingChoice)]
       : [];
+  if (state.run?.postPassPayOrEndRun)
+    return side === "runner" ? postPassPayOrEndRunActions(state) : [];
   const sharedRunWindow =
     state.timingPoint === "run.approach_ice" ||
     state.timingPoint === "run.jack_out_window";
@@ -5644,8 +5646,63 @@ function corpRunRootRezActions(state: GameState): LegalAction[] {
   return actions;
 }
 
+function corpFortPassWindowActions(state: GameState): LegalAction[] {
+  const run = state.run;
+  if (!run || run.position.kind !== "server") return [];
+  if (!run.lastPassedIceId) return [];
+  const server = mustServer(state, run.position.serverId);
+  const used = new Set(run.fortPassWindowUsedSourceIdsThisRun ?? []);
+  const actions: LegalAction[] = [];
+  for (const sourceCardId of server.root.slice().sort()) {
+    if (used.has(sourceCardId)) continue;
+    const sourceInstance = state.cardInstances[sourceCardId];
+    if (!sourceInstance?.rezzed) continue;
+    const implementation = fortRunWindowImplementationForCard(
+      state,
+      sourceCardId,
+      "add_advancement_counters_after_passing_last_ice_on_this_fort",
+    );
+    if (!implementation) continue;
+    const cost = Math.max(0, Math.floor(implementation.cost.amount));
+    if (state.corp.credits < cost) continue;
+    const targets = advanceableInstalledCardTargetsOnServer(state, server.id);
+    for (const targetCardId of targets) {
+      const sourceDefinition = definitionFor(state, sourceCardId);
+      const targetDefinition = definitionFor(state, targetCardId);
+      actions.push(
+        action(
+          state,
+          "corp",
+          "trigger_ability",
+          `${sourceDefinition.title}: 2 Advancement-Counter auf ${targetDefinition.title}`,
+          sourceCardId,
+          cost > 0 ? [{ credits: cost }] : [],
+          {
+            cardId: sourceCardId,
+            sourceDefinitionId: sourceDefinition.id,
+            targetCardId,
+            targetCardDefinitionId: targetDefinition.id,
+            serverId: server.id,
+            serverLabel: server.label,
+            passedIceId: run.lastPassedIceId,
+            fortRunWindowAbility:
+              "add_advancement_counters_after_passing_last_ice_on_this_fort",
+            advancementCountersAdded: implementation.amount,
+            addedCounterAmount: implementation.amount,
+            creditCost: cost,
+          },
+        ),
+      );
+    }
+  }
+  return actions;
+}
+
 function corpRunRootRezWindowActions(state: GameState): LegalAction[] {
-  const actions = corpRunRootRezActions(state);
+  const actions = [
+    ...corpRunRootRezActions(state),
+    ...corpFortPassWindowActions(state),
+  ];
   if (actions.length === 0 || !isCorpRunRootRezWindowOpen(state)) return [];
   const run = mustRun(state);
   const server = mustServer(state, run.attackedServerId);
@@ -5673,7 +5730,10 @@ function isCorpRunRootRezWindowOpen(state: GameState): boolean {
   if (!run) return false;
   if (run.rootRezWindowPassedKeys?.includes(corpRunRootRezWindowKey(run)))
     return false;
-  return corpRunRootRezActions(state).length > 0;
+  return (
+    corpRunRootRezActions(state).length > 0 ||
+    corpFortPassWindowActions(state).length > 0
+  );
 }
 
 function corpRunRootRezWindowKey(run: ActiveRun): string {
@@ -6654,6 +6714,7 @@ function encounterSubroutineIndexesForNextContinue(
 
 function runnerMovementActions(state: GameState): LegalAction[] {
   const run = mustRun(state);
+  if (run.postPassPayOrEndRun) return postPassPayOrEndRunActions(state);
   if (
     run.jackOutLockedUntilEncounterEnds ||
     run.nextEncounterJackOutLock ||
@@ -6698,6 +6759,61 @@ function runnerMovementActions(state: GameState): LegalAction[] {
   }
   actions.push(
     action(state, "runner", "continue_run", "Run fortsetzen", "game_rule"),
+  );
+  return actions;
+}
+
+function postPassPayOrEndRunActions(state: GameState): LegalAction[] {
+  const run = mustRun(state);
+  const pending = run.postPassPayOrEndRun;
+  if (!pending) return [];
+  const amount = Math.max(0, Math.floor(pending.amount));
+  const serverLabel = publicServerLabel(state, pending.serverId);
+  const payload = {
+    fortRunWindowAbility: "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+    ...(pending.sourceDefinitionIds[0]
+      ? { sourceDefinitionId: pending.sourceDefinitionIds[0] }
+      : {}),
+    sourceDefinitionIds: pending.sourceDefinitionIds.join(","),
+    sourceCardIds: pending.sourceCardInstanceIds.join(","),
+    passedIceId: pending.passedIceId,
+    passedIceDefinitionId: definitionFor(state, pending.passedIceId).id,
+    serverId: pending.serverId,
+    ...(serverLabel ? { serverLabel } : {}),
+    paymentAmount: amount,
+  };
+  const actions: LegalAction[] = [];
+  if (availableRunnerRunCredits(runDurationPaymentHost(state)) >= amount) {
+    actions.push(
+      action(
+        state,
+        "runner",
+        "continue_run",
+        amount > 0
+          ? `Fort-Pass-Kosten zahlen (${amount} Credit)`
+          : "Fort-Pass-Kosten zahlen",
+        "game_rule",
+        amount > 0 ? [{ credits: amount }] : [],
+        {
+          ...payload,
+          decision: "pay",
+        },
+      ),
+    );
+  }
+  actions.push(
+    action(
+      state,
+      "runner",
+      "continue_run",
+      "Run beenden",
+      "game_rule",
+      [],
+      {
+        ...payload,
+        decision: "end_run",
+      },
+    ),
   );
   return actions;
 }
@@ -7939,6 +8055,13 @@ function performAction(
         "microtech_backup_drive_return_top_hosted"
       ) {
         resolveMicrotechBackupDriveReturnTopHosted(state, legalAction);
+        return;
+      }
+      if (
+        legalAction.payload?.fortRunWindowAbility ===
+        "add_advancement_counters_after_passing_last_ice_on_this_fort"
+      ) {
+        resolveFortPassAdvancementWindow(state, legalAction);
         return;
       }
       if (legalAction.payload?.runnerUtilityAbility === "preying_mantis_gain_action") {
@@ -10849,7 +10972,7 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
     throw new Error("Runner ist nicht an ICE positioniert.");
   const server = mustServer(state, run.position.serverId);
   const nextIndex = run.position.iceIndex - 1;
-  const passedIceId = run.encounteredIceId;
+  const passedIceId = run.encounteredIceId ?? run.approachedIceId;
   clearEncounterTemporaryTraceCredits(run, legalAction);
   const passedIceFollowups = passedIceFollowupMarkersForCurrentIce(
     encounterResolutionHostForState(state),
@@ -10889,6 +11012,7 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
         position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
         approachedIceId,
         ...passedIceFollowups,
+        ...fortPassFollowupsForPassedIce(state, server, passedIceId),
         brokenSubroutineIndexes: [],
         resolvedSubroutineIndexes: [],
       };
@@ -10902,6 +11026,7 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
       position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
       approachedIceId,
       ...passedIceFollowups,
+      ...fortPassFollowupsForPassedIce(state, server, passedIceId),
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
     };
@@ -10916,6 +11041,7 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
       position: { kind: "server", serverId: server.id },
       phase: "movement",
       ...passedIceFollowups,
+      ...fortPassFollowupsForPassedIce(state, server, passedIceId),
     };
     state.timingPoint = "run.jack_out_window";
     state.activeSide = "runner";
@@ -10929,8 +11055,51 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
   enterAccessFromSuccessfulRun(runAccessTransitionHost(state));
 }
 
+function fortPassFollowupsForPassedIce(
+  state: GameState,
+  server: CorpServer,
+  passedIceId: CardInstanceId | undefined,
+): Pick<RunState, "lastPassedIceId" | "postPassPayOrEndRun"> {
+  if (!passedIceId) return {};
+  const payOrEndSources = server.root
+    .filter((cardId) => {
+      const instance = state.cardInstances[cardId];
+      if (instance?.rezzed !== true) return false;
+      const implementation = fortRunWindowImplementationForCard(
+        state,
+        cardId,
+        "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+      );
+      return Boolean(implementation);
+    })
+    .sort();
+  if (payOrEndSources.length === 0) return { lastPassedIceId: passedIceId };
+  const amount = payOrEndSources.reduce((sum, cardId) => {
+    const implementation = fortRunWindowImplementationForCard(
+      state,
+      cardId,
+      "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+    );
+    return sum + Math.max(0, Math.floor(implementation?.amount ?? 0));
+  }, 0);
+  if (amount <= 0) return { lastPassedIceId: passedIceId };
+  return {
+    lastPassedIceId: passedIceId,
+    postPassPayOrEndRun: {
+      sourceCardInstanceIds: payOrEndSources,
+      sourceDefinitionIds: payOrEndSources.map(
+        (cardId) => definitionFor(state, cardId).id,
+      ),
+      passedIceId,
+      serverId: server.id,
+      amount,
+    },
+  };
+}
+
 function continueFromMovement(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
+  if (resolvePostPassPayOrEndRun(state, legalAction)) return;
   if (
     handlePostPassProgramTrashChoices(
       encounterResolutionHostForState(state),
@@ -10949,6 +11118,123 @@ function continueFromMovement(state: GameState, legalAction?: LegalAction): void
     return;
   }
   enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction);
+}
+
+function resolvePostPassPayOrEndRun(
+  state: GameState,
+  legalAction: LegalAction | undefined,
+): boolean {
+  const run = mustRun(state);
+  const pending = run.postPassPayOrEndRun;
+  if (!pending) return false;
+  if (!legalAction)
+    throw new Error("Fort-Pass-Zahlungsfenster braucht eine LegalAction.");
+  if (
+    legalAction.payload?.fortRunWindowAbility !==
+    "runner_pay_or_end_run_after_passing_ice_on_this_fort"
+  )
+    throw new Error("Die Fort-Pass-Aktion passt nicht zum offenen Fenster.");
+  const decision = String(legalAction.payload?.decision ?? "");
+  const amount = Math.max(0, Math.floor(pending.amount));
+  const actionAmount = Number(legalAction.payload?.paymentAmount ?? amount);
+  if (!Number.isInteger(actionAmount) || actionAmount !== amount)
+    throw new Error("Die Fort-Pass-Kosten passen nicht mehr.");
+  if (String(legalAction.payload?.passedIceId ?? "") !== pending.passedIceId)
+    throw new Error("Das passierte ICE passt nicht mehr zum Fort-Pass-Fenster.");
+  if (String(legalAction.payload?.serverId ?? "") !== pending.serverId)
+    throw new Error("Der Fort-Pass-Server passt nicht mehr.");
+  if (decision === "pay") {
+    spendRunnerRunCredits(runDurationPaymentHost(state), amount);
+    delete run.postPassPayOrEndRun;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      paidCredits: amount,
+      endedRun: false,
+      runnerCreditsAfter: state.runner.credits,
+    };
+    return true;
+  }
+  if (decision === "end_run") {
+    delete run.postPassPayOrEndRun;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      paidCredits: 0,
+      endedRun: true,
+    };
+    finishRun(state, false, legalAction);
+    return true;
+  }
+  throw new Error("Die Fort-Pass-Entscheidung ist ungueltig.");
+}
+
+function resolveFortPassAdvancementWindow(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf dieses Fort-Pass-Fenster nutzen.");
+  if (state.timingPoint !== "run.jack_out_window")
+    throw new Error("Das Fort-Pass-Fenster ist nicht offen.");
+  const run = mustRun(state);
+  if (run.position.kind !== "server" || !run.lastPassedIceId)
+    throw new Error("Runner hat nicht gerade das letzte ICE dieses Forts passiert.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const targetCardId = String(legalAction.payload?.targetCardId ?? "") as CardInstanceId;
+  const serverId = String(legalAction.payload?.serverId ?? "");
+  if (serverId !== run.position.serverId)
+    throw new Error("Das Fort-Pass-Fenster gehoert zu einem anderen Fort.");
+  if (String(legalAction.payload?.passedIceId ?? "") !== run.lastPassedIceId)
+    throw new Error("Das passierte ICE passt nicht mehr zum Fort-Pass-Fenster.");
+  const server = mustServer(state, run.position.serverId);
+  if (!server.root.includes(sourceCardId))
+    throw new Error("Die Fort-Pass-Quelle liegt nicht in diesem Fort.");
+  if (!server.root.includes(targetCardId))
+    throw new Error("Das Advancement-Ziel liegt nicht in diesem Fort.");
+  const source = mustInstance(state.cardInstances, sourceCardId);
+  if (!source.rezzed)
+    throw new Error("Die Fort-Pass-Quelle ist nicht rezzed.");
+  const used = run.fortPassWindowUsedSourceIdsThisRun ?? [];
+  if (used.includes(sourceCardId))
+    throw new Error("Diese Fort-Pass-Quelle wurde in diesem Run bereits genutzt.");
+  const implementation = fortRunWindowImplementationForCard(
+    state,
+    sourceCardId,
+    "add_advancement_counters_after_passing_last_ice_on_this_fort",
+  );
+  if (!implementation)
+    throw new Error("Die Fort-Pass-Quelle hat keine passende Ability.");
+  if (
+    !isInstalledCorpCardAdvanceable(
+      state,
+      targetCardId,
+      definitionFor(state, targetCardId),
+    )
+  )
+    throw new Error("Das Fort-Pass-Ziel kann keine Advancement-Counter erhalten.");
+  const cost = Math.max(0, Math.floor(implementation.cost.amount));
+  if (creditCostForAction(legalAction) !== cost)
+    throw new Error("Die Fort-Pass-Kosten passen nicht mehr.");
+  spendCredits(state, "corp", cost);
+  const amount = Math.max(0, Math.floor(implementation.amount));
+  mustInstance(state.cardInstances, targetCardId).advancementCounters += amount;
+  run.fortPassWindowUsedSourceIdsThisRun = [
+    ...used,
+    sourceCardId,
+  ];
+  run.rootRezWindowPassedKeys = Array.from(
+    new Set([...(run.rootRezWindowPassedKeys ?? []), corpRunRootRezWindowKey(run)]),
+  ).sort();
+  state.activeSide = "runner";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    targetCardDefinitionId: definitionFor(state, targetCardId).id,
+    advancementCountersAdded: amount,
+    addedCounterAmount: amount,
+    advancementCountersAfter: mustInstance(state.cardInstances, targetCardId)
+      .advancementCounters,
+    corpCreditsAfter: state.corp.credits,
+  };
 }
 
 function archivesAccessRequiresDecisionOrEffect(
@@ -15651,6 +15937,19 @@ function advanceableInstalledCardTargets(state: GameState): CardInstanceId[] {
           return isInstalledCorpCardAdvanceable(state, cardId, definition);
         }),
     );
+}
+
+function advanceableInstalledCardTargetsOnServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): CardInstanceId[] {
+  return mustServer(state, serverId).root
+    .slice()
+    .sort()
+    .filter((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return isInstalledCorpCardAdvanceable(state, cardId, definition);
+    });
 }
 
 function isInstalledCorpCardAdvanceable(

@@ -577,6 +577,37 @@ describe("CardImplementation coverage and registry invariants", () => {
     });
   });
 
+  it("migrates Proteus Phase 1d public fort pass windows into CardImplementation coverage", () => {
+    const phase1dCards = [
+      "onr_proteus_062_lesley-major",
+      "onr_proteus_070_rasmin-bridger",
+    ] as const;
+
+    for (const definitionId of phase1dCards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_062_lesley-major")
+        ?.fortRunWindows?.[0],
+    ).toMatchObject({
+      kind: "add_advancement_counters_after_passing_last_ice_on_this_fort",
+      timing: "pass_last_ice_on_this_fort",
+      target: "advanceable_installed_card_in_this_fort",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_070_rasmin-bridger")
+        ?.fortRunWindows?.[0],
+    ).toMatchObject({
+      kind: "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+      timing: "pass_ice_on_this_fort",
+      amount: 1,
+    });
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",

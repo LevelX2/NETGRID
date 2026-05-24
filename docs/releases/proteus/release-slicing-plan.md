@@ -2,7 +2,7 @@
 
 Datum: 2026-05-17
 Aktualisiert: 2026-05-24
-Status: Planungs-Handoff mit abgeschlossenen Detail-Implementierungsslices 1a und 1b; keine Decklegalität, keine Formatlegalität, keine AI-Hints
+Status: Planungs-Handoff mit abgeschlossenen Detail-Implementierungsslices 1a, 1b und 1d; keine Decklegalität, keine Formatlegalität, keine AI-Hints
 
 ## Ziel und Ausgangslage
 
@@ -27,6 +27,7 @@ Aktuelle Basis:
 - Proteus Phase 1a ist umgesetzt: fünf Reuse-only-Baseline-Karten sind `implemented`, `engine_supported`, `playable` und `human_playable` (`Toughonium™ Wall`, `Networked Center`, `Research Bunker`, `Weapons Depot`, `Streetware Distributor`).
 - Proteus Phase 1b ist umgesetzt: `Minotaur` und `Riddler` sind über eigene CardImplementation-Dateien, generische öffentliche Additional-Subroutine-Bausteine und ein generisches `corp_encounter`-Aktivierungsfenster `implemented`, `engine_supported`, `playable` und `human_playable`. Es wurden keine neuen Proteus-ID-Branches in `packages/engine/src/index.ts`, UI, Catalog oder KI ergänzt; der vorbestehende Digiconda-/Food-Fight-Harness bleibt als Phase-3-Schuld gesondert zu migrieren.
 - Proteus Phase 1c ist blockiert: `Emergency Rig` verlangt laut lokaler Quelle eine positive, aber unbegrenzte `X`-Auswahl für Kludge-Counter ohne Kosten- oder Wertbezug. Der Blocker ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md` dokumentiert; `Rent-to-Own Contract` wird nicht separat aus dem gemeinsamen Slice promotet.
+- Proteus Phase 1d ist umgesetzt: `Lesley Major` und `Rasmin Bridger` sind über eigene CardImplementation-Dateien, generische öffentliche Fort-Pass-Window-Bausteine, Manifest-/Szenario-Spur und Replay-/StateHash-Tests `implemented`, `engine_supported`, `playable` und `human_playable`. Es wurden keine neuen Proteus-ID-Branches in Runtime, UI, Catalog oder KI ergänzt.
 - Alle übrigen Proteus-Karten bleiben blockiert. Keine Proteus-Karte ist `deck_legal`, `format_legal` oder `ai_supported`.
 - Proteus wird nicht als Großrelease freigegeben. Jede Karte braucht einen eigenen Resolver-/Manifest-/Szenario-/Visibility-/Replay-/StateHash-Nachweis.
 
@@ -69,7 +70,7 @@ Aktueller Proteus-nahe Codebestand, der bei spaeterer Umsetzung beruecksichtigt 
 - `bad_publicity_7` existiert bereits als Engine-Game-End-Reason und in Shared/API-Typen. Es fehlt aber ein generischer CardImplementation-Effekt wie `add_bad_publicity`; vorhandene V0.99-Harnesslogik ist keine Proteus-Kartenfamilie.
 - Hidden-Runner-Resource-Redaction existiert bereits fuer PlayerView/PublicContext/Install-/Trash-Ziele als Foundation. Es fehlen noch CardImplementation-Aktivierungsfamilien je Timingfenster und Reveal-/Trash-Kostenresolver fuer konkrete Proteus-Karten.
 - Variable Proteus-ICE haben bereits einen engen Harness in `packages/engine/src/index.ts` fuer `Digiconda` und `Food Fight`. Dieser Harness ist ID-spezifische technische Schuld fuer die Planung: vor echter Proteus-Promotion muss daraus eine generische CardImplementation-Familie werden, z. B. `variableRez`/`variableIceState`, die von `onr_proteus_020_digiconda.ts`, `onr_proteus_022_food-fight.ts` usw. deklarativ genutzt wird.
-- Es gibt aktuell Proteus-CardImplementation-Dateien nur für die abgeschlossenen Phase-1a-/1b-Karten unter `packages/engine/src/card-implementations/proteus/`. Jede weitere Proteus-Karte braucht weiterhin eine eigene Datei und einen Registry-/Coverage-/Manifest-/Testnachweis.
+- Es gibt aktuell Proteus-CardImplementation-Dateien nur für die abgeschlossenen Phase-1a-, 1b- und 1d-Karten unter `packages/engine/src/card-implementations/proteus/`. Jede weitere Proteus-Karte braucht weiterhin eine eigene Datei und einen Registry-/Coverage-/Manifest-/Testnachweis.
 
 Verbindliche No-ID-Branching-Regel fuer Proteus:
 

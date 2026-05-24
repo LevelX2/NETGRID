@@ -1,6 +1,6 @@
 # Proteus-Dokumentation
 
-`docs/releases/proteus/` bündelt die Artefakte für den importierten Proteus-Kartenstand. Import, Coverage, Slicing und Mechanikverträge bleiben die führenden Handoffs; seit Phase 1a und 1b gibt es zusätzlich eine eng begrenzte Runtime-Freigabe für sieben Baseline-Karten. Proteus ist weiterhin nicht decklegal, nicht formatlegal und nicht AI-unterstützt.
+`docs/releases/proteus/` bündelt die Artefakte für den importierten Proteus-Kartenstand. Import, Coverage, Slicing und Mechanikverträge bleiben die führenden Handoffs; seit Phase 1a, 1b und 1d gibt es zusätzlich eine eng begrenzte Runtime-Freigabe für neun Baseline-Karten. Proteus ist weiterhin nicht decklegal, nicht formatlegal und nicht AI-unterstützt.
 
 ## Enthaltene Artefakte
 
@@ -18,7 +18,7 @@
 
 ## Gate
 
-Proteus bleibt außerhalb explizit abgeschlossener Implementierungsslices blockiert. Abgeschlossen sind `docs/activities/done/act-2026-05-24-proteus-phase-1a-reuse-only-baseline.md` und `docs/activities/done/act-2026-05-24-proteus-phase-1b-dynamic-public-etr-ice.md`: `Toughonium™ Wall`, `Networked Center`, `Research Bunker`, `Weapons Depot`, `Streetware Distributor`, `Minotaur` und `Riddler` sind `human_playable`, aber nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`. Phase 1b ergänzt generische öffentliche Additional-Subroutine-Modifier und ein `corp_encounter`-Aktivierungsfenster ohne neue Proteus-ID-Branches; der ältere Digiconda-/Food-Fight-Harness bleibt technische Schuld für spätere Variable-ICE-Slices. Jeder spätere Slice braucht eigene Requirements, Tests und Gate-Nachweise. Die groben Phase-Activities für Phase 2 bis 9 sind vor Codearbeit entlang von `detailed-phase-slice-plan-2026-05-24.md` weiter zu schneiden.
+Proteus bleibt außerhalb explizit abgeschlossener Implementierungsslices blockiert. Abgeschlossen sind `docs/activities/done/act-2026-05-24-proteus-phase-1a-reuse-only-baseline.md`, `docs/activities/done/act-2026-05-24-proteus-phase-1b-dynamic-public-etr-ice.md` und `docs/activities/done/act-2026-05-24-proteus-phase-1d-public-fort-pass-windows.md`: `Toughonium™ Wall`, `Networked Center`, `Research Bunker`, `Weapons Depot`, `Streetware Distributor`, `Minotaur`, `Riddler`, `Lesley Major` und `Rasmin Bridger` sind `human_playable`, aber nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`. Phase 1b ergänzt generische öffentliche Additional-Subroutine-Modifier und ein `corp_encounter`-Aktivierungsfenster ohne neue Proteus-ID-Branches; Phase 1d ergänzt generische öffentliche Fort-Pass-Window-Bausteine für same-fort Advancement-Counter und Runner-Pay-or-End-run-Folgefenster. Der ältere Digiconda-/Food-Fight-Harness bleibt technische Schuld für spätere Variable-ICE-Slices. Jeder spätere Slice braucht eigene Requirements, Tests und Gate-Nachweise. Die groben Phase-Activities für Phase 2 bis 9 sind vor Codearbeit entlang von `detailed-phase-slice-plan-2026-05-24.md` weiter zu schneiden.
 
 Phase 1c ist aktuell blockiert: `Emergency Rig` enthält in den lokalen Quellen eine positive, aber unbegrenzte `X`-Counter-Auswahl ohne Kosten- oder Wertbezug. Der Blocker ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md` dokumentiert; `Rent-to-Own Contract` wird nicht isoliert promotet, solange der gemeinsame Slice nicht vollständig erfüllbar ist.
 

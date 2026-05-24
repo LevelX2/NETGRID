@@ -1473,6 +1473,208 @@ describe("Proteus Dynamic Public ETR ICE", () => {
   });
 });
 
+describe("Proteus Public Fort Pass Windows", () => {
+  const LESLEY = "onr_proteus_062_lesley-major";
+  const RASMIN = "onr_proteus_070_rasmin-bridger";
+  const AGENDA = "onr_v1_203_hostile-takeover";
+  const ICE = "simple_barrier_ice";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusFortPassGame(seed: string): GameState {
+    const corpOverrideIds = new Set([LESLEY, RASMIN, AGENDA, ICE]);
+    return createGameAfterSetup({
+      seed,
+      runnerDeck: ONR_V1_6_2_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_6_2_CORP_DECK,
+        id: `${seed}_corp`,
+        cards: [
+          { id: LESLEY, quantity: 1 },
+          { id: RASMIN, quantity: 1 },
+          { id: AGENDA, quantity: 1 },
+          { id: ICE, quantity: 1 },
+          ...ONR_V1_6_2_CORP_DECK.cards.filter(
+            (card) => !corpOverrideIds.has(card.id),
+          ),
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+  }
+
+  function setRezzed(state: GameState, cardId: CardInstanceId): void {
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+
+  function startRunAndPassUnrezzedIce(
+    state: GameState,
+  ): GameState {
+    state = apply(
+      toRunnerTurnFromCorpMain(state),
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    return apply(state, "corp", (action) => action.type === "decline_rez");
+  }
+
+  it("lets Lesley Major add counters after the last ICE is passed once per run", () => {
+    let state = proteusFortPassGame("proteus-phase-1d-lesley");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 10;
+    const lesleyId = putCorpRootInRemote(state, LESLEY);
+    const agendaId = putCorpRootInRemote(state, AGENDA);
+    putCorpIceOnServer(state, "remote_1", ICE);
+    setRezzed(state, lesleyId);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = startRunAndPassUnrezzedIce(state);
+    const lesleyAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.source === lesleyId &&
+        action.payload?.targetCardId === agendaId,
+    );
+    expect(lesleyAction.costs).toEqual([{ credits: 5 }]);
+    expect(lesleyAction.payload).toMatchObject({
+      fortRunWindowAbility:
+        "add_advancement_counters_after_passing_last_ice_on_this_fort",
+      serverId: "remote_1",
+      targetCardDefinitionId: AGENDA,
+    });
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: lesleyAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-lesley-wrong-side",
+      }).ok,
+    ).toBe(false);
+    const noCredits = structuredClone(state);
+    noCredits.corp.credits = 4;
+    expect(
+      applyAction(noCredits, {
+        matchId: noCredits.matchId,
+        side: "corp",
+        actionId: lesleyAction.actionId,
+        clientKnownStateVersion: noCredits.stateVersion,
+        idempotencyKey: "proteus-lesley-cost",
+      }).ok,
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === lesleyAction.actionId,
+    );
+    expect(state.cardInstances[agendaId]?.advancementCounters).toBe(2);
+    expect(state.corp.credits).toBe(5);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.source === lesleyId,
+      ),
+    ).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      sourceDefinitionId: LESLEY,
+      targets: { targetCardDefinitionId: AGENDA },
+      amounts: { addedCounterAmount: 2 },
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("forces Rasmin Bridger pay-or-end-run after each passed ICE", () => {
+    let state = proteusFortPassGame("proteus-phase-1d-rasmin");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.runner.credits = 2;
+    state.corp.credits = 10;
+    const rasminId = putCorpRootInRemote(state, RASMIN);
+    putCorpIceOnServer(state, "remote_1", ICE);
+    setRezzed(state, rasminId);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = startRunAndPassUnrezzedIce(state);
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    const payAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.fortRunWindowAbility ===
+          "runner_pay_or_end_run_after_passing_ice_on_this_fort" &&
+        action.payload?.decision === "pay",
+    );
+    expect(payAction.costs).toEqual([{ credits: 1 }]);
+    expect(payAction.payload).toMatchObject({
+      sourceDefinitionIds: RASMIN,
+      serverId: "remote_1",
+      paymentAmount: 1,
+    });
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: payAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-rasmin-wrong-side",
+      }).ok,
+    ).toBe(false);
+
+    const broke = structuredClone(state);
+    broke.runner.credits = 0;
+    expect(
+      getLegalActions(broke, "runner").some(
+        (action) => action.payload?.decision === "pay",
+      ),
+    ).toBe(false);
+    const endAction = mustAction(
+      broke,
+      "runner",
+      (action) => action.payload?.decision === "end_run",
+    );
+    const endResult = applyAction(broke, {
+      matchId: broke.matchId,
+      side: "runner",
+      actionId: endAction.actionId,
+      clientKnownStateVersion: broke.stateVersion,
+      idempotencyKey: "proteus-rasmin-end",
+    });
+    expect(endResult.ok).toBe(true);
+    expect(endResult.state.run).toBeUndefined();
+
+    state = apply(state, "runner", (action) => action.actionId === payAction.actionId);
+    expect(state.runner.credits).toBe(1);
+    expect(state.run).toBeDefined();
+    expect(state.run?.postPassPayOrEndRun).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      sourceDefinitionId: RASMIN,
+      amounts: { paidCredits: 1 },
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", () => {
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;

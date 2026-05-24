@@ -1,7 +1,7 @@
 # Proteus Detail-Slice-Plan
 
 Stand: 2026-05-24  
-Status: Planungs-Handoff mit abgeschlossenen Detail-Implementierungsslices 1a und 1b; keine Decklegalität, keine Formatlegalität, keine AI-Hints.
+Status: Planungs-Handoff mit abgeschlossenen Detail-Implementierungsslices 1a, 1b und 1d; keine Decklegalität, keine Formatlegalität, keine AI-Hints.
 
 ## Ziel
 
@@ -35,12 +35,12 @@ Führend für Phase 1 bleibt `phase-1-slice-handoff-2026-05-24.md`. Die Phase wa
 | 1a Reuse-only Baseline | `Toughonium™ Wall`, drei Region-Agenda-Difficulty-Karten, `Streetware Distributor` | Vorhandene `printedSubroutines`, Agenda-Difficulty-/Region-Modifier, einfache installierte Runner-Resource-Aktion, keine neue Helper-Familie. |
 | 1b Dynamic Public ETR ICE | `Minotaur`, `Riddler` | Öffentliche dynamische ETR-Subroutinen, effektive Run-Quote, Break-Projektion aus öffentlichen Zuständen. |
 | 1c Free-Rez ICE Counter Lifecycle | `Emergency Rig`, `Rent-to-Own Contract` | Temporäre Free-Rez-/Kostenmodifikatoren, ICE-Counter-Lifecycle, StateHash-relevante Rez-Erinnerung. |
-| 1d Public Fort-Pass Windows | `Herman Revista`, `Networked Center`, `Research Bunker`, `Simon Francisco` | Öffentliche Fort-Pass-/Run-End-Fenster, Agenda-/Asset-/Upgrade-Zielwahl, Credit-/Draw-/Trash-Effekte. |
-| 1e Hidden Fort Manipulation and Central Access | `Lesley Major`, `Marcel DeSoleil`, `Obfuscated Fortress`, `Pavit Bharat` | Hidden-Zone-/Central-Access-Folgefenster, private Korp-Choices, redigierte PublicPayloads. |
-| 1f Run Spend Cap | `Rasmin Bridger` | Run-gebundene Ausgabenobergrenze, LegalAction-Kostenprojektion, `applyAction`-Revalidierung. |
-| 1g Post-Pass Derez Utility | `Weapons Depot` | Post-Pass-/Run-Folgefenster, Derez-Zielwahl, side-sichere öffentliche Auflösung. |
+| 1d Public Fort-Pass Windows | `Lesley Major`, `Rasmin Bridger` | Öffentliche Fort-Pass-Folgefenster, same-fort Advancement-Ziele, Runner-Pay-or-End-run-Fenster, Kosten-/Timing-Revalidierung. |
+| 1e Hidden Fort Manipulation and Central Access | `Herman Revista`, `Marcel DeSoleil`, `Pavit Bharat`, `Simon Francisco` | Hidden-Zone-/Central-Access-Folgefenster, private Korp-Choices, redigierte PublicPayloads. |
+| 1f Run Spend Cap | `Obfuscated Fortress` | Run-gebundene Ausgabenobergrenze, LegalAction-Kostenprojektion, `applyAction`-Revalidierung. |
+| 1g Post-Pass Derez Utility | `Disintegrator` | Post-Pass-/Run-Folgefenster, Derez-Zielwahl, side-sichere öffentliche Auflösung. |
 
-Status 2026-05-24: Phase 1a ist umgesetzt und dokumentiert in `docs/activities/done/act-2026-05-24-proteus-phase-1a-reuse-only-baseline.md`. Phase 1b ist umgesetzt und dokumentiert in `docs/activities/done/act-2026-05-24-proteus-phase-1b-dynamic-public-etr-ice.md`. Die sieben Zielkarten aus 1a und 1b sind `human_playable`; Decklegalität, Formatlegalität und AI-Support bleiben unverändert aus. Phase 1b hat generische öffentliche Additional-Subroutine-Modifier und ein generisches `corp_encounter`-Aktivierungsfenster ergänzt, ohne neue Proteus-ID-Branches einzuführen.
+Status 2026-05-24: Phase 1a ist umgesetzt und dokumentiert in `docs/activities/done/act-2026-05-24-proteus-phase-1a-reuse-only-baseline.md`. Phase 1b ist umgesetzt und dokumentiert in `docs/activities/done/act-2026-05-24-proteus-phase-1b-dynamic-public-etr-ice.md`. Phase 1d ist umgesetzt und dokumentiert in `docs/activities/done/act-2026-05-24-proteus-phase-1d-public-fort-pass-windows.md`. Die neun Zielkarten aus 1a, 1b und 1d sind `human_playable`; Decklegalität, Formatlegalität und AI-Support bleiben unverändert aus. Phase 1b hat generische öffentliche Additional-Subroutine-Modifier und ein generisches `corp_encounter`-Aktivierungsfenster ergänzt. Phase 1d hat generische öffentliche Fort-Pass-Window-Bausteine für same-fort Advancement-Counter und Runner-Pay-or-End-run-Folgefenster ergänzt. Beide Slices führen keine neuen Proteus-ID-Branches ein.
 
 Blocker 2026-05-24: Phase 1c ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md` blockiert. `Emergency Rig` hat im lokalen Proteus-Text eine positive, aber unbegrenzte `X`-Auswahl für Kludge-Counter ohne Kosten- oder Wertbezug. Bis zur Quellen-/Regelentscheidung wird auch `Rent-to-Own Contract` nicht isoliert aus diesem gemeinsamen Slice promotet.
 

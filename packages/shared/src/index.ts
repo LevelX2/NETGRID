@@ -863,6 +863,15 @@ export type RunState = {
     subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
     amount?: number;
   }>;
+  lastPassedIceId?: CardInstanceId;
+  fortPassWindowUsedSourceIdsThisRun?: CardInstanceId[];
+  postPassPayOrEndRun?: {
+    sourceCardInstanceIds: CardInstanceId[];
+    sourceDefinitionIds: CardDefinitionId[];
+    passedIceId: CardInstanceId;
+    serverId: Exclude<ServerId, "new_remote">;
+    amount: number;
+  };
   aiBoonSourceCardId?: CardInstanceId;
   aiBoonRunStrength?: number;
   aiBoonRunStrengthByBreaker?: Partial<Record<CardInstanceId, number>>;
@@ -9182,6 +9191,44 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
       "dynamic_subroutine",
       "end_the_run",
       "proteus_dynamic_public_etr_ice",
+    ],
+  },
+  {
+    id: "onr_proteus_062_lesley-major",
+    title: "Lesley Major",
+    side: "corp",
+    type: "upgrade",
+    subtypes: ["sysop"],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 0,
+    rulesText:
+      "Install Lesley Major only in a subsidiary data fort. [5]: Add two advancement counters, at no cost, to a card installed in this data fort. Use this ability only when Runner passes the last piece of ice on this fort, and only once per run.",
+    mechanics: [
+      "install_remote",
+      "rez_upgrade",
+      "fort_run_window",
+      "advancement_counter",
+      "proteus_public_fort_pass_window",
+    ],
+  },
+  {
+    id: "onr_proteus_070_rasmin-bridger",
+    title: "Rasmin Bridger",
+    side: "corp",
+    type: "upgrade",
+    subtypes: ["sysop"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    trashCost: 2,
+    rulesText:
+      "After Runner passes each piece of ice on this fort, Runner must pay [1] or end the run.",
+    mechanics: [
+      "install_remote",
+      "rez_upgrade",
+      "fort_run_window",
+      "run_tax",
+      "proteus_public_fort_pass_window",
     ],
   },
   {
