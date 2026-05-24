@@ -537,6 +537,7 @@ import {
 } from "./mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "./ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "./ability-engine/card-implementation-effect-adapters";
+import { executeCardImplementationEffects } from "./ability-engine/effect-interpreter";
 import {
   canPlayPrintedCostOnPlayImplementation,
   executeCardImplementationLifecycleEffects,
@@ -1459,6 +1460,22 @@ function cardImplementationRunnerEventResolver(
           name: "card_implementation_runner_event_playful_ai_dice_loop",
           resolve: (state, legalAction) =>
             resolvePlayfulAiDiceLoopEvent(
+              state,
+              legalAction,
+              definition.id,
+              longtail,
+            ),
+        };
+      case "trash_installed_runner_connections_then_add_bad_publicity":
+        return {
+          name: "card_implementation_runner_event_trash_installed_runner_connections_then_add_bad_publicity",
+          canPlay: (state) =>
+            canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity(
+              state,
+              longtail,
+            ),
+          resolve: (state, legalAction) =>
+            resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent(
               state,
               legalAction,
               definition.id,
@@ -18132,6 +18149,18 @@ function resolvePendingChoice(
     return;
   }
   if (
+    state.pendingChoice.source.startsWith(
+      `${RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE}:`,
+    )
+  ) {
+    resolveRunnerInstalledConnectionTrashBadPublicityChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
+    return;
+  }
+  if (
     state.pendingChoice.source.startsWith("p3_56.too_many_doors_secret_spend")
   ) {
     resolveTooManyDoorsSecretSpendChoiceInRunModule(
@@ -19730,6 +19759,197 @@ function resolveP358HiddenReplacementChoice(
   void legalAction;
   void playerAction;
   throw new Error("Unbekannte P3.58-Choice.");
+}
+
+const RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE =
+  "card_implementation.runner_installed_connection_trash_bad_publicity";
+const RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_ACTION =
+  "card_implementation_runner_installed_connection_trash_bad_publicity";
+
+type TrashInstalledRunnerConnectionsThenAddBadPublicityImplementation = Extract<
+  CardRunnerEventLongtailImplementation,
+  { kind: "trash_installed_runner_connections_then_add_bad_publicity" }
+>;
+
+function installedRunnerConnectionIds(state: GameState): CardInstanceId[] {
+  return runnerInstalledCardIds(state).filter((cardId) => {
+    const definition = definitionFor(state, cardId);
+    return definition.type === "resource" && cardHasSubtype(definition, "connection");
+  });
+}
+
+function canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity(
+  state: GameState,
+  implementation: TrashInstalledRunnerConnectionsThenAddBadPublicityImplementation,
+): boolean {
+  return installedRunnerConnectionIds(state).length >= implementation.count;
+}
+
+function resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceDefinitionId: CardDefinitionId,
+  implementation: TrashInstalledRunnerConnectionsThenAddBadPublicityImplementation,
+): void {
+  if (
+    implementation.kind !==
+      "trash_installed_runner_connections_then_add_bad_publicity" ||
+    implementation.count !== 2 ||
+    implementation.badPublicity !== 1 ||
+    implementation.visibility !== "hidden_info_barrier"
+  )
+    throw new Error("Runner-Connection-Trash-Implementation ist ungueltig.");
+  if (
+    !canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity(
+      state,
+      implementation,
+    )
+  )
+    throw new Error("Es sind nicht genug installierte Connections vorhanden.");
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  if (!sourceCardId || !state.runner.heap.includes(sourceCardId))
+    throw new Error("Die Runner-Event-Quelle liegt nicht im Heap.");
+
+  const eligible = installedRunnerConnectionIds(state).sort();
+  const choiceStateVersion = state.stateVersion + 1;
+  state.pendingChoice = {
+    choiceId: `card_impl_runner_connection_trash_${choiceStateVersion}`,
+    side: "runner",
+    source: [
+      RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE,
+      sourceCardId,
+      sourceDefinitionId,
+      String(implementation.count),
+      String(choiceStateVersion),
+    ].join(":"),
+    prompt: "Zwei installierte Connections trashen",
+    kind: "select_cards",
+    options: eligible.map((cardId) => ({
+      id: `card_${cardId}`,
+      label: definitionFor(state, cardId).title,
+      value: cardId,
+    })),
+    minSelections: implementation.count,
+    maxSelections: implementation.count,
+    stateVersion: choiceStateVersion,
+    visibility: "hidden_info_barrier",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_ACTION,
+    sourceDefinitionId,
+    requiredConnectionTrashCount: implementation.count,
+    eligibleConnectionCount: eligible.length,
+    installedConnectionTrashChoiceOpened: true,
+  };
+}
+
+function parseRunnerInstalledConnectionTrashBadPublicityChoiceSource(
+  source: string,
+): {
+  sourceCardId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  count: number;
+} {
+  const [kind, sourceCardId = "", sourceDefinitionId = "", countRaw = ""] =
+    source.split(":");
+  if (kind !== RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE)
+    throw new Error("Es ist keine Runner-Connection-Trash-Choice offen.");
+  const count = Number(countRaw);
+  if (!sourceCardId || !sourceDefinitionId || !Number.isInteger(count) || count <= 0)
+    throw new Error("Die Runner-Connection-Trash-Choice ist ungueltig.");
+  return {
+    sourceCardId: sourceCardId as CardInstanceId,
+    sourceDefinitionId: sourceDefinitionId as CardDefinitionId,
+    count,
+  };
+}
+
+function selectedChoiceCardIdsForChoice(
+  choice: ChoiceRequest,
+  playerAction: PlayerAction,
+): CardInstanceId[] {
+  return selectedChoiceIds(playerAction.selectedChoices).map((optionId) => {
+    const option = choice.options.find((candidate) => candidate.id === optionId);
+    if (typeof option?.value !== "string")
+      throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
+    return option.value as CardInstanceId;
+  });
+}
+
+function resolveRunnerInstalledConnectionTrashBadPublicityChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (
+    !choice ||
+    !choice.source.startsWith(
+      `${RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE}:`,
+    )
+  )
+    throw new Error("Es ist keine Runner-Connection-Trash-Choice offen.");
+  const { sourceCardId, sourceDefinitionId, count } =
+    parseRunnerInstalledConnectionTrashBadPublicityChoiceSource(choice.source);
+  if (!state.runner.heap.includes(sourceCardId))
+    throw new Error("Die Runner-Connection-Trash-Choice gehoert nicht zur gespielten Karte.");
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  const implementation = runnerEventLongtailForDefinition(sourceDefinition);
+  if (
+    sourceDefinition.id !== sourceDefinitionId ||
+    implementation?.kind !==
+      "trash_installed_runner_connections_then_add_bad_publicity" ||
+    implementation.count !== count
+  )
+    throw new Error("Die Runner-Connection-Trash-Choice gehoert nicht zur gespielten Karte.");
+
+  const selectedIds = selectedChoiceCardIdsForChoice(choice, playerAction);
+  if (selectedIds.length !== count || new Set(selectedIds).size !== selectedIds.length)
+    throw new Error("Genau zwei unterschiedliche Connections muessen gewaehlt werden.");
+  const eligible = new Set(installedRunnerConnectionIds(state));
+  for (const cardId of selectedIds) {
+    if (!eligible.has(cardId))
+      throw new Error("Eine gewaehlte Karte ist keine installierte Connection.");
+  }
+  const trashedCardDefinitionIds = selectedIds.map(
+    (cardId) => definitionFor(state, cardId).id,
+  );
+
+  delete state.pendingChoice;
+  for (const cardId of selectedIds)
+    trashRunnerInstalledCardToHeap(state, cardId, legalAction);
+
+  const result = executeCardImplementationEffects(
+    state,
+    {
+      sourceCardId,
+      sourceDefinitionId,
+      sourceTitle: sourceDefinition.title,
+      controller: "runner",
+    },
+    [
+      {
+        kind: "add_bad_publicity",
+        amount: implementation.badPublicity,
+        visibility: "public",
+      },
+    ],
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_ACTION,
+    sourceDefinitionId,
+    trashedCount: selectedIds.length,
+    installedConnectionTrashCount: selectedIds.length,
+    trashedCardDefinitionIds: trashedCardDefinitionIds.join(","),
+    installedConnectionTrashChoiceResolved: true,
+    ...result.publicPayload,
+  };
+  appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
 }
 
 function resolvePlayfulAiDiceLoopEvent(

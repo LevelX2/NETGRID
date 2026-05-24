@@ -669,6 +669,23 @@ describe("CardImplementation coverage and registry invariants", () => {
     });
   });
 
+  it("migrates Proteus Phase 2d installed-connection BP cost into CardImplementation coverage", () => {
+    const definitionId = "onr_proteus_117_poisoned-water-supply";
+    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      cardDefinitionId: definitionId,
+      status: "implemented",
+    });
+    expect(
+      cardImplementationForDefinitionId(definitionId)?.runnerEventLongtail,
+    ).toMatchObject({
+      kind: "trash_installed_runner_connections_then_add_bad_publicity",
+      count: 2,
+      badPublicity: 1,
+      visibility: "hidden_info_barrier",
+    });
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",

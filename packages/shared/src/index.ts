@@ -9372,6 +9372,24 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
     ],
   },
   {
+    id: "onr_proteus_117_poisoned-water-supply",
+    title: "Poisoned Water Supply",
+    side: "runner",
+    type: "event",
+    subtypes: ["bad_publicity"],
+    implementationStatus: "playable_mvp",
+    cost: 3,
+    rulesText:
+      "Play only if you have at least two connections in play. Trash two connections. Give the Corp 1 Bad Publicity point. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+    mechanics: [
+      "play_event",
+      "connection_condition",
+      "trash_installed_connection_cost",
+      "bad_publicity",
+      "bad_publicity_loss_gate",
+    ],
+  },
+  {
     id: "onr_proteus_150_streetware-distributor",
     title: "Streetware Distributor",
     side: "runner",

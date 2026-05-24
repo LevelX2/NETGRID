@@ -192,6 +192,7 @@ describe("catalog API filters", () => {
       "onr_proteus_077_weapons-depot",
       "onr_proteus_085_disintegrator",
       "onr_proteus_108_faked-hit",
+      "onr_proteus_117_poisoned-water-supply",
       "onr_proteus_150_streetware-distributor",
     ]);
     for (const candidateId of PROTEUS_VISIBLE_BASELINE_CARD_IDS) {

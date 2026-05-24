@@ -3127,24 +3127,37 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_117_poisoned-water-supply",
+        "coverage": [
+          "bad_publicity_loss_gate",
+          "card_implementation",
+          "choice_revalidation",
+          "installed_connection_cost",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-2d-installed-connection-bp-cost-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 2d: Poisoned Water Supply plays through a CardImplementation runner event longtail, gates on two installed Runner connections, opens a hidden-info-barrier choice to trash exactly two installed connections, then reuses the generic add_bad_publicity effect."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_118_prearranged-drop",

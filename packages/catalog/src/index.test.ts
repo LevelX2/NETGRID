@@ -195,6 +195,7 @@ describe("card set support catalog source", () => {
       "onr_proteus_077_weapons-depot",
       "onr_proteus_085_disintegrator",
       "onr_proteus_108_faked-hit",
+      "onr_proteus_117_poisoned-water-supply",
       "onr_proteus_150_streetware-distributor",
     ]);
     for (const cardId of PROTEUS_VISIBLE_BASELINE_CARD_IDS) {
@@ -211,7 +212,7 @@ describe("card set support catalog source", () => {
         card.catalogCardId.startsWith("onr_proteus_") &&
         !PROTEUS_VISIBLE_BASELINE_CARD_IDS.includes(card.catalogCardId),
     );
-    expect(blockedProteus).toHaveLength(142);
+    expect(blockedProteus).toHaveLength(141);
     expect(blockedProteus.every((card) => card.statuses.blocked)).toBe(true);
   });
 

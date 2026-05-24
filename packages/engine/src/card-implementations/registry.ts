@@ -389,6 +389,7 @@ import { proteusRasminBridgerImplementation } from "./proteus/corp/upgrades/rasm
 import { proteusResearchBunkerImplementation } from "./proteus/corp/upgrades/research-bunker";
 import { proteusWeaponsDepotImplementation } from "./proteus/corp/upgrades/weapons-depot";
 import { proteusFakedHitImplementation } from "./proteus/runner/events/faked-hit";
+import { proteusPoisonedWaterSupplyImplementation } from "./proteus/runner/events/poisoned-water-supply";
 import { proteusDisintegratorImplementation } from "./proteus/runner/programs/disintegrator";
 import { proteusStreetwareDistributorImplementation } from "./proteus/runner/resources/streetware-distributor";
 import type { CardImplementationDefinition } from "./types";
@@ -777,6 +778,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusWeaponsDepotImplementation,
   proteusCharityTakeoverImplementation,
   proteusFakedHitImplementation,
+  proteusPoisonedWaterSupplyImplementation,
   proteusDisintegratorImplementation,
   proteusStreetwareDistributorImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];

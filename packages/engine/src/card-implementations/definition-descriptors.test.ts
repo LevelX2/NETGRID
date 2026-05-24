@@ -1442,6 +1442,24 @@ describe("CardImplementation definition descriptors", () => {
     ).toBe("implemented");
   });
 
+  it("describes Proteus Phase 2d Poisoned Water Supply event implementation", () => {
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_proteus_117_poisoned-water-supply",
+      )?.runnerEventLongtail,
+    ).toEqual({
+      kind: "trash_installed_runner_connections_then_add_bad_publicity",
+      count: 2,
+      badPublicity: 1,
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_proteus_117_poisoned-water-supply",
+      )?.status,
+    ).toBe("implemented");
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

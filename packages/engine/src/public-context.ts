@@ -663,6 +663,32 @@ export function publicContextForAction(
       context.arrangedCount = legalAction.payload.arrangedCount;
     if (typeof legalAction.payload.trashedCount === "number")
       context.trashedCount = legalAction.payload.trashedCount;
+    if (typeof legalAction.payload.requiredConnectionTrashCount === "number")
+      context.requiredConnectionTrashCount =
+        legalAction.payload.requiredConnectionTrashCount;
+    if (typeof legalAction.payload.eligibleConnectionCount === "number")
+      context.eligibleConnectionCount =
+        legalAction.payload.eligibleConnectionCount;
+    if (
+      typeof legalAction.payload.installedConnectionTrashCount === "number"
+    )
+      context.installedConnectionTrashCount =
+        legalAction.payload.installedConnectionTrashCount;
+    if (
+      typeof legalAction.payload.installedConnectionTrashChoiceOpened ===
+      "boolean"
+    )
+      context.installedConnectionTrashChoiceOpened =
+        legalAction.payload.installedConnectionTrashChoiceOpened;
+    if (
+      typeof legalAction.payload.installedConnectionTrashChoiceResolved ===
+      "boolean"
+    )
+      context.installedConnectionTrashChoiceResolved =
+        legalAction.payload.installedConnectionTrashChoiceResolved;
+    if (typeof legalAction.payload.trashedCardDefinitionIds === "string")
+      context.trashedCardDefinitionIds =
+        legalAction.payload.trashedCardDefinitionIds;
     if (typeof legalAction.payload.installedCount === "number")
       context.installedCount = legalAction.payload.installedCount;
     if (typeof legalAction.payload.installedIceCount === "number")

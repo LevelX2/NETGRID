@@ -410,12 +410,19 @@ export type CardRunEncounterInterventionImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     };
 
-export type CardRunnerEventLongtailImplementation = {
-  kind: "playful_ai_dice_loop";
-  dieFaces: 6;
-  choiceOn: readonly [1, 2, 3];
-  visibility: Extract<EventVisibilityClass, "public">;
-};
+export type CardRunnerEventLongtailImplementation =
+  | {
+      kind: "playful_ai_dice_loop";
+      dieFaces: 6;
+      choiceOn: readonly [1, 2, 3];
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "trash_installed_runner_connections_then_add_bad_publicity";
+      count: 2;
+      badPublicity: 1;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    };
 
 export type CardVirusCounterKindImplementation =
   | "boardwalk"

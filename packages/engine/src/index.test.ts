@@ -2176,6 +2176,259 @@ describe("Proteus Phase 2c Direct Runner Event BP Damage", () => {
   });
 });
 
+describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
+  const POISONED_WATER_SUPPLY = "onr_proteus_117_poisoned-water-supply";
+  const CONNECTION_A = "onr_v1_159_databroker";
+  const CONNECTION_B = "onr_v1_161_fall-guy";
+  const CONNECTION_C = "onr_v1_185_trauma-team";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function poisonedWaterSupplyGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: `${seed}_runner`,
+          cards: [
+            { id: POISONED_WATER_SUPPLY, quantity: 1 },
+            { id: CONNECTION_A, quantity: 1 },
+            { id: CONNECTION_B, quantity: 1 },
+            { id: CONNECTION_C, quantity: 1 },
+            ...ONR_V1_1_2K_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_1_2K_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  function preparePoisonedWaterSupply(
+    seed: string,
+    installedConnections: readonly string[],
+    badPublicityBefore = 0,
+  ): {
+    initial: GameState;
+    beforePlay: GameState;
+    state: GameState;
+    playAction: LegalAction;
+    installedIds: CardInstanceId[];
+  } {
+    let state = poisonedWaterSupplyGame(seed);
+    const installedIds = installedConnections.map((definitionId) =>
+      installRunnerResourceForTest(state, definitionId),
+    );
+    moveRunnerCardToGrip(state, POISONED_WATER_SUPPLY);
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    state.corp.badPublicity = badPublicityBefore;
+    const initial = structuredClone(state);
+    const playAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(state, action) === POISONED_WATER_SUPPLY,
+    );
+    const beforePlay = structuredClone(state);
+    state = apply(state, "runner", (action) => action.actionId === playAction.actionId);
+    return { initial, beforePlay, state, playAction, installedIds };
+  }
+
+  function selectedOptionIdsForCards(
+    state: GameState,
+    cardIds: readonly CardInstanceId[],
+  ): string[] {
+    const choice = state.pendingChoice;
+    if (!choice) throw new Error("Missing pending choice");
+    return cardIds.map((cardId) => {
+      const option = choice.options.find((candidate) => candidate.value === cardId);
+      expect(option).toBeDefined();
+      return option?.id ?? "";
+    });
+  }
+
+  it("requires two installed Runner connections before Poisoned Water Supply is legal", () => {
+    const state = poisonedWaterSupplyGame("proteus-phase-2d-poisoned-gate");
+    installRunnerResourceForTest(state, CONNECTION_A);
+    moveRunnerCardToGrip(state, POISONED_WATER_SUPPLY);
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(state, action) === POISONED_WATER_SUPPLY,
+      ),
+    ).toBe(false);
+  });
+
+  it("trashes exactly two installed connections before generic Bad Publicity", () => {
+    const { initial, beforePlay, playAction, installedIds } =
+      preparePoisonedWaterSupply(
+        "proteus-phase-2d-poisoned-water-supply",
+        [CONNECTION_A, CONNECTION_B],
+        0,
+      );
+    let state = apply(
+      beforePlay,
+      "runner",
+      (action) => action.actionId === playAction.actionId,
+    );
+
+    expect(state.runner.credits).toBe(beforePlay.runner.credits - 3);
+    expect(state.corp.badPublicity).toBe(0);
+    expect(state.pendingChoice?.source).toContain(
+      "card_implementation.runner_installed_connection_trash_bad_publicity",
+    );
+    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: POISONED_WATER_SUPPLY,
+      hiddenZoneBarrier: true,
+      hiddenZoneAction:
+        "card_implementation_runner_installed_connection_trash_bad_publicity",
+      sourceDefinitionId: POISONED_WATER_SUPPLY,
+      requiredConnectionTrashCount: 2,
+      eligibleConnectionCount: 2,
+      installedConnectionTrashChoiceOpened: true,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    const wrongSide = applyAction(beforePlay, {
+      matchId: beforePlay.matchId,
+      side: "corp",
+      actionId: playAction.actionId,
+      clientKnownStateVersion: beforePlay.stateVersion,
+      idempotencyKey: "proteus-poisoned-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(beforePlay, {
+      matchId: beforePlay.matchId,
+      side: "runner",
+      actionId: playAction.actionId,
+      clientKnownStateVersion: beforePlay.stateVersion - 1,
+      idempotencyKey: "proteus-poisoned-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = applyChoices(state, "runner", selectedOptionIdsForCards(state, installedIds));
+    expect(state.pendingChoice).toBeUndefined();
+    for (const cardId of installedIds) {
+      expect(state.runner.heap).toContain(cardId);
+      expect(state.runner.rig.resources).not.toContain(cardId);
+    }
+    expect(state.corp.badPublicity).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction:
+        "card_implementation_runner_installed_connection_trash_bad_publicity",
+      sourceDefinitionId: POISONED_WATER_SUPPLY,
+      trashedCount: 2,
+      installedConnectionTrashCount: 2,
+      badPublicityAdded: 1,
+      corpBadPublicityBefore: 0,
+      corpBadPublicityAfter: 1,
+      installedConnectionTrashChoiceResolved: true,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload?.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "add_bad_publicity",
+        sourceDefinitionId: POISONED_WATER_SUPPLY,
+        amount: 1,
+      }),
+    ]);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.errors).toEqual([]);
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("rejects invalid or drifted connection choices during revalidation", () => {
+    const { state, installedIds } = preparePoisonedWaterSupply(
+      "proteus-phase-2d-poisoned-choice-revalidation",
+      [CONNECTION_A, CONNECTION_B, CONNECTION_C],
+      0,
+    );
+    const choiceAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
+    const oneSelection = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "proteus-poisoned-one-selection",
+      selectedChoices: {
+        selectedOptionIds: selectedOptionIdsForCards(state, [installedIds[0]!]),
+      },
+    });
+    expect(oneSelection.ok).toBe(false);
+
+    const drifted = structuredClone(state);
+    removeEverywhere(drifted, installedIds[1]!);
+    const driftedSelection = applyAction(drifted, {
+      matchId: drifted.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: drifted.stateVersion,
+      idempotencyKey: "proteus-poisoned-drifted-selection",
+      selectedChoices: {
+        selectedOptionIds: selectedOptionIdsForCards(state, [
+          installedIds[0]!,
+          installedIds[1]!,
+        ]),
+      },
+    });
+    expect(driftedSelection.ok).toBe(false);
+  });
+
+  it("keeps Bad-Publicity-7 primary after Poisoned Water Supply choice resolves", () => {
+    const { initial, state: opened, installedIds } = preparePoisonedWaterSupply(
+      "proteus-phase-2d-poisoned-bp-priority",
+      [CONNECTION_A, CONNECTION_B],
+      6,
+    );
+    const state = applyChoices(
+      opened,
+      "runner",
+      selectedOptionIdsForCards(opened, installedIds),
+    );
+
+    expect(state.corp.badPublicity).toBe(7);
+    expect(state.phase).toBe("game_over");
+    expect(state.winner).toBe("runner");
+    expect(state.gameEndReason).toBe("bad_publicity_7");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      gameEndReason: "bad_publicity_7",
+      badPublicityThreshold: 7,
+      corpBadPublicityBefore: 6,
+      corpBadPublicityAfter: 7,
+      sourceDefinitionId: POISONED_WATER_SUPPLY,
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", () => {
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
