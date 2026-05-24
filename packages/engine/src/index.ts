@@ -306,6 +306,17 @@ import {
   resolveViral15ProgramTrashChoice as resolveViral15ProgramTrashChoiceInRunModule,
   type EncounterResolutionHost,
 } from "./game/run/encounter-resolution";
+import {
+  applyRioDeJaneiroCityGridPassedIceTrigger,
+  encounterSpecialWindowHost,
+  isSubmarineUplinkSource,
+  markSubmarineUplinkJackOutAfterEncounter,
+  resolveEncounterSpecialWindowSubroutine,
+  resolveStartupImmolatorTrashIce as resolveStartupImmolatorTrashIceInRunModule,
+  resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
+  startupImmolatorPostPassActions,
+  type EncounterSpecialWindowHost,
+} from "./game/run/encounter-special-windows";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -432,7 +443,6 @@ import {
   RABBIT_HQ_INTERFACE_PROGRAM_ID,
   SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
   SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID,
-  STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID,
   SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID,
   VALU_PAK_SOFTWARE_BUNDLE_INSTALL_EVENT_ID,
   ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
@@ -4884,17 +4894,6 @@ function parisTracePoolCapacityForCard(
   );
 }
 
-function isRioPassRezzedIceSource(
-  state: GameState,
-  cardId: CardInstanceId,
-): boolean {
-  return hasFortRunWindowKind(
-    state,
-    cardId,
-    "roll_die_on_pass_rezzed_ice_on_same_fort",
-  );
-}
-
 function isRovingRunRestrictionSource(
   state: GameState,
   cardId: CardInstanceId,
@@ -6577,7 +6576,7 @@ function runnerMovementActions(state: GameState): LegalAction[] {
   }
   const actions: LegalAction[] = [];
   actions.push(...runnerDuringRunCardImplementationActions(state));
-  actions.push(...startupImmolatorPostPassActions(state, run));
+  actions.push(...startupImmolatorPostPassActions(encounterSpecialWindowHostForState(state)));
   actions.push(...mysteryBoxRunActions(state, run));
   const jackOutAdditionalCost = runJackOutAdditionalCost(run);
   if (availableRunnerRunCredits(runDurationPaymentHost(state)) >= jackOutAdditionalCost) {
@@ -6674,48 +6673,6 @@ function runnerDuringRunCardImplementationActions(
     );
   }
   return actions;
-}
-
-function startupImmolatorPostPassActions(
-  state: GameState,
-  run: ActiveRun,
-): LegalAction[] {
-  const targetIceId = run.startupImmolatorPendingPassedIceId;
-  if (!targetIceId || !state.cardInstances[targetIceId]) return [];
-  if (!rezzedInstalledIceIds(state).includes(targetIceId)) return [];
-  if (!run.fullyBrokenIceIds?.includes(targetIceId)) return [];
-  const used = new Set(
-    ensureRunnerTurnFlags(state).startupImmolatorUsedSourceIdsThisTurn ?? [],
-  );
-  const rezCost = rezCostForCard(state, targetIceId);
-  if (state.runner.credits < rezCost) return [];
-  const targetDefinition = definitionFor(state, targetIceId);
-  return state.runner.rig.programs
-    .filter(
-      (cardId) =>
-        runnerUtilityLongtailKindForCard(state, cardId) ===
-          "startup_immolator_trash_fully_broken_ice" ||
-        definitionFor(state, cardId).id === STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID,
-    )
-    .filter((cardId) => !used.has(cardId))
-    .sort()
-    .map((sourceCardId) =>
-      action(
-        state,
-        "runner",
-        "trigger_ability",
-        `${definitionFor(state, sourceCardId).title}: ICE trashen`,
-        sourceCardId,
-        rezCost > 0 ? [{ credits: rezCost }] : [],
-        {
-          cardId: sourceCardId,
-          targetIceId,
-          targetIceDefinitionId: targetDefinition.id,
-          v1922RunnerProgramAbility: "startup_immolator_trash_ice",
-          rezCostPaid: rezCost,
-        },
-      ),
-    );
 }
 
 function runStartTaxForServerUpgrades(
@@ -7852,7 +7809,7 @@ function performAction(
         legalAction.payload?.v1922RunnerProgramAbility ===
         "startup_immolator_trash_ice"
       ) {
-        resolveStartupImmolatorTrashIce(state, legalAction);
+        resolveStartupImmolatorTrashIceInRunModule(encounterSpecialWindowHostForState(state), legalAction);
         return;
       }
       if (
@@ -8344,63 +8301,6 @@ function applyShellTradersStartOfTurn(
       cardTitle: publicCardTitle(targetDefinition.id),
     });
   }
-}
-
-function resolveStartupImmolatorTrashIce(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Startup Immolator nutzen.");
-  const run = mustRun(state);
-  if (run.phase !== "movement")
-    throw new Error("Startup Immolator ist nur nach dem Passieren von ICE legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  const targetIceId = String(legalAction.payload?.targetIceId ?? "");
-  if (!state.runner.rig.programs.includes(sourceCardId))
-    throw new Error("Startup Immolator ist nicht installiert.");
-  if (
-    runnerUtilityLongtailKindForCard(state, sourceCardId) !==
-      "startup_immolator_trash_fully_broken_ice" &&
-    definitionFor(state, sourceCardId).id !== STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID
-  )
-    throw new Error("Die Startup-Immolator-Faehigkeit passt nicht zur Karte.");
-  const flags = ensureRunnerTurnFlags(state);
-  const used = flags.startupImmolatorUsedSourceIdsThisTurn ?? [];
-  if (used.includes(sourceCardId))
-    throw new Error("Startup Immolator wurde in diesem Zug bereits genutzt.");
-  if (
-    !targetIceId ||
-    run.startupImmolatorPendingPassedIceId !== targetIceId ||
-    !run.fullyBrokenIceIds?.includes(targetIceId) ||
-    !rezzedInstalledIceIds(state).includes(targetIceId)
-  )
-    throw new Error("Das Startup-Immolator-Ziel ist nicht legal.");
-  const rezCost = rezCostForCard(state, targetIceId);
-  const paid = Number(legalAction.payload?.rezCostPaid ?? rezCost);
-  if (!Number.isInteger(paid) || paid !== rezCost)
-    throw new Error("Startup Immolator muss exakt die Rez-Kosten zahlen.");
-  spendCredits(state, "runner", rezCost);
-  const targetDefinitionId = definitionFor(state, targetIceId).id;
-  trashCorpInstalledCardToArchives(state, targetIceId);
-  flags.startupImmolatorUsedSourceIdsThisTurn = [...used, sourceCardId];
-  const {
-    startupImmolatorPendingPassedIceId: _startupPending,
-    ...runWithoutStartupPending
-  } = run;
-  void _startupPending;
-  if (state.run) state.run = runWithoutStartupPending;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1922RunnerProgramAbility: "startup_immolator_trash_ice",
-    sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    targetIceDefinitionId: targetDefinitionId,
-    rezCostPaid: rezCost,
-    trashedCount: 1,
-    trashedCardDefinitionId: targetDefinitionId,
-    runnerCreditsAfter: state.runner.credits,
-    startupImmolatorExhausted: true,
-  };
 }
 
 function resolveMicrotechBackupDriveReturnTopHosted(
@@ -9563,27 +9463,6 @@ function isHackerTrackerCentralCard(
   );
 }
 
-function isSubmarineUplinkSource(state: GameState, cardId: CardInstanceId): boolean {
-  return (
-    runnerUtilityLongtailKindForCard(state, cardId) ===
-    "submarine_uplink_trace_link_force_jack_out"
-  );
-}
-
-function markSubmarineUplinkJackOutAfterEncounter(
-  state: GameState,
-  cardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  if (!state.run || !isSubmarineUplinkSource(state, cardId)) return;
-  state.run.forceJackOutAfterEncounterSourceId = cardId;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    forceJackOutAfterEncounter: true,
-    sourceDefinitionId: definitionFor(state, cardId).id,
-  };
-}
-
 function resolveRemoveRunnerTraceCounter(
   state: GameState,
   legalAction: LegalAction,
@@ -10475,23 +10354,11 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
         run.resolvedSubroutineIndexes.push(index);
       return;
     }
-    if (
-      subroutine.type ===
-      "secret_spend_compare_end_run_unless_corp_spent_at_least_runner"
-    ) {
-      startTooManyDoorsSecretSpendCorpChoice(
-        state,
-        run.encounteredIceId,
-        index,
-        legalAction,
-      );
-      if (!run.resolvedSubroutineIndexes.includes(index))
-        run.resolvedSubroutineIndexes.push(index);
-      return;
-    }
-    if (subroutine.type === "rewind_run_to_rezzed_ice_by_die") {
-      if (resolveVacuumLinkRewindSubroutine(state, run, legalAction)) return;
-    }
+    const specialWindow = resolveEncounterSpecialWindowSubroutine(
+      encounterSpecialWindowHostForState(state),
+      { definition, subroutine, subroutineIndex: index, legalAction },
+    );
+    if (specialWindow.suspended) return;
     if (subroutine.type === "end_the_run") {
       appendResolvedSubroutineEffect(legalAction, definition, index, subroutine);
       ended = true;
@@ -10983,132 +10850,6 @@ function traceBidChoice(
   };
 }
 
-function secretSpendChoice(
-  state: GameState,
-  side: Side,
-  source: string,
-  prompt: string,
-  maxSpend: number,
-): ChoiceRequest {
-  const boundedMax = Math.min(2, Math.max(0, Math.floor(maxSpend)));
-  return {
-    choiceId: `${source}.${side}.${state.stateVersion + 1}`,
-    side,
-    source,
-    prompt,
-    kind: "bid_amount",
-    options: Array.from({ length: boundedMax + 1 }, (_, amount) => ({
-      id: `bid_${amount}`,
-      label: `${amount} Credits`,
-      publicLabel: `${amount} Credits`,
-      value: amount,
-    })),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-}
-
-function startTooManyDoorsSecretSpendCorpChoice(
-  state: GameState,
-  sourceIceId: CardInstanceId,
-  subroutineIndex: number,
-  legalAction?: LegalAction,
-): void {
-  if (state.pendingChoice || state.secretSpendComparison)
-    throw new Error("Es ist bereits eine Secret-Spend-Choice offen.");
-  const run = mustRun(state);
-  const source = `p3_56.too_many_doors_secret_spend:${run.runId}:${sourceIceId}:${subroutineIndex}`;
-  state.secretSpendComparison = {
-    source: "too_many_doors",
-    runId: run.runId,
-    sourceIceId,
-    subroutineIndex,
-  };
-  state.pendingChoice = secretSpendChoice(
-    state,
-    "corp",
-    source,
-    "Too Many Doors: Korp geheim 0, 1 oder 2 Credits ausgeben.",
-    state.corp.credits,
-  );
-  state.activeSide = "corp";
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      secretSpendStarted: true,
-      sourceDefinitionId: definitionFor(state, sourceIceId).id,
-      secretSpendAmounts: "0,1,2",
-    };
-  }
-}
-
-function resolveTooManyDoorsSecretSpendChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  const comparison = state.secretSpendComparison;
-  if (
-    !choice ||
-    !comparison ||
-    !choice.source.startsWith("p3_56.too_many_doors_secret_spend")
-  )
-    throw new Error("Too-Many-Doors-Secret-Spend-Choice ist nicht offen.");
-  const selected = selectedBidAmount(choice, playerAction);
-  if (selected < 0 || selected > 2)
-    throw new Error("Too Many Doors erlaubt nur 0, 1 oder 2 Credits.");
-  if (choice.side === "corp") {
-    if (state.corp.credits < selected)
-      throw new Error("Die Korp kann diesen Secret Spend nicht bezahlen.");
-    state.secretSpendComparison = {
-      ...comparison,
-      corpSpend: selected,
-    };
-    state.pendingChoice = secretSpendChoice(
-      state,
-      "runner",
-      choice.source,
-      "Too Many Doors: Runner geheim 0, 1 oder 2 Credits ausgeben.",
-      state.runner.credits,
-    );
-    state.activeSide = "runner";
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      secretSpendStep: "corp_selected",
-      sourceDefinitionId: definitionFor(state, comparison.sourceIceId).id,
-      hiddenInfoBarrier: true,
-    };
-    return;
-  }
-  const corpSpend = comparison.corpSpend;
-  if (corpSpend === undefined)
-    throw new Error("Der Korp-Secret-Spend fehlt.");
-  if (state.corp.credits < corpSpend || state.runner.credits < selected)
-    throw new Error("Secret Spend ist nicht mehr bezahlbar.");
-  spendCredits(state, "corp", corpSpend);
-  spendCredits(state, "runner", selected);
-  const endRun = corpSpend < selected;
-  delete state.pendingChoice;
-  delete state.secretSpendComparison;
-  if (state.run) {
-    state.timingPoint = "run.encounter_ice";
-    state.activeSide = "runner";
-    if (endRun) finishRun(state, false, legalAction);
-  }
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    choiceVisibility: "public",
-    secretSpendRevealed: true,
-    secretSpendCorp: corpSpend,
-    secretSpendRunner: selected,
-    tooManyDoorsEndRun: endRun,
-    sourceDefinitionId: definitionFor(state, comparison.sourceIceId).id,
-  };
-}
-
 function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
   if (run.position.kind !== "ice")
@@ -11123,7 +10864,11 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
   if (
     passedIceId &&
     mustInstance(state.cardInstances, passedIceId).rezzed &&
-    applyRioDeJaneiroCityGridPassedIceTrigger(state, run, passedIceId, legalAction)
+    applyRioDeJaneiroCityGridPassedIceTrigger(
+      encounterSpecialWindowHostForState(state),
+      passedIceId,
+      legalAction,
+    ).runShouldEnd
   ) {
     return;
   }
@@ -11189,138 +10934,6 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
     phase: "access",
   };
   enterAccessFromSuccessfulRun(runAccessTransitionHost(state));
-}
-
-function applyRioDeJaneiroCityGridPassedIceTrigger(
-  state: GameState,
-  run: ActiveRun,
-  passedIceId: CardInstanceId,
-  legalAction?: LegalAction,
-): boolean {
-  if (run.position.kind !== "ice") return false;
-  const server = mustServer(state, run.position.serverId);
-  const rioIds = server.root
-    .filter((cardId) => {
-      const instance = state.cardInstances[cardId];
-      return (
-        instance?.rezzed === true &&
-        isRioPassRezzedIceSource(state, cardId)
-      );
-    })
-    .sort();
-  if (rioIds.length === 0) return false;
-
-  for (const rioId of rioIds) {
-    const rioDefinitionId = definitionFor(state, rioId).id;
-    const randomPurpose = `v1921.die.${rioDefinitionId}.passed_ice.${run.runId}.${passedIceId}.${rioId}`;
-    const dieRoll = rollDeterministicDie(state, randomPurpose);
-    const runEnded = dieRoll === 1;
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
-        sourceCardId: rioId,
-        sourceDefinitionId: rioDefinitionId,
-        passedIceId,
-        passedIceDefinitionId: definitionFor(state, passedIceId).id,
-        serverLabel: server.label,
-        v1921DieRoll: dieRoll,
-        randomPurpose,
-        randomCounterAfter: state.randomCounter,
-        rioRunEnded: runEnded,
-      };
-    }
-    if (runEnded) {
-      finishRun(state, false, legalAction);
-      return true;
-    }
-  }
-  return false;
-}
-
-function resolveVacuumLinkRewindSubroutine(
-  state: GameState,
-  run: ActiveRun,
-  legalAction?: LegalAction,
-): boolean {
-  if (!run.encounteredIceId)
-    throw new Error("Vacuum-Link-Rewind benötigt einen aktiven ICE-Encounter.");
-  if (run.position.kind !== "ice")
-    throw new Error("Vacuum-Link-Rewind erwartet eine ICE-Position.");
-  const server = mustServer(state, run.position.serverId);
-  const currentIndex =
-    server.ice[run.position.iceIndex] === run.encounteredIceId
-      ? run.position.iceIndex
-      : server.ice.findIndex((cardId) => cardId === run.encounteredIceId);
-  if (currentIndex < 0)
-    throw new Error(
-      "Vacuum-Link-Rewind konnte das Encounter-ICE nicht finden.",
-    );
-
-  const die = rollDeterministicDie(
-    state,
-    `${definitionFor(state, run.encounteredIceId).id}.rewind.${run.runId}.${run.encounteredIceId}`,
-  );
-  if (legalAction)
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      vacuumLinkDieRoll: die,
-    };
-  if (die >= 4) {
-    if (legalAction)
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        vacuumLinkRewindApplied: false,
-      };
-    return false;
-  }
-
-  let targetIndex = outermostIceIndex(server);
-  let remainingRezzedBack = die;
-  for (let index = currentIndex + 1; index < server.ice.length; index += 1) {
-    const cardId = server.ice[index];
-    if (!cardId || !mustInstance(state.cardInstances, cardId).rezzed) continue;
-    remainingRezzedBack -= 1;
-    if (remainingRezzedBack === 0) {
-      targetIndex = index;
-      break;
-    }
-  }
-  if (remainingRezzedBack > 0) targetIndex = outermostIceIndex(server);
-  const targetIceId = mustArrayValue(
-    server.ice,
-    targetIndex,
-    "Vacuum-Link-Ziel-ICE fehlt.",
-  );
-
-  const {
-    encounteredIceId: _encounteredIceId,
-    accessedCardId: _accessedCardId,
-    ...runWithoutEncounter
-  } = run;
-  void _encounteredIceId;
-  void _accessedCardId;
-  state.run = {
-    ...runWithoutEncounter,
-    phase: "movement",
-    position: { kind: "ice", serverId: server.id, iceIndex: targetIndex },
-    approachedIceId: targetIceId,
-    brokenSubroutineIndexes: [],
-    resolvedSubroutineIndexes: [],
-  };
-  state.timingPoint = "run.jack_out_window";
-  state.activeSide = "runner";
-  resetBreakerStrength(state);
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      vacuumLinkRewindApplied: true,
-      vacuumLinkRewindRezzedIceBack: die,
-      vacuumLinkTargetIceId: targetIceId,
-      vacuumLinkTargetIceIndex: targetIndex,
-    };
-  }
-  return true;
 }
 
 function continueFromMovement(state: GameState, legalAction?: LegalAction): void {
@@ -17589,6 +17202,21 @@ function encounterResolutionHostForState(state: GameState): EncounterResolutionH
   });
 }
 
+function encounterSpecialWindowHostForState(
+  state: GameState,
+): EncounterSpecialWindowHost {
+  return encounterSpecialWindowHost(state, {
+    finishRun: (successful, legalAction) =>
+      finishRun(state, successful, legalAction),
+    quoteIceRezCost: (iceId) => rezCostForCard(state, iceId),
+    resetBreakerStrength: () => resetBreakerStrength(state),
+    rollDie: (purpose) => rollDeterministicDie(state, purpose),
+    spendCredits: (side, amount) => spendCredits(state, side, amount),
+    trashCorpInstalledCard: (cardId) =>
+      trashCorpInstalledCardToArchives(state, cardId),
+  });
+}
+
 function runEndCleanupHost(state: GameState): RunEndCleanupHost {
   return {
     state,
@@ -18130,7 +17758,11 @@ function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith("p3_56.too_many_doors_secret_spend")
   ) {
-    resolveTooManyDoorsSecretSpendChoice(state, legalAction, playerAction);
+    resolveTooManyDoorsSecretSpendChoiceInRunModule(
+      encounterSpecialWindowHostForState(state),
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (
@@ -20981,7 +20613,7 @@ function resolveTraceBaseLinkChoice(
   const candidate = assertTraceBaseLinkChoiceValid(state, cardId);
   spendCredits(state, "runner", candidate.creditCost);
   markSubmarineUplinkJackOutAfterEncounter(
-    state,
+    encounterSpecialWindowHostForState(state),
     candidate.sourceCardInstanceId,
     legalAction,
   );
@@ -21285,7 +20917,7 @@ function resolveTracePostBidLinkChoice(
     );
     const paymentPayload = postBidLinkPaymentPublicPayload(paymentReceipt);
     markSubmarineUplinkJackOutAfterEncounter(
-      state,
+      encounterSpecialWindowHostForState(state),
       candidate.cardId,
       legalAction,
     );
