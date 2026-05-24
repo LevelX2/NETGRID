@@ -8780,7 +8780,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 0,
-    rulesText: "Play only if the Runner made a run last turn. Gain 3 credits.",
+    rulesText:
+      "Conceal all revealed but unrezzed ice; then rearrange your installed ice by swapping pairs of ice while Runner looks away.",
     mechanics: [
       "play_operation",
       "run_flow",
