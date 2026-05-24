@@ -9587,6 +9587,7 @@ function ChronicleCardTrigger({
 }) {
   const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
   const { tooltipPercent } = useCardScaleSettings();
+  const tooltipViewId = useId();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -9608,6 +9609,7 @@ function ChronicleCardTrigger({
     tooltipEnabled && card
       ? `chronicle-card-tooltip-${`${card.catalogCardId}-${item.id}`.replace(/[^A-Za-z0-9_-]/g, "-")}`
       : undefined;
+  const tooltipOwnerId = `chronicle-card-tooltip-${tooltipViewId}`;
   const hasGeneratedImage = hasGeneratedCardArt(card?.catalogCardId);
   const showHardwareOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isHardwareCardType(cardType) && hasGeneratedImage;
   const showOperationOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isOperationCardType(cardType) && hasGeneratedImage;
@@ -9691,6 +9693,21 @@ function ChronicleCardTrigger({
     }, CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS);
   };
 
+  const closeTooltip = () => {
+    clearOpenTimer();
+    clearCloseTimer();
+    setTooltipHoverVisible(false);
+    setTooltipFocusVisible(false);
+  };
+
+  const openTouchTooltip = () => {
+    clearOpenTimer();
+    clearCloseTimer();
+    setTooltipHoverVisible(false);
+    setTooltipFocusVisible(true);
+    window.dispatchEvent(new CustomEvent(CARD_TOOLTIP_PIN_EVENT, { detail: { ownerId: tooltipOwnerId } }));
+  };
+
   const activateCardPreview = () => {
     if (disabled) return;
     onClick();
@@ -9717,6 +9734,29 @@ function ChronicleCardTrigger({
     },
     []
   );
+
+  useEffect(() => {
+    const closeWhenOtherTooltipOpens = (event: Event) => {
+      const ownerId = event instanceof CustomEvent ? (event.detail as { ownerId?: unknown } | null)?.ownerId : undefined;
+      if (ownerId === tooltipOwnerId) return;
+      closeTooltip();
+    };
+    window.addEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipOpens);
+    return () => window.removeEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipOpens);
+  }, [tooltipOwnerId]);
+
+  useEffect(() => {
+    if (!tooltipFocusVisible) return;
+    const closeFocusedTooltipOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      const triggerElement = triggerRef.current;
+      if (triggerElement?.contains(target)) return;
+      closeTooltip();
+    };
+    window.addEventListener("pointerdown", closeFocusedTooltipOnOutsidePointer, true);
+    return () => window.removeEventListener("pointerdown", closeFocusedTooltipOnOutsidePointer, true);
+  }, [tooltipFocusVisible]);
 
   return (
     <button
@@ -9745,7 +9785,7 @@ function ChronicleCardTrigger({
       onPointerUp={(event) => {
         if (event.pointerType !== "touch" || disabled) return;
         updateTooltipPlacement();
-        if (tooltipEnabled) setTooltipFocusVisible(true);
+        if (tooltipEnabled) openTouchTooltip();
         const now = Date.now();
         const previousTapMs = lastTouchTapRef.current;
         lastTouchTapRef.current = now;
