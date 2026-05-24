@@ -172,6 +172,14 @@ import {
   createSneakPreviewFreeProgramInstallInput,
   executeFreeProgramInstallPlan,
 } from "./game/hidden-zone/free-program-install-execution";
+import {
+  applyMysteryBoxOncePerRunPlan,
+  applyMysteryBoxSourceTrashPlan,
+  applySneakPreviewTemporaryReturnPlan,
+  createMysteryBoxOncePerRunPlan,
+  createMysteryBoxPostInstallSideEffectPlan,
+  createSneakPreviewPostInstallSideEffectPlan,
+} from "./game/hidden-zone/post-install-side-effects";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -9273,15 +9281,20 @@ function resolveMysteryBoxTop5ProgramInstall(
     throw new Error("Mystery Box ist nicht installiert.");
   if (definitionFor(state, sourceCardId).id !== MYSTERY_BOX_ID)
     throw new Error("Die Mystery-Box-Faehigkeit passt nicht zur Karte.");
-  const used = run.mysteryBoxUsedSourceIdsThisRun ?? [];
-  if (used.includes(sourceCardId))
-    throw new Error("Mystery Box wurde in diesem Run bereits genutzt.");
+  const oncePerRunPlan = createMysteryBoxOncePerRunPlan({
+    sourceCardId,
+    usedSourceIdsThisRun: run.mysteryBoxUsedSourceIdsThisRun ?? [],
+  });
   const topCards = state.runner.stack.slice(0, 5);
   if (topCards.length === 0) throw new Error("Der Stack ist leer.");
   const programIds = topCards.filter(
     (cardId) => definitionFor(state, cardId).type === "program",
   );
-  run.mysteryBoxUsedSourceIdsThisRun = [...used, sourceCardId].sort();
+  applyMysteryBoxOncePerRunPlan(oncePerRunPlan, {
+    markUsedThisRun: (usedSourceIds) => {
+      run.mysteryBoxUsedSourceIdsThisRun = usedSourceIds;
+    },
+  });
   if (programIds.length === 0) {
     shuffleRunnerStack(
       state,
@@ -9364,8 +9377,10 @@ function resolveMysteryBoxChoice(
         }),
     },
   });
-  if (execution.sourceTrashNeeded && execution.sourceCardId)
-    trashRunnerInstalledCardToHeap(state, execution.sourceCardId);
+  const postInstall = createMysteryBoxPostInstallSideEffectPlan(execution);
+  applyMysteryBoxSourceTrashPlan(postInstall, {
+    trashSource: (cardId) => trashRunnerInstalledCardToHeap(state, cardId),
+  });
   if (execution.shuffleNeeded)
     shuffleRunnerStack(
       state,
@@ -23988,13 +24003,16 @@ function resolveSneakPreviewProgramChoice(
         installRunnerProgramForFree(state, programId, legalAction),
     },
   });
-  if (execution.temporaryReturnNeeded) {
-    state.sneakPreviewTemporaryInstalls ??= [];
-    state.sneakPreviewTemporaryInstalls.push({
-      cardId: execution.installedProgramId,
-      sourceCardDefinitionId: plan.sourceDefinitionId,
-    });
-  }
+  const postInstall = createSneakPreviewPostInstallSideEffectPlan({
+    execution,
+    sourceCardDefinitionId: plan.sourceDefinitionId,
+  });
+  applySneakPreviewTemporaryReturnPlan(postInstall, {
+    recordTemporaryReturn: (record) => {
+      state.sneakPreviewTemporaryInstalls ??= [];
+      state.sneakPreviewTemporaryInstalls.push(record);
+    },
+  });
   if (execution.shuffleNeeded)
     shuffleRunnerStack(state, `v1911_sneak_preview:${choice!.choiceId}:shuffle`);
   delete state.pendingChoice;
