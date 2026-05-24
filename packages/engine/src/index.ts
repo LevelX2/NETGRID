@@ -169,6 +169,19 @@ import {
   startRunnerStackTop5Choice,
   type HiddenZoneArrangeChoiceHandlerHost,
 } from "./game/hidden-zone/arrange-choice-handlers";
+import {
+  handleHiddenZoneNonSearchChoice,
+  startCardImplementationTrashCardsFromGripForCreditsChoice,
+  startCardImplementationTrashOwnInstalledCardsForCreditsChoice,
+  startCorpArchivesToHqChoice,
+  startCorpDiscardHqWithRetainPaymentChoice,
+  startRunnerGripTrashForCreditsChoice,
+  startRunnerInstalledTrashForCreditsChoice,
+  startSmithsPawnshopChoice,
+  startSocialEngineeringHideChoice,
+  startSynchronizedAttackOnHqRetainChoice,
+  type HiddenZoneNonSearchChoiceHandlerHost,
+} from "./game/hidden-zone/nonsearch-choice-handlers";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -321,7 +334,6 @@ import {
 } from "./mechanics/public-payload-schema";
 import {
   isP358HiddenReplacementCompatibilityChoiceSource,
-  isP358SocialEngineeringChoiceSource,
   isReplayCompatibilityActionPayload,
 } from "./compatibility/payload-compatibility";
 import {
@@ -907,13 +919,8 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     gainPerTrashed,
   ) =>
     startCardImplementationTrashOwnInstalledCardsForCreditsChoice(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
-      min,
-      max,
-      gainPerTrashed,
+      hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+      { sourceCardId, sourceDefinitionId, min, max, gainPerTrashed },
     ),
   startTrashCardsFromGripForCreditsChoice: (
     state,
@@ -924,12 +931,8 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     gainPerTrashed,
   ) =>
     startCardImplementationTrashCardsFromGripForCreditsChoice(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
-      max,
-      gainPerTrashed,
+      hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+      { sourceCardId, sourceDefinitionId, max, gainPerTrashed },
     ),
   shuffleGripTrashAndStackThenDraw: (
     state,
@@ -1003,33 +1006,11 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     legalAction,
     sourceCardId,
     retainCostPerCard,
-  ) => {
-    if (retainCostPerCard !== 2)
-      throw new Error("Synchronized Attack on HQ retain cost must be 2.");
-    if (state.corp.hq.length === 0) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
-        retainedCount: 0,
-        discardedCount: 0,
-        paidCredits: 0,
-        corpCreditsAfter: state.corp.credits,
-        sourceDefinitionId: definitionFor(state, sourceCardId).id,
-      };
-      return { publicPayload: legalAction.payload ?? {} };
-    }
-    startSynchronizedAttackOnHqRetainChoice(state, sourceCardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
-      sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    };
-    return { publicPayload: legalAction.payload ?? {} };
-  },
+  ) =>
+    startCorpDiscardHqWithRetainPaymentChoice(
+      hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+      { sourceCardId, retainCostPerCard },
+    ),
   startRunnerProgramInstallActionBundle: (
     state,
     legalAction,
@@ -1570,7 +1551,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     canPlay: (state) => state.runner.grip.length > 1,
     resolve: (state, legalAction) => {
       startRunnerGripTrashForCreditsChoice(
-        state,
+        hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
         String(legalAction.payload?.cardId ?? ""),
       );
       legalAction.payload = {
@@ -1585,7 +1566,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     canPlay: (state) => runnerInstalledCardIds(state).length > 0,
     resolve: (state, legalAction) => {
       startRunnerInstalledTrashForCreditsChoice(
-        state,
+        hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
         String(legalAction.payload?.cardId ?? ""),
       );
       legalAction.payload = {
@@ -1645,7 +1626,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
           "Synchronized Attack on HQ benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
         );
       startSynchronizedAttackOnHqRetainChoice(
-        state,
+        hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
         String(legalAction.payload?.cardId ?? ""),
       );
       legalAction.payload = {
@@ -1778,9 +1759,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       if (state.runner.credits < 2)
         throw new Error("Social Engineering benoetigt mindestens 2 Credits.");
       startSocialEngineeringHideChoice(
-        state,
+        hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
         String(legalAction.payload?.cardId ?? ""),
-        legalAction,
       );
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -1891,7 +1871,10 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
         definitionFor(state, sourceCardId).id !== CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID
       )
         throw new Error("Off-Site Backups fehlt als Quelle.");
-      startCorpArchivesToHqChoice(state, sourceCardId, legalAction);
+      startCorpArchivesToHqChoice(
+        hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+        sourceCardId,
+      );
     },
   },
   [CORP_RD_TOP5_REORDER_OPERATION_CARD_ID]: {
@@ -16887,7 +16870,13 @@ function applyRunnerStartOfTurnEffects(
       uniqueDirectLongtailKindForCard(state, cardId) ===
       "smiths_pawnshop_start_turn_trash_for_credits"
     )
-      startSmithsPawnshopChoice(state, cardId);
+      startSmithsPawnshopChoice(
+        hiddenZoneNonSearchChoiceHandlerHost(state, {
+          side: "runner",
+          payload: {},
+        } as LegalAction),
+        cardId,
+      );
   }
 }
 
@@ -17176,38 +17165,6 @@ function startIncubatorTransformChoice(state: GameState): boolean {
     visibility: "hidden_info_barrier",
   };
   return true;
-}
-
-function startSmithsPawnshopChoice(
-  state: GameState,
-  pawnshopId: CardInstanceId,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  if (!state.runner.rig.resources.includes(pawnshopId)) return;
-  const eligible = runnerInstalledCardIds(state)
-    .filter((cardId) => cardId !== pawnshopId)
-    .sort();
-  if (eligible.length === 0) return;
-  state.pendingChoice = {
-    choiceId: `v170_smiths_pawnshop_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `v170.smiths_pawnshop:${pawnshopId}:${state.stateVersion + 1}`,
-    prompt:
-      "Smith's Pawnshop: Eine andere installierte Karte trashen und 2 Credits nehmen?",
-    kind: "select_option",
-    options: [
-      { id: "pass", label: "Nein" },
-      ...eligible.map((cardId) => ({
-        id: `card_${cardId}`,
-        label: definitionFor(state, cardId).title,
-        value: cardId,
-      })),
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
 }
 
 function handForSide(state: GameState, side: Side): CardInstanceId[] {
@@ -22019,6 +21976,66 @@ function hiddenZoneArrangeChoiceHandlerHost(
   };
 }
 
+function hiddenZoneNonSearchChoiceHandlerHost(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction?: PlayerAction,
+): HiddenZoneNonSearchChoiceHandlerHost {
+  return {
+    state,
+    legalAction,
+    ...(playerAction ? { playerAction } : {}),
+    constants: {
+      corpArchivesToHqOperationCardId: CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
+      runAccessPressureEventCardId: RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
+    },
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      hasCorpUtilityKind: (cardId, kind) =>
+        hasCorpUtilityKind(
+          state,
+          cardId,
+          kind as Parameters<typeof hasCorpUtilityKind>[2],
+        ),
+      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
+      smithsPawnshopGainCredits: (cardId) => {
+        const implementation = uniqueDirectLongtailImplementationForDefinition(
+          definitionFor(state, cardId).id,
+        );
+        return implementation?.kind ===
+          "smiths_pawnshop_start_turn_trash_for_credits"
+          ? implementation.gainCredits
+          : 2;
+      },
+    },
+    zones: {
+      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+      trashRunnerInstalledCardToHeap: (cardId) =>
+        trashRunnerInstalledCardToHeap(state, cardId),
+    },
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
+      iceChoiceLabelForSide: (cardId, visibleTo, fallback) =>
+        iceChoiceLabelForSide(state, cardId, visibleTo, fallback),
+    },
+    callbacks: {
+      hasSuccessfulHqRunThisTurn: () => hasSuccessfulHqRunThisTurn(state),
+      spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
+      gainRunnerCredits: (amount) => credits(state, "runner", amount),
+      startRunWithAutoPass: (serverId, iceId) =>
+        startRun(
+          state,
+          serverId,
+          undefined,
+          1,
+          { socialEngineeringAutoPassIceId: iceId },
+          legalAction,
+        ),
+    },
+  };
+}
+
 function resolvePendingChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -22063,6 +22080,10 @@ function resolvePendingChoice(
     hiddenZoneArrangeChoiceHandlerHost(state, legalAction, playerAction),
   );
   if (hiddenZoneArrangeChoice.handled) return;
+  const hiddenZoneNonSearchChoice = handleHiddenZoneNonSearchChoice(
+    hiddenZoneNonSearchChoiceHandlerHost(state, legalAction, playerAction),
+  );
+  if (hiddenZoneNonSearchChoice.handled) return;
   if (
     isP358HiddenReplacementCompatibilityChoiceSource(
       state.pendingChoice.source,
@@ -22154,10 +22175,6 @@ function resolvePendingChoice(
     resolveSingaporeCityGridSwapChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1922.corp_archives_to_hq")) {
-    resolveCorpArchivesToHqChoice(state, legalAction, playerAction);
-    return;
-  }
   if (
     state.pendingChoice.source.startsWith("v1922.anonymous_tip_derez_black_ice")
   ) {
@@ -22196,36 +22213,8 @@ function resolvePendingChoice(
     resolveSecurityCodeWormChipTrashIceChoice(state, legalAction, playerAction);
     return;
   }
-  if (
-    state.pendingChoice.source.startsWith("v1922.synchronized_attack_on_hq")
-  ) {
-    resolveSynchronizedAttackOnHqRetainChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith(
-      "v1922.runner_grip_trash_gain_credits",
-    ) ||
-    state.pendingChoice.source.startsWith(
-      "p3_47.runner_grip_trash_for_credits",
-    )
-  ) {
-    resolveRunnerGripTrashForCreditsChoice(state, legalAction, playerAction);
-    return;
-  }
   if (state.pendingChoice.source.startsWith("v1921.playful_ai")) {
     resolveV1921PlayfulAiChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith(
-      "v1922.runner_installed_trash_gain_credits",
-    ) ||
-    state.pendingChoice.source.startsWith(
-      "p3_47.runner_installed_trash_for_credits",
-    )
-  ) {
-    resolveRunnerInstalledTrashForCreditsChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -22306,10 +22295,6 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("p3_35.access_payment")) {
     resolveCardImplementationAccessPaymentChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v170.smiths_pawnshop")) {
-    resolveSmithsPawnshopChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_33.priority_wreck")) {
@@ -23248,329 +23233,6 @@ function resolveSecurityCodeWormChipTrashIceChoice(
   };
 }
 
-function startSynchronizedAttackOnHqRetainChoice(
-  state: GameState,
-  sourceCardId: string,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  if (state.corp.hq.length === 0)
-    throw new Error("HQ enthaelt keine Karten fuer Synchronized Attack on HQ.");
-  state.pendingChoice = {
-    choiceId: `v1922_synchronized_attack_on_hq_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1922.synchronized_attack_on_hq:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "HQ-Karten fuer je 2 Credits behalten",
-    kind: "select_cards",
-    options: state.corp.hq.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    }),
-    minSelections: 0,
-    maxSelections: Math.min(
-      state.corp.hq.length,
-      Math.floor(state.corp.credits / 2),
-    ),
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-}
-
-function resolveSynchronizedAttackOnHqRetainChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.synchronized_attack_on_hq"))
-    throw new Error(
-      "Es ist keine V1.9.22-Synchronized-Attack-on-HQ-Choice offen.",
-    );
-  if (!hasSuccessfulHqRunThisTurn(state))
-    throw new Error(
-      "Synchronized Attack on HQ benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
-    );
-  const retainedIds = selectedChoiceCardIds(choice, playerAction);
-  const retainedSet = new Set(retainedIds);
-  if (
-    retainedSet.size !== retainedIds.length ||
-    retainedIds.some((cardId) => !state.corp.hq.includes(cardId))
-  )
-    throw new Error("Eine gewaehlte HQ-Karte ist nicht legal.");
-  const cost = retainedIds.length * 2;
-  if (state.corp.credits < cost)
-    throw new Error("Die Korp kann die behaltenen HQ-Karten nicht bezahlen.");
-  const discardedIds = state.corp.hq.filter(
-    (cardId) => !retainedSet.has(cardId),
-  );
-  spendCredits(state, "corp", cost);
-  for (const cardId of discardedIds) {
-    removeFromAllZones(state, cardId);
-    state.corp.archives.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: false,
-      rezzed: false,
-      zone: { side: "corp", zone: "archives" },
-    };
-  }
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
-    retainedCount: retainedIds.length,
-    discardedCount: discardedIds.length,
-    paidCredits: cost,
-    corpCreditsAfter: state.corp.credits,
-  };
-}
-
-function startRunnerGripTrashForCreditsChoice(
-  state: GameState,
-  sourceCardId: string,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const options = state.runner.grip.map((cardId) => {
-    const definition = definitionFor(state, cardId);
-    return { id: `card_${cardId}`, label: definition.title, value: cardId };
-  });
-  if (options.length === 0) throw new Error("Keine Karten in der Grip.");
-  state.pendingChoice = {
-    choiceId: `v1922_runner_grip_trash_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `v1922.runner_grip_trash_gain_credits:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Grip-Karten trashen",
-    kind: "select_cards",
-    options,
-    minSelections: 0,
-    maxSelections: Math.min(5, options.length),
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-}
-
-function startCardImplementationTrashCardsFromGripForCreditsChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  sourceCardId: CardInstanceId,
-  sourceDefinitionId: CardDefinition["id"],
-  max: number,
-  gainPerTrashed: number,
-): { publicPayload: Record<string, string | number | boolean> } {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const boundedMax = Math.max(0, Math.floor(max));
-  const options = state.runner.grip.map((cardId) => {
-    const definition = definitionFor(state, cardId);
-    return { id: `card_${cardId}`, label: definition.title, value: cardId };
-  });
-  state.pendingChoice = {
-    choiceId: `p3_47_runner_grip_trash_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_47.runner_grip_trash_for_credits:${sourceCardId}:${sourceDefinitionId}:${boundedMax}:${gainPerTrashed}:${state.stateVersion + 1}`,
-    prompt: "Grip-Karten trashen",
-    kind: "select_cards",
-    options,
-    minSelections: 0,
-    maxSelections: Math.min(boundedMax, options.length),
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  const payload = {
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_47_runner_grip_trash_for_credits",
-    sourceDefinitionId,
-    maxTrashCount: boundedMax,
-    gainPerTrashed,
-  };
-  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
-  return { publicPayload: payload };
-}
-
-function runnerGripTrashChoiceParameters(choiceSource: string): {
-  max: number;
-  gainPerTrashed: number;
-  hiddenZoneAction: string;
-} {
-  if (choiceSource.startsWith("p3_47.runner_grip_trash_for_credits")) {
-    const [, , , max, gainPerTrashed] = choiceSource.split(":");
-    return {
-      max: Math.max(0, Math.floor(Number(max))),
-      gainPerTrashed: Math.max(0, Math.floor(Number(gainPerTrashed))),
-      hiddenZoneAction: "p3_47_runner_grip_trash_for_credits",
-    };
-  }
-  return {
-    max: 5,
-    gainPerTrashed: 2,
-    hiddenZoneAction: "v1922_runner_grip_trash_gain_credits",
-  };
-}
-
-function resolveRunnerGripTrashForCreditsChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice) throw new Error("Es ist keine V1.9.22-Grip-Trash-Choice offen.");
-  const parameters = runnerGripTrashChoiceParameters(choice.source);
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  if (selectedIds.length > parameters.max)
-    throw new Error("Es wurden zu viele Grip-Karten ausgewaehlt.");
-  const selectedSet = new Set(selectedIds);
-  if (
-    selectedSet.size !== selectedIds.length ||
-    selectedIds.some((cardId) => !state.runner.grip.includes(cardId))
-  )
-    throw new Error("Die Grip-Auswahl enthaelt ungueltige Karten.");
-  for (const cardId of selectedIds) {
-    removeFromAllZones(state, cardId);
-    state.runner.heap.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      zone: { side: "runner", zone: "heap" },
-    };
-  }
-  const gainedCredits = selectedIds.length * parameters.gainPerTrashed;
-  if (gainedCredits > 0) credits(state, "runner", gainedCredits);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: parameters.hiddenZoneAction,
-    trashedCount: selectedIds.length,
-    gainedCredits,
-    runnerCreditsAfter: state.runner.credits,
-  };
-}
-
-function startRunnerInstalledTrashForCreditsChoice(
-  state: GameState,
-  sourceCardId: string,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const installed = runnerInstalledCardIds(state);
-  if (installed.length === 0)
-    throw new Error("Keine installierten Runner-Karten.");
-  state.pendingChoice = {
-    choiceId: `v1922_runner_installed_trash_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `v1922.runner_installed_trash_gain_credits:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Installierte Karten trashen",
-    kind: "select_cards",
-    options: installed.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    }),
-    minSelections: 0,
-    maxSelections: installed.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-}
-
-function startCardImplementationTrashOwnInstalledCardsForCreditsChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  sourceCardId: CardInstanceId,
-  sourceDefinitionId: CardDefinition["id"],
-  min: 0 | 1,
-  max: "any",
-  gainPerTrashed: number,
-): { publicPayload: Record<string, string | number | boolean> } {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  if (max !== "any")
-    throw new Error("Diese installierte-Karten-Auswahl unterstuetzt nur any.");
-  const installed = runnerInstalledCardIds(state);
-  state.pendingChoice = {
-    choiceId: `p3_47_runner_installed_trash_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_47.runner_installed_trash_for_credits:${sourceCardId}:${sourceDefinitionId}:${min}:${gainPerTrashed}:${state.stateVersion + 1}`,
-    prompt: "Installierte Karten trashen",
-    kind: "select_cards",
-    options: installed.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    }),
-    minSelections: min,
-    maxSelections: installed.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  const payload = {
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_47_runner_installed_trash_for_credits",
-    sourceDefinitionId,
-    minTrashCount: min,
-    gainPerTrashed,
-  };
-  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
-  return { publicPayload: payload };
-}
-
-function runnerInstalledTrashChoiceParameters(choiceSource: string): {
-  min: number;
-  gainPerTrashed: number;
-  hiddenZoneAction: string;
-} {
-  if (choiceSource.startsWith("p3_47.runner_installed_trash_for_credits")) {
-    const [, , , min, gainPerTrashed] = choiceSource.split(":");
-    return {
-      min: Math.max(0, Math.floor(Number(min))),
-      gainPerTrashed: Math.max(0, Math.floor(Number(gainPerTrashed))),
-      hiddenZoneAction: "p3_47_runner_installed_trash_for_credits",
-    };
-  }
-  return {
-    min: 0,
-    gainPerTrashed: 3,
-    hiddenZoneAction: "v1922_runner_installed_trash_gain_credits",
-  };
-}
-
-function resolveRunnerInstalledTrashForCreditsChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice)
-    throw new Error("Es ist keine V1.9.22-Installed-Trash-Choice offen.");
-  const parameters = runnerInstalledTrashChoiceParameters(choice.source);
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  if (selectedIds.length < parameters.min)
-    throw new Error("Es wurden zu wenige installierte Karten ausgewaehlt.");
-  const installed = runnerInstalledCardIds(state);
-  const selectedSet = new Set(selectedIds);
-  if (
-    selectedSet.size !== selectedIds.length ||
-    selectedIds.some((cardId) => !installed.includes(cardId))
-  )
-    throw new Error("Die Installed-Auswahl enthaelt ungueltige Karten.");
-  for (const cardId of selectedIds) {
-    removeFromAllZones(state, cardId);
-    state.runner.heap.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      zone: { side: "runner", zone: "heap" },
-    };
-  }
-  const gainedCredits = selectedIds.length * parameters.gainPerTrashed;
-  if (gainedCredits > 0) credits(state, "runner", gainedCredits);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: parameters.hiddenZoneAction,
-    trashedCount: selectedIds.length,
-    gainedCredits,
-    runnerCreditsAfter: state.runner.credits,
-  };
-}
-
 function startOpenEndedMileageProgramReturnChoice(
   state: GameState,
   sourceCardId: string,
@@ -24344,83 +24006,6 @@ function resolveSingaporeCityGridSwapChoice(
   };
 }
 
-function startCorpArchivesToHqChoice(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  if (
-    definitionFor(state, sourceCardId).id !== CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID &&
-    !hasCorpUtilityKind(state, sourceCardId, "corp_archives_to_hq")
-  )
-    throw new Error("Die Archives-Quelle ist nicht Off-Site Backups.");
-  const archiveCards = state.corp.archives.filter(
-    (cardId) => cardId !== sourceCardId,
-  );
-  if (archiveCards.length === 0) throw new Error("Archives ist leer.");
-  state.pendingChoice = {
-    choiceId: `v1922_corp_archives_to_hq_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1922.corp_archives_to_hq:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Archives-Karte nach HQ nehmen",
-    kind: "select_cards",
-    options: archiveCards.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    }),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_corp_archives_to_hq",
-    eligibleCount: archiveCards.length,
-  };
-}
-
-function resolveCorpArchivesToHqChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.corp_archives_to_hq"))
-    throw new Error("Es ist keine V1.9.22-Archives-Choice offen.");
-  const [, sourceCardId] = choice.source.split(":");
-  if (
-    !sourceCardId ||
-    (definitionFor(state, sourceCardId).id !== CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID &&
-      !hasCorpUtilityKind(state, sourceCardId, "corp_archives_to_hq"))
-  )
-    throw new Error(
-      "Die V1.9.22-Archives-Choice gehoert nicht zu Off-Site Backups.",
-    );
-  const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
-  if (!selectedId || !state.corp.archives.includes(selectedId))
-    throw new Error("Die gewaehlte Archives-Karte ist ungueltig.");
-  state.corp.archives = state.corp.archives.filter(
-    (cardId) => cardId !== selectedId,
-  );
-  state.corp.hq.unshift(selectedId);
-  state.cardInstances[selectedId] = {
-    ...mustInstance(state.cardInstances, selectedId),
-    zone: { side: "corp", zone: "hq" },
-    faceup: false,
-    rezzed: false,
-  };
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_corp_archives_to_hq",
-    movedCount: 1,
-  };
-}
-
 function startRunnerHostingChoice(
   state: GameState,
   hostId: CardInstanceId,
@@ -24513,63 +24098,6 @@ function resolveRunnerHostingChoice(
     hostedCount: 1,
     hostId,
   };
-}
-
-function resolveSmithsPawnshopChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v170.smiths_pawnshop"))
-    throw new Error("Es ist keine Smith's-Pawnshop-Choice offen.");
-  const sourceParts = choice.source.split(":");
-  const pawnshopId = sourceParts[1];
-  if (!pawnshopId || !state.runner.rig.resources.includes(pawnshopId))
-    throw new Error("Smith's Pawnshop ist nicht mehr installiert.");
-  const pawnshopDefinition = definitionFor(state, pawnshopId);
-  const implementation = uniqueDirectLongtailImplementationForDefinition(
-    pawnshopDefinition.id,
-  );
-  const gainCredits =
-    implementation?.kind === "smiths_pawnshop_start_turn_trash_for_credits"
-      ? implementation.gainCredits
-      : 2;
-  const selectedId =
-    selectedChoiceIds(playerAction.selectedChoices)[0] ?? "pass";
-  if (selectedId !== "pass") {
-    const option = choice.options.find(
-      (candidate) => candidate.id === selectedId,
-    );
-    const cardId = typeof option?.value === "string" ? option.value : "";
-    if (!cardId) throw new Error("Die gewaehlte Karte ist ungueltig.");
-    if (cardId === pawnshopId)
-      throw new Error("Smith's Pawnshop kann sich nicht selbst trashen.");
-    if (!runnerInstalledCardIds(state).includes(cardId))
-      throw new Error("Die gewaehlte Karte ist nicht mehr installiert.");
-    const trashedDefinition = definitionFor(state, cardId);
-    trashRunnerInstalledCardToHeap(state, cardId);
-    credits(state, "runner", gainCredits);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      smithsPawnshopTriggered: true,
-      smithsPawnshopCardId: pawnshopId,
-      sourceDefinitionId: pawnshopDefinition.id,
-      trashedCardId: cardId,
-      trashedCardDefinitionId: trashedDefinition.id,
-      trashedCardTitle: trashedDefinition.title,
-      creditsGained: gainCredits,
-      gainedCredits: gainCredits,
-    };
-  } else {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      smithsPawnshopTriggered: false,
-      smithsPawnshopCardId: pawnshopId,
-      sourceDefinitionId: pawnshopDefinition.id,
-    };
-  }
-  delete state.pendingChoice;
 }
 
 function resolveIncubatorTransformChoice(
@@ -24984,38 +24512,6 @@ function selectedChoiceCardIds(
   });
 }
 
-type InstalledIceSlot = {
-  server: CorpServer;
-  serverId: Exclude<ServerId, "new_remote">;
-  index: number;
-  cardId: CardInstanceId;
-};
-
-function installedIceSlots(state: GameState): InstalledIceSlot[] {
-  const slots: InstalledIceSlot[] = [];
-  for (const server of state.corp.servers) {
-    for (let index = 0; index < server.ice.length; index += 1) {
-      slots.push({
-        server,
-        serverId: server.id,
-        index,
-        cardId: server.ice[index]!,
-      });
-    }
-  }
-  return slots;
-}
-
-function concealedIceCountForCardIds(
-  state: GameState,
-  cardIds: readonly CardInstanceId[],
-): number {
-  return cardIds.filter((cardId) => {
-    const instance = state.cardInstances[cardId];
-    return instance && !instance.rezzed && !instance.faceup;
-  }).length;
-}
-
 function iceChoiceLabelForSide(
   state: GameState,
   cardId: CardInstanceId,
@@ -25030,194 +24526,6 @@ function iceChoiceLabelForSide(
   return { label: fallback, publicLabel: fallback };
 }
 
-function startSocialEngineeringHideChoice(
-  state: GameState,
-  sourceCardId: string,
-  _legalAction: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const maxAmount = Math.max(0, Math.floor(state.runner.credits));
-  if (maxAmount < 2)
-    throw new Error("Social Engineering benoetigt mindestens 2 Credits.");
-  state.pendingChoice = {
-    choiceId: `p3_58_social_engineering_hide_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_58.social_engineering_hide:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Social Engineering: Credits geheim verstecken.",
-    kind: "bid_amount",
-    options: Array.from({ length: maxAmount - 1 }, (_, index) => index + 2).map(
-      (amount) => ({
-        id: `hide_${amount}`,
-        label: `${amount}`,
-        publicLabel: "Versteckte Credits",
-        value: amount,
-      }),
-    ),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  state.activeSide = "runner";
-}
-
-function socialEngineeringGuessChoice(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-): ChoiceRequest {
-  const maxAmount = Math.max(2, Math.floor(state.runner.credits));
-  return {
-    choiceId: `p3_58_social_engineering_guess_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `p3_58.social_engineering_guess:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Social Engineering: versteckte Credits raten.",
-    kind: "bid_amount",
-    options: Array.from({ length: maxAmount + 1 }, (_, amount) => ({
-      id: `guess_${amount}`,
-      label: `${amount}`,
-      publicLabel: "Geratene Credits",
-      value: amount,
-    })),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-}
-
-function startSocialEngineeringTargetChoice(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const slots = installedIceSlots(state);
-  if (slots.length === 0) {
-    delete state.socialEngineeringSecret;
-    delete state.pendingChoice;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      socialEngineeringGuessCorrect: false,
-      socialEngineeringNoIceTarget: true,
-      hiddenZoneBarrier: true,
-    };
-    return;
-  }
-  state.pendingChoice = {
-    choiceId: `p3_58_social_engineering_target_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_58.social_engineering_target:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Social Engineering: Fort und ICE fuer Auto-Pass waehlen.",
-    kind: "select_cards",
-    options: slots.map((slot) => {
-      const fallback = `${publicServerLabel(state, slot.serverId) ?? slot.serverId} ICE ${slot.index + 1}`;
-      const labels = iceChoiceLabelForSide(state, slot.cardId, "runner", fallback);
-      return {
-        id: `ice_${slot.cardId}`,
-        label: labels.label,
-        publicLabel: fallback,
-        value: `${slot.serverId}|${slot.cardId}`,
-      };
-    }),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  state.activeSide = "runner";
-}
-
-function resolveSocialEngineeringChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !isP358SocialEngineeringChoiceSource(choice.source))
-    throw new Error("Es ist keine Social-Engineering-Choice offen.");
-  const [, sourceCardId = ""] = choice.source.split(":");
-  if (definitionFor(state, sourceCardId).id !== RUN_ACCESS_PRESSURE_EVENT_CARD_ID)
-    throw new Error("Die Social-Engineering-Quelle passt nicht zur Karte.");
-  if (choice.source.startsWith("p3_58.social_engineering_hide:")) {
-    const hiddenAmount = selectedBidAmount(choice, playerAction);
-    if (hiddenAmount < 2 || hiddenAmount > state.runner.credits)
-      throw new Error("Der Social-Engineering-Betrag ist nicht legal.");
-    state.socialEngineeringSecret = {
-      sourceCardId,
-      hiddenAmount,
-    };
-    state.pendingChoice = socialEngineeringGuessChoice(state, sourceCardId);
-    state.activeSide = "corp";
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      socialEngineeringStep: "runner_hidden_amount_selected",
-      hiddenZoneBarrier: true,
-    };
-    return;
-  }
-  if (choice.source.startsWith("p3_58.social_engineering_guess:")) {
-    const secret = state.socialEngineeringSecret;
-    if (!secret || secret.sourceCardId !== sourceCardId)
-      throw new Error("Social Engineering hat keinen geheimen Betrag.");
-    const guess = selectedBidAmount(choice, playerAction);
-    const correct = guess === secret.hiddenAmount;
-    if (correct) {
-      state.runner.credits = Math.max(0, state.runner.credits - secret.hiddenAmount);
-      delete state.socialEngineeringSecret;
-      delete state.pendingChoice;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        socialEngineeringGuessCorrect: true,
-        secretHiddenAmountRevealed: secret.hiddenAmount,
-        secretGuessAmount: guess,
-        runnerCreditsAfter: state.runner.credits,
-        hiddenZoneBarrier: true,
-      };
-      return;
-    }
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      socialEngineeringGuessCorrect: false,
-      secretHiddenAmountRevealed: secret.hiddenAmount,
-      secretGuessAmount: guess,
-      hiddenZoneBarrier: true,
-    };
-    startSocialEngineeringTargetChoice(state, sourceCardId, legalAction);
-    return;
-  }
-  if (choice.source.startsWith("p3_58.social_engineering_target:")) {
-    const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-    const option = choice.options.find((candidate) => candidate.id === selectedId);
-    const value = typeof option?.value === "string" ? option.value : "";
-    const [serverId = "", iceId = ""] = value.split("|") as [
-      Exclude<ServerId, "new_remote">,
-      CardInstanceId,
-    ];
-    const server = mustServer(state, serverId);
-    if (!server.ice.includes(iceId))
-      throw new Error("Das Social-Engineering-ICE-Ziel ist nicht mehr installiert.");
-    delete state.socialEngineeringSecret;
-    delete state.pendingChoice;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      socialEngineeringGuessCorrect: false,
-      autoPassChosenIce: true,
-      hiddenZoneBarrier: true,
-      serverId,
-      chosenIcePosition: server.ice.indexOf(iceId),
-    };
-    startRun(
-      state,
-      server.id,
-      undefined,
-      1,
-      { socialEngineeringAutoPassIceId: iceId },
-      legalAction,
-    );
-    return;
-  }
-  throw new Error("Unbekannte Social-Engineering-Choice.");
-}
-
 function resolveP358HiddenReplacementChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -25228,10 +24536,8 @@ function resolveP358HiddenReplacementChoice(
     hiddenZoneArrangeChoiceHandlerHost(state, legalAction, playerAction),
   );
   if (hiddenZoneArrangeChoice.handled) return;
-  if (isP358SocialEngineeringChoiceSource(source)) {
-    resolveSocialEngineeringChoice(state, legalAction, playerAction);
-    return;
-  }
+  void legalAction;
+  void playerAction;
   throw new Error("Unbekannte P3.58-Choice.");
 }
 
@@ -29147,7 +28453,10 @@ function resolveCorpUtilityOperation(
       const sourceCardId = String(legalAction.payload?.cardId ?? "");
       if (!sourceCardId || definitionFor(state, sourceCardId).id !== definition.id)
         throw new Error("Off-Site Backups fehlt als Quelle.");
-      startCorpArchivesToHqChoice(state, sourceCardId, legalAction);
+      startCorpArchivesToHqChoice(
+        hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+        sourceCardId,
+      );
       return;
     }
     case "corp_rd_top_reorder": {
