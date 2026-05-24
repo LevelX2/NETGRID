@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "ai-real-scene-benchmark-decks-v1",
+  "storage": {
+    "kind": "repo_frozen_snapshots",
+    "format": "netgrid-editable-deck-v1",
+    "cardReference": "cardId",
+    "runtimeLiveDeckDependency": false
+  },
+  "frozenSnapshotsFile": "data/ai/ai-real-scene-benchmark-deck-snapshots-2026-05-24.json",
+  "decks": [
+    {
+      "localDeckId": "local_runner_deep_market_engine",
+      "snapshotId": "real_scene_runner_deep_market_engine_snapshot_v1",
+      "expectedName": "Deep Market Engine",
+      "side": "runner",
+      "sourceFileName": "local_runner_deep_market_engine.json",
+      "classification": "runnable_ai_benchmark",
+      "role": "real_scene_runner_rig_economy_pressure"
+    },
+    {
+      "localDeckId": "local_corp_siren_fortress",
+      "snapshotId": "real_scene_corp_siren_fortress_snapshot_v1",
+      "expectedName": "Siren Fortress",
+      "side": "corp",
+      "sourceFileName": "local_corp_siren_fortress.json",
+      "classification": "runnable_ai_benchmark",
+      "role": "real_scene_corp_glacier_remote_scoring"
+    },
+    {
+      "localDeckId": "local_runner_stealth_interface_starter",
+      "snapshotId": "real_scene_runner_stealth_interface_starter_snapshot_v1",
+      "expectedName": "Stealth Interface Starter",
+      "side": "runner",
+      "sourceFileName": "local_runner_stealth_interface_starter.json",
+      "classification": "runnable_ai_benchmark",
+      "role": "real_scene_runner_rnd_multiaccess"
+    },
+    {
+      "localDeckId": "local_corp_manhunt_pressure_bureau",
+      "snapshotId": "real_scene_corp_manhunt_pressure_bureau_snapshot_v1",
+      "expectedName": "Manhunt Pressure Bureau",
+      "side": "corp",
+      "sourceFileName": "local_corp_manhunt_pressure_bureau.json",
+      "classification": "runnable_ai_benchmark",
+      "role": "real_scene_corp_tag_punish"
+    }
+  ],
+  "slots": [
+    {
+      "slotId": "real_scene_pair_1",
+      "label": "Real Scene Holdout 1",
+      "slotType": "real_scene_holdout",
+      "status": "runnable",
+      "runnerLocalDeckId": "local_runner_deep_market_engine",
+      "corpLocalDeckId": "local_corp_siren_fortress",
+      "tuningUse": "holdout_only",
+      "selectionReason": "Rig-/Economy-/Pressure-Runner gegen Glacier-/Remote-Scoring-Corp; anderes Profil als die bestehenden Local-Realistic-Holdouts."
+    },
+    {
+      "slotId": "real_scene_pair_2",
+      "label": "Real Scene Holdout 2",
+      "slotType": "real_scene_holdout",
+      "status": "runnable",
+      "runnerLocalDeckId": "local_runner_stealth_interface_starter",
+      "corpLocalDeckId": "local_corp_manhunt_pressure_bureau",
+      "tuningUse": "holdout_only",
+      "selectionReason": "Stealth-/Interface-/Multiaccess-Runner gegen Tag-/Punish-Corp; anderer Drucktyp als Pair 1."
+    }
+  ]
+}
