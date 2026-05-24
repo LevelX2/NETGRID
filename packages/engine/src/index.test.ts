@@ -1865,6 +1865,170 @@ describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
   });
 });
 
+describe("Proteus Phase 2b Scored-Agenda Bad Publicity", () => {
+  const CHARITY_TAKEOVER = "onr_proteus_002_charity-takeover";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+  const internalViewMarkers = /"cardInstances"|"privatePayload"/;
+
+  function scoreCharityTakeover(
+    seed: string,
+    badPublicityBefore: number,
+    agendaPointsToWin: number,
+  ): {
+    initial: GameState;
+    beforeScore: GameState;
+    state: GameState;
+    scoreAction: LegalAction;
+  } {
+    let state = createGameAfterSetup({
+      seed,
+      runnerDeck: ONR_V1_1_2K_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_1_2K_CORP_DECK,
+        id: `${seed}_corp`,
+        cards: [
+          { id: CHARITY_TAKEOVER, quantity: 1 },
+          ...ONR_V1_1_2K_CORP_DECK.cards,
+        ],
+      },
+      agendaPointsToWin,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(state, CHARITY_TAKEOVER);
+    state.corp.credits = 20;
+    state.corp.clicks = 10;
+    state.corp.badPublicity = badPublicityBefore;
+    const initial = structuredClone(state);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === CHARITY_TAKEOVER,
+    );
+    for (let i = 0; i < 4; i += 1) {
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "advance_card" &&
+          sourceDefinition(state, action) === CHARITY_TAKEOVER,
+      );
+    }
+    const scoreAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(state, action) === CHARITY_TAKEOVER,
+    );
+    const beforeScore = structuredClone(state);
+    state = apply(state, "corp", (action) => action.actionId === scoreAction.actionId);
+    return { initial, beforeScore, state, scoreAction };
+  }
+
+  it("scores Charity Takeover for credits plus generic Bad Publicity", () => {
+    const { initial, beforeScore, state, scoreAction } = scoreCharityTakeover(
+      "proteus-phase-2b-charity-score",
+      0,
+      7,
+    );
+
+    expect(state.corp.credits).toBe(beforeScore.corp.credits + 9);
+    expect(state.corp.badPublicity).toBe(1);
+    expect(agendaPoints(state, "corp")).toBe(1);
+    expect(state.winner).toBeNull();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      cardDefinitionId: CHARITY_TAKEOVER,
+      sourceDefinitionId: CHARITY_TAKEOVER,
+      gainedCredits: 9,
+      corpCreditsAfter: state.corp.credits,
+      badPublicityAdded: 1,
+      corpBadPublicityBefore: 0,
+      corpBadPublicityAfter: 1,
+      sourceVisibility: "public",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload?.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "gain_credits",
+        sourceDefinitionId: CHARITY_TAKEOVER,
+        amount: 9,
+      }),
+      expect.objectContaining({
+        kind: "add_bad_publicity",
+        sourceDefinitionId: CHARITY_TAKEOVER,
+        amount: 1,
+      }),
+    ]);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    expect(
+      applyAction(beforeScore, {
+        matchId: beforeScore.matchId,
+        side: "runner",
+        actionId: scoreAction.actionId,
+        clientKnownStateVersion: beforeScore.stateVersion,
+        idempotencyKey: "proteus-charity-score-wrong-side",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(beforeScore, {
+        matchId: beforeScore.matchId,
+        side: "corp",
+        actionId: scoreAction.actionId,
+        clientKnownStateVersion: beforeScore.stateVersion - 1,
+        idempotencyKey: "proteus-charity-score-stale",
+      }).ok,
+    ).toBe(false);
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.errors).toEqual([]);
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps Bad-Publicity-7 primary over simultaneous Charity Takeover Corp win", () => {
+    const { initial, state } = scoreCharityTakeover(
+      "proteus-phase-2b-charity-bp-priority",
+      6,
+      1,
+    );
+
+    expect(agendaPoints(state, "corp")).toBeGreaterThanOrEqual(1);
+    expect(state.corp.badPublicity).toBe(7);
+    expect(state.phase).toBe("game_over");
+    expect(state.winner).toBe("runner");
+    expect(state.gameEndReason).toBe("bad_publicity_7");
+    expect(getLegalActions(state, "corp")).toHaveLength(0);
+    expect(getLegalActions(state, "runner")).toHaveLength(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      gameEndReason: "bad_publicity_7",
+      badPublicityThreshold: 7,
+      corpBadPublicityBefore: 6,
+      corpBadPublicityAfter: 7,
+      sourceVisibility: "public",
+      sourceDefinitionId: CHARITY_TAKEOVER,
+    });
+
+    for (const side of ["runner", "corp"] as const) {
+      const view = getPlayerView(state, side);
+      expect(view.winner).toBe("runner");
+      expect(view.gameEndReason).toBe("bad_publicity_7");
+      expect(JSON.stringify(view)).not.toMatch(internalViewMarkers);
+    }
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", () => {
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;

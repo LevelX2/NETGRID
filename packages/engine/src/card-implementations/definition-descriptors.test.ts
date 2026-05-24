@@ -1389,6 +1389,30 @@ describe("CardImplementation definition descriptors", () => {
     });
   });
 
+  it("describes Proteus Phase 2b Charity Takeover score implementation", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_002_charity-takeover")
+        ?.lifecycle?.on_score,
+    ).toEqual([
+      {
+        kind: "gain_credits",
+        recipient: "corp",
+        amount: 9,
+        visibility: "public",
+      },
+      {
+        kind: "add_bad_publicity",
+        amount: 1,
+        visibility: "public",
+      },
+    ]);
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_proteus_002_charity-takeover",
+      )?.status,
+    ).toBe("implemented");
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

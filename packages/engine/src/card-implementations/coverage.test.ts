@@ -625,6 +625,28 @@ describe("CardImplementation coverage and registry invariants", () => {
     });
   });
 
+  it("migrates Proteus Phase 2b scored-agenda Bad Publicity into CardImplementation coverage", () => {
+    const definitionId = "onr_proteus_002_charity-takeover";
+    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      cardDefinitionId: definitionId,
+      status: "implemented",
+    });
+    expect(
+      cardImplementationForDefinitionId(definitionId)?.lifecycle?.on_score,
+    ).toEqual([
+      expect.objectContaining({
+        kind: "gain_credits",
+        recipient: "corp",
+        amount: 9,
+      }),
+      expect.objectContaining({
+        kind: "add_bad_publicity",
+        amount: 1,
+      }),
+    ]);
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",

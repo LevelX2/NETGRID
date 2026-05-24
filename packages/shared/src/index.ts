@@ -9156,6 +9156,24 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
 
 const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
   {
+    id: "onr_proteus_002_charity-takeover",
+    title: "Charity Takeover",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["bad_publicity", "black_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 1,
+    rulesText:
+      "Gain [9] and 1 Bad Publicity point. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+    mechanics: [
+      "score_agenda",
+      "gain_credits",
+      "bad_publicity",
+      "bad_publicity_loss_gate",
+    ],
+  },
+  {
     id: "onr_proteus_031_minotaur",
     title: "Minotaur",
     side: "corp",

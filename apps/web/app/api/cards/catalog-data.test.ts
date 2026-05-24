@@ -181,6 +181,7 @@ describe("catalog API filters", () => {
 
   it("guards the Proteus visible baseline against decklegal, AI or broad promotion", () => {
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
+      "onr_proteus_002_charity-takeover",
       "onr_proteus_031_minotaur",
       "onr_proteus_034_riddler",
       "onr_proteus_041_toughoniumtm-wall",
