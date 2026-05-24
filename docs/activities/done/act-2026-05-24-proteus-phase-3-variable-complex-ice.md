@@ -1,20 +1,27 @@
 ---
 activityId: act-2026-05-24-proteus-phase-3-variable-complex-ice
-status: inbox
+status: done
 kind: concept
 area: cards
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-05-24
+completedAt: 2026-05-24
+branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 3
 blockedBy:
   - act-2026-05-24-proteus-phase-2-bad-publicity-cards
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-3a-variable-ice-foundation.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-3b-variable-cost-strength-subtype-ice.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-3c-relative-board-count-ice.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-3d-pass-trigger-uninstall-trash-ice.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-3e-ice-repositioning.md
+checks:
+  - rg -n "Phase 3: Variable and Complex ICE|3a Variable ICE Foundation|3e ICE Repositioning" docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md docs/activities
+  - git diff --check
 ---
 
 # Proteus Phase 3: Variable und komplexe ICE
@@ -88,4 +95,6 @@ Die variable und komplexe Proteus-ICE-Familie in CardImplementation-kompatible g
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt am 2026-05-24 als Planungsschnitt. Das Umbrella-Paket wurde vor Codearbeit gemäß `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md` in die Detail-Activities 3a bis 3e zerlegt.
+
+Die Umsetzung beginnt mit `act-2026-05-24-proteus-phase-3a-variable-ice-foundation`; 3b bis 3e bleiben abhängig von 3a.
