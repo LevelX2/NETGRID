@@ -10271,6 +10271,7 @@ select,
 .sideZoneTitle.rigGroupSideLabel {
   font-size: clamp(13px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.135), 18px);
   letter-spacing: 0.05em;
+  transform: rotate(180deg) translateY(-5px);
 }
 
 .rigMemoryBadge {
