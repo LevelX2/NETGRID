@@ -44,6 +44,7 @@ export const GENERATED_CARD_IMAGES: Record<string, string> = {
 };
 
 export const LOCALIZED_DE_CARD_IMAGES: Record<string, string> = localizedDeCardImages();
+export const LOCALIZED_DE_CARD_TITLES: Record<string, string> = localizedDeCardTitles();
 
 const GENERATED_CARD_IMAGE_IDS = new Set(Object.keys(GENERATED_CARD_IMAGES));
 const LOCALIZED_DE_CARD_IMAGE_IDS = new Set(Object.keys(LOCALIZED_DE_CARD_IMAGES));
@@ -65,10 +66,16 @@ export function localizedDeCardImagePath(cardId: string | undefined | null): str
   return LOCALIZED_DE_CARD_IMAGES[cardId];
 }
 
+export function localizedDeCardTitle(cardId: string | undefined | null): string | undefined {
+  if (typeof cardId !== "string") return undefined;
+  return LOCALIZED_DE_CARD_TITLES[cardId];
+}
+
 type LocalizedDeCardSkin = {
   cards?: Array<{
     cardId?: unknown;
     displayOnly?: unknown;
+    localizedTitle?: unknown;
     rendered?: {
       full?: unknown;
     };
@@ -81,6 +88,16 @@ function localizedDeCardImages(): Record<string, string> {
   for (const card of skin.cards ?? []) {
     if (typeof card.cardId !== "string" || card.displayOnly !== true || typeof card.rendered?.full !== "string") continue;
     entries.push([card.cardId, card.rendered.full]);
+  }
+  return Object.fromEntries(entries);
+}
+
+function localizedDeCardTitles(): Record<string, string> {
+  const skin = localizedDeCardSkin as LocalizedDeCardSkin;
+  const entries: Array<[string, string]> = [];
+  for (const card of skin.cards ?? []) {
+    if (typeof card.cardId !== "string" || card.displayOnly !== true || typeof card.localizedTitle !== "string") continue;
+    entries.push([card.cardId, card.localizedTitle]);
   }
   return Object.fromEntries(entries);
 }

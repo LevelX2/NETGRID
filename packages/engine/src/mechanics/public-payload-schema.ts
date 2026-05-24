@@ -81,6 +81,8 @@ const AMOUNT_KEYS = [
   "afterRunUnpreventableCoreDamage",
   "corpCreditsAfter",
   "runnerCreditsAfter",
+  "corpRezzedIceThisTurnCount",
+  "sourceCount",
   "karlSuccessfulRunCreditGain",
   "corpClicksAfter",
   "runnerClicksAfter",

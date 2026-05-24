@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import {
   DEFAULT_CUE_POSITION,
@@ -18,6 +18,8 @@ import {
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   breachProgressLabel,
+  cardChoiceIsReadonlyPrivateLook,
+  cardChoiceReadonlyConfirmationOptionId,
   cardCreditCounterVisual,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
@@ -569,6 +571,38 @@ describe("V1.0.5 action board UI helpers", () => {
       minSelections: 2,
       maxSelections: 2
     };
+    const technicianPrivateLookChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...exactSingleChoice,
+      choiceId: "p3_33_private_look_rd_7",
+      source: "p3_33.private_look:ability:runner_resource_1:rd:7",
+      prompt: "R&D ansehen (1)",
+      options: [
+        {
+          id: "card_corp_rd_1",
+          label: "Agenda",
+          value: "corp_rd_1",
+          selectable: false,
+          card: card("corp_rd_1", "Agenda", "agenda", false)
+        },
+        { id: "done", label: "Fertig", value: "done" }
+      ]
+    };
+    const protocolFilesPrivateLookChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...technicianPrivateLookChoice,
+      choiceId: "p3_33_private_look_rd_9",
+      prompt: "R&D ansehen (2)",
+      options: [
+        ...technicianPrivateLookChoice.options.slice(0, 1),
+        {
+          id: "card_corp_rd_2",
+          label: "ICE",
+          value: "corp_rd_2",
+          selectable: false,
+          card: card("corp_rd_2", "ICE", "ice", false)
+        },
+        { id: "done", label: "Fertig", value: "done" }
+      ]
+    };
 
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
@@ -576,10 +610,16 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseCardChoicePanel(heapSearchChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(offSiteBackupsChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(stackTopFiveChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(technicianPrivateLookChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(protocolFilesPrivateLookChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(organDonorChoice)).toBe(false);
     expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(heapSearchChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(stackTopFiveChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(technicianPrivateLookChoice)).toBe(true);
+    expect(cardChoiceIsReadonlyPrivateLook(technicianPrivateLookChoice)).toBe(true);
+    expect(cardChoiceIsReadonlyPrivateLook(protocolFilesPrivateLookChoice)).toBe(true);
+    expect(cardChoiceReadonlyConfirmationOptionId(technicianPrivateLookChoice)).toBe("done");
     expect(cardChoiceUsesOrderedSelection(stackTopFiveChoice)).toBe(true);
     expect(cardChoiceUsesOrderedSelection(organDonorChoice)).toBe(false);
   });
@@ -1031,6 +1071,25 @@ describe("V1.0.6 resource and card-display helpers", () => {
       shortLabel: "2 Data-Raven"
     });
     expect(
+      counterDisplayBadgeView(
+        {
+          id: "trauma",
+          amount: 3,
+          displayKind: "damage_prevention",
+          label: "Trauma-Counter",
+          ariaLabel: "3 Trauma-Counter",
+          counterType: "trauma",
+          usageHint: "status_marker"
+        },
+        "counter-display-badge"
+      )
+    ).toMatchObject({
+      amount: 3,
+      label: "3 Trauma-Counter",
+      ariaLabel: "3 Trauma-Counter",
+      shortLabel: "3 Trauma"
+    });
+    expect(
       armoredFridgeAblativeCounterBadge(rawArmoredFridge)
     ).toBeNull();
     expect(
@@ -1223,6 +1282,44 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(remove)).toBe("Raven-Counter entfernen");
   });
 
+  it("keeps Fang run-lock payment visible with normal Runner actions", () => {
+    const removeLock = legalAction("runner", "trigger_ability", "game_rule", "Run-Sperre für 2 Credits entfernen", {
+      v1920RunnerRunLockAbility: "fang_2_0_pay_to_run",
+      fangRunLockCreditCost: 2,
+      runnerRunLockCreditCost: 2,
+      gainCreditsAmount: 0
+    });
+
+    const split = splitLegalActions([removeLock]);
+
+    expect(split.primaryActions).toEqual([removeLock]);
+    expect(split.contextualActions).toEqual([]);
+    expect(actionButtonLabel(removeLock)).toBe("Run-Sperre für 2 Credits entfernen");
+  });
+
+  it("warns and keeps contextless contextual actions visible", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const brokenContextAction = legalAction("corp", "advance_card", "game_rule", "Kontextlose Aktion");
+
+      const split = splitLegalActions([brokenContextAction]);
+
+      expect(split.primaryActions).toEqual([brokenContextAction]);
+      expect(split.contextualActions).toEqual([]);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("classified as contextual without a selectable context"),
+        expect.objectContaining({
+          actionId: brokenContextAction.actionId,
+          type: "advance_card",
+          source: "game_rule",
+          label: "Kontextlose Aktion"
+        })
+      );
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
   it("labels The Shell Traders abilities on the installed resource overlay", () => {
     const prepare = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: Karte vorbereiten", {
       cardId: "shell_traders_1",
@@ -1324,7 +1421,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionCostChips({ ...searchInstall, costs: [{ credits: 2 }] })).toEqual([]);
   });
 
-  it("mirrors Self-Modifying Code and immediate encounter actions into the Run window without changing their card context", () => {
+  it("mirrors run-timing actions into the Run window without changing their card context", () => {
     const smc = card("smc_1", "Self-Modifying Code", "program");
     const breaker = card("breaker_1", "Simple Decoder", "program");
     const running = view("runner", {
@@ -1347,16 +1444,18 @@ describe("V1.0.6 resource and card-display helpers", () => {
     }, "run.encounter_ice");
     const pump: LegalAction = { ...legalAction("runner", "pump_breaker", "breaker_1", "Simple Decoder: Stärke +1", { breakerId: "breaker_1", iceId: "ice_1" }, "run.encounter_ice"), costs: [{ credits: 1 }] };
     const continueRun = legalAction("runner", "continue_run", "game_rule", "ICE passieren", { encounterContinue: true, unbrokenSubroutineCount: 0 }, "run.encounter_ice");
+    const runPaidAbility = legalAction("runner", "trigger_ability", "broker_1", "Broker: 3 Credits auf Broker legen", { cardId: "broker_1", resourceAbility: "broker_load_credits" }, "run.encounter_ice");
     const offRunAbility = legalAction("runner", "trigger_ability", "broker_1", "Broker: 3 Credits auf Broker legen", { cardId: "broker_1", resourceAbility: "broker_load_credits" });
 
-    const split = splitLegalActions([searchInstall, pump, continueRun, offRunAbility]);
-    const mirrored = runWindowActions(running, [searchInstall, pump, continueRun, offRunAbility]);
+    const split = splitLegalActions([searchInstall, pump, continueRun, runPaidAbility, offRunAbility]);
+    const mirrored = runWindowActions(running, [searchInstall, pump, continueRun, runPaidAbility, offRunAbility]);
 
     expect(split.primaryActions).toEqual([continueRun]);
-    expect(split.contextualActions).toEqual([searchInstall, pump, offRunAbility]);
-    expect(mirrored).toEqual([searchInstall, pump, continueRun]);
+    expect(split.contextualActions).toEqual([searchInstall, pump, runPaidAbility, offRunAbility]);
+    expect(mirrored).toEqual([searchInstall, pump, continueRun, runPaidAbility]);
     expect(runWindowActionButtonLabel(running, searchInstall)).toBe("SMC: Programm suchen");
     expect(runWindowActionButtonLabel(running, pump)).toBe("Simple Decoder +1 Stärke");
+    expect(runWindowActionButtonLabel(running, runPaidAbility)).toBe("3 Credits laden");
     const breakAction = legalAction(
       "runner",
       "break_subroutine",
@@ -1545,7 +1644,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionMatchesContext(startupTrash, { kind: "card", id: "startup_1", label: "Startup Immolator" })).toBe(true);
   });
 
-  it("mirrors the card access action into the Run window with a German label", () => {
+  it("mirrors access and access-resolution actions into the Run window", () => {
     const running = view("runner", {
       run: {
         attackedServerId: "rd",
@@ -1555,13 +1654,19 @@ describe("V1.0.6 resource and card-display helpers", () => {
       }
     });
     const access = legalAction("runner", "access_card", "game_rule", "Karte accessen", undefined, "access.resolve_card");
+    const steal = legalAction("runner", "steal_agenda", "agenda_1", "Priority Requisition stehlen", { cardId: "agenda_1" }, "access.resolve_card");
+    const trash = legalAction("runner", "trash_accessed_card", "asset_1", "South African Mining Corp trashen", { cardId: "asset_1" }, "access.resolve_card");
+    const decline = legalAction("runner", "decline_trash", "game_rule", "Weiter accessen", { cardId: "asset_1" }, "access.resolve_card");
+    const showCard = legalAction("runner", "trigger_ability", "viewer_1", "Karte anzeigen", { cardId: "viewer_1" }, "access.resolve_card");
     const draw = legalAction("runner", "draw_card", "basic_action", "Karte ziehen");
 
-    const mirrored = runWindowActions(running, [access, draw]);
+    const mirrored = runWindowActions(running, [access, steal, trash, decline, showCard, draw]);
 
     expect(actionButtonLabel(access)).toBe("Zugriff auf Karte");
-    expect(mirrored).toEqual([access]);
+    expect(mirrored).toEqual([access, steal, trash, decline, showCard]);
     expect(runWindowActionButtonLabel(running, access)).toBe("Zugriff auf Karte");
+    expect(runWindowActionButtonLabel(running, decline)).toBe("Zugriff abschließen");
+    expect(runWindowActionButtonLabel(running, showCard)).toBe("Karte anzeigen");
   });
 
   it("keeps City Surveillance draw choices visible in draw action labels", () => {

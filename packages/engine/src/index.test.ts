@@ -8087,6 +8087,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.runner.credits).toBe(creditsBeforeEnd + 1);
     expect(state.runner.coreDamage).toBe(coreBeforeEnd + 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      gainedCredits: 1,
+      corpRezzedIceThisTurnCount: 1,
       damageType: "core",
       damageAmount: 1,
     });
@@ -38758,6 +38760,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     setCardCounterForTest(state, recurringId, "recurring_credit", 2);
     setCardCounterForTest(state, restrictedId, "bit", 1);
+    setCardCounterForTest(state, state.runner.identity, "trauma", 2);
     setCardCounterForTest(state, virusId, "virus", 3);
     setCardCounterForTest(state, fridgeId, "ablative", 2);
     setCardCounterForTest(state, state.runner.identity, "data_raven", 1);
@@ -38850,6 +38853,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       ]),
     );
     expect(runnerView.own.identity.counterDisplays?.map((display) => display.id)).toEqual([
+      "trauma",
       "data_raven",
       "cerberus",
       "mastiff",
@@ -38857,6 +38861,13 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     ]);
     expect(runnerView.own.identity.counterDisplays).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          id: "trauma",
+          amount: 2,
+          displayKind: "damage_prevention",
+          counterType: "trauma",
+          label: "Trauma-Counter",
+        }),
         expect.objectContaining({
           id: "data_raven",
           amount: 1,
@@ -40858,6 +40869,103 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(hashState(replay.state)).toBe(hashState(recordState));
   });
 
+  it("resolves Record Reconstructor after a protected Archives run reaches access", () => {
+    const p333State = (seed: string, runnerCards: CardDefinitionId[]) =>
+      toRunnerTurn(
+        createGameAfterSetup({
+          seed,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: {
+            ...MECHANIC_SMOKE_DECKS.runAccess.runner,
+            id: `${seed}_runner`,
+            name: `${seed} Runner`,
+            cards: [
+              ...runnerCards.map((id) => ({ id, quantity: 1 })),
+              ...MECHANIC_SMOKE_DECKS.runAccess.runner.cards.filter(
+                (card) => !runnerCards.includes(card.id),
+              ),
+            ],
+          },
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.runAccess.corp,
+            id: `${seed}_corp`,
+            name: `${seed} Corp`,
+            cards: [
+              { id: "simple_barrier_ice", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards,
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+    let state = p333State("p3-33-record-reconstructor-protected-archives", [
+      "onr_v1_142_record-reconstructor",
+    ]);
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_142_record-reconstructor");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_142_record-reconstructor",
+    );
+    putCorpIceOnServer(state, "archives", "simple_barrier_ice");
+    const firstArchive = moveCorpCardToHq(state, "simple_economy_operation");
+    removeEverywhere(state, firstArchive);
+    state.corp.archives.push(firstArchive);
+    state.cardInstances[firstArchive] = {
+      ...state.cardInstances[firstArchive]!,
+      zone: { side: "corp", zone: "archives" },
+      faceup: true,
+    };
+    const secondArchive = moveCorpCardToHq(state, "simple_agenda");
+    removeEverywhere(state, secondArchive);
+    state.corp.archives.push(secondArchive);
+    state.cardInstances[secondArchive] = {
+      ...state.cardInstances[secondArchive]!,
+      zone: { side: "corp", zone: "archives" },
+      faceup: true,
+    };
+    const rdCountBefore = state.corp.rd.length;
+    const archivesCountBefore = state.corp.archives.length;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_142_record-reconstructor",
+    );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.run).toBeUndefined();
+    expect(state.corp.rd).toHaveLength(rdCountBefore + 2);
+    expect(state.corp.rd.slice(0, 2).sort()).toEqual(
+      [firstArchive, secondArchive].sort(),
+    );
+    expect(state.corp.archives).not.toContain(firstArchive);
+    expect(state.corp.archives).not.toContain(secondArchive);
+    expect(getPlayerView(state, "runner").opponent.deckCount).toBe(
+      rdCountBefore + 2,
+    );
+    expect(getPlayerView(state, "runner").opponent.discardCount).toBe(
+      archivesCountBefore - 2,
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      accessReplacement: "archives_faceup_to_rd",
+      movedCount: 2,
+      sourceDefinitionId: "onr_v1_142_record-reconstructor",
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("uses Mystery Box once per run with public top-five reveal, free program install and deterministic shuffle", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("spotcheck-mystery-box-install"));
     state.runner.credits = 20;
@@ -42819,6 +42927,69 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       expect(replay.ok, definitionId).toBe(true);
       expect(hashState(replay.state), definitionId).toBe(hashState(state));
     }
+  });
+
+  it("shows Trauma Team trauma counters after install and its add-counter action", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.damagePrevention("spotcheck-trauma-team-counters"),
+    );
+    state.runner.credits = 30;
+    state.runner.clicks = 10;
+    moveRunnerCardToGrip(state, "onr_v1_185_trauma-team");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_185_trauma-team",
+    );
+    const traumaTeamId = state.runner.rig.resources.find(
+      (cardId) =>
+        state.cardInstances[cardId]?.definitionId ===
+        "onr_v1_185_trauma-team",
+    );
+    expect(traumaTeamId).toBeDefined();
+    if (!traumaTeamId) throw new Error("Missing Trauma Team install");
+    expect(cardCounterAmount(state, traumaTeamId, "trauma")).toBe(2);
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === traumaTeamId,
+      )?.counterDisplays,
+    ).toEqual([
+      expect.objectContaining({
+        id: "trauma",
+        amount: 2,
+        displayKind: "damage_prevention",
+        counterType: "trauma",
+        label: "Trauma-Counter",
+      }),
+    ]);
+
+    const addCounterAction = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === traumaTeamId &&
+        action.payload?.cardImplementationAbility === "activated",
+    );
+    expect(addCounterAction?.label).toBe("Trauma-Counter hinzufügen");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === addCounterAction?.actionId,
+    );
+    expect(cardCounterAmount(state, traumaTeamId, "trauma")).toBe(3);
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === traumaTeamId,
+      )?.counterDisplays,
+    ).toEqual([
+      expect.objectContaining({
+        id: "trauma",
+        amount: 3,
+        displayKind: "damage_prevention",
+        counterType: "trauma",
+      }),
+    ]);
   });
 
   it("keeps scored agendas scoreArea-bound and replay-safe", () => {
