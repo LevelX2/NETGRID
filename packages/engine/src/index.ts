@@ -236,6 +236,20 @@ import {
   handleAccessExecution,
   type AccessFlowHost,
 } from "./game/access/access-flow";
+import {
+  installedAccessBonusForServer,
+  installedAccessBonusSourceDefinitionIdsForServer,
+  runnerHqAccessBonus as runnerHqAccessBonusForBreach,
+  type BreachStateHost,
+} from "./game/access/breach-state";
+import {
+  enterAccessFromSuccessfulRun,
+  resolveMicrotechAiInterfacePreAccessChoice,
+  resolvePriorityWreckSpendChoice,
+  sourcePayloadForSuccessfulRunReplacement,
+  type SuccessfulRunInterventionKind,
+  type RunAccessTransitionHost,
+} from "./game/run/run-access-transition";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -262,7 +276,6 @@ import {
   dynamicSubroutineAttributionFor,
 } from "./ability-engine/additional-subroutine-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "./ability-engine/break-subroutine-cost-modifiers";
-import { quoteAccessCountModifiers } from "./ability-engine/access-count-modifiers";
 import { runnerCardImplementationAbilityLimitHost } from "./ability-engine/card-implementation-ability-limits";
 import {
   effectiveAgendaDifficulty,
@@ -1171,8 +1184,10 @@ const publicContextDeps: PublicContextForActionDependencies = {
   creditCostForAction,
   definitionFor,
   pumpAmountForLegalAction,
-  runnerHqAccessBonus,
-  v1915InstalledAccessBonus,
+  runnerHqAccessBonus: (state) =>
+    runnerHqAccessBonusForBreach(breachStateHost(state)),
+  v1915InstalledAccessBonus: (state, serverId) =>
+    installedAccessBonusForServer(breachStateHost(state), serverId),
 };
 type VisibleCounterPayload = {
   counterType: CounterType;
@@ -9618,9 +9633,13 @@ function startRun(
     state,
     legalAction,
   );
-  const installedAccessBonus = v1915InstalledAccessBonus(state, server.id);
+  const breachHost = breachStateHost(state);
+  const installedAccessBonus = installedAccessBonusForServer(
+    breachHost,
+    server.id,
+  );
   const installedAccessBonusSourceDefinitionIds =
-    v1915InstalledAccessBonusSourceDefinitionIds(state, server.id);
+    installedAccessBonusSourceDefinitionIdsForServer(breachHost, server.id);
   const baseAccessCount = Math.max(1, Math.floor(accessCount));
   const effectiveAccessCount = baseAccessCount + installedAccessBonus;
   state.phase = "run";
@@ -9755,7 +9774,7 @@ function startRun(
     state.run.approachedIceId = approachedIceId;
     approachOrEncounterIce(state, approachedIceId, legalAction);
   } else {
-    enterAccess(state, legalAction);
+    enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction);
   }
 }
 
@@ -11897,7 +11916,7 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
     position: { kind: "server", serverId: server.id },
     phase: "access",
   };
-  enterAccess(state);
+  enterAccessFromSuccessfulRun(runAccessTransitionHost(state));
 }
 
 function applyRioDeJaneiroCityGridPassedIceTrigger(
@@ -12083,218 +12102,7 @@ function continueFromMovement(state: GameState, legalAction?: LegalAction): void
     approachOrEncounterIce(state, approachedIceId);
     return;
   }
-  enterAccess(state, legalAction);
-}
-
-function successfulRunInterventionKindForSource(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-):
-  | "temporary_hq_ice_encounter_after_successful_run"
-  | "install_hq_ice_innermost_after_successful_run"
-  | undefined {
-  const window = fortRunWindowImplementationsForDefinition(
-    definitionFor(state, sourceCardId).id,
-  ).find(
-    (candidate) =>
-      candidate.kind === "temporary_hq_ice_encounter_after_successful_run" ||
-      candidate.kind === "install_hq_ice_innermost_after_successful_run",
-  );
-  return window?.kind;
-}
-
-function successfulRunInterventionCost(
-  state: GameState,
-  kind:
-    | "temporary_hq_ice_encounter_after_successful_run"
-    | "install_hq_ice_innermost_after_successful_run",
-  server: CorpServer,
-  hqIceId: CardInstanceId,
-): number {
-  if (kind === "temporary_hq_ice_encounter_after_successful_run")
-    return Math.max(0, Math.floor(rezCostForCard(state, hqIceId) / 2));
-  return Math.max(0, Math.floor(server.ice.length));
-}
-
-function successfulRunInterventionSourceIds(
-  state: GameState,
-  run: ActiveRun,
-): CardInstanceId[] {
-  if (run.successfulRunInterventionWindowClosed || run.delayedSuccessfulRun)
-    return [];
-  const server = mustServer(state, run.attackedServerId);
-  const used = new Set(run.successfulRunInterventionUsedSourceIds ?? []);
-  const hqIceIds = state.corp.hq
-    .filter((cardId) => definitionFor(state, cardId).type === "ice")
-    .sort();
-  if (hqIceIds.length === 0) return [];
-  return server.root
-    .slice()
-    .sort()
-    .filter((cardId) => !used.has(cardId))
-    .filter((cardId) => mustInstance(state.cardInstances, cardId).rezzed)
-    .filter((cardId) => {
-      const kind = successfulRunInterventionKindForSource(state, cardId);
-      if (!kind) return false;
-      return hqIceIds.some(
-        (hqIceId) =>
-          state.corp.credits >=
-          successfulRunInterventionCost(state, kind, server, hqIceId),
-      );
-    });
-}
-
-function startSuccessfulRunInterventionChoice(
-  state: GameState,
-  run: ActiveRun,
-  legalAction?: LegalAction,
-): boolean {
-  const sourceCardId = successfulRunInterventionSourceIds(state, run)[0];
-  if (!sourceCardId) return false;
-  const kind = successfulRunInterventionKindForSource(state, sourceCardId);
-  if (!kind) return false;
-  const server = mustServer(state, run.attackedServerId);
-  const hqIceOptions = state.corp.hq
-    .filter((cardId) => definitionFor(state, cardId).type === "ice")
-    .sort()
-    .map((cardId) => ({
-      cardId,
-      cost: successfulRunInterventionCost(state, kind, server, cardId),
-    }))
-    .filter(({ cost }) => state.corp.credits >= cost);
-  if (hqIceOptions.length === 0) return false;
-  const definition = definitionFor(state, sourceCardId);
-  state.pendingChoice = {
-    choiceId: `p3_54_delayed_success_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `p3_54.delayed_success:${sourceCardId}:${kind}:${run.attackedServerId}:${state.stateVersion + 1}`,
-    prompt: `${definition.title}: Successful Run verzögern?`,
-    kind: "select_option",
-    options: [
-      {
-        id: "decline",
-        label: "Nicht nutzen",
-        publicLabel: `${definition.title} wird nicht genutzt`,
-        value: "decline",
-      },
-      ...hqIceOptions.map(({ cardId, cost }) => ({
-        id: `ice_${sanitizeId(cardId)}`,
-        label: `ICE aus HQ wählen (${cost} Credits)`,
-        publicLabel: `${definition.title}: ICE aus HQ wählen`,
-        value: cardId,
-      })),
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  state.activeSide = "corp";
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      delayedSuccessfulRun: true,
-      runSuccessDelayed: true,
-      fortWindowSourceTitle: definition.title,
-      sourceDefinitionId: definition.id,
-      sourceCardId: sourceCardId,
-      hqIceSelectedCount: hqIceOptions.length,
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_54_delayed_success_intervention_choice",
-      serverId: run.attackedServerId,
-    };
-  }
-  return true;
-}
-
-function enterAccess(state: GameState, legalAction?: LegalAction): void {
-  const run = mustRun(state);
-  if (startSuccessfulRunInterventionChoice(state, run, legalAction)) return;
-  markSuccessfulRunForTurn(state, run);
-  applyUniqueDirectSuccessfulRunTriggers(state, legalAction);
-  if (
-    run.successfulRunAccessReplacement === "corp_lose_credits" &&
-    (!run.successfulRunRequiresCorpCredits || state.corp.credits > 0)
-  ) {
-    applySuccessfulRunAccessReplacement(state, run, legalAction);
-    finishRun(state, true, legalAction);
-    return;
-  }
-  if (run.successfulRunAccessReplacement === "runner_spend_corp_lose_credits") {
-    startPriorityWreckSpendChoice(state, run, legalAction);
-    return;
-  }
-  if (run.successfulRunAccessReplacement === "private_look_top_rd") {
-    startSuccessfulRunPrivateLookChoice(state, run, legalAction);
-    return;
-  }
-  if (run.successfulRunAccessReplacement === "archives_faceup_to_rd") {
-    applyArchivesFaceupToRdReplacement(state, run, legalAction);
-    finishRun(state, true, legalAction);
-    return;
-  }
-  if (shouldOpenMicrotechAiInterfacePreAccessChoice(state, run)) {
-    startMicrotechAiInterfacePreAccessChoice(state, run, legalAction);
-    return;
-  }
-  if (isV097OrLater(state)) {
-    revealArchivesAtBreachStart(state, run, legalAction);
-    const breach = buildBreachState(state, run);
-    if (breach.queue.length === 0) {
-      finishRun(state, true, legalAction);
-      return;
-    }
-    if (legalAction) {
-      const v1915AccessBonus = v1915InstalledAccessBonus(
-        state,
-        breach.serverId,
-      );
-      const hqAccessBonus =
-        breach.serverId === "hq" ? runnerHqAccessBonus(state) : 0;
-      const installedAccessBonus = v1915AccessBonus + hqAccessBonus;
-      const installedAccessBonusSourceDefinitionIds =
-        [
-          ...v1915InstalledAccessBonusSourceDefinitionIds(state, breach.serverId),
-          ...(breach.serverId === "hq"
-            ? quoteAccessCountModifiers(state, "hq").sourceDefinitionIds
-            : []),
-        ].sort();
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        baseAccessCount: Math.max(1, breach.queue.length - installedAccessBonus),
-        installedAccessBonus,
-        effectiveAccessCount: breach.queue.length,
-        ...(installedAccessBonusSourceDefinitionIds.length > 0
-          ? {
-              installedAccessBonusSourceDefinitionIds:
-                installedAccessBonusSourceDefinitionIds.join(","),
-            }
-          : {}),
-      };
-    }
-    const { accessedCardId: _accessedCardId, ...runWithoutAccessedCard } = run;
-    void _accessedCardId;
-    state.run = {
-      ...runWithoutAccessedCard,
-      phase: "access",
-      successful: true,
-      breach,
-    };
-    advanceArchivesBreachPastNonDecisionCards(
-      accessFlowHost(state),
-      legalAction,
-    );
-    if (!state.run) return;
-  } else {
-    state.run = { ...run, phase: "access", successful: true };
-  }
-  state.timingPoint = "access.resolve_card";
-  state.activeSide = "runner";
-}
-
-function markSuccessfulRunForTurn(state: GameState, run: ActiveRun): void {
-  if (run.attackedServerId === "hq")
-    ensureRunnerTurnFlags(state).successfulHqRunThisTurn = true;
+  enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction);
 }
 
 function applyUniqueDirectSuccessfulRunTriggers(
@@ -12336,31 +12144,6 @@ function applyUniqueDirectSuccessfulRunTriggers(
   };
 }
 
-function revealArchivesAtBreachStart(
-  state: GameState,
-  run: ActiveRun,
-  legalAction?: LegalAction,
-): void {
-  const accessServerId = run.accessServerOverride ?? run.attackedServerId;
-  if (accessServerId !== "archives") return;
-  const revealedIds = state.corp.archives.filter(
-    (cardId) => !mustInstance(state.cardInstances, cardId).faceup,
-  );
-  if (revealedIds.length === 0) return;
-  for (const cardId of revealedIds) {
-    const instance = mustInstance(state.cardInstances, cardId);
-    state.cardInstances[cardId] = { ...instance, faceup: true, rezzed: true };
-  }
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "archives_breach_reveal",
-      archivesRevealCount: revealedIds.length,
-    };
-  }
-}
-
 function archivesAccessRequiresDecisionOrEffect(
   state: GameState,
   cardId: CardInstanceId,
@@ -12394,129 +12177,6 @@ function archivesAccessRequiresDecisionOrEffect(
       mechanic === "access_trace" ||
       mechanic === "access_replacement",
   );
-}
-
-function applySuccessfulRunAccessReplacement(
-  state: GameState,
-  run: ActiveRun,
-  legalAction?: LegalAction,
-): void {
-  const creditLoss = Math.max(0, Math.floor(run.successfulRunCreditLoss ?? 0));
-  if (creditLoss > 0) {
-    state.corp.credits = Math.max(0, state.corp.credits - creditLoss);
-  }
-  const runnerTagGain = Math.max(
-    0,
-    Math.floor(run.successfulRunRunnerTagGain ?? 0),
-  );
-  if (runnerTagGain > 0) state.runner.tags += runnerTagGain;
-  const corpDraw = Math.max(0, Math.floor(run.successfulRunCorpDraw ?? 0));
-  if (corpDraw > 0) drawCorpCards(state, corpDraw);
-  const runnerCreditGain = Math.max(
-    0,
-    Math.floor(run.successfulRunRunnerCreditGain ?? 0),
-  );
-  if (runnerCreditGain > 0) state.runner.credits += runnerCreditGain;
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      accessReplacement: run.successfulRunAccessReplacement ?? "corp_lose_credits",
-      creditLoss,
-      corpCreditsAfter: state.corp.credits,
-      tagsAdded: runnerTagGain,
-      runnerTagsAfter: state.runner.tags,
-      corpDrawnCount: corpDraw,
-      gainedCredits: runnerCreditGain,
-      runnerCreditsAfter: state.runner.credits,
-      hiddenZoneBarrier: true,
-    };
-  }
-}
-
-function sourcePayloadForSuccessfulRunReplacement(
-  run: ActiveRun,
-): Record<string, string> {
-  return {
-    ...(run.successfulRunSourceCardId
-      ? { cardId: run.successfulRunSourceCardId }
-      : {}),
-    ...(run.successfulRunSourceDefinitionId
-      ? { sourceDefinitionId: run.successfulRunSourceDefinitionId }
-      : {}),
-    ...(run.successfulRunSourceTitle
-      ? { sourceTitle: run.successfulRunSourceTitle }
-      : {}),
-  };
-}
-
-function startPriorityWreckSpendChoice(
-  state: GameState,
-  run: ActiveRun,
-  legalAction?: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  state.run = { ...run, phase: "access", successful: true };
-  const maxSpend = Math.max(0, Math.floor(state.runner.credits));
-  state.pendingChoice = {
-    choiceId: `p3_33_priority_wreck_${run.runId}_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_33.priority_wreck:${run.runId}:${state.stateVersion + 1}`,
-    prompt: "Priority Wreck: Betrag zahlen",
-    kind: "select_option",
-    options: Array.from({ length: maxSpend + 1 }, (_, amount) => ({
-      id: `pay_${amount}`,
-      label: `${amount} Credits zahlen`,
-      publicLabel: "Priority-Wreck-Zahlung",
-      value: amount,
-    })),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      accessReplacement: "runner_spend_corp_lose_credits",
-      priorityWreckChoiceOpened: true,
-      hiddenZoneBarrier: true,
-      ...sourcePayloadForSuccessfulRunReplacement(run),
-    };
-  }
-}
-
-function resolvePriorityWreckSpendChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  const run = state.run;
-  if (!choice || !run || !choice.source.startsWith("p3_33.priority_wreck"))
-    throw new Error("Es ist keine Priority-Wreck-Choice offen.");
-  if (run.successfulRunAccessReplacement !== "runner_spend_corp_lose_credits")
-    throw new Error("Priority Wreck passt nicht zum aktuellen Run.");
-  const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const option = choice.options.find((candidate) => candidate.id === selectedId);
-  const amount = Number(option?.value ?? -1);
-  if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Priority-Wreck-Betrag ist ungueltig.");
-  if (amount > state.runner.credits)
-    throw new Error("Der Runner kann diesen Priority-Wreck-Betrag nicht zahlen.");
-  state.runner.credits -= amount;
-  state.corp.credits = Math.max(0, state.corp.credits - amount);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    accessReplacement: "runner_spend_corp_lose_credits",
-    runnerPaidAmount: amount,
-    corpLostCredits: amount,
-    runnerCreditsAfter: state.runner.credits,
-    corpCreditsAfter: state.corp.credits,
-    hiddenZoneBarrier: true,
-    ...sourcePayloadForSuccessfulRunReplacement(run),
-  };
-  finishRun(state, true, legalAction);
 }
 
 function privateLookCardIds(
@@ -12581,28 +12241,6 @@ function startRunnerPrivateLookChoice(
   return true;
 }
 
-function startSuccessfulRunPrivateLookChoice(
-  state: GameState,
-  run: ActiveRun,
-  legalAction?: LegalAction,
-): void {
-  const sourceCardId = run.successfulRunSourceCardId;
-  const sourceDefinitionId = run.successfulRunSourceDefinitionId;
-  if (!sourceCardId || !sourceDefinitionId)
-    throw new Error("Successful-run private look has no source.");
-  state.run = { ...run, phase: "access", successful: true };
-  const opened = startRunnerPrivateLookChoice(
-    state,
-    sourceCardId,
-    sourceDefinitionId,
-    "rd",
-    Math.max(1, Math.floor(run.successfulRunPrivateLookCount ?? 5)),
-    "successful_run",
-    legalAction,
-  );
-  if (!opened) finishRun(state, true, legalAction);
-}
-
 function resolveRunnerPrivateLookChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -12657,98 +12295,6 @@ function resolveRunnerPrivateLookChoice(
     finishRun(state, true, legalAction);
 }
 
-function shouldOpenMicrotechAiInterfacePreAccessChoice(
-  state: GameState,
-  run: ActiveRun,
-): boolean {
-  if (run.microtechAiInterfacePreAccessResolved) return false;
-  const accessServerId = run.accessServerOverride ?? run.attackedServerId;
-  if (accessServerId !== "rd") return false;
-  return runnerInstalledCardIds(state).some((cardId) =>
-    cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-      ?.accessHooks?.some((hook) => hook.kind === "pre_access_rd_cut"),
-  );
-}
-
-function startMicrotechAiInterfacePreAccessChoice(
-  state: GameState,
-  run: ActiveRun,
-  legalAction?: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const sourceCardId = runnerInstalledCardIds(state)
-    .slice()
-    .sort()
-    .find((cardId) =>
-      cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-        ?.accessHooks?.some((hook) => hook.kind === "pre_access_rd_cut"),
-    );
-  if (!sourceCardId) return;
-  state.run = { ...run, microtechAiInterfacePreAccessResolved: true };
-  const maxCut = state.corp.rd.length;
-  state.pendingChoice = {
-    choiceId: `p3_33_microtech_ai_interface_${run.runId}_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_33.microtech_ai_interface:${run.runId}:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Microtech AI Interface: R&D cutten",
-    kind: "select_option",
-    options: Array.from({ length: maxCut + 1 }, (_, amount) => ({
-      id: `cut_${amount}`,
-      label: `${amount} Karten nach unten legen`,
-      publicLabel: "R&D-Cut-Anzahl",
-      value: amount,
-    })),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_33_microtech_ai_interface_pre_access",
-      sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    };
-  }
-}
-
-function resolveMicrotechAiInterfacePreAccessChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_33.microtech_ai_interface"))
-    throw new Error("Es ist keine Microtech-AI-Interface-Choice offen.");
-  const sourceCardId = choice.source.split(":")[2] as CardInstanceId | undefined;
-  if (
-    !sourceCardId ||
-    !runnerInstalledCardIds(state).includes(sourceCardId) ||
-    !cardImplementationForDefinitionId(definitionFor(state, sourceCardId).id)
-      ?.accessHooks?.some((hook) => hook.kind === "pre_access_rd_cut")
-  )
-    throw new Error("Microtech AI Interface ist nicht mehr installiert.");
-  const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const option = choice.options.find((candidate) => candidate.id === selectedId);
-  const amount = Number(option?.value ?? -1);
-  if (!Number.isInteger(amount) || amount < 0 || amount > state.corp.rd.length)
-    throw new Error("Die Microtech-Cut-Anzahl ist ungueltig.");
-  if (amount > 0) {
-    const moved = state.corp.rd.slice(0, amount);
-    state.corp.rd = [...state.corp.rd.slice(amount), ...moved];
-  }
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_33_microtech_ai_interface_pre_access",
-    sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    movedCount: amount,
-  };
-  enterAccess(state, legalAction);
-}
-
 function startExpertScheduleAnalyzerPostAccessChoice(
   state: GameState,
   run: ActiveRun,
@@ -12781,136 +12327,6 @@ function startExpertScheduleAnalyzerPostAccessChoice(
   );
 }
 
-function applyArchivesFaceupToRdReplacement(
-  state: GameState,
-  run: ActiveRun,
-  legalAction?: LegalAction,
-): void {
-  const faceupIds = state.corp.archives.filter(
-    (cardId) => mustInstance(state.cardInstances, cardId).faceup,
-  );
-  const shuffled = shuffleStateIds(
-    state,
-    faceupIds,
-    `p3_33.record_reconstructor.${run.runId}`,
-  );
-  const moveCount = Math.min(
-    Math.max(0, Math.floor(run.successfulRunArchivesMoveCount ?? 2)),
-    shuffled.length,
-  );
-  const moved = shuffled.slice(0, moveCount);
-  const remainingFaceup = shuffled.slice(moveCount);
-  const facedownArchives = state.corp.archives.filter(
-    (cardId) => !faceupIds.includes(cardId),
-  );
-  state.corp.archives = [...facedownArchives, ...remainingFaceup];
-  state.corp.rd = [...moved, ...state.corp.rd];
-  for (const cardId of moved) {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: false,
-      rezzed: false,
-      zone: { side: "corp", zone: "rd" },
-    };
-  }
-  for (const cardId of remainingFaceup) {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      zone: { side: "corp", zone: "archives" },
-    };
-  }
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      accessReplacement: "archives_faceup_to_rd",
-      shuffledFaceUpArchivesCount: faceupIds.length,
-      movedCount: moveCount,
-      randomCounterAfter: state.randomCounter,
-      hiddenZoneBarrier: true,
-      ...sourcePayloadForSuccessfulRunReplacement(run),
-    };
-  }
-}
-
-function buildBreachState(state: GameState, run: ActiveRun): ActiveBreach {
-  const accessServerId = run.accessServerOverride ?? run.attackedServerId;
-  const server = mustServer(state, accessServerId);
-  const accessCount = Math.max(1, run.accessCount ?? 1);
-  const queue = accessQueueEntries(state, server, run, accessCount);
-  return {
-    breachId: `${run.runId}.breach`,
-    serverId: server.id,
-    accessMode: queue.length > 1 ? "multi" : "single",
-    queue: queue.map((entry, index) => ({
-      entryId: `${run.runId}.breach.${index}`,
-      cardInstanceId: entry.cardInstanceId,
-      serverId: server.id,
-      zone: entry.zone,
-      status: "pending",
-      hiddenInfo: isBreachEntryHidden(state, entry.cardInstanceId),
-    })),
-    currentIndex: 0,
-    completed: false,
-    accessedSummaries: [],
-  };
-}
-
-function accessQueueEntries(
-  state: GameState,
-  server: CorpServer,
-  run: ActiveRun,
-  accessCount: number,
-): Array<{
-  cardInstanceId: CardInstanceId;
-  zone: ActiveBreach["queue"][number]["zone"];
-}> {
-  if (server.id === "rd")
-    return state.corp.rd
-      .slice(0, Math.min(accessCount, state.corp.rd.length))
-      .map((cardInstanceId) => ({ cardInstanceId, zone: "rd" as const }));
-  if (server.id === "hq") {
-    const bonus = runnerHqAccessBonus(state);
-    return [
-      ...randomHqAccessQueue(state, run.runId, accessCount + bonus).map(
-        (cardInstanceId) => ({ cardInstanceId, zone: "hq" as const }),
-      ),
-      ...server.root
-        .filter(
-          (cardInstanceId) =>
-            definitionFor(state, cardInstanceId).type === "upgrade",
-        )
-        .map((cardInstanceId) => ({
-          cardInstanceId,
-          zone: "remote_root" as const,
-        })),
-    ];
-  }
-  if (server.id === "archives")
-    return state.corp.archives.map((cardInstanceId) => ({
-      cardInstanceId,
-      zone: "archives" as const,
-    }));
-  return server.root.map((cardInstanceId) => ({
-    cardInstanceId,
-    zone: "remote_root" as const,
-  }));
-}
-
-function v1915InstalledAccessBonus(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): number {
-  return v1915InstalledAccessBonusSourceDefinitionIds(state, serverId).length;
-}
-
-function v1915InstalledAccessBonusSourceDefinitionIds(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): CardDefinitionId[] {
-  if (serverId !== "rd") return [];
-  return quoteAccessCountModifiers(state, "rd").sourceDefinitionIds;
-}
-
 function v1915InstalledRevealHelperIds(state: GameState): CardDefinitionId[] {
   const helperIds = [MYSTERY_BOX_ID, SMARTEYE_ID];
   return helperIds.filter((definitionId) =>
@@ -12927,44 +12343,6 @@ function runnerHasInstalledDefinition(
     ...state.runner.rig.hardware,
     ...state.runner.rig.resources,
   ].some((cardId) => definitionFor(state, cardId).id === definitionId);
-}
-
-function runnerHqAccessBonus(state: GameState): number {
-  return quoteAccessCountModifiers(state, "hq").amount;
-}
-
-function isBreachEntryHidden(
-  state: GameState,
-  cardId: CardInstanceId,
-): boolean {
-  const instance = mustInstance(state.cardInstances, cardId);
-  if (state.corp.archives.includes(cardId)) return !instance.faceup;
-  return !instance.rezzed && !instance.faceup;
-}
-
-function randomHqAccessQueue(
-  state: GameState,
-  runId: string,
-  accessCount: number,
-): CardInstanceId[] {
-  const available = state.corp.hq.slice();
-  const selected: CardInstanceId[] = [];
-  const limit = Math.min(accessCount, available.length);
-  for (let index = 0; index < limit; index += 1) {
-    const value = nextRandom(
-      state,
-      `hq_multiaccess:${runId}:selection:${index}`,
-    );
-    const selectedIndex = Math.floor(value * available.length);
-    const cardId = mustArrayValue(
-      available,
-      selectedIndex,
-      "HQ access selection missing.",
-    );
-    available.splice(selectedIndex, 1);
-    selected.push(cardId);
-  }
-  return selected;
 }
 
 function discardRandomCorpHqCards(
@@ -19394,6 +18772,22 @@ function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
   };
 }
 
+function breachStateHost(state: GameState): BreachStateHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+    },
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+    },
+    rng: {
+      nextRandom: (purpose) => nextRandom(state, purpose),
+    },
+  };
+}
+
 function accessFlowHost(state: GameState): AccessFlowHost {
   return {
     state,
@@ -19452,6 +18846,94 @@ function accessFlowHost(state: GameState): AccessFlowHost {
     },
     access: {
       installedRevealHelperCount: () => v1915InstalledRevealHelperIds(state).length,
+    },
+  };
+}
+
+function runAccessTransitionHost(state: GameState): RunAccessTransitionHost {
+  return {
+    state,
+    breach: breachStateHost(state),
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+    },
+    runner: {
+      ensureTurnFlags: () => ensureRunnerTurnFlags(state),
+    },
+    draw: {
+      drawCorpCards: (count) => drawCorpCards(state, count),
+    },
+    rng: {
+      shuffleStateIds: (ids, purpose) => shuffleStateIds(state, ids, purpose),
+    },
+    access: {
+      advanceArchivesBreachPastNonDecisionCards: (legalAction) =>
+        advanceArchivesBreachPastNonDecisionCards(
+          accessFlowHost(state),
+          legalAction,
+        ),
+      findMicrotechAiInterfacePreAccessSource: (run) => {
+        if (run.microtechAiInterfacePreAccessResolved) return undefined;
+        const accessServerId = run.accessServerOverride ?? run.attackedServerId;
+        if (accessServerId !== "rd") return undefined;
+        return runnerInstalledCardIds(state)
+          .slice()
+          .sort()
+          .find((cardId) =>
+            cardImplementationForDefinitionId(definitionFor(state, cardId).id)
+              ?.accessHooks?.some((hook) => hook.kind === "pre_access_rd_cut"),
+          );
+      },
+      isMicrotechAiInterfacePreAccessSource: (cardId) =>
+        runnerInstalledCardIds(state).includes(cardId) &&
+        Boolean(
+          cardImplementationForDefinitionId(definitionFor(state, cardId).id)
+            ?.accessHooks?.some((hook) => hook.kind === "pre_access_rd_cut"),
+        ),
+      startRunnerPrivateLookChoice: (
+        sourceCardId,
+        sourceDefinitionId,
+        zone,
+        count,
+        reason,
+        legalAction,
+      ) =>
+        startRunnerPrivateLookChoice(
+          state,
+          sourceCardId,
+          sourceDefinitionId,
+          zone,
+          count,
+          reason,
+          legalAction,
+        ),
+    },
+    run: {
+      isV097OrLater: () => isV097OrLater(state),
+      finishRun: (successful, legalAction) =>
+        finishRun(state, successful, legalAction),
+      applyUniqueDirectSuccessfulRunTriggers: (legalAction) =>
+        applyUniqueDirectSuccessfulRunTriggers(state, legalAction),
+      successfulRunInterventionKindForSource: (sourceCardId) => {
+        const window = fortRunWindowImplementationsForDefinition(
+          definitionFor(state, sourceCardId).id,
+        ).find(
+          (candidate) =>
+            candidate.kind ===
+              "temporary_hq_ice_encounter_after_successful_run" ||
+            candidate.kind === "install_hq_ice_innermost_after_successful_run",
+        );
+        return window?.kind as SuccessfulRunInterventionKind | undefined;
+      },
+      successfulRunInterventionCost: (kind, serverId, hqIceId) => {
+        if (kind === "temporary_hq_ice_encounter_after_successful_run")
+          return Math.max(0, Math.floor(rezCostForCard(state, hqIceId) / 2));
+        return Math.max(0, Math.floor(mustServer(state, serverId).ice.length));
+      },
+    },
+    choices: {
+      selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
     },
   };
 }
@@ -19806,7 +19288,11 @@ function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_33.priority_wreck")) {
-    resolvePriorityWreckSpendChoice(state, legalAction, playerAction);
+    resolvePriorityWreckSpendChoice(
+      runAccessTransitionHost(state),
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_33.private_look")) {
@@ -19814,7 +19300,11 @@ function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_33.microtech_ai_interface")) {
-    resolveMicrotechAiInterfacePreAccessChoice(state, legalAction, playerAction);
+    resolveMicrotechAiInterfacePreAccessChoice(
+      runAccessTransitionHost(state),
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_34.distribute_advancement")) {
@@ -21273,7 +20763,12 @@ function resolveSuccessfulRunInterventionChoice(
   const server = mustServer(state, run.attackedServerId);
   if (!server.root.includes(sourceCardId) || !mustInstance(state.cardInstances, sourceCardId).rezzed)
     throw new Error("Die Delayed-Success-Quelle ist nicht mehr gueltig.");
-  if (successfulRunInterventionKindForSource(state, sourceCardId) !== kind)
+  const transitionHost = runAccessTransitionHost(state);
+  const interventionKind = kind as SuccessfulRunInterventionKind;
+  if (
+    transitionHost.run.successfulRunInterventionKindForSource(sourceCardId) !==
+    interventionKind
+  )
     throw new Error("Die Delayed-Success-Quelle passt nicht zur Karte.");
   const used = run.successfulRunInterventionUsedSourceIds ?? [];
   if (used.includes(sourceCardId))
@@ -21294,7 +20789,7 @@ function resolveSuccessfulRunInterventionChoice(
       sourceCardId,
       serverId: run.attackedServerId,
     };
-    enterAccess(state, legalAction);
+    enterAccessFromSuccessfulRun(transitionHost, legalAction);
     return;
   }
 
@@ -21303,7 +20798,11 @@ function resolveSuccessfulRunInterventionChoice(
     throw new Error("Das gewaehlte HQ-ICE ist nicht mehr in HQ.");
   if (definitionFor(state, hqIceId).type !== "ice")
     throw new Error("Delayed Success darf nur ICE aus HQ waehlen.");
-  const cost = successfulRunInterventionCost(state, kind, server, hqIceId);
+  const cost = transitionHost.run.successfulRunInterventionCost(
+    interventionKind,
+    server.id,
+    hqIceId,
+  );
   spendCredits(state, "corp", cost);
   removeFromAllZones(state, hqIceId);
   server.ice.unshift(hqIceId);
