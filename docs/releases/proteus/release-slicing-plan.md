@@ -26,6 +26,7 @@ Aktuelle Basis:
 - Statusverteilung: 17 `covered`, 56 `resolver`, 80 `deepen`, 1 `blocked`.
 - Proteus Phase 1a ist umgesetzt: fünf Reuse-only-Baseline-Karten sind `implemented`, `engine_supported`, `playable` und `human_playable` (`Toughonium™ Wall`, `Networked Center`, `Research Bunker`, `Weapons Depot`, `Streetware Distributor`).
 - Proteus Phase 1b ist umgesetzt: `Minotaur` und `Riddler` sind über eigene CardImplementation-Dateien, generische öffentliche Additional-Subroutine-Bausteine und ein generisches `corp_encounter`-Aktivierungsfenster `implemented`, `engine_supported`, `playable` und `human_playable`. Es wurden keine neuen Proteus-ID-Branches in `packages/engine/src/index.ts`, UI, Catalog oder KI ergänzt; der vorbestehende Digiconda-/Food-Fight-Harness bleibt als Phase-3-Schuld gesondert zu migrieren.
+- Proteus Phase 1c ist blockiert: `Emergency Rig` verlangt laut lokaler Quelle eine positive, aber unbegrenzte `X`-Auswahl für Kludge-Counter ohne Kosten- oder Wertbezug. Der Blocker ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md` dokumentiert; `Rent-to-Own Contract` wird nicht separat aus dem gemeinsamen Slice promotet.
 - Alle übrigen Proteus-Karten bleiben blockiert. Keine Proteus-Karte ist `deck_legal`, `format_legal` oder `ai_supported`.
 - Proteus wird nicht als Großrelease freigegeben. Jede Karte braucht einen eigenen Resolver-/Manifest-/Szenario-/Visibility-/Replay-/StateHash-Nachweis.
 

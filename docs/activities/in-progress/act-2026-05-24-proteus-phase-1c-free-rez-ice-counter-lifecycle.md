@@ -1,20 +1,22 @@
 ---
 activityId: act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle
-status: inbox
-kind: concept
+status: blocked
+kind: implementation
 area: cards
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
-startedAt:
+startedAt: 2026-05-24
 completedAt:
-branch:
+branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1c
 blockedBy:
-  - act-2026-05-24-proteus-phase-1a-reuse-only-baseline
-resultArtifacts: []
-checks: []
+  - rule-source-clarification-emergency-rig-x
+resultArtifacts:
+  - docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md
+checks:
+  - Lokale Quellenprüfung `data/cards/proteus-cards.json` für `Emergency Rig` und `Rent-to-Own Contract`
 ---
 
 # Proteus Phase 1c: Free Rez and ICE Counter Lifecycle
@@ -78,6 +80,17 @@ Die beiden Korp-Operationen `Emergency Rig` und `Rent-to-Own Contract` als gemei
 - Diese Familie ist ein guter Vorlauf für spätere Proteus-Counter, darf aber keine Virus-/Antibody-Semantik vorwegnehmen.
 - Wenn `X` für `Emergency Rig` eine Regellücke bleibt, zuerst eine Regelklärungsnotiz anlegen und die Karte nicht als umgesetzt markieren.
 
-## Ergebnisnotiz
+## Blocker
 
-Noch offen.
+Blockiert am 2026-05-24.
+
+`Emergency Rig` kann aus den lokalen Proteus-Quellen nicht legal-action-stabil umgesetzt werden. Der importierte Text lautet: "Rez a piece of ice, at no cost. Put X Kludge counters on that piece of ice; X cannot be 0. At the start of each of your turns, remove a Kludge counter. Trash that piece of ice when the last Kludge counter is removed from it."
+
+Damit ist nur bekannt, dass `X` positiv sein muss. Es fehlt eine Obergrenze, ein Kostenbezug oder ein anderer Auswahlvertrag. Eine unbeschränkte positive Integer-Choice würde entweder unendlich viele `LegalActions` erzeugen oder eine clientgelieferte Zahl ohne belastbare Regelgrenze in `applyAction` akzeptieren. Beides verletzt LegalAction-Projektion, Revalidierung, Replay/StateHash-Stabilität und das Phase-1-Gate.
+
+`Rent-to-Own Contract` wirkt für sich aus dem lokalen Text umsetzbar, wird aber in diesem Slice nicht isoliert promotet, weil die Activity ausdrücklich beide Operationen als gemeinsame Free-Rez-/Named-Counter-Familie fordert und die Akzeptanzkriterien beide per-card Implementierungen verlangen.
+
+Entblockung:
+
+- Lokale Regel-/Quellenentscheidung für `Emergency Rig` dokumentieren: Was begrenzt `X`, kostet `X` Credits oder ist `X` an einen öffentlichen Wert gebunden?
+- Danach den Slice erneut claimen und die gemeinsame generische Familie für Free-Rez, Named-ICE-Counter und Start-of-Corp-turn-Counter-Lifecycle umsetzen.

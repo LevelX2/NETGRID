@@ -42,6 +42,8 @@ Führend für Phase 1 bleibt `phase-1-slice-handoff-2026-05-24.md`. Die Phase wa
 
 Status 2026-05-24: Phase 1a ist umgesetzt und dokumentiert in `docs/activities/done/act-2026-05-24-proteus-phase-1a-reuse-only-baseline.md`. Phase 1b ist umgesetzt und dokumentiert in `docs/activities/done/act-2026-05-24-proteus-phase-1b-dynamic-public-etr-ice.md`. Die sieben Zielkarten aus 1a und 1b sind `human_playable`; Decklegalität, Formatlegalität und AI-Support bleiben unverändert aus. Phase 1b hat generische öffentliche Additional-Subroutine-Modifier und ein generisches `corp_encounter`-Aktivierungsfenster ergänzt, ohne neue Proteus-ID-Branches einzuführen.
 
+Blocker 2026-05-24: Phase 1c ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md` blockiert. `Emergency Rig` hat im lokalen Proteus-Text eine positive, aber unbegrenzte `X`-Auswahl für Kludge-Counter ohne Kosten- oder Wertbezug. Bis zur Quellen-/Regelentscheidung wird auch `Rent-to-Own Contract` nicht isoliert aus diesem gemeinsamen Slice promotet.
+
 Activity-Zuschnitt: Die bestehenden Phase-1a bis Phase-1g Activities sind die kleinsten Umsetzungseinheiten. Das alte Phase-1-Sammelpaket bleibt blockiert/ersetzt.
 
 ## Phase 2: Bad Publicity
