@@ -98,6 +98,6 @@ Karten in Runner-Heap und Korp-Archiv sollen auf dem Board klar als abgelegte, d
 
 - `CardView` unterstützt jetzt `inactiveZone="heap" | "archives"` und setzt daraus eine getrennte CSS-Klasse, ein `data-inactive-zone`-Attribut, einen sichtbaren Badge mit `Trash2` beziehungsweise `Clipboard` und einen ARIA-Zusatz wie `im Heap abgelegt` oder `im Archiv abgelegt`.
 - Runner-Heap-Karten in eigener und gegnerischer Sicht sowie faceup Archivkarten erhalten den neuen Ablagezustand. Aus Korp-Sicht lesbare facedown Archivkarten erhalten ihn ebenfalls; echte Kartenrückseiten blenden den Badge aus.
-- Die Optik nutzt eine matte Abdunklung und ein horizontales Ablageband statt der diagonalen Unrezzed-Schraffur. Nicht gerezzte installierte Korp-Karten behalten den bestehenden gestrichelten `unrezzedInstalled`-Zustand.
+- Die Optik nutzt eine transparente, vollflächige Abdunklung mit zentralem Symbol-/Label-Badge statt unterem Balken oder diagonaler Unrezzed-Schraffur. Nicht gerezzte installierte Korp-Karten behalten den bestehenden gestrichelten `unrezzedInstalled`-Zustand.
 - Verifikation: fokussierter Helper-Test, Web-Vitest-Lauf, Web-Typecheck, CSS-basierter Playwright-Smoke für Heap/Archiv/Unrezzed/Verschleierung und `git diff --check`.
 - Offene Punkte: keine.
