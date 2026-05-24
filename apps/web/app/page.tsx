@@ -133,6 +133,7 @@ import {
   baseActionSlotCapacity,
   breachProgressLabel,
   cardCreditCounterVisual,
+  cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   counterDisplaysForRendering,
   clampCuePosition,
@@ -266,6 +267,8 @@ const MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
 const LEGACY_MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
 const RUN_OVERLAY_POSITION_STORAGE_KEY = "netgrid.runOverlayPosition.v1";
 const LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY = "netgrid.runOverlayPosition.v1";
+const ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY = "netgrid.actionPanelOverlayPosition.v1";
+const LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY = "netgrid.actionPanelOverlayPosition.v1";
 const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
 const DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
 const LEGACY_DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
@@ -313,6 +316,7 @@ type CardDisplayMode = "placeholder" | "text-card" | "compact";
 type ChronicleDetailMode = "simple" | "medium" | "full";
 type ColorScheme = "black" | "white";
 type ResourceStripMode = "auto" | "on" | "off";
+type ActionPanelMode = "docked" | "floating";
 type EntryTab = "play" | "catalog" | "decks" | "options";
 type ActiveMatchWorkspace = "game" | "catalog" | "decks" | "options";
 type DeckSideFilter = Side | "all";
@@ -811,6 +815,10 @@ function normalizeAiPacingMode(value: unknown): AiPacingMode {
 
 function normalizeResourceStripMode(value: unknown): ResourceStripMode {
   return value === "auto" || value === "on" || value === "off" ? value : "auto";
+}
+
+function normalizeActionPanelMode(value: unknown): ActionPanelMode {
+  return value === "floating" ? "floating" : "docked";
 }
 
 function normalizeCardScalePercent(value: unknown, min = CARD_SCALE_PERCENT_MIN, max = CARD_SCALE_PERCENT_MAX): number {
@@ -2014,6 +2022,12 @@ export default function Page() {
   const [priorityWindowHoldEnabled, setPriorityWindowHoldEnabled] = useState(false);
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
   const [resourceStripMode, setResourceStripMode] = useState<ResourceStripMode>("auto");
+  const [actionPanelMode, setActionPanelMode] = useState<ActionPanelMode>("docked");
+  const [actionPanelOverlayPosition, setActionPanelOverlayPosition] = useState<RunOverlayPositionPreference>(() =>
+    typeof window === "undefined"
+      ? { kind: "default" }
+      : parseRunOverlayPositionPreference(readLocalStorageWithLegacy(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY))
+  );
   const [topbarHeightPx, setTopbarHeightPx] = useState(0);
   const [statusPanelsVisible, setStatusPanelsVisible] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
@@ -2360,13 +2374,14 @@ export default function Page() {
     const stored = readLocalStorageWithLegacy(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { autoCorpMandatoryDrawEnabled?: unknown; autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; priorityWindowHoldEnabled?: unknown; topbarStickyEnabled?: unknown; resourceStripMode?: unknown };
+        const parsed = JSON.parse(stored) as { autoCorpMandatoryDrawEnabled?: unknown; autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; priorityWindowHoldEnabled?: unknown; topbarStickyEnabled?: unknown; resourceStripMode?: unknown; actionPanelMode?: unknown };
         if (typeof parsed.autoCorpMandatoryDrawEnabled === "boolean") setAutoCorpMandatoryDrawEnabled(parsed.autoCorpMandatoryDrawEnabled);
         if (typeof parsed.autoEndTurnEnabled === "boolean") setAutoEndTurnEnabled(parsed.autoEndTurnEnabled);
         if (typeof parsed.autoDiscardEnabled === "boolean") setAutoDiscardEnabled(parsed.autoDiscardEnabled);
         if (typeof parsed.priorityWindowHoldEnabled === "boolean") setPriorityWindowHoldEnabled(parsed.priorityWindowHoldEnabled);
         if (typeof parsed.topbarStickyEnabled === "boolean") setTopbarStickyEnabled(parsed.topbarStickyEnabled);
         setResourceStripMode(normalizeResourceStripMode(parsed.resourceStripMode));
+        setActionPanelMode(normalizeActionPanelMode(parsed.actionPanelMode));
       } catch {
         removeLocalStorageKeys(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
       }
@@ -2376,8 +2391,12 @@ export default function Page() {
 
   useEffect(() => {
     if (!gameplaySettingsLoaded) return;
-    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode }));
-  }, [gameplaySettingsLoaded, autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode]);
+    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode, actionPanelMode }));
+  }, [gameplaySettingsLoaded, autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode, actionPanelMode]);
+
+  useEffect(() => {
+    window.localStorage.setItem(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, serializeRunOverlayPositionPreference(actionPanelOverlayPosition));
+  }, [actionPanelOverlayPosition]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
@@ -2880,6 +2899,12 @@ export default function Page() {
   const runActions = useMemo(() => (activeView ? runWindowActions(activeView, payload?.legalActions ?? []) : []), [activeView, payload?.legalActions]);
   const selectedPanelContext = selectedActionContext?.kind === "server" ? selectedActionContext : null;
   const selectedPanelContextActions = selectedPanelContext ? legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, selectedPanelContext)) : [];
+  const runActionIds = new Set(runActions.map((action) => action.actionId));
+  const floatingPanelPrimaryActions = activeView?.run ? legalActionSplit.primaryActions.filter((action) => !runActionIds.has(action.actionId)) : legalActionSplit.primaryActions;
+  const floatingPanelContextualActions = activeView?.run ? selectedPanelContextActions.filter((action) => !runActionIds.has(action.actionId)) : selectedPanelContextActions;
+  const floatingPanelNeededDuringRun = Boolean(activeView?.run && (activeView.pendingChoice || floatingPanelPrimaryActions.length > 0 || floatingPanelContextualActions.length > 0));
+  const showFloatingActionPanel = Boolean(activeMatchIsGame && activeView && actionPanelMode === "floating" && (!activeView.run || floatingPanelNeededDuringRun));
+  const floatingPanelHasHiddenContextActions = Boolean(!activeView?.run && legalActionSplit.contextualActions.length > 0 && selectedActionContext?.kind !== "card");
   const cardActionsFor = (card: VisibleCard): LegalAction[] => {
     if (!card.known) return [];
     return orderedCardContextActions(
@@ -2912,6 +2937,7 @@ export default function Page() {
     "app",
     "activeMatch",
     topbarStickyEnabled ? "" : "topbarStickyDisabled",
+    actionPanelMode === "floating" ? "actionPanelFloatingMode" : "",
     `resourceStrip-${resourceStripMode}`,
     resourceStripVisible ? "resourceStripVisible" : ""
   ].filter(Boolean).join(" ");
@@ -5006,6 +5032,7 @@ export default function Page() {
               autoEndTurnEnabled={autoEndTurnEnabled}
               topbarStickyEnabled={topbarStickyEnabled}
               resourceStripMode={resourceStripMode}
+              actionPanelMode={actionPanelMode}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
               cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -5029,6 +5056,7 @@ export default function Page() {
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onTopbarStickyEnabled={setTopbarStickyEnabled}
               onResourceStripMode={setResourceStripMode}
+              onActionPanelMode={setActionPanelMode}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -5182,6 +5210,39 @@ export default function Page() {
           onAction={submitAction}
         />
       ) : null}
+      {showFloatingActionPanel && activeView ? (
+        <FloatingActionPanelOverlay
+          position={actionPanelOverlayPosition}
+          onPosition={setActionPanelOverlayPosition}
+          onDock={() => setActionPanelMode("docked")}
+        >
+          <LegalActionsPanel
+            view={activeView}
+            primaryActions={floatingPanelPrimaryActions}
+            contextualActions={floatingPanelContextualActions}
+            selectedContext={selectedPanelContext}
+            hasHiddenContextActions={floatingPanelHasHiddenContextActions}
+            cardContextActive={selectedActionContext?.kind === "card"}
+            hiddenContextHint={hiddenContextHint}
+            actionCapacities={actionSlotCapacities}
+            priorityWindowHoldEnabled={priorityWindowHoldEnabled}
+            {...(aiTurnPresentation?.activeAiSide ? { activeAiSide: aiTurnPresentation.activeAiSide } : {})}
+            disabled={Boolean(payload.winner) || connection !== "online"}
+            highlighted={hasDecisionCue}
+            selectedDiscardOptionIds={selectedDiscardOptionIds}
+            selectedFieldCardChoiceOptionIds={selectedFieldCardChoiceOptionIds}
+            onAction={submitAction}
+            onChoiceOption={submitChoiceOption}
+            onChoiceOptions={submitChoiceOptions}
+            onDiscardChoiceToggle={toggleDiscardOption}
+            onFieldCardChoiceClear={clearFieldCardChoiceSelection}
+            onPriorityWindowHoldEnabled={setPriorityWindowHoldEnabled}
+            enrichCard={enrichCard}
+            connection={connection}
+            onClearContext={() => setSelectedActionContext(null)}
+          />
+        </FloatingActionPanelOverlay>
+      ) : null}
       {activeMatchIsGame ? (
       <ScoredAgendaOverlay
         side="corp"
@@ -5254,31 +5315,40 @@ export default function Page() {
               onAdvance={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
             />
           ) : null}
-          <LegalActionsPanel
-            view={activeView}
-            primaryActions={legalActionSplit.primaryActions}
-            contextualActions={selectedPanelContextActions}
-            selectedContext={selectedPanelContext}
-            hasHiddenContextActions={legalActionSplit.contextualActions.length > 0 && selectedActionContext?.kind !== "card"}
-            cardContextActive={selectedActionContext?.kind === "card"}
-            hiddenContextHint={hiddenContextHint}
-            actionCapacities={actionSlotCapacities}
-            priorityWindowHoldEnabled={priorityWindowHoldEnabled}
-            {...(aiTurnPresentation?.activeAiSide ? { activeAiSide: aiTurnPresentation.activeAiSide } : {})}
-            disabled={Boolean(payload.winner) || connection !== "online"}
-            highlighted={hasDecisionCue}
-            selectedDiscardOptionIds={selectedDiscardOptionIds}
-            selectedFieldCardChoiceOptionIds={selectedFieldCardChoiceOptionIds}
-            onAction={submitAction}
-            onChoiceOption={submitChoiceOption}
-            onChoiceOptions={submitChoiceOptions}
-            onDiscardChoiceToggle={toggleDiscardOption}
-            onFieldCardChoiceClear={clearFieldCardChoiceSelection}
-            onPriorityWindowHoldEnabled={setPriorityWindowHoldEnabled}
-            enrichCard={enrichCard}
-            connection={connection}
-            onClearContext={() => setSelectedActionContext(null)}
-          />
+          {actionPanelMode === "floating" ? (
+            <ActionPanelDockPlaceholder
+              runActive={Boolean(activeView.run)}
+              floatingVisible={showFloatingActionPanel}
+              onDock={() => setActionPanelMode("docked")}
+            />
+          ) : (
+            <LegalActionsPanel
+              view={activeView}
+              primaryActions={legalActionSplit.primaryActions}
+              contextualActions={selectedPanelContextActions}
+              selectedContext={selectedPanelContext}
+              hasHiddenContextActions={legalActionSplit.contextualActions.length > 0 && selectedActionContext?.kind !== "card"}
+              cardContextActive={selectedActionContext?.kind === "card"}
+              hiddenContextHint={hiddenContextHint}
+              actionCapacities={actionSlotCapacities}
+              priorityWindowHoldEnabled={priorityWindowHoldEnabled}
+              {...(aiTurnPresentation?.activeAiSide ? { activeAiSide: aiTurnPresentation.activeAiSide } : {})}
+              disabled={Boolean(payload.winner) || connection !== "online"}
+              highlighted={hasDecisionCue}
+              selectedDiscardOptionIds={selectedDiscardOptionIds}
+              selectedFieldCardChoiceOptionIds={selectedFieldCardChoiceOptionIds}
+              onAction={submitAction}
+              onChoiceOption={submitChoiceOption}
+              onChoiceOptions={submitChoiceOptions}
+              onDiscardChoiceToggle={toggleDiscardOption}
+              onFieldCardChoiceClear={clearFieldCardChoiceSelection}
+              onPriorityWindowHoldEnabled={setPriorityWindowHoldEnabled}
+              onFloatPanel={() => setActionPanelMode("floating")}
+              enrichCard={enrichCard}
+              connection={connection}
+              onClearContext={() => setSelectedActionContext(null)}
+            />
+          )}
           <PlayerPanel
             view={activeView}
             title={`Du · ${sideLabel(activeView.side)}`}
@@ -5851,6 +5921,7 @@ export default function Page() {
               autoEndTurnEnabled={autoEndTurnEnabled}
               topbarStickyEnabled={topbarStickyEnabled}
               resourceStripMode={resourceStripMode}
+              actionPanelMode={actionPanelMode}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
               cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -5875,6 +5946,7 @@ export default function Page() {
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onTopbarStickyEnabled={setTopbarStickyEnabled}
               onResourceStripMode={setResourceStripMode}
+              onActionPanelMode={setActionPanelMode}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -5939,6 +6011,7 @@ export default function Page() {
             autoEndTurnEnabled={autoEndTurnEnabled}
             topbarStickyEnabled={topbarStickyEnabled}
             resourceStripMode={resourceStripMode}
+            actionPanelMode={actionPanelMode}
             audioEnabled={audioEnabled}
             audioVolume={audioVolume}
             cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -5964,6 +6037,7 @@ export default function Page() {
             onAutoEndTurnEnabled={setAutoEndTurnEnabled}
             onTopbarStickyEnabled={setTopbarStickyEnabled}
             onResourceStripMode={setResourceStripMode}
+            onActionPanelMode={setActionPanelMode}
             onAudioEnabled={updateAudioEnabled}
             onAudioVolume={setAudioVolume}
             onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -6662,6 +6736,7 @@ function OptionsPanel({
   autoEndTurnEnabled,
   topbarStickyEnabled,
   resourceStripMode,
+  actionPanelMode,
   audioEnabled,
   audioVolume,
   cardTooltipHoverDelayMs,
@@ -6687,6 +6762,7 @@ function OptionsPanel({
   onAutoEndTurnEnabled,
   onTopbarStickyEnabled,
   onResourceStripMode,
+  onActionPanelMode,
   onAudioEnabled,
   onAudioVolume,
   onCardTooltipHoverDelayMs,
@@ -6713,6 +6789,7 @@ function OptionsPanel({
   autoEndTurnEnabled: boolean;
   topbarStickyEnabled: boolean;
   resourceStripMode: ResourceStripMode;
+  actionPanelMode: ActionPanelMode;
   audioEnabled: boolean;
   audioVolume: number;
   cardTooltipHoverDelayMs: CardTooltipHoverDelayMs;
@@ -6738,6 +6815,7 @@ function OptionsPanel({
   onAutoEndTurnEnabled(value: boolean): void;
   onTopbarStickyEnabled(value: boolean): void;
   onResourceStripMode(value: ResourceStripMode): void;
+  onActionPanelMode(value: ActionPanelMode): void;
   onAudioEnabled(value: boolean): void;
   onAudioVolume(value: number): void;
   onCardTooltipHoverDelayMs(value: CardTooltipHoverDelayMs): void;
@@ -6793,11 +6871,13 @@ function OptionsPanel({
           autoEndTurnEnabled={autoEndTurnEnabled}
           topbarStickyEnabled={topbarStickyEnabled}
           resourceStripMode={resourceStripMode}
+          actionPanelMode={actionPanelMode}
           onAutoCorpMandatoryDrawEnabled={onAutoCorpMandatoryDrawEnabled}
           onAutoDiscardEnabled={onAutoDiscardEnabled}
           onAutoEndTurnEnabled={onAutoEndTurnEnabled}
           onTopbarStickyEnabled={onTopbarStickyEnabled}
           onResourceStripMode={onResourceStripMode}
+          onActionPanelMode={onActionPanelMode}
         />
         <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
         <ActionCueSettings
@@ -7084,22 +7164,26 @@ function GameplaySettings({
   autoEndTurnEnabled,
   topbarStickyEnabled,
   resourceStripMode,
+  actionPanelMode,
   onAutoCorpMandatoryDrawEnabled,
   onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
   onTopbarStickyEnabled,
-  onResourceStripMode
+  onResourceStripMode,
+  onActionPanelMode
 }: {
   autoCorpMandatoryDrawEnabled: boolean;
   autoDiscardEnabled: boolean;
   autoEndTurnEnabled: boolean;
   topbarStickyEnabled: boolean;
   resourceStripMode: ResourceStripMode;
+  actionPanelMode: ActionPanelMode;
   onAutoCorpMandatoryDrawEnabled(value: boolean): void;
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
   onTopbarStickyEnabled(value: boolean): void;
   onResourceStripMode(value: ResourceStripMode): void;
+  onActionPanelMode(value: ActionPanelMode): void;
 }) {
   return (
     <div className="gameplaySettings">
@@ -7125,6 +7209,10 @@ function GameplaySettings({
             <input data-testid="sticky-topbar-toggle" type="checkbox" checked={topbarStickyEnabled} onChange={(event) => onTopbarStickyEnabled(event.target.checked)} />
             Kopfzeile fixieren
           </label>
+          <label className={`settingsToggle ${actionPanelMode === "floating" ? "checked" : ""}`}>
+            <input data-testid="floating-action-panel-toggle" type="checkbox" checked={actionPanelMode === "floating"} onChange={(event) => onActionPanelMode(event.target.checked ? "floating" : "docked")} />
+            Aktionsfenster schwebend
+          </label>
         </div>
       </div>
       <div className="resourceStripSettings">
@@ -7137,7 +7225,7 @@ function GameplaySettings({
           ))}
         </div>
       </div>
-      <p className="settingsHelp">Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch, wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar. Der Spielstandsstreifen zeigt Credits, Agenda-Punkte und aktuelle Aktionen platzsparend über dem Spielfeld.</p>
+      <p className="settingsHelp">Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch, wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar. Das schwebende Aktionsfenster zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Der Spielstandsstreifen zeigt Credits, Agenda-Punkte und aktuelle Aktionen platzsparend über dem Spielfeld.</p>
     </div>
   );
 }
@@ -8119,6 +8207,133 @@ function runHiddenContextActionHint(view: PlayerView, contextualActions: LegalAc
   return `Eisbrecher verfügbar: Wähle den passenden Eisbrecher im Rig für Aktionen gegen ${target}.`;
 }
 
+function FloatingActionPanelOverlay({
+  position,
+  onPosition,
+  onDock,
+  children
+}: {
+  position: RunOverlayPositionPreference;
+  onPosition(position: RunOverlayPositionPreference): void;
+  onDock(): void;
+  children: ReactNode;
+}) {
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (position.kind !== "custom") return;
+    const clampToViewport = () => {
+      const overlay = overlayRef.current;
+      if (!overlay) return;
+      const rect = overlay.getBoundingClientRect();
+      const next = clampRunOverlayPosition(position.xPercent, position.yPercent, window.innerWidth, window.innerHeight, rect.width, rect.height);
+      if (next.kind !== "custom" || next.xPercent !== position.xPercent || next.yPercent !== position.yPercent) onPosition(next);
+    };
+    clampToViewport();
+    window.addEventListener("resize", clampToViewport);
+    return () => window.removeEventListener("resize", clampToViewport);
+  }, [position, onPosition]);
+
+  const startDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    const rect = overlay.getBoundingClientRect();
+    dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const dragOverlay = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const overlay = overlayRef.current;
+    const offset = dragOffsetRef.current;
+    if (!overlay || !offset) return;
+    const rect = overlay.getBoundingClientRect();
+    onPosition(
+      clampRunOverlayPosition(
+        ((event.clientX - offset.x) / window.innerWidth) * 100,
+        ((event.clientY - offset.y) / window.innerHeight) * 100,
+        window.innerWidth,
+        window.innerHeight,
+        rect.width,
+        rect.height
+      )
+    );
+  };
+  const stopDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    dragOffsetRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+  const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
+
+  const overlay = (
+    <div ref={overlayRef} className={`actionPanelFloatingOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} data-testid="floating-legal-actions">
+      <section className="actionPanelFloatingWindow" aria-label="Mögliche Aktionen">
+        <div
+          className="actionPanelFloatingHead actionPanelFloatingDragHandle"
+          onPointerDown={startDrag}
+          onPointerMove={dragOverlay}
+          onPointerUp={stopDrag}
+          onPointerCancel={stopDrag}
+          title="Aktionsfenster verschieben"
+          aria-label="Aktionsfenster verschieben"
+        >
+          <div className="actionPanelFloatingTitle">
+            <Zap size={16} aria-hidden="true" />
+            <strong>Mögliche Aktionen</strong>
+          </div>
+          <div className="actionPanelFloatingControls">
+            <Move size={14} aria-hidden="true" />
+            <button
+              className="button iconOnly"
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={onDock}
+              aria-label="Aktionsfenster andocken"
+              title="Aktionsfenster andocken"
+            >
+              <PanelTopClose size={14} />
+            </button>
+          </div>
+        </div>
+        <div className="actionPanelFloatingBody">{children}</div>
+      </section>
+    </div>
+  );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(overlay, document.body);
+}
+
+function ActionPanelDockPlaceholder({
+  runActive,
+  floatingVisible,
+  onDock
+}: {
+  runActive: boolean;
+  floatingVisible: boolean;
+  onDock(): void;
+}) {
+  return (
+    <section className="section actionPanelDockPlaceholder" data-testid="legal-actions-dock-placeholder">
+      <div className="sectionTitleLine">
+        <h2>Mögliche Aktionen</h2>
+        <button className="button actionPanelDockButton" type="button" onClick={onDock} title="Aktionsfenster andocken">
+          <PanelTopClose size={14} />
+          Andocken
+        </button>
+      </div>
+      <p className="meta">{runActive && !floatingVisible ? "Run-Fenster aktiv." : "Schwebendes Aktionsfenster aktiv."}</p>
+    </section>
+  );
+}
+
+function ActionPanelFloatButton({ onFloat }: { onFloat(): void }) {
+  return (
+    <button className="priorityHoldToggle actionPanelFloatToggle" type="button" onClick={onFloat} aria-label="Aktionsfenster schweben lassen" title="Aktionsfenster schweben lassen">
+      <PanelTopOpen size={14} />
+    </button>
+  );
+}
+
 function LegalActionsPanel({
   view,
   primaryActions,
@@ -8140,6 +8355,7 @@ function LegalActionsPanel({
   onDiscardChoiceToggle,
   onFieldCardChoiceClear,
   onPriorityWindowHoldEnabled,
+  onFloatPanel,
   enrichCard,
   connection,
   onClearContext
@@ -8164,6 +8380,7 @@ function LegalActionsPanel({
   onDiscardChoiceToggle(optionId: string): void;
   onFieldCardChoiceClear(): void;
   onPriorityWindowHoldEnabled(enabled: boolean): void;
+  onFloatPanel?: (() => void) | undefined;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
   connection: "offline" | "connecting" | "online";
   onClearContext(): void;
@@ -8262,6 +8479,7 @@ function LegalActionsPanel({
         <div className="turnActionHeaderTop">
           <h2>{turnActionHeaderLabel(view, currentTurnSide, activeAiSide)}</h2>
           <PriorityWindowHoldToggle enabled={priorityWindowHoldEnabled} onToggle={onPriorityWindowHoldEnabled} />
+          {onFloatPanel ? <ActionPanelFloatButton onFloat={onFloatPanel} /> : null}
         </div>
         <div className={`actionAvailability side-${currentTurnSide}`} data-testid="action-availability">
           <span className="actionAvailabilityCount">{`noch ${currentTurnDisplay.available}`}</span>
@@ -8433,6 +8651,7 @@ function CardChoicePanel({
   const prompt = choice.prompt.trim();
   const effectHint = programInstallTrashInfo?.effectHint ?? cardChoiceEffectHint(choice);
   const readableCards = cardChoiceUsesReadableCards(choice);
+  const orderedSelection = cardChoiceUsesOrderedSelection(choice);
 
   useEffect(() => {
     setSelected([]);
@@ -8479,11 +8698,18 @@ function CardChoicePanel({
             <div className="cardChoiceOverlapRow" key={`choice-row-${rowIndex}`}>
               {row.map((option) => {
                 const active = selected.includes(option.id);
+                const selectionIndex = selected.indexOf(option.id);
                 const selectable = cardChoiceOptionSelectable(option);
                 const card = option.card ? enrichCard(option.card) : null;
                 const cardChoiceDisplayMode: CardDisplayMode = card?.imageUrl ? "placeholder" : "text-card";
+                const orderBadge = orderedSelection && selectionIndex >= 0 ? cardChoiceOrderBadge(choice, selectionIndex) : null;
                 return (
                   <div className={`cardChoiceOptionSlot ${active ? "selected" : ""}${selectable ? "" : " displayOnly"}`} key={option.id}>
+                    {orderBadge ? (
+                      <span className="cardChoiceOrderBadge" aria-label={orderBadge.ariaLabel} title={orderBadge.ariaLabel}>
+                        {orderBadge.label}
+                      </span>
+                    ) : null}
                     {card ? (
                       <CardView
                         card={card}
@@ -8523,7 +8749,7 @@ function CardChoicePanel({
           </div>
           <button className="button primary cardChoiceSubmit" onClick={() => onChoiceOptions(action, choice.choiceId, selected)} disabled={disabled || !canSubmit} type="button" data-testid="card-choice-submit">
             <Check size={15} />
-            {programInstallTrashInfo?.submitLabel ?? cardChoiceSubmitLabel(selected.length)}
+            {programInstallTrashInfo?.submitLabel ?? cardChoiceSubmitLabel(choice, selected.length)}
           </button>
         </footer>
       </div>
@@ -8549,6 +8775,8 @@ function cardChoiceRows(options: VisibleChoiceOption[]): VisibleChoiceOption[][]
 function cardChoiceTitle(choice: VisibleChoice): string {
   if (choice.cardSearchPresentation?.sourceZone === "heap") return "Heap durchsuchen";
   if (choice.cardSearchPresentation?.sourceZone === "stack") return "Stack durchsuchen";
+  if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) return "Stack-Spitze wählen und anordnen";
+  if (choice.source.includes("corp_rd_arrange")) return "R&D-Spitze anordnen";
   if (choice.source.includes("self_modifying_code_free_mu")) return "MU freimachen";
   if (choice.source.includes("sneak_preview_source")) return "Quelle wählen";
   if (choice.source.includes("sneak_preview_heap_install")) return "Heap durchsuchen";
@@ -8566,20 +8794,42 @@ function choiceSelectionRangeLabel(minSelections: number, maxSelections: number)
 function cardChoiceQuestion(choice: VisibleChoice, selectedOptions: VisibleChoiceOption[]): string {
   if (selectedOptions.length === 0) return choice.source.includes("sneak_preview_source") ? "Noch keine Quelle gewählt." : "Noch keine Karte gewählt.";
   if (choice.source.includes("sneak_preview_source")) return "Diese Quelle für Sneak Preview verwenden?";
+  if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) {
+    const firstTitle = selectedOptions[0]?.card?.title ?? selectedOptions[0]?.label;
+    if (selectedOptions.length < choice.maxSelections) return `${firstTitle} wird in den Grip genommen.`;
+    return `${firstTitle} in den Grip nehmen und den Rest anordnen?`;
+  }
+  if (cardChoiceUsesOrderedSelection(choice)) return `${selectedOptions.length} Karten in dieser Reihenfolge übernehmen?`;
   if (choice.cardSearchPresentation || choice.source.includes("search_stack")) {
     return selectedOptions.length === 1 ? "Diese Auswahl für den Sucheffekt übernehmen?" : `${selectedOptions.length} Karten für den Sucheffekt übernehmen?`;
   }
   return selectedOptions.length === 1 ? "Diese Auswahl übernehmen?" : `${selectedOptions.length} Karten übernehmen?`;
 }
 
-function cardChoiceSubmitLabel(selectedCount: number): string {
+function cardChoiceSubmitLabel(choice: VisibleChoice, selectedCount: number): string {
+  if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) return "Karte nehmen und anordnen";
+  if (cardChoiceUsesOrderedSelection(choice)) return "Reihenfolge übernehmen";
   if (selectedCount <= 1) return "Auswahl übernehmen";
   return `${selectedCount} Karten übernehmen`;
+}
+
+function cardChoiceOrderBadge(choice: VisibleChoice, selectionIndex: number): { label: string; ariaLabel: string } {
+  if (isRunnerStackTopChooseOneArrangeRestChoice(choice) && selectionIndex === 0) {
+    return { label: "Grip", ariaLabel: "Erste Auswahl: in den Grip nehmen" };
+  }
+  const position = selectionIndex + 1;
+  return {
+    label: String(position),
+    ariaLabel: `Auswahlposition ${position}`,
+  };
 }
 
 function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   const presentation = choice.cardSearchPresentation;
   const resolution = presentation ?? choice.stackSearchResolution;
+  if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) {
+    return "Die erste gewählte Karte geht in den Grip; danach bilden die übrigen gewählten Karten in Auswahlreihenfolge die neue Stack-Spitze.";
+  }
   if (choice.source.includes("self_modifying_code_free_mu")) {
     return "Die gewählten installierten Programme werden getrasht; danach wird das vorgezeigte Programm installiert.";
   }
@@ -8594,9 +8844,17 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   if (resolution?.destination === "grip") {
     return `Die gewählte Karte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}in den Grip genommen${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}.`;
   }
+  if (choice.source.includes("corp_rd_arrange")) return "Die gewählte Reihenfolge wird für die R&D-Spitze übernommen.";
   if (choice.source.includes("arrange_stack")) return "Die gewählte Reihenfolge wird für den Stack übernommen.";
   if (choice.source.includes("search_trash")) return "Die gewählte Karte wird aus dem Heap in den Grip genommen.";
   return null;
+}
+
+function isRunnerStackTopChooseOneArrangeRestChoice(choice: VisibleChoice): boolean {
+  return (
+    choice.source.startsWith("v1922.runner_stack_top5_choose_one_arrange_rest") ||
+    choice.source.startsWith("p3_37.runner_stack_top5_choose_one_arrange_rest")
+  );
 }
 
 function FieldCardChoicePanel({
