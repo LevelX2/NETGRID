@@ -505,6 +505,40 @@ export type AiMatchProgressionMetrics = {
   scoredAgendaActionValueOverBasic: number;
   basicCreditTakenWhileBetterAgendaEconomyAvailable: number;
   basicDrawTakenWhileBetterAgendaDrawAvailable: number;
+  corpNewRemoteCreated: number;
+  corpNewRemoteCreatedWithPlan: number;
+  corpNewRemoteCreatedWithoutPayloadPlan: number;
+  corpEmptyRemoteWithIceCreated: number;
+  corpEmptyRemoteStayedUnusedTurns: number;
+  corpRemoteConvertedToAgendaAssetOrBait: number;
+  corpRemoteConversionRate: number;
+  corpIceInstalledOnNewRemoteInsteadOfExistingScoringRemote: number;
+  corpExistingRemoteCouldBeStrengthened: number;
+  corpRemotePortfolioOverExpanded: number;
+  corpOneIceRemoteCheaplyContestable: number;
+  corpRemoteIceConsolidationOpportunity: number;
+  corpRemoteIceConsolidationTaken: number;
+  corpRemoteCreatedThenNoScorePath: number;
+  corpRemoteCreatedThenAgendaInstalledWithin3: number;
+  corpRemoteCreatedThenAssetInstalledWithin3: number;
+  corpRemoteCreatedThenBaitOrAmbushWithin3: number;
+  corpHqCardCount: number;
+  corpHqKnownAgendaCount: number;
+  corpHqAgendaDensity: number;
+  corpHqAgendaFloodRisk: number;
+  runnerHqAccessThreat: number;
+  runnerHqKnownAgendaThreat: number;
+  runnerHqMultiaccessThreat: number;
+  corpDrawWouldLikelyDiluteHq: number;
+  corpDrawWouldRiskAgendaFlood: number;
+  corpDrawChosenToDiluteAgendaFlood: number;
+  corpDrawSkippedBecauseAgendaFloodRisk: number;
+  corpAgendaRemovedFromHqToRemoteOrScore: number;
+  corpHqProtectionChosenOverDilution: number;
+  corpHqDilutionChosenBecauseNoSafeRemote: number;
+  corpHqDilutionBackfiredAgendaDrawn: number;
+  corpHqDensityReducedAfterDraw: number;
+  corpHqDensityIncreasedAfterDraw: number;
   advancedAgendaSteals: number;
   advancedAgendaStealsFromRemote: number;
   advancedAgendaStealsFromCentral: number;
@@ -4065,6 +4099,72 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.delta.basicCreditTakenWhileBetterAgendaEconomyAvailable,
     ],
     [
+      "corpNewRemoteCreated",
+      benchmark.baseline.corpNewRemoteCreated,
+      benchmark.candidate.corpNewRemoteCreated,
+      benchmark.delta.corpNewRemoteCreated,
+    ],
+    [
+      "corpNewRemoteCreatedWithoutPayloadPlan",
+      benchmark.baseline.corpNewRemoteCreatedWithoutPayloadPlan,
+      benchmark.candidate.corpNewRemoteCreatedWithoutPayloadPlan,
+      benchmark.delta.corpNewRemoteCreatedWithoutPayloadPlan,
+    ],
+    [
+      "corpRemoteConversionRate",
+      benchmark.baseline.corpRemoteConversionRate,
+      benchmark.candidate.corpRemoteConversionRate,
+      benchmark.delta.corpRemoteConversionRate,
+    ],
+    [
+      "corpRemoteIceConsolidationOpportunity",
+      benchmark.baseline.corpRemoteIceConsolidationOpportunity,
+      benchmark.candidate.corpRemoteIceConsolidationOpportunity,
+      benchmark.delta.corpRemoteIceConsolidationOpportunity,
+    ],
+    [
+      "corpRemoteIceConsolidationTaken",
+      benchmark.baseline.corpRemoteIceConsolidationTaken,
+      benchmark.candidate.corpRemoteIceConsolidationTaken,
+      benchmark.delta.corpRemoteIceConsolidationTaken,
+    ],
+    [
+      "corpRemotePortfolioOverExpanded",
+      benchmark.baseline.corpRemotePortfolioOverExpanded,
+      benchmark.candidate.corpRemotePortfolioOverExpanded,
+      benchmark.delta.corpRemotePortfolioOverExpanded,
+    ],
+    [
+      "corpHqAgendaDensity",
+      benchmark.baseline.corpHqAgendaDensity,
+      benchmark.candidate.corpHqAgendaDensity,
+      benchmark.delta.corpHqAgendaDensity,
+    ],
+    [
+      "corpHqAgendaFloodRisk",
+      benchmark.baseline.corpHqAgendaFloodRisk,
+      benchmark.candidate.corpHqAgendaFloodRisk,
+      benchmark.delta.corpHqAgendaFloodRisk,
+    ],
+    [
+      "runnerHqAccessThreat",
+      benchmark.baseline.runnerHqAccessThreat,
+      benchmark.candidate.runnerHqAccessThreat,
+      benchmark.delta.runnerHqAccessThreat,
+    ],
+    [
+      "corpDrawChosenToDiluteAgendaFlood",
+      benchmark.baseline.corpDrawChosenToDiluteAgendaFlood,
+      benchmark.candidate.corpDrawChosenToDiluteAgendaFlood,
+      benchmark.delta.corpDrawChosenToDiluteAgendaFlood,
+    ],
+    [
+      "corpDrawSkippedBecauseAgendaFloodRisk",
+      benchmark.baseline.corpDrawSkippedBecauseAgendaFloodRisk,
+      benchmark.candidate.corpDrawSkippedBecauseAgendaFloodRisk,
+      benchmark.delta.corpDrawSkippedBecauseAgendaFloodRisk,
+    ],
+    [
       "advanceThenScoreSameTurn",
       benchmark.baseline.advanceThenScoreSameTurn,
       benchmark.candidate.advanceThenScoreSameTurn,
@@ -7181,8 +7281,10 @@ function scoreCorpAction(
               : []),
           );
         } else {
-          const betterAgendaEconomy =
-            betterScoredAgendaEconomyAvailable(input, action);
+          const betterAgendaEconomy = betterScoredAgendaEconomyAvailable(
+            input,
+            action,
+          );
           const politicalOverthrowAvailable =
             politicalOverthrowEconomyAvailable(input, action);
           score = features.credits < 5 ? 500 : 350;
@@ -7245,9 +7347,7 @@ function scoreCorpAction(
 }
 
 function scoreCorpScoredAgendaAbility(
-  assessment: NonNullable<
-    ReturnType<typeof classifyCorpScoredAgendaAbility>
-  >,
+  assessment: NonNullable<ReturnType<typeof classifyCorpScoredAgendaAbility>>,
   features: AiFeatures,
 ): number {
   const lowCredits = features.credits < 5;
@@ -7308,9 +7408,9 @@ function betterScoredAgendaEconomyAvailable(
     const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
     return Boolean(
       scoredAgenda &&
-        (scoredAgenda.kind === "scored_agenda_economy" ||
-          scoredAgenda.kind === "scored_agenda_counter_economy") &&
-        scoredAgenda.netCredits > Math.max(1, scoredAgenda.clickCost),
+      (scoredAgenda.kind === "scored_agenda_economy" ||
+        scoredAgenda.kind === "scored_agenda_counter_economy") &&
+      scoredAgenda.netCredits > Math.max(1, scoredAgenda.clickCost),
     );
   });
 }
@@ -7324,9 +7424,9 @@ function betterScoredAgendaDrawAvailable(
     const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
     return Boolean(
       scoredAgenda &&
-        (scoredAgenda.kind === "scored_agenda_draw" ||
-          scoredAgenda.kind === "scored_agenda_shuffle_draw") &&
-        scoredAgenda.drawAmount > Math.max(1, scoredAgenda.clickCost),
+      (scoredAgenda.kind === "scored_agenda_draw" ||
+        scoredAgenda.kind === "scored_agenda_shuffle_draw") &&
+      scoredAgenda.drawAmount > Math.max(1, scoredAgenda.clickCost),
     );
   });
 }
@@ -7340,8 +7440,8 @@ function politicalOverthrowEconomyAvailable(
     const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
     return Boolean(
       scoredAgenda?.sourceDefinitionId === "onr_v1_210_political-overthrow" &&
-        scoredAgenda.kind === "scored_agenda_economy" &&
-        scoredAgenda.netCredits > Math.max(1, scoredAgenda.clickCost),
+      scoredAgenda.kind === "scored_agenda_economy" &&
+      scoredAgenda.netCredits > Math.max(1, scoredAgenda.clickCost),
     );
   });
 }
@@ -8853,6 +8953,40 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "scoredAgendaActionValueOverBasic",
   "basicCreditTakenWhileBetterAgendaEconomyAvailable",
   "basicDrawTakenWhileBetterAgendaDrawAvailable",
+  "corpNewRemoteCreated",
+  "corpNewRemoteCreatedWithPlan",
+  "corpNewRemoteCreatedWithoutPayloadPlan",
+  "corpEmptyRemoteWithIceCreated",
+  "corpEmptyRemoteStayedUnusedTurns",
+  "corpRemoteConvertedToAgendaAssetOrBait",
+  "corpRemoteConversionRate",
+  "corpIceInstalledOnNewRemoteInsteadOfExistingScoringRemote",
+  "corpExistingRemoteCouldBeStrengthened",
+  "corpRemotePortfolioOverExpanded",
+  "corpOneIceRemoteCheaplyContestable",
+  "corpRemoteIceConsolidationOpportunity",
+  "corpRemoteIceConsolidationTaken",
+  "corpRemoteCreatedThenNoScorePath",
+  "corpRemoteCreatedThenAgendaInstalledWithin3",
+  "corpRemoteCreatedThenAssetInstalledWithin3",
+  "corpRemoteCreatedThenBaitOrAmbushWithin3",
+  "corpHqCardCount",
+  "corpHqKnownAgendaCount",
+  "corpHqAgendaDensity",
+  "corpHqAgendaFloodRisk",
+  "runnerHqAccessThreat",
+  "runnerHqKnownAgendaThreat",
+  "runnerHqMultiaccessThreat",
+  "corpDrawWouldLikelyDiluteHq",
+  "corpDrawWouldRiskAgendaFlood",
+  "corpDrawChosenToDiluteAgendaFlood",
+  "corpDrawSkippedBecauseAgendaFloodRisk",
+  "corpAgendaRemovedFromHqToRemoteOrScore",
+  "corpHqProtectionChosenOverDilution",
+  "corpHqDilutionChosenBecauseNoSafeRemote",
+  "corpHqDilutionBackfiredAgendaDrawn",
+  "corpHqDensityReducedAfterDraw",
+  "corpHqDensityIncreasedAfterDraw",
   "advancedAgendaSteals",
   "advancedAgendaStealsFromRemote",
   "advancedAgendaStealsFromCentral",
@@ -12630,6 +12764,40 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   | "scoredAgendaActionValueOverBasic"
   | "basicCreditTakenWhileBetterAgendaEconomyAvailable"
   | "basicDrawTakenWhileBetterAgendaDrawAvailable"
+  | "corpNewRemoteCreated"
+  | "corpNewRemoteCreatedWithPlan"
+  | "corpNewRemoteCreatedWithoutPayloadPlan"
+  | "corpEmptyRemoteWithIceCreated"
+  | "corpEmptyRemoteStayedUnusedTurns"
+  | "corpRemoteConvertedToAgendaAssetOrBait"
+  | "corpRemoteConversionRate"
+  | "corpIceInstalledOnNewRemoteInsteadOfExistingScoringRemote"
+  | "corpExistingRemoteCouldBeStrengthened"
+  | "corpRemotePortfolioOverExpanded"
+  | "corpOneIceRemoteCheaplyContestable"
+  | "corpRemoteIceConsolidationOpportunity"
+  | "corpRemoteIceConsolidationTaken"
+  | "corpRemoteCreatedThenNoScorePath"
+  | "corpRemoteCreatedThenAgendaInstalledWithin3"
+  | "corpRemoteCreatedThenAssetInstalledWithin3"
+  | "corpRemoteCreatedThenBaitOrAmbushWithin3"
+  | "corpHqCardCount"
+  | "corpHqKnownAgendaCount"
+  | "corpHqAgendaDensity"
+  | "corpHqAgendaFloodRisk"
+  | "runnerHqAccessThreat"
+  | "runnerHqKnownAgendaThreat"
+  | "runnerHqMultiaccessThreat"
+  | "corpDrawWouldLikelyDiluteHq"
+  | "corpDrawWouldRiskAgendaFlood"
+  | "corpDrawChosenToDiluteAgendaFlood"
+  | "corpDrawSkippedBecauseAgendaFloodRisk"
+  | "corpAgendaRemovedFromHqToRemoteOrScore"
+  | "corpHqProtectionChosenOverDilution"
+  | "corpHqDilutionChosenBecauseNoSafeRemote"
+  | "corpHqDilutionBackfiredAgendaDrawn"
+  | "corpHqDensityReducedAfterDraw"
+  | "corpHqDensityIncreasedAfterDraw"
 > {
   let corpUnsafeScoringRemoteDetected = 0;
   let corpUnsafeScoringRemoteAlternativeChosen = 0;
@@ -12708,9 +12876,42 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   let scoredAgendaActionValueOverBasic = 0;
   let basicCreditTakenWhileBetterAgendaEconomyAvailable = 0;
   let basicDrawTakenWhileBetterAgendaDrawAvailable = 0;
+  let corpNewRemoteCreated = 0;
+  let corpNewRemoteCreatedWithPlan = 0;
+  let corpNewRemoteCreatedWithoutPayloadPlan = 0;
+  let corpEmptyRemoteWithIceCreated = 0;
+  let corpEmptyRemoteStayedUnusedTurns = 0;
+  let corpRemoteConvertedToAgendaAssetOrBait = 0;
+  let corpIceInstalledOnNewRemoteInsteadOfExistingScoringRemote = 0;
+  let corpExistingRemoteCouldBeStrengthened = 0;
+  let corpRemotePortfolioOverExpanded = 0;
+  let corpOneIceRemoteCheaplyContestable = 0;
+  let corpRemoteIceConsolidationOpportunity = 0;
+  let corpRemoteIceConsolidationTaken = 0;
+  let corpRemoteCreatedThenNoScorePath = 0;
+  let corpRemoteCreatedThenAgendaInstalledWithin3 = 0;
+  let corpRemoteCreatedThenAssetInstalledWithin3 = 0;
+  let corpRemoteCreatedThenBaitOrAmbushWithin3 = 0;
+  let corpHqAgendaFloodRisk = 0;
+  let runnerHqAccessThreat = 0;
+  let runnerHqKnownAgendaThreat = 0;
+  let runnerHqMultiaccessThreat = 0;
+  let corpDrawWouldLikelyDiluteHq = 0;
+  let corpDrawWouldRiskAgendaFlood = 0;
+  let corpDrawChosenToDiluteAgendaFlood = 0;
+  let corpDrawSkippedBecauseAgendaFloodRisk = 0;
+  let corpAgendaRemovedFromHqToRemoteOrScore = 0;
+  let corpHqProtectionChosenOverDilution = 0;
+  let corpHqDilutionChosenBecauseNoSafeRemote = 0;
+  let corpHqDilutionBackfiredAgendaDrawn = 0;
+  let corpHqDensityReducedAfterDraw = 0;
+  let corpHqDensityIncreasedAfterDraw = 0;
   const protectionSafetyDeltas: number[] = [];
   const remoteSafetyDeltas: number[] = [];
   const remoteSafetyDeltasAfterProtection: number[] = [];
+  const hqCardCounts: number[] = [];
+  const hqKnownAgendaCounts: number[] = [];
+  const hqAgendaDensities: number[] = [];
 
   for (const summary of summaries) {
     const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
@@ -12730,9 +12931,7 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         )
       )
         corpUnsafeScoringRemoteAlternativeChosen += 1;
-      if (
-        hasEvidenceFlag(entry, "corp_unsafe_scoring_remote_stalled:true")
-      )
+      if (hasEvidenceFlag(entry, "corp_unsafe_scoring_remote_stalled:true"))
         corpUnsafeScoringRemoteStalled += 1;
       const protection = hasEvidenceFlag(
         entry,
@@ -12761,10 +12960,7 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
       )
         corpUnsafeRemoteConvertedToHqProtection += 1;
       if (
-        hasEvidenceFlag(
-          entry,
-          "corp_unsafe_remote_converted_to_economy:true",
-        )
+        hasEvidenceFlag(entry, "corp_unsafe_remote_converted_to_economy:true")
       )
         corpUnsafeRemoteConvertedToEconomy += 1;
       if (
@@ -12780,8 +12976,10 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         corpBestRemoteSelectedForAgenda += 1;
       if (hasEvidenceFlag(entry, "corp_protection_no_safety_delta:true"))
         corpProtectionNoSafetyDelta += 1;
-      const scorePathFollowsRecentProtection =
-        scorePathFollowsCorpProtection(sequence, index);
+      const scorePathFollowsRecentProtection = scorePathFollowsCorpProtection(
+        sequence,
+        index,
+      );
       if (
         hasEvidenceFlag(entry, "corp_protection_opened_score_path:true") &&
         scorePathFollowsRecentProtection
@@ -12830,7 +13028,10 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
       if (hasEvidenceFlag(entry, "corp_remote_safety_ready_for_agenda:true"))
         corpRemoteSafetyReadyForAgenda += 1;
       if (
-        hasEvidenceFlag(entry, "corp_score_path_chosen_after_protection:true") &&
+        hasEvidenceFlag(
+          entry,
+          "corp_score_path_chosen_after_protection:true",
+        ) &&
         scorePathFollowsRecentProtection
       )
         corpScorePathChosenAfterProtection += 1;
@@ -12863,17 +13064,11 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
       )
         corpAgendaHeldTooLongWithHqPressure += 1;
       if (
-        hasEvidenceFlag(
-          entry,
-          "corp_agenda_installed_in_protected_remote:true",
-        )
+        hasEvidenceFlag(entry, "corp_agenda_installed_in_protected_remote:true")
       )
         corpAgendaInstalledInProtectedRemote += 1;
       if (
-        hasEvidenceFlag(
-          entry,
-          "corp_agenda_advanced_in_protected_remote:true",
-        )
+        hasEvidenceFlag(entry, "corp_agenda_advanced_in_protected_remote:true")
       )
         corpAgendaAdvancedInProtectedRemote += 1;
       if (hasEvidenceFlag(entry, "corp_agenda_near_score_window:true"))
@@ -12883,18 +13078,14 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         "corp_score_window_compression_opportunity:true",
       );
       if (compressionOpportunity) corpScoreWindowCompressionOpportunity += 1;
-      if (
-        hasEvidenceFlag(entry, "corp_score_window_compression_taken:true")
-      ) {
+      if (hasEvidenceFlag(entry, "corp_score_window_compression_taken:true")) {
         corpScoreWindowCompressionTaken += 1;
         if (corpCompressionActionLeadsToScoreLine(sequence, index, 2))
           corpAdvanceToScoreLineCompressedWithin2 += 1;
         if (corpCompressionActionLeadsToScoreLine(sequence, index, 3))
           corpAdvanceToScoreLineCompressedWithin3 += 1;
       }
-      if (
-        hasEvidenceFlag(entry, "corp_score_window_compression_skipped:true")
-      )
+      if (hasEvidenceFlag(entry, "corp_score_window_compression_skipped:true"))
         corpScoreWindowCompressionSkipped += 1;
       const nonEssentialBeforeScoreWindow = hasEvidenceFlag(
         entry,
@@ -12991,7 +13182,9 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         scoredAgendaTraceTagOpportunities += 1;
       if (hasEvidenceFlag(entry, "scored_agenda_trace_tag_taken:true"))
         scoredAgendaTraceTagTaken += 1;
-      if (hasEvidenceFlag(entry, "scored_agenda_damage_punish_opportunity:true"))
+      if (
+        hasEvidenceFlag(entry, "scored_agenda_damage_punish_opportunity:true")
+      )
         scoredAgendaDamagePunishOpportunities += 1;
       if (hasEvidenceFlag(entry, "scored_agenda_damage_punish_taken:true"))
         scoredAgendaDamagePunishTaken += 1;
@@ -13015,6 +13208,117 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         )
       )
         basicDrawTakenWhileBetterAgendaDrawAvailable += 1;
+      if (hasEvidenceFlag(entry, "corp_new_remote_created:true"))
+        corpNewRemoteCreated += 1;
+      if (hasEvidenceFlag(entry, "corp_new_remote_created_with_plan:true"))
+        corpNewRemoteCreatedWithPlan += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_new_remote_created_without_payload_plan:true",
+        )
+      )
+        corpNewRemoteCreatedWithoutPayloadPlan += 1;
+      if (hasEvidenceFlag(entry, "corp_empty_remote_with_ice_created:true"))
+        corpEmptyRemoteWithIceCreated += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_ice_installed_on_new_remote_instead_of_existing_scoring_remote:true",
+        )
+      )
+        corpIceInstalledOnNewRemoteInsteadOfExistingScoringRemote += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_existing_remote_could_be_strengthened:true",
+        )
+      )
+        corpExistingRemoteCouldBeStrengthened += 1;
+      if (hasEvidenceFlag(entry, "corp_remote_portfolio_overexpanded:true"))
+        corpRemotePortfolioOverExpanded += 1;
+      if (
+        hasEvidenceFlag(entry, "corp_one_ice_remote_cheaply_contestable:true")
+      )
+        corpOneIceRemoteCheaplyContestable += 1;
+      if (
+        hasEvidenceFlag(entry, "corp_remote_ice_consolidation_opportunity:true")
+      )
+        corpRemoteIceConsolidationOpportunity += 1;
+      if (hasEvidenceFlag(entry, "corp_remote_ice_consolidation_taken:true"))
+        corpRemoteIceConsolidationTaken += 1;
+      if (
+        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
+        !corpRemoteCreatedConverts(sequence, index, 3)
+      ) {
+        corpEmptyRemoteStayedUnusedTurns += 1;
+        corpRemoteCreatedThenNoScorePath += 1;
+      }
+      if (
+        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
+        corpRemoteCreatedConvertsTo(sequence, index, 3, "agenda")
+      )
+        corpRemoteCreatedThenAgendaInstalledWithin3 += 1;
+      if (
+        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
+        corpRemoteCreatedConvertsTo(sequence, index, 3, "asset")
+      )
+        corpRemoteCreatedThenAssetInstalledWithin3 += 1;
+      if (
+        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
+        corpRemoteCreatedConvertsTo(sequence, index, 3, "bait")
+      )
+        corpRemoteCreatedThenBaitOrAmbushWithin3 += 1;
+      if (hasEvidenceFlag(entry, "corp_hq_agenda_flood_risk:true"))
+        corpHqAgendaFloodRisk += 1;
+      if (hasEvidenceFlag(entry, "runner_hq_access_threat:true"))
+        runnerHqAccessThreat += 1;
+      if (hasEvidenceFlag(entry, "runner_hq_known_agenda_threat:true"))
+        runnerHqKnownAgendaThreat += 1;
+      if (hasEvidenceFlag(entry, "runner_hq_multiaccess_threat:true"))
+        runnerHqMultiaccessThreat += 1;
+      if (hasEvidenceFlag(entry, "corp_draw_would_likely_dilute_hq:true"))
+        corpDrawWouldLikelyDiluteHq += 1;
+      if (hasEvidenceFlag(entry, "corp_draw_would_risk_agenda_flood:true"))
+        corpDrawWouldRiskAgendaFlood += 1;
+      if (
+        hasEvidenceFlag(entry, "corp_draw_chosen_to_dilute_agenda_flood:true")
+      )
+        corpDrawChosenToDiluteAgendaFlood += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_draw_skipped_because_agenda_flood_risk:true",
+        )
+      )
+        corpDrawSkippedBecauseAgendaFloodRisk += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_agenda_removed_from_hq_to_remote_or_score:true",
+        )
+      )
+        corpAgendaRemovedFromHqToRemoteOrScore += 1;
+      if (
+        hasEvidenceFlag(entry, "corp_hq_protection_chosen_over_dilution:true")
+      )
+        corpHqProtectionChosenOverDilution += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_hq_dilution_chosen_because_no_safe_remote:true",
+        )
+      )
+        corpHqDilutionChosenBecauseNoSafeRemote += 1;
+      const hqCardCount = Number(evidenceValue(entry, "corp_hq_card_count:"));
+      if (Number.isFinite(hqCardCount)) hqCardCounts.push(hqCardCount);
+      const hqAgendaCount = Number(
+        evidenceValue(entry, "corp_hq_known_agenda_count:"),
+      );
+      if (Number.isFinite(hqAgendaCount))
+        hqKnownAgendaCounts.push(hqAgendaCount);
+      const hqDensity = Number(evidenceValue(entry, "corp_hq_agenda_density:"));
+      if (Number.isFinite(hqDensity)) hqAgendaDensities.push(hqDensity);
 
       const delta = Number(
         evidenceValue(
@@ -13064,8 +13368,9 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
     corpUnsafeRemoteConvertedToNoScorePath,
     corpBetterRemoteAvailable,
     corpBestRemoteSelectedForAgenda,
-    corpScoringRemoteSafetyDeltaAfterProtection:
-      averageNumber(protectionSafetyDeltas),
+    corpScoringRemoteSafetyDeltaAfterProtection: averageNumber(
+      protectionSafetyDeltas,
+    ),
     corpProtectionConvertedToScoreWithin3,
     corpProtectionRepeatedWithoutScoreConversion,
     corpProtectionImprovedRemoteSafety,
@@ -13147,6 +13452,51 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
     scoredAgendaActionValueOverBasic,
     basicCreditTakenWhileBetterAgendaEconomyAvailable,
     basicDrawTakenWhileBetterAgendaDrawAvailable,
+    corpNewRemoteCreated,
+    corpNewRemoteCreatedWithPlan,
+    corpNewRemoteCreatedWithoutPayloadPlan,
+    corpEmptyRemoteWithIceCreated,
+    corpEmptyRemoteStayedUnusedTurns,
+    corpRemoteConvertedToAgendaAssetOrBait:
+      corpRemoteCreatedThenAgendaInstalledWithin3 +
+      corpRemoteCreatedThenAssetInstalledWithin3 +
+      corpRemoteCreatedThenBaitOrAmbushWithin3,
+    corpRemoteConversionRate:
+      corpNewRemoteCreated > 0
+        ? round(
+            (corpRemoteCreatedThenAgendaInstalledWithin3 +
+              corpRemoteCreatedThenAssetInstalledWithin3 +
+              corpRemoteCreatedThenBaitOrAmbushWithin3) /
+              corpNewRemoteCreated,
+          )
+        : 0,
+    corpIceInstalledOnNewRemoteInsteadOfExistingScoringRemote,
+    corpExistingRemoteCouldBeStrengthened,
+    corpRemotePortfolioOverExpanded,
+    corpOneIceRemoteCheaplyContestable,
+    corpRemoteIceConsolidationOpportunity,
+    corpRemoteIceConsolidationTaken,
+    corpRemoteCreatedThenNoScorePath,
+    corpRemoteCreatedThenAgendaInstalledWithin3,
+    corpRemoteCreatedThenAssetInstalledWithin3,
+    corpRemoteCreatedThenBaitOrAmbushWithin3,
+    corpHqCardCount: averageNumber(hqCardCounts),
+    corpHqKnownAgendaCount: averageNumber(hqKnownAgendaCounts),
+    corpHqAgendaDensity: averageNumber(hqAgendaDensities),
+    corpHqAgendaFloodRisk,
+    runnerHqAccessThreat,
+    runnerHqKnownAgendaThreat,
+    runnerHqMultiaccessThreat,
+    corpDrawWouldLikelyDiluteHq,
+    corpDrawWouldRiskAgendaFlood,
+    corpDrawChosenToDiluteAgendaFlood,
+    corpDrawSkippedBecauseAgendaFloodRisk,
+    corpAgendaRemovedFromHqToRemoteOrScore,
+    corpHqProtectionChosenOverDilution,
+    corpHqDilutionChosenBecauseNoSafeRemote,
+    corpHqDilutionBackfiredAgendaDrawn,
+    corpHqDensityReducedAfterDraw,
+    corpHqDensityIncreasedAfterDraw,
   };
 }
 
@@ -13258,6 +13608,57 @@ function isCorpProtectionScoreConversionAction(
   );
 }
 
+function corpRemoteCreatedConverts(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  ownDecisions: number,
+): boolean {
+  return (
+    corpRemoteCreatedConvertsTo(sequence, index, ownDecisions, "agenda") ||
+    corpRemoteCreatedConvertsTo(sequence, index, ownDecisions, "asset") ||
+    corpRemoteCreatedConvertsTo(sequence, index, ownDecisions, "bait")
+  );
+}
+
+function corpRemoteCreatedConvertsTo(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  ownDecisions: number,
+  target: "agenda" | "asset" | "bait",
+): boolean {
+  return ownStrategicWindow(sequence, index, ownDecisions)
+    .filter((entry) => entry.side === "corp")
+    .some((entry) => {
+      if (target === "agenda") {
+        return (
+          entry.actionType === "score_agenda" ||
+          entry.actionType === "advance_card" ||
+          entry.targetCardType === "agenda" ||
+          hasEvidenceFlag(
+            entry,
+            "corp_agenda_installed_in_protected_remote:true",
+          )
+        );
+      }
+      if (target === "bait") {
+        return (
+          entry.reasonCode.includes("bait") ||
+          hasEvidenceFlag(entry, "plan:bait_runner")
+        );
+      }
+      return (
+        entry.actionType === "install_card" &&
+        (entry.reasonCode.includes("asset") ||
+          (entry.evidence ?? []).some(
+            (item) =>
+              item.includes("remote_support") ||
+              item.includes("economy_asset") ||
+              item.includes("asset_trash_target"),
+          ))
+      );
+    });
+}
+
 function corpCompressionActionLeadsToScoreLine(
   sequence: PlanConversionActionEntry[],
   index: number,
@@ -13295,7 +13696,10 @@ function isCorpRemoteProtectionActionEntry(
 ): boolean {
   return (
     entry.side === "corp" &&
-    (hasEvidenceFlag(entry, "corp_unsafe_remote_converted_to_protection:true") ||
+    (hasEvidenceFlag(
+      entry,
+      "corp_unsafe_remote_converted_to_protection:true",
+    ) ||
       hasEvidenceFlag(
         entry,
         "corp_protection_chosen_before_unsafe_agenda_install:true",
