@@ -269,6 +269,28 @@ import {
   resolvePattelsVirusCounterChoice,
   type RunEndCleanupHost,
 } from "./game/run/run-end-cleanup";
+import {
+  activeWilsonSourceIds,
+  availableRunnerRunCredits,
+  availableRunnerRunStartCredits,
+  hostedPaymentCredits,
+  isRestrictedHostedCreditSource,
+  payEncounterSubroutineRunCost,
+  payEncounterTaxForFutureIce,
+  payJackOutAdditionalCost,
+  payRunStartTaxCredits,
+  recordWilsonRunCapSpend,
+  restrictedHostedCreditSourceForDefinition,
+  restrictedHostedCreditSourceIds,
+  restrictedHostedCredits,
+  runDurationPaymentHost,
+  runJackOutAdditionalCost,
+  shouldLoadLegacyRecurringCredits,
+  spendHostedPaymentCredits,
+  spendRestrictedHostedCredits,
+  spendRunnerRunCredits,
+  type RunDurationPaymentHost,
+} from "./game/run/run-duration-payment";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -386,7 +408,6 @@ import { COUNTER_UPGRADE_CARD_IDS } from "./mechanics/hosting-counters";
 import {
   ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
   CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
-  COROLLA_SPEED_CHIP_STRENGTH_HARDWARE_ID,
   EDGERUNNER_TEMPS_INSTALL_OPERATION_ID,
   FORGED_ACTIVATION_ORDERS_FORCE_REZ_EVENT_ID,
   JAPANESE_WATER_TORTURE_BREAKER_ID,
@@ -420,7 +441,6 @@ import {
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
-  BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE,
   BARTMOSS_ID,
   BIZARRE_ENCRYPTION_SCHEME_ID,
   BLINK_ID,
@@ -457,7 +477,6 @@ import {
   SNEAK_PREVIEW_ID,
   TERRORIST_REPRISAL_ID,
   TOO_MANY_DOORS_ID,
-  ZZ22_SPEED_CHIP_ID,
 } from "./compatibility/runtime-compatibility";
 import {
   AI_BOON_RANDOM_BREAKER_CARD_ID,
@@ -517,7 +536,6 @@ import type {
   CardVirusCounterImplementation,
   IncreaseTraceLinkEffectImplementation,
   MakeRunEffectImplementation,
-  RestrictedHostedCreditUse,
 } from "./ability-engine/definition-types";
 
 type AutomaticEffectCollector = ResolvedGameEffect[];
@@ -3469,7 +3487,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
     return actions;
   }
   if (hasClicks) {
-    for (const sourceCardId of activeWilsonSourceIds(state)) {
+    for (const sourceCardId of activeWilsonSourceIds(runDurationPaymentHost(state))) {
       const used = flags.wilsonUsedSourceIdsThisTurn ?? [];
       if (!used.includes(sourceCardId)) {
         actions.push(
@@ -4164,7 +4182,8 @@ function runnerMainActions(state: GameState): LegalAction[] {
     ) {
       if (
         runStartTaxCredits === 0 ||
-        availableRunnerRunStartCredits(state) >= runStartTaxCredits
+        availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
+          runStartTaxCredits
       ) {
         actions.push(
           action(
@@ -4183,7 +4202,8 @@ function runnerMainActions(state: GameState): LegalAction[] {
       Math.max(0, Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0)) > 0 &&
       !rovingRunBlocked &&
       (runStartTaxCredits === 0 ||
-        availableRunnerRunStartCredits(state) >= runStartTaxCredits)
+        availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
+        runStartTaxCredits)
     ) {
       actions.push(
         action(
@@ -4205,7 +4225,8 @@ function runnerMainActions(state: GameState): LegalAction[] {
       bonusRunPending &&
       !rovingRunBlocked &&
       (runStartTaxCredits === 0 ||
-        availableRunnerRunStartCredits(state) >= runStartTaxCredits)
+        availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
+        runStartTaxCredits)
     ) {
       actions.push(
         action(
@@ -5877,13 +5898,16 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       pump &&
       !run.noBreakSubroutinesActive &&
       hasEligibleBreakTarget &&
-      availableRunnerRunCredits(state, breakerId) >= pump.cost.credits
+      availableRunnerRunCredits(runDurationPaymentHost(state), breakerId) >=
+      pump.cost.credits
     ) {
       const variableStrength = pump.variableStrength;
       if (variableStrength) {
         const maxAmount = Math.max(
           0,
-          Math.floor(availableRunnerRunCredits(state, breakerId)),
+          Math.floor(
+            availableRunnerRunCredits(runDurationPaymentHost(state), breakerId),
+          ),
         );
         for (
           let amount = Math.max(1, Math.floor(variableStrength.min));
@@ -5925,7 +5949,10 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     }
     const canPayAtLeastOneBreakAbility = breakAbilities.some((ability) => {
       const cost = breakSubroutineCostBreakdown(state, ability.cost.credits, 1);
-      return availableRunnerRunCredits(state, breakerId) >= cost.totalCost;
+      return (
+        availableRunnerRunCredits(runDurationPaymentHost(state), breakerId) >=
+        cost.totalCost
+      );
     });
     if (
       !run.noBreakSubroutinesActive &&
@@ -5970,7 +5997,10 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
           breakAbility.cost.credits,
           1,
         );
-        if (availableRunnerRunCredits(state, breakerId) < singleBreakCost.totalCost)
+        if (
+          availableRunnerRunCredits(runDurationPaymentHost(state), breakerId) <
+          singleBreakCost.totalCost
+        )
           return;
         if (
           !run.brokenSubroutineIndexes.includes(index) &&
@@ -6049,7 +6079,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   if (
     payOrEndRunAmount > 0 &&
     !hardEndRun &&
-    availableRunnerRunCredits(state) >= payOrEndRunAmount
+    availableRunnerRunCredits(runDurationPaymentHost(state)) >= payOrEndRunAmount
   ) {
     actions.push(
       action(
@@ -6119,7 +6149,10 @@ function pileDriverBreakActions(
         breakAbility.cost.credits,
         subroutineIndexes.length,
       );
-      if (availableRunnerRunCredits(state, breakerId) < breakCost.totalCost)
+      if (
+        availableRunnerRunCredits(runDurationPaymentHost(state), breakerId) <
+        breakCost.totalCost
+      )
         return;
       actions.push(
         action(
@@ -6386,7 +6419,7 @@ function resolvePileDriverBreakSubroutinesAction(
   ).totalCost;
   if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
     throw new Error("Pile Driver-Kosten sind nicht mehr gueltig.");
-  spendRunnerRunCredits(state, expectedCost, breakerId);
+  spendRunnerRunCredits(runDurationPaymentHost(state), expectedCost, breakerId);
   executeEffectCommands(
     state,
     subroutineIndexes.map((subroutineIndex) => ({
@@ -6534,7 +6567,7 @@ function runnerMovementActions(state: GameState): LegalAction[] {
   actions.push(...startupImmolatorPostPassActions(state, run));
   actions.push(...mysteryBoxRunActions(state, run));
   const jackOutAdditionalCost = runJackOutAdditionalCost(run);
-  if (availableRunnerRunCredits(state) >= jackOutAdditionalCost) {
+  if (availableRunnerRunCredits(runDurationPaymentHost(state)) >= jackOutAdditionalCost) {
     actions.push(
       action(
         state,
@@ -6672,13 +6705,6 @@ function startupImmolatorPostPassActions(
     );
 }
 
-function runJackOutAdditionalCost(run: ActiveRun): number {
-  return (
-    Math.max(0, Math.floor(run.jackOutAdditionalCostForRun ?? 0)) +
-    (run.viral15ActiveSourceIceId ? 1 : 0)
-  );
-}
-
 function runStartTaxForServerUpgrades(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,
@@ -6712,10 +6738,6 @@ function newsgroupTauntingRunStartTax(
     amount: sourceDefinitionIds.length,
     sourceDefinitionIds,
   };
-}
-
-function availableRunnerRunStartCredits(state: GameState): number {
-  return state.runner.credits + runnerRunRecurringCredits(state);
 }
 
 function spendRunnerAccessTrashCredits(
@@ -7493,7 +7515,7 @@ function performAction(
         legalAction,
       );
       if (legalAction.payload?.wilsonRunOnlyAction === true && state.run) {
-        const sourceCardId = activeWilsonSourceIds(state)[0];
+        const sourceCardId = activeWilsonSourceIds(runDurationPaymentHost(state))[0];
         state.run.wilsonRunSpendingCap = {
           sourceCardInstanceId: sourceCardId ?? ("" as CardInstanceId),
           limit: 3,
@@ -7506,19 +7528,7 @@ function performAction(
           wilsonRunSpendingCapActive: true,
         };
       }
-      if (typeof legalAction.payload?.runStartTaxCredits === "number") {
-        const taxCredits = legalAction.costs.reduce(
-          (sum, cost) =>
-            sum + (Number.isInteger(cost.credits) ? (cost.credits ?? 0) : 0),
-          0,
-        );
-        if (taxCredits > 0) spendRunnerRunCredits(state, taxCredits);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          runStartTaxPaid: taxCredits,
-          runnerCreditsAfter: state.runner.credits,
-        };
-      }
+      payRunStartTaxCredits(runDurationPaymentHost(state), legalAction);
       return;
     case "jack_out":
       {
@@ -7534,16 +7544,11 @@ function performAction(
           ...(serverLabel ? { serverLabel } : {}),
           ...(reachedServerBeforeAccess ? { jackOutBeforeAccess: true } : {}),
         };
-        if (jackOutAdditionalCost > 0) {
-          spendRunnerRunCredits(state, jackOutAdditionalCost);
-          legalAction.payload = {
-            ...jackOutPayload,
-            jackOutAdditionalCost,
-            runnerCreditsAfter: state.runner.credits,
-          };
-        } else {
-          legalAction.payload = jackOutPayload;
-        }
+        payJackOutAdditionalCost(
+          runDurationPaymentHost(state),
+          legalAction,
+          jackOutPayload,
+        );
       }
       finishRun(state, false);
       return;
@@ -7581,7 +7586,7 @@ function performAction(
             throw new Error("Variable Icebreaker-Pump-Kosten sind nicht mehr gueltig.");
         }
         spendRunnerRunCredits(
-          state,
+          runDurationPaymentHost(state),
           legalAction.costs[0]?.credits ?? 1,
           breakerId,
         );
@@ -7683,7 +7688,7 @@ function performAction(
         currentSubroutine,
       );
       spendRunnerRunCredits(
-        state,
+        runDurationPaymentHost(state),
         legalAction.costs[0]?.credits ?? 1,
         breakerId,
       );
@@ -10234,32 +10239,13 @@ function beginEncounter(
     run.fatalDamageAmountForEncounter = queuedFatalDamage;
   else delete run.fatalDamageAmountForEncounter;
   run.nextEncounterFatalDamage = 0;
-  const encounterTax = Math.max(
-    0,
-    Math.floor(run.encounterTaxForFutureIce ?? 0),
+  const encounterTaxPayment = payEncounterTaxForFutureIce(
+    runDurationPaymentHost(state),
+    legalAction,
   );
-  if (encounterTax > 0) {
-    if (availableRunnerRunCredits(state) < encounterTax) {
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          encounterTaxForFutureIce: encounterTax,
-          encounterTaxPaid: 0,
-          encounterTaxSource: BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE,
-        };
-      }
-      finishRun(state, false, legalAction);
-      return;
-    }
-    spendRunnerRunCredits(state, encounterTax);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        encounterTaxForFutureIce: encounterTax,
-        encounterTaxPaid: encounterTax,
-        encounterTaxSource: BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE,
-      };
-    }
+  if (encounterTaxPayment.runShouldEnd) {
+    finishRun(state, false, legalAction);
+    return;
   }
   const encounteredDefinition = definitionFor(state, encounteredIceId);
   const iceEncounter = cardImplementationForDefinitionId(
@@ -10356,29 +10342,11 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       Math.floor(subroutine.amount ?? 0),
     );
   }
-  if (expectedPayOrEndRunPayment > 0) {
-    const declaredPayment = Math.max(
-      0,
-      Math.floor(
-        Number(legalAction?.payload?.payOrEndRunSubroutinePayment ?? 0),
-      ),
-    );
-    const declaredCost = Math.max(
-      0,
-      Math.floor(
-        (legalAction?.costs ?? []).reduce(
-          (sum, cost) => sum + (cost.credits ?? 0),
-          0,
-        ),
-      ),
-    );
-    if (
-      declaredPayment !== expectedPayOrEndRunPayment ||
-      declaredCost !== expectedPayOrEndRunPayment
-    )
-      throw new Error("Die Pay-or-End-the-Run-Kosten sind nicht mehr gueltig.");
-    spendRunnerRunCredits(state, expectedPayOrEndRunPayment);
-  }
+  payEncounterSubroutineRunCost(
+    runDurationPaymentHost(state),
+    legalAction,
+    expectedPayOrEndRunPayment,
+  );
   for (let index = 0; index < subroutines.length; index += 1) {
     const subroutine = subroutines[index];
     if (
@@ -13586,16 +13554,6 @@ function activeCrashEverettSourceId(state: GameState): CardInstanceId | undefine
         "crash_everett_draw_extra_choose_trash_or_top",
     )
     .sort()[0];
-}
-
-function activeWilsonSourceIds(state: GameState): CardInstanceId[] {
-  return state.runner.rig.resources
-    .filter(
-      (cardId) =>
-        remainingReplacementLongtailKindForCard(state, cardId) ===
-        "wilson_run_action_spending_cap",
-    )
-    .sort();
 }
 
 function startCrashEverettDrawChoice(
@@ -21063,7 +21021,8 @@ const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
   spendHostedPaymentCredits,
   runnerCreditsAvailable: (state) => state.runner.credits,
   spendRunnerCredits: (state, amount) => spendCredits(state, "runner", amount),
-  recordWilsonRunCapSpend,
+  recordWilsonRunCapSpend: (state, amount) =>
+    recordWilsonRunCapSpend(runDurationPaymentHost(state), amount),
   definitionIdForCard: (state, cardId) => definitionFor(state, cardId).id,
   hellsRunDefinitionId: HELLS_RUN_ID,
 };
@@ -21825,16 +21784,6 @@ function runnerTraceLinkCredits(state: GameState): number {
     (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
     0,
   );
-}
-
-function recordWilsonRunCapSpend(state: GameState, amount: number): void {
-  if (amount <= 0) return;
-  const cap = state.run?.wilsonRunSpendingCap;
-  if (!cap) return;
-  const nextSpent = Math.max(0, Math.floor(cap.spent ?? 0)) + amount;
-  if (nextSpent > cap.limit)
-    throw new Error("Wilson erlaubt maximal 3 Credits fuer Icebreaker oder Link.");
-  cap.spent = nextSpent;
 }
 
 function selectedBidAmount(
@@ -22747,152 +22696,6 @@ function spendCredits(state: GameState, side: Side, amount: number): void {
   state.runner.credits -= amount;
 }
 
-type RestrictedHostedCreditPaymentOptions = {
-  breakerId?: CardInstanceId | undefined;
-  accessedCardId?: CardInstanceId | undefined;
-  installCardType?: CardDefinition["type"] | undefined;
-};
-
-function restrictedHostedCreditSourceForDefinition(
-  definition: CardDefinition,
-) {
-  return cardImplementationForDefinitionId(definition.id)
-    ?.restrictedHostedCreditSource;
-}
-
-function isRestrictedHostedCreditSource(definition: CardDefinition): boolean {
-  return Boolean(restrictedHostedCreditSourceForDefinition(definition));
-}
-
-function shouldLoadLegacyRecurringCredits(definition: CardDefinition): boolean {
-  return (
-    (definition.recurringCredits ?? 0) > 0 &&
-    !isRestrictedHostedCreditSource(definition) &&
-    !cardImplementationForDefinitionId(definition.id)?.virusCounter
-  );
-}
-
-function hostedPaymentCounterTypeForSource(
-  state: GameState,
-  cardId: CardInstanceId,
-): Extract<CounterType, "bit" | "recurring_credit"> {
-  return isRestrictedHostedCreditSource(definitionFor(state, cardId))
-    ? "bit"
-    : "recurring_credit";
-}
-
-function hostedPaymentCredits(
-  state: GameState,
-  cardId: CardInstanceId,
-): number {
-  return cardCounter(state, cardId, hostedPaymentCounterTypeForSource(state, cardId));
-}
-
-function spendHostedPaymentCredits(
-  state: GameState,
-  cardId: CardInstanceId,
-  amount: number,
-): void {
-  spendCardCounter(
-    state,
-    cardId,
-    hostedPaymentCounterTypeForSource(state, cardId),
-    amount,
-  );
-}
-
-function restrictedHostedCreditSourceMatchesUse(
-  state: GameState,
-  cardId: CardInstanceId,
-  use: RestrictedHostedCreditUse,
-  options: RestrictedHostedCreditPaymentOptions = {},
-): boolean {
-  if (!runnerInstalledCardIds(state).includes(cardId)) return false;
-  const definition = definitionFor(state, cardId);
-  const source = restrictedHostedCreditSourceForDefinition(definition);
-  if (!source || source.counterType !== "bit" || !source.usableFor.includes(use))
-    return false;
-  if (cardCounter(state, cardId, "bit") <= 0) return false;
-  if (
-    state.run &&
-    cardHasSubtype(definition, "stealth") &&
-    hasStealthPaymentBlockOnServer(state, state.run.attackedServerId)
-  )
-    return false;
-  if (
-    use === "using_icebreaker_during_run" ||
-    use === "using_icebreaker_during_run_non_noisy" ||
-    use === "using_killer_during_run"
-  ) {
-    const breakerId = options.breakerId;
-    if (!state.run || !breakerId || !state.runner.rig.programs.includes(breakerId))
-      return false;
-    const breakerDefinition = definitionFor(state, breakerId);
-    if (!cardHasSubtype(breakerDefinition, "icebreaker")) return false;
-    if (use === "using_icebreaker_during_run") return true;
-    if (use === "using_icebreaker_during_run_non_noisy")
-      return !cardHasSubtype(breakerDefinition, "noisy");
-    return cardHasSubtype(breakerDefinition, "killer");
-  }
-  if (use === "trash_nodes" || use === "trash_upgrades") {
-    const accessedCardId = options.accessedCardId;
-    if (!accessedCardId || !state.cardInstances[accessedCardId]) return false;
-    const accessedDefinition = definitionFor(state, accessedCardId);
-    return use === "trash_nodes"
-      ? accessedDefinition.type === "asset"
-      : accessedDefinition.type === "upgrade";
-  }
-  if (use === "install_programs") return options.installCardType === "program";
-  return use === "increase_link" || use === "remove_tags";
-}
-
-function restrictedHostedCreditSourceIds(
-  state: GameState,
-  use: RestrictedHostedCreditUse,
-  options: RestrictedHostedCreditPaymentOptions = {},
-): CardInstanceId[] {
-  return runnerInstalledCardIds(state)
-    .filter((cardId) =>
-      restrictedHostedCreditSourceMatchesUse(state, cardId, use, options),
-    )
-    .sort();
-}
-
-function restrictedHostedCredits(
-  state: GameState,
-  use: RestrictedHostedCreditUse,
-  options: RestrictedHostedCreditPaymentOptions = {},
-): number {
-  return restrictedHostedCreditSourceIds(state, use, options).reduce(
-    (sum, cardId) => sum + cardCounter(state, cardId, "bit"),
-    0,
-  );
-}
-
-function spendRestrictedHostedCredits(
-  state: GameState,
-  use: RestrictedHostedCreditUse,
-  amount: number,
-  options: RestrictedHostedCreditPaymentOptions = {},
-): {
-  spent: number;
-  sourceDefinitionIds: string[];
-} {
-  let remaining = Math.max(0, Math.floor(amount));
-  let spent = 0;
-  const sourceDefinitionIds = new Set<string>();
-  for (const cardId of restrictedHostedCreditSourceIds(state, use, options)) {
-    if (remaining <= 0) break;
-    const cardSpent = Math.min(cardCounter(state, cardId, "bit"), remaining);
-    if (cardSpent <= 0) continue;
-    spendCardCounter(state, cardId, "bit", cardSpent);
-    remaining -= cardSpent;
-    spent += cardSpent;
-    sourceDefinitionIds.add(definitionFor(state, cardId).id);
-  }
-  return { spent, sourceDefinitionIds: [...sourceDefinitionIds].sort() };
-}
-
 function availableRunnerProgramInstallCredits(state: GameState): number {
   return (
     state.runner.credits +
@@ -22958,135 +22761,6 @@ function spendRunnerInstallCredits(
   );
   remaining -= restricted.spent;
   for (const cardId of runnerProgramInstallRecurringCreditSourceIds(state)) {
-    if (remaining <= 0) break;
-    const available = hostedPaymentCredits(state, cardId);
-    const spent = Math.min(available, remaining);
-    if (spent > 0) {
-      spendHostedPaymentCredits(state, cardId, spent);
-      remaining -= spent;
-    }
-  }
-  spendCredits(state, "runner", remaining);
-}
-
-function runnerRunRecurringCreditSourceIds(
-  state: GameState,
-  breakerId?: CardInstanceId,
-): CardInstanceId[] {
-  const noisyBreaker =
-    breakerId &&
-    state.cardInstances[breakerId] &&
-    state.runner.rig.programs.includes(breakerId)
-      ? cardHasSubtype(definitionFor(state, breakerId), "noisy")
-      : false;
-  const runnerRig = [
-    ...state.runner.rig.hardware,
-    ...state.runner.rig.programs,
-    ...state.runner.rig.resources,
-  ];
-  const restrictedRunCostSources =
-    breakerId === undefined
-      ? runnerRig.filter((cardId) => {
-          const source =
-            restrictedHostedCreditSourceForDefinition(definitionFor(state, cardId));
-          return (
-            Boolean(source) &&
-            source?.counterType === "bit" &&
-            source.usableFor.includes("using_icebreaker_during_run_non_noisy") &&
-            cardCounter(state, cardId, "bit") > 0
-          );
-        })
-      : [];
-  const restrictedSources = [
-    ...restrictedRunCostSources,
-    ...restrictedHostedCreditSourceIds(state, "using_icebreaker_during_run", {
-      breakerId,
-    }),
-    ...restrictedHostedCreditSourceIds(
-      state,
-      "using_icebreaker_during_run_non_noisy",
-      { breakerId },
-    ),
-    ...restrictedHostedCreditSourceIds(state, "using_killer_during_run", {
-      breakerId,
-    }),
-  ];
-  const legacySources = runnerRig.filter((cardId) => {
-    if (isRestrictedHostedCreditSource(definitionFor(state, cardId))) return false;
-    if (cardCounter(state, cardId, "recurring_credit") <= 0) return false;
-    const definition = definitionFor(state, cardId);
-    if (
-      definition.id === ZZ22_SPEED_CHIP_ID ||
-      definition.id === COROLLA_SPEED_CHIP_STRENGTH_HARDWARE_ID
-    ) {
-      return Boolean(
-        state.run &&
-          breakerId &&
-          state.runner.rig.programs.includes(breakerId) &&
-          cardHasSubtype(definitionFor(state, breakerId), "killer"),
-      );
-    }
-    if (
-      definition.id === ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID ||
-      TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS.has(definition.id)
-    ) {
-      return false;
-    }
-    if (definition.id === HELLS_RUN_ID) return false;
-    if (!noisyBreaker) return true;
-    return !cardHasSubtype(definition, "stealth");
-  });
-  return [...new Set([...restrictedSources, ...legacySources])].sort();
-}
-
-function runnerRunRecurringCredits(
-  state: GameState,
-  breakerId?: CardInstanceId,
-): number {
-  return runnerRunRecurringCreditSourceIds(state, breakerId).reduce(
-    (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
-    0,
-  );
-}
-
-function availableRunnerRunCredits(
-  state: GameState,
-  breakerId?: CardInstanceId,
-): number {
-  return (
-    state.runner.credits +
-    (state.run?.badPublicityCredits ?? 0) +
-    (state.run?.runnerRunTemporaryCredits?.remaining ?? 0) +
-    runnerRunRecurringCredits(state, breakerId)
-  );
-}
-
-function spendRunnerRunCredits(
-  state: GameState,
-  amount: number,
-  breakerId?: CardInstanceId,
-): void {
-  if (amount <= 0) return;
-  if (availableRunnerRunCredits(state, breakerId) < amount)
-    throw new Error("Der Runner kann die Run-Kosten nicht bezahlen.");
-  if (breakerId) recordWilsonRunCapSpend(state, amount);
-  const run = mustRun(state);
-  let remaining = amount;
-  const fromBadPublicity = Math.min(run.badPublicityCredits ?? 0, remaining);
-  if (fromBadPublicity > 0) {
-    run.badPublicityCredits = (run.badPublicityCredits ?? 0) - fromBadPublicity;
-    remaining -= fromBadPublicity;
-  }
-  const runTemporaryCredits = run.runnerRunTemporaryCredits;
-  const fromRunTemporaryCredits = Math.min(
-    runTemporaryCredits?.remaining ?? 0,
-    remaining,
-  );
-  if (runTemporaryCredits && fromRunTemporaryCredits > 0) {
-    runTemporaryCredits.remaining -= fromRunTemporaryCredits;
-    remaining -= fromRunTemporaryCredits;
-  }
-  for (const cardId of runnerRunRecurringCreditSourceIds(state, breakerId)) {
     if (remaining <= 0) break;
     const available = hostedPaymentCredits(state, cardId);
     const spent = Math.min(available, remaining);
