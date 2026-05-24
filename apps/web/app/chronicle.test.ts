@@ -2978,6 +2978,81 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.chips).toContain("+2 Credits");
   });
 
+  it("shows Quest for Cattekin die rolls and outcomes for start-turn effects", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "quest-noop",
+            kind: "counter_change",
+            visibility: "public",
+            side: "runner",
+            amount: 0,
+            reason: "start_of_turn",
+            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceTitle: "Quest for Cattekin",
+            v1921DieRoll: 4,
+            questForCattekinOutcome: "no_effect"
+          },
+          {
+            effectId: "quest-core",
+            kind: "damage",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            reason: "start_of_turn",
+            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceTitle: "Quest for Cattekin",
+            v1921DieRoll: 1,
+            questForCattekinOutcome: "core_damage",
+            damageCannotBePrevented: true,
+            damageType: "core"
+          },
+          {
+            effectId: "quest-net",
+            kind: "damage",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            reason: "start_of_turn",
+            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceTitle: "Quest for Cattekin",
+            v1921DieRoll: 2,
+            questForCattekinOutcome: "net_damage",
+            damageCannotBePrevented: true,
+            damageType: "net"
+          },
+          {
+            effectId: "quest-action",
+            kind: "gain_actions",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            reason: "start_of_turn",
+            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceTitle: "Quest for Cattekin",
+            v1921DieRoll: 6,
+            questForCattekinOutcome: "permanent_action",
+            sourceTrashed: true,
+            permanentActionGain: true
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items.map((item) => item.title)).toEqual([
+      "Quest for Cattekin würfelt eine 4: kein weiterer Effekt.",
+      "Quest for Cattekin würfelt eine 1: Du erleidest 1 Core Damage.",
+      "Quest for Cattekin würfelt eine 2: Du erleidest 1 Net Damage.",
+      "Quest for Cattekin würfelt eine 6: Du erhältst dauerhaft 1 zusätzliche Aktion."
+    ]);
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Quest for Cattekin", "Wurf 4", "Kein Effekt"]));
+    expect(items[1]?.description).toBe("Der Schaden von Quest for Cattekin kann nicht verhindert werden.");
+    expect(items[3]?.chips).toEqual(expect.arrayContaining(["Wurf 6", "Extra-Aktion", "Dauerhaft", "Trash"]));
+  });
+
   it("formats auto-rezzed region effects", () => {
     const items = formatChronicleEffectItems(
       makeEvent("install_card", {
