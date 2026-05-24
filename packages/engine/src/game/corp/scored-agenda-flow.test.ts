@@ -11,10 +11,8 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
-import type { ScoredAgendaActionProfile } from "../../mechanics/agenda-scoring";
 import {
   handleScoredAgendaFlowChoice,
-  resolveScoredAgendaCounterCreditAction,
   scoreAgenda,
   startEmployeeEmpowermentStartDrawChoice,
   type ScoredAgendaFlowHost,
@@ -79,7 +77,6 @@ type MakeHostInput = {
   overadvanceDefinitionIds?: string[];
   effectiveDifficulty?: number;
   corpCredits?: number;
-  profile?: ScoredAgendaActionProfile;
 };
 
 function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
@@ -199,11 +196,6 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
         ),
       cardCounter: (cardId, counterType) =>
         counters.get(`${cardId}:${counterType}`) ?? 0,
-      spendVisibleCardCounter: (cardId, counterType, amount) => {
-        const key = `${cardId}:${counterType}`;
-        counters.set(key, (counters.get(key) ?? 0) - amount);
-        return { remainingCounters: counters.get(key) ?? 0 };
-      },
     },
     credits: {
       gainCredits: (_side, amount) => {
@@ -235,9 +227,6 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       resolveSecurityPurge: () => {
         callbacks.securityPurge += 1;
       },
-    },
-    actionProfiles: {
-      scoredAgendaCounterCreditProfileForPayload: () => input.profile,
     },
   };
 }
@@ -401,42 +390,6 @@ describe("scored agenda flow", () => {
       targetIceId: "ice_1",
       strengthBonus: 1,
       duplicatedSubroutineCount: 1,
-    });
-  });
-
-  it("executes scored agenda counter credit actions through the scored flow boundary", () => {
-    const legalAction = makeLegalAction({
-      cardId: "agenda_1",
-      agendaAbility: "take_credit",
-      removePowerCounterAmount: 1,
-      gainCreditsAmount: 3,
-    });
-    const host = makeHost({
-      legalAction,
-      scoreArea: ["agenda_1" as CardInstanceId],
-      profile: {
-        profileId: "profile_1",
-        sourceDefinitionId: "agenda_1_def",
-        agendaAbility: "take_credit",
-        side: "corp",
-        clickCost: 1,
-        counterType: "power",
-        removeCounterAmount: 1,
-        creditGain: 3,
-        label: "Take credit",
-      },
-    });
-    host.counters.addCardCounter("agenda_1" as CardInstanceId, "mark", 0);
-    host.counters.spendVisibleCardCounter("agenda_1" as CardInstanceId, "power", -2);
-
-    const result = resolveScoredAgendaCounterCreditAction(host);
-
-    expect(result.handled).toBe(true);
-    expect(host.state.corp.credits).toBe(3);
-    expect(legalAction.payload).toMatchObject({
-      spentPowerCounters: 1,
-      gainedCredits: 3,
-      remainingPowerCounters: 1,
     });
   });
 

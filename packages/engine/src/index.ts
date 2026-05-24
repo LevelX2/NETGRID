@@ -200,11 +200,15 @@ import {
 } from "./game/corp/install-rez-sequence-handlers";
 import {
   handleScoredAgendaFlowChoice,
-  resolveScoredAgendaCounterCreditAction,
   scoreAgenda,
   startEmployeeEmpowermentStartDrawChoice,
   type ScoredAgendaFlowHost,
 } from "./game/corp/scored-agenda-flow";
+import {
+  buildScoredAgendaAbilityActionsForCard,
+  handleScoredAgendaActivatedAbilityAction,
+  type ScoredAgendaAbilityHost,
+} from "./game/corp/scored-agenda-abilities";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -3213,108 +3217,24 @@ function corpMainActions(state: GameState): LegalAction[] {
       ),
     );
   }
+  const scoredAgendaAbilityActionsHost = scoredAgendaAbilityHost(state);
   for (const agendaId of state.corp.scoreArea.slice().sort()) {
-    const definition = definitionFor(state, agendaId);
+    const scoredAgendaAbilityActions = buildScoredAgendaAbilityActionsForCard(
+      scoredAgendaAbilityActionsHost,
+      agendaId,
+    );
+    if (scoredAgendaAbilityActions.handled) {
+      actions.push(...scoredAgendaAbilityActions.actions);
+      continue;
+    }
     pushActivatedCardImplementationActions(
       cardImplementationRuntimeDeps,
       state,
       actions,
       "corp",
       agendaId,
-      definition,
+      definitionFor(state, agendaId),
     );
-    if (
-      scoredAgendaKindForDefinition(definition) ===
-      "ai_cfo_shuffle_hq_archives_into_rd_draw"
-    ) {
-      const implementation = scoredAgendaImplementationForDefinition(definition);
-      const drawCardsAmount =
-        implementation?.kind === "ai_cfo_shuffle_hq_archives_into_rd_draw"
-          ? implementation.drawCount
-          : 0;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: HQ/Archives in R&D mischen, 5 ziehen`,
-          agendaId,
-          [{ clicks: 1 }],
-          {
-            cardId: agendaId,
-            agendaAbility: "ai_chief_financial_officer",
-            drawCardsAmount,
-          },
-        ),
-      );
-      continue;
-    }
-    const scoredCounterCreditProfile =
-      scoredAgendaCounterCreditProfileForDefinition(definition.id);
-    if (
-      scoredCounterCreditProfile &&
-      cardCounter(state, agendaId, scoredCounterCreditProfile.counterType) >=
-        scoredCounterCreditProfile.removeCounterAmount
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: ${scoredCounterCreditProfile.label}`,
-          agendaId,
-          [{ clicks: scoredCounterCreditProfile.clickCost }],
-          scoredAgendaCounterCreditPayload(
-            scoredCounterCreditProfile,
-            agendaId,
-          ),
-        ),
-      );
-      continue;
-    }
-    if (
-      SCORED_REVEAL_AGENDA_CARD_IDS.has(definition.id) &&
-      state.corp.rd.length > 0
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: R&D-Spitze revealn`,
-          agendaId,
-          [{ clicks: 1 }],
-          {
-            cardId: agendaId,
-            agendaAbility: "v1919_scored_agenda_reveal_rd_top",
-            hiddenZoneAction: "v1919_scored_agenda_reveal_rd_top",
-          },
-        ),
-      );
-      continue;
-    }
-    if (
-      scoredAgendaKindForDefinition(definition) ===
-        "corporate_retreat_disable_on_rez_or_install" &&
-      isCorporateRetreatInstallCreditAbilityAvailable(state, agendaId)
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: 2 Credits`,
-          agendaId,
-          [{ clicks: 1 }],
-          {
-            cardId: agendaId,
-            agendaAbility: "v1922_corporate_retreat",
-            gainCreditsAmount: 2,
-          },
-        ),
-      );
-      continue;
-    }
   }
   actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(buildCorpEndTurnAction(state));
@@ -3346,18 +3266,6 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
   }
   return actions;
-}
-
-function isCorporateRetreatInstallCreditAbilityAvailable(
-  state: GameState,
-  agendaId: CardInstanceId,
-): boolean {
-  return (
-    state.corp.scoreArea.includes(agendaId) &&
-    scoredAgendaKindForDefinition(definitionFor(state, agendaId)) ===
-      "corporate_retreat_disable_on_rez_or_install" &&
-    cardCounter(state, agendaId, "mark") > 0
-  );
 }
 
 function expireCorporateRetreatInstallCreditAbilities(state: GameState): void {
@@ -7348,6 +7256,12 @@ function performAction(
       return;
     case "activated_card_ability":
       if (
+        handleScoredAgendaActivatedAbilityAction(
+          scoredAgendaAbilityHost(state, legalAction),
+        ).handled
+      )
+        return;
+      if (
         !resolveActivatedCardImplementationAbility(
           cardImplementationRuntimeDeps,
           state,
@@ -7985,92 +7899,10 @@ function performAction(
         return;
       }
       if (
-        resolveScoredAgendaCounterCreditAction(
-          scoredAgendaFlowHost(state, legalAction),
+        handleScoredAgendaActivatedAbilityAction(
+          scoredAgendaAbilityHost(state, legalAction),
         ).handled
       ) {
-        return;
-      }
-      if (legalAction.payload?.agendaAbility === "v1922_corporate_retreat") {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf Corporate Retreat nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.corp.scoreArea.includes(sourceCardId))
-          throw new Error("Corporate Retreat ist nicht gescort.");
-        const definition = definitionFor(state, sourceCardId);
-        const implementation = scoredAgendaImplementationForDefinition(definition);
-        if (
-          implementation?.kind !==
-          "corporate_retreat_disable_on_rez_or_install"
-        )
-          throw new Error(
-            "Die Agenda-Aktion passt nicht zu Corporate Retreat.",
-          );
-        if (!isCorporateRetreatInstallCreditAbilityAvailable(state, sourceCardId))
-          throw new Error(
-            "Corporate Retreat ist nach Install oder Rez nicht mehr verfuegbar.",
-          );
-        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        const expectedGain =
-          implementation?.kind ===
-          "corporate_retreat_disable_on_rez_or_install"
-            ? implementation.gainAmount
-            : 0;
-        if (!Number.isInteger(gainAmount) || gainAmount !== expectedGain)
-          throw new Error(
-            "Corporate Retreat gewaehrt in diesem Scope genau 2 Credits.",
-          );
-        credits(state, "corp", gainAmount);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          gainedCredits: gainAmount,
-          corpCreditsAfter: state.corp.credits,
-        };
-        return;
-      }
-      if (
-        legalAction.payload?.agendaAbility ===
-        "v1919_scored_agenda_reveal_rd_top"
-      ) {
-        if (legalAction.side !== "corp")
-          throw new Error(
-            "Nur die Korp darf V1.9.19-Scored-Agenda-Faehigkeiten nutzen.",
-          );
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.corp.scoreArea.includes(sourceCardId))
-          throw new Error("Die V1.9.19-Scored-Agenda ist nicht gescort.");
-        const definition = definitionFor(state, sourceCardId);
-        if (!SCORED_REVEAL_AGENDA_CARD_IDS.has(definition.id))
-          throw new Error(
-            "Die V1.9.19-Scored-Agenda-Faehigkeit passt nicht zur Karte.",
-          );
-        revealCorpRdTop(state, legalAction);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          hiddenZoneAction: "v1919_scored_agenda_reveal_rd_top",
-        };
-        return;
-      }
-      if (legalAction.payload?.agendaAbility === "ai_chief_financial_officer") {
-        if (legalAction.side !== "corp")
-          throw new Error(
-            "Nur die Korp darf die AI Chief Financial Officer Agenda-Aktion nutzen.",
-          );
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.corp.scoreArea.includes(sourceCardId))
-          throw new Error(
-            "Die gewaehlte AI Chief Financial Officer Agenda ist nicht gescort.",
-          );
-        const definition = definitionFor(state, sourceCardId);
-        const implementation = scoredAgendaImplementationForDefinition(definition);
-        if (implementation?.kind !== "ai_cfo_shuffle_hq_archives_into_rd_draw")
-          throw new Error(
-            "Die Agenda-Aktion passt nicht zur ausgewaehlten AI Chief Financial Officer Agenda.",
-          );
-        resolveAiChiefFinancialOfficer(
-          corpZoneChoiceHandlerHost(state, legalAction),
-          sourceCardId,
-        );
         return;
       }
       if (
@@ -21195,8 +21027,6 @@ function scoredAgendaFlowHost(
       addCardCounter: (cardId, counterType, amount) =>
         addCardCounter(state, cardId, counterType, amount),
       cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
-      spendVisibleCardCounter: (cardId, counterType, amount) =>
-        spendVisibleCardCounter(state, cardId, counterType, amount),
     },
     credits: {
       gainCredits: (side, amount) => credits(state, side, amount),
@@ -21276,9 +21106,74 @@ function scoredAgendaFlowHost(
         );
       },
     },
+  };
+}
+
+function scoredAgendaAbilityHost(
+  state: GameState,
+  legalAction?: LegalAction,
+): ScoredAgendaAbilityHost {
+  return {
+    state,
+    ...(legalAction ? { legalAction } : {}),
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      scoredAgendaKindForDefinition: (definition) =>
+        scoredAgendaKindForDefinition(definition),
+      scoredAgendaForDefinition: (definition) =>
+        scoredAgendaImplementationForDefinition(definition),
+      isScoredRevealAgendaDefinition: (definitionId) =>
+        SCORED_REVEAL_AGENDA_CARD_IDS.has(definitionId as CardDefinitionId),
+    },
+    actions: {
+      createLegalAction: (side, type, label, source, costs, payload) =>
+        action(state, side, type, label, source, costs, payload),
+    },
+    counters: {
+      cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
+      spendVisibleCardCounter: (cardId, counterType, amount) =>
+        spendVisibleCardCounter(state, cardId, counterType, amount),
+    },
+    credits: {
+      gainCorpCredits: (amount) => credits(state, "corp", amount),
+    },
     actionProfiles: {
+      scoredAgendaCounterCreditProfileForDefinition: (definitionId) =>
+        scoredAgendaCounterCreditProfileForDefinition(definitionId),
       scoredAgendaCounterCreditProfileForPayload: (definitionId, payload) =>
         scoredAgendaCounterCreditProfileForPayload(definitionId, payload),
+      scoredAgendaCounterCreditPayload: (profile, cardId) =>
+        scoredAgendaCounterCreditPayload(profile, cardId),
+    },
+    callbacks: {
+      pushActivatedCardImplementationActions: (actions, cardId, definition) =>
+        pushActivatedCardImplementationActions(
+          cardImplementationRuntimeDeps,
+          state,
+          actions,
+          "corp",
+          cardId,
+          definition,
+        ),
+      resolveActivatedCardImplementationAbility: () => {
+        if (!legalAction) return false;
+        return resolveActivatedCardImplementationAbility(
+          cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+        );
+      },
+      revealCorpRdTop: () => {
+        if (!legalAction) throw new Error("Scored-Agenda-Aktion fehlt.");
+        revealCorpRdTop(state, legalAction);
+      },
+      resolveAiChiefFinancialOfficer: (sourceCardId) => {
+        if (!legalAction) throw new Error("AI CFO braucht eine LegalAction.");
+        resolveAiChiefFinancialOfficer(
+          corpZoneChoiceHandlerHost(state, legalAction),
+          sourceCardId,
+        );
+      },
     },
   };
 }

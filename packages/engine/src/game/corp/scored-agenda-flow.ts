@@ -9,7 +9,6 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
-import type { ScoredAgendaActionProfile } from "../../mechanics/agenda-scoring";
 
 type ScoredAgendaPayload = Record<string, string | number | boolean>;
 type ScoredSubtypeRevealSubtype = "code_gate" | "wall";
@@ -58,15 +57,7 @@ export type ScoredAgendaFlowHost = {
       counterType: "boon" | "mark",
       amount: number,
     ) => void;
-    cardCounter: (
-      cardId: CardInstanceId,
-      counterType: "boon" | "mark" | "power",
-    ) => number;
-    spendVisibleCardCounter: (
-      cardId: CardInstanceId,
-      counterType: "power",
-      amount: number,
-    ) => ScoredAgendaPayload;
+    cardCounter: (cardId: CardInstanceId, counterType: "boon" | "mark") => number;
   };
   credits: {
     gainCredits: (side: "corp", amount: number) => void;
@@ -95,12 +86,6 @@ export type ScoredAgendaFlowHost = {
       creditPerAgendaPoint: number,
     ) => void;
     resolveSecurityPurge: () => void;
-  };
-  actionProfiles: {
-    scoredAgendaCounterCreditProfileForPayload: (
-      definitionId: string,
-      payload: Record<string, unknown> | undefined,
-    ) => ScoredAgendaActionProfile | undefined;
   };
 };
 
@@ -390,42 +375,6 @@ export function startEmployeeEmpowermentStartDrawChoice(
   };
 }
 
-export function resolveScoredAgendaCounterCreditAction(
-  host: ScoredAgendaFlowHost,
-): ScoredAgendaFlowResult {
-  const legalAction = host.legalAction;
-  if (!legalAction) return { handled: false };
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  if (!sourceCardId || !host.state.cardInstances[sourceCardId])
-    return { handled: false };
-  const definition = host.cards.definitionFor(sourceCardId);
-  const profile = host.actionProfiles.scoredAgendaCounterCreditProfileForPayload(
-    definition.id,
-    legalAction.payload,
-  );
-  if (!profile) return { handled: false };
-  validateScoredAgendaCounterCreditAction(host, sourceCardId, profile);
-  const counterPayload = host.counters.spendVisibleCardCounter(
-    sourceCardId,
-    profile.counterType,
-    profile.removeCounterAmount,
-  );
-  host.credits.gainCredits("corp", profile.creditGain);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ...counterPayload,
-    spentPowerCounters: profile.removeCounterAmount,
-    gainedCredits: profile.creditGain,
-    remainingPowerCounters: Number(counterPayload.remainingCounters ?? 0),
-  };
-  return {
-    handled: true,
-    stateChanged: true,
-    gainedCredits: profile.creditGain,
-    resolvedPayload: legalAction.payload as ScoredAgendaPayload,
-  };
-}
-
 function scoredEmployeeEmpowermentSourceIds(
   host: ScoredAgendaFlowHost,
 ): CardInstanceId[] {
@@ -487,36 +436,6 @@ function resolveEmployeeEmpowermentStartDrawChoice(
     );
   }
   if (!host.state.winner) startEmployeeEmpowermentStartDrawChoice(host);
-}
-
-function validateScoredAgendaCounterCreditAction(
-  host: ScoredAgendaFlowHost,
-  sourceCardId: CardInstanceId,
-  profile: ScoredAgendaActionProfile,
-): void {
-  const legalAction = host.legalAction;
-  if (!legalAction) throw new Error("Scored-Agenda-Aktion fehlt.");
-  if (legalAction.side !== profile.side)
-    throw new Error("Nur die Korp darf diese scored Agenda-Aktion nutzen.");
-  if (host.state.phase !== "corp_action_phase" || host.state.activeSide !== "corp")
-    throw new Error("Diese scored Agenda-Aktion ist nur in der Korp-Aktionsphase nutzbar.");
-  if (!host.state.corp.scoreArea.includes(sourceCardId))
-    throw new Error("Die scored Agenda-Aktion ist nicht gescort.");
-  if (host.cards.definitionFor(sourceCardId).id !== profile.sourceDefinitionId)
-    throw new Error("Die scored Agenda-Aktion passt nicht zur Karte.");
-  if (legalAction.payload?.agendaAbility !== profile.agendaAbility)
-    throw new Error("Die scored Agenda-Aktion passt nicht zum Profil.");
-  const removeAmount = Number(legalAction.payload?.removePowerCounterAmount ?? 0);
-  if (
-    !Number.isInteger(removeAmount) ||
-    removeAmount !== profile.removeCounterAmount
-  )
-    throw new Error("Die scored Agenda-Aktion hat ungueltige Counterkosten.");
-  if (host.counters.cardCounter(sourceCardId, profile.counterType) < removeAmount)
-    throw new Error("Auf der scored Agenda sind nicht genug Counter.");
-  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-  if (!Number.isInteger(gainAmount) || gainAmount !== profile.creditGain)
-    throw new Error("Die scored Agenda-Aktion hat einen ungueltigen Creditbetrag.");
 }
 
 function scoredSubtypeRevealAgendaAbility(
