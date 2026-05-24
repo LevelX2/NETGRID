@@ -159,7 +159,9 @@ type CorpPlanFeatures = {
 type CorpInstalledEconomyActionKind =
   | "direct_payout"
   | "pool_payout"
-  | "side_economy";
+  | "side_economy"
+  | "scored_agenda_economy"
+  | "scored_agenda_counter_economy";
 
 type CorpInstalledEconomyActionAssessment = {
   kind: CorpInstalledEconomyActionKind;
@@ -168,6 +170,34 @@ type CorpInstalledEconomyActionAssessment = {
   storedCredits: number;
   futurePoolAfter: number;
   ability: string;
+  scoredAgenda?: CorpScoredAgendaAbilityAssessment;
+};
+
+export type CorpScoredAgendaAbilityKind =
+  | "scored_agenda_economy"
+  | "scored_agenda_draw"
+  | "scored_agenda_extra_action"
+  | "scored_agenda_trace_tag"
+  | "scored_agenda_damage_punish"
+  | "scored_agenda_shuffle_draw"
+  | "scored_agenda_counter_economy"
+  | "scored_agenda_utility"
+  | "unknown_scored_agenda_ability";
+
+export type CorpScoredAgendaAbilityAssessment = {
+  kind: CorpScoredAgendaAbilityKind;
+  sourceDefinitionId: string;
+  sourceTitle: string;
+  immediateGain: number;
+  drawAmount: number;
+  gainedActions: number;
+  netCredits: number;
+  clickCost: number;
+  creditCost: number;
+  storedCredits: number;
+  valueOverBasic: number;
+  tacticalValue: number;
+  evidence: string[];
 };
 
 type CorpExtraActionOperationAssessment = {
@@ -325,6 +355,26 @@ type CorpProtectionToScoreConversionContext = {
   safeRemoteButAgendaHeld: boolean;
   centralRiskHigher: boolean;
   noScorePath: boolean;
+};
+
+type CorpScoreWindowCompressionContext = {
+  compressionActionIds: string[];
+  agendaInstallActionIds: string[];
+  advanceActionIds: string[];
+  scoreActionIds: string[];
+  advanceBurstActionIds: string[];
+  nearScoreActionIds: string[];
+  protectedRemoteIds: string[];
+  protectedAgendaServers: string[];
+  remoteProtectionActionIds: string[];
+  protectionNoSafetyDeltaActionIds: string[];
+  economyActionIds: string[];
+  economyNecessaryActionIds: string[];
+  centralProtectionActionIds: string[];
+  centralProtectionNecessary: boolean;
+  drawActionIds: string[];
+  endTurnActionIds: string[];
+  opportunity: boolean;
 };
 
 export type CorpEvaluationContext = {
@@ -621,7 +671,8 @@ export function generateCorpPlanCandidates(
               Boolean(
                 classifyCorpExtraActionOperation(input, action, context),
               ))) ||
-          Boolean(classifyCorpInstalledEconomyAction(input, action)),
+          Boolean(classifyCorpInstalledEconomyAction(input, action)) ||
+          Boolean(classifyCorpScoredAgendaAbility(input, action)),
       ),
     ),
     buildCandidate(
@@ -681,6 +732,7 @@ export function evaluateCorpPlan(
     input,
     candidate,
   );
+  const scoredAgendaActions = evaluateCorpScoredAgendaActions(input, candidate);
   const extraActions = evaluateCorpExtraActionOperations(
     input,
     candidate,
@@ -707,6 +759,11 @@ export function evaluateCorpPlan(
     candidate,
     context,
   );
+  const scoreWindowCompression = evaluateCorpScoreWindowCompression(
+    input,
+    candidate,
+    context,
+  );
   const outcomeFollowup = evaluateCorpOutcomeFollowup(
     input,
     candidate,
@@ -729,12 +786,14 @@ export function evaluateCorpPlan(
     recentRemoteAgendaLoss.score +
     advanceProtection.score +
     installedEconomy.score +
+    scoredAgendaActions.score +
     extraActions.score +
     planContinuation.score +
     strategicLine.score +
     effectiveRemoteSafety.score +
     scoreConversion.score +
     protectionToScore.score +
+    scoreWindowCompression.score +
     outcomeFollowup.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
@@ -751,6 +810,7 @@ export function evaluateCorpPlan(
     `doctrine_plan_weight:${doctrinePlanWeight}`,
     ...scoreConversion.evidence,
     ...protectionToScore.evidence,
+    ...scoreWindowCompression.evidence,
     ...recentRemoteAgendaLoss.evidence,
     ...advanceProtection.evidence,
     ...runnerContest.evidence,
@@ -764,6 +824,7 @@ export function evaluateCorpPlan(
       : ["doctrine:neutral"]),
     ...candidate.expectedBenefits,
     ...installedEconomy.evidence,
+    ...scoredAgendaActions.evidence,
     ...extraActions.evidence,
     ...planContinuation.evidence,
     ...strategicLine.evidence,
@@ -888,6 +949,13 @@ export function evaluateCorpPlan(
         firstReason(installedEconomy.reasons),
       ],
       [
+        "scoredAgendaActions",
+        "Scored-Agenda-Aktionen",
+        scoredAgendaActions.score,
+        1,
+        firstReason(scoredAgendaActions.reasons),
+      ],
+      [
         "extraActions",
         "Extra-Aktionen",
         extraActions.score,
@@ -914,6 +982,13 @@ export function evaluateCorpPlan(
         scoreConversion.score,
         1,
         firstReason(scoreConversion.reasons),
+      ],
+      [
+        "scoreWindowCompression",
+        "Scorefenster-Kompression",
+        scoreWindowCompression.score,
+        1,
+        firstReason(scoreWindowCompression.reasons),
       ],
       [
         "planContinuation",
@@ -951,6 +1026,7 @@ export function evaluateCorpPlan(
       ...recentRemoteAgendaLoss.reasons,
       ...advanceProtection.reasons,
       ...installedEconomy.reasons,
+      ...scoredAgendaActions.reasons,
       ...extraActions.reasons,
       ...planContinuation.reasons,
       ...strategicLine.reasons,
@@ -958,6 +1034,7 @@ export function evaluateCorpPlan(
       ...outcomeFollowup.reasons,
       ...scoreConversion.reasons,
       ...protectionToScore.reasons,
+      ...scoreWindowCompression.reasons,
     ]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence),
   };
@@ -1340,6 +1417,192 @@ function evaluateCorpProtectionToScoreConversion(
     );
     if (conversion.safeRemoteButAgendaHeld)
       evidence.push("corp_remote_safe_but_agenda_held:true");
+  }
+
+  return {
+    score,
+    reasons: sortedUnique(reasons),
+    evidence: sortedUnique(evidence),
+  };
+}
+
+function evaluateCorpScoreWindowCompression(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+  context: CorpEvaluationContext,
+): CorpPlanEvaluatorResult {
+  if (!input.profileId.includes("v1.4.2")) {
+    return {
+      score: 0,
+      reasons: [],
+      evidence: ["corp_score_window_compression_profile:false"],
+    };
+  }
+  const compression = corpScoreWindowCompressionContext(input, context);
+  if (!compression.opportunity) {
+    return {
+      score: 0,
+      reasons: [],
+      evidence: ["corp_score_window_compression_opportunity:false"],
+    };
+  }
+
+  const actions = actionsForCandidate(input, candidate);
+  const choosesCompression = actions.some((action) =>
+    compression.compressionActionIds.includes(action.actionId),
+  );
+  const choosesAgendaInstall = actions.some((action) =>
+    compression.agendaInstallActionIds.includes(action.actionId),
+  );
+  const choosesAdvance = actions.some((action) =>
+    compression.advanceActionIds.includes(action.actionId),
+  );
+  const choosesScore = actions.some((action) =>
+    compression.scoreActionIds.includes(action.actionId),
+  );
+  const choosesAdvanceBurst = actions.some((action) =>
+    compression.advanceBurstActionIds.includes(action.actionId),
+  );
+  const choosesNearScore = actions.some((action) =>
+    compression.nearScoreActionIds.includes(action.actionId),
+  );
+  const choosesRemoteProtection = actions.some((action) =>
+    compression.remoteProtectionActionIds.includes(action.actionId),
+  );
+  const choosesProtectionNoDelta = actions.some((action) =>
+    compression.protectionNoSafetyDeltaActionIds.includes(action.actionId),
+  );
+  const choosesEconomy = actions.some((action) =>
+    compression.economyActionIds.includes(action.actionId),
+  );
+  const choosesNecessaryEconomy = actions.some((action) =>
+    compression.economyNecessaryActionIds.includes(action.actionId),
+  );
+  const choosesCentralProtection = actions.some((action) =>
+    compression.centralProtectionActionIds.includes(action.actionId),
+  );
+  const choosesUnnecessaryCentralProtection =
+    choosesCentralProtection && !compression.centralProtectionNecessary;
+  const choosesDraw = actions.some((action) =>
+    compression.drawActionIds.includes(action.actionId),
+  );
+  const choosesEndTurn = actions.some((action) =>
+    compression.endTurnActionIds.includes(action.actionId),
+  );
+  const nonEssential =
+    choosesProtectionNoDelta ||
+    (choosesEconomy && !choosesNecessaryEconomy) ||
+    choosesUnnecessaryCentralProtection ||
+    choosesDraw ||
+    choosesEndTurn ||
+    (!choosesCompression &&
+      !choosesRemoteProtection &&
+      candidate.kind !== "recover_economy");
+
+  let score = 0;
+  const reasons: string[] = [];
+  const evidence: string[] = [
+    "corp_score_window_compression_opportunity:true",
+    `corp_score_window_compression_protected_remote_count:${compression.protectedRemoteIds.length}`,
+    `corp_score_window_compression_agenda_server_count:${compression.protectedAgendaServers.length}`,
+  ];
+
+  if (choosesCompression) {
+    const bonus = choosesScore
+      ? 175
+      : choosesAdvanceBurst
+        ? 145
+        : choosesAdvance
+          ? 125
+          : 80;
+    score += bonus;
+    reasons.push("compress_score_window");
+    evidence.push("corp_score_window_compression_taken:true");
+    if (choosesAgendaInstall)
+      evidence.push("corp_agenda_installed_in_protected_remote:true");
+    if (choosesAdvance)
+      evidence.push("corp_agenda_advanced_in_protected_remote:true");
+    if (choosesNearScore) evidence.push("corp_agenda_near_score_window:true");
+    if (choosesAdvanceBurst)
+      evidence.push(
+        "corp_advance_burst_opportunity:true",
+        "corp_advance_burst_taken:true",
+        "corp_same_turn_score_opportunity:true",
+        "corp_same_turn_score_taken:true",
+      );
+  }
+
+  if (choosesRemoteProtection && !choosesProtectionNoDelta) {
+    score += 35;
+    reasons.push("protect_before_score_window_when_needed");
+    evidence.push("corp_protection_before_score_window:true");
+  }
+
+  if (choosesProtectionNoDelta) {
+    score -= 120;
+    reasons.push("avoid_protection_without_score_window_delta");
+    evidence.push(
+      "corp_protection_before_score_window:true",
+      "corp_protection_before_score_window_no_safety_delta:true",
+      "corp_non_essential_action_before_score_window:true",
+    );
+  }
+
+  if (choosesEconomy) {
+    evidence.push("corp_economy_before_score_window:true");
+    if (choosesNecessaryEconomy) {
+      score += 25;
+      reasons.push("economy_enables_score_window");
+      evidence.push("corp_economy_before_score_window_necessary:true");
+    } else {
+      score -= 80;
+      reasons.push("avoid_unneeded_economy_before_score_window");
+      evidence.push("corp_non_essential_action_before_score_window:true");
+    }
+  }
+
+  if (choosesCentralProtection) {
+    evidence.push("corp_central_protection_before_score_window:true");
+    if (compression.centralProtectionNecessary) {
+      score += 20;
+      evidence.push("corp_central_protection_before_score_window_necessary:true");
+    } else {
+      score -= 85;
+      reasons.push("avoid_central_protection_over_score_window");
+      evidence.push("corp_non_essential_action_before_score_window:true");
+    }
+  }
+
+  if (choosesDraw) {
+    score -= 65;
+    reasons.push("avoid_draw_before_score_window");
+    evidence.push(
+      "corp_draw_before_score_window:true",
+      "corp_non_essential_action_before_score_window:true",
+    );
+  }
+
+  if (choosesEndTurn) {
+    score -= 95;
+    reasons.push("avoid_end_turn_before_score_window");
+    evidence.push(
+      "corp_end_turn_before_score_window:true",
+      "corp_non_essential_action_before_score_window:true",
+    );
+  }
+
+  if (!choosesCompression && nonEssential) {
+    evidence.push(
+      "corp_score_window_compression_skipped:true",
+      `corp_score_window_compression_skip_reason:${compressionSkipReason({
+        choosesEconomy,
+        choosesNecessaryEconomy,
+        choosesProtectionNoDelta,
+        choosesCentralProtection: choosesUnnecessaryCentralProtection,
+        choosesDraw,
+        choosesEndTurn,
+      })}`,
+    );
   }
 
   return {
@@ -1869,6 +2132,221 @@ function corpProtectionToScoreConversionContext(
   };
 }
 
+function corpScoreWindowCompressionContext(
+  input: AiDecisionInput,
+  context: CorpEvaluationContext,
+): CorpScoreWindowCompressionContext {
+  const features = extractCorpPlanFeatures(input);
+  const memory = evaluateRemoteIntentMemory(input, context.beliefState);
+  const centralProtectionNecessary =
+    features.ownAgendaPressure >= 110 ||
+    memory.centralRunSignals.hq >= 3 ||
+    memory.centralRunSignals.rd >= 3;
+  const protectedRemoteIds = sortedUnique(
+    input.playerView.servers
+      .filter((server) => server.id.startsWith("remote_"))
+      .filter((server) =>
+        assessCorpEffectiveRemoteSafety(input, server.id, context)
+          .effectivelyProtected,
+      )
+      .map((server) => server.id),
+  );
+  const protectedAgendaServers = sortedUnique(
+    input.playerView.servers
+      .filter((server) => protectedRemoteIds.includes(server.id))
+      .filter((server) =>
+        server.root.some(
+          (card) => card.definitionId && isAgendaDefinition(card.definitionId),
+        ),
+      )
+      .map((server) => server.id),
+  );
+  const agendaRemoteIds = sortedUnique(
+    input.playerView.servers
+      .filter((server) => server.id.startsWith("remote_"))
+      .filter((server) =>
+        server.root.some(
+          (card) => card.definitionId && isAgendaDefinition(card.definitionId),
+        ),
+      )
+      .map((server) => server.id),
+  );
+  const scorePathActions = input.legalActions.filter((action) =>
+    isScoreWindowCompressionAction(input, action, context),
+  );
+  const agendaInstallActionIds = scorePathActions
+    .filter(
+      (action) =>
+        action.type === "install_card" &&
+        rolesForAction(input, action).some(isAgendaRole),
+    )
+    .map((action) => action.actionId);
+  const advanceActionIds = scorePathActions
+    .filter((action) => action.type === "advance_card")
+    .map((action) => action.actionId);
+  const scoreActionIds = scorePathActions
+    .filter((action) => action.type === "score_agenda")
+    .map((action) => action.actionId);
+  const advanceBurstActionIds = scorePathActions
+    .filter((action) => isCorpAdvanceBurstScoreAction(input, action, context))
+    .map((action) => action.actionId);
+  const nearScoreActionIds = scorePathActions
+    .filter((action) => {
+      const horizon = remoteScoreHorizonForAction(input, action, context);
+      return (
+        action.type === "score_agenda" ||
+        horizon?.advancesRemainingAfterAction === 0 ||
+        horizon?.advancesRemainingAfterAction === 1
+      );
+    })
+    .map((action) => action.actionId);
+  const compressionServerIds = sortedUnique(
+    scorePathActions.flatMap((action) => {
+      const horizon = remoteScoreHorizonForAction(input, action, context);
+      const serverId = horizon?.serverId ?? remoteServerIdForAction(input, action);
+      return serverId?.startsWith("remote_") ? [serverId] : [];
+    }),
+  );
+  const scoreServerIdsForEconomy = sortedUnique([
+    ...compressionServerIds,
+    ...protectedAgendaServers,
+    ...agendaRemoteIds,
+  ]);
+  const remoteProtectionActionIds = input.legalActions
+    .filter((action) =>
+      compressionServerIds.some((serverId) =>
+        isRemoteProtectionAction(input, action, serverId, context),
+      ),
+    )
+    .map((action) => action.actionId);
+  const protectionNoSafetyDeltaActionIds = input.legalActions
+    .filter((action) =>
+      isProtectionNoSafetyDeltaAction(input, action, context, protectedRemoteIds),
+    )
+    .map((action) => action.actionId);
+  const economyActionIds = input.legalActions
+    .filter((action) => isCorpEconomyOrDrawAction(input, action, context))
+    .map((action) => action.actionId);
+  const economyNecessaryActionIds = input.legalActions
+    .filter((action) =>
+      isScoreWindowCompressionEconomyNecessary(
+        input,
+        action,
+        context,
+        scoreServerIdsForEconomy,
+      ),
+    )
+    .map((action) => action.actionId);
+  const centralProtectionActionIds = input.legalActions
+    .filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        (action.payload?.serverId === "hq" || action.payload?.serverId === "rd"),
+    )
+    .map((action) => action.actionId);
+  const drawActionIds = input.legalActions
+    .filter((action) => action.type === "draw_card")
+    .map((action) => action.actionId);
+  const endTurnActionIds = input.legalActions
+    .filter((action) => action.type === "end_turn")
+    .map((action) => action.actionId);
+  return {
+    compressionActionIds: scorePathActions.map((action) => action.actionId),
+    agendaInstallActionIds,
+    advanceActionIds,
+    scoreActionIds,
+    advanceBurstActionIds,
+    nearScoreActionIds,
+    protectedRemoteIds,
+    protectedAgendaServers,
+    remoteProtectionActionIds,
+    protectionNoSafetyDeltaActionIds,
+    economyActionIds,
+    economyNecessaryActionIds,
+    centralProtectionActionIds,
+    centralProtectionNecessary,
+    drawActionIds,
+    endTurnActionIds,
+    opportunity: scorePathActions.length > 0 || economyNecessaryActionIds.length > 0,
+  };
+}
+
+function isScoreWindowCompressionAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+): boolean {
+  if (action.type === "score_agenda") return true;
+  if (isCorpAdvanceBurstScoreAction(input, action, context)) return true;
+  if (action.type !== "advance_card" && action.type !== "install_card")
+    return false;
+  if (
+    action.type === "install_card" &&
+    (action.payload?.placement === "ice" ||
+      !rolesForAction(input, action).some(isAgendaRole))
+  )
+    return false;
+  const horizon = remoteScoreHorizonForAction(input, action, context);
+  const serverId = horizon?.serverId ?? remoteServerIdForAction(input, action);
+  if (!serverId?.startsWith("remote_")) return false;
+  const safety = assessCorpEffectiveRemoteSafety(input, serverId, context, action);
+  if (safety.cheaplyContestable && !safety.sameTurnScoreAllowed) return false;
+  const reserve = remoteRezReserveNeedForServer(input, serverId, context);
+  if (
+    !safety.sameTurnScoreAllowed &&
+    reserve &&
+    reserve.reserveTarget > 0 &&
+    creditsAfterCorpPlanAction(input, action) < reserve.reserveTarget
+  )
+    return false;
+  if (action.type === "install_card") return safety.effectivelyProtected;
+  const remaining = horizon?.advancesRemainingAfterAction;
+  return (
+    safety.effectivelyProtected ||
+    safety.sameTurnScoreAllowed ||
+    remaining === 0 ||
+    remaining === 1
+  );
+}
+
+function isScoreWindowCompressionEconomyNecessary(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+  scoreServerIds: string[],
+): boolean {
+  if (!isCorpEconomyOrDrawAction(input, action, context)) return false;
+  const creditsBefore = input.playerView.own.credits;
+  const creditsAfter = creditsAfterCorpPlanAction(input, action);
+  return scoreServerIds.some((serverId) => {
+    const reserve = remoteRezReserveNeedForServer(input, serverId, context);
+    return Boolean(
+      reserve &&
+        creditsBefore < reserve.reserveTarget &&
+        creditsAfter >= reserve.reserveTarget,
+    );
+  });
+}
+
+function compressionSkipReason(flags: {
+  choosesEconomy: boolean;
+  choosesNecessaryEconomy: boolean;
+  choosesProtectionNoDelta: boolean;
+  choosesCentralProtection: boolean;
+  choosesDraw: boolean;
+  choosesEndTurn: boolean;
+}): string {
+  if (flags.choosesEconomy && flags.choosesNecessaryEconomy)
+    return "insufficient_credits";
+  if (flags.choosesProtectionNoDelta) return "runner_contest_high";
+  if (flags.choosesCentralProtection) return "central_risk_higher";
+  if (flags.choosesDraw) return "better_immediate_action";
+  if (flags.choosesEndTurn) return "insufficient_actions";
+  if (flags.choosesEconomy) return "better_immediate_action";
+  return "unknown";
+}
+
 function isProtectionToScorePathAction(
   input: AiDecisionInput,
   action: LegalAction,
@@ -1915,6 +2393,7 @@ function isCorpEconomyOrDrawAction(
         (role) => role.includes("economy") || role.includes("draw"),
       )) ||
     Boolean(classifyCorpInstalledEconomyAction(input, action)) ||
+    Boolean(classifyCorpScoredAgendaAbility(input, action)) ||
     Boolean(classifyCorpExtraActionOperation(input, action, context))
   );
 }
@@ -2381,10 +2860,31 @@ function evaluateCorpInstalledEconomyActions(
   const acuteNeed = input.playerView.own.credits < 5;
   const score =
     95 + Math.max(0, best.netCredits - 1) * 55 + (acuteNeed ? 110 : 40);
+  const scoredAgendaEvidence = best.scoredAgenda
+    ? [
+        ...best.scoredAgenda.evidence,
+        "scored_agenda_action_taken:true",
+        ...(best.scoredAgenda.kind === "scored_agenda_economy" ||
+        best.scoredAgenda.kind === "scored_agenda_counter_economy"
+          ? ["scored_agenda_economy_taken:true"]
+          : []),
+        ...(best.scoredAgenda.kind === "scored_agenda_counter_economy"
+          ? ["scored_agenda_counter_economy_taken:true"]
+          : []),
+        ...(best.scoredAgenda.sourceDefinitionId ===
+        "onr_v1_210_political-overthrow"
+          ? ["political_overthrow_taken:true"]
+          : []),
+      ]
+    : [];
   return {
     score,
     reasons: [
-      best.kind === "pool_payout"
+      best.kind === "scored_agenda_economy"
+        ? "scored_agenda_economy"
+        : best.kind === "scored_agenda_counter_economy"
+          ? "scored_agenda_counter_economy"
+          : best.kind === "pool_payout"
         ? "installed_corp_economy_pool_payout"
         : "installed_corp_economy_direct_payout",
     ],
@@ -2396,6 +2896,68 @@ function evaluateCorpInstalledEconomyActions(
       `installed_corp_economy_stored_credits:${best.storedCredits}`,
       `installed_corp_economy_future_pool_after:${best.futurePoolAfter}`,
       `corp_credit_need:${acuteNeed ? "acute" : "stable"}`,
+      ...scoredAgendaEvidence,
+    ],
+  };
+}
+
+function evaluateCorpScoredAgendaActions(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+): CorpPlanEvaluatorResult {
+  const assessments = candidate.legalActionIds
+    .map((actionId) =>
+      input.legalActions.find((action) => action.actionId === actionId),
+    )
+    .map((action) =>
+      action ? classifyCorpScoredAgendaAbility(input, action) : undefined,
+    )
+    .filter((assessment): assessment is CorpScoredAgendaAbilityAssessment =>
+      Boolean(assessment),
+    );
+  if (assessments.length === 0)
+    return { score: 0, reasons: [], evidence: [] };
+  const best = assessments
+    .slice()
+    .sort(
+      (left, right) =>
+        right.tacticalValue - left.tacticalValue ||
+        right.valueOverBasic - left.valueOverBasic ||
+        left.sourceDefinitionId.localeCompare(right.sourceDefinitionId),
+    )[0]!;
+  const score =
+    35 +
+    Math.max(0, best.valueOverBasic) * 25 +
+    Math.max(0, best.tacticalValue);
+  return {
+    score,
+    reasons: [best.kind],
+    evidence: [
+      ...best.evidence,
+      "scored_agenda_action_taken:true",
+      ...(best.kind === "scored_agenda_economy" ||
+      best.kind === "scored_agenda_counter_economy"
+        ? ["scored_agenda_economy_taken:true"]
+        : []),
+      ...(best.kind === "scored_agenda_counter_economy"
+        ? ["scored_agenda_counter_economy_taken:true"]
+        : []),
+      ...(best.kind === "scored_agenda_draw" ||
+      best.kind === "scored_agenda_shuffle_draw"
+        ? ["scored_agenda_draw_taken:true"]
+        : []),
+      ...(best.kind === "scored_agenda_extra_action"
+        ? ["scored_agenda_extra_action_taken:true"]
+        : []),
+      ...(best.kind === "scored_agenda_trace_tag"
+        ? ["scored_agenda_trace_tag_taken:true"]
+        : []),
+      ...(best.kind === "scored_agenda_damage_punish"
+        ? ["scored_agenda_damage_punish_taken:true"]
+        : []),
+      ...(best.sourceDefinitionId === "onr_v1_210_political-overthrow"
+        ? ["political_overthrow_taken:true"]
+        : []),
     ],
   };
 }
@@ -2758,6 +3320,26 @@ function classifyCorpInstalledEconomyAction(
     action.type !== "activated_card_ability"
   )
     return undefined;
+  const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+  if (
+    scoredAgenda &&
+    (scoredAgenda.kind === "scored_agenda_economy" ||
+      scoredAgenda.kind === "scored_agenda_counter_economy") &&
+    scoredAgenda.immediateGain > 0
+  ) {
+    return {
+      kind: scoredAgenda.kind,
+      immediateGain: scoredAgenda.immediateGain,
+      netCredits: scoredAgenda.netCredits,
+      storedCredits: scoredAgenda.storedCredits,
+      futurePoolAfter: Math.max(
+        0,
+        scoredAgenda.storedCredits - scoredAgenda.immediateGain,
+      ),
+      ability: scoredAgenda.kind,
+      scoredAgenda,
+    };
+  }
   const sourceCard = findVisibleCard(input, action.source);
   if (!sourceCard || sourceCard.rezzed !== true) return undefined;
   const installedInServer = input.playerView.servers.some((server) =>
@@ -2823,6 +3405,125 @@ function classifyCorpInstalledEconomyAction(
   };
 }
 
+export function classifyCorpScoredAgendaAbility(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpScoredAgendaAbilityAssessment | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  if (action.source === "basic_action" || action.source === "game_rule")
+    return undefined;
+  if (
+    action.type !== "activated_card_ability" &&
+    action.type !== "gain_credit" &&
+    action.type !== "draw_card" &&
+    action.type !== "trigger_ability"
+  )
+    return undefined;
+  const sourceCard = findVisibleCard(input, action.source);
+  if (!sourceCard?.known || sourceCard.type !== "agenda" || !sourceCard.definitionId)
+    return undefined;
+  if (
+    !input.playerView.own.scoreArea.some(
+      (card) => card.instanceId === sourceCard.instanceId && card.known,
+    )
+  )
+    return undefined;
+  const text = scoredAgendaAbilityText(sourceCard, action);
+  const storedCredits = Math.max(
+    0,
+    sourceCard.counters?.bit ?? sourceCard.counters?.power ?? 0,
+  );
+  const clickCost = Math.max(1, actionClickCost(action));
+  const creditCost = actionCreditCost(action);
+  const payloadGain = Math.max(
+    0,
+    numberPayload(action, "gainCreditsAmount"),
+    numberPayload(action, "gainedCredits"),
+    numberPayload(action, "amount"),
+  );
+  const textGain = scoredAgendaCreditGainFromText(text);
+  const immediateGain = Math.max(payloadGain, textGain);
+  const drawAmount = Math.max(
+    0,
+    numberPayload(action, "drawCardsAmount"),
+    scoredAgendaDrawAmountFromText(text),
+  );
+  const gainedActions = scoredAgendaGainedActionsFromText(text);
+  const netCredits = Math.max(0, immediateGain - creditCost);
+  const valueOverBasic = Math.max(
+    0,
+    Math.max(netCredits - clickCost, drawAmount - clickCost, gainedActions),
+  );
+  const lowerText = text.toLowerCase();
+  const counterEconomy =
+    immediateGain > 0 &&
+    (storedCredits > 0 ||
+      numberPayload(action, "removePowerCounterAmount") > 0 ||
+      /counter|coup|take\s+\[?\d+\]?.*from/i.test(text));
+  const kind: CorpScoredAgendaAbilityKind =
+    action.payload?.agendaAbility === "ai_chief_financial_officer" ||
+    (lowerText.includes("shuffle") && drawAmount > 0)
+      ? "scored_agenda_shuffle_draw"
+      : counterEconomy
+        ? "scored_agenda_counter_economy"
+        : immediateGain > 0
+          ? "scored_agenda_economy"
+          : drawAmount > 1
+            ? "scored_agenda_draw"
+            : gainedActions > 0
+              ? "scored_agenda_extra_action"
+              : lowerText.includes("trace") && lowerText.includes("tag")
+                ? "scored_agenda_trace_tag"
+                : lowerText.includes("damage")
+                  ? "scored_agenda_damage_punish"
+                  : "scored_agenda_utility";
+  const tacticalValue =
+    kind === "scored_agenda_damage_punish"
+      ? input.playerView.opponent.tags > 0
+        ? 165
+        : -120
+      : kind === "scored_agenda_trace_tag"
+        ? input.playerView.opponent.tags > 0 ||
+          rolesForVisibleCorpCards(input).some((role) =>
+            role.includes("tag_punishment"),
+          )
+          ? 110
+          : 25
+        : kind === "scored_agenda_extra_action"
+          ? 145
+          : kind === "scored_agenda_shuffle_draw"
+            ? 120
+            : valueOverBasic * 45;
+  return {
+    kind,
+    sourceDefinitionId: sourceCard.definitionId,
+    sourceTitle: sourceCard.title ?? sourceCard.definitionId,
+    immediateGain,
+    drawAmount,
+    gainedActions,
+    netCredits,
+    clickCost,
+    creditCost,
+    storedCredits,
+    valueOverBasic,
+    tacticalValue,
+    evidence: scoredAgendaAbilityEvidence({
+      kind,
+      sourceDefinitionId: sourceCard.definitionId,
+      sourceTitle: sourceCard.title ?? sourceCard.definitionId,
+      immediateGain,
+      drawAmount,
+      gainedActions,
+      netCredits,
+      clickCost,
+      creditCost,
+      storedCredits,
+      valueOverBasic,
+      tacticalValue,
+    }),
+  };
+}
+
 function activatedCardAbilityCreditGain(
   action: LegalAction,
   storedCredits: number,
@@ -2838,6 +3539,111 @@ function activatedCardAbilityCreditGain(
   if (!Number.isFinite(amount) || amount <= 0 || storedCredits < amount)
     return 0;
   return amount;
+}
+
+function scoredAgendaAbilityText(
+  sourceCard: VisibleCard,
+  action: LegalAction,
+): string {
+  const definitionText =
+    (sourceCard.definitionId
+      ? (RUNTIME_CARDS[sourceCard.definitionId]?.text ??
+        DEMO_CARDS_BY_ID[sourceCard.definitionId]?.rulesText)
+      : "") ?? "";
+  return [
+    sourceCard.title,
+    sourceCard.rulesText,
+    definitionText,
+    action.label,
+    action.payload?.cardImplementationAbilityLabel,
+    action.payload?.agendaAbility,
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
+}
+
+function scoredAgendaCreditGainFromText(text: string): number {
+  const normalized = text.replace(/\[[^\d]*(\d+)[^\d]*\]/g, "$1");
+  const match =
+    /\b(?:gain|take)\s+(\d+)(?:\s+(?:credits?|bits?))?/i.exec(normalized) ??
+    /(\d+)\s+Credits?\s+nehmen/i.exec(normalized);
+  if (!match) return 0;
+  const amount = Number(match[1]);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+function scoredAgendaDrawAmountFromText(text: string): number {
+  const normalized = text.replace(/\btwo\b/gi, "2").replace(/\bfive\b/gi, "5");
+  const match = /\bdraw\s+(\d+)\s+cards?/i.exec(normalized);
+  if (!match) return 0;
+  const amount = Number(match[1]);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+function scoredAgendaGainedActionsFromText(text: string): number {
+  const normalized = text.toLowerCase();
+  if (
+    normalized.includes("gain an action") ||
+    normalized.includes("gain 1 action") ||
+    normalized.includes("aktion ausgeben") ||
+    normalized.includes("aktion gewinnen")
+  )
+    return 1;
+  const match = /\bgain\s+(\d+)\s+actions?/i.exec(text);
+  if (!match) return 0;
+  const amount = Number(match[1]);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+function rolesForVisibleCorpCards(input: AiDecisionInput): string[] {
+  return sortedUnique(
+    [
+      ...input.playerView.own.gripOrHq,
+      ...input.playerView.own.heapOrArchives,
+      ...input.playerView.own.scoreArea,
+      ...input.playerView.servers.flatMap((server) => [
+        ...server.ice,
+        ...server.root,
+      ]),
+    ].flatMap((card) => rolesForCardId(card.definitionId)),
+  );
+}
+
+function scoredAgendaAbilityEvidence(
+  assessment: Omit<CorpScoredAgendaAbilityAssessment, "evidence">,
+): string[] {
+  return [
+    "scored_agenda_action_opportunity:true",
+    `scored_agenda_action_kind:${assessment.kind}`,
+    `scored_agenda_action_definition:${assessment.sourceDefinitionId}`,
+    `scored_agenda_action_immediate_gain:${assessment.immediateGain}`,
+    `scored_agenda_action_draw_amount:${assessment.drawAmount}`,
+    `scored_agenda_action_gained_actions:${assessment.gainedActions}`,
+    `scored_agenda_action_value_over_basic:${assessment.valueOverBasic}`,
+    ...(assessment.kind === "scored_agenda_economy" ||
+    assessment.kind === "scored_agenda_counter_economy"
+      ? ["scored_agenda_economy_opportunity:true"]
+      : []),
+    ...(assessment.kind === "scored_agenda_counter_economy"
+      ? ["scored_agenda_counter_economy_opportunity:true"]
+      : []),
+    ...(assessment.kind === "scored_agenda_draw" ||
+    assessment.kind === "scored_agenda_shuffle_draw"
+      ? ["scored_agenda_draw_opportunity:true"]
+      : []),
+    ...(assessment.kind === "scored_agenda_extra_action"
+      ? ["scored_agenda_extra_action_opportunity:true"]
+      : []),
+    ...(assessment.kind === "scored_agenda_trace_tag"
+      ? ["scored_agenda_trace_tag_opportunity:true"]
+      : []),
+    ...(assessment.kind === "scored_agenda_damage_punish"
+      ? ["scored_agenda_damage_punish_opportunity:true"]
+      : []),
+    ...(assessment.sourceDefinitionId === "onr_v1_210_political-overthrow"
+      ? ["political_overthrow_opportunity:true"]
+      : []),
+  ];
 }
 
 function classifyCorpExtraActionOperation(
@@ -4015,6 +4821,21 @@ function creditsAfterCorpPlanAction(
       )
     );
   }
+  if (action.type === "activated_card_ability") {
+    const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+    const installedEconomy = classifyCorpInstalledEconomyAction(input, action);
+    return (
+      creditsAfterCosts +
+      Math.max(
+        0,
+        scoredAgenda?.immediateGain ?? 0,
+        installedEconomy?.immediateGain ?? 0,
+        numberPayload(action, "gainCreditsAmount"),
+        numberPayload(action, "gainedCredits"),
+        numberPayload(action, "amount"),
+      )
+    );
+  }
   return creditsAfterCosts;
 }
 
@@ -5131,6 +5952,17 @@ function actionPriority(
     classifyCorpInstalledEconomyAction(input, action)
   )
     return corpInstalledEconomyPriority(input, action);
+  if (kind === "recover_economy") {
+    const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+    if (scoredAgenda) {
+      return (
+        84 +
+        scoredAgenda.tacticalValue +
+        Math.max(0, scoredAgenda.valueOverBasic) * 8 +
+        (scoredAgenda.kind === "scored_agenda_damage_punish" ? 55 : 0)
+      );
+    }
+  }
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
   if (
     kind === "build_scoring_remote" &&

@@ -28,7 +28,11 @@ import soakSeeds143Data from "../../../data/ai/ai-soak-seeds-1.4.3.json";
 import deckFormatProfiles130Data from "../../../data/decks/deck-format-profiles-1.3.0.json";
 import deckSnapshots08Data from "../../../data/decks/deck-snapshots-0.8.json";
 import exploitFixtures143Data from "../../../data/scenarios/ai-v143-exploit-regression-fixtures.json";
-import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
+import {
+  chooseCorpPlanAction,
+  classifyCorpScoredAgendaAbility,
+  hasCorpPlanAction,
+} from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import {
   beliefDebugSummary,
@@ -101,6 +105,7 @@ export {
 export {
   chooseCorpPlanAction,
   chooseCorpPlanDecision,
+  classifyCorpScoredAgendaAbility,
   corpPlanUsesOnlyAiSupportedCards,
   evaluateAgendaRisk,
   evaluateCorpPlan,
@@ -456,6 +461,50 @@ export type AiMatchProgressionMetrics = {
   corpScorePathBlockedByEffectiveRemoteSafety: number;
   corpAgendaHeldDueToUnsafeRemote: number;
   corpAgendaHeldTooLongWithHqPressure: number;
+  corpAgendaInstalledInProtectedRemote: number;
+  corpAgendaAdvancedInProtectedRemote: number;
+  corpAgendaNearScoreWindow: number;
+  corpScoreWindowCompressionOpportunity: number;
+  corpScoreWindowCompressionTaken: number;
+  corpScoreWindowCompressionRate: number;
+  corpScoreWindowCompressionSkipped: number;
+  corpNonEssentialActionBeforeScoreWindow: number;
+  corpEconomyBeforeScoreWindow: number;
+  corpEconomyBeforeScoreWindowNecessary: number;
+  corpProtectionBeforeScoreWindow: number;
+  corpProtectionBeforeScoreWindowNoSafetyDelta: number;
+  corpCentralProtectionBeforeScoreWindow: number;
+  corpCentralProtectionBeforeScoreWindowNecessary: number;
+  corpDrawBeforeScoreWindow: number;
+  corpEndTurnBeforeScoreWindow: number;
+  corpSameTurnScoreOpportunity: number;
+  corpSameTurnScoreTaken: number;
+  corpScoreWindowLostAfterNonEssentialAction: number;
+  corpRunnerStealAfterDelayedScoreWindow: number;
+  corpAdvanceToScoreLineCompressedWithin2: number;
+  corpAdvanceToScoreLineCompressedWithin3: number;
+  scoredAgendaActionOpportunities: number;
+  scoredAgendaActionTaken: number;
+  scoredAgendaActionTakeRate: number;
+  scoredAgendaEconomyOpportunities: number;
+  scoredAgendaEconomyTaken: number;
+  scoredAgendaEconomySkippedForBasicCredit: number;
+  politicalOverthrowOpportunities: number;
+  politicalOverthrowTaken: number;
+  politicalOverthrowSkippedForBasicCredit: number;
+  scoredAgendaCounterEconomyOpportunities: number;
+  scoredAgendaCounterEconomyTaken: number;
+  scoredAgendaDrawOpportunities: number;
+  scoredAgendaDrawTaken: number;
+  scoredAgendaExtraActionOpportunities: number;
+  scoredAgendaExtraActionTaken: number;
+  scoredAgendaTraceTagOpportunities: number;
+  scoredAgendaTraceTagTaken: number;
+  scoredAgendaDamagePunishOpportunities: number;
+  scoredAgendaDamagePunishTaken: number;
+  scoredAgendaActionValueOverBasic: number;
+  basicCreditTakenWhileBetterAgendaEconomyAvailable: number;
+  basicDrawTakenWhileBetterAgendaDrawAvailable: number;
   advancedAgendaSteals: number;
   advancedAgendaStealsFromRemote: number;
   advancedAgendaStealsFromCentral: number;
@@ -3908,6 +3957,114 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.delta.corpScorePathAvailableButNotTaken,
     ],
     [
+      "corpScoreWindowCompressionOpportunity",
+      benchmark.baseline.corpScoreWindowCompressionOpportunity,
+      benchmark.candidate.corpScoreWindowCompressionOpportunity,
+      benchmark.delta.corpScoreWindowCompressionOpportunity,
+    ],
+    [
+      "corpScoreWindowCompressionTaken",
+      benchmark.baseline.corpScoreWindowCompressionTaken,
+      benchmark.candidate.corpScoreWindowCompressionTaken,
+      benchmark.delta.corpScoreWindowCompressionTaken,
+    ],
+    [
+      "corpScoreWindowCompressionRate",
+      benchmark.baseline.corpScoreWindowCompressionRate,
+      benchmark.candidate.corpScoreWindowCompressionRate,
+      benchmark.delta.corpScoreWindowCompressionRate,
+    ],
+    [
+      "corpNonEssentialActionBeforeScoreWindow",
+      benchmark.baseline.corpNonEssentialActionBeforeScoreWindow,
+      benchmark.candidate.corpNonEssentialActionBeforeScoreWindow,
+      benchmark.delta.corpNonEssentialActionBeforeScoreWindow,
+    ],
+    [
+      "corpEconomyBeforeScoreWindow",
+      benchmark.baseline.corpEconomyBeforeScoreWindow,
+      benchmark.candidate.corpEconomyBeforeScoreWindow,
+      benchmark.delta.corpEconomyBeforeScoreWindow,
+    ],
+    [
+      "corpEconomyBeforeScoreWindowNecessary",
+      benchmark.baseline.corpEconomyBeforeScoreWindowNecessary,
+      benchmark.candidate.corpEconomyBeforeScoreWindowNecessary,
+      benchmark.delta.corpEconomyBeforeScoreWindowNecessary,
+    ],
+    [
+      "corpProtectionBeforeScoreWindowNoSafetyDelta",
+      benchmark.baseline.corpProtectionBeforeScoreWindowNoSafetyDelta,
+      benchmark.candidate.corpProtectionBeforeScoreWindowNoSafetyDelta,
+      benchmark.delta.corpProtectionBeforeScoreWindowNoSafetyDelta,
+    ],
+    [
+      "corpCentralProtectionBeforeScoreWindow",
+      benchmark.baseline.corpCentralProtectionBeforeScoreWindow,
+      benchmark.candidate.corpCentralProtectionBeforeScoreWindow,
+      benchmark.delta.corpCentralProtectionBeforeScoreWindow,
+    ],
+    [
+      "corpAdvanceBurstOpportunity",
+      benchmark.baseline.corpAdvanceBurstOpportunity,
+      benchmark.candidate.corpAdvanceBurstOpportunity,
+      benchmark.delta.corpAdvanceBurstOpportunity,
+    ],
+    [
+      "corpAdvanceBurstTaken",
+      benchmark.baseline.corpAdvanceBurstTaken,
+      benchmark.candidate.corpAdvanceBurstTaken,
+      benchmark.delta.corpAdvanceBurstTaken,
+    ],
+    [
+      "corpSameTurnScoreOpportunity",
+      benchmark.baseline.corpSameTurnScoreOpportunity,
+      benchmark.candidate.corpSameTurnScoreOpportunity,
+      benchmark.delta.corpSameTurnScoreOpportunity,
+    ],
+    [
+      "corpSameTurnScoreTaken",
+      benchmark.baseline.corpSameTurnScoreTaken,
+      benchmark.candidate.corpSameTurnScoreTaken,
+      benchmark.delta.corpSameTurnScoreTaken,
+    ],
+    [
+      "corpRunnerStealAfterDelayedScoreWindow",
+      benchmark.baseline.corpRunnerStealAfterDelayedScoreWindow,
+      benchmark.candidate.corpRunnerStealAfterDelayedScoreWindow,
+      benchmark.delta.corpRunnerStealAfterDelayedScoreWindow,
+    ],
+    [
+      "scoredAgendaActionOpportunities",
+      benchmark.baseline.scoredAgendaActionOpportunities,
+      benchmark.candidate.scoredAgendaActionOpportunities,
+      benchmark.delta.scoredAgendaActionOpportunities,
+    ],
+    [
+      "scoredAgendaActionTaken",
+      benchmark.baseline.scoredAgendaActionTaken,
+      benchmark.candidate.scoredAgendaActionTaken,
+      benchmark.delta.scoredAgendaActionTaken,
+    ],
+    [
+      "scoredAgendaActionTakeRate",
+      benchmark.baseline.scoredAgendaActionTakeRate,
+      benchmark.candidate.scoredAgendaActionTakeRate,
+      benchmark.delta.scoredAgendaActionTakeRate,
+    ],
+    [
+      "politicalOverthrowSkippedForBasicCredit",
+      benchmark.baseline.politicalOverthrowSkippedForBasicCredit,
+      benchmark.candidate.politicalOverthrowSkippedForBasicCredit,
+      benchmark.delta.politicalOverthrowSkippedForBasicCredit,
+    ],
+    [
+      "basicCreditTakenWhileBetterAgendaEconomyAvailable",
+      benchmark.baseline.basicCreditTakenWhileBetterAgendaEconomyAvailable,
+      benchmark.candidate.basicCreditTakenWhileBetterAgendaEconomyAvailable,
+      benchmark.delta.basicCreditTakenWhileBetterAgendaEconomyAvailable,
+    ],
+    [
       "advanceThenScoreSameTurn",
       benchmark.baseline.advanceThenScoreSameTurn,
       benchmark.candidate.advanceThenScoreSameTurn,
@@ -6953,6 +7110,50 @@ function scoreCorpAction(
         `runner_tags:${features.opponentTags}`,
       );
       break;
+    case "activated_card_ability":
+    case "trigger_ability": {
+      const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+      if (scoredAgenda) {
+        score = scoreCorpScoredAgendaAbility(scoredAgenda, features);
+        reasonCode = corpScoredAgendaAbilityReasonCode(scoredAgenda.kind);
+        explanation =
+          "Die Corp nutzt eine sichtbare Fähigkeit einer gescorten Agenda.";
+        evidence.push(
+          ...scoredAgenda.evidence,
+          "scored_agenda_action_taken:true",
+          ...(scoredAgenda.kind === "scored_agenda_economy" ||
+          scoredAgenda.kind === "scored_agenda_counter_economy"
+            ? ["scored_agenda_economy_taken:true"]
+            : []),
+          ...(scoredAgenda.kind === "scored_agenda_counter_economy"
+            ? ["scored_agenda_counter_economy_taken:true"]
+            : []),
+          ...(scoredAgenda.kind === "scored_agenda_draw" ||
+          scoredAgenda.kind === "scored_agenda_shuffle_draw"
+            ? ["scored_agenda_draw_taken:true"]
+            : []),
+          ...(scoredAgenda.kind === "scored_agenda_extra_action"
+            ? ["scored_agenda_extra_action_taken:true"]
+            : []),
+          ...(scoredAgenda.kind === "scored_agenda_trace_tag"
+            ? ["scored_agenda_trace_tag_taken:true"]
+            : []),
+          ...(scoredAgenda.kind === "scored_agenda_damage_punish"
+            ? ["scored_agenda_damage_punish_taken:true"]
+            : []),
+          ...(scoredAgenda.sourceDefinitionId ===
+          "onr_v1_210_political-overthrow"
+            ? ["political_overthrow_taken:true"]
+            : []),
+        );
+      } else {
+        score = 260;
+        reasonCode = "corp.card_ability.visible";
+        explanation = "Eine sichtbare Kartenfähigkeit ist legal verfügbar.";
+        evidence.push("corp_card_ability");
+      }
+      break;
+    }
     case "purge_virus_counters":
       score = 780;
       reasonCode = "corp.purge.visible_virus_counters";
@@ -6961,17 +7162,67 @@ function scoreCorpAction(
       evidence.push("purge_legal");
       break;
     case "gain_credit":
-      score = features.credits < 5 ? 500 : 350;
-      reasonCode = "corp.economy.basic_credit";
-      explanation = "Credits verbessern Rez- und Score-Fenster.";
-      evidence.push("basic_economy");
+      {
+        const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+        if (scoredAgenda) {
+          score = scoreCorpScoredAgendaAbility(scoredAgenda, features);
+          reasonCode = corpScoredAgendaAbilityReasonCode(scoredAgenda.kind);
+          explanation =
+            "Die Corp nutzt eine sichtbare Fähigkeit einer gescorten Agenda.";
+          evidence.push(
+            ...scoredAgenda.evidence,
+            "scored_agenda_action_taken:true",
+            ...(scoredAgenda.kind === "scored_agenda_economy" ||
+            scoredAgenda.kind === "scored_agenda_counter_economy"
+              ? ["scored_agenda_economy_taken:true"]
+              : []),
+            ...(scoredAgenda.kind === "scored_agenda_counter_economy"
+              ? ["scored_agenda_counter_economy_taken:true"]
+              : []),
+          );
+        } else {
+          const betterAgendaEconomy =
+            betterScoredAgendaEconomyAvailable(input, action);
+          const politicalOverthrowAvailable =
+            politicalOverthrowEconomyAvailable(input, action);
+          score = features.credits < 5 ? 500 : 350;
+          if (betterAgendaEconomy) score -= 220;
+          reasonCode = betterAgendaEconomy
+            ? "corp.economy.basic_credit_deferred_for_scored_agenda"
+            : "corp.economy.basic_credit";
+          explanation = "Credits verbessern Rez- und Score-Fenster.";
+          evidence.push(
+            "basic_economy",
+            ...(betterAgendaEconomy
+              ? [
+                  "basic_credit_taken_while_better_agenda_economy_available:true",
+                  "scored_agenda_economy_skipped_for_basic_credit:true",
+                  ...(politicalOverthrowAvailable
+                    ? ["political_overthrow_skipped_for_basic_credit:true"]
+                    : []),
+                ]
+              : []),
+          );
+        }
+      }
       break;
     case "draw_card":
-      score = features.handCount < 4 ? 460 : 320;
-      reasonCode = "corp.economy.draw_card";
+      {
+        const betterAgendaDraw = betterScoredAgendaDrawAvailable(input, action);
+        score = features.handCount < 4 ? 460 : 320;
+        if (betterAgendaDraw) score -= 180;
+        reasonCode = betterAgendaDraw
+          ? "corp.economy.basic_draw_deferred_for_scored_agenda"
+          : "corp.economy.draw_card";
+      }
       explanation =
         "Eine Karte zu ziehen verbessert die sichtbare Corp-Auswahl.";
-      evidence.push(`hand_count:${features.handCount}`);
+      evidence.push(
+        `hand_count:${features.handCount}`,
+        ...(betterScoredAgendaDrawAvailable(input, action)
+          ? ["basic_draw_taken_while_better_agenda_draw_available:true"]
+          : []),
+      );
       break;
     case "end_turn":
       score = 120 + (features.clicks <= 0 ? 500 : 0);
@@ -6991,6 +7242,108 @@ function scoreCorpAction(
     confidence: confidence(score),
     evidence,
   };
+}
+
+function scoreCorpScoredAgendaAbility(
+  assessment: NonNullable<
+    ReturnType<typeof classifyCorpScoredAgendaAbility>
+  >,
+  features: AiFeatures,
+): number {
+  const lowCredits = features.credits < 5;
+  switch (assessment.kind) {
+    case "scored_agenda_economy":
+    case "scored_agenda_counter_economy":
+      return (
+        610 +
+        Math.max(0, assessment.netCredits - assessment.clickCost) * 55 +
+        (lowCredits ? 80 : 25) -
+        Math.max(0, assessment.clickCost - 1) * 70
+      );
+    case "scored_agenda_draw":
+      return 600 + Math.max(0, assessment.drawAmount - 1) * 55;
+    case "scored_agenda_shuffle_draw":
+      return 640 + Math.max(0, assessment.drawAmount - 2) * 35;
+    case "scored_agenda_extra_action":
+      return 720 + assessment.gainedActions * 45;
+    case "scored_agenda_trace_tag":
+      return features.opponentTags > 0 ? 520 : 560 + assessment.tacticalValue;
+    case "scored_agenda_damage_punish":
+      return features.opponentTags > 0 ? 790 + assessment.tacticalValue : 180;
+    case "scored_agenda_utility":
+      return 330 + assessment.tacticalValue;
+    case "unknown_scored_agenda_ability":
+      return 240;
+  }
+}
+
+function corpScoredAgendaAbilityReasonCode(
+  kind: NonNullable<ReturnType<typeof classifyCorpScoredAgendaAbility>>["kind"],
+): string {
+  switch (kind) {
+    case "scored_agenda_economy":
+      return "corp.scored_agenda.economy";
+    case "scored_agenda_counter_economy":
+      return "corp.scored_agenda.counter_economy";
+    case "scored_agenda_draw":
+    case "scored_agenda_shuffle_draw":
+      return "corp.scored_agenda.draw";
+    case "scored_agenda_extra_action":
+      return "corp.scored_agenda.extra_action";
+    case "scored_agenda_trace_tag":
+      return "corp.scored_agenda.trace_tag";
+    case "scored_agenda_damage_punish":
+      return "corp.scored_agenda.damage_punish";
+    default:
+      return "corp.scored_agenda.utility";
+  }
+}
+
+function betterScoredAgendaEconomyAvailable(
+  input: AiDecisionInput,
+  selectedAction: LegalAction,
+): boolean {
+  return input.legalActions.some((action) => {
+    if (action.actionId === selectedAction.actionId) return false;
+    const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+    return Boolean(
+      scoredAgenda &&
+        (scoredAgenda.kind === "scored_agenda_economy" ||
+          scoredAgenda.kind === "scored_agenda_counter_economy") &&
+        scoredAgenda.netCredits > Math.max(1, scoredAgenda.clickCost),
+    );
+  });
+}
+
+function betterScoredAgendaDrawAvailable(
+  input: AiDecisionInput,
+  selectedAction: LegalAction,
+): boolean {
+  return input.legalActions.some((action) => {
+    if (action.actionId === selectedAction.actionId) return false;
+    const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+    return Boolean(
+      scoredAgenda &&
+        (scoredAgenda.kind === "scored_agenda_draw" ||
+          scoredAgenda.kind === "scored_agenda_shuffle_draw") &&
+        scoredAgenda.drawAmount > Math.max(1, scoredAgenda.clickCost),
+    );
+  });
+}
+
+function politicalOverthrowEconomyAvailable(
+  input: AiDecisionInput,
+  selectedAction: LegalAction,
+): boolean {
+  return input.legalActions.some((action) => {
+    if (action.actionId === selectedAction.actionId) return false;
+    const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+    return Boolean(
+      scoredAgenda?.sourceDefinitionId === "onr_v1_210_political-overthrow" &&
+        scoredAgenda.kind === "scored_agenda_economy" &&
+        scoredAgenda.netCredits > Math.max(1, scoredAgenda.clickCost),
+    );
+  });
 }
 
 function extractAiFeatures(input: AiDecisionInput): AiFeatures {
@@ -8456,6 +8809,50 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpScorePathBlockedByEffectiveRemoteSafety",
   "corpAgendaHeldDueToUnsafeRemote",
   "corpAgendaHeldTooLongWithHqPressure",
+  "corpAgendaInstalledInProtectedRemote",
+  "corpAgendaAdvancedInProtectedRemote",
+  "corpAgendaNearScoreWindow",
+  "corpScoreWindowCompressionOpportunity",
+  "corpScoreWindowCompressionTaken",
+  "corpScoreWindowCompressionRate",
+  "corpScoreWindowCompressionSkipped",
+  "corpNonEssentialActionBeforeScoreWindow",
+  "corpEconomyBeforeScoreWindow",
+  "corpEconomyBeforeScoreWindowNecessary",
+  "corpProtectionBeforeScoreWindow",
+  "corpProtectionBeforeScoreWindowNoSafetyDelta",
+  "corpCentralProtectionBeforeScoreWindow",
+  "corpCentralProtectionBeforeScoreWindowNecessary",
+  "corpDrawBeforeScoreWindow",
+  "corpEndTurnBeforeScoreWindow",
+  "corpSameTurnScoreOpportunity",
+  "corpSameTurnScoreTaken",
+  "corpScoreWindowLostAfterNonEssentialAction",
+  "corpRunnerStealAfterDelayedScoreWindow",
+  "corpAdvanceToScoreLineCompressedWithin2",
+  "corpAdvanceToScoreLineCompressedWithin3",
+  "scoredAgendaActionOpportunities",
+  "scoredAgendaActionTaken",
+  "scoredAgendaActionTakeRate",
+  "scoredAgendaEconomyOpportunities",
+  "scoredAgendaEconomyTaken",
+  "scoredAgendaEconomySkippedForBasicCredit",
+  "politicalOverthrowOpportunities",
+  "politicalOverthrowTaken",
+  "politicalOverthrowSkippedForBasicCredit",
+  "scoredAgendaCounterEconomyOpportunities",
+  "scoredAgendaCounterEconomyTaken",
+  "scoredAgendaDrawOpportunities",
+  "scoredAgendaDrawTaken",
+  "scoredAgendaExtraActionOpportunities",
+  "scoredAgendaExtraActionTaken",
+  "scoredAgendaTraceTagOpportunities",
+  "scoredAgendaTraceTagTaken",
+  "scoredAgendaDamagePunishOpportunities",
+  "scoredAgendaDamagePunishTaken",
+  "scoredAgendaActionValueOverBasic",
+  "basicCreditTakenWhileBetterAgendaEconomyAvailable",
+  "basicDrawTakenWhileBetterAgendaDrawAvailable",
   "advancedAgendaSteals",
   "advancedAgendaStealsFromRemote",
   "advancedAgendaStealsFromCentral",
@@ -12189,6 +12586,50 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   | "corpScorePathBlockedByEffectiveRemoteSafety"
   | "corpAgendaHeldDueToUnsafeRemote"
   | "corpAgendaHeldTooLongWithHqPressure"
+  | "corpAgendaInstalledInProtectedRemote"
+  | "corpAgendaAdvancedInProtectedRemote"
+  | "corpAgendaNearScoreWindow"
+  | "corpScoreWindowCompressionOpportunity"
+  | "corpScoreWindowCompressionTaken"
+  | "corpScoreWindowCompressionRate"
+  | "corpScoreWindowCompressionSkipped"
+  | "corpNonEssentialActionBeforeScoreWindow"
+  | "corpEconomyBeforeScoreWindow"
+  | "corpEconomyBeforeScoreWindowNecessary"
+  | "corpProtectionBeforeScoreWindow"
+  | "corpProtectionBeforeScoreWindowNoSafetyDelta"
+  | "corpCentralProtectionBeforeScoreWindow"
+  | "corpCentralProtectionBeforeScoreWindowNecessary"
+  | "corpDrawBeforeScoreWindow"
+  | "corpEndTurnBeforeScoreWindow"
+  | "corpSameTurnScoreOpportunity"
+  | "corpSameTurnScoreTaken"
+  | "corpScoreWindowLostAfterNonEssentialAction"
+  | "corpRunnerStealAfterDelayedScoreWindow"
+  | "corpAdvanceToScoreLineCompressedWithin2"
+  | "corpAdvanceToScoreLineCompressedWithin3"
+  | "scoredAgendaActionOpportunities"
+  | "scoredAgendaActionTaken"
+  | "scoredAgendaActionTakeRate"
+  | "scoredAgendaEconomyOpportunities"
+  | "scoredAgendaEconomyTaken"
+  | "scoredAgendaEconomySkippedForBasicCredit"
+  | "politicalOverthrowOpportunities"
+  | "politicalOverthrowTaken"
+  | "politicalOverthrowSkippedForBasicCredit"
+  | "scoredAgendaCounterEconomyOpportunities"
+  | "scoredAgendaCounterEconomyTaken"
+  | "scoredAgendaDrawOpportunities"
+  | "scoredAgendaDrawTaken"
+  | "scoredAgendaExtraActionOpportunities"
+  | "scoredAgendaExtraActionTaken"
+  | "scoredAgendaTraceTagOpportunities"
+  | "scoredAgendaTraceTagTaken"
+  | "scoredAgendaDamagePunishOpportunities"
+  | "scoredAgendaDamagePunishTaken"
+  | "scoredAgendaActionValueOverBasic"
+  | "basicCreditTakenWhileBetterAgendaEconomyAvailable"
+  | "basicDrawTakenWhileBetterAgendaDrawAvailable"
 > {
   let corpUnsafeScoringRemoteDetected = 0;
   let corpUnsafeScoringRemoteAlternativeChosen = 0;
@@ -12225,6 +12666,48 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   let corpScorePathBlockedByEffectiveRemoteSafety = 0;
   let corpAgendaHeldDueToUnsafeRemote = 0;
   let corpAgendaHeldTooLongWithHqPressure = 0;
+  let corpAgendaInstalledInProtectedRemote = 0;
+  let corpAgendaAdvancedInProtectedRemote = 0;
+  let corpAgendaNearScoreWindow = 0;
+  let corpScoreWindowCompressionOpportunity = 0;
+  let corpScoreWindowCompressionTaken = 0;
+  let corpScoreWindowCompressionSkipped = 0;
+  let corpNonEssentialActionBeforeScoreWindow = 0;
+  let corpEconomyBeforeScoreWindow = 0;
+  let corpEconomyBeforeScoreWindowNecessary = 0;
+  let corpProtectionBeforeScoreWindow = 0;
+  let corpProtectionBeforeScoreWindowNoSafetyDelta = 0;
+  let corpCentralProtectionBeforeScoreWindow = 0;
+  let corpCentralProtectionBeforeScoreWindowNecessary = 0;
+  let corpDrawBeforeScoreWindow = 0;
+  let corpEndTurnBeforeScoreWindow = 0;
+  let corpSameTurnScoreOpportunity = 0;
+  let corpSameTurnScoreTaken = 0;
+  let corpScoreWindowLostAfterNonEssentialAction = 0;
+  let corpRunnerStealAfterDelayedScoreWindow = 0;
+  let corpAdvanceToScoreLineCompressedWithin2 = 0;
+  let corpAdvanceToScoreLineCompressedWithin3 = 0;
+  let scoredAgendaActionOpportunities = 0;
+  let scoredAgendaActionTaken = 0;
+  let scoredAgendaEconomyOpportunities = 0;
+  let scoredAgendaEconomyTaken = 0;
+  let scoredAgendaEconomySkippedForBasicCredit = 0;
+  let politicalOverthrowOpportunities = 0;
+  let politicalOverthrowTaken = 0;
+  let politicalOverthrowSkippedForBasicCredit = 0;
+  let scoredAgendaCounterEconomyOpportunities = 0;
+  let scoredAgendaCounterEconomyTaken = 0;
+  let scoredAgendaDrawOpportunities = 0;
+  let scoredAgendaDrawTaken = 0;
+  let scoredAgendaExtraActionOpportunities = 0;
+  let scoredAgendaExtraActionTaken = 0;
+  let scoredAgendaTraceTagOpportunities = 0;
+  let scoredAgendaTraceTagTaken = 0;
+  let scoredAgendaDamagePunishOpportunities = 0;
+  let scoredAgendaDamagePunishTaken = 0;
+  let scoredAgendaActionValueOverBasic = 0;
+  let basicCreditTakenWhileBetterAgendaEconomyAvailable = 0;
+  let basicDrawTakenWhileBetterAgendaDrawAvailable = 0;
   const protectionSafetyDeltas: number[] = [];
   const remoteSafetyDeltas: number[] = [];
   const remoteSafetyDeltasAfterProtection: number[] = [];
@@ -12379,6 +12862,159 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         )
       )
         corpAgendaHeldTooLongWithHqPressure += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_agenda_installed_in_protected_remote:true",
+        )
+      )
+        corpAgendaInstalledInProtectedRemote += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_agenda_advanced_in_protected_remote:true",
+        )
+      )
+        corpAgendaAdvancedInProtectedRemote += 1;
+      if (hasEvidenceFlag(entry, "corp_agenda_near_score_window:true"))
+        corpAgendaNearScoreWindow += 1;
+      const compressionOpportunity = hasEvidenceFlag(
+        entry,
+        "corp_score_window_compression_opportunity:true",
+      );
+      if (compressionOpportunity) corpScoreWindowCompressionOpportunity += 1;
+      if (
+        hasEvidenceFlag(entry, "corp_score_window_compression_taken:true")
+      ) {
+        corpScoreWindowCompressionTaken += 1;
+        if (corpCompressionActionLeadsToScoreLine(sequence, index, 2))
+          corpAdvanceToScoreLineCompressedWithin2 += 1;
+        if (corpCompressionActionLeadsToScoreLine(sequence, index, 3))
+          corpAdvanceToScoreLineCompressedWithin3 += 1;
+      }
+      if (
+        hasEvidenceFlag(entry, "corp_score_window_compression_skipped:true")
+      )
+        corpScoreWindowCompressionSkipped += 1;
+      const nonEssentialBeforeScoreWindow = hasEvidenceFlag(
+        entry,
+        "corp_non_essential_action_before_score_window:true",
+      );
+      if (nonEssentialBeforeScoreWindow) {
+        corpNonEssentialActionBeforeScoreWindow += 1;
+        if (runnerStealsBeforeNextCorpScore(sequence, index)) {
+          corpScoreWindowLostAfterNonEssentialAction += 1;
+          corpRunnerStealAfterDelayedScoreWindow += 1;
+        }
+      }
+      if (hasEvidenceFlag(entry, "corp_economy_before_score_window:true"))
+        corpEconomyBeforeScoreWindow += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_economy_before_score_window_necessary:true",
+        )
+      )
+        corpEconomyBeforeScoreWindowNecessary += 1;
+      if (hasEvidenceFlag(entry, "corp_protection_before_score_window:true"))
+        corpProtectionBeforeScoreWindow += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_protection_before_score_window_no_safety_delta:true",
+        )
+      )
+        corpProtectionBeforeScoreWindowNoSafetyDelta += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_central_protection_before_score_window:true",
+        )
+      )
+        corpCentralProtectionBeforeScoreWindow += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_central_protection_before_score_window_necessary:true",
+        )
+      )
+        corpCentralProtectionBeforeScoreWindowNecessary += 1;
+      if (hasEvidenceFlag(entry, "corp_draw_before_score_window:true"))
+        corpDrawBeforeScoreWindow += 1;
+      if (hasEvidenceFlag(entry, "corp_end_turn_before_score_window:true"))
+        corpEndTurnBeforeScoreWindow += 1;
+      if (hasEvidenceFlag(entry, "corp_same_turn_score_opportunity:true"))
+        corpSameTurnScoreOpportunity += 1;
+      if (hasEvidenceFlag(entry, "corp_same_turn_score_taken:true"))
+        corpSameTurnScoreTaken += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_action_opportunity:true"))
+        scoredAgendaActionOpportunities += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_action_taken:true"))
+        scoredAgendaActionTaken += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_economy_opportunity:true"))
+        scoredAgendaEconomyOpportunities += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_economy_taken:true"))
+        scoredAgendaEconomyTaken += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "scored_agenda_economy_skipped_for_basic_credit:true",
+        )
+      )
+        scoredAgendaEconomySkippedForBasicCredit += 1;
+      if (hasEvidenceFlag(entry, "political_overthrow_opportunity:true"))
+        politicalOverthrowOpportunities += 1;
+      if (hasEvidenceFlag(entry, "political_overthrow_taken:true"))
+        politicalOverthrowTaken += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "political_overthrow_skipped_for_basic_credit:true",
+        )
+      )
+        politicalOverthrowSkippedForBasicCredit += 1;
+      if (
+        hasEvidenceFlag(entry, "scored_agenda_counter_economy_opportunity:true")
+      )
+        scoredAgendaCounterEconomyOpportunities += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_counter_economy_taken:true"))
+        scoredAgendaCounterEconomyTaken += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_draw_opportunity:true"))
+        scoredAgendaDrawOpportunities += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_draw_taken:true"))
+        scoredAgendaDrawTaken += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_extra_action_opportunity:true"))
+        scoredAgendaExtraActionOpportunities += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_extra_action_taken:true"))
+        scoredAgendaExtraActionTaken += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_trace_tag_opportunity:true"))
+        scoredAgendaTraceTagOpportunities += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_trace_tag_taken:true"))
+        scoredAgendaTraceTagTaken += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_damage_punish_opportunity:true"))
+        scoredAgendaDamagePunishOpportunities += 1;
+      if (hasEvidenceFlag(entry, "scored_agenda_damage_punish_taken:true"))
+        scoredAgendaDamagePunishTaken += 1;
+      scoredAgendaActionValueOverBasic += Math.max(
+        0,
+        Number(
+          evidenceValue(entry, "scored_agenda_action_value_over_basic:") ?? 0,
+        ),
+      );
+      if (
+        hasEvidenceFlag(
+          entry,
+          "basic_credit_taken_while_better_agenda_economy_available:true",
+        )
+      )
+        basicCreditTakenWhileBetterAgendaEconomyAvailable += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "basic_draw_taken_while_better_agenda_draw_available:true",
+        )
+      )
+        basicDrawTakenWhileBetterAgendaDrawAvailable += 1;
 
       const delta = Number(
         evidenceValue(
@@ -12458,6 +13094,59 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
     corpScorePathBlockedByEffectiveRemoteSafety,
     corpAgendaHeldDueToUnsafeRemote,
     corpAgendaHeldTooLongWithHqPressure,
+    corpAgendaInstalledInProtectedRemote,
+    corpAgendaAdvancedInProtectedRemote,
+    corpAgendaNearScoreWindow,
+    corpScoreWindowCompressionOpportunity,
+    corpScoreWindowCompressionTaken,
+    corpScoreWindowCompressionRate:
+      corpScoreWindowCompressionOpportunity > 0
+        ? round(
+            corpScoreWindowCompressionTaken /
+              corpScoreWindowCompressionOpportunity,
+          )
+        : 0,
+    corpScoreWindowCompressionSkipped,
+    corpNonEssentialActionBeforeScoreWindow,
+    corpEconomyBeforeScoreWindow,
+    corpEconomyBeforeScoreWindowNecessary,
+    corpProtectionBeforeScoreWindow,
+    corpProtectionBeforeScoreWindowNoSafetyDelta,
+    corpCentralProtectionBeforeScoreWindow,
+    corpCentralProtectionBeforeScoreWindowNecessary,
+    corpDrawBeforeScoreWindow,
+    corpEndTurnBeforeScoreWindow,
+    corpSameTurnScoreOpportunity,
+    corpSameTurnScoreTaken,
+    corpScoreWindowLostAfterNonEssentialAction,
+    corpRunnerStealAfterDelayedScoreWindow,
+    corpAdvanceToScoreLineCompressedWithin2,
+    corpAdvanceToScoreLineCompressedWithin3,
+    scoredAgendaActionOpportunities,
+    scoredAgendaActionTaken,
+    scoredAgendaActionTakeRate:
+      scoredAgendaActionOpportunities > 0
+        ? round(scoredAgendaActionTaken / scoredAgendaActionOpportunities)
+        : 0,
+    scoredAgendaEconomyOpportunities,
+    scoredAgendaEconomyTaken,
+    scoredAgendaEconomySkippedForBasicCredit,
+    politicalOverthrowOpportunities,
+    politicalOverthrowTaken,
+    politicalOverthrowSkippedForBasicCredit,
+    scoredAgendaCounterEconomyOpportunities,
+    scoredAgendaCounterEconomyTaken,
+    scoredAgendaDrawOpportunities,
+    scoredAgendaDrawTaken,
+    scoredAgendaExtraActionOpportunities,
+    scoredAgendaExtraActionTaken,
+    scoredAgendaTraceTagOpportunities,
+    scoredAgendaTraceTagTaken,
+    scoredAgendaDamagePunishOpportunities,
+    scoredAgendaDamagePunishTaken,
+    scoredAgendaActionValueOverBasic,
+    basicCreditTakenWhileBetterAgendaEconomyAvailable,
+    basicDrawTakenWhileBetterAgendaDrawAvailable,
   };
 }
 
@@ -12567,6 +13256,38 @@ function isCorpProtectionScoreConversionAction(
       (entry.actionType === "install_card" &&
         entry.targetCardType === "agenda"))
   );
+}
+
+function corpCompressionActionLeadsToScoreLine(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  ownDecisions: number,
+): boolean {
+  const entry = sequence[index];
+  if (!entry || entry.side !== "corp") return false;
+  if (
+    entry.actionType === "score_agenda" ||
+    entry.actionType === "advance_card" ||
+    (entry.actionType === "install_card" && entry.targetCardType === "agenda")
+  )
+    return true;
+  return ownStrategicWindow(sequence, index, ownDecisions).some(
+    isCorpProtectionScoreConversionAction,
+  );
+}
+
+function runnerStealsBeforeNextCorpScore(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  for (let cursor = index + 1; cursor < sequence.length; cursor += 1) {
+    const entry = sequence[cursor]!;
+    if (entry.side === "corp" && entry.actionType === "score_agenda")
+      return false;
+    if (entry.side === "runner" && entry.actionType === "steal_agenda")
+      return true;
+  }
+  return false;
 }
 
 function isCorpRemoteProtectionActionEntry(

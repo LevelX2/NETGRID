@@ -4110,6 +4110,293 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
   });
 
+  it("sees Political Overthrow scored-agenda LegalAction side-safely in Corp AIInput", () => {
+    const { input, agendaId } = corpScoredAgendaAbilityInput(
+      "ai-political-overthrow-visible",
+      "onr_v1_210_political-overthrow",
+    );
+    const overthrow = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.source === agendaId &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_210_political-overthrow",
+    );
+
+    expect(overthrow).toBeDefined();
+    expect(input.playerView.own.scoreArea).toContainEqual(
+      expect.objectContaining({
+        instanceId: agendaId,
+        definitionId: "onr_v1_210_political-overthrow",
+        title: "Political Overthrow",
+      }),
+    );
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(JSON.stringify(input)).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("uses Political Overthrow scored-agenda economy before basic credit", () => {
+    const { input } = corpScoredAgendaAbilityInput(
+      "ai-political-overthrow-economy",
+      "onr_v1_210_political-overthrow",
+      { credits: 1 },
+    );
+    const overthrow = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_210_political-overthrow",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+    expect(overthrow).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!overthrow || !basicCredit)
+      throw new Error("Missing Political Overthrow economy fixture actions");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, overthrow],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(overthrow.actionId);
+    expect(debugText).toContain("scored_agenda_action_taken:true");
+    expect(debugText).toContain("political_overthrow_taken:true");
+    expect(debugText).toContain("scored_agenda_economy_taken:true");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("uses Political Overthrow repeatedly while clicks remain and no better tactic exists", () => {
+    let { state } = corpScoredAgendaAbilityInput(
+      "ai-political-overthrow-repeat",
+      "onr_v1_210_political-overthrow",
+      { credits: 0, clicks: 3 },
+    );
+    for (let index = 0; index < 2; index += 1) {
+      const input = buildAiDecisionInput(state, "corp", {
+        difficulty: "normal",
+        profileId: "corp-ai-v1.4.2-normal",
+      });
+      const decision = chooseCorpAction(input);
+      const action = input.legalActions.find(
+        (candidate) => candidate.actionId === decision.actionId,
+      );
+      expect(action?.type).toBe("activated_card_ability");
+      expect(sourceDefinitionFromInput(input, action!)).toBe(
+        "onr_v1_210_political-overthrow",
+      );
+      state = apply(
+        state,
+        "corp",
+        (candidate) => candidate.actionId === decision.actionId,
+      );
+    }
+  });
+
+  it("lets score-now tactically override Political Overthrow economy", () => {
+    const { input } = corpScoredAgendaAbilityInput(
+      "ai-political-overthrow-score-override",
+      "onr_v1_210_political-overthrow",
+      {
+        credits: 4,
+        mutate: (state) => {
+          state.corp.credits = 8;
+          putCorpRootInRemote(state, "simple_agenda", 3);
+        },
+      },
+    );
+    const score = input.legalActions.find(
+      (action) => action.type === "score_agenda",
+    );
+    const overthrow = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_210_political-overthrow",
+    );
+    expect(score).toBeDefined();
+    expect(overthrow).toBeDefined();
+    if (!score || !overthrow) throw new Error("Missing score override actions");
+
+    const decision = chooseCorpAction({ ...input, legalActions: [overthrow, score] });
+    expect(decision.actionId).toBe(score.actionId);
+  });
+
+  it("uses counter-economy scored agenda actions before basic credit", () => {
+    const { input } = corpScoredAgendaAbilityInput(
+      "ai-corporate-coup-counter-economy",
+      "onr_v1_193_corporate-coup",
+      { credits: 1, counters: { bit: 15 } },
+    );
+    const coup = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_193_corporate-coup",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+    expect(coup).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!coup || !basicCredit)
+      throw new Error("Missing Corporate Coup counter economy fixture");
+
+    const decision = chooseCorpAction({ ...input, legalActions: [basicCredit, coup] });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(coup.actionId);
+    expect(debugText).toContain("scored_agenda_counter_economy_taken:true");
+  });
+
+  it("values Marine Arcology economy with its two-action cost accounted for", () => {
+    const { input } = corpScoredAgendaAbilityInput(
+      "ai-marine-arcology-economy",
+      "onr_v1_206_marine-arcology",
+      { credits: 1, clicks: 3 },
+    );
+    const marine = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_206_marine-arcology",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+    expect(marine).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!marine || !basicCredit) throw new Error("Missing Marine fixture");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, marine],
+    });
+    expect(decision.actionId).toBe(marine.actionId);
+  });
+
+  it("uses Employee Empowerment draw before basic draw when draw is useful", () => {
+    const { input } = corpScoredAgendaAbilityInput(
+      "ai-employee-empowerment-draw",
+      "onr_v1_199_employee-empowerment",
+      { credits: 6 },
+    );
+    const empowerment = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_199_employee-empowerment",
+    );
+    const basicDraw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    expect(empowerment).toBeDefined();
+    expect(basicDraw).toBeDefined();
+    if (!empowerment || !basicDraw)
+      throw new Error("Missing Employee Empowerment fixture");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicDraw, empowerment],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(empowerment.actionId);
+    expect(debugText).toContain("scored_agenda_draw_taken:true");
+  });
+
+  it("uses Corporate Boon extra-action ability as scored-agenda tempo", () => {
+    const { input } = corpScoredAgendaAbilityInput(
+      "ai-corporate-boon-extra-action",
+      "onr_v1_192_corporate-boon",
+      { credits: 4, counters: { boon: 4 } },
+    );
+    const boon = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_192_corporate-boon",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+    expect(boon).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!boon || !basicCredit) throw new Error("Missing Corporate Boon fixture");
+
+    const decision = chooseCorpAction({ ...input, legalActions: [basicCredit, boon] });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(boon.actionId);
+    expect(debugText).toContain("scored_agenda_extra_action_taken:true");
+  });
+
+  it("uses tagged-runner damage agendas without hidden Runner hand data", () => {
+    const { input } = corpScoredAgendaAbilityInput(
+      "ai-on-call-solo-tagged-damage",
+      "onr_v1_208_on-call-solo-team",
+      { credits: 5, runnerTagged: true },
+    );
+    const damage = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_208_on-call-solo-team",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+    expect(damage).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!damage || !basicCredit) throw new Error("Missing damage agenda fixture");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, damage],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(damage.actionId);
+    expect(debugText).toContain("scored_agenda_damage_punish_taken:true");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("keeps scored-agenda economy hidden-state invariant", () => {
+    const first = corpScoredAgendaAbilityInput(
+      "ai-scored-agenda-hidden-a",
+      "onr_v1_210_political-overthrow",
+      { credits: 1 },
+    ).input;
+    const secondFixture = corpScoredAgendaAbilityInput(
+      "ai-scored-agenda-hidden-b",
+      "onr_v1_210_political-overthrow",
+      {
+        credits: 1,
+        mutate: (state) => {
+          state.runner.stack.reverse();
+          state.runner.grip.reverse();
+        },
+      },
+    );
+    const second = {
+      ...secondFixture.input,
+      seed: first.seed,
+      decisionId: first.decisionId,
+      actionNumber: first.actionNumber,
+      legalActions: first.legalActions,
+      playerView: {
+        ...first.playerView,
+        opponent: secondFixture.input.playerView.opponent,
+      },
+    };
+
+    expect(chooseCorpAction(first).actionId).toBe(
+      chooseCorpAction(second).actionId,
+    );
+  });
+
   it("ignores installed Corp BBS sources with too few stored credits", () => {
     const input = installedCorpBbsEconomyInput(
       "ai-corp-low-counter-installed-bbs-economy",
@@ -4723,6 +5010,148 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.selectedActionId).toBe(advance.actionId);
     expect(decision.score.evidence).not.toContain(
       "corp_protection_repeated_without_score_conversion:true",
+    );
+    expect(decision.score.evidence).toContain(
+      "corp_score_window_compression_taken:true",
+    );
+    expect(decision.score.evidence).toContain(
+      "corp_agenda_advanced_in_protected_remote:true",
+    );
+  });
+
+  it("compresses a protected agenda line instead of taking unnecessary economy", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-compress-before-economy",
+      {
+        runnerCredits: 0,
+        includeTaxUpgrade: true,
+        installedAgendaCounters: 1,
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain)
+      throw new Error("Missing compression economy fixture actions");
+
+    const scopedInput = { ...input, legalActions: [advance, gain] };
+    const economyCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.legalActionIds.includes(gain.actionId),
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+    expect(economyCandidate).toBeDefined();
+    if (!economyCandidate)
+      throw new Error("Missing economy candidate for compression fixture");
+
+    const economyScore = evaluateCorpPlan(scopedInput, economyCandidate);
+
+    expect(decision.selectedActionId).toBe(advance.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_score_window_compression_taken:true",
+    );
+    expect(economyScore.evidence).toContain(
+      "corp_economy_before_score_window:true",
+    );
+    expect(economyScore.evidence).toContain(
+      "corp_non_essential_action_before_score_window:true",
+    );
+  });
+
+  it("allows economy before score compression when rez reserve is still missing", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-compression-economy-needed",
+      (state) => {
+        state.corp.credits = 2;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 1);
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain)
+      throw new Error("Missing necessary economy compression fixture actions");
+
+    const scopedInput = {
+      ...input,
+      profileId: "corp-ai-v1.4.2-normal",
+      legalActions: [advance, gain],
+    };
+    const economyCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.legalActionIds.includes(gain.actionId),
+    );
+    expect(economyCandidate).toBeDefined();
+    if (!economyCandidate)
+      throw new Error("Missing necessary economy candidate for compression");
+    const economyScore = evaluateCorpPlan(scopedInput, economyCandidate);
+    expect(economyScore.evidence).toContain(
+      "corp_economy_before_score_window_necessary:true",
+    );
+    expect(economyScore.evidence).not.toContain(
+      "corp_non_essential_action_before_score_window:true",
+    );
+  });
+
+  it("penalizes central protection before a ready remote score window without acute central risk", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-compression-central-delay",
+      {
+        runnerCredits: 0,
+        includeTaxUpgrade: true,
+        installedAgendaCounters: 1,
+        protectionIceInHq: true,
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const hqProtection = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
+    expect(advance).toBeDefined();
+    expect(hqProtection).toBeDefined();
+    if (!advance || !hqProtection)
+      throw new Error("Missing compression central-protection fixture actions");
+
+    const scopedInput = { ...input, legalActions: [advance, hqProtection] };
+    const centralCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.legalActionIds.includes(hqProtection.actionId),
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+    expect(centralCandidate).toBeDefined();
+    if (!centralCandidate)
+      throw new Error("Missing central protection candidate for compression");
+
+    const centralScore = evaluateCorpPlan(scopedInput, centralCandidate);
+
+    expect(decision.selectedActionId).toBe(advance.actionId);
+    expect(centralScore.evidence).toContain(
+      "corp_central_protection_before_score_window:true",
+    );
+    expect(centralScore.evidence).toContain(
+      "corp_non_essential_action_before_score_window:true",
     );
   });
 
@@ -14880,6 +15309,138 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.corpScorePathChosenAfterProtection).toBe(2);
   });
 
+  it("summarizes corp score-window compression and delayed steal metrics", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "advance_card", "remote_1", 1, {
+            targetCardType: "agenda",
+            evidence: [
+              "corp_score_window_compression_opportunity:true",
+              "corp_score_window_compression_taken:true",
+              "corp_agenda_advanced_in_protected_remote:true",
+              "corp_agenda_near_score_window:true",
+            ],
+          }),
+          progressionAction("corp", 2, "gain_credit", undefined, 1, {
+            evidence: [
+              "corp_score_window_compression_opportunity:true",
+              "corp_score_window_compression_skipped:true",
+              "corp_economy_before_score_window:true",
+              "corp_non_essential_action_before_score_window:true",
+            ],
+          }),
+          progressionAction("runner", 3, "steal_agenda", "remote_1", 2),
+        ],
+        "score-window-compression-metric-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "gain_credit", undefined, 1, {
+            evidence: [
+              "corp_score_window_compression_opportunity:true",
+              "corp_economy_before_score_window:true",
+              "corp_economy_before_score_window_necessary:true",
+            ],
+          }),
+        ],
+        "score-window-compression-necessary-economy-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpScoreWindowCompressionOpportunity).toBe(3);
+    expect(metrics.corpScoreWindowCompressionTaken).toBe(1);
+    expect(metrics.corpScoreWindowCompressionRate).toBeCloseTo(1 / 3, 3);
+    expect(metrics.corpScoreWindowCompressionSkipped).toBe(1);
+    expect(metrics.corpNonEssentialActionBeforeScoreWindow).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreWindow).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreWindowNecessary).toBe(1);
+    expect(metrics.corpRunnerStealAfterDelayedScoreWindow).toBe(1);
+    expect(metrics.corpAdvanceToScoreLineCompressedWithin2).toBe(1);
+    expect(metrics.corpAdvanceToScoreLineCompressedWithin3).toBe(1);
+  });
+
+  it("summarizes scored-agenda action metrics", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction(
+            "corp",
+            1,
+            "activated_card_ability",
+            undefined,
+            1,
+            {
+              evidence: [
+                "scored_agenda_action_opportunity:true",
+                "scored_agenda_action_taken:true",
+                "scored_agenda_economy_opportunity:true",
+                "scored_agenda_economy_taken:true",
+                "political_overthrow_opportunity:true",
+                "political_overthrow_taken:true",
+                "scored_agenda_action_value_over_basic:2",
+              ],
+            },
+          ),
+          progressionAction("corp", 2, "gain_credit", undefined, 1, {
+            evidence: [
+              "basic_credit_taken_while_better_agenda_economy_available:true",
+              "scored_agenda_economy_skipped_for_basic_credit:true",
+              "political_overthrow_skipped_for_basic_credit:true",
+            ],
+          }),
+          progressionAction(
+            "corp",
+            3,
+            "activated_card_ability",
+            undefined,
+            1,
+            {
+              evidence: [
+                "scored_agenda_action_opportunity:true",
+                "scored_agenda_action_taken:true",
+                "scored_agenda_draw_opportunity:true",
+                "scored_agenda_draw_taken:true",
+                "scored_agenda_extra_action_opportunity:true",
+                "scored_agenda_extra_action_taken:true",
+                "scored_agenda_trace_tag_opportunity:true",
+                "scored_agenda_trace_tag_taken:true",
+                "scored_agenda_damage_punish_opportunity:true",
+                "scored_agenda_damage_punish_taken:true",
+                "scored_agenda_counter_economy_opportunity:true",
+                "scored_agenda_counter_economy_taken:true",
+              ],
+            },
+          ),
+          progressionAction("corp", 4, "draw_card", undefined, 1, {
+            evidence: [
+              "basic_draw_taken_while_better_agenda_draw_available:true",
+            ],
+          }),
+        ],
+        "scored-agenda-action-metric-fixture",
+      ),
+    ]);
+
+    expect(metrics.scoredAgendaActionOpportunities).toBe(2);
+    expect(metrics.scoredAgendaActionTaken).toBe(2);
+    expect(metrics.scoredAgendaActionTakeRate).toBe(1);
+    expect(metrics.scoredAgendaEconomyOpportunities).toBe(1);
+    expect(metrics.scoredAgendaEconomyTaken).toBe(1);
+    expect(metrics.scoredAgendaEconomySkippedForBasicCredit).toBe(1);
+    expect(metrics.politicalOverthrowOpportunities).toBe(1);
+    expect(metrics.politicalOverthrowTaken).toBe(1);
+    expect(metrics.politicalOverthrowSkippedForBasicCredit).toBe(1);
+    expect(metrics.scoredAgendaCounterEconomyTaken).toBe(1);
+    expect(metrics.scoredAgendaDrawTaken).toBe(1);
+    expect(metrics.scoredAgendaExtraActionTaken).toBe(1);
+    expect(metrics.scoredAgendaTraceTagTaken).toBe(1);
+    expect(metrics.scoredAgendaDamagePunishTaken).toBe(1);
+    expect(metrics.scoredAgendaActionValueOverBasic).toBe(2);
+    expect(metrics.basicCreditTakenWhileBetterAgendaEconomyAvailable).toBe(1);
+    expect(metrics.basicDrawTakenWhileBetterAgendaDrawAvailable).toBe(1);
+  });
+
   it("does not count generic central endgame runs as true runner closeout", () => {
     const metrics = summarizeMatchProgressionMetrics([
       {
@@ -16592,6 +17153,57 @@ function corpActionPhaseInput(
     difficulty: "normal",
     profileId: "corp-ai-v1.4.0-normal",
   });
+}
+
+function corpScoredAgendaAbilityInput(
+  seed: string,
+  definitionId: string,
+  options: {
+    credits?: number;
+    clicks?: number;
+    runnerTagged?: boolean;
+    counters?: Partial<NonNullable<GameState["cardInstances"][string]["counters"]>>;
+    mutate?: (state: GameState) => void;
+  } = {},
+) {
+  let state = createGameAfterSetup({
+    seed,
+    baseline: CURRENT_RULES_BASELINE,
+    runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+    corpDeck: {
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+      id: `ai_scored_agenda_corp_${seed}`,
+      name: "AI Scored Agenda Corp Fixture",
+      cards: [
+        { id: definitionId, quantity: 1 },
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+          (entry) => entry.id !== definitionId,
+        ),
+      ],
+    },
+    agendaPointsToWin: 7,
+  });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  const agendaId = putCorpCardInScoreArea(state, definitionId);
+  state.cardInstances[agendaId] = {
+    ...state.cardInstances[agendaId]!,
+    counters: {
+      ...(state.cardInstances[agendaId]?.counters ?? {}),
+      ...(options.counters ?? {}),
+    },
+  };
+  state.corp.credits = options.credits ?? 2;
+  state.corp.clicks = options.clicks ?? 3;
+  state.runner.tags = options.runnerTagged ? 1 : 0;
+  options.mutate?.(state);
+  return {
+    state,
+    agendaId,
+    input: buildAiDecisionInput(state, "corp", {
+      difficulty: "normal",
+      profileId: "corp-ai-v1.4.2-normal",
+    }),
+  };
 }
 
 function installedCorpBbsEconomyInput(seed: string, bbsBits: number[] = [16]) {
@@ -18376,6 +18988,22 @@ function moveUnusedCorpCardToHq(
     zone: { side: "corp", zone: "hq" },
     faceup: false,
     rezzed: false,
+  };
+  return id;
+}
+
+function putCorpCardInScoreArea(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.corp.scoreArea.push(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "scoreArea" },
+    faceup: true,
+    rezzed: true,
   };
   return id;
 }
