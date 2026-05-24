@@ -147,6 +147,9 @@ import {
   groupRunnerRigCards,
   hasLegalAction,
   iceModifierBadgesForServer,
+  inactiveCardZoneAriaSuffix,
+  inactiveCardZoneBadgeLabel,
+  inactiveCardZoneClassName,
   orderedCardContextActions,
   parseCuePositionPreference,
   normalizeVisibleTerms,
@@ -177,7 +180,8 @@ import {
   type ActionContext,
   type CuePositionPreference,
   type CuePositionPreset,
-  type IceModifierBadgeView
+  type IceModifierBadgeView,
+  type InactiveCardZone
 } from "./action-board-ui";
 import { CardImage, isGeneratedCardImageId, localCardImageUrl } from "./card-image-service";
 import {
@@ -5667,6 +5671,7 @@ export default function Page() {
                             card={displayCard}
                             compact
                             displayMode={cardDisplayMode}
+                            inactiveZone="heap"
                             selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
                             actions={cardActionsFor(card)}
                             actionDisabled={Boolean(payload.winner) || connection !== "online"}
@@ -7563,6 +7568,7 @@ function RunnerOpponentZonesStrip({
                   card={displayCard}
                   compact
                   displayMode={displayMode}
+                  inactiveZone="heap"
                   selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
                   actions={cardActionsForHeap(card)}
                   actionDisabled={actionDisabled}
@@ -12352,6 +12358,7 @@ function ArchivesDualStackLane({
                     displayMode={displayMode}
                     hiddenSide="corp"
                     installedCorpCard={false}
+                    inactiveZone="archives"
                     selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
                     actions={cardActionsFor(card)}
                     actionDisabled={actionDisabled}
@@ -12412,6 +12419,7 @@ function ArchivesDualStackLane({
                         hiddenSide="corp"
                         installedCorpCard={false}
                         archiveFacedown
+                        {...(!showCorpFacedownBacks ? { inactiveZone: "archives" as const } : {})}
                         {...(showCorpFacedownBacks ? { forceCardBack: "corp" as Side } : {})}
                         selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
                         actions={cardActionsFor(card)}
@@ -12464,6 +12472,7 @@ function CardView({
   showScoreStateBadges = false,
   scoreStateBadges: explicitScoreStateBadges = [],
   archiveFacedown = false,
+  inactiveZone,
   forceCardBack,
   choiceSelected = false,
   choiceShortcut,
@@ -12493,6 +12502,7 @@ function CardView({
   showScoreStateBadges?: boolean;
   scoreStateBadges?: ScoredAgendaStateLine[];
   archiveFacedown?: boolean;
+  inactiveZone?: InactiveCardZone;
   forceCardBack?: Side;
   choiceSelected?: boolean;
   choiceShortcut?: CardChoiceShortcut;
@@ -12526,6 +12536,9 @@ function CardView({
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
   const hiddenBackClass = forceCardBack ? ` hiddenBack ${forceCardBack}HiddenBack forcedCardBack` : !card.known && hiddenSide ? ` hiddenBack ${hiddenSide}HiddenBack` : "";
   const archiveFacedownClass = archiveFacedown ? " archiveFacedown" : "";
+  const inactiveZoneClass = inactiveZone ? ` inactiveZoneCard ${inactiveCardZoneClassName(inactiveZone)}` : "";
+  const inactiveZoneBadge = inactiveZone ? inactiveCardZoneBadgeLabel(inactiveZone) : null;
+  const inactiveZoneAriaSuffix = inactiveZone ? inactiveCardZoneAriaSuffix(inactiveZone) : "";
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const previewCard = preview ? cardWithoutDevelopmentCounters(card) : card;
@@ -12580,11 +12593,11 @@ function CardView({
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${archiveFacedown ? ", verdeckt im Archiv" : ""}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}, ${advancementLabel}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${archiveFacedown ? ", verdeckt im Archiv" : ""}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
-      : `Verdeckte Karte${modifierBadgeAriaSuffix}`;
+      ? `Karte ${card.title}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
+      : `Verdeckte Karte${inactiveZoneAriaSuffix}${modifierBadgeAriaSuffix}`;
 
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
@@ -12895,7 +12908,7 @@ function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${archiveFacedownClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -12942,6 +12955,7 @@ function CardView({
         data-testid={onSelect ? "card-choice-card" : card.known ? "known-card" : "hidden-card"}
         data-known={card.known ? "true" : "false"}
         data-archive-facedown={archiveFacedown ? "true" : undefined}
+        data-inactive-zone={inactiveZone}
       >
         {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} decorative /> : null}
         {isHardwareImageCard ? (
@@ -12955,6 +12969,12 @@ function CardView({
         ) : null}
         {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
         {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
+        {inactiveZoneBadge ? (
+          <span className="cardInactiveZoneBadge" aria-hidden="true">
+            {inactiveZone === "heap" ? <Trash2 size={10} strokeWidth={2.4} /> : <Clipboard size={10} strokeWidth={2.4} />}
+            <span>{inactiveZoneBadge}</span>
+          </span>
+        ) : null}
         {modifierBadges.length > 0 ? <IceModifierBadges badges={modifierBadges} /> : null}
         {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
         {showRulesPreview ? (

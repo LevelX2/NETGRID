@@ -10,6 +10,20 @@ export type ActionContext = {
   label: string;
 };
 
+export type InactiveCardZone = "heap" | "archives";
+
+export function inactiveCardZoneBadgeLabel(zone: InactiveCardZone): string {
+  return zone === "heap" ? "Heap" : "Archiv";
+}
+
+export function inactiveCardZoneAriaSuffix(zone: InactiveCardZone): string {
+  return zone === "heap" ? ", im Heap abgelegt" : ", im Archiv abgelegt";
+}
+
+export function inactiveCardZoneClassName(zone: InactiveCardZone): string {
+  return zone === "heap" ? "inactiveZoneHeap" : "inactiveZoneArchives";
+}
+
 export type CuePositionPreset = "top-right" | "top-left" | "bottom-right" | "bottom-left" | "center";
 
 export type CuePositionPreference =

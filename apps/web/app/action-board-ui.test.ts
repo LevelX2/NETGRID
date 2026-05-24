@@ -35,6 +35,9 @@ import {
   currentRunTimelineStep,
   groupRunnerRigCards,
   iceModifierBadgesForServer,
+  inactiveCardZoneAriaSuffix,
+  inactiveCardZoneBadgeLabel,
+  inactiveCardZoneClassName,
   latestRetainableAccessRevealEvent,
   orderedCardContextActions,
   parseCuePositionPreference,
@@ -96,6 +99,16 @@ describe("V1.0.5 action board UI helpers", () => {
     );
 
     expect(actionButtonLabel(action)).toBe("Olivia Salazar: Crystal Wall für 2 Credits rezzen");
+  });
+
+  it("labels inactive heap and archive cards distinctly from installed card state", () => {
+    expect(inactiveCardZoneBadgeLabel("heap")).toBe("Heap");
+    expect(inactiveCardZoneBadgeLabel("archives")).toBe("Archiv");
+    expect(inactiveCardZoneAriaSuffix("heap")).toBe(", im Heap abgelegt");
+    expect(inactiveCardZoneAriaSuffix("archives")).toBe(", im Archiv abgelegt");
+    expect(inactiveCardZoneClassName("heap")).toBe("inactiveZoneHeap");
+    expect(inactiveCardZoneClassName("archives")).toBe("inactiveZoneArchives");
+    expect(inactiveCardZoneClassName("heap")).not.toBe("unrezzedInstalled");
   });
 
   it("only offers automatic end turn when end turn is the sole remaining own action", () => {
