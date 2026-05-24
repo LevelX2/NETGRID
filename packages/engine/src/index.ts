@@ -10703,6 +10703,7 @@ function resolveApproachIceExposeAbility(
       hiddenZoneAction: "approach_ice_expose",
       publicRevealKind: "expose",
       publicRevealDefinitionId: definition.id,
+      exposedCardDefinitionId: definition.id,
     };
   } else if (decision === "decline") {
     markApproachIceExposeSkippedForIce(run, approachedIceId);
@@ -13303,6 +13304,17 @@ function resolveRunnerPrivateLookChoice(
   const privateLookCount = choice.options.filter((option) =>
     option.id.startsWith("card_"),
   ).length;
+  const knownPrivateLookDefinitionIds = choice.options
+    .filter((option) => option.id.startsWith("card_"))
+    .map((option) =>
+      typeof option.value === "string" &&
+      state.cardInstances[option.value]
+        ? definitionFor(state, option.value).id
+        : undefined,
+    )
+    .filter((definitionId): definitionId is CardDefinitionId =>
+      Boolean(definitionId),
+    );
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -13310,6 +13322,12 @@ function resolveRunnerPrivateLookChoice(
     hiddenZoneAction: "p3_33_private_look",
     privateLookZone: zone,
     privateLookCount,
+    ...(knownPrivateLookDefinitionIds.length > 0
+      ? {
+          knownPrivateLookDefinitionIdsCsv:
+            knownPrivateLookDefinitionIds.join("|"),
+        }
+      : {}),
     ...(sourceCardId ? { cardId: sourceCardId } : {}),
     ...(sourceCardId && state.cardInstances[sourceCardId]
       ? {
@@ -23813,6 +23831,9 @@ function exposeInstalledCorpCardForImplementation(
       ? {
           exposedServerId: context.server.id,
           exposedServerLabel: context.server.label,
+          exposedArea: context.area,
+          exposedIndex: context.index,
+          exposedPositionKey: `${context.area}:${context.index}`,
         }
       : {}),
   };

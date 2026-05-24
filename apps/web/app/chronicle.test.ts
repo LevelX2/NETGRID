@@ -904,6 +904,38 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(["Runner", "Core Command", "Trash", "3 Credits", "R&D"]);
   });
 
+  it("summarizes Synchronized Attack on HQ retain choices without hidden card details", () => {
+    const aiChoice = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
+        sourceDefinitionId: "onr_v1_113_synchronized-attack-on-hq",
+        retainedCount: 2,
+        discardedCount: 3,
+        aiExplanation: "legal choice"
+      }),
+      "runner"
+    );
+    const humanChoice = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
+        retainedCount: 1,
+        discardedCount: 1
+      }),
+      "runner"
+    );
+
+    expect(aiChoice.title).toBe("Die Korp-KI behält mit Synchronized Attack on HQ 2 HQ-Karten, wirft 3 HQ-Karten verdeckt ab und bezahlt dafür 4 Credits.");
+    expect(aiChoice.category).toBe("hidden");
+    expect(aiChoice.visibility).toBe("public");
+    expect(aiChoice.cardDefinitionId).toBe("onr_v1_113_synchronized-attack-on-hq");
+    expect(aiChoice.chips).toEqual(["Korp", "KI", "Synchronized Attack", "2 behalten", "3 verdeckt abgeworfen", "4 Credits"]);
+    expect(JSON.stringify(aiChoice)).not.toContain("card-");
+    expect(aiChoice.title).not.toContain("Entscheidung beantwortet");
+    expect(humanChoice.title).toBe("Die Korp behält mit Synchronized Attack on HQ 1 HQ-Karte, wirft 1 HQ-Karte verdeckt ab und bezahlt dafür 2 Credits.");
+  });
+
   it("names Forged Activation Orders target and Corp rez-or-trash decisions in the chronicle", () => {
     const runnerChoice = formatChronicleEvent(
       makeEvent("resolve_choice", {

@@ -776,12 +776,451 @@ describe("MVP 0.3 AI controller contract", () => {
     const hiddenJson = JSON.stringify(hiddenInput);
     expect(
       hiddenQuote?.subroutines.some(
-        (subroutine) => subroutine.sourceDefinitionId === "onr_v1_320_encoder-inc",
+        (subroutine) =>
+          subroutine.sourceDefinitionId === "onr_v1_320_encoder-inc",
       ),
     ).toBe(false);
     expect(hiddenJson).not.toContain("Encoder, Inc.");
     expect(hiddenJson).not.toContain("onr_v1_320_encoder-inc");
     expect(assertAiInputIsSideSafe(hiddenInput)).toBe(true);
+  });
+
+  it("counts Tutor's active run-duration subroutine in runner visible path costs", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-visible-run-quote-tutor",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "ai_visible_run_quote_tutor_runner",
+          name: "AI Visible Run Quote Tutor Runner",
+          cards: [
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "ai_visible_run_quote_tutor_corp",
+          name: "AI Visible Run Quote Tutor Corp",
+          cards: [
+            { id: "onr_v1_274_tutor", quantity: 1 },
+            { id: "onr_v1_279_wall-of-static", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 10;
+    moveRunnerProgramToRig(state, "onr_v1_031_hammer");
+    const innerWallId = putCorpIceOnServer(
+      state,
+      "rd",
+      "onr_v1_279_wall-of-static",
+    );
+    const tutorId = putCorpIceOnServer(state, "rd", "onr_v1_274_tutor");
+    for (const id of [innerWallId, tutorId]) {
+      state.cardInstances[id] = {
+        ...state.cardInstances[id]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+    });
+    const rdServer = input.playerView.servers.find(
+      (server) => server.id === "rd",
+    );
+    const innerWallQuote = rdServer?.ice.find(
+      (ice) => ice.instanceId === innerWallId,
+    )?.effectiveRunQuote;
+
+    expect(innerWallQuote?.subroutines.map((subroutine) => subroutine.type)).toEqual([
+      "end_the_run",
+      "end_the_run",
+    ]);
+    expect(innerWallQuote?.subroutines[1]).toMatchObject({
+      sourceDefinitionId: "onr_v1_274_tutor",
+      sourceTitle: "Tutor",
+      dynamicSourceKind: "run_duration_additional_subroutine",
+    });
+    expect(
+      assessKnownRezzedIcePath(
+        rdServer?.ice ?? [],
+        input.playerView.own.rig ?? [],
+        1,
+        rdServer?.root ?? [],
+      ),
+    ).toEqual({ blocked: true, visibleBreakCost: 2 });
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
+  it("counts Virizz's active run-duration break tax in runner visible path costs", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-visible-run-quote-virizz",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "ai_visible_run_quote_virizz_runner",
+          name: "AI Visible Run Quote Virizz Runner",
+          cards: [
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "ai_visible_run_quote_virizz_corp",
+          name: "AI Visible Run Quote Virizz Corp",
+          cards: [
+            { id: "onr_v1_277_virizz", quantity: 1 },
+            { id: "onr_v1_279_wall-of-static", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 10;
+    moveRunnerProgramToRig(state, "onr_v1_031_hammer");
+    const innerWallId = putCorpIceOnServer(
+      state,
+      "rd",
+      "onr_v1_279_wall-of-static",
+    );
+    const virizzId = putCorpIceOnServer(state, "rd", "onr_v1_277_virizz");
+    for (const id of [innerWallId, virizzId]) {
+      state.cardInstances[id] = {
+        ...state.cardInstances[id]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+    });
+    const rdServer = input.playerView.servers.find(
+      (server) => server.id === "rd",
+    );
+    const innerWallQuote = rdServer?.ice.find(
+      (ice) => ice.instanceId === innerWallId,
+    )?.effectiveRunQuote;
+
+    expect(innerWallQuote).toMatchObject({
+      breakSubroutineAdditionalCostPerSubroutine: 1,
+    });
+    expect(
+      assessKnownRezzedIcePath(
+        rdServer?.ice ?? [],
+        input.playerView.own.rig ?? [],
+        1,
+        rdServer?.root ?? [],
+      ),
+    ).toEqual({ blocked: true, visibleBreakCost: 2 });
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
+  it("keeps active Tutor run-duration effects in later effective ICE quotes", () => {
+    let state = runDurationIceEncounterState(
+      "ai-effective-quote-active-tutor",
+      ["onr_v1_052_raffles", "onr_v1_031_hammer"],
+      ["onr_v1_274_tutor", "onr_v1_279_wall-of-static"],
+    );
+    moveRunnerCardToGrip(state, "onr_v1_052_raffles");
+    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    state = installRunnerCard(state, "onr_v1_052_raffles");
+    state = installRunnerCard(state, "onr_v1_031_hammer");
+    state.runner.credits = 8;
+    const wallId = putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+    state.cardInstances[wallId] = {
+      ...state.cardInstances[wallId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const tutorId = putCorpIceOnServer(state, "rd", "onr_v1_274_tutor");
+
+    state = startAndRezOuterIce(state, "rd", tutorId);
+    state = continueRunAction(state);
+    expect(state.run?.futureEncounterEndTheRunSourceIceId).toBe(tutorId);
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const quote = input.playerView.servers
+      .find((server) => server.id === "rd")
+      ?.ice.find((ice) => ice.instanceId === wallId)?.effectiveRunQuote;
+
+    expect(quote?.subroutines.map((subroutine) => subroutine.type)).toEqual([
+      "end_the_run",
+      "end_the_run",
+    ]);
+    expect(quote?.subroutines[1]).toMatchObject({
+      sourceDefinitionId: "onr_v1_274_tutor",
+      dynamicSourceKind: "run_duration_additional_subroutine",
+    });
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
+  it("breaks a visible Tutor run-duration subroutine when it would add an unaffordable future ETR", () => {
+    let state = runDurationIceEncounterState(
+      "ai-tutor-run-duration-must-break",
+      ["onr_v1_052_raffles", "onr_v1_031_hammer"],
+      ["onr_v1_274_tutor", "onr_v1_279_wall-of-static"],
+    );
+    moveRunnerCardToGrip(state, "onr_v1_052_raffles");
+    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    state = installRunnerCard(state, "onr_v1_052_raffles");
+    state = installRunnerCard(state, "onr_v1_031_hammer");
+    const wallId = putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+    state.cardInstances[wallId] = {
+      ...state.cardInstances[wallId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const tutorId = putCorpIceOnServer(state, "rd", "onr_v1_274_tutor");
+    state.runner.credits = 1;
+    const rafflesId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_052_raffles",
+    );
+    if (!rafflesId) throw new Error("Missing Raffles");
+    state.cardInstances[rafflesId] = {
+      ...state.cardInstances[rafflesId]!,
+      strengthModifier: 1,
+    };
+
+    state = startAndRezOuterIce(state, "rd", tutorId);
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(selected?.type).toBe("break_subroutine");
+    expect(decision.reasonCode).toBe(
+      "runner.encounter.break_run_remainder_effect",
+    );
+    expect(decision.evidence).toContain(
+      "adds_future_end_the_run_subroutines:true",
+    );
+    expect(decision.evidence).toContain("run_remainder_effect_must_break:true");
+  });
+
+  it("lets a Tutor future-effect subroutine fire when Tutor is the last ICE", () => {
+    let state = runDurationIceEncounterState(
+      "ai-tutor-last-ice-no-future-effect",
+      ["onr_v1_039_krash"],
+      ["onr_v1_274_tutor", "simple_upgrade"],
+    );
+    moveRunnerCardToGrip(state, "onr_v1_039_krash");
+    state = installRunnerCard(state, "onr_v1_039_krash");
+    ensureRemoteServer(state, "remote_1");
+    const tutorId = putCorpIceOnServer(state, "remote_1", "onr_v1_274_tutor");
+    state.runner.credits = 12;
+
+    state = startAndRezOuterIce(state, "remote_1", tutorId);
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const pump = input.legalActions.find(
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_039_krash",
+    );
+    const continueRun = input.legalActions.find(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true,
+    );
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(pump).toBeDefined();
+    expect(continueRun).toBeDefined();
+    expect(selected?.type).toBe("continue_run");
+    expect([
+      "runner.encounter.continue",
+      "runner.plan.safe_probe_run",
+    ]).toContain(decision.reasonCode);
+    if (!pump || !continueRun)
+      throw new Error("Missing Tutor last-ICE fixture actions");
+    const baselineDecision = chooseRunnerBaselineAction({
+      ...input,
+      legalActions: [pump, continueRun],
+    });
+    expect(baselineDecision.actionId).toBe(continueRun.actionId);
+    expect(baselineDecision.evidence).toContain(
+      "unbroken_run_effect_ignored_because_no_remaining_ice:true",
+    );
+    expect(baselineDecision.evidence).toContain("future_effect_remaining_ice:0");
+    expect(baselineDecision.evidence).not.toContain(
+      "run_remainder_effect_must_break:true",
+    );
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
+  it("does not partially pump for a Tutor future-effect break that cannot be completed", () => {
+    let state = runDurationIceEncounterState(
+      "ai-tutor-future-effect-no-partial-pump",
+      ["onr_v1_052_raffles", "onr_v1_031_hammer"],
+      ["onr_v1_274_tutor", "onr_v1_279_wall-of-static"],
+    );
+    moveRunnerCardToGrip(state, "onr_v1_052_raffles");
+    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    state = installRunnerCard(state, "onr_v1_052_raffles");
+    state = installRunnerCard(state, "onr_v1_031_hammer");
+    const wallId = putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+    state.cardInstances[wallId] = {
+      ...state.cardInstances[wallId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const tutorId = putCorpIceOnServer(state, "rd", "onr_v1_274_tutor");
+    state.runner.credits = 2;
+
+    state = startAndRezOuterIce(state, "rd", tutorId);
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const pump = input.legalActions.find(
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_052_raffles",
+    );
+    const continueRun = input.legalActions.find(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true,
+    );
+    expect(pump).toBeDefined();
+    expect(continueRun).toBeDefined();
+    if (!pump || !continueRun)
+      throw new Error("Missing Tutor partial-pump fixture actions");
+
+    const decision = chooseRunnerBaselineAction({
+      ...input,
+      legalActions: [pump, continueRun],
+    });
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(selected?.type).toBe("continue_run");
+    expect(decision.reasonCode).toMatch(/^runner\.encounter\.continue/);
+  });
+
+  it("breaks a visible Virizz run-duration subroutine when future break taxes block the path", () => {
+    let state = runDurationIceEncounterState(
+      "ai-virizz-run-duration-must-break",
+      ["onr_v1_015_codeslinger", "onr_v1_031_hammer"],
+      ["onr_v1_277_virizz", "onr_v1_278_wall-of-ice"],
+    );
+    moveRunnerCardToGrip(state, "onr_v1_015_codeslinger");
+    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    state = installRunnerCard(state, "onr_v1_015_codeslinger");
+    state = installRunnerCard(state, "onr_v1_031_hammer");
+    const wallId = putCorpIceOnServer(state, "rd", "onr_v1_278_wall-of-ice");
+    state.cardInstances[wallId] = {
+      ...state.cardInstances[wallId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const virizzId = putCorpIceOnServer(state, "rd", "onr_v1_277_virizz");
+    state.runner.credits = 3;
+    for (const breakerId of state.runner.rig.programs) {
+      const definitionId = state.cardInstances[breakerId]?.definitionId;
+      if (definitionId === "onr_v1_015_codeslinger")
+        state.cardInstances[breakerId] = {
+          ...state.cardInstances[breakerId]!,
+          strengthModifier: 1,
+        };
+      if (definitionId === "onr_v1_031_hammer")
+        state.cardInstances[breakerId] = {
+          ...state.cardInstances[breakerId]!,
+          strengthModifier: 4,
+        };
+    }
+
+    state = startAndRezOuterIce(state, "rd", virizzId);
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(selected?.type).toBe("break_subroutine");
+    expect(decision.reasonCode).toBe(
+      "runner.encounter.break_run_remainder_effect",
+    );
+    expect(decision.evidence).toContain("increases_future_break_cost:true");
+    expect(decision.evidence).toContain("run_remainder_effect_must_break:true");
+  });
+
+  it("may continue through a visible run-duration subroutine when the future path stays affordable", () => {
+    let state = runDurationIceEncounterState(
+      "ai-run-duration-affordable-probe",
+      ["onr_v1_031_hammer"],
+      ["onr_v1_277_virizz", "onr_v1_279_wall-of-static"],
+    );
+    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    state = installRunnerCard(state, "onr_v1_031_hammer");
+    const wallId = putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+    state.cardInstances[wallId] = {
+      ...state.cardInstances[wallId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const virizzId = putCorpIceOnServer(state, "rd", "onr_v1_277_virizz");
+    state.runner.credits = 8;
+
+    state = startAndRezOuterIce(state, "rd", virizzId);
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const continueRun = input.legalActions.find(
+      (action) => action.type === "continue_run",
+    );
+    expect(continueRun).toBeDefined();
+    if (!continueRun) throw new Error("Missing continue action");
+    const decision = chooseRunnerBaselineAction({
+      ...input,
+      legalActions: [continueRun],
+    });
+
+    expect(decision.actionId).toBe(continueRun.actionId);
+    expect(decision.evidence).toContain("run_remainder_subroutine_effect:true");
+    expect(decision.evidence).toContain(
+      "future_path_blocked_if_unbroken:false",
+    );
+    expect(decision.evidence).not.toContain(
+      "run_remainder_effect_must_break:true",
+    );
   });
 
   it("keeps visible run analysis invariant across hidden-info variants", () => {
@@ -2635,7 +3074,7 @@ describe("MVP 0.3 Runner AI", () => {
 
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "normal",
-      profileId: "runner-ai-v1.4.1-normal",
+      profileId: "runner-ai-v1.4.2-normal",
     });
     const remoteRun = input.legalActions.find(
       (action) =>
@@ -2654,14 +3093,33 @@ describe("MVP 0.3 Runner AI", () => {
     );
     expect(contestCandidate).toBeDefined();
     if (!contestCandidate) throw new Error("Missing contest_remote candidate");
-    const runCost = estimateRunCost(input, contestCandidate);
-    const decision = chooseRunnerAction({
+    const scopedInput = {
       ...input,
+      ownDeckDoctrine: runnerDoctrineForTest(
+        "runner-effective-outcome",
+        ["balanced"],
+        {},
+      ),
+      eventTail: [
+        syntheticPlanActionEvent(
+          "runner-effective-jack-out",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "jack_out",
+          "remote_1",
+        ),
+      ],
       legalActions: [remoteRun, gain],
-    });
+    };
+    const runCost = estimateRunCost(scopedInput, contestCandidate);
+    const outcomeScore = evaluateRunnerPlan(scopedInput, contestCandidate);
+    const decision = chooseRunnerAction(scopedInput);
 
     expect(runCost.reasons).toContain("visible_ice_unaffordable_to_break");
     expect(runCost.evidence).toContain("visible_etr_break_cost:3");
+    expect(outcomeScore.evidence).toContain(
+      "runner_jack_out_repeated_same_server_without_new_info:true",
+    );
     expect(decision.actionId).toBe(gain.actionId);
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
   });
@@ -2691,6 +3149,7 @@ describe("MVP 0.3 Runner AI", () => {
     const runCost = estimateRunCost(input, pressureCandidate);
     const decision = chooseRunnerAction({
       ...input,
+      profileId: "corp-ai-v1.4.2-normal",
       legalActions: [rdRun, gain],
     });
 
@@ -4408,6 +4867,60 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.selectedActionId).toBe(finalAdvance.actionId);
   });
 
+  it("does not treat last-click final advance as a safe same-turn score window", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-last-click-final-advance-risk",
+      (state) => {
+        state.corp.credits = 7;
+        state.corp.clicks = 1;
+        state.runner.credits = 10;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        moveCorpCardToHq(state, "simple_barrier_ice");
+        moveRunnerProgramToRig(state, "simple_fracter");
+      },
+    );
+    const finalAdvance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const remoteIceInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1",
+    );
+    expect(finalAdvance).toBeDefined();
+    expect(remoteIceInstall).toBeDefined();
+    if (!finalAdvance || !remoteIceInstall)
+      throw new Error("Missing last-click advance risk fixture actions");
+
+    const scopedInput = {
+      ...input,
+      legalActions: [finalAdvance, remoteIceInstall],
+    };
+    const advanceCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.legalActionIds.includes(finalAdvance.actionId),
+    );
+    const protectCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) =>
+        candidate.legalActionIds.includes(remoteIceInstall.actionId),
+    );
+    expect(advanceCandidate).toBeDefined();
+    expect(protectCandidate).toBeDefined();
+    if (!advanceCandidate || !protectCandidate)
+      throw new Error("Missing last-click advance risk candidates");
+
+    const advanceScore = evaluateCorpPlan(scopedInput, advanceCandidate);
+    const protectScore = evaluateCorpPlan(scopedInput, protectCandidate);
+
+    expect(advanceScore.evidence).toContain(
+      "advance_protection_contains_risky_advance:true",
+    );
+    expect(advanceScore.score).toBeLessThan(protectScore.score);
+  });
+
   it("builds rez reserve before a near-final advance when protection would become unrezzable", () => {
     const input = corpActionPhaseInput(
       "ai-corp-rez-reserve-before-risky-advance",
@@ -4812,6 +5325,268 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
+  it("continues Corp remote-build intent into advance or score instead of loose economy", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-plan-continuation-remote-build",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain) throw new Error("Missing corp continuation actions");
+    const scopedInput = {
+      ...input,
+      profileId: "corp-ai-v1.4.2-normal",
+      eventTail: [
+        syntheticPlanActionEvent(
+          "corp-prior-remote-build",
+          1,
+          "corp",
+          "advance_card",
+          "remote_1",
+        ),
+      ],
+      legalActions: [advance, gain],
+    };
+    const scoreCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_next_turn",
+    );
+    const economyCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(scoreCandidate).toBeDefined();
+    expect(economyCandidate).toBeDefined();
+    if (!scoreCandidate || !economyCandidate)
+      throw new Error("Missing corp continuation candidates");
+    const score = evaluateCorpPlan(scopedInput, scoreCandidate);
+    const economy = evaluateCorpPlan(scopedInput, economyCandidate);
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(score.score).toBeGreaterThan(economy.score);
+    expect(JSON.stringify(score.scoreBreakdown)).toContain(
+      "continue_short_horizon_plan",
+    );
+    expect(decision.debug.planKind).toBe("score_next_turn");
+  });
+
+  it("protects or pivots after a Runner remote steal instead of repeating an unsafe line", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-outcome-remote-steal",
+      (state) => {
+        state.corp.credits = 6;
+        ensureRemoteServer(state, "remote_1");
+        moveCorpCardToHq(state, "simple_barrier_ice");
+        moveCorpCardToHq(state, "simple_agenda");
+      },
+    );
+    const protectHq = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq",
+    );
+    const remoteInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "root" &&
+        action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(protectHq).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!protectHq || !gain)
+      throw new Error("Missing corp remote-steal follow-up actions");
+    const scopedInput = {
+      ...input,
+      profileId: "corp-ai-v1.4.2-normal",
+      ownDeckDoctrine: corpDoctrineForTest(
+        "corp-outcome-remote-steal",
+        ["glacier"],
+        {},
+      ),
+      eventTail: [
+        syntheticPlanActionEvent(
+          "runner-stole-remote-agenda",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "steal_agenda",
+          "remote_1",
+        ),
+      ],
+      legalActions: remoteInstall
+        ? [protectHq, remoteInstall, gain]
+        : [protectHq, gain],
+    };
+    const protect = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "protect_hq",
+    );
+    const remote = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "build_scoring_remote",
+    );
+    const economy = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(protect).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!protect || !economy)
+      throw new Error("Missing corp remote-steal candidates");
+
+    expect(evaluateCorpPlan(scopedInput, protect).score).toBeGreaterThan(
+      evaluateCorpPlan(scopedInput, economy).score - 250,
+    );
+    expect(evaluateCorpPlan(scopedInput, protect).evidence).toContain(
+      "corp_remote_steal_followup_protect_or_pivot:true",
+    );
+    if (remote)
+      expect(evaluateCorpPlan(scopedInput, remote).evidence).toContain(
+        "corp_remote_steal_followup_repeated_unsafe_line:true",
+      );
+  });
+
+  it("does not let Corp remote-steal follow-up displace a legal score window", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-outcome-score-window-protected",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 3);
+        moveCorpCardToHq(state, "simple_barrier_ice");
+      },
+    );
+    const score = input.legalActions.find(
+      (action) => action.type === "score_agenda",
+    );
+    const protect = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1",
+    );
+    expect(score).toBeDefined();
+    expect(protect).toBeDefined();
+    if (!score || !protect)
+      throw new Error("Missing score-protected follow-up actions");
+    const scopedInput = {
+      ...input,
+      profileId: "corp-ai-v1.4.2-normal",
+      ownDeckDoctrine: corpDoctrineForTest(
+        "corp-outcome-score-window-protected",
+        ["score_remote"],
+        {},
+      ),
+      eventTail: [
+        syntheticPlanActionEvent(
+          "runner-stole-prior-remote-agenda",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "steal_agenda",
+          "remote_1",
+        ),
+      ],
+      legalActions: [score, protect],
+    };
+    const scoreCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_now",
+    );
+    const protectCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.legalActionIds.includes(protect.actionId),
+    );
+    expect(scoreCandidate).toBeDefined();
+    expect(protectCandidate).toBeDefined();
+    if (!scoreCandidate || !protectCandidate)
+      throw new Error("Missing score-protected follow-up candidates");
+
+    const scorePlan = evaluateCorpPlan(scopedInput, scoreCandidate);
+    const protectPlan = evaluateCorpPlan(scopedInput, protectCandidate);
+    const decision = chooseCorpAction(scopedInput);
+
+    expect(decision.actionId).toBe(score.actionId);
+    expect(scorePlan.evidence).toContain(
+      "score_now_protected_from_followup:true",
+    );
+    expect(scorePlan.evidence).toContain(
+      "outcome_followup_preserved_score_window:true",
+    );
+    expect(protectPlan.evidence).toContain(
+      "outcome_followup_suppressed_by_better_immediate_value:true",
+    );
+  });
+
+  it("converts a failed Runner remote run into Corp score-line progress", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-outcome-runner-failed-remote",
+      (state) => {
+        state.corp.credits = 7;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain)
+      throw new Error("Missing failed-run follow-up actions");
+    const scopedInput = {
+      ...input,
+      profileId: "corp-ai-v1.4.2-normal",
+      ownDeckDoctrine: corpDoctrineForTest(
+        "corp-outcome-failed-run",
+        ["score_remote"],
+        {},
+      ),
+      eventTail: [
+        syntheticPlanActionEvent(
+          "runner-jacked-out-remote",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "jack_out",
+          "remote_1",
+        ),
+      ],
+      legalActions: [advance, gain],
+    };
+    const scoreNext = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_next_turn",
+    );
+    const economy = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(scoreNext).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!scoreNext || !economy)
+      throw new Error("Missing failed-run follow-up candidates");
+
+    expect(evaluateCorpPlan(scopedInput, scoreNext).score).toBeGreaterThan(
+      evaluateCorpPlan(scopedInput, economy).score,
+    );
+    expect(evaluateCorpPlan(scopedInput, scoreNext).evidence).toContain(
+      "corp_runner_failed_run_followup_score_or_advance:true",
+    );
+  });
+
   it("evaluates Corp mulligan choices from opening hand and deck doctrine", () => {
     const baseInput = corpActionPhaseInput("ai-doctrine-mulligan", (state) => {
       state.corp.credits = 5;
@@ -5024,6 +5799,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
       throw new Error("Missing naked-agenda guard fixture actions");
     const decision = chooseCorpAction({
       ...input,
+      profileId: "runner-ai-v1.4.2-normal",
       legalActions: [nakedAgendaInstall, rdIceInstall, gain],
     });
     const selected = input.legalActions.find(
@@ -6445,6 +7221,309 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("pivots Runner economy intent into a reachable contest instead of repeating economy", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-plan-continuation-economy",
+      (state) => {
+        state.runner.credits = 8;
+        state.corp.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        moveRunnerProgramToRig(state, "simple_fracter");
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing economy-continuation actions");
+    const scopedInput = {
+      ...input,
+      profileId: "runner-ai-v1.4.2-normal",
+      eventTail: [
+        syntheticPlanActionEvent(
+          "runner-prior-economy",
+          1,
+          "runner",
+          "gain_credit",
+        ),
+      ],
+      legalActions: [remoteRun, gain],
+    };
+    const contestCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    const economyCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(contestCandidate).toBeDefined();
+    expect(economyCandidate).toBeDefined();
+    if (!contestCandidate || !economyCandidate)
+      throw new Error("Missing economy-continuation candidates");
+    const contestScore = evaluateRunnerPlan(scopedInput, contestCandidate);
+    const economyScore = evaluateRunnerPlan(scopedInput, economyCandidate);
+    const decision = chooseRunnerPlanDecision(scopedInput);
+
+    expect(contestScore.score).toBeGreaterThan(economyScore.score);
+    expect(contestScore.evidence).toContain(
+      "plan_abort_reason:reserve_reached",
+    );
+    expect(contestScore.evidence).toContain("plan_abort_taken:true");
+    expect(decision.debug.planKind).toBe("contest_remote");
+  });
+
+  it("pivots Runner after a no-value central access instead of repeating the same server", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-outcome-central-no-value",
+      (state) => {
+        state.runner.credits = 1;
+      },
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdRun || !gain) throw new Error("Missing central outcome actions");
+    const scopedInput = {
+      ...input,
+      profileId: "runner-ai-v1.4.2-normal",
+      ownDeckDoctrine: runnerDoctrineForTest(
+        "runner-outcome-central",
+        ["balanced"],
+        {},
+      ),
+      eventTail: [
+        syntheticPlanActionEvent(
+          "runner-outcome-rd-run",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "start_run",
+          "rd",
+        ),
+        syntheticPlanActionEvent(
+          "runner-outcome-rd-access",
+          input.playerView.stateVersion + 2,
+          "runner",
+          "access_card",
+          "rd",
+        ),
+      ],
+      legalActions: [rdRun, gain],
+    };
+    const pressure = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "pressure_rnd",
+    );
+    const economy = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(pressure).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!pressure || !economy)
+      throw new Error("Missing central outcome candidates");
+
+    expect(evaluateRunnerPlan(scopedInput, economy).score).toBeGreaterThan(
+      evaluateRunnerPlan(scopedInput, pressure).score,
+    );
+    expect(evaluateRunnerPlan(scopedInput, pressure).evidence).toContain(
+      "runner_central_success_followed_by_repeat_no_value:true",
+    );
+    expect(evaluateRunnerPlan(scopedInput, economy).evidence).toContain(
+      "runner_central_no_value_pivoted:true",
+    );
+  });
+
+  it("suppresses Runner no-value central pivots that do not create progression", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-outcome-central-no-value-no-progress",
+      (state) => {
+        state.runner.credits = 8;
+      },
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdRun || !gain)
+      throw new Error("Missing no-progress central outcome actions");
+    const scopedInput = {
+      ...input,
+      profileId: "runner-ai-v1.4.2-normal",
+      ownDeckDoctrine: runnerDoctrineForTest(
+        "runner-outcome-central-no-progress",
+        ["balanced"],
+        {},
+      ),
+      eventTail: [
+        syntheticPlanActionEvent(
+          "runner-outcome-no-progress-rd-run",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "start_run",
+          "rd",
+        ),
+        syntheticPlanActionEvent(
+          "runner-outcome-no-progress-rd-access",
+          input.playerView.stateVersion + 2,
+          "runner",
+          "access_card",
+          "rd",
+        ),
+      ],
+      legalActions: [rdRun, gain],
+    };
+    const economy = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(economy).toBeDefined();
+    if (!economy) throw new Error("Missing no-progress economy candidate");
+
+    const score = evaluateRunnerPlan(scopedInput, economy);
+    expect(score.evidence).toContain(
+      "outcome_followup_suppressed_by_progression_cost:true",
+    );
+    expect(score.evidence).not.toContain(
+      "runner_central_no_value_pivoted:true",
+    );
+    expect(score.evidence).not.toContain("outcome_followup_applied:true");
+  });
+
+  it("allows Runner central follow-up after visible interface value", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-outcome-central-fresh",
+      (state) => {
+        state.runner.credits = 5;
+      },
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdRun || !gain) throw new Error("Missing central fresh actions");
+    const scopedInput = {
+      ...input,
+      profileId: "runner-ai-v1.4.2-normal",
+      ownDeckDoctrine: runnerDoctrineForTest(
+        "runner-outcome-central-fresh",
+        ["central_pressure"],
+        { pressure_rnd: 12 },
+      ),
+      eventTail: [
+        syntheticPlanActionEvent(
+          "runner-outcome-fresh-rd-run",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "start_run",
+          "rd",
+        ),
+        syntheticPlanActionEvent(
+          "runner-outcome-fresh-rd-access",
+          input.playerView.stateVersion + 2,
+          "runner",
+          "access_card",
+          "rd",
+          { interfaceValue: true },
+        ),
+      ],
+      legalActions: [rdRun, gain],
+    };
+    const pressure = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "pressure_rnd",
+    );
+    expect(pressure).toBeDefined();
+    if (!pressure) throw new Error("Missing central fresh candidate");
+
+    const score = evaluateRunnerPlan(scopedInput, pressure);
+    expect(score.evidence).toContain(
+      "runner_central_success_followed_by_value:true",
+    );
+    expect(score.reasons).toContain("continue_central_after_fresh_value");
+  });
+
+  it("pivots Runner after an empty remote access instead of repeating it", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-outcome-empty-remote",
+      (state) => {
+        state.runner.credits = 1;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_economy_asset", 0);
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain) throw new Error("Missing remote outcome actions");
+    const scopedInput = {
+      ...input,
+      profileId: "runner-ai-v1.4.2-normal",
+      ownDeckDoctrine: runnerDoctrineForTest(
+        "runner-outcome-empty-remote",
+        ["balanced"],
+        {},
+      ),
+      eventTail: [
+        syntheticPlanActionEvent(
+          "runner-outcome-remote-run",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "start_run",
+          "remote_1",
+        ),
+        syntheticPlanActionEvent(
+          "runner-outcome-remote-access",
+          input.playerView.stateVersion + 2,
+          "runner",
+          "access_card",
+          "remote_1",
+        ),
+      ],
+      legalActions: [remoteRun, gain],
+    };
+    const remote = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    const economy = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(remote).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!remote || !economy)
+      throw new Error("Missing remote outcome candidates");
+
+    expect(evaluateRunnerPlan(scopedInput, economy).score).toBeGreaterThan(
+      evaluateRunnerPlan(scopedInput, remote).score,
+    );
+    expect(evaluateRunnerPlan(scopedInput, economy).evidence).toContain(
+      "runner_remote_empty_or_low_value_pivoted:true",
+    );
+  });
+
   it("keeps known remote contest viable when Krash can still afford BBS trash after Data Wall", () => {
     const input = krashDataWallBbsRemoteInput(
       "ai-v141-krash-bbs-trash-affordable",
@@ -7542,16 +8621,21 @@ describe("V1.4.1 plan-based Runner AI", () => {
   });
 
   it("uses playable Runner economy before generic draw", () => {
-    const input = runnerActionPhaseInput("ai-v141-hand-economy-before-draw", (state) => {
-      state.runner.credits = 2;
-      moveRunnerCardToGrip(state, "simple_economy_event");
-    });
+    const input = runnerActionPhaseInput(
+      "ai-v141-hand-economy-before-draw",
+      (state) => {
+        state.runner.credits = 2;
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+    );
     const economy = input.legalActions.find(
       (action) =>
         action.type === "play_event" &&
         sourceDefinitionFromInput(input, action) === "simple_economy_event",
     );
-    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
 
     expect(economy).toBeDefined();
     expect(draw).toBeDefined();
@@ -7568,21 +8652,26 @@ describe("V1.4.1 plan-based Runner AI", () => {
   });
 
   it("installs a relevant missing breaker before generic draw", () => {
-    const input = runnerActionPhaseInput("ai-v141-hand-breaker-before-draw", (state) => {
-      moveRunnerCardToGrip(state, "simple_fracter");
-      const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-      state.cardInstances[iceId] = {
-        ...state.cardInstances[iceId]!,
-        faceup: true,
-        rezzed: true,
-      };
-    });
+    const input = runnerActionPhaseInput(
+      "ai-v141-hand-breaker-before-draw",
+      (state) => {
+        moveRunnerCardToGrip(state, "simple_fracter");
+        const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+    );
     const breakerInstall = input.legalActions.find(
       (action) =>
         action.type === "install_card" &&
         sourceDefinitionFromInput(input, action) === "simple_fracter",
     );
-    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
 
     expect(breakerInstall).toBeDefined();
     expect(draw).toBeDefined();
@@ -7599,17 +8688,326 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(decision.evidence).toContain("hand_use_installable_breaker:1");
   });
 
+  it("uses a search card when visible ICE blocks a path and no matching breaker is in hand", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-coverage-search-before-credit",
+      (state) => {
+        state.runner.credits = 5;
+        moveRunnerCardToGrip(state, "v098_stack_search_event");
+        putRunnerCardOnTopOfStack(state, "simple_fracter");
+        const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      runnerCoverageSearchDeckConfig("search-before-credit"),
+    );
+    const search = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "v098_stack_search_event",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+
+    expect(search).toBeDefined();
+    expect(gain).toBeDefined();
+    expect(rdRun).toBeDefined();
+    if (!search || !gain || !rdRun)
+      throw new Error("Missing coverage-search actions");
+
+    const scopedInput = {
+      ...input,
+      legalActions: [search, gain, rdRun],
+    };
+    const buildCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "build_rig",
+    );
+    expect(buildCandidate).toBeDefined();
+    if (!buildCandidate) throw new Error("Missing coverage-search candidate");
+    const buildScore = evaluateRunnerPlan(scopedInput, buildCandidate);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(decision.actionId).toBe(search.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(buildScore.reasons).toContain(
+      "visible_missing_breaker_search_available",
+    );
+  });
+
+  it("takes economy before search when coverage line would leave no useful run budget", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-coverage-economy-before-search",
+      (state) => {
+        state.runner.credits = 0;
+        moveRunnerCardToGrip(state, "v098_stack_search_event");
+        putRunnerCardOnTopOfStack(state, "simple_fracter");
+        const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      runnerCoverageSearchDeckConfig("economy-before-search"),
+    );
+    const originalSearch = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "v098_stack_search_event",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(originalSearch).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!originalSearch || !gain)
+      throw new Error("Missing economy-before-search actions");
+    const costlySearch: LegalAction = {
+      ...originalSearch,
+      costs: [{ credits: 3 }],
+    };
+
+    const scopedInput = {
+      ...input,
+      legalActions: [costlySearch, gain],
+    };
+    const economyCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(economyCandidate).toBeDefined();
+    if (!economyCandidate)
+      throw new Error("Missing economy-before-search candidate");
+    const economyScore = evaluateRunnerPlan(scopedInput, economyCandidate);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(economyScore.score).toBeGreaterThan(0);
+  });
+
+  it("does not prefer further search when coverage and credits already enable pressure", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-coverage-ready-run-before-search",
+      (state) => {
+        state.runner.credits = 5;
+        moveRunnerCardToGrip(state, "v098_stack_search_event");
+        moveRunnerProgramToRig(state, "simple_fracter");
+        const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      runnerCoverageSearchDeckConfig("ready-run-before-search"),
+    );
+    const search = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "v098_stack_search_event",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(search).toBeDefined();
+    expect(rdRun).toBeDefined();
+    if (!search || !rdRun) throw new Error("Missing ready-coverage actions");
+
+    const scopedInput = {
+      ...input,
+      eventTail: [
+        ...input.eventTail,
+        syntheticPlanActionEvent(
+          "runner-ready-coverage-install",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "install_card",
+          undefined,
+          { cardDefinitionId: "simple_fracter" },
+        ),
+      ],
+      legalActions: [search, rdRun],
+    };
+    const pressureCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "pressure_rnd",
+    );
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate)
+      throw new Error("Missing ready-coverage phase-exit candidate");
+    const pressureScore = evaluateRunnerPlan(scopedInput, pressureCandidate);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(decision.actionId).toBe(rdRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.pressure_rnd");
+    expect(pressureScore.evidence).toContain(
+      "runner_pressure_ready_false_positive:true",
+    );
+  });
+
+  it("exits economy setup once reserve and a concrete R&D pressure line are ready", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-phase-exit-economy-to-rd",
+      (state) => {
+        state.runner.credits = 5;
+      },
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(gain).toBeDefined();
+    expect(rdRun).toBeDefined();
+    if (!gain || !rdRun) throw new Error("Missing economy-to-pressure actions");
+
+    const scopedInput = {
+      ...input,
+      eventTail: [
+        ...input.eventTail,
+        syntheticPlanActionEvent(
+          "runner-reserve-reached",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "gain_credit",
+        ),
+      ],
+      legalActions: [gain, rdRun],
+    };
+    const pressureCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "pressure_rnd",
+    );
+    const economyCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(pressureCandidate).toBeDefined();
+    expect(economyCandidate).toBeDefined();
+    if (!pressureCandidate || !economyCandidate)
+      throw new Error("Missing economy-to-pressure candidates");
+
+    const pressureScore = evaluateRunnerPlan(scopedInput, pressureCandidate);
+    const economyScore = evaluateRunnerPlan(scopedInput, economyCandidate);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(decision.actionId).toBe(rdRun.actionId);
+    expect(pressureScore.reasons).toContain("phase_exit_pressure_ready");
+    expect(economyScore.reasons).toContain(
+      "phase_exit_suppress_setup_after_pressure_ready",
+    );
+  });
+
+  it("does not phase-exit into a run when the visible path remains unaffordable", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-phase-exit-false-positive-cost",
+      (state) => {
+        state.runner.credits = 0;
+        moveRunnerProgramToRig(state, "simple_fracter");
+        const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(gain).toBeDefined();
+    expect(rdRun).toBeDefined();
+    if (!gain || !rdRun) throw new Error("Missing blocked-run actions");
+
+    const scopedInput = { ...input, legalActions: [gain, rdRun] };
+    const pressureCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "pressure_rnd",
+    );
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate)
+      throw new Error("Missing blocked pressure candidate");
+    const pressureScore = evaluateRunnerPlan(scopedInput, pressureCandidate);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(pressureScore.reasons).not.toContain("phase_exit_pressure_ready");
+  });
+
+  it("phase-exits to contest an advanced remote when coverage and reserve are ready", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-phase-exit-advanced-remote",
+      (state) => {
+        state.runner.credits = 6;
+        moveRunnerProgramToRig(state, "simple_fracter");
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 1);
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(gain).toBeDefined();
+    expect(remoteRun).toBeDefined();
+    if (!gain || !remoteRun)
+      throw new Error("Missing remote phase-exit actions");
+
+    const scopedInput = { ...input, legalActions: [gain, remoteRun] };
+    const remoteCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(remoteCandidate).toBeDefined();
+    if (!remoteCandidate) throw new Error("Missing remote contest candidate");
+    const remoteScore = evaluateRunnerPlan(scopedInput, remoteCandidate);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(decision.actionId).toBe(remoteRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.contest_remote");
+    expect(remoteScore.reasons).toContain("phase_exit_pressure_ready");
+  });
+
   it("uses a visible pressure event before additional draw", () => {
-    const input = runnerActionPhaseInput("ai-v141-hand-pressure-before-draw", (state) => {
-      state.runner.credits = 5;
-      moveRunnerCardToGrip(state, "simple_run_event");
-    });
+    const input = runnerActionPhaseInput(
+      "ai-v141-hand-pressure-before-draw",
+      (state) => {
+        state.runner.credits = 5;
+        moveRunnerCardToGrip(state, "simple_run_event");
+      },
+    );
     const pressureEvent = input.legalActions.find(
       (action) =>
         action.type === "play_event" &&
         sourceDefinitionFromInput(input, action) === "simple_run_event",
     );
-    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
 
     expect(pressureEvent).toBeDefined();
     expect(draw).toBeDefined();
@@ -7627,21 +9025,26 @@ describe("V1.4.1 plan-based Runner AI", () => {
   });
 
   it("avoids draw into discard pressure when useful hand actions exist", () => {
-    const input = runnerActionPhaseInput("ai-v141-hand-avoid-discard-draw", (state) => {
-      state.runner.maxHandSize = 5;
-      state.runner.credits = 3;
-      moveRunnerCardToGrip(state, "simple_economy_event");
-      moveRunnerCardToGrip(state, "simple_run_event");
-      moveRunnerCardToGrip(state, "simple_fracter");
-      moveRunnerCardToGrip(state, "simple_decoder");
-      moveRunnerCardToGrip(state, "simple_killer");
-    });
+    const input = runnerActionPhaseInput(
+      "ai-v141-hand-avoid-discard-draw",
+      (state) => {
+        state.runner.maxHandSize = 5;
+        state.runner.credits = 3;
+        moveRunnerCardToGrip(state, "simple_economy_event");
+        moveRunnerCardToGrip(state, "simple_run_event");
+        moveRunnerCardToGrip(state, "simple_fracter");
+        moveRunnerCardToGrip(state, "simple_decoder");
+        moveRunnerCardToGrip(state, "simple_killer");
+      },
+    );
     const economy = input.legalActions.find(
       (action) =>
         action.type === "play_event" &&
         sourceDefinitionFromInput(input, action) === "simple_economy_event",
     );
-    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
 
     expect(input.playerView.own.gripOrHq.length).toBeGreaterThanOrEqual(
       input.playerView.own.maxHandSize,
@@ -7742,7 +9145,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
         sourceDefinitionFromInput(input, action) ===
           "onr_v1_041_microtech-ai-interface",
     );
-    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
 
     expect(interfaceInstall).toBeDefined();
     expect(draw).toBeDefined();
@@ -7832,7 +9237,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
       "simple_economy_asset",
     );
     expect(
-      input.legalActions.some((action) => action.type === "trash_accessed_card"),
+      input.legalActions.some(
+        (action) => action.type === "trash_accessed_card",
+      ),
     ).toBe(true);
     expect(decision.reasonCode).toBe("runner.plan.trash_asset");
     expect(
@@ -7883,6 +9290,195 @@ describe("V1.4.1 plan-based Runner AI", () => {
     ).toBe("trash_accessed_card");
   });
 
+  it("defers an early expensive run-tax region trash when no acute remote threat exists", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-expensive-run-tax-trash-no-threat",
+        corpDeck: {
+          id: "ai_expensive_run_tax_no_threat_corp",
+          name: "AI Expensive Run Tax No Threat Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+            { id: "simple_economy_operation", quantity: 8 },
+            { id: "simple_agenda", quantity: 3 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 5;
+    const crystalId = putCorpRootInRemote(
+      state,
+      "onr_v1_355_crystal-palace-station-grid",
+      0,
+    );
+    state.cardInstances[crystalId] = {
+      ...state.cardInstances[crystalId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(input.playerView.run?.accessedCard?.definitionId).toBe(
+      "onr_v1_355_crystal-palace-station-grid",
+    );
+    expect(decision.reasonCode).toBe("runner.access.decline_trash");
+    expect(decision.evidence).toContain("remote_trash_role:run_tax");
+    expect(decision.evidence).toContain(
+      "remote_trash_deferred_by_budget:true",
+    );
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
+  it("trashes an expensive run-tax region when it protects an acute advanced remote and reserve remains", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-expensive-run-tax-trash-threat",
+        corpDeck: {
+          id: "ai_expensive_run_tax_threat_corp",
+          name: "AI Expensive Run Tax Threat Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 10;
+    const crystalId = putCorpRootInRemote(
+      state,
+      "onr_v1_355_crystal-palace-station-grid",
+      0,
+    );
+    state.cardInstances[crystalId] = {
+      ...state.cardInstances[crystalId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    putCorpRootInRemote(state, "simple_agenda", 2);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(input.playerView.run?.accessedCard?.definitionId).toBe(
+      "onr_v1_355_crystal-palace-station-grid",
+    );
+    expect(
+      input.legalActions.some((action) => action.type === "trash_accessed_card"),
+    ).toBe(true);
+    expect(decision.reasonCode).toBe("runner.plan.trash_asset");
+    expect(
+      input.legalActions.find((action) => action.actionId === decision.actionId)
+        ?.type,
+    ).toBe("trash_accessed_card");
+    expect(decision.evidence).toContain("remote_trash_role:run_tax");
+    expect(decision.evidence).toContain("remote_trash_acute_threat:true");
+  });
+
+  it("uses dedicated upgrade trash credits for an expensive high-impact trash without treating all cost as general cash", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-dedicated-trash-credits",
+        runnerDeck: {
+          id: "ai_dedicated_trash_runner",
+          name: "AI Dedicated Trash Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_057_scatter-shot", quantity: 1 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+        corpDeck: {
+          id: "ai_dedicated_trash_corp",
+          name: "AI Dedicated Trash Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 3;
+    moveRunnerCardToGrip(state, "onr_v1_057_scatter-shot");
+    state = installRunnerCard(state, "onr_v1_057_scatter-shot");
+    const scatterId = state.runner.rig.programs.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_057_scatter-shot",
+    );
+    expect(scatterId).toBeDefined();
+    if (!scatterId) throw new Error("Missing Scatter Shot");
+    state.cardInstances[scatterId] = {
+      ...state.cardInstances[scatterId]!,
+      counters: {
+        ...(state.cardInstances[scatterId]?.counters ?? {}),
+        bit: 2,
+      },
+    };
+    const crystalId = putCorpRootInRemote(
+      state,
+      "onr_v1_355_crystal-palace-station-grid",
+      0,
+    );
+    state.cardInstances[crystalId] = {
+      ...state.cardInstances[crystalId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(input.playerView.run?.accessedCard?.definitionId).toBe(
+      "onr_v1_355_crystal-palace-station-grid",
+    );
+    expect(input.playerView.own.rig?.[0]?.counters).toMatchObject({
+      bit: 2,
+    });
+    expect(decision.evidence).toContain("remote_trash_role:run_tax");
+    expect(decision.evidence).toContain("remote_trash_dedicated_credits:2");
+    expect(decision.reasonCode).toBe("runner.plan.trash_asset");
+    expect(decision.evidence).toContain(
+      "remote_trash_deferred_by_budget:false",
+    );
+  });
+
   it("declines a low-value remote trash when credits are better preserved", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -7919,7 +9515,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
       "simple_upgrade",
     );
     expect(
-      input.legalActions.some((action) => action.type === "trash_accessed_card"),
+      input.legalActions.some(
+        (action) => action.type === "trash_accessed_card",
+      ),
     ).toBe(true);
     expect(decision.reasonCode).toBe("runner.access.decline_trash");
   });
@@ -7952,8 +9550,12 @@ describe("V1.4.1 plan-based Runner AI", () => {
 
     expect(decision.actionId).toBe(remoteRun.actionId);
     expect(decision.reasonCode).toBe("runner.plan.contest_remote");
-    expect(decision.evidence).toContain("remote_contest_selected_advanced:true");
-    expect(decision.evidence).toContain("remote_contest_selected_contestable:true");
+    expect(decision.evidence).toContain(
+      "remote_contest_selected_advanced:true",
+    );
+    expect(decision.evidence).toContain(
+      "remote_contest_selected_contestable:true",
+    );
     expect(decision.evidence).toContain(
       "remote_contest_selected_post_run_reserve_sufficient:true",
     );
@@ -8020,7 +9622,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
     if (!contestCandidate)
       throw new Error("Missing post-run reserve contest candidate");
     const contestScore = evaluateRunnerPlan(input, contestCandidate);
-    expect(contestScore.reasons).toContain("preserve_credits_for_steal_or_trash");
+    expect(contestScore.reasons).toContain(
+      "preserve_credits_for_steal_or_trash",
+    );
     expect(contestScore.evidence).toContain(
       "remote_contest_selected_post_run_reserve_sufficient:false",
     );
@@ -8089,8 +9693,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
       legalActions: [remoteRun, rdRun],
     }).find((candidate) => candidate.kind === "pressure_rnd");
     expect(centralCandidate).toBeDefined();
-    if (!centralCandidate)
-      throw new Error("Missing central burn candidate");
+    if (!centralCandidate) throw new Error("Missing central burn candidate");
     const centralScore = evaluateRunnerPlan(input, centralCandidate);
     expect(centralScore.evidence).toContain(
       "central_run_burns_contest_reserve:true",
@@ -8103,7 +9706,11 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (state) => {
         state.runner.credits = 1;
         putCorpRootInRemote(state, "simple_upgrade", 0);
-        const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
         state.cardInstances[iceId] = {
           ...state.cardInstances[iceId]!,
           faceup: true,
@@ -8204,11 +9811,13 @@ describe("V1.4.1 plan-based Runner AI", () => {
 
     expect(decisionA.reasonCode).toBe(decisionB.reasonCode);
     expect(
-      inputA.legalActions.find((action) => action.actionId === decisionA.actionId)
-        ?.type,
+      inputA.legalActions.find(
+        (action) => action.actionId === decisionA.actionId,
+      )?.type,
     ).toBe(
-      inputB.legalActions.find((action) => action.actionId === decisionB.actionId)
-        ?.type,
+      inputB.legalActions.find(
+        (action) => action.actionId === decisionB.actionId,
+      )?.type,
     );
     expect(assertAiInputIsSideSafe(inputA)).toBe(true);
     expect(assertAiInputIsSideSafe(inputB)).toBe(true);
@@ -8221,7 +9830,11 @@ describe("V1.4.1 plan-based Runner AI", () => {
         state.runner.credits = 1;
         moveRunnerProgramToRig(state, "simple_fracter");
         ensureRemoteServer(state, "remote_1");
-        const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
         state.cardInstances[iceId] = {
           ...state.cardInstances[iceId]!,
           faceup: true,
@@ -8329,7 +9942,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
       runnerCentralPressureDeckConfig("rd-interface"),
     );
     const rdRun = input.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     const economy = input.legalActions.find(
       (action) =>
@@ -8340,7 +9954,10 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(economy).toBeDefined();
     if (!rdRun || !economy) throw new Error("Missing R&D interface fixture");
 
-    const decision = chooseRunnerAction({ ...input, legalActions: [rdRun, economy] });
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [rdRun, economy],
+    });
 
     expect(decision.actionId).toBe(rdRun.actionId);
     expect(decision.reasonCode).toBe("runner.plan.pressure_rnd");
@@ -8360,7 +9977,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
       runnerCentralPressureDeckConfig("hq-interface"),
     );
     const hqRun = input.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     const economy = input.legalActions.find(
       (action) =>
@@ -8371,7 +9989,10 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(economy).toBeDefined();
     if (!hqRun || !economy) throw new Error("Missing HQ interface fixture");
 
-    const decision = chooseRunnerAction({ ...input, legalActions: [hqRun, economy] });
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [hqRun, economy],
+    });
 
     expect(decision.actionId).toBe(hqRun.actionId);
     expect(decision.reasonCode).toBe("runner.plan.pressure_hq");
@@ -8392,9 +10013,12 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const interfaceInstall = input.legalActions.find(
       (action) =>
         action.type === "install_card" &&
-        sourceDefinitionFromInput(input, action) === "onr_v1_139_r-and-d-interface",
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_139_r-and-d-interface",
     );
-    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
     expect(interfaceInstall).toBeDefined();
     expect(draw).toBeDefined();
     if (!interfaceInstall || !draw)
@@ -8492,17 +10116,26 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const baseInput = runnerActionPhaseInput(
       "ai-v142-central-repeat-low-value",
       (state) => {
-        state.runner.credits = 5;
-        moveRunnerCardToGrip(state, "simple_economy_event");
+        state.runner.credits = 2;
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
       },
     );
     const rdRun = baseInput.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     const economy = baseInput.legalActions.find(
-      (action) =>
-        action.type === "play_event" &&
-        sourceDefinitionFromInput(baseInput, action) === "simple_economy_event",
+      (action) => action.type === "gain_credit",
     );
     expect(rdRun).toBeDefined();
     expect(economy).toBeDefined();
@@ -8526,11 +10159,280 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
 
     expect(centralCandidate).toBeDefined();
-    if (!centralCandidate) throw new Error("Missing repeated central candidate");
+    if (!centralCandidate)
+      throw new Error("Missing repeated central candidate");
     expect(decision.actionId).toBe(economy.actionId);
-    expect(evaluateRunnerPlan(repeatedInput, centralCandidate).reasons).toContain(
-      "avoid_repeated_low_value_central",
+    expect(
+      evaluateRunnerPlan(repeatedInput, centralCandidate).reasons,
+    ).toContain("avoid_repeated_low_value_central");
+    expect(decision.evidence).toContain("no_fresh_central_window:true");
+    expect(decision.evidence).toContain(
+      "no_fresh_central_better_alternatives:economy",
     );
+  });
+
+  it("substitutes stale central pressure with a breaker install that unlocks a visible path", () => {
+    const baseInput = runnerActionPhaseInput(
+      "ai-v143-no-fresh-substitute-rig-unlock",
+      (state) => {
+        state.runner.credits = 6;
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        moveRunnerCardToGrip(state, "simple_fracter");
+      },
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const breakerInstall = baseInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(baseInput, action) === "simple_fracter",
+    );
+    expect(rdRun).toBeDefined();
+    expect(breakerInstall).toBeDefined();
+    if (!rdRun || !breakerInstall)
+      throw new Error("Missing no-fresh rig-unlock fixture actions");
+    const repeatedInput = {
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticRunStartedEvent(
+          "ai-v143-no-fresh-rig-repeat",
+          baseInput.playerView.stateVersion + 1,
+          "rd",
+        ),
+      ],
+      legalActions: [rdRun, breakerInstall],
+    };
+
+    const decision = chooseRunnerAction(repeatedInput);
+
+    expect(decision.actionId).toBe(breakerInstall.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(decision.evidence).toContain(
+      "no_fresh_central_better_alternatives:rig_unlock",
+    );
+  });
+
+  it("substitutes stale central pressure with remote contest when an advanced remote is contestable", () => {
+    const baseInput = runnerActionPhaseInput(
+      "ai-v143-no-fresh-substitute-remote-contest",
+      (state) => {
+        state.runner.credits = 6;
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const remoteRun = baseInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(rdRun).toBeDefined();
+    expect(remoteRun).toBeDefined();
+    if (!rdRun || !remoteRun)
+      throw new Error("Missing no-fresh remote-contest fixture actions");
+    const repeatedInput = {
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticRunStartedEvent(
+          "ai-v143-no-fresh-remote-repeat",
+          baseInput.playerView.stateVersion + 1,
+          "rd",
+        ),
+      ],
+      legalActions: [rdRun, remoteRun],
+    };
+
+    const decision = chooseRunnerAction(repeatedInput);
+
+    expect(decision.actionId).toBe(remoteRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.contest_remote");
+    expect(decision.evidence).toContain(
+      "no_fresh_central_better_alternatives:remote_contest",
+    );
+  });
+
+  it("substitutes stale central pressure with an interface install that creates near-term pressure", () => {
+    const baseInput = runnerActionPhaseInput(
+      "ai-v143-no-fresh-substitute-pressure-install",
+      (state) => {
+        state.runner.credits = 6;
+        moveRunnerCardToGrip(state, "onr_v1_139_r-and-d-interface");
+      },
+      runnerCentralPressureDeckConfig("no-fresh-pressure-install"),
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const interfaceInstall = baseInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(baseInput, action) ===
+          "onr_v1_139_r-and-d-interface",
+    );
+    expect(rdRun).toBeDefined();
+    expect(interfaceInstall).toBeDefined();
+    if (!rdRun || !interfaceInstall)
+      throw new Error("Missing no-fresh pressure-install fixture actions");
+    const repeatedInput = {
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticRunStartedEvent(
+          "ai-v143-no-fresh-pressure-repeat",
+          baseInput.playerView.stateVersion + 1,
+          "rd",
+        ),
+      ],
+      legalActions: [rdRun, interfaceInstall],
+    };
+
+    const decision = chooseRunnerAction(repeatedInput);
+
+    expect(decision.actionId).toBe(interfaceInstall.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(decision.evidence).toContain(
+      "no_fresh_central_better_alternatives:pressure_install",
+    );
+  });
+
+  it("allows repeated central pressure when fresh interface value is present", () => {
+    const baseInput = runnerActionPhaseInput(
+      "ai-v142-central-repeat-fresh-interface",
+      (state) => {
+        state.runner.credits = 7;
+        moveRunnerHardwareToRig(state, "onr_v1_139_r-and-d-interface");
+        moveRunnerCardToGrip(state, "simple_economy_event");
+      },
+      runnerCentralPressureDeckConfig("repeat-fresh"),
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const economy = baseInput.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(baseInput, action) === "simple_economy_event",
+    );
+    expect(rdRun).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!rdRun || !economy) throw new Error("Missing fresh repeat fixture");
+    const repeatedInput = {
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticRunStartedEvent(
+          "ai-v142-central-repeat-fresh-run",
+          baseInput.playerView.stateVersion + 1,
+          "rd",
+        ),
+      ],
+      legalActions: [rdRun, economy],
+    };
+
+    const decision = chooseRunnerAction(repeatedInput);
+    const centralCandidate = generateRunnerPlanCandidates(repeatedInput).find(
+      (candidate) => candidate.kind === "pressure_rnd",
+    );
+
+    expect(centralCandidate).toBeDefined();
+    if (!centralCandidate) throw new Error("Missing fresh central candidate");
+    expect(decision.actionId).toBe(rdRun.actionId);
+    expect(
+      evaluateRunnerPlan(repeatedInput, centralCandidate).reasons,
+    ).toContain("central_pressure_with_fresh_value");
+  });
+
+  it("keeps stale central pressure when no better active alternative is available", () => {
+    const baseInput = runnerActionPhaseInput(
+      "ai-v143-no-fresh-allow-no-better-action",
+      (state) => {
+        state.runner.credits = 5;
+      },
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(rdRun).toBeDefined();
+    if (!rdRun) throw new Error("Missing no-fresh allow fixture action");
+    const repeatedInput = {
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticRunStartedEvent(
+          "ai-v143-no-fresh-allow-repeat",
+          baseInput.playerView.stateVersion + 1,
+          "rd",
+        ),
+      ],
+      legalActions: [rdRun],
+    };
+
+    const decision = chooseRunnerAction(repeatedInput);
+
+    expect(decision.actionId).toBe(rdRun.actionId);
+    expect(decision.evidence).toContain("no_fresh_central_window:true");
+    expect(decision.evidence).toContain(
+      "stale_central_allowed_reasons:central_open|remote_uncontestable|no_better_action",
+    );
+  });
+
+  it("does not treat generic central access as a true closeout opportunity", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-v142-central-generic-not-closeout",
+        ...runnerCentralPressureDeckConfig("generic-closeout"),
+      }),
+    );
+    state.runner.credits = 5;
+    scoreRunnerAgendaForTest(state, "simple_agenda", 0);
+    scoreRunnerAgendaForTest(state, "simple_agenda", 1);
+    scoreRunnerAgendaForTest(state, "simple_agenda", 2);
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdRun || !gain) throw new Error("Missing generic closeout fixture");
+    const centralCandidate = generateRunnerPlanCandidates({
+      ...input,
+      legalActions: [rdRun, gain],
+    }).find((candidate) => candidate.kind === "pressure_rnd");
+
+    expect(centralCandidate).toBeDefined();
+    if (!centralCandidate) throw new Error("Missing generic central candidate");
+    expect(
+      evaluateRunnerPlan(
+        { ...input, legalActions: [rdRun, gain] },
+        centralCandidate,
+      ).evidence,
+    ).toContain("central_closeout_opportunity:false");
   });
 
   it("uses a central closeout line near victory without reading hidden zones", () => {
@@ -8541,6 +10443,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
       }),
     );
     stateA.runner.credits = 5;
+    moveRunnerHardwareToRig(stateA, "onr_v1_139_r-and-d-interface");
     scoreRunnerAgendaForTest(stateA, "simple_agenda", 0);
     scoreRunnerAgendaForTest(stateA, "simple_agenda", 1);
     scoreRunnerAgendaForTest(stateA, "simple_agenda", 2);
@@ -8561,13 +10464,19 @@ describe("V1.4.1 plan-based Runner AI", () => {
       profileId: "runner-ai-v1.4.1-normal",
     });
     const rdRunA = inputA.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
-    const gainA = inputA.legalActions.find((action) => action.type === "gain_credit");
+    const gainA = inputA.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
     const rdRunB = inputB.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
-    const gainB = inputB.legalActions.find((action) => action.type === "gain_credit");
+    const gainB = inputB.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
     expect(rdRunA && gainA && rdRunB && gainB).toBeTruthy();
     if (!rdRunA || !gainA || !rdRunB || !gainB)
       throw new Error("Missing closeout hidden-invariance actions");
@@ -8584,9 +10493,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(decisionA.reasonCode).toBe("runner.plan.pressure_rnd");
     expect(decisionB.reasonCode).toBe(decisionA.reasonCode);
     expect(decisionA.evidence).toContain("central_closeout_opportunity:true");
-    expect(JSON.stringify({ inputA, inputB, decisionA, decisionB })).not.toMatch(
-      /cardInstances|privatePayload|fullGameState/i,
-    );
+    expect(
+      JSON.stringify({ inputA, inputB, decisionA, decisionB }),
+    ).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
   });
 
   it("still installs an important breaker when it unlocks visible run paths", () => {
@@ -8608,7 +10517,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
         action.type === "install_card" &&
         sourceDefinitionFromInput(input, action) === "simple_fracter",
     );
-    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
 
     expect(breakerInstall).toBeDefined();
     expect(gain).toBeDefined();
@@ -8700,7 +10611,11 @@ describe("V1.4.1 plan-based Runner AI", () => {
         moveRunnerProgramToRig(state, "simple_fracter");
         putCorpRootInRemote(state, "simple_upgrade", 0);
         for (const _ of [0, 1]) {
-          const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+          const iceId = putCorpIceOnServer(
+            state,
+            "remote_1",
+            "simple_barrier_ice",
+          );
           state.cardInstances[iceId] = {
             ...state.cardInstances[iceId]!,
             faceup: true,
@@ -8770,7 +10685,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
 
     expect(remoteRun).toBeDefined();
     expect(gain).toBeDefined();
@@ -9546,6 +11463,283 @@ describe("V1.4.2 belief state and opponent model", () => {
     );
   });
 
+  it("transfers known R&D top agenda into HQ memory after Corp draw and boosts HQ pressure", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-rnd-top-agenda-to-hq",
+        ...hqMemoryDeckConfig("rnd-top-agenda-to-hq"),
+      }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const input = {
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticCentralAccessEvent(
+          "ai-rnd-known-agenda",
+          100,
+          "rd",
+          "simple_agenda",
+        ),
+        syntheticPlanActionEvent(
+          "ai-rnd-known-agenda-drawn",
+          101,
+          "corp",
+          "mandatory_draw",
+        ),
+      ],
+    };
+    const belief = reconstructBeliefState(input);
+    const candidate = generateRunnerPlanCandidates(input).find(
+      (plan) => plan.kind === "pressure_hq",
+    );
+    if (!candidate) throw new Error("Missing pressure_hq candidate");
+    const score = evaluateServerAccessValue(input, candidate, belief);
+
+    expect(belief.runnerOpponentModel?.hqHandMemory.knownDefinitions).toContain(
+      "simple_agenda",
+    );
+    expect(
+      belief.runnerOpponentModel?.hqHandMemory.invalidationReasons.join("|"),
+    ).toContain("known_rnd_top_moved_to_hq");
+    expect(score.reasons).toContain("known_hq_agenda_pressure");
+    expect(score.evidence).toContain(
+      "hq_run_boosted_because_known_agenda:true",
+    );
+  });
+
+  it("does not transfer R&D top knowledge through shuffle/reorder before draw and keeps multi-draw unknown remainder", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-rnd-top-shuffle-before-draw",
+        ...hqMemoryDeckConfig("rnd-top-shuffle"),
+      }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const shuffled = reconstructBeliefState({
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticCentralAccessEvent(
+          "ai-rnd-known-before-shuffle",
+          100,
+          "rd",
+          "simple_agenda",
+        ),
+        syntheticPlanActionEvent(
+          "ai-rnd-shuffle",
+          101,
+          "corp",
+          "resolve_choice",
+          undefined,
+          {
+            hiddenZoneAction: "corp_rd_shuffle",
+          },
+        ),
+        syntheticPlanActionEvent(
+          "ai-rnd-draw-after-shuffle",
+          102,
+          "corp",
+          "mandatory_draw",
+        ),
+      ],
+    });
+    const multiDrawInput = {
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        opponent: { ...baseInput.playerView.opponent, handCount: 4 },
+      },
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticCentralAccessEvent(
+          "ai-rnd-known-nonagenda",
+          100,
+          "rd",
+          "simple_barrier_ice",
+        ),
+        syntheticPlanActionEvent(
+          "ai-rnd-multi-draw",
+          101,
+          "corp",
+          "draw_card",
+          undefined,
+          {
+            drawnCount: 3,
+          },
+        ),
+      ],
+    };
+    const multiDraw = reconstructBeliefState(multiDrawInput);
+    const candidate = generateRunnerPlanCandidates(multiDrawInput).find(
+      (plan) => plan.kind === "pressure_hq",
+    );
+    if (!candidate) throw new Error("Missing pressure_hq candidate");
+    const score = evaluateServerAccessValue(
+      multiDrawInput,
+      candidate,
+      multiDraw,
+    );
+
+    expect(
+      shuffled.runnerOpponentModel?.hqHandMemory.knownDefinitions ?? [],
+    ).not.toContain("simple_agenda");
+    expect(multiDraw.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      knownDefinitions: ["simple_barrier_ice"],
+      knownCount: 1,
+      handCount: 4,
+      allCardsKnown: false,
+    });
+    expect(score.reasons).not.toContain("known_hq_agenda_pressure");
+    expect(score.evidence).toContain(
+      "hq_run_boosted_because_unknown_cards_remain:true",
+    );
+  });
+
+  it("retains known remote access memory for agendas and trashable cards, then invalidates on new install", () => {
+    const input = runnerActionPhaseInput(
+      "ai-known-remote-memory",
+      (state) => {
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 0);
+        state.runner.credits = 6;
+      },
+      hqMemoryDeckConfig("known-remote-memory"),
+    );
+    const agendaMemoryInput = {
+      ...input,
+      eventTail: [
+        ...input.eventTail,
+        syntheticRemoteAccessEvent(
+          "ai-known-remote-agenda",
+          100,
+          "remote_1",
+          "simple_agenda",
+          "root:0",
+        ),
+      ],
+    };
+    const trashMemoryInput = {
+      ...input,
+      eventTail: [
+        ...input.eventTail,
+        syntheticRemoteAccessEvent(
+          "ai-known-remote-upgrade",
+          100,
+          "remote_1",
+          "simple_upgrade",
+          "root:0",
+        ),
+      ],
+    };
+    const invalidated = reconstructBeliefState({
+      ...agendaMemoryInput,
+      eventTail: [
+        ...agendaMemoryInput.eventTail,
+        syntheticPlanActionEvent(
+          "ai-known-remote-new-install",
+          101,
+          "corp",
+          "install_card",
+          "remote_1",
+        ),
+      ],
+    });
+    const agendaCandidate = generateRunnerPlanCandidates(
+      agendaMemoryInput,
+    ).find((candidate) => candidate.kind === "contest_remote");
+    const trashCandidate = generateRunnerPlanCandidates(trashMemoryInput).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    if (!agendaCandidate || !trashCandidate)
+      throw new Error("Missing remote contest candidates");
+    const agendaThreat = evaluateRemoteThreat(
+      agendaMemoryInput,
+      agendaCandidate,
+      reconstructBeliefState(agendaMemoryInput),
+    );
+    const trashThreat = evaluateRemoteThreat(
+      trashMemoryInput,
+      trashCandidate,
+      reconstructBeliefState(trashMemoryInput),
+    );
+
+    expect(
+      reconstructBeliefState(agendaMemoryInput).knownPositionMemory?.[0],
+    ).toMatchObject({
+      zone: "remote_1",
+      positionKey: "root:0",
+      definitionId: "simple_agenda",
+    });
+    expect(agendaThreat.reasons).toContain("known_remote_agenda_pressure");
+    expect(trashThreat.reasons).toContain("known_remote_trash_target");
+    expect(invalidated.knownPositionMemory ?? []).toEqual([]);
+  });
+
+  it("uses exposed unrezzed ICE memory for later run-cost assessment and invalidates on conceal/reorder", () => {
+    const input = runnerActionPhaseInput(
+      "ai-known-unrezzed-ice-memory",
+      (state) => {
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 1);
+        state.runner.credits = 0;
+      },
+      hqMemoryDeckConfig("known-unrezzed-ice"),
+    );
+    const exposedInput = {
+      ...input,
+      eventTail: [
+        ...input.eventTail,
+        syntheticExposeInstalledEvent(
+          "ai-exposed-unrezzed-ice",
+          100,
+          "remote_1",
+          "ice:0",
+          "simple_barrier_ice",
+        ),
+      ],
+    };
+    const candidate = generateRunnerPlanCandidates(exposedInput).find(
+      (plan) => plan.kind === "contest_remote",
+    );
+    if (!candidate) throw new Error("Missing exposed ICE run candidate");
+    const cost = estimateRunCost(exposedInput, candidate);
+    const invalidated = reconstructBeliefState({
+      ...exposedInput,
+      eventTail: [
+        ...exposedInput.eventTail,
+        syntheticPlanActionEvent(
+          "ai-new-blood-reorder",
+          101,
+          "corp",
+          "play_operation",
+          undefined,
+          {
+            hiddenZoneAction: "new_blood_conceal_reorder_installed_ice",
+          },
+        ),
+      ],
+    });
+
+    expect(
+      reconstructBeliefState(exposedInput).knownPositionMemory?.[0],
+    ).toMatchObject({
+      zone: "remote_1",
+      positionKey: "ice:0",
+      definitionId: "simple_barrier_ice",
+    });
+    expect(cost.evidence).toContain("known_unrezzed_ice_from_expose:1");
+    expect(cost.evidence).toContain("known_unrezzed_ice_blocks_path:true");
+    expect(invalidated.knownPositionMemory ?? []).toEqual([]);
+  });
+
   it("applies R&D repeat-access penalty only while top-card freshness is stale", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({ seed: "ai-v142-rnd-penalty" }),
@@ -9833,8 +12027,8 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(fullyKnownBelief.runnerOpponentModel?.hqHandMemory).toMatchObject({
       handCount: 2,
       knownDefinitions: [
-        "onr_v1_297_overtime-incentives",
         "simple_economy_operation",
+        "onr_v1_297_overtime-incentives",
       ],
       knownCount: 2,
       allCardsKnown: true,
@@ -9896,6 +12090,489 @@ describe("V1.4.2 belief state and opponent model", () => {
       knownCount: 1,
       allCardsKnown: true,
     });
+  });
+
+  it("uses full known HQ agenda memory to prefer a payable HQ run", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-hq-known-agenda-run-value",
+        baseline: CURRENT_RULES_BASELINE,
+        ...hqMemoryDeckConfig("known-agenda"),
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 6;
+    setCorpHqCardsForTest(state, ["simple_agenda", "simple_economy_operation"]);
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const input = {
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticHqPrivateLookEvent("ai-hq-full-look-agenda", 100, [
+          "simple_agenda",
+          "simple_economy_operation",
+        ]),
+      ],
+    };
+    const hqRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(hqRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!hqRun || !gainCredit)
+      throw new Error("Missing HQ agenda fixture actions");
+
+    const belief = reconstructBeliefState(input);
+    const pressureCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "pressure_hq",
+    );
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate) throw new Error("Missing pressure_hq candidate");
+    const accessValue = evaluateServerAccessValue(
+      input,
+      pressureCandidate,
+      belief,
+    );
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [hqRun, gainCredit],
+    });
+
+    expect(belief.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      handCount: 2,
+      knownCount: 2,
+      allCardsKnown: true,
+      knownDefinitions: ["simple_agenda", "simple_economy_operation"],
+    });
+    expect(accessValue.reasons).toContain("known_hq_agenda_pressure");
+    expect(accessValue.evidence).toContain(
+      "hq_run_boosted_because_known_agenda:true",
+    );
+    expect(decision.actionId).toBe(hqRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.pressure_hq");
+  });
+
+  it("keeps partial known HQ without agenda positive but below known agenda pressure", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-hq-partial-memory-run-value",
+        baseline: CURRENT_RULES_BASELINE,
+        ...hqMemoryDeckConfig("partial-memory"),
+        agendaPointsToWin: 7,
+      }),
+    );
+    setCorpHqCardsForTest(state, [
+      "simple_economy_operation",
+      "simple_barrier_ice",
+      "simple_code_gate_ice",
+      "simple_agenda",
+    ]);
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const partialNoAgendaInput = {
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticHqMemoryEvent(
+          "ai-hq-partial-economy",
+          100,
+          "runner",
+          "access_card",
+          "simple_economy_operation",
+        ),
+        syntheticHqMemoryEvent(
+          "ai-hq-partial-wall",
+          101,
+          "runner",
+          "access_card",
+          "simple_barrier_ice",
+        ),
+        syntheticHqMemoryEvent(
+          "ai-hq-partial-code-gate",
+          102,
+          "runner",
+          "access_card",
+          "simple_code_gate_ice",
+        ),
+      ],
+    };
+    const partialAgendaInput = {
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticHqMemoryEvent(
+          "ai-hq-partial-agenda-economy",
+          100,
+          "runner",
+          "access_card",
+          "simple_economy_operation",
+        ),
+        syntheticHqMemoryEvent(
+          "ai-hq-partial-agenda-wall",
+          101,
+          "runner",
+          "access_card",
+          "simple_barrier_ice",
+        ),
+        syntheticHqMemoryEvent(
+          "ai-hq-partial-agenda",
+          102,
+          "runner",
+          "access_card",
+          "simple_agenda",
+        ),
+      ],
+    };
+    const noAgendaCandidate = generateRunnerPlanCandidates(
+      partialNoAgendaInput,
+    ).find((candidate) => candidate.kind === "pressure_hq");
+    const agendaCandidate = generateRunnerPlanCandidates(
+      partialAgendaInput,
+    ).find((candidate) => candidate.kind === "pressure_hq");
+    if (!noAgendaCandidate || !agendaCandidate)
+      throw new Error("Missing partial HQ candidates");
+
+    const noAgendaValue = evaluateServerAccessValue(
+      partialNoAgendaInput,
+      noAgendaCandidate,
+      reconstructBeliefState(partialNoAgendaInput),
+    );
+    const agendaValue = evaluateServerAccessValue(
+      partialAgendaInput,
+      agendaCandidate,
+      reconstructBeliefState(partialAgendaInput),
+    );
+
+    expect(
+      reconstructBeliefState(partialNoAgendaInput).runnerOpponentModel
+        ?.hqHandMemory,
+    ).toMatchObject({ handCount: 4, knownCount: 3, allCardsKnown: false });
+    expect(noAgendaValue.reasons).toContain("unknown_hq_cards_remain");
+    expect(noAgendaValue.evidence).toContain(
+      "hq_run_boosted_because_unknown_cards_remain:true",
+    );
+    expect(agendaValue.reasons).toContain("known_hq_agenda_pressure");
+    expect(agendaValue.score).toBeGreaterThan(noAgendaValue.score);
+  });
+
+  it("reopens HQ value after draw and removes known HQ cards after install/play/reorder", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-hq-memory-invalidations",
+        baseline: CURRENT_RULES_BASELINE,
+        ...hqMemoryDeckConfig("invalidations"),
+        agendaPointsToWin: 7,
+      }),
+    );
+    setCorpHqCardsForTest(state, [
+      "simple_economy_operation",
+      "simple_barrier_ice",
+    ]);
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const fullKnownEvents = [
+      syntheticHqPrivateLookEvent("ai-hq-full-look-no-agenda", 100, [
+        "simple_economy_operation",
+        "simple_barrier_ice",
+      ]),
+    ];
+    const afterDraw = reconstructBeliefState({
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        opponent: { ...baseInput.playerView.opponent, handCount: 3 },
+      },
+      eventTail: [
+        ...baseInput.eventTail,
+        ...fullKnownEvents,
+        syntheticHqMemoryEvent(
+          "ai-hq-draw-invalidates",
+          101,
+          "corp",
+          "mandatory_draw",
+        ),
+      ],
+    });
+    const afterInstall = reconstructBeliefState({
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        opponent: { ...baseInput.playerView.opponent, handCount: 1 },
+      },
+      eventTail: [
+        ...baseInput.eventTail,
+        ...fullKnownEvents,
+        syntheticHqMemoryEvent(
+          "ai-hq-known-install",
+          101,
+          "corp",
+          "install_card",
+          "simple_economy_operation",
+        ),
+      ],
+    });
+    const afterReorder = reconstructBeliefState({
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        ...fullKnownEvents,
+        syntheticPlanActionEvent(
+          "ai-hq-reorder-invalidates",
+          101,
+          "corp",
+          "resolve_choice",
+          undefined,
+          { hiddenZoneAction: "hq_shuffle" },
+        ),
+      ],
+    });
+
+    expect(afterDraw.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      handCount: 3,
+      knownCount: 2,
+      allCardsKnown: false,
+    });
+    expect(
+      afterDraw.runnerOpponentModel?.hqHandMemory.invalidationReasons.join("|"),
+    ).toContain("corp_draw_added_unknown_hq_card");
+    expect(afterInstall.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      handCount: 1,
+      knownDefinitions: ["simple_barrier_ice"],
+      knownCount: 1,
+      allCardsKnown: true,
+    });
+    expect(afterReorder.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      knownCount: 0,
+      allCardsKnown: false,
+    });
+  });
+
+  it("projects Expert Schedule Analyzer HQ look only to Runner AIInput", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-hq-expert-schedule-memory",
+        baseline: CURRENT_RULES_BASELINE,
+        ...hqMemoryDeckConfig("expert-schedule", true),
+        agendaPointsToWin: 7,
+      }),
+    );
+    moveRunnerProgramToRig(state, "onr_v1_024_expert-schedule-analyzer");
+    setCorpHqCardsForTest(state, ["simple_agenda", "simple_economy_operation"]);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    if (
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "steal_agenda",
+      )
+    ) {
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "steal_agenda",
+      );
+    }
+    if (
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "continue_run",
+      )
+    ) {
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
+    }
+    if (state.pendingChoice?.source.startsWith("p3_33.private_look")) {
+      state = applyChoice(state, "runner", ["done"]);
+    }
+    const runnerInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const corpView = getPlayerView(state, "corp");
+    const belief = reconstructBeliefState(runnerInput);
+
+    expect(
+      runnerInput.playerView.publicEvents.some((event) =>
+        Array.isArray(event.publicPayload.knownHqDefinitionIds),
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(corpView.publicEvents)).not.toContain(
+      "knownHqDefinitionIds",
+    );
+    expect(belief.runnerOpponentModel?.hqHandMemory.allCardsKnown).toBe(true);
+    expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+    expect(JSON.stringify(runnerInput)).not.toMatch(
+      /privatePayload|cardInstances|fullGameState/i,
+    );
+  });
+
+  it("keeps HQ-memory decisions invariant across different hidden HQ contents with equal revealed memory", () => {
+    const stateA = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-hq-memory-hidden-invariance",
+        baseline: CURRENT_RULES_BASELINE,
+        ...hqMemoryDeckConfig("hidden-invariance"),
+        agendaPointsToWin: 7,
+      }),
+    );
+    const stateB = structuredClone(stateA);
+    setCorpHqCardsForTest(stateA, [
+      "simple_agenda",
+      "simple_economy_operation",
+    ]);
+    setCorpHqCardsForTest(stateB, [
+      "simple_barrier_ice",
+      "simple_code_gate_ice",
+    ]);
+    const baseA = buildAiDecisionInput(stateA, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const baseB = buildAiDecisionInput(stateB, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const eventTail = [
+      syntheticHqPrivateLookEvent("ai-hq-invariant-known-memory", 100, [
+        "simple_agenda",
+        "simple_economy_operation",
+      ]),
+    ];
+    const inputA = { ...baseA, eventTail: [...baseA.eventTail, ...eventTail] };
+    const inputB = { ...baseB, eventTail: [...baseB.eventTail, ...eventTail] };
+    const selectedA = chooseRunnerAction(inputA);
+    const selectedB = chooseRunnerAction(inputB);
+
+    expect(JSON.stringify(inputA.playerView.opponent)).toBe(
+      JSON.stringify(inputB.playerView.opponent),
+    );
+    expect(selectedA.reasonCode).toBe(selectedB.reasonCode);
+    expect(
+      inputA.legalActions.find(
+        (action) => action.actionId === selectedA.actionId,
+      )?.type,
+    ).toBe(
+      inputB.legalActions.find(
+        (action) => action.actionId === selectedB.actionId,
+      )?.type,
+    );
+  });
+
+  it("summarizes HQ-memory benchmark metrics from side-safe action entries", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary([
+        progressionAction("runner", 1, "start_run", "hq", 4, {
+          hqKnownCards: 2,
+          hqUnknownCards: 0,
+          hqKnownFraction: 1,
+          hqFullyKnown: true,
+          hqKnownAgendaCount: 1,
+          hqKnownNonAgendaCount: 1,
+          hqKnownAgendaPoints: 2,
+          hqRunValueFromKnownCards: 680,
+          hqRunBoostedBecauseKnownAgenda: true,
+        }),
+        progressionAction("runner", 2, "start_run", "hq", 4, {
+          hqKnownCards: 2,
+          hqUnknownCards: 1,
+          hqKnownFraction: 0.667,
+          hqMemoryInvalidatedByDraw: true,
+          hqRunValueFromUnknownCards: 55,
+          hqRunBoostedBecauseUnknownCardsRemain: true,
+        }),
+      ]),
+    ]);
+
+    expect(metrics.hqKnownCards).toBe(2);
+    expect(metrics.hqUnknownCards).toBe(1);
+    expect(metrics.hqKnownAgendaCount).toBe(1);
+    expect(metrics.hqKnownAgendaPoints).toBe(2);
+    expect(metrics.hqMemoryInvalidatedByDraw).toBe(1);
+    expect(metrics.hqRunBoostedBecauseKnownAgenda).toBe(1);
+    expect(metrics.hqRunBoostedBecauseUnknownCardsRemain).toBe(1);
+  });
+
+  it("summarizes runner breaker-search coverage diagnostics from side-safe action entries", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary([
+        progressionAction("runner", 1, "play_event", undefined, 5, {
+          runnerMissingBreakerCoverageByType: 1,
+          runnerVisibleIceBlockingByType: 1,
+          runnerPathBlockedByMissingCoverage: true,
+          runnerSearchCardAvailableForMissingBreaker: true,
+          runnerSearchCardUsedForMissingBreaker: true,
+          runnerProbeRevealedIceThenSearchedBreaker: true,
+        }),
+        progressionAction("runner", 2, "install_card", undefined, 5, {
+          runnerInstallableBreakerForBlockedPath: true,
+          runnerCoverageImproved: true,
+          runnerTutorConvertedToBreakerInstall: true,
+          runnerPressureReadyWindow: true,
+          runnerPressureReadyTrue: true,
+          runnerPressureReadyByTargetRnd: true,
+          runnerSetupContinuedAfterPressureReady: true,
+          runnerPressureSkippedAfterCoverageReady: true,
+          runnerPressureSkippedReason: "better_immediate_action",
+          runnerSetupLoopAfterPressureReady: true,
+        }),
+        progressionAction("runner", 3, "start_run", "rd", 5, {
+          runnerPhaseExitToPressure: true,
+          runnerPressureReadyWindow: true,
+          runnerPressureReadyTrue: true,
+          runnerPressureReadyByTargetRnd: true,
+          runnerPressureTakenAfterCoverageReady: true,
+        }),
+        progressionAction("runner", 4, "gain_credit", undefined, 6, {
+          runnerSearchCardAvailableForMissingBreaker: true,
+          runnerSearchCardAvailableButUnused: true,
+          runnerSetupEconomyStalled: true,
+          runnerSetupBreakerSearchStalled: true,
+          runnerPressureReadyWindow: true,
+          runnerPressureReadyFalsePositive: true,
+          runnerPhaseExitBlockedByTargetValue: true,
+        }),
+      ]),
+    ]);
+
+    expect(metrics.runnerMissingBreakerCoverageByType).toBe(1);
+    expect(metrics.runnerVisibleIceBlockingByType).toBe(1);
+    expect(metrics.runnerPathBlockedByMissingCoverage).toBe(1);
+    expect(metrics.runnerSearchCardAvailableForMissingBreaker).toBe(2);
+    expect(metrics.runnerSearchCardUsedForMissingBreaker).toBe(1);
+    expect(metrics.runnerSearchCardAvailableButUnused).toBe(1);
+    expect(metrics.runnerTutorConvertedToBreakerInstall).toBe(1);
+    expect(metrics.runnerCoverageImproved).toBe(1);
+    expect(metrics.runnerSetupEconomyStalled).toBe(1);
+    expect(metrics.runnerSetupBreakerSearchStalled).toBe(1);
+    expect(metrics.runnerPhaseExitToPressure).toBe(1);
+    expect(metrics.runnerPressureReadyWindows).toBe(3);
+    expect(metrics.runnerPressureReadyTrue).toBe(2);
+    expect(metrics.runnerPressureReadyFalsePositive).toBe(1);
+    expect(metrics.runnerPressureReadyByTargetRnd).toBe(2);
+    expect(metrics.runnerSetupContinuedAfterPressureReady).toBe(1);
+    expect(metrics.runnerPressureTakenAfterCoverageReady).toBe(1);
+    expect(metrics.runnerPressureSkippedAfterCoverageReady).toBe(1);
+    expect(metrics.runnerPressureSkippedBetterImmediateAction).toBe(1);
+    expect(metrics.runnerCoverageImprovedThenPressureWithin3).toBe(1);
+    expect(metrics.runnerSetupLoopAfterPressureReady).toBe(1);
+    expect(metrics.runnerPhaseExitBlockedByTargetValue).toBe(1);
   });
 
   it("provides Corp and Runner opponent models and keeps DecisionDebug side-safe", () => {
@@ -10978,6 +13655,16 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             runnerRelevantRemoteTrashTaken: true,
             runnerRemoteTrashTargetType: "asset_node",
             runnerRemoteTrashRole: "economy",
+            runnerRemoteTrashCost: 4,
+            runnerExpensiveRemoteTrashOpportunity: true,
+            runnerExpensiveRemoteTrashTaken: true,
+            runnerHighImpactRemoteTrashTaken: true,
+            runnerCreditsAfterRemoteTrash: 5,
+            runnerRemoteTrashPreservedReserve: true,
+            runnerRemoteTrashProtectedScoreThreat: true,
+            runnerRemoteTrashCostBucket: "4_5",
+            dedicatedTrashCreditsUsed: 1,
+            generalCreditsSpentOnTrash: 3,
             runnerHandUseOpportunity: true,
             runnerHandUseActionTaken: true,
           }),
@@ -11062,9 +13749,21 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
       remoteTrashTargetsUnknown: 0,
       remoteTrashRoleEconomy: 1,
       remoteTrashRoleScoringProtection: 0,
+      remoteTrashRoleRunTax: 0,
+      remoteTrashRoleRemoteCapacity: 0,
       remoteTrashRoleTagPunish: 0,
       remoteTrashRoleAmbush: 0,
       remoteTrashRoleLowValue: 0,
+      remoteTrashCostTotal: 4,
+      expensiveRemoteTrashOpportunities: 1,
+      expensiveRemoteTrashTaken: 1,
+      highImpactRemoteTrashTaken: 1,
+      runnerCreditsAfterRemoteTrash: 5,
+      remoteTrashPreservedReserve: 1,
+      remoteTrashProtectedScoreThreat: 1,
+      remoteTrashCostBucket4To5: 1,
+      dedicatedTrashCreditsUsed: 1,
+      generalCreditsSpentOnTrash: 3,
       remoteRunOpportunitiesAgainstAdvancedRemote: 2,
       remoteRunsAgainstAdvancedRemote: 1,
       skippedAdvancedRemoteContest: 1,
@@ -11158,6 +13857,577 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
       turnsFromRemoteThreatCreatedToContest: 2,
       turnsFromRemoteThreatCreatedToScoreOrSteal: 2.5,
     });
+  });
+
+  it("summarizes short-horizon plan conversion metrics from action traces", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary([
+        progressionAction("runner", 1, "draw_card", undefined, 1, {
+          runnerDrawAction: true,
+          reasonCode: "runner.plan.setup_for_run",
+        }),
+        progressionAction("runner", 2, "start_run", "rd", 1),
+        progressionAction("runner", 3, "access_card", undefined, 1),
+        progressionAction("runner", 4, "play_event", undefined, 2, {
+          runnerEconomyActionTaken: true,
+          runnerCreditsBefore: 2,
+          runnerCreditsAfter: 5,
+          runnerReserveTarget: 4,
+          runnerCreditDelta: 3,
+          reasonCode: "runner.plan.economy_reserve",
+        }),
+        progressionAction("runner", 5, "start_run", "remote_1", 2, {
+          runnerRemoteRunAgainstAdvancedRemote: true,
+        }),
+        progressionAction("runner", 6, "trash_accessed_card", undefined, 2, {
+          runnerRelevantRemoteTrashTaken: true,
+        }),
+        progressionAction("runner", 7, "install_card", undefined, 3, {
+          runnerRigInstallAction: true,
+          runnerInstallAction: true,
+          reasonCode: "runner.plan.rig_unlock",
+        }),
+        progressionAction("runner", 8, "start_run", "hq", 3, {
+          runnerCentralRunWithInterfaceInstalled: true,
+        }),
+        progressionAction("runner", 9, "steal_agenda", undefined, 3),
+        progressionAction("corp", 10, "install_card", "remote_2", 4, {
+          installPlacement: "root",
+          targetCardType: "agenda",
+          reasonCode: "corp.plan.remote_build",
+        }),
+        progressionAction("corp", 11, "advance_card", "remote_2", 4, {
+          targetCardType: "agenda",
+          advancementTargetTypes: ["agenda"],
+          reasonCode: "corp.plan.advance",
+        }),
+        progressionAction("corp", 12, "score_agenda", "remote_2", 4, {
+          targetCardType: "agenda",
+        }),
+      ]),
+    ]);
+
+    expect(metrics.setupActionConvertedToRun).toBe(1);
+    expect(metrics.economyActionConvertedToRun).toBe(1);
+    expect(metrics.rigActionConvertedToRun).toBe(1);
+    expect(metrics.remoteBuildConvertedToAdvanceOrScore).toBe(1);
+    expect(metrics.advanceConvertedToScore).toBe(1);
+    expect(metrics.remoteContestConvertedToStealOrTrash).toBe(1);
+    expect(metrics.centralPressureConvertedToSteal).toBe(1);
+    expect(metrics.planIntentConverted).toBeGreaterThanOrEqual(5);
+    expect(metrics.actionLedToProgressWithin3).toBeGreaterThan(
+      metrics.actionLedToProgressWithin1,
+    );
+  });
+
+  it("does not convert economy spam or value-free central runs into progress", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("runner", 1, "play_event", undefined, 1, {
+            runnerEconomyActionTaken: true,
+            runnerCreditsBefore: 1,
+            runnerCreditsAfter: 2,
+            runnerReserveTarget: 5,
+            runnerCreditDelta: 1,
+            reasonCode: "runner.plan.economy_reserve",
+          }),
+          progressionAction("runner", 2, "play_event", undefined, 1, {
+            runnerEconomyActionTaken: true,
+            runnerCreditsBefore: 2,
+            runnerCreditsAfter: 3,
+            runnerReserveTarget: 5,
+            runnerCreditDelta: 1,
+            reasonCode: "runner.plan.economy_reserve",
+          }),
+          progressionAction("runner", 3, "start_run", "rd", 2, {
+            reasonCode: "runner.plan.central_pressure",
+          }),
+          progressionAction("runner", 4, "end_turn", undefined, 2),
+        ],
+        "plan-conversion-stall-fixture",
+      ),
+    ]);
+
+    expect(metrics.economyActionConvertedToRun).toBe(0);
+    expect(metrics.centralPressureConvertedToSteal).toBe(0);
+    expect(metrics.actionLedToProgressWithin3).toBe(0);
+    expect(metrics.planIntentAbandoned).toBeGreaterThanOrEqual(2);
+    expect(metrics.samePlanRepeatedWithoutProgress).toBeGreaterThanOrEqual(1);
+    expect(metrics.longestNoProgressChain).toBe(4);
+    expect(metrics.turnsWithNoProgress).toBe(2);
+  });
+
+  it("keeps run and forced micro-actions out of strategic no-progress chains", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("runner", 1, "start_run", "rd", 1, {
+            reasonCode: "runner.plan.pressure_rnd",
+          }),
+          progressionAction("runner", 2, "continue_run", undefined, 1),
+          progressionAction("runner", 3, "access_card", undefined, 1),
+          progressionAction("corp", 4, "mandatory_draw", undefined, 2),
+          progressionAction("runner", 5, "end_turn", undefined, 2),
+        ],
+        "strategic-micro-chain-fixture",
+      ),
+    ]);
+
+    expect(metrics.longestNoProgressChain).toBe(5);
+    expect(metrics.strategicLongestNoProgressChain).toBe(2);
+    expect(metrics.microActionNoProgressContribution).toBe(3);
+    expect(metrics.planIntentAbandonedWithoutReason).toBeGreaterThan(0);
+  });
+
+  it("classifies action-limit endgames from the final strategic window without micro-action inflation", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      {
+        ...progressionSummary(
+          [
+            progressionAction("runner", 1, "continue_run", undefined, 7),
+            progressionAction("runner", 2, "access_card", undefined, 7),
+            progressionAction("corp", 3, "mandatory_draw", undefined, 8),
+            progressionAction("runner", 4, "draw_card", undefined, 8, {
+              runnerDrawAction: true,
+              reasonCode: "runner.plan.setup_without_conversion",
+              hqKnownAgendaCount: 1,
+            }),
+            progressionAction("runner", 5, "gain_credit", undefined, 8, {
+              runnerEconomyActionTaken: true,
+              runnerCreditsBefore: 7,
+              runnerCreditsAfter: 8,
+              runnerCreditDelta: 1,
+              runnerReserveTarget: 5,
+              hqKnownAgendaCount: 1,
+              runnerSkippedAdvancedRemoteContest: true,
+              reasonCode: "runner.plan.recover_economy",
+            }),
+            progressionAction("runner", 6, "install_card", undefined, 9, {
+              runnerInstallAction: true,
+              runnerRigInstallAction: true,
+              runnerLowValueDuplicateInstallAction: true,
+              hqKnownAgendaCount: 1,
+              reasonCode: "runner.plan.build_rig",
+            }),
+            progressionAction("corp", 7, "install_card", "remote_1", 9, {
+              installPlacement: "ice",
+              reasonCode: "corp.plan.protect_remote",
+            }),
+            progressionAction("runner", 8, "end_turn", undefined, 9),
+            progressionAction("corp", 9, "end_turn", undefined, 10),
+          ],
+          "action-limit-endgame-runner-stall",
+        ),
+        finalAgendaPoints: { runner: 5, corp: 4 },
+      },
+    ]);
+
+    expect(metrics.actionLimitRootCauseByMatch).toBe(1);
+    expect(metrics.actionLimitDominantSideRunner).toBe(1);
+    expect(metrics.finalStrategicWindowNoProgressActions).toBe(5);
+    expect(metrics.finalStrategicWindowRunnerNoProgressActions).toBe(4);
+    expect(metrics.finalWindowKnownInfoExploitationOpportunities).toBe(3);
+    expect(metrics.finalWindowKnownInfoExploitationTaken).toBe(0);
+    expect(metrics.endgameCloseoutOpportunitiesRunnerRaw).toBe(3);
+    expect(metrics.endgameCloseoutOpportunitiesRunnerDeduped).toBe(1);
+    expect(metrics.endgameCloseoutOpportunitiesRunnerTrue).toBe(1);
+    expect(metrics.endgameCloseoutOpportunitiesRunner).toBe(1);
+    expect(metrics.runnerCloseoutByKnownHqAgenda).toBe(1);
+    expect(metrics.runnerCloseoutByPointsToWin).toBe(1);
+    expect(metrics.endgameCloseoutAttemptsRunner).toBe(0);
+    expect(metrics.endgameSetupOrEconomyActions).toBe(2);
+    expect(metrics.endgameProtectionActions).toBe(1);
+    expect(metrics.actionLimitLikelyStrategyIssue).toBe(1);
+    expect(metrics.microActionNoProgressContribution).toBe(3);
+  });
+
+  it("classifies corp score-path endgame stalls separately from runner stalls", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      {
+        ...progressionSummary(
+          [
+            progressionAction("corp", 1, "install_card", "remote_1", 8, {
+              installPlacement: "root",
+              targetCardType: "agenda",
+              reasonCode: "corp.plan.remote_build",
+            }),
+            progressionAction("corp", 2, "install_card", "remote_1", 8, {
+              installPlacement: "ice",
+              protectBeforeAdvance: true,
+              reasonCode: "corp.plan.protect_remote",
+            }),
+            progressionAction("corp", 3, "gain_credit", undefined, 9, {
+              reasonCode: "corp.plan.recover_economy",
+            }),
+            progressionAction("corp", 4, "end_turn", undefined, 9, {
+              scoreActionsAvailable: 1,
+            }),
+            progressionAction("runner", 5, "end_turn", undefined, 9),
+          ],
+          "action-limit-endgame-corp-score-stall",
+        ),
+        finalAgendaPoints: { runner: 3, corp: 5 },
+      },
+    ]);
+
+    expect(metrics.actionLimitRootCauseByMatch).toBe(1);
+    expect(metrics.actionLimitDominantSideCorp).toBe(1);
+    expect(metrics.finalWindowCorpScorePathOpportunities).toBe(3);
+    expect(metrics.finalWindowCorpScorePathTaken).toBe(1);
+    expect(metrics.endgameCloseoutOpportunitiesCorp).toBe(3);
+    expect(metrics.endgameCloseoutAttemptsCorp).toBe(1);
+    expect(metrics.endgameProtectionActions).toBe(1);
+    expect(metrics.endgameSetupOrEconomyActions).toBe(1);
+  });
+
+  it("does not count generic central endgame runs as true runner closeout", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      {
+        ...progressionSummary(
+          [
+            progressionAction("runner", 1, "start_run", "hq", 8, {
+              reasonCode: "runner.plan.safe_probe_run",
+            }),
+            progressionAction("runner", 2, "start_run", "rd", 8, {
+              reasonCode: "runner.plan.pressure_rnd",
+            }),
+            progressionAction("runner", 3, "gain_credit", undefined, 8, {
+              runnerEconomyActionTaken: true,
+              reasonCode: "runner.plan.recover_economy",
+            }),
+          ],
+          "action-limit-endgame-generic-central-closeout-fixture",
+        ),
+        finalAgendaPoints: { runner: 5, corp: 4 },
+      },
+    ]);
+
+    expect(metrics.endgameCloseoutOpportunitiesRunnerRaw).toBe(0);
+    expect(metrics.endgameCloseoutOpportunitiesRunnerDeduped).toBe(0);
+    expect(metrics.endgameCloseoutOpportunitiesRunnerTrue).toBe(0);
+    expect(metrics.endgameCloseoutOpportunitiesRunner).toBe(0);
+    expect(metrics.endgameCloseoutOpportunitiesRunnerFalsePositive).toBe(0);
+  });
+
+  it("marks blocked known-agenda closeout windows as false positives", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      {
+        ...progressionSummary(
+          [
+            progressionAction("runner", 1, "draw_card", undefined, 8, {
+              hqKnownAgendaCount: 1,
+              runnerContestBlockedByCredits: true,
+              runCreditsMissingForKnownPath: 3,
+              reasonCode: "runner.plan.setup_without_conversion",
+            }),
+            progressionAction("runner", 2, "start_run", "remote_1", 8, {
+              knownRemoteAgendas: 1,
+              remoteRunBoostedByKnownRemoteAgenda: true,
+              runnerRemoteContestBlockedByPostRunReserve: true,
+              reasonCode: "runner.plan.contest_remote",
+            }),
+          ],
+          "action-limit-endgame-blocked-closeout-fixture",
+        ),
+        finalAgendaPoints: { runner: 5, corp: 4 },
+      },
+    ]);
+
+    expect(metrics.endgameCloseoutOpportunitiesRunnerRaw).toBe(2);
+    expect(metrics.endgameCloseoutOpportunitiesRunnerDeduped).toBe(2);
+    expect(metrics.endgameCloseoutOpportunitiesRunnerTrue).toBe(0);
+    expect(metrics.endgameCloseoutOpportunitiesRunnerFalsePositive).toBe(2);
+    expect(metrics.runnerCloseoutBlockedByCredits).toBe(1);
+    expect(metrics.runnerCloseoutBlockedByPostRunReserve).toBe(1);
+    expect(metrics.runnerCloseoutSkippedWithReason).toBe(2);
+    expect(metrics.runnerCloseoutAttempted).toBe(0);
+  });
+
+  it("summarizes outcome follow-up opportunities and conversions", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("runner", 1, "gain_credit", undefined, 1, {
+            evidence: [
+              "outcome_followup_opportunity:true",
+              "outcome_followup_taken:true",
+              "outcome_followup_applied:true",
+              "good_outcome_converted:true",
+              "runner_economy_converted_after_outcome:true",
+            ],
+          }),
+          progressionAction("runner", 2, "start_run", "rd", 1, {
+            evidence: [
+              "outcome_followup_opportunity:true",
+              "bad_outcome_repeated_without_new_info:true",
+              "runner_access_no_value_repeated:true",
+              "runner_central_success_followed_by_repeat_no_value:true",
+              "outcome_followup_suppressed_by_progression_cost:true",
+              "outcome_ignored:true",
+            ],
+          }),
+          progressionAction("runner", 3, "gain_credit", undefined, 2, {
+            evidence: [
+              "outcome_followup_opportunity:true",
+              "outcome_followup_taken:true",
+              "outcome_followup_applied:true",
+              "outcome_pivot_with_reason:true",
+              "runner_access_no_value_pivoted:true",
+            ],
+          }),
+          progressionAction("corp", 4, "advance_card", "remote_1", 2, {
+            evidence: [
+              "outcome_followup_opportunity:true",
+              "outcome_followup_taken:true",
+              "outcome_followup_applied:true",
+              "good_outcome_converted:true",
+              "outcome_followup_preserved_score_window:true",
+              "score_now_protected_from_followup:true",
+              "corp_remote_build_followup_advance_protect_score:true",
+            ],
+          }),
+        ],
+        "outcome-followup-metric-fixture",
+      ),
+    ]);
+
+    expect(metrics.outcomeFollowupOpportunities).toBe(4);
+    expect(metrics.outcomeFollowupTaken).toBe(3);
+    expect(metrics.outcomeFollowupRate).toBe(0.75);
+    expect(metrics.outcomeFollowupApplied).toBe(3);
+    expect(metrics.outcomeFollowupSuppressedByProgressionCost).toBe(1);
+    expect(metrics.outcomeFollowupLedToProgressWithin3).toBe(3);
+    expect(metrics.outcomeFollowupLedToNoProgressChain).toBe(0);
+    expect(metrics.outcomeFollowupPreservedScoreWindow).toBe(1);
+    expect(metrics.scoreNowProtectedFromFollowup).toBe(1);
+    expect(metrics.badOutcomeRepeatedWithoutNewInfo).toBe(1);
+    expect(metrics.goodOutcomeConverted).toBe(2);
+    expect(metrics.runnerAccessNoValuePivoted).toBe(1);
+    expect(metrics.runnerAccessNoValueRepeated).toBe(1);
+    expect(metrics.corpRemoteBuildFollowupAdvanceProtectScore).toBe(1);
+  });
+
+  it("summarizes future-effect encounter and pump viability metrics", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("runner", 1, "continue_run", "remote_1", 1, {
+            evidence: [
+              "run_remainder_subroutine_effect:true",
+              "unbroken_run_effect_ignored_because_no_remaining_ice:true",
+            ],
+          }),
+          progressionAction("runner", 2, "break_subroutine", "rd", 1, {
+            evidence: [
+              "run_remainder_subroutine_effect:true",
+              "unbroken_run_effect_applied_to_remaining_path:true",
+            ],
+          }),
+          progressionAction("runner", 3, "pump_breaker", "rd", 1, {
+            evidence: [
+              "run_remainder_subroutine_effect:true",
+              "pump_cannot_lead_to_useful_break:true",
+              "pump_would_destroy_access_reserve:true",
+            ],
+          }),
+        ],
+        "future-effect-encounter-metric-fixture",
+      ),
+    ]);
+
+    expect(metrics.futureEffectSubroutinesEncountered).toBe(3);
+    expect(metrics.futureEffectSubroutinesWithRemainingIce).toBe(1);
+    expect(metrics.futureEffectSubroutinesWithoutRemainingIce).toBe(1);
+    expect(metrics.futureEffectBreaksTaken).toBe(1);
+    expect(metrics.futureEffectBreaksSkippedNoRemainingIce).toBe(1);
+    expect(metrics.pumpActionsBeforeFutureEffectBreak).toBe(1);
+    expect(metrics.pumpActionsThatCouldNotLeadToBreak).toBe(1);
+    expect(metrics.pumpActionsThatDestroyedAccessReserve).toBe(1);
+    expect(metrics.unbrokenRunEffectIgnoredBecauseNoRemainingIce).toBe(1);
+    expect(metrics.unbrokenRunEffectAppliedToRemainingPath).toBe(1);
+  });
+
+  it("keeps remote builds unconverted without advance score or protection progress", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "install_card", "remote_1", 1, {
+            installPlacement: "root",
+            reasonCode: "corp.plan.remote_build",
+          }),
+          progressionAction("corp", 2, "play_event", undefined, 1, {
+            reasonCode: "corp.plan.economy",
+          }),
+          progressionAction("corp", 3, "end_turn", undefined, 1),
+        ],
+        "plan-conversion-remote-stall-fixture",
+      ),
+    ]);
+
+    expect(metrics.remoteBuildConvertedToAdvanceOrScore).toBe(0);
+    expect(metrics.planIntentConverted).toBe(0);
+    expect(metrics.planIntentAbandoned).toBeGreaterThanOrEqual(1);
+    expect(metrics.longestNoProgressChain).toBe(3);
+  });
+
+  it("keeps plan-conversion metrics invariant to hidden-state-like trace noise", () => {
+    const visibleActions = [
+      progressionAction("runner", 1, "draw_card", undefined, 1, {
+        runnerDrawAction: true,
+        reasonCode: "runner.plan.setup_for_run",
+        evidence: ["public:draw"],
+      }),
+      progressionAction("runner", 2, "start_run", "remote_1", 1),
+      progressionAction("runner", 3, "steal_agenda", undefined, 1),
+    ];
+    const first = summarizeMatchProgressionMetrics([
+      progressionSummary(visibleActions, "hidden-invariance-a"),
+    ]);
+    const second = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        visibleActions.map((entry) => ({
+          ...entry,
+          evidence: ["hidden:hq_has_agenda", "hidden:rd_top_card"],
+          stateHashAfter: `${entry.stateHashAfter}-other-hidden-state`,
+        })),
+        "hidden-invariance-b",
+      ),
+    ]);
+
+    expect(second).toMatchObject({
+      actionLedToProgressWithin1: first.actionLedToProgressWithin1,
+      actionLedToProgressWithin2: first.actionLedToProgressWithin2,
+      actionLedToProgressWithin3: first.actionLedToProgressWithin3,
+      planIntentConverted: first.planIntentConverted,
+      planIntentAbandoned: first.planIntentAbandoned,
+      setupActionConvertedToRun: first.setupActionConvertedToRun,
+      remoteContestConvertedToStealOrTrash:
+        first.remoteContestConvertedToStealOrTrash,
+      actionsUntilNextScoreOrSteal: first.actionsUntilNextScoreOrSteal,
+      actionsUntilNextMeaningfulBoardProgress:
+        first.actionsUntilNextMeaningfulBoardProgress,
+      actionLimitRootCauseByMatch: first.actionLimitRootCauseByMatch,
+      actionLimitDominantSide: first.actionLimitDominantSide,
+      finalStrategicWindowNoProgressActions:
+        first.finalStrategicWindowNoProgressActions,
+      finalWindowKnownInfoExploitationOpportunities:
+        first.finalWindowKnownInfoExploitationOpportunities,
+      endgameCloseoutOpportunitiesRunner:
+        first.endgameCloseoutOpportunitiesRunner,
+    });
+  });
+
+  it("deduplicates true closeout and repeated-central windows", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      {
+        seed: "ai-central-dedupe-fixture",
+        winner: "action_limit_reached",
+        actions: 8,
+        turns: 2,
+        finalAgendaPoints: { runner: 4, corp: 0 },
+        finalStateHash: "fnv1a:central-dedupe",
+        eventLogLength: 8,
+        replayOk: true,
+        replayErrors: [],
+        actionSequence: [
+          progressionAction("runner", 1, "start_run", "rd", 1, {
+            runnerCentralCloseoutOpportunityRaw: true,
+            runnerTrueCentralCloseoutOpportunity: true,
+            runnerCentralCloseoutOpportunity: true,
+            runnerCentralCloseoutRunTaken: true,
+            runnerCentralCloseoutReason: "interface",
+            runnerCentralRunRepeatWindow: true,
+            runnerRepeatedCentralRunWithFreshValue: true,
+            runnerCentralRunInsteadOfContestableAdvancedRemote: true,
+            runnerCentralRunInsteadWasJustified: true,
+            runnerCentralRunJustificationReason: "interface",
+            runnerContestableAdvancedRemoteThreatServerIds: ["remote_1"],
+          }),
+          progressionAction("runner", 2, "start_run", "rd", 1, {
+            runnerCentralCloseoutOpportunityRaw: true,
+            runnerTrueCentralCloseoutOpportunity: true,
+            runnerCentralCloseoutOpportunity: true,
+            runnerCentralCloseoutRunTaken: true,
+            runnerCentralCloseoutReason: "interface",
+            runnerCentralRunRepeatWindow: true,
+            runnerRepeatedCentralRunWithFreshValue: true,
+            runnerCentralRunInsteadOfContestableAdvancedRemote: true,
+            runnerCentralRunInsteadWasJustified: true,
+            runnerCentralRunJustificationReason: "interface",
+            runnerContestableAdvancedRemoteThreatServerIds: ["remote_1"],
+          }),
+          progressionAction("runner", 3, "start_run", "hq", 2, {
+            runnerCentralCloseoutOpportunityRaw: true,
+            runnerCentralCloseoutSkippedWithGoodReason: true,
+            runnerCentralRunRepeatWindow: true,
+            runnerRepeatedCentralRunWithoutFreshValue: true,
+            runnerRepeatedLowValueCentralRun: true,
+            runnerCentralRunStalePenaltyApplied: true,
+            runnerNoFreshCentralServerIds: ["hq"],
+            runnerNoFreshCentralRunTaken: true,
+            runnerNoFreshCentralBetterAlternativeTypes: [
+              "economy",
+              "remote_contest",
+            ],
+            runnerStaleCentralAllowedReason: "central_open",
+            runnerCentralRunInsteadOfContestableAdvancedRemote: true,
+            runnerContestableAdvancedRemoteThreatServerIds: ["remote_2"],
+          }),
+          progressionAction("runner", 4, "play_event", undefined, 3, {
+            runnerNoFreshCentralServerIds: ["rd"],
+            runnerNoFreshCentralBetterAlternativeTypes: ["economy"],
+            runnerNoFreshCentralSubstitutionType: "economy",
+          }),
+        ],
+        errors: [],
+        cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
+        metrics: {
+          illegalActions: 0,
+          fallbackRate: 0,
+          timeoutRate: 0,
+          reasonCodeCoverage: [],
+          actionTypeCoverage: [],
+          roleCoverage: [],
+          progressScore: 0,
+          holdout: false,
+          doctrine: {
+            nakedAgendaInstalls: 0,
+            agendaFloodExposure: 0,
+            scoreWindowMissed: 0,
+            remoteOverbuild: 0,
+            economyStall: 0,
+            repeatedLowValueCentralRun: 0,
+            rigStall: 0,
+            assetTrashNeglect: 0,
+          },
+        },
+      },
+    ]);
+
+    expect(metrics.centralCloseoutOpportunitiesRaw).toBe(2);
+    expect(metrics.trueCentralCloseoutOpportunities).toBe(1);
+    expect(metrics.centralCloseoutOpportunitiesDeduped).toBe(1);
+    expect(metrics.centralCloseoutRunsTaken).toBe(1);
+    expect(metrics.centralCloseoutFalsePositiveRate).toBe(0.5);
+    expect(metrics.centralRunRepeatWindowsRaw).toBe(3);
+    expect(metrics.centralRunRepeatWindowsDeduped).toBe(2);
+    expect(metrics.repeatedCentralRunsWithFreshValue).toBe(1);
+    expect(metrics.repeatedCentralRunsWithoutFreshValue).toBe(1);
+    expect(metrics.centralRunInsteadUnjustified).toBe(1);
+    expect(metrics.centralRunJustifiedByInterface).toBe(1);
+    expect(metrics.centralRunStalePenaltyApplied).toBe(1);
+    expect(metrics.noFreshCentralWindows).toBe(2);
+    expect(metrics.noFreshCentralRunsTaken).toBe(1);
+    expect(metrics.noFreshCentralSubstitutions).toBe(1);
+    expect(metrics.noFreshCentralSubstitutionRate).toBe(0.5);
+    expect(metrics.noFreshCentralSubstitutionEconomy).toBe(1);
+    expect(metrics.noFreshCentralWithBetterAlternative).toBe(2);
+    expect(metrics.staleCentralChosenDespiteEconomy).toBe(1);
+    expect(metrics.staleCentralChosenDespiteRemoteContest).toBe(1);
+    expect(metrics.staleCentralAllowedWithReason).toBe(1);
+    expect(metrics.staleCentralAllowedCentralOpen).toBe(1);
+    expect(metrics.alternativeChosenAfterStaleCentralPenalty).toBe(1);
   });
 
   it("analyzes doctrine quality case examples without private state", () => {
@@ -11298,6 +14568,296 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(JSON.stringify(results)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
+  });
+
+  it("boosts a repeat R&D run after the top card was stolen and therefore freshened", () => {
+    const baseInput = runnerActionPhaseInput(
+      "ai-rnd-fresh-after-agenda-steal",
+      (state) => {
+        state.runner.credits = 8;
+        state.corp.credits = 0;
+      },
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gain = baseInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdRun || !gain) throw new Error("Missing R&D fresh repeat fixture actions");
+
+    const input = {
+      ...baseInput,
+      profileId: "current_candidate",
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticCentralAccessEvent(
+          "ai-rnd-fresh-steal-access",
+          100,
+          "rd",
+          "simple_agenda",
+        ),
+        syntheticPlanActionEvent(
+          "ai-rnd-fresh-steal",
+          101,
+          "runner",
+          "steal_agenda",
+          "rd",
+          { cardDefinitionId: "simple_agenda" },
+        ),
+      ],
+      legalActions: [rdRun, gain],
+    } satisfies AiDecisionInput;
+
+    const belief = reconstructBeliefState(input);
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(belief.runnerOpponentModel?.rndTopFreshness?.freshness).toBe(
+      "fresh_after_top_removed",
+    );
+    expect(
+      belief.runnerOpponentModel?.rndTopFreshness?.freshenedByRunnerAccess,
+    ).toBe(true);
+    expect(selected?.type).toBe("start_run");
+    expect(selected?.payload?.serverId).toBe("rd");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload|FullState/,
+    );
+  });
+
+  it("suppresses an immediate normal R&D repeat when a known non-agenda top card stayed in place", () => {
+    const baseInput = runnerActionPhaseInput(
+      "ai-rnd-stale-known-nonagenda",
+      (state) => {
+        state.runner.credits = 8;
+        state.corp.credits = 0;
+      },
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gain = baseInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdRun || !gain) throw new Error("Missing R&D stale repeat fixture actions");
+
+    const input = {
+      ...baseInput,
+      profileId: "current_candidate",
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticCentralAccessEvent(
+          "ai-rnd-stale-operation-access",
+          100,
+          "rd",
+          "simple_economy_operation",
+        ),
+      ],
+      legalActions: [rdRun, gain],
+    } satisfies AiDecisionInput;
+
+    const belief = reconstructBeliefState(input);
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
+      freshness: "stale_known_same_top",
+      knownTopDefinitionId: "simple_economy_operation",
+      knownTopIsAgenda: false,
+    });
+    expect(selected?.type).toBe("gain_credit");
+    expect(decision.reasonCode).not.toBe("runner.plan.pressure_rnd");
+  });
+
+  it("keeps R&D pressure high when a known top agenda remains accessible", () => {
+    const baseInput = runnerActionPhaseInput(
+      "ai-rnd-stale-known-agenda",
+      (state) => {
+        state.runner.credits = 8;
+        state.corp.credits = 0;
+      },
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gain = baseInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdRun || !gain) throw new Error("Missing R&D agenda top fixture actions");
+
+    const input = {
+      ...baseInput,
+      profileId: "current_candidate",
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticCentralAccessEvent(
+          "ai-rnd-agenda-top-access",
+          100,
+          "rd",
+          "simple_agenda",
+        ),
+      ],
+      legalActions: [rdRun, gain],
+    } satisfies AiDecisionInput;
+
+    const belief = reconstructBeliefState(input);
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
+      freshness: "stale_known_same_top",
+      knownTopDefinitionId: "simple_agenda",
+      knownTopIsAgenda: true,
+    });
+    expect(selected?.type).toBe("start_run");
+    expect(selected?.payload?.serverId).toBe("rd");
+  });
+
+  it("advances a legally known R&D top sequence after the first card is removed", () => {
+    const baseInput = runnerActionPhaseInput(
+      "ai-rnd-known-sequence-advances",
+      (state) => {
+        state.runner.credits = 8;
+        state.corp.credits = 0;
+      },
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gain = baseInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdRun || !gain) throw new Error("Missing R&D sequence fixture actions");
+
+    const input = {
+      ...baseInput,
+      profileId: "current_candidate",
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticRndPrivateLookEvent("ai-rnd-sequence-look", 100, [
+          "simple_economy_operation",
+          "simple_agenda",
+        ]),
+        syntheticPlanActionEvent(
+          "ai-rnd-sequence-trash-top",
+          101,
+          "runner",
+          "trash_accessed_card",
+          "rd",
+          { cardDefinitionId: "simple_economy_operation" },
+        ),
+      ],
+      legalActions: [rdRun, gain],
+    } satisfies AiDecisionInput;
+
+    const belief = reconstructBeliefState(input);
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+    const rdTop = belief.knownPositionMemory?.find(
+      (entry) => entry.zone === "rd" && entry.positionKey === "top",
+    );
+
+    expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
+      freshness: "fresh_after_top_removed",
+      knownTopDefinitionId: "simple_agenda",
+      knownTopIsAgenda: true,
+    });
+    expect(
+      belief.runnerOpponentModel?.rndTopFreshness?.knownSequenceDefinitionIds,
+    ).toEqual(["simple_agenda"]);
+    expect(rdTop).toMatchObject({
+      definitionId: "simple_agenda",
+      positionKey: "top",
+    });
+    expect(selected?.type).toBe("start_run");
+    expect(selected?.payload?.serverId).toBe("rd");
+  });
+
+  it("summarizes R&D freshness and repeat-pressure metrics", () => {
+    const actionSequence = [
+      {
+        side: "runner",
+        actionType: "access_card",
+        targetServerId: "rd",
+        evidence: [],
+        rndAccesses: true,
+        rndAccessLeftTopCardUnchanged: true,
+        rndAccessNoValueRepeatStale: true,
+      },
+      {
+        side: "runner",
+        actionType: "steal_agenda",
+        targetServerId: "rd",
+        evidence: [],
+        rndAccessRemovedTopCard: true,
+        rndAccessStoleAgenda: true,
+        rndTopFreshenedByRunnerAccess: true,
+        rndKnownTopAdvancedAfterAccess: true,
+        rndKnownTopSequenceAdvanced: true,
+      },
+      {
+        side: "runner",
+        actionType: "start_run",
+        targetServerId: "rd",
+        evidence: [],
+        rndRepeatRunAfterTopRemoved: true,
+        rndRepeatRunBoostedByFreshTop: true,
+        rndFreshTopPressureOpportunity: true,
+        rndFreshTopPressureTaken: true,
+        rndCloseoutOpportunityAfterTopRemoved: true,
+      },
+      {
+        side: "runner",
+        actionType: "start_run",
+        targetServerId: "rd",
+        evidence: [],
+        rndRepeatRunAfterTopUnchanged: true,
+        rndRepeatRunSuppressedBecauseKnownStaleTop: true,
+        rndRepeatRunSuppressedBecauseKnownNonAgendaTop: true,
+        rndStaleTopRepeatMistake: true,
+      },
+    ] as unknown as AiSimulationSummary["actionSequence"];
+    const metrics = summarizeMatchProgressionMetrics([
+      {
+        seed: "ai-rnd-freshness-metrics",
+        winner: undefined,
+        actions: actionSequence.length,
+        turns: 1,
+        finalAgendaPoints: { runner: 0, corp: 0 },
+        replayOk: true,
+        metrics: { illegalActions: 0 },
+        actionSequence,
+      } as unknown as AiSimulationSummary,
+    ]);
+
+    expect(metrics.rndAccesses).toBe(1);
+    expect(metrics.rndAccessRemovedTopCard).toBe(1);
+    expect(metrics.rndAccessLeftTopCardUnchanged).toBe(1);
+    expect(metrics.rndTopFreshenedByRunnerAccess).toBe(1);
+    expect(metrics.rndKnownTopSequenceAdvanced).toBe(1);
+    expect(metrics.rndRepeatRunAfterTopRemoved).toBe(1);
+    expect(metrics.rndRepeatRunAfterTopUnchanged).toBe(1);
+    expect(metrics.rndRepeatRunBoostedByFreshTop).toBe(1);
+    expect(metrics.rndRepeatRunSuppressedBecauseKnownStaleTop).toBe(1);
+    expect(metrics.rndFreshTopPressureTaken).toBe(1);
+    expect(metrics.rndStaleTopRepeatMistake).toBe(1);
   });
 });
 
@@ -12344,6 +15904,70 @@ function runnerCentralPressureDeckConfig(idSuffix: string): CreateGameConfig {
   };
 }
 
+function runnerCoverageSearchDeckConfig(idSuffix: string): CreateGameConfig {
+  return {
+    runnerDeck: {
+      id: `ai_coverage_search_runner_${idSuffix}`,
+      name: "AI Coverage Search Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "v098_stack_search_event", quantity: 3 },
+        { id: "simple_fracter", quantity: 3 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    },
+    corpDeck: {
+      id: `ai_coverage_search_corp_${idSuffix}`,
+      name: "AI Coverage Search Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "simple_agenda", quantity: 6 },
+        { id: "simple_barrier_ice", quantity: 4 },
+        { id: "simple_economy_operation", quantity: 8 },
+      ],
+    },
+  };
+}
+
+function hqMemoryDeckConfig(
+  idSuffix: string,
+  includeExpertScheduleAnalyzer = false,
+): CreateGameConfig {
+  const runnerCards = [
+    ...(includeExpertScheduleAnalyzer
+      ? [{ id: "onr_v1_024_expert-schedule-analyzer", quantity: 1 }]
+      : []),
+    { id: "onr_v1_139_r-and-d-interface", quantity: 2 },
+    { id: "onr_v1_129_hq-interface", quantity: 2 },
+    { id: "simple_fracter", quantity: 3 },
+    { id: "simple_decoder", quantity: 3 },
+    { id: "simple_economy_event", quantity: 8 },
+  ];
+  return {
+    runnerDeck: {
+      id: `ai_hq_memory_runner_${idSuffix}`,
+      name: "AI HQ Memory Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: runnerCards,
+    },
+    corpDeck: {
+      id: `ai_hq_memory_corp_${idSuffix}`,
+      name: "AI HQ Memory Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "simple_agenda", quantity: 6 },
+        { id: "simple_barrier_ice", quantity: 4 },
+        { id: "simple_code_gate_ice", quantity: 4 },
+        { id: "simple_economy_operation", quantity: 8 },
+      ],
+    },
+  };
+}
+
 function runnerProgramTrashChoiceInput(
   seed: string,
   options: {
@@ -12608,6 +16232,46 @@ function progressionAction(
   };
 }
 
+function progressionSummary(
+  actionSequence: AiSimulationSummary["actionSequence"],
+  seed = "plan-conversion-fixture",
+): AiSimulationSummary {
+  return {
+    seed,
+    winner: "action_limit_reached",
+    actions: actionSequence.length,
+    turns: Math.max(1, ...actionSequence.map((entry) => entry.turnNumber ?? 1)),
+    finalAgendaPoints: { runner: 0, corp: 0 },
+    finalStateHash: `fnv1a:${seed}`,
+    eventLogLength: actionSequence.length,
+    replayOk: true,
+    replayErrors: [],
+    actionSequence,
+    errors: [],
+    cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
+    metrics: {
+      illegalActions: 0,
+      fallbackRate: 0,
+      timeoutRate: 0,
+      reasonCodeCoverage: [],
+      actionTypeCoverage: [],
+      roleCoverage: [],
+      progressScore: 0,
+      holdout: false,
+      doctrine: {
+        nakedAgendaInstalls: 0,
+        agendaFloodExposure: 0,
+        scoreWindowMissed: 0,
+        remoteOverbuild: 0,
+        economyStall: 0,
+        repeatedLowValueCentralRun: 0,
+        rigStall: 0,
+        assetTrashNeglect: 0,
+      },
+    },
+  };
+}
+
 function syntheticCentralAccessEvent(
   eventId: string,
   stateVersionBefore: number,
@@ -12633,6 +16297,62 @@ function syntheticCentralAccessEvent(
   };
 }
 
+function syntheticRemoteAccessEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  serverId: `remote_${number}`,
+  cardDefinitionId: string,
+  positionKey = "root:0",
+): PublicGameEvent {
+  return {
+    eventId,
+    type: "access_card",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "hidden_info_barrier",
+    publicPayload: {
+      actor: "runner",
+      actionType: "access_card",
+      serverId,
+      serverLabel: serverId,
+      cardDefinitionId,
+      accessedCardPositionKey: positionKey,
+    },
+  };
+}
+
+function syntheticExposeInstalledEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  serverId: `remote_${number}` | "hq" | "rd",
+  positionKey: string,
+  cardDefinitionId: string,
+): PublicGameEvent {
+  const [area, index] = positionKey.split(":");
+  return {
+    eventId,
+    type: "trigger_ability",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "hidden_info_barrier",
+    publicPayload: {
+      actor: "runner",
+      actionType: "trigger_ability",
+      hiddenZoneAction: "approach_ice_expose",
+      publicRevealKind: "expose",
+      revealKind: "expose",
+      exposedServerId: serverId,
+      exposedPositionKey: positionKey,
+      ...(area ? { exposedArea: area } : {}),
+      ...(index !== undefined ? { exposedIndex: Number(index) } : {}),
+      exposedCardDefinitionId: cardDefinitionId,
+      cardDefinitionId,
+    },
+  };
+}
+
 function syntheticRunStartedEvent(
   eventId: string,
   stateVersionBefore: number,
@@ -12649,6 +16369,30 @@ function syntheticRunStartedEvent(
       actor: "runner",
       actionType: "start_run",
       serverId,
+    },
+  };
+}
+
+function syntheticPlanActionEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  side: Side,
+  actionType: LegalAction["type"],
+  serverId?: string,
+  extra: Record<string, unknown> = {},
+): PublicGameEvent {
+  return {
+    eventId,
+    type: actionType,
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload: {
+      actor: side,
+      actionType,
+      ...(serverId ? { serverId } : {}),
+      ...extra,
     },
   };
 }
@@ -12673,6 +16417,54 @@ function syntheticHqMemoryEvent(
       serverId: "hq",
       serverLabel: "HQ",
       ...(cardDefinitionId ? { cardDefinitionId } : {}),
+    },
+  };
+}
+
+function syntheticHqPrivateLookEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  knownHqDefinitionIds: string[],
+): PublicGameEvent {
+  return {
+    eventId,
+    type: "resolve_choice",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "hidden_info_barrier",
+    publicPayload: {
+      actor: "runner",
+      actionType: "resolve_choice",
+      hiddenZoneAction: "p3_33_private_look",
+      privateLookZone: "hq",
+      privateLookCount: knownHqDefinitionIds.length,
+      knownHqDefinitionIds,
+    },
+  };
+}
+
+function syntheticRndPrivateLookEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  knownRndDefinitionIds: string[],
+): PublicGameEvent {
+  return {
+    eventId,
+    type: "resolve_choice",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "hidden_info_barrier",
+    publicPayload: {
+      actor: "runner",
+      actionType: "resolve_choice",
+      hiddenZoneAction: "p3_33_private_look",
+      privateLookZone: "rd",
+      privateLookCount: knownRndDefinitionIds.length,
+      knownRndDefinitionIds,
+      knownRndTopDefinitionId: knownRndDefinitionIds[0],
+      knownRndCardCount: knownRndDefinitionIds.length,
     },
   };
 }
@@ -13139,6 +16931,97 @@ function apply(
   expect(result.ok, result.ok ? "" : result.error.message).toBe(true);
   if (!result.ok) throw new Error(result.error.message);
   return result.state;
+}
+
+function continueRunAction(state: GameState): GameState {
+  return apply(state, "runner", (action) => action.type === "continue_run");
+}
+
+function enterEncounterFromMovementWindow(state: GameState): GameState {
+  return continueRunAction(state);
+}
+
+function installRunnerCard(state: GameState, definitionId: string): GameState {
+  return apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "install_card" &&
+      sourceDefinition(state, action) === definitionId,
+  );
+}
+
+function startAndRezOuterIce(
+  state: GameState,
+  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  iceId: CardInstanceId,
+): GameState {
+  let next = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === serverId,
+  );
+  next = apply(
+    next,
+    "corp",
+    (action) => action.type === "rez_ice" && action.source === iceId,
+  );
+  return next.run?.phase === "encounter_ice"
+    ? next
+    : enterEncounterFromMovementWindow(next);
+}
+
+function rezIceAndEnterIfNeeded(
+  state: GameState,
+  iceId: CardInstanceId,
+): GameState {
+  const next = apply(
+    state,
+    "corp",
+    (action) => action.type === "rez_ice" && action.source === iceId,
+  );
+  return next.run?.phase === "encounter_ice"
+    ? next
+    : enterEncounterFromMovementWindow(next);
+}
+
+function runDurationIceEncounterState(
+  seed: string,
+  runnerCards: string[],
+  corpCards: string[],
+): GameState {
+  const extraRunnerCards = runnerCards.map((id) => ({ id, quantity: 1 }));
+  const extraCorpCards = corpCards.map((id) => ({ id, quantity: 1 }));
+  const state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        id: `${seed}_runner`,
+        name: `${seed} Runner`,
+        cards: [
+          ...extraRunnerCards,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+        ],
+      },
+      corpDeck: {
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        id: `${seed}_corp`,
+        name: `${seed} Corp`,
+        cards: [
+          ...extraCorpCards,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 20;
+  state.runner.clicks = 4;
+  state.runner.memoryLimit = 6;
+  state.corp.credits = 20;
+  return state;
 }
 
 function mustAction(
@@ -13719,6 +17602,28 @@ function keepOnlyCorpHqCard(state: GameState, id: CardInstanceId): void {
     };
   }
   state.corp.hq = [id];
+}
+
+function setCorpHqCardsForTest(
+  state: GameState,
+  definitionIds: string[],
+): CardInstanceId[] {
+  const ids = definitionIds.map((definitionId) =>
+    moveCorpCardToHq(state, definitionId),
+  );
+  for (const cardId of state.corp.hq.filter(
+    (candidate) => !ids.includes(candidate),
+  )) {
+    state.corp.rd.push(cardId);
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      zone: { side: "corp", zone: "rd" },
+      faceup: false,
+      rezzed: false,
+    };
+  }
+  state.corp.hq = ids;
+  return ids;
 }
 
 function putRunnerCardOnTopOfStack(

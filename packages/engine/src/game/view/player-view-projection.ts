@@ -21,7 +21,7 @@ import {
   visibleSpecialZones,
 } from "./card-view";
 import { visibleChoice } from "./choice-view";
-import { redactPublicEventForSide, toPublicEvent } from "./public-event-view";
+import { toPublicEventForSide } from "./public-event-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 export function buildPlayerViewProjection(
   state: GameState,
@@ -215,9 +215,7 @@ export function buildPlayerViewProjection(
           },
         }
       : {}),
-    publicEvents: state.eventLog.map((event) =>
-      redactPublicEventForSide(toPublicEvent(event), side),
-    ),
+    publicEvents: state.eventLog.map((event) => toPublicEventForSide(event, side)),
     legalActions,
     winner: state.winner,
     agendaPointsToWin: state.agendaPointsToWin,

@@ -102,6 +102,24 @@ export function publicContextForAction(
   // source titles or definition ids.
   if (Array.isArray(resolvedEffects)) context.resolvedEffects = resolvedEffects;
   if (serverLabel) context.serverLabel = serverLabel;
+  if (legalAction.type === "access_card" && cardId && state.cardInstances[cardId]) {
+    const instance = state.cardInstances[cardId];
+    if (
+      instance?.zone.side === "corp" &&
+      instance.zone.zone === "serverRoot"
+    ) {
+      const serverId = instance.zone.serverId;
+      const server = state.corp.servers.find(
+        (candidate) => candidate.id === serverId,
+      );
+      const index = server?.root.indexOf(cardId) ?? -1;
+      if (server && index >= 0) {
+        context.accessedCardPositionKey = `root:${index}`;
+        context.accessedArea = "root";
+        context.accessedIndex = index;
+      }
+    }
+  }
   if (legalAction.type === "start_run" && state.run) {
     const runAccessCount = Math.max(1, Math.floor(state.run.accessCount ?? 1));
     const runInstalledAccessBonus =

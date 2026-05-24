@@ -1,0 +1,1896 @@
+{
+  "schemaVersion": "localized-card-skin-v1",
+  "locale": "de",
+  "skinId": "de-project-frame-v1-originalset-agendas",
+  "status": "draft_complete_originalset_agendas_display_only",
+  "generatedAt": "2026-05-24",
+  "sourceSetId": "originalset-v1",
+  "sourceCardFile": "data/cards/originalset-v1-cards.json",
+  "scope": {
+    "cardType": "agenda",
+    "expectedCount": 33,
+    "actualCount": 33,
+    "displayOnly": true,
+    "engineRuleAuthority": false
+  },
+  "fallbackPolicy": "Wenn eine deutsche Skin-Karte vorhanden ist, kann sie als Anzeigeersatz dienen; fehlt sie, bleibt die Originalanzeige Fallback.",
+  "notes": [
+    "Die internen cardIds bleiben die Originalkarten-IDs.",
+    "Diese Skin-Schicht ist keine Regelautorität und ändert keine LegalActions, Replay-, StateHash-, KI- oder Decklegalitätsdaten.",
+    "sourceText ist Originaltext für Nachvollziehbarkeit; lokalisiert gerendert werden nur localizedTitle, localizedProjectClass und localizedRules.",
+    "Projektklassen sind strukturiert als sourceProjectClasses und sichtbar als localizedProjectClass hinterlegt."
+  ],
+  "cards": [
+    {
+      "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "sourceTitle": "AI Chief Financial Officer",
+      "localizedTitle": "KI-Finanzvorstand",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "asset",
+      "sourceProjectClasses": [
+        "asset"
+      ],
+      "sourceSubtypes": [
+        "asset"
+      ],
+      "localizedProjectClass": "Projekt - Anlage",
+      "advancementRequirement": 5,
+      "projectPoints": 2,
+      "sourceText": "[A]: Shuffle cards stored in HQ and the Archives into R&D; then draw five cards.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "symbol",
+              "symbol": "action",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": "Mische Karten aus Hauptquartier und Archiv in F&E; ziehe dann 5 Karten."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "1 Aktion Mische Karten aus Hauptquartier und Archiv in F&E; ziehe dann 5 Karten.",
+      "artPrompt": "Cyberpunk corporate finance command room with an abstract AI executive presence, holographic ledgers, secure vault geometry, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_188_ai-chief-financial-officer.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_188_ai-chief-financial-officer.svg",
+        "full": "rendered/full/onr_v1_188_ai-chief-financial-officer.png",
+        "preview": "rendered/preview/onr_v1_188_ai-chief-financial-officer.png",
+        "thumb": "rendered/thumb/onr_v1_188_ai-chief-financial-officer.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_189_artificial-security-directors",
+      "sourceTitle": "Artificial Security Directors",
+      "localizedTitle": "Künstliche Sicherheitsdirektion",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "research",
+      "sourceProjectClasses": [
+        "research"
+      ],
+      "sourceSubtypes": [
+        "research"
+      ],
+      "localizedProjectClass": "Projekt - Forschung",
+      "advancementRequirement": 3,
+      "projectPoints": 1,
+      "sourceText": "Difficulty of Black Ops agendas is reduced by 1.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Entwicklungskosten von Projekten der Klasse Schwarze Operation sind um 1 reduziert."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Entwicklungskosten von Projekten der Klasse Schwarze Operation sind um 1 reduziert.",
+      "artPrompt": "Cyberpunk security boardroom run by abstract machine directors, surveillance panes and access-control glass, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_189_artificial-security-directors.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_189_artificial-security-directors.svg",
+        "full": "rendered/full/onr_v1_189_artificial-security-directors.png",
+        "preview": "rendered/preview/onr_v1_189_artificial-security-directors.png",
+        "thumb": "rendered/thumb/onr_v1_189_artificial-security-directors.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "sourceTitle": "Bioweapons Engineering",
+      "localizedTitle": "Biowaffen-Engineering",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "research",
+      "sourceProjectClasses": [
+        "research"
+      ],
+      "sourceSubtypes": [
+        "research"
+      ],
+      "localizedProjectClass": "Projekt - Forschung",
+      "advancementRequirement": 4,
+      "projectPoints": 3,
+      "sourceText": "Each source of meat damage inflicts +1 meat damage.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Jede Quelle von Fleischschaden verursacht +1 Fleischschaden."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Jede Quelle von Fleischschaden verursacht +1 Fleischschaden.",
+      "artPrompt": "Corporate cyberpunk bioengineering lab with sealed vats, gene helix lights and hazard-glass architecture, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_190_bioweapons-engineering.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_190_bioweapons-engineering.svg",
+        "full": "rendered/full/onr_v1_190_bioweapons-engineering.png",
+        "preview": "rendered/preview/onr_v1_190_bioweapons-engineering.png",
+        "thumb": "rendered/thumb/onr_v1_190_bioweapons-engineering.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "sourceTitle": "Black Ice Quality Assurance",
+      "localizedTitle": "Qualitätssicherung für Schwarzes ICE",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "black-ops/research",
+      "sourceProjectClasses": [
+        "black-ops",
+        "research"
+      ],
+      "sourceSubtypes": [
+        "black-ops",
+        "research"
+      ],
+      "localizedProjectClass": "Projekt - Schwarze Operation / Forschung",
+      "advancementRequirement": 5,
+      "projectPoints": 2,
+      "sourceText": "All black ice has +2 strength.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Alles schwarze ICE hat +2 Stärke."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Alles schwarze ICE hat +2 Stärke.",
+      "artPrompt": "Dark cyberpunk black ICE quality lab, crystalline defensive code structures under diagnostic light, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_191_black-ice-quality-assurance.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_191_black-ice-quality-assurance.svg",
+        "full": "rendered/full/onr_v1_191_black-ice-quality-assurance.png",
+        "preview": "rendered/preview/onr_v1_191_black-ice-quality-assurance.png",
+        "thumb": "rendered/thumb/onr_v1_191_black-ice-quality-assurance.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_192_corporate-boon",
+      "sourceTitle": "Corporate Boon",
+      "localizedTitle": "Konzernbonus",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "asset",
+      "sourceProjectClasses": [
+        "asset"
+      ],
+      "sourceSubtypes": [
+        "asset"
+      ],
+      "localizedProjectClass": "Projekt - Anlage",
+      "advancementRequirement": 6,
+      "projectPoints": 2,
+      "sourceText": "Put four Boon counters on Corporate Boon when you score it.\nBoon counter: Gain an action. Use this ability only once per turn and only during your turn.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Lege 4 Bonus-Zähler auf dieses Projekt."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Bonus-Zähler: Erhalte 1 Aktion. Nur 1x pro Zug in deinem Zug."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Lege 4 Bonus-Zähler auf dieses Projekt.\nBonus-Zähler: Erhalte 1 Aktion. Nur 1x pro Zug in deinem Zug.",
+      "artPrompt": "Prestige corporate benefit vault, executive reward circuitry and stacked luminous counters, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_192_corporate-boon.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_192_corporate-boon.svg",
+        "full": "rendered/full/onr_v1_192_corporate-boon.png",
+        "preview": "rendered/preview/onr_v1_192_corporate-boon.png",
+        "thumb": "rendered/thumb/onr_v1_192_corporate-boon.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_193_corporate-coup",
+      "sourceTitle": "Corporate Coup",
+      "localizedTitle": "Konzernputsch",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "black-ops",
+      "sourceProjectClasses": [
+        "black-ops"
+      ],
+      "sourceSubtypes": [
+        "black-ops"
+      ],
+      "localizedProjectClass": "Projekt - Schwarze Operation",
+      "advancementRequirement": 5,
+      "projectPoints": 2,
+      "sourceText": "Put 15 from the bank on Corporate Coup when you score it.\n[A]: Take 3 from Corporate Coup, if it has any bits.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Lege "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 15
+            },
+            {
+              "type": "text",
+              "text": " aus der Bank auf dieses Projekt."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "symbol",
+              "symbol": "action",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": "Nimm "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 3
+            },
+            {
+              "type": "text",
+              "text": " davon."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Lege 15 Gridmark aus der Bank auf dieses Projekt.\n1 Aktion Nimm 3 Gridmark davon.",
+      "artPrompt": "Cyberpunk hostile boardroom coup, corporate towers fractured by red security light and encrypted takeover lines, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_193_corporate-coup.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_193_corporate-coup.svg",
+        "full": "rendered/full/onr_v1_193_corporate-coup.png",
+        "preview": "rendered/preview/onr_v1_193_corporate-coup.png",
+        "thumb": "rendered/thumb/onr_v1_193_corporate-coup.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_194_corporate-downsizing",
+      "sourceTitle": "Corporate Downsizing",
+      "localizedTitle": "Konzernabbau",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "gray-ops",
+      "sourceProjectClasses": [
+        "gray-ops"
+      ],
+      "sourceSubtypes": [
+        "gray-ops"
+      ],
+      "localizedProjectClass": "Projekt - Graue Operation",
+      "advancementRequirement": 3,
+      "projectPoints": 2,
+      "sourceText": "When you score Corporate Downsizing, show to Runner any number of agenda cards stored in HQ. Gain bits equal to twice the combined agenda points of these cards; then shuffle them into R&D.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Zeige dem Runner Agendas aus dem Hauptquartier. Erhalte das Doppelte ihrer Projektpunkte als Gridmark; mische sie in F&E."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Zeige dem Runner Agendas aus dem Hauptquartier. Erhalte das Doppelte ihrer Projektpunkte als Gridmark; mische sie in F&E.",
+      "artPrompt": "Corporate downsizing in a neon operations floor, empty workstations and severed network lines, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_194_corporate-downsizing.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_194_corporate-downsizing.svg",
+        "full": "rendered/full/onr_v1_194_corporate-downsizing.png",
+        "preview": "rendered/preview/onr_v1_194_corporate-downsizing.png",
+        "thumb": "rendered/thumb/onr_v1_194_corporate-downsizing.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_195_corporate-retreat",
+      "sourceTitle": "Corporate Retreat",
+      "localizedTitle": "Konzernrückzug",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "gray-ops",
+      "sourceProjectClasses": [
+        "gray-ops"
+      ],
+      "sourceSubtypes": [
+        "gray-ops"
+      ],
+      "localizedProjectClass": "Projekt - Graue Operation",
+      "advancementRequirement": 4,
+      "projectPoints": 3,
+      "sourceText": "You lose the following ability as soon as you rez or install any card. A: Gain [2].",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Bis du eine Karte installierst oder aktivierst:"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "symbol",
+              "symbol": "action",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": "Erhalte "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 2
+            },
+            {
+              "type": "text",
+              "text": "."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Bis du eine Karte installierst oder aktivierst:\n1 Aktion Erhalte 2 Gridmark.",
+      "artPrompt": "Corporate evacuation from a sealed headquarters, mobile command pods and retreating light trails, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_195_corporate-retreat.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_195_corporate-retreat.svg",
+        "full": "rendered/full/onr_v1_195_corporate-retreat.png",
+        "preview": "rendered/preview/onr_v1_195_corporate-retreat.png",
+        "thumb": "rendered/thumb/onr_v1_195_corporate-retreat.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_196_corporate-war",
+      "sourceTitle": "Corporate War",
+      "localizedTitle": "Konzernkrieg",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "black-ops",
+      "sourceProjectClasses": [
+        "black-ops"
+      ],
+      "sourceSubtypes": [
+        "black-ops"
+      ],
+      "localizedProjectClass": "Projekt - Schwarze Operation",
+      "advancementRequirement": 3,
+      "projectPoints": 3,
+      "sourceText": "If you have 12 or more bits in your pool when you score Corporate War, gain 12; otherwise, lose all bits.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Mit 12+ Gridmark im Vorrat: erhalte "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 12
+            },
+            {
+              "type": "text",
+              "text": ". Sonst verlierst du alle Gridmark."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Mit 12+ Gridmark im Vorrat: erhalte 12 Gridmark. Sonst verlierst du alle Gridmark.",
+      "artPrompt": "Corporate cyberwar command map with competing megacorp towers, red-orange alert grids and data salvos, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_196_corporate-war.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_196_corporate-war.svg",
+        "full": "rendered/full/onr_v1_196_corporate-war.png",
+        "preview": "rendered/preview/onr_v1_196_corporate-war.png",
+        "thumb": "rendered/thumb/onr_v1_196_corporate-war.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_197_data-fort-reclamation",
+      "sourceTitle": "Data Fort Reclamation",
+      "localizedTitle": "Datenfestung-Rückgewinnung",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "gray-ops",
+      "sourceProjectClasses": [
+        "gray-ops"
+      ],
+      "sourceSubtypes": [
+        "gray-ops"
+      ],
+      "localizedProjectClass": "Projekt - Graue Operation",
+      "advancementRequirement": 4,
+      "projectPoints": 2,
+      "sourceText": "Gain [10] and choose up to four cards stored in HQ when you score Data Fort Reclamation. Create a new data fort using the cards chosen. Install the cards one at a time; you may rez them when you install them. Then, return to the bank any of the [10] not spent.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Erhalte "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 10
+            },
+            {
+              "type": "text",
+              "text": " für bis zu 4 Karten aus dem Hauptquartier: installiere sie einzeln in einer neuen Datenfestung; Rest zurück."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Erhalte 10 Gridmark für bis zu 4 Karten aus dem Hauptquartier: installiere sie einzeln in einer neuen Datenfestung; Rest zurück.",
+      "artPrompt": "Cyberpunk data fortress reclamation, rebuilt server bastion and corporate installation rigs, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_197_data-fort-reclamation.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_197_data-fort-reclamation.svg",
+        "full": "rendered/full/onr_v1_197_data-fort-reclamation.png",
+        "preview": "rendered/preview/onr_v1_197_data-fort-reclamation.png",
+        "thumb": "rendered/thumb/onr_v1_197_data-fort-reclamation.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_198_detroit-police-contract",
+      "sourceTitle": "Detroit Police Contract",
+      "localizedTitle": "Detroit-Polizeivertrag",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "black-ops",
+      "sourceProjectClasses": [
+        "black-ops"
+      ],
+      "sourceSubtypes": [
+        "black-ops"
+      ],
+      "localizedProjectClass": "Projekt - Schwarze Operation",
+      "advancementRequirement": 4,
+      "projectPoints": 1,
+      "sourceText": "Put [12] from the bank on Detroit Police Contract when you score it. Take [2] from Detroit Police Contract, if it has any bits, at the start of each of your turns.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Lege "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 12
+            },
+            {
+              "type": "text",
+              "text": " aus der Bank auf dieses Projekt."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Zu Beginn deines Zugs nimm "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 2
+            },
+            {
+              "type": "text",
+              "text": " davon."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Lege 12 Gridmark aus der Bank auf dieses Projekt.\nZu Beginn deines Zugs nimm 2 Gridmark davon.",
+      "artPrompt": "Private cyberpunk police contract in Detroit, armored drones, rain, city grid and corporate badges without logos or text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_198_detroit-police-contract.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_198_detroit-police-contract.svg",
+        "full": "rendered/full/onr_v1_198_detroit-police-contract.png",
+        "preview": "rendered/preview/onr_v1_198_detroit-police-contract.png",
+        "thumb": "rendered/thumb/onr_v1_198_detroit-police-contract.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "sourceTitle": "Employee Empowerment",
+      "localizedTitle": "Mitarbeiterermächtigung",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "gray-ops",
+      "sourceProjectClasses": [
+        "gray-ops"
+      ],
+      "sourceSubtypes": [
+        "gray-ops"
+      ],
+      "localizedProjectClass": "Projekt - Graue Operation",
+      "advancementRequirement": 4,
+      "projectPoints": 3,
+      "sourceText": "You may choose to draw an additional card at the start of each of your turns. [A]: Draw two cards.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Du darfst zu Zugbeginn 1 zusätzliche Karte ziehen."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "symbol",
+              "symbol": "action",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": "Ziehe 2 Karten."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Du darfst zu Zugbeginn 1 zusätzliche Karte ziehen.\n1 Aktion Ziehe 2 Karten.",
+      "artPrompt": "Cyberpunk corporate workforce empowerment, employees at luminous terminals connected by green-blue network lanes, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_199_employee-empowerment.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_199_employee-empowerment.svg",
+        "full": "rendered/full/onr_v1_199_employee-empowerment.png",
+        "preview": "rendered/preview/onr_v1_199_employee-empowerment.png",
+        "thumb": "rendered/thumb/onr_v1_199_employee-empowerment.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_200_encryption-breakthrough",
+      "sourceTitle": "Encryption Breakthrough",
+      "localizedTitle": "Verschlüsselungsdurchbruch",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "research",
+      "sourceProjectClasses": [
+        "research"
+      ],
+      "sourceSubtypes": [
+        "research"
+      ],
+      "localizedProjectClass": "Projekt - Forschung",
+      "advancementRequirement": 5,
+      "projectPoints": 2,
+      "sourceText": "All code gates have +1 strength. When you score Encryption Breakthrough, reveal as many code gates as you wish. Then, gain 1 for each revealed or rezzed code gate.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Alle Code-Gates haben +1 Stärke."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Zeige beliebig viele Code-Gates; erhalte "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": " je gezeigtem oder aktiviertem Code-Gate."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Alle Code-Gates haben +1 Stärke.\nZeige beliebig viele Code-Gates; erhalte 1 Gridmark je gezeigtem oder aktiviertem Code-Gate.",
+      "artPrompt": "Cyberpunk encryption breakthrough, code-gate lattice cracking open into clean corporate light, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_200_encryption-breakthrough.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_200_encryption-breakthrough.svg",
+        "full": "rendered/full/onr_v1_200_encryption-breakthrough.png",
+        "preview": "rendered/preview/onr_v1_200_encryption-breakthrough.png",
+        "thumb": "rendered/thumb/onr_v1_200_encryption-breakthrough.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_201_executive-extraction",
+      "sourceTitle": "Executive Extraction",
+      "localizedTitle": "Führungskräfte-Extraktion",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "black-ops",
+      "sourceProjectClasses": [
+        "black-ops"
+      ],
+      "sourceSubtypes": [
+        "black-ops"
+      ],
+      "localizedProjectClass": "Projekt - Schwarze Operation",
+      "advancementRequirement": 3,
+      "projectPoints": 1,
+      "sourceText": "Difficulty of Gray Ops agendas is reduced by 1.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Entwicklungskosten von Projekten der Klasse Graue Operation sind um 1 reduziert."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Entwicklungskosten von Projekten der Klasse Graue Operation sind um 1 reduziert.",
+      "artPrompt": "Cyberpunk executive extraction from a corporate tower, stealth VTOL silhouettes and encrypted escape corridors, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_201_executive-extraction.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_201_executive-extraction.svg",
+        "full": "rendered/full/onr_v1_201_executive-extraction.png",
+        "preview": "rendered/preview/onr_v1_201_executive-extraction.png",
+        "thumb": "rendered/thumb/onr_v1_201_executive-extraction.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_202_genetics-visionary-acquisition",
+      "sourceTitle": "Genetics-Visionary Acquisition",
+      "localizedTitle": "Übernahme von Genetics-Visionary",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "gray-ops",
+      "sourceProjectClasses": [
+        "gray-ops"
+      ],
+      "sourceSubtypes": [
+        "gray-ops"
+      ],
+      "localizedProjectClass": "Projekt - Graue Operation",
+      "advancementRequirement": 3,
+      "projectPoints": 1,
+      "sourceText": "Difficulty of Research agendas is reduced by 1.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Entwicklungskosten von Projekten der Klasse Forschung sind um 1 reduziert."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Entwicklungskosten von Projekten der Klasse Forschung sind um 1 reduziert.",
+      "artPrompt": "Corporate acquisition of a futuristic genetics company, clean biotech tower and merger network streams, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_202_genetics-visionary-acquisition.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_202_genetics-visionary-acquisition.svg",
+        "full": "rendered/full/onr_v1_202_genetics-visionary-acquisition.png",
+        "preview": "rendered/preview/onr_v1_202_genetics-visionary-acquisition.png",
+        "thumb": "rendered/thumb/onr_v1_202_genetics-visionary-acquisition.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_203_hostile-takeover",
+      "sourceTitle": "Hostile Takeover",
+      "localizedTitle": "Feindliche Übernahme",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "gray-ops",
+      "sourceProjectClasses": [
+        "gray-ops"
+      ],
+      "sourceSubtypes": [
+        "gray-ops"
+      ],
+      "localizedProjectClass": "Projekt - Graue Operation",
+      "advancementRequirement": 3,
+      "projectPoints": 1,
+      "sourceText": "Gain 5 credits when scored.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Erhalte "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 5
+            },
+            {
+              "type": "text",
+              "text": "."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Erhalte 5 Gridmark.",
+      "artPrompt": "Cyberpunk hostile takeover, corporate skyscraper seized by red acquisition lines and cold blue network grids, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_203_hostile-takeover.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_203_hostile-takeover.svg",
+        "full": "rendered/full/onr_v1_203_hostile-takeover.png",
+        "preview": "rendered/preview/onr_v1_203_hostile-takeover.png",
+        "thumb": "rendered/thumb/onr_v1_203_hostile-takeover.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_204_ice-transmutation",
+      "sourceTitle": "Ice Transmutation",
+      "localizedTitle": "ICE-Transmutation",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "research",
+      "sourceProjectClasses": [
+        "research"
+      ],
+      "sourceSubtypes": [
+        "research"
+      ],
+      "localizedProjectClass": "Projekt - Forschung",
+      "advancementRequirement": 5,
+      "projectPoints": 3,
+      "sourceText": "Choose a piece of rezzed ice when you score Ice Transmutation. That ice now has +1 strength, and each subroutine on it is repeated once. Treat this as if each repeated subroutine appeared immediately after the original subroutine.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Wähle ein aktiviertes ICE: Es erhält +1 Stärke; jede Subroutine darauf wird einmal direkt wiederholt."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Wähle ein aktiviertes ICE: Es erhält +1 Stärke; jede Subroutine darauf wird einmal direkt wiederholt.",
+      "artPrompt": "Cyberpunk ICE transmutation, crystalline code defense morphing into repeated subroutine prisms, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_204_ice-transmutation.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_204_ice-transmutation.svg",
+        "full": "rendered/full/onr_v1_204_ice-transmutation.png",
+        "preview": "rendered/preview/onr_v1_204_ice-transmutation.png",
+        "thumb": "rendered/thumb/onr_v1_204_ice-transmutation.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_205_main-office-relocation",
+      "sourceTitle": "Main-Office Relocation",
+      "localizedTitle": "Hauptquartier-Verlegung",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "gray-ops",
+      "sourceProjectClasses": [
+        "gray-ops"
+      ],
+      "sourceSubtypes": [
+        "gray-ops"
+      ],
+      "localizedProjectClass": "Projekt - Graue Operation",
+      "advancementRequirement": 4,
+      "projectPoints": 3,
+      "sourceText": "Hand size +2.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Handlimit +2."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Handlimit +2.",
+      "artPrompt": "Corporate headquarters relocation, mobile tower modules and secure transit corridors over a neon city, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_205_main-office-relocation.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_205_main-office-relocation.svg",
+        "full": "rendered/full/onr_v1_205_main-office-relocation.png",
+        "preview": "rendered/preview/onr_v1_205_main-office-relocation.png",
+        "thumb": "rendered/thumb/onr_v1_205_main-office-relocation.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_206_marine-arcology",
+      "sourceTitle": "Marine Arcology",
+      "localizedTitle": "Meeres-Arkologie",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "asset",
+      "sourceProjectClasses": [
+        "asset"
+      ],
+      "sourceSubtypes": [
+        "asset"
+      ],
+      "localizedProjectClass": "Projekt - Anlage",
+      "advancementRequirement": 3,
+      "projectPoints": 2,
+      "sourceText": "A, A: Gain [3].",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "symbol",
+              "symbol": "action",
+              "amount": 2
+            },
+            {
+              "type": "text",
+              "text": "Erhalte "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 3
+            },
+            {
+              "type": "text",
+              "text": "."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "2 Aktionen: Erhalte 3 Gridmark.",
+      "artPrompt": "Marine cyberpunk arcology above dark water, corporate habitat domes and undersea fiber-optic networks, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_206_marine-arcology.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_206_marine-arcology.svg",
+        "full": "rendered/full/onr_v1_206_marine-arcology.png",
+        "preview": "rendered/preview/onr_v1_206_marine-arcology.png",
+        "thumb": "rendered/thumb/onr_v1_206_marine-arcology.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "sourceTitle": "Netwatch Operations Office",
+      "localizedTitle": "Netwatch-Einsatzzentrale",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "asset",
+      "sourceProjectClasses": [
+        "asset"
+      ],
+      "sourceSubtypes": [
+        "asset"
+      ],
+      "localizedProjectClass": "Projekt - Anlage",
+      "advancementRequirement": 5,
+      "projectPoints": 2,
+      "sourceText": "[A]: Trace 2 - If trace is successful, give Runner a tag.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "symbol",
+              "symbol": "action",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": "Ortung 2 - bei Erfolg erhält der Runner 1 Markierung."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "1 Aktion Ortung 2 - bei Erfolg erhält der Runner 1 Markierung.",
+      "artPrompt": "Cyberpunk network operations office, trace consoles, signal triangulation beams and corporate security glass, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_207_netwatch-operations-office.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_207_netwatch-operations-office.svg",
+        "full": "rendered/full/onr_v1_207_netwatch-operations-office.png",
+        "preview": "rendered/preview/onr_v1_207_netwatch-operations-office.png",
+        "thumb": "rendered/thumb/onr_v1_207_netwatch-operations-office.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "sourceTitle": "On-Call Solo Team",
+      "localizedTitle": "Solo-Einsatzteam",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "asset",
+      "sourceProjectClasses": [
+        "asset"
+      ],
+      "sourceSubtypes": [
+        "asset"
+      ],
+      "localizedProjectClass": "Projekt - Anlage",
+      "advancementRequirement": 4,
+      "projectPoints": 3,
+      "sourceText": "[A]: Do 1 meat damage. Use this ability only if Runner is tagged.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "symbol",
+              "symbol": "action",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": "Verursache 1 Fleischschaden. Nur wenn der Runner markiert ist."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "1 Aktion Verursache 1 Fleischschaden. Nur wenn der Runner markiert ist.",
+      "artPrompt": "On-call cyberpunk solo response team in a corporate armory, tactical silhouettes and amber alert lighting, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_208_on-call-solo-team.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_208_on-call-solo-team.svg",
+        "full": "rendered/full/onr_v1_208_on-call-solo-team.png",
+        "preview": "rendered/preview/onr_v1_208_on-call-solo-team.png",
+        "thumb": "rendered/thumb/onr_v1_208_on-call-solo-team.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_209_political-coup",
+      "sourceTitle": "Political Coup",
+      "localizedTitle": "Politischer Putsch",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "black-ops",
+      "sourceProjectClasses": [
+        "black-ops"
+      ],
+      "sourceSubtypes": [
+        "black-ops"
+      ],
+      "localizedProjectClass": "Projekt - Schwarze Operation",
+      "advancementRequirement": 4,
+      "projectPoints": 2,
+      "sourceText": "Put 12 from the bank on Political Coup when you score it.\n[A]: Take 3 from Political Coup, if it has any bits.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Lege "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 12
+            },
+            {
+              "type": "text",
+              "text": " aus der Bank auf dieses Projekt."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "symbol",
+              "symbol": "action",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": "Nimm "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 3
+            },
+            {
+              "type": "text",
+              "text": " davon."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Lege 12 Gridmark aus der Bank auf dieses Projekt.\n1 Aktion Nimm 3 Gridmark davon.",
+      "artPrompt": "Cyberpunk political coup, corporate influence over a government chamber with neon red control lines, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_209_political-coup.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_209_political-coup.svg",
+        "full": "rendered/full/onr_v1_209_political-coup.png",
+        "preview": "rendered/preview/onr_v1_209_political-coup.png",
+        "thumb": "rendered/thumb/onr_v1_209_political-coup.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "sourceTitle": "Political Overthrow",
+      "localizedTitle": "Politischer Umsturz",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "black-ops",
+      "sourceProjectClasses": [
+        "black-ops"
+      ],
+      "sourceSubtypes": [
+        "black-ops"
+      ],
+      "localizedProjectClass": "Projekt - Schwarze Operation",
+      "advancementRequirement": 9,
+      "projectPoints": 6,
+      "sourceText": "A: Gain [3].",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "symbol",
+              "symbol": "action",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": "Erhalte "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 3
+            },
+            {
+              "type": "text",
+              "text": "."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "1 Aktion Erhalte 3 Gridmark.",
+      "artPrompt": "Cyberpunk political overthrow, shattered public authority architecture replaced by corporate network control, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_210_political-overthrow.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_210_political-overthrow.svg",
+        "full": "rendered/full/onr_v1_210_political-overthrow.png",
+        "preview": "rendered/preview/onr_v1_210_political-overthrow.png",
+        "thumb": "rendered/thumb/onr_v1_210_political-overthrow.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_211_polymer-breakthrough",
+      "sourceTitle": "Polymer Breakthrough",
+      "localizedTitle": "Polymer-Durchbruch",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "research",
+      "sourceProjectClasses": [
+        "research"
+      ],
+      "sourceSubtypes": [
+        "research"
+      ],
+      "localizedProjectClass": "Projekt - Forschung",
+      "advancementRequirement": 6,
+      "projectPoints": 3,
+      "sourceText": "Gain 1 at the start of each of your turns.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Erhalte zu Beginn jedes deiner Züge "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": "."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Erhalte zu Beginn jedes deiner Züge 1 Gridmark.",
+      "artPrompt": "Futuristic polymer breakthrough lab, smart material sheets flowing through corporate fabrication rigs, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_211_polymer-breakthrough.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_211_polymer-breakthrough.svg",
+        "full": "rendered/full/onr_v1_211_polymer-breakthrough.png",
+        "preview": "rendered/preview/onr_v1_211_polymer-breakthrough.png",
+        "thumb": "rendered/thumb/onr_v1_211_polymer-breakthrough.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_212_priority-requisition",
+      "sourceTitle": "Priority Requisition",
+      "localizedTitle": "Priorisierte Anforderung",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "gray-ops",
+      "sourceProjectClasses": [
+        "gray-ops"
+      ],
+      "sourceSubtypes": [
+        "gray-ops"
+      ],
+      "localizedProjectClass": "Projekt - Graue Operation",
+      "advancementRequirement": 5,
+      "projectPoints": 3,
+      "sourceText": "You may rez a piece of ice, at no cost, when you score Priority Requisition.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Du darfst 1 ICE kostenlos aktivieren."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Du darfst 1 ICE kostenlos aktivieren.",
+      "artPrompt": "Priority corporate requisition, heavy ICE hardware deployed from a secure logistics bay into a network corridor, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_212_priority-requisition.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_212_priority-requisition.svg",
+        "full": "rendered/full/onr_v1_212_priority-requisition.png",
+        "preview": "rendered/preview/onr_v1_212_priority-requisition.png",
+        "thumb": "rendered/thumb/onr_v1_212_priority-requisition.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_213_private-cybernet-police",
+      "sourceTitle": "Private Cybernet Police",
+      "localizedTitle": "Private Cybernet-Polizei",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "asset",
+      "sourceProjectClasses": [
+        "asset"
+      ],
+      "sourceSubtypes": [
+        "asset"
+      ],
+      "localizedProjectClass": "Projekt - Anlage",
+      "advancementRequirement": 7,
+      "projectPoints": 2,
+      "sourceText": "[A]: Trace 5 - If trace is successful, give Runner a tag.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "symbol",
+              "symbol": "action",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": "Ortung 5 - bei Erfolg erhält der Runner 1 Markierung."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "1 Aktion Ortung 5 - bei Erfolg erhält der Runner 1 Markierung.",
+      "artPrompt": "Private cybernet police unit, synthetic officers and trace drones in a corporate surveillance district, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_213_private-cybernet-police.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_213_private-cybernet-police.svg",
+        "full": "rendered/full/onr_v1_213_private-cybernet-police.png",
+        "preview": "rendered/preview/onr_v1_213_private-cybernet-police.png",
+        "thumb": "rendered/thumb/onr_v1_213_private-cybernet-police.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_214_project-babylon",
+      "sourceTitle": "Project Babylon",
+      "localizedTitle": "Projekt Babylon",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "black-ops",
+      "sourceProjectClasses": [
+        "black-ops"
+      ],
+      "sourceSubtypes": [
+        "black-ops"
+      ],
+      "localizedProjectClass": "Projekt - Schwarze Operation",
+      "advancementRequirement": 3,
+      "projectPoints": 1,
+      "sourceText": "Score 1 additional agenda point for every two advancement counters over Project Babylon's difficulty that are on Project Babylon when you score it.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Erhalte 1 zusätzlichen Projektpunkt für je 2 Advancement-Counter über der Entwicklungskosten-Schwelle."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Erhalte 1 zusätzlichen Projektpunkt für je 2 Advancement-Counter über der Entwicklungskosten-Schwelle.",
+      "artPrompt": "Project Babylon as a towering cyberpunk megastructure rising through network clouds and corporate scaffolds, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_214_project-babylon.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_214_project-babylon.svg",
+        "full": "rendered/full/onr_v1_214_project-babylon.png",
+        "preview": "rendered/preview/onr_v1_214_project-babylon.png",
+        "thumb": "rendered/thumb/onr_v1_214_project-babylon.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_215_security-net-optimization",
+      "sourceTitle": "Security Net Optimization",
+      "localizedTitle": "Sicherheitsnetz-Optimierung",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "gray-ops",
+      "sourceProjectClasses": [
+        "gray-ops"
+      ],
+      "sourceSubtypes": [
+        "gray-ops"
+      ],
+      "localizedProjectClass": "Projekt - Graue Operation",
+      "advancementRequirement": 5,
+      "projectPoints": 3,
+      "sourceText": "Choose a fort when scored. Ice installed on that fort gets +1 strength.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Wähle eine Datenfestung. ICE auf dieser Datenfestung erhält +1 Stärke."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Wähle eine Datenfestung. ICE auf dieser Datenfestung erhält +1 Stärke.",
+      "artPrompt": "Optimized security net over a corporate data fort, reinforced ICE lines and luminous defensive mesh, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_215_security-net-optimization.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_215_security-net-optimization.svg",
+        "full": "rendered/full/onr_v1_215_security-net-optimization.png",
+        "preview": "rendered/preview/onr_v1_215_security-net-optimization.png",
+        "thumb": "rendered/thumb/onr_v1_215_security-net-optimization.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_216_security-purge",
+      "sourceTitle": "Security Purge",
+      "localizedTitle": "Sicherheitssäuberung",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "gray-ops",
+      "sourceProjectClasses": [
+        "gray-ops"
+      ],
+      "sourceSubtypes": [
+        "gray-ops"
+      ],
+      "localizedProjectClass": "Projekt - Graue Operation",
+      "advancementRequirement": 3,
+      "projectPoints": 2,
+      "sourceText": "Show the top three cards of R&D to Runner when you score Security Purge. If any of those cards are ice, install and rez them, at no cost. Trash the rest of those cards.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Zeige dem Runner die obersten 3 F&E-Karten. Installiere und aktiviere ICE daraus kostenlos; wirf den Rest ab."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Zeige dem Runner die obersten 3 F&E-Karten. Installiere und aktiviere ICE daraus kostenlos; wirf den Rest ab.",
+      "artPrompt": "Cyberpunk security purge, corporate firewall sweep burning through a network archive and exposing ICE shapes, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_216_security-purge.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_216_security-purge.svg",
+        "full": "rendered/full/onr_v1_216_security-purge.png",
+        "preview": "rendered/preview/onr_v1_216_security-purge.png",
+        "thumb": "rendered/thumb/onr_v1_216_security-purge.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_217_strike-force-kali",
+      "sourceTitle": "Strike Force Kali",
+      "localizedTitle": "Einsatzgruppe Kali",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "asset",
+      "sourceProjectClasses": [
+        "asset"
+      ],
+      "sourceSubtypes": [
+        "asset"
+      ],
+      "localizedProjectClass": "Projekt - Anlage",
+      "advancementRequirement": 6,
+      "projectPoints": 3,
+      "sourceText": "[A]: Do 2 meat damage. Use this ability only if Runner is tagged.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "symbol",
+              "symbol": "action",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": "Verursache 2 Fleischschaden. Nur wenn der Runner markiert ist."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "1 Aktion Verursache 2 Fleischschaden. Nur wenn der Runner markiert ist.",
+      "artPrompt": "Cyberpunk strike force Kali, elite corporate tactical squad with crimson network targeting and no insignia text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_217_strike-force-kali.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_217_strike-force-kali.svg",
+        "full": "rendered/full/onr_v1_217_strike-force-kali.png",
+        "preview": "rendered/preview/onr_v1_217_strike-force-kali.png",
+        "thumb": "rendered/thumb/onr_v1_217_strike-force-kali.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_218_subsidiary-branch",
+      "sourceTitle": "Subsidiary Branch",
+      "localizedTitle": "Tochterfiliale",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "gray-ops",
+      "sourceProjectClasses": [
+        "gray-ops"
+      ],
+      "sourceSubtypes": [
+        "gray-ops"
+      ],
+      "localizedProjectClass": "Projekt - Graue Operation",
+      "advancementRequirement": 6,
+      "projectPoints": 1,
+      "sourceText": "Gain an action during each of your turns.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Erhalte in jedem deiner Züge 1 zusätzliche Aktion."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Erhalte in jedem deiner Züge 1 zusätzliche Aktion.",
+      "artPrompt": "Corporate subsidiary branch office expanding through a city network, modular tower nodes and workflow channels, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_218_subsidiary-branch.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_218_subsidiary-branch.svg",
+        "full": "rendered/full/onr_v1_218_subsidiary-branch.png",
+        "preview": "rendered/preview/onr_v1_218_subsidiary-branch.png",
+        "thumb": "rendered/thumb/onr_v1_218_subsidiary-branch.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_219_superior-net-barriers",
+      "sourceTitle": "Superior Net Barriers",
+      "localizedTitle": "Überlegene Netzbarrieren",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "research",
+      "sourceProjectClasses": [
+        "research"
+      ],
+      "sourceSubtypes": [
+        "research"
+      ],
+      "localizedProjectClass": "Projekt - Forschung",
+      "advancementRequirement": 6,
+      "projectPoints": 3,
+      "sourceText": "All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you wish. Then, gain 1 for each revealed or rezzed wall.",
+      "localizedRules": [
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Alle Barriere-ICE haben +1 Stärke."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "segments": [
+            {
+              "type": "text",
+              "text": "Zeige beliebig viele Barriere-ICE; erhalte "
+            },
+            {
+              "type": "symbol",
+              "symbol": "gridmark",
+              "amount": 1
+            },
+            {
+              "type": "text",
+              "text": " je gezeigtem oder aktiviertem Barriere-ICE."
+            }
+          ]
+        }
+      ],
+      "localizedRulesText": "Alle Barriere-ICE haben +1 Stärke.\nZeige beliebig viele Barriere-ICE; erhalte 1 Gridmark je gezeigtem oder aktiviertem Barriere-ICE.",
+      "artPrompt": "Superior cyberpunk net barriers, layered luminous wall ICE plates protecting a corporate server horizon, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_219_superior-net-barriers.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_219_superior-net-barriers.svg",
+        "full": "rendered/full/onr_v1_219_superior-net-barriers.png",
+        "preview": "rendered/preview/onr_v1_219_superior-net-barriers.png",
+        "thumb": "rendered/thumb/onr_v1_219_superior-net-barriers.png"
+      }
+    },
+    {
+      "cardId": "onr_v1_220_tycho-extension",
+      "sourceTitle": "Tycho Extension",
+      "localizedTitle": "Tycho-Erweiterung",
+      "frameId": "project-frame-v1",
+      "type": "project",
+      "displayOnly": true,
+      "sourceProjectClass": "asset",
+      "sourceProjectClasses": [
+        "asset"
+      ],
+      "sourceSubtypes": [
+        "asset"
+      ],
+      "localizedProjectClass": "Projekt - Anlage",
+      "advancementRequirement": 4,
+      "projectPoints": 4,
+      "sourceText": "No additional ability.",
+      "localizedRules": [],
+      "localizedRulesText": "",
+      "artPrompt": "Tycho space extension as a corporate lunar network facility, orbital infrastructure and violet-blue data beams, no readable text.",
+      "artGeneration": {
+        "method": "project-local generated or preserved raster draft",
+        "status": "present",
+        "constraints": [
+          "no official artwork",
+          "no official frame",
+          "no logos",
+          "no readable text in image"
+        ]
+      },
+      "art": "art/onr_v1_220_tycho-extension.png",
+      "rendered": {
+        "svg": "rendered/svg/onr_v1_220_tycho-extension.svg",
+        "full": "rendered/full/onr_v1_220_tycho-extension.png",
+        "preview": "rendered/preview/onr_v1_220_tycho-extension.png",
+        "thumb": "rendered/thumb/onr_v1_220_tycho-extension.png"
+      }
+    }
+  ]
+}

@@ -10,6 +10,8 @@ export type GameStanding = {
   summary: string;
   viewerMatchPoints: number;
   opponentMatchPoints: number;
+  viewerAgendaPoints: number;
+  opponentAgendaPoints: number;
 };
 
 const SERIES_WIN_MATCH_POINTS = 10;
@@ -44,15 +46,33 @@ export function resultFooterOutcomeLabel(winner: Winner, viewerSide: Side, oppon
   return winner === viewerSide ? "Deine Seite" : opponentName ?? "Gegenseite";
 }
 
+export function resultPlayerLabel(side: Side, viewerSide: Side, viewerName?: string, opponentName?: string): string {
+  const name = side === viewerSide ? viewerName : opponentName;
+  const fallback = side === viewerSide ? "Du" : "Gegenseite";
+  return normalizePlayerName(name) ?? fallback;
+}
+
+export function resultPlayerRoleLabel(side: Side, viewerSide: Side, viewerName?: string, opponentName?: string): string {
+  return `${resultPlayerLabel(side, viewerSide, viewerName, opponentName)} (${resultSideLabel(side)})`;
+}
+
+export function resultOutcomeHeadline(winner: Winner, viewerSide: Side, viewerName?: string, opponentName?: string): string {
+  if (winner === "draw") return "Das Spiel endet unentschieden.";
+  const winnerLabel = resultPlayerLabel(winner, viewerSide, viewerName, opponentName);
+  const verb = winner === viewerSide && winnerLabel.trim().toLocaleLowerCase("de-DE") === "du" ? "gewinnst" : "gewinnt";
+  return `${winnerLabel} ${verb} als ${resultSideLabel(winner)}.`;
+}
+
 export function resultOutcomeText(winner: Winner): string {
   if (winner === "runner") return "Runner gewinnt.";
   if (winner === "corp") return "Korp gewinnt.";
   return "Das Spiel endet unentschieden.";
 }
 
-export function seriesResultHeadline(series: ApiSeriesResultSummary, opponentName?: string): string | null {
+export function seriesResultHeadline(series: ApiSeriesResultSummary, opponentName?: string, viewerName?: string): string | null {
   if (series.status !== "finished") return null;
-  if (series.viewerSeriesOutcome === "won") return "Du hast die Match-Serie gewonnen.";
+  const viewerLabel = normalizePlayerName(viewerName);
+  if (series.viewerSeriesOutcome === "won") return viewerLabel ? `${viewerLabel} hat die Match-Serie gewonnen.` : "Du hast die Match-Serie gewonnen.";
   if (series.viewerSeriesOutcome === "lost") return `${opponentName ?? "Gegenseite"} hat die Match-Serie gewonnen.`;
   return "Die Match-Serie endet unentschieden.";
 }
@@ -85,29 +105,37 @@ export function resultExitButtonUi(hasNextSeriesGame: boolean): { label: string;
 
 export function gameStandingForResult(
   result: Pick<ApiGameResultSummary, "winner" | "runnerAgendaPoints" | "corpAgendaPoints">,
-  viewerSide: Side
+  viewerSide: Side,
+  viewerName?: string,
+  opponentName?: string
 ): GameStanding {
   const opponentSide = oppositeSide(viewerSide);
+  const viewerAgendaPoints = agendaPointsForResultSide(result, viewerSide);
+  const opponentAgendaPoints = agendaPointsForResultSide(result, opponentSide);
   if (result.winner === "draw") {
     return {
       summary: "Draw: beide Seiten erhalten ihre Agenda-Punkte.",
-      viewerMatchPoints: agendaPointsForResultSide(result, viewerSide),
-      opponentMatchPoints: agendaPointsForResultSide(result, opponentSide)
+      viewerMatchPoints: viewerAgendaPoints,
+      opponentMatchPoints: opponentAgendaPoints,
+      viewerAgendaPoints,
+      opponentAgendaPoints
     };
   }
 
   const winnerSide = result.winner;
   const loserSide = oppositeSide(winnerSide);
   const loserAgendaPoints = agendaPointsForResultSide(result, loserSide);
-  const winnerLabel = winnerSide === viewerSide ? "Du" : "Gegenseite";
-  const loserLabel = loserSide === viewerSide ? "Du" : "Gegenseite";
-  const viewerMatchPoints = winnerSide === viewerSide ? SERIES_WIN_MATCH_POINTS : agendaPointsForResultSide(result, viewerSide);
-  const opponentMatchPoints = winnerSide === opponentSide ? SERIES_WIN_MATCH_POINTS : agendaPointsForResultSide(result, opponentSide);
+  const winnerLabel = resultPlayerRoleLabel(winnerSide, viewerSide, viewerName, opponentName);
+  const loserLabel = resultPlayerRoleLabel(loserSide, viewerSide, viewerName, opponentName);
+  const viewerMatchPoints = winnerSide === viewerSide ? SERIES_WIN_MATCH_POINTS : viewerAgendaPoints;
+  const opponentMatchPoints = winnerSide === opponentSide ? SERIES_WIN_MATCH_POINTS : opponentAgendaPoints;
 
   return {
     summary: `${winnerLabel}: ${SERIES_WIN_MATCH_POINTS} Matchpunkte. ${loserLabel}: ${loserAgendaPoints} Agenda-Punkte aus ${agendaPointSourceLabel(loserSide)} Agendas.`,
     viewerMatchPoints,
-    opponentMatchPoints
+    opponentMatchPoints,
+    viewerAgendaPoints,
+    opponentAgendaPoints
   };
 }
 
@@ -121,4 +149,13 @@ function agendaPointSourceLabel(side: Side): string {
 
 function oppositeSide(side: Side): Side {
   return side === "runner" ? "corp" : "runner";
+}
+
+function resultSideLabel(side: Side): string {
+  return side === "corp" ? "Korp" : "Runner";
+}
+
+function normalizePlayerName(name: string | undefined): string | null {
+  const normalized = name?.trim();
+  return normalized ? normalized : null;
 }

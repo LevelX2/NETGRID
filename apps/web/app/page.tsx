@@ -53,7 +53,7 @@ import {
   Zap,
   ZoomIn
 } from "lucide-react";
-import { createContext, Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, Fragment, useContext, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ButtonHTMLAttributes, CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type {
@@ -147,6 +147,9 @@ import {
   groupRunnerRigCards,
   hasLegalAction,
   iceModifierBadgesForServer,
+  inactiveCardZoneAriaSuffix,
+  inactiveCardZoneBadgeLabel,
+  inactiveCardZoneClassName,
   orderedCardContextActions,
   parseCuePositionPreference,
   normalizeVisibleTerms,
@@ -177,7 +180,8 @@ import {
   type ActionContext,
   type CuePositionPreference,
   type CuePositionPreset,
-  type IceModifierBadgeView
+  type IceModifierBadgeView,
+  type InactiveCardZone
 } from "./action-board-ui";
 import { CardImage, isGeneratedCardImageId, localCardImageUrl } from "./card-image-service";
 import {
@@ -198,7 +202,7 @@ import {
 import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
-import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultOutcomeText, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, seriesResultHeadline, type ResultWinnerMotifKind } from "./result-modal-ui";
+import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultOutcomeHeadline, resultOutcomeText, resultPlayerLabel, resultPlayerRoleLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, seriesResultHeadline, type ResultWinnerMotifKind } from "./result-modal-ui";
 import {
   CATALOG_RARITY_FILTERS,
   catalogCardMatchesTypeFilters,
@@ -285,6 +289,7 @@ const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASS
 const CARD_TOOLTIP_HOVER_DELAY_OPTIONS = [300, 500, 750, 1000, 1250, 1500] as const;
 const CARD_TOOLTIP_HOVER_OPEN_DELAY_MS = 1000;
 const CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS = 120;
+const CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS = 450;
 const CARD_TOOLTIP_PIN_EVENT = "netgrid:card-tooltip-pin";
 const CARD_SCALE_PERCENT_MIN = 50;
 const CARD_SCALE_PERCENT_MAX = 170;
@@ -5666,6 +5671,7 @@ export default function Page() {
                             card={displayCard}
                             compact
                             displayMode={cardDisplayMode}
+                            inactiveZone="heap"
                             selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
                             actions={cardActionsFor(card)}
                             actionDisabled={Boolean(payload.winner) || connection !== "online"}
@@ -5894,6 +5900,7 @@ export default function Page() {
         <GameOverModal
           result={resultSummary}
           side={session.side}
+          playerName={session.displayName}
           onDismiss={() => {
             if (resultKey) setDismissedResultKey(resultKey);
           }}
@@ -6396,6 +6403,7 @@ function GameOverModal({
   onNewMatch,
   onNextSeriesGame,
   opponentName,
+  playerName,
   retentionProtected,
   onRetentionProtection,
   nextSeriesPending = false
@@ -6406,20 +6414,27 @@ function GameOverModal({
   onNewMatch(): void;
   onNextSeriesGame?: () => void;
   opponentName?: string;
+  playerName?: string;
   retentionProtected: boolean;
   onRetentionProtection(protectedValue: boolean): void;
   nextSeriesPending?: boolean;
 }) {
-  const outcomeText = resultOutcomeText(result.winner);
-  const seriesHeadline = result.series ? seriesResultHeadline(result.series, opponentName) : null;
+  const outcomeText = resultOutcomeHeadline(result.winner, side, playerName, opponentName);
+  const seriesHeadline = result.series ? seriesResultHeadline(result.series, opponentName, playerName) : null;
   const headlineText = seriesHeadline ?? outcomeText;
+  const lastGameOutcomeText = resultOutcomeText(result.winner);
   const reasonText = seriesHeadline
-    ? `Letztes Spiel: ${outcomeText} ${resultReasonLabel(result.reason)}`
+    ? `Letztes Spiel: ${lastGameOutcomeText} ${resultReasonLabel(result.reason)}`
     : resultReasonLabel(result.reason);
-  const seriesText = result.series ? seriesStatusText(result.series) : null;
-  const gameStanding = gameStandingForResult(result, side);
+  const gameStanding = gameStandingForResult(result, side, playerName, opponentName);
   const winnerMotif = resultWinnerMotifFor(result.winner);
   const winnerMotifUi = resultWinnerMotifUi(winnerMotif);
+  const opponentSideLabel = opponentSide(side);
+  const playerSeriesLabel = resultPlayerLabel(side, side, playerName, opponentName);
+  const opponentSeriesLabel = resultPlayerLabel(opponentSideLabel, side, playerName, opponentName);
+  const playerStandingLabel = resultPlayerRoleLabel(side, side, playerName, opponentName);
+  const opponentStandingLabel = resultPlayerRoleLabel(opponentSideLabel, side, playerName, opponentName);
+  const seriesText = result.series ? seriesStatusText(result.series, playerSeriesLabel, opponentSeriesLabel) : null;
   const retentionUi = retentionProtectionUi(retentionProtected);
   const exitUi = resultExitButtonUi(Boolean(onNextSeriesGame));
   const handleNewMatch = () => {
@@ -6450,8 +6465,8 @@ function GameOverModal({
               <small>{gameStanding.summary}</small>
             </div>
             <div className="gameStandingScore">
-              <span>Du {gameStanding.viewerMatchPoints} MP</span>
-              <span>Gegenseite {gameStanding.opponentMatchPoints} MP</span>
+              <span>{playerStandingLabel} {gameStanding.viewerMatchPoints} MP · {gameStanding.viewerAgendaPoints} Agenda</span>
+              <span>{opponentStandingLabel} {gameStanding.opponentMatchPoints} MP · {gameStanding.opponentAgendaPoints} Agenda</span>
             </div>
           </div>
         ) : null}
@@ -6472,13 +6487,13 @@ function GameOverModal({
               <small>{seriesText}</small>
             </div>
             <div className="seriesScore">
-              <span>Matchpunkte Du {result.series.viewerMatchPoints}</span>
-              <span>Matchpunkte Gegenseite {result.series.opponentMatchPoints}</span>
-              <span>Siege Du {result.series.viewerWins}</span>
-              <span>Siege Gegenseite {result.series.opponentWins}</span>
+              <span>Matchpunkte {playerStandingLabel} {result.series.viewerMatchPoints}</span>
+              <span>Matchpunkte {opponentStandingLabel} {result.series.opponentMatchPoints}</span>
+              <span>Siege {playerStandingLabel} {result.series.viewerWins}</span>
+              <span>Siege {opponentStandingLabel} {result.series.opponentWins}</span>
               <span>Draws {result.series.draws}</span>
-              <span>Agenda Du {result.series.viewerAgendaPoints}</span>
-              <span>Agenda Gegenseite {result.series.opponentAgendaPoints}</span>
+              <span>Agenda {playerStandingLabel} {result.series.viewerAgendaPoints}</span>
+              <span>Agenda {opponentStandingLabel} {result.series.opponentAgendaPoints}</span>
             </div>
           </div>
         ) : null}
@@ -6629,10 +6644,10 @@ function shouldForgetRecoveryStatus(status: MatchStatus): boolean {
   return status === "cancelled" || status === "abandoned" || status === "finished" || status === "forfeited";
 }
 
-function seriesStatusText(series: SeriesResultSummary): string {
+function seriesStatusText(series: SeriesResultSummary, viewerLabel = "Du", opponentLabel = "Gegenseite"): string {
   if (series.status === "finished") {
-    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "match_points" ? "Matchserie nach Matchpunkten entschieden: Du vorne." : "Matchserie abgeschlossen: Du vorne.";
-    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "match_points" ? "Matchserie nach Matchpunkten entschieden: Gegenseite vorne." : "Matchserie abgeschlossen: Gegenseite vorne.";
+    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "match_points" ? `Matchserie nach Matchpunkten entschieden: ${viewerLabel} vorne.` : `Matchserie abgeschlossen: ${viewerLabel} vorne.`;
+    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "match_points" ? `Matchserie nach Matchpunkten entschieden: ${opponentLabel} vorne.` : `Matchserie abgeschlossen: ${opponentLabel} vorne.`;
     return "Die Matchserie endet unentschieden.";
   }
   return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";
@@ -7553,6 +7568,7 @@ function RunnerOpponentZonesStrip({
                   card={displayCard}
                   compact
                   displayMode={displayMode}
+                  inactiveZone="heap"
                   selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
                   actions={cardActionsForHeap(card)}
                   actionDisabled={actionDisabled}
@@ -12342,6 +12358,7 @@ function ArchivesDualStackLane({
                     displayMode={displayMode}
                     hiddenSide="corp"
                     installedCorpCard={false}
+                    inactiveZone="archives"
                     selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
                     actions={cardActionsFor(card)}
                     actionDisabled={actionDisabled}
@@ -12402,6 +12419,7 @@ function ArchivesDualStackLane({
                         hiddenSide="corp"
                         installedCorpCard={false}
                         archiveFacedown
+                        {...(!showCorpFacedownBacks ? { inactiveZone: "archives" as const } : {})}
                         {...(showCorpFacedownBacks ? { forceCardBack: "corp" as Side } : {})}
                         selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
                         actions={cardActionsFor(card)}
@@ -12454,6 +12472,7 @@ function CardView({
   showScoreStateBadges = false,
   scoreStateBadges: explicitScoreStateBadges = [],
   archiveFacedown = false,
+  inactiveZone,
   forceCardBack,
   choiceSelected = false,
   choiceShortcut,
@@ -12483,6 +12502,7 @@ function CardView({
   showScoreStateBadges?: boolean;
   scoreStateBadges?: ScoredAgendaStateLine[];
   archiveFacedown?: boolean;
+  inactiveZone?: InactiveCardZone;
   forceCardBack?: Side;
   choiceSelected?: boolean;
   choiceShortcut?: CardChoiceShortcut;
@@ -12494,11 +12514,15 @@ function CardView({
 }) {
   const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
   const { tooltipPercent } = useCardScaleSettings();
+  const tooltipViewId = useId();
   const cardRef = useRef<HTMLButtonElement | null>(null);
   const tooltipOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tooltipCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipOutsideCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTouchTapRef = useRef(0);
   const lastTouchTooltipPinRef = useRef(0);
+  const tooltipPinnedVisibleRef = useRef(false);
+  const tooltipRef = useRef<HTMLSpanElement | null>(null);
   const [tooltipPositionStyle, setTooltipPositionStyle] = useState<CSSProperties>({});
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
   const [actionMenuPlacement, setActionMenuPlacement] = useState<"above" | "below">("below");
@@ -12512,6 +12536,9 @@ function CardView({
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
   const hiddenBackClass = forceCardBack ? ` hiddenBack ${forceCardBack}HiddenBack forcedCardBack` : !card.known && hiddenSide ? ` hiddenBack ${hiddenSide}HiddenBack` : "";
   const archiveFacedownClass = archiveFacedown ? " archiveFacedown" : "";
+  const inactiveZoneClass = inactiveZone ? ` inactiveZoneCard ${inactiveCardZoneClassName(inactiveZone)}` : "";
+  const inactiveZoneBadge = inactiveZone ? inactiveCardZoneBadgeLabel(inactiveZone) : null;
+  const inactiveZoneAriaSuffix = inactiveZone ? inactiveCardZoneAriaSuffix(inactiveZone) : "";
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const previewCard = preview ? cardWithoutDevelopmentCounters(card) : card;
@@ -12528,8 +12555,9 @@ function CardView({
   const canPinTooltip = tooltipAvailable && !onSelect;
   const tooltipEnabled = tooltipAvailable && (!suppressCardTooltip || tooltipPinnedVisible);
   const showTooltip = tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible || tooltipPinnedVisible);
-  const tooltipId = tooltipEnabled ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
-  const tooltipOwnerId = `card-tooltip-owner-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}`;
+  const tooltipDomId = `${card.instanceId}-${tooltipViewId}`.replace(/[^A-Za-z0-9_-]/g, "-");
+  const tooltipId = tooltipEnabled ? `card-tooltip-${tooltipDomId}` : undefined;
+  const tooltipOwnerId = `card-tooltip-owner-${tooltipDomId}`;
   const nativeTitle = tooltipEnabled || showCardActions || suppressCardTooltip ? undefined : tooltipText;
   const tooltipStats = card.known
     ? [
@@ -12565,11 +12593,11 @@ function CardView({
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${archiveFacedown ? ", verdeckt im Archiv" : ""}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}, ${advancementLabel}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${archiveFacedown ? ", verdeckt im Archiv" : ""}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
-      : `Verdeckte Karte${modifierBadgeAriaSuffix}`;
+      ? `Karte ${card.title}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
+      : `Verdeckte Karte${inactiveZoneAriaSuffix}${modifierBadgeAriaSuffix}`;
 
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
@@ -12596,6 +12624,18 @@ function CardView({
       clearTimeout(tooltipCloseTimerRef.current);
       tooltipCloseTimerRef.current = null;
     }
+  };
+
+  const clearTooltipOutsideCloseTimer = () => {
+    if (tooltipOutsideCloseTimerRef.current !== null) {
+      clearTimeout(tooltipOutsideCloseTimerRef.current);
+      tooltipOutsideCloseTimerRef.current = null;
+    }
+  };
+
+  const setPinnedTooltipVisible = (visible: boolean) => {
+    tooltipPinnedVisibleRef.current = visible;
+    setTooltipPinnedVisible(visible);
   };
 
   const updateOverlayPlacement = () => {
@@ -12665,12 +12705,17 @@ function CardView({
   };
 
   useEffect(() => {
+    tooltipPinnedVisibleRef.current = tooltipPinnedVisible;
+  }, [tooltipPinnedVisible]);
+
+  useEffect(() => {
     if (tooltipAvailable) return;
     clearTooltipOpenTimer();
     clearTooltipCloseTimer();
+    clearTooltipOutsideCloseTimer();
     setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
-    setTooltipPinnedVisible(false);
+    setPinnedTooltipVisible(false);
     setTooltipPositionStyle({});
   }, [tooltipAvailable]);
 
@@ -12678,25 +12723,25 @@ function CardView({
     if (!canPinTooltip) return;
     clearTooltipOpenTimer();
     clearTooltipCloseTimer();
+    clearTooltipOutsideCloseTimer();
     setSuppressCardTooltip(false);
     setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
-    setTooltipPinnedVisible((visible) => {
-      const nextVisible = !visible;
-      if (nextVisible) {
-        window.dispatchEvent(new CustomEvent(CARD_TOOLTIP_PIN_EVENT, { detail: { ownerId: tooltipOwnerId } }));
-      }
-      return nextVisible;
-    });
+    const nextVisible = !tooltipPinnedVisibleRef.current;
+    setPinnedTooltipVisible(nextVisible);
+    if (nextVisible) {
+      window.dispatchEvent(new CustomEvent(CARD_TOOLTIP_PIN_EVENT, { detail: { ownerId: tooltipOwnerId } }));
+    }
     updateOverlayPlacement();
   };
 
   const closePinnedTooltip = () => {
     clearTooltipOpenTimer();
     clearTooltipCloseTimer();
+    clearTooltipOutsideCloseTimer();
     setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
-    setTooltipPinnedVisible(false);
+    setPinnedTooltipVisible(false);
   };
 
   useEffect(() => {
@@ -12708,13 +12753,46 @@ function CardView({
     const closeWhenOtherTooltipPins = (event: Event) => {
       const ownerId = event instanceof CustomEvent ? (event.detail as { ownerId?: unknown } | null)?.ownerId : undefined;
       if (ownerId === tooltipOwnerId) return;
-      setTooltipPinnedVisible(false);
+      clearTooltipOpenTimer();
+      clearTooltipCloseTimer();
+      clearTooltipOutsideCloseTimer();
+      setPinnedTooltipVisible(false);
       setTooltipHoverVisible(false);
       setTooltipFocusVisible(false);
     };
     window.addEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipPins);
     return () => window.removeEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipPins);
   }, [tooltipOwnerId]);
+
+  useEffect(() => {
+    if (!tooltipPinnedVisible) return;
+    const closePinnedTooltipOnOutsideClick = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      const cardElement = cardRef.current;
+      const tooltipElement = tooltipRef.current;
+      if (cardElement?.contains(target) || tooltipElement?.contains(target)) return;
+      clearTooltipOutsideCloseTimer();
+      const targetElement = target instanceof Element ? target : target.parentElement;
+      const clickedCard = targetElement?.closest(
+        'button[data-testid="known-card"], button[data-testid="hidden-card"], button[data-testid="card-choice-card"]',
+      );
+      if (clickedCard) {
+        if (event.detail > 1) return;
+        tooltipOutsideCloseTimerRef.current = setTimeout(() => {
+          tooltipOutsideCloseTimerRef.current = null;
+          if (tooltipPinnedVisibleRef.current) closePinnedTooltip();
+        }, CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS);
+        return;
+      }
+      closePinnedTooltip();
+    };
+    window.addEventListener("click", closePinnedTooltipOnOutsideClick, true);
+    return () => {
+      window.removeEventListener("click", closePinnedTooltipOnOutsideClick, true);
+      clearTooltipOutsideCloseTimer();
+    };
+  }, [tooltipPinnedVisible]);
 
   useEffect(() => {
     if (!showCardActions) {
@@ -12728,12 +12806,14 @@ function CardView({
     () => () => {
       clearTooltipOpenTimer();
       clearTooltipCloseTimer();
+      clearTooltipOutsideCloseTimer();
     },
     []
   );
 
   const tooltipElement = showTooltip && tooltipId ? (
     <span
+      ref={tooltipRef}
       className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
       id={tooltipId}
       role="tooltip"
@@ -12828,7 +12908,7 @@ function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${archiveFacedownClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -12875,6 +12955,7 @@ function CardView({
         data-testid={onSelect ? "card-choice-card" : card.known ? "known-card" : "hidden-card"}
         data-known={card.known ? "true" : "false"}
         data-archive-facedown={archiveFacedown ? "true" : undefined}
+        data-inactive-zone={inactiveZone}
       >
         {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} decorative /> : null}
         {isHardwareImageCard ? (
@@ -12888,6 +12969,12 @@ function CardView({
         ) : null}
         {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
         {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
+        {inactiveZoneBadge ? (
+          <span className="cardInactiveZoneBadge" aria-hidden="true">
+            {inactiveZone === "heap" ? <Trash2 size={10} strokeWidth={2.4} /> : <Clipboard size={10} strokeWidth={2.4} />}
+            <span>{inactiveZoneBadge}</span>
+          </span>
+        ) : null}
         {modifierBadges.length > 0 ? <IceModifierBadges badges={modifierBadges} /> : null}
         {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
         {showRulesPreview ? (

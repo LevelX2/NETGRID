@@ -5620,6 +5620,88 @@ select {
   background: var(--card-hidden-art-bg);
 }
 
+.card.inactiveZoneCard {
+  isolation: isolate;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--muted), var(--line) 42%);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card-bg), #071016 8%) 0%, color-mix(in srgb, var(--card-bg), #030608 18%) 100%);
+}
+
+.card.inactiveZoneCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 50% 45%, rgb(255 255 255 / 0.08) 0, transparent 34%),
+    linear-gradient(180deg, rgb(3 6 9 / 0.22) 0%, rgb(3 6 9 / 0.48) 100%);
+  pointer-events: none;
+}
+
+.card.inactiveZoneHeap {
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 42%);
+}
+
+.card.inactiveZoneArchives {
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 42%);
+}
+
+.card.inactiveZoneCard .cardArt,
+.card.inactiveZoneCard .cardTitle,
+.card.inactiveZoneCard .cardMeta,
+.card.inactiveZoneCard .cardRulesPreview,
+.card.inactiveZoneCard .hardwareImageOverlay,
+.card.inactiveZoneCard .operationImageOverlay {
+  position: relative;
+  z-index: 4;
+}
+
+.card.inactiveZoneCard .cardImage,
+.card.inactiveZoneCard .hardwareImageOverlay {
+  filter: saturate(0.78) brightness(0.82);
+}
+
+.cardInactiveZoneBadge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  max-width: calc(100% - 16px);
+  min-height: 26px;
+  padding: 5px 8px;
+  border: 1px solid rgb(255 255 255 / 0.22);
+  border-radius: 999px;
+  background: rgb(10 15 20 / 0.42);
+  color: color-mix(in srgb, var(--text), white 8%);
+  box-shadow:
+    0 8px 18px rgb(0 0 0 / 0.34),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.48);
+  text-transform: uppercase;
+  transform: translate(-50%, -50%);
+}
+
+.cardInactiveZoneBadge svg {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+
+.card.hiddenBack.inactiveZoneCard::after,
+.card.hiddenBack .cardInactiveZoneBadge {
+  display: none;
+}
+
 .card.unrezzedInstalled {
   position: relative;
   isolation: isolate;
@@ -8704,7 +8786,7 @@ select,
 
 .matchResourceStrip {
   display: none;
-  position: fixed;
+  position: sticky;
   top: var(--resource-strip-top, 0px);
   left: 0;
   right: 0;

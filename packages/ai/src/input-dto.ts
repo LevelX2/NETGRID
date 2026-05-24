@@ -125,6 +125,20 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "hiddenRunnerResourceInstall",
   "hiddenRunnerResourceRevealed",
   "hiddenZoneAction",
+  "privateLookZone",
+  "privateLookCount",
+  "knownHqCardCount",
+  "knownRndCardCount",
+  "knownRndTopDefinitionId",
+  "accessedCardPositionKey",
+  "accessedArea",
+  "accessedIndex",
+  "exposedCardDefinitionId",
+  "exposedServerId",
+  "exposedServerLabel",
+  "exposedArea",
+  "exposedIndex",
+  "exposedPositionKey",
   "discardResolved",
   "revealKind",
   "abilityFamily",
@@ -170,6 +184,14 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "trashCostPaid",
   "agendaPointCost",
   "agendaPointCostPaid",
+  "accessTrashBaseCost",
+  "accessTrashCostModifier",
+  "accessTrashTotalCost",
+  "scatterShotRecurringCreditsAvailable",
+  "scatterShotRecurringCreditsSpent",
+  "poltergeistRecurringCreditsAvailable",
+  "poltergeistRecurringCreditsSpent",
+  "runnerCreditsSpent",
   "temporaryCreditsProvided",
   "temporaryCreditsSpent",
   "temporaryCreditsRemaining",
@@ -188,6 +210,8 @@ const PUBLIC_PAYLOAD_STRING_ARRAY_KEYS = new Set([
   "returnedCardDefinitionIds",
   "revealedCardDefinitionIds",
   "exposedCardDefinitionIds",
+  "knownHqDefinitionIds",
+  "knownRndDefinitionIds",
 ]);
 
 const PUBLIC_AMOUNT_KEYS = new Set([
@@ -437,6 +461,66 @@ function sanitizeVisibleEffectiveIceRunQuote(
       ...(subroutine.sourceTitle ? { sourceTitle: subroutine.sourceTitle } : {}),
       ...(subroutine.dynamicSourceKind
         ? { dynamicSourceKind: subroutine.dynamicSourceKind }
+        : {}),
+      ...(subroutine.unbrokenRunEffect
+        ? {
+            unbrokenRunEffect: {
+              ...(subroutine.unbrokenRunEffect
+                .addsFutureEndTheRunSubroutines !== undefined
+                ? {
+                    addsFutureEndTheRunSubroutines:
+                      subroutine.unbrokenRunEffect
+                        .addsFutureEndTheRunSubroutines,
+                  }
+                : {}),
+              ...(subroutine.unbrokenRunEffect
+                .increasesFutureBreakCostPerSubroutine !== undefined
+                ? {
+                    increasesFutureBreakCostPerSubroutine:
+                      subroutine.unbrokenRunEffect
+                        .increasesFutureBreakCostPerSubroutine,
+                  }
+                : {}),
+              ...(subroutine.unbrokenRunEffect.increasesFutureIceStrength !==
+              undefined
+                ? {
+                    increasesFutureIceStrength:
+                      subroutine.unbrokenRunEffect.increasesFutureIceStrength,
+                  }
+                : {}),
+              ...(subroutine.unbrokenRunEffect.preventsFutureBreaking !==
+              undefined
+                ? {
+                    preventsFutureBreaking:
+                      subroutine.unbrokenRunEffect.preventsFutureBreaking,
+                  }
+                : {}),
+              ...(subroutine.unbrokenRunEffect.addsFutureEncounterCost !==
+              undefined
+                ? {
+                    addsFutureEncounterCost:
+                      subroutine.unbrokenRunEffect.addsFutureEncounterCost,
+                  }
+                : {}),
+              ...(subroutine.unbrokenRunEffect.preventsJackOut !== undefined
+                ? { preventsJackOut: subroutine.unbrokenRunEffect.preventsJackOut }
+                : {}),
+              ...(subroutine.unbrokenRunEffect.causesDamageOrProgramTrash !==
+              undefined
+                ? {
+                    causesDamageOrProgramTrash:
+                      subroutine.unbrokenRunEffect.causesDamageOrProgramTrash,
+                  }
+                : {}),
+              ...(subroutine.unbrokenRunEffect.createsRunLockOrActionTax !==
+              undefined
+                ? {
+                    createsRunLockOrActionTax:
+                      subroutine.unbrokenRunEffect.createsRunLockOrActionTax,
+                  }
+                : {}),
+            },
+          }
         : {}),
     })),
     ...(quote.breakSubroutineAdditionalCostPerSubroutine !== undefined

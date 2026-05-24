@@ -10,6 +10,20 @@ export type ActionContext = {
   label: string;
 };
 
+export type InactiveCardZone = "heap" | "archives";
+
+export function inactiveCardZoneBadgeLabel(zone: InactiveCardZone): string {
+  return zone === "heap" ? "Heap" : "Archiv";
+}
+
+export function inactiveCardZoneAriaSuffix(zone: InactiveCardZone): string {
+  return zone === "heap" ? ", im Heap abgelegt" : ", im Archiv abgelegt";
+}
+
+export function inactiveCardZoneClassName(zone: InactiveCardZone): string {
+  return zone === "heap" ? "inactiveZoneHeap" : "inactiveZoneArchives";
+}
+
 export type CuePositionPreset = "top-right" | "top-left" | "bottom-right" | "bottom-left" | "center";
 
 export type CuePositionPreference =
@@ -833,6 +847,7 @@ export function hasLegalAction(actions: LegalAction[], type: LegalAction["type"]
 
 export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
   if (choice.kind !== "select_cards") return false;
+  if (choice.source.startsWith("v1922.corp_archives_to_hq")) return true;
   if (choice.cardSearchPresentation || choice.stackSearchResolution || choice.source.includes("search_stack")) return true;
   if (choice.options.some((option) => option.card)) return true;
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
@@ -850,6 +865,7 @@ export function shouldUseFieldCardChoice(
 ): boolean {
   if (choice.kind !== "select_cards") return false;
   if (choice.source === "discard_phase") return false;
+  if (choice.source.startsWith("v1922.corp_archives_to_hq")) return false;
   if (choice.cardSearchPresentation || choice.stackSearchResolution || choice.source.includes("search_stack")) return false;
   const selectableOptions = choice.options.filter((option) => option.selectable !== false);
   if (selectableOptions.length === 0) return false;

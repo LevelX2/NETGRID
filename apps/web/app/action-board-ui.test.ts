@@ -35,6 +35,9 @@ import {
   currentRunTimelineStep,
   groupRunnerRigCards,
   iceModifierBadgesForServer,
+  inactiveCardZoneAriaSuffix,
+  inactiveCardZoneBadgeLabel,
+  inactiveCardZoneClassName,
   latestRetainableAccessRevealEvent,
   orderedCardContextActions,
   parseCuePositionPreference,
@@ -96,6 +99,16 @@ describe("V1.0.5 action board UI helpers", () => {
     );
 
     expect(actionButtonLabel(action)).toBe("Olivia Salazar: Crystal Wall für 2 Credits rezzen");
+  });
+
+  it("labels inactive heap and archive cards distinctly from installed card state", () => {
+    expect(inactiveCardZoneBadgeLabel("heap")).toBe("Heap");
+    expect(inactiveCardZoneBadgeLabel("archives")).toBe("Archiv");
+    expect(inactiveCardZoneAriaSuffix("heap")).toBe(", im Heap abgelegt");
+    expect(inactiveCardZoneAriaSuffix("archives")).toBe(", im Archiv abgelegt");
+    expect(inactiveCardZoneClassName("heap")).toBe("inactiveZoneHeap");
+    expect(inactiveCardZoneClassName("archives")).toBe("inactiveZoneArchives");
+    expect(inactiveCardZoneClassName("heap")).not.toBe("unrezzedInstalled");
   });
 
   it("only offers automatic end turn when end turn is the sole remaining own action", () => {
@@ -525,11 +538,20 @@ describe("V1.0.5 action board UI helpers", () => {
         showNonMatchingCards: true
       }
     };
+    const offSiteBackupsChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...exactSingleChoice,
+      choiceId: "v1922_corp_archives_to_hq_7",
+      side: "corp",
+      source: "v1922.corp_archives_to_hq:onr_v1_296_off-site-backups_1:7",
+      prompt: "Archives-Karte nach HQ nehmen",
+      options: [{ id: "card_archives_1", label: "Archived Agenda", value: "corp_archives_1" }]
+    };
 
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
     expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(heapSearchChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(offSiteBackupsChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(organDonorChoice)).toBe(false);
     expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(heapSearchChoice)).toBe(true);
@@ -586,6 +608,22 @@ describe("V1.0.5 action board UI helpers", () => {
       minSelections: 1,
       maxSelections: 1
     };
+    const offSiteArchiveChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...fieldChoice,
+      choiceId: "v1922_corp_archives_to_hq_7",
+      side: "corp",
+      source: "v1922.corp_archives_to_hq:onr_v1_296_off-site-backups_1:7",
+      prompt: "Archives-Karte nach HQ nehmen",
+      options: [{ id: "card_archived_agenda", label: "Archived Agenda", value: "corp_archive_1" }],
+      minSelections: 1,
+      maxSelections: 1
+    };
+    const corpArchivesBoard = view("corp", {
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "archives", label: "Archive", ice: [], root: [card("corp_archive_1", "Archived Agenda", "agenda", false)] }
+      ]
+    });
 
     expect(shouldUseFieldCardChoice(fieldChoice, board)).toBe(true);
     expect(shouldUseFieldCardChoice(runnerRigChoice, board)).toBe(true);
@@ -602,6 +640,8 @@ describe("V1.0.5 action board UI helpers", () => {
     });
     expect(shouldUseFieldCardChoice(handChoice, board)).toBe(false);
     expect(shouldUseFieldCardChoice(stackChoice, board)).toBe(false);
+    expect(shouldUseFieldCardChoice(offSiteArchiveChoice, corpArchivesBoard)).toBe(false);
+    expect(shouldUseCardChoicePanel(offSiteArchiveChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(stackChoice)).toBe(true);
   });
 
