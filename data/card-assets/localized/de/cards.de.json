@@ -1560,12 +1560,12 @@
           "segments": [
             {
               "type": "text",
-              "text": "Erhalte 1 zusätzlichen Projektpunkt für je 2 Advancement-Counter über der Entwicklungskosten-Schwelle."
+              "text": "Erhalte 1 zusätzlichen Projektpunkt je 2 Entwicklungszähler über der Schwelle."
             }
           ]
         }
       ],
-      "localizedRulesText": "Erhalte 1 zusätzlichen Projektpunkt für je 2 Advancement-Counter über der Entwicklungskosten-Schwelle.",
+      "localizedRulesText": "Erhalte 1 zusätzlichen Projektpunkt je 2 Entwicklungszähler über der Schwelle.",
       "artPrompt": "Project Babylon as a towering cyberpunk megastructure rising through network clouds and corporate scaffolds, no readable text.",
       "artGeneration": {
         "method": "project-local generated or preserved raster draft",

@@ -70,6 +70,25 @@ function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
   );
 }
 
+function isRunnerStackArrangeChoice(choice: ChoiceRequest): boolean {
+  return (
+    choice.kind === "select_cards" &&
+    (choice.source.startsWith("v098.arrange_stack_top2") ||
+      choice.source.startsWith("v1911.arrange_stack_top2") ||
+      choice.source.startsWith("v1922.runner_stack_top5_choose_one_arrange_rest") ||
+      choice.source.startsWith("p3_37.runner_stack_top5_choose_one_arrange_rest"))
+  );
+}
+
+function isCorpRdArrangeChoice(choice: ChoiceRequest): boolean {
+  return (
+    choice.kind === "select_cards" &&
+    (choice.source.startsWith("v1911.corp_rd_arrange_top2") ||
+      choice.source.startsWith("v1917.corp_rd_arrange_top2") ||
+      choice.source.startsWith("v1922.corp_rd_arrange_top5"))
+  );
+}
+
 function stackSearchResolutionForChoice(
   choice: ChoiceRequest,
 ): ChoiceRequest["stackSearchResolution"] | undefined {
@@ -166,6 +185,8 @@ export function visibleChoiceCardForOption(
       choice.stackSearchResolution ?? stackSearchResolutionForChoice(choice),
     );
   const isStackChoice = isRunnerStackSearchChoice(choice);
+  const isRunnerArrangeChoice = isRunnerStackArrangeChoice(choice);
+  const isCorpArrangeChoice = isCorpRdArrangeChoice(choice);
   const isSneakHeapChoice =
     choice.source.startsWith("v1911.sneak_preview_heap_install") ||
     (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
@@ -179,6 +200,8 @@ export function visibleChoiceCardForOption(
   if (
     !cardSearchPresentation &&
     !isStackChoice &&
+    !isRunnerArrangeChoice &&
+    !isCorpArrangeChoice &&
     !isSneakHeapChoice &&
     !isPriorityRequisitionChoice &&
     !isP333PrivateLookChoice
@@ -203,20 +226,28 @@ export function visibleChoiceCardForOption(
     return visibleOwnCard(state, cardId);
   }
   if (
-    (cardSearchPresentation?.sourceZone === "stack" || isStackChoice) &&
+    (cardSearchPresentation?.sourceZone === "stack" ||
+      isStackChoice ||
+      isRunnerArrangeChoice) &&
     !state.runner.stack.includes(cardId)
   )
     return undefined;
+  if (isCorpArrangeChoice && !state.corp.rd.includes(cardId)) return undefined;
   if (
     (cardSearchPresentation?.sourceZone === "heap" || isSneakHeapChoice) &&
     !state.runner.heap.includes(cardId)
   )
     return undefined;
   const instance = state.cardInstances[cardId];
+  if (isCorpArrangeChoice) {
+    if (!instance || instance.owner !== "corp") return undefined;
+    return visibleOwnCard(state, cardId);
+  }
   if (!instance || instance.owner !== "runner") return undefined;
   if (
     !cardSearchPresentation &&
     !isStackChoice &&
+    !isRunnerArrangeChoice &&
     definitionFor(state, cardId).type !== "program"
   )
     return undefined;

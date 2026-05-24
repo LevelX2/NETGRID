@@ -35,6 +35,8 @@ describe("run window layering", () => {
     expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("display: grid");
     expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("minmax(190px, 1fr)");
     expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot + .cardChoiceOptionSlot")).toContain("margin-left: 0");
+    expect(selectorBlock(".cardChoiceOrderBadge")).toContain("position: absolute");
+    expect(selectorBlock(".cardChoiceOrderBadge")).toContain("pointer-events: none");
   });
 
   it("keeps access reveal cards primary with compact round actions", () => {

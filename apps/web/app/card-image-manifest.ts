@@ -1,4 +1,7 @@
+import localizedDeCardSkin from "../../../data/card-assets/localized/de/cards.de.json";
+
 export const LOCAL_CARD_IMAGE_VERSION = "2026-05-23-local-onr-assets-3";
+export const LOCALIZED_DE_CARD_IMAGE_VERSION = "2026-05-24-localized-de-assets-1";
 
 export const GENERATED_CARD_IMAGES: Record<string, string> = {
   corp_identity_001: "generated-identities/corp_identity_001.png",
@@ -40,7 +43,10 @@ export const GENERATED_CARD_IMAGES: Record<string, string> = {
   v094_neural_sentry_ice: "generated-ice/v094_neural_sentry_ice.png"
 };
 
+export const LOCALIZED_DE_CARD_IMAGES: Record<string, string> = localizedDeCardImages();
+
 const GENERATED_CARD_IMAGE_IDS = new Set(Object.keys(GENERATED_CARD_IMAGES));
+const LOCALIZED_DE_CARD_IMAGE_IDS = new Set(Object.keys(LOCALIZED_DE_CARD_IMAGES));
 
 export function isGeneratedCardImageId(cardId: string | undefined | null): cardId is string {
   return typeof cardId === "string" && GENERATED_CARD_IMAGE_IDS.has(cardId);
@@ -48,4 +54,33 @@ export function isGeneratedCardImageId(cardId: string | undefined | null): cardI
 
 export function isLocalOnrCardId(cardId: string | undefined | null): cardId is string {
   return typeof cardId === "string" && (cardId.startsWith("onr_v1_") || cardId.startsWith("onr_proteus_") || cardId.startsWith("onr_classic_"));
+}
+
+export function isLocalizedDeCardImageId(cardId: string | undefined | null): cardId is string {
+  return typeof cardId === "string" && LOCALIZED_DE_CARD_IMAGE_IDS.has(cardId);
+}
+
+export function localizedDeCardImagePath(cardId: string | undefined | null): string | undefined {
+  if (!isLocalizedDeCardImageId(cardId)) return undefined;
+  return LOCALIZED_DE_CARD_IMAGES[cardId];
+}
+
+type LocalizedDeCardSkin = {
+  cards?: Array<{
+    cardId?: unknown;
+    displayOnly?: unknown;
+    rendered?: {
+      full?: unknown;
+    };
+  }>;
+};
+
+function localizedDeCardImages(): Record<string, string> {
+  const skin = localizedDeCardSkin as LocalizedDeCardSkin;
+  const entries: Array<[string, string]> = [];
+  for (const card of skin.cards ?? []) {
+    if (typeof card.cardId !== "string" || card.displayOnly !== true || typeof card.rendered?.full !== "string") continue;
+    entries.push([card.cardId, card.rendered.full]);
+  }
+  return Object.fromEntries(entries);
 }
