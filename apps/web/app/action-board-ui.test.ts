@@ -19,6 +19,7 @@ import {
   automaticEndTurnAction,
   breachProgressLabel,
   cardCreditCounterVisual,
+  cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   counterDisplayBadgeView,
   counterDisplaysForRendering,
@@ -546,15 +547,41 @@ describe("V1.0.5 action board UI helpers", () => {
       prompt: "Archives-Karte nach HQ nehmen",
       options: [{ id: "card_archives_1", label: "Archived Agenda", value: "corp_archives_1" }]
     };
+    const stackTopFiveChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...organDonorChoice,
+      choiceId: "p3_37_runner_stack_top5_7",
+      source: "p3_37.runner_stack_top5_choose_one_arrange_rest:source:7",
+      prompt: "Stack-Spitze wählen und anordnen",
+      options: [
+        {
+          id: "card_stack_a",
+          label: "Stack A",
+          value: "stack_a",
+          card: card("stack_a", "Stack A", "program")
+        },
+        {
+          id: "card_stack_b",
+          label: "Stack B",
+          value: "stack_b",
+          card: card("stack_b", "Stack B", "event")
+        }
+      ],
+      minSelections: 2,
+      maxSelections: 2
+    };
 
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
     expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(heapSearchChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(offSiteBackupsChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(stackTopFiveChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(organDonorChoice)).toBe(false);
     expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(heapSearchChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(stackTopFiveChoice)).toBe(true);
+    expect(cardChoiceUsesOrderedSelection(stackTopFiveChoice)).toBe(true);
+    expect(cardChoiceUsesOrderedSelection(organDonorChoice)).toBe(false);
   });
 
   it("detects field-card choices for installed board cards only", () => {

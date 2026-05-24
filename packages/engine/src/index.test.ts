@@ -26729,6 +26729,22 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"stack"|"grip"|"cardInstances"|"privatePayload"/,
     );
+    const runnerChoiceView = getPlayerView(state, "runner");
+    const corpChoiceView = getPlayerView(state, "corp");
+    const runnerChoiceCards =
+      runnerChoiceView.pendingChoice?.options.map((option) => option.card) ??
+      [];
+    expect(runnerChoiceView.pendingChoice?.choiceId).toBe(
+      state.pendingChoice!.choiceId,
+    );
+    expect(runnerChoiceCards).toHaveLength(5);
+    expect(
+      runnerChoiceCards.every(
+        (card) => card?.known === true && Boolean(card.rulesText),
+      ),
+    ).toBe(true);
+    expect(corpChoiceView.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(corpChoiceView)).not.toContain(topFive[0]);
 
     const pendingChoice = state.pendingChoice;
     expect(pendingChoice).toBeDefined();

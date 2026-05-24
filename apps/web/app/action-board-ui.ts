@@ -848,6 +848,7 @@ export function hasLegalAction(actions: LegalAction[], type: LegalAction["type"]
 export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
   if (choice.kind !== "select_cards") return false;
   if (choice.source.startsWith("v1922.corp_archives_to_hq")) return true;
+  if (isHiddenZoneReadableCardChoiceSource(choice.source)) return true;
   if (choice.cardSearchPresentation || choice.stackSearchResolution || choice.source.includes("search_stack")) return true;
   if (choice.options.some((option) => option.card)) return true;
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
@@ -856,7 +857,47 @@ export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pending
 }
 
 export function cardChoiceUsesReadableCards(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
-  return choice.kind === "select_cards" && Boolean(choice.cardSearchPresentation || choice.stackSearchResolution || choice.source.includes("search_stack"));
+  return (
+    choice.kind === "select_cards" &&
+    Boolean(
+      choice.cardSearchPresentation ||
+        choice.stackSearchResolution ||
+        choice.source.includes("search_stack") ||
+        isHiddenZoneReadableCardChoiceSource(choice.source) ||
+        choice.options.some((option) => option.card),
+    )
+  );
+}
+
+export function cardChoiceUsesOrderedSelection(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
+  const minSelections = Math.max(0, Math.floor(choice.minSelections));
+  const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
+  return (
+    choice.kind === "select_cards" &&
+    minSelections === maxSelections &&
+    maxSelections > 1 &&
+    isHiddenZoneOrderedCardChoiceSource(choice.source)
+  );
+}
+
+function isHiddenZoneReadableCardChoiceSource(source: string): boolean {
+  return (
+    source.startsWith("v098.arrange_stack_top2") ||
+    source.startsWith("v1911.arrange_stack_top2") ||
+    source.startsWith("v1911.corp_rd_arrange_top2") ||
+    source.startsWith("v1917.corp_rd_arrange_top2") ||
+    source.startsWith("v1922.corp_rd_arrange_top5") ||
+    source.startsWith("v1922.runner_stack_top5_choose_one_arrange_rest") ||
+    source.startsWith("p3_37.runner_stack_top5_choose_one_arrange_rest")
+  );
+}
+
+function isHiddenZoneOrderedCardChoiceSource(source: string): boolean {
+  return (
+    isHiddenZoneReadableCardChoiceSource(source) ||
+    source.startsWith("p3_58.fortress_respecification") ||
+    source.startsWith("p3_58.new_blood_reorder")
+  );
 }
 
 export function shouldUseFieldCardChoice(
