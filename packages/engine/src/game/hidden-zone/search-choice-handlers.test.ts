@@ -9,9 +9,9 @@ import type {
 import { describe, expect, it } from "vitest";
 import {
   handleHiddenZoneSearchChoice,
-  handleMysteryBoxTopFiveProgramInstall,
   type HiddenZoneSearchChoiceHandlerHost,
 } from "./search-choice-handlers";
+import { handleMysteryBoxTopFiveProgramInstallActivation } from "./search-choice-activations";
 
 const programId = "program_1" as CardInstanceId;
 const secondProgramId = "program_2" as CardInstanceId;
@@ -379,7 +379,7 @@ describe("hidden-zone search choice handlers", () => {
     );
     testHost.legalAction.payload = { cardId: sourceCardId };
 
-    const result = handleMysteryBoxTopFiveProgramInstall(testHost);
+    const result = handleMysteryBoxTopFiveProgramInstallActivation(testHost);
 
     expect(result).toMatchObject({
       handled: true,

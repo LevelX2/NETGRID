@@ -7,16 +7,11 @@ import type {
   LegalAction,
   PlayerAction,
 } from "@netgrid/shared";
-import {
-  buildMysteryBoxInstallChoice,
-  buildSneakPreviewProgramChoice,
-} from "./search-choice-builders";
+import { buildSneakPreviewProgramChoice } from "./search-choice-builders";
 import {
   buildSelfModifyingCodeMemoryDeferredPayload,
-  buildMysteryBoxNoInstallResolvedPayload,
   buildMysteryBoxSearchInstallResolvedPayload,
   buildSneakPreviewSearchInstallResolvedPayload,
-  createMysteryBoxNoInstallIntent,
   resolveMysteryBoxSearchInstallIntent,
   buildSelfModifyingCodeResolvedPayload,
   resolveSneakPreviewSearchInstallIntent,
@@ -43,7 +38,6 @@ import {
   applyMysteryBoxOncePerRunPlan,
   applyMysteryBoxSourceTrashPlan,
   applySneakPreviewTemporaryReturnPlan,
-  createMysteryBoxOncePerRunPlan,
   createMysteryBoxPostInstallSideEffectPlan,
   createSneakPreviewPostInstallSideEffectPlan,
 } from "./post-install-side-effects";
@@ -245,79 +239,6 @@ export function handleMysteryBoxChoice(
     shufflePerformed: execution.shuffleNeeded,
     installedCardId: execution.installedProgramId,
     sourceTrashCardIds: postInstall.sourceCardId ? [postInstall.sourceCardId] : [],
-  };
-}
-
-export function handleMysteryBoxTopFiveProgramInstall(
-  host: HiddenZoneSearchActivationHandlerHost,
-): HiddenZoneChoiceHandlerResult {
-  if (host.legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Mystery Box nutzen.");
-  const run = requireRun(host);
-  const sourceCardId = String(host.legalAction.payload?.cardId ?? "") as CardInstanceId;
-  if (!host.state.runner.rig.programs.includes(sourceCardId))
-    throw new Error("Mystery Box ist nicht installiert.");
-  if (host.cards.definitionFor(sourceCardId).id !== host.constants.mysteryBoxId)
-    throw new Error("Die Mystery-Box-Faehigkeit passt nicht zur Karte.");
-  const oncePerRunPlan = createMysteryBoxOncePerRunPlan({
-    sourceCardId,
-    usedSourceIdsThisRun: run.mysteryBoxUsedSourceIdsThisRun ?? [],
-  });
-  const topCards = host.state.runner.stack.slice(0, 5);
-  if (topCards.length === 0) throw new Error("Der Stack ist leer.");
-  const programIds = topCards.filter(
-    (cardId) => host.cards.definitionFor(cardId).type === "program",
-  );
-  applyMysteryBoxOncePerRunPlan(oncePerRunPlan, {
-    markUsedThisRun: (usedSourceIds) => {
-      run.mysteryBoxUsedSourceIdsThisRun = usedSourceIds;
-    },
-  });
-  if (programIds.length === 0) {
-    host.shuffleRunnerStack(
-      `v1915.mystery_box.shuffle.no_program.${sourceCardId}.${run.runId}`,
-    );
-    host.legalAction.payload = {
-      ...(host.legalAction.payload ?? {}),
-      ...buildMysteryBoxNoInstallResolvedPayload(
-        createMysteryBoxNoInstallIntent({
-          sourceCardId,
-          topCardIds: topCards,
-          programCandidateIds: programIds,
-        }),
-        { randomCounterAfter: host.state.randomCounter },
-      ),
-    };
-    return {
-      handled: true,
-      stateChanged: true,
-      resolvedPayload: host.legalAction.payload as HiddenZonePayload,
-      shufflePerformed: true,
-    };
-  }
-  host.state.pendingChoice = buildMysteryBoxInstallChoice({
-    stateVersion: host.state.stateVersion,
-    sourceCardId,
-    topCards,
-    options: programIds.map((cardId) => {
-      const definition = host.cards.definitionFor(cardId);
-      return {
-        id: `card_${cardId}`,
-        label: definition.title,
-        publicLabel: definition.title,
-        value: cardId,
-      };
-    }),
-  });
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
-    programFound: true,
-    choiceVisibility: "public",
-  };
-  return {
-    handled: true,
-    stateChanged: true,
-    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
   };
 }
 
