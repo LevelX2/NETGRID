@@ -5266,6 +5266,7 @@ export default function Page() {
           actionDisabled={Boolean(payload.winner) || connection !== "online"}
           highlighted={activeCueHighlight?.kind === "run"}
           onAction={submitAction}
+          onChoiceOption={submitChoiceOption}
         />
       ) : null}
       {showFloatingActionPanel && activeView ? (
@@ -7987,7 +7988,8 @@ function RunTimelineOverlay({
   cardDetailsById,
   actionDisabled,
   highlighted = false,
-  onAction
+  onAction,
+  onChoiceOption
 }: {
   view: PlayerView;
   legalActions: LegalAction[];
@@ -7996,6 +7998,7 @@ function RunTimelineOverlay({
   actionDisabled: boolean;
   highlighted?: boolean;
   onAction(action: LegalAction): void;
+  onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
 }) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
@@ -8049,6 +8052,9 @@ function RunTimelineOverlay({
   const headerStatus = runWindowStatusLabel(view);
   const breakerHint = runBreakerActionHint(view, legalActions);
   const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
+  const choiceAction = view.pendingChoice ? runActions.find((action) => action.type === "resolve_choice" && action.payload?.choiceId === view.pendingChoice?.choiceId) : undefined;
+  const regularRunActions = choiceAction ? runActions.filter((action) => action.actionId !== choiceAction.actionId) : runActions;
+  const runChoice = view.pendingChoice && choiceAction && view.pendingChoice.minSelections === 1 && view.pendingChoice.maxSelections === 1 ? view.pendingChoice : null;
 
   const overlay = (
     <div ref={overlayRef} className={`runTimelineOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} aria-live="polite" aria-atomic="true">
@@ -8076,9 +8082,28 @@ function RunTimelineOverlay({
             </span>
           ))}
         </div>
-        {runActions.length > 0 ? (
+        {runChoice && choiceAction ? (
+          <div className="runActionBar" aria-label={runChoice.prompt} data-testid="run-choice-action-bar">
+            {runChoice.options.map((option) => (
+              <OverflowAwareActionButton
+                action={choiceAction}
+                className="button primary actionButton runActionButton"
+                key={option.id}
+                label={option.label}
+                displayLabel={option.label}
+                onClick={() => onChoiceOption(choiceAction, runChoice.choiceId, option.id)}
+                disabled={actionDisabled || option.selectable === false}
+                type="button"
+                data-testid="run-choice-button"
+                data-action-type={choiceAction.type}
+                iconSize={14}
+              />
+            ))}
+          </div>
+        ) : null}
+        {regularRunActions.length > 0 ? (
           <div className="runActionBar" aria-label="Run-Aktionen" data-testid="run-action-bar">
-            {runActions.map((action) => {
+            {regularRunActions.map((action) => {
               const compactLabel = runWindowActionButtonLabel(view, action);
               const fullLabel =
                 compactLabel.startsWith("SMC:") && action.label
@@ -8101,7 +8126,7 @@ function RunTimelineOverlay({
               );
             })}
           </div>
-        ) : jackOutAvailable ? (
+        ) : !runChoice && jackOutAvailable ? (
           <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p>
         ) : null}
         {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
