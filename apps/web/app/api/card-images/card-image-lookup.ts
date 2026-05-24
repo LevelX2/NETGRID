@@ -1,10 +1,11 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { GENERATED_CARD_IMAGES } from "../../card-image-manifest";
+import { GENERATED_CARD_IMAGES, localizedDeCardImagePath } from "../../card-image-manifest";
 
 const REPO_ROOT = resolveRepoRoot();
 const IMAGE_DIR = path.join(REPO_ROOT, "data", "local-assets", "card-images");
+const LOCALIZED_DE_IMAGE_DIR = path.join(REPO_ROOT, "data", "card-assets", "localized", "de");
 const LOCAL_ONR_SNAPSHOT_PATH = path.join(REPO_ROOT, "data", "local", "card-import", "onr-v1-limited", "card-snapshot-onr-v1-limited.local.json");
 const LOCAL_ONR_ASSET_INDEX_PATH = path.join(IMAGE_DIR, "onr-1996", "card-image-index.local.json");
 const PROTEUS_CARD_SET_PATH = path.join(REPO_ROOT, "data", "cards", "proteus-cards.json");
@@ -12,13 +13,20 @@ const CLASSIC_CARD_SET_PATH = path.join(REPO_ROOT, "data", "cards", "classic-car
 
 export type CardImageLookupResult = {
   cardId: string;
-  kind: "generated" | "local_onr";
+  kind: "generated" | "local_onr" | "localized_de";
   relativePath: string;
   absolutePath: string;
   versioned: boolean;
 };
 
 export async function lookupCardImage(cardId: string, requestUrl: string): Promise<CardImageLookupResult | null> {
+  const request = safeRequestUrl(requestUrl);
+  if (request?.searchParams.get("skin") === "de") {
+    const localizedPath = localizedDeCardImagePath(cardId);
+    if (localizedPath) return imageResult(cardId, "localized_de", localizedPath, request.searchParams.has("v"));
+    return null;
+  }
+
   const generatedPath = GENERATED_CARD_IMAGES[cardId];
   if (generatedPath) return imageResult(cardId, "generated", generatedPath, hasVersionParam(requestUrl));
   if (!isLocalOnrCatalogCardId(cardId)) return null;
@@ -34,16 +42,22 @@ export function imageDir(): string {
 
 function imageResult(cardId: string, kind: CardImageLookupResult["kind"], relativePath: string, versioned: boolean): CardImageLookupResult | null {
   if (!isSafeLocalImagePath(relativePath, kind)) return null;
-  const absolutePath = path.resolve(IMAGE_DIR, relativePath);
-  if (!absolutePath.startsWith(`${IMAGE_DIR}${path.sep}`)) return null;
+  const baseDir = imageBaseDir(kind);
+  const absolutePath = path.resolve(baseDir, relativePath);
+  if (!absolutePath.startsWith(`${baseDir}${path.sep}`)) return null;
   return { cardId, kind, relativePath, absolutePath, versioned };
 }
 
 function hasVersionParam(requestUrl: string): boolean {
+  const request = safeRequestUrl(requestUrl);
+  return request?.searchParams.has("v") ?? false;
+}
+
+function safeRequestUrl(requestUrl: string): URL | null {
   try {
-    return new URL(requestUrl).searchParams.has("v");
+    return new URL(requestUrl);
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -74,7 +88,12 @@ async function addLocalOnrV1SnapshotImages(lookup: Map<string, string>): Promise
 function isSafeLocalImagePath(value: string | undefined, kind: CardImageLookupResult["kind"]): value is string {
   if (!value || !value.endsWith(".png") || value.includes("..") || path.isAbsolute(value)) return false;
   if (kind === "local_onr") return value.startsWith("onr-1996/");
+  if (kind === "localized_de") return value.startsWith("rendered/full/");
   return value.startsWith("generated-");
+}
+
+function imageBaseDir(kind: CardImageLookupResult["kind"]): string {
+  return kind === "localized_de" ? LOCALIZED_DE_IMAGE_DIR : IMAGE_DIR;
 }
 
 function isLocalOnrCatalogCardId(cardId: string): boolean {

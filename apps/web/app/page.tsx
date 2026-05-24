@@ -258,6 +258,8 @@ const DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY = "netgrid.deckTableViewSettings.v1";
 const LEGACY_DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY = "netgrid.deckTableViewSettings.v1";
 const CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
 const LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
+const CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY = "netgrid.cardImageSkinSettings.v1";
+const LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY = "netgrid.cardImageSkinSettings.v1";
 const CHRONICLE_DETAIL_MODE_STORAGE_KEY = "netgrid.chronicleDetailMode.v1";
 const LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY = "netgrid.chronicleDetailMode.v1";
 const CARD_PREVIEW_COLLAPSED_STORAGE_PREFIX = "netgrid.cardPreviewCollapsed.v1";
@@ -339,6 +341,10 @@ type CardTooltipSettings = {
   mode: CardTooltipMode;
 };
 
+type CardImagePreferenceSettings = {
+  preferGermanCardImages: boolean;
+};
+
 type CardScaleSettings = {
   tooltipPercent: number;
   handPercent: number;
@@ -362,12 +368,30 @@ const CardScaleSettingsContext = createContext<CardScaleSettings>({
   rigPercent: CARD_SCALE_DEFAULT_PERCENT
 });
 
+const CardImagePreferenceContext = createContext<CardImagePreferenceSettings>({
+  preferGermanCardImages: false
+});
+
 function useCardTooltipSettings(): CardTooltipSettings {
   return useContext(CardTooltipSettingsContext);
 }
 
 function useCardScaleSettings(): CardScaleSettings {
   return useContext(CardScaleSettingsContext);
+}
+
+function useCardImagePreference(): CardImagePreferenceSettings {
+  return useContext(CardImagePreferenceContext);
+}
+
+function usePreferredCardImageSource(cardId: string | undefined | null): { src: string | undefined; fallbackSrc: string | undefined } {
+  const { preferGermanCardImages } = useCardImagePreference();
+  const src = localCardImageUrl(cardId, { preferGerman: preferGermanCardImages });
+  const originalSrc = preferGermanCardImages ? localCardImageUrl(cardId) : undefined;
+  return {
+    src,
+    fallbackSrc: originalSrc && originalSrc !== src ? originalSrc : undefined
+  };
 }
 
 type SeriesResultSummary = ApiSeriesResultSummary;
@@ -1976,6 +2000,7 @@ export default function Page() {
   const [deckImportText, setDeckImportText] = useState("");
   const [deckExportText, setDeckExportText] = useState("");
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
+  const [preferGermanCardImages, setPreferGermanCardImages] = useState(false);
   const [cardPreviewCollapsed, setCardPreviewCollapsed] = useState(false);
   const [boardZoneCollapsed, setBoardZoneCollapsed] = useState<Record<string, boolean>>({});
   const [scoreAreaOverlays, setScoreAreaOverlays] = useState<Record<Side, boolean>>({ runner: false, corp: false });
@@ -1998,6 +2023,7 @@ export default function Page() {
   const [localAiPacingMode, setLocalAiPacingMode] = useState<AiPacingMode>("paced");
   const [aiPacingModeLoaded, setAiPacingModeLoaded] = useState(false);
   const [cardDisplayModeLoaded, setCardDisplayModeLoaded] = useState(false);
+  const [cardImageSkinSettingsLoaded, setCardImageSkinSettingsLoaded] = useState(false);
   const [chronicleDetailMode, setChronicleDetailMode] = useState<ChronicleDetailMode>("full");
   const [chronicleDetailModeLoaded, setChronicleDetailModeLoaded] = useState(false);
 
@@ -2253,6 +2279,24 @@ export default function Page() {
     if (!cardDisplayModeLoaded) return;
     window.localStorage.setItem(CARD_DISPLAY_MODE_STORAGE_KEY, cardDisplayMode);
   }, [cardDisplayModeLoaded, cardDisplayMode]);
+
+  useEffect(() => {
+    const stored = readLocalStorageWithLegacy(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY, LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as { preferGermanCardImages?: unknown };
+        if (typeof parsed.preferGermanCardImages === "boolean") setPreferGermanCardImages(parsed.preferGermanCardImages);
+      } catch {
+        removeLocalStorageKeys(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY, LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY);
+      }
+    }
+    setCardImageSkinSettingsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!cardImageSkinSettingsLoaded) return;
+    window.localStorage.setItem(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY, JSON.stringify({ preferGermanCardImages }));
+  }, [cardImageSkinSettingsLoaded, preferGermanCardImages]);
 
   useEffect(() => {
     setChronicleDetailMode(normalizeChronicleDetailMode(readLocalStorageWithLegacy(CHRONICLE_DETAIL_MODE_STORAGE_KEY, LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY)));
@@ -4463,6 +4507,7 @@ export default function Page() {
           rigPercent: cardRigScalePercent
         }}
       >
+      <CardImagePreferenceContext.Provider value={{ preferGermanCardImages }}>
       <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
       <main className="app" data-theme={colorScheme}>
         <header className="topbar">
@@ -5044,6 +5089,7 @@ export default function Page() {
               cardBoardScalePercent={cardBoardScalePercent}
               cardRigScalePercent={cardRigScalePercent}
               cardDisplayMode={cardDisplayMode}
+              preferGermanCardImages={preferGermanCardImages}
               chronicleDetailMode={chronicleDetailMode}
               colorScheme={colorScheme}
               cuePosition={cuePosition}
@@ -5068,6 +5114,7 @@ export default function Page() {
               onCardBoardScalePercent={setCardBoardScalePercent}
               onCardRigScalePercent={setCardRigScalePercent}
               onCardDisplayMode={setCardDisplayMode}
+              onPreferGermanCardImages={setPreferGermanCardImages}
               onChronicleDetailMode={setChronicleDetailMode}
               onColorScheme={setColorScheme}
               onCuePosition={setCuePosition}
@@ -5078,6 +5125,7 @@ export default function Page() {
         </div>
       </main>
       </CardTooltipSettingsContext.Provider>
+      </CardImagePreferenceContext.Provider>
       </CardScaleSettingsContext.Provider>
     );
   }
@@ -5093,6 +5141,7 @@ export default function Page() {
         rigPercent: cardRigScalePercent
       }}
     >
+    <CardImagePreferenceContext.Provider value={{ preferGermanCardImages }}>
     <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
     <main className={activeMatchClassName} data-theme={colorScheme}>
       <header className="topbar" ref={topbarRef}>
@@ -5933,6 +5982,7 @@ export default function Page() {
               cardBoardScalePercent={cardBoardScalePercent}
               cardRigScalePercent={cardRigScalePercent}
               cardDisplayMode={cardDisplayMode}
+              preferGermanCardImages={preferGermanCardImages}
               chronicleDetailMode={chronicleDetailMode}
               colorScheme={colorScheme}
               cuePosition={cuePosition}
@@ -5958,6 +6008,7 @@ export default function Page() {
               onCardBoardScalePercent={setCardBoardScalePercent}
               onCardRigScalePercent={setCardRigScalePercent}
               onCardDisplayMode={setCardDisplayMode}
+              onPreferGermanCardImages={setPreferGermanCardImages}
               onChronicleDetailMode={setChronicleDetailMode}
               onColorScheme={setColorScheme}
               onCuePosition={setCuePosition}
@@ -6023,6 +6074,7 @@ export default function Page() {
             cardBoardScalePercent={cardBoardScalePercent}
             cardRigScalePercent={cardRigScalePercent}
             cardDisplayMode={cardDisplayMode}
+            preferGermanCardImages={preferGermanCardImages}
             chronicleDetailMode={chronicleDetailMode}
             colorScheme={colorScheme}
             cuePosition={cuePosition}
@@ -6049,6 +6101,7 @@ export default function Page() {
             onCardBoardScalePercent={setCardBoardScalePercent}
             onCardRigScalePercent={setCardRigScalePercent}
             onCardDisplayMode={setCardDisplayMode}
+            onPreferGermanCardImages={setPreferGermanCardImages}
             onChronicleDetailMode={setChronicleDetailMode}
             onColorScheme={setColorScheme}
             onCuePosition={setCuePosition}
@@ -6071,6 +6124,7 @@ export default function Page() {
       ) : null}
     </main>
     </CardTooltipSettingsContext.Provider>
+    </CardImagePreferenceContext.Provider>
     </CardScaleSettingsContext.Provider>
   );
 }
@@ -6748,6 +6802,7 @@ function OptionsPanel({
   cardBoardScalePercent,
   cardRigScalePercent,
   cardDisplayMode,
+  preferGermanCardImages,
   chronicleDetailMode,
   colorScheme,
   cuePosition,
@@ -6774,6 +6829,7 @@ function OptionsPanel({
   onCardBoardScalePercent,
   onCardRigScalePercent,
   onCardDisplayMode,
+  onPreferGermanCardImages,
   onChronicleDetailMode,
   onColorScheme,
   onCuePosition,
@@ -6801,6 +6857,7 @@ function OptionsPanel({
   cardBoardScalePercent: number;
   cardRigScalePercent: number;
   cardDisplayMode: CardDisplayMode;
+  preferGermanCardImages: boolean;
   chronicleDetailMode: ChronicleDetailMode;
   colorScheme: ColorScheme;
   cuePosition: CuePositionPreference;
@@ -6827,6 +6884,7 @@ function OptionsPanel({
   onCardBoardScalePercent(value: number): void;
   onCardRigScalePercent(value: number): void;
   onCardDisplayMode(value: CardDisplayMode): void;
+  onPreferGermanCardImages(value: boolean): void;
   onChronicleDetailMode(value: ChronicleDetailMode): void;
   onColorScheme(value: ColorScheme): void;
   onCuePosition(value: CuePositionPreference): void;
@@ -6849,6 +6907,7 @@ function OptionsPanel({
         {session ? <SessionAccessSettings session={session} onCopyReconnectLink={onCopyReconnectLink} onDiscardLocalSession={onDiscardLocalSession} /> : null}
         <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
         <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
+        <CardImageSkinSettings preferGermanCardImages={preferGermanCardImages} onPreferGermanCardImages={onPreferGermanCardImages} />
         <ChronicleDetailSettings mode={chronicleDetailMode} onChange={onChronicleDetailMode} />
         <CardTooltipSettings mode={cardTooltipMode} hoverOpenDelayMs={cardTooltipHoverDelayMs} onMode={onCardTooltipMode} onHoverOpenDelayMs={onCardTooltipHoverDelayMs} />
         <CardSizeSettings
@@ -7020,6 +7079,27 @@ function CardDisplayModeSelector({ mode, onChange, iconOnly = false }: { mode: C
         <ZoomIn size={15} />
         {!iconOnly ? "Kompakt" : <span className="srOnly">Kompakt</span>}
       </button>
+    </div>
+  );
+}
+
+function CardImageSkinSettings({
+  preferGermanCardImages,
+  onPreferGermanCardImages
+}: {
+  preferGermanCardImages: boolean;
+  onPreferGermanCardImages(value: boolean): void;
+}) {
+  return (
+    <div className="cardImageSkinSettings">
+      <div>
+        <span className="settingsTitle">Kartenbilder</span>
+        <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
+      </div>
+      <label className={`deckBuilderToggle ${preferGermanCardImages ? "checked" : ""}`}>
+        <input checked={preferGermanCardImages} onChange={(event) => onPreferGermanCardImages(event.target.checked)} type="checkbox" />
+        Deutsche Kartenbilder bevorzugen
+      </label>
     </div>
   );
 }
@@ -9516,7 +9596,8 @@ function ChronicleCardTrigger({
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
   const [tooltipPositionStyle, setTooltipPositionStyle] = useState<CSSProperties>({});
 
-  const imageUrl = card ? localCardImageUrl(card.catalogCardId) : undefined;
+  const imageSource = usePreferredCardImageSource(card?.catalogCardId);
+  const imageUrl = imageSource.src;
   const showImageTooltip = tooltipMode === "image" && Boolean(imageUrl);
   const rulesLines = card ? rulesTextLines(card.text) : [];
   const hasTooltipTextContent = Boolean(card && (card.title || item.cardDetailLines.length > 0 || rulesLines.length > 0));
@@ -9698,7 +9779,7 @@ function ChronicleCardTrigger({
         >
           {showImageTooltip ? (
             <span className={`chronicleCardImageFrame ${showHardwareOverlay || showOperationOverlay ? "withOverlay" : ""}`}>
-              <CardImage className="chronicleCardImage" src={imageUrl} alt={`Kartenbild ${card.title}`} />
+              <CardImage className="chronicleCardImage" src={imageUrl} fallbackSrc={imageSource.fallbackSrc} alt={`Kartenbild ${card.title}`} />
               {showHardwareOverlay ? (
                 <HardwareImageOverlay
                   title={card.title}
@@ -9923,7 +10004,8 @@ function CatalogPanel({
   onSelectAllTypes(): void;
   onClearTypeFilters(): void;
 }) {
-  const catalogImageUrl = detail ? localCardImageUrl(detail.catalogCardId) : undefined;
+  const catalogImageSource = usePreferredCardImageSource(detail?.catalogCardId);
+  const catalogImageUrl = catalogImageSource.src;
   const catalogImageTooltip = catalogImageMetricTooltip(detail);
   const showCatalogHardwareOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isHardwareCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
   const showCatalogOperationOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isOperationCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
@@ -10106,7 +10188,7 @@ function CatalogPanel({
               </div>
               {catalogImageUrl ? (
                 <div className={`catalogImagePreview ${catalogImagePreviewMode}`} {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})}>
-                  <CardImage src={catalogImageUrl} alt={`Kartenbild ${detail.title}`} priority {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})} />
+                  <CardImage src={catalogImageUrl} fallbackSrc={catalogImageSource.fallbackSrc} alt={`Kartenbild ${detail.title}`} priority {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})} />
                   {showCatalogHardwareOverlay ? (
                     <HardwareImageOverlay
                       title={detail.title}
@@ -11676,7 +11758,8 @@ function DeckCardTooltipTrigger({
   const tooltipText = card ? deckBuilderCardTooltip(card, detail) : cardId;
   const tooltipImageId = detail?.definitionId ?? detail?.catalogCardId ?? card?.catalogCardId ?? cardId;
   const overlayImageId = detail?.definitionId;
-  const tooltipImageUrl = tooltipImageId ? localCardImageUrl(tooltipImageId) : undefined;
+  const tooltipImageSource = usePreferredCardImageSource(tooltipImageId);
+  const tooltipImageUrl = tooltipImageSource.src;
   const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
   const hasTooltipTextContent = Boolean(card && (card.title || detailLines.length > 0 || hasRulesLines));
   const tooltipEnabled = Boolean(card) && (showImageTooltip || hasTooltipTextContent);
@@ -11835,7 +11918,7 @@ function DeckCardTooltipTrigger({
             <>
               {showHardwareOverlay ? <HardwareImageOverlay title={card.title} rulesText={rulesText} installCost={detail?.numeric.installCost} /> : null}
               {showOperationOverlay ? <OperationImageOverlay title={card.title} rulesText={rulesText} cost={detail?.numeric.cost} /> : null}
-              <CardImage className="cardTooltipImage" src={tooltipImageUrl} alt={`Kartenbild ${card.title ?? "Karte"}`} />
+              <CardImage className="cardTooltipImage" src={tooltipImageUrl} fallbackSrc={tooltipImageSource.fallbackSrc} alt={`Kartenbild ${card.title ?? "Karte"}`} />
             </>
           ) : (
             <>
@@ -12002,7 +12085,8 @@ function DeckCardThumb({
   preview?: boolean;
   table?: boolean;
 }) {
-  const imageUrl = localCardImageUrl(cardId);
+  const imageSource = usePreferredCardImageSource(cardId);
+  const imageUrl = imageSource.src;
   const hasGeneratedImage = hasGeneratedCardArt(cardId);
   const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(cardType) && hasGeneratedImage;
   const showOperationOverlay = Boolean(imageUrl) && isOperationCardType(cardType) && hasGeneratedImage;
@@ -12010,7 +12094,7 @@ function DeckCardThumb({
     <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${table ? "table" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
       {imageUrl ? (
         <>
-          <CardImage src={imageUrl} decorative />
+          <CardImage src={imageUrl} fallbackSrc={imageSource.fallbackSrc} decorative />
           {showHardwareOverlay ? (
             <HardwareImageOverlay
               title={title}
@@ -12806,7 +12890,10 @@ function CardView({
   const hasRulesLines = rulesTextLines(rulesText).length > 0;
   const hasSubroutineMarkers = rulesTextLines(rulesText).some((line) => isSubroutineRuleLine(card.type ?? "", rulesText, line));
   const tooltipText = card.known ? [card.title, ...detailLines, rulesText].filter(Boolean).join("\n") : undefined;
-  const tooltipImageUrl = card.known ? (card.definitionId ? localCardImageUrl(card.definitionId) : undefined) ?? card.imageUrl : undefined;
+  const preferredImageSource = usePreferredCardImageSource(card.definitionId);
+  const preferredImageUrl = preferredImageSource.src ?? card.imageUrl;
+  const preferredImageFallbackUrl = preferredImageSource.fallbackSrc;
+  const tooltipImageUrl = card.known ? preferredImageUrl : undefined;
   const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
   const hasTooltipTextContent = Boolean(card.title) || detailLines.length > 0 || hasRulesLines;
   const tooltipAvailable = card.known && !showCardActions && (showImageTooltip || hasTooltipTextContent);
@@ -12827,7 +12914,7 @@ function CardView({
         card.memoryCost !== undefined ? { icon: "MU", label: "MU", value: String(card.memoryCost) } : null
       ].filter((entry): entry is { icon: string; label: string; value: string } => entry !== null)
     : [];
-  const cardImageUrl = card.known && displayMode === "placeholder" && !forceCardBack ? card.imageUrl : undefined;
+  const cardImageUrl = card.known && displayMode === "placeholder" && !forceCardBack ? preferredImageUrl : undefined;
   const visualImageUrl = cardImageUrl;
   const isHardwareImageCard = Boolean(visualImageUrl) && card.known && isHardwareCardType(card.type) && hasGeneratedCardArt(card.definitionId);
   const isOperationImageCard = Boolean(visualImageUrl) && card.known && isOperationCardType(card.type) && hasGeneratedCardArt(card.definitionId);
@@ -13099,6 +13186,7 @@ function CardView({
         <CardImage
           className="cardTooltipImage"
           src={tooltipImageUrl}
+          fallbackSrc={preferredImageFallbackUrl}
           alt={`Kartenbild ${card.title ?? "Karte"}`}
         />
       ) : (
@@ -13215,7 +13303,7 @@ function CardView({
         data-archive-facedown={archiveFacedown ? "true" : undefined}
         data-inactive-zone={inactiveZone}
       >
-        {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} decorative /> : null}
+        {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} fallbackSrc={preferredImageFallbackUrl} decorative /> : null}
         {isHardwareImageCard ? (
           <HardwareImageOverlay
             title={card.title ?? "Hardware"}

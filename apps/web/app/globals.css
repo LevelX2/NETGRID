@@ -8387,6 +8387,7 @@ select,
 
 .colorSchemeSettings,
 .cardDisplaySettings,
+.cardImageSkinSettings,
 .chronicleDetailSettings,
 .cardTooltipSettings,
 .cardSizeSettings,
@@ -8404,6 +8405,7 @@ select,
 
 .colorSchemeSettings,
 .cardDisplaySettings,
+.cardImageSkinSettings,
 .chronicleDetailSettings {
   display: flex;
   align-items: center;
@@ -10908,6 +10910,7 @@ select,
   .deckDisplayRow,
   .colorSchemeSettings,
   .cardDisplaySettings,
+  .cardImageSkinSettings,
   .gameOverFooter {
     align-items: stretch;
     flex-direction: column;
