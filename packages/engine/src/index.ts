@@ -191,6 +191,13 @@ import {
   startShowHqAgendasForCreditsChoice,
   type CorpZoneChoiceHandlerHost,
 } from "./game/hidden-zone/corp-zone-choice-handlers";
+import {
+  handleCorpInstallRezSequenceChoice,
+  resolveSecurityPurgeAgendaPurge,
+  startDataFortReclamationChoice,
+  startPriorityRequisitionChoice,
+  type CorpInstallRezSequenceHandlerHost,
+} from "./game/corp/install-rez-sequence-handlers";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -20676,7 +20683,10 @@ function scoreAgenda(
     legalAction &&
     scoredAgenda?.kind === "data_fort_reclamation"
   ) {
-    startDataFortReclamationChoice(state, cardId, legalAction);
+    startDataFortReclamationChoice(
+      corpInstallRezSequenceHandlerHost(state, legalAction),
+      cardId as CardInstanceId,
+    );
   }
   if (
     legalAction &&
@@ -20688,7 +20698,10 @@ function scoreAgenda(
     legalAction &&
     scoredAgenda?.kind === "priority_requisition_rez_ice_at_no_cost"
   ) {
-    startPriorityRequisitionChoice(state, cardId, legalAction);
+    startPriorityRequisitionChoice(
+      corpInstallRezSequenceHandlerHost(state, legalAction),
+      cardId as CardInstanceId,
+    );
   }
   if (
     legalAction &&
@@ -20751,25 +20764,11 @@ function scoreAgenda(
     legalAction &&
     scoredAgenda?.kind === "security_purge_top_rd"
   ) {
-    resolveSecurityPurgeAgendaPurge(state, legalAction);
+    resolveSecurityPurgeAgendaPurge(
+      corpInstallRezSequenceHandlerHost(state, legalAction),
+    );
   }
   cleanupEmptyRemotes(state);
-}
-
-function priorityRequisitionCandidates(state: GameState): CardInstanceId[] {
-  return Object.entries(state.cardInstances)
-    .filter(
-      ([, instance]) =>
-        instance.zone.side === "corp" &&
-        instance.zone.zone === "serverIce" &&
-        !instance.rezzed,
-    )
-    .map(([instanceId]) => instanceId as CardInstanceId)
-    .sort((left, right) => {
-      const leftCost = definitionFor(state, left).rezCost ?? 0;
-      const rightCost = definitionFor(state, right).rezCost ?? 0;
-      return rightCost - leftCost || left.localeCompare(right);
-    });
 }
 
 type ScoredSubtypeRevealSubtype = "code_gate" | "wall";
@@ -20955,432 +20954,6 @@ function resolveScoredSubtypeReveal(
     gainedCredits,
     corpCreditsAfter: state.corp.credits,
     publicRevealDefinitionIds: publicRevealDefinitionIds.join(","),
-  };
-}
-
-function startPriorityRequisitionChoice(
-  state: GameState,
-  agendaId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const candidates = priorityRequisitionCandidates(state);
-  if (candidates.length === 0) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      priorityRequisitionChoiceOpened: false,
-      priorityRequisitionCandidateCount: 0,
-    };
-    return;
-  }
-  state.pendingChoice = {
-    choiceId: `v162_priority_requisition_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v162.priority_requisition:${agendaId}:${state.stateVersion + 1}`,
-    prompt: "Priority Requisition: ICE kostenlos rezzen",
-    kind: "select_cards",
-    options: [
-      ...candidates.map((cardId) => ({
-        id: `card_${cardId}`,
-        label: definitionFor(state, cardId).title,
-        publicLabel: "Installiertes ICE",
-        value: cardId,
-      })),
-      {
-        id: "skip",
-        label: "Überspringen",
-        publicLabel: "Überspringen",
-      },
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    priorityRequisitionChoiceOpened: true,
-    priorityRequisitionCandidateCount: candidates.length,
-  };
-}
-
-function resolvePriorityRequisitionChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v162.priority_requisition"))
-    throw new Error("Es ist keine Priority-Requisition-Choice offen.");
-  if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf Priority Requisition resolven.");
-  const [, agendaId] = choice.source.split(":");
-  if (
-    !agendaId ||
-    !state.corp.scoreArea.includes(agendaId) ||
-    scoredAgendaKindForDefinition(definitionFor(state, agendaId)) !==
-      "priority_requisition_rez_ice_at_no_cost"
-  ) {
-    throw new Error("Priority Requisition ist nicht mehr in der Korp-ScoreArea.");
-  }
-  const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
-  if (selectedOptionIds.length === 1 && selectedOptionIds[0] === "skip") {
-    delete state.pendingChoice;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      priorityRequisitionFreeRez: false,
-      priorityRequisitionDeclined: true,
-    };
-    return;
-  }
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  if (selectedIds.length > 1)
-    throw new Error("Priority Requisition darf hoechstens ein ICE rezzen.");
-  const targetId = selectedIds[0];
-  if (!targetId) {
-    delete state.pendingChoice;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      priorityRequisitionFreeRez: false,
-      priorityRequisitionDeclined: true,
-    };
-    return;
-  }
-  const optionValues = new Set(
-    choice.options
-      .map((option) => option.value)
-      .filter((value): value is string => typeof value === "string"),
-  );
-  const instance = state.cardInstances[targetId];
-  if (
-    !optionValues.has(targetId) ||
-    !instance ||
-    instance.zone.side !== "corp" ||
-    instance.zone.zone !== "serverIce" ||
-    instance.rezzed
-  ) {
-    throw new Error("Das Priority-Requisition-Ziel ist nicht mehr gueltig.");
-  }
-  state.cardInstances[targetId] = {
-    ...instance,
-    faceup: true,
-    rezzed: true,
-  };
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v162_priority_requisition_free_rez",
-    priorityRequisitionFreeRez: true,
-    priorityRequisitionTarget: targetId,
-    priorityRequisitionTargetDefinitionId: definitionFor(state, targetId).id,
-    rezCostPaid: 0,
-  };
-}
-
-function resolveSecurityPurgeAgendaPurge(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const revealedIds = state.corp.rd.slice(0, 3);
-  const installedIce: Array<{ cardId: CardInstanceId; serverId: string }> = [];
-  const trashedIds: CardInstanceId[] = [];
-  for (const cardId of revealedIds) {
-    const definition = definitionFor(state, cardId);
-    removeFromAllZones(state, cardId);
-    if (definition.type === "ice") {
-      const server = createRemote(state);
-      server.ice.push(cardId);
-      state.cardInstances[cardId] = {
-        ...mustInstance(state.cardInstances, cardId),
-        faceup: true,
-        rezzed: true,
-        zone: { side: "corp", zone: "serverIce", serverId: server.id },
-      };
-      installedIce.push({ cardId, serverId: server.id });
-    } else {
-      state.corp.archives.unshift(cardId);
-      state.cardInstances[cardId] = {
-        ...mustInstance(state.cardInstances, cardId),
-        faceup: true,
-        rezzed: true,
-        zone: { side: "corp", zone: "archives" },
-      };
-      trashedIds.push(cardId);
-    }
-  }
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    agendaAbility: "v1922_security_purge",
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_security_purge_rd_top3",
-    publicRevealKind: "reveal",
-    revealedCount: revealedIds.length,
-    installedIceCount: installedIce.length,
-    trashedCount: trashedIds.length,
-    securityPurgeInstallContract: "new_remote_per_ice_reveal_order",
-    securityPurgeWaivesPrintedRezCosts: true,
-    publicRevealDefinitionIds: revealedIds
-      .map((id) => definitionFor(state, id).id)
-      .join(","),
-    installedIceDefinitionIds: installedIce
-      .map((entry) => definitionFor(state, entry.cardId).id)
-      .join(","),
-    trashedDefinitionIds: trashedIds
-      .map((id) => definitionFor(state, id).id)
-      .join(","),
-  };
-}
-
-function startDataFortReclamationChoice(
-  state: GameState,
-  agendaId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const options = state.corp.hq
-    .filter((cardId) => isCorpInstallableCardType(definitionFor(state, cardId)))
-    .sort()
-    .map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    });
-  if (options.length === 0) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      v1922CorpAgendaAbility: "data_fort_reclamation",
-      dataFortReclamationChoiceOpened: false,
-      dataFortReclamationCandidateCount: 0,
-    };
-    return;
-  }
-  state.pendingChoice = {
-    choiceId: `choice_v1922_data_fort_reclamation_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1922.data_fort_reclamation:${agendaId}:${state.stateVersion + 1}`,
-    prompt: "Data Fort Reclamation: HQ-Karten fuer neues Data Fort waehlen.",
-    kind: "select_cards",
-    options,
-    minSelections: 0,
-    maxSelections: Math.min(4, options.length),
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1922CorpAgendaAbility: "data_fort_reclamation",
-    dataFortReclamationChoiceOpened: true,
-    dataFortReclamationCandidateCount: options.length,
-    dataFortReclamationMaxSelections: Math.min(4, options.length),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_data_fort_reclamation_hq_choice",
-  };
-}
-
-function resolveDataFortReclamationChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.data_fort_reclamation"))
-    throw new Error("Data-Fort-Reclamation-Choice ist nicht offen.");
-  const [, agendaId] = choice.source.split(":");
-  if (
-    !agendaId ||
-    !state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
-    scoredAgendaKindForDefinition(definitionFor(state, agendaId as CardInstanceId)) !==
-      "data_fort_reclamation"
-  )
-    throw new Error("Data Fort Reclamation ist nicht gescored.");
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  const selectedSet = new Set(selectedIds);
-  if (selectedSet.size !== selectedIds.length)
-    throw new Error("Eine HQ-Karte wurde doppelt gewaehlt.");
-  if (selectedIds.some((cardId) => !state.corp.hq.includes(cardId)))
-    throw new Error("Eine gewaehlte Karte liegt nicht mehr in HQ.");
-  if (
-    selectedIds.some(
-      (cardId) => !isCorpInstallableCardType(definitionFor(state, cardId)),
-    )
-  )
-    throw new Error("Eine gewaehlte Karte ist nicht installierbar.");
-  const server = createRemote(state);
-  let installedIceCount = 0;
-  let installedRootCount = 0;
-  const installedIds: CardInstanceId[] = [];
-  for (const cardId of selectedIds) {
-    const definition = definitionFor(state, cardId);
-    removeFromAllZones(state, cardId);
-    if (definition.type === "ice") {
-      server.ice.push(cardId);
-      state.cardInstances[cardId] = {
-        ...mustInstance(state.cardInstances, cardId),
-        faceup: false,
-        rezzed: false,
-        zone: { side: "corp", zone: "serverIce", serverId: server.id },
-      };
-      installedIceCount += 1;
-      installedIds.push(cardId);
-      continue;
-    }
-    if (!canInstallCorpRootCardInServer(state, definition, server))
-      throw new Error("Diese Root-Karte kann nicht in das neue Remote.");
-    server.root.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: false,
-      rezzed: false,
-      zone: { side: "corp", zone: "serverRoot", serverId: server.id },
-    };
-    installedRootCount += 1;
-    installedIds.push(cardId);
-  }
-  const rezCandidates = installedIds.filter((cardId) =>
-    isDataFortReclamationRezCandidate(state, cardId, server.id),
-  );
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
-    selectedCount: selectedIds.length,
-    installedCount: installedIceCount + installedRootCount,
-    installedIceCount,
-    installedRootCount,
-    createdServerId: server.id,
-    temporaryCreditsProvided: 10,
-    temporaryCreditsSpent: 0,
-    corpCreditsSpent: 0,
-    temporaryCreditsRemaining: 10,
-    dataFortReclamationRezChoiceOpened: rezCandidates.length > 0,
-    dataFortReclamationRezCandidateCount: rezCandidates.length,
-  };
-  if (rezCandidates.length === 0) return;
-  state.pendingChoice = {
-    choiceId: `choice_v1922_data_fort_reclamation_rez_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1922.data_fort_reclamation_rez:${agendaId}:${server.id}:10:${state.stateVersion + 1}`,
-    prompt: "Data Fort Reclamation: installierte Karten rezzen.",
-    kind: "select_cards",
-    options: rezCandidates.sort().map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    }),
-    minSelections: 0,
-    maxSelections: rezCandidates.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-}
-
-function isDataFortReclamationRezCandidate(
-  state: GameState,
-  cardId: CardInstanceId,
-  serverId: string,
-): boolean {
-  const instance = mustInstance(state.cardInstances, cardId);
-  const definition = definitionFor(state, cardId);
-  if (instance.rezzed) return false;
-  if (instance.zone.side !== "corp") return false;
-  if (
-    instance.zone.zone !== "serverIce" &&
-    instance.zone.zone !== "serverRoot"
-  )
-    return false;
-  if (instance.zone.serverId !== serverId) return false;
-  if (definition.type === "ice") return instance.zone.zone === "serverIce";
-  return (
-    instance.zone.zone === "serverRoot" &&
-    (definition.type === "asset" || definition.type === "upgrade")
-  );
-}
-
-function resolveDataFortReclamationRezChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (
-    !choice ||
-    !choice.source.startsWith("v1922.data_fort_reclamation_rez")
-  )
-    throw new Error("Data-Fort-Reclamation-Rez-Choice ist nicht offen.");
-  const [, agendaId, serverId, temporaryCreditText] = choice.source.split(":");
-  if (
-    !serverId ||
-    !agendaId ||
-    !state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
-    scoredAgendaKindForDefinition(definitionFor(state, agendaId as CardInstanceId)) !==
-      "data_fort_reclamation"
-  )
-    throw new Error("Data Fort Reclamation ist nicht gescored.");
-  mustServer(state, serverId);
-  let temporaryCreditsRemaining = Math.max(
-    0,
-    Math.floor(Number(temporaryCreditText)),
-  );
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  const selectedSet = new Set(selectedIds);
-  if (selectedSet.size !== selectedIds.length)
-    throw new Error("Eine Rez-Karte wurde doppelt gewaehlt.");
-  if (
-    selectedIds.some(
-      (cardId) =>
-        !isDataFortReclamationRezCandidate(state, cardId, serverId),
-    )
-  )
-    throw new Error("Eine gewaehlte Karte kann nicht gerezzed werden.");
-
-  let temporaryCreditsSpent = 0;
-  let corpCreditsSpent = 0;
-  let rezzedIceCount = 0;
-  let rezzedRootCount = 0;
-  for (const cardId of selectedIds) {
-    const rezCost = rezCostForCard(state, cardId);
-    const temporary = Math.min(temporaryCreditsRemaining, rezCost);
-    const corp = rezCost - temporary;
-    if (state.corp.credits < corp)
-      throw new Error(
-        "Die Korp kann die Data-Fort-Reclamation-Rez-Kosten nicht bezahlen.",
-      );
-    temporaryCreditsRemaining -= temporary;
-    temporaryCreditsSpent += temporary;
-    if (corp > 0) {
-      spendCredits(state, "corp", corp);
-      corpCreditsSpent += corp;
-    }
-    const definition = definitionFor(state, cardId);
-    const instance = mustInstance(state.cardInstances, cardId);
-    state.cardInstances[cardId] = {
-      ...instance,
-      faceup: true,
-      rezzed: true,
-    };
-    if (definition.type === "ice") {
-      rezzedIceCount += 1;
-    } else {
-      rezzedRootCount += 1;
-      (
-        cardImplementationCorpRootRezResolver(definition) ??
-        CORP_ROOT_REZ_RESOLVERS[definition.id]
-      )?.resolve(state);
-    }
-  }
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_data_fort_reclamation_rez_sequence",
-    selectedCount: selectedIds.length,
-    rezzedCount: rezzedIceCount + rezzedRootCount,
-    rezzedIceCount,
-    rezzedRootCount,
-    temporaryCreditsProvided: 10,
-    temporaryCreditsSpent,
-    temporaryCreditsRemaining,
-    corpCreditsSpent,
-    corpCreditsAfter: state.corp.credits,
   };
 }
 
@@ -22060,6 +21633,65 @@ function corpZoneChoiceHandlerHost(
   };
 }
 
+function corpInstallRezSequenceHandlerHost(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction?: PlayerAction,
+): CorpInstallRezSequenceHandlerHost {
+  return {
+    state,
+    legalAction,
+    ...(playerAction ? { playerAction } : {}),
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
+      scoredAgendaKind: (cardId) =>
+        scoredAgendaKindForDefinition(definitionFor(state, cardId)),
+      isCorpInstallableCardType: (definition) =>
+        isCorpInstallableCardType(definition),
+      canInstallCorpRootCardInServer: (definition, server) =>
+        canInstallCorpRootCardInServer(state, definition, server),
+      rezCostForCard: (cardId) => rezCostForCard(state, cardId),
+      isPriorityRequisitionCandidate: (cardId) => {
+        const instance = state.cardInstances[cardId];
+        return (
+          instance?.zone.side === "corp" &&
+          instance.zone.zone === "serverIce" &&
+          !instance.rezzed
+        );
+      },
+    },
+    zones: {
+      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+      moveCardToArchivesFaceup: (cardId) => {
+        state.corp.archives.unshift(cardId);
+        state.cardInstances[cardId] = {
+          ...mustInstance(state.cardInstances, cardId),
+          faceup: true,
+          rezzed: true,
+          zone: { side: "corp", zone: "archives" },
+        };
+      },
+    },
+    servers: {
+      createRemote: () => createRemote(state),
+      mustServer: (serverId) => mustServer(state, serverId),
+    },
+    credits: {
+      spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
+    },
+    callbacks: {
+      resolveCorpRootRez: (cardId) => {
+        const definition = definitionFor(state, cardId);
+        (
+          cardImplementationCorpRootRezResolver(definition) ??
+          CORP_ROOT_REZ_RESOLVERS[definition.id]
+        )?.resolve(state);
+      },
+    },
+  };
+}
+
 function resolvePendingChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -22112,6 +21744,10 @@ function resolvePendingChoice(
     corpZoneChoiceHandlerHost(state, legalAction, playerAction),
   );
   if (corpZoneChoice.handled) return;
+  const corpInstallRezSequenceChoice = handleCorpInstallRezSequenceChoice(
+    corpInstallRezSequenceHandlerHost(state, legalAction, playerAction),
+  );
+  if (corpInstallRezSequenceChoice.handled) return;
   if (
     isP358HiddenReplacementCompatibilityChoiceSource(
       state.pendingChoice.source,
@@ -22143,10 +21779,6 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("p3_36.expose_installed_cards")) {
     resolveExposeInstalledCorpCardsChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v162.priority_requisition")) {
-    resolvePriorityRequisitionChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v162.scored_subtype_reveal")) {
@@ -22263,20 +21895,6 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1922.speed_trap")) {
     resolveSpeedTrapRezInterruptChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("v1922.data_fort_reclamation_rez")
-  ) {
-    resolveDataFortReclamationRezChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1922.data_fort_reclamation")) {
-    resolveDataFortReclamationChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
