@@ -214,6 +214,13 @@ import {
   handleCorpTraceDamageActivatedAbility,
   type CorpTraceDamageAbilityHost,
 } from "./game/corp/trace-damage-abilities";
+import {
+  buildCorpSpecialDamageAbilityActionsForCard,
+  handleCorpAccessAmbushDamageEffects,
+  handleCorpSpecialDamageAbilityAction,
+  resolveCorpAccessAmbushPaymentChoice,
+  type CorpSpecialDamageAbilityHost,
+} from "./game/corp/special-damage-abilities";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -454,9 +461,6 @@ import {
 } from "./ability-engine/card-implementation-runtime";
 import type {
   ActivatedCardAbilityImplementation,
-  CardAccessEffectImplementation,
-  CardAccessEffectStepImplementation,
-  CardAccessZone,
   CardCorpUtilityImplementation,
   CardDamagePreventionSourceImplementation,
   CardEffectImplementation,
@@ -2921,6 +2925,7 @@ function corpMainActions(state: GameState): LegalAction[] {
     }
   }
   const corpTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);
+  const corpSpecialDamageAbilityActionsHost = corpSpecialDamageAbilityHost(state);
   for (const assetId of rezzedCorpRootCardIds(state).sort()) {
     const definition = definitionFor(state, assetId);
     pushCorpTraceDamageOrCardImplementationActions(
@@ -2929,6 +2934,12 @@ function corpMainActions(state: GameState): LegalAction[] {
       assetId,
       corpTraceDamageAbilityActionsHost,
     );
+    const specialDamageActions = buildCorpSpecialDamageAbilityActionsForCard(
+      corpSpecialDamageAbilityActionsHost,
+      assetId,
+    );
+    if (specialDamageActions.handled)
+      actions.push(...specialDamageActions.actions);
     if (
       HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS.has(definition.id) &&
       state.corp.rd.length > 0
@@ -3131,67 +3142,6 @@ function corpMainActions(state: GameState): LegalAction[] {
             v1920AssetAbility: "gain_actions",
             gainedActions: 2,
           },
-        ),
-      );
-    }
-    const iGotARockImplementation = uniqueDirectLongtailImplementationForCard(
-      state,
-      assetId,
-    );
-    const isIGotARockCard =
-      iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage";
-    const iGotARockRequiredTags =
-      iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage"
-        ? iGotARockImplementation.requiredRunnerTags
-        : 2;
-    const iGotARockAgendaPointCost =
-      iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage"
-        ? iGotARockImplementation.agendaPointCost
-        : 3;
-    if (
-      isIGotARockCard &&
-      state.runner.tags >= iGotARockRequiredTags &&
-      corpAgendaPointTotal(state) >= iGotARockAgendaPointCost
-    ) {
-      const agendaPointCost =
-        iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage"
-          ? iGotARockImplementation.agendaPointCost
-          : 3;
-      const damageAmount =
-        iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage"
-          ? iGotARockImplementation.damageAmount
-          : 15;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: ${damageAmount} Meat Damage`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
-            agendaPointCost,
-            damageType: "meat",
-            damageAmount,
-          },
-        ),
-      );
-    }
-    if (
-      uniqueDirectLongtailKindForCard(state, assetId) ===
-      "schlaghund_tag_die_meat_damage"
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: Wuerfel gegen Tags werfen`,
-          assetId,
-          [{ clicks: 1 }],
-          { cardId: assetId, v1921AssetAbility: "schlaghund_tag_damage" },
         ),
       );
     }
@@ -7698,79 +7648,11 @@ function performAction(
         return;
       }
       if (
-        legalAction.payload?.v1920AssetAbility ===
-        "i_got_a_rock_tagged_meat_damage"
-      ) {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf I Got a Rock nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-          throw new Error("I Got a Rock ist nicht rezzed installiert.");
-        const implementation =
-          uniqueDirectLongtailImplementationForCard(state, sourceCardId);
-        if (implementation?.kind !== "i_got_a_rock_tagged_meat_damage")
-          throw new Error("Die I-Got-a-Rock-Faehigkeit passt nicht zur Karte.");
-        const requiredTags = implementation.requiredRunnerTags;
-        if (state.runner.tags < requiredTags)
-          throw new Error("I Got a Rock verlangt mindestens zwei Runner-Tags.");
-        resolveIGotARockDamage(state, sourceCardId, legalAction);
+        handleCorpSpecialDamageAbilityAction(
+          corpSpecialDamageAbilityHost(state, legalAction),
+        ).handled
+      )
         return;
-      }
-      if (
-        legalAction.payload?.v1921AssetAbility === "deterministic_die_probe"
-      ) {
-        throw new Error("Schlaghund nutzt keine Wuerfelprobe mehr.");
-      }
-      if (
-        legalAction.payload?.v1921AssetAbility === "schlaghund_tag_damage"
-      ) {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf V1.9.21-Asset-Zufall nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-          throw new Error(
-            "Die V1.9.21-Asset-Zufallsfaehigkeit ist nicht rezzed installiert.",
-          );
-        const definition = definitionFor(state, sourceCardId);
-        const implementation =
-          uniqueDirectLongtailImplementationForDefinition(definition.id);
-        if (implementation?.kind !== "schlaghund_tag_die_meat_damage")
-          throw new Error(
-            "Die V1.9.21-Asset-Zufallsfaehigkeit passt nicht zur Karte.",
-          );
-        const randomPurpose = `v1921.die.${definition.id}.tag_damage`;
-        const dieRoll = rollDeterministicDie(state, randomPurpose);
-        const runnerTags = state.runner.tags;
-        const tagThresholdMet = runnerTags >= dieRoll;
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          randomPurpose,
-          v1921DieRoll: dieRoll,
-          runnerTags,
-          tagThresholdMet,
-          randomCounterAfter: state.randomCounter,
-        };
-        if (!tagThresholdMet) return;
-        resolveDamageOperation(
-          state,
-          legalAction,
-          implementation?.kind === "schlaghund_tag_die_meat_damage"
-            ? implementation.damageType
-            : "meat",
-          implementation?.kind === "schlaghund_tag_die_meat_damage"
-            ? implementation.damageAmount
-            : 10,
-          definition.id,
-        );
-        if (!state.pendingChoice) {
-          trashCorpInstalledCardToArchives(state, sourceCardId);
-          legalAction.payload = {
-            ...(legalAction.payload ?? {}),
-            selfTrashed: true,
-          };
-        }
-        return;
-      }
       if (
         legalAction.payload?.v1921UpgradeAbility ===
         "deterministic_server_die_probe"
@@ -13564,10 +13446,10 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     const instance = mustInstance(state.cardInstances, cardId);
     state.cardInstances[cardId] = { ...instance, faceup: true };
     resolveAmbushOnAccessFoundation(state, cardId, legalAction);
-    resolveCardImplementationAccessEffects(state, cardId, legalAction);
-    resolveAccessAmbushAssetEffect(state, cardId, legalAction);
-    resolveUpgradeAccessEffect(state, cardId, legalAction);
-    resolveAssetAccessEffect(state, cardId, legalAction);
+    handleCorpAccessAmbushDamageEffects(
+      corpSpecialDamageAbilityHost(state, legalAction),
+      cardId,
+    );
     resolveV199UpgradeOnAccess(state, cardId, legalAction);
     const definition = definitionFor(state, cardId);
     const freeTrashAccess = canFreeTrashCurrentAccessCard(
@@ -13612,10 +13494,10 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   const instance = mustInstance(state.cardInstances, cardId);
   state.cardInstances[cardId] = { ...instance, faceup: true };
   resolveAmbushOnAccessFoundation(state, cardId, legalAction);
-  resolveCardImplementationAccessEffects(state, cardId, legalAction);
-  resolveAccessAmbushAssetEffect(state, cardId, legalAction);
-  resolveUpgradeAccessEffect(state, cardId, legalAction);
-  resolveAssetAccessEffect(state, cardId, legalAction);
+  handleCorpAccessAmbushDamageEffects(
+    corpSpecialDamageAbilityHost(state, legalAction),
+    cardId,
+  );
   resolveV199UpgradeOnAccess(state, cardId, legalAction);
   const definition = definitionFor(state, cardId);
   const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
@@ -13667,906 +13549,6 @@ function resolveAmbushOnAccessFoundation(
   };
 }
 
-function cardImplementationAccessZone(
-  state: GameState,
-  cardId: CardInstanceId,
-  legalAction: LegalAction,
-): CardAccessZone {
-  const serverId = String(legalAction.payload?.serverId ?? "");
-  if (serverId === "hq" || serverId === "rd" || serverId === "archives")
-    return serverId;
-  const instance = mustInstance(state.cardInstances, cardId);
-  if (instance.zone.side === "corp") {
-    if (instance.zone.zone === "hq") return "hq";
-    if (instance.zone.zone === "rd") return "rd";
-    if (instance.zone.zone === "archives") return "archives";
-  }
-  if (state.corp.hq.includes(cardId)) return "hq";
-  if (state.corp.rd.includes(cardId)) return "rd";
-  if (state.corp.archives.includes(cardId)) return "archives";
-  return "installed";
-}
-
-function cardHasImplementationAccessEffects(
-  definition: CardDefinition,
-): boolean {
-  return (
-    (cardImplementationForDefinitionId(definition.id)?.accessEffects?.length ??
-      0) > 0
-  );
-}
-
-function accessConditionMet(
-  state: GameState,
-  cardId: CardInstanceId,
-  condition: CardAccessEffectImplementation["condition"],
-): boolean {
-  if (!condition) return true;
-  switch (condition.kind) {
-    case "runner_is_tagged":
-      return state.runner.tags > 0;
-    case "source_has_advancement_counters":
-      return (
-        mustInstance(state.cardInstances, cardId).advancementCounters >=
-        condition.minimum
-      );
-    case "source_has_hosted_credits":
-      return cardCounter(state, cardId, "bit") > 0;
-    case "runner_attempted_run_last_turn":
-      return runnerRunAttemptsLastTurn(state) >= condition.minimumRuns;
-    default: {
-      const unknown = condition as { kind?: string };
-      throw new Error(
-        `Unsupported CardImplementation access condition: ${
-          unknown.kind ?? "unknown"
-        }`,
-      );
-    }
-  }
-}
-
-function accessEffectApplies(
-  state: GameState,
-  cardId: CardInstanceId,
-  effect: CardAccessEffectImplementation,
-  accessZone: CardAccessZone,
-): boolean {
-  return (
-    effect.sourceZones.includes(accessZone) &&
-    !(effect.ignoreIfAccessedFrom ?? []).includes(accessZone) &&
-    accessConditionMet(state, cardId, effect.condition)
-  );
-}
-
-function accessEffectHiddenZoneAction(
-  definition: CardDefinition,
-  effect: CardAccessEffectImplementation,
-): string {
-  if (
-    effect.effects.some(
-      (step) => step.kind === "add_runner_counter" && step.counterType === "crying",
-    )
-  )
-    return "v1918_crybaby_access_counter";
-  if (
-    effect.effects.some((step) => step.kind === "trash_installed_runner_cards")
-  )
-    return "v1919_access_ambush_trash_installed";
-  if (
-    effect.effects.some(
-      (step) => step.kind === "damage_from_source_advancement_counters",
-    )
-  )
-    return "v1919_access_ambush_damage";
-  if (definition.type === "upgrade") return "v1918_upgrade_access_ambush";
-  if (effect.sourceZones.some((zone) => zone === "hq" || zone === "rd"))
-    return "v1917_access_ambush";
-  return "card_implementation_access_effect";
-}
-
-function setAccessEffectBasePayload(
-  legalAction: LegalAction,
-  definition: CardDefinition,
-  accessZone: CardAccessZone,
-  effect: CardAccessEffectImplementation,
-): void {
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: accessEffectHiddenZoneAction(definition, effect),
-    ambushDefinitionId: definition.id,
-    accessEffectSourceDefinitionId: definition.id,
-    accessedFromZone: accessZone,
-    ...(effect.revealIfAccessedFrom?.includes(accessZone as "rd")
-      ? {
-          publicRevealKind: "reveal",
-          publicRevealDefinitionId: definition.id,
-        }
-      : {}),
-  };
-}
-
-function resolveCardImplementationAccessEffects(
-  state: GameState,
-  cardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const definition = definitionFor(state, cardId);
-  const accessEffects =
-    cardImplementationForDefinitionId(definition.id)?.accessEffects ?? [];
-  if (accessEffects.length === 0) return;
-  if (
-    legalAction.side !== "runner" ||
-    legalAction.type !== "access_card" ||
-    state.run?.accessedCardId !== cardId
-  ) {
-    throw new Error(
-      "CardImplementation-Access-Effekt darf nur aus einem legalen Access-Fenster ausloesen.",
-    );
-  }
-  const accessZone = cardImplementationAccessZone(state, cardId, legalAction);
-  for (const [effectIndex, effect] of accessEffects.entries()) {
-    setAccessEffectBasePayload(legalAction, definition, accessZone, effect);
-    if ((effect.ignoreIfAccessedFrom ?? []).includes(accessZone)) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        ambushSkippedReason: accessZone,
-      };
-      continue;
-    }
-    if (!effect.sourceZones.includes(accessZone)) continue;
-    if (!accessConditionMet(state, cardId, effect.condition)) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        ...(effect.condition?.kind === "runner_is_tagged"
-          ? {
-              tagConditionMet: false,
-              damageSkippedReason: "runner_not_tagged",
-            }
-          : { accessEffectConditionMet: false }),
-      };
-      continue;
-    }
-    if (effect.cost?.kind === "corp_may_pay_credits") {
-      startCardImplementationAccessPaymentChoice(
-        state,
-        cardId,
-        effectIndex,
-        accessZone,
-        effect,
-        legalAction,
-      );
-      continue;
-    }
-    executeCardImplementationAccessEffectSteps(
-      state,
-      cardId,
-      definition,
-      effect,
-      legalAction,
-    );
-  }
-}
-
-function startCardImplementationAccessPaymentChoice(
-  state: GameState,
-  cardId: CardInstanceId,
-  effectIndex: number,
-  accessZone: CardAccessZone,
-  effect: CardAccessEffectImplementation,
-  legalAction: LegalAction,
-): void {
-  const cost = effect.cost;
-  if (!cost || cost.kind !== "corp_may_pay_credits") return;
-  if (state.corp.credits < cost.amount) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      ambushPaymentAvailable: false,
-      ambushPaidCost: 0,
-      corpCreditsAfter: state.corp.credits,
-    };
-    return;
-  }
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  state.pendingChoice = {
-    choiceId: `p3_35_access_payment_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `p3_35.access_payment:${cardId}:${effectIndex}:${accessZone}:${state.stateVersion + 1}`,
-    prompt: "Access-Ambush bezahlen",
-    kind: "select_option",
-    options: [
-      {
-        id: "pay",
-        label: `${cost.amount} Credits zahlen`,
-        publicLabel: "Access-Ambush bezahlen",
-        value: "pay",
-      },
-      {
-        id: "decline",
-        label: "Nicht zahlen",
-        publicLabel: "Access-Ambush nicht bezahlen",
-        value: "decline",
-      },
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ambushPaymentAvailable: true,
-    ambushPaymentChoiceOpened: true,
-    ambushPaymentAmount: cost.amount,
-  };
-}
-
-function executeCardImplementationAccessEffectSteps(
-  state: GameState,
-  cardId: CardInstanceId,
-  definition: CardDefinition,
-  effect: CardAccessEffectImplementation,
-  legalAction: LegalAction,
-): void {
-  const resolvedEffects: ResolvedGameEffect[] = [];
-  for (const [index, step] of effect.effects.entries()) {
-    executeCardImplementationAccessEffectStep(
-      state,
-      cardId,
-      definition,
-      step,
-      index,
-      legalAction,
-      resolvedEffects,
-    );
-  }
-  appendResolvedEffectsToPayload(legalAction, resolvedEffects);
-}
-
-function accessEffectId(
-  definition: CardDefinition,
-  cardId: CardInstanceId,
-  index: number,
-  kind: string,
-): string {
-  return `${definition.id}.${sanitizeId(cardId)}.access_effect.${index}.${kind}`;
-}
-
-function executeCardImplementationAccessEffectStep(
-  state: GameState,
-  cardId: CardInstanceId,
-  definition: CardDefinition,
-  step: CardAccessEffectStepImplementation,
-  index: number,
-  legalAction: LegalAction,
-  resolvedEffects: ResolvedGameEffect[],
-): void {
-  switch (step.kind) {
-    case "damage": {
-      resolveDamageOperation(
-        state,
-        legalAction,
-        step.damageType,
-        step.amount,
-        definition.id,
-      );
-      if (legalAction.payload?.damageResolved === true) {
-        resolvedEffects.push({
-          effectId: accessEffectId(definition, cardId, index, "damage"),
-          kind: "damage",
-          visibility: step.visibility,
-          side: "runner",
-          amount: Number(legalAction.payload.damageAmount ?? step.amount),
-          damageType: step.damageType,
-          cardsTrashed: Number(legalAction.payload.cardsTrashed ?? 0),
-          reason: "access_effect",
-          sourceDefinitionId: definition.id,
-          sourceTitle: definition.title,
-        });
-      }
-      return;
-    }
-    case "damage_from_source_advancement_counters": {
-      const advancementCounterCount = Math.max(
-        0,
-        Math.floor(mustInstance(state.cardInstances, cardId).advancementCounters),
-      );
-      const amount =
-        advancementCounterCount > 0
-          ? advancementCounterCount * step.amountPerCounter
-          : step.minimumAmount;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        advancementCounterCount,
-        damageAmount: amount,
-      };
-      if (amount <= 0) return;
-      resolveDamageOperation(
-        state,
-        legalAction,
-        step.damageType,
-        amount,
-        definition.id,
-      );
-      if (legalAction.payload?.damageResolved === true) {
-        resolvedEffects.push({
-          effectId: accessEffectId(
-            definition,
-            cardId,
-            index,
-            "damage_from_source_advancement_counters",
-          ),
-          kind: "damage",
-          visibility: step.visibility,
-          side: "runner",
-          amount: Number(legalAction.payload.damageAmount ?? amount),
-          damageType: step.damageType,
-          cardsTrashed: Number(legalAction.payload.cardsTrashed ?? 0),
-          reason: "access_effect",
-          sourceDefinitionId: definition.id,
-          sourceTitle: definition.title,
-        });
-      }
-      return;
-    }
-    case "trace": {
-      if (!("baseTraceStrength" in step) || !("limit" in step))
-        throw new Error("Access-Trace braucht eine Base-Trace-Staerke.");
-      const accessTraceStep = step as {
-        kind: "trace";
-        baseTraceStrength: number;
-        onSuccess: readonly CardTraceSuccessEffectImplementation[];
-        limit: "once_per_run_on_this_fort_per_source";
-        visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
-      };
-      const run = state.run;
-      if (!run || run.accessedCardId !== cardId)
-        throw new Error("Access-Trace braucht einen aktiven Access-Kontext.");
-      const serverId = run.attackedServerId;
-      const consumed = run.turbeauAccessTraceConsumedByServer?.[serverId] ?? [];
-      if (
-        accessTraceStep.limit === "once_per_run_on_this_fort_per_source" &&
-        consumed.includes(cardId)
-      ) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          hiddenZoneBarrier: true,
-          hiddenZoneAction: "v1918_upgrade_access_trace",
-          ambushDefinitionId: definition.id,
-          oncePerRunConsumed: true,
-          serverId,
-        };
-        return;
-      }
-      run.turbeauAccessTraceConsumedByServer = {
-        ...(run.turbeauAccessTraceConsumedByServer ?? {}),
-        [serverId]: [...consumed, cardId],
-      };
-      legalAction.payload = { ...(legalAction.payload ?? {}), cardId };
-      startTraceFromOperation(
-        state,
-        definition.id,
-        accessTraceStep.baseTraceStrength,
-        legalAction,
-        traceSuccessEffectForCardImplementation(accessTraceStep.onSuccess),
-      );
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1918_upgrade_access_trace",
-        ambushDefinitionId: definition.id,
-        oncePerRunConsumed: true,
-        baseTraceStrength: accessTraceStep.baseTraceStrength,
-        serverId,
-      };
-      return;
-    }
-    case "add_tags": {
-      addRunnerTagsWithPrevention(
-        state,
-        legalAction,
-        step.amount,
-        definition.id,
-      );
-      if (legalAction.payload?.eventModificationWindowOpened === true) return;
-      resolvedEffects.push({
-        effectId: accessEffectId(definition, cardId, index, "add_tags"),
-        kind: "add_tags",
-        visibility: step.visibility,
-        side: "runner",
-        amount: step.amount,
-        reason: "access_effect",
-        runnerTagsAfter: state.runner.tags,
-        sourceDefinitionId: definition.id,
-        sourceTitle: definition.title,
-      });
-      return;
-    }
-    case "add_runner_counter": {
-      addCardCounter(state, state.runner.identity, step.counterType, step.amount);
-      const remainingCounters = cardCounter(
-        state,
-        state.runner.identity,
-        step.counterType,
-      );
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        counterType: step.counterType,
-        addedCounterAmount: step.amount,
-        remainingCounters,
-        ...(step.counterType === "crying"
-          ? {
-              cryingCountersAfter: remainingCounters,
-              linkModifierAmount: -2 * remainingCounters,
-            }
-          : {}),
-      };
-      resolvedEffects.push({
-        effectId: accessEffectId(definition, cardId, index, "add_runner_counter"),
-        kind: "counter_change",
-        visibility: step.visibility,
-        side: "runner",
-        counterType: step.counterType,
-        addedCounterAmount: step.amount,
-        remainingCounters,
-        sourceDefinitionId: definition.id,
-        sourceTitle: definition.title,
-      });
-      return;
-    }
-    case "trash_installed_runner_cards": {
-      const amount =
-        typeof step.amount === "number"
-          ? step.amount
-          : Math.max(
-              0,
-              Math.floor(
-                mustInstance(state.cardInstances, cardId).advancementCounters,
-              ),
-            );
-      trashRunnerInstalledTargetsForAccessEffect(
-        state,
-        definition,
-        step.target,
-        amount,
-        legalAction,
-        resolvedEffects,
-        index,
-      );
-      return;
-    }
-    default: {
-      const unsupported = step as { kind?: string };
-      throw new Error(
-        `Unsupported CardImplementation access effect step: ${
-          unsupported.kind ?? "unknown"
-        }`,
-      );
-    }
-  }
-}
-
-function runnerInstalledTrashCandidatesForAccessEffect(
-  state: GameState,
-  target: "program" | "hardware" | "daemon",
-): CardInstanceId[] {
-  const candidates =
-    target === "hardware" ? state.runner.rig.hardware : state.runner.rig.programs;
-  return candidates
-    .filter((candidateId) => {
-      const candidateDefinition = definitionFor(state, candidateId);
-      if (target === "hardware") return candidateDefinition.type === "hardware";
-      if (candidateDefinition.type !== "program") return false;
-      return target === "program" || cardHasSubtype(candidateDefinition, "daemon");
-    })
-    .slice()
-    .sort((left, right) => {
-      const leftDefinition = definitionFor(state, left);
-      const rightDefinition = definitionFor(state, right);
-      const byInstallCost =
-        (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
-      if (byInstallCost !== 0) return byInstallCost;
-      const byMemory =
-        (rightDefinition.memoryCost ?? 0) - (leftDefinition.memoryCost ?? 0);
-      if (byMemory !== 0) return byMemory;
-      return left.localeCompare(right);
-    });
-}
-
-function trashRunnerInstalledTargetsForAccessEffect(
-  state: GameState,
-  sourceDefinition: CardDefinition,
-  target: "program" | "hardware" | "daemon",
-  amount: number,
-  legalAction: LegalAction,
-  resolvedEffects: ResolvedGameEffect[],
-  effectIndex: number,
-): void {
-  const selectedTargetIds = runnerInstalledTrashCandidatesForAccessEffect(
-    state,
-    target,
-  ).slice(0, amount);
-  if (selectedTargetIds.length === 0) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneAction: "v1919_access_ambush_no_target",
-      targetTrashCount: amount,
-      trashedCount: 0,
-      trashedCardType: target,
-      accessEffectNoTarget: true,
-    };
-    return;
-  }
-  const targetDefinitionIds = selectedTargetIds.map(
-    (targetId) => definitionFor(state, targetId).id,
-  );
-  if (
-    openRunnerInstalledTrashPreventionWindow(
-      state,
-      legalAction,
-      selectedTargetIds,
-      sourceDefinition.id,
-    )
-  )
-    return;
-  for (const targetId of selectedTargetIds) trashRunnerInstalledCardToHeap(state, targetId);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    advancementCounterCount: amount,
-    targetTrashCount: amount,
-    trashedCount: selectedTargetIds.length,
-    trashedCardDefinitionId: targetDefinitionIds[0] ?? "",
-    trashedCardDefinitionIds: targetDefinitionIds.join(","),
-    trashedCardType: target,
-  };
-  resolvedEffects.push({
-    effectId: `${sourceDefinition.id}.access_effect.${effectIndex}.trash_installed_runner_cards`,
-    kind: "trash_card",
-    visibility: "hidden_info_barrier",
-    side: "runner",
-    amount: selectedTargetIds.length,
-    reason: "access_effect",
-    sourceDefinitionId: sourceDefinition.id,
-    sourceTitle: sourceDefinition.title,
-    ...(targetDefinitionIds[0]
-      ? { cardDefinitionId: targetDefinitionIds[0] }
-      : {}),
-  });
-}
-
-function resolveAccessAmbushAssetEffect(
-  state: GameState,
-  cardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const definition = definitionFor(state, cardId);
-  if (cardHasImplementationAccessEffects(definition)) return;
-  if (
-    definition.id !== SETUP_ACCESS_AMBUSH_ASSET_CARD_ID &&
-    definition.id !== TRAP_ACCESS_AMBUSH_ASSET_CARD_ID
-  )
-    return;
-  if (
-    legalAction.side !== "runner" ||
-    legalAction.type !== "access_card" ||
-    state.run?.accessedCardId !== cardId
-  ) {
-    throw new Error(
-      "V1.9.17-Ambush darf nur aus einem legalen Access-Fenster ausloesen.",
-    );
-  }
-  const accessServerId = String(legalAction.payload?.serverId ?? "");
-  const accessedFromArchives =
-    accessServerId === "archives" ||
-    mustInstance(state.cardInstances, cardId).zone.zone === "archives";
-  if (accessedFromArchives) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1917_access_ambush",
-      ambushDefinitionId: definition.id,
-      ambushSkippedReason: "archives",
-    };
-    return;
-  }
-  if (definition.id === TRAP_ACCESS_AMBUSH_ASSET_CARD_ID)
-    state.runner.tags += 1;
-  const damageAmount =
-    definition.id === SETUP_ACCESS_AMBUSH_ASSET_CARD_ID ? 2 : 3;
-  const summary = doDamage(state, {
-    damageId: `v1917.ambush.${state.run.runId}.${cardId}.${state.stateVersion + 1}`,
-    damageType: "net",
-    amount: damageAmount,
-    source: definition.id,
-  });
-  setDamagePayload(legalAction, summary);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1917_access_ambush",
-    ambushDefinitionId: definition.id,
-    damageAmount,
-    ...(accessServerId === "rd"
-      ? {
-          publicRevealKind: "reveal",
-          publicRevealDefinitionId: definition.id,
-        }
-      : {}),
-    ...(definition.id === TRAP_ACCESS_AMBUSH_ASSET_CARD_ID
-      ? { tagsAdded: 1, runnerTagsAfter: state.runner.tags }
-      : {}),
-  };
-}
-
-function resolveUpgradeAccessEffect(
-  state: GameState,
-  cardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const definition = definitionFor(state, cardId);
-  if (cardHasImplementationAccessEffects(definition)) return;
-  if (
-    definition.id !== CRYBABY_ACCESS_COST_UPGRADE_ID &&
-    definition.id !== DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID &&
-    definition.id !== DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID &&
-    definition.id !== TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID
-  )
-    return;
-  if (
-    legalAction.side !== "runner" ||
-    legalAction.type !== "access_card" ||
-    state.run?.accessedCardId !== cardId
-  ) {
-    throw new Error(
-      "V1.9.18-Upgrade-Ambush darf nur aus einem legalen Access-Fenster ausloesen.",
-    );
-  }
-  if (!mustInstance(state.cardInstances, cardId).rezzed) return;
-  if (cardImplementationForDefinitionId(definition.id)?.accessEffects?.length)
-    return;
-
-  if (definition.id === CRYBABY_ACCESS_COST_UPGRADE_ID) {
-    addCardCounter(state, state.runner.identity, "crying", 1);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1918_crybaby_access_counter",
-      ambushDefinitionId: definition.id,
-      counterType: "crying",
-      addedCounterAmount: 1,
-      remainingCounters: cardCounter(state, state.runner.identity, "crying"),
-    };
-    return;
-  }
-
-  if (definition.id === TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID) {
-    const serverId = state.run.attackedServerId;
-    const consumed = state.run.turbeauAccessTraceConsumedByServer?.[serverId] ?? [];
-    if (consumed.includes(cardId)) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1918_upgrade_access_trace",
-        ambushDefinitionId: definition.id,
-        oncePerRunConsumed: true,
-        serverId,
-      };
-      return;
-    }
-    state.run.turbeauAccessTraceConsumedByServer = {
-      ...(state.run.turbeauAccessTraceConsumedByServer ?? {}),
-      [serverId]: [...consumed, cardId],
-    };
-    legalAction.payload = { ...(legalAction.payload ?? {}), cardId };
-    startTraceFromOperation(state, definition.id, 4, legalAction);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1918_upgrade_access_trace",
-      ambushDefinitionId: definition.id,
-      oncePerRunConsumed: true,
-      baseTraceStrength: 4,
-      serverId,
-    };
-    return;
-  }
-
-  const damageType =
-    definition.id === DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID
-      ? "meat"
-      : "net";
-  const damageAmount =
-    definition.id === DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID ? 3 : 1;
-  const runnerTagsBefore = state.runner.tags;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ambushDefinitionId: definition.id,
-    damageType,
-    damageAmount,
-    ...(definition.id === DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID
-      ? { runnerTagsBefore, tagConditionMet: runnerTagsBefore >= 1 }
-      : {}),
-  };
-  if (
-    definition.id === DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID &&
-    runnerTagsBefore < 1
-  ) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      damageSkippedReason: "runner_not_tagged",
-    };
-    return;
-  }
-  resolveDamageOperation(
-    state,
-    legalAction,
-    damageType,
-    damageAmount,
-    definition.id,
-  );
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1918_upgrade_access_ambush",
-    ambushDefinitionId: definition.id,
-    damageType,
-    damageAmount,
-  };
-}
-
-function resolveAssetAccessEffect(
-  state: GameState,
-  cardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const definition = definitionFor(state, cardId);
-  if (cardHasImplementationAccessEffects(definition)) return;
-  if (
-    definition.id !== CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID &&
-    definition.id !== EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID &&
-    definition.id !== VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID &&
-    definition.id !== VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID
-  ) {
-    return;
-  }
-  if (
-    legalAction.side !== "runner" ||
-    legalAction.type !== "access_card" ||
-    state.run?.accessedCardId !== cardId
-  ) {
-    throw new Error(
-      "V1.9.19-Asset-Ambush darf nur aus einem legalen Access-Fenster ausloesen.",
-    );
-  }
-  const accessServerId = String(legalAction.payload?.serverId ?? "");
-  const accessedFromArchives =
-    accessServerId === "archives" ||
-    mustInstance(state.cardInstances, cardId).zone.zone === "archives";
-  if (
-    accessedFromArchives &&
-    definition.id === VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID
-  ) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1919_access_ambush_damage",
-      ambushDefinitionId: definition.id,
-      ambushSkippedReason: "archives",
-    };
-    return;
-  }
-
-  if (
-    definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID ||
-    definition.id === EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID
-  ) {
-    const candidates =
-      definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID
-        ? state.runner.rig.hardware
-        : state.runner.rig.programs;
-    const targetCardIds = candidates.slice().sort((left, right) => {
-      const leftDefinition = definitionFor(state, left);
-      const rightDefinition = definitionFor(state, right);
-      const byInstallCost =
-        (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
-      return byInstallCost !== 0 ? byInstallCost : left.localeCompare(right);
-    });
-    const trashLimit =
-      definition.id === EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID ||
-      definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID
-        ? Math.max(0, mustInstance(state.cardInstances, cardId).advancementCounters)
-        : 1;
-    const selectedTargetIds = targetCardIds.slice(0, trashLimit);
-    if (selectedTargetIds.length > 0) {
-      const targetDefinitionIds = selectedTargetIds.map(
-        (targetCardId) => definitionFor(state, targetCardId).id,
-      );
-      for (const targetCardId of selectedTargetIds)
-        trashRunnerInstalledCardToHeap(state, targetCardId);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1919_access_ambush_trash_installed",
-        ambushDefinitionId: definition.id,
-        ...(definition.id === EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID ||
-        definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID
-          ? { advancementCounterCount: trashLimit }
-          : {}),
-        trashedCount: selectedTargetIds.length,
-        trashedCardDefinitionId: targetDefinitionIds[0] ?? "",
-        trashedCardDefinitionIds: targetDefinitionIds.join(","),
-        trashedCardType:
-          definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID
-            ? "hardware"
-            : "program",
-      };
-      return;
-    }
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1919_access_ambush_no_target",
-      ambushDefinitionId: definition.id,
-    };
-    return;
-  }
-
-  const damageType: DamageType =
-    definition.id === VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID
-      ? "core"
-      : "net";
-  const advancementCounterCount = Math.max(
-    0,
-    Math.floor(mustInstance(state.cardInstances, cardId).advancementCounters),
-  );
-  const damageAmount =
-    definition.id === VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID
-      ? advancementCounterCount
-      : definition.id === VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID
-        ? Math.max(1, advancementCounterCount * 2)
-        : 2;
-  if (damageAmount <= 0) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1919_access_ambush_damage",
-      ambushDefinitionId: definition.id,
-      advancementCounterCount,
-      damageAmount: 0,
-      ...(accessServerId === "rd"
-        ? {
-            publicRevealKind: "reveal",
-            publicRevealDefinitionId: definition.id,
-          }
-        : {}),
-    };
-    return;
-  }
-  const summary = doDamage(state, {
-    damageId: `v1919.asset_access.${state.run.runId}.${cardId}.${state.stateVersion + 1}`,
-    damageType,
-    amount: damageAmount,
-    source: definition.id,
-  });
-  setDamagePayload(legalAction, summary);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1919_access_ambush_damage",
-    ambushDefinitionId: definition.id,
-    ...(definition.id === VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID ||
-    definition.id === VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID
-      ? { advancementCounterCount, damageAmount }
-      : {}),
-    ...(accessServerId === "rd"
-      ? {
-          publicRevealKind: "reveal",
-          publicRevealDefinitionId: definition.id,
-        }
-      : {}),
-  };
-}
-
 function resolveV199UpgradeOnAccess(
   state: GameState,
   cardId: CardInstanceId,
@@ -14580,7 +13562,10 @@ function resolveV199UpgradeOnAccess(
       bizarreEncryptionSchemeAccessed: true,
     };
   }
-  if (definition.id === CHIMERA_ID && !cardHasImplementationAccessEffects(definition)) {
+  if (
+    definition.id === CHIMERA_ID &&
+    (cardImplementationForDefinitionId(definition.id)?.accessEffects?.length ?? 0) === 0
+  ) {
     startChimeraDaemonTrashChoice(state, cardId, legalAction);
   }
 }
@@ -21219,6 +20204,124 @@ function corpTraceDamageAbilityHost(
   };
 }
 
+function corpSpecialDamageAbilityHost(
+  state: GameState,
+  legalAction?: LegalAction,
+): CorpSpecialDamageAbilityHost {
+  return {
+    state,
+    ...(legalAction ? { legalAction } : {}),
+    definitions: {
+      setup: SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
+      trap: TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
+      crybaby: CRYBABY_ACCESS_COST_UPGRADE_ID,
+      dedicatedResponseTeam: DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
+      dieterEsslin: DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
+      turbeauDelacroix: TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
+      corprunnersShatteredRemains: CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
+      experimentalAi: EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
+      vacantSoulkiller: VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
+      virusTestSite: VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
+    },
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
+      cardHasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
+      accessEffectsForDefinition: (definitionId) =>
+        cardImplementationForDefinitionId(definitionId)?.accessEffects ?? [],
+      uniqueDirectLongtailImplementationForCard: (cardId) =>
+        uniqueDirectLongtailImplementationForCard(state, cardId),
+      uniqueDirectLongtailImplementationForDefinition: (definitionId) =>
+        uniqueDirectLongtailImplementationForDefinition(definitionId),
+      uniqueDirectLongtailKindForCard: (cardId) =>
+        uniqueDirectLongtailKindForCard(state, cardId),
+      rezzedCorpRootCardIds: () => rezzedCorpRootCardIds(state),
+    },
+    actions: {
+      buildLegalAction: (side, type, label, source, costs, payload) =>
+        action(state, side, type, label, source, costs, payload),
+    },
+    agendaPoints: {
+      total: () => corpAgendaPointTotal(state),
+      scoredForfeitTargets: () => corpScoredAgendaForfeitTargets(state),
+      pointsForScoredCard: (cardId) => agendaPointsForScoredCard(state, cardId),
+      forfeitCorpAgendaForPointCost: (cardId) =>
+        forfeitCorpAgendaForPointCost(state, cardId),
+    },
+    counters: {
+      cardCounter: (cardId, counterType) =>
+        cardCounter(state, cardId, counterType as CounterType),
+      addCardCounter: (cardId, counterType, amount) =>
+        addCardCounter(state, cardId, counterType as CounterType, amount),
+    },
+    damage: {
+      resolveDamageOperation: (damageType, amount, sourceDefinitionId) => {
+        if (!legalAction) throw new Error("Damage-Aktion fehlt.");
+        resolveDamageOperation(
+          state,
+          legalAction,
+          damageType,
+          amount,
+          sourceDefinitionId,
+        );
+      },
+      doDamage: (damageId, damageType, amount, sourceDefinitionId) =>
+        doDamage(state, {
+          damageId,
+          damageType,
+          amount,
+          source: sourceDefinitionId,
+        }),
+      setDamagePayload: (summary) => {
+        if (!legalAction) throw new Error("Damage-Aktion fehlt.");
+        setDamagePayload(legalAction, summary);
+      },
+    },
+    tags: {
+      addRunnerTagsWithPrevention: (amount, sourceDefinitionId) => {
+        if (!legalAction) throw new Error("Tag-Aktion fehlt.");
+        addRunnerTagsWithPrevention(state, legalAction, amount, sourceDefinitionId);
+      },
+    },
+    trace: {
+      startTraceFromOperation: (sourceDefinitionId, baseTraceStrength, successEffect) => {
+        if (!legalAction) throw new Error("Trace-Aktion fehlt.");
+        startTraceFromOperation(
+          state,
+          sourceDefinitionId,
+          baseTraceStrength,
+          legalAction,
+          successEffect as TraceSuccessEffect | undefined,
+        );
+      },
+      traceSuccessEffectForCardImplementation: (effects) =>
+        traceSuccessEffectForCardImplementation(effects),
+    },
+    rng: {
+      rollDie: (purpose) => rollDeterministicDie(state, purpose),
+      randomCounter: () => state.randomCounter,
+    },
+    trash: {
+      trashCorpInstalledCardToArchives: (cardId) =>
+        trashCorpInstalledCardToArchives(state, cardId),
+      trashRunnerInstalledCardToHeap: (cardId) =>
+        trashRunnerInstalledCardToHeap(state, cardId),
+      openRunnerInstalledTrashPreventionWindow: (targetIds, sourceDefinitionId) => {
+        if (!legalAction) throw new Error("Trash-Prevention-Aktion fehlt.");
+        return openRunnerInstalledTrashPreventionWindow(
+          state,
+          legalAction,
+          targetIds,
+          sourceDefinitionId,
+        );
+      },
+    },
+    credits: {
+      spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
+    },
+  };
+}
+
 function pushCorpTraceDamageOrCardImplementationActions(
   state: GameState,
   actions: LegalAction[],
@@ -22506,58 +21609,6 @@ function chooseCorpAgendasForPointCost(
   return [];
 }
 
-function resolveIGotARockDamage(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const definition = definitionFor(state, sourceCardId);
-  const implementation = uniqueDirectLongtailImplementationForDefinition(
-    definition.id,
-  );
-  const requiredPoints =
-    implementation?.kind === "i_got_a_rock_tagged_meat_damage"
-      ? implementation.agendaPointCost
-      : 3;
-  const forfeitedAgendaIds = chooseCorpAgendasForPointCost(state, requiredPoints);
-  const paidPoints = forfeitedAgendaIds.reduce(
-    (sum, cardId) => sum + agendaPointsForScoredCard(state, cardId),
-    0,
-  );
-  if (paidPoints < requiredPoints)
-    throw new Error("I Got a Rock braucht 3 Agenda-Punkte.");
-  const forfeitedDefinitionIds = forfeitedAgendaIds
-    .map((cardId) => definitionFor(state, cardId).id)
-    .join(",");
-  for (const agendaId of forfeitedAgendaIds) {
-    forfeitCorpAgendaForPointCost(state, agendaId);
-  }
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
-    sourceDefinitionId: definition.id,
-    sourceCardId,
-    runnerTagsBefore: state.runner.tags,
-    agendaPointCost: requiredPoints,
-    agendaPointCostPaid: paidPoints,
-    forfeitedAgendaDefinitionIds: forfeitedDefinitionIds,
-    specialZone: "removed_from_game",
-    specialZoneVisibility: "public",
-    specialZoneReason: "v1920_i_got_a_rock",
-  };
-  resolveDamageOperation(
-    state,
-    legalAction,
-    implementation?.kind === "i_got_a_rock_tagged_meat_damage"
-      ? implementation.damageType
-      : "meat",
-    implementation?.kind === "i_got_a_rock_tagged_meat_damage"
-      ? implementation.damageAmount
-      : 15,
-    definition.id,
-  );
-}
-
 function startSingaporeCityGridSwapChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -23142,61 +22193,9 @@ function resolveCardImplementationAccessPaymentChoice(
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_35.access_payment"))
-    throw new Error("Es ist keine CardImplementation-Access-Payment-Choice offen.");
-  const [, sourceCardId = "", effectIndexRaw = "", accessZoneRaw = ""] =
-    choice.source.split(":");
-  const effectIndex = Number(effectIndexRaw);
-  if (
-    !sourceCardId ||
-    !state.cardInstances[sourceCardId] ||
-    state.run?.accessedCardId !== sourceCardId ||
-    !Number.isInteger(effectIndex) ||
-    effectIndex < 0
-  )
-    throw new Error("Die Access-Payment-Choice ist nicht mehr gueltig.");
-  const definition = definitionFor(state, sourceCardId);
-  const effect =
-    cardImplementationForDefinitionId(definition.id)?.accessEffects?.[effectIndex];
-  if (!effect?.cost || effect.cost.kind !== "corp_may_pay_credits")
-    throw new Error("Die Access-Payment-Choice passt nicht zur Karte.");
-  const accessZone = cardImplementationAccessZone(state, sourceCardId, legalAction);
-  if (accessZone !== accessZoneRaw || !accessEffectApplies(state, sourceCardId, effect, accessZone))
-    throw new Error("Der Access-Payment-Kontext ist nicht mehr gueltig.");
-  const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  if (selectedId !== "pay" && selectedId !== "decline")
-    throw new Error("Die Access-Payment-Auswahl ist ungueltig.");
-  setAccessEffectBasePayload(legalAction, definition, accessZone, effect);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ambushPaymentAmount: effect.cost.amount,
-  };
-  if (selectedId === "decline") {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      ambushPaymentDeclined: true,
-      ambushPaidCost: 0,
-      corpCreditsAfter: state.corp.credits,
-    };
-    delete state.pendingChoice;
-    return;
-  }
-  if (state.corp.credits < effect.cost.amount)
-    throw new Error("Die Korp kann die Access-Ambush-Kosten nicht bezahlen.");
-  spendCredits(state, "corp", effect.cost.amount);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ambushPaidCost: effect.cost.amount,
-    corpCreditsAfter: state.corp.credits,
-  };
-  delete state.pendingChoice;
-  executeCardImplementationAccessEffectSteps(
-    state,
-    sourceCardId,
-    definition,
-    effect,
-    legalAction,
+  resolveCorpAccessAmbushPaymentChoice(
+    corpSpecialDamageAbilityHost(state, legalAction),
+    selectedChoiceIds(playerAction.selectedChoices)[0] ?? "",
   );
 }
 
