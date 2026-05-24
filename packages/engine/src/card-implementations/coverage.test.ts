@@ -608,6 +608,23 @@ describe("CardImplementation coverage and registry invariants", () => {
     });
   });
 
+  it("migrates Proteus Phase 1g post-pass derez utility into CardImplementation coverage", () => {
+    const definitionId = "onr_proteus_085_disintegrator";
+    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      cardDefinitionId: definitionId,
+      status: "implemented",
+    });
+    expect(
+      cardImplementationForDefinitionId(definitionId)?.runnerUtilityLongtail,
+    ).toMatchObject({
+      kind: "derez_fully_broken_passed_ice_and_end_run",
+      cost: { kind: "credit", amount: 2 },
+      timing: "after_passing_fully_broken_ice",
+      target: "that_ice",
+    });
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",

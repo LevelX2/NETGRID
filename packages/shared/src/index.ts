@@ -885,6 +885,7 @@ export type RunState = {
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
+  fullyBrokenPassedIcePendingId?: CardInstanceId;
   startupImmolatorPendingPassedIceId?: CardInstanceId;
   forceJackOutAfterEncounterSourceId?: CardInstanceId;
   dupreUsedBreakerIdsThisRun?: CardInstanceId[];
@@ -9311,6 +9312,25 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
       "region",
       "agenda_difficulty",
       "proteus_visible_baseline",
+    ],
+  },
+  {
+    id: "onr_proteus_085_disintegrator",
+    title: "Disintegrator",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 6,
+    memoryCost: 2,
+    rulesText:
+      "[2]: Derez a piece of ice and end your run. Use this ability only when you have just broken all the subroutines of that piece of ice and have successfully passed it.",
+    mechanics: [
+      "install_program",
+      "post_pass_fully_broken_ice",
+      "derez_ice",
+      "end_run",
+      "proteus_post_pass_derez_utility",
     ],
   },
   {

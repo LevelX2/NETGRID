@@ -1675,6 +1675,195 @@ describe("Proteus Public Fort Pass Windows", () => {
   });
 });
 
+describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
+  const DISINTEGRATOR = "onr_proteus_085_disintegrator";
+  const ICE = "simple_barrier_ice";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusDisintegratorGame(seed: string): GameState {
+    const runnerOverrideIds = new Set([DISINTEGRATOR, "simple_fracter"]);
+    const corpOverrideIds = new Set([ICE]);
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_6_2_RUNNER_DECK,
+          id: `${seed}_runner`,
+          cards: [
+            { id: DISINTEGRATOR, quantity: 1 },
+            { id: "simple_fracter", quantity: 1 },
+            ...ONR_V1_6_2_RUNNER_DECK.cards.filter(
+              (card) => !runnerOverrideIds.has(card.id),
+            ),
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_6_2_CORP_DECK,
+          id: `${seed}_corp`,
+          cards: [
+            { id: ICE, quantity: 1 },
+            ...ONR_V1_6_2_CORP_DECK.cards.filter(
+              (card) => !corpOverrideIds.has(card.id),
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  function passFullyBrokenIce(state: GameState): {
+    state: GameState;
+    iceId: CardInstanceId;
+  } {
+    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, DISINTEGRATOR);
+    const iceId = putCorpIceOnServer(state, "rd", ICE);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && sourceDefinition(state, action) === ICE,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(state, action) === "simple_fracter",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "simple_fracter",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    return { state, iceId };
+  }
+
+  it("derezzes the just-passed fully-broken ICE and ends the run", () => {
+    let state = proteusDisintegratorGame("proteus-phase-1g-disintegrator");
+    state.runner.credits = 10;
+    state.corp.credits = 10;
+
+    const passed = passFullyBrokenIce(state);
+    state = passed.state;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const disintegratorAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.runnerUtilityAbility ===
+          "derez_fully_broken_passed_ice_and_end_run",
+    );
+    expect(disintegratorAction.payload?.targetIceId).toBe(passed.iceId);
+    expect(disintegratorAction.costs).toEqual([{ credits: 2 }]);
+
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: disintegratorAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-disintegrator-wrong-side",
+      }).ok,
+    ).toBe(false);
+    const broke = structuredClone(state);
+    broke.runner.credits = 1;
+    expect(
+      applyAction(broke, {
+        matchId: broke.matchId,
+        side: "runner",
+        actionId: disintegratorAction.actionId,
+        clientKnownStateVersion: broke.stateVersion,
+        idempotencyKey: "proteus-disintegrator-cost",
+      }).ok,
+    ).toBe(false);
+    const staleTarget = structuredClone(state);
+    staleTarget.cardInstances[passed.iceId] = {
+      ...staleTarget.cardInstances[passed.iceId]!,
+      rezzed: false,
+    };
+    expect(
+      applyAction(staleTarget, {
+        matchId: staleTarget.matchId,
+        side: "runner",
+        actionId: disintegratorAction.actionId,
+        clientKnownStateVersion: staleTarget.stateVersion,
+        idempotencyKey: "proteus-disintegrator-stale-target",
+      }).ok,
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === disintegratorAction.actionId,
+    );
+    expect(state.run).toBeUndefined();
+    expect(state.cardInstances[passed.iceId]?.rezzed).toBe(false);
+    expect(state.runner.credits).toBe(6);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
+      sourceDefinitionId: DISINTEGRATOR,
+      targetCardDefinitionId: ICE,
+      derezzedCount: 1,
+      endedRun: true,
+      paidCredits: 2,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.errors).toEqual([]);
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("does not offer Disintegrator outside the fully-broken post-pass window", () => {
+    let state = proteusDisintegratorGame("proteus-phase-1g-disintegrator-window");
+    state.runner.credits = 10;
+    state.corp.credits = 10;
+    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, DISINTEGRATOR);
+    putCorpIceOnServer(state, "rd", ICE);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.payload?.runnerUtilityAbility ===
+          "derez_fully_broken_passed_ice_and_end_run",
+      ),
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && sourceDefinition(state, action) === ICE,
+    );
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.payload?.runnerUtilityAbility ===
+          "derez_fully_broken_passed_ice_and_end_run",
+      ),
+    ).toBe(false);
+  });
+});
+
 describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", () => {
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;

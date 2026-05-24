@@ -1376,6 +1376,19 @@ describe("CardImplementation definition descriptors", () => {
     );
   });
 
+  it("describes Proteus Phase 1g post-pass derez utility implementation", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_085_disintegrator")
+        ?.runnerUtilityLongtail,
+    ).toMatchObject({
+      kind: "derez_fully_broken_passed_ice_and_end_run",
+      cost: { kind: "credit", amount: 2 },
+      timing: "after_passing_fully_broken_ice",
+      target: "that_ice",
+      visibility: "public",
+    });
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

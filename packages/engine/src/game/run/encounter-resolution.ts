@@ -414,6 +414,7 @@ export function passedIceFollowupMarkersForCurrentIce(
 ): {
   viral15PendingPassedIceId?: CardInstanceId;
   passRezzedIceProgramTrashPendingPassedIceId?: CardInstanceId;
+  fullyBrokenPassedIcePendingId?: CardInstanceId;
   startupImmolatorPendingPassedIceId?: CardInstanceId;
 } {
   const run = mustRun(host.state);
@@ -432,7 +433,10 @@ export function passedIceFollowupMarkersForCurrentIce(
     ...(passedIceId &&
     mustInstance(host.state.cardInstances, passedIceId).rezzed &&
     run.fullyBrokenIceIds?.includes(passedIceId)
-      ? { startupImmolatorPendingPassedIceId: passedIceId }
+      ? {
+          fullyBrokenPassedIcePendingId: passedIceId,
+          startupImmolatorPendingPassedIceId: passedIceId,
+        }
       : {}),
   };
 }
@@ -705,6 +709,19 @@ export function clearStartupImmolatorPostPassMarker(
   } = run;
   void _startupPending;
   host.state.run = runWithoutStartupPending;
+}
+
+export function clearFullyBrokenPassedIcePostPassMarker(
+  host: EncounterResolutionHost,
+): void {
+  const run = host.state.run;
+  if (!run?.fullyBrokenPassedIcePendingId) return;
+  const {
+    fullyBrokenPassedIcePendingId: _fullyBrokenPassedIcePendingId,
+    ...runWithoutPending
+  } = run;
+  void _fullyBrokenPassedIcePendingId;
+  host.state.run = runWithoutPending;
 }
 
 export function appendResolvedSubroutineEffect(

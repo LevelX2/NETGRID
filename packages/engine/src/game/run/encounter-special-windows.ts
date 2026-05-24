@@ -20,6 +20,7 @@ type ActiveRun = NonNullable<GameState["run"]>;
 export type EncounterSpecialWindowHost = {
   state: GameState;
   callbacks?: {
+    derezCorpInstalledCard?: (cardId: CardInstanceId) => void;
     finishRun?: (successful: boolean, legalAction?: LegalAction) => void;
     quoteIceRezCost?: (iceId: CardInstanceId) => number;
     resetBreakerStrength?: () => void;
@@ -55,6 +56,14 @@ export type StartupImmolatorWindowResult = EncounterSpecialWindowResult & {
   paymentAmount?: number;
   paid?: boolean;
   iceTrashed?: boolean;
+};
+
+export type FullyBrokenPassedIceWindowResult = EncounterSpecialWindowResult & {
+  sourceCardId?: CardInstanceId;
+  iceId?: CardInstanceId;
+  paymentAmount?: number;
+  paid?: boolean;
+  iceDerezzed?: boolean;
 };
 
 export type SubmarinePostBidMarkerResult = EncounterSpecialWindowResult & {
@@ -391,6 +400,119 @@ export function startupImmolatorPostPassActions(
     );
 }
 
+export function fullyBrokenPassedIcePostPassActions(
+  host: EncounterSpecialWindowHost,
+): LegalAction[] {
+  const state = host.state;
+  const run = state.run;
+  const targetIceId = run?.fullyBrokenPassedIcePendingId;
+  if (!run || !targetIceId || !state.cardInstances[targetIceId]) return [];
+  if (!rezzedInstalledIceIds(state).includes(targetIceId)) return [];
+  if (!run.fullyBrokenIceIds?.includes(targetIceId)) return [];
+  const targetDefinition = definitionFor(state, targetIceId);
+  return state.runner.rig.programs
+    .filter((cardId) => fullyBrokenPassedIceDerezImplementationForCard(state, cardId))
+    .filter((cardId) => {
+      const implementation = fullyBrokenPassedIceDerezImplementationForCard(
+        state,
+        cardId,
+      );
+      const amount = Math.max(0, Math.floor(implementation?.cost.amount ?? 0));
+      return state.runner.credits >= amount;
+    })
+    .sort()
+    .map((sourceCardId) => {
+      const sourceDefinition = definitionFor(state, sourceCardId);
+      const implementation = fullyBrokenPassedIceDerezImplementationForCard(
+        state,
+        sourceCardId,
+      );
+      const amount = Math.max(0, Math.floor(implementation?.cost.amount ?? 0));
+      return buildLegalAction(
+        state,
+        "runner",
+        "trigger_ability",
+        `${sourceDefinition.title}: ICE derezzen und Run beenden`,
+        sourceCardId,
+        amount > 0 ? [{ credits: amount }] : [],
+        {
+          cardId: sourceCardId,
+          targetIceId,
+          targetIceDefinitionId: targetDefinition.id,
+          runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
+          paymentAmount: amount,
+        },
+      );
+    });
+}
+
+export function resolveFullyBrokenPassedIceDerezAndEndRun(
+  host: EncounterSpecialWindowHost,
+  legalAction: LegalAction,
+): FullyBrokenPassedIceWindowResult {
+  const state = host.state;
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf diese Post-Pass-Faehigkeit nutzen.");
+  const run = mustRun(state);
+  if (run.phase !== "movement")
+    throw new Error("Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const targetIceId = String(legalAction.payload?.targetIceId ?? "") as CardInstanceId;
+  if (!state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Die Post-Pass-Quelle ist nicht installiert.");
+  const implementation = fullyBrokenPassedIceDerezImplementationForCard(
+    state,
+    sourceCardId,
+  );
+  if (!implementation)
+    throw new Error("Die Post-Pass-Faehigkeit passt nicht zur Karte.");
+  if (
+    !targetIceId ||
+    run.fullyBrokenPassedIcePendingId !== targetIceId ||
+    !run.fullyBrokenIceIds?.includes(targetIceId) ||
+    !rezzedInstalledIceIds(state).includes(targetIceId)
+  )
+    throw new Error("Das Post-Pass-ICE-Ziel ist nicht legal.");
+  const amount = Math.max(0, Math.floor(implementation.cost.amount));
+  const paid = Number(legalAction.payload?.paymentAmount ?? amount);
+  if (!Number.isInteger(paid) || paid !== amount)
+    throw new Error("Die Post-Pass-Kosten passen nicht mehr.");
+  spendCredits(host, "runner", amount);
+  const targetDefinitionId = definitionFor(state, targetIceId).id;
+  if (!host.callbacks?.derezCorpInstalledCard)
+    throw new Error("Corp-Derez-Callback fehlt.");
+  host.callbacks.derezCorpInstalledCard(targetIceId);
+  const {
+    fullyBrokenPassedIcePendingId: _fullyBrokenPassedIcePendingId,
+    ...runWithoutPending
+  } = run;
+  void _fullyBrokenPassedIcePendingId;
+  if (state.run) state.run = runWithoutPending;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
+    sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    targetIceDefinitionId: targetDefinitionId,
+    targetCardDefinitionId: targetDefinitionId,
+    paymentAmount: amount,
+    paidCredits: amount,
+    derezzedCount: 1,
+    endedRun: true,
+    runnerCreditsAfter: state.runner.credits,
+  };
+  host.callbacks?.finishRun?.(false, legalAction);
+  return {
+    handled: true,
+    sourceCardId,
+    iceId: targetIceId,
+    paymentAmount: amount,
+    paid: amount > 0,
+    iceDerezzed: true,
+    runShouldEnd: true,
+    stateChanged: true,
+  };
+}
+
 export function resolveStartupImmolatorTrashIce(
   host: EncounterSpecialWindowHost,
   legalAction: LegalAction,
@@ -562,6 +684,26 @@ function isStartupImmolatorSource(
       ?.kind === "startup_immolator_trash_fully_broken_ice" ||
     definition.id === STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID
   );
+}
+
+function fullyBrokenPassedIceDerezImplementationForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+):
+  | {
+      kind: "derez_fully_broken_passed_ice_and_end_run";
+      cost: { kind: "credit"; amount: number };
+      timing: "after_passing_fully_broken_ice";
+      target: "that_ice";
+      visibility: "public";
+    }
+  | undefined {
+  const implementation = cardImplementationForDefinitionId(
+    definitionFor(state, cardId).id,
+  )?.runnerUtilityLongtail;
+  return implementation?.kind === "derez_fully_broken_passed_ice_and_end_run"
+    ? implementation
+    : undefined;
 }
 
 function isRioPassRezzedIceSource(

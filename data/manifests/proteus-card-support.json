@@ -2261,20 +2261,33 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_085_disintegrator",
+        "coverage": [
+          "card_implementation",
+          "post_pass_fully_broken_ice",
+          "legal_action",
+          "apply_action_revalidation",
+          "public_event_redaction",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-1g-post-pass-derez-utility-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 1g: installed Runner program ability after passing a fully broken rezzed ICE; Runner pays 2, derezzes that ICE, and ends the run."
       },
       "blockReasons": [
         "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."

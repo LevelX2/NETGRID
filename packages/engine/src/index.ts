@@ -294,6 +294,7 @@ import {
   appendResolvedSubroutineEffect,
   appendUnpaidPayOrEndRunEffects,
   cleanupEncounterDurationMarkers,
+  clearFullyBrokenPassedIcePostPassMarker,
   clearStartupImmolatorPostPassMarker,
   consumeForcedJackOutAfterEncounter,
   encounterResolutionHost,
@@ -309,9 +310,11 @@ import {
 import {
   applyRioDeJaneiroCityGridPassedIceTrigger,
   encounterSpecialWindowHost,
+  fullyBrokenPassedIcePostPassActions,
   isSubmarineUplinkSource,
   markSubmarineUplinkJackOutAfterEncounter,
   resolveEncounterSpecialWindowSubroutine,
+  resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
   resolveStartupImmolatorTrashIce as resolveStartupImmolatorTrashIceInRunModule,
   resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
   startupImmolatorPostPassActions,
@@ -6726,6 +6729,7 @@ function runnerMovementActions(state: GameState): LegalAction[] {
   }
   const actions: LegalAction[] = [];
   actions.push(...runnerDuringRunCardImplementationActions(state));
+  actions.push(...fullyBrokenPassedIcePostPassActions(encounterSpecialWindowHostForState(state)));
   actions.push(...startupImmolatorPostPassActions(encounterSpecialWindowHostForState(state)));
   actions.push(...mysteryBoxRunActions(state, run));
   const jackOutAdditionalCost = runJackOutAdditionalCost(run);
@@ -8034,6 +8038,16 @@ function performAction(
         ).handled
       )
         return;
+      if (
+        legalAction.payload?.runnerUtilityAbility ===
+        "derez_fully_broken_passed_ice_and_end_run"
+      ) {
+        resolveFullyBrokenPassedIceDerezAndEndRunInRunModule(
+          encounterSpecialWindowHostForState(state),
+          legalAction,
+        );
+        return;
+      }
       if (
         legalAction.payload?.v1922RunnerProgramAbility ===
         "startup_immolator_trash_ice"
@@ -11108,6 +11122,7 @@ function continueFromMovement(state: GameState, legalAction?: LegalAction): void
   )
     return;
   clearStartupImmolatorPostPassMarker(encounterResolutionHostForState(state));
+  clearFullyBrokenPassedIcePostPassMarker(encounterResolutionHostForState(state));
   if (run.position.kind === "ice") {
     const server = mustServer(state, run.position.serverId);
     const approachedIceId =
@@ -17506,6 +17521,13 @@ function encounterSpecialWindowHostForState(
   state: GameState,
 ): EncounterSpecialWindowHost {
   return encounterSpecialWindowHost(state, {
+    derezCorpInstalledCard: (cardId) => {
+      state.cardInstances[cardId] = {
+        ...withoutProteusVariableIceState(mustInstance(state.cardInstances, cardId)),
+        faceup: false,
+        rezzed: false,
+      };
+    },
     finishRun: (successful, legalAction) =>
       finishRun(state, successful, legalAction),
     quoteIceRezCost: (iceId) => rezCostForCard(state, iceId),

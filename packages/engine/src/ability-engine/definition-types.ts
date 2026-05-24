@@ -151,6 +151,13 @@ export type CardRunnerUtilityLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "derez_fully_broken_passed_ice_and_end_run";
+      cost: { kind: "credit"; amount: number };
+      timing: "after_passing_fully_broken_ice";
+      target: "that_ice";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "rabbit_ice_trace_limit_reduction";
       amount: 1;
       visibility: Extract<EventVisibilityClass, "public">;
