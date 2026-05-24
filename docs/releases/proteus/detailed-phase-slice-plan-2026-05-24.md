@@ -44,6 +44,8 @@ Status 2026-05-24: Phase 1a ist umgesetzt und dokumentiert in `docs/activities/d
 
 Blocker 2026-05-24: Phase 1c ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md` blockiert. `Emergency Rig` hat im lokalen Proteus-Text eine positive, aber unbegrenzte `X`-Auswahl für Kludge-Counter ohne Kosten- oder Wertbezug. Bis zur Quellen-/Regelentscheidung wird auch `Rent-to-Own Contract` nicht isoliert aus diesem gemeinsamen Slice promotet.
 
+Blocker 2026-05-24: Phase 1e ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1e-hidden-fort-manipulation-access.md` blockiert. `Pavit Bharat` braucht einen Hidden-HQ-to-Fort-Installationsvertrag für Typfilter, Slots, Kosten und öffentliche Count-/Positionsredaction; `Simon Francisco` braucht einen Central-Access-Reihenfolge-/Queue-Vertrag für Access-Count-Reduktion nach Access. Bis zur Quellen-/Scope-Entscheidung werden `Herman Revista` und `Marcel DeSoleil` nicht isoliert aus diesem gemeinsamen Slice promotet.
+
 Activity-Zuschnitt: Die bestehenden Phase-1a bis Phase-1g Activities sind die kleinsten Umsetzungseinheiten. Das alte Phase-1-Sammelpaket bleibt blockiert/ersetzt.
 
 ## Phase 2: Bad Publicity

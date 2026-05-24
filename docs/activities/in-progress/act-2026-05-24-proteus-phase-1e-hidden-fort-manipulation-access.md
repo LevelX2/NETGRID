@@ -1,20 +1,22 @@
 ---
 activityId: act-2026-05-24-proteus-phase-1e-hidden-fort-manipulation-access
-status: inbox
-kind: concept
+status: blocked
+kind: implementation
 area: cards
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
-startedAt:
+startedAt: 2026-05-24
 completedAt:
-branch:
+branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1e
 blockedBy:
-  - act-2026-05-24-proteus-phase-1a-reuse-only-baseline
-resultArtifacts: []
-checks: []
+  - rule-source-clarification-proteus-phase-1e-hidden-fort-and-central-access
+resultArtifacts:
+  - docs/activities/in-progress/act-2026-05-24-proteus-phase-1e-hidden-fort-manipulation-access.md
+checks:
+  - Lokale Quellenprüfung `docs/source/Proteusspoiler.txt` und `data/cards/proteus-cards.json` für `Herman Revista`, `Marcel DeSoleil`, `Pavit Bharat` und `Simon Francisco`
 ---
 
 # Proteus Phase 1e: Hidden Fort Manipulation and Central Access
@@ -81,4 +83,11 @@ Die Phase-1-Karten mit Fort-Reorder, verdeckter R&D/HQ-Bewegung oder zentraler A
 
 ## Ergebnisnotiz
 
-Noch offen.
+Blockiert am 2026-05-24.
+
+Der Slice ist als Gesamtpaket nicht legal-action-stabil vollständig umsetzbar, weil zwei Zielkarten vor Codearbeit weitere Regel-/Scope-Entscheidungen brauchen:
+
+- `Pavit Bharat`: Der lokale Text sagt, beim Rezzen alle Karten in diesem Fort zu deinstallieren und in HQ zu speichern, dann eine gleiche Anzahl Karten aus HQ in diesem Fort zu installieren. Der aktuelle Handoff entscheidet nicht, ob damit ICE, Root-Karten oder beide gemeint sind, ob HQ-Karten nach Typ/Installierbarkeit gefiltert werden, wie viele ICE- und Root-Slots gewählt werden, ob Installkosten/Region-/Agenda-/Asset-Root-Grenzen gelten und wie öffentliche Count-/Positionsänderungen gegen verdeckte HQ-Identitäten redigiert werden. Ohne diesen Vertrag kann `applyAction` die private HQ-Auswahl nicht belastbar revalidieren.
+- `Simon Francisco`: Der lokale Text reduziert die Anzahl der Zugriffe auf Karten in HQ oder R&D während eines Runs, in dem Simon accessed wird. Der aktuelle Engine-Breach baut zentrale HQ-/R&D-Zugriffsqueues vor dem Access; der Handoff entscheidet nicht, ob Simon vor oder nach den stored-card-Zugriffen accessed wird und wie eine nachträgliche Access-Count-Reduktion mit Multiaccess, laufender Queue und bereits accessed Karten zu verrechnen ist.
+
+`Herman Revista` und `Marcel DeSoleil` wirken technisch schneidbar, werden aber nicht isoliert promotet, solange diese Activity die vier Karten als gemeinsamen Hidden-Fort-/Central-Access-Slice mit gemeinsamen Akzeptanzkriterien fordert. Entblockung: Pavit-Installationsvertrag und Simon-Central-Access-Reihenfolge/Queue-Vertrag dokumentieren oder die Activity planning-konform in kleinere Folgepakete zerlegen.
