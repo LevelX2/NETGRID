@@ -110,6 +110,7 @@ function visibleEffectiveSubroutine(
   subroutine: SubroutineDefinition,
 ): VisibleEffectiveSubroutine {
   const dynamic = dynamicSubroutineAttributionFor(subroutine);
+  const unbrokenRunEffect = visibleUnbrokenRunEffectForSubroutine(subroutine);
   return {
     id: subroutine.id,
     type: subroutine.type,
@@ -125,5 +126,40 @@ function visibleEffectiveSubroutine(
               : "additional_subroutine",
         }
       : {}),
+    ...(unbrokenRunEffect ? { unbrokenRunEffect } : {}),
   };
+}
+
+function visibleUnbrokenRunEffectForSubroutine(
+  subroutine: SubroutineDefinition,
+): VisibleEffectiveSubroutine["unbrokenRunEffect"] | undefined {
+  const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
+  switch (subroutine.type) {
+    case "set_run_future_end_the_run_subroutine":
+      return { addsFutureEndTheRunSubroutines: 1 };
+    case "set_run_break_subroutine_cost_modifier":
+      return amount > 0
+        ? { increasesFutureBreakCostPerSubroutine: amount }
+        : undefined;
+    case "set_run_future_strength_bonus":
+      return amount > 0 ? { increasesFutureIceStrength: amount } : undefined;
+    case "set_next_encounter_no_break_subroutines":
+      return { preventsFutureBreaking: true };
+    case "set_run_encounter_tax":
+      return amount > 0 ? { addsFutureEncounterCost: amount } : undefined;
+    case "set_run_jack_out_lock":
+    case "set_next_encounter_lock":
+      return { preventsJackOut: true };
+    case "set_next_encounter_unless_fully_break_damage":
+    case "set_run_pass_rezzed_ice_program_trash":
+    case "do_damage":
+    case "trash_installed_program":
+      return { causesDamageOrProgramTrash: true };
+    case "set_runner_run_lock_actions":
+      return { createsRunLockOrActionTax: Math.max(1, amount) };
+    case "set_runner_forgo_next_action":
+      return { createsRunLockOrActionTax: 1 };
+    default:
+      return undefined;
+  }
 }

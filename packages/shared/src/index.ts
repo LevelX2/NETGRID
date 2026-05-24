@@ -1234,6 +1234,16 @@ export type VisibleEffectiveSubroutine = {
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
   dynamicSourceKind?: "additional_subroutine" | "run_duration_additional_subroutine";
+  unbrokenRunEffect?: {
+    addsFutureEndTheRunSubroutines?: number;
+    increasesFutureBreakCostPerSubroutine?: number;
+    increasesFutureIceStrength?: number;
+    preventsFutureBreaking?: boolean;
+    addsFutureEncounterCost?: number;
+    preventsJackOut?: boolean;
+    causesDamageOrProgramTrash?: boolean;
+    createsRunLockOrActionTax?: number;
+  };
 };
 
 export type VisibleEffectiveIceRunQuote = {

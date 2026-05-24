@@ -21,6 +21,26 @@ export function toPublicEvent(event: GameEvent): PublicGameEvent {
   };
 }
 
+export function toPublicEventForSide(
+  event: GameEvent,
+  viewerSide: Side,
+): PublicGameEvent {
+  const publicEvent = toPublicEvent(event);
+  const privateProjection = sidePrivatePublicPayload(event, viewerSide);
+  return redactPublicEventForSide(
+    privateProjection
+      ? {
+          ...publicEvent,
+          publicPayload: {
+            ...publicEvent.publicPayload,
+            ...privateProjection,
+          },
+        }
+      : publicEvent,
+    viewerSide,
+  );
+}
+
 export function redactPublicEventForSide(
   event: PublicGameEvent,
   viewerSide: Side,
@@ -60,5 +80,53 @@ export function redactPublicEventForSide(
       ...publicPayload,
       redactedKind: "accessed_card",
     },
+  };
+}
+
+function sidePrivatePublicPayload(
+  event: GameEvent,
+  viewerSide: Side,
+): Record<string, unknown> | undefined {
+  const privatePayload = event.privatePayload?.[viewerSide];
+  const legalAction =
+    privatePayload &&
+    typeof privatePayload.legalAction === "object" &&
+    privatePayload.legalAction !== null
+      ? (privatePayload.legalAction as { payload?: Record<string, unknown> })
+      : undefined;
+  const payload = legalAction?.payload;
+  if (
+    viewerSide !== "runner" ||
+    event.publicPayload.actor !== "runner" ||
+    payload?.hiddenZoneAction !== "p3_33_private_look"
+  ) {
+    return undefined;
+  }
+  const zone = payload.privateLookZone;
+  if (zone !== "hq" && zone !== "rd") return undefined;
+  const definitionIds = payload.knownHqDefinitionIds;
+  const csvDefinitionIds =
+    typeof payload.knownPrivateLookDefinitionIdsCsv === "string"
+      ? payload.knownPrivateLookDefinitionIdsCsv
+          .split("|")
+          .filter((value) => value.length > 0)
+      : [];
+  const knownHqDefinitionIds = Array.isArray(definitionIds)
+    ? definitionIds.filter(
+        (value): value is string =>
+          typeof value === "string" && value.length > 0,
+      )
+    : csvDefinitionIds;
+  if (knownHqDefinitionIds.length === 0) return undefined;
+  if (zone === "rd") {
+    return {
+      knownRndDefinitionIds: knownHqDefinitionIds,
+      knownRndTopDefinitionId: knownHqDefinitionIds[0],
+      knownRndCardCount: knownHqDefinitionIds.length,
+    };
+  }
+  return {
+    knownHqDefinitionIds,
+    knownHqCardCount: knownHqDefinitionIds.length,
   };
 }
