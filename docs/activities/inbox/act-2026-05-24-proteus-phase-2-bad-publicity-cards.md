@@ -26,6 +26,7 @@ Die Bad-Publicity-Phase nach vorhandenem `bad_publicity_7`-Harness als Karten-Sl
 ## Kontext und Quellen
 
 - `docs/releases/proteus/release-slicing-plan.md`, Abschnitte `Phase 2`, `Slice 2` und `Ability-Bedarf nach Phase`.
+- `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md`, Abschnitt `Phase 2: Bad Publicity`; dieses Paket ist vor Codearbeit in die dort beschriebenen Slices 2a bis 2f zu zerlegen.
 - `docs/releases/proteus/bad-publicity-loss-gate-contract.md`.
 - `docs/releases/proteus/mechanics-coverage-analysis.md`.
 - `docs/activities/done/act-2026-05-17-proteus-bad-publicity-loss-gate.md`.

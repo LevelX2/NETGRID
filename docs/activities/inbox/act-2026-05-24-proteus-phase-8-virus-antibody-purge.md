@@ -26,6 +26,7 @@ Die Proteus-Virus-/Antibody-/Purge-Familie mit klarer Counter-Taxonomie, purgef√
 ## Kontext und Quellen
 
 - `docs/releases/proteus/release-slicing-plan.md`, Abschnitte `Phase 8`, `Slice 8` und `Ability-Bedarf nach Phase`.
+- `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md`, Abschnitt `Phase 8: Virus/Antibody/Purge`; dieses Paket ist vor Codearbeit in die dort beschriebenen Slices 8a bis 8f zu zerlegen.
 - `docs/releases/proteus/virus-antibody-counter-contract.md`.
 - `docs/releases/proteus/purge-action-debt-contract.md`.
 - `docs/releases/proteus/bad-publicity-loss-gate-contract.md`.

@@ -26,6 +26,7 @@ Die sichtbaren Runner-Programme, Events, Economy-Karten und kleinen Ressourcen a
 ## Kontext und Quellen
 
 - `docs/releases/proteus/release-slicing-plan.md`, Abschnitte `Phase 5`, `Slice 5` und `Ability-Bedarf nach Phase`.
+- `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md`, Abschnitt `Phase 5: Visible Runner Breaker, Event, Economy`; dieses Paket ist vor Codearbeit in die dort beschriebenen Slices 5a bis 5e zu zerlegen.
 - `docs/releases/proteus/mechanics-coverage-analysis.md`.
 - `docs/architecture/ability-engine/card-implementation-v1-pattern-catalog.md`.
 - V1.9.x-Completion-Artefakte zu Icebreakern, Hidden-Zone, Run/Access, Damage/Prevention und Trace/Tags.

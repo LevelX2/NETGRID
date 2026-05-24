@@ -26,6 +26,7 @@ Die 16 Proteus-Hidden-Runner-Resources auf der vorhandenen Hidden-Resource-Found
 ## Kontext und Quellen
 
 - `docs/releases/proteus/release-slicing-plan.md`, Abschnitte `Phase 4`, `Slice 4` und `Ability-Bedarf nach Phase`.
+- `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md`, Abschnitt `Phase 4: Hidden Runner Resources`; dieses Paket ist vor Codearbeit in die dort beschriebenen Slices 4a bis 4e zu zerlegen.
 - `docs/releases/proteus/hidden-runner-resources-contract-2026-05-17.md`.
 - `docs/releases/proteus/mechanics-coverage-analysis.md`.
 - `docs/activities/done/act-2026-05-17-proteus-hidden-resources-contract.md`.

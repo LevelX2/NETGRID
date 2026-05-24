@@ -26,6 +26,7 @@ Die späte Proteus-Longtail-Phase in kleine Umsetzungsschritte zerlegen und dana
 ## Kontext und Quellen
 
 - `docs/releases/proteus/release-slicing-plan.md`, Abschnitte `Phase 9`, `Slice 9` und `Ability-Bedarf nach Phase`.
+- `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md`, Abschnitt `Phase 9: Random, Hidden-Zone Search, Action Economy, Longtail`; dieses Paket ist vor Codearbeit in die dort beschriebenen Slices 9a bis 9e zu zerlegen.
 - `docs/releases/proteus/mechanics-coverage-analysis.md`.
 - `docs/releases/proteus/variable-ice-contract.md` für Random-/ICE-Nähe bei `Roadblock`.
 - `docs/releases/proteus/purge-action-debt-contract.md` für Future-/Forgo-Actions-Bezug.

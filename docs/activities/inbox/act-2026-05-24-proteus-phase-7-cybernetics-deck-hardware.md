@@ -26,6 +26,7 @@ Die vier Cybernetics-/Deck-Hardware-Karten mit vorhandenen Hardware-, Modifier-,
 ## Kontext und Quellen
 
 - `docs/releases/proteus/release-slicing-plan.md`, Abschnitte `Phase 7`, `Slice 7` und `Ability-Bedarf nach Phase`.
+- `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md`, Abschnitt `Phase 7: Cybernetics/Deck Hardware`; dieses Paket ist vor Codearbeit in die dort beschriebenen Slices 7a bis 7d zu zerlegen.
 - `docs/releases/proteus/cybernetics-deck-hardware-contract.md`.
 - `docs/releases/proteus/mechanics-coverage-analysis.md`.
 - `docs/activities/done/act-2026-05-17-proteus-cybernetics-deck-hardware-contract.md`.

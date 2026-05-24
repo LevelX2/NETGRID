@@ -26,6 +26,7 @@ Die variable und komplexe Proteus-ICE-Familie in CardImplementation-kompatible g
 ## Kontext und Quellen
 
 - `docs/releases/proteus/release-slicing-plan.md`, Abschnitte `Phase 3`, `Slice 3` und `CardImplementation- und Ability-Bedarfsanalyse`.
+- `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md`, Abschnitt `Phase 3: Variable and Complex ICE`; dieses Paket ist vor Codearbeit in die dort beschriebenen Slices 3a bis 3e zu zerlegen.
 - `docs/releases/proteus/variable-ice-contract.md`.
 - `docs/releases/proteus/mechanics-coverage-analysis.md`.
 - `docs/activities/done/act-2026-05-17-proteus-variable-ice-contracts.md`.
