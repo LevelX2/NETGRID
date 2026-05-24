@@ -12231,6 +12231,7 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
 
   for (const summary of summaries) {
     const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
+    const repeatedProtectionIndexes = new Set<number>();
     for (let index = 0; index < sequence.length; index += 1) {
       const entry = sequence[index]!;
       if (entry.side !== "corp") continue;
@@ -12296,7 +12297,12 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         corpBestRemoteSelectedForAgenda += 1;
       if (hasEvidenceFlag(entry, "corp_protection_no_safety_delta:true"))
         corpProtectionNoSafetyDelta += 1;
-      if (hasEvidenceFlag(entry, "corp_protection_opened_score_path:true"))
+      const scorePathFollowsRecentProtection =
+        scorePathFollowsCorpProtection(sequence, index);
+      if (
+        hasEvidenceFlag(entry, "corp_protection_opened_score_path:true") &&
+        scorePathFollowsRecentProtection
+      )
         corpProtectionOpenedScorePath += 1;
       if (
         hasEvidenceFlag(
@@ -12341,7 +12347,8 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
       if (hasEvidenceFlag(entry, "corp_remote_safety_ready_for_agenda:true"))
         corpRemoteSafetyReadyForAgenda += 1;
       if (
-        hasEvidenceFlag(entry, "corp_score_path_chosen_after_protection:true")
+        hasEvidenceFlag(entry, "corp_score_path_chosen_after_protection:true") &&
+        scorePathFollowsRecentProtection
       )
         corpScorePathChosenAfterProtection += 1;
       if (
@@ -12391,12 +12398,11 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
           ownStrategicWindow(sequence, index, 3).some(
             (candidate) =>
               candidate.side === "corp" &&
-              (candidate.actionType === "score_agenda" ||
-                candidate.actionType === "advance_card"),
+              isCorpProtectionScoreConversionAction(candidate),
           )
         )
           corpProtectionConvertedToScoreWithin3 += 1;
-        else corpProtectionRepeatedWithoutScoreConversion += 1;
+        else repeatedProtectionIndexes.add(index);
       }
       if (
         hasEvidenceFlag(
@@ -12404,8 +12410,10 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
           "corp_protection_repeated_without_score_conversion:true",
         )
       )
-        corpProtectionRepeatedWithoutScoreConversion += 1;
+        repeatedProtectionIndexes.add(index);
     }
+    corpProtectionRepeatedWithoutScoreConversion +=
+      repeatedProtectionIndexes.size;
   }
 
   return {
@@ -12517,6 +12525,64 @@ function ownStrategicWindow(
     if (window.length >= ownDecisions) break;
   }
   return window;
+}
+
+function previousOwnStrategicWindow(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  ownDecisions: number,
+): PlanConversionActionEntry[] {
+  const side = sequence[index]?.side;
+  if (!side) return [];
+  const window: PlanConversionActionEntry[] = [];
+  for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
+    const entry = sequence[cursor]!;
+    if (entry.side !== side) continue;
+    if (!isStrategicPlanDecision(entry)) continue;
+    window.push(entry);
+    if (window.length >= ownDecisions) break;
+  }
+  return window;
+}
+
+function scorePathFollowsCorpProtection(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): boolean {
+  const entry = sequence[index];
+  if (!entry || entry.side !== "corp") return false;
+  if (!isCorpProtectionScoreConversionAction(entry)) return false;
+  return previousOwnStrategicWindow(sequence, index, 3).some(
+    isCorpRemoteProtectionActionEntry,
+  );
+}
+
+function isCorpProtectionScoreConversionAction(
+  entry: PlanConversionActionEntry,
+): boolean {
+  return (
+    entry.side === "corp" &&
+    (entry.actionType === "score_agenda" ||
+      entry.actionType === "advance_card" ||
+      (entry.actionType === "install_card" &&
+        entry.targetCardType === "agenda"))
+  );
+}
+
+function isCorpRemoteProtectionActionEntry(
+  entry: PlanConversionActionEntry,
+): boolean {
+  return (
+    entry.side === "corp" &&
+    (hasEvidenceFlag(entry, "corp_unsafe_remote_converted_to_protection:true") ||
+      hasEvidenceFlag(
+        entry,
+        "corp_protection_chosen_before_unsafe_agenda_install:true",
+      ) ||
+      (entry.actionType === "install_card" &&
+        entry.installPlacement === "ice" &&
+        Boolean(entry.targetServerId?.startsWith("remote_"))))
+  );
 }
 
 function strategicPlanConvertsWithinOwnDecisions(

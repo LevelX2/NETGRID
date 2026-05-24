@@ -14830,6 +14830,56 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.endgameSetupOrEconomyActions).toBe(1);
   });
 
+  it("dedupes protection-to-score metrics around actual prior protection", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "install_card", "remote_1", 1, {
+            installPlacement: "ice",
+            evidence: [
+              "corp_unsafe_remote_converted_to_protection:true",
+              "corp_protection_chosen_before_unsafe_agenda_install:true",
+            ],
+          }),
+          progressionAction("corp", 2, "install_card", "remote_1", 1, {
+            installPlacement: "root",
+            targetCardType: "agenda",
+            evidence: [
+              "corp_protection_opened_score_path:true",
+              "corp_score_path_chosen_after_protection:true",
+            ],
+          }),
+          progressionAction("corp", 3, "advance_card", "remote_1", 1, {
+            targetCardType: "agenda",
+            evidence: [
+              "corp_protection_opened_score_path:true",
+              "corp_score_path_chosen_after_protection:true",
+            ],
+          }),
+        ],
+        "protection-to-score-metric-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "install_card", "remote_2", 1, {
+            installPlacement: "root",
+            targetCardType: "agenda",
+            evidence: [
+              "corp_protection_opened_score_path:true",
+              "corp_score_path_chosen_after_protection:true",
+            ],
+          }),
+        ],
+        "protection-to-score-no-prior-protection-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpProtectionConvertedToScoreWithin3).toBe(1);
+    expect(metrics.corpProtectionRepeatedWithoutScoreConversion).toBe(0);
+    expect(metrics.corpProtectionOpenedScorePath).toBe(2);
+    expect(metrics.corpScorePathChosenAfterProtection).toBe(2);
+  });
+
   it("does not count generic central endgame runs as true runner closeout", () => {
     const metrics = summarizeMatchProgressionMetrics([
       {
