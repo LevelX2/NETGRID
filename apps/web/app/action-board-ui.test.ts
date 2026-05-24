@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import {
   DEFAULT_CUE_POSITION,
@@ -1221,6 +1221,44 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionMatchesContext(remove, { kind: "card", id: "data_raven_1", label: "Data Raven" })).toBe(true);
     expect(actionButtonLabel(remove)).toBe("Raven-Counter entfernen");
     expect(contextualCardActionLabel(remove)).toBe("Raven-Counter entfernen");
+  });
+
+  it("keeps Fang run-lock payment visible with normal Runner actions", () => {
+    const removeLock = legalAction("runner", "trigger_ability", "game_rule", "Run-Sperre für 2 Credits entfernen", {
+      v1920RunnerRunLockAbility: "fang_2_0_pay_to_run",
+      fangRunLockCreditCost: 2,
+      runnerRunLockCreditCost: 2,
+      gainCreditsAmount: 0
+    });
+
+    const split = splitLegalActions([removeLock]);
+
+    expect(split.primaryActions).toEqual([removeLock]);
+    expect(split.contextualActions).toEqual([]);
+    expect(actionButtonLabel(removeLock)).toBe("Run-Sperre für 2 Credits entfernen");
+  });
+
+  it("warns and keeps contextless contextual actions visible", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const brokenContextAction = legalAction("corp", "advance_card", "game_rule", "Kontextlose Aktion");
+
+      const split = splitLegalActions([brokenContextAction]);
+
+      expect(split.primaryActions).toEqual([brokenContextAction]);
+      expect(split.contextualActions).toEqual([]);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("classified as contextual without a selectable context"),
+        expect.objectContaining({
+          actionId: brokenContextAction.actionId,
+          type: "advance_card",
+          source: "game_rule",
+          label: "Kontextlose Aktion"
+        })
+      );
+    } finally {
+      warn.mockRestore();
+    }
   });
 
   it("labels The Shell Traders abilities on the installed resource overlay", () => {

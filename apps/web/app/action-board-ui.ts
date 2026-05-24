@@ -264,10 +264,33 @@ export function splitLegalActions(actions: LegalAction[]): { primaryActions: Leg
   const primaryActions: LegalAction[] = [];
   const contextualActions: LegalAction[] = [];
   for (const action of actions) {
-    if (isContextualLegalAction(action)) contextualActions.push(action);
-    else primaryActions.push(action);
+    if (isContextualLegalAction(action)) {
+      if (!hasSelectableActionContext(action)) {
+        warnContextlessLegalAction(action);
+        primaryActions.push(action);
+      } else {
+        contextualActions.push(action);
+      }
+    } else {
+      primaryActions.push(action);
+    }
   }
   return { primaryActions, contextualActions };
+}
+
+function hasSelectableActionContext(action: LegalAction): boolean {
+  return cardRefsForAction(action).length > 0 || serverRefsForAction(action).length > 0;
+}
+
+function warnContextlessLegalAction(action: LegalAction): void {
+  if (process.env.NODE_ENV === "production") return;
+  console.warn("NETGRID legal action was classified as contextual without a selectable context; keeping it visible as a primary action.", {
+    actionId: action.actionId,
+    type: action.type,
+    source: action.source,
+    timingPoint: action.timingPoint,
+    label: action.label
+  });
 }
 
 export function automaticEndTurnAction(view: PlayerView, actions: LegalAction[], side: Side, options: { accessRevealVisible?: boolean } = {}): LegalAction | undefined {
@@ -1393,7 +1416,7 @@ function isPriorityAction(action: LegalAction): boolean {
 
 function objectBoundAction(action: LegalAction): boolean {
   if (action.type === "start_run") return false;
-  return serverRefsForAction(action).length > 0 || ["advance_card", "score_agenda", "trash_resource", "trigger_ability"].includes(action.type);
+  return serverRefsForAction(action).length > 0 || ["advance_card", "score_agenda", "trash_resource"].includes(action.type);
 }
 
 function isSelfModifyingCodeAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
