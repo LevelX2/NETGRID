@@ -182,6 +182,15 @@ import {
   startSynchronizedAttackOnHqRetainChoice,
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "./game/hidden-zone/nonsearch-choice-handlers";
+import {
+  handleCorpZoneChoice,
+  resolveAiChiefFinancialOfficer,
+  resolveReschedulerHqShuffleDraw,
+  startCorporateDownsizingScoreChoice,
+  startCorporateNegotiatingCenterChoice,
+  startShowHqAgendasForCreditsChoice,
+  type CorpZoneChoiceHandlerHost,
+} from "./game/hidden-zone/corp-zone-choice-handlers";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -725,10 +734,11 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     creditPerAgenda,
   ) =>
     startShowHqAgendasForCreditsChoice(
-      state,
-      sourceCardId,
-      sourceDefinitionId,
-      creditPerAgenda,
+      corpZoneChoiceHandlerHost(
+        state,
+        { side: "corp", payload: {} } as LegalAction,
+      ),
+      { sourceCardId, sourceDefinitionId, creditPerAgenda },
     ),
   searchTrashToGripTargetCount: (state, filter) =>
     searchTrashToGripTargets(hiddenZoneSearchActivationTargetHost(state), filter)
@@ -7412,7 +7422,10 @@ function performAction(
           throw new Error("Rescheduler ist nicht rezzed installiert.");
         if (definitionFor(state, sourceCardId).id !== CORP_HQ_SHUFFLE_DRAW_CARD_ID)
           throw new Error("Die Rescheduler-Faehigkeit passt nicht zur Karte.");
-        resolveReschedulerHqShuffleDraw(state, sourceCardId, legalAction);
+        resolveReschedulerHqShuffleDraw(
+          corpZoneChoiceHandlerHost(state, legalAction),
+          sourceCardId,
+        );
         return;
       }
       if (legalAction.payload?.v1917AssetAbility === "reveal_rd_top") {
@@ -8037,7 +8050,10 @@ function performAction(
           throw new Error(
             "Die Agenda-Aktion passt nicht zur ausgewaehlten AI Chief Financial Officer Agenda.",
           );
-        resolveAiChiefFinancialOfficer(state, sourceCardId, legalAction);
+        resolveAiChiefFinancialOfficer(
+          corpZoneChoiceHandlerHost(state, legalAction),
+          sourceCardId,
+        );
         return;
       }
       if (
@@ -9559,49 +9575,6 @@ function shuffleGripTrashAndStackThenDrawForCardImplementation(
   };
   applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
   return { publicPayload: legalAction.payload ?? payload };
-}
-
-function resolveAiChiefFinancialOfficer(
-  state: GameState,
-  agendaId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const sourceDefinition = definitionFor(state, agendaId);
-  const implementation = scoredAgendaImplementationForDefinition(sourceDefinition);
-  const previousHq = state.corp.hq.slice();
-  const previousArchives = state.corp.archives.slice();
-  const merge = [...state.corp.rd, ...previousHq, ...previousArchives];
-  state.corp.hq = [];
-  state.corp.archives = [];
-  state.corp.rd = shuffleStateIds(
-    state,
-    merge,
-    `v192.shuffle.${sourceDefinition.id}.hq_archives_into_rd.${state.stateVersion + 1}`,
-  );
-  for (const cardId of state.corp.rd) {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: false,
-      rezzed: false,
-      zone: { side: "corp", zone: "rd" },
-    };
-  }
-  const drawAmount =
-    implementation?.kind === "ai_cfo_shuffle_hq_archives_into_rd_draw"
-      ? implementation.drawCount
-      : 5;
-  const beforeDraw = state.corp.hq.length;
-  drawCorpCards(state, drawAmount);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    cardId: agendaId,
-    cardDefinitionId: sourceDefinition.id,
-    sourceDefinitionId: sourceDefinition.id,
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
-    shuffledCardsCount: previousHq.length + previousArchives.length,
-    drawnCardsCount: state.corp.hq.length - beforeDraw,
-  };
 }
 
 function startRunnerProgramTrashBeforeInstallChoice(
@@ -16652,7 +16625,13 @@ function applyCorpStartOfTurnEffects(
       );
     }
   }
-  if (!state.pendingChoice) startCorporateNegotiatingCenterChoice(state);
+  if (!state.pendingChoice)
+    startCorporateNegotiatingCenterChoice(
+      corpZoneChoiceHandlerHost(
+        state,
+        { side: "corp", payload: {} } as LegalAction,
+      ),
+    );
   if (!state.pendingChoice) startEmployeeEmpowermentStartDrawChoice(state);
 }
 
@@ -20761,10 +20740,11 @@ function scoreAgenda(
     scoredAgenda?.kind === "corporate_downsizing_hq_agendas"
   ) {
     startCorporateDownsizingScoreChoice(
-      state,
-      cardId as CardInstanceId,
-      legalAction,
-      scoredAgenda.creditPerAgendaPoint,
+      corpZoneChoiceHandlerHost(state, legalAction),
+      {
+        sourceCardId: cardId as CardInstanceId,
+        creditPerAgendaPoint: scoredAgenda.creditPerAgendaPoint,
+      },
     );
   }
   if (
@@ -22036,6 +22016,50 @@ function hiddenZoneNonSearchChoiceHandlerHost(
   };
 }
 
+function corpZoneChoiceHandlerHost(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction?: PlayerAction,
+): CorpZoneChoiceHandlerHost {
+  return {
+    state,
+    legalAction,
+    ...(playerAction ? { playerAction } : {}),
+    constants: {
+      corpHqAgendaRevealCardId: CORP_HQ_AGENDA_REVEAL_CARD_ID,
+    },
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      hasCardImplementation: (definitionId) =>
+        Boolean(cardImplementationForDefinitionId(definitionId)),
+      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
+      scoredAgendaKind: (cardId) =>
+        scoredAgendaImplementationForDefinition(definitionFor(state, cardId))
+          ?.kind,
+      scoredAgendaDrawCount: (cardId) => {
+        const implementation = scoredAgendaImplementationForDefinition(
+          definitionFor(state, cardId),
+        );
+        return implementation?.kind ===
+          "ai_cfo_shuffle_hq_archives_into_rd_draw"
+          ? implementation.drawCount
+          : 5;
+      },
+    },
+    zones: {
+      rezzedCorpRootCardIds: () => rezzedCorpRootCardIds(state),
+      shuffleCorpRnd: (cardIds, randomPurpose) =>
+        shuffleStateIds(state, cardIds, randomPurpose),
+    },
+    credits: {
+      gainCorpCredits: (amount) => credits(state, "corp", amount),
+    },
+    draw: {
+      drawCorpCards: (amount) => drawCorpCards(state, amount),
+    },
+  };
+}
+
 function resolvePendingChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -22084,6 +22108,10 @@ function resolvePendingChoice(
     hiddenZoneNonSearchChoiceHandlerHost(state, legalAction, playerAction),
   );
   if (hiddenZoneNonSearchChoice.handled) return;
+  const corpZoneChoice = handleCorpZoneChoice(
+    corpZoneChoiceHandlerHost(state, legalAction, playerAction),
+  );
+  if (corpZoneChoice.handled) return;
   if (
     isP358HiddenReplacementCompatibilityChoiceSource(
       state.pendingChoice.source,
@@ -22127,20 +22155,6 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1912.employee_empowerment_start_draw")) {
     resolveEmployeeEmpowermentStartDrawChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1917.corp_negotiating_center")) {
-    resolveCorporateNegotiatingCenterChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("p3_36.show_hq_agendas_for_credits")
-  ) {
-    resolveShowHqAgendasForCreditsChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("p3_50.corporate_downsizing")) {
-    resolveCorporateDownsizingScoreChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
@@ -23306,387 +23320,6 @@ function resolveOpenEndedMileageProgramReturnChoice(
     returnedToGrip: selectedOptionId === "pay_1_return_to_grip",
     paidCredits: selectedOptionId === "pay_1_return_to_grip" ? 1 : 0,
     runnerCreditsAfter: state.runner.credits,
-  };
-}
-
-function startCorporateNegotiatingCenterChoice(state: GameState): void {
-  const sourceIds = rezzedCorpRootCardIds(state)
-    .filter(
-      (cardId) =>
-        definitionFor(state, cardId).id ===
-          CORP_HQ_AGENDA_REVEAL_CARD_ID &&
-        !cardImplementationForDefinitionId(definitionFor(state, cardId).id),
-    )
-    .sort();
-  if (sourceIds.length === 0) return;
-  const agendaIds = state.corp.hq
-    .filter((cardId) => definitionFor(state, cardId).type === "agenda")
-    .sort();
-  if (agendaIds.length === 0) return;
-  state.pendingChoice = {
-    choiceId: `v1917_corp_negotiating_center_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1917.corp_negotiating_center:${sourceIds.join(",")}:${state.stateVersion + 1}`,
-    prompt: "Corporate Negotiating Center: HQ-Agenden zeigen",
-    kind: "select_cards",
-    options: agendaIds.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return {
-        id: `card_${cardId}`,
-        label: definition.title,
-        publicLabel: "HQ-Agenda",
-        value: cardId,
-      };
-    }),
-    minSelections: 0,
-    maxSelections: agendaIds.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-}
-
-function startShowHqAgendasForCreditsChoice(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  sourceDefinitionId: CardDefinition["id"],
-  creditPerAgenda: number,
-): { publicPayload: Record<string, string | number | boolean> } {
-  if (state.pendingChoice) return { publicPayload: {} };
-  if (
-    !rezzedCorpRootCardIds(state).includes(sourceCardId) ||
-    definitionFor(state, sourceCardId).id !== sourceDefinitionId
-  )
-    return { publicPayload: {} };
-  const agendaIds = state.corp.hq
-    .filter((cardId) => definitionFor(state, cardId).type === "agenda")
-    .sort();
-  if (agendaIds.length === 0) return { publicPayload: {} };
-  state.pendingChoice = {
-    choiceId: `p3_36_show_hq_agendas_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `p3_36.show_hq_agendas_for_credits:${sourceCardId}:${sourceDefinitionId}:${creditPerAgenda}:${state.stateVersion + 1}`,
-    prompt: "Corporate Negotiating Center: HQ-Agenden zeigen",
-    kind: "select_cards",
-    options: agendaIds.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return {
-        id: `card_${cardId}`,
-        label: definition.title,
-        publicLabel: "HQ-Agenda",
-        value: cardId,
-      };
-    }),
-    minSelections: 0,
-    maxSelections: agendaIds.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  return {
-    publicPayload: {
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1917_corporate_negotiating_center_choice",
-      sourceDefinitionId,
-      creditPerAgenda,
-    },
-  };
-}
-
-function resolveCorporateNegotiatingCenterChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1917.corp_negotiating_center"))
-    throw new Error("Es ist keine Corporate-Negotiating-Center-Choice offen.");
-  const sourceText = choice.source.split(":")[1] ?? "";
-  const sourceIds = sourceText.split(",").filter(Boolean);
-  if (
-    sourceIds.length === 0 ||
-    sourceIds.some(
-      (sourceId) =>
-        !rezzedCorpRootCardIds(state).includes(sourceId) ||
-        definitionFor(state, sourceId).id !==
-          CORP_HQ_AGENDA_REVEAL_CARD_ID,
-    )
-  )
-    throw new Error("Corporate Negotiating Center ist nicht mehr aktiv.");
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  const selectedSet = new Set(selectedIds);
-  if (
-    selectedSet.size !== selectedIds.length ||
-    selectedIds.some(
-      (cardId) =>
-        !state.corp.hq.includes(cardId) ||
-        definitionFor(state, cardId).type !== "agenda",
-    )
-  )
-    throw new Error("Corporate Negotiating Center darf nur HQ-Agenden zeigen.");
-  const sourceDefinition = definitionFor(state, sourceIds[0]!);
-  const revealedDefinitions = selectedIds.map((cardId) =>
-    definitionFor(state, cardId),
-  );
-  credits(state, "corp", selectedIds.length);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
-    sourceDefinitionId: sourceDefinition.id,
-    sourceTitle: sourceDefinition.title,
-    publicRevealKind: "reveal",
-    publicRevealDefinitionIds: revealedDefinitions
-      .map((definition) => definition.id)
-      .join(","),
-    publicRevealTitles: revealedDefinitions
-      .map((definition) => definition.title)
-      .join("||"),
-    revealedAgendaDefinitionIds: revealedDefinitions
-      .map((definition) => definition.id)
-      .join(","),
-    revealedCount: selectedIds.length,
-    gainedCredits: selectedIds.length,
-    corpCreditsAfter: state.corp.credits,
-  };
-}
-
-function resolveShowHqAgendasForCreditsChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_36.show_hq_agendas_for_credits"))
-    throw new Error("Es ist keine HQ-Agenda-Show-Choice offen.");
-  const [
-    ,
-    sourceCardId = "",
-    sourceDefinitionId = "",
-    creditPerAgendaRaw = "",
-  ] = choice.source.split(":");
-  const creditPerAgenda = Number(creditPerAgendaRaw);
-  if (
-    !sourceCardId ||
-    !rezzedCorpRootCardIds(state).includes(sourceCardId) ||
-    definitionFor(state, sourceCardId).id !== sourceDefinitionId ||
-    !Number.isInteger(creditPerAgenda) ||
-    creditPerAgenda <= 0
-  )
-    throw new Error("Corporate Negotiating Center ist nicht mehr aktiv.");
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  const selectedSet = new Set(selectedIds);
-  if (
-    selectedSet.size !== selectedIds.length ||
-    selectedIds.some(
-      (cardId) =>
-        !state.corp.hq.includes(cardId) ||
-        definitionFor(state, cardId).type !== "agenda",
-    )
-  )
-    throw new Error("Corporate Negotiating Center darf nur HQ-Agenden zeigen.");
-  const sourceDefinition = definitionFor(state, sourceCardId);
-  const revealedDefinitions = selectedIds.map((cardId) =>
-    definitionFor(state, cardId),
-  );
-  const gainedCredits = selectedIds.length * creditPerAgenda;
-  credits(state, "corp", gainedCredits);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
-    sourceDefinitionId: sourceDefinition.id,
-    sourceTitle: sourceDefinition.title,
-    publicRevealKind: "reveal",
-    publicRevealDefinitionIds: revealedDefinitions
-      .map((definition) => definition.id)
-      .join(","),
-    publicRevealTitles: revealedDefinitions
-      .map((definition) => definition.title)
-      .join("||"),
-    revealedAgendaDefinitionIds: revealedDefinitions
-      .map((definition) => definition.id)
-      .join(","),
-    revealedCount: selectedIds.length,
-    shownCount: selectedIds.length,
-    gainedCredits,
-    corpCreditsAfter: state.corp.credits,
-  };
-}
-
-function startCorporateDownsizingScoreChoice(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  legalAction: LegalAction,
-  creditPerAgendaPoint: number,
-): void {
-  if (state.pendingChoice) return;
-  const sourceDefinition = definitionFor(state, sourceCardId);
-  const implementation = scoredAgendaImplementationForDefinition(sourceDefinition);
-  if (
-    !state.corp.scoreArea.includes(sourceCardId) ||
-    implementation?.kind !== "corporate_downsizing_hq_agendas" ||
-    !Number.isInteger(creditPerAgendaPoint) ||
-    creditPerAgendaPoint < 0
-  )
-    return;
-  const agendaIds = state.corp.hq
-    .filter((cardId) => definitionFor(state, cardId).type === "agenda")
-    .sort();
-  if (agendaIds.length === 0) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      agendaAbility: "corporate_downsizing",
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "corporate_downsizing_hq_agendas",
-      shownCount: 0,
-      shuffledIntoRndCount: 0,
-      gainedCredits: 0,
-      corpCreditsAfter: state.corp.credits,
-    };
-    return;
-  }
-  state.pendingChoice = {
-    choiceId: `p3_50_corporate_downsizing_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `p3_50.corporate_downsizing:${sourceCardId}:${creditPerAgendaPoint}:${state.stateVersion + 1}`,
-    prompt: "Corporate Downsizing: HQ-Agenden zeigen",
-    kind: "select_cards",
-    options: agendaIds.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return {
-        id: `card_${cardId}`,
-        label: definition.title,
-        publicLabel: "HQ-Agenda",
-        value: cardId,
-      };
-    }),
-    minSelections: 0,
-    maxSelections: agendaIds.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    agendaAbility: "corporate_downsizing_choice",
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "corporate_downsizing_hq_agendas",
-    hqAgendaChoiceCount: agendaIds.length,
-  };
-}
-
-function resolveCorporateDownsizingScoreChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_50.corporate_downsizing"))
-    throw new Error("Es ist keine Corporate-Downsizing-Choice offen.");
-  const [, sourceCardId = "", creditPerAgendaPointRaw = ""] =
-    choice.source.split(":");
-  const creditPerAgendaPoint = Number(creditPerAgendaPointRaw);
-  const sourceDefinition = sourceCardId
-    ? definitionFor(state, sourceCardId)
-    : undefined;
-  const implementation = sourceDefinition
-    ? scoredAgendaImplementationForDefinition(sourceDefinition)
-    : undefined;
-  if (
-    !sourceCardId ||
-    !sourceDefinition ||
-    !state.corp.scoreArea.includes(sourceCardId) ||
-    implementation?.kind !== "corporate_downsizing_hq_agendas" ||
-    !Number.isInteger(creditPerAgendaPoint) ||
-    creditPerAgendaPoint < 0
-  )
-    throw new Error("Corporate Downsizing ist nicht mehr aktiv.");
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  const selectedSet = new Set(selectedIds);
-  if (
-    selectedSet.size !== selectedIds.length ||
-    selectedIds.some(
-      (cardId) =>
-        !state.corp.hq.includes(cardId) ||
-        definitionFor(state, cardId).type !== "agenda",
-    )
-  )
-    throw new Error("Corporate Downsizing darf nur HQ-Agenden zeigen.");
-  const revealedDefinitions = selectedIds.map((cardId) =>
-    definitionFor(state, cardId),
-  );
-  const combinedAgendaPoints = revealedDefinitions.reduce(
-    (sum, definition) => sum + Math.max(0, Math.floor(definition.agendaPoints ?? 0)),
-    0,
-  );
-  const gainedCredits = combinedAgendaPoints * creditPerAgendaPoint;
-  if (gainedCredits > 0) credits(state, "corp", gainedCredits);
-  state.corp.hq = state.corp.hq.filter((cardId) => !selectedSet.has(cardId));
-  const randomPurpose = `p3_50.corporate_downsizing.hq_agendas_into_rd.${sourceCardId}.${state.stateVersion + 1}`;
-  state.corp.rd = shuffleStateIds(
-    state,
-    [...state.corp.rd, ...selectedIds],
-    randomPurpose,
-  );
-  for (const cardId of state.corp.rd) {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      zone: { side: "corp", zone: "rd" },
-    };
-  }
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    agendaAbility: "corporate_downsizing",
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "corporate_downsizing_hq_agendas",
-    sourceDefinitionId: sourceDefinition.id,
-    sourceTitle: sourceDefinition.title,
-    publicRevealKind: "reveal",
-    publicRevealDefinitionIds: revealedDefinitions
-      .map((definition) => definition.id)
-      .join(","),
-    publicRevealTitles: revealedDefinitions
-      .map((definition) => definition.title)
-      .join("||"),
-    shownCardDefinitionIds: revealedDefinitions
-      .map((definition) => definition.id)
-      .join(","),
-    shownCount: selectedIds.length,
-    shuffledIntoRndCount: selectedIds.length,
-    combinedAgendaPoints,
-    gainedCredits,
-    corpCreditsAfter: state.corp.credits,
-    randomDrawRecordPurpose: randomPurpose,
-    randomCounterAfter: state.randomCounter,
-  };
-}
-
-function resolveReschedulerHqShuffleDraw(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const hqCards = state.corp.hq.slice();
-  const hqCardCount = hqCards.length;
-  const randomPurpose = `v1917.rescheduler.hq_into_rd.${sourceCardId}.${state.stateVersion + 1}`;
-  state.corp.hq = [];
-  state.corp.rd = shuffleStateIds(state, [...state.corp.rd, ...hqCards], randomPurpose);
-  for (const cardId of state.corp.rd) {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      zone: { side: "corp", zone: "rd" },
-    };
-  }
-  drawCorpCards(state, hqCardCount);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1917_rescheduler_hq_shuffle_draw",
-    hqCardCount,
-    drawnCount: hqCardCount,
-    randomDrawRecordPurpose: randomPurpose,
-    randomCounterAfter: state.randomCounter,
   };
 }
 
