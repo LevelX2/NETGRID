@@ -222,8 +222,6 @@ import {
 import {
   availableRunnerAccessTrashCredits,
   buildRunnerAccessActions,
-  canFreeTrashCurrentAccessCard,
-  effectiveAccessTrashCost,
   runnerAccessTrashRecurringCreditSourceIds,
   type RunnerAccessActionHost,
 } from "./game/access/access-actions";
@@ -233,6 +231,11 @@ import {
   resolveChimeraDaemonTrashChoice as resolveAccessChimeraDaemonTrashChoice,
   type AccessEffectHandlerHost,
 } from "./game/access/access-effect-handlers";
+import {
+  advanceArchivesBreachPastNonDecisionCards,
+  handleAccessExecution,
+  type AccessFlowHost,
+} from "./game/access/access-flow";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -1371,8 +1374,6 @@ type DamageSummary = {
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
-type BreachEntryStatus = ActiveBreach["queue"][number]["status"];
-
 const INITIAL_HAND_SIZE = 5;
 const PROTEUS_DIGICONDA_ID = "onr_proteus_020_digiconda";
 const PROTEUS_FOOD_FIGHT_ID = "onr_proteus_022_food-fight";
@@ -7856,19 +7857,11 @@ function performAction(
       continueRun(state, legalAction);
       return;
     case "access_card":
-      accessCurrentCard(state, legalAction);
-      return;
     case "steal_agenda":
-      spendCredits(state, "runner", legalAction.costs[0]?.credits ?? 0);
-      stealAgenda(state, mustRun(state).accessedCardId ?? "", legalAction);
-      return;
     case "trash_accessed_card":
-      trashAccessedCard(
-        state,
-        mustRun(state).accessedCardId ?? "",
-        legalAction,
-      );
-      return;
+      if (handleAccessExecution(accessFlowHost(state), legalAction).handled)
+        return;
+      throw new Error("Die Access-Aktion ist nicht gueltig.");
     case "trash_resource":
       trashResource(
         state,
@@ -7879,8 +7872,9 @@ function performAction(
       );
       return;
     case "decline_trash":
-      declineCurrentAccess(state, legalAction);
-      return;
+      if (handleAccessExecution(accessFlowHost(state), legalAction).handled)
+        return;
+      throw new Error("Die Access-Aktion ist nicht gueltig.");
     case "remove_tag":
       spendClick(state, "runner");
       if (legalAction.payload?.resourceAbility === "danshis_second_id") {
@@ -12286,7 +12280,10 @@ function enterAccess(state: GameState, legalAction?: LegalAction): void {
       successful: true,
       breach,
     };
-    autoAdvanceArchivesBreachPastNonDecisionCards(state, legalAction);
+    advanceArchivesBreachPastNonDecisionCards(
+      accessFlowHost(state),
+      legalAction,
+    );
     if (!state.run) return;
   } else {
     state.run = { ...run, phase: "access", successful: true };
@@ -12364,72 +12361,6 @@ function revealArchivesAtBreachStart(
   }
 }
 
-function autoAdvanceArchivesBreachPastNonDecisionCards(
-  state: GameState,
-  legalAction?: LegalAction,
-): void {
-  const run = state.run;
-  const breach = run?.breach;
-  if (!run || !breach || breach.serverId !== "archives" || breach.completed)
-    return;
-
-  let queue = breach.queue.slice();
-  let currentIndex = breach.currentIndex;
-  let accessedSummaries = breach.accessedSummaries.slice();
-  let autoAccessedCount = 0;
-
-  while (true) {
-    const current = queue[currentIndex];
-    if (!current || current.status !== "pending") break;
-    if (archivesAccessRequiresDecisionOrEffect(state, current.cardInstanceId))
-      break;
-
-    queue = queue.map((entry, index) =>
-      index === currentIndex ? { ...entry, status: "accessed" as const } : entry,
-    );
-    accessedSummaries = [
-      ...accessedSummaries,
-      {
-        entryId: current.entryId,
-        status: "accessed" as const,
-        cardDefinitionId: definitionFor(state, current.cardInstanceId).id,
-      },
-    ];
-    autoAccessedCount += 1;
-
-    const nextIndex = queue.findIndex(
-      (entry, index) => index > currentIndex && entry.status === "pending",
-    );
-    if (nextIndex === -1) {
-      state.run = {
-        ...run,
-        breach: {
-          ...breach,
-          queue,
-          completed: true,
-          accessedSummaries,
-        },
-      };
-      recordArchivesAutoAccess(legalAction, autoAccessedCount);
-      finishRun(state, true, legalAction);
-      return;
-    }
-    currentIndex = nextIndex;
-  }
-
-  if (autoAccessedCount === 0) return;
-  state.run = {
-    ...run,
-    breach: {
-      ...breach,
-      queue,
-      currentIndex,
-      accessedSummaries,
-    },
-  };
-  recordArchivesAutoAccess(legalAction, autoAccessedCount);
-}
-
 function archivesAccessRequiresDecisionOrEffect(
   state: GameState,
   cardId: CardInstanceId,
@@ -12463,21 +12394,6 @@ function archivesAccessRequiresDecisionOrEffect(
       mechanic === "access_trace" ||
       mechanic === "access_replacement",
   );
-}
-
-function recordArchivesAutoAccess(
-  legalAction: LegalAction | undefined,
-  count: number,
-): void {
-  if (!legalAction || count <= 0) return;
-  const previousCount =
-    typeof legalAction.payload?.archivesAutoAccessedCount === "number"
-      ? legalAction.payload.archivesAutoAccessedCount
-      : 0;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    archivesAutoAccessedCount: previousCount + count,
-  };
 }
 
 function applySuccessfulRunAccessReplacement(
@@ -13017,15 +12933,6 @@ function runnerHqAccessBonus(state: GameState): number {
   return quoteAccessCountModifiers(state, "hq").amount;
 }
 
-function accessQueueZone(
-  serverId: Exclude<ServerId, "new_remote">,
-): ActiveBreach["queue"][number]["zone"] {
-  if (serverId === "rd") return "rd";
-  if (serverId === "hq") return "hq";
-  if (serverId === "archives") return "archives";
-  return "remote_root";
-}
-
 function isBreachEntryHidden(
   state: GameState,
   cardId: CardInstanceId,
@@ -13088,407 +12995,6 @@ function discardRandomCorpHqCards(
     discarded.push(cardId);
   }
   return discarded;
-}
-
-function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
-  const run = mustRun(state);
-  if (run.breach) {
-    const breach = run.breach;
-    const entry = breach.queue[breach.currentIndex];
-    if (!entry || entry.status !== "pending") {
-      finishRun(state, true, legalAction);
-      return;
-    }
-    const cardId = entry.cardInstanceId;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      accessedCardId: cardId,
-      serverId: breach.serverId,
-      breachId: breach.breachId,
-      accessIndex: breach.currentIndex,
-    };
-    markV1915InstalledRevealAccess(state, entry, legalAction);
-    const updatedQueue = breach.queue.map((candidate, index) =>
-      index === breach.currentIndex
-        ? { ...candidate, status: "accessed" as const }
-        : candidate,
-    );
-    state.run = {
-      ...run,
-      accessedCardId: cardId,
-      breach: {
-        ...breach,
-        queue: updatedQueue,
-      },
-    };
-    const instance = mustInstance(state.cardInstances, cardId);
-    state.cardInstances[cardId] = { ...instance, faceup: true };
-    resolveAmbushOnAccessFoundation(state, cardId, legalAction);
-    handleAccessEffectsForCard(accessEffectHandlerHost(state, legalAction), cardId);
-    const definition = definitionFor(state, cardId);
-    const freeTrashAccess = canFreeTrashCurrentAccessCard(
-      runnerAccessActionHost(state),
-      run,
-      definition,
-    );
-    if (
-      definition.type !== "agenda" &&
-      definition.type !== "asset" &&
-      definition.type !== "upgrade" &&
-      !freeTrashAccess
-    ) {
-      completeCurrentBreachAccess(state, "accessed", legalAction);
-    }
-    return;
-  }
-  const server = mustServer(state, run.attackedServerId);
-  let cardId: string | undefined;
-  if (server.id === "rd") cardId = state.corp.rd[0];
-  else if (server.id === "hq") cardId = randomHqAccess(state);
-  else if (server.id === "archives") cardId = state.corp.archives[0];
-  else cardId = server.root[0];
-  if (!cardId) {
-    finishRun(state, true, legalAction);
-    return;
-  }
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    accessedCardId: cardId,
-    serverId: server.id,
-  };
-  markV1915InstalledRevealAccess(
-    state,
-    {
-      hiddenInfo: isBreachEntryHidden(state, cardId),
-      zone: accessQueueZone(server.id),
-    },
-    legalAction,
-  );
-  state.run = { ...run, accessedCardId: cardId };
-  const instance = mustInstance(state.cardInstances, cardId);
-  state.cardInstances[cardId] = { ...instance, faceup: true };
-  resolveAmbushOnAccessFoundation(state, cardId, legalAction);
-  handleAccessEffectsForCard(accessEffectHandlerHost(state, legalAction), cardId);
-  const definition = definitionFor(state, cardId);
-  const freeTrashAccess = canFreeTrashCurrentAccessCard(
-    runnerAccessActionHost(state),
-    run,
-    definition,
-  );
-  if (
-    definition.type !== "agenda" &&
-    definition.type !== "asset" &&
-    definition.type !== "upgrade" &&
-    !freeTrashAccess
-  ) {
-    finishRun(state, true, legalAction);
-  }
-}
-
-function markV1915InstalledRevealAccess(
-  state: GameState,
-  entry: { hiddenInfo: boolean; zone: ActiveBreach["queue"][number]["zone"] },
-  legalAction: LegalAction,
-): void {
-  if (!entry.hiddenInfo || !["rd", "hq", "archives"].includes(entry.zone))
-    return;
-  const helperIds = v1915InstalledRevealHelperIds(state);
-  if (helperIds.length === 0) return;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1915_installed_access_reveal",
-    revealHelperCount: helperIds.length,
-  };
-}
-
-function resolveAmbushOnAccessFoundation(
-  state: GameState,
-  cardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const harness = state.ambushHarness;
-  if (!harness?.enabled) return;
-  const definition = definitionFor(state, cardId);
-  const triggered =
-    !harness.triggerDefinitionId ||
-    harness.triggerDefinitionId === definition.id;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "ambush_on_access_foundation",
-    ambushFoundationChecked: true,
-    ambushFoundationTriggered: triggered,
-    ...(triggered ? { ambushFoundationDefinitionId: definition.id } : {}),
-  };
-}
-
-function stealAgenda(state: GameState, cardId: string, legalAction?: LegalAction): void {
-  if (!cardId) throw new Error("Keine Agenda wird accessed.");
-  if (state.run?.bizarreEncryptionSchemeActive) {
-    delayBizarreEncryptionSchemeAgendaScore(state, cardId, legalAction);
-    return;
-  }
-  const flags = ensureRunnerTurnFlags(state);
-  flags.stoleAgendaThisTurn = true;
-  flags.stolenAgendaAdvancementCountersThisTurn =
-    Math.max(0, Math.floor(flags.stolenAgendaAdvancementCountersThisTurn ?? 0)) +
-    Math.max(
-      0,
-      Math.floor(mustInstance(state.cardInstances, cardId).advancementCounters),
-    );
-  const definition = definitionFor(state, cardId);
-  if (cardHasSubtype(definition, "research"))
-    flags.stoleResearchAgendaThisTurn = true;
-  if (cardHasSubtype(definition, "gray_ops"))
-    flags.stoleGrayOpsAgendaThisTurn = true;
-  if (cardHasSubtype(definition, "black_ops"))
-    flags.stoleBlackOpsAgendaThisTurn = true;
-  const agendaPointValue = agendaPointsForScoredCard(state, cardId);
-  const agendaDebt = Math.max(
-    0,
-    Math.floor(state.runnerAgendaPointsToForfeit ?? 0),
-  );
-  removeFromAllZones(state, cardId);
-  if (agendaDebt > 0) {
-    const paidDebt = Math.min(agendaDebt, agendaPointValue);
-    state.runnerAgendaPointsToForfeit = agendaDebt - paidDebt;
-    ensureSpecialZones(state).removedFromGame.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      rezzed: true,
-      zone: {
-        side: "special",
-        zone: "removed_from_game",
-        visibility: "public",
-      },
-    };
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1919RunnerEventAbility: "arasaka_owns_you_future_agenda_forfeit",
-        futureAgendaPointForfeitPaid: paidDebt,
-        futureAgendaPointForfeitPending: state.runnerAgendaPointsToForfeit,
-        specialZone: "removed_from_game",
-        specialZoneVisibility: "public",
-        specialZoneReason: "v1919_arasaka_owns_you_future_agenda_forfeit",
-      };
-    }
-    if (state.run?.breach) {
-      completeCurrentBreachAccess(state, "stolen", legalAction);
-      return;
-    }
-    finishRun(state, true, legalAction);
-    return;
-  }
-  state.runner.scoreArea.push(cardId);
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    faceup: true,
-    rezzed: true,
-    zone: { side: "runner", zone: "scoreArea" },
-  };
-  if (state.run?.breach) {
-    completeCurrentBreachAccess(state, "stolen", legalAction);
-    return;
-  }
-  finishRun(state, true, legalAction);
-}
-
-function delayBizarreEncryptionSchemeAgendaScore(
-  state: GameState,
-  cardId: CardInstanceId,
-  legalAction?: LegalAction,
-): void {
-  const run = mustRun(state);
-  const definition = definitionFor(state, cardId);
-  if (definition.type !== "agenda")
-    throw new Error(
-      "Bizarre Encryption Scheme kann nur Agenda-Scoring verzögern.",
-    );
-  const serverId = run.breach?.serverId ?? run.attackedServerId;
-  const zone = mustInstance(state.cardInstances, cardId).zone;
-  if (
-    zone.side !== "corp" ||
-    zone.zone !== "serverRoot" ||
-    zone.serverId !== serverId
-  ) {
-    throw new Error("Die verzögerte Agenda liegt nicht im betroffenen Remote.");
-  }
-  const existing = state.bizarreEncryptionDelayedAgendas ?? [];
-  if (!existing.some((entry) => entry.agendaId === cardId)) {
-    state.bizarreEncryptionDelayedAgendas = [
-      ...existing,
-      { agendaId: cardId, serverId },
-    ];
-  }
-  if (state.run?.breach) {
-    completeCurrentBreachAccess(state, "declined", legalAction);
-    return;
-  }
-  finishRun(state, true, legalAction);
-}
-
-function trashAccessedCard(
-  state: GameState,
-  cardId: string,
-  legalAction?: LegalAction,
-): void {
-  const definition = definitionFor(state, cardId);
-  const rawOverride = legalAction?.payload?.accessTrashCostOverride;
-  const overrideCost =
-    typeof rawOverride === "number"
-      ? Math.max(0, Math.floor(rawOverride))
-      : undefined;
-  const effectiveCost = effectiveAccessTrashCost(
-    runnerAccessActionHost(state),
-    cardId as CardInstanceId,
-  );
-  const trashCost = overrideCost ?? effectiveCost.totalCost;
-  const sourceZone = mustInstance(state.cardInstances, cardId).zone;
-  if (sourceZone.side === "corp" && sourceZone.zone === "archives") {
-    throw new Error("Karten in Archives können beim Zugriff nicht getrasht werden.");
-  }
-  const trashPayment = spendRunnerAccessTrashCredits(
-    state,
-    trashCost,
-    cardId as CardInstanceId,
-  );
-  if (legalAction && overrideCost === undefined) {
-    const scatterShotSpent =
-      definition.type === "upgrade" ? trashPayment.recurringSpent : 0;
-    const poltergeistSpent =
-      definition.type === "asset" ? trashPayment.recurringSpent : 0;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      accessTrashBaseCost: effectiveCost.baseCost,
-      accessTrashCostModifier: effectiveCost.modifier,
-      accessTrashTotalCost: trashCost,
-      ...(effectiveCost.sourceDefinitionIds.length > 0
-        ? {
-            accessTrashCostSourceDefinitionIds:
-              effectiveCost.sourceDefinitionIds.join(","),
-            accessTrashCostSourceTitles: effectiveCost.sourceTitles.join(","),
-          }
-        : {}),
-      ...(scatterShotSpent > 0
-        ? {
-            v1922RunnerProgramAbility:
-              "scatter_shot_upgrade_trash_recurring_credit",
-            scatterShotRecurringCreditsSpent: scatterShotSpent,
-            runnerCreditsSpent: trashPayment.runnerCreditsSpent,
-          }
-        : {}),
-      ...(poltergeistSpent > 0
-        ? {
-            v1922RunnerProgramAbility:
-              "poltergeist_node_trash_recurring_credit",
-            poltergeistRecurringCreditsSpent: poltergeistSpent,
-            runnerCreditsSpent: trashPayment.runnerCreditsSpent,
-          }
-        : {}),
-    };
-  }
-  const run = state.run;
-  if (
-    run &&
-    sourceZone.side === "corp" &&
-    sourceZone.zone === "serverRoot" &&
-    sourceZone.serverId === (run.breach?.serverId ?? run.attackedServerId)
-  ) {
-    snapshotPersistentStealCostModifiersForSource(
-      state,
-      cardId as CardInstanceId,
-      sourceZone.serverId,
-      legalAction,
-    );
-  }
-  trashCorpInstalledCardToArchives(state, cardId, legalAction);
-  if (state.run?.breach) {
-    completeCurrentBreachAccess(state, "trashed", legalAction);
-    return;
-  }
-  finishRun(state, true, legalAction);
-}
-
-function declineCurrentAccess(state: GameState, legalAction?: LegalAction): void {
-  if (state.run?.breach) {
-    completeCurrentBreachAccess(state, "declined", legalAction);
-    return;
-  }
-  finishRun(state, true, legalAction);
-}
-
-function completeCurrentBreachAccess(
-  state: GameState,
-  status: BreachEntryStatus,
-  legalAction?: LegalAction,
-): void {
-  const run = mustRun(state);
-  const breach = run.breach;
-  if (!breach) {
-    finishRun(state, true, legalAction);
-    return;
-  }
-  const current = breach.queue[breach.currentIndex];
-  if (!current) {
-    finishRun(state, true, legalAction);
-    return;
-  }
-  const finalStatus: BreachEntryStatus =
-    status === "pending" ? "accessed" : status;
-  const queue = breach.queue.map((entry, index) =>
-    index === breach.currentIndex ? { ...entry, status: finalStatus } : entry,
-  );
-  const nextIndex = queue.findIndex(
-    (entry, index) => index > breach.currentIndex && entry.status === "pending",
-  );
-  const accessedSummaries = [
-    ...breach.accessedSummaries,
-    {
-      entryId: current.entryId,
-      status: finalStatus,
-      cardDefinitionId: definitionFor(state, current.cardInstanceId).id,
-    },
-  ];
-  const { accessedCardId: _accessedCardId, ...runWithoutAccessedCard } = run;
-  void _accessedCardId;
-  if (nextIndex === -1) {
-    const completedRun = {
-      ...runWithoutAccessedCard,
-      breach: {
-        ...breach,
-        queue,
-        completed: true,
-        accessedSummaries,
-      },
-    };
-    state.run = completedRun;
-    if (
-      startExpertScheduleAnalyzerPostAccessChoice(
-        state,
-        completedRun,
-        legalAction,
-      )
-    )
-      return;
-    finishRun(state, true, legalAction);
-    return;
-  }
-  state.run = {
-    ...runWithoutAccessedCard,
-    breach: {
-      ...breach,
-      queue,
-      currentIndex: nextIndex,
-      accessedSummaries,
-    },
-  };
-  autoAdvanceArchivesBreachPastNonDecisionCards(state, legalAction);
-  if (!state.run) return;
-  state.timingPoint = "access.resolve_card";
-  state.activeSide = "runner";
 }
 
 function trashResource(
@@ -19884,6 +19390,68 @@ function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
       runnerDuringRunCardImplementationActions: () =>
         runnerDuringRunCardImplementationActions(state),
       mysteryBoxRunActions: (run) => mysteryBoxRunActions(state, run),
+    },
+  };
+}
+
+function accessFlowHost(state: GameState): AccessFlowHost {
+  return {
+    state,
+    accessActions: runnerAccessActionHost(state),
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+      cardHasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
+    },
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+      randomHqAccess: () => randomHqAccess(state),
+    },
+    effects: {
+      executeAccessEffects: (cardId, legalAction) =>
+        handleAccessEffectsForCard(accessEffectHandlerHost(state, legalAction), cardId),
+      archivesAccessRequiresDecisionOrEffect: (cardId) =>
+        archivesAccessRequiresDecisionOrEffect(state, cardId),
+    },
+    runner: {
+      ensureTurnFlags: () => ensureRunnerTurnFlags(state),
+    },
+    zones: {
+      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+      ensureSpecialZones: () => ensureSpecialZones(state),
+    },
+    payment: {
+      spendRunnerCredits: (amount) => spendCredits(state, "runner", amount),
+      spendRunnerAccessTrashCredits: (amount, accessedCardId) =>
+        spendRunnerAccessTrashCredits(state, amount, accessedCardId),
+    },
+    steal: {
+      agendaPointsForScoredCard: (cardId) =>
+        agendaPointsForScoredCard(state, cardId),
+      snapshotPersistentStealCostModifiersForSource: (
+        cardId,
+        serverId,
+        legalAction,
+      ) =>
+        snapshotPersistentStealCostModifiersForSource(
+          state,
+          cardId,
+          serverId,
+          legalAction,
+        ),
+    },
+    trash: {
+      trashCorpInstalledCardToArchives: (cardId, legalAction) =>
+        trashCorpInstalledCardToArchives(state, cardId, legalAction),
+    },
+    run: {
+      finishRun: (successful, legalAction) =>
+        finishRun(state, successful, legalAction),
+      startExpertScheduleAnalyzerPostAccessChoice: (run, legalAction) =>
+        startExpertScheduleAnalyzerPostAccessChoice(state, run, legalAction),
+    },
+    access: {
+      installedRevealHelperCount: () => v1915InstalledRevealHelperIds(state).length,
     },
   };
 }
