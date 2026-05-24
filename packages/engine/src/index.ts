@@ -216,11 +216,15 @@ import {
 } from "./game/corp/trace-damage-abilities";
 import {
   buildCorpSpecialDamageAbilityActionsForCard,
-  handleCorpAccessAmbushDamageEffects,
   handleCorpSpecialDamageAbilityAction,
-  resolveCorpAccessAmbushPaymentChoice,
   type CorpSpecialDamageAbilityHost,
 } from "./game/corp/special-damage-abilities";
+import {
+  handleAccessEffectsForCard,
+  resolveAccessPaymentChoice,
+  resolveChimeraDaemonTrashChoice as resolveAccessChimeraDaemonTrashChoice,
+  type AccessEffectHandlerHost,
+} from "./game/access/access-effect-handlers";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -13446,11 +13450,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     const instance = mustInstance(state.cardInstances, cardId);
     state.cardInstances[cardId] = { ...instance, faceup: true };
     resolveAmbushOnAccessFoundation(state, cardId, legalAction);
-    handleCorpAccessAmbushDamageEffects(
-      corpSpecialDamageAbilityHost(state, legalAction),
-      cardId,
-    );
-    resolveV199UpgradeOnAccess(state, cardId, legalAction);
+    handleAccessEffectsForCard(accessEffectHandlerHost(state, legalAction), cardId);
     const definition = definitionFor(state, cardId);
     const freeTrashAccess = canFreeTrashCurrentAccessCard(
       state,
@@ -13494,11 +13494,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   const instance = mustInstance(state.cardInstances, cardId);
   state.cardInstances[cardId] = { ...instance, faceup: true };
   resolveAmbushOnAccessFoundation(state, cardId, legalAction);
-  handleCorpAccessAmbushDamageEffects(
-    corpSpecialDamageAbilityHost(state, legalAction),
-    cardId,
-  );
-  resolveV199UpgradeOnAccess(state, cardId, legalAction);
+  handleAccessEffectsForCard(accessEffectHandlerHost(state, legalAction), cardId);
   const definition = definitionFor(state, cardId);
   const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
   if (
@@ -13546,80 +13542,6 @@ function resolveAmbushOnAccessFoundation(
     ambushFoundationChecked: true,
     ambushFoundationTriggered: triggered,
     ...(triggered ? { ambushFoundationDefinitionId: definition.id } : {}),
-  };
-}
-
-function resolveV199UpgradeOnAccess(
-  state: GameState,
-  cardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const definition = definitionFor(state, cardId);
-  if (definition.id === BIZARRE_ENCRYPTION_SCHEME_ID && state.run) {
-    state.run.bizarreEncryptionSchemeActive = true;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      bizarreEncryptionSchemeAccessed: true,
-    };
-  }
-  if (
-    definition.id === CHIMERA_ID &&
-    (cardImplementationForDefinitionId(definition.id)?.accessEffects?.length ?? 0) === 0
-  ) {
-    startChimeraDaemonTrashChoice(state, cardId, legalAction);
-  }
-}
-
-function startChimeraDaemonTrashChoice(
-  state: GameState,
-  chimeraId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const options = state.runner.rig.programs
-    .filter((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return (
-        definition.type === "program" && cardHasSubtype(definition, "daemon")
-      );
-    })
-    .sort((left, right) => {
-      const leftDefinition = definitionFor(state, left);
-      const rightDefinition = definitionFor(state, right);
-      const costCompare =
-        (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
-      if (costCompare !== 0) return costCompare;
-      const memoryCompare =
-        (rightDefinition.memoryCost ?? 0) - (leftDefinition.memoryCost ?? 0);
-      if (memoryCompare !== 0) return memoryCompare;
-      return left.localeCompare(right);
-    })
-    .map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return {
-        id: `card_${cardId}`,
-        label: definition.title,
-        publicLabel: "Daemon",
-        value: cardId,
-      };
-    });
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    chimeraAccessed: true,
-    chimeraDaemonCandidateCount: options.length,
-  };
-  if (options.length === 0) return;
-  state.pendingChoice = {
-    choiceId: `v199_chimera_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `v199.chimera_daemon_trash:${chimeraId}:${state.stateVersion + 1}`,
-    prompt: "Daemon für Chimera trashen",
-    kind: "select_cards",
-    options,
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
   };
 }
 
@@ -20211,30 +20133,12 @@ function corpSpecialDamageAbilityHost(
   return {
     state,
     ...(legalAction ? { legalAction } : {}),
-    definitions: {
-      setup: SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
-      trap: TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
-      crybaby: CRYBABY_ACCESS_COST_UPGRADE_ID,
-      dedicatedResponseTeam: DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
-      dieterEsslin: DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
-      turbeauDelacroix: TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
-      corprunnersShatteredRemains: CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
-      experimentalAi: EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
-      vacantSoulkiller: VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
-      virusTestSite: VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
-    },
     cards: {
       definitionFor: (cardId) => definitionFor(state, cardId),
-      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
-      cardHasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
-      accessEffectsForDefinition: (definitionId) =>
-        cardImplementationForDefinitionId(definitionId)?.accessEffects ?? [],
       uniqueDirectLongtailImplementationForCard: (cardId) =>
         uniqueDirectLongtailImplementationForCard(state, cardId),
       uniqueDirectLongtailImplementationForDefinition: (definitionId) =>
         uniqueDirectLongtailImplementationForDefinition(definitionId),
-      uniqueDirectLongtailKindForCard: (cardId) =>
-        uniqueDirectLongtailKindForCard(state, cardId),
       rezzedCorpRootCardIds: () => rezzedCorpRootCardIds(state),
     },
     actions: {
@@ -20248,11 +20152,56 @@ function corpSpecialDamageAbilityHost(
       forfeitCorpAgendaForPointCost: (cardId) =>
         forfeitCorpAgendaForPointCost(state, cardId),
     },
-    counters: {
-      cardCounter: (cardId, counterType) =>
-        cardCounter(state, cardId, counterType as CounterType),
-      addCardCounter: (cardId, counterType, amount) =>
-        addCardCounter(state, cardId, counterType as CounterType, amount),
+    damage: {
+      resolveDamageOperation: (damageType, amount, sourceDefinitionId) => {
+        if (!legalAction) throw new Error("Damage-Aktion fehlt.");
+        resolveDamageOperation(
+          state,
+          legalAction,
+          damageType,
+          amount,
+          sourceDefinitionId,
+        );
+      },
+    },
+    rng: {
+      rollDie: (purpose) => rollDeterministicDie(state, purpose),
+      randomCounter: () => state.randomCounter,
+    },
+    trash: {
+      trashCorpInstalledCardToArchives: (cardId) =>
+        trashCorpInstalledCardToArchives(state, cardId),
+    },
+  };
+}
+
+function accessEffectHandlerHost(
+  state: GameState,
+  legalAction?: LegalAction,
+): AccessEffectHandlerHost {
+  return {
+    state,
+    ...(legalAction ? { legalAction } : {}),
+    definitions: {
+      setup: SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
+      trap: TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
+      crybaby: CRYBABY_ACCESS_COST_UPGRADE_ID,
+      dedicatedResponseTeam: DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
+      dieterEsslin: DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
+      turbeauDelacroix: TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
+      corprunnersShatteredRemains: CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
+      experimentalAi: EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
+      vacantSoulkiller: VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
+      virusTestSite: VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
+      bizarreEncryptionScheme: BIZARRE_ENCRYPTION_SCHEME_ID,
+      chimera: CHIMERA_ID,
+    },
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
+      cardHasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
+      accessEffectsForDefinition: (definitionId) =>
+        cardImplementationForDefinitionId(definitionId)?.accessEffects ?? [],
     },
     damage: {
       resolveDamageOperation: (damageType, amount, sourceDefinitionId) => {
@@ -20297,13 +20246,16 @@ function corpSpecialDamageAbilityHost(
       traceSuccessEffectForCardImplementation: (effects) =>
         traceSuccessEffectForCardImplementation(effects),
     },
-    rng: {
-      rollDie: (purpose) => rollDeterministicDie(state, purpose),
-      randomCounter: () => state.randomCounter,
+    counters: {
+      cardCounter: (cardId, counterType) =>
+        cardCounter(state, cardId, counterType as CounterType),
+      addCardCounter: (cardId, counterType, amount) =>
+        addCardCounter(state, cardId, counterType as CounterType, amount),
+    },
+    payment: {
+      spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
     },
     trash: {
-      trashCorpInstalledCardToArchives: (cardId) =>
-        trashCorpInstalledCardToArchives(state, cardId),
       trashRunnerInstalledCardToHeap: (cardId) =>
         trashRunnerInstalledCardToHeap(state, cardId),
       openRunnerInstalledTrashPreventionWindow: (targetIds, sourceDefinitionId) => {
@@ -20315,9 +20267,6 @@ function corpSpecialDamageAbilityHost(
           sourceDefinitionId,
         );
       },
-    },
-    credits: {
-      spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
     },
   };
 }
@@ -22156,36 +22105,10 @@ function resolveChimeraDaemonTrashChoice(
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v199.chimera_daemon_trash"))
-    throw new Error("Es ist keine Chimera-Choice offen.");
-  const [, sourceCardId = ""] = choice.source.split(":");
-  if (
-    !sourceCardId ||
-    state.run?.accessedCardId !== sourceCardId ||
-    !state.cardInstances[sourceCardId] ||
-    state.cardInstances[sourceCardId]?.zone.zone === "archives" ||
-    definitionFor(state, sourceCardId).id !== CHIMERA_ID
-  ) {
-    throw new Error("Chimera ist nicht mehr die gueltige Access-Quelle.");
-  }
-  const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const option = choice.options.find(
-    (candidate) => candidate.id === selectedId,
+  resolveAccessChimeraDaemonTrashChoice(
+    accessEffectHandlerHost(state, legalAction),
+    selectedChoiceIds(playerAction.selectedChoices)[0] ?? "",
   );
-  const daemonId = typeof option?.value === "string" ? option.value : "";
-  if (!daemonId || !state.runner.rig.programs.includes(daemonId))
-    throw new Error("Der gewaehlte Daemon ist nicht installiert.");
-  const definition = definitionFor(state, daemonId);
-  if (definition.type !== "program" || !cardHasSubtype(definition, "daemon"))
-    throw new Error("Chimera darf nur einen Daemon trashen.");
-  trashRunnerInstalledProgram(state, daemonId);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    chimeraDaemonTrashed: true,
-    chimeraDaemonDefinitionId: definition.id,
-  };
-  delete state.pendingChoice;
 }
 
 function resolveCardImplementationAccessPaymentChoice(
@@ -22193,8 +22116,8 @@ function resolveCardImplementationAccessPaymentChoice(
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
-  resolveCorpAccessAmbushPaymentChoice(
-    corpSpecialDamageAbilityHost(state, legalAction),
+  resolveAccessPaymentChoice(
+    accessEffectHandlerHost(state, legalAction),
     selectedChoiceIds(playerAction.selectedChoices)[0] ?? "",
   );
 }
