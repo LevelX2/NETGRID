@@ -317,6 +317,14 @@ import {
   startupImmolatorPostPassActions,
   type EncounterSpecialWindowHost,
 } from "./game/run/encounter-special-windows";
+import {
+  applyPrintedTraceSuccessFollowups,
+  encounterPrintedEffectHost,
+  isSupportedEncounterTraceSuccessEffect,
+  resolvePrintedDamageSubroutine,
+  startTraceFromPrintedSubroutine,
+  type EncounterPrintedEffectHost,
+} from "./game/run/encounter-printed-effects";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -10223,57 +10231,29 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     if (subroutine.type === "give_runner_tag")
       state.runner.tags += subroutine.amount ?? 1;
     if (subroutine.type === "initiate_trace") {
-      startTraceFromSubroutine(
-        state,
-        run.encounteredIceId,
-        index,
-        subroutine,
-        legalAction,
+      startTraceFromPrintedSubroutine(
+        encounterPrintedEffectHostForState(state, legalAction),
+        {
+          sourceCardInstanceId: run.encounteredIceId,
+          subroutineIndex: index,
+          subroutine,
+          legalAction,
+        },
       );
       return;
     }
     if (subroutine.type === "do_damage") {
-      const damageType = subroutine.damageType ?? "net";
-      const printedAmount = subroutine.amount ?? 1;
-      const microtechApNetReduction =
-        damageType === "net" &&
-        printedAmount > 1 &&
-        cardHasSubtype(definition, "ap") &&
-        hasInstalledMicrotechTrodeSet(state);
-      const damageAmount = microtechApNetReduction ? 1 : printedAmount;
-      const event = createDamageImminentEvent(state, {
-        damageId: `${run.runId}.${run.encounteredIceId}.${index}`,
-        damageType,
-        amount: damageAmount,
-        source: `subroutine:${definition.id}:${subroutine.id}`,
-      });
-      if (microtechApNetReduction && legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          runnerHardwareAbility: "microtech_trode_set_ap_net_damage_reduction",
-          sourceDefinitionId: MICROTECH_TRODE_SET_ID,
-          printedDamageAmount: printedAmount,
-          damageAmount,
-        };
-      }
-      if (
-        legalAction &&
-        (openReplacementWindow(state, event, legalAction) ||
-          openEventModificationWindow(state, event, legalAction))
-      ) {
-        if (!run.resolvedSubroutineIndexes.includes(index))
-          run.resolvedSubroutineIndexes.push(index);
-        return;
-      }
-      const summary = resolveDamageImminentEvent(state, event);
-      damageSummaries.push(summary);
-      appendResolvedSubroutineEffect(legalAction, definition, index, subroutine, summary);
-      if (legalAction) {
-        setDamagePayload(
+      const damageResult = resolvePrintedDamageSubroutine(
+        encounterPrintedEffectHostForState(state, legalAction),
+        {
+          definition,
+          subroutine,
+          subroutineIndex: index,
+          damageSummaries,
           legalAction,
-          aggregateDamageSummaries(damageSummaries),
-        );
-      }
+        },
+      );
+      if (damageResult.suspended) return;
       if (state.winner) return;
     }
     if (subroutine.type === "trash_installed_program") {
@@ -10626,104 +10606,6 @@ function addHackerTrackerTraceCounters(state: GameState): number {
   return added;
 }
 
-function startTraceFromSubroutine(
-  state: GameState,
-  sourceCardInstanceId: CardInstanceId,
-  subroutineIndex: number,
-  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
-  legalAction?: LegalAction,
-): void {
-  if (state.trace || state.pendingChoice)
-    throw new Error("Es ist bereits ein Trace oder eine Choice offen.");
-  const baseTraceStrength =
-    subroutine.baseTraceStrength ?? subroutine.amount ?? 0;
-  if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0)
-    throw new Error("Trace strength ist ungueltig.");
-  const successEffect = subroutine.traceSuccessEffect;
-  if (!successEffect || !isSupportedTraceSuccessEffect(successEffect))
-    throw new Error("Dieser Trace-Effekt ist nicht freigegeben.");
-
-  const run = mustRun(state);
-  if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
-    run.resolvedSubroutineIndexes.push(subroutineIndex);
-  const sourceDefinition = definitionFor(state, sourceCardInstanceId);
-  const traceId = `${run.runId}.${sourceCardInstanceId}.${subroutineIndex}.trace`;
-  const parisPoolSource = parisCityGridTracePoolSource(state);
-  const encounterTemporaryTraceCredits =
-    run.encounterTemporaryTraceCredits?.sourceIceId === sourceCardInstanceId
-      ? Math.max(0, Math.floor(run.encounterTemporaryTraceCredits.remaining ?? 0))
-      : 0;
-  const baseCorpBidMax =
-    state.corp.credits +
-    encounterTemporaryTraceCredits +
-    hackerTrackerCounterTotal(state) +
-    krumzTraceBitTotal(state) +
-    (parisPoolSource ? cardCounter(state, parisPoolSource.cardId, "bit") : 0);
-  const rabbitTraceLimitReduction = rabbitTraceLimitReductionForIceTrace(state);
-  const corpBidMax = Math.max(0, baseCorpBidMax - rabbitTraceLimitReduction);
-  state.trace = {
-    traceId,
-    sourceCardInstanceId,
-    sourceDefinitionId: sourceDefinition.id,
-    subroutineIndex,
-    baseTraceStrength,
-    corpBidMax,
-    ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
-    ...(parisPoolSource
-      ? {
-          parisCityGridPoolSourceCardInstanceId: parisPoolSource.cardId,
-          parisCityGridPoolServerId: parisPoolSource.serverId,
-        }
-      : {}),
-    ...(encounterTemporaryTraceCredits > 0
-      ? {
-          encounterTemporaryTraceCreditSourceIceId: sourceCardInstanceId,
-          encounterTemporaryTraceCreditSourceDefinitionId: sourceDefinition.id,
-        }
-      : {}),
-    status: "corp_bid",
-    successEffect,
-  };
-  state.pendingChoice = traceBidChoice(
-    state,
-    "corp",
-    traceId,
-    `Korp Trace-Bid wählen (Base Trace ${baseTraceStrength})`,
-    corpBidMax,
-  );
-  state.activeSide = "corp";
-  state.timingPoint = "run.encounter_ice";
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      traceStarted: true,
-      traceId,
-      sourceCardId: sourceCardInstanceId,
-      sourceDefinitionId: sourceDefinition.id,
-      baseTraceStrength,
-      corpBidMax,
-      ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
-      ...(parisPoolSource
-        ? {
-            parisCityGridPoolAvailable: cardCounter(
-              state,
-              parisPoolSource.cardId,
-              "bit",
-            ),
-            parisCityGridPoolServerId: parisPoolSource.serverId,
-            sourceDefinitionId: sourceDefinition.id,
-          }
-        : {}),
-      ...(encounterTemporaryTraceCredits > 0
-        ? {
-            temporaryTraceCreditsAvailable: encounterTemporaryTraceCredits,
-            temporaryTraceCreditsSourceDefinitionId: sourceDefinition.id,
-          }
-        : {}),
-    };
-  }
-}
-
 function rabbitTraceLimitReductionForIceTrace(state: GameState): number {
   const reductions = state.runner.rig.programs.map((cardId) => {
     const implementation = runnerUtilityLongtailImplementationForCard(state, cardId);
@@ -10754,7 +10636,12 @@ function startTraceFromOperation(
     throw new Error("Es ist bereits ein Trace oder eine Choice offen.");
   if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0)
     throw new Error("Trace strength ist ungueltig.");
-  if (!isSupportedTraceSuccessEffect(successEffect))
+  if (
+    !isSupportedEncounterTraceSuccessEffect(
+      successEffect,
+      traceCounterEffectDefinitionFor,
+    )
+  )
     throw new Error("Dieser Trace-Erfolgseffekt wird nicht unterstuetzt.");
   const sourceCardInstanceId = String(legalAction.payload?.cardId ?? "");
   if (!sourceCardInstanceId || !state.cardInstances[sourceCardInstanceId])
@@ -17217,6 +17104,59 @@ function encounterSpecialWindowHostForState(
   });
 }
 
+function encounterPrintedEffectHostForState(
+  state: GameState,
+  legalAction?: LegalAction,
+): EncounterPrintedEffectHost {
+  return encounterPrintedEffectHost(state, {
+    addCardCounter: (cardId, counterType, amount) =>
+      addCardCounter(state, cardId, counterType, amount),
+    addHackerTrackerTraceCounters: () => addHackerTrackerTraceCounters(state),
+    calculateRunnerLink: () => calculateRunnerLink(state),
+    cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
+    createDamageImminentEvent: (request) =>
+      createDamageImminentEvent(state, request),
+    definitionFor: (cardId) => definitionFor(state, cardId),
+    ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
+    finishRun: (successful) => finishRun(state, successful),
+    hasInstalledMicrotechTrodeSet: () => hasInstalledMicrotechTrodeSet(state),
+    hackerTrackerCounterTotal: () => hackerTrackerCounterTotal(state),
+    krumzTraceBitTotal: () => krumzTraceBitTotal(state),
+    openEventModificationWindow: (event, action) =>
+      openEventModificationWindow(state, event, action),
+    openReplacementWindow: (event, action) =>
+      openReplacementWindow(state, event, action),
+    parisCityGridTracePoolSource: () => parisCityGridTracePoolSource(state),
+    rabbitTraceLimitReductionForIceTrace: () =>
+      rabbitTraceLimitReductionForIceTrace(state),
+    resolveDamageImminentEvent: (event) =>
+      resolveDamageImminentEvent(state, event),
+    resolveTraceHardwareWreckerSuccess: (
+      sourceDefinitionId,
+      sourceCardInstanceId,
+      traceId,
+    ) =>
+      resolveTraceHardwareWreckerSuccess(
+        state,
+        sourceDefinitionId as CardDefinitionId,
+        sourceCardInstanceId,
+        traceId,
+      ),
+    resolveTrashInstalledProgramSubroutine: (action = legalAction) =>
+      resolveTrashInstalledProgramSubroutine(state, action),
+    setDamagePayload: (summary) => {
+      if (legalAction) setDamagePayload(legalAction, summary);
+    },
+    supportsTraceSuccessEffect: (effect) =>
+      isSupportedEncounterTraceSuccessEffect(
+        effect,
+        traceCounterEffectDefinitionFor,
+      ),
+    traceBidChoice: (side, traceId, prompt, maxBid) =>
+      traceBidChoice(state, side, traceId, prompt, maxBid),
+  });
+}
+
 function runEndCleanupHost(state: GameState): RunEndCleanupHost {
   return {
     state,
@@ -20698,118 +20638,17 @@ function resolveTraceRunnerBid(
     };
     return;
   }
-  const tagsAdded =
-    successful && trace.successEffect.type === "add_tag_and_counter"
-      ? trace.successEffect.tagAmount
-      : successful && trace.successEffect.type === "add_tag"
-      ? trace.successEffect.amount
-      : 0;
-  const hackerTrackerCountersAdded = addHackerTrackerTraceCounters(state);
-  let runnerRunLockCreditCost = 0;
-  let runnerRunEnded = false;
-  let traceHardwareWreckerPayload: Record<string, unknown> = {};
-  if (successful) state.runner.tags += tagsAdded;
-  let traceCounterPayload: Record<string, string | number> = {};
-  if (
-    successful &&
-    (trace.successEffect.type === "add_counter" ||
-      trace.successEffect.type === "add_tag_and_counter")
-  ) {
-    addCardCounter(
-      state,
-      state.runner.identity,
-      trace.successEffect.counterType,
-      trace.successEffect.amount,
-    );
-    traceCounterPayload = {
-      addedCounterAmount: trace.successEffect.amount,
-      counterType: trace.successEffect.counterType,
-      remainingCounters: cardCounter(
-        state,
-        state.runner.identity,
-        trace.successEffect.counterType,
-      ),
-    };
-  }
-  if (
-    successful &&
-    (trace.successEffect.type === "end_run_and_run_lock" ||
-      trace.successEffect.type === "end_run_trash_program_and_run_lock")
-  ) {
-    runnerRunLockCreditCost = trace.successEffect.amount;
-    ensureRunnerTurnFlags(state).fangRunLockCreditCost =
-      runnerRunLockCreditCost;
-    runnerRunEnded = true;
-    if (trace.successEffect.type === "end_run_trash_program_and_run_lock")
-      resolveTrashInstalledProgramSubroutine(state, legalAction);
-  }
-  delete state.pendingChoice;
-  delete state.trace;
-  if (state.run) {
-    if (trace.subroutineIndex !== undefined) {
-      state.run.traceSuccessBySubroutineIndex = {
-        ...(state.run.traceSuccessBySubroutineIndex ?? {}),
-        [trace.subroutineIndex]: successful,
-      };
-    }
-    if (
-      successful &&
-      trace.successEffect.type ===
-        "end_run_trash_hardware_and_unpreventable_meat_damage"
-    ) {
-      traceHardwareWreckerPayload = resolveTraceHardwareWreckerSuccess(
-        state,
-        trace.sourceDefinitionId,
-        trace.sourceCardInstanceId,
-        trace.traceId,
-      );
-      if (!state.winner && state.run) finishRun(state, false);
-    } else if (runnerRunEnded) {
-      finishRun(state, false);
-    } else {
-      state.timingPoint = "run.encounter_ice";
-      state.activeSide = "runner";
-    }
-  } else if (
-    trace.returnTimingPoint &&
-    trace.returnActiveSide &&
-    trace.returnPhase
-  ) {
-    state.timingPoint = trace.returnTimingPoint;
-    state.activeSide = trace.returnActiveSide;
-    state.phase = trace.returnPhase;
-  }
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    traceId: trace.traceId,
-    traceStep: "runner_bid",
-    baseTraceStrength: trace.baseTraceStrength,
-    sourceDefinitionId: trace.sourceDefinitionId,
-    corpBid: trace.corpBid ?? 0,
-    traceStrength,
-    runnerLink,
-    runnerBid: bid,
-    ...tracePaymentPayload,
-    runnerStrength,
-    traceSuccessful: successful,
-    tagsAdded,
-    ...traceCounterPayload,
-    ...(hackerTrackerCountersAdded > 0
-      ? {
-          hackerTrackerCountersAdded,
-          traceHostedCreditsAdded: hackerTrackerCountersAdded,
-        }
-      : {}),
-    ...(runnerRunEnded
-      ? {
-          fangRunEnded: true,
-          runnerRunEnded: true,
-          fangRunLockCreditCost: runnerRunLockCreditCost,
-          runnerRunLockCreditCost,
-        }
-      : {}),
-    ...traceHardwareWreckerPayload,
-  };
+  applyPrintedTraceSuccessFollowups(
+    encounterPrintedEffectHostForState(state, legalAction),
+    {
+      trace: postBidTrace,
+      traceStep: "runner_bid",
+      legalAction,
+      runnerLinkFallback: runnerLink,
+      extraPayload: tracePaymentPayload,
+      deletePendingChoice: true,
+    },
+  );
 }
 
 function postBidTraceLinkCandidates(
@@ -20963,157 +20802,14 @@ function completeTraceAfterPostBidLink(
   trace: NonNullable<GameState["trace"]>,
   legalAction: LegalAction,
 ): void {
-  const result = describeTraceResultFromTrace(trace, {
-    runnerLinkFallback: calculateRunnerLink(state),
-  });
-  const traceStrength = result.corpTraceStrength;
-  const runnerLink = result.runnerLink;
-  const runnerBid = result.runnerBid;
-  const runnerStrength = result.runnerTraceStrength;
-  const successful = result.successful;
-  const tagsAdded =
-    successful && trace.successEffect.type === "add_tag_and_counter"
-      ? trace.successEffect.tagAmount
-      : successful && trace.successEffect.type === "add_tag"
-      ? trace.successEffect.amount
-      : 0;
-  const hackerTrackerCountersAdded = addHackerTrackerTraceCounters(state);
-  let runnerRunLockCreditCost = 0;
-  let runnerRunEnded = false;
-  let traceHardwareWreckerPayload: Record<string, unknown> = {};
-  if (successful) state.runner.tags += tagsAdded;
-  let traceCounterPayload: Record<string, string | number> = {};
-  if (
-    successful &&
-    (trace.successEffect.type === "add_counter" ||
-      trace.successEffect.type === "add_tag_and_counter")
-  ) {
-    addCardCounter(
-      state,
-      state.runner.identity,
-      trace.successEffect.counterType,
-      trace.successEffect.amount,
-    );
-    traceCounterPayload = {
-      addedCounterAmount: trace.successEffect.amount,
-      counterType: trace.successEffect.counterType,
-      remainingCounters: cardCounter(
-        state,
-        state.runner.identity,
-        trace.successEffect.counterType,
-      ),
-    };
-  }
-  if (
-    successful &&
-    (trace.successEffect.type === "end_run_and_run_lock" ||
-      trace.successEffect.type === "end_run_trash_program_and_run_lock")
-  ) {
-    runnerRunLockCreditCost = trace.successEffect.amount;
-    ensureRunnerTurnFlags(state).fangRunLockCreditCost =
-      runnerRunLockCreditCost;
-    runnerRunEnded = true;
-    if (trace.successEffect.type === "end_run_trash_program_and_run_lock")
-      resolveTrashInstalledProgramSubroutine(state, legalAction);
-  }
-  delete state.trace;
-  if (state.run) {
-    if (trace.subroutineIndex !== undefined) {
-      state.run.traceSuccessBySubroutineIndex = {
-        ...(state.run.traceSuccessBySubroutineIndex ?? {}),
-        [trace.subroutineIndex]: successful,
-      };
-    }
-    if (
-      successful &&
-      trace.successEffect.type ===
-        "end_run_trash_hardware_and_unpreventable_meat_damage"
-    ) {
-      traceHardwareWreckerPayload = resolveTraceHardwareWreckerSuccess(
-        state,
-        trace.sourceDefinitionId,
-        trace.sourceCardInstanceId,
-        trace.traceId,
-      );
-      if (!state.winner && state.run) finishRun(state, false);
-    } else if (runnerRunEnded) {
-      finishRun(state, false);
-    } else {
-      state.timingPoint = "run.encounter_ice";
-      state.activeSide = "runner";
-    }
-  } else if (
-    trace.returnTimingPoint &&
-    trace.returnActiveSide &&
-    trace.returnPhase
-  ) {
-    state.timingPoint = trace.returnTimingPoint;
-    state.activeSide = trace.returnActiveSide;
-    state.phase = trace.returnPhase;
-  }
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    traceId: trace.traceId,
-    traceStep: "post_bid_link",
-    baseTraceStrength: trace.baseTraceStrength,
-    sourceDefinitionId: trace.sourceDefinitionId,
-    corpBid: trace.corpBid ?? 0,
-    traceStrength,
-    runnerLink,
-    runnerBid,
-    runnerStrength,
-    postBidTraceLinkBonus: trace.postBidLinkBonus ?? 0,
-    traceSuccessful: successful,
-    tagsAdded,
-    ...traceCounterPayload,
-    ...(hackerTrackerCountersAdded > 0
-      ? {
-          hackerTrackerCountersAdded,
-          traceHostedCreditsAdded: hackerTrackerCountersAdded,
-        }
-      : {}),
-    ...(runnerRunEnded
-      ? {
-          fangRunEnded: true,
-          runnerRunEnded: true,
-          fangRunLockCreditCost: runnerRunLockCreditCost,
-          runnerRunLockCreditCost,
-        }
-      : {}),
-    ...traceHardwareWreckerPayload,
-  };
-}
-
-function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
-  if (effect.type === "none") return true;
-  if (effect.type === "add_counter") {
-    return (
-      Number.isInteger(effect.amount) &&
-      effect.amount >= 0 &&
-      traceCounterEffectDefinitionFor(effect.counterType) !== undefined
-    );
-  }
-  if (effect.type === "add_tag_and_counter") {
-    return (
-      Number.isInteger(effect.tagAmount) &&
-      effect.tagAmount >= 0 &&
-      Number.isInteger(effect.amount) &&
-      effect.amount >= 0 &&
-      traceCounterEffectDefinitionFor(effect.counterType) !== undefined
-    );
-  }
-  if (
-    effect.type === "end_run_and_run_lock" ||
-    effect.type === "end_run_trash_program_and_run_lock"
-  ) {
-    return Number.isInteger(effect.amount) && effect.amount > 0;
-  }
-  if (effect.type === "end_run_trash_hardware_and_unpreventable_meat_damage")
-    return Number.isInteger(effect.amount) && effect.amount > 0;
-  return (
-    effect.type === "add_tag" &&
-    Number.isInteger(effect.amount) &&
-    effect.amount >= 0
+  applyPrintedTraceSuccessFollowups(
+    encounterPrintedEffectHostForState(state, legalAction),
+    {
+      trace,
+      traceStep: "post_bid_link",
+      legalAction,
+      runnerLinkFallback: calculateRunnerLink(state),
+    },
   );
 }
 
