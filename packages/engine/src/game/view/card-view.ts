@@ -309,6 +309,14 @@ function specialCounterDisplays(
       counterType: "ablative",
       usageHint: "status_marker",
     }),
+    ...singleCounterDisplay(counters.trauma, {
+      id: "trauma",
+      displayKind: "damage_prevention",
+      label: "Trauma-Counter",
+      ariaLabelName: "Trauma-Counter",
+      counterType: "trauma",
+      usageHint: "status_marker",
+    }),
     ...(definition.id === SKIVVISS_ID
       ? []
       : singleCounterDisplay(counters.virus, {

@@ -38760,6 +38760,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     setCardCounterForTest(state, recurringId, "recurring_credit", 2);
     setCardCounterForTest(state, restrictedId, "bit", 1);
+    setCardCounterForTest(state, state.runner.identity, "trauma", 2);
     setCardCounterForTest(state, virusId, "virus", 3);
     setCardCounterForTest(state, fridgeId, "ablative", 2);
     setCardCounterForTest(state, state.runner.identity, "data_raven", 1);
@@ -38852,6 +38853,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       ]),
     );
     expect(runnerView.own.identity.counterDisplays?.map((display) => display.id)).toEqual([
+      "trauma",
       "data_raven",
       "cerberus",
       "mastiff",
@@ -38859,6 +38861,13 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     ]);
     expect(runnerView.own.identity.counterDisplays).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          id: "trauma",
+          amount: 2,
+          displayKind: "damage_prevention",
+          counterType: "trauma",
+          label: "Trauma-Counter",
+        }),
         expect.objectContaining({
           id: "data_raven",
           amount: 1,
@@ -42821,6 +42830,69 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       expect(replay.ok, definitionId).toBe(true);
       expect(hashState(replay.state), definitionId).toBe(hashState(state));
     }
+  });
+
+  it("shows Trauma Team trauma counters after install and its add-counter action", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.damagePrevention("spotcheck-trauma-team-counters"),
+    );
+    state.runner.credits = 30;
+    state.runner.clicks = 10;
+    moveRunnerCardToGrip(state, "onr_v1_185_trauma-team");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_185_trauma-team",
+    );
+    const traumaTeamId = state.runner.rig.resources.find(
+      (cardId) =>
+        state.cardInstances[cardId]?.definitionId ===
+        "onr_v1_185_trauma-team",
+    );
+    expect(traumaTeamId).toBeDefined();
+    if (!traumaTeamId) throw new Error("Missing Trauma Team install");
+    expect(cardCounterAmount(state, traumaTeamId, "trauma")).toBe(2);
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === traumaTeamId,
+      )?.counterDisplays,
+    ).toEqual([
+      expect.objectContaining({
+        id: "trauma",
+        amount: 2,
+        displayKind: "damage_prevention",
+        counterType: "trauma",
+        label: "Trauma-Counter",
+      }),
+    ]);
+
+    const addCounterAction = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === traumaTeamId &&
+        action.payload?.cardImplementationAbility === "activated",
+    );
+    expect(addCounterAction?.label).toBe("Trauma-Counter hinzufügen");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === addCounterAction?.actionId,
+    );
+    expect(cardCounterAmount(state, traumaTeamId, "trauma")).toBe(3);
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === traumaTeamId,
+      )?.counterDisplays,
+    ).toEqual([
+      expect.objectContaining({
+        id: "trauma",
+        amount: 3,
+        displayKind: "damage_prevention",
+        counterType: "trauma",
+      }),
+    ]);
   });
 
   it("keeps scored agendas scoreArea-bound and replay-safe", () => {

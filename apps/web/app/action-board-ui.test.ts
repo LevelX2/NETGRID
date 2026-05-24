@@ -1031,6 +1031,25 @@ describe("V1.0.6 resource and card-display helpers", () => {
       shortLabel: "2 Data-Raven"
     });
     expect(
+      counterDisplayBadgeView(
+        {
+          id: "trauma",
+          amount: 3,
+          displayKind: "damage_prevention",
+          label: "Trauma-Counter",
+          ariaLabel: "3 Trauma-Counter",
+          counterType: "trauma",
+          usageHint: "status_marker"
+        },
+        "counter-display-badge"
+      )
+    ).toMatchObject({
+      amount: 3,
+      label: "3 Trauma-Counter",
+      ariaLabel: "3 Trauma-Counter",
+      shortLabel: "3 Trauma"
+    });
+    expect(
       armoredFridgeAblativeCounterBadge(rawArmoredFridge)
     ).toBeNull();
     expect(
