@@ -209,6 +209,11 @@ import {
   handleScoredAgendaActivatedAbilityAction,
   type ScoredAgendaAbilityHost,
 } from "./game/corp/scored-agenda-abilities";
+import {
+  buildCorpTraceDamageAbilityActionsForCard,
+  handleCorpTraceDamageActivatedAbility,
+  type CorpTraceDamageAbilityHost,
+} from "./game/corp/trace-damage-abilities";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -2915,15 +2920,14 @@ function corpMainActions(state: GameState): LegalAction[] {
       }
     }
   }
+  const corpTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);
   for (const assetId of rezzedCorpRootCardIds(state).sort()) {
     const definition = definitionFor(state, assetId);
-    pushActivatedCardImplementationActions(
-      cardImplementationRuntimeDeps,
+    pushCorpTraceDamageOrCardImplementationActions(
       state,
       actions,
-      "corp",
       assetId,
-      definition,
+      corpTraceDamageAbilityActionsHost,
     );
     if (
       HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS.has(definition.id) &&
@@ -3218,6 +3222,7 @@ function corpMainActions(state: GameState): LegalAction[] {
     );
   }
   const scoredAgendaAbilityActionsHost = scoredAgendaAbilityHost(state);
+  const scoredAgendaTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);
   for (const agendaId of state.corp.scoreArea.slice().sort()) {
     const scoredAgendaAbilityActions = buildScoredAgendaAbilityActionsForCard(
       scoredAgendaAbilityActionsHost,
@@ -3227,13 +3232,11 @@ function corpMainActions(state: GameState): LegalAction[] {
       actions.push(...scoredAgendaAbilityActions.actions);
       continue;
     }
-    pushActivatedCardImplementationActions(
-      cardImplementationRuntimeDeps,
+    pushCorpTraceDamageOrCardImplementationActions(
       state,
       actions,
-      "corp",
       agendaId,
-      definitionFor(state, agendaId),
+      scoredAgendaTraceDamageAbilityActionsHost,
     );
   }
   actions.push(...specialZoneHarnessActions(state, "corp"));
@@ -7255,6 +7258,12 @@ function performAction(
       state.activeSide = "corp";
       return;
     case "activated_card_ability":
+      if (
+        handleCorpTraceDamageActivatedAbility(
+          corpTraceDamageAbilityHost(state, legalAction),
+        ).handled
+      )
+        return;
       if (
         handleScoredAgendaActivatedAbilityAction(
           scoredAgendaAbilityHost(state, legalAction),
@@ -21176,6 +21185,62 @@ function scoredAgendaAbilityHost(
       },
     },
   };
+}
+
+function corpTraceDamageAbilityHost(
+  state: GameState,
+  legalAction?: LegalAction,
+): CorpTraceDamageAbilityHost {
+  return {
+    state,
+    ...(legalAction ? { legalAction } : {}),
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+    },
+    callbacks: {
+      pushActivatedCardImplementationActions: (actions, cardId, definition) =>
+        pushActivatedCardImplementationActions(
+          cardImplementationRuntimeDeps,
+          state,
+          actions,
+          "corp",
+          cardId,
+          definition,
+        ),
+      resolveActivatedCardImplementationAbility: () => {
+        if (!legalAction) return false;
+        return resolveActivatedCardImplementationAbility(
+          cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+        );
+      },
+    },
+  };
+}
+
+function pushCorpTraceDamageOrCardImplementationActions(
+  state: GameState,
+  actions: LegalAction[],
+  cardId: CardInstanceId,
+  host: CorpTraceDamageAbilityHost = corpTraceDamageAbilityHost(state),
+): void {
+  const traceDamageActions = buildCorpTraceDamageAbilityActionsForCard(
+    host,
+    cardId,
+  );
+  if (traceDamageActions.handled) {
+    actions.push(...traceDamageActions.actions);
+    return;
+  }
+  pushActivatedCardImplementationActions(
+    cardImplementationRuntimeDeps,
+    state,
+    actions,
+    "corp",
+    cardId,
+    definitionFor(state, cardId),
+  );
 }
 
 function resolvePendingChoice(
