@@ -109,6 +109,7 @@ import {
   type OpponentActionCue,
   type TurnStartAudioState
 } from "./action-cues";
+import { localizedDeCardTitle } from "./card-image-manifest";
 import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
@@ -1881,7 +1882,11 @@ function zoneHighlighted(highlight: BoardHighlight | null, side: Side, zone: "hq
   return Boolean(highlight?.kind === "zone" && highlight.side === side && highlight.zone === zone);
 }
 
-function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Record<string, CatalogCardDetail>): Record<string, Omit<ChronicleContext, "side">> {
+function chronicleContextByEventId(
+  events: PublicGameEvent[],
+  detailsById: Record<string, CatalogCardDetail>,
+  options: { preferGermanCardImages?: boolean } = {}
+): Record<string, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
   const turnSideByEventId = chronicleTurnSideByEventId(events);
   const actionUseByEventId = chronicleActionUseByEventId(events);
@@ -1895,11 +1900,13 @@ function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Recor
   return Object.fromEntries(
     events.map((event) => {
       const card = eventCardDetail(event, detailsById);
+      const cardId = card?.catalogCardId ?? revealedEventCardId(event);
+      const cardTitle = options.preferGermanCardImages ? localizedDeCardTitle(cardId) ?? card?.title ?? null : card?.title ?? null;
       const serverTurnNumber = payloadPositiveInteger(event.publicPayload, "chronicleTurnNumber");
       return [
         event.eventId,
         {
-          cardTitle: card?.title ?? null,
+          cardTitle,
           cardText: card?.text ?? null,
           cardType: card?.type ?? null,
           cardDetailLines: card ? catalogDetailLines(card) : [],
@@ -3186,7 +3193,7 @@ export default function Page() {
       return;
     }
     const newEvents = publicEventsAfter(payload.eventTail, lastSeen);
-    const contextByEventId = chronicleContextByEventId(payload.playerView.publicEvents, catalogDetailsById);
+    const contextByEventId = chronicleContextByEventId(payload.playerView.publicEvents, catalogDetailsById, { preferGermanCardImages });
     const cues = actionCuesEnabled
       ? deriveOpponentActionCues({
           viewerSide: payload.side,
@@ -3210,7 +3217,7 @@ export default function Page() {
       const sound = actionSoundForActionType(actionType, item.visibility);
       if (sound) playActionCueSound(sound, audioVolume, actionSoundCountForAction(actionType, event.publicPayload));
     }
-  }, [actionCuesEnabled, automaticEffectCuesEnabled, audioEnabled, audioVolume, payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById]);
+  }, [actionCuesEnabled, automaticEffectCuesEnabled, audioEnabled, audioVolume, payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById, preferGermanCardImages]);
 
   useEffect(() => {
     if (currentActionCue || actionCueQueue.length === 0) return;
@@ -5887,6 +5894,7 @@ export default function Page() {
                 cardDetailsById={catalogDetailsById}
                 displayMode={cardDisplayMode}
                 detailMode={chronicleDetailMode}
+                preferGermanCardImages={preferGermanCardImages}
                 onFocusCard={focusCard}
               />
               <section className="section">
@@ -9236,6 +9244,7 @@ function ChroniclePanel({
   cardDetailsById,
   displayMode,
   detailMode,
+  preferGermanCardImages,
   onFocusCard
 }: {
   events: PublicGameEvent[];
@@ -9244,11 +9253,12 @@ function ChroniclePanel({
   cardDetailsById: Record<string, CatalogCardDetail>;
   displayMode: CardDisplayMode;
   detailMode: ChronicleDetailMode;
+  preferGermanCardImages: boolean;
   onFocusCard(card: DisplayVisibleCard): void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => new Set());
-  const contextByEventId = chronicleContextByEventId(turnContextEvents, cardDetailsById);
+  const contextByEventId = chronicleContextByEventId(turnContextEvents, cardDetailsById, { preferGermanCardImages });
   const entries = chronicleEntriesWithRunGroups(events, side, contextByEventId, cardDetailsById).reverse();
   const groupedEntries = groupChronicleEntriesForRender(entries);
   const shownChronicleGroupLabels = new Set<string>();

@@ -1148,6 +1148,22 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(expect.arrayContaining(["Score", "Remote 1"]));
   });
 
+  it("uses the localized display title from context for scored agendas", () => {
+    const item = formatChronicleEvent(
+      makeEvent("score_agenda", {
+        actor: "corp",
+        title: "AI Chief Financial Officer",
+        cardDefinitionId: "onr_v1_188_ai-chief-financial-officer"
+      }),
+      "runner",
+      { agendaPoints: 2, cardTitle: "KI-Finanzvorstand" }
+    );
+
+    expect(item.title).toBe("Die Korp hat KI-Finanzvorstand gescored und 2 Agenda-Punkte erhalten.");
+    expect(item.cardTitle).toBe("KI-Finanzvorstand");
+    expect(item.chips).toEqual(expect.arrayContaining(["Score", "+2 Agenda"]));
+  });
+
   it("describes Data Fort Reclamation and Aardvark hidden-zone choices", () => {
     const dataFortInstall = formatChronicleEvent(
       makeEvent("resolve_choice", {
