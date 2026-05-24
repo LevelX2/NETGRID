@@ -17,6 +17,7 @@
 - `ai-real-scene-deck-suite-expansion-2026-05-24.md`: Aktivierung von zwei frozen Real-Scene-/Constructed-Holdout-Paaren mit Validierung, Hashes und erstem 160er Benchmarkbefund.
 - `ai-corp-score-failure-diagnosis-2026-05-24.md`: Diagnose der verbleibenden Corp-Score-Schwächen nach Effective-Remote-Safety und Protection->Score-Conversion inklusive Metrikkorrektur und Slot-Traces.
 - `ai-advance-to-score-window-compression-2026-05-24.md`: enger Corp-Slice zur Advance-to-Score-Window-Kompression mit neuen Verzögerungsmetriken, 8-Slot-Benchmark und Bewertung der verbleibenden Corp-Score-Schwächen.
+- `ai-local-pair2-actionlimit-and-remote-portfolio-diagnosis-2026-05-24.md`: Diagnose der verbleibenden ActionLimit-/Stagnationssignale nach Remote-Portfolio-/HQ-Density-Slice mit Fokus auf Local Pair 2 und Remote-Ice-Consolidation-Metrik.
 - `match-progression-deck-suite-benchmark-2026-05-23.md`: deckseitig getrennte Progression-Suite mit Demo-Smoke, kuratierten Snapshot-Tuning-/Holdout-Paaren und pending Real-Scene-Holdouts.
 - `match-progression-benchmark-2026-05-23.md`: erweiterter Progression-Benchmark mit Tuning- plus Holdout-Seeds, Profilvergleich und Stagnationsbefund zu Remote-Advances/Trash.
 - `ai-hints-role-gap-report-2026-05-17.md`: Rollenlücken in AI-Hints und Folgepakete.
