@@ -149,7 +149,6 @@ import {
   resolveMysteryBoxInstallSelection,
   resolveSearchStackInstallSelection,
   resolveSearchToGripSelection,
-  resolveSneakPreviewSearchInstallSelection,
 } from "./game/hidden-zone/search-choice-resolvers";
 import { applyResolvedSearchToGripMove } from "./game/hidden-zone/search-choice-move-intents";
 import {
@@ -161,7 +160,9 @@ import {
 import {
   buildSelfModifyingCodeMemoryDeferredPayload,
   buildSelfModifyingCodeResolvedPayload,
+  buildSneakPreviewSearchInstallResolvedPayload,
   resolveSelfModifyingCodeSearchInstallIntent,
+  resolveSneakPreviewSearchInstallIntent,
 } from "./game/hidden-zone/search-install-intents";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -24000,50 +24001,30 @@ function resolveSneakPreviewProgramChoice(
   const selectedCardId = choice
     ? selectedChoiceCardIds(choice, playerAction)[0]
     : undefined;
-  const sourceZoneForTargets = choice?.source.startsWith("v1911.sneak_preview_heap_install")
-    ? "heap"
-    : choice?.source.startsWith("v1911.sneak_preview_stack_install")
-      ? "stack"
-      : choice?.source.startsWith("p3_38.stack_or_trash_program_install")
-        ? (choice.source.split(":")[3] as "heap" | "stack" | undefined)
-        : undefined;
-  const selection = resolveSneakPreviewSearchInstallSelection({
+  const selectedDefinition = selectedCardId && state.cardInstances[selectedCardId]
+    ? definitionFor(state, selectedCardId)
+    : undefined;
+  const plan = resolveSneakPreviewSearchInstallIntent({
     choice,
     selectedCardId,
-    legalTargetIds: sourceZoneForTargets
-      ? sneakPreviewInstallableProgramIds(state, sourceZoneForTargets)
-      : [],
+    legalTargetIdsForSourceZone: (sourceZone) =>
+      sneakPreviewInstallableProgramIds(state, sourceZone),
+    selectedCardDefinition: selectedDefinition,
     defaultSourceDefinitionId: SNEAK_PREVIEW_ID,
   });
-  const resolvedChoice = choice!;
-  const cardId = selection.selectedCardId;
+  const cardId = plan.selectedCardId;
   installRunnerProgramForFree(state, cardId, legalAction);
   state.sneakPreviewTemporaryInstalls ??= [];
   state.sneakPreviewTemporaryInstalls.push({
     cardId,
-    sourceCardDefinitionId: selection.sourceDefinitionId,
+    sourceCardDefinitionId: plan.sourceDefinitionId,
   });
-  if (selection.shuffleNeeded)
-    shuffleRunnerStack(state, `v1911_sneak_preview:${resolvedChoice.choiceId}:shuffle`);
+  if (plan.shuffleNeeded)
+    shuffleRunnerStack(state, `v1911_sneak_preview:${choice!.choiceId}:shuffle`);
   delete state.pendingChoice;
-  const definition = definitionFor(state, cardId);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: selection.isCardImplementationChoice
-      ? "p3_38_stack_or_trash_program_install"
-      : "sneak_preview_program_install",
-    sourceDefinitionId: selection.sourceDefinitionId,
-    searchReveal: selection.sourceZone === "stack" ? "public" : "hidden",
-    searchDestination: "install_program",
-    searchShuffleAfter: selection.shuffleNeeded,
-    shuffled: selection.shuffleNeeded,
-    temporaryInstall: true,
-    selectedCount: 1,
-    installedProgramDefinitionId: definition.id,
-    ...(selection.sourceZone === "stack"
-      ? { publicRevealKind: "reveal", publicRevealDefinitionId: definition.id }
-      : {}),
+    ...buildSneakPreviewSearchInstallResolvedPayload(plan),
   };
 }
 

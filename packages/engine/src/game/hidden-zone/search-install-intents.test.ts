@@ -7,12 +7,16 @@ import { describe, expect, it } from "vitest";
 import {
   buildSelfModifyingCodeMemoryDeferredPayload,
   buildSelfModifyingCodeResolvedPayload,
+  buildSneakPreviewSearchInstallResolvedPayload,
   resolveSelfModifyingCodeSearchInstallIntent,
+  resolveSneakPreviewSearchInstallIntent,
 } from "./search-install-intents";
 
 const sourceDefinitionId = "onr_v1_059_self-modifying-code" as CardDefinitionId;
 const selectedCardId = "stack_program" as CardInstanceId;
 const selectedDefinitionId = "simple_decoder" as CardDefinitionId;
+const sneakPreviewDefinitionId =
+  "onr_v1_089_sneak-preview" as CardDefinitionId;
 
 function choice(overrides: Partial<ChoiceRequest> = {}): ChoiceRequest {
   return {
@@ -158,5 +162,105 @@ describe("hidden-zone search/install intents", () => {
       installed: false,
       installBlockedReason: "insufficient_credits",
     });
+  });
+
+  it("builds a Sneak Preview stack search/install plan", () => {
+    const plan = resolveSneakPreviewSearchInstallIntent({
+      choice: choice({
+        source: "v1911.sneak_preview_stack_install:8",
+      }),
+      selectedCardId,
+      legalTargetIdsForSourceZone: () => [selectedCardId],
+      selectedCardDefinition: {
+        id: selectedDefinitionId,
+        type: "program",
+      },
+      defaultSourceDefinitionId: sneakPreviewDefinitionId,
+    });
+
+    expect(plan).toEqual({
+      selectedCardId,
+      selectedCardDefinitionId: selectedDefinitionId,
+      sourceCardId: undefined,
+      sourceDefinitionId: sneakPreviewDefinitionId,
+      sourceZone: "stack",
+      destination: "install_program",
+      shuffleNeeded: true,
+      sourceTrashNeeded: false,
+      freeInstall: true,
+      temporaryReturnNeeded: true,
+      isCardImplementationChoice: false,
+    });
+    expect(buildSneakPreviewSearchInstallResolvedPayload(plan)).toEqual({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "sneak_preview_program_install",
+      sourceDefinitionId: sneakPreviewDefinitionId,
+      searchReveal: "public",
+      searchDestination: "install_program",
+      searchShuffleAfter: true,
+      shuffled: true,
+      temporaryInstall: true,
+      selectedCount: 1,
+      installedProgramDefinitionId: selectedDefinitionId,
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: selectedDefinitionId,
+    });
+  });
+
+  it("builds a Sneak Preview heap search/install plan without shuffle", () => {
+    const plan = resolveSneakPreviewSearchInstallIntent({
+      choice: choice({
+        source: "v1911.sneak_preview_heap_install:8",
+      }),
+      selectedCardId,
+      legalTargetIdsForSourceZone: () => [selectedCardId],
+      selectedCardDefinition: {
+        id: selectedDefinitionId,
+        type: "program",
+      },
+      defaultSourceDefinitionId: sneakPreviewDefinitionId,
+    });
+
+    expect(plan).toMatchObject({
+      selectedCardId,
+      selectedCardDefinitionId: selectedDefinitionId,
+      sourceDefinitionId: sneakPreviewDefinitionId,
+      sourceZone: "heap",
+      destination: "install_program",
+      shuffleNeeded: false,
+      sourceTrashNeeded: false,
+      freeInstall: true,
+      temporaryReturnNeeded: true,
+      isCardImplementationChoice: false,
+    });
+    expect(buildSneakPreviewSearchInstallResolvedPayload(plan)).toEqual({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "sneak_preview_program_install",
+      sourceDefinitionId: sneakPreviewDefinitionId,
+      searchReveal: "hidden",
+      searchDestination: "install_program",
+      searchShuffleAfter: false,
+      shuffled: false,
+      temporaryInstall: true,
+      selectedCount: 1,
+      installedProgramDefinitionId: selectedDefinitionId,
+    });
+  });
+
+  it("rejects invalid Sneak Preview program selections", () => {
+    expect(() =>
+      resolveSneakPreviewSearchInstallIntent({
+        choice: choice({
+          source: "v1911.sneak_preview_stack_install:8",
+        }),
+        selectedCardId,
+        legalTargetIdsForSourceZone: () => ["other_card" as CardInstanceId],
+        selectedCardDefinition: {
+          id: selectedDefinitionId,
+          type: "program",
+        },
+        defaultSourceDefinitionId: sneakPreviewDefinitionId,
+      }),
+    ).toThrow("Dieses Programm ist nicht mehr legal installierbar.");
   });
 });
