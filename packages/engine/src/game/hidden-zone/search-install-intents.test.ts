@@ -5,9 +5,13 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
+  buildMysteryBoxNoInstallResolvedPayload,
+  buildMysteryBoxSearchInstallResolvedPayload,
   buildSelfModifyingCodeMemoryDeferredPayload,
   buildSelfModifyingCodeResolvedPayload,
   buildSneakPreviewSearchInstallResolvedPayload,
+  createMysteryBoxNoInstallIntent,
+  resolveMysteryBoxSearchInstallIntent,
   resolveSelfModifyingCodeSearchInstallIntent,
   resolveSneakPreviewSearchInstallIntent,
 } from "./search-install-intents";
@@ -17,6 +21,7 @@ const selectedCardId = "stack_program" as CardInstanceId;
 const selectedDefinitionId = "simple_decoder" as CardDefinitionId;
 const sneakPreviewDefinitionId =
   "onr_v1_089_sneak-preview" as CardDefinitionId;
+const mysterySourceCardId = "mystery_box" as CardInstanceId;
 
 function choice(overrides: Partial<ChoiceRequest> = {}): ChoiceRequest {
   return {
@@ -262,5 +267,119 @@ describe("hidden-zone search/install intents", () => {
         defaultSourceDefinitionId: sneakPreviewDefinitionId,
       }),
     ).toThrow("Dieses Programm ist nicht mehr legal installierbar.");
+  });
+
+  it("builds a Mystery Box no-install plan for top cards without programs", () => {
+    const topCardIds = [
+      "top_event_1",
+      "top_event_2",
+      "top_event_3",
+    ] as CardInstanceId[];
+    const plan = createMysteryBoxNoInstallIntent({
+      sourceCardId: mysterySourceCardId,
+      topCardIds,
+      programCandidateIds: [],
+    });
+
+    expect(plan).toEqual({
+      sourceCardId: mysterySourceCardId,
+      topCardIds,
+      programCandidateIds: [],
+      destination: "install_program",
+      shuffleNeeded: true,
+      freeInstall: false,
+      sourceTrashNeeded: false,
+      revealTopCards: true,
+      showToCorp: true,
+      installedProgramCount: 0,
+      selfTrashed: false,
+    });
+    expect(buildMysteryBoxNoInstallResolvedPayload(plan, {
+      randomCounterAfter: 4,
+    })).toEqual({
+      programFound: false,
+      installedProgramCount: 0,
+      selfTrashed: false,
+      randomCounterAfter: 4,
+    });
+  });
+
+  it("builds a Mystery Box top-five program install plan", () => {
+    const topCardIds = [
+      selectedCardId,
+      "top_event",
+      "second_program",
+    ] as CardInstanceId[];
+    const plan = resolveMysteryBoxSearchInstallIntent({
+      choice: choice({
+        source: `v1915.mystery_box:${mysterySourceCardId}:${topCardIds.join(",")}:8`,
+      }),
+      selectedCardId,
+      topCardIds,
+      programCandidateIds: [selectedCardId, "second_program" as CardInstanceId],
+      selectedCardDefinition: {
+        id: selectedDefinitionId,
+        type: "program",
+      },
+    });
+
+    expect(plan).toEqual({
+      sourceCardId: mysterySourceCardId,
+      topCardIds,
+      programCandidateIds: [selectedCardId, "second_program"],
+      selectedCardId,
+      selectedCardDefinitionId: selectedDefinitionId,
+      destination: "install_program",
+      shuffleNeeded: true,
+      freeInstall: true,
+      sourceTrashNeeded: true,
+      revealTopCards: true,
+      showToCorp: true,
+      installedProgramCount: 1,
+      selfTrashed: true,
+    });
+    expect(buildMysteryBoxSearchInstallResolvedPayload(plan, {
+      randomCounterAfter: 5,
+    })).toEqual({
+      v1915RunnerProgramAbility: "mystery_box_top5_program_install",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "mystery_box_program_install",
+      installedProgramDefinitionId: selectedDefinitionId,
+      installedProgramCount: 1,
+      selfTrashed: true,
+      randomCounterAfter: 5,
+    });
+  });
+
+  it("rejects invalid Mystery Box top-five install selections", () => {
+    expect(() =>
+      resolveMysteryBoxSearchInstallIntent({
+        choice: choice({
+          source: `v1915.mystery_box:${mysterySourceCardId}:top_event:8`,
+        }),
+        selectedCardId,
+        topCardIds: ["top_event" as CardInstanceId],
+        programCandidateIds: [selectedCardId],
+        selectedCardDefinition: {
+          id: selectedDefinitionId,
+          type: "program",
+        },
+      }),
+    ).toThrow("Das gewaehlte Programm liegt nicht mehr im Reveal-Fenster.");
+
+    expect(() =>
+      resolveMysteryBoxSearchInstallIntent({
+        choice: choice({
+          source: `v1915.mystery_box:${mysterySourceCardId}:${selectedCardId}:8`,
+        }),
+        selectedCardId,
+        topCardIds: [selectedCardId],
+        programCandidateIds: [selectedCardId],
+        selectedCardDefinition: {
+          id: "simple_event" as CardDefinitionId,
+          type: "event",
+        },
+      }),
+    ).toThrow("Mystery Box kann nur ein Programm installieren.");
   });
 });

@@ -146,7 +146,6 @@ import {
 } from "./game/hidden-zone/search-choice-builders";
 import {
   resolveLookTopStackTakeMatchingSelection,
-  resolveMysteryBoxInstallSelection,
   resolveSearchStackInstallSelection,
   resolveSearchToGripSelection,
 } from "./game/hidden-zone/search-choice-resolvers";
@@ -158,9 +157,13 @@ import {
   toTopNSelectedCardMove,
 } from "./game/hidden-zone/topn-move-intents";
 import {
+  buildMysteryBoxNoInstallResolvedPayload,
+  buildMysteryBoxSearchInstallResolvedPayload,
   buildSelfModifyingCodeMemoryDeferredPayload,
   buildSelfModifyingCodeResolvedPayload,
   buildSneakPreviewSearchInstallResolvedPayload,
+  createMysteryBoxNoInstallIntent,
+  resolveMysteryBoxSearchInstallIntent,
   resolveSelfModifyingCodeSearchInstallIntent,
   resolveSneakPreviewSearchInstallIntent,
 } from "./game/hidden-zone/search-install-intents";
@@ -9287,10 +9290,14 @@ function resolveMysteryBoxTop5ProgramInstall(
     }
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      programFound: false,
-      installedProgramCount: 0,
-      selfTrashed: false,
-      randomCounterAfter: state.randomCounter,
+      ...buildMysteryBoxNoInstallResolvedPayload(
+        createMysteryBoxNoInstallIntent({
+          sourceCardId,
+          topCardIds: topCards,
+          programCandidateIds: programIds,
+        }),
+        { randomCounterAfter: state.randomCounter },
+      ),
     };
     return;
   }
@@ -9336,18 +9343,18 @@ function resolveMysteryBoxChoice(
     : undefined;
   const currentTopCards = state.runner.stack.slice(0, 5);
   const selectedDefinition = selectedId ? definitionFor(state, selectedId) : undefined;
-  const selection = resolveMysteryBoxInstallSelection({
+  const plan = resolveMysteryBoxSearchInstallIntent({
     choice,
     selectedCardId: selectedId,
-    currentTopCardIds: currentTopCards,
-    isSelectedProgram: selectedDefinition?.type === "program",
+    topCardIds: currentTopCards,
+    selectedCardDefinition: selectedDefinition,
   });
-  const sourceCardId = selection.sourceCardId;
+  const sourceCardId = plan.sourceCardId;
   if (!sourceCardId || !state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Mystery Box ist nicht mehr installiert.");
   if (definitionFor(state, sourceCardId).id !== MYSTERY_BOX_ID)
     throw new Error("Die Mystery-Box-Choice passt nicht zur Quelle.");
-  const selectedProgramId = selection.selectedCardId;
+  const selectedProgramId = plan.selectedCardId!;
   const selectedProgramDefinition = selectedDefinition!;
   if (
     state.runner.memoryUsed + (selectedProgramDefinition.memoryCost ?? 0) >
@@ -9401,13 +9408,9 @@ function resolveMysteryBoxChoice(
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    v1915RunnerProgramAbility: "mystery_box_top5_program_install",
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "mystery_box_program_install",
-    installedProgramDefinitionId: selectedProgramDefinition.id,
-    installedProgramCount: 1,
-    selfTrashed: true,
-    randomCounterAfter: state.randomCounter,
+    ...buildMysteryBoxSearchInstallResolvedPayload(plan, {
+      randomCounterAfter: state.randomCounter,
+    }),
   };
 }
 
