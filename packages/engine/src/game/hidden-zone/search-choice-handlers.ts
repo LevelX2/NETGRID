@@ -1,0 +1,524 @@
+import type {
+  CardDefinition,
+  CardDefinitionId,
+  CardInstanceId,
+  ChoiceRequest,
+  GameState,
+  LegalAction,
+  PlayerAction,
+} from "@netgrid/shared";
+import {
+  buildSelfModifyingCodeMemoryDeferredPayload,
+  buildSelfModifyingCodeResolvedPayload,
+  resolveSelfModifyingCodeSearchInstallIntent,
+} from "./search-install-intents";
+import {
+  resolveLookTopStackTakeMatchingSelection,
+  resolveSearchToGripSelection,
+} from "./search-choice-resolvers";
+import { applyResolvedSearchToGripMove } from "./search-choice-move-intents";
+import {
+  applyTopNTakeMatchingMoveIntent,
+  buildTopNTakeMatchingResolvedPayload,
+  createTopNTakeMatchingMoveIntent,
+  toTopNSelectedCardMove,
+} from "./topn-move-intents";
+
+type HiddenZonePayload = Record<string, string | number | boolean>;
+
+export type HiddenZoneSearchChoiceHandlerHost = {
+  choice: ChoiceRequest;
+  playerAction: PlayerAction;
+  legalAction: LegalAction;
+  state: Pick<GameState, "runner" | "cardInstances">;
+  constants: {
+    aujourdOuiResourceCardId: CardDefinitionId;
+    selfModifyingCodeId: CardDefinitionId;
+    shortCircuitResourceCardId: CardDefinitionId;
+  };
+  cards: {
+    definitionFor: (cardId: CardInstanceId) => CardDefinition;
+    isUniqueRunnerDefinitionInstalled: (definition: CardDefinition) => boolean;
+    runnerProgramUsesMemory: (cardId: CardInstanceId) => boolean;
+  };
+  zones: {
+    removeFromAllZones: (cardId: CardInstanceId) => void;
+    addToGrip: (cardId: CardInstanceId) => void;
+    trashRunnerInstalledCardToHeap: (cardId: CardInstanceId) => void;
+  };
+  shuffleRunnerStack: (purpose: string) => void;
+  spendRunnerCredits: (amount: number) => void;
+  installRunnerProgramFromStackWithoutClick: (cardId: CardInstanceId) => boolean;
+  startSelfModifyingCodeFreeMuChoice: (cardId: CardInstanceId) => boolean;
+  availableRunnerProgramInstallCredits: () => number;
+  runnerMemoryLimit: () => number;
+};
+
+export type HiddenZoneChoiceHandlerResult = {
+  handled: boolean;
+  stateChanged?: boolean;
+  deletePendingChoice?: boolean;
+  resolvedPayload?: HiddenZonePayload;
+  shufflePerformed?: boolean;
+  installedCardId?: CardInstanceId;
+  movedCardIds?: CardInstanceId[];
+  sourceTrashCardIds?: CardInstanceId[];
+};
+
+export function handleHiddenZoneSearchChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const source = host.choice.source;
+  if (isSelfModifyingCodeChoiceSource(source))
+    return handleSelfModifyingCodeChoice(host);
+  if (isTopNTakeMatchingChoiceSource(source))
+    return handleTopNTakeMatchingChoice(host);
+  if (isSearchToGripChoiceSource(source))
+    return handleSearchToGripChoice(host);
+  return { handled: false };
+}
+
+export function handleSearchToGripChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  if (isCardImplementationSearchToGripChoiceSource(host.choice.source))
+    return handleCardImplementationSearchToGripChoice(host);
+  return handleRunnerStackSearchChoice(host);
+}
+
+export function handleTopNTakeMatchingChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  if (host.choice.source.startsWith("v1911.aujourdoui_top5"))
+    return handleAujourdOuiTop5Choice(host);
+  return handleCardImplementationLookTopStackTakeMatchingChoice(host);
+}
+
+export function handleSelfModifyingCodeChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  if (host.choice.source.startsWith("v1911.self_modifying_code_free_mu"))
+    return handleSelfModifyingCodeFreeMuChoice(host);
+  return handleSelfModifyingCodeStackChoice(host);
+}
+
+function handleRunnerStackSearchChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const { choice, state } = host;
+  const cardId = selectedChoiceCardIds(choice, host.playerAction)[0];
+  if (!cardId || !state.runner.stack.includes(cardId))
+    throw new Error("Die gewaehlte Karte liegt nicht im Stack.");
+  if (
+    !choice.source.startsWith("v1911.search_stack_card") &&
+    host.cards.definitionFor(cardId).type !== "program"
+  )
+    throw new Error("Nur Programme sind in dieser Search-Harness legal.");
+  host.zones.removeFromAllZones(cardId);
+  host.zones.addToGrip(cardId);
+  const instance = state.cardInstances[cardId];
+  if (!instance) throw new Error(`CardInstance fehlt: ${cardId}`);
+  state.cardInstances[cardId] = {
+    ...instance,
+    zone: { side: "runner", zone: "grip" },
+  };
+  let shortCircuitSourceId: CardInstanceId | undefined;
+  if (choice.source.startsWith("v1911.short_circuit_search:")) {
+    shortCircuitSourceId = choice.source.split(":")[1] as
+      | CardInstanceId
+      | undefined;
+    if (
+      !shortCircuitSourceId ||
+      !state.runner.rig.resources.includes(shortCircuitSourceId) ||
+      host.cards.definitionFor(shortCircuitSourceId).id !==
+        host.constants.shortCircuitResourceCardId
+    )
+      throw new Error("The Short Circuit ist nicht mehr installiert.");
+  }
+  host.shuffleRunnerStack(`v098_search_stack:${choice.choiceId}:shuffle`);
+  const payload: HiddenZonePayload = {
+    ...(host.legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: shortCircuitSourceId
+      ? "v1911_short_circuit_search"
+      : "search_stack",
+    selectedCount: 1,
+    searchDestination: "runner_grip",
+    shuffled: true,
+    ...(shortCircuitSourceId
+      ? {
+          sourceDefinitionId: host.constants.shortCircuitResourceCardId,
+          cardDefinitionId: host.cards.definitionFor(cardId).id,
+          publicRevealDefinitionId: host.cards.definitionFor(cardId).id,
+          publicRevealKind: "reveal",
+        }
+      : {}),
+  };
+  host.legalAction.payload = payload;
+  return {
+    handled: true,
+    stateChanged: true,
+    deletePendingChoice: true,
+    resolvedPayload: payload,
+    shufflePerformed: true,
+    movedCardIds: [cardId],
+  };
+}
+
+function handleCardImplementationSearchToGripChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const { choice, state } = host;
+  const selection = resolveSearchToGripSelection({
+    choice,
+    selectedCardId: selectedChoiceCardIds(choice, host.playerAction)[0],
+    legalTargetIdsFor: ({ sourceZone, filter }) =>
+      sourceZone === "heap"
+        ? searchTrashToGripTargets(host, filter)
+        : searchStackToGripTargets(host, filter),
+  });
+  const move = applyResolvedSearchToGripMove({
+    selection,
+    sourceCardIds: selection.sourceZone === "heap" ? state.runner.heap : state.runner.stack,
+    sourceDefinition: host.cards.definitionFor(selection.sourceCardId),
+    selectedCardDefinitionId: host.cards.definitionFor(selection.selectedCardId).id,
+    installedRunnerResourceIds: state.runner.rig.resources,
+    cardInstances: state.cardInstances,
+    removeFromAllZones: host.zones.removeFromAllZones,
+    addToGrip: host.zones.addToGrip,
+  });
+  if (move.result.shuffleNeeded)
+    host.shuffleRunnerStack(`p3_37_search_stack_to_grip:${choice.choiceId}:shuffle`);
+  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...move.payload };
+  return {
+    handled: true,
+    stateChanged: true,
+    deletePendingChoice: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+    shufflePerformed: move.result.shuffleNeeded,
+    movedCardIds: [move.result.movedCardId],
+  };
+}
+
+function handleAujourdOuiTop5Choice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const { choice, state } = host;
+  if (!choice.source.startsWith("v1911.aujourdoui_top5"))
+    throw new Error("Es ist keine Aujourd'Oui-Top-5-Choice offen.");
+  const sourceCardId = choice.source.split(":")[1] as
+    | CardInstanceId
+    | undefined;
+  if (
+    !sourceCardId ||
+    !state.runner.rig.resources.includes(sourceCardId) ||
+    host.cards.definitionFor(sourceCardId).id !==
+      host.constants.aujourdOuiResourceCardId
+  ) {
+    throw new Error("Aujourd'Oui ist nicht mehr installiert.");
+  }
+
+  const topCardIds = choice.options
+    .map((option) => option.value)
+    .filter((value): value is CardInstanceId => typeof value === "string");
+  const selectedIds = selectedChoiceCardIds(choice, host.playerAction);
+  const uniqueSelectedIds = [...new Set(selectedIds)];
+  if (uniqueSelectedIds.length !== selectedIds.length)
+    throw new Error("Die Aujourd'Oui-Auswahl enthaelt doppelte Karten.");
+  if (uniqueSelectedIds.some((cardId) => !topCardIds.includes(cardId)))
+    throw new Error("Aujourd'Oui darf nur Karten aus den obersten 5 waehlen.");
+  if (
+    uniqueSelectedIds.some((cardId) => host.cards.definitionFor(cardId).type !== "program")
+  )
+    throw new Error("Aujourd'Oui darf nur Programme in den Grip nehmen.");
+  const creditCost = uniqueSelectedIds.length;
+  if (state.runner.credits < creditCost)
+    throw new Error("Der Runner kann die Aujourd'Oui-Kosten nicht bezahlen.");
+
+  host.spendRunnerCredits(creditCost);
+  for (const cardId of uniqueSelectedIds) {
+    host.zones.removeFromAllZones(cardId);
+    host.zones.addToGrip(cardId);
+    const instance = state.cardInstances[cardId];
+    if (!instance) throw new Error(`CardInstance fehlt: ${cardId}`);
+    state.cardInstances[cardId] = {
+      ...instance,
+      zone: { side: "runner", zone: "grip" },
+    };
+  }
+  host.shuffleRunnerStack(`v1911_aujourdoui_top5:${choice.choiceId}:shuffle`);
+  const revealedDefinitionIds = uniqueSelectedIds.map(
+    (cardId) => host.cards.definitionFor(cardId).id,
+  );
+  const revealPayload: HiddenZonePayload =
+    revealedDefinitionIds.length > 0
+      ? {
+          publicRevealKind: "reveal",
+          publicRevealDefinitionId: revealedDefinitionIds[0]!,
+          publicRevealDefinitionIds: revealedDefinitionIds.join(","),
+          revealedCount: revealedDefinitionIds.length,
+        }
+      : { revealedCount: 0 };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1911_aujourdoui_top5",
+    sourceDefinitionId: host.constants.aujourdOuiResourceCardId,
+    selectedCount: uniqueSelectedIds.length,
+    searchedTopCount: topCardIds.length,
+    searchDestination: "runner_grip",
+    creditCostPaid: creditCost,
+    runnerCreditsAfter: state.runner.credits,
+    shuffled: true,
+    ...revealPayload,
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    deletePendingChoice: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+    shufflePerformed: true,
+    movedCardIds: uniqueSelectedIds,
+  };
+}
+
+function handleCardImplementationLookTopStackTakeMatchingChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const { choice, state } = host;
+  if (!choice.source.startsWith("p3_37.look_top_stack_take_matching"))
+    throw new Error("Es ist keine Stack-Look-Choice offen.");
+  const selection = resolveLookTopStackTakeMatchingSelection({
+    choice,
+    selectedCardIds: selectedChoiceCardIds(choice, host.playerAction),
+    topCardIdsForCount: (count) => state.runner.stack.slice(0, count),
+    legalTargetIdsFor: ({ count, allowedTypes }) =>
+      lookTopStackTakeMatchingTargets(host, count, allowedTypes),
+    runnerCredits: state.runner.credits,
+  });
+  const topCards = state.runner.stack.slice(0, selection.count);
+  const moveIntent = createTopNTakeMatchingMoveIntent({
+    selection,
+    topCardIds: topCards,
+    sourceDefinition: host.cards.definitionFor(selection.sourceCardId),
+    installedRunnerResourceIds: state.runner.rig.resources,
+    selectedCards: selection.selectedCardIds.map((cardId) =>
+      toTopNSelectedCardMove(cardId, host.cards.definitionFor(cardId)),
+    ),
+  });
+  host.spendRunnerCredits(selection.paidCredits);
+  const moveResult = applyTopNTakeMatchingMoveIntent(moveIntent, {
+    cardInstances: state.cardInstances,
+    removeFromAllZones: host.zones.removeFromAllZones,
+    addToGrip: host.zones.addToGrip,
+  });
+  if (moveResult.shuffleNeeded)
+    host.shuffleRunnerStack(`p3_37_look_top_stack_take_matching:${choice.choiceId}:shuffle`);
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...buildTopNTakeMatchingResolvedPayload(moveResult, {
+      runnerCreditsAfter: state.runner.credits,
+    }),
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    deletePendingChoice: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+    shufflePerformed: moveResult.shuffleNeeded,
+    movedCardIds: moveResult.movedCardIds,
+  };
+}
+
+function handleSelfModifyingCodeStackChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const { choice, state } = host;
+  const selectedCardId = selectedChoiceCardIds(choice, host.playerAction)[0];
+  const selectedDefinition = selectedCardId
+    ? host.cards.definitionFor(selectedCardId)
+    : undefined;
+  const plan = resolveSelfModifyingCodeSearchInstallIntent({
+    choice,
+    selectedCardId,
+    stackCardIds: state.runner.stack,
+    selectedCardDefinition: selectedDefinition,
+    availableInstallCredits: host.availableRunnerProgramInstallCredits(),
+    runnerMemoryUsed: state.runner.memoryUsed,
+    runnerMemoryLimit: host.runnerMemoryLimit(),
+    uniqueBlocked: !!selectedDefinition &&
+      host.cards.isUniqueRunnerDefinitionInstalled(selectedDefinition),
+    sourceDefinitionId: host.constants.selfModifyingCodeId,
+  });
+  const cardId = plan.selectedCardId;
+  if (plan.shouldOpenMemoryChoice) {
+    if (plan.shuffleNeeded)
+      host.shuffleRunnerStack(`v1911_self_modifying_code:${choice.choiceId}:shuffle`);
+    const opened = host.startSelfModifyingCodeFreeMuChoice(cardId);
+    host.legalAction.payload = {
+      ...(host.legalAction.payload ?? {}),
+      ...buildSelfModifyingCodeMemoryDeferredPayload(plan, { installDeferredForMemory: opened }),
+    };
+    return {
+      handled: true,
+      stateChanged: true,
+      deletePendingChoice: !opened,
+      resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+      shufflePerformed: plan.shuffleNeeded,
+    };
+  }
+
+  const installed = plan.canAttemptInstall
+    ? host.installRunnerProgramFromStackWithoutClick(cardId)
+    : false;
+  if (plan.shuffleNeeded)
+    host.shuffleRunnerStack(`v1911_self_modifying_code:${choice.choiceId}:shuffle`);
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...buildSelfModifyingCodeResolvedPayload(plan, { installed }),
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    deletePendingChoice: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+    shufflePerformed: plan.shuffleNeeded,
+    ...(installed ? { installedCardId: cardId } : {}),
+  };
+}
+
+function handleSelfModifyingCodeFreeMuChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const { choice, state } = host;
+  if (!choice.source.startsWith("v1911.self_modifying_code_free_mu"))
+    throw new Error("Es ist keine Self-Modifying-Code-MU-Choice offen.");
+  const selectedProgramId = choice.source.split(":")[1] as
+    | CardInstanceId
+    | undefined;
+  if (!selectedProgramId || !state.runner.stack.includes(selectedProgramId))
+    throw new Error("Das Self-Modifying-Code-Programm liegt nicht mehr im Stack.");
+  const trashIds = selectedChoiceCardIds(choice, host.playerAction);
+  if (trashIds.length === 0) throw new Error("Es wurde kein Programm gewählt.");
+  const uniqueTrashIds = [...new Set(trashIds)];
+  if (uniqueTrashIds.length !== trashIds.length)
+    throw new Error("Die MU-Auswahl enthält doppelte Karten.");
+  for (const cardId of uniqueTrashIds) {
+    if (!state.runner.rig.programs.includes(cardId))
+      throw new Error("Die MU-Auswahl enthält kein installiertes Programm.");
+    if (!host.cards.runnerProgramUsesMemory(cardId))
+      throw new Error("Dieses Programm macht keine MU frei.");
+  }
+  const trashedDefinitionIds = uniqueTrashIds.map(
+    (cardId) => host.cards.definitionFor(cardId).id,
+  );
+  for (const cardId of uniqueTrashIds)
+    host.zones.trashRunnerInstalledCardToHeap(cardId);
+  const installed = host.installRunnerProgramFromStackWithoutClick(selectedProgramId);
+  if (!installed)
+    throw new Error("Nach der MU-Auswahl kann das Programm nicht installiert werden.");
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    sourceDefinitionId: host.constants.selfModifyingCodeId,
+    hiddenZoneAction: "self_modifying_code_free_mu",
+    publicRevealKind: "reveal",
+    publicRevealDefinitionId: host.cards.definitionFor(selectedProgramId).id,
+    trashedCount: uniqueTrashIds.length,
+    trashedCardDefinitionIds: trashedDefinitionIds.join(","),
+    installed: true,
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    deletePendingChoice: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+    installedCardId: selectedProgramId,
+    sourceTrashCardIds: uniqueTrashIds,
+  };
+}
+
+function selectedChoiceIds(
+  selectedChoices: PlayerAction["selectedChoices"],
+): string[] {
+  const raw =
+    selectedChoices?.selectedOptionIds ??
+    selectedChoices?.optionIds ??
+    selectedChoices?.options ??
+    selectedChoices?.selectedOptions;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((value): value is string => typeof value === "string");
+}
+
+function selectedChoiceCardIds(
+  choice: ChoiceRequest,
+  playerAction: PlayerAction,
+): CardInstanceId[] {
+  return selectedChoiceIds(playerAction.selectedChoices).map((optionId) => {
+    const option = choice.options.find(
+      (candidate) => candidate.id === optionId,
+    );
+    if (typeof option?.value !== "string")
+      throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
+    return option.value;
+  });
+}
+
+function searchStackToGripTargets(
+  host: HiddenZoneSearchChoiceHandlerHost,
+  filter: "program" | "any_card",
+): CardInstanceId[] {
+  return host.state.runner.stack.filter((cardId) =>
+    filter === "any_card" || host.cards.definitionFor(cardId).type === "program",
+  );
+}
+
+function searchTrashToGripTargets(
+  host: HiddenZoneSearchChoiceHandlerHost,
+  filter: "program" | "any_card",
+): CardInstanceId[] {
+  return host.state.runner.heap.filter((cardId) =>
+    filter === "any_card" || host.cards.definitionFor(cardId).type === "program",
+  );
+}
+
+function lookTopStackTakeMatchingTargets(
+  host: HiddenZoneSearchChoiceHandlerHost,
+  count: number,
+  allowedTypes: readonly string[],
+): CardInstanceId[] {
+  return host.state.runner.stack
+    .slice(0, count)
+    .filter((cardId) => allowedTypes.includes(host.cards.definitionFor(cardId).type));
+}
+
+function isSelfModifyingCodeChoiceSource(source: string): boolean {
+  return (
+    source.startsWith("v1911.self_modifying_code_install_program") ||
+    source.startsWith("v1911.self_modifying_code_free_mu")
+  );
+}
+
+function isTopNTakeMatchingChoiceSource(source: string): boolean {
+  return (
+    source.startsWith("v1911.aujourdoui_top5") ||
+    source.startsWith("p3_37.look_top_stack_take_matching")
+  );
+}
+
+function isSearchToGripChoiceSource(source: string): boolean {
+  return (
+    source.startsWith("v098.search_stack") ||
+    source.startsWith("v1911.search_stack") ||
+    source.startsWith("v1912.search_stack") ||
+    source.startsWith("v1911.short_circuit_search") ||
+    isCardImplementationSearchToGripChoiceSource(source)
+  );
+}
+
+function isCardImplementationSearchToGripChoiceSource(source: string): boolean {
+  return (
+    source.startsWith("p3_37.search_trash_to_grip") ||
+    source.startsWith("p3_37.search_stack_to_grip")
+  );
+}

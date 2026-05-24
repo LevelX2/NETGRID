@@ -145,26 +145,16 @@ import {
   buildSneakPreviewSourceChoicePayload,
 } from "./game/hidden-zone/search-choice-builders";
 import {
-  resolveLookTopStackTakeMatchingSelection,
-  resolveSearchStackInstallSelection,
-  resolveSearchToGripSelection,
-} from "./game/hidden-zone/search-choice-resolvers";
-import { applyResolvedSearchToGripMove } from "./game/hidden-zone/search-choice-move-intents";
-import {
-  applyTopNTakeMatchingMoveIntent,
-  buildTopNTakeMatchingResolvedPayload,
-  createTopNTakeMatchingMoveIntent,
-  toTopNSelectedCardMove,
-} from "./game/hidden-zone/topn-move-intents";
+  handleHiddenZoneSearchChoice,
+  type HiddenZoneSearchChoiceHandlerHost,
+} from "./game/hidden-zone/search-choice-handlers";
+import { resolveSearchStackInstallSelection } from "./game/hidden-zone/search-choice-resolvers";
 import {
   buildMysteryBoxNoInstallResolvedPayload,
   buildMysteryBoxSearchInstallResolvedPayload,
-  buildSelfModifyingCodeMemoryDeferredPayload,
-  buildSelfModifyingCodeResolvedPayload,
   buildSneakPreviewSearchInstallResolvedPayload,
   createMysteryBoxNoInstallIntent,
   resolveMysteryBoxSearchInstallIntent,
-  resolveSelfModifyingCodeSearchInstallIntent,
   resolveSneakPreviewSearchInstallIntent,
 } from "./game/hidden-zone/search-install-intents";
 import {
@@ -21945,6 +21935,50 @@ function resolveCrashEverettDrawChoice(
   };
 }
 
+function hiddenZoneSearchChoiceHandlerHost(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): HiddenZoneSearchChoiceHandlerHost {
+  if (!state.pendingChoice) throw new Error("Diese Choice ist nicht offen.");
+  return {
+    choice: state.pendingChoice,
+    legalAction,
+    playerAction,
+    state: {
+      runner: state.runner,
+      cardInstances: state.cardInstances,
+    },
+    constants: {
+      aujourdOuiResourceCardId: AUJOURD_OUI_RESOURCE_CARD_ID,
+      selfModifyingCodeId: SELF_MODIFYING_CODE_ID,
+      shortCircuitResourceCardId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
+    },
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      isUniqueRunnerDefinitionInstalled: (definition) =>
+        isUniqueCard(definition) &&
+        hasInstalledUniqueCardDefinition(state, "runner", definition.id),
+      runnerProgramUsesMemory: (cardId) => runnerProgramUsesMemory(state, cardId),
+    },
+    zones: {
+      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+      addToGrip: (cardId) => state.runner.grip.push(cardId),
+      trashRunnerInstalledCardToHeap: (cardId) =>
+        trashRunnerInstalledCardToHeap(state, cardId),
+    },
+    shuffleRunnerStack: (purpose) => shuffleRunnerStack(state, purpose),
+    spendRunnerCredits: (amount) => spendCredits(state, "runner", amount),
+    installRunnerProgramFromStackWithoutClick: (cardId) =>
+      installRunnerProgramFromStackWithoutClick(state, cardId, legalAction),
+    startSelfModifyingCodeFreeMuChoice: (cardId) =>
+      startSelfModifyingCodeFreeMuChoice(state, cardId),
+    availableRunnerProgramInstallCredits: () =>
+      availableRunnerProgramInstallCredits(state),
+    runnerMemoryLimit: () => runnerMemoryLimit(state),
+  };
+}
+
 function resolvePendingChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -21993,40 +22027,11 @@ function resolvePendingChoice(
     resolveP358HiddenReplacementChoice(state, legalAction, playerAction);
     return;
   }
-  if (
-    state.pendingChoice.source.startsWith(
-      "v1911.self_modifying_code_install_program",
-    ) ||
-    state.pendingChoice.source.startsWith("v098.search_stack") ||
-    state.pendingChoice.source.startsWith("v1911.search_stack") ||
-    state.pendingChoice.source.startsWith("v1911.aujourdoui_top5") ||
-    state.pendingChoice.source.startsWith("v1912.search_stack") ||
-    state.pendingChoice.source.startsWith("v1911.short_circuit_search")
-  ) {
-    if (
-      state.pendingChoice.source.startsWith(
-        "v1911.self_modifying_code_install_program",
-      )
-    ) {
-      resolveSelfModifyingCodeStackChoice(state, legalAction, playerAction);
-      return;
-    }
-    if (state.pendingChoice.source.startsWith("v1911.aujourdoui_top5")) {
-      resolveAujourdOuiTop5Choice(state, legalAction, playerAction);
-      return;
-    }
-    resolveRunnerStackSearchChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("p3_37.search_trash_to_grip") ||
-    state.pendingChoice.source.startsWith("p3_37.search_stack_to_grip")
-  ) {
-    resolveCardImplementationSearchToGripChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
+  const hiddenZoneSearchChoice = handleHiddenZoneSearchChoice(
+    hiddenZoneSearchChoiceHandlerHost(state, legalAction, playerAction),
+  );
+  if (hiddenZoneSearchChoice.handled) {
+    if (hiddenZoneSearchChoice.deletePendingChoice) delete state.pendingChoice;
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_38.search_stack_install")) {
@@ -22035,20 +22040,6 @@ function resolvePendingChoice(
       legalAction,
       playerAction,
     );
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("p3_37.look_top_stack_take_matching")
-  ) {
-    resolveCardImplementationLookTopStackTakeMatchingChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1911.self_modifying_code_free_mu")) {
-    resolveSelfModifyingCodeFreeMuChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -23413,263 +23404,6 @@ function startSelfModifyingCodeFreeMuChoice(
   return true;
 }
 
-function resolveSelfModifyingCodeStackChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  const selectedCardId = choice ? selectedChoiceCardIds(choice, playerAction)[0] : undefined;
-  const selectedDefinition = selectedCardId ? definitionFor(state, selectedCardId) : undefined;
-  const plan = resolveSelfModifyingCodeSearchInstallIntent({
-    choice,
-    selectedCardId,
-    stackCardIds: state.runner.stack,
-    selectedCardDefinition: selectedDefinition,
-    availableInstallCredits: availableRunnerProgramInstallCredits(state),
-    runnerMemoryUsed: state.runner.memoryUsed,
-    runnerMemoryLimit: runnerMemoryLimit(state),
-    uniqueBlocked: !!selectedDefinition &&
-      isUniqueCard(selectedDefinition) &&
-      hasInstalledUniqueCardDefinition(state, "runner", selectedDefinition.id),
-    sourceDefinitionId: SELF_MODIFYING_CODE_ID,
-  });
-  const resolvedChoice = choice!;
-  const cardId = plan.selectedCardId;
-  if (plan.shouldOpenMemoryChoice) {
-    if (plan.shuffleNeeded)
-      shuffleRunnerStack(state, `v1911_self_modifying_code:${resolvedChoice.choiceId}:shuffle`);
-    const opened = startSelfModifyingCodeFreeMuChoice(state, cardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      ...buildSelfModifyingCodeMemoryDeferredPayload(plan, { installDeferredForMemory: opened }),
-    };
-    if (!opened) delete state.pendingChoice;
-    return;
-  }
-
-  const installed = plan.canAttemptInstall
-    ? installRunnerProgramFromStackWithoutClick(state, cardId, legalAction)
-    : false;
-  if (plan.shuffleNeeded)
-    shuffleRunnerStack(state, `v1911_self_modifying_code:${resolvedChoice.choiceId}:shuffle`);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ...buildSelfModifyingCodeResolvedPayload(plan, { installed }),
-  };
-}
-
-function resolveSelfModifyingCodeFreeMuChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1911.self_modifying_code_free_mu"))
-    throw new Error("Es ist keine Self-Modifying-Code-MU-Choice offen.");
-  const selectedProgramId = choice.source.split(":")[1] as
-    | CardInstanceId
-    | undefined;
-  if (!selectedProgramId || !state.runner.stack.includes(selectedProgramId))
-    throw new Error("Das Self-Modifying-Code-Programm liegt nicht mehr im Stack.");
-  const trashIds = selectedChoiceCardIds(choice, playerAction);
-  if (trashIds.length === 0) throw new Error("Es wurde kein Programm gewählt.");
-  const uniqueTrashIds = [...new Set(trashIds)];
-  if (uniqueTrashIds.length !== trashIds.length)
-    throw new Error("Die MU-Auswahl enthält doppelte Karten.");
-  for (const cardId of uniqueTrashIds) {
-    if (!state.runner.rig.programs.includes(cardId))
-      throw new Error("Die MU-Auswahl enthält kein installiertes Programm.");
-    if (!runnerProgramUsesMemory(state, cardId))
-      throw new Error("Dieses Programm macht keine MU frei.");
-  }
-  const trashedDefinitionIds = uniqueTrashIds.map(
-    (cardId) => definitionFor(state, cardId).id,
-  );
-  for (const cardId of uniqueTrashIds) trashRunnerInstalledCardToHeap(state, cardId);
-  const installed = installRunnerProgramFromStackWithoutClick(
-    state,
-    selectedProgramId,
-    legalAction,
-  );
-  if (!installed)
-    throw new Error("Nach der MU-Auswahl kann das Programm nicht installiert werden.");
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    sourceDefinitionId: SELF_MODIFYING_CODE_ID,
-    hiddenZoneAction: "self_modifying_code_free_mu",
-    publicRevealKind: "reveal",
-    publicRevealDefinitionId: definitionFor(state, selectedProgramId).id,
-    trashedCount: uniqueTrashIds.length,
-    trashedCardDefinitionIds: trashedDefinitionIds.join(","),
-    installed: true,
-  };
-}
-
-function resolveAujourdOuiTop5Choice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1911.aujourdoui_top5"))
-    throw new Error("Es ist keine Aujourd'Oui-Top-5-Choice offen.");
-  const sourceCardId = choice.source.split(":")[1] as
-    | CardInstanceId
-    | undefined;
-  if (
-    !sourceCardId ||
-    !state.runner.rig.resources.includes(sourceCardId) ||
-    definitionFor(state, sourceCardId).id !== AUJOURD_OUI_RESOURCE_CARD_ID
-  ) {
-    throw new Error("Aujourd'Oui ist nicht mehr installiert.");
-  }
-
-  const topCardIds = choice.options
-    .map((option) => option.value)
-    .filter((value): value is CardInstanceId => typeof value === "string");
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  const uniqueSelectedIds = [...new Set(selectedIds)];
-  if (uniqueSelectedIds.length !== selectedIds.length)
-    throw new Error("Die Aujourd'Oui-Auswahl enthaelt doppelte Karten.");
-  if (uniqueSelectedIds.some((cardId) => !topCardIds.includes(cardId)))
-    throw new Error("Aujourd'Oui darf nur Karten aus den obersten 5 waehlen.");
-  if (
-    uniqueSelectedIds.some((cardId) => definitionFor(state, cardId).type !== "program")
-  )
-    throw new Error("Aujourd'Oui darf nur Programme in den Grip nehmen.");
-  const creditCost = uniqueSelectedIds.length;
-  if (state.runner.credits < creditCost)
-    throw new Error("Der Runner kann die Aujourd'Oui-Kosten nicht bezahlen.");
-
-  spendCredits(state, "runner", creditCost);
-  for (const cardId of uniqueSelectedIds) {
-    removeFromAllZones(state, cardId);
-    state.runner.grip.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      zone: { side: "runner", zone: "grip" },
-    };
-  }
-  shuffleRunnerStack(state, `v1911_aujourdoui_top5:${choice.choiceId}:shuffle`);
-  delete state.pendingChoice;
-  const revealedDefinitionIds = uniqueSelectedIds.map(
-    (cardId) => definitionFor(state, cardId).id,
-  );
-  const revealPayload: NonNullable<LegalAction["payload"]> =
-    revealedDefinitionIds.length > 0
-      ? {
-          publicRevealKind: "reveal",
-          publicRevealDefinitionId: revealedDefinitionIds[0]!,
-          publicRevealDefinitionIds: revealedDefinitionIds.join(","),
-          revealedCount: revealedDefinitionIds.length,
-        }
-      : { revealedCount: 0 };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1911_aujourdoui_top5",
-    sourceDefinitionId: AUJOURD_OUI_RESOURCE_CARD_ID,
-    selectedCount: uniqueSelectedIds.length,
-    searchedTopCount: topCardIds.length,
-    searchDestination: "runner_grip",
-    creditCostPaid: creditCost,
-    runnerCreditsAfter: state.runner.credits,
-    shuffled: true,
-    ...revealPayload,
-  };
-}
-
-function resolveRunnerStackSearchChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice) throw new Error("Es ist keine Search-Choice offen.");
-  const cardId = selectedChoiceCardIds(choice, playerAction)[0];
-  if (!cardId || !state.runner.stack.includes(cardId))
-    throw new Error("Die gewaehlte Karte liegt nicht im Stack.");
-  if (
-    !choice.source.startsWith("v1911.search_stack_card") &&
-    definitionFor(state, cardId).type !== "program"
-  )
-    throw new Error("Nur Programme sind in dieser Search-Harness legal.");
-  removeFromAllZones(state, cardId);
-  state.runner.grip.push(cardId);
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    zone: { side: "runner", zone: "grip" },
-  };
-  let shortCircuitSourceId: CardInstanceId | undefined;
-  if (choice.source.startsWith("v1911.short_circuit_search:")) {
-    shortCircuitSourceId = choice.source.split(":")[1] as
-      | CardInstanceId
-      | undefined;
-    if (
-      !shortCircuitSourceId ||
-      !state.runner.rig.resources.includes(shortCircuitSourceId) ||
-      definitionFor(state, shortCircuitSourceId).id !==
-        SHORT_CIRCUIT_RESOURCE_CARD_ID
-    )
-      throw new Error("The Short Circuit ist nicht mehr installiert.");
-  }
-  shuffleRunnerStack(state, `v098_search_stack:${choice.choiceId}:shuffle`);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: shortCircuitSourceId
-      ? "v1911_short_circuit_search"
-      : "search_stack",
-    selectedCount: 1,
-    searchDestination: "runner_grip",
-    shuffled: true,
-    ...(shortCircuitSourceId
-      ? {
-          sourceDefinitionId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
-          cardDefinitionId: definitionFor(state, cardId).id,
-          publicRevealDefinitionId: definitionFor(state, cardId).id,
-          publicRevealKind: "reveal",
-        }
-      : {}),
-  };
-}
-
-function resolveCardImplementationSearchToGripChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice) throw new Error("Es ist keine CardImplementation-Search-Choice offen.");
-  const selection = resolveSearchToGripSelection({
-    choice,
-    selectedCardId: selectedChoiceCardIds(choice, playerAction)[0],
-    legalTargetIdsFor: ({ sourceZone, filter }) =>
-      sourceZone === "heap"
-        ? searchTrashToGripTargets(state, filter)
-        : searchStackToGripTargets(state, filter),
-  });
-  const move = applyResolvedSearchToGripMove({
-    selection,
-    sourceCardIds: selection.sourceZone === "heap" ? state.runner.heap : state.runner.stack,
-    sourceDefinition: definitionFor(state, selection.sourceCardId),
-    selectedCardDefinitionId: definitionFor(state, selection.selectedCardId).id,
-    installedRunnerResourceIds: state.runner.rig.resources,
-    cardInstances: state.cardInstances,
-    removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
-    addToGrip: (cardId) => state.runner.grip.push(cardId),
-  });
-  if (move.result.shuffleNeeded)
-    shuffleRunnerStack(state, `p3_37_search_stack_to_grip:${choice.choiceId}:shuffle`);
-  delete state.pendingChoice;
-  legalAction.payload = { ...(legalAction.payload ?? {}), ...move.payload };
-}
-
 function resolveCardImplementationSearchStackInstallChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -23793,53 +23527,6 @@ function resolveCardImplementationLookTopStackShowInstallChoice(
     shufflePerformed: true,
     shuffled: true,
     randomCounterAfter: state.randomCounter,
-  };
-}
-
-function resolveCardImplementationLookTopStackTakeMatchingChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (
-    !choice ||
-    !choice.source.startsWith("p3_37.look_top_stack_take_matching")
-  )
-    throw new Error("Es ist keine Stack-Look-Choice offen.");
-  const selection = resolveLookTopStackTakeMatchingSelection({
-    choice,
-    selectedCardIds: selectedChoiceCardIds(choice, playerAction),
-    topCardIdsForCount: (count) => state.runner.stack.slice(0, count),
-    legalTargetIdsFor: ({ count, allowedTypes }) =>
-      lookTopStackTakeMatchingTargets(state, count, allowedTypes),
-    runnerCredits: state.runner.credits,
-  });
-  const topCards = state.runner.stack.slice(0, selection.count);
-  const cost = selection.paidCredits;
-  const moveIntent = createTopNTakeMatchingMoveIntent({
-    selection,
-    topCardIds: topCards,
-    sourceDefinition: definitionFor(state, selection.sourceCardId),
-    installedRunnerResourceIds: state.runner.rig.resources,
-    selectedCards: selection.selectedCardIds.map((cardId) =>
-      toTopNSelectedCardMove(cardId, definitionFor(state, cardId)),
-    ),
-  });
-  spendCredits(state, "runner", cost);
-  const moveResult = applyTopNTakeMatchingMoveIntent(moveIntent, {
-    cardInstances: state.cardInstances,
-    removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
-    addToGrip: (cardId) => state.runner.grip.push(cardId),
-  });
-  if (moveResult.shuffleNeeded)
-    shuffleRunnerStack(state, `p3_37_look_top_stack_take_matching:${choice.choiceId}:shuffle`);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ...buildTopNTakeMatchingResolvedPayload(moveResult, {
-      runnerCreditsAfter: state.runner.credits,
-    }),
   };
 }
 
