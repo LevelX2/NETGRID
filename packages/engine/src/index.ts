@@ -167,6 +167,7 @@ import {
   resolveSelfModifyingCodeSearchInstallIntent,
   resolveSneakPreviewSearchInstallIntent,
 } from "./game/hidden-zone/search-install-intents";
+import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -9277,17 +9278,10 @@ function resolveMysteryBoxTop5ProgramInstall(
   );
   run.mysteryBoxUsedSourceIdsThisRun = [...used, sourceCardId].sort();
   if (programIds.length === 0) {
-    state.runner.stack = shuffleStateIds(
+    shuffleRunnerStack(
       state,
-      state.runner.stack,
       `v1915.mystery_box.shuffle.no_program.${sourceCardId}.${run.runId}`,
     );
-    for (const cardId of state.runner.stack) {
-      state.cardInstances[cardId] = {
-        ...mustInstance(state.cardInstances, cardId),
-        zone: { side: "runner", zone: "stack" },
-      };
-    }
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       ...buildMysteryBoxNoInstallResolvedPayload(
@@ -9394,17 +9388,10 @@ function resolveMysteryBoxChoice(
   );
 
   trashRunnerInstalledCardToHeap(state, sourceCardId);
-  state.runner.stack = shuffleStateIds(
+  shuffleRunnerStack(
     state,
-    state.runner.stack,
     `v1915.mystery_box.shuffle.after_install.${sourceCardId}.${selectedProgramId}`,
   );
-  for (const cardId of state.runner.stack) {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      zone: { side: "runner", zone: "stack" },
-    };
-  }
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -27359,17 +27346,12 @@ function resolveV1921PlayfulAiChoice(
 }
 
 function shuffleRunnerStack(state: GameState, purpose: string): void {
-  const random = {
-    counter: state.randomCounter,
-    records: state.randomDrawRecords,
-  };
-  state.runner.stack = shuffleIds(
-    state.runner.stack,
-    state.seed,
-    purpose,
-    random,
-  );
-  state.randomCounter = random.counter;
+  const result = shuffleRunnerStackAndRefreshZones({
+    stack: state.runner.stack,
+    cardInstances: state.cardInstances,
+    shuffle: (stack) => shuffleStateIds(state, stack, purpose),
+  });
+  state.runner.stack = result.shuffledStack;
 }
 
 function revealRunnerStackTop(
