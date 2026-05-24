@@ -1222,6 +1222,7 @@ describe("CardImplementation definition descriptors", () => {
       expect.objectContaining({
         kind: "activated",
         timing: "runner_main",
+        label: "2 Credits nehmen",
         costs: [{ kind: "action", amount: 1 }],
         effects: [
           expect.objectContaining({

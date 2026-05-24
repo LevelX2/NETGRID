@@ -8,6 +8,7 @@ export const newsgroupFilterImplementation: CardImplementationDefinition = {
     {
       kind: "activated",
       timing: "runner_main",
+      label: "2 Credits nehmen",
       costs: [{ kind: "action", amount: 1 }],
       effects: [
         {
