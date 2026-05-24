@@ -1324,7 +1324,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionCostChips({ ...searchInstall, costs: [{ credits: 2 }] })).toEqual([]);
   });
 
-  it("mirrors Self-Modifying Code and immediate encounter actions into the Run window without changing their card context", () => {
+  it("mirrors run-timing actions into the Run window without changing their card context", () => {
     const smc = card("smc_1", "Self-Modifying Code", "program");
     const breaker = card("breaker_1", "Simple Decoder", "program");
     const running = view("runner", {
@@ -1347,16 +1347,18 @@ describe("V1.0.6 resource and card-display helpers", () => {
     }, "run.encounter_ice");
     const pump: LegalAction = { ...legalAction("runner", "pump_breaker", "breaker_1", "Simple Decoder: Stärke +1", { breakerId: "breaker_1", iceId: "ice_1" }, "run.encounter_ice"), costs: [{ credits: 1 }] };
     const continueRun = legalAction("runner", "continue_run", "game_rule", "ICE passieren", { encounterContinue: true, unbrokenSubroutineCount: 0 }, "run.encounter_ice");
+    const runPaidAbility = legalAction("runner", "trigger_ability", "broker_1", "Broker: 3 Credits auf Broker legen", { cardId: "broker_1", resourceAbility: "broker_load_credits" }, "run.encounter_ice");
     const offRunAbility = legalAction("runner", "trigger_ability", "broker_1", "Broker: 3 Credits auf Broker legen", { cardId: "broker_1", resourceAbility: "broker_load_credits" });
 
-    const split = splitLegalActions([searchInstall, pump, continueRun, offRunAbility]);
-    const mirrored = runWindowActions(running, [searchInstall, pump, continueRun, offRunAbility]);
+    const split = splitLegalActions([searchInstall, pump, continueRun, runPaidAbility, offRunAbility]);
+    const mirrored = runWindowActions(running, [searchInstall, pump, continueRun, runPaidAbility, offRunAbility]);
 
     expect(split.primaryActions).toEqual([continueRun]);
-    expect(split.contextualActions).toEqual([searchInstall, pump, offRunAbility]);
-    expect(mirrored).toEqual([searchInstall, pump, continueRun]);
+    expect(split.contextualActions).toEqual([searchInstall, pump, runPaidAbility, offRunAbility]);
+    expect(mirrored).toEqual([searchInstall, pump, continueRun, runPaidAbility]);
     expect(runWindowActionButtonLabel(running, searchInstall)).toBe("SMC: Programm suchen");
     expect(runWindowActionButtonLabel(running, pump)).toBe("Simple Decoder +1 Stärke");
+    expect(runWindowActionButtonLabel(running, runPaidAbility)).toBe("3 Credits laden");
     const breakAction = legalAction(
       "runner",
       "break_subroutine",
@@ -1545,7 +1547,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionMatchesContext(startupTrash, { kind: "card", id: "startup_1", label: "Startup Immolator" })).toBe(true);
   });
 
-  it("mirrors the card access action into the Run window with a German label", () => {
+  it("mirrors access and access-resolution actions into the Run window", () => {
     const running = view("runner", {
       run: {
         attackedServerId: "rd",
@@ -1555,13 +1557,19 @@ describe("V1.0.6 resource and card-display helpers", () => {
       }
     });
     const access = legalAction("runner", "access_card", "game_rule", "Karte accessen", undefined, "access.resolve_card");
+    const steal = legalAction("runner", "steal_agenda", "agenda_1", "Priority Requisition stehlen", { cardId: "agenda_1" }, "access.resolve_card");
+    const trash = legalAction("runner", "trash_accessed_card", "asset_1", "South African Mining Corp trashen", { cardId: "asset_1" }, "access.resolve_card");
+    const decline = legalAction("runner", "decline_trash", "game_rule", "Weiter accessen", { cardId: "asset_1" }, "access.resolve_card");
+    const showCard = legalAction("runner", "trigger_ability", "viewer_1", "Karte anzeigen", { cardId: "viewer_1" }, "access.resolve_card");
     const draw = legalAction("runner", "draw_card", "basic_action", "Karte ziehen");
 
-    const mirrored = runWindowActions(running, [access, draw]);
+    const mirrored = runWindowActions(running, [access, steal, trash, decline, showCard, draw]);
 
     expect(actionButtonLabel(access)).toBe("Zugriff auf Karte");
-    expect(mirrored).toEqual([access]);
+    expect(mirrored).toEqual([access, steal, trash, decline, showCard]);
     expect(runWindowActionButtonLabel(running, access)).toBe("Zugriff auf Karte");
+    expect(runWindowActionButtonLabel(running, decline)).toBe("Zugriff abschließen");
+    expect(runWindowActionButtonLabel(running, showCard)).toBe("Karte anzeigen");
   });
 
   it("keeps City Surveillance draw choices visible in draw action labels", () => {

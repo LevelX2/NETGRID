@@ -1139,12 +1139,15 @@ export function runAwareActionButtonLabel(view: PlayerView, action: LegalAction)
 export function runWindowActions(view: PlayerView, actions: LegalAction[]): LegalAction[] {
   if (!view.run) return [];
   return actions.filter((action) => {
-    if (action.type === "access_card") return true;
+    if (isAccessWindowAction(action)) return true;
     if (!action.timingPoint.startsWith("run.")) return false;
-    if (action.type === "jack_out" || action.type === "continue_run" || action.type === "rez_ice" || action.type === "decline_rez") return true;
     if (action.type === "pump_breaker" || action.type === "break_subroutine") return action.payload?.iceId === activeRunIceInstanceId(view);
-    return isRunWindowTriggerAction(action);
+    return true;
   });
+}
+
+function isAccessWindowAction(action: LegalAction): boolean {
+  return action.type === "access_card" || action.timingPoint.startsWith("access.");
 }
 
 export function runWindowActionButtonLabel(view: PlayerView, action: LegalAction): string {
@@ -1395,14 +1398,6 @@ function objectBoundAction(action: LegalAction): boolean {
 
 function isSelfModifyingCodeAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
   return action.type === "trigger_ability" && actionHasAbility(action, "self_modifying_code_install_program");
-}
-
-function isStartupImmolatorAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
-  return action.type === "trigger_ability" && actionHasAbility(action, "startup_immolator_trash_ice");
-}
-
-function isRunWindowTriggerAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
-  return isSelfModifyingCodeAction(action) || isStartupImmolatorAction(action) || isApproachIceExposeAction(action);
 }
 
 function isApproachIceExposeAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
