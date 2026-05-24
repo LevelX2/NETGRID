@@ -9,11 +9,13 @@ import type {
 import { describe, expect, it } from "vitest";
 import {
   handleHiddenZoneSearchChoice,
+  handleMysteryBoxTopFiveProgramInstall,
   type HiddenZoneSearchChoiceHandlerHost,
 } from "./search-choice-handlers";
 
 const programId = "program_1" as CardInstanceId;
 const secondProgramId = "program_2" as CardInstanceId;
+const hardwareId = "hardware_1" as CardInstanceId;
 const sourceCardId = "source_card" as CardInstanceId;
 const sourceDefinitionId = "source_definition" as CardDefinitionId;
 const selfModifyingCodeId =
@@ -74,7 +76,9 @@ function host(
     heap?: CardInstanceId[];
     credits?: number;
     definitions?: Record<string, CardDefinition>;
+    canInstall?: (cardId: CardInstanceId) => boolean;
     installFromStack?: (cardId: CardInstanceId) => boolean;
+    installForFree?: (cardId: CardInstanceId) => CardInstanceId;
   } = {},
 ): HiddenZoneSearchChoiceHandlerHost {
   const definitions = {
@@ -86,6 +90,7 @@ function host(
       installCost: 1,
       memoryCost: 1,
     }),
+    [hardwareId]: definition("hardware_definition" as CardDefinitionId, "hardware"),
     [sourceCardId]: definition(sourceDefinitionId, "resource"),
     ...overrides.definitions,
   };
@@ -104,8 +109,9 @@ function host(
   const cardInstances: Record<CardInstanceId, any> = {};
   for (const cardId of [
     ...runner.stack,
-    ...runner.heap,
-    ...runner.rig.programs,
+      ...runner.heap,
+      hardwareId,
+      ...runner.rig.programs,
     ...runner.rig.resources,
   ]) {
     cardInstances[cardId] = {
@@ -132,11 +138,19 @@ function host(
     state: {
       runner: runner as unknown as HiddenZoneSearchChoiceHandlerHost["state"]["runner"],
       cardInstances,
+      stateVersion: 1,
+      randomCounter: 0,
+      run: {
+        runId: "run-1",
+        phase: "movement",
+      } as unknown as NonNullable<HiddenZoneSearchChoiceHandlerHost["state"]["run"]>,
     },
     constants: {
       aujourdOuiResourceCardId: aujourdOuiId,
+      mysteryBoxId: "mystery_box" as CardDefinitionId,
       selfModifyingCodeId,
       shortCircuitResourceCardId: shortCircuitId,
+      sneakPreviewId: "sneak_preview" as CardDefinitionId,
     },
     cards: {
       definitionFor: (cardId) => {
@@ -167,6 +181,17 @@ function host(
     startSelfModifyingCodeFreeMuChoice: () => false,
     availableRunnerProgramInstallCredits: () => 5,
     runnerMemoryLimit: () => 4,
+    install: {
+      canInstallRunnerProgramFromZone: (cardId) =>
+        overrides.canInstall?.(cardId) ?? true,
+      installRunnerProgramFromZoneWithoutClick: () => true,
+      installRunnerProgramForFree: (cardId) =>
+        overrides.installForFree?.(cardId) ?? cardId,
+      searchStackInstallTargets: () => runner.stack,
+      sneakPreviewInstallableProgramIds: (sourceZone) =>
+        sourceZone === "heap" ? runner.heap : runner.stack,
+      lookTopStackShowToCorpThenInstallMatchingTargets: () => runner.stack,
+    },
   };
 }
 
@@ -280,6 +305,150 @@ describe("hidden-zone search choice handlers", () => {
       hiddenZoneAction: "self_modifying_code_install_program",
       installed: true,
       searchDestination: "runner_rig",
+    });
+  });
+
+  it("handles Sneak Preview source choices by opening a program choice", () => {
+    const testHost = host(
+      choice({
+        source: "v1911.sneak_preview_source:1",
+        options: [{ id: "source_stack", label: "Stack", value: "stack" }],
+      }),
+      playerAction("source_stack"),
+    );
+
+    const result = handleHiddenZoneSearchChoice(testHost);
+
+    expect(result).toMatchObject({
+      handled: true,
+      stateChanged: true,
+    });
+    expect(testHost.state.pendingChoice?.source).toContain(
+      "v1911.sneak_preview_stack_install",
+    );
+    expect(testHost.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "sneak_preview_source_selected",
+      choiceVisibility: "runner_private",
+    });
+  });
+
+  it("handles Sneak Preview program choices with free install and temporary return", () => {
+    const installed: CardInstanceId[] = [];
+    const testHost = host(
+      choice({
+        source: "v1911.sneak_preview_stack_install:1",
+      }),
+      playerAction(`card_${programId}`),
+      {
+        installForFree: (cardId) => {
+          installed.push(cardId);
+          return cardId;
+        },
+      },
+    );
+
+    const result = handleHiddenZoneSearchChoice(testHost);
+
+    expect(result).toMatchObject({
+      handled: true,
+      deletePendingChoice: true,
+      shufflePerformed: true,
+      installedCardId: programId,
+    });
+    expect(installed).toEqual([programId]);
+    expect(testHost.state.sneakPreviewTemporaryInstalls).toEqual([
+      { cardId: programId, sourceCardDefinitionId: "sneak_preview" },
+    ]);
+    expect(testHost.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "sneak_preview_program_install",
+      temporaryInstall: true,
+      publicRevealKind: "reveal",
+    });
+  });
+
+  it("handles Mystery Box activation no-install path", () => {
+    const testHost = host(
+      choice({ source: "unused" }),
+      playerAction(),
+      {
+        stack: [hardwareId],
+        definitions: {
+          [sourceCardId]: definition("mystery_box" as CardDefinitionId, "program"),
+        },
+      },
+    );
+    testHost.legalAction.payload = { cardId: sourceCardId };
+
+    const result = handleMysteryBoxTopFiveProgramInstall(testHost);
+
+    expect(result).toMatchObject({
+      handled: true,
+      shufflePerformed: true,
+    });
+    expect(testHost.legalAction.payload).toMatchObject({
+      programFound: false,
+      installedProgramCount: 0,
+      selfTrashed: false,
+      randomCounterAfter: 0,
+    });
+  });
+
+  it("handles Mystery Box install choices with source-trash metadata", () => {
+    const installed: CardInstanceId[] = [];
+    const testHost = host(
+      choice({
+        source: `v1915.mystery_box:${sourceCardId}:${programId}:1`,
+      }),
+      playerAction(`card_${programId}`),
+      {
+        definitions: {
+          [sourceCardId]: definition("mystery_box" as CardDefinitionId, "program"),
+        },
+        installForFree: (cardId) => {
+          installed.push(cardId);
+          return cardId;
+        },
+      },
+    );
+
+    const result = handleHiddenZoneSearchChoice(testHost);
+
+    expect(result).toMatchObject({
+      handled: true,
+      deletePendingChoice: true,
+      shufflePerformed: true,
+      installedCardId: programId,
+      sourceTrashCardIds: [sourceCardId],
+    });
+    expect(installed).toEqual([programId]);
+    expect(testHost.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "mystery_box_program_install",
+      installedProgramDefinitionId: "program_definition",
+      installedProgramCount: 1,
+      selfTrashed: true,
+    });
+  });
+
+  it("handles p3_38 stack install choices", () => {
+    const testHost = host(
+      choice({
+        source: `p3_38.search_stack_install:${sourceCardId}:${sourceDefinitionId}:program:free:shuffle`,
+      }),
+      playerAction(`card_${programId}`),
+    );
+
+    const result = handleHiddenZoneSearchChoice(testHost);
+
+    expect(result).toMatchObject({
+      handled: true,
+      deletePendingChoice: true,
+      shufflePerformed: true,
+      installedCardId: programId,
+    });
+    expect(testHost.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "p3_38_search_stack_install",
+      searchDestination: "runner_rig",
+      installedProgramCount: 1,
     });
   });
 

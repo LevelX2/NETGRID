@@ -132,7 +132,6 @@ import {
 import {
   buildLookTopStackTakeMatchingChoice,
   buildLookTopStackTakeMatchingPayload,
-  buildMysteryBoxInstallChoice,
   buildSearchStackInstallChoice,
   buildSearchStackInstallPayload,
   buildSearchStackToGripChoice,
@@ -140,36 +139,15 @@ import {
   buildSearchTrashToGripChoice,
   buildSearchTrashToGripPayload,
   buildSelfModifyingCodeSearchInstallChoice,
-  buildSneakPreviewProgramChoice,
   buildSneakPreviewSourceChoice,
   buildSneakPreviewSourceChoicePayload,
 } from "./game/hidden-zone/search-choice-builders";
 import {
   handleHiddenZoneSearchChoice,
+  handleMysteryBoxTopFiveProgramInstall,
+  type HiddenZoneSearchActivationHandlerHost,
   type HiddenZoneSearchChoiceHandlerHost,
 } from "./game/hidden-zone/search-choice-handlers";
-import { resolveSearchStackInstallSelection } from "./game/hidden-zone/search-choice-resolvers";
-import {
-  buildMysteryBoxNoInstallResolvedPayload,
-  buildMysteryBoxSearchInstallResolvedPayload,
-  buildSneakPreviewSearchInstallResolvedPayload,
-  createMysteryBoxNoInstallIntent,
-  resolveMysteryBoxSearchInstallIntent,
-  resolveSneakPreviewSearchInstallIntent,
-} from "./game/hidden-zone/search-install-intents";
-import {
-  createMysteryBoxFreeProgramInstallInput,
-  createSneakPreviewFreeProgramInstallInput,
-  executeFreeProgramInstallPlan,
-} from "./game/hidden-zone/free-program-install-execution";
-import {
-  applyMysteryBoxOncePerRunPlan,
-  applyMysteryBoxSourceTrashPlan,
-  applySneakPreviewTemporaryReturnPlan,
-  createMysteryBoxOncePerRunPlan,
-  createMysteryBoxPostInstallSideEffectPlan,
-  createSneakPreviewPostInstallSideEffectPlan,
-} from "./game/hidden-zone/post-install-side-effects";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -8549,7 +8527,9 @@ function performAction(
         legalAction.payload?.v1915RunnerProgramAbility ===
         "mystery_box_top5_program_install"
       ) {
-        resolveMysteryBoxTop5ProgramInstall(state, legalAction);
+        handleMysteryBoxTopFiveProgramInstall(
+          hiddenZoneSearchActivationHandlerHost(state, legalAction),
+        );
         return;
       }
       if (
@@ -9256,132 +9236,6 @@ function resolveStartupImmolatorTrashIce(
     trashedCardDefinitionId: targetDefinitionId,
     runnerCreditsAfter: state.runner.credits,
     startupImmolatorExhausted: true,
-  };
-}
-
-function resolveMysteryBoxTop5ProgramInstall(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Mystery Box nutzen.");
-  const run = mustRun(state);
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  if (!state.runner.rig.programs.includes(sourceCardId))
-    throw new Error("Mystery Box ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== MYSTERY_BOX_ID)
-    throw new Error("Die Mystery-Box-Faehigkeit passt nicht zur Karte.");
-  const oncePerRunPlan = createMysteryBoxOncePerRunPlan({
-    sourceCardId,
-    usedSourceIdsThisRun: run.mysteryBoxUsedSourceIdsThisRun ?? [],
-  });
-  const topCards = state.runner.stack.slice(0, 5);
-  if (topCards.length === 0) throw new Error("Der Stack ist leer.");
-  const programIds = topCards.filter(
-    (cardId) => definitionFor(state, cardId).type === "program",
-  );
-  applyMysteryBoxOncePerRunPlan(oncePerRunPlan, {
-    markUsedThisRun: (usedSourceIds) => {
-      run.mysteryBoxUsedSourceIdsThisRun = usedSourceIds;
-    },
-  });
-  if (programIds.length === 0) {
-    shuffleRunnerStack(
-      state,
-      `v1915.mystery_box.shuffle.no_program.${sourceCardId}.${run.runId}`,
-    );
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      ...buildMysteryBoxNoInstallResolvedPayload(
-        createMysteryBoxNoInstallIntent({
-          sourceCardId,
-          topCardIds: topCards,
-          programCandidateIds: programIds,
-        }),
-        { randomCounterAfter: state.randomCounter },
-      ),
-    };
-    return;
-  }
-  startMysteryBoxProgramChoice(state, sourceCardId, topCards, programIds);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    programFound: true,
-    choiceVisibility: "public",
-  };
-}
-
-function startMysteryBoxProgramChoice(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  topCards: CardInstanceId[],
-  programIds: CardInstanceId[],
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  state.pendingChoice = buildMysteryBoxInstallChoice({
-    stateVersion: state.stateVersion,
-    sourceCardId,
-    topCards,
-    options: programIds.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return {
-        id: `card_${cardId}`,
-        label: definition.title,
-        publicLabel: definition.title,
-        value: cardId,
-      };
-    }),
-  });
-}
-
-function resolveMysteryBoxChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  const selectedId = choice
-    ? selectedChoiceCardIds(choice, playerAction)[0]
-    : undefined;
-  const currentTopCards = state.runner.stack.slice(0, 5);
-  const selectedDefinition = selectedId ? definitionFor(state, selectedId) : undefined;
-  const plan = resolveMysteryBoxSearchInstallIntent({
-    choice,
-    selectedCardId: selectedId,
-    topCardIds: currentTopCards,
-    selectedCardDefinition: selectedDefinition,
-  });
-  const sourceCardId = plan.sourceCardId;
-  if (!sourceCardId || !state.runner.rig.programs.includes(sourceCardId))
-    throw new Error("Mystery Box ist nicht mehr installiert.");
-  if (definitionFor(state, sourceCardId).id !== MYSTERY_BOX_ID)
-    throw new Error("Die Mystery-Box-Choice passt nicht zur Quelle.");
-  const execution = executeFreeProgramInstallPlan({
-    plan: createMysteryBoxFreeProgramInstallInput(plan),
-    callbacks: {
-      installProgramForFree: (programId) =>
-        installRunnerProgramForFree(state, programId, legalAction, {
-          checkUnique: false,
-          typeError: "Mystery Box kann nur ein Programm installieren.",
-          memoryError: "Nicht genug Memory fuer das Mystery-Box-Programm.",
-        }),
-    },
-  });
-  const postInstall = createMysteryBoxPostInstallSideEffectPlan(execution);
-  applyMysteryBoxSourceTrashPlan(postInstall, {
-    trashSource: (cardId) => trashRunnerInstalledCardToHeap(state, cardId),
-  });
-  if (execution.shuffleNeeded)
-    shuffleRunnerStack(
-      state,
-      `v1915.mystery_box.shuffle.after_install.${sourceCardId}.${execution.installedProgramId}`,
-    );
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ...buildMysteryBoxSearchInstallResolvedPayload(plan, {
-      randomCounterAfter: state.randomCounter,
-    }),
   };
 }
 
@@ -21935,24 +21789,19 @@ function resolveCrashEverettDrawChoice(
   };
 }
 
-function hiddenZoneSearchChoiceHandlerHost(
+function hiddenZoneSearchHandlerHostBase(
   state: GameState,
   legalAction: LegalAction,
-  playerAction: PlayerAction,
-): HiddenZoneSearchChoiceHandlerHost {
-  if (!state.pendingChoice) throw new Error("Diese Choice ist nicht offen.");
+): HiddenZoneSearchActivationHandlerHost {
   return {
-    choice: state.pendingChoice,
+    state,
     legalAction,
-    playerAction,
-    state: {
-      runner: state.runner,
-      cardInstances: state.cardInstances,
-    },
     constants: {
       aujourdOuiResourceCardId: AUJOURD_OUI_RESOURCE_CARD_ID,
+      mysteryBoxId: MYSTERY_BOX_ID,
       selfModifyingCodeId: SELF_MODIFYING_CODE_ID,
       shortCircuitResourceCardId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
+      sneakPreviewId: SNEAK_PREVIEW_ID,
     },
     cards: {
       definitionFor: (cardId) => definitionFor(state, cardId),
@@ -21976,7 +21825,60 @@ function hiddenZoneSearchChoiceHandlerHost(
     availableRunnerProgramInstallCredits: () =>
       availableRunnerProgramInstallCredits(state),
     runnerMemoryLimit: () => runnerMemoryLimit(state),
+    install: {
+      canInstallRunnerProgramFromZone: (cardId, sourceZone, installCost) =>
+        canInstallRunnerProgramFromZone(state, cardId, sourceZone, installCost),
+      installRunnerProgramFromZoneWithoutClick: (
+        cardId,
+        sourceZone,
+        installCost,
+      ) =>
+        installRunnerProgramFromZoneWithoutClick(
+          state,
+          cardId,
+          sourceZone,
+          installCost,
+          legalAction,
+        ),
+      installRunnerProgramForFree: (cardId, options) =>
+        installRunnerProgramForFree(state, cardId, legalAction, options),
+      searchStackInstallTargets: (filter, installCost) =>
+        searchStackInstallTargets(state, filter, installCost),
+      sneakPreviewInstallableProgramIds: (sourceZone) =>
+        sneakPreviewInstallableProgramIds(state, sourceZone),
+      lookTopStackShowToCorpThenInstallMatchingTargets: (
+        count,
+        allowedTypes,
+        installCost,
+      ) =>
+        lookTopStackShowToCorpThenInstallMatchingTargets(
+          state,
+          count,
+          allowedTypes,
+          installCost,
+        ),
+    },
   };
+}
+
+function hiddenZoneSearchChoiceHandlerHost(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): HiddenZoneSearchChoiceHandlerHost {
+  if (!state.pendingChoice) throw new Error("Diese Choice ist nicht offen.");
+  return {
+    ...hiddenZoneSearchHandlerHostBase(state, legalAction),
+    choice: state.pendingChoice,
+    playerAction,
+  };
+}
+
+function hiddenZoneSearchActivationHandlerHost(
+  state: GameState,
+  legalAction: LegalAction,
+): HiddenZoneSearchActivationHandlerHost {
+  return hiddenZoneSearchHandlerHostBase(state, legalAction);
 }
 
 function resolvePendingChoice(
@@ -22034,14 +21936,6 @@ function resolvePendingChoice(
     if (hiddenZoneSearchChoice.deletePendingChoice) delete state.pendingChoice;
     return;
   }
-  if (state.pendingChoice.source.startsWith("p3_38.search_stack_install")) {
-    resolveCardImplementationSearchStackInstallChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
   if (
     state.pendingChoice.source.startsWith("runner_program_trash_before_install")
   ) {
@@ -22050,26 +21944,6 @@ function resolvePendingChoice(
       legalAction,
       playerAction,
     );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1911.sneak_preview_source")) {
-    resolveSneakPreviewSourceChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith(
-      "p3_38.stack_or_trash_program_install_source",
-    )
-  ) {
-    resolveSneakPreviewSourceChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("v1911.sneak_preview_heap_install") ||
-    state.pendingChoice.source.startsWith("v1911.sneak_preview_stack_install") ||
-    state.pendingChoice.source.startsWith("p3_38.stack_or_trash_program_install")
-  ) {
-    resolveSneakPreviewProgramChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1912.hunt_club_bbs_expose")) {
@@ -22151,22 +22025,6 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1918.singapore_city_grid")) {
     resolveSingaporeCityGridSwapChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1915.mystery_box")) {
-    resolveMysteryBoxChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith(
-      "p3_38.look_top_stack_show_to_corp_then_install_matching",
-    )
-  ) {
-    resolveCardImplementationLookTopStackShowInstallChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
     return;
   }
   if (state.pendingChoice.source.startsWith("v1922.corp_rd_arrange_top5")) {
@@ -23404,132 +23262,6 @@ function startSelfModifyingCodeFreeMuChoice(
   return true;
 }
 
-function resolveCardImplementationSearchStackInstallChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_38.search_stack_install"))
-    throw new Error("Es ist keine CardImplementation-Install-Choice offen.");
-  const selection = resolveSearchStackInstallSelection({
-    choice,
-    selectedCardId: selectedChoiceCardIds(choice, playerAction)[0],
-    legalTargetIdsFor: ({ filter, installCost }) =>
-      searchStackInstallTargets(state, filter, installCost),
-  });
-  if (
-    !state.cardInstances[selection.sourceCardId] ||
-    definitionFor(state, selection.sourceCardId).id !== selection.sourceDefinitionId
-  )
-    throw new Error("Die CardImplementation-Install-Choice ist ungueltig.");
-  const cardId = selection.selectedCardId;
-  const definition = definitionFor(state, cardId);
-  const installed = installRunnerProgramFromZoneWithoutClick(
-    state,
-    cardId,
-    "stack",
-    selection.installCost,
-    legalAction,
-  );
-  if (!installed) throw new Error("Das Programm kann nicht installiert werden.");
-  if (selection.shuffleNeeded)
-    shuffleRunnerStack(state, `p3_38_search_stack_install:${choice.choiceId}:shuffle`);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_38_search_stack_install",
-    sourceDefinitionId: selection.sourceDefinitionId,
-    searchedZone: "runner_stack",
-    selectedCount: 1,
-    publicRevealKind: "reveal",
-    publicRevealDefinitionId: definition.id,
-    installed: true,
-    installedProgramCount: 1,
-    searchDestination: "runner_rig",
-    shufflePerformed: true,
-    shuffled: true,
-  };
-}
-
-function resolveCardImplementationLookTopStackShowInstallChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (
-    !choice ||
-    !choice.source.startsWith(
-      "p3_38.look_top_stack_show_to_corp_then_install_matching",
-    )
-  )
-    throw new Error("Es ist keine Stack-Show-Install-Choice offen.");
-  const [
-    ,
-    sourceCardId = "",
-    sourceDefinitionId = "",
-    topCardsRaw = "",
-  ] = choice.source.split(":");
-  if (
-    !sourceCardId ||
-    !state.runner.rig.programs.includes(sourceCardId) ||
-    definitionFor(state, sourceCardId).id !== sourceDefinitionId
-  )
-    throw new Error("Die Stack-Show-Quelle ist nicht mehr installiert.");
-  const run = mustRun(state);
-  const used = run.successfulRunAbilityUsedSourceIds ?? [];
-  if (used.includes(sourceCardId))
-    throw new Error("Diese Kartenquelle wurde in diesem Run bereits genutzt.");
-  const topCardsAtReveal = topCardsRaw
-    .split(",")
-    .filter((cardId): cardId is CardInstanceId => Boolean(cardId));
-  const currentTopCards = state.runner.stack.slice(0, topCardsAtReveal.length);
-  if (
-    topCardsAtReveal.length === 0 ||
-    topCardsAtReveal.some((cardId, index) => currentTopCards[index] !== cardId)
-  )
-    throw new Error("Die Stack-Spitze hat sich seit dem Reveal veraendert.");
-  const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
-  if (
-    !selectedId ||
-    !topCardsAtReveal.includes(selectedId) ||
-    !canInstallRunnerProgramFromZone(state, selectedId, "stack", "free")
-  )
-    throw new Error("Das gewaehlte Programm ist nicht legal installierbar.");
-  const selectedDefinition = definitionFor(state, selectedId);
-  const installed = installRunnerProgramFromZoneWithoutClick(
-    state,
-    selectedId,
-    "stack",
-    "free",
-    legalAction,
-  );
-  if (!installed) throw new Error("Das Programm kann nicht installiert werden.");
-  trashRunnerInstalledCardToHeap(state, sourceCardId);
-  run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId].sort();
-  shuffleRunnerStack(
-    state,
-    `p3_38_stack_show_install:${choice.choiceId}:shuffle`,
-  );
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
-    sourceDefinitionId,
-    publicRevealKind: "reveal",
-    publicRevealDefinitionId: selectedDefinition.id,
-    installed: true,
-    installedProgramCount: 1,
-    selfTrashed: true,
-    shufflePerformed: true,
-    shuffled: true,
-    randomCounterAfter: state.randomCounter,
-  };
-}
-
 function sneakPreviewInstallableProgramIds(
   state: GameState,
   zone: "heap" | "stack",
@@ -23581,131 +23313,6 @@ function startSneakPreviewSourceChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     ...buildSneakPreviewSourceChoicePayload(),
-  };
-}
-
-function resolveSneakPreviewSourceChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (
-    !choice ||
-    (!choice.source.startsWith("v1911.sneak_preview_source") &&
-      !choice.source.startsWith("p3_38.stack_or_trash_program_install_source"))
-  )
-    throw new Error("Es ist keine Sneak-Preview-Quellenwahl offen.");
-  const parts = choice.source.split(":");
-  const isCardImplementationChoice = choice.source.startsWith(
-    "p3_38.stack_or_trash_program_install_source",
-  );
-  const sourceCardId = isCardImplementationChoice
-    ? (parts[1] as CardInstanceId | undefined)
-    : undefined;
-  const sourceDefinitionId = isCardImplementationChoice
-    ? (parts[2] as CardDefinition["id"] | undefined)
-    : SNEAK_PREVIEW_ID;
-  const optionId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const option = choice.options.find((candidate) => candidate.id === optionId);
-  const selectedSource = option?.value;
-  if (selectedSource !== "heap" && selectedSource !== "stack")
-    throw new Error("Die Sneak-Preview-Quelle ist ungueltig.");
-  startSneakPreviewProgramChoice(
-    state,
-    selectedSource,
-    isCardImplementationChoice
-      ? "p3_38.stack_or_trash_program_install"
-      : "v1911.sneak_preview",
-    sourceCardId,
-    sourceDefinitionId,
-  );
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: isCardImplementationChoice
-      ? "p3_38_stack_or_trash_program_install_source_selected"
-      : "sneak_preview_source_selected",
-    sourceDefinitionId: sourceDefinitionId ?? SNEAK_PREVIEW_ID,
-    choiceVisibility: "runner_private",
-  };
-}
-
-function startSneakPreviewProgramChoice(
-  state: GameState,
-  sourceZone: "heap" | "stack",
-  sourcePrefix = "v1911.sneak_preview",
-  sourceCardId?: CardInstanceId,
-  sourceDefinitionId: CardDefinition["id"] = SNEAK_PREVIEW_ID,
-): void {
-  const sourceCards =
-    sourceZone === "heap" ? state.runner.heap.slice().sort() : state.runner.stack;
-  const targets = sneakPreviewInstallableProgramIds(state, sourceZone);
-  const options = sourceCards.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      const selectable = targets.includes(cardId);
-      return {
-        id: `card_${cardId}`,
-        label: definition.title,
-        value: cardId,
-        ...(!selectable ? { selectable: false } : {}),
-      };
-    });
-  if (targets.length === 0)
-    throw new Error("In dieser Sneak-Preview-Quelle liegt kein legales Programm.");
-  state.pendingChoice = buildSneakPreviewProgramChoice({
-    stateVersion: state.stateVersion,
-    sourceZone,
-    sourcePrefix,
-    sourceCardId,
-    sourceDefinitionId,
-    options,
-  });
-}
-
-function resolveSneakPreviewProgramChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  const selectedCardId = choice
-    ? selectedChoiceCardIds(choice, playerAction)[0]
-    : undefined;
-  const selectedDefinition = selectedCardId && state.cardInstances[selectedCardId]
-    ? definitionFor(state, selectedCardId)
-    : undefined;
-  const plan = resolveSneakPreviewSearchInstallIntent({
-    choice,
-    selectedCardId,
-    legalTargetIdsForSourceZone: (sourceZone) =>
-      sneakPreviewInstallableProgramIds(state, sourceZone),
-    selectedCardDefinition: selectedDefinition,
-    defaultSourceDefinitionId: SNEAK_PREVIEW_ID,
-  });
-  const execution = executeFreeProgramInstallPlan({
-    plan: createSneakPreviewFreeProgramInstallInput(plan),
-    callbacks: {
-      installProgramForFree: (programId) =>
-        installRunnerProgramForFree(state, programId, legalAction),
-    },
-  });
-  const postInstall = createSneakPreviewPostInstallSideEffectPlan({
-    execution,
-    sourceCardDefinitionId: plan.sourceDefinitionId,
-  });
-  applySneakPreviewTemporaryReturnPlan(postInstall, {
-    recordTemporaryReturn: (record) => {
-      state.sneakPreviewTemporaryInstalls ??= [];
-      state.sneakPreviewTemporaryInstalls.push(record);
-    },
-  });
-  if (execution.shuffleNeeded)
-    shuffleRunnerStack(state, `v1911_sneak_preview:${choice!.choiceId}:shuffle`);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ...buildSneakPreviewSearchInstallResolvedPayload(plan),
   };
 }
 

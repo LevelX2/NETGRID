@@ -8,12 +8,23 @@ import type {
   PlayerAction,
 } from "@netgrid/shared";
 import {
+  buildMysteryBoxInstallChoice,
+  buildSneakPreviewProgramChoice,
+} from "./search-choice-builders";
+import {
   buildSelfModifyingCodeMemoryDeferredPayload,
+  buildMysteryBoxNoInstallResolvedPayload,
+  buildMysteryBoxSearchInstallResolvedPayload,
+  buildSneakPreviewSearchInstallResolvedPayload,
+  createMysteryBoxNoInstallIntent,
+  resolveMysteryBoxSearchInstallIntent,
   buildSelfModifyingCodeResolvedPayload,
+  resolveSneakPreviewSearchInstallIntent,
   resolveSelfModifyingCodeSearchInstallIntent,
 } from "./search-install-intents";
 import {
   resolveLookTopStackTakeMatchingSelection,
+  resolveSearchStackInstallSelection,
   resolveSearchToGripSelection,
 } from "./search-choice-resolvers";
 import { applyResolvedSearchToGripMove } from "./search-choice-move-intents";
@@ -23,18 +34,44 @@ import {
   createTopNTakeMatchingMoveIntent,
   toTopNSelectedCardMove,
 } from "./topn-move-intents";
+import {
+  createMysteryBoxFreeProgramInstallInput,
+  createSneakPreviewFreeProgramInstallInput,
+  executeFreeProgramInstallPlan,
+} from "./free-program-install-execution";
+import {
+  applyMysteryBoxOncePerRunPlan,
+  applyMysteryBoxSourceTrashPlan,
+  applySneakPreviewTemporaryReturnPlan,
+  createMysteryBoxOncePerRunPlan,
+  createMysteryBoxPostInstallSideEffectPlan,
+  createSneakPreviewPostInstallSideEffectPlan,
+} from "./post-install-side-effects";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
+type SearchInstallCost = "normal" | "free";
+type SearchInstallSourceZone = "heap" | "stack";
 
 export type HiddenZoneSearchChoiceHandlerHost = {
   choice: ChoiceRequest;
   playerAction: PlayerAction;
   legalAction: LegalAction;
-  state: Pick<GameState, "runner" | "cardInstances">;
+  state: Pick<
+    GameState,
+    | "runner"
+    | "cardInstances"
+    | "pendingChoice"
+    | "randomCounter"
+    | "stateVersion"
+    | "sneakPreviewTemporaryInstalls"
+    | "run"
+  >;
   constants: {
     aujourdOuiResourceCardId: CardDefinitionId;
+    mysteryBoxId: CardDefinitionId;
     selfModifyingCodeId: CardDefinitionId;
     shortCircuitResourceCardId: CardDefinitionId;
+    sneakPreviewId: CardDefinitionId;
   };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
@@ -52,7 +89,44 @@ export type HiddenZoneSearchChoiceHandlerHost = {
   startSelfModifyingCodeFreeMuChoice: (cardId: CardInstanceId) => boolean;
   availableRunnerProgramInstallCredits: () => number;
   runnerMemoryLimit: () => number;
+  install: {
+    canInstallRunnerProgramFromZone: (
+      cardId: CardInstanceId,
+      sourceZone: SearchInstallSourceZone,
+      installCost: SearchInstallCost,
+    ) => boolean;
+    installRunnerProgramFromZoneWithoutClick: (
+      cardId: CardInstanceId,
+      sourceZone: SearchInstallSourceZone,
+      installCost: SearchInstallCost,
+    ) => boolean;
+    installRunnerProgramForFree: (
+      cardId: CardInstanceId,
+      options?: {
+        checkUnique?: boolean;
+        typeError?: string;
+        memoryError?: string;
+      },
+    ) => CardInstanceId;
+    searchStackInstallTargets: (
+      filter: "program",
+      installCost: SearchInstallCost,
+    ) => CardInstanceId[];
+    sneakPreviewInstallableProgramIds: (
+      sourceZone: SearchInstallSourceZone,
+    ) => CardInstanceId[];
+    lookTopStackShowToCorpThenInstallMatchingTargets: (
+      count: 5,
+      allowedTypes: readonly "program"[],
+      installCost: "free",
+    ) => CardInstanceId[];
+  };
 };
+
+export type HiddenZoneSearchActivationHandlerHost = Omit<
+  HiddenZoneSearchChoiceHandlerHost,
+  "choice" | "playerAction"
+>;
 
 export type HiddenZoneChoiceHandlerResult = {
   handled: boolean;
@@ -71,6 +145,14 @@ export function handleHiddenZoneSearchChoice(
   const source = host.choice.source;
   if (isSelfModifyingCodeChoiceSource(source))
     return handleSelfModifyingCodeChoice(host);
+  if (isSneakPreviewChoiceSource(source))
+    return handleSneakPreviewChoice(host);
+  if (isMysteryBoxChoiceSource(source))
+    return handleMysteryBoxChoice(host);
+  if (isP338SearchInstallChoiceSource(source))
+    return handleSearchStackInstallChoice(host);
+  if (isP338LookTopStackShowInstallChoiceSource(source))
+    return handleLookTopStackShowInstallChoice(host);
   if (isTopNTakeMatchingChoiceSource(source))
     return handleTopNTakeMatchingChoice(host);
   if (isSearchToGripChoiceSource(source))
@@ -100,6 +182,402 @@ export function handleSelfModifyingCodeChoice(
   if (host.choice.source.startsWith("v1911.self_modifying_code_free_mu"))
     return handleSelfModifyingCodeFreeMuChoice(host);
   return handleSelfModifyingCodeStackChoice(host);
+}
+
+export function handleSneakPreviewChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  if (isSneakPreviewSourceChoiceSource(host.choice.source))
+    return handleSneakPreviewSourceChoice(host);
+  return handleSneakPreviewProgramChoice(host);
+}
+
+export function handleMysteryBoxChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const { choice, state } = host;
+  const selectedId = selectedChoiceCardIds(choice, host.playerAction)[0];
+  const currentTopCards = state.runner.stack.slice(0, 5);
+  const selectedDefinition = selectedId
+    ? host.cards.definitionFor(selectedId)
+    : undefined;
+  const plan = resolveMysteryBoxSearchInstallIntent({
+    choice,
+    selectedCardId: selectedId,
+    topCardIds: currentTopCards,
+    selectedCardDefinition: selectedDefinition,
+  });
+  const sourceCardId = plan.sourceCardId;
+  if (!sourceCardId || !state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Mystery Box ist nicht mehr installiert.");
+  if (host.cards.definitionFor(sourceCardId).id !== host.constants.mysteryBoxId)
+    throw new Error("Die Mystery-Box-Choice passt nicht zur Quelle.");
+  const execution = executeFreeProgramInstallPlan({
+    plan: createMysteryBoxFreeProgramInstallInput(plan),
+    callbacks: {
+      installProgramForFree: (programId) =>
+        host.install.installRunnerProgramForFree(programId, {
+          checkUnique: false,
+          typeError: "Mystery Box kann nur ein Programm installieren.",
+          memoryError: "Nicht genug Memory fuer das Mystery-Box-Programm.",
+        }),
+    },
+  });
+  const postInstall = createMysteryBoxPostInstallSideEffectPlan(execution);
+  applyMysteryBoxSourceTrashPlan(postInstall, {
+    trashSource: host.zones.trashRunnerInstalledCardToHeap,
+  });
+  if (execution.shuffleNeeded)
+    host.shuffleRunnerStack(
+      `v1915.mystery_box.shuffle.after_install.${sourceCardId}.${execution.installedProgramId}`,
+    );
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...buildMysteryBoxSearchInstallResolvedPayload(plan, {
+      randomCounterAfter: state.randomCounter,
+    }),
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    deletePendingChoice: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+    shufflePerformed: execution.shuffleNeeded,
+    installedCardId: execution.installedProgramId,
+    sourceTrashCardIds: postInstall.sourceCardId ? [postInstall.sourceCardId] : [],
+  };
+}
+
+export function handleMysteryBoxTopFiveProgramInstall(
+  host: HiddenZoneSearchActivationHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  if (host.legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Mystery Box nutzen.");
+  const run = requireRun(host);
+  const sourceCardId = String(host.legalAction.payload?.cardId ?? "") as CardInstanceId;
+  if (!host.state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Mystery Box ist nicht installiert.");
+  if (host.cards.definitionFor(sourceCardId).id !== host.constants.mysteryBoxId)
+    throw new Error("Die Mystery-Box-Faehigkeit passt nicht zur Karte.");
+  const oncePerRunPlan = createMysteryBoxOncePerRunPlan({
+    sourceCardId,
+    usedSourceIdsThisRun: run.mysteryBoxUsedSourceIdsThisRun ?? [],
+  });
+  const topCards = host.state.runner.stack.slice(0, 5);
+  if (topCards.length === 0) throw new Error("Der Stack ist leer.");
+  const programIds = topCards.filter(
+    (cardId) => host.cards.definitionFor(cardId).type === "program",
+  );
+  applyMysteryBoxOncePerRunPlan(oncePerRunPlan, {
+    markUsedThisRun: (usedSourceIds) => {
+      run.mysteryBoxUsedSourceIdsThisRun = usedSourceIds;
+    },
+  });
+  if (programIds.length === 0) {
+    host.shuffleRunnerStack(
+      `v1915.mystery_box.shuffle.no_program.${sourceCardId}.${run.runId}`,
+    );
+    host.legalAction.payload = {
+      ...(host.legalAction.payload ?? {}),
+      ...buildMysteryBoxNoInstallResolvedPayload(
+        createMysteryBoxNoInstallIntent({
+          sourceCardId,
+          topCardIds: topCards,
+          programCandidateIds: programIds,
+        }),
+        { randomCounterAfter: host.state.randomCounter },
+      ),
+    };
+    return {
+      handled: true,
+      stateChanged: true,
+      resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+      shufflePerformed: true,
+    };
+  }
+  host.state.pendingChoice = buildMysteryBoxInstallChoice({
+    stateVersion: host.state.stateVersion,
+    sourceCardId,
+    topCards,
+    options: programIds.map((cardId) => {
+      const definition = host.cards.definitionFor(cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        publicLabel: definition.title,
+        value: cardId,
+      };
+    }),
+  });
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    programFound: true,
+    choiceVisibility: "public",
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+  };
+}
+
+export function handleSearchStackInstallChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const { choice, state } = host;
+  const selection = resolveSearchStackInstallSelection({
+    choice,
+    selectedCardId: selectedChoiceCardIds(choice, host.playerAction)[0],
+    legalTargetIdsFor: ({ filter, installCost }) =>
+      host.install.searchStackInstallTargets(filter, installCost),
+  });
+  if (
+    !state.cardInstances[selection.sourceCardId] ||
+    host.cards.definitionFor(selection.sourceCardId).id !==
+      selection.sourceDefinitionId
+  )
+    throw new Error("Die CardImplementation-Install-Choice ist ungueltig.");
+  const cardId = selection.selectedCardId;
+  const definition = host.cards.definitionFor(cardId);
+  const installed = host.install.installRunnerProgramFromZoneWithoutClick(
+    cardId,
+    "stack",
+    selection.installCost,
+  );
+  if (!installed) throw new Error("Das Programm kann nicht installiert werden.");
+  if (selection.shuffleNeeded)
+    host.shuffleRunnerStack(`p3_38_search_stack_install:${choice.choiceId}:shuffle`);
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "p3_38_search_stack_install",
+    sourceDefinitionId: selection.sourceDefinitionId,
+    searchedZone: "runner_stack",
+    selectedCount: 1,
+    publicRevealKind: "reveal",
+    publicRevealDefinitionId: definition.id,
+    installed: true,
+    installedProgramCount: 1,
+    searchDestination: "runner_rig",
+    shufflePerformed: true,
+    shuffled: true,
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    deletePendingChoice: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+    shufflePerformed: selection.shuffleNeeded,
+    installedCardId: cardId,
+  };
+}
+
+export function handleLookTopStackShowInstallChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const { choice, state } = host;
+  if (!choice.source.startsWith("p3_38.look_top_stack_show_to_corp_then_install_matching"))
+    throw new Error("Es ist keine Stack-Show-Install-Choice offen.");
+  const [
+    ,
+    sourceCardId = "",
+    sourceDefinitionId = "",
+    topCardsRaw = "",
+  ] = choice.source.split(":");
+  if (
+    !sourceCardId ||
+    !state.runner.rig.programs.includes(sourceCardId) ||
+    host.cards.definitionFor(sourceCardId as CardInstanceId).id !==
+      sourceDefinitionId
+  )
+    throw new Error("Die Stack-Show-Quelle ist nicht mehr installiert.");
+  const run = requireRun(host);
+  const used = run.successfulRunAbilityUsedSourceIds ?? [];
+  if (used.includes(sourceCardId as CardInstanceId))
+    throw new Error("Diese Kartenquelle wurde in diesem Run bereits genutzt.");
+  const topCardsAtReveal = topCardsRaw
+    .split(",")
+    .filter((cardId): cardId is CardInstanceId => Boolean(cardId));
+  const currentTopCards = state.runner.stack.slice(0, topCardsAtReveal.length);
+  if (
+    topCardsAtReveal.length === 0 ||
+    topCardsAtReveal.some((cardId, index) => currentTopCards[index] !== cardId)
+  )
+    throw new Error("Die Stack-Spitze hat sich seit dem Reveal veraendert.");
+  const selectedId = selectedChoiceCardIds(choice, host.playerAction)[0];
+  if (
+    !selectedId ||
+    !topCardsAtReveal.includes(selectedId) ||
+    !host.install.canInstallRunnerProgramFromZone(selectedId, "stack", "free")
+  )
+    throw new Error("Das gewaehlte Programm ist nicht legal installierbar.");
+  const selectedDefinition = host.cards.definitionFor(selectedId);
+  const installed = host.install.installRunnerProgramFromZoneWithoutClick(
+    selectedId,
+    "stack",
+    "free",
+  );
+  if (!installed) throw new Error("Das Programm kann nicht installiert werden.");
+  host.zones.trashRunnerInstalledCardToHeap(sourceCardId as CardInstanceId);
+  run.successfulRunAbilityUsedSourceIds = [
+    ...used,
+    sourceCardId as CardInstanceId,
+  ].sort();
+  host.shuffleRunnerStack(`p3_38_stack_show_install:${choice.choiceId}:shuffle`);
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+    sourceDefinitionId,
+    publicRevealKind: "reveal",
+    publicRevealDefinitionId: selectedDefinition.id,
+    installed: true,
+    installedProgramCount: 1,
+    selfTrashed: true,
+    shufflePerformed: true,
+    shuffled: true,
+    randomCounterAfter: host.state.randomCounter,
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    deletePendingChoice: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+    shufflePerformed: true,
+    installedCardId: selectedId,
+    sourceTrashCardIds: [sourceCardId as CardInstanceId],
+  };
+}
+
+function handleSneakPreviewSourceChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const { choice } = host;
+  if (!isSneakPreviewSourceChoiceSource(choice.source))
+    throw new Error("Es ist keine Sneak-Preview-Quellenwahl offen.");
+  const parts = choice.source.split(":");
+  const isCardImplementationChoice = choice.source.startsWith(
+    "p3_38.stack_or_trash_program_install_source",
+  );
+  const sourceCardId = isCardImplementationChoice
+    ? (parts[1] as CardInstanceId | undefined)
+    : undefined;
+  const sourceDefinitionId = isCardImplementationChoice
+    ? (parts[2] as CardDefinitionId | undefined)
+    : host.constants.sneakPreviewId;
+  const optionId = selectedChoiceIds(host.playerAction.selectedChoices)[0] ?? "";
+  const option = choice.options.find((candidate) => candidate.id === optionId);
+  const selectedSource = option?.value;
+  if (selectedSource !== "heap" && selectedSource !== "stack")
+    throw new Error("Die Sneak-Preview-Quelle ist ungueltig.");
+  startSneakPreviewProgramChoice(host, {
+    sourceZone: selectedSource,
+    sourcePrefix: isCardImplementationChoice
+      ? "p3_38.stack_or_trash_program_install"
+      : "v1911.sneak_preview",
+    sourceCardId,
+    sourceDefinitionId: sourceDefinitionId ?? host.constants.sneakPreviewId,
+  });
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: isCardImplementationChoice
+      ? "p3_38_stack_or_trash_program_install_source_selected"
+      : "sneak_preview_source_selected",
+    sourceDefinitionId: sourceDefinitionId ?? host.constants.sneakPreviewId,
+    choiceVisibility: "runner_private",
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+  };
+}
+
+function handleSneakPreviewProgramChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const { choice } = host;
+  const selectedCardId = selectedChoiceCardIds(choice, host.playerAction)[0];
+  const selectedDefinition =
+    selectedCardId && host.state.cardInstances[selectedCardId]
+      ? host.cards.definitionFor(selectedCardId)
+      : undefined;
+  const plan = resolveSneakPreviewSearchInstallIntent({
+    choice,
+    selectedCardId,
+    legalTargetIdsForSourceZone: (sourceZone) =>
+      host.install.sneakPreviewInstallableProgramIds(sourceZone),
+    selectedCardDefinition: selectedDefinition,
+    defaultSourceDefinitionId: host.constants.sneakPreviewId,
+  });
+  const execution = executeFreeProgramInstallPlan({
+    plan: createSneakPreviewFreeProgramInstallInput(plan),
+    callbacks: {
+      installProgramForFree: (programId) =>
+        host.install.installRunnerProgramForFree(programId),
+    },
+  });
+  const postInstall = createSneakPreviewPostInstallSideEffectPlan({
+    execution,
+    sourceCardDefinitionId: plan.sourceDefinitionId,
+  });
+  applySneakPreviewTemporaryReturnPlan(postInstall, {
+    recordTemporaryReturn: (record) => {
+      host.state.sneakPreviewTemporaryInstalls ??= [];
+      host.state.sneakPreviewTemporaryInstalls.push(record);
+    },
+  });
+  if (execution.shuffleNeeded)
+    host.shuffleRunnerStack(`v1911_sneak_preview:${choice.choiceId}:shuffle`);
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...buildSneakPreviewSearchInstallResolvedPayload(plan),
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    deletePendingChoice: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+    shufflePerformed: execution.shuffleNeeded,
+    installedCardId: execution.installedProgramId,
+  };
+}
+
+function startSneakPreviewProgramChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+  input: {
+    sourceZone: SearchInstallSourceZone;
+    sourcePrefix: string;
+    sourceCardId?: CardInstanceId | undefined;
+    sourceDefinitionId: CardDefinitionId;
+  },
+): void {
+  const sourceCards =
+    input.sourceZone === "heap"
+      ? host.state.runner.heap.slice().sort()
+      : host.state.runner.stack;
+  const targets = host.install.sneakPreviewInstallableProgramIds(input.sourceZone);
+  const options = sourceCards.map((cardId) => {
+    const definition = host.cards.definitionFor(cardId);
+    const selectable = targets.includes(cardId);
+    return {
+      id: `card_${cardId}`,
+      label: definition.title,
+      value: cardId,
+      ...(!selectable ? { selectable: false } : {}),
+    };
+  });
+  if (targets.length === 0)
+    throw new Error("In dieser Sneak-Preview-Quelle liegt kein legales Programm.");
+  host.state.pendingChoice = buildSneakPreviewProgramChoice({
+    stateVersion: host.state.stateVersion,
+    sourceZone: input.sourceZone,
+    sourcePrefix: input.sourcePrefix,
+    sourceCardId: input.sourceCardId,
+    sourceDefinitionId: input.sourceDefinitionId,
+    options,
+  });
 }
 
 function handleRunnerStackSearchChoice(
@@ -499,6 +977,36 @@ function isSelfModifyingCodeChoiceSource(source: string): boolean {
   );
 }
 
+function isSneakPreviewChoiceSource(source: string): boolean {
+  return (
+    isSneakPreviewSourceChoiceSource(source) ||
+    source.startsWith("v1911.sneak_preview_heap_install") ||
+    source.startsWith("v1911.sneak_preview_stack_install") ||
+    source.startsWith("p3_38.stack_or_trash_program_install")
+  );
+}
+
+function isSneakPreviewSourceChoiceSource(source: string): boolean {
+  return (
+    source.startsWith("v1911.sneak_preview_source") ||
+    source.startsWith("p3_38.stack_or_trash_program_install_source")
+  );
+}
+
+function isMysteryBoxChoiceSource(source: string): boolean {
+  return source.startsWith("v1915.mystery_box");
+}
+
+function isP338SearchInstallChoiceSource(source: string): boolean {
+  return source.startsWith("p3_38.search_stack_install");
+}
+
+function isP338LookTopStackShowInstallChoiceSource(source: string): boolean {
+  return source.startsWith(
+    "p3_38.look_top_stack_show_to_corp_then_install_matching",
+  );
+}
+
 function isTopNTakeMatchingChoiceSource(source: string): boolean {
   return (
     source.startsWith("v1911.aujourdoui_top5") ||
@@ -521,4 +1029,11 @@ function isCardImplementationSearchToGripChoiceSource(source: string): boolean {
     source.startsWith("p3_37.search_trash_to_grip") ||
     source.startsWith("p3_37.search_stack_to_grip")
   );
+}
+
+function requireRun(
+  host: HiddenZoneSearchActivationHandlerHost | HiddenZoneSearchChoiceHandlerHost,
+): NonNullable<GameState["run"]> {
+  if (!host.state.run) throw new Error("Es läuft kein Run.");
+  return host.state.run;
 }
