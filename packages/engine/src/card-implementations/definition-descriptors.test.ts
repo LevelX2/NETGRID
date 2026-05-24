@@ -1413,6 +1413,35 @@ describe("CardImplementation definition descriptors", () => {
     ).toBe("implemented");
   });
 
+  it("describes Proteus Phase 2c Faked Hit event implementation", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_108_faked-hit")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "on_play",
+      costs: "printed",
+      effects: [
+        {
+          kind: "add_bad_publicity",
+          amount: 1,
+          visibility: "public",
+        },
+        {
+          kind: "damage",
+          recipient: "runner",
+          damageType: "core",
+          amount: 2,
+          preventable: false,
+          visibility: "public",
+        },
+      ],
+    });
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_proteus_108_faked-hit")
+        ?.status,
+    ).toBe("implemented");
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

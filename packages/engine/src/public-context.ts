@@ -622,6 +622,10 @@ export function publicContextForAction(
     if (typeof legalAction.payload.runnerMaxHandSizeAfter === "number")
       context.runnerMaxHandSizeAfter =
         legalAction.payload.runnerMaxHandSizeAfter;
+    if (typeof legalAction.payload.preventableDamage === "boolean")
+      context.preventableDamage = legalAction.payload.preventableDamage;
+    if (typeof legalAction.payload.unpreventableDamage === "boolean")
+      context.unpreventableDamage = legalAction.payload.unpreventableDamage;
     if (typeof legalAction.payload.cerberusCounterCount === "number")
       context.cerberusCounterCount = legalAction.payload.cerberusCounterCount;
   }

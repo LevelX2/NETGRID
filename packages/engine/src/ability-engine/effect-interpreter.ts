@@ -35,6 +35,10 @@ export type CardEffectExecutionContext = {
     damageType: Extract<DamageType, "meat" | "net" | "core">,
     amount: number,
   ) => CardEffectDamageResult;
+  unpreventableDamageRunner?: (
+    damageType: Extract<DamageType, "meat" | "net" | "core">,
+    amount: number,
+  ) => CardEffectDamageResult;
   addHostedCredits?: (
     sourceCardId: CardInstanceId,
     amount: number,
@@ -787,13 +791,20 @@ export function executeCardImplementationEffects(
           )
         )
           throw new Error("damage effect damageType must be meat, net, or core.");
-        if ((effect as { preventable?: boolean }).preventable !== true)
-          throw new Error("damage effect must be preventable.");
-        if (!context.damageRunner)
+        const preventable = (effect as { preventable?: boolean }).preventable;
+        if (preventable !== true && preventable !== false)
+          throw new Error("damage effect preventable must be true or false.");
+        const damageRunner =
+          preventable === true
+            ? context.damageRunner
+            : context.unpreventableDamageRunner;
+        if (!damageRunner)
           throw new Error(
-            "damage effect requires a damageRunner execution context.",
+            preventable === true
+              ? "damage effect requires a damageRunner execution context."
+              : "unpreventable damage effect requires an unpreventableDamageRunner execution context.",
           );
-        const damageResult = context.damageRunner(
+        const damageResult = damageRunner(
           effect.damageType,
           effect.amount,
         );
@@ -807,6 +818,7 @@ export function executeCardImplementationEffects(
           amount: damageResult.amount,
           damageType: damageResult.damageType,
           cardsTrashed: damageResult.cardsTrashed,
+          preventable,
           reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }

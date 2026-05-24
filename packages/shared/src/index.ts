@@ -255,6 +255,7 @@ export type ResolvedGameEffect = {
   cardsTrashed?: number;
   endedRun?: boolean;
   paidCredits?: number;
+  preventable?: boolean;
   gameLost?: boolean;
   winner?: Winner;
   sourceDefinitionId?: CardDefinitionId;
@@ -9350,6 +9351,24 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
       "derez_ice",
       "end_run",
       "proteus_post_pass_derez_utility",
+    ],
+  },
+  {
+    id: "onr_proteus_108_faked-hit",
+    title: "Faked Hit",
+    side: "runner",
+    type: "event",
+    subtypes: ["bad_publicity"],
+    implementationStatus: "playable_mvp",
+    cost: 5,
+    rulesText:
+      "Give the Corp 1 Bad Publicity point. Take 2 brain damage. This damage cannot be prevented. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+    mechanics: [
+      "play_event",
+      "bad_publicity",
+      "bad_publicity_loss_gate",
+      "core_damage",
+      "flatline",
     ],
   },
   {

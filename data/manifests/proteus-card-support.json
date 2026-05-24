@@ -2882,24 +2882,35 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_108_faked-hit",
+        "coverage": [
+          "bad_publicity_loss_gate",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "unpreventable_damage",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
-      },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+        "scenarioRefs": [
+          "proteus-phase-2c-direct-runner-event-bp-damage-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 2c: Faked Hit plays through CardImplementation on_play effects, adds 1 Bad Publicity, then deals 2 unpreventable core damage while preserving bad_publicity_7 priority over simultaneous flatline."
+      }
     },
     {
       "cardId": "onr_proteus_109_frame-up",

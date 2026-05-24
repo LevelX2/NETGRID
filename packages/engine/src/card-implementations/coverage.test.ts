@@ -647,6 +647,28 @@ describe("CardImplementation coverage and registry invariants", () => {
     ]);
   });
 
+  it("migrates Proteus Phase 2c direct runner event BP damage into CardImplementation coverage", () => {
+    const definitionId = "onr_proteus_108_faked-hit";
+    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      cardDefinitionId: definitionId,
+      status: "implemented",
+    });
+    expect(cardImplementationForDefinitionId(definitionId)?.abilities?.[0]).toMatchObject({
+      kind: "on_play",
+      costs: "printed",
+      effects: [
+        { kind: "add_bad_publicity", amount: 1 },
+        {
+          kind: "damage",
+          damageType: "core",
+          amount: 2,
+          preventable: false,
+        },
+      ],
+    });
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",

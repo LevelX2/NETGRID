@@ -119,6 +119,13 @@ export type CardImplementationRuntimeDependencies = {
     damageType: Extract<DamageType, "meat" | "net" | "core">,
     amount: number,
   ) => CardEffectDamageResult;
+  unpreventableDamageRunner: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceDefinitionId: CardDefinition["id"],
+    damageType: Extract<DamageType, "meat" | "net" | "core">,
+    amount: number,
+  ) => CardEffectDamageResult;
   startTrace: (
     state: GameState,
     legalAction: LegalAction,
@@ -1672,6 +1679,14 @@ export function resolveActivatedCardImplementationAbility(
           damageType,
           amount,
         ),
+      unpreventableDamageRunner: (damageType, amount) =>
+        deps.unpreventableDamageRunner(
+          state,
+          legalAction,
+          match.definition.id,
+          damageType,
+          amount,
+        ),
       startTrace: (sourceCardId, baseTraceStrength, successEffect) => ({
         ...deps.startTrace(
           state,
@@ -1914,6 +1929,14 @@ export function executeOnPlayCardImplementationAbility(
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
         deps.damageRunner(state, legalAction, definition.id, damageType, amount),
+      unpreventableDamageRunner: (damageType, amount) =>
+        deps.unpreventableDamageRunner(
+          state,
+          legalAction,
+          definition.id,
+          damageType,
+          amount,
+        ),
       startTrace: (sourceCardId, baseTraceStrength, successEffect) => ({
         ...deps.startTrace(
           state,

@@ -2029,6 +2029,153 @@ describe("Proteus Phase 2b Scored-Agenda Bad Publicity", () => {
   });
 });
 
+describe("Proteus Phase 2c Direct Runner Event BP Damage", () => {
+  const FAKED_HIT = "onr_proteus_108_faked-hit";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function fakedHitGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: `${seed}_runner`,
+          cards: [{ id: FAKED_HIT, quantity: 1 }, ...ONR_V1_1_2K_RUNNER_DECK.cards],
+        },
+        corpDeck: ONR_V1_1_2K_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  function playFakedHit(
+    seed: string,
+    badPublicityBefore: number,
+    emptyGripBeforePlay = false,
+  ): {
+    initial: GameState;
+    beforePlay: GameState;
+    state: GameState;
+    playAction: LegalAction;
+  } {
+    let state = fakedHitGame(seed);
+    if (emptyGripBeforePlay) emptyRunnerGripForTest(state);
+    moveRunnerCardToGrip(state, FAKED_HIT);
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    state.corp.badPublicity = badPublicityBefore;
+    const initial = structuredClone(state);
+    const playAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(state, action) === FAKED_HIT,
+    );
+    const beforePlay = structuredClone(state);
+    state = apply(state, "runner", (action) => action.actionId === playAction.actionId);
+    return { initial, beforePlay, state, playAction };
+  }
+
+  it("plays Faked Hit as Bad Publicity plus unpreventable core damage", () => {
+    const { initial, beforePlay, state, playAction } = playFakedHit(
+      "proteus-phase-2c-faked-hit",
+      0,
+    );
+
+    expect(state.corp.badPublicity).toBe(1);
+    expect(state.runner.coreDamage).toBe(beforePlay.runner.coreDamage + 2);
+    expect(state.runner.credits).toBe(beforePlay.runner.credits - 5);
+    expect(state.winner).toBeNull();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: FAKED_HIT,
+      badPublicityAdded: 1,
+      corpBadPublicityBefore: 0,
+      corpBadPublicityAfter: 1,
+      damageResolved: true,
+      damageType: "core",
+      damageAmount: 2,
+      unpreventableDamage: true,
+      preventableDamage: false,
+      coreDamageAfter: state.runner.coreDamage,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload?.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "add_bad_publicity",
+        sourceDefinitionId: FAKED_HIT,
+        amount: 1,
+      }),
+      expect.objectContaining({
+        kind: "damage",
+        sourceDefinitionId: FAKED_HIT,
+        damageType: "core",
+        amount: 2,
+        preventable: false,
+      }),
+    ]);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    expect(
+      applyAction(beforePlay, {
+        matchId: beforePlay.matchId,
+        side: "corp",
+        actionId: playAction.actionId,
+        clientKnownStateVersion: beforePlay.stateVersion,
+        idempotencyKey: "proteus-faked-hit-wrong-side",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(beforePlay, {
+        matchId: beforePlay.matchId,
+        side: "runner",
+        actionId: playAction.actionId,
+        clientKnownStateVersion: beforePlay.stateVersion - 1,
+        idempotencyKey: "proteus-faked-hit-stale",
+      }).ok,
+    ).toBe(false);
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.errors).toEqual([]);
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps Bad-Publicity-7 primary over simultaneous Faked Hit flatline", () => {
+    const { initial, state } = playFakedHit(
+      "proteus-phase-2c-faked-hit-bp-flatline-priority",
+      6,
+      true,
+    );
+
+    expect(state.corp.badPublicity).toBe(7);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      gameEndReason: "bad_publicity_7",
+      badPublicityThreshold: 7,
+      corpBadPublicityBefore: 6,
+      corpBadPublicityAfter: 7,
+      damageResolved: true,
+      damageType: "core",
+      damageAmount: 2,
+      flatline: true,
+      unpreventableDamage: true,
+    });
+    expect(state.phase).toBe("game_over");
+    expect(state.winner).toBe("runner");
+    expect(state.gameEndReason).toBe("bad_publicity_7");
+    expect(getLegalActions(state, "corp")).toHaveLength(0);
+    expect(getLegalActions(state, "runner")).toHaveLength(0);
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", () => {
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;

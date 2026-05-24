@@ -1094,7 +1094,7 @@ export type DamageEffectImplementation = {
   recipient: "runner";
   damageType: Extract<DamageType, "meat" | "net" | "core">;
   amount: number;
-  preventable: true;
+  preventable: boolean;
   visibility: EventVisibilityClass;
 };
 

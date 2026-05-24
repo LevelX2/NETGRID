@@ -595,6 +595,7 @@ const cardImplementationEffectAdapters = createCardImplementationEffectAdapters(
   openReplacementWindow,
   openEventModificationWindow,
   resolveDamageImminentEvent,
+  resolveUnpreventableDamage: (state, request) => doDamage(state, request),
   addCardCounter,
   cardCounter,
   spendCardCounter,
