@@ -820,20 +820,21 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       {
         const installEffect = mergedCardResolverEffect;
         const installSuffix = installEffect?.suffix ? ` und ${installEffect.suffix}` : "";
-      if (actor === "runner" && selectedServerLabel) {
-        category = "card";
-        title = phrase(subject, `${cardTitle ?? "eine Karte"} auf ${selectedServerLabel} ausgerichtet installiert${installSuffix}`);
-        chips.push("Install", "Resource", selectedServerLabel, ...(installEffect?.chips ?? []));
-      } else if (actor === "corp" && (redactedKind || !cardTitle)) {
-        category = "hidden";
-        visibility = "redacted";
-        title = phrase(subject, `eine verdeckte Karte${installLocation(serverLabel, zoneLabel, label)} installiert`);
-        chips.push("Verdeckt", installAreaFromPayload(serverLabel, zoneLabel, label));
-      } else {
-        category = installEffect?.category ?? "card";
-        title = phrase(subject, `${cardTitle ?? "eine Karte"}${installDestinationForTitle(actor, serverLabel, zoneLabel, label)} installiert${installSuffix}`);
-        chips.push("Install", installAreaFromPayload(serverLabel, zoneLabel, label), ...(installEffect?.chips ?? []));
-      }
+        const deckReplacementSuffix = runnerHardwareDeckReplacementSuffix(payload);
+        if (actor === "runner" && selectedServerLabel) {
+          category = "card";
+          title = phrase(subject, `${cardTitle ?? "eine Karte"} auf ${selectedServerLabel} ausgerichtet installiert${installSuffix}${deckReplacementSuffix}`);
+          chips.push("Install", "Resource", selectedServerLabel, ...(installEffect?.chips ?? []), ...runnerHardwareDeckReplacementChips(payload));
+        } else if (actor === "corp" && (redactedKind || !cardTitle)) {
+          category = "hidden";
+          visibility = "redacted";
+          title = phrase(subject, `eine verdeckte Karte${installLocation(serverLabel, zoneLabel, label)} installiert`);
+          chips.push("Verdeckt", installAreaFromPayload(serverLabel, zoneLabel, label));
+        } else {
+          category = installEffect?.category ?? "card";
+          title = phrase(subject, `${cardTitle ?? "eine Karte"}${installDestinationForTitle(actor, serverLabel, zoneLabel, label)} installiert${installSuffix}${deckReplacementSuffix}`);
+          chips.push("Install", installAreaFromPayload(serverLabel, zoneLabel, label), ...(installEffect?.chips ?? []), ...runnerHardwareDeckReplacementChips(payload));
+        }
       }
       break;
     case "play_event":
@@ -2103,6 +2104,20 @@ function titlesForDefinitionIds(value: string | undefined): string[] {
         .map((definitionId) => titleForDefinitionId(definitionId.trim()))
         .filter((title): title is string => Boolean(title))
     : [];
+}
+
+function runnerHardwareDeckReplacementSuffix(payload: Record<string, unknown>): string {
+  if (payload.deckUniqueReplacement !== true) return "";
+  const titles = titlesForDefinitionIds(stringValue(payload.trashedDeckDefinitionIds));
+  const target = titles.length > 0 ? joinChronicleParts(titles) : "ein älteres Hardware-Deck";
+  const verb = titles.length > 1 ? "wurden" : "wurde";
+  return `; ${target} ${verb} getrasht, weil nur ein Hardware-Deck installiert sein darf`;
+}
+
+function runnerHardwareDeckReplacementChips(payload: Record<string, unknown>): string[] {
+  if (payload.deckUniqueReplacement !== true) return [];
+  const titles = titlesForDefinitionIds(stringValue(payload.trashedDeckDefinitionIds));
+  return ["Deck-Einzigartigkeit", "Trash", ...(titles.length > 0 ? [`${titles.length} Deck${titles.length === 1 ? "" : "s"}`] : [])];
 }
 
 function installBlockedReasonLabel(reason: string | undefined): string | undefined {
