@@ -275,7 +275,6 @@ import {
   availableRunnerRunStartCredits,
   hostedPaymentCredits,
   isRestrictedHostedCreditSource,
-  payEncounterSubroutineRunCost,
   payEncounterTaxForFutureIce,
   payJackOutAdditionalCost,
   payRunStartTaxCredits,
@@ -291,6 +290,22 @@ import {
   spendRunnerRunCredits,
   type RunDurationPaymentHost,
 } from "./game/run/run-duration-payment";
+import {
+  appendResolvedSubroutineEffect,
+  appendUnpaidPayOrEndRunEffects,
+  cleanupEncounterDurationMarkers,
+  clearStartupImmolatorPostPassMarker,
+  consumeForcedJackOutAfterEncounter,
+  encounterResolutionHost,
+  handlePostPassProgramTrashChoices,
+  passedIceFollowupMarkersForCurrentIce,
+  preparePayOrEndRunSubroutinePayment,
+  resolveFatalAttractorPostEncounter,
+  resolvePassRezzedIceProgramTrashChoice as resolvePassRezzedIceProgramTrashChoiceInRunModule,
+  resolveRunDurationMarkerSubroutine,
+  resolveViral15ProgramTrashChoice as resolveViral15ProgramTrashChoiceInRunModule,
+  type EncounterResolutionHost,
+} from "./game/run/encounter-resolution";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -420,7 +435,6 @@ import {
   STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID,
   SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID,
   VALU_PAK_SOFTWARE_BUNDLE_INSTALL_EVENT_ID,
-  VIRAL_15_PROGRAM_TRASH_ICE_ID,
   ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
 } from "./mechanics/longtail-card-effects";
 import {
@@ -454,7 +468,6 @@ import {
   DRIFTER_MOBILE_ENVIRONMENT_ID,
   DUPRE_ID,
   EMPLOYEE_EMPOWERMENT_ID,
-  FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE,
   GRUBB_ID,
   HELLS_RUN_ID,
   HUNT_CLUB_BBS_ID,
@@ -10294,59 +10307,15 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   let ended = false;
   const damageSummaries: DamageSummary[] = [];
   const subroutines = subroutinesForCurrentEncounter(state, definition);
-  const payOrEndRunIndexesForThisContinue = new Set(
-    encounterSubroutineIndexesForNextContinue(run, subroutines).filter(
-      (index) =>
-        subroutines[index]?.type === "end_the_run_unless_runner_pays",
-    ),
-  );
-  const expectedSubroutineIds =
-    typeof legalAction?.payload?.encounterSubroutineIds === "string"
-      ? String(legalAction.payload.encounterSubroutineIds)
-      : undefined;
-  if (expectedSubroutineIds !== undefined) {
-    const currentSubroutineIds = encounterSubroutinesForNextContinue(
-      run,
-      subroutines,
-    )
-      .map((subroutine) => subroutine.id)
-      .join(",");
-    if (currentSubroutineIds !== expectedSubroutineIds)
-      throw new Error("Die Encounter-Subroutinen sind nicht mehr gueltig.");
-  }
-  const paidPayOrEndRunIndexes = new Set<number>();
-  const payOrEndRunIndexPayload =
-    typeof legalAction?.payload?.payOrEndRunSubroutineIndexes === "string"
-      ? String(legalAction.payload.payOrEndRunSubroutineIndexes)
-      : "";
-  for (const rawIndex of payOrEndRunIndexPayload.split(",")) {
-    if (!rawIndex) continue;
-    const index = Number(rawIndex);
-    if (!Number.isInteger(index) || index < 0)
-      throw new Error("Die Pay-or-End-the-Run-Subroutine ist ungueltig.");
-    paidPayOrEndRunIndexes.add(index);
-  }
-  let expectedPayOrEndRunPayment = 0;
-  for (const index of paidPayOrEndRunIndexes) {
-    const subroutine = subroutines[index];
-    if (
-      !subroutine ||
-      subroutine.type !== "end_the_run_unless_runner_pays" ||
-      run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index)
-    ) {
-      throw new Error("Die Pay-or-End-the-Run-Subroutine ist nicht mehr gueltig.");
-    }
-    expectedPayOrEndRunPayment += Math.max(
-      0,
-      Math.floor(subroutine.amount ?? 0),
-    );
-  }
-  payEncounterSubroutineRunCost(
-    runDurationPaymentHost(state),
+  const payOrEndRunPayment = preparePayOrEndRunSubroutinePayment(
+    encounterResolutionHostForState(state),
+    subroutines,
     legalAction,
-    expectedPayOrEndRunPayment,
   );
+  const payOrEndRunIndexesForThisContinue =
+    payOrEndRunPayment.payOrEndRunIndexesForThisContinue ?? new Set<number>();
+  const paidPayOrEndRunIndexes =
+    payOrEndRunPayment.paidPayOrEndRunIndexes ?? new Set<number>();
   for (let index = 0; index < subroutines.length; index += 1) {
     const subroutine = subroutines[index];
     if (
@@ -10448,96 +10417,11 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
           : { cardsTrashed: 0 },
       );
     }
-    if (subroutine.type === "set_run_encounter_tax") {
-      const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
-      run.encounterTaxForFutureIce =
-        Math.max(0, Math.floor(run.encounterTaxForFutureIce ?? 0)) + amount;
-    }
-    if (subroutine.type === "set_run_break_subroutine_cost_modifier") {
-      const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
-      run.breakSubroutineAdditionalCost =
-        runBreakSubroutineAdditionalCost(run) + amount;
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          v1922CorpIceAbility: "virizz_break_cost_modifier",
-          breakSubroutineAdditionalCost: run.breakSubroutineAdditionalCost,
-          sourceDefinitionId: definition.id,
-        };
-      }
-    }
-    if (subroutine.type === "set_run_future_end_the_run_subroutine") {
-      run.futureEncounterEndTheRunSourceIceId = run.encounteredIceId;
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          v1922CorpIceAbility: "tutor_future_end_the_run_subroutine",
-          sourceDefinitionId: definition.id,
-        };
-      }
-    }
-    if (subroutine.type === "set_run_viral_15") {
-      if (!run.encounteredIceId)
-        throw new Error("Viral 15 benoetigt ein Encounter-ICE.");
-      run.viral15ActiveSourceIceId = run.encounteredIceId;
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          v1922CorpIceAbility: "viral_15_run_modifier",
-          jackOutAdditionalCost: runJackOutAdditionalCost(run),
-          sourceDefinitionId: definition.id,
-        };
-      }
-    }
-    if (subroutine.type === "set_run_jack_out_additional_cost") {
-      const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
-      run.jackOutAdditionalCostForRun =
-        Math.max(0, Math.floor(run.jackOutAdditionalCostForRun ?? 0)) + amount;
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          jackOutAdditionalCost: runJackOutAdditionalCost(run),
-          sourceDefinitionId: definition.id,
-        };
-      }
-    }
-    if (subroutine.type === "set_run_pass_rezzed_ice_program_trash") {
-      if (!run.encounteredIceId)
-        throw new Error("Program-Trash-Runmodifier benoetigt ein Encounter-ICE.");
-      run.passRezzedIceProgramTrashSourceIceId = run.encounteredIceId;
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          passIceTrashProgramPrompt: true,
-          sourceDefinitionId: definition.id,
-        };
-      }
-    }
-    if (subroutine.type === "set_run_future_strength_bonus") {
-      const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
-      run.futureEncounterIceStrengthBonus =
-        Math.max(0, Math.floor(run.futureEncounterIceStrengthBonus ?? 0)) +
-        amount;
-    }
-    if (subroutine.type === "set_next_encounter_unless_fully_break_damage") {
-      const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
-      run.nextEncounterFatalDamage =
-        Math.max(0, Math.floor(run.nextEncounterFatalDamage ?? 0)) + amount;
-    }
-    if (
-      subroutine.type === "set_next_encounter_lock" ||
-      subroutine.type === "set_next_encounter_no_break_subroutines"
-    ) {
-      run.nextEncounterNoBreakSubroutines = true;
-      if (subroutine.type === "set_next_encounter_lock")
-        run.nextEncounterJackOutLock = true;
-    }
-    if (subroutine.type === "set_run_jack_out_lock") {
-      run.jackOutLockedForRun = true;
-    }
-    if (subroutine.type === "set_runner_forgo_next_action") {
-      applyRunnerForgoNextAction(state);
-    }
+    resolveRunDurationMarkerSubroutine(encounterResolutionHostForState(state), {
+      definition,
+      subroutine,
+      legalAction,
+    });
     if (subroutine.type === "set_runner_run_lock_actions") {
       const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
       const flags = ensureRunnerTurnFlags(state);
@@ -10636,61 +10520,27 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       }
     }
   }
-  for (const index of payOrEndRunIndexesForThisContinue) {
-    if (ended) break;
-    if (paidPayOrEndRunIndexes.has(index)) continue;
-    const alreadyResolved = (legalAction?.resolvedEffects ?? []).some(
-      (effect) =>
-        effect.kind === "resolve_subroutine" &&
-        effect.subroutineIndex === index,
-    );
-    if (alreadyResolved) continue;
-    const subroutine = subroutines[index];
-    if (!subroutine || subroutine.type !== "end_the_run_unless_runner_pays")
-      continue;
-    appendResolvedSubroutineEffect(
-      legalAction,
-      definition,
-      index,
-      subroutine,
-      undefined,
-      { paidCredits: 0, endedRun: true },
-    );
-    ended = true;
-  }
+  ended = appendUnpaidPayOrEndRunEffects({
+    definition,
+    subroutines,
+    legalAction,
+    payOrEndRunIndexesForThisContinue,
+    paidPayOrEndRunIndexes,
+    ended,
+  }).ended;
   if (state.winner) return;
   const encounteredIceId = run.encounteredIceId;
-  const encounterFullyBroken = encounteredIceId
-    ? encounterWasFullyBrokenByRunner(run, subroutines)
-    : false;
-  if (encounteredIceId && encounterFullyBroken)
-    recordRunFullyBrokenIce(run, encounteredIceId);
-  if (run.fatalDamageActiveForEncounter) {
-    const fatalDamageAmount = Math.max(
-      0,
-      Math.floor(run.fatalDamageAmountForEncounter ?? 0),
-    );
-    if (!encounterFullyBroken && fatalDamageAmount > 0 && encounteredIceId) {
-      const summary = doDamage(state, {
-        damageId: `${run.runId}.${encounteredIceId}.fatal_attractor`,
-        damageType: "net",
-        amount: fatalDamageAmount,
-        source: FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE,
-      });
-      damageSummaries.push(summary);
-      if (legalAction) {
-        setDamagePayload(
-          legalAction,
-          aggregateDamageSummaries(damageSummaries),
-        );
-      }
-      if (state.winner) return;
-    }
-  }
-  run.fatalDamageActiveForEncounter = false;
-  delete run.fatalDamageAmountForEncounter;
-  run.noBreakSubroutinesActive = false;
-  run.jackOutLockedUntilEncounterEnds = false;
+  resolveFatalAttractorPostEncounter(encounterResolutionHostForState(state), {
+    subroutines,
+    damageSummaries,
+    legalAction,
+    dealDamage: (input) => doDamage(state, input),
+    setDamagePayload: (summary) => {
+      if (legalAction) setDamagePayload(legalAction, summary);
+    },
+  });
+  if (state.winner) return;
+  cleanupEncounterDurationMarkers(encounterResolutionHostForState(state));
   resetBreakerStrength(state);
   if (ended) {
     finishRun(state, false, legalAction);
@@ -10704,77 +10554,6 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       legalAction,
     );
   movePastCurrentIce(state, legalAction);
-}
-
-function appendResolvedSubroutineEffect(
-  legalAction: LegalAction | undefined,
-  definition: CardDefinition,
-  subroutineIndex: number,
-  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
-  damageSummary?: DamageSummary,
-  options: {
-    paidCredits?: number;
-    endedRun?: boolean;
-    cardDefinitionId?: string;
-    cardTitle?: string;
-    cardsTrashed?: number;
-  } = {},
-): void {
-  if (!legalAction) return;
-  const dynamicAttribution = dynamicSubroutineAttributionFor(subroutine);
-  legalAction.resolvedEffects = [
-    ...(legalAction.resolvedEffects ?? []),
-    {
-      effectId: `subroutine_${subroutineIndex + 1}`,
-      kind: "resolve_subroutine",
-      visibility: "public",
-      side: "runner",
-      reason: "ice_subroutine",
-      sourceDefinitionId: definition.id,
-      sourceTitle: definition.title,
-      subroutineIndex,
-      subroutineType: subroutine.type,
-      ...(dynamicAttribution
-        ? {
-            cardDefinitionId: dynamicAttribution.sourceDefinitionId,
-            cardTitle: dynamicAttribution.sourceTitle,
-          }
-        : {}),
-      ...(damageSummary
-        ? {
-            damageType: damageSummary.damageType,
-            amount: damageSummary.amount,
-            cardsTrashed: damageSummary.cardsTrashed,
-          }
-        : {}),
-      ...(options.paidCredits !== undefined
-        ? { paidCredits: options.paidCredits }
-        : {}),
-      ...(options.cardDefinitionId
-        ? { cardDefinitionId: options.cardDefinitionId }
-        : {}),
-      ...(options.cardTitle ? { cardTitle: options.cardTitle } : {}),
-      ...(options.cardsTrashed !== undefined
-        ? { cardsTrashed: options.cardsTrashed }
-        : {}),
-      ...(subroutine.type === "end_the_run" || options.endedRun
-        ? { endedRun: true }
-        : {}),
-    },
-  ];
-}
-
-function encounterWasFullyBrokenByRunner(
-  run: ActiveRun,
-  subroutines: NonNullable<CardDefinition["subroutines"]>,
-): boolean {
-  if (subroutines.length === 0) return true;
-  for (let index = 0; index < subroutines.length; index += 1) {
-    const subroutine = subroutines[index];
-    if (!subroutine) continue;
-    if (!run.brokenSubroutineIndexes.includes(index)) return false;
-  }
-  return true;
 }
 
 function applyBartmossPostEncounterTrigger(
@@ -10920,12 +10699,6 @@ function icebreakerHasSpecial(
   return icebreakerAbilitiesForDefinition(definitionFor(state, breakerId)).some(
     (ability) => ability.special === special,
   );
-}
-
-function recordRunFullyBrokenIce(run: ActiveRun, iceId: CardInstanceId): void {
-  const fullyBroken = run.fullyBrokenIceIds ?? [];
-  if (!fullyBroken.includes(iceId)) fullyBroken.push(iceId);
-  run.fullyBrokenIceIds = fullyBroken;
 }
 
 function hackerTrackerCardIds(state: GameState): CardInstanceId[] {
@@ -11344,24 +11117,9 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
   const nextIndex = run.position.iceIndex - 1;
   const passedIceId = run.encounteredIceId;
   clearEncounterTemporaryTraceCredits(run, legalAction);
-  const viral15PendingPassedIceId =
-    run.viral15ActiveSourceIceId &&
-    passedIceId &&
-    mustInstance(state.cardInstances, passedIceId).rezzed
-      ? passedIceId
-      : undefined;
-  const passRezzedIceProgramTrashPendingPassedIceId =
-    run.passRezzedIceProgramTrashSourceIceId &&
-    passedIceId &&
-    mustInstance(state.cardInstances, passedIceId).rezzed
-      ? passedIceId
-      : undefined;
-  const startupImmolatorPendingPassedIceId =
-    passedIceId &&
-    mustInstance(state.cardInstances, passedIceId).rezzed &&
-    run.fullyBrokenIceIds?.includes(passedIceId)
-      ? passedIceId
-      : undefined;
+  const passedIceFollowups = passedIceFollowupMarkersForCurrentIce(
+    encounterResolutionHostForState(state),
+  );
   if (
     passedIceId &&
     mustInstance(state.cardInstances, passedIceId).rezzed &&
@@ -11369,17 +11127,11 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
   ) {
     return;
   }
-  if (run.forceJackOutAfterEncounterSourceId) {
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        forcedJackOutAfterEncounter: true,
-        forceJackOutAfterEncounterSourceDefinitionId: definitionFor(
-          state,
-          run.forceJackOutAfterEncounterSourceId,
-        ).id,
-      };
-    }
+  const forcedJackOut = consumeForcedJackOutAfterEncounter(
+    encounterResolutionHostForState(state),
+    legalAction,
+  );
+  if (forcedJackOut.runShouldEnd) {
     finishRun(state, false, legalAction);
     return;
   }
@@ -11398,13 +11150,7 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
         phase: "movement",
         position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
         approachedIceId,
-        ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
-        ...(passRezzedIceProgramTrashPendingPassedIceId
-          ? { passRezzedIceProgramTrashPendingPassedIceId }
-          : {}),
-        ...(startupImmolatorPendingPassedIceId
-          ? { startupImmolatorPendingPassedIceId }
-          : {}),
+        ...passedIceFollowups,
         brokenSubroutineIndexes: [],
         resolvedSubroutineIndexes: [],
       };
@@ -11417,13 +11163,7 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
       phase: "approach_ice",
       position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
       approachedIceId,
-      ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
-      ...(passRezzedIceProgramTrashPendingPassedIceId
-        ? { passRezzedIceProgramTrashPendingPassedIceId }
-        : {}),
-      ...(startupImmolatorPendingPassedIceId
-        ? { startupImmolatorPendingPassedIceId }
-        : {}),
+      ...passedIceFollowups,
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
     };
@@ -11437,13 +11177,7 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
       ...runWithoutEncounter,
       position: { kind: "server", serverId: server.id },
       phase: "movement",
-      ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
-      ...(passRezzedIceProgramTrashPendingPassedIceId
-        ? { passRezzedIceProgramTrashPendingPassedIceId }
-        : {}),
-      ...(startupImmolatorPendingPassedIceId
-        ? { startupImmolatorPendingPassedIceId }
-        : {}),
+      ...passedIceFollowups,
     };
     state.timingPoint = "run.jack_out_window";
     state.activeSide = "runner";
@@ -11591,46 +11325,14 @@ function resolveVacuumLinkRewindSubroutine(
 
 function continueFromMovement(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
-  if (run.viral15PendingPassedIceId) {
-    const pendingPassedIceId = run.viral15PendingPassedIceId;
-    const { viral15PendingPassedIceId: _pending, ...runWithoutPending } = run;
-    void _pending;
-    state.run = runWithoutPending;
-    if (
-      startViral15ProgramTrashChoice(
-        state,
-        pendingPassedIceId,
-        legalAction,
-      )
-    )
-      return;
-  }
-  if (state.run?.passRezzedIceProgramTrashPendingPassedIceId) {
-    const pendingPassedIceId =
-      state.run.passRezzedIceProgramTrashPendingPassedIceId;
-    const {
-      passRezzedIceProgramTrashPendingPassedIceId: _pending,
-      ...runWithoutPending
-    } = state.run;
-    void _pending;
-    state.run = runWithoutPending;
-    if (
-      startPassRezzedIceProgramTrashChoice(
-        state,
-        pendingPassedIceId,
-        legalAction,
-      )
-    )
-      return;
-  }
-  if (run.startupImmolatorPendingPassedIceId) {
-    const {
-      startupImmolatorPendingPassedIceId: _startupPending,
-      ...runWithoutStartupPending
-    } = run;
-    void _startupPending;
-    state.run = runWithoutStartupPending;
-  }
+  if (
+    handlePostPassProgramTrashChoices(
+      encounterResolutionHostForState(state),
+      legalAction,
+    ).choiceOpened
+  )
+    return;
+  clearStartupImmolatorPostPassMarker(encounterResolutionHostForState(state));
   if (run.position.kind === "ice") {
     const server = mustServer(state, run.position.serverId);
     const approachedIceId =
@@ -17879,6 +17581,14 @@ function successfulRunInterventionHost(
   };
 }
 
+function encounterResolutionHostForState(state: GameState): EncounterResolutionHost {
+  return encounterResolutionHost(state, {
+    applyRunnerForgoNextAction: () => applyRunnerForgoNextAction(state),
+    trashRunnerInstalledProgram: (cardId) =>
+      trashRunnerInstalledProgram(state, cardId),
+  });
+}
+
 function runEndCleanupHost(state: GameState): RunEndCleanupHost {
   return {
     state,
@@ -18438,13 +18148,21 @@ function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith("v1922.viral_15_program_trash")
   ) {
-    resolveViral15ProgramTrashChoice(state, legalAction, playerAction);
+    resolveViral15ProgramTrashChoiceInRunModule(
+      encounterResolutionHostForState(state),
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (
     state.pendingChoice.source.startsWith("p3_56.pass_ice_program_trash")
   ) {
-    resolvePassRezzedIceProgramTrashChoice(state, legalAction, playerAction);
+    resolvePassRezzedIceProgramTrashChoiceInRunModule(
+      encounterResolutionHostForState(state),
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (state.pendingChoice.source.startsWith("v1922.speed_trap")) {
@@ -23000,183 +22718,6 @@ function resolveHammerStealthLossChoice(
     hiddenZoneAction: "v1922_hammer_stealth_loss_distribution",
     selectedCount: selectedOptionIds.length,
     postBreakStealthLoss: selectedOptionIds.length,
-  };
-}
-
-function startViral15ProgramTrashChoice(
-  state: GameState,
-  passedIceId: CardInstanceId,
-  legalAction?: LegalAction,
-): boolean {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const run = mustRun(state);
-  const sourceIceId = run.viral15ActiveSourceIceId;
-  if (!sourceIceId) return false;
-  if (definitionFor(state, sourceIceId).id !== VIRAL_15_PROGRAM_TRASH_ICE_ID)
-    throw new Error("Viral-15-Quelle ist ungueltig.");
-  const programOptions = state.runner.rig.programs
-    .filter((cardId) => state.cardInstances[cardId])
-    .sort()
-    .map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    });
-  if (programOptions.length === 0) {
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1922CorpIceAbility: "viral_15_program_trash",
-        sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
-        viral15ProgramTrashChoiceOpened: false,
-        trashedCount: 0,
-      };
-    }
-    return false;
-  }
-  state.pendingChoice = {
-    choiceId: `choice_v1922_viral_15_program_trash_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `v1922.viral_15_program_trash:${sourceIceId}:${passedIceId}:${state.stateVersion + 1}`,
-    prompt: "Viral 15: installiertes Programm trashen.",
-    kind: "select_cards",
-    options: programOptions,
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      v1922CorpIceAbility: "viral_15_program_trash",
-      sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
-      viral15ProgramTrashChoiceOpened: true,
-      viral15ProgramTrashCandidateCount: programOptions.length,
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_viral_15_program_trash_choice",
-    };
-  }
-  return true;
-}
-
-function resolveViral15ProgramTrashChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.viral_15_program_trash"))
-    throw new Error("Viral-15-Programmtrash-Choice ist nicht offen.");
-  const [, sourceIceId, passedIceId] = choice.source.split(":");
-  if (
-    !sourceIceId ||
-    !state.cardInstances[sourceIceId] ||
-    definitionFor(state, sourceIceId).id !== VIRAL_15_PROGRAM_TRASH_ICE_ID
-  )
-    throw new Error("Viral-15-Quelle ist nicht mehr gueltig.");
-  if (!passedIceId || !state.cardInstances[passedIceId])
-    throw new Error("Das passierte ICE fuer Viral 15 fehlt.");
-  const selectedProgramId = selectedChoiceCardIds(choice, playerAction)[0];
-  if (
-    !selectedProgramId ||
-    !state.runner.rig.programs.includes(selectedProgramId)
-  )
-    throw new Error("Das gewaehlte Programm ist nicht installiert.");
-  const selectedDefinitionId = definitionFor(state, selectedProgramId).id;
-  trashRunnerInstalledProgram(state, selectedProgramId);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1922CorpIceAbility: "viral_15_program_trash",
-    sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_viral_15_program_trash",
-    trashedCount: 1,
-    trashedCardDefinitionId: selectedDefinitionId,
-  };
-}
-
-function startPassRezzedIceProgramTrashChoice(
-  state: GameState,
-  passedIceId: CardInstanceId,
-  legalAction?: LegalAction,
-): boolean {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const run = mustRun(state);
-  const sourceIceId = run.passRezzedIceProgramTrashSourceIceId;
-  if (!sourceIceId) return false;
-  const sourceDefinition = definitionFor(state, sourceIceId);
-  const programOptions = state.runner.rig.programs
-    .filter((cardId) => state.cardInstances[cardId])
-    .sort()
-    .map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    });
-  if (programOptions.length === 0) {
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        passIceTrashProgramPrompt: false,
-        sourceDefinitionId: sourceDefinition.id,
-        programTrashCount: 0,
-      };
-    }
-    return false;
-  }
-  state.pendingChoice = {
-    choiceId: `p3_56_pass_ice_program_trash_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_56.pass_ice_program_trash:${sourceIceId}:${passedIceId}:${state.stateVersion + 1}`,
-    prompt: `${sourceDefinition.title}: installiertes Programm trashen.`,
-    kind: "select_cards",
-    options: programOptions,
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      passIceTrashProgramPrompt: true,
-      sourceDefinitionId: sourceDefinition.id,
-      passIceTrashProgramCandidateCount: programOptions.length,
-      hiddenZoneBarrier: true,
-    };
-  }
-  return true;
-}
-
-function resolvePassRezzedIceProgramTrashChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_56.pass_ice_program_trash"))
-    throw new Error("Pass-ICE-Programmtrash-Choice ist nicht offen.");
-  const [, sourceIceId, passedIceId] = choice.source.split(":");
-  if (!sourceIceId || !state.cardInstances[sourceIceId])
-    throw new Error("Die Programmtrash-Quelle ist nicht mehr gueltig.");
-  if (!passedIceId || !state.cardInstances[passedIceId])
-    throw new Error("Das passierte ICE fuer Programmtrash fehlt.");
-  const selectedProgramId = selectedChoiceCardIds(choice, playerAction)[0];
-  if (
-    !selectedProgramId ||
-    !state.runner.rig.programs.includes(selectedProgramId)
-  )
-    throw new Error("Das gewaehlte Programm ist nicht installiert.");
-  const selectedDefinitionId = definitionFor(state, selectedProgramId).id;
-  trashRunnerInstalledProgram(state, selectedProgramId);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    passIceTrashProgramPrompt: false,
-    sourceDefinitionId: definitionFor(state, sourceIceId).id,
-    hiddenZoneBarrier: true,
-    programTrashCount: 1,
-    trashedCardDefinitionId: selectedDefinitionId,
   };
 }
 
