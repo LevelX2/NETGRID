@@ -432,6 +432,24 @@ export type AiMatchProgressionMetrics = {
   corpScoringRemoteSafetyDeltaAfterProtection: number;
   corpProtectionConvertedToScoreWithin3: number;
   corpProtectionRepeatedWithoutScoreConversion: number;
+  corpProtectionImprovedRemoteSafety: number;
+  corpProtectionNoSafetyDelta: number;
+  corpProtectionOpenedScorePath: number;
+  corpProtectionFollowedByAgendaInstall: number;
+  corpProtectionFollowedByAdvance: number;
+  corpProtectionFollowedByScore: number;
+  corpProtectionFollowedByMoreProtection: number;
+  corpProtectionFollowedByEconomy: number;
+  corpProtectionFollowedByCentralProtection: number;
+  corpProtectionLoopAfterRemoteSafe: number;
+  corpRemoteSafeButNoScoreActionTaken: number;
+  corpRemoteSafeButAgendaHeld: number;
+  corpRemoteSafeButAdvancedTooLate: number;
+  corpRemoteSafetyDelta: number;
+  corpRemoteSafetyDeltaAfterProtection: number;
+  corpRemoteSafetyReadyForAgenda: number;
+  corpScorePathChosenAfterProtection: number;
+  corpScorePathSkippedAfterProtection: number;
   corpAdvanceBurstOpportunity: number;
   corpAdvanceBurstTaken: number;
   corpScorePathAvailableButNotTaken: number;
@@ -3816,6 +3834,66 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.baseline.corpProtectionRepeatedWithoutScoreConversion,
       benchmark.candidate.corpProtectionRepeatedWithoutScoreConversion,
       benchmark.delta.corpProtectionRepeatedWithoutScoreConversion,
+    ],
+    [
+      "corpProtectionImprovedRemoteSafety",
+      benchmark.baseline.corpProtectionImprovedRemoteSafety,
+      benchmark.candidate.corpProtectionImprovedRemoteSafety,
+      benchmark.delta.corpProtectionImprovedRemoteSafety,
+    ],
+    [
+      "corpProtectionNoSafetyDelta",
+      benchmark.baseline.corpProtectionNoSafetyDelta,
+      benchmark.candidate.corpProtectionNoSafetyDelta,
+      benchmark.delta.corpProtectionNoSafetyDelta,
+    ],
+    [
+      "corpProtectionOpenedScorePath",
+      benchmark.baseline.corpProtectionOpenedScorePath,
+      benchmark.candidate.corpProtectionOpenedScorePath,
+      benchmark.delta.corpProtectionOpenedScorePath,
+    ],
+    [
+      "corpProtectionFollowedByAgendaInstall",
+      benchmark.baseline.corpProtectionFollowedByAgendaInstall,
+      benchmark.candidate.corpProtectionFollowedByAgendaInstall,
+      benchmark.delta.corpProtectionFollowedByAgendaInstall,
+    ],
+    [
+      "corpProtectionFollowedByAdvance",
+      benchmark.baseline.corpProtectionFollowedByAdvance,
+      benchmark.candidate.corpProtectionFollowedByAdvance,
+      benchmark.delta.corpProtectionFollowedByAdvance,
+    ],
+    [
+      "corpProtectionFollowedByScore",
+      benchmark.baseline.corpProtectionFollowedByScore,
+      benchmark.candidate.corpProtectionFollowedByScore,
+      benchmark.delta.corpProtectionFollowedByScore,
+    ],
+    [
+      "corpProtectionLoopAfterRemoteSafe",
+      benchmark.baseline.corpProtectionLoopAfterRemoteSafe,
+      benchmark.candidate.corpProtectionLoopAfterRemoteSafe,
+      benchmark.delta.corpProtectionLoopAfterRemoteSafe,
+    ],
+    [
+      "corpRemoteSafeButNoScoreActionTaken",
+      benchmark.baseline.corpRemoteSafeButNoScoreActionTaken,
+      benchmark.candidate.corpRemoteSafeButNoScoreActionTaken,
+      benchmark.delta.corpRemoteSafeButNoScoreActionTaken,
+    ],
+    [
+      "corpRemoteSafeButAgendaHeld",
+      benchmark.baseline.corpRemoteSafeButAgendaHeld,
+      benchmark.candidate.corpRemoteSafeButAgendaHeld,
+      benchmark.delta.corpRemoteSafeButAgendaHeld,
+    ],
+    [
+      "corpScorePathChosenAfterProtection",
+      benchmark.baseline.corpScorePathChosenAfterProtection,
+      benchmark.candidate.corpScorePathChosenAfterProtection,
+      benchmark.delta.corpScorePathChosenAfterProtection,
     ],
     [
       "corpBestRemoteSelectedForAgenda",
@@ -8354,6 +8432,24 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpScoringRemoteSafetyDeltaAfterProtection",
   "corpProtectionConvertedToScoreWithin3",
   "corpProtectionRepeatedWithoutScoreConversion",
+  "corpProtectionImprovedRemoteSafety",
+  "corpProtectionNoSafetyDelta",
+  "corpProtectionOpenedScorePath",
+  "corpProtectionFollowedByAgendaInstall",
+  "corpProtectionFollowedByAdvance",
+  "corpProtectionFollowedByScore",
+  "corpProtectionFollowedByMoreProtection",
+  "corpProtectionFollowedByEconomy",
+  "corpProtectionFollowedByCentralProtection",
+  "corpProtectionLoopAfterRemoteSafe",
+  "corpRemoteSafeButNoScoreActionTaken",
+  "corpRemoteSafeButAgendaHeld",
+  "corpRemoteSafeButAdvancedTooLate",
+  "corpRemoteSafetyDelta",
+  "corpRemoteSafetyDeltaAfterProtection",
+  "corpRemoteSafetyReadyForAgenda",
+  "corpScorePathChosenAfterProtection",
+  "corpScorePathSkippedAfterProtection",
   "corpAdvanceBurstOpportunity",
   "corpAdvanceBurstTaken",
   "corpScorePathAvailableButNotTaken",
@@ -12069,6 +12165,24 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   | "corpScoringRemoteSafetyDeltaAfterProtection"
   | "corpProtectionConvertedToScoreWithin3"
   | "corpProtectionRepeatedWithoutScoreConversion"
+  | "corpProtectionImprovedRemoteSafety"
+  | "corpProtectionNoSafetyDelta"
+  | "corpProtectionOpenedScorePath"
+  | "corpProtectionFollowedByAgendaInstall"
+  | "corpProtectionFollowedByAdvance"
+  | "corpProtectionFollowedByScore"
+  | "corpProtectionFollowedByMoreProtection"
+  | "corpProtectionFollowedByEconomy"
+  | "corpProtectionFollowedByCentralProtection"
+  | "corpProtectionLoopAfterRemoteSafe"
+  | "corpRemoteSafeButNoScoreActionTaken"
+  | "corpRemoteSafeButAgendaHeld"
+  | "corpRemoteSafeButAdvancedTooLate"
+  | "corpRemoteSafetyDelta"
+  | "corpRemoteSafetyDeltaAfterProtection"
+  | "corpRemoteSafetyReadyForAgenda"
+  | "corpScorePathChosenAfterProtection"
+  | "corpScorePathSkippedAfterProtection"
   | "corpAdvanceBurstOpportunity"
   | "corpAdvanceBurstTaken"
   | "corpScorePathAvailableButNotTaken"
@@ -12089,6 +12203,22 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   let corpBestRemoteSelectedForAgenda = 0;
   let corpProtectionConvertedToScoreWithin3 = 0;
   let corpProtectionRepeatedWithoutScoreConversion = 0;
+  let corpProtectionImprovedRemoteSafety = 0;
+  let corpProtectionNoSafetyDelta = 0;
+  let corpProtectionOpenedScorePath = 0;
+  let corpProtectionFollowedByAgendaInstall = 0;
+  let corpProtectionFollowedByAdvance = 0;
+  let corpProtectionFollowedByScore = 0;
+  let corpProtectionFollowedByMoreProtection = 0;
+  let corpProtectionFollowedByEconomy = 0;
+  let corpProtectionFollowedByCentralProtection = 0;
+  let corpProtectionLoopAfterRemoteSafe = 0;
+  let corpRemoteSafeButNoScoreActionTaken = 0;
+  let corpRemoteSafeButAgendaHeld = 0;
+  let corpRemoteSafeButAdvancedTooLate = 0;
+  let corpRemoteSafetyReadyForAgenda = 0;
+  let corpScorePathChosenAfterProtection = 0;
+  let corpScorePathSkippedAfterProtection = 0;
   let corpAdvanceBurstOpportunity = 0;
   let corpAdvanceBurstTaken = 0;
   let corpScorePathAvailableButNotTaken = 0;
@@ -12096,6 +12226,8 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   let corpAgendaHeldDueToUnsafeRemote = 0;
   let corpAgendaHeldTooLongWithHqPressure = 0;
   const protectionSafetyDeltas: number[] = [];
+  const remoteSafetyDeltas: number[] = [];
+  const remoteSafetyDeltasAfterProtection: number[] = [];
 
   for (const summary of summaries) {
     const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
@@ -12162,6 +12294,60 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         corpBetterRemoteAvailable += 1;
       if (hasEvidenceFlag(entry, "corp_best_remote_selected_for_agenda:true"))
         corpBestRemoteSelectedForAgenda += 1;
+      if (hasEvidenceFlag(entry, "corp_protection_no_safety_delta:true"))
+        corpProtectionNoSafetyDelta += 1;
+      if (hasEvidenceFlag(entry, "corp_protection_opened_score_path:true"))
+        corpProtectionOpenedScorePath += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_protection_followed_by_agenda_install:true",
+        )
+      )
+        corpProtectionFollowedByAgendaInstall += 1;
+      if (hasEvidenceFlag(entry, "corp_protection_followed_by_advance:true"))
+        corpProtectionFollowedByAdvance += 1;
+      if (hasEvidenceFlag(entry, "corp_protection_followed_by_score:true"))
+        corpProtectionFollowedByScore += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_protection_followed_by_more_protection:true",
+        )
+      )
+        corpProtectionFollowedByMoreProtection += 1;
+      if (hasEvidenceFlag(entry, "corp_protection_followed_by_economy:true"))
+        corpProtectionFollowedByEconomy += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_protection_followed_by_central_protection:true",
+        )
+      )
+        corpProtectionFollowedByCentralProtection += 1;
+      if (hasEvidenceFlag(entry, "corp_protection_loop_after_remote_safe:true"))
+        corpProtectionLoopAfterRemoteSafe += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_remote_safe_but_no_score_action_taken:true",
+        )
+      )
+        corpRemoteSafeButNoScoreActionTaken += 1;
+      if (hasEvidenceFlag(entry, "corp_remote_safe_but_agenda_held:true"))
+        corpRemoteSafeButAgendaHeld += 1;
+      if (hasEvidenceFlag(entry, "corp_remote_safe_but_advanced_too_late:true"))
+        corpRemoteSafeButAdvancedTooLate += 1;
+      if (hasEvidenceFlag(entry, "corp_remote_safety_ready_for_agenda:true"))
+        corpRemoteSafetyReadyForAgenda += 1;
+      if (
+        hasEvidenceFlag(entry, "corp_score_path_chosen_after_protection:true")
+      )
+        corpScorePathChosenAfterProtection += 1;
+      if (
+        hasEvidenceFlag(entry, "corp_score_path_skipped_after_protection:true")
+      )
+        corpScorePathSkippedAfterProtection += 1;
       if (hasEvidenceFlag(entry, "corp_advance_burst_opportunity:true"))
         corpAdvanceBurstOpportunity += 1;
       if (hasEvidenceFlag(entry, "corp_advance_burst_taken:true"))
@@ -12194,6 +12380,11 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         ),
       );
       if (Number.isFinite(delta)) protectionSafetyDeltas.push(delta);
+      if (Number.isFinite(delta)) {
+        remoteSafetyDeltas.push(delta);
+        remoteSafetyDeltasAfterProtection.push(delta);
+        if (delta > 0) corpProtectionImprovedRemoteSafety += 1;
+      }
 
       if (protection) {
         if (
@@ -12233,6 +12424,26 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
       averageNumber(protectionSafetyDeltas),
     corpProtectionConvertedToScoreWithin3,
     corpProtectionRepeatedWithoutScoreConversion,
+    corpProtectionImprovedRemoteSafety,
+    corpProtectionNoSafetyDelta,
+    corpProtectionOpenedScorePath,
+    corpProtectionFollowedByAgendaInstall,
+    corpProtectionFollowedByAdvance,
+    corpProtectionFollowedByScore,
+    corpProtectionFollowedByMoreProtection,
+    corpProtectionFollowedByEconomy,
+    corpProtectionFollowedByCentralProtection,
+    corpProtectionLoopAfterRemoteSafe,
+    corpRemoteSafeButNoScoreActionTaken,
+    corpRemoteSafeButAgendaHeld,
+    corpRemoteSafeButAdvancedTooLate,
+    corpRemoteSafetyDelta: averageNumber(remoteSafetyDeltas),
+    corpRemoteSafetyDeltaAfterProtection: averageNumber(
+      remoteSafetyDeltasAfterProtection,
+    ),
+    corpRemoteSafetyReadyForAgenda,
+    corpScorePathChosenAfterProtection,
+    corpScorePathSkippedAfterProtection,
     corpAdvanceBurstOpportunity,
     corpAdvanceBurstTaken,
     corpScorePathAvailableButNotTaken,

@@ -4726,6 +4726,138 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
+  it("converts a protected remote into agenda install instead of further protection", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-protected-remote-install-agenda",
+      {
+        runnerCredits: 0,
+        includeTaxUpgrade: true,
+        protectionIceInHq: true,
+      },
+    );
+    const agendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const protectionInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(agendaInstall).toBeDefined();
+    expect(protectionInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!agendaInstall || !protectionInstall || !gain)
+      throw new Error("Missing protected-remote agenda install fixture");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [agendaInstall, protectionInstall, gain],
+    });
+
+    expect(decision.selectedActionId).toBe(agendaInstall.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_score_path_chosen_after_protection:true",
+    );
+    expect(decision.score.evidence).toContain(
+      "corp_protection_followed_by_agenda_install:true",
+    );
+  });
+
+  it("penalizes protection without safety delta when a protected score path is ready", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-protection-no-safety-delta",
+      {
+        runnerCredits: 0,
+        includeTaxUpgrade: true,
+        installedAgendaCounters: 1,
+        protectionIceInHq: true,
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const protectionInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
+    expect(advance).toBeDefined();
+    expect(protectionInstall).toBeDefined();
+    if (!advance || !protectionInstall)
+      throw new Error("Missing no-safety-delta fixture actions");
+
+    const scopedInput = { ...input, legalActions: [advance, protectionInstall] };
+    const protectCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "build_scoring_remote",
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+    expect(protectCandidate).toBeDefined();
+    if (!protectCandidate)
+      throw new Error("Missing protection candidate for no-delta fixture");
+
+    const protectScore = evaluateCorpPlan(scopedInput, protectCandidate);
+
+    expect(decision.selectedActionId).toBe(advance.actionId);
+    expect(protectScore.evidence).toContain(
+      "corp_protection_no_safety_delta:true",
+    );
+    expect(protectScore.evidence).toContain(
+      "corp_protection_loop_after_remote_safe:true",
+    );
+  });
+
+  it("does not let central protection displace a ready protected remote score path", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-central-protection-does-not-displace-score",
+      {
+        runnerCredits: 0,
+        includeTaxUpgrade: true,
+        protectionIceInHq: true,
+      },
+    );
+    const agendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const hqProtection = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
+    expect(agendaInstall).toBeDefined();
+    expect(hqProtection).toBeDefined();
+    if (!agendaInstall || !hqProtection)
+      throw new Error("Missing central-protection fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [agendaInstall, hqProtection],
+    });
+
+    expect(decision.selectedActionId).toBe(agendaInstall.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_score_path_chosen_after_protection:true",
+    );
+  });
+
   it("recognizes a fast-advance counter operation as an alternative to an unsafe remote", () => {
     const input = corpEffectiveRemoteSafetyInput(
       "ai-corp-fast-advance-after-unsafe-remote",

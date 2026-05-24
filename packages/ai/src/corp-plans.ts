@@ -313,6 +313,20 @@ type CorpUnsafeRemoteScoreConversionContext = {
   doctrine: CorpDoctrineScoreConversionSignals;
 };
 
+type CorpProtectionToScoreConversionContext = {
+  scorePathActionIds: string[];
+  agendaInstallActionIds: string[];
+  advanceActionIds: string[];
+  scoreActionIds: string[];
+  protectionNoSafetyDeltaActionIds: string[];
+  economyActionIds: string[];
+  centralProtectionActionIds: string[];
+  remoteSafetyReadyForAgenda: boolean;
+  safeRemoteButAgendaHeld: boolean;
+  centralRiskHigher: boolean;
+  noScorePath: boolean;
+};
+
 export type CorpEvaluationContext = {
   beliefState: BeliefState;
   remoteRootSecurityByActionId: Map<string, number>;
@@ -688,6 +702,11 @@ export function evaluateCorpPlan(
     candidate,
     context,
   );
+  const protectionToScore = evaluateCorpProtectionToScoreConversion(
+    input,
+    candidate,
+    context,
+  );
   const outcomeFollowup = evaluateCorpOutcomeFollowup(
     input,
     candidate,
@@ -715,6 +734,7 @@ export function evaluateCorpPlan(
     strategicLine.score +
     effectiveRemoteSafety.score +
     scoreConversion.score +
+    protectionToScore.score +
     outcomeFollowup.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
@@ -730,6 +750,7 @@ export function evaluateCorpPlan(
     `difficulty:${input.difficulty}`,
     `doctrine_plan_weight:${doctrinePlanWeight}`,
     ...scoreConversion.evidence,
+    ...protectionToScore.evidence,
     ...recentRemoteAgendaLoss.evidence,
     ...advanceProtection.evidence,
     ...runnerContest.evidence,
@@ -936,6 +957,7 @@ export function evaluateCorpPlan(
       ...effectiveRemoteSafety.reasons,
       ...outcomeFollowup.reasons,
       ...scoreConversion.reasons,
+      ...protectionToScore.reasons,
     ]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence),
   };
@@ -1205,6 +1227,125 @@ function evaluateCorpUnsafeRemoteScoreConversion(
       ...primarySafety.evidence,
       ...conversion.doctrine.evidence,
     ],
+  };
+}
+
+function evaluateCorpProtectionToScoreConversion(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+  context: CorpEvaluationContext,
+): CorpPlanEvaluatorResult {
+  if (!input.profileId.includes("v1.4.2")) {
+    return {
+      score: 0,
+      reasons: [],
+      evidence: ["corp_protection_to_score_profile:false"],
+    };
+  }
+  const conversion = corpProtectionToScoreConversionContext(input, context);
+  if (conversion.scorePathActionIds.length === 0) {
+    return {
+      score: 0,
+      reasons: [],
+      evidence: [
+        ...(conversion.noScorePath
+          ? ["corp_score_path_skip_reason:no_agenda"]
+          : []),
+      ],
+    };
+  }
+
+  const candidateActions = actionsForCandidate(input, candidate);
+  const selectedScorePathActions = candidateActions.filter((action) =>
+    conversion.scorePathActionIds.includes(action.actionId),
+  );
+  const choosesScorePath = selectedScorePathActions.length > 0;
+  const choosesAgendaInstall = selectedScorePathActions.some((action) =>
+    conversion.agendaInstallActionIds.includes(action.actionId),
+  );
+  const choosesAdvance = selectedScorePathActions.some((action) =>
+    conversion.advanceActionIds.includes(action.actionId),
+  );
+  const choosesScore = selectedScorePathActions.some((action) =>
+    conversion.scoreActionIds.includes(action.actionId),
+  );
+  const choosesProtectionNoDelta = candidateActions.some((action) =>
+    conversion.protectionNoSafetyDeltaActionIds.includes(action.actionId),
+  );
+  const choosesEconomyAfterReady = candidateActions.some((action) =>
+    conversion.economyActionIds.includes(action.actionId),
+  );
+  const choosesCentralProtectionAfterReady =
+    !conversion.centralRiskHigher &&
+    candidateActions.some((action) =>
+      conversion.centralProtectionActionIds.includes(action.actionId),
+    );
+  const skipsScorePath =
+    !choosesScorePath &&
+    (choosesProtectionNoDelta ||
+      choosesEconomyAfterReady ||
+      choosesCentralProtectionAfterReady ||
+      candidate.kind === "bait_runner");
+
+  let score = 0;
+  const reasons: string[] = [];
+  const evidence: string[] = [
+    "corp_protection_to_score_window:true",
+    `corp_remote_safety_ready_for_agenda:${conversion.remoteSafetyReadyForAgenda}`,
+  ];
+
+  if (choosesScorePath) {
+    const actionBonus = choosesScore ? 170 : choosesAdvance ? 135 : 115;
+    score += actionBonus;
+    reasons.push("convert_protection_to_score_path");
+    evidence.push(
+      "corp_score_path_chosen_after_protection:true",
+      "corp_protection_opened_score_path:true",
+    );
+    if (choosesAgendaInstall)
+      evidence.push("corp_protection_followed_by_agenda_install:true");
+    if (choosesAdvance)
+      evidence.push("corp_protection_followed_by_advance:true");
+    if (choosesScore)
+      evidence.push("corp_protection_followed_by_score:true");
+  }
+
+  if (choosesProtectionNoDelta) {
+    score -= 115;
+    reasons.push("avoid_protection_without_remote_safety_delta");
+    evidence.push(
+      "corp_protection_no_safety_delta:true",
+      "corp_protection_followed_by_more_protection:true",
+      "corp_protection_loop_after_remote_safe:true",
+    );
+  }
+
+  if (choosesEconomyAfterReady) {
+    score -= 75;
+    reasons.push("avoid_economy_after_score_path_ready");
+    evidence.push("corp_protection_followed_by_economy:true");
+  }
+
+  if (choosesCentralProtectionAfterReady) {
+    score -= 80;
+    reasons.push("avoid_central_protection_over_remote_score_path");
+    evidence.push("corp_protection_followed_by_central_protection:true");
+  }
+
+  if (skipsScorePath) {
+    evidence.push(
+      "corp_score_path_skipped_after_protection:true",
+      `corp_score_path_skip_reason:${choosesProtectionNoDelta ? "runner_contest_still_high" : choosesEconomyAfterReady ? "insufficient_credits" : choosesCentralProtectionAfterReady ? "central_pressure" : "better_immediate_action"}`,
+      "corp_remote_safe_but_no_score_action_taken:true",
+    );
+    if (conversion.safeRemoteButAgendaHeld)
+      evidence.push("corp_remote_safe_but_agenda_held:true");
+  }
+
+  return {
+    score,
+    reasons: sortedUnique(reasons),
+    evidence: sortedUnique(evidence),
   };
 }
 
@@ -1653,6 +1794,129 @@ function corpUnsafeRemoteScoreConversionContext(
     noScorePath,
     doctrine: corpDoctrineScoreConversionSignals(input),
   };
+}
+
+function corpProtectionToScoreConversionContext(
+  input: AiDecisionInput,
+  context: CorpEvaluationContext,
+): CorpProtectionToScoreConversionContext {
+  const features = extractCorpPlanFeatures(input);
+  const memory = evaluateRemoteIntentMemory(input, context.beliefState);
+  const centralRiskHigher =
+    features.ownAgendaPressure >= 95 ||
+    memory.centralRunSignals.hq >= 2 ||
+    memory.centralRunSignals.rd >= 2;
+  const scorePathActions = input.legalActions.filter((action) =>
+    isProtectionToScorePathAction(input, action, context),
+  );
+  const agendaInstallActionIds = scorePathActions
+    .filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        rolesForAction(input, action).some(isAgendaRole),
+    )
+    .map((action) => action.actionId);
+  const advanceActionIds = scorePathActions
+    .filter((action) => action.type === "advance_card")
+    .map((action) => action.actionId);
+  const scoreActionIds = scorePathActions
+    .filter((action) => action.type === "score_agenda")
+    .map((action) => action.actionId);
+  const protectedRemoteIds = sortedUnique(
+    input.playerView.servers
+      .filter((server) => server.id.startsWith("remote_"))
+      .filter((server) =>
+        assessCorpEffectiveRemoteSafety(input, server.id, context)
+          .effectivelyProtected,
+      )
+      .map((server) => server.id),
+  );
+  const protectionNoSafetyDeltaActionIds = input.legalActions
+    .filter((action) =>
+      isProtectionNoSafetyDeltaAction(
+        input,
+        action,
+        context,
+        protectedRemoteIds,
+      ),
+    )
+    .map((action) => action.actionId);
+  const economyActionIds = input.legalActions
+    .filter((action) => isCorpEconomyOrDrawAction(input, action, context))
+    .map((action) => action.actionId);
+  const centralProtectionActionIds = input.legalActions
+    .filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        (action.payload?.serverId === "hq" || action.payload?.serverId === "rd"),
+    )
+    .map((action) => action.actionId);
+  return {
+    scorePathActionIds: scorePathActions.map((action) => action.actionId),
+    agendaInstallActionIds,
+    advanceActionIds,
+    scoreActionIds,
+    protectionNoSafetyDeltaActionIds,
+    economyActionIds,
+    centralProtectionActionIds,
+    remoteSafetyReadyForAgenda: agendaInstallActionIds.length > 0,
+    safeRemoteButAgendaHeld:
+      features.ownAgendaCount > 0 && agendaInstallActionIds.length > 0,
+    centralRiskHigher,
+    noScorePath: scorePathActions.length === 0 && features.ownAgendaCount === 0,
+  };
+}
+
+function isProtectionToScorePathAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+): boolean {
+  if (action.type === "score_agenda") return true;
+  if (isCorpAdvanceBurstScoreAction(input, action, context)) return true;
+  if (action.type !== "advance_card" && action.type !== "install_card")
+    return false;
+  if (
+    action.type === "install_card" &&
+    action.payload?.placement !== "ice" &&
+    !rolesForAction(input, action).some(isAgendaRole)
+  )
+    return false;
+  return isProtectedScorePathAction(input, action, context);
+}
+
+function isProtectionNoSafetyDeltaAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+  protectedRemoteIds: string[],
+): boolean {
+  const serverId = remoteServerIdForAction(input, action);
+  if (!serverId?.startsWith("remote_")) return false;
+  if (!protectedRemoteIds.includes(serverId)) return false;
+  if (action.type !== "install_card") return false;
+  if (action.payload?.placement === "ice") return true;
+  const card = findVisibleCard(input, action.source);
+  return Boolean(card && isVisibleRemoteProtectionCard(card));
+}
+
+function isCorpEconomyOrDrawAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+): boolean {
+  return (
+    action.type === "gain_credit" ||
+    action.type === "draw_card" ||
+    (action.type === "play_operation" &&
+      rolesForAction(input, action).some(
+        (role) => role.includes("economy") || role.includes("draw"),
+      )) ||
+    Boolean(classifyCorpInstalledEconomyAction(input, action)) ||
+    Boolean(classifyCorpExtraActionOperation(input, action, context))
+  );
 }
 
 function unsafeScoringRemoteOpportunity(
