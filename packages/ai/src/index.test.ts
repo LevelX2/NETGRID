@@ -3592,7 +3592,7 @@ describe("MVP 0.3 Runner AI", () => {
       (action) => action.actionId === encounterDecision.actionId,
     );
 
-    expect(pump).toBeDefined();
+    expect(pump).toBeUndefined();
     expect(breakAction).toBeUndefined();
     expect(encounterSelected?.type).toBe("continue_run");
     expect(encounterDecision.reasonCode).toBe("runner.plan.safe_probe_run");
@@ -3680,7 +3680,7 @@ describe("MVP 0.3 Runner AI", () => {
       (action) => action.actionId === afterBreakDecision.actionId,
     );
 
-    expect(afterBreakPump).toBeDefined();
+    expect(afterBreakPump).toBeUndefined();
     expect(afterBreakContinue?.payload?.unbrokenSubroutineCount).toBe(0);
     expect(afterBreakSelected?.type).toBe("continue_run");
     expect([
