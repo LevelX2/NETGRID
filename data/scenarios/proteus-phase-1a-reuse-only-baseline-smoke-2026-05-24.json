@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "scenario-pack-v1",
+  "scenarioId": "proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24",
+  "release": "Proteus Phase 1a Reuse-only Baseline",
+  "coversCards": [
+    "onr_proteus_041_toughoniumtm-wall",
+    "onr_proteus_065_networked-center",
+    "onr_proteus_072_research-bunker",
+    "onr_proteus_077_weapons-depot",
+    "onr_proteus_150_streetware-distributor"
+  ],
+  "assertions": [
+    "Each target card has an engine-local per-card CardImplementation file.",
+    "Toughonium Wall resolves exactly four public End the run subroutines through the CardImplementation printed-subroutine family.",
+    "Networked Center, Research Bunker and Weapons Depot use the existing region baseline and same-fort agenda_difficulty modifier family.",
+    "Streetware Distributor uses existing public hosted-credit lifecycle and runner-main activated ability primitives.",
+    "No target card becomes deck_legal, format_legal or ai_supported.",
+    "All other Proteus cards remain blocked unless separately released."
+  ],
+  "checks": [
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/coverage.test.ts -t \"Proteus Phase 1a\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts -t \"Proteus Phase 1a\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t \"Proteus Visible Baseline\"",
+    "corepack pnpm --filter @netgrid/catalog exec vitest run src/index.test.ts -t \"Proteus\"",
+    "corepack pnpm --filter @netgrid/web exec vitest run app/api/cards/catalog-data.test.ts -t \"Proteus\""
+  ]
+}

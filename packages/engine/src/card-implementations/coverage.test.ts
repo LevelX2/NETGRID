@@ -511,6 +511,36 @@ describe("CardImplementation coverage and registry invariants", () => {
     ).toHaveLength(2);
   });
 
+  it("migrates Proteus Phase 1a reuse-only cards into CardImplementation coverage", () => {
+    const phase1aCards = [
+      "onr_proteus_041_toughoniumtm-wall",
+      "onr_proteus_065_networked-center",
+      "onr_proteus_072_research-bunker",
+      "onr_proteus_077_weapons-depot",
+      "onr_proteus_150_streetware-distributor",
+    ] as const;
+
+    for (const definitionId of phase1aCards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_041_toughoniumtm-wall")
+        ?.printedSubroutines,
+    ).toHaveLength(4);
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_150_streetware-distributor")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "activated",
+      timing: "runner_main",
+      costs: [{ kind: "action", amount: 1 }],
+    });
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",

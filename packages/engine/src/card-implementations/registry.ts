@@ -379,6 +379,11 @@ import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/to
 import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team";
 import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella-policy";
 import { wilsonWeeflerunnerApprenticeImplementation } from "./onr-v1/runner/resources/wilson-weeflerunner-apprentice";
+import { proteusToughoniumWallImplementation } from "./proteus/corp/ice/toughonium-wall";
+import { proteusNetworkedCenterImplementation } from "./proteus/corp/upgrades/networked-center";
+import { proteusResearchBunkerImplementation } from "./proteus/corp/upgrades/research-bunker";
+import { proteusWeaponsDepotImplementation } from "./proteus/corp/upgrades/weapons-depot";
+import { proteusStreetwareDistributorImplementation } from "./proteus/runner/resources/streetware-distributor";
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
@@ -755,6 +760,11 @@ export const CARD_IMPLEMENTATIONS = [
   tokyoChibaInfightingImplementation,
   turbeauDelacroixImplementation,
   washingtonDcCityGridImplementation,
+  proteusToughoniumWallImplementation,
+  proteusNetworkedCenterImplementation,
+  proteusResearchBunkerImplementation,
+  proteusWeaponsDepotImplementation,
+  proteusStreetwareDistributorImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 
 export const CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: Partial<

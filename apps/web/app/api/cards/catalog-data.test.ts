@@ -180,35 +180,41 @@ describe("catalog API filters", () => {
   });
 
   it("guards the Proteus visible baseline against decklegal, AI or broad promotion", () => {
-    const [candidateId] = PROTEUS_VISIBLE_BASELINE_CARD_IDS;
-    expect(candidateId).toBeDefined();
-    if (!candidateId) throw new Error("Missing Proteus visible baseline card");
-    const candidateResponse = catalogDetailResponse(candidateId);
-    expect(candidateResponse.status).toBe(200);
-    const candidateBody = candidateResponse.body as {
-      card: {
-        catalogCardId: string;
-        statuses: {
-          human_playable: boolean;
-          deck_legal: boolean;
-          format_legal: boolean;
-          ai_supported: boolean;
-          blocked: boolean;
+    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
+      "onr_proteus_041_toughoniumtm-wall",
+      "onr_proteus_065_networked-center",
+      "onr_proteus_072_research-bunker",
+      "onr_proteus_077_weapons-depot",
+      "onr_proteus_150_streetware-distributor",
+    ]);
+    for (const candidateId of PROTEUS_VISIBLE_BASELINE_CARD_IDS) {
+      const candidateResponse = catalogDetailResponse(candidateId);
+      expect(candidateResponse.status).toBe(200);
+      const candidateBody = candidateResponse.body as {
+        card: {
+          catalogCardId: string;
+          statuses: {
+            human_playable: boolean;
+            deck_legal: boolean;
+            format_legal: boolean;
+            ai_supported: boolean;
+            blocked: boolean;
+          };
+          aiHints: { aiSupportStatus: string } | null;
         };
-        aiHints: { aiSupportStatus: string } | null;
       };
-    };
-    expect(candidateBody.card).toMatchObject({
-      catalogCardId: candidateId,
-      statuses: {
-        human_playable: true,
-        deck_legal: false,
-        format_legal: false,
-        ai_supported: false,
-        blocked: false,
-      },
-      aiHints: null,
-    });
+      expect(candidateBody.card).toMatchObject({
+        catalogCardId: candidateId,
+        statuses: {
+          human_playable: true,
+          deck_legal: false,
+          format_legal: false,
+          ai_supported: false,
+          blocked: false,
+        },
+        aiHints: null,
+      });
+    }
 
     const humanPlayableResponse = catalogListResponse(
       new URLSearchParams({ status: "human_playable", q: "Toughonium" }),
@@ -218,7 +224,7 @@ describe("catalog API filters", () => {
       cards: Array<{ catalogCardId: string }>;
     };
     expect(humanPlayableBody.cards.map((card) => card.catalogCardId)).toEqual([
-      candidateId,
+      "onr_proteus_041_toughoniumtm-wall",
     ]);
 
     for (const status of ["deck_legal", "format_legal", "ai_supported"] as const) {

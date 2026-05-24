@@ -1213,6 +1213,83 @@ describe("CardImplementation definition descriptors", () => {
     }
   });
 
+  it("describes Proteus Phase 1a reuse-only baseline implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_041_toughoniumtm-wall")
+        ?.printedSubroutines,
+    ).toEqual([
+      { kind: "end_the_run", text: "*End the run." },
+      { kind: "end_the_run", text: "*End the run." },
+      { kind: "end_the_run", text: "*End the run." },
+      { kind: "end_the_run", text: "*End the run." },
+    ]);
+
+    for (const [definitionId, subtype] of [
+      ["onr_proteus_065_networked-center", "gray_ops"],
+      ["onr_proteus_072_research-bunker", "research"],
+      ["onr_proteus_077_weapons-depot", "black_ops"],
+    ] as const) {
+      expect(cardImplementationForDefinitionId(definitionId)?.regionBaseline).toMatchObject({
+        kind: "region_baseline",
+        rezOnInstall: true,
+        installOnlyIfRezAffordable: true,
+        oneRegionPerFort: true,
+        trashOlderRegions: true,
+      });
+      expect(cardImplementationForDefinitionId(definitionId)?.modifiers).toContainEqual(
+        expect.objectContaining({
+          kind: "agenda_difficulty",
+          operation: "reduce",
+          amount: 1,
+          activeWhile: "rezzed",
+          sourceZone: "corp_root",
+          side: "corp",
+          visibility: "public",
+          appliesTo: {
+            cardType: "agenda",
+            subtype,
+            sameServerAsSource: true,
+          },
+        }),
+      );
+    }
+
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_150_streetware-distributor")
+        ?.lifecycle?.start_of_runner_turn,
+    ).toEqual([
+      {
+        condition: { kind: "source_has_hosted_credits" },
+        effects: [
+          {
+            kind: "take_hosted_credits",
+            source: "source",
+            recipient: "controller",
+            amount: 1,
+            mode: "up_to_amount_if_available",
+            visibility: "public",
+          },
+        ],
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_150_streetware-distributor")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "activated",
+      timing: "runner_main",
+      costs: [{ kind: "action", amount: 1 }],
+      effects: [
+        {
+          kind: "add_hosted_credits",
+          target: "source",
+          amount: 3,
+          visibility: "public",
+        },
+      ],
+    });
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

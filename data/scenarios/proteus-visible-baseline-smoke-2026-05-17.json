@@ -7,12 +7,12 @@
     "onr_proteus_041_toughoniumtm-wall"
   ],
   "assertions": [
-    "The candidate set contains exactly Toughonium Wall.",
+    "The original 2026-05-17 candidate set contained exactly Toughonium Wall.",
     "Toughonium Wall uses existing public install ICE, rez ICE, encounter ICE and End the run resolver paths.",
     "applyAction revalidates wrong side, stale state and rez costs for the candidate.",
     "Player views and public payloads reveal Toughonium Wall only through public install and rez state.",
     "Replay reproduces the same final StateHash after the rez smoke.",
-    "No other Proteus card becomes human_playable, deck_legal, format_legal or ai_supported.",
+    "Later Proteus Phase 1a expansion is tracked by proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24.",
     "The web catalog shows the candidate as human_playable but not deck_legal, format_legal or ai_supported."
   ],
   "completionGate": {

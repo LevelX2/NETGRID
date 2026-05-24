@@ -758,6 +758,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tesseract-fort-construction.ts",
   "onr_v1_374_washington-d-c-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/washington-d-c-city-grid.ts",
+  "onr_proteus_041_toughoniumtm-wall":
+    "packages/engine/src/card-implementations/proteus/corp/ice/toughonium-wall.ts",
+  "onr_proteus_065_networked-center":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/networked-center.ts",
+  "onr_proteus_072_research-bunker":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/research-bunker.ts",
+  "onr_proteus_077_weapons-depot":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/weapons-depot.ts",
+  "onr_proteus_150_streetware-distributor":
+    "packages/engine/src/card-implementations/proteus/runner/resources/streetware-distributor.ts",
 };
 
 const CURRENT_RELEASE_CARD_DEFINITION_ID_PATTERN = /^onr_v1_\d{3}_/;

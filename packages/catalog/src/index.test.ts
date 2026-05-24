@@ -155,6 +155,10 @@ describe("card set support catalog source", () => {
     );
     expect(runtimeIdsWithoutHints).toEqual([
       "onr_proteus_041_toughoniumtm-wall",
+      "onr_proteus_065_networked-center",
+      "onr_proteus_072_research-bunker",
+      "onr_proteus_077_weapons-depot",
+      "onr_proteus_150_streetware-distributor",
     ]);
 
     for (const cardId of activeAiApprovedCardIds) {
@@ -181,21 +185,26 @@ describe("card set support catalog source", () => {
     const cardsById = createRuntimeCardsById();
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
       "onr_proteus_041_toughoniumtm-wall",
+      "onr_proteus_065_networked-center",
+      "onr_proteus_072_research-bunker",
+      "onr_proteus_077_weapons-depot",
+      "onr_proteus_150_streetware-distributor",
     ]);
-    const baseline = cardsById["onr_proteus_041_toughoniumtm-wall"];
-    expect(baseline?.statuses).toMatchObject({
-      human_playable: true,
-      deck_legal: false,
-      format_legal: false,
-      ai_supported: false,
-      blocked: false,
-    });
+    for (const cardId of PROTEUS_VISIBLE_BASELINE_CARD_IDS) {
+      expect(cardsById[cardId]?.statuses, cardId).toMatchObject({
+        human_playable: true,
+        deck_legal: false,
+        format_legal: false,
+        ai_supported: false,
+        blocked: false,
+      });
+    }
     const blockedProteus = Object.values(cardsById).filter(
       (card) =>
         card.catalogCardId.startsWith("onr_proteus_") &&
-        card.catalogCardId !== "onr_proteus_041_toughoniumtm-wall",
+        !PROTEUS_VISIBLE_BASELINE_CARD_IDS.includes(card.catalogCardId),
     );
-    expect(blockedProteus).toHaveLength(153);
+    expect(blockedProteus).toHaveLength(149);
     expect(blockedProteus.every((card) => card.statuses.blocked)).toBe(true);
   });
 

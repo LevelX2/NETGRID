@@ -9162,6 +9162,81 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
       "proteus_visible_baseline",
     ],
   },
+  {
+    id: "onr_proteus_065_networked-center",
+    title: "Networked Center",
+    side: "corp",
+    type: "upgrade",
+    subtypes: ["asset", "region"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    trashCost: 3,
+    rulesText:
+      "The difficulty of Gray Ops agendas installed in this fort is reduced by 1. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+    mechanics: [
+      "install_remote",
+      "rez_upgrade",
+      "region",
+      "agenda_difficulty",
+      "proteus_visible_baseline",
+    ],
+  },
+  {
+    id: "onr_proteus_072_research-bunker",
+    title: "Research Bunker",
+    side: "corp",
+    type: "upgrade",
+    subtypes: ["asset", "region"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    trashCost: 3,
+    rulesText:
+      "The difficulty of research agendas installed in this fort is reduced by 1. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+    mechanics: [
+      "install_remote",
+      "rez_upgrade",
+      "region",
+      "agenda_difficulty",
+      "proteus_visible_baseline",
+    ],
+  },
+  {
+    id: "onr_proteus_077_weapons-depot",
+    title: "Weapons Depot",
+    side: "corp",
+    type: "upgrade",
+    subtypes: ["asset", "region"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    trashCost: 3,
+    rulesText:
+      "The difficulty of Black Ops agendas installed in this fort is reduced by 1. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+    mechanics: [
+      "install_remote",
+      "rez_upgrade",
+      "region",
+      "agenda_difficulty",
+      "proteus_visible_baseline",
+    ],
+  },
+  {
+    id: "onr_proteus_150_streetware-distributor",
+    title: "Streetware Distributor",
+    side: "runner",
+    type: "resource",
+    subtypes: ["bbs", "position"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText:
+      "Take [1] from Streetware Distributor, if it has any bits, at the start of each of your turns. A: Put [3] from the bank on Streetware Distributor.",
+    mechanics: [
+      "install_resource",
+      "counter",
+      "recurring_pool",
+      "gain_credits",
+      "proteus_visible_baseline",
+    ],
+  },
 ];
 
 const PROTEUS_VARIABLE_ICE_HARNESS_CARDS: CardDefinition[] = [

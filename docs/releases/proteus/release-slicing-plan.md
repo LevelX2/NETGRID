@@ -24,7 +24,7 @@ Aktuelle Basis:
 
 - 154 Proteus-Karten sind importiert, validiert und catalog-ready, bleiben aber blockiert.
 - Statusverteilung: 17 `covered`, 56 `resolver`, 80 `deepen`, 1 `blocked`.
-- Keine Proteus-Karte ist `implemented`, `engine_supported`, `playable`, `human_playable`, `deck_legal`, `format_legal` oder `ai_supported`.
+- Proteus Phase 1a ist umgesetzt: fünf Reuse-only-Baseline-Karten sind `implemented`, `engine_supported`, `playable` und `human_playable` (`Toughonium™ Wall`, `Networked Center`, `Research Bunker`, `Weapons Depot`, `Streetware Distributor`). Alle übrigen Proteus-Karten bleiben blockiert. Keine Proteus-Karte ist `deck_legal`, `format_legal` oder `ai_supported`.
 - Proteus wird nicht als Großrelease freigegeben. Jede Karte braucht einen eigenen Resolver-/Manifest-/Szenario-/Visibility-/Replay-/StateHash-Nachweis.
 
 ## Implementierungsarchitektur für spätere Karten

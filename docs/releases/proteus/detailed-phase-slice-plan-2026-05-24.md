@@ -40,6 +40,8 @@ Führend für Phase 1 bleibt `phase-1-slice-handoff-2026-05-24.md`. Die Phase wa
 | 1f Run Spend Cap | `Rasmin Bridger` | Run-gebundene Ausgabenobergrenze, LegalAction-Kostenprojektion, `applyAction`-Revalidierung. |
 | 1g Post-Pass Derez Utility | `Weapons Depot` | Post-Pass-/Run-Folgefenster, Derez-Zielwahl, side-sichere öffentliche Auflösung. |
 
+Status 2026-05-24: Phase 1a ist umgesetzt und dokumentiert in `docs/activities/done/act-2026-05-24-proteus-phase-1a-reuse-only-baseline.md`. Die fünf Zielkarten sind `human_playable`; Decklegalität, Formatlegalität und AI-Support bleiben unverändert aus.
+
 Activity-Zuschnitt: Die bestehenden Phase-1a bis Phase-1g Activities sind die kleinsten Umsetzungseinheiten. Das alte Phase-1-Sammelpaket bleibt blockiert/ersetzt.
 
 ## Phase 2: Bad Publicity
