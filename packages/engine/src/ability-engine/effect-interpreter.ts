@@ -428,6 +428,44 @@ export function executeCardImplementationEffects(
         });
         return;
       }
+      case "add_bad_publicity": {
+        assertPositiveIntegerAmount("add_bad_publicity", effect.amount);
+        assertPublicVisibility("add_bad_publicity", effect.visibility);
+        const sourceVisibility = effect.sourceVisibility ?? "public";
+        if (sourceVisibility !== "public" && sourceVisibility !== "redacted")
+          throw new Error(
+            "add_bad_publicity sourceVisibility must be public or redacted.",
+          );
+        const before = state.corp.badPublicity;
+        state.corp.badPublicity += effect.amount;
+        publicPayload.badPublicityAdded =
+          Number(publicPayload.badPublicityAdded ?? 0) + effect.amount;
+        if (typeof publicPayload.corpBadPublicityBefore !== "number")
+          publicPayload.corpBadPublicityBefore = before;
+        publicPayload.corpBadPublicityAfter = state.corp.badPublicity;
+        publicPayload.sourceVisibility = sourceVisibility;
+        if (sourceVisibility === "redacted") {
+          publicPayload.redactedKind = "hidden_resource_source";
+        }
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "add_bad_publicity"),
+          kind: "add_bad_publicity",
+          visibility: effect.visibility,
+          side: "corp",
+          amount: effect.amount,
+          reason: effectReason(context),
+          ...(sourceVisibility === "redacted"
+            ? { redactedKind: "hidden_resource_source" }
+            : {}),
+          ...(sourceVisibility === "public" && context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(sourceVisibility === "public" && context.sourceTitle
+            ? { sourceTitle: context.sourceTitle }
+            : {}),
+        });
+        return;
+      }
       case "gain_credits_per_advancement_counter_on_source": {
         assertPositiveIntegerAmount(
           "gain_credits_per_advancement_counter_on_source",

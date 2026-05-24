@@ -26,6 +26,7 @@ import {
   cardImplementationForDefinitionId,
 } from "./card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
+import { publicContextForAction } from "./public-context";
 import {
   MECHANIC_SMOKE_CARD_IDS,
   MECHANIC_SMOKE_DECKS,
@@ -10480,6 +10481,125 @@ describe("V1.6.2 Mechanikpaket B", () => {
         [{ kind: "unknown_effect", visibility: "public" } as never],
       ),
     ).toThrow(/Unsupported card implementation effect/);
+  });
+
+  it("executes typed add_bad_publicity card effects with redacted source projection", () => {
+    const state = createGameAfterSetup({ seed: "card-effect-add-bad-publicity" });
+    state.corp.badPublicity = 4;
+
+    const result = executeCardImplementationEffects(
+      state,
+      {
+        sourceCardId: state.corp.identity,
+        sourceDefinitionId: "synthetic_hidden_source" as CardDefinitionId,
+        sourceTitle: "Synthetic Hidden Source",
+        controller: "corp",
+      },
+      [
+        {
+          kind: "add_bad_publicity",
+          amount: 2,
+          visibility: "public",
+          sourceVisibility: "redacted",
+        },
+      ],
+    );
+
+    expect(state.corp.badPublicity).toBe(6);
+    expect(result.publicPayload).toMatchObject({
+      badPublicityAdded: 2,
+      corpBadPublicityBefore: 4,
+      corpBadPublicityAfter: 6,
+      sourceVisibility: "redacted",
+      redactedKind: "hidden_resource_source",
+    });
+    expect(result.publicPayload).not.toHaveProperty("sourceDefinitionId");
+    expect(result.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "add_bad_publicity",
+        visibility: "public",
+        side: "corp",
+        amount: 2,
+        reason: "card_resolver",
+        redactedKind: "hidden_resource_source",
+      }),
+    ]);
+    expect(result.resolvedEffects[0]).not.toHaveProperty("sourceDefinitionId");
+    expect(result.resolvedEffects[0]).not.toHaveProperty("sourceTitle");
+
+    const publicContext = publicContextForAction(
+      state,
+      {
+        actionId: "test_add_bad_publicity_redaction",
+        type: "play_operation",
+        side: "corp",
+        label: "Synthetic source",
+        source: state.corp.identity,
+        timingPoint: state.timingPoint,
+        costs: [],
+        targetRequirements: [],
+        visibility: "public",
+        expiresAtStateVersion: state.stateVersion,
+        payload: {
+          sourceDefinitionId: "synthetic_hidden_source",
+          ...result.publicPayload,
+        },
+        resolvedEffects: result.resolvedEffects,
+      } as LegalAction,
+      {
+        agendaPointsForScoredCard: () => 0,
+        cardCounter: () => 0,
+        cardStrengthModifier: () => 0,
+        creditCostForAction: () => 0,
+        definitionFor: () =>
+          DEMO_CARDS_BY_ID.simple_agenda ?? Object.values(DEMO_CARDS_BY_ID)[0]!,
+        pumpAmountForLegalAction: () => 0,
+        runnerHqAccessBonus: () => 0,
+        v1915InstalledAccessBonus: () => 0,
+      },
+    );
+    expect(publicContext).toMatchObject({
+      badPublicityAdded: 2,
+      corpBadPublicityBefore: 4,
+      corpBadPublicityAfter: 6,
+      sourceVisibility: "redacted",
+      redactedKind: "hidden_resource_source",
+    });
+    expect(publicContext).not.toHaveProperty("sourceDefinitionId");
+
+    const terminal = createGameAfterSetup({
+      seed: "card-effect-add-bad-publicity-terminal",
+    });
+    terminal.corp.badPublicity = 6;
+    executeCardImplementationEffects(
+      terminal,
+      { sourceCardId: terminal.corp.identity, controller: "corp" },
+      [
+        {
+          kind: "add_bad_publicity",
+          amount: 1,
+          visibility: "public",
+        },
+      ],
+    );
+    checkWinConditions(terminal);
+    expect(terminal.winner).toBe("runner");
+    expect(terminal.gameEndReason).toBe("bad_publicity_7");
+    expect(hashState(terminal)).toMatch(/^fnv1a:/);
+
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.corp.identity, controller: "corp" },
+        [
+          {
+            kind: "add_bad_publicity",
+            amount: 0,
+            visibility: "public",
+          },
+        ],
+      ),
+    ).toThrow(/positive integer/);
   });
 
   it("executes typed lose_credits card effects", () => {

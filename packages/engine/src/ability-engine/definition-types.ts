@@ -779,6 +779,7 @@ export type CardRemainingReplacementLongtailImplementation =
 
 export type CardEffectImplementation =
   | GainCreditsEffectImplementation
+  | AddBadPublicityEffectImplementation
   | DrawCardsEffectImplementation
   | LoseCreditsEffectImplementation
   | AddTagsEffectImplementation
@@ -833,6 +834,13 @@ export type GainCreditsEffectImplementation = {
   recipient: "controller" | "runner" | "corp";
   amount: number;
   visibility: EventVisibilityClass;
+};
+
+export type AddBadPublicityEffectImplementation = {
+  kind: "add_bad_publicity";
+  amount: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+  sourceVisibility?: "public" | "redacted";
 };
 
 export type GainCreditsPerAdvancementCounterOnSourceEffectImplementation = {

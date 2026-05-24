@@ -964,6 +964,10 @@ export function publicContextForAction(
     "creditsLost",
     "tagsAdded",
     "runnerTagsAfter",
+    "badPublicityAdded",
+    "corpBadPublicityBefore",
+    "corpBadPublicityAfter",
+    "sourceVisibility",
     "sourceDefinitionId",
     "sourceZone",
     "destinationZone",
@@ -998,6 +1002,14 @@ export function publicContextForAction(
   }
   if (legalAction.payload?.allNighterBonusRunOnFinish === true)
     context.allNighterBonusRunOnFinish = true;
+  if (legalAction.payload?.sourceVisibility === "redacted") {
+    delete context.sourceDefinitionId;
+    delete context.sourceTitle;
+    context.redactedKind =
+      typeof legalAction.payload.redactedKind === "string"
+        ? legalAction.payload.redactedKind
+        : "hidden_resource_source";
+  }
   if (legalAction.payload?.bypassFirstIce === true)
     context.bypassFirstIce = true;
   if (legalAction.payload?.scoredAsAgenda === true)
