@@ -167,6 +167,11 @@ import {
   resolveSelfModifyingCodeSearchInstallIntent,
   resolveSneakPreviewSearchInstallIntent,
 } from "./game/hidden-zone/search-install-intents";
+import {
+  createMysteryBoxFreeProgramInstallInput,
+  createSneakPreviewFreeProgramInstallInput,
+  executeFreeProgramInstallPlan,
+} from "./game/hidden-zone/free-program-install-execution";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -9348,50 +9353,24 @@ function resolveMysteryBoxChoice(
     throw new Error("Mystery Box ist nicht mehr installiert.");
   if (definitionFor(state, sourceCardId).id !== MYSTERY_BOX_ID)
     throw new Error("Die Mystery-Box-Choice passt nicht zur Quelle.");
-  const selectedProgramId = plan.selectedCardId!;
-  const selectedProgramDefinition = selectedDefinition!;
-  if (
-    state.runner.memoryUsed + (selectedProgramDefinition.memoryCost ?? 0) >
-    runnerMemoryLimit(state)
-  )
-    throw new Error("Nicht genug Memory fuer das Mystery-Box-Programm.");
-
-  removeFromAllZones(state, selectedProgramId);
-  state.runner.rig.programs.push(selectedProgramId);
-  state.runner.memoryUsed += selectedProgramDefinition.memoryCost ?? 0;
-  state.cardInstances[selectedProgramId] = {
-    ...mustInstance(state.cardInstances, selectedProgramId),
-    faceup: true,
-    rezzed: true,
-    zone: { side: "runner", zone: "rig" },
-  };
-  if (shouldLoadLegacyRecurringCredits(selectedProgramDefinition))
-    setCardCounter(
+  const execution = executeFreeProgramInstallPlan({
+    plan: createMysteryBoxFreeProgramInstallInput(plan),
+    callbacks: {
+      installProgramForFree: (programId) =>
+        installRunnerProgramForFree(state, programId, legalAction, {
+          checkUnique: false,
+          typeError: "Mystery Box kann nur ein Programm installieren.",
+          memoryError: "Nicht genug Memory fuer das Mystery-Box-Programm.",
+        }),
+    },
+  });
+  if (execution.sourceTrashNeeded && execution.sourceCardId)
+    trashRunnerInstalledCardToHeap(state, execution.sourceCardId);
+  if (execution.shuffleNeeded)
+    shuffleRunnerStack(
       state,
-      selectedProgramId,
-      "recurring_credit",
-      selectedProgramDefinition.recurringCredits ?? 0,
+      `v1915.mystery_box.shuffle.after_install.${sourceCardId}.${execution.installedProgramId}`,
     );
-  if (
-    selectedProgramDefinition.mechanics.includes("virus") &&
-    selectedProgramDefinition.id !== BUTCHER_BOY_ID &&
-    selectedProgramDefinition.id !== SKIVVISS_ID
-  )
-    addCardCounter(state, selectedProgramId, "virus", 1);
-  executeCardImplementationLifecycleEffects(
-    cardImplementationRuntimeDeps,
-    state,
-    legalAction,
-    selectedProgramDefinition,
-    selectedProgramId,
-    "on_install",
-  );
-
-  trashRunnerInstalledCardToHeap(state, sourceCardId);
-  shuffleRunnerStack(
-    state,
-    `v1915.mystery_box.shuffle.after_install.${sourceCardId}.${selectedProgramId}`,
-  );
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -24002,14 +23981,21 @@ function resolveSneakPreviewProgramChoice(
     selectedCardDefinition: selectedDefinition,
     defaultSourceDefinitionId: SNEAK_PREVIEW_ID,
   });
-  const cardId = plan.selectedCardId;
-  installRunnerProgramForFree(state, cardId, legalAction);
-  state.sneakPreviewTemporaryInstalls ??= [];
-  state.sneakPreviewTemporaryInstalls.push({
-    cardId,
-    sourceCardDefinitionId: plan.sourceDefinitionId,
+  const execution = executeFreeProgramInstallPlan({
+    plan: createSneakPreviewFreeProgramInstallInput(plan),
+    callbacks: {
+      installProgramForFree: (programId) =>
+        installRunnerProgramForFree(state, programId, legalAction),
+    },
   });
-  if (plan.shuffleNeeded)
+  if (execution.temporaryReturnNeeded) {
+    state.sneakPreviewTemporaryInstalls ??= [];
+    state.sneakPreviewTemporaryInstalls.push({
+      cardId: execution.installedProgramId,
+      sourceCardDefinitionId: plan.sourceDefinitionId,
+    });
+  }
+  if (execution.shuffleNeeded)
     shuffleRunnerStack(state, `v1911_sneak_preview:${choice!.choiceId}:shuffle`);
   delete state.pendingChoice;
   legalAction.payload = {
@@ -24022,11 +24008,17 @@ function installRunnerProgramForFree(
   state: GameState,
   cardId: CardInstanceId,
   legalAction: LegalAction,
-): void {
+  options: {
+    checkUnique?: boolean;
+    typeError?: string;
+    memoryError?: string;
+  } = {},
+): CardInstanceId {
   const definition = definitionFor(state, cardId);
   if (definition.type !== "program")
-    throw new Error("Sneak Preview darf nur Programme installieren.");
+    throw new Error(options.typeError ?? "Sneak Preview darf nur Programme installieren.");
   if (
+    (options.checkUnique ?? true) &&
     isUniqueCard(definition) &&
     hasInstalledUniqueCardDefinition(state, "runner", definition.id)
   )
@@ -24035,7 +24027,7 @@ function installRunnerProgramForFree(
     state.runner.memoryUsed + (definition.memoryCost ?? 0) >
     runnerMemoryLimit(state)
   )
-    throw new Error("Nicht genug Memory fuer Sneak Preview.");
+    throw new Error(options.memoryError ?? "Nicht genug Memory fuer Sneak Preview.");
   removeFromAllZones(state, cardId);
   state.runner.rig.programs.push(cardId);
   state.runner.memoryUsed += definition.memoryCost ?? 0;
@@ -24061,6 +24053,7 @@ function installRunnerProgramForFree(
     cardId,
     "on_install",
   );
+  return cardId;
 }
 
 function startRunnerStackArrangeChoice(
