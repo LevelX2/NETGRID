@@ -96,6 +96,7 @@ import {
 } from "./visible-run-analysis";
 import type {
   AiDeckDoctrineProfile,
+  AiDecisionDebug,
   AiDecisionInput,
   CardDefinition,
   CardInstanceId,
@@ -829,7 +830,8 @@ describe("MVP 0.3 AI controller contract", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
@@ -843,10 +845,9 @@ describe("MVP 0.3 AI controller contract", () => {
       (ice) => ice.instanceId === innerWallId,
     )?.effectiveRunQuote;
 
-    expect(innerWallQuote?.subroutines.map((subroutine) => subroutine.type)).toEqual([
-      "end_the_run",
-      "end_the_run",
-    ]);
+    expect(
+      innerWallQuote?.subroutines.map((subroutine) => subroutine.type),
+    ).toEqual(["end_the_run", "end_the_run"]);
     expect(innerWallQuote?.subroutines[1]).toMatchObject({
       sourceDefinitionId: "onr_v1_274_tutor",
       sourceTitle: "Tutor",
@@ -907,7 +908,8 @@ describe("MVP 0.3 AI controller contract", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
@@ -1073,7 +1075,9 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(baselineDecision.evidence).toContain(
       "unbroken_run_effect_ignored_because_no_remaining_ice:true",
     );
-    expect(baselineDecision.evidence).toContain("future_effect_remaining_ice:0");
+    expect(baselineDecision.evidence).toContain(
+      "future_effect_remaining_ice:0",
+    );
     expect(baselineDecision.evidence).not.toContain(
       "run_remainder_effect_must_break:true",
     );
@@ -4407,6 +4411,482 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
+  it("does not treat a one-ICE remote as safe when visible breaker coverage makes the path cheap", () => {
+    const input = corpEffectiveRemoteSafetyInput("ai-corp-cheap-wall-contest", {
+      runnerCredits: 5,
+    });
+    const agendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(agendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!agendaInstall || !gain)
+      throw new Error("Missing cheap remote safety fixture actions");
+
+    const scopedInput = { ...input, legalActions: [agendaInstall, gain] };
+    const contest = evaluateRunnerContestCapacity(scopedInput, "remote_1");
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(contest.capacity).toBe("high");
+    expect(contest.visibleBreakCost).toBe(0);
+    expect(decision.selectedActionId).not.toBe(agendaInstall.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_agenda_install_deferred_due_to_cheap_contest:true",
+    );
+    expect(decision.score.evidence).toContain(
+      "corp_remote_protection_overestimated_by_ice_presence:true",
+    );
+    expect(JSON.stringify(decision.score.evidence)).not.toMatch(
+      /privatePayload|FullState|runner\.grip/,
+    );
+  });
+
+  it("keeps the Data Wall versus Japanese Water Torture repro generic through visible break cost", () => {
+    const input = corpEffectiveRemoteSafetyInput("ai-corp-jwt-data-wall", {
+      runnerCredits: 8,
+    });
+    const agendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    expect(agendaInstall).toBeDefined();
+    if (!agendaInstall) throw new Error("Missing agenda install action");
+
+    const scopedInput = { ...input, legalActions: [agendaInstall] };
+    const scoreNext = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_next_turn",
+    );
+    const buildRemote = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "build_scoring_remote",
+    );
+    const contest = evaluateRunnerContestCapacity(scopedInput, "remote_1");
+
+    expect(contest.capacity).toBe("high");
+    expect(contest.visibleBreakCost).toBe(0);
+    expect(scoreNext?.legalActionIds ?? []).not.toContain(
+      agendaInstall.actionId,
+    );
+    expect(buildRemote?.legalActionIds ?? []).not.toContain(
+      agendaInstall.actionId,
+    );
+  });
+
+  it("allows agenda install when visible remote tax makes the remote effectively protected", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-tax-protected-remote",
+      { runnerCredits: 8, includeTaxUpgrade: true },
+    );
+    const agendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(agendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!agendaInstall || !gain)
+      throw new Error("Missing tax-protected remote fixture actions");
+
+    const scopedInput = { ...input, legalActions: [agendaInstall, gain] };
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(decision.selectedActionId).toBe(agendaInstall.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_score_line_continued_when_remote_effectively_protected:true",
+    );
+  });
+
+  it("allows same-turn score setup despite cheap contest when Runner has no response window", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-same-turn-score-cheap",
+      { runnerCredits: 8, installedAgendaCounters: 2 },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain)
+      throw new Error("Missing same-turn score fixture actions");
+
+    const scopedInput = { ...input, legalActions: [advance, gain] };
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(decision.selectedActionId).toBe(advance.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_same_turn_score_allowed_despite_cheap_contest:true",
+    );
+  });
+
+  it("does not count bait remotes as safe agenda score protection", () => {
+    const input = corpEffectiveRemoteSafetyInput("ai-corp-cheap-bait-remote", {
+      runnerCredits: 8,
+      agendaInHq: false,
+      assetInHq: true,
+    });
+    const assetInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_asset",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(assetInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!assetInstall || !gain)
+      throw new Error("Missing bait remote fixture actions");
+
+    const scopedInput = { ...input, legalActions: [assetInstall, gain] };
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(decision.selectedActionId).toBe(assetInstall.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_bait_remote_not_counted_as_scoring_protection:true",
+    );
+  });
+
+  it("keeps effective remote safety invariant to hidden Runner hand differences", () => {
+    const first = corpEffectiveRemoteSafetyInput(
+      "ai-corp-remote-safety-hidden-a",
+      { runnerCredits: 5, hiddenRunnerCard: "simple_economy_event" },
+    );
+    const second = corpEffectiveRemoteSafetyInput(
+      "ai-corp-remote-safety-hidden-b",
+      { runnerCredits: 5, hiddenRunnerCard: "simple_fracter" },
+    );
+    const narrow = (input: AiDecisionInput): AiDecisionInput => {
+      const agendaInstall = input.legalActions.find(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.placement !== "ice" &&
+          action.payload?.serverId === "remote_1" &&
+          sourceDefinitionFromInput(input, action) === "simple_agenda",
+      );
+      const gain = input.legalActions.find(
+        (action) => action.type === "gain_credit",
+      );
+      expect(agendaInstall).toBeDefined();
+      expect(gain).toBeDefined();
+      if (!agendaInstall || !gain)
+        throw new Error("Missing hidden-invariance fixture actions");
+      return { ...input, legalActions: [agendaInstall, gain] };
+    };
+
+    const firstDecision = chooseCorpPlanDecision(narrow(first));
+    const secondDecision = chooseCorpPlanDecision(narrow(second));
+
+    expect(firstDecision.selectedActionType).toBe(
+      secondDecision.selectedActionType,
+    );
+    expect(firstDecision.debug.planKind).toBe(secondDecision.debug.planKind);
+  });
+
+  it("selects the effectively safest remote for agenda install after a cheap-contest remote is detected", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-better-remote-after-unsafe",
+      { runnerCredits: 8, safeSecondRemote: true },
+    );
+    const unsafeAgendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const saferAgendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_2" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(unsafeAgendaInstall).toBeDefined();
+    expect(saferAgendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!unsafeAgendaInstall || !saferAgendaInstall || !gain)
+      throw new Error("Missing better-remote fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [unsafeAgendaInstall, saferAgendaInstall, gain],
+    });
+
+    expect(decision.selectedActionId).toBe(saferAgendaInstall.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_unsafe_remote_converted_to_better_remote:true",
+    );
+    expect(decision.score.evidence).toContain(
+      "corp_best_remote_selected_for_agenda:true",
+    );
+  });
+
+  it("converts an unsafe scoring remote into protection before reinstalling the agenda line", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-protect-after-unsafe-remote",
+      { runnerCredits: 8, protectionIceInHq: true },
+    );
+    const unsafeAgendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const protectionInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(unsafeAgendaInstall).toBeDefined();
+    expect(protectionInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!unsafeAgendaInstall || !protectionInstall || !gain)
+      throw new Error("Missing protect-to-score fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [unsafeAgendaInstall, protectionInstall, gain],
+    });
+
+    expect(decision.selectedActionId).toBe(protectionInstall.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_unsafe_remote_converted_to_protection:true",
+    );
+  });
+
+  it("does not loop protection when the remote is already effectively protected and advance is legal", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-no-protection-loop-after-safe",
+      {
+        runnerCredits: 0,
+        includeTaxUpgrade: true,
+        installedAgendaCounters: 1,
+        protectionIceInHq: true,
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const protectionInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(advance).toBeDefined();
+    expect(protectionInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !protectionInstall || !gain)
+      throw new Error("Missing no-protection-loop fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [advance, protectionInstall, gain],
+    });
+
+    expect(decision.selectedActionId).toBe(advance.actionId);
+    expect(decision.score.evidence).not.toContain(
+      "corp_protection_repeated_without_score_conversion:true",
+    );
+  });
+
+  it("recognizes a fast-advance counter operation as an alternative to an unsafe remote", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-fast-advance-after-unsafe-remote",
+      { runnerCredits: 8, installedAgendaCounters: 1 },
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(gain).toBeDefined();
+    if (!gain) throw new Error("Missing fast-advance fixture gain action");
+    const operationCard = visibleCard(
+      "onr_v1_304_systematic-layoffs",
+      "unsafe_remote_systematic_layoffs_fixture",
+    );
+    const advancementOperation: LegalAction = {
+      ...gain,
+      actionId: "corp.fixture.unsafe_remote.play_systematic_layoffs",
+      type: "play_operation",
+      source: operationCard.instanceId,
+      payload: {
+        cost: 2,
+        addedAdvancementCounters: 2,
+      },
+    };
+    const scopedInput = {
+      ...input,
+      legalActions: [
+        advancementOperation,
+        ...input.legalActions.filter(
+          (action) =>
+            action.type === "advance_card" &&
+            sourceDefinitionFromInput(input, action) === "simple_agenda",
+        ),
+        gain,
+      ],
+      playerView: {
+        ...input.playerView,
+        own: {
+          ...input.playerView.own,
+          gripOrHq: [operationCard, ...input.playerView.own.gripOrHq],
+        },
+      },
+    };
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(decision.selectedActionId).toBe(advancementOperation.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_unsafe_remote_converted_to_fast_advance:true",
+    );
+    expect(decision.score.evidence).toContain("corp_advance_burst_taken:true");
+  });
+
+  it("protects HQ instead of holding agendas indefinitely when the remote is unsafe and HQ pressure is visible", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-hq-risk-after-unsafe-remote",
+      { runnerCredits: 8, protectionIceInHq: true },
+    );
+    const unsafeAgendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const hqProtection = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(unsafeAgendaInstall).toBeDefined();
+    expect(hqProtection).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!unsafeAgendaInstall || !hqProtection || !gain)
+      throw new Error("Missing HQ-risk fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [unsafeAgendaInstall, hqProtection, gain],
+    });
+
+    expect(decision.selectedActionId).toBe(hqProtection.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_unsafe_remote_converted_to_hq_protection:true",
+    );
+  });
+
+  it("marks no-score-path and builds resources when no safe remote, burst, or protection line is legal", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-no-score-path-after-unsafe-remote",
+      { runnerCredits: 8 },
+    );
+    const unsafeAgendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(unsafeAgendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!unsafeAgendaInstall || !gain)
+      throw new Error("Missing no-score-path fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [unsafeAgendaInstall, gain],
+    });
+
+    expect(decision.selectedActionId).toBe(gain.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_unsafe_remote_converted_to_no_score_path:true",
+    );
+  });
+
+  it("keeps unsafe-remote score conversion invariant to hidden Runner hand differences", () => {
+    const first = corpEffectiveRemoteSafetyInput(
+      "ai-corp-score-conversion-hidden-a",
+      { runnerCredits: 8, hiddenRunnerCard: "simple_economy_event" },
+    );
+    const second = corpEffectiveRemoteSafetyInput(
+      "ai-corp-score-conversion-hidden-b",
+      { runnerCredits: 8, hiddenRunnerCard: "simple_fracter" },
+    );
+    const narrow = (input: AiDecisionInput): AiDecisionInput => {
+      const agendaInstall = input.legalActions.find(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.placement !== "ice" &&
+          action.payload?.serverId === "remote_1" &&
+          sourceDefinitionFromInput(input, action) === "simple_agenda",
+      );
+      const gain = input.legalActions.find(
+        (action) => action.type === "gain_credit",
+      );
+      expect(agendaInstall).toBeDefined();
+      expect(gain).toBeDefined();
+      if (!agendaInstall || !gain)
+        throw new Error("Missing hidden-invariance score-conversion fixture");
+      return { ...input, legalActions: [agendaInstall, gain] };
+    };
+
+    const firstDecision = chooseCorpPlanDecision(narrow(first));
+    const secondDecision = chooseCorpPlanDecision(narrow(second));
+
+    expect(firstDecision.selectedActionType).toBe(
+      secondDecision.selectedActionType,
+    );
+    expect(firstDecision.debug.planKind).toBe(secondDecision.debug.planKind);
+    expect(JSON.stringify(firstDecision.score.evidence)).not.toMatch(
+      /privatePayload|FullState|runner\.grip/,
+    );
+  });
+
   it("weights near-term remote score horizons before generic economy and further remote build", () => {
     const input = corpActionPhaseInput("ai-corp-score-horizon", (state) => {
       state.corp.credits = 7;
@@ -5763,6 +6243,135 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(JSON.stringify(keepDecision.evidence)).not.toMatch(
       /cardInstances|privatePayload|simple_fracter|simple_economy_event/,
     );
+  });
+
+  it("selects Runner strategic lines deterministically for the same seed and state", () => {
+    const input = strategicRunnerInput("ai-strategic-line-deterministic");
+    const first = chooseRunnerPlanDecision(input);
+    const second = chooseRunnerPlanDecision({ ...input });
+
+    expect(strategicLineKindFromDebug(first.debug)).toBeDefined();
+    expect(strategicLineKindFromDebug(first.debug)).toBe(
+      strategicLineKindFromDebug(second.debug),
+    );
+    expect(first.selectedPlanId).toBe(second.selectedPlanId);
+    expect(JSON.stringify(first.debug)).not.toMatch(
+      /privatePayload|cardInstances|fullGameState/i,
+    );
+  });
+
+  it("allows seeded Runner line variance when HQ and R&D pressure are similarly plausible", () => {
+    const lineKinds = new Set(
+      ["line-a", "line-b", "line-c", "line-d", "line-e", "line-f"].map(
+        (suffix) =>
+          strategicLineKindFromDebug(
+            chooseRunnerPlanDecision(strategicRunnerInput(suffix)).debug,
+          ),
+      ),
+    );
+
+    expect(lineKinds.size).toBeGreaterThan(1);
+    expect([...lineKinds]).toEqual(
+      expect.arrayContaining(["early_hq_pressure"]),
+    );
+    expect([...lineKinds].every(Boolean)).toBe(true);
+  });
+
+  it("keeps a dominant Runner closeout line stable across seeds", () => {
+    const lineKinds = new Set(
+      ["closeout-a", "closeout-b", "closeout-c", "closeout-d"].map((seed) =>
+        strategicLineKindFromDebug(
+          chooseRunnerPlanDecision(
+            strategicRunnerInput(seed, {
+              knownHqAgenda: true,
+              runnerAgendaPoints: 5,
+            }),
+          ).debug,
+        ),
+      ),
+    );
+
+    expect([...lineKinds]).toEqual(["closeout_pressure"]);
+  });
+
+  it("selects and continues a Corp remote scoring strategic line", () => {
+    const input = strategicCorpInput("ai-strategic-corp-remote", (state) => {
+      state.corp.credits = 7;
+      moveCorpCardToHq(state, "simple_agenda");
+      moveCorpCardToHq(state, "simple_barrier_ice");
+    });
+    const decision = chooseCorpPlanDecision(input);
+
+    expect(strategicLineKindFromDebug(decision.debug)).toBe(
+      "remote_scoring_build",
+    );
+    expect(decision.debug.evidence).toContain(
+      "strategic_line_continuation_taken:true",
+    );
+    expect(["build_scoring_remote", "score_next_turn"]).toContain(
+      decision.debug.planKind,
+    );
+  });
+
+  it("lets Corp score-now override strategic line variance", () => {
+    const input = strategicCorpInput("ai-strategic-corp-score-now", (state) => {
+      state.corp.credits = 7;
+      putCorpRootInRemote(state, "simple_agenda", 3);
+    });
+    const decision = chooseCorpPlanDecision(input);
+
+    expect(decision.debug.planKind).toBe("score_now");
+    expect(strategicLineKindFromDebug(decision.debug)).toBe("score_closeout");
+    expect(JSON.stringify(decision.debug)).not.toMatch(
+      /privatePayload|cardInstances|fullGameState/i,
+    );
+  });
+
+  it("summarizes strategic-line metrics from side-safe evidence", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary([
+        progressionAction("runner", 1, "install_card", undefined, 1, {
+          evidence: [
+            "strategic_line_selected:true",
+            "strategic_line_side:runner",
+            "strategic_line_kind:rig_first",
+            "strategic_line_selected_by_seed:true",
+            "strategic_line_commitment_ttl:3",
+            "strategic_line_continuation_taken:true",
+          ],
+        }),
+        progressionAction("runner", 2, "start_run", "rd", 1, {
+          evidence: [
+            "strategic_line_selected:true",
+            "strategic_line_side:runner",
+            "strategic_line_kind:early_rnd_pressure",
+            "strategic_line_commitment_ttl:3",
+          ],
+        }),
+        progressionAction("runner", 3, "steal_agenda", "rd", 1),
+        progressionAction("corp", 4, "score_agenda", "remote_1", 2, {
+          evidence: [
+            "strategic_line_selected:true",
+            "strategic_line_side:corp",
+            "strategic_line_kind:score_closeout",
+            "strategic_line_commitment_ttl:3",
+            "strategic_line_continuation_taken:true",
+          ],
+        }),
+      ]),
+    ]);
+
+    expect(metrics.strategicLineSelected).toBe(3);
+    expect(metrics.strategicLineSelectedBySideRunner).toBe(2);
+    expect(metrics.strategicLineSelectedBySideCorp).toBe(1);
+    expect(metrics.strategicLineSelectedBySeed).toBe(1);
+    expect(metrics.runnerStrategicLineRigFirst).toBe(1);
+    expect(metrics.runnerStrategicLineEarlyRndPressure).toBe(1);
+    expect(metrics.corpStrategicLineScoreCloseout).toBe(1);
+    expect(metrics.strategicLineConvertedToProgress).toBeGreaterThan(0);
+    expect(metrics.lineCommitmentLedToSteal).toBeGreaterThan(0);
+    expect(metrics.lineCommitmentLedToScore).toBeGreaterThan(0);
+    expect(metrics.strategicLineVarianceAcrossSeeds).toBeGreaterThan(0);
   });
 
   it("prefers ICE protection over installing a naked agenda in a new remote", () => {
@@ -9336,9 +9945,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
     expect(decision.reasonCode).toBe("runner.access.decline_trash");
     expect(decision.evidence).toContain("remote_trash_role:run_tax");
-    expect(decision.evidence).toContain(
-      "remote_trash_deferred_by_budget:true",
-    );
+    expect(decision.evidence).toContain("remote_trash_deferred_by_budget:true");
     expect(assertAiInputIsSideSafe(input)).toBe(true);
   });
 
@@ -9388,7 +9995,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
       "onr_v1_355_crystal-palace-station-grid",
     );
     expect(
-      input.legalActions.some((action) => action.type === "trash_accessed_card"),
+      input.legalActions.some(
+        (action) => action.type === "trash_accessed_card",
+      ),
     ).toBe(true);
     expect(decision.reasonCode).toBe("runner.plan.trash_asset");
     expect(
@@ -13534,12 +14143,20 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
       expect(slot.benchmark?.candidate.replayFailures).toBe(0);
     }
     expect(realSceneSlots).toHaveLength(2);
-    expect(realSceneSlots.every((slot) => slot.status === "pending")).toBe(
+    expect(realSceneSlots.every((slot) => slot.status === "runnable")).toBe(
       true,
     );
     expect(
       realSceneSlots.every((slot) => !slot.runnerDeckRef.includes("demo_008")),
     ).toBe(true);
+    for (const slot of realSceneSlots) {
+      expect(slot.benchmark?.runnerDeckId).toContain("real_scene_");
+      expect(slot.benchmark?.corpDeckId).toContain("real_scene_");
+      expect(slot.benchmark?.runnerDeckId).not.toBe("demo_runner_008");
+      expect(slot.benchmark?.corpDeckId).not.toBe("demo_corp_008");
+      expect(slot.benchmark?.candidate.illegalActions).toBe(0);
+      expect(slot.benchmark?.candidate.replayFailures).toBe(0);
+    }
     expect(report).toContain("## Demo Smoke");
     expect(report).toContain("## Snapshot Progression");
     expect(report).toContain("## Local Realistic Holdout");
@@ -14579,14 +15196,16 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
       },
     );
     const rdRun = baseInput.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     const gain = baseInput.legalActions.find(
       (action) => action.type === "gain_credit",
     );
     expect(rdRun).toBeDefined();
     expect(gain).toBeDefined();
-    if (!rdRun || !gain) throw new Error("Missing R&D fresh repeat fixture actions");
+    if (!rdRun || !gain)
+      throw new Error("Missing R&D fresh repeat fixture actions");
 
     const input = {
       ...baseInput,
@@ -14639,14 +15258,16 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
       },
     );
     const rdRun = baseInput.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     const gain = baseInput.legalActions.find(
       (action) => action.type === "gain_credit",
     );
     expect(rdRun).toBeDefined();
     expect(gain).toBeDefined();
-    if (!rdRun || !gain) throw new Error("Missing R&D stale repeat fixture actions");
+    if (!rdRun || !gain)
+      throw new Error("Missing R&D stale repeat fixture actions");
 
     const input = {
       ...baseInput,
@@ -14687,14 +15308,16 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
       },
     );
     const rdRun = baseInput.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     const gain = baseInput.legalActions.find(
       (action) => action.type === "gain_credit",
     );
     expect(rdRun).toBeDefined();
     expect(gain).toBeDefined();
-    if (!rdRun || !gain) throw new Error("Missing R&D agenda top fixture actions");
+    if (!rdRun || !gain)
+      throw new Error("Missing R&D agenda top fixture actions");
 
     const input = {
       ...baseInput,
@@ -14735,14 +15358,16 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
       },
     );
     const rdRun = baseInput.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     const gain = baseInput.legalActions.find(
       (action) => action.type === "gain_credit",
     );
     expect(rdRun).toBeDefined();
     expect(gain).toBeDefined();
-    if (!rdRun || !gain) throw new Error("Missing R&D sequence fixture actions");
+    if (!rdRun || !gain)
+      throw new Error("Missing R&D sequence fixture actions");
 
     const input = {
       ...baseInput,
@@ -16469,6 +17094,209 @@ function syntheticRndPrivateLookEvent(
   };
 }
 
+function strategicLineKindFromDebug(
+  debug: AiDecisionDebug | undefined,
+): string | undefined {
+  return debug?.evidence
+    ?.find((entry) => entry.startsWith("strategic_line_kind:"))
+    ?.slice("strategic_line_kind:".length);
+}
+
+function strategicRunnerInput(
+  seed: string,
+  options: { knownHqAgenda?: boolean; runnerAgendaPoints?: number } = {},
+): AiDecisionInput {
+  const state = toRunnerTurn(createGameAfterSetup({ seed }));
+  state.runner.credits = 5;
+  const doctrine = buildDeckDoctrineProfile({
+    deckSnapshotId: `strategic-runner-${seed}`,
+    side: "runner",
+    cards: [
+      { cardId: "simple_run_event", quantity: 4 },
+      { cardId: "simple_economy_event", quantity: 4 },
+      { cardId: "simple_fracter", quantity: 3 },
+      { cardId: "simple_decoder", quantity: 3 },
+    ],
+  });
+  const input = buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.2-normal",
+    decisionId: `${seed}:strategic-runner:0`,
+    actionNumber: 4,
+    ownDeckDoctrine: doctrine,
+  });
+  return {
+    ...input,
+    playerView: {
+      ...input.playerView,
+      own: {
+        ...input.playerView.own,
+        agendaPoints:
+          options.runnerAgendaPoints ?? input.playerView.own.agendaPoints,
+      },
+    },
+    eventTail: options.knownHqAgenda
+      ? [
+          ...input.eventTail,
+          syntheticHqPrivateLookEvent(`${seed}:known-hq-agenda`, 100, [
+            "simple_agenda",
+          ]),
+        ]
+      : input.eventTail,
+  };
+}
+
+function strategicCorpInput(
+  seed: string,
+  mutate: (state: GameState) => void,
+): AiDecisionInput {
+  let state = createGameAfterSetup({ seed });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  mutate(state);
+  const doctrine = buildDeckDoctrineProfile({
+    deckSnapshotId: `strategic-corp-${seed}`,
+    side: "corp",
+    cards: [
+      { cardId: "simple_agenda", quantity: 6 },
+      { cardId: "simple_barrier_ice", quantity: 8 },
+      { cardId: "simple_economy_operation", quantity: 6 },
+      { cardId: "simple_economy_asset", quantity: 4 },
+    ],
+  });
+  return buildAiDecisionInput(state, "corp", {
+    difficulty: "normal",
+    profileId: "corp-ai-v1.4.2-normal",
+    decisionId: `${seed}:strategic-corp:0`,
+    actionNumber: 4,
+    ownDeckDoctrine: doctrine,
+  });
+}
+
+function corpEffectiveRemoteSafetyInput(
+  seed: string,
+  options: {
+    runnerCredits: number;
+    includeTaxUpgrade?: boolean;
+    installedAgendaCounters?: number;
+    agendaInHq?: boolean;
+    assetInHq?: boolean;
+    hiddenRunnerCard?: string;
+    safeSecondRemote?: boolean;
+    protectionIceInHq?: boolean;
+  },
+): AiDecisionInput {
+  let state = createGameAfterSetup({
+    seed,
+    runnerDeck: {
+      id: `corp_effective_remote_safety_runner_${seed}`,
+      name: "Corp Effective Remote Safety Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_037_japanese-water-torture", quantity: 1 },
+        { id: "simple_fracter", quantity: 2 },
+        { id: "simple_economy_event", quantity: 6 },
+      ],
+    },
+    corpDeck: {
+      id: `corp_effective_remote_safety_corp_${seed}`,
+      name: "Corp Effective Remote Safety Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "simple_agenda", quantity: 4 },
+        { id: "simple_economy_asset", quantity: 2 },
+        { id: "simple_economy_operation", quantity: 4 },
+        { id: "onr_v1_237_data-wall", quantity: 2 },
+        { id: "simple_code_gate_ice", quantity: 2 },
+        { id: "simple_barrier_ice", quantity: 2 },
+        { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+      ],
+    },
+    agendaPointsToWin: 7,
+  });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  ensureRemoteServer(state, "remote_1");
+  const dataWallId = putCorpIceOnServer(
+    state,
+    "remote_1",
+    "onr_v1_237_data-wall",
+  );
+  state.cardInstances[dataWallId] = {
+    ...state.cardInstances[dataWallId]!,
+    faceup: true,
+    rezzed: true,
+  };
+  if (options.includeTaxUpgrade) {
+    const taxId = putCorpRootInRemote(
+      state,
+      "onr_v1_355_crystal-palace-station-grid",
+      0,
+    );
+    state.cardInstances[taxId] = {
+      ...state.cardInstances[taxId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+  if (options.safeSecondRemote) {
+    ensureRemoteServer(state, "remote_2");
+    const secondRemoteIceId = putCorpIceOnServer(
+      state,
+      "remote_2",
+      "simple_code_gate_ice",
+    );
+    state.cardInstances[secondRemoteIceId] = {
+      ...state.cardInstances[secondRemoteIceId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+  if (options.installedAgendaCounters !== undefined) {
+    const agendaId = putCorpRootInRemote(
+      state,
+      "simple_agenda",
+      options.installedAgendaCounters,
+    );
+    state.cardInstances[agendaId] = {
+      ...state.cardInstances[agendaId]!,
+      faceup: false,
+      rezzed: false,
+    };
+  } else if (options.agendaInHq !== false) {
+    moveCorpCardToHq(state, "simple_agenda");
+  }
+  if (options.assetInHq) moveCorpCardToHq(state, "simple_economy_asset");
+  if (options.protectionIceInHq)
+    moveCorpCardToHq(state, "simple_code_gate_ice");
+  moveRunnerProgramToRig(state, "onr_v1_037_japanese-water-torture");
+  if (options.hiddenRunnerCard) {
+    moveRunnerCardToGrip(state, options.hiddenRunnerCard);
+  }
+  state.runner.credits = options.runnerCredits;
+  state.corp.credits = 10;
+  state.corp.clicks = 3;
+  const doctrine = buildDeckDoctrineProfile({
+    deckSnapshotId: `corp-effective-remote-safety-${seed}`,
+    side: "corp",
+    cards: [
+      { cardId: "simple_agenda", quantity: 4 },
+      { cardId: "onr_v1_237_data-wall", quantity: 2 },
+      { cardId: "simple_code_gate_ice", quantity: 2 },
+      { cardId: "simple_barrier_ice", quantity: 2 },
+      { cardId: "simple_economy_operation", quantity: 4 },
+      { cardId: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+    ],
+  });
+  return buildAiDecisionInput(state, "corp", {
+    difficulty: "normal",
+    profileId: "corp-ai-v1.4.2-normal",
+    decisionId: `${seed}:corp-effective-remote-safety`,
+    actionNumber: 6,
+    ownDeckDoctrine: doctrine,
+  });
+}
+
 function runCorpAiOnlySmoke(
   seed: string,
   maxActions: number,
@@ -17760,6 +18588,32 @@ function putCorpRootInRemote(
     zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
     faceup: false,
     rezzed: false,
+    advancementCounters,
+  };
+  return id;
+}
+
+function putCorpRootInServer(
+  state: GameState,
+  serverId: `remote_${number}`,
+  definitionId: string,
+  advancementCounters: number,
+  options: { faceup?: boolean; rezzed?: boolean } = {},
+): CardInstanceId {
+  ensureRemoteServer(state, serverId);
+  const id = findCard(state, definitionId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  expect(server).toBeDefined();
+  if (!server) throw new Error("Missing server");
+  removeEverywhere(state, id);
+  server.root.push(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "serverRoot", serverId },
+    faceup: options.faceup ?? false,
+    rezzed: options.rezzed ?? false,
     advancementCounters,
   };
   return id;
