@@ -5849,11 +5849,26 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       dupreStrengthCounterBonus(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
     const breakerAbilities = icebreakerAbilitiesForDefinition(breaker);
+    const breakAbilities = breakerAbilities.filter(
+      (ability) =>
+        ability.type === "break_subroutine" &&
+        breakAbilityMatchesIce(ability, iceDefinition),
+    );
+    const hasEligibleBreakTarget = breakAbilities.some((ability) =>
+      encounterSubroutines.some(
+        (subroutine, index) =>
+          breakAbilityMatchesSubroutine(ability, subroutine) &&
+          !run.brokenSubroutineIndexes.includes(index) &&
+          !run.resolvedSubroutineIndexes.includes(index),
+      ),
+    );
     const pump = breakerAbilities.find(
       (ability) => ability.type === "pump_strength",
     );
     if (
       pump &&
+      !run.noBreakSubroutinesActive &&
+      hasEligibleBreakTarget &&
       availableRunnerRunCredits(state, breakerId) >= pump.cost.credits
     ) {
       const variableStrength = pump.variableStrength;
@@ -5900,11 +5915,6 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
         );
       }
     }
-    const breakAbilities = breakerAbilities.filter(
-      (ability) =>
-        ability.type === "break_subroutine" &&
-        breakAbilityMatchesIce(ability, iceDefinition),
-    );
     const canPayAtLeastOneBreakAbility = breakAbilities.some((ability) => {
       const cost = breakSubroutineCostBreakdown(state, ability.cost.credits, 1);
       return availableRunnerRunCredits(state, breakerId) >= cost.totalCost;

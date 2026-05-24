@@ -14,4 +14,13 @@ describe("card image client service", () => {
     expect(localCardImageUrl("hidden-card")).toBeUndefined();
     expect(localCardImageUrl("netgrid-corp-back")).toBeUndefined();
   });
+
+  it("prefers registered German display-only card skins when requested", () => {
+    expect(localCardImageUrl("onr_v1_188_ai-chief-financial-officer", { preferGerman: true })).toBe(
+      "/api/card-images/onr_v1_188_ai-chief-financial-officer?skin=de&v=2026-05-24-localized-de-assets-1"
+    );
+    expect(localCardImageUrl("onr_v1_001_afreet", { preferGerman: true })).toBe(
+      "/api/card-images/onr_v1_001_afreet?v=2026-05-23-local-onr-assets-3"
+    );
+  });
 });

@@ -26729,6 +26729,22 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"stack"|"grip"|"cardInstances"|"privatePayload"/,
     );
+    const runnerChoiceView = getPlayerView(state, "runner");
+    const corpChoiceView = getPlayerView(state, "corp");
+    const runnerChoiceCards =
+      runnerChoiceView.pendingChoice?.options.map((option) => option.card) ??
+      [];
+    expect(runnerChoiceView.pendingChoice?.choiceId).toBe(
+      state.pendingChoice!.choiceId,
+    );
+    expect(runnerChoiceCards).toHaveLength(5);
+    expect(
+      runnerChoiceCards.every(
+        (card) => card?.known === true && Boolean(card.rulesText),
+      ),
+    ).toBe(true);
+    expect(corpChoiceView.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(corpChoiceView)).not.toContain(topFive[0]);
 
     const pendingChoice = state.pendingChoice;
     expect(pendingChoice).toBeDefined();
@@ -28175,6 +28191,82 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("does not offer Japanese Water Torture pump actions against non-Wall ICE", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-japanese-water-torture-quandary-no-pump",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "onr_v1_runner_v1922_japanese_water_torture_quandary",
+          name: "O:NR V1.9.22 Japanese Water Torture Quandary",
+          cards: [
+            { id: "onr_v1_037_japanese-water-torture", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "onr_v1_corp_v1922_japanese_water_torture_quandary",
+          name: "O:NR V1.9.22 Japanese Water Torture Quandary Corp",
+          cards: [
+            { id: "onr_v1_261_quandary", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.runner.memoryLimit = 4;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_037_japanese-water-torture");
+    const iceId = putCorpIceOnServer(state, "hq", "onr_v1_261_quandary");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_037_japanese-water-torture",
+    );
+    const tortureId = state.runner.rig.programs.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_037_japanese-water-torture",
+    );
+    expect(tortureId).toBeDefined();
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+
+    const runnerActions = getLegalActions(state, "runner");
+    expect(
+      runnerActions.some(
+        (action) =>
+          action.type === "pump_breaker" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_037_japanese-water-torture",
+      ),
+    ).toBe(false);
+    expect(
+      runnerActions.some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_037_japanese-water-torture",
+      ),
+    ).toBe(false);
   });
 
   it("installs Hammer and applies ordered Stealth loss after breaking Wall subroutines without release promotion", () => {

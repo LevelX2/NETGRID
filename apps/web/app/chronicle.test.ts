@@ -1042,6 +1042,24 @@ describe("formatChronicleEvent", () => {
     expect(taxedIce.chips).toEqual(expect.arrayContaining(["+2 Installkosten", "5 gesamt"]));
   });
 
+  it("names older hardware decks trashed by Runner deck replacement", () => {
+    const item = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "runner",
+        title: "Artemis 2020",
+        cardDefinitionId: "onr_v1_122_artemis-2020",
+        zoneLabel: "Rig",
+        deckUniqueReplacement: true,
+        trashedDeckDefinitionIds: "onr_v1_137_parraline-5750"
+      }),
+      "runner",
+      { cardTitle: "Artemis 2020" }
+    );
+
+    expect(item.title).toBe("Du hast Artemis 2020 im Rig installiert; Parraline 5750 wurde getrasht, weil nur ein Hardware-Deck installiert sein darf.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Deck-Einzigartigkeit", "Trash", "1 Deck"]));
+  });
+
   it("names Restrictive Net Zoning selected servers in the chronicle", () => {
     const item = formatChronicleEvent(
       makeEvent("install_card", {

@@ -59,7 +59,7 @@ function imageValidators(image: CardImageLookupResult, fileStat: Awaited<ReturnT
 }
 
 export function cacheControlForCardImage(image: Pick<CardImageLookupResult, "kind" | "versioned">): string {
-  return image.kind === "generated" && image.versioned ? VERSIONED_CACHE_CONTROL : LOCAL_ONR_CACHE_CONTROL;
+  return (image.kind === "generated" || image.kind === "localized_de") && image.versioned ? VERSIONED_CACHE_CONTROL : LOCAL_ONR_CACHE_CONTROL;
 }
 
 export function clientHasFreshImage(request: Request, validators: { etag: string; lastModified: string }): boolean {
