@@ -109,6 +109,7 @@ import {
   type OpponentActionCue,
   type TurnStartAudioState
 } from "./action-cues";
+import { localizedDeCardTitle } from "./card-image-manifest";
 import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
@@ -133,6 +134,8 @@ import {
   baseActionSlotCapacity,
   breachProgressLabel,
   cardCreditCounterVisual,
+  cardChoiceIsReadonlyPrivateLook,
+  cardChoiceReadonlyConfirmationOptionId,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   counterDisplaysForRendering,
@@ -1881,7 +1884,11 @@ function zoneHighlighted(highlight: BoardHighlight | null, side: Side, zone: "hq
   return Boolean(highlight?.kind === "zone" && highlight.side === side && highlight.zone === zone);
 }
 
-function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Record<string, CatalogCardDetail>): Record<string, Omit<ChronicleContext, "side">> {
+function chronicleContextByEventId(
+  events: PublicGameEvent[],
+  detailsById: Record<string, CatalogCardDetail>,
+  options: { preferGermanCardImages?: boolean } = {}
+): Record<string, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
   const turnSideByEventId = chronicleTurnSideByEventId(events);
   const actionUseByEventId = chronicleActionUseByEventId(events);
@@ -1895,11 +1902,13 @@ function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Recor
   return Object.fromEntries(
     events.map((event) => {
       const card = eventCardDetail(event, detailsById);
+      const cardId = card?.catalogCardId ?? revealedEventCardId(event);
+      const cardTitle = options.preferGermanCardImages ? localizedDeCardTitle(cardId) ?? card?.title ?? null : card?.title ?? null;
       const serverTurnNumber = payloadPositiveInteger(event.publicPayload, "chronicleTurnNumber");
       return [
         event.eventId,
         {
-          cardTitle: card?.title ?? null,
+          cardTitle,
           cardText: card?.text ?? null,
           cardType: card?.type ?? null,
           cardDetailLines: card ? catalogDetailLines(card) : [],
@@ -3186,7 +3195,7 @@ export default function Page() {
       return;
     }
     const newEvents = publicEventsAfter(payload.eventTail, lastSeen);
-    const contextByEventId = chronicleContextByEventId(payload.playerView.publicEvents, catalogDetailsById);
+    const contextByEventId = chronicleContextByEventId(payload.playerView.publicEvents, catalogDetailsById, { preferGermanCardImages });
     const cues = actionCuesEnabled
       ? deriveOpponentActionCues({
           viewerSide: payload.side,
@@ -3210,7 +3219,7 @@ export default function Page() {
       const sound = actionSoundForActionType(actionType, item.visibility);
       if (sound) playActionCueSound(sound, audioVolume, actionSoundCountForAction(actionType, event.publicPayload));
     }
-  }, [actionCuesEnabled, automaticEffectCuesEnabled, audioEnabled, audioVolume, payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById]);
+  }, [actionCuesEnabled, automaticEffectCuesEnabled, audioEnabled, audioVolume, payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById, preferGermanCardImages]);
 
   useEffect(() => {
     if (currentActionCue || actionCueQueue.length === 0) return;
@@ -5257,6 +5266,7 @@ export default function Page() {
           actionDisabled={Boolean(payload.winner) || connection !== "online"}
           highlighted={activeCueHighlight?.kind === "run"}
           onAction={submitAction}
+          onChoiceOption={submitChoiceOption}
         />
       ) : null}
       {showFloatingActionPanel && activeView ? (
@@ -5887,6 +5897,7 @@ export default function Page() {
                 cardDetailsById={catalogDetailsById}
                 displayMode={cardDisplayMode}
                 detailMode={chronicleDetailMode}
+                preferGermanCardImages={preferGermanCardImages}
                 onFocusCard={focusCard}
               />
               <section className="section">
@@ -7977,7 +7988,8 @@ function RunTimelineOverlay({
   cardDetailsById,
   actionDisabled,
   highlighted = false,
-  onAction
+  onAction,
+  onChoiceOption
 }: {
   view: PlayerView;
   legalActions: LegalAction[];
@@ -7986,6 +7998,7 @@ function RunTimelineOverlay({
   actionDisabled: boolean;
   highlighted?: boolean;
   onAction(action: LegalAction): void;
+  onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
 }) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
@@ -8039,6 +8052,9 @@ function RunTimelineOverlay({
   const headerStatus = runWindowStatusLabel(view);
   const breakerHint = runBreakerActionHint(view, legalActions);
   const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
+  const choiceAction = view.pendingChoice ? runActions.find((action) => action.type === "resolve_choice" && action.payload?.choiceId === view.pendingChoice?.choiceId) : undefined;
+  const regularRunActions = choiceAction ? runActions.filter((action) => action.actionId !== choiceAction.actionId) : runActions;
+  const runChoice = view.pendingChoice && choiceAction && view.pendingChoice.minSelections === 1 && view.pendingChoice.maxSelections === 1 ? view.pendingChoice : null;
 
   const overlay = (
     <div ref={overlayRef} className={`runTimelineOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} aria-live="polite" aria-atomic="true">
@@ -8066,9 +8082,28 @@ function RunTimelineOverlay({
             </span>
           ))}
         </div>
-        {runActions.length > 0 ? (
+        {runChoice && choiceAction ? (
+          <div className="runActionBar" aria-label={runChoice.prompt} data-testid="run-choice-action-bar">
+            {runChoice.options.map((option) => (
+              <OverflowAwareActionButton
+                action={choiceAction}
+                className="button primary actionButton runActionButton"
+                key={option.id}
+                label={option.label}
+                displayLabel={option.label}
+                onClick={() => onChoiceOption(choiceAction, runChoice.choiceId, option.id)}
+                disabled={actionDisabled || option.selectable === false}
+                type="button"
+                data-testid="run-choice-button"
+                data-action-type={choiceAction.type}
+                iconSize={14}
+              />
+            ))}
+          </div>
+        ) : null}
+        {regularRunActions.length > 0 ? (
           <div className="runActionBar" aria-label="Run-Aktionen" data-testid="run-action-bar">
-            {runActions.map((action) => {
+            {regularRunActions.map((action) => {
               const compactLabel = runWindowActionButtonLabel(view, action);
               const fullLabel =
                 compactLabel.startsWith("SMC:") && action.label
@@ -8091,7 +8126,7 @@ function RunTimelineOverlay({
               );
             })}
           </div>
-        ) : jackOutAvailable ? (
+        ) : !runChoice && jackOutAvailable ? (
           <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p>
         ) : null}
         {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
@@ -8715,19 +8750,27 @@ function CardChoicePanel({
   const [showOnlySelectable, setShowOnlySelectable] = useState(false);
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
   const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
-  const hasDisplayOnlyOptions = choice.options.some((option) => option.selectable === false);
-  const visibleOptions = showOnlySelectable ? choice.options.filter(cardChoiceOptionSelectable) : choice.options;
+  const readonlyPrivateLook = cardChoiceIsReadonlyPrivateLook(choice);
+  const readonlyConfirmationOptionId = readonlyPrivateLook ? cardChoiceReadonlyConfirmationOptionId(choice) : null;
+  const hasDisplayOnlyOptions = !readonlyPrivateLook && choice.options.some((option) => option.selectable === false);
+  const visibleOptions = readonlyPrivateLook
+    ? choice.options.filter((option) => option.id !== readonlyConfirmationOptionId)
+    : showOnlySelectable
+      ? choice.options.filter(cardChoiceOptionSelectable)
+      : choice.options;
   const rows = cardChoiceRows(visibleOptions);
   const selectedOptions = selected
     .map((optionId) => choice.options.find((option) => option.id === optionId))
     .filter((option): option is VisibleChoiceOption => Boolean(option));
   const programInstallTrashInfo = runnerProgramInstallTrashChoiceInfo(choice, view, selected);
   const canSubmit =
-    selected.length >= minSelections &&
-    selected.length <= maxSelections &&
-    (programInstallTrashInfo?.canSubmit ?? true);
+    readonlyPrivateLook && readonlyConfirmationOptionId
+      ? true
+      : selected.length >= minSelections &&
+        selected.length <= maxSelections &&
+        (programInstallTrashInfo?.canSubmit ?? true);
   const singleSelection = maxSelections === 1;
-  const title = programInstallTrashInfo?.title ?? cardChoiceTitle(choice);
+  const title = programInstallTrashInfo?.title ?? cardChoiceReadonlyPrivateLookTitle(choice, view) ?? cardChoiceTitle(choice);
   const prompt = choice.prompt.trim();
   const effectHint = programInstallTrashInfo?.effectHint ?? cardChoiceEffectHint(choice);
   const readableCards = cardChoiceUsesReadableCards(choice);
@@ -8770,7 +8813,7 @@ function CardChoicePanel({
                 </button>
               </div>
             ) : null}
-            <span className="cardChoiceCounter">{choiceSelectionRangeLabel(minSelections, maxSelections)}</span>
+            {readonlyPrivateLook ? null : <span className="cardChoiceCounter">{choiceSelectionRangeLabel(minSelections, maxSelections)}</span>}
           </div>
         </header>
         <div className="cardChoiceRows">
@@ -8803,19 +8846,21 @@ function CardChoicePanel({
                         <span className="actionButtonLabel">{option.label}</span>
                       </button>
                     )}
-                    <button
-                      className={`button cardChoiceSelectButton ${active ? "primary" : ""}`}
-                      onClick={() => toggleOption(option.id)}
-                      disabled={disabled || !selectable}
-                      type="button"
-                      aria-label={selectable ? active ? "Auswahl entfernen" : "Karte auswählen" : "Nur ansehen"}
-                      title={selectable ? active ? "Auswahl entfernen" : "Karte auswählen" : "Nur ansehen"}
-                      aria-pressed={active}
-                      data-testid="card-choice-option"
-                    >
-                      {selectable ? active ? <Check size={14} /> : <Plus size={14} /> : <Eye size={14} />}
-                      <span className="srOnly">{selectable ? active ? "Gewählt" : "Wählen" : "Nur ansehen"}</span>
-                    </button>
+                    {readonlyPrivateLook ? null : (
+                      <button
+                        className={`button cardChoiceSelectButton ${active ? "primary" : ""}`}
+                        onClick={() => toggleOption(option.id)}
+                        disabled={disabled || !selectable}
+                        type="button"
+                        aria-label={selectable ? active ? "Auswahl entfernen" : "Karte auswählen" : "Nur ansehen"}
+                        title={selectable ? active ? "Auswahl entfernen" : "Karte auswählen" : "Nur ansehen"}
+                        aria-pressed={active}
+                        data-testid="card-choice-option"
+                      >
+                        {selectable ? active ? <Check size={14} /> : <Plus size={14} /> : <Eye size={14} />}
+                        <span className="srOnly">{selectable ? active ? "Gewählt" : "Wählen" : "Nur ansehen"}</span>
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -8825,11 +8870,17 @@ function CardChoicePanel({
         <footer className="cardChoiceFooter">
           <div className="cardChoiceFooterText">
             {effectHint ? <p className="cardChoiceEffectHint">{effectHint}</p> : null}
-            <p className="cardChoiceQuestion">{programInstallTrashInfo?.question ?? cardChoiceQuestion(choice, selectedOptions)}</p>
+            <p className="cardChoiceQuestion">{readonlyPrivateLook ? "Diese Karten wurden nur dir angezeigt." : programInstallTrashInfo?.question ?? cardChoiceQuestion(choice, selectedOptions)}</p>
           </div>
-          <button className="button primary cardChoiceSubmit" onClick={() => onChoiceOptions(action, choice.choiceId, selected)} disabled={disabled || !canSubmit} type="button" data-testid="card-choice-submit">
+          <button
+            className="button primary cardChoiceSubmit"
+            onClick={() => onChoiceOptions(action, choice.choiceId, readonlyPrivateLook && readonlyConfirmationOptionId ? [readonlyConfirmationOptionId] : selected)}
+            disabled={disabled || !canSubmit}
+            type="button"
+            data-testid="card-choice-submit"
+          >
             <Check size={15} />
-            {programInstallTrashInfo?.submitLabel ?? cardChoiceSubmitLabel(choice, selected.length)}
+            {readonlyPrivateLook ? "Fertig" : programInstallTrashInfo?.submitLabel ?? cardChoiceSubmitLabel(choice, selected.length)}
           </button>
         </footer>
       </div>
@@ -8850,6 +8901,22 @@ function cardChoiceRows(options: VisibleChoiceOption[]): VisibleChoiceOption[][]
   const rows: VisibleChoiceOption[][] = [];
   for (let index = 0; index < options.length; index += rowSize) rows.push(options.slice(index, index + rowSize));
   return rows;
+}
+
+function cardChoiceReadonlyPrivateLookTitle(choice: VisibleChoice, view: PlayerView): string | null {
+  if (!cardChoiceIsReadonlyPrivateLook(choice)) return null;
+  const [, , sourceCardId, zone] = choice.source.split(":");
+  const sourceTitle = sourceCardId ? visibleCardsByInstanceId(view).get(sourceCardId)?.title : null;
+  const shownCards = choice.options.filter((option) => option.id !== "done").length;
+  const zoneLabel =
+    zone === "rd"
+      ? shownCards === 1
+        ? "oberste R&D-Karte"
+        : "R&D-Karten ansehen"
+      : zone === "hq"
+        ? "HQ-Karten ansehen"
+        : "Karten ansehen";
+  return sourceTitle ? `${sourceTitle}: ${zoneLabel}` : zoneLabel;
 }
 
 function cardChoiceTitle(choice: VisibleChoice): string {
@@ -9236,6 +9303,7 @@ function ChroniclePanel({
   cardDetailsById,
   displayMode,
   detailMode,
+  preferGermanCardImages,
   onFocusCard
 }: {
   events: PublicGameEvent[];
@@ -9244,11 +9312,12 @@ function ChroniclePanel({
   cardDetailsById: Record<string, CatalogCardDetail>;
   displayMode: CardDisplayMode;
   detailMode: ChronicleDetailMode;
+  preferGermanCardImages: boolean;
   onFocusCard(card: DisplayVisibleCard): void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => new Set());
-  const contextByEventId = chronicleContextByEventId(turnContextEvents, cardDetailsById);
+  const contextByEventId = chronicleContextByEventId(turnContextEvents, cardDetailsById, { preferGermanCardImages });
   const entries = chronicleEntriesWithRunGroups(events, side, contextByEventId, cardDetailsById).reverse();
   const groupedEntries = groupChronicleEntriesForRender(entries);
   const shownChronicleGroupLabels = new Set<string>();

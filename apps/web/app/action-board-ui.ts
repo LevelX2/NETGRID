@@ -264,10 +264,33 @@ export function splitLegalActions(actions: LegalAction[]): { primaryActions: Leg
   const primaryActions: LegalAction[] = [];
   const contextualActions: LegalAction[] = [];
   for (const action of actions) {
-    if (isContextualLegalAction(action)) contextualActions.push(action);
-    else primaryActions.push(action);
+    if (isContextualLegalAction(action)) {
+      if (!hasSelectableActionContext(action)) {
+        warnContextlessLegalAction(action);
+        primaryActions.push(action);
+      } else {
+        contextualActions.push(action);
+      }
+    } else {
+      primaryActions.push(action);
+    }
   }
   return { primaryActions, contextualActions };
+}
+
+function hasSelectableActionContext(action: LegalAction): boolean {
+  return cardRefsForAction(action).length > 0 || serverRefsForAction(action).length > 0;
+}
+
+function warnContextlessLegalAction(action: LegalAction): void {
+  if (process.env.NODE_ENV === "production") return;
+  console.warn("NETGRID legal action was classified as contextual without a selectable context; keeping it visible as a primary action.", {
+    actionId: action.actionId,
+    type: action.type,
+    source: action.source,
+    timingPoint: action.timingPoint,
+    label: action.label
+  });
 }
 
 export function automaticEndTurnAction(view: PlayerView, actions: LegalAction[], side: Side, options: { accessRevealVisible?: boolean } = {}): LegalAction | undefined {
@@ -847,6 +870,7 @@ export function hasLegalAction(actions: LegalAction[], type: LegalAction["type"]
 
 export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
   if (choice.kind !== "select_cards") return false;
+  if (cardChoiceIsReadonlyPrivateLook(choice)) return true;
   if (choice.source.startsWith("v1922.corp_archives_to_hq")) return true;
   if (isHiddenZoneReadableCardChoiceSource(choice.source)) return true;
   if (choice.cardSearchPresentation || choice.stackSearchResolution || choice.source.includes("search_stack")) return true;
@@ -860,13 +884,30 @@ export function cardChoiceUsesReadableCards(choice: NonNullable<PlayerView["pend
   return (
     choice.kind === "select_cards" &&
     Boolean(
-      choice.cardSearchPresentation ||
+      cardChoiceIsReadonlyPrivateLook(choice) ||
+        choice.cardSearchPresentation ||
         choice.stackSearchResolution ||
         choice.source.includes("search_stack") ||
         isHiddenZoneReadableCardChoiceSource(choice.source) ||
         choice.options.some((option) => option.card),
     )
   );
+}
+
+export function cardChoiceIsReadonlyPrivateLook(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
+  if (choice.kind !== "select_cards" || !choice.source.startsWith("p3_33.private_look:")) return false;
+  const doneOptions = choice.options.filter((option) => option.id === "done" && option.selectable !== false);
+  const cardOptions = choice.options.filter((option) => option.id !== "done");
+  return (
+    doneOptions.length === 1 &&
+    cardOptions.length > 0 &&
+    cardOptions.every((option) => option.selectable === false && Boolean(option.card))
+  );
+}
+
+export function cardChoiceReadonlyConfirmationOptionId(choice: NonNullable<PlayerView["pendingChoice"]>): string | null {
+  if (!cardChoiceIsReadonlyPrivateLook(choice)) return null;
+  return choice.options.find((option) => option.id === "done" && option.selectable !== false)?.id ?? null;
 }
 
 export function cardChoiceUsesOrderedSelection(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
@@ -1139,12 +1180,16 @@ export function runAwareActionButtonLabel(view: PlayerView, action: LegalAction)
 export function runWindowActions(view: PlayerView, actions: LegalAction[]): LegalAction[] {
   if (!view.run) return [];
   return actions.filter((action) => {
-    if (action.type === "access_card") return true;
+    if (action.type === "resolve_choice" && view.pendingChoice) return true;
+    if (isAccessWindowAction(action)) return true;
     if (!action.timingPoint.startsWith("run.")) return false;
-    if (action.type === "jack_out" || action.type === "continue_run" || action.type === "rez_ice" || action.type === "decline_rez") return true;
     if (action.type === "pump_breaker" || action.type === "break_subroutine") return action.payload?.iceId === activeRunIceInstanceId(view);
-    return isRunWindowTriggerAction(action);
+    return true;
   });
+}
+
+function isAccessWindowAction(action: LegalAction): boolean {
+  return action.type === "access_card" || action.timingPoint.startsWith("access.");
 }
 
 export function runWindowActionButtonLabel(view: PlayerView, action: LegalAction): string {
@@ -1390,19 +1435,11 @@ function isPriorityAction(action: LegalAction): boolean {
 
 function objectBoundAction(action: LegalAction): boolean {
   if (action.type === "start_run") return false;
-  return serverRefsForAction(action).length > 0 || ["advance_card", "score_agenda", "trash_resource", "trigger_ability"].includes(action.type);
+  return serverRefsForAction(action).length > 0 || ["advance_card", "score_agenda", "trash_resource"].includes(action.type);
 }
 
 function isSelfModifyingCodeAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
   return action.type === "trigger_ability" && actionHasAbility(action, "self_modifying_code_install_program");
-}
-
-function isStartupImmolatorAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
-  return action.type === "trigger_ability" && actionHasAbility(action, "startup_immolator_trash_ice");
-}
-
-function isRunWindowTriggerAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
-  return isSelfModifyingCodeAction(action) || isStartupImmolatorAction(action) || isApproachIceExposeAction(action);
 }
 
 function isApproachIceExposeAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {

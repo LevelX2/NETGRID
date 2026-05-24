@@ -12418,6 +12418,14 @@ function applyQuestForCattekinStartOfTurn(
       sourceDefinitionId,
       sourceTitle: publicCardTitle(sourceDefinitionId),
       v1921DieRoll: dieRoll,
+      questForCattekinOutcome:
+        dieRoll === 6
+          ? "permanent_action"
+          : dieRoll === 1
+            ? "core_damage"
+            : dieRoll === 2
+              ? "net_damage"
+              : "no_effect",
       randomPurpose,
       randomCounterAfter: state.randomCounter,
       ...(dieRoll === 6

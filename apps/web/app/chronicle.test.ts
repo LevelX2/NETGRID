@@ -340,6 +340,27 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify([paid, startTurn])).not.toContain("von The Shell Traders entfernt");
   });
 
+  it("keeps end-turn entries and shows card credit payouts as separate economy entries", () => {
+    const event = makeEvent("end_turn", {
+      actor: "runner",
+      gainedCredits: 2,
+      runnerCreditsAfter: 12,
+      corpRezzedIceThisTurnCount: 2,
+      sourceDefinitionId: "onr_v1_162_field-reporter-for-ice-and-data"
+    });
+    const item = formatChronicleEvent(event, "runner");
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Du hast den Zug beendet.");
+    expect(item.category).toBe("turn");
+    expect(effects).toHaveLength(1);
+    expect(effects[0]?.title).toBe("Die Korp hat in diesem Zug 2 ICE gerezzt. Du erhältst durch Field Reporter for Ice and Data 2 Credits.");
+    expect(effects[0]?.category).toBe("economy");
+    expect(effects[0]?.importance).toBe("important");
+    expect(effects[0]?.cardDefinitionId).toBe("onr_v1_162_field-reporter-for-ice-and-data");
+    expect(effects[0]?.chips).toEqual(expect.arrayContaining(["Zugende", "+2 Credits", "2 ICE gerezzt", "Field Reporter for Ice and Data"]));
+  });
+
   it("names generic card abilities from their public action label", () => {
     const item = formatChronicleEvent(
       makeEvent("trigger_ability", {
@@ -685,6 +706,39 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(item)).not.toContain("cardInstances");
     expect(JSON.stringify(item)).not.toContain("\"hq\"");
     expect(JSON.stringify(item)).not.toContain("\"rd\"");
+  });
+
+  it("describes Record Reconstructor Archives replacement on immediate and protected runs", () => {
+    const immediate = formatChronicleEvent(
+      makeEvent("activated_card_ability", {
+        actor: "runner",
+        title: "Record Reconstructor",
+        sourceDefinitionId: "onr_v1_142_record-reconstructor",
+        accessReplacement: "archives_faceup_to_rd",
+        shuffledFaceUpArchivesCount: 4,
+        movedCount: 2,
+        hiddenZoneBarrier: true
+      }),
+      "runner"
+    );
+    const protectedRun = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_142_record-reconstructor",
+        accessReplacement: "archives_faceup_to_rd",
+        shuffledFaceUpArchivesCount: 3,
+        movedCount: 2,
+        hiddenZoneBarrier: true
+      }),
+      "runner"
+    );
+
+    expect(immediate.title).toBe("Du hast Record Reconstructor genutzt: 2 offene Archives-Karten oben auf R&D gelegt.");
+    expect(immediate.description).toBe("4 offene Archives-Karten wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.");
+    expect(immediate.chips).toEqual(expect.arrayContaining(["Record Reconstructor", "Archives", "R&D", "2 bewegt"]));
+    expect(protectedRun.title).toBe("Du hast Record Reconstructor abgeschlossen: 2 offene Archives-Karten oben auf R&D gelegt.");
+    expect(protectedRun.description).toBe("3 offene Archives-Karten wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.");
+    expect(JSON.stringify(protectedRun)).not.toContain("cardInstances");
   });
 
   it("shows Schlaghund tag-check damage without internal state", () => {
@@ -1092,6 +1146,22 @@ describe("formatChronicleEvent", () => {
 
     expect(item.title).toBe("Die Korp hat Security Net Optimization gescored und Remote 1 gewählt.");
     expect(item.chips).toEqual(expect.arrayContaining(["Score", "Remote 1"]));
+  });
+
+  it("uses the localized display title from context for scored agendas", () => {
+    const item = formatChronicleEvent(
+      makeEvent("score_agenda", {
+        actor: "corp",
+        title: "AI Chief Financial Officer",
+        cardDefinitionId: "onr_v1_188_ai-chief-financial-officer"
+      }),
+      "runner",
+      { agendaPoints: 2, cardTitle: "KI-Finanzvorstand" }
+    );
+
+    expect(item.title).toBe("Die Korp hat KI-Finanzvorstand gescored und 2 Agenda-Punkte erhalten.");
+    expect(item.cardTitle).toBe("KI-Finanzvorstand");
+    expect(item.chips).toEqual(expect.arrayContaining(["Score", "+2 Agenda"]));
   });
 
   it("describes Data Fort Reclamation and Aardvark hidden-zone choices", () => {
@@ -2906,6 +2976,81 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.cardDefinitionId).toBe("onr_v1_371_tokyo-chiba-infighting");
     expect(items[0]?.cardTitle).toBe("Tokyo-Chiba Infighting");
     expect(items[0]?.chips).toContain("+2 Credits");
+  });
+
+  it("shows Quest for Cattekin die rolls and outcomes for start-turn effects", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "quest-noop",
+            kind: "counter_change",
+            visibility: "public",
+            side: "runner",
+            amount: 0,
+            reason: "start_of_turn",
+            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceTitle: "Quest for Cattekin",
+            v1921DieRoll: 4,
+            questForCattekinOutcome: "no_effect"
+          },
+          {
+            effectId: "quest-core",
+            kind: "damage",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            reason: "start_of_turn",
+            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceTitle: "Quest for Cattekin",
+            v1921DieRoll: 1,
+            questForCattekinOutcome: "core_damage",
+            damageCannotBePrevented: true,
+            damageType: "core"
+          },
+          {
+            effectId: "quest-net",
+            kind: "damage",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            reason: "start_of_turn",
+            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceTitle: "Quest for Cattekin",
+            v1921DieRoll: 2,
+            questForCattekinOutcome: "net_damage",
+            damageCannotBePrevented: true,
+            damageType: "net"
+          },
+          {
+            effectId: "quest-action",
+            kind: "gain_actions",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            reason: "start_of_turn",
+            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceTitle: "Quest for Cattekin",
+            v1921DieRoll: 6,
+            questForCattekinOutcome: "permanent_action",
+            sourceTrashed: true,
+            permanentActionGain: true
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items.map((item) => item.title)).toEqual([
+      "Quest for Cattekin würfelt eine 4: kein weiterer Effekt.",
+      "Quest for Cattekin würfelt eine 1: Du erleidest 1 Core Damage.",
+      "Quest for Cattekin würfelt eine 2: Du erleidest 1 Net Damage.",
+      "Quest for Cattekin würfelt eine 6: Du erhältst dauerhaft 1 zusätzliche Aktion."
+    ]);
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Quest for Cattekin", "Wurf 4", "Kein Effekt"]));
+    expect(items[1]?.description).toBe("Der Schaden von Quest for Cattekin kann nicht verhindert werden.");
+    expect(items[3]?.chips).toEqual(expect.arrayContaining(["Wurf 6", "Extra-Aktion", "Dauerhaft", "Trash"]));
   });
 
   it("formats auto-rezzed region effects", () => {

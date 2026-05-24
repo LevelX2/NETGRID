@@ -27,7 +27,7 @@ export const traumaTeamImplementation: CardImplementationDefinition = {
           visibility: "public",
         },
       ],
-      label: "Trauma Team: Trauma-Counter legen",
+      label: "Trauma-Counter hinzufügen",
     },
   ],
   damagePreventionSources: [

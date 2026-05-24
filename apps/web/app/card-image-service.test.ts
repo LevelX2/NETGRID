@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { localizedDeCardTitle } from "./card-image-manifest";
 import { localCardImageUrl } from "./card-image-service";
 
 describe("card image client service", () => {
@@ -22,5 +23,10 @@ describe("card image client service", () => {
     expect(localCardImageUrl("onr_v1_001_afreet", { preferGerman: true })).toBe(
       "/api/card-images/onr_v1_001_afreet?v=2026-05-23-local-onr-assets-3"
     );
+  });
+
+  it("exposes German display-only titles for registered skin cards", () => {
+    expect(localizedDeCardTitle("onr_v1_188_ai-chief-financial-officer")).toBe("KI-Finanzvorstand");
+    expect(localizedDeCardTitle("onr_v1_001_afreet")).toBeUndefined();
   });
 });

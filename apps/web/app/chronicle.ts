@@ -64,6 +64,7 @@ export const CHRONICLE_CATEGORY_LABELS: Record<ChronicleCategory, string> = {
 const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
 const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
 const SKIVVISS_ID = "onr_v1_064_skivviss";
+const QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 
 type EffectSummary = {
   category?: ChronicleCategory;
@@ -670,6 +671,27 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Pflichtkarte", ...(turnChip ? [turnChip] : []));
       break;
     case "activated_card_ability":
+      if (stringValue(payload.accessReplacement) === "archives_faceup_to_rd") {
+        const movedCount = numberValue(payload.movedCount) ?? 0;
+        const shuffledCount =
+          numberValue(payload.shuffledFaceUpArchivesCount) ?? movedCount;
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "Record Reconstructor";
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${source} genutzt: ${openArchivesCardCountText(movedCount)} oben auf R&D gelegt`,
+        );
+        description = `${openArchivesCardCountText(shuffledCount)} wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.`;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(source, "Archives", "R&D", `${movedCount} bewegt`);
+        break;
+      }
       if (mergedCardResolverEffect) {
         const cardResolverEffect = mergedCardResolverEffect;
         category = cardResolverEffect.category ?? "card";
@@ -1022,6 +1044,27 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       }
       break;
     case "continue_run":
+      if (stringValue(payload.accessReplacement) === "archives_faceup_to_rd") {
+        const movedCount = numberValue(payload.movedCount) ?? 0;
+        const shuffledCount =
+          numberValue(payload.shuffledFaceUpArchivesCount) ?? movedCount;
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "Record Reconstructor";
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${source} abgeschlossen: ${openArchivesCardCountText(movedCount)} oben auf R&D gelegt`,
+        );
+        description = `${openArchivesCardCountText(shuffledCount)} wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.`;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(source, "Archives", "R&D", `${movedCount} bewegt`);
+        break;
+      }
       if (abilityId === "rio_de_janeiro_passed_ice") {
         const dieRoll = payloadRandomRoll(payload);
         const runEnded = payload.rioRunEnded === true;
@@ -1329,9 +1372,11 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
 
 export function formatChronicleEffectItems(event: PublicGameEvent, side: Side): ChronicleItem[] {
   const effects = resolvedEffectsFromPayload(event.publicPayload.resolvedEffects);
-  return effects
+  const effectItems = effects
     .filter((effect) => !shouldMergeCardResolverEffect(event, effect))
     .map((effect, index) => formatChronicleEffect(event, effect, index, side));
+  const payloadItem = endTurnCreditPayoutChronicleItem(event, side);
+  return payloadItem ? [payloadItem, ...effectItems] : effectItems;
 }
 
 export function shouldSuppressChronicleEventItem(event: PublicGameEvent): boolean {
@@ -1468,6 +1513,48 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
 
   if (visibility === "redacted") {
     return redactedChronicleEffectItem(event, effect, index, actor, subject, amount);
+  }
+
+  if (sourceDefinitionId === QUEST_FOR_CATTEKIN_ID && effect.reason === "start_of_turn") {
+    const payload = effect as Record<string, unknown>;
+    const dieRoll = numberValue(payload.v1921DieRoll);
+    const outcome = stringValue(payload.questForCattekinOutcome);
+    category = outcome === "core_damage" || outcome === "net_damage" ? "danger" : outcome === "permanent_action" ? "turn" : "card";
+    importance = outcome === "core_damage" || outcome === "net_damage" ? "critical" : outcome === "permanent_action" ? "important" : "normal";
+    const source = sourceTitle ?? "Quest for Cattekin";
+    const rollText = dieRoll !== undefined ? ` würfelt eine ${dieRoll}` : " würfelt";
+    const gainsAction = subject === "Du" ? "Du erhältst" : `${subject} erhält`;
+    const suffersDamage = subject === "Du" ? "Du erleidest" : `${subject} erleidet`;
+    if (outcome === "permanent_action") {
+      title = `${source}${rollText}: ${gainsAction} dauerhaft 1 zusätzliche Aktion`;
+      description = `${source} wurde getrasht; die zusätzliche Aktion gilt ab diesem und den folgenden Runner-Zügen.`;
+      chips.push(source, ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), "Extra-Aktion", "Dauerhaft", "Trash");
+    } else if (outcome === "core_damage") {
+      title = `${source}${rollText}: ${suffersDamage} ${amount || 1} Core Damage`;
+      description = "Der Schaden von Quest for Cattekin kann nicht verhindert werden.";
+      chips.push(source, ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), "Core Damage", "Nicht verhinderbar");
+    } else if (outcome === "net_damage") {
+      title = `${source}${rollText}: ${suffersDamage} ${amount || 1} Net Damage`;
+      description = "Der Schaden von Quest for Cattekin kann nicht verhindert werden.";
+      chips.push(source, ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), "Net Damage", "Nicht verhinderbar");
+    } else {
+      title = `${source}${rollText}: kein weiterer Effekt`;
+      chips.push(source, ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), "Kein Effekt");
+    }
+    return {
+      id: `${event.eventId}:effect:${effect.effectId || index}`,
+      category,
+      importance,
+      visibility,
+      ...(actor ? { actor } : {}),
+      title: ensurePeriod(title),
+      ...(description ? { description: ensurePeriod(description) } : {}),
+      chips: uniqueChips(chips.filter(Boolean)),
+      cardDefinitionId: QUEST_FOR_CATTEKIN_ID,
+      cardTitle: source,
+      cardDetailLines: [],
+      groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
+    };
   }
 
   switch (effect.kind) {
@@ -1683,6 +1770,46 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     ...(displayCardTitle ? { cardTitle: displayCardTitle } : {}),
     cardDetailLines: [],
     groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
+  };
+}
+
+function endTurnCreditPayoutChronicleItem(event: PublicGameEvent, side: Side): ChronicleItem | undefined {
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  if (actionType !== "end_turn") return undefined;
+  const gainedCredits = numberValue(payload.gainedCredits) ?? numberValue(payload.gainCreditsAmount);
+  if (gainedCredits === undefined || gainedCredits <= 0) return undefined;
+  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  const sourceTitle = titleForDefinitionId(sourceDefinitionId) ?? stringValue(payload.sourceTitle) ?? stringValue(payload.title);
+  const actor = sideValue(payload.actor);
+  const recipient = subjectFor(actor, side, false);
+  const rezzedIceCount = numberValue(payload.corpRezzedIceThisTurnCount) ?? numberValueFromRecord(payload.amounts, "corpRezzedIceThisTurnCount");
+  const iceClause =
+    rezzedIceCount !== undefined && rezzedIceCount > 0
+      ? `Die Korp hat in diesem Zug ${rezzedIceCount} ICE gerezzt. `
+      : "Die Korp hat in diesem Zug ICE gerezzt. ";
+  const recipientClause =
+    recipient === "Du"
+      ? "Du erhältst"
+      : `${recipient} erhält`;
+  const sourceClause = sourceTitle ? ` durch ${sourceTitle}` : "";
+  return {
+    id: `${event.eventId}:end-turn-credit-payout`,
+    category: "economy",
+    importance: "important",
+    visibility: "public",
+    ...(actor ? { actor } : {}),
+    title: `${iceClause}${recipientClause}${sourceClause} ${creditText(gainedCredits)}.`,
+    chips: uniqueChips([
+      "Zugende",
+      `+${gainedCredits} ${creditLabel(gainedCredits)}`,
+      ...(rezzedIceCount !== undefined && rezzedIceCount > 0 ? [`${rezzedIceCount} ICE gerezzt`] : []),
+      ...(sourceTitle ? [sourceTitle] : []),
+    ]),
+    ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
+    ...(sourceTitle ? { cardTitle: sourceTitle } : {}),
+    cardDetailLines: [],
+    groupLabel: groupLabelFor("economy", actor, undefined, undefined, undefined),
   };
 }
 
@@ -1975,6 +2102,12 @@ function cardCountText(amount: number): string {
   return amount === 1 ? "eine Karte" : `${amount} Karten`;
 }
 
+function openArchivesCardCountText(amount: number): string {
+  return amount === 1
+    ? "eine offene Archives-Karte"
+    : `${amount} offene Archives-Karten`;
+}
+
 function damageTypeLabel(damageType: string | undefined): string {
   if (damageType === "net") return "Net Damage";
   if (damageType === "meat") return "Meat Damage";
@@ -2212,6 +2345,11 @@ function stringValue(value: unknown): string | undefined {
 
 function numberValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function numberValueFromRecord(value: unknown, key: string): number | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  return numberValue((value as Record<string, unknown>)[key]);
 }
 
 function numberArrayValue(value: unknown): number[] {

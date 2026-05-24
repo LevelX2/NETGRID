@@ -1031,6 +1031,11 @@ export function publicContextForAction(
     context.spentPowerCounters = legalAction.payload.spentPowerCounters;
   if (typeof legalAction.payload?.gainedCredits === "number")
     context.gainedCredits = legalAction.payload.gainedCredits;
+  if (typeof legalAction.payload?.corpRezzedIceThisTurnCount === "number")
+    context.corpRezzedIceThisTurnCount =
+      legalAction.payload.corpRezzedIceThisTurnCount;
+  if (typeof legalAction.payload?.sourceCount === "number")
+    context.sourceCount = legalAction.payload.sourceCount;
   for (const key of [
     "targetIceDefinitionId",
     "strengthBonus",
