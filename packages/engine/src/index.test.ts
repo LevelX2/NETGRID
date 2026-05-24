@@ -1197,6 +1197,282 @@ describe("Proteus variable ICE harness", () => {
   });
 });
 
+describe("Proteus Dynamic Public ETR ICE", () => {
+  const MINOTAUR = "onr_proteus_031_minotaur";
+  const RIDDLER = "onr_proteus_034_riddler";
+  const TOUGHONIUM = "onr_proteus_041_toughoniumtm-wall";
+  const CODE_GATE = "onr_v1_230_cortical-scanner";
+  const WALL = "onr_v1_232_crystal-wall";
+  const SENTRY = "onr_v1_231_cortical-scrub";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusDynamicIceGame(seed: string): GameState {
+    const corpOverrideIds = new Set([
+      MINOTAUR,
+      RIDDLER,
+      TOUGHONIUM,
+      CODE_GATE,
+      WALL,
+      SENTRY,
+    ]);
+    return createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        ...ONR_V1_6_2_RUNNER_DECK,
+        id: `${seed}_runner`,
+        cards: [
+          { id: "simple_killer", quantity: 1 },
+          ...ONR_V1_6_2_RUNNER_DECK.cards.filter(
+            (card) => card.id !== "simple_killer",
+          ),
+        ],
+      },
+      corpDeck: {
+        ...ONR_V1_6_2_CORP_DECK,
+        id: `${seed}_corp`,
+        cards: [
+          { id: MINOTAUR, quantity: 1 },
+          { id: RIDDLER, quantity: 2 },
+          { id: TOUGHONIUM, quantity: 1 },
+          { id: CODE_GATE, quantity: 1 },
+          { id: WALL, quantity: 2 },
+          { id: SENTRY, quantity: 1 },
+          ...ONR_V1_6_2_CORP_DECK.cards.filter(
+            (card) => !corpOverrideIds.has(card.id),
+          ),
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+  }
+
+  function setRezzed(state: GameState, cardId: CardInstanceId): void {
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+
+  function effectiveSubroutineIds(
+    state: GameState,
+    serverId: Exclude<ServerId, "new_remote">,
+    iceId: CardInstanceId,
+  ): string[] {
+    const ice = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === serverId)
+      ?.ice.find((card) => card.instanceId === iceId) as
+      | { effectiveRunQuote?: { subroutines: Array<{ id: string }> } }
+      | undefined;
+    return ice?.effectiveRunQuote?.subroutines.map((subroutine) => subroutine.id) ?? [];
+  }
+
+  function startEncounterWithRezzedIce(
+    state: GameState,
+    serverId: Exclude<ServerId, "new_remote">,
+  ): GameState {
+    return enterEncounterFromMovementWindow(
+      apply(
+        toRunnerTurnFromCorpMain(state),
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === serverId,
+      ),
+    );
+  }
+
+  it("counts only other rezzed installed code gates and walls for Minotaur", () => {
+    let state = proteusDynamicIceGame("proteus-phase-1b-minotaur");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 30;
+    state.runner.credits = 20;
+    const minotaurId = putCorpIceOnServer(state, "rd", MINOTAUR);
+    const codeGateId = putCorpIceOnServer(state, "hq", CODE_GATE);
+    const wallId = putCorpIceOnServer(state, "archives", WALL);
+    const sentryId = putCorpIceOnServer(state, "archives", SENTRY);
+    for (const cardId of [
+      minotaurId,
+      codeGateId,
+      wallId,
+      sentryId,
+    ]) {
+      setRezzed(state, cardId);
+    }
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = startEncounterWithRezzedIce(state, "rd");
+    const subroutineIds = effectiveSubroutineIds(state, "rd", minotaurId);
+    expect(subroutineIds).toEqual([
+      `card_implementation.${MINOTAUR}.additional_subroutine.1.repeat.1.end_the_run`,
+      `card_implementation.${MINOTAUR}.additional_subroutine.2.repeat.2.end_the_run`,
+    ]);
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(continueAction.payload).toMatchObject({
+      unbrokenSubroutineCount: 2,
+      encounterWillEndRun: true,
+    });
+    expect(JSON.stringify(continueAction.payload)).not.toContain(minotaurId);
+    expect(JSON.stringify(continueAction.payload)).not.toMatch(hiddenPayloadMarkers);
+
+    const stale = structuredClone(state);
+    stale.cardInstances[wallId] = {
+      ...stale.cardInstances[wallId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    const staleContinue = applyAction(stale, {
+      matchId: stale.matchId,
+      side: "runner",
+      actionId: continueAction.actionId,
+      clientKnownStateVersion: stale.stateVersion,
+      idempotencyKey: "proteus-minotaur-stale-continue",
+    });
+    expect(staleContinue.ok).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
+    expect(state.run).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        sourceDefinitionId: MINOTAUR,
+        subroutineIndex: 0,
+        cardDefinitionId: MINOTAUR,
+        cardTitle: "Minotaur",
+        endedRun: true,
+      }),
+    ]);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("lets Riddler add repeatable current-encounter ETR subroutines for [2]", () => {
+    let state = proteusDynamicIceGame("proteus-phase-1b-riddler");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 10;
+    state.runner.credits = 10;
+    const riddlerId = putCorpIceOnServer(state, "rd", RIDDLER);
+    setRezzed(state, riddlerId);
+    state = startEncounterWithRezzedIce(state, "rd");
+
+    const addAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.source === riddlerId,
+    );
+    expect(addAction.costs).toEqual([{ credits: 2 }]);
+    expect(addAction.payload).toMatchObject({
+      cardImplementationAbility: "activated",
+      cardImplementationAbilityTiming: "corp_encounter",
+    });
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: addAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-riddler-wrong-side",
+      }).ok,
+    ).toBe(false);
+    const lowCredits = structuredClone(state);
+    lowCredits.corp.credits = 1;
+    expect(
+      applyAction(lowCredits, {
+        matchId: lowCredits.matchId,
+        side: "corp",
+        actionId: addAction.actionId,
+        clientKnownStateVersion: lowCredits.stateVersion,
+        idempotencyKey: "proteus-riddler-cost",
+      }).ok,
+    ).toBe(false);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === addAction.actionId,
+    );
+    expect(state.corp.credits).toBe(8);
+    expect(effectiveSubroutineIds(state, "rd", riddlerId)).toEqual([
+      `card_implementation.${RIDDLER}.current_encounter_additional_subroutine.1.end_the_run`,
+    ]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+      sourceDefinitionId: RIDDLER,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    const staleAfterOne = structuredClone(state);
+    const staleContinue = mustAction(
+      staleAfterOne,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.source === riddlerId,
+    );
+    expect(state.corp.credits).toBe(6);
+    expect(effectiveSubroutineIds(state, "rd", riddlerId)).toHaveLength(2);
+    staleAfterOne.run!.encounterAdditionalSubroutines = [
+      ...(staleAfterOne.run!.encounterAdditionalSubroutines ?? []),
+      {
+        sourceCardInstanceId: riddlerId,
+        sourceDefinitionId: RIDDLER,
+        sourceTitle: "Riddler",
+        subroutineKind: "end_the_run",
+      },
+    ];
+    const staleResult = applyAction(staleAfterOne, {
+      matchId: staleAfterOne.matchId,
+      side: "runner",
+      actionId: staleContinue.actionId,
+      clientKnownStateVersion: staleAfterOne.stateVersion,
+      idempotencyKey: "proteus-riddler-stale-continue",
+    });
+    expect(staleResult.ok).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.unbrokenSubroutineCount === 2,
+    );
+    expect(state.run).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        sourceDefinitionId: RIDDLER,
+        subroutineIndex: 0,
+        cardDefinitionId: RIDDLER,
+        cardTitle: "Riddler",
+        endedRun: true,
+      }),
+    ]);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", () => {
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;

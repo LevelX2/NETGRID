@@ -1290,6 +1290,57 @@ describe("CardImplementation definition descriptors", () => {
     });
   });
 
+  it("describes Proteus Phase 1b dynamic public ETR ICE implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_031_minotaur")
+        ?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "additional_subroutine",
+        activeWhile: "rezzed",
+        sourceZone: "corp_installed",
+        visibility: "public",
+        appliesTo: {
+          side: "corp",
+          cardType: "ice",
+          sourceCardOnly: true,
+        },
+        append: "after_existing",
+        repeat: {
+          kind: "for_each_rezzed_installed_ice",
+          subtypeAnyOf: ["code_gate", "wall"],
+          excludeSource: true,
+        },
+        subroutine: {
+          kind: "end_the_run",
+          text: "*End the run.",
+          visibility: "public",
+        },
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_034_riddler")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "activated",
+      timing: "corp_encounter",
+      costs: [{ kind: "credit", amount: 2 }],
+      effects: [
+        {
+          kind: "add_current_encounter_additional_subroutine",
+          target: "encountered_ice_self",
+          append: "after_existing",
+          subroutine: {
+            kind: "end_the_run",
+            text: "*End the run.",
+            visibility: "public",
+          },
+          visibility: "public",
+        },
+      ],
+    });
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

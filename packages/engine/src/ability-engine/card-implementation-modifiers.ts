@@ -65,12 +65,19 @@ export function cardHasNormalizedSubtype(
 
 export function cardMatchesModifierAppliesTo(
   definition: CardDefinition,
-  appliesTo: { cardType: CardType; subtype?: string },
+  appliesTo: { cardType: CardType; subtype?: string; subtypeAnyOf?: readonly string[] },
 ): boolean {
   if (definition.type !== appliesTo.cardType) return false;
   if (
     appliesTo.subtype &&
     !cardHasNormalizedSubtype(definition, appliesTo.subtype)
+  )
+    return false;
+  if (
+    appliesTo.subtypeAnyOf &&
+    !appliesTo.subtypeAnyOf.some((subtype) =>
+      cardHasNormalizedSubtype(definition, subtype),
+    )
   )
     return false;
   return true;
@@ -112,6 +119,16 @@ export function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
   const ids: CardInstanceId[] = [];
   for (const server of state.corp.servers) {
     for (const cardId of server.root) {
+      if (cardInstanceFor(state, cardId).rezzed) ids.push(cardId);
+    }
+  }
+  return ids;
+}
+
+export function rezzedCorpInstalledCardIds(state: GameState): CardInstanceId[] {
+  const ids: CardInstanceId[] = [];
+  for (const server of state.corp.servers) {
+    for (const cardId of [...server.ice, ...server.root]) {
       if (cardInstanceFor(state, cardId).rezzed) ids.push(cardId);
     }
   }
@@ -187,6 +204,47 @@ export function activeCardImplementationModifiersForCorpRoot<
     Extract<CardModifierImplementation, { kind: TKind }>
   >[] = [];
   for (const sourceCardInstanceId of rezzedCorpRootCardIds(state)) {
+    const sourceDefinition = cardDefinitionForInstance(
+      state,
+      sourceCardInstanceId,
+    );
+    const sourceImplementation = cardImplementationForDefinitionId(
+      sourceDefinition.id,
+    );
+    for (const modifier of sourceImplementation?.modifiers ?? []) {
+      if (modifier.kind !== kind) continue;
+      matches.push({
+        sourceCardInstanceId,
+        sourceDefinitionId: sourceDefinition.id,
+        sourceDefinition,
+        modifier: modifier as Extract<
+          CardModifierImplementation,
+          { kind: TKind }
+        >,
+      });
+    }
+  }
+  return matches;
+}
+
+/**
+ * Returns active modifiers from currently rezzed Corp installed cards.
+ *
+ * This includes ICE and root cards. Callers still filter by modifier sourceZone
+ * so root-only and installed-card modifiers do not accidentally overlap.
+ */
+export function activeCardImplementationModifiersForCorpInstalled<
+  TKind extends CardModifierImplementation["kind"],
+>(
+  state: GameState,
+  kind: TKind,
+): ActiveCardImplementationModifier<
+  Extract<CardModifierImplementation, { kind: TKind }>
+>[] {
+  const matches: ActiveCardImplementationModifier<
+    Extract<CardModifierImplementation, { kind: TKind }>
+  >[] = [];
+  for (const sourceCardInstanceId of rezzedCorpInstalledCardIds(state)) {
     const sourceDefinition = cardDefinitionForInstance(
       state,
       sourceCardInstanceId,

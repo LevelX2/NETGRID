@@ -541,6 +541,42 @@ describe("CardImplementation coverage and registry invariants", () => {
     });
   });
 
+  it("migrates Proteus Phase 1b dynamic public ETR ICE into CardImplementation coverage", () => {
+    const phase1bCards = [
+      "onr_proteus_031_minotaur",
+      "onr_proteus_034_riddler",
+    ] as const;
+
+    for (const definitionId of phase1bCards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_031_minotaur")
+        ?.modifiers?.[0],
+    ).toMatchObject({
+      kind: "additional_subroutine",
+      sourceZone: "corp_installed",
+      appliesTo: { sourceCardOnly: true },
+      repeat: {
+        kind: "for_each_rezzed_installed_ice",
+        subtypeAnyOf: ["code_gate", "wall"],
+        excludeSource: true,
+      },
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_034_riddler")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "activated",
+      timing: "corp_encounter",
+      costs: [{ kind: "credit", amount: 2 }],
+    });
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",

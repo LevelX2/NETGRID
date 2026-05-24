@@ -348,6 +348,7 @@ export {
 } from "./game/validation";
 import {
   additionalSubroutinesForIce,
+  currentEncounterAdditionalSubroutinesForIce,
   dynamicSubroutineAttributionFor,
 } from "./ability-engine/additional-subroutine-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "./ability-engine/break-subroutine-cost-modifiers";
@@ -1223,6 +1224,22 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       source,
       maxAmount,
     ),
+  addCurrentEncounterAdditionalSubroutine: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+    sourceTitle,
+    input,
+  ) =>
+    addCurrentEncounterAdditionalSubroutineForCardImplementation(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      sourceTitle,
+      input,
+    ),
   removeRunnerTags: (state, mode, amount) =>
     removeRunnerTagsForCardImplementation(state, mode, amount),
   avoidNextTag: (state, amount) =>
@@ -1236,6 +1253,62 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     ),
   abilityLimits: runnerCardImplementationAbilityLimitHost,
 };
+
+function addCurrentEncounterAdditionalSubroutineForCardImplementation(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+  sourceTitle: string,
+  input: {
+    subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
+    amount?: number;
+  },
+): { publicPayload: Record<string, string | number | boolean> } {
+  void legalAction;
+  const run = state.run;
+  if (
+    state.timingPoint !== "run.encounter_ice" ||
+    run?.phase !== "encounter_ice" ||
+    run.encounteredIceId !== sourceCardId
+  )
+    throw new Error("Encounter-Subroutine kann nur auf das encountered ICE gelegt werden.");
+  const instance = state.cardInstances[sourceCardId];
+  if (!instance?.rezzed)
+    throw new Error("Encounter-Subroutine braucht gerezzte ICE.");
+  const subroutineKind = input.subroutineKind;
+  if (
+    subroutineKind !== "end_the_run" &&
+    subroutineKind !== "end_the_run_unless_runner_pays"
+  )
+    throw new Error("Encounter-Subroutine-Typ ist nicht unterstuetzt.");
+  let amount: number | undefined;
+  if (subroutineKind === "end_the_run_unless_runner_pays") {
+    amount = Math.max(0, Math.floor(input.amount ?? 0));
+    if (amount <= 0)
+      throw new Error("Pay-or-End-Subroutine braucht einen positiven Betrag.");
+  }
+  run.encounterAdditionalSubroutines = [
+    ...(run.encounterAdditionalSubroutines ?? []),
+    {
+      sourceCardInstanceId: sourceCardId,
+      sourceDefinitionId,
+      sourceTitle,
+      subroutineKind,
+      ...(amount !== undefined ? { amount } : {}),
+    },
+  ];
+  const count = run.encounterAdditionalSubroutines.filter(
+    (record) => record.sourceCardInstanceId === sourceCardId,
+  ).length;
+  return {
+    publicPayload: {
+      currentEncounterAdditionalSubroutines: count,
+      currentEncounterAdditionalSubroutineKind: subroutineKind,
+      currentEncounterAdditionalSubroutineSourceDefinitionId: sourceDefinitionId,
+    },
+  };
+}
 
 // Public context generation is read-only and injected here to avoid an import
 // cycle. It may format already-public payload data, but it must not decide
@@ -2229,10 +2302,13 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
     state.timingPoint === "run.jack_out_window";
   const inactiveCorpRunnerActionPaidWindow =
     state.timingPoint === "runner_action.main" && side === "corp";
+  const inactiveCorpEncounterPaidWindow =
+    state.timingPoint === "run.encounter_ice" && side === "corp";
   if (
     side !== state.activeSide &&
     !sharedRunWindow &&
-    !inactiveCorpRunnerActionPaidWindow
+    !inactiveCorpRunnerActionPaidWindow &&
+    !inactiveCorpEncounterPaidWindow
   )
     return [];
 
@@ -2263,8 +2339,10 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
       return side === "runner" ? runnerApproachIceExposeActions(state) : [];
     return side === "corp" ? corpApproachActions(state) : [];
   }
-  if (state.timingPoint === "run.encounter_ice")
-    return side === "runner" ? runnerEncounterActions(state) : [];
+  if (state.timingPoint === "run.encounter_ice") {
+    if (side === "runner") return runnerEncounterActions(state);
+    return side === "corp" ? corpEncounterActions(state) : [];
+  }
   if (state.timingPoint === "run.jack_out_window") {
     if (side === "corp") return corpRunRootRezWindowActions(state);
     if (isCorpRunRootRezWindowOpen(state)) return [];
@@ -6535,6 +6613,9 @@ function subroutinesForCurrentEncounter(
         });
       }
     }
+    subroutines.push(
+      ...currentEncounterAdditionalSubroutinesForIce(state, run.encounteredIceId),
+    );
     subroutines.push(...additionalSubroutinesForIce(state, run.encounteredIceId));
   }
   return subroutines;
@@ -6680,6 +6761,30 @@ function runnerDuringRunCardImplementationActions(
       "during_run",
     );
   }
+  return actions;
+}
+
+function corpEncounterActions(state: GameState): LegalAction[] {
+  const run = state.run;
+  if (
+    state.timingPoint !== "run.encounter_ice" ||
+    run?.phase !== "encounter_ice" ||
+    !run.encounteredIceId
+  )
+    return [];
+  const instance = state.cardInstances[run.encounteredIceId];
+  if (!instance?.rezzed || instance.controller !== "corp") return [];
+  const definition = definitionFor(state, run.encounteredIceId);
+  const actions: LegalAction[] = [];
+  pushActivatedCardImplementationActionsForTiming(
+    cardImplementationRuntimeDeps,
+    state,
+    actions,
+    "corp",
+    run.encounteredIceId,
+    definition,
+    "corp_encounter",
+  );
   return actions;
 }
 
@@ -10116,6 +10221,7 @@ function beginEncounter(
   run.resolvedSubroutineIndexes = [];
   run.traceSuccessBySubroutineIndex = {};
   delete run.encounterTemporaryTraceCredits;
+  delete run.encounterAdditionalSubroutines;
   run.bartmossUsedBreakerIdsThisEncounter = [];
   run.blinkUsedSubroutinesByBreakerThisEncounter = {};
   if (run.nextEncounterNoBreakSubroutines) {

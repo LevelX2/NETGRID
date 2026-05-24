@@ -856,6 +856,13 @@ export type RunState = {
     remaining: number;
     usableFor: "this_ice_printed_trace_subroutines";
   };
+  encounterAdditionalSubroutines?: Array<{
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    sourceTitle: string;
+    subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
+    amount?: number;
+  }>;
   aiBoonSourceCardId?: CardInstanceId;
   aiBoonRunStrength?: number;
   aiBoonRunStrengthByBreaker?: Partial<Record<CardInstanceId, number>>;
@@ -9137,6 +9144,46 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
 ];
 
 const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
+  {
+    id: "onr_proteus_031_minotaur",
+    title: "Minotaur",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 4,
+    rulesText:
+      'For each rezzed code gate or wall installed outside Minotaur, Minotaur has one "[Subroutine] End the run" subroutine.',
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "dynamic_subroutine",
+      "end_the_run",
+      "proteus_dynamic_public_etr_ice",
+    ],
+  },
+  {
+    id: "onr_proteus_034_riddler",
+    title: "Riddler",
+    side: "corp",
+    type: "ice",
+    subtypes: ["code_gate"],
+    implementationStatus: "playable_mvp",
+    rezCost: 2,
+    strength: 4,
+    rulesText:
+      '[2]: Riddler has one "[Subroutine] End the run" subroutine for the present encounter. Use this ability only when Runner encounters Riddler.',
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "dynamic_subroutine",
+      "end_the_run",
+      "proteus_dynamic_public_etr_ice",
+    ],
+  },
   {
     id: "onr_proteus_041_toughoniumtm-wall",
     title: "Toughonium™ Wall",

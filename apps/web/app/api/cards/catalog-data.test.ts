@@ -181,6 +181,8 @@ describe("catalog API filters", () => {
 
   it("guards the Proteus visible baseline against decklegal, AI or broad promotion", () => {
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
+      "onr_proteus_031_minotaur",
+      "onr_proteus_034_riddler",
       "onr_proteus_041_toughoniumtm-wall",
       "onr_proteus_065_networked-center",
       "onr_proteus_072_research-bunker",
@@ -237,7 +239,7 @@ describe("catalog API filters", () => {
     }
 
     const outsideResponse = catalogDetailResponse(
-      "onr_proteus_031_minotaur",
+      "onr_proteus_030_mastermind",
     );
     expect(outsideResponse.status).toBe(200);
     const outsideBody = outsideResponse.body as {

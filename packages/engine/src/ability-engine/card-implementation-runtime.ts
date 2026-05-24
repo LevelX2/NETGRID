@@ -411,6 +411,17 @@ export type CardImplementationRuntimeDependencies = {
     source: "chosen_card" | "source_card",
     maxAmount: number | "all",
   ) => CardEffectAdvancementChoiceResult;
+  addCurrentEncounterAdditionalSubroutine: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    sourceTitle: string,
+    input: {
+      subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
+      amount?: number;
+    },
+  ) => CardEffectHiddenInfoResult;
   abilityLimits: CardImplementationAbilityLimitHost;
 };
 
@@ -1578,6 +1589,28 @@ function validateActivatedCardImplementationAbility(
     );
     return;
   }
+  if (ability.timing === "corp_encounter") {
+    if (legalAction.side !== "corp")
+      throw new Error("Nur die Korp darf diese Encounter-Kartenfaehigkeit nutzen.");
+    if (
+      state.timingPoint !== "run.encounter_ice" ||
+      state.run?.phase !== "encounter_ice" ||
+      state.run.encounteredIceId !== cardId
+    )
+      throw new Error(
+        "Diese Kartenfaehigkeit ist nur beim Encounter mit dieser ICE nutzbar.",
+      );
+    const instance = deps.mustInstance(state.cardInstances, cardId);
+    if (!instance.rezzed || match.definition.type !== "ice")
+      throw new Error("Die Encounter-Kartenfaehigkeit braucht gerezzte ICE.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf diese aktivierte Kartenfaehigkeit nutzen.");
   if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
@@ -1820,6 +1853,15 @@ export function resolveActivatedCardImplementationAbility(
           match.definition.id,
           source,
           maxAmount,
+        ),
+      addCurrentEncounterAdditionalSubroutine: (input) =>
+        deps.addCurrentEncounterAdditionalSubroutine(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          match.definition.title,
+          input,
         ),
     },
     match.ability.effects,

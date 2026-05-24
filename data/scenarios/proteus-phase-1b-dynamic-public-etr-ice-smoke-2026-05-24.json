@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "scenario-pack-v1",
+  "scenarioId": "proteus-phase-1b-dynamic-public-etr-ice-smoke-2026-05-24",
+  "release": "Proteus Phase 1b Dynamic Public ETR ICE",
+  "coversCards": [
+    "onr_proteus_031_minotaur",
+    "onr_proteus_034_riddler"
+  ],
+  "assertions": [
+    "Each target card has an engine-local per-card CardImplementation file.",
+    "Minotaur uses a generic public additional_subroutine modifier with a dynamic count from rezzed installed code gates and walls outside the source ICE.",
+    "Riddler uses a generic corp_encounter activated CardImplementation ability that adds one public current-encounter End the run subroutine per paid use.",
+    "Dynamic subroutine LegalActions are revalidated by stateVersion and current subroutine ids, rejecting stale break and continue actions.",
+    "Public payloads expose only source definition/title and public subroutine metadata, not hidden zones or card instance ids.",
+    "No target card becomes deck_legal, format_legal or ai_supported."
+  ],
+  "checks": [
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/coverage.test.ts -t \"Proteus Phase 1b\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts -t \"Proteus Phase 1b\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t \"Proteus Dynamic Public ETR ICE\"",
+    "corepack pnpm --filter @netgrid/catalog exec vitest run src/index.test.ts -t \"Proteus\"",
+    "corepack pnpm --filter @netgrid/web exec vitest run app/api/cards/catalog-data.test.ts -t \"Proteus\""
+  ]
+}

@@ -613,6 +613,7 @@ export type ActivatedCardAbilityImplementation = {
     | "runner_main"
     | "during_run"
     | "corp_main"
+    | "corp_encounter"
     | "trace_base_link_window"
     | "trace_post_bid_link_window";
   costs: readonly CardAbilityCostImplementation[];
@@ -800,6 +801,7 @@ export type CardEffectImplementation =
   | CorpRandomDiscardFromHqEffectImplementation
   | CorpDiscardHqWithRetainPaymentEffectImplementation
   | DerezRezzedBlackIceEffectImplementation
+  | AddCurrentEncounterAdditionalSubroutineEffectImplementation
   | StartRunnerProgramInstallActionBundleEffectImplementation
   | DistributeAdvancementCountersEffectImplementation
   | MoveAdvancementCountersEffectImplementation;
@@ -853,6 +855,14 @@ export type CorpDiscardHqWithRetainPaymentEffectImplementation = {
 export type DerezRezzedBlackIceEffectImplementation = {
   kind: "derez_rezzed_black_ice";
   target: "chosen_rezzed_black_ice";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type AddCurrentEncounterAdditionalSubroutineEffectImplementation = {
+  kind: "add_current_encounter_additional_subroutine";
+  target: "encountered_ice_self";
+  append: "after_existing";
+  subroutine: CardSubroutineImplementation;
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -1286,16 +1296,23 @@ export type CardIceStrengthModifierImplementation = {
 export type CardAdditionalSubroutineModifierImplementation = {
   kind: "additional_subroutine";
   activeWhile: "rezzed";
-  sourceZone: "corp_root";
+  sourceZone: "corp_root" | "corp_installed";
   visibility: EventVisibilityClass;
   appliesTo: {
     side: Extract<Side, "corp">;
     cardType: Extract<CardType, "ice">;
     subtype?: string;
+    subtypeAnyOf?: readonly string[];
+    sourceCardOnly?: boolean;
     sameServerAsSource?: boolean;
   };
   append: "after_existing";
   subroutine: CardSubroutineImplementation;
+  repeat?: {
+    kind: "for_each_rezzed_installed_ice";
+    subtypeAnyOf: readonly string[];
+    excludeSource: true;
+  };
 };
 
 export type CardHandSizeModifierImplementation = {

@@ -181,9 +181,11 @@ describe("card set support catalog source", () => {
     }
   });
 
-  it("models Proteus conservatively with only the visible baseline playable", () => {
+  it("models Proteus conservatively with only released detail slices playable", () => {
     const cardsById = createRuntimeCardsById();
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
+      "onr_proteus_031_minotaur",
+      "onr_proteus_034_riddler",
       "onr_proteus_041_toughoniumtm-wall",
       "onr_proteus_065_networked-center",
       "onr_proteus_072_research-bunker",
@@ -204,7 +206,7 @@ describe("card set support catalog source", () => {
         card.catalogCardId.startsWith("onr_proteus_") &&
         !PROTEUS_VISIBLE_BASELINE_CARD_IDS.includes(card.catalogCardId),
     );
-    expect(blockedProteus).toHaveLength(149);
+    expect(blockedProteus).toHaveLength(147);
     expect(blockedProteus.every((card) => card.statuses.blocked)).toBe(true);
   });
 

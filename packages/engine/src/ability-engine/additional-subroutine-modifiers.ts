@@ -13,9 +13,11 @@ import type {
   SubroutineDefinition,
 } from "@netgrid/shared";
 import {
+  activeCardImplementationModifiersForCorpInstalled,
   activeCardImplementationModifiersForCorpRoot,
   cardDefinitionForInstance,
   cardInstanceFor,
+  cardHasNormalizedSubtype,
   cardMatchesModifierAppliesTo,
   isPublicRezzedCorpRootModifier,
   sameServerAsSourceApplies,
@@ -47,8 +49,18 @@ function additionalSubroutineModifierAppliesToIce(
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
 ): boolean {
-  if (!isPublicRezzedCorpRootModifier(modifier)) return false;
+  if (
+    modifier.activeWhile !== "rezzed" ||
+    modifier.visibility !== "public" ||
+    (modifier.sourceZone !== "corp_root" &&
+      modifier.sourceZone !== "corp_installed")
+  )
+    return false;
+  if (modifier.sourceZone === "corp_root" && !isPublicRezzedCorpRootModifier(modifier))
+    return false;
   if (modifier.appliesTo.side !== "corp") return false;
+  if (modifier.appliesTo.sourceCardOnly && sourceCardInstanceId !== iceId)
+    return false;
   if (!cardMatchesModifierAppliesTo(iceDefinition, modifier.appliesTo))
     return false;
   return sameServerAsSourceApplies(
@@ -68,10 +80,13 @@ function subroutineDefinitionForImplementation(
   match: ActiveCardImplementationModifier<CardAdditionalSubroutineModifierImplementation>,
   subroutine: CardSubroutineImplementation,
   index: number,
+  repeatIndex?: number,
 ): DynamicSubroutineDefinition {
   if (subroutine.visibility !== "public")
     throw new Error("Unsupported additional subroutine visibility.");
-  const publicId = `card_implementation.${match.sourceDefinitionId}.additional_subroutine.${index + 1}.${subroutine.kind}`;
+  const repeatPart =
+    repeatIndex === undefined ? "" : `.repeat.${repeatIndex + 1}`;
+  const publicId = `card_implementation.${match.sourceDefinitionId}.additional_subroutine.${index + 1}${repeatPart}.${subroutine.kind}`;
   const dynamicSubroutine: DynamicSubroutineAttribution = {
     internalId: `${publicId}.${match.sourceCardInstanceId}`,
     publicId,
@@ -99,6 +114,48 @@ function subroutineDefinitionForImplementation(
   throw new Error(`Unsupported additional subroutine: ${JSON.stringify(subroutine)}`);
 }
 
+function rezzedInstalledIceRepeatCount(
+  state: GameState,
+  sourceCardInstanceId: CardInstanceId,
+  modifier: CardAdditionalSubroutineModifierImplementation,
+): number {
+  const repeat = modifier.repeat;
+  if (!repeat) return 1;
+  if (repeat.kind !== "for_each_rezzed_installed_ice")
+    throw new Error("Unsupported additional subroutine repeat kind.");
+  return state.corp.servers.reduce((count, server) => {
+    for (const cardId of server.ice) {
+      if (repeat.excludeSource && cardId === sourceCardInstanceId)
+        continue;
+      const instance = state.cardInstances[cardId];
+      if (!instance?.rezzed) continue;
+      const definition = cardDefinitionForInstance(state, cardId);
+      if (
+        repeat.subtypeAnyOf.some((subtype) =>
+          cardHasNormalizedSubtype(definition, subtype),
+        )
+      )
+        count += 1;
+    }
+    return count;
+  }, 0);
+}
+
+function activeAdditionalSubroutineModifiers(
+  state: GameState,
+): ActiveCardImplementationModifier<CardAdditionalSubroutineModifierImplementation>[] {
+  return [
+    ...activeCardImplementationModifiersForCorpRoot(
+      state,
+      "additional_subroutine",
+    ).filter((match) => match.modifier.sourceZone === "corp_root"),
+    ...activeCardImplementationModifiersForCorpInstalled(
+      state,
+      "additional_subroutine",
+    ).filter((match) => match.modifier.sourceZone === "corp_installed"),
+  ];
+}
+
 /**
  * Returns active additional subroutines for a rezzed ICE in append order.
  *
@@ -114,10 +171,7 @@ export function additionalSubroutinesForIce(
   const iceDefinition = cardDefinitionForInstance(state, iceId);
   if (iceDefinition.type !== "ice") return [];
   const subroutines: SubroutineDefinition[] = [];
-  for (const match of activeCardImplementationModifiersForCorpRoot(
-    state,
-    "additional_subroutine",
-  )) {
+  for (const match of activeAdditionalSubroutineModifiers(state)) {
     const { modifier } = match;
     if (modifier.append !== "after_existing")
       throw new Error("Unsupported additional subroutine append position.");
@@ -131,10 +185,66 @@ export function additionalSubroutinesForIce(
       )
     )
       continue;
-    subroutines.push(
-      subroutineDefinitionForImplementation(match, modifier.subroutine, subroutines.length),
+    const repeatCount = rezzedInstalledIceRepeatCount(
+      state,
+      match.sourceCardInstanceId,
+      modifier,
     );
+    for (let repeatIndex = 0; repeatIndex < repeatCount; repeatIndex += 1) {
+      subroutines.push(
+        subroutineDefinitionForImplementation(
+          match,
+          modifier.subroutine,
+          subroutines.length,
+          modifier.repeat ? repeatIndex : undefined,
+        ),
+      );
+    }
   }
+  return subroutines;
+}
+
+export function currentEncounterAdditionalSubroutinesForIce(
+  state: GameState,
+  iceId: CardInstanceId,
+): SubroutineDefinition[] {
+  const run = state.run;
+  if (!run || run.encounteredIceId !== iceId) return [];
+  const records = run.encounterAdditionalSubroutines ?? [];
+  const subroutines: SubroutineDefinition[] = [];
+  records.forEach((record, index) => {
+    if (record.sourceCardInstanceId !== iceId) return;
+    const publicId = `card_implementation.${record.sourceDefinitionId}.current_encounter_additional_subroutine.${index + 1}.${record.subroutineKind}`;
+    const dynamicSubroutine: DynamicSubroutineAttribution = {
+      internalId: `${publicId}.${record.sourceCardInstanceId}`,
+      publicId,
+      sourceCardInstanceId: record.sourceCardInstanceId,
+      sourceDefinitionId: record.sourceDefinitionId,
+      sourceTitle: record.sourceTitle,
+      modifierKind: "additional_subroutine",
+      subroutineKind: record.subroutineKind,
+    };
+    if (record.subroutineKind === "end_the_run") {
+      const subroutine: DynamicSubroutineDefinition = {
+        id: publicId,
+        type: "end_the_run",
+        dynamicSubroutine,
+      };
+      subroutines.push(subroutine);
+      return;
+    }
+    if (record.subroutineKind === "end_the_run_unless_runner_pays") {
+      const amount = Math.max(0, Math.floor(record.amount ?? 0));
+      if (amount <= 0) return;
+      const subroutine: DynamicSubroutineDefinition = {
+        id: publicId,
+        type: "end_the_run_unless_runner_pays",
+        amount,
+        dynamicSubroutine,
+      };
+      subroutines.push(subroutine);
+    }
+  });
   return subroutines;
 }
 

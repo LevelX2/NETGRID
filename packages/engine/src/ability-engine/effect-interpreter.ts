@@ -169,6 +169,10 @@ export type CardEffectExecutionContext = {
     source: "chosen_card" | "source_card",
     maxAmount: number | "all",
   ) => CardEffectAdvancementChoiceResult;
+  addCurrentEncounterAdditionalSubroutine?: (input: {
+    subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
+    amount?: number;
+  }) => CardEffectHiddenInfoResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -591,6 +595,36 @@ export function executeCardImplementationEffects(
             : {}),
           ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
         });
+        return;
+      }
+      case "add_current_encounter_additional_subroutine": {
+        assertPublicVisibility(
+          "add_current_encounter_additional_subroutine",
+          effect.visibility,
+        );
+        if (effect.target !== "encountered_ice_self")
+          throw new Error(
+            "add_current_encounter_additional_subroutine supports only encountered_ice_self.",
+          );
+        if (effect.append !== "after_existing")
+          throw new Error(
+            "add_current_encounter_additional_subroutine supports only after_existing append.",
+          );
+        if (effect.subroutine.visibility !== "public")
+          throw new Error(
+            "add_current_encounter_additional_subroutine requires a public subroutine.",
+          );
+        if (!context.addCurrentEncounterAdditionalSubroutine)
+          throw new Error(
+            "add_current_encounter_additional_subroutine requires an encounter execution context.",
+          );
+        const result = context.addCurrentEncounterAdditionalSubroutine({
+          subroutineKind: effect.subroutine.kind,
+          ...(effect.subroutine.kind === "end_the_run_unless_runner_pays"
+            ? { amount: effect.subroutine.amount }
+            : {}),
+        });
+        mergePublicPayload(publicPayload, result.publicPayload);
         return;
       }
       case "remove_tags": {
