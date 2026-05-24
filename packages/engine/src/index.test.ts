@@ -8218,6 +8218,94 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
+  it("records Quest for Cattekin start-turn outcomes for no-op, damage and permanent action rolls", () => {
+    function resolveQuestStartForRoll(targetRoll: number | number[]): {
+      state: GameState;
+      effect: Record<string, unknown>;
+      questId: CardInstanceId;
+      randomBefore: number;
+    } {
+      const targetRolls = Array.isArray(targetRoll) ? targetRoll : [targetRoll];
+      for (let seedIndex = 0; seedIndex < 120; seedIndex += 1) {
+        let state = toRunnerTurn(
+          createGameAfterSetup({
+            seed: `p359-quest-outcome-${targetRoll}-${seedIndex}`,
+            baseline: CURRENT_RULES_BASELINE,
+            runnerDeck: {
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+              id: `p359_quest_runner_${targetRoll}_${seedIndex}`,
+              name: "P3.59 Quest Runner",
+              cards: [
+                { id: "onr_v1_172_quest-for-cattekin", quantity: 1 },
+                ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+                  (card) => card.id !== "onr_v1_172_quest-for-cattekin",
+                ),
+              ],
+            },
+            corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+            agendaPointsToWin: 7,
+          }),
+        );
+        const questId = installRunnerResourceForTest(
+          state,
+          "onr_v1_172_quest-for-cattekin",
+        );
+        state.randomCounter = seedIndex;
+        const randomBefore = state.randomDrawRecords.length;
+        const replayStart = state.eventLog.length;
+        state = apply(state, "runner", (action) => action.type === "end_turn");
+        state = toRunnerTurn(state);
+        const effect = state.eventLog
+          .slice(replayStart)
+          .flatMap((event) => event.publicPayload.resolvedEffects ?? [])
+          .find(
+            (candidate) =>
+              (candidate as { effectId?: string }).effectId?.startsWith(
+                "runner.start.quest_for_cattekin.",
+              ) === true,
+          ) as Record<string, unknown> | undefined;
+        if (effect && targetRolls.includes(Number(effect.v1921DieRoll)))
+          return { state, effect, questId, randomBefore };
+      }
+      throw new Error(`No Quest for Cattekin seed produced roll ${targetRolls.join(", ")}`);
+    }
+
+    const noOp = resolveQuestStartForRoll([3, 4, 5]);
+    expect(noOp.state.randomDrawRecords.length).toBe(noOp.randomBefore + 1);
+    expect(noOp.effect.questForCattekinOutcome).toBe("no_effect");
+    expect(noOp.state.runner.rig.resources).toContain(noOp.questId);
+    expect(noOp.state.runner.clicks).toBe(4);
+
+    const coreDamage = resolveQuestStartForRoll(1);
+    expect(coreDamage.effect.questForCattekinOutcome).toBe("core_damage");
+    expect(coreDamage.effect.damageCannotBePrevented).toBe(true);
+    expect(coreDamage.effect.damageType).toBe("core");
+    expect(coreDamage.effect.coreDamageAfter).toBeGreaterThanOrEqual(1);
+
+    const netDamage = resolveQuestStartForRoll(2);
+    expect(netDamage.effect.questForCattekinOutcome).toBe("net_damage");
+    expect(netDamage.effect.damageCannotBePrevented).toBe(true);
+    expect(netDamage.effect.damageType).toBe("net");
+    expect(netDamage.effect.cardsTrashed).toBeGreaterThanOrEqual(1);
+
+    const permanentAction = resolveQuestStartForRoll(6);
+    expect(permanentAction.effect.questForCattekinOutcome).toBe("permanent_action");
+    expect(permanentAction.effect.sourceTrashed).toBe(true);
+    expect(permanentAction.state.runner.rig.resources).not.toContain(
+      permanentAction.questId,
+    );
+    expect(permanentAction.state.runner.heap).toContain(permanentAction.questId);
+    expect(permanentAction.state.runner.clicks).toBe(5);
+    expect(
+      permanentAction.state.runnerTurnFlags?.questForCattekinPermanentActionGain,
+    ).toBe(true);
+    const randomAfterFirstQuest = permanentAction.state.randomDrawRecords.length;
+    let nextTurn = apply(permanentAction.state, "runner", (action) => action.type === "end_turn");
+    nextTurn = toRunnerTurn(nextTurn);
+    expect(nextTurn.runner.clicks).toBe(5);
+    expect(nextTurn.randomDrawRecords.length).toBe(randomAfterFirstQuest);
+  });
+
   it("resolves Social Engineering secret guess and auto-passes the chosen ICE on a wrong guess", () => {
     const socialRunnerDeck = MECHANIC_SMOKE_DECKS.runAccess.runner;
     const socialCorpDeck = {

@@ -64,6 +64,7 @@ export const CHRONICLE_CATEGORY_LABELS: Record<ChronicleCategory, string> = {
 const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
 const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
 const SKIVVISS_ID = "onr_v1_064_skivviss";
+const QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 
 type EffectSummary = {
   category?: ChronicleCategory;
@@ -1512,6 +1513,48 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
 
   if (visibility === "redacted") {
     return redactedChronicleEffectItem(event, effect, index, actor, subject, amount);
+  }
+
+  if (sourceDefinitionId === QUEST_FOR_CATTEKIN_ID && effect.reason === "start_of_turn") {
+    const payload = effect as Record<string, unknown>;
+    const dieRoll = numberValue(payload.v1921DieRoll);
+    const outcome = stringValue(payload.questForCattekinOutcome);
+    category = outcome === "core_damage" || outcome === "net_damage" ? "danger" : outcome === "permanent_action" ? "turn" : "card";
+    importance = outcome === "core_damage" || outcome === "net_damage" ? "critical" : outcome === "permanent_action" ? "important" : "normal";
+    const source = sourceTitle ?? "Quest for Cattekin";
+    const rollText = dieRoll !== undefined ? ` würfelt eine ${dieRoll}` : " würfelt";
+    const gainsAction = subject === "Du" ? "Du erhältst" : `${subject} erhält`;
+    const suffersDamage = subject === "Du" ? "Du erleidest" : `${subject} erleidet`;
+    if (outcome === "permanent_action") {
+      title = `${source}${rollText}: ${gainsAction} dauerhaft 1 zusätzliche Aktion`;
+      description = `${source} wurde getrasht; die zusätzliche Aktion gilt ab diesem und den folgenden Runner-Zügen.`;
+      chips.push(source, ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), "Extra-Aktion", "Dauerhaft", "Trash");
+    } else if (outcome === "core_damage") {
+      title = `${source}${rollText}: ${suffersDamage} ${amount || 1} Core Damage`;
+      description = "Der Schaden von Quest for Cattekin kann nicht verhindert werden.";
+      chips.push(source, ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), "Core Damage", "Nicht verhinderbar");
+    } else if (outcome === "net_damage") {
+      title = `${source}${rollText}: ${suffersDamage} ${amount || 1} Net Damage`;
+      description = "Der Schaden von Quest for Cattekin kann nicht verhindert werden.";
+      chips.push(source, ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), "Net Damage", "Nicht verhinderbar");
+    } else {
+      title = `${source}${rollText}: kein weiterer Effekt`;
+      chips.push(source, ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), "Kein Effekt");
+    }
+    return {
+      id: `${event.eventId}:effect:${effect.effectId || index}`,
+      category,
+      importance,
+      visibility,
+      ...(actor ? { actor } : {}),
+      title: ensurePeriod(title),
+      ...(description ? { description: ensurePeriod(description) } : {}),
+      chips: uniqueChips(chips.filter(Boolean)),
+      cardDefinitionId: QUEST_FOR_CATTEKIN_ID,
+      cardTitle: source,
+      cardDetailLines: [],
+      groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
+    };
   }
 
   switch (effect.kind) {
