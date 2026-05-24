@@ -2962,7 +2962,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("keeps Nasuko Cycle, Fall Guy and Nomad Allies source-bound across damage windows and removal drift", () => {
+  it("keeps Nasuko Cycle source-bound across damage windows and removal drift", () => {
     let state = createGameAfterSetup({
       seed: "spotcheck-prevention-sources",
       runnerDeck: {
@@ -3018,46 +3018,6 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       sourceDefinitionId: "onr_v1_135_nasuko-cycle",
     });
     expect(state.runner.rig.hardware).toContain(nasukoId);
-    for (const definitionId of ["onr_v1_161_fall-guy", "onr_v1_170_nomad-allies"]) {
-      let sourceState = createGameAfterSetup({
-        seed: `spotcheck-prevention-${definitionId}`,
-        runnerDeck: {
-          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          id: `spotcheck_prevention_${definitionId}`,
-          name: `Spotcheck Prevention ${definitionId}`,
-          cards: [
-            { id: definitionId, quantity: 1 },
-            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
-          ],
-        },
-        corpDeck: {
-          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
-          cards: [
-            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
-            { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
-          ],
-        },
-        agendaPointsToWin: 7,
-      });
-      sourceState = apply(sourceState, "corp", (action) => action.type === "mandatory_draw");
-      sourceState.runner.tags = 1;
-      sourceState.corp.credits = 10;
-      sourceState.corp.clicks = 3;
-      installRunnerResourceForTest(sourceState, definitionId);
-      moveCorpCardToHq(sourceState, "onr_v1_301_punitive-counterstrike");
-      sourceState = apply(
-        sourceState,
-        "corp",
-        (action) =>
-          action.type === "play_operation" &&
-          sourceDefinition(sourceState, action) ===
-            "onr_v1_301_punitive-counterstrike",
-      );
-      expect(
-        sourceState.eventModificationWindow?.candidates[0]?.sourceRef.definitionId,
-      ).toBe(definitionId);
-    }
-
     let removedSource = structuredClone(initial);
     moveCorpCardToHq(removedSource, "onr_v1_301_punitive-counterstrike");
     removedSource = apply(
@@ -42961,60 +42921,92 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     expect(hashState(topRunnersReplay.state)).toBe(hashState(topRunners));
   });
 
-  it("keeps Trauma Team and Umbrella Policy prevention choices source-safe", () => {
-    for (const [definitionId, preventedAmount] of [
-      ["onr_v1_185_trauma-team", 1],
-      ["onr_v1_186_umbrella-policy", 1],
-    ] as const) {
-      let state = toRunnerTurn(
-        MECHANIC_SMOKE_GAMES.damagePrevention(
-          `spotcheck-resource-scorearea-${definitionId}`,
-        ),
-      );
-      state.runner.credits = 30;
-      state.runner.clicks = 10;
-      state.corp.credits = 30;
-      moveRunnerCardToGrip(state, definitionId);
-      state = apply(
-        state,
-        "runner",
-        (action) =>
-          action.type === "install_card" &&
-          sourceDefinition(state, action) === definitionId,
-      );
-      state = apply(state, "runner", (action) => action.type === "end_turn");
-      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-      state.runner.tags = 1;
-      moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
-      const initial = structuredClone(state);
-      const replayStart = state.eventLog.length;
-      state = apply(
-        state,
-        "corp",
-        (action) =>
-          action.type === "play_operation" &&
-          sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
-      );
-      expect(state.pendingChoice?.side).toBe("runner");
-      const optionId = state.pendingChoice?.options.find(
-        (option) => option.id !== "pass",
-      )?.id;
-      expect(optionId).toBeDefined();
-      if (!optionId) throw new Error(`Missing prevention option for ${definitionId}`);
-      state = applyChoice(state, "runner", optionId);
-      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-        eventModificationDecision: "apply",
-        sourceDefinitionId: definitionId,
-        originalAmount: 2,
-        preventedAmount,
-      });
-      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-        privatePayloadMarkers,
-      );
-      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
-    }
+  it("keeps Trauma Team damage prevention choices source-safe", () => {
+    const definitionId = "onr_v1_185_trauma-team";
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.damagePrevention(
+        `spotcheck-resource-scorearea-${definitionId}`,
+      ),
+    );
+    state.runner.credits = 30;
+    state.runner.clicks = 10;
+    state.corp.credits = 30;
+    moveRunnerCardToGrip(state, definitionId);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === definitionId,
+    );
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.runner.tags = 1;
+    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+    );
+    expect(state.pendingChoice?.side).toBe("runner");
+    const optionId = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    )?.id;
+    expect(optionId).toBeDefined();
+    if (!optionId) throw new Error(`Missing prevention option for ${definitionId}`);
+    state = applyChoice(state, "runner", optionId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationDecision: "apply",
+      sourceDefinitionId: definitionId,
+      originalAmount: 2,
+      preventedAmount: 1,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("does not treat Umbrella Policy as Net Damage prevention during a run", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.damagePrevention("umbrella-data-darts-net-damage"),
+    );
+    state.runner.credits = 30;
+    state.runner.clicks = 10;
+    moveRunnerCardToGrip(state, "onr_v1_186_umbrella-policy");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_186_umbrella-policy",
+    );
+    putCorpIceOnServer(state, "rd", "onr_v1_234_data-darts");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "continue_run" && action.payload?.encounterContinue === true,
+    );
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.heap).toHaveLength(3);
+    expect(state.run?.phase).toBe("movement");
+    expect(getLegalActions(state, "runner").map((action) => action.type)).toContain(
+      "continue_run",
+    );
   });
 
   it("shows Trauma Team trauma counters after install and its add-counter action", () => {

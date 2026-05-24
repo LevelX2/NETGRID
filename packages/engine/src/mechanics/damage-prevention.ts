@@ -72,25 +72,10 @@ export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
     damageTypes: ["net", "meat"],
     priority: 124,
   },
-  "onr_v1_161_fall-guy": {
-    maxPerTurn: 1,
-    damageTypes: ["net", "meat"],
-    priority: 126,
-  },
-  "onr_v1_170_nomad-allies": {
-    maxPerTurn: 1,
-    damageTypes: ["net", "meat"],
-    priority: 127,
-  },
   "onr_v1_185_trauma-team": {
     maxPerTurn: 2,
     damageTypes: ["meat"],
     priority: 128,
-  },
-  "onr_v1_186_umbrella-policy": {
-    maxPerTurn: 1,
-    damageTypes: ["net", "meat", "core"],
-    priority: 129,
   },
   "onr_v1_061_shield": {
     maxPerTurn: 2,
