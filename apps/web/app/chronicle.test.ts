@@ -708,6 +708,39 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(item)).not.toContain("\"rd\"");
   });
 
+  it("describes Record Reconstructor Archives replacement on immediate and protected runs", () => {
+    const immediate = formatChronicleEvent(
+      makeEvent("activated_card_ability", {
+        actor: "runner",
+        title: "Record Reconstructor",
+        sourceDefinitionId: "onr_v1_142_record-reconstructor",
+        accessReplacement: "archives_faceup_to_rd",
+        shuffledFaceUpArchivesCount: 4,
+        movedCount: 2,
+        hiddenZoneBarrier: true
+      }),
+      "runner"
+    );
+    const protectedRun = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_142_record-reconstructor",
+        accessReplacement: "archives_faceup_to_rd",
+        shuffledFaceUpArchivesCount: 3,
+        movedCount: 2,
+        hiddenZoneBarrier: true
+      }),
+      "runner"
+    );
+
+    expect(immediate.title).toBe("Du hast Record Reconstructor genutzt: 2 offene Archives-Karten oben auf R&D gelegt.");
+    expect(immediate.description).toBe("4 offene Archives-Karten wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.");
+    expect(immediate.chips).toEqual(expect.arrayContaining(["Record Reconstructor", "Archives", "R&D", "2 bewegt"]));
+    expect(protectedRun.title).toBe("Du hast Record Reconstructor abgeschlossen: 2 offene Archives-Karten oben auf R&D gelegt.");
+    expect(protectedRun.description).toBe("3 offene Archives-Karten wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.");
+    expect(JSON.stringify(protectedRun)).not.toContain("cardInstances");
+  });
+
   it("shows Schlaghund tag-check damage without internal state", () => {
     const item = formatChronicleEvent(
       makeEvent("gain_credit", {

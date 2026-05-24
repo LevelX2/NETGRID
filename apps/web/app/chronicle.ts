@@ -670,6 +670,27 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Pflichtkarte", ...(turnChip ? [turnChip] : []));
       break;
     case "activated_card_ability":
+      if (stringValue(payload.accessReplacement) === "archives_faceup_to_rd") {
+        const movedCount = numberValue(payload.movedCount) ?? 0;
+        const shuffledCount =
+          numberValue(payload.shuffledFaceUpArchivesCount) ?? movedCount;
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "Record Reconstructor";
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${source} genutzt: ${openArchivesCardCountText(movedCount)} oben auf R&D gelegt`,
+        );
+        description = `${openArchivesCardCountText(shuffledCount)} wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.`;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(source, "Archives", "R&D", `${movedCount} bewegt`);
+        break;
+      }
       if (mergedCardResolverEffect) {
         const cardResolverEffect = mergedCardResolverEffect;
         category = cardResolverEffect.category ?? "card";
@@ -1022,6 +1043,27 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       }
       break;
     case "continue_run":
+      if (stringValue(payload.accessReplacement) === "archives_faceup_to_rd") {
+        const movedCount = numberValue(payload.movedCount) ?? 0;
+        const shuffledCount =
+          numberValue(payload.shuffledFaceUpArchivesCount) ?? movedCount;
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "Record Reconstructor";
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${source} abgeschlossen: ${openArchivesCardCountText(movedCount)} oben auf R&D gelegt`,
+        );
+        description = `${openArchivesCardCountText(shuffledCount)} wurden vorher gemischt; es gab keinen normalen Archives-Zugriff.`;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(source, "Archives", "R&D", `${movedCount} bewegt`);
+        break;
+      }
       if (abilityId === "rio_de_janeiro_passed_ice") {
         const dieRoll = payloadRandomRoll(payload);
         const runEnded = payload.rioRunEnded === true;
@@ -2015,6 +2057,12 @@ function traceStartTitle(subject: string, cardTitle: string | undefined, baseTra
 
 function cardCountText(amount: number): string {
   return amount === 1 ? "eine Karte" : `${amount} Karten`;
+}
+
+function openArchivesCardCountText(amount: number): string {
+  return amount === 1
+    ? "eine offene Archives-Karte"
+    : `${amount} offene Archives-Karten`;
 }
 
 function damageTypeLabel(damageType: string | undefined): string {

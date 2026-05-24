@@ -40869,6 +40869,103 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(hashState(replay.state)).toBe(hashState(recordState));
   });
 
+  it("resolves Record Reconstructor after a protected Archives run reaches access", () => {
+    const p333State = (seed: string, runnerCards: CardDefinitionId[]) =>
+      toRunnerTurn(
+        createGameAfterSetup({
+          seed,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: {
+            ...MECHANIC_SMOKE_DECKS.runAccess.runner,
+            id: `${seed}_runner`,
+            name: `${seed} Runner`,
+            cards: [
+              ...runnerCards.map((id) => ({ id, quantity: 1 })),
+              ...MECHANIC_SMOKE_DECKS.runAccess.runner.cards.filter(
+                (card) => !runnerCards.includes(card.id),
+              ),
+            ],
+          },
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.runAccess.corp,
+            id: `${seed}_corp`,
+            name: `${seed} Corp`,
+            cards: [
+              { id: "simple_barrier_ice", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards,
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+    let state = p333State("p3-33-record-reconstructor-protected-archives", [
+      "onr_v1_142_record-reconstructor",
+    ]);
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_142_record-reconstructor");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_142_record-reconstructor",
+    );
+    putCorpIceOnServer(state, "archives", "simple_barrier_ice");
+    const firstArchive = moveCorpCardToHq(state, "simple_economy_operation");
+    removeEverywhere(state, firstArchive);
+    state.corp.archives.push(firstArchive);
+    state.cardInstances[firstArchive] = {
+      ...state.cardInstances[firstArchive]!,
+      zone: { side: "corp", zone: "archives" },
+      faceup: true,
+    };
+    const secondArchive = moveCorpCardToHq(state, "simple_agenda");
+    removeEverywhere(state, secondArchive);
+    state.corp.archives.push(secondArchive);
+    state.cardInstances[secondArchive] = {
+      ...state.cardInstances[secondArchive]!,
+      zone: { side: "corp", zone: "archives" },
+      faceup: true,
+    };
+    const rdCountBefore = state.corp.rd.length;
+    const archivesCountBefore = state.corp.archives.length;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_142_record-reconstructor",
+    );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.run).toBeUndefined();
+    expect(state.corp.rd).toHaveLength(rdCountBefore + 2);
+    expect(state.corp.rd.slice(0, 2).sort()).toEqual(
+      [firstArchive, secondArchive].sort(),
+    );
+    expect(state.corp.archives).not.toContain(firstArchive);
+    expect(state.corp.archives).not.toContain(secondArchive);
+    expect(getPlayerView(state, "runner").opponent.deckCount).toBe(
+      rdCountBefore + 2,
+    );
+    expect(getPlayerView(state, "runner").opponent.discardCount).toBe(
+      archivesCountBefore - 2,
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      accessReplacement: "archives_faceup_to_rd",
+      movedCount: 2,
+      sourceDefinitionId: "onr_v1_142_record-reconstructor",
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("uses Mystery Box once per run with public top-five reveal, free program install and deterministic shuffle", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("spotcheck-mystery-box-install"));
     state.runner.credits = 20;
