@@ -149,7 +149,6 @@ import {
   resolveMysteryBoxInstallSelection,
   resolveSearchStackInstallSelection,
   resolveSearchToGripSelection,
-  resolveSelfModifyingCodeSearchInstallSelection,
   resolveSneakPreviewSearchInstallSelection,
 } from "./game/hidden-zone/search-choice-resolvers";
 import { applyResolvedSearchToGripMove } from "./game/hidden-zone/search-choice-move-intents";
@@ -159,6 +158,11 @@ import {
   createTopNTakeMatchingMoveIntent,
   toTopNSelectedCardMove,
 } from "./game/hidden-zone/topn-move-intents";
+import {
+  buildSelfModifyingCodeMemoryDeferredPayload,
+  buildSelfModifyingCodeResolvedPayload,
+  resolveSelfModifyingCodeSearchInstallIntent,
+} from "./game/hidden-zone/search-install-intents";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -23430,70 +23434,44 @@ function resolveSelfModifyingCodeStackChoice(
   playerAction: PlayerAction,
 ): void {
   const choice = state.pendingChoice;
-  const selectedCardId = choice
-    ? selectedChoiceCardIds(choice, playerAction)[0]
-    : undefined;
-  const selectedDefinition = selectedCardId
-    ? definitionFor(state, selectedCardId)
-    : undefined;
-  const selection = resolveSelfModifyingCodeSearchInstallSelection({
+  const selectedCardId = choice ? selectedChoiceCardIds(choice, playerAction)[0] : undefined;
+  const selectedDefinition = selectedCardId ? definitionFor(state, selectedCardId) : undefined;
+  const plan = resolveSelfModifyingCodeSearchInstallIntent({
     choice,
     selectedCardId,
     stackCardIds: state.runner.stack,
-    isSelectedProgram: selectedDefinition?.type === "program",
+    selectedCardDefinition: selectedDefinition,
+    availableInstallCredits: availableRunnerProgramInstallCredits(state),
+    runnerMemoryUsed: state.runner.memoryUsed,
+    runnerMemoryLimit: runnerMemoryLimit(state),
+    uniqueBlocked: !!selectedDefinition &&
+      isUniqueCard(selectedDefinition) &&
+      hasInstalledUniqueCardDefinition(state, "runner", selectedDefinition.id),
+    sourceDefinitionId: SELF_MODIFYING_CODE_ID,
   });
   const resolvedChoice = choice!;
-  const cardId = selection.selectedCardId;
-  const definition = selectedDefinition!;
-
-  const canPay =
-    availableRunnerProgramInstallCredits(state) >= (definition.installCost ?? 0);
-  const uniqueBlocked =
-    isUniqueCard(definition) &&
-    hasInstalledUniqueCardDefinition(state, "runner", definition.id);
-  const needsMemory =
-    state.runner.memoryUsed + (definition.memoryCost ?? 0) > runnerMemoryLimit(state);
-  if (canPay && !uniqueBlocked && needsMemory) {
-    if (selection.shuffleNeeded)
+  const cardId = plan.selectedCardId;
+  if (plan.shouldOpenMemoryChoice) {
+    if (plan.shuffleNeeded)
       shuffleRunnerStack(state, `v1911_self_modifying_code:${resolvedChoice.choiceId}:shuffle`);
     const opened = startSelfModifyingCodeFreeMuChoice(state, cardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      sourceDefinitionId: SELF_MODIFYING_CODE_ID,
-      hiddenZoneAction: "self_modifying_code_install_program",
-      publicRevealKind: "reveal",
-      publicRevealDefinitionId: definition.id,
-      selectedCount: 1,
-      searchDestination: "install_program",
-      shuffled: true,
-      installDeferredForMemory: opened,
-      installed: false,
+      ...buildSelfModifyingCodeMemoryDeferredPayload(plan, { installDeferredForMemory: opened }),
     };
     if (!opened) delete state.pendingChoice;
     return;
   }
 
-  const installed =
-    canPay && !uniqueBlocked
-      ? installRunnerProgramFromStackWithoutClick(state, cardId, legalAction)
-      : false;
-  if (selection.shuffleNeeded)
+  const installed = plan.canAttemptInstall
+    ? installRunnerProgramFromStackWithoutClick(state, cardId, legalAction)
+    : false;
+  if (plan.shuffleNeeded)
     shuffleRunnerStack(state, `v1911_self_modifying_code:${resolvedChoice.choiceId}:shuffle`);
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    sourceDefinitionId: SELF_MODIFYING_CODE_ID,
-    hiddenZoneAction: "self_modifying_code_install_program",
-    publicRevealKind: "reveal",
-    publicRevealDefinitionId: definition.id,
-    selectedCount: 1,
-    searchDestination: installed ? "runner_rig" : "runner_stack",
-    shuffled: true,
-    installed,
-    ...(uniqueBlocked ? { installBlockedReason: "unique_already_installed" } : {}),
-    ...(!canPay ? { installBlockedReason: "insufficient_credits" } : {}),
+    ...buildSelfModifyingCodeResolvedPayload(plan, { installed }),
   };
 }
 
