@@ -165,9 +165,16 @@ type RunnerServerFeatures =
     : never;
 type VisibleBreakerPressure = {
   blockedServerIds: Set<string>;
+  knownIceBlockedServerIds: Set<string>;
+  missingBreakerRoles: Set<string>;
   matchingGripBreakerCount: number;
   matchingInstallActionIds: Set<string>;
+  searchActionIds: Set<string>;
+  recoveryActionIds: Set<string>;
+  heapMatchingBreakerCount: number;
+  deckAnswerCount: number;
   missingAnswerCount: number;
+  requiredCoverageCredits: number;
 };
 type RunnerTwoTurnRunIntent = {
   targetServerId: string;
@@ -176,6 +183,30 @@ type RunnerTwoTurnRunIntent = {
   creditsNeeded: number;
   ready: boolean;
   stateKey: string;
+};
+
+type RunnerPressureReadyTarget = {
+  targetServerId: string;
+  targetType: "hq" | "rnd" | "archives" | "remote";
+  planKind: RunnerPlanKind;
+  visibleBreakCost: number;
+  creditsAfterPath: number;
+  reason: string;
+  priority: number;
+};
+
+type RunnerPressureReadyBlocker =
+  | "insufficient_credits"
+  | "missing_post_run_reserve"
+  | "stale_central"
+  | "remote_too_dangerous"
+  | "no_valuable_target";
+
+type RunnerPressureReadyAssessment = {
+  broadReady: boolean;
+  readyTargets: RunnerPressureReadyTarget[];
+  falsePositive: boolean;
+  blockers: Set<RunnerPressureReadyBlocker>;
 };
 
 type CitySurveillanceDrawProjection = {
@@ -307,6 +338,23 @@ type RunnerPlanContinuationIntent = {
   converted: boolean;
   expired: boolean;
   abortReasons: string[];
+  evidence: string[];
+};
+
+type RunnerOutcomeKind =
+  | "central_no_value"
+  | "central_fresh_value"
+  | "remote_empty_or_low_value"
+  | "remote_value"
+  | "jack_out_blocked"
+  | "economy_or_rig_ready";
+
+type RunnerOutcomeFollowup = {
+  kind: RunnerOutcomeKind;
+  targetServerId?: string | undefined;
+  sourceVersion: number;
+  ownStrategicDecisionCount: number;
+  stale: boolean;
   evidence: string[];
 };
 
@@ -516,6 +564,8 @@ export function generateRunnerPlanCandidates(
 ): RunnerPlanCandidate[] {
   if (input.side !== "runner") return [];
   const features = extractRunnerFeatures(input);
+  const breakerPressure = assessVisibleBreakerPressure(input);
+  const hasCoverageSearchNeed = breakerPressure.missingBreakerRoles.size > 0;
   const actions = input.legalActions.slice().sort(compareAction);
   return [
     buildCandidate(
@@ -560,6 +610,8 @@ export function generateRunnerPlanCandidates(
                 role === "build_rig" ||
                 isRunnerPressureRole(role),
             )) ||
+          (hasCoverageSearchNeed &&
+            runnerCoverageSearchAction(input, action)) ||
           Boolean(classifyShellTradersAction(input, action)),
       ),
     ),
@@ -582,6 +634,8 @@ export function generateRunnerPlanCandidates(
       actions.filter(
         (action) =>
           action.type === "draw_card" ||
+          (hasCoverageSearchNeed &&
+            runnerCoverageSearchAction(input, action)) ||
           (action.type === "play_event" &&
             rolesForAction(input, action).some(
               (role) => role === "draw" || role === "setup",
@@ -652,7 +706,17 @@ export function evaluateRunnerPlan(
     candidate,
     beliefState,
   );
+  const phaseExitPressure = evaluateRunnerPhaseExitPressure(
+    input,
+    candidate,
+    beliefState,
+  );
   const planContinuation = evaluateRunnerPlanContinuationAbort(
+    input,
+    candidate,
+    beliefState,
+  );
+  const outcomeFollowup = evaluateRunnerOutcomeFollowup(
     input,
     candidate,
     beliefState,
@@ -683,7 +747,9 @@ export function evaluateRunnerPlan(
     remoteContest.score +
     centralPressure.score +
     noFreshCentralSubstitution.score +
+    phaseExitPressure.score +
     planContinuation.score +
+    outcomeFollowup.score +
     economyReserve.score -
     visibleRiskPenalty(candidate, profile.riskTolerance) -
     easyRunPenalty;
@@ -708,7 +774,9 @@ export function evaluateRunnerPlan(
       ...remoteContest.reasons,
       ...centralPressure.reasons,
       ...noFreshCentralSubstitution.reasons,
+      ...phaseExitPressure.reasons,
       ...planContinuation.reasons,
+      ...outcomeFollowup.reasons,
       ...economyReserve.reasons,
     ]).slice(0, 6),
     scoreBreakdown: scoreComponents([
@@ -739,6 +807,13 @@ export function evaluateRunnerPlan(
         rig.score * profile.weights.runnerRig,
         profile.weights.runnerRig,
         firstReason(rig.reasons),
+      ],
+      [
+        "outcomeFollowup",
+        "Outcome-Follow-up",
+        outcomeFollowup.score,
+        1,
+        firstReason(outcomeFollowup.reasons),
       ],
       [
         "runCost",
@@ -839,6 +914,13 @@ export function evaluateRunnerPlan(
         firstReason(noFreshCentralSubstitution.reasons),
       ],
       [
+        "phaseExitPressure",
+        "Setup-to-Pressure",
+        phaseExitPressure.score,
+        1,
+        firstReason(phaseExitPressure.reasons),
+      ],
+      [
         "planContinuation",
         "Planfortsetzung/-abbruch",
         planContinuation.score,
@@ -876,6 +958,7 @@ export function evaluateRunnerPlan(
             `doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`,
           ]
         : ["doctrine:neutral"]),
+      ...outcomeFollowup.evidence,
       ...candidate.visibleBenefits,
       ...installedEconomy.evidence,
       ...shellTraders.evidence,
@@ -884,6 +967,7 @@ export function evaluateRunnerPlan(
       ...remoteContest.evidence,
       ...centralPressure.evidence,
       ...noFreshCentralSubstitution.evidence,
+      ...phaseExitPressure.evidence,
       ...planContinuation.evidence,
       ...economyReserve.evidence,
       ...twoTurnIntent.evidence,
@@ -1148,21 +1232,45 @@ function evaluateRunnerRemoteContestAndTrashDiscipline(
   const opportunity = runnerRemoteContestOpportunity(input, candidate);
   let score = 0;
   const reasons: string[] = [];
+  const evidence: string[] = [];
 
   if (candidate.kind === "trash_asset") {
     const context = currentRemoteTrashAccessContext(input);
-    if (context.affordableRelevant) {
-      score += context.role === "scoring_protection" ? 260 : 210;
+    evidence.push(...context.evidence);
+    if (context.affordableRelevant && context.deferredByBudget) {
+      score -= context.acuteThreat ? 120 : 360;
+      reasons.push(
+        context.acuteThreat
+          ? "delay_remote_trash_until_reserve_recovers"
+          : "defer_expensive_remote_trash_without_threat",
+      );
+    } else if (context.affordableRelevant) {
+      const highImpactBonus =
+        context.role === "scoring_protection"
+          ? 270
+          : context.role === "run_tax"
+            ? 235
+            : context.role === "economy"
+              ? 220
+              : 190;
+      score += highImpactBonus;
+      if (context.acuteThreat) score += 110;
+      if (context.dedicatedTrashCredits > 0) score += 80;
       reasons.push(
         context.role === "scoring_protection"
           ? "trash_scoring_protection_upgrade"
-          : context.role === "economy"
-            ? "trash_economy_node"
-            : "trash_high_value_remote_asset",
+          : context.role === "run_tax"
+            ? "trash_run_tax_upgrade_when_budget_ok"
+            : context.role === "economy"
+              ? "trash_economy_node"
+              : "trash_high_value_remote_asset",
       );
     } else if (context.trashable && context.role === "low_value") {
       score -= 260;
       reasons.push("do_not_trash_low_value_card");
+    } else if (context.trashable && context.expensive) {
+      score -= 120;
+      reasons.push("avoid_expensive_unknown_remote_trash");
     }
   }
 
@@ -1224,6 +1332,7 @@ function evaluateRunnerRemoteContestAndTrashDiscipline(
           ]
         : []),
       `remote_contest_relevant_trash_targets:${opportunity.relevantTrashRemoteTargetCount}`,
+      ...evidence,
       `remote_contest_selected_advanced:${opportunity.selectedTargetAdvanced}`,
       ...(opportunity.selectedTargetAdvanced
         ? [
@@ -1566,6 +1675,263 @@ function evaluateRunnerPlanContinuationAbort(
       ...intent.evidence,
     ],
   };
+}
+
+function evaluateRunnerOutcomeFollowup(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+  beliefState: BeliefState,
+): RunnerPlanEvaluatorResult {
+  if (!input.profileId.includes("v1.4.2") || !input.ownDeckDoctrine) {
+    return {
+      score: 0,
+      reasons: [],
+      evidence: ["outcome_followup_profile:false"],
+    };
+  }
+  const outcome = reconstructRunnerOutcomeFollowup(input);
+  if (!outcome) {
+    return {
+      score: 0,
+      reasons: [],
+      evidence: ["outcome_followup_opportunity:false"],
+    };
+  }
+  const features = extractRunnerFeatures(input);
+  const target = targetServerId(input, candidate);
+  const sameTargetRun =
+    target !== undefined &&
+    target === outcome.targetServerId &&
+    isRunPlan(candidate.kind);
+  const centralTarget =
+    outcome.targetServerId === "hq" ||
+    outcome.targetServerId === "rd" ||
+    outcome.targetServerId === "archives"
+      ? outcome.targetServerId
+      : undefined;
+  const candidateActions = actionsForRunnerCandidate(input, candidate);
+  const freshCentral =
+    centralTarget !== undefined &&
+    runnerCentralTargetHasFreshPlanValue(input, centralTarget, beliefState);
+  const pathEstimate = target
+    ? runnerKnownPathEstimate(input, target, features)
+    : undefined;
+  const rigUnlock = candidateActions.some((action) =>
+    runnerInstallUnlocksVisiblePath(input, action),
+  );
+  const reserveTarget = runnerCreditReserveTargetForPlanInput(input, features);
+  const candidateCentralFreshValue =
+    target === "hq" || target === "rd" || target === "archives"
+      ? runnerCentralTargetHasFreshPlanValue(input, target, beliefState)
+      : false;
+  const blockedFollowupRun =
+    isRunPlan(candidate.kind) &&
+    target !== undefined &&
+    (features.blockedRunServers.has(target) ||
+      (pathEstimate?.blocked ?? false));
+  const economyProgression =
+    candidate.kind === "recover_economy" && features.credits <= reserveTarget;
+  const rigProgression =
+    candidate.kind === "build_rig" &&
+    (rigUnlock || features.blockedRunServers.size > 0);
+  const runPivotProgression =
+    isRunPlan(candidate.kind) &&
+    target !== undefined &&
+    target !== outcome.targetServerId &&
+    pathEstimate !== undefined &&
+    !blockedFollowupRun &&
+    (candidateCentralFreshValue ||
+      (candidate.kind === "contest_remote" &&
+        target.startsWith("remote_") &&
+        runnerRemoteTargetStillContestable(input, target, features)));
+  const pivotCreatesProgression =
+    economyProgression || rigProgression || runPivotProgression;
+  const pivot =
+    candidate.kind === "recover_economy" ||
+    candidate.kind === "build_rig" ||
+    candidate.kind === "draw_for_answers" ||
+    (isRunPlan(candidate.kind) && target !== outcome.targetServerId);
+  let score = 0;
+  const reasons: string[] = [];
+  const evidence: string[] = [
+    "outcome_followup_opportunity:true",
+    `outcome_kind:${outcome.kind}`,
+    `outcome_source_version:${outcome.sourceVersion}`,
+    `outcome_stale:${outcome.stale}`,
+    `outcome_candidate_kind:${candidate.kind}`,
+    ...(sameTargetRun ? ["outcome_candidate_same_target_run:true"] : []),
+    ...outcome.evidence,
+  ];
+  const applyFollowup = (...flags: string[]): void => {
+    evidence.push(
+      "outcome_followup_taken:true",
+      "outcome_followup_applied:true",
+    );
+    evidence.push(...flags);
+  };
+  const suppressByProgressionCost = (...flags: string[]): void => {
+    evidence.push("outcome_followup_suppressed_by_progression_cost:true");
+    if (blockedFollowupRun)
+      evidence.push("effective_run_quote_blocked_followup_run:true");
+    evidence.push(...flags);
+  };
+
+  switch (outcome.kind) {
+    case "central_no_value":
+      if (sameTargetRun && !freshCentral) {
+        score -= 290;
+        reasons.push("avoid_post_access_no_value_central_repeat");
+        evidence.push(
+          "bad_outcome_repeated_without_new_info:true",
+          "runner_central_success_followed_by_repeat_no_value:true",
+          "runner_access_no_value_repeated:true",
+        );
+      } else if (pivot && pivotCreatesProgression) {
+        score += candidate.kind === "recover_economy" ? 150 : 115;
+        reasons.push("pivot_after_no_value_central_access");
+        applyFollowup(
+          "outcome_pivot_with_reason:true",
+          "runner_central_no_value_pivoted:true",
+          "runner_access_no_value_pivoted:true",
+        );
+      } else if (pivot) {
+        reasons.push("suppress_no_value_central_pivot_without_progression");
+        suppressByProgressionCost();
+      }
+      break;
+    case "central_fresh_value":
+      if (
+        sameTargetRun &&
+        (freshCentral || outcome.kind === "central_fresh_value")
+      ) {
+        score += 145;
+        reasons.push("continue_central_after_fresh_value");
+        applyFollowup(
+          "good_outcome_converted:true",
+          "runner_central_success_followed_by_value:true",
+        );
+      }
+      break;
+    case "remote_empty_or_low_value":
+      if (sameTargetRun) {
+        score -= 560;
+        reasons.push("avoid_empty_remote_repeat");
+        evidence.push("bad_outcome_repeated_without_new_info:true");
+      } else if (
+        pivot &&
+        (economyProgression || rigProgression || runPivotProgression)
+      ) {
+        score += candidate.kind === "recover_economy" ? 150 : 110;
+        reasons.push("pivot_after_empty_remote_access");
+        applyFollowup(
+          "outcome_pivot_with_reason:true",
+          "runner_remote_empty_or_low_value_pivoted:true",
+        );
+      } else if (pivot) {
+        reasons.push("suppress_empty_remote_pivot_without_progression");
+        suppressByProgressionCost();
+      }
+      break;
+    case "remote_value":
+      if (sameTargetRun && outcome.targetServerId) {
+        const contestable = runnerRemoteTargetStillContestable(
+          input,
+          outcome.targetServerId,
+          features,
+        );
+        if (!contestable) {
+          score -= 210;
+          reasons.push("avoid_finished_remote_repeat");
+          evidence.push("bad_outcome_repeated_without_new_info:true");
+        }
+      } else if (pivot && pivotCreatesProgression) {
+        score += 85;
+        reasons.push("reassess_after_remote_value");
+        applyFollowup(
+          "good_outcome_converted:true",
+          "runner_remote_success_followed_by_value:true",
+        );
+      } else if (pivot) {
+        reasons.push("suppress_remote_value_pivot_without_progression");
+        suppressByProgressionCost();
+      }
+      break;
+    case "jack_out_blocked":
+      if (
+        sameTargetRun &&
+        (features.blockedRunServers.has(target ?? "") ||
+          (pathEstimate?.blocked ?? false))
+      ) {
+        score -= 340;
+        reasons.push("avoid_repeating_blocked_run_after_jack_out");
+        evidence.push(
+          "bad_outcome_repeated_without_new_info:true",
+          "runner_jack_out_repeated_same_server_without_new_info:true",
+        );
+        if (blockedFollowupRun)
+          evidence.push("effective_run_quote_blocked_followup_run:true");
+      } else if (
+        economyProgression ||
+        rigProgression ||
+        (rigUnlock && candidate.kind === "build_rig")
+      ) {
+        score += rigUnlock ? 230 : 170;
+        reasons.push("repair_path_after_jack_out");
+        applyFollowup(
+          "outcome_pivot_with_reason:true",
+          "runner_jack_out_followed_by_economy_or_rig:true",
+        );
+      } else if (
+        candidate.kind === "recover_economy" ||
+        candidate.kind === "build_rig" ||
+        isRunPlan(candidate.kind)
+      ) {
+        reasons.push("suppress_jack_out_followup_without_path_progress");
+        suppressByProgressionCost();
+      }
+      break;
+    case "economy_or_rig_ready":
+      if (
+        isRunPlan(candidate.kind) &&
+        target &&
+        pathEstimate &&
+        !pathEstimate.blocked
+      ) {
+        score += candidate.kind === "contest_remote" ? 180 : 135;
+        reasons.push("convert_economy_or_rig_into_run");
+        applyFollowup(
+          "good_outcome_converted:true",
+          outcome.evidence.includes("outcome_source:runner_rig")
+            ? "runner_rig_converted_after_outcome:true"
+            : "runner_economy_converted_after_outcome:true",
+        );
+      } else if (isRunPlan(candidate.kind) && blockedFollowupRun) {
+        reasons.push("suppress_ready_followup_run_blocked_by_effective_quote");
+        suppressByProgressionCost();
+      } else if (
+        (candidate.kind === "recover_economy" ||
+          candidate.kind === "draw_for_answers") &&
+        input.playerView.own.credits >=
+          runnerCreditReserveTargetForPlanInput(input, features)
+      ) {
+        score -= 120;
+        reasons.push("avoid_setup_spam_after_outcome_ready");
+      }
+      break;
+  }
+
+  if (
+    evidence.includes("outcome_followup_opportunity:true") &&
+    !evidence.includes("outcome_followup_taken:true") &&
+    (evidence.includes("bad_outcome_repeated_without_new_info:true") ||
+      evidence.includes(
+        "runner_central_success_followed_by_repeat_no_value:true",
+      ))
+  ) {
+    evidence.push("outcome_ignored:true");
+  }
+
+  return { score, reasons, evidence };
 }
 
 function evaluateRunnerEconomyReserveDiscipline(
@@ -2042,14 +2408,31 @@ function evaluateVisibleBreakerPlan(
   }
   let score = 0;
   const reasons: string[] = [];
+  const hasCandidateSearch = candidate.legalActionIds.some((actionId) =>
+    pressure.searchActionIds.has(actionId),
+  );
+  const hasCandidateRecovery = candidate.legalActionIds.some((actionId) =>
+    pressure.recoveryActionIds.has(actionId),
+  );
+  const needsCreditsForCoverage =
+    pressure.requiredCoverageCredits > input.playerView.own.credits;
   if (candidate.kind === "build_rig") {
     if (
       candidate.legalActionIds.some((actionId) =>
         pressure.matchingInstallActionIds.has(actionId),
       )
     ) {
-      score += 320;
+      score += 380;
       reasons.push("visible_matching_breaker_install_available");
+    } else if (hasCandidateRecovery && !needsCreditsForCoverage) {
+      score += 330;
+      reasons.push("visible_missing_breaker_recovery_available");
+    } else if (hasCandidateSearch && !needsCreditsForCoverage) {
+      score += 310;
+      reasons.push("visible_missing_breaker_search_available");
+    } else if (hasCandidateSearch || hasCandidateRecovery) {
+      score += 95;
+      reasons.push("visible_missing_breaker_search_needs_credits");
     } else if (pressure.matchingGripBreakerCount > 0) {
       score += 120;
       reasons.push("visible_matching_breaker_in_grip");
@@ -2057,19 +2440,23 @@ function evaluateVisibleBreakerPlan(
   }
   if (
     candidate.kind === "recover_economy" &&
-    pressure.matchingGripBreakerCount > 0 &&
-    pressure.matchingInstallActionIds.size === 0 &&
-    input.playerView.own.credits < 4
+    ((pressure.matchingGripBreakerCount > 0 &&
+      pressure.matchingInstallActionIds.size === 0) ||
+      pressure.searchActionIds.size > 0 ||
+      pressure.recoveryActionIds.size > 0) &&
+    needsCreditsForCoverage
   ) {
-    score += 190;
+    score += 240;
     reasons.push("visible_matching_breaker_needs_credits");
   }
   if (
     candidate.kind === "draw_for_answers" &&
     pressure.matchingGripBreakerCount === 0 &&
+    pressure.searchActionIds.size === 0 &&
+    pressure.recoveryActionIds.size === 0 &&
     pressure.missingAnswerCount > 0
   ) {
-    score += 210;
+    score += 170;
     reasons.push("visible_blocker_needs_draw_or_search");
   }
   if (
@@ -2086,12 +2473,264 @@ function evaluateVisibleBreakerPlan(
     evidence: [
       `visible_breaker_pressure:true`,
       `visible_blocked_servers:${pressure.blockedServerIds.size}`,
+      `known_ice_blocked_servers:${pressure.knownIceBlockedServerIds.size}`,
+      `missing_breaker_roles:${pressure.missingBreakerRoles.size}`,
       `matching_grip_breakers:${pressure.matchingGripBreakerCount}`,
       `matching_install_actions:${pressure.matchingInstallActionIds.size}`,
+      `coverage_search_actions:${pressure.searchActionIds.size}`,
+      `coverage_recovery_actions:${pressure.recoveryActionIds.size}`,
+      `heap_matching_breakers:${pressure.heapMatchingBreakerCount}`,
+      `deck_breaker_answers:${pressure.deckAnswerCount}`,
       `missing_breaker_answers:${pressure.missingAnswerCount}`,
+      `coverage_required_credits:${pressure.requiredCoverageCredits}`,
+      `coverage_needs_credits:${needsCreditsForCoverage}`,
       `visible_breaker_target:${target ?? "none"}`,
     ],
   };
+}
+
+function evaluateRunnerPhaseExitPressure(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+  beliefState: BeliefState,
+): RunnerPlanEvaluatorResult {
+  if (input.difficulty === "easy") {
+    return {
+      score: 0,
+      reasons: [],
+      evidence: ["runner_phase_exit_disabled_for_easy:true"],
+    };
+  }
+  const features = extractRunnerFeatures(input);
+  const assessment = assessRunnerPressureReady(input, beliefState, features);
+  const bestTarget = assessment.readyTargets[0];
+  const phaseExitActive = runnerPhaseExitPressureActive(input, assessment);
+  const target = targetServerId(input, candidate);
+  const matchesReadyTarget = Boolean(
+    phaseExitActive &&
+    target &&
+    bestTarget &&
+    assessment.readyTargets.some(
+      (ready) =>
+        ready.targetServerId === target && ready.planKind === candidate.kind,
+    ),
+  );
+  const setupContinuation = runnerSetupContinuationCandidate(input, candidate);
+  let score = 0;
+  const reasons: string[] = [];
+  if (matchesReadyTarget) {
+    score += bestTarget?.targetType === "remote" ? 230 : 170;
+    reasons.push("phase_exit_pressure_ready");
+  } else if (
+    phaseExitActive &&
+    assessment.readyTargets.length > 0 &&
+    setupContinuation &&
+    !(
+      candidate.kind === "recover_economy" &&
+      (runnerStillNeedsEconomyForVisibleContestOrTrash(input, features) ||
+        runnerNeedsEconomyForKnownRemoteTrash(input, features))
+    )
+  ) {
+    score -= candidate.kind === "build_rig" ? 80 : 125;
+    reasons.push("phase_exit_suppress_setup_after_pressure_ready");
+  }
+  return {
+    score,
+    reasons,
+    evidence: [
+      `runner_pressure_ready_windows:${assessment.broadReady ? 1 : 0}`,
+      `runner_pressure_ready_true:${assessment.readyTargets.length > 0}`,
+      `runner_pressure_ready_false_positive:${assessment.falsePositive}`,
+      `runner_pressure_ready_targets:${assessment.readyTargets.length}`,
+      `runner_pressure_ready_best:${bestTarget?.targetServerId ?? "none"}`,
+      `runner_pressure_ready_best_type:${bestTarget?.targetType ?? "none"}`,
+      `runner_pressure_ready_reason:${bestTarget?.reason ?? "none"}`,
+      `runner_phase_exit_active:${phaseExitActive}`,
+      `runner_phase_exit_candidate_target:${target ?? "none"}`,
+      `runner_phase_exit_matches_pressure:${matchesReadyTarget}`,
+      `runner_phase_exit_setup_continuation:${setupContinuation}`,
+      `runner_pressure_skipped_reason:${[...assessment.blockers].join("|") || "none"}`,
+    ],
+  };
+}
+
+function runnerNeedsEconomyForKnownRemoteTrash(
+  input: AiDecisionInput,
+  features: RunnerFeatures,
+): boolean {
+  return input.playerView.servers.some((server) => {
+    if (!server.id.startsWith("remote_")) return false;
+    const estimate = runnerKnownPathEstimate(input, server.id, features);
+    if (!estimate || estimate.blocked) return false;
+    return server.root.some((card) => {
+      const trashCost = remoteRootTrashCost(card);
+      if (trashCost === undefined) return false;
+      const role = remoteTrashRoleForCard(card);
+      return (
+        role !== "low_value" &&
+        role !== "unknown" &&
+        estimate.creditsAfterPath < trashCost + 1
+      );
+    });
+  });
+}
+
+function runnerPhaseExitPressureActive(
+  input: AiDecisionInput,
+  assessment: RunnerPressureReadyAssessment,
+): boolean {
+  if (assessment.readyTargets.length === 0) return false;
+  if (assessment.readyTargets.some((target) => target.targetType === "remote"))
+    return true;
+  const outcome = reconstructRunnerOutcomeFollowup(input);
+  return (
+    outcome?.kind === "economy_or_rig_ready" &&
+    outcome.ownStrategicDecisionCount <= 2
+  );
+}
+
+function assessRunnerPressureReady(
+  input: AiDecisionInput,
+  beliefState: BeliefState,
+  features: RunnerFeatures = extractRunnerFeatures(input),
+): RunnerPressureReadyAssessment {
+  const blockers = new Set<RunnerPressureReadyBlocker>();
+  const readyTargets: RunnerPressureReadyTarget[] = [];
+  let broadReady = false;
+  const seen = new Set<string>();
+  for (const action of input.legalActions) {
+    if (
+      action.type !== "start_run" ||
+      typeof action.payload?.serverId !== "string"
+    )
+      continue;
+    const targetServerId = action.payload.serverId;
+    if (seen.has(targetServerId)) continue;
+    seen.add(targetServerId);
+    const estimate = runnerKnownPathEstimate(input, targetServerId, features);
+    if (!estimate) continue;
+    if (!estimate.blocked) broadReady = true;
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === targetServerId,
+    );
+    if (!server) continue;
+    if (estimate.blocked) {
+      if (estimate.visibleBreakCost > input.playerView.own.credits)
+        blockers.add("insufficient_credits");
+      else blockers.add("no_valuable_target");
+      continue;
+    }
+    const target = runnerPressureReadyTargetForServer(
+      input,
+      targetServerId,
+      server,
+      estimate,
+      features,
+      beliefState,
+    );
+    if (target) readyTargets.push(target);
+    else blockers.add("no_valuable_target");
+  }
+  readyTargets.sort(
+    (left, right) =>
+      right.priority - left.priority ||
+      left.targetServerId.localeCompare(right.targetServerId),
+  );
+  return {
+    broadReady,
+    readyTargets,
+    falsePositive: broadReady && readyTargets.length === 0,
+    blockers,
+  };
+}
+
+function runnerPressureReadyTargetForServer(
+  input: AiDecisionInput,
+  targetServerId: string,
+  server: AiDecisionInput["playerView"]["servers"][number],
+  estimate: NonNullable<ReturnType<typeof runnerKnownPathEstimate>>,
+  features: RunnerFeatures,
+  beliefState: BeliefState,
+): RunnerPressureReadyTarget | undefined {
+  if (estimate.creditsAfterPath < 0) return undefined;
+  if (targetServerId.startsWith("remote_")) {
+    const profile = runnerRemoteContestProfile(input, targetServerId, features);
+    const remoteValue =
+      profile.contestable ||
+      (profile.relevantTrash &&
+        !profile.blockedByBreakerCoverage &&
+        !profile.blockedByKnownIceCost &&
+        !profile.blockedByPostRunReserve);
+    if (!remoteValue) return undefined;
+    return {
+      targetServerId,
+      targetType: "remote",
+      planKind: "contest_remote",
+      visibleBreakCost: estimate.visibleBreakCost,
+      creditsAfterPath: estimate.creditsAfterPath,
+      reason: profile.contestable ? "remote_contest" : "remote_trash",
+      priority:
+        260 +
+        (profile.advanced ? 100 : 0) +
+        (profile.relevantTrash ? 55 : 0) -
+        estimate.visibleBreakCost * 8,
+    };
+  }
+  if (
+    targetServerId !== "hq" &&
+    targetServerId !== "rd" &&
+    targetServerId !== "archives"
+  )
+    return undefined;
+  const centralTarget = targetServerId as "hq" | "rd" | "archives";
+  if (estimate.creditsAfterPath < 1) return undefined;
+  if (!centralPressureTargetIsGood(input, centralTarget, features, beliefState))
+    return undefined;
+  const targetType = targetServerId === "rd" ? "rnd" : targetServerId;
+  const planKind =
+    targetServerId === "rd"
+      ? "pressure_rnd"
+      : targetServerId === "hq"
+        ? "pressure_hq"
+        : "safe_probe_run";
+  return {
+    targetServerId,
+    targetType,
+    planKind,
+    visibleBreakCost: estimate.visibleBreakCost,
+    creditsAfterPath: estimate.creditsAfterPath,
+    reason: runnerCentralCloseoutProfile(input, centralTarget, beliefState)
+      .opportunity
+      ? "central_closeout"
+      : "central_fresh_pressure",
+    priority:
+      (targetServerId === "rd" ? 210 : targetServerId === "hq" ? 190 : 120) -
+      estimate.visibleBreakCost * 8 +
+      (server.ice.length === 0 ? 35 : 0),
+  };
+}
+
+function runnerSetupContinuationCandidate(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): boolean {
+  if (
+    candidate.kind === "recover_economy" ||
+    candidate.kind === "draw_for_answers"
+  )
+    return true;
+  if (candidate.kind !== "build_rig") return false;
+  return candidate.legalActionIds.some((actionId) => {
+    const action = input.legalActions.find(
+      (candidateAction) => candidateAction.actionId === actionId,
+    );
+    if (!action) return false;
+    return (
+      action.type === "install_card" ||
+      runnerCoverageSearchAction(input, action) ||
+      Boolean(classifyShellTradersAction(input, action))
+    );
+  });
 }
 
 export function evaluateRunnerEarlyTurnDoctrine(
@@ -2317,12 +2956,20 @@ export function estimateRunCost(
   const visibleBreakCost = target
     ? features.visibleRunBreakCosts.get(target)
     : undefined;
+  const knownUnrezzedIceAdjustment = knownUnrezzedIceCostAdjustment(
+    input,
+    target,
+    beliefStateForCost(input),
+  );
   const rezzedIce = server?.rezzedIceCount ?? 0;
   const breakCostPressure =
     visibleBreakCost === undefined
       ? 0
       : visibleBreakCost * 18 +
         Math.max(0, visibleBreakCost - features.credits) * 55;
+  const knownIcePressure =
+    knownUnrezzedIceAdjustment.cost * 16 +
+    (knownUnrezzedIceAdjustment.blocked ? 420 : 0);
   const score =
     candidate.kind === "recover_economy"
       ? features.credits < 4
@@ -2335,7 +2982,8 @@ export function estimateRunCost(
             90 -
               rezzedIce * 55 -
               Math.max(0, 3 - features.credits) * 35 -
-              breakCostPressure,
+              breakCostPressure -
+              knownIcePressure,
           );
   return {
     score,
@@ -2351,6 +2999,7 @@ export function estimateRunCost(
       `blocked:${blocked}`,
       `credit_reserve:${features.credits}`,
       `visible_etr_break_cost:${visibleBreakCost ?? "unavailable"}`,
+      ...knownUnrezzedIceAdjustment.evidence,
     ],
   };
 }
@@ -2398,7 +3047,19 @@ export function evaluateServerAccessValue(
     target,
     freshness,
   );
-  const lowValueKnownHq = isKnownLowValueHqHand(input, target, hqHandMemory);
+  const rndMemoryValue = evaluateKnownRndRunMemoryValue(
+    input,
+    candidate,
+    target,
+    freshness,
+  );
+  const hqMemoryValue = evaluateKnownHqRunMemoryValue(
+    input,
+    candidate,
+    target,
+    hqHandMemory,
+  );
+  const lowValueKnownHq = hqMemoryValue.fullyKnownNoAgenda;
   const staleHqPenalty =
     target === "hq" &&
     (candidate.kind === "pressure_hq" || candidate.kind === "safe_probe_run") &&
@@ -2419,41 +3080,68 @@ export function evaluateServerAccessValue(
       target,
       features,
     );
+  const knownRemoteValue = evaluateKnownRemoteMemoryValue(
+    input,
+    candidate,
+    target,
+    beliefState,
+  );
   evidence.push(`recent_central_penalty:${recentCentralPenalty}`);
   const score =
     candidate.kind === "pressure_rnd"
-      ? 135 + history * 10 - staleRndPenalty - recentCentralPenalty
+      ? 135 +
+        history * 10 +
+        rndMemoryValue.score -
+        staleRndPenalty -
+        recentCentralPenalty
       : candidate.kind === "pressure_hq"
         ? 110 +
           Math.max(0, 5 - input.playerView.opponent.handCount) * 4 +
-          history * 8 -
+          history * 8 +
+          hqMemoryValue.knownCardValue +
+          hqMemoryValue.unknownCardValue -
           staleHqPenalty -
           recentCentralPenalty
         : candidate.kind === "contest_remote"
           ? 90 +
             (server?.rootCount ?? 0) * 55 +
             (server?.advancedRootCount ?? 0) * 35 -
-            remoteRootAffordabilityPenalty.penalty
+            remoteRootAffordabilityPenalty.penalty +
+            knownRemoteValue.score
           : candidate.kind === "trash_asset"
             ? 150
             : candidate.kind === "safe_probe_run"
               ? 55 -
                 staleRndPenalty * 0.4 -
+                Math.max(0, rndMemoryValue.penalty) * 0.4 +
+                Math.max(0, rndMemoryValue.score) * 0.4 -
                 staleHqPenalty * 0.4 -
                 staleArchivesPenalty
               : 0;
   const reasons = [
     "server_value_from_visible_projection",
     ...(staleRndPenalty > 0 ? ["known_rnd_top_not_fresh"] : []),
+    ...rndMemoryValue.reasons,
     ...(staleHqPenalty > 0 ? ["known_hq_hand_low_value"] : []),
+    ...(hqMemoryValue.knownAgendaCount > 0 ? ["known_hq_agenda_pressure"] : []),
+    ...(hqMemoryValue.unknownCount > 0 && target === "hq"
+      ? ["unknown_hq_cards_remain"]
+      : []),
     ...(recentCentralPenalty > 0 ? ["recent_central_pressure_repeated"] : []),
     ...(staleArchivesPenalty > 0 ? ["known_archives_access_not_fresh"] : []),
+    ...knownRemoteValue.reasons,
     ...remoteRootAffordabilityPenalty.reasons,
   ];
   return {
     score,
     reasons,
-    evidence: [...evidence, ...remoteRootAffordabilityPenalty.evidence],
+    evidence: [
+      ...evidence,
+      ...rndMemoryValue.evidence,
+      ...hqMemoryValue.evidence,
+      ...knownRemoteValue.evidence,
+      ...remoteRootAffordabilityPenalty.evidence,
+    ],
   };
 }
 
@@ -2548,9 +3236,85 @@ function staleKnownRndPlanPenalty(
     freshness?.freshness !== "stale_known_same_top"
   )
     return 0;
+  if (knownRndTopIsAgenda(freshness)) return 0;
+  if (
+    freshness.knownTopDefinitionId &&
+    knownRndTopIsLowValue(freshness) === false
+  )
+    return 0;
   // This is a preference penalty, not a legality gate: the Runner has side-safe public evidence that the same R&D top card is still known,
   // so ordinary economy/draw plans should beat another identical access unless another evaluator contributes a concrete advantage.
   return candidate.kind === "pressure_rnd" ? 540 : 260;
+}
+
+function evaluateKnownRndRunMemoryValue(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+  target: string | undefined,
+  freshness: RndTopFreshnessMemory | undefined,
+): { score: number; penalty: number; reasons: string[]; evidence: string[] } {
+  if (
+    target !== "rd" ||
+    (candidate.kind !== "pressure_rnd" && candidate.kind !== "safe_probe_run")
+  )
+    return { score: 0, penalty: 0, reasons: [], evidence: [] };
+  const knownTopDefinitionId = freshness?.knownTopDefinitionId;
+  const knownAgenda = knownRndTopIsAgenda(freshness);
+  const knownLowValue = knownRndTopIsLowValue(freshness);
+  const freshAfterRemoved = freshness?.freshness === "fresh_after_top_removed";
+  const score =
+    knownAgenda
+      ? 520
+      : freshAfterRemoved
+        ? 165
+        : knownLowValue && freshness?.freshness === "stale_known_same_top"
+          ? 0
+          : 0;
+  const penalty =
+    knownLowValue && freshness?.freshness === "stale_known_same_top" ? 300 : 0;
+  return {
+    score,
+    penalty,
+    reasons: [
+      ...(freshAfterRemoved ? ["rnd_top_fresh_after_access_removed"] : []),
+      ...(knownAgenda ? ["known_rnd_top_agenda_pressure"] : []),
+      ...(knownLowValue && freshness?.freshness === "stale_known_same_top"
+        ? ["known_rnd_top_low_value_stale"]
+        : []),
+    ],
+    evidence: [
+      `rnd_known_top_definition:${knownTopDefinitionId ?? "unknown"}`,
+      `rnd_known_top_agenda:${knownAgenda}`,
+      `rnd_known_top_low_value:${knownLowValue}`,
+      `rnd_freshened_by_runner_access:${freshness?.freshenedByRunnerAccess === true}`,
+      `rnd_known_sequence_count:${freshness?.knownSequenceDefinitionIds?.length ?? 0}`,
+    ],
+  };
+}
+
+function knownRndTopIsAgenda(
+  freshness: RndTopFreshnessMemory | undefined,
+): boolean {
+  const definitionId = freshness?.knownTopDefinitionId;
+  if (!definitionId) return false;
+  return (
+    freshness.knownTopIsAgenda === true ||
+    RUNTIME_CARDS[definitionId]?.type === "agenda" ||
+    DEMO_CARDS_BY_ID[definitionId]?.type === "agenda"
+  );
+}
+
+function knownRndTopIsLowValue(
+  freshness: RndTopFreshnessMemory | undefined,
+): boolean {
+  const definitionId = freshness?.knownTopDefinitionId;
+  if (!definitionId) return false;
+  const runtimeType = RUNTIME_CARDS[definitionId]?.type;
+  const demoType = DEMO_CARDS_BY_ID[definitionId]?.type;
+  const type = runtimeType ?? demoType;
+  if (type === "agenda") return false;
+  if (type === "asset" || type === "upgrade") return false;
+  return freshness.knownTopIsLowValue === true || type !== undefined;
 }
 
 function recentCentralPressurePenalty(
@@ -2563,6 +3327,15 @@ function recentCentralPressurePenalty(
     (target !== "hq" && target !== "rd")
   )
     return 0;
+  if (target === "rd") {
+    const freshness =
+      reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness;
+    if (
+      freshness?.freshness === "fresh_after_top_removed" ||
+      knownRndTopIsAgenda(freshness)
+    )
+      return 0;
+  }
   const history = mergedPublicHistory(input);
   const lastSameCentralRun = findLastIndex(
     history,
@@ -2718,6 +3491,162 @@ function reconstructRunnerPlanContinuationIntent(
   };
 }
 
+function reconstructRunnerOutcomeFollowup(
+  input: AiDecisionInput,
+): RunnerOutcomeFollowup | undefined {
+  const history = mergedPublicHistory(input);
+  const recent = history.slice(-18);
+  const lastOutcomeIndex = findLastIndex(recent, (event) =>
+    runnerEventCanStartOutcomeFollowup(event),
+  );
+  if (lastOutcomeIndex < 0) return undefined;
+  const event = recent[lastOutcomeIndex]!;
+  const actionType = publicActionType(event);
+  const sourceVersion = eventVersion(event);
+  const ownStrategicDecisionCount = recent
+    .slice(lastOutcomeIndex + 1)
+    .filter(
+      (candidate) =>
+        candidate.publicPayload.actor === "runner" &&
+        runnerPlanKindFromPublicEvent(candidate) !== undefined,
+    ).length;
+  if (ownStrategicDecisionCount > 3) return undefined;
+
+  if (actionType === "jack_out") {
+    return {
+      kind: "jack_out_blocked",
+      targetServerId: serverIdFromEvent(event),
+      sourceVersion,
+      ownStrategicDecisionCount,
+      stale: ownStrategicDecisionCount > 0,
+      evidence: ["outcome_source:runner_jack_out"],
+    };
+  }
+
+  if (
+    actionType === "gain_credit" ||
+    actionType === "install_card" ||
+    actionType === "play_event" ||
+    actionType === "activated_card_ability" ||
+    actionType === "trigger_ability"
+  ) {
+    const features = extractRunnerFeatures(input);
+    const roles = publicEventRoles(event);
+    const sourceDefinitionId =
+      stringPayloadValue(event, "sourceDefinitionId") ??
+      stringPayloadValue(event, "cardDefinitionId") ??
+      stringPayloadValue(event, "targetDefinitionId");
+    const rigSource =
+      actionType === "install_card" &&
+      (roles.some((role) => role.startsWith("breaker_") || role === "memory") ||
+        runnerDefinitionIsCoverageCard(sourceDefinitionId));
+    const economySource =
+      (actionType === "gain_credit" ||
+        roles.some((role) => isRunnerEconomyRole(role))) &&
+      features.credits >=
+        runnerCreditReserveTargetForPlanInput(input, features);
+    if (rigSource || economySource) {
+      return {
+        kind: "economy_or_rig_ready",
+        targetServerId: serverIdFromEvent(event),
+        sourceVersion,
+        ownStrategicDecisionCount,
+        stale: ownStrategicDecisionCount > 0,
+        evidence: [
+          rigSource
+            ? "outcome_source:runner_rig"
+            : "outcome_source:runner_economy",
+        ],
+      };
+    }
+  }
+
+  const runIndex =
+    actionType === "start_run"
+      ? lastOutcomeIndex
+      : findLastIndex(
+          recent.slice(0, lastOutcomeIndex + 1),
+          (candidate) =>
+            candidate.publicPayload.actor === "runner" &&
+            publicActionType(candidate) === "start_run",
+        );
+  if (runIndex < 0) return undefined;
+  const run = recent[runIndex]!;
+  const targetServerId = serverIdFromEvent(run);
+  if (!targetServerId) return undefined;
+  const afterRun = recent.slice(runIndex + 1, lastOutcomeIndex + 1);
+  const hasStealOrTrash = afterRun.some((candidate) =>
+    ["steal_agenda", "trash_accessed_card"].includes(
+      publicActionType(candidate),
+    ),
+  );
+  const hasAccess = afterRun.some(
+    (candidate) =>
+      publicActionType(candidate) === "access_card" ||
+      candidate.type.includes("access"),
+  );
+  const hasFreshValue = afterRun.some((candidate) =>
+    Boolean(
+      candidate.publicPayload.runnerCentralFreshValue === true ||
+      candidate.publicPayload.multiaccess === true ||
+      candidate.publicPayload.interfaceValue === true ||
+      candidate.publicPayload.closeoutPressure === true,
+    ),
+  );
+  if (
+    targetServerId === "hq" ||
+    targetServerId === "rd" ||
+    targetServerId === "archives"
+  ) {
+    if (!hasAccess && actionType === "start_run") return undefined;
+    return {
+      kind:
+        hasStealOrTrash || hasFreshValue
+          ? "central_fresh_value"
+          : "central_no_value",
+      targetServerId,
+      sourceVersion,
+      ownStrategicDecisionCount,
+      stale: ownStrategicDecisionCount > 0,
+      evidence: [
+        "outcome_source:runner_central_run",
+        `outcome_has_value:${hasStealOrTrash || hasFreshValue}`,
+      ],
+    };
+  }
+  if (targetServerId.startsWith("remote_")) {
+    if (!hasAccess && actionType === "start_run") return undefined;
+    return {
+      kind: hasStealOrTrash ? "remote_value" : "remote_empty_or_low_value",
+      targetServerId,
+      sourceVersion,
+      ownStrategicDecisionCount,
+      stale: ownStrategicDecisionCount > 0,
+      evidence: [
+        "outcome_source:runner_remote_run",
+        `outcome_has_value:${hasStealOrTrash}`,
+      ],
+    };
+  }
+  return undefined;
+}
+
+function runnerEventCanStartOutcomeFollowup(event: PublicGameEvent): boolean {
+  if (event.publicPayload.actor !== "runner") return false;
+  const actionType = publicActionType(event);
+  return (
+    actionType === "access_card" ||
+    actionType === "steal_agenda" ||
+    actionType === "trash_accessed_card" ||
+    actionType === "jack_out" ||
+    actionType === "gain_credit" ||
+    actionType === "install_card" ||
+    actionType === "play_event" ||
+    actionType === "activated_card_ability" ||
+    actionType === "trigger_ability"
+  );
+}
+
 function runnerPlanKindFromPublicEvent(
   event: PublicGameEvent,
 ): RunnerPlanKind | undefined {
@@ -2759,11 +3688,36 @@ function publicEventRoles(event: PublicGameEvent): string[] {
   );
 }
 
+function runnerDefinitionIsCoverageCard(
+  definitionId: string | undefined,
+): boolean {
+  if (!definitionId) return false;
+  const runtimeDefinition = RUNTIME_CARDS[definitionId];
+  const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
+  const type = runtimeDefinition?.type ?? demoDefinition?.type;
+  const subtypes = [
+    ...(((runtimeDefinition as { subtypes?: string[] } | undefined)?.subtypes ??
+      []) as string[]),
+    ...(((demoDefinition as { subtypes?: string[] } | undefined)?.subtypes ??
+      []) as string[]),
+  ].map((subtype) => subtype.toLowerCase());
+  return (
+    type === "program" &&
+    (subtypes.includes("icebreaker") ||
+      subtypes.includes("fracter") ||
+      subtypes.includes("decoder") ||
+      subtypes.includes("killer"))
+  );
+}
+
+function publicActionType(event: PublicGameEvent): string {
+  return typeof event.publicPayload.actionType === "string"
+    ? event.publicPayload.actionType
+    : event.type;
+}
+
 function runnerPublicEventConvertsPlan(event: PublicGameEvent): boolean {
-  const actionType =
-    typeof event.publicPayload.actionType === "string"
-      ? event.publicPayload.actionType
-      : event.type;
+  const actionType = publicActionType(event);
   return (
     actionType === "steal_agenda" ||
     actionType === "trash_accessed_card" ||
@@ -3039,6 +3993,206 @@ function isKnownLowValueHqHand(
   );
 }
 
+function evaluateKnownHqRunMemoryValue(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+  target: string | undefined,
+  hqHandMemory: KnownHqHandMemory | undefined,
+): {
+  knownCardValue: number;
+  unknownCardValue: number;
+  knownAgendaCount: number;
+  knownNonAgendaCount: number;
+  knownAgendaPoints: number;
+  unknownCount: number;
+  fullyKnownNoAgenda: boolean;
+  evidence: string[];
+} {
+  if (target !== "hq" || !hqHandMemory) {
+    return {
+      knownCardValue: 0,
+      unknownCardValue: 0,
+      knownAgendaCount: 0,
+      knownNonAgendaCount: 0,
+      knownAgendaPoints: 0,
+      unknownCount: 0,
+      fullyKnownNoAgenda: false,
+      evidence: [],
+    };
+  }
+  const knownAgendaDefinitions = hqHandMemory.knownDefinitions.filter(
+    (definitionId) => cardDefinitionType(definitionId) === "agenda",
+  );
+  const knownAgendaPoints = knownAgendaDefinitions.reduce(
+    (sum, definitionId) => sum + cardDefinitionAgendaPoints(definitionId),
+    0,
+  );
+  const knownNonAgendaCount =
+    hqHandMemory.knownDefinitions.length - knownAgendaDefinitions.length;
+  const unknownCount = Math.max(
+    0,
+    hqHandMemory.handCount - hqHandMemory.knownCount,
+  );
+  const fullyKnownNoAgenda =
+    hqHandMemory.allCardsKnown &&
+    hqHandMemory.knownCount > 0 &&
+    knownAgendaDefinitions.length === 0 &&
+    hqHandMemory.knownDefinitions.every((definitionId) =>
+      isLowValueKnownHqAccessCard(definitionId, input.playerView.own.credits),
+    );
+  const pressureMultiplier = candidate.kind === "pressure_hq" ? 1 : 0.45;
+  const knownCardValue = Math.round(
+    pressureMultiplier *
+      (knownAgendaDefinitions.length * 520 + knownAgendaPoints * 80),
+  );
+  const unknownCardValue = Math.round(
+    pressureMultiplier * Math.min(140, unknownCount * 55),
+  );
+  return {
+    knownCardValue,
+    unknownCardValue,
+    knownAgendaCount: knownAgendaDefinitions.length,
+    knownNonAgendaCount,
+    knownAgendaPoints,
+    unknownCount,
+    fullyKnownNoAgenda,
+    evidence: [
+      `hq_known_cards:${hqHandMemory.knownCount}`,
+      `hq_unknown_cards:${unknownCount}`,
+      `hq_known_fraction:${
+        hqHandMemory.handCount > 0
+          ? roundScore(hqHandMemory.knownCount / hqHandMemory.handCount)
+          : 0
+      }`,
+      `hq_fully_known:${hqHandMemory.allCardsKnown}`,
+      `hq_known_agenda_count:${knownAgendaDefinitions.length}`,
+      `hq_known_non_agenda_count:${knownNonAgendaCount}`,
+      `hq_known_agenda_points:${knownAgendaPoints}`,
+      `hq_run_value_from_known_cards:${knownCardValue}`,
+      `hq_run_value_from_unknown_cards:${unknownCardValue}`,
+      ...(fullyKnownNoAgenda
+        ? ["hq_run_suppressed_because_fully_known_no_agenda:true"]
+        : []),
+      ...(knownAgendaDefinitions.length > 0
+        ? ["hq_run_boosted_because_known_agenda:true"]
+        : []),
+      ...(unknownCount > 0
+        ? ["hq_run_boosted_because_unknown_cards_remain:true"]
+        : []),
+    ],
+  };
+}
+
+function evaluateKnownRemoteMemoryValue(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+  target: string | undefined,
+  beliefState: BeliefState,
+): { score: number; reasons: string[]; evidence: string[] } {
+  if (candidate.kind !== "contest_remote" || !target?.startsWith("remote_")) {
+    return { score: 0, reasons: [], evidence: [] };
+  }
+  const entries =
+    beliefState.runnerOpponentModel?.knownPositionMemory.filter(
+      (entry) =>
+        entry.zone === target &&
+        entry.positionKey.startsWith("root:") &&
+        entry.definitionId,
+    ) ?? [];
+  if (entries.length === 0) return { score: 0, reasons: [], evidence: [] };
+  let score = 0;
+  const reasons: string[] = [];
+  const evidence: string[] = [`known_remote_cards:${entries.length}`];
+  const runnerCredits = input.playerView.own.credits;
+  for (const entry of entries) {
+    const type = cardDefinitionType(entry.definitionId);
+    const trashCost = cardDefinitionTrashCost(entry.definitionId);
+    if (type === "agenda") {
+      score += 420;
+      reasons.push("known_remote_agenda_pressure");
+      evidence.push("remote_run_boosted_by_known_remote_agenda:true");
+      continue;
+    }
+    if (
+      (type === "asset" || type === "upgrade") &&
+      trashCost !== undefined &&
+      runnerCredits >= trashCost
+    ) {
+      score += 150;
+      reasons.push("known_remote_trash_target");
+      evidence.push("remote_trash_boosted_by_known_remote_trashable:true");
+      evidence.push(`known_remote_trash_cost:${trashCost}`);
+      continue;
+    }
+    if (isLowValueKnownHqAccessCard(entry.definitionId, runnerCredits)) {
+      score -= 190;
+      reasons.push("known_remote_low_value");
+      evidence.push("remote_run_suppressed_by_known_low_value_remote:true");
+    }
+  }
+  evidence.push(`known_remote_memory_score:${score}`);
+  return { score, reasons: sortedUnique(reasons), evidence };
+}
+
+function beliefStateForCost(input: AiDecisionInput): BeliefState {
+  return reconstructBeliefState(input);
+}
+
+function knownUnrezzedIceCostAdjustment(
+  input: AiDecisionInput,
+  target: string | undefined,
+  beliefState: BeliefState,
+): { cost: number; blocked: boolean; evidence: string[] } {
+  if (!target) return { cost: 0, blocked: false, evidence: [] };
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === target,
+  );
+  if (!server) return { cost: 0, blocked: false, evidence: [] };
+  const knownIce = (
+    beliefState.runnerOpponentModel?.knownPositionMemory ?? []
+  ).filter(
+    (entry) =>
+      entry.zone === target &&
+      entry.positionKey.startsWith("ice:") &&
+      server.ice.some((ice) => !ice.known || ice.rezzed !== true),
+  );
+  if (knownIce.length === 0) return { cost: 0, blocked: false, evidence: [] };
+  const pseudoIce = knownIce.map((entry) =>
+    visibleIceFromKnownDefinition(entry.definitionId),
+  );
+  const assessment = assessKnownRezzedIcePath(
+    pseudoIce,
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+  );
+  return {
+    cost: assessment.visibleBreakCost ?? 0,
+    blocked: assessment.blocked,
+    evidence: [
+      `known_unrezzed_ice_from_expose:${knownIce.length}`,
+      `run_cost_adjusted_by_known_unrezzed_ice:${assessment.visibleBreakCost ?? 0}`,
+      ...(assessment.blocked ? ["known_unrezzed_ice_blocks_path:true"] : []),
+    ],
+  };
+}
+
+function visibleIceFromKnownDefinition(definitionId: string): VisibleCard {
+  const definition = DEMO_CARDS_BY_ID[definitionId];
+  return {
+    instanceId: `known_unrezzed_${definitionId}`,
+    known: true,
+    definitionId,
+    title: definition?.title ?? RUNTIME_CARDS[definitionId]?.title,
+    type: "ice",
+    subtypes: definition?.subtypes ?? [],
+    rezzed: true,
+    strength: definition?.strength,
+    subroutines: definition?.subroutines ?? [],
+    owner: "corp",
+    controller: "corp",
+  } as VisibleCard;
+}
+
 function isLowValueKnownHqAccessCard(
   definitionId: string,
   runnerCredits: number,
@@ -3053,6 +4207,27 @@ function isLowValueKnownHqAccessCard(
   if ((type === "asset" || type === "upgrade") && runnerCredits >= trashCost)
     return false;
   return true;
+}
+
+function cardDefinitionTrashCost(definitionId: string): number | undefined {
+  return (
+    RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
+    DEMO_CARDS_BY_ID[definitionId]?.trashCost
+  );
+}
+
+function cardDefinitionType(definitionId: string): string | undefined {
+  return (
+    RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type
+  );
+}
+
+function cardDefinitionAgendaPoints(definitionId: string): number {
+  return (
+    RUNTIME_CARDS[definitionId]?.numeric.agendaPoints ??
+    DEMO_CARDS_BY_ID[definitionId]?.agendaPoints ??
+    0
+  );
 }
 
 function isLowValueKnownArchivesAccessCard(definitionId: string): boolean {
@@ -3092,6 +4267,12 @@ export function evaluateRemoteThreat(
           .reduce((sum, belief) => sum + belief.confidence * 25, 0) ?? 0,
       )
     : 0;
+  const knownRemoteValue = evaluateKnownRemoteMemoryValue(
+    input,
+    candidate,
+    target,
+    beliefState,
+  );
   if (candidate.kind === "contest_remote" && blocked) {
     return {
       score: -90,
@@ -3100,6 +4281,7 @@ export function evaluateRemoteThreat(
         `remote_target:${target?.startsWith("remote_") ? target : "none"}`,
         `advanced_roots:${server?.advancedRootCount ?? 0}`,
         `remote_belief_boost:${remoteBeliefBoost}`,
+        ...knownRemoteValue.evidence,
         `low_reserve_remote_penalty:${lowReserveRemotePenalty}`,
         `recent_remote_penalty:${recentRemotePenalty}`,
       ],
@@ -3112,7 +4294,8 @@ export function evaluateRemoteThreat(
           80 +
           remoteBeliefBoost -
           lowReserveRemotePenalty -
-          recentRemotePenalty
+          recentRemotePenalty +
+          knownRemoteValue.score
         : candidate.kind === "safe_probe_run"
           ? Math.min(30, remoteThreat)
           : 0,
@@ -3122,11 +4305,13 @@ export function evaluateRemoteThreat(
         ? ["remote_contest_credit_reserve_low"]
         : []),
       ...(recentRemotePenalty > 0 ? ["recent_remote_contest_repeated"] : []),
+      ...knownRemoteValue.reasons,
     ]),
     evidence: [
       `remote_target:${target?.startsWith("remote_") ? target : "none"}`,
       `advanced_roots:${server?.advancedRootCount ?? 0}`,
       `remote_belief_boost:${remoteBeliefBoost}`,
+      ...knownRemoteValue.evidence,
       `low_reserve_remote_penalty:${lowReserveRemotePenalty}`,
       `recent_remote_penalty:${recentRemotePenalty}`,
     ],
@@ -4165,6 +5350,19 @@ function actionPriority(
   }
   if (kind === "build_rig" && action.type === "install_card")
     return runnerInstallPriority(input, action);
+  if (kind === "build_rig" && runnerCoverageSearchAction(input, action)) {
+    const pressure = assessVisibleBreakerPressure(input);
+    const recovery = runnerCoverageRecoveryAction(input, action);
+    const relevant =
+      pressure.searchActionIds.has(action.actionId) ||
+      pressure.recoveryActionIds.has(action.actionId);
+    return (
+      76 +
+      (relevant ? 58 : 0) +
+      (recovery && pressure.heapMatchingBreakerCount > 0 ? 28 : 0) +
+      Math.max(0, 5 - actionCreditCost(action)) * 4
+    );
+  }
   if (
     kind === "build_rig" &&
     (action.type === "trigger_ability" ||
@@ -4856,6 +6054,7 @@ function runnerSetupSearchAction(
   if (action.side !== "runner") return false;
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length <= 2)
     return true;
+  if (runnerCoverageSearchAction(input, action)) return true;
   if (action.type !== "play_event" && action.type !== "resolve_choice")
     return false;
   const roles = rolesForAction(input, action);
@@ -5072,7 +6271,11 @@ function eventMayChangeRndPressure(event: PublicGameEvent): boolean {
     actionType === "draw_card" ||
     actionType === "mandatory_draw" ||
     actionType === "reorder_cards" ||
-    actionType === "shuffle_stack"
+    actionType === "shuffle_stack" ||
+    actionType === "steal_agenda" ||
+    actionType === "trash_accessed_card" ||
+    actionType === "move_to_removed_from_game" ||
+    actionType === "move_to_set_aside"
   );
 }
 
@@ -5126,8 +6329,7 @@ function runnerCentralCloseoutProfile(
     target === "hq" &&
     (input.playerView.opponent.handCount >= 5 ||
       beliefState.runnerOpponentModel?.hqHandMemory?.knownDefinitions.some(
-        (definitionId) =>
-          rolesForCardId(definitionId).some((role) => role.includes("agenda")),
+        (definitionId) => cardDefinitionType(definitionId) === "agenda",
       ) === true);
   const rndFreshness =
     target === "rd" &&
@@ -5438,9 +6640,22 @@ function remoteServerHasKnownRelevantTrashTarget(
 function currentRemoteTrashAccessContext(input: AiDecisionInput): {
   trashable: boolean;
   affordableRelevant: boolean;
+  expensive: boolean;
+  highImpact: boolean;
+  acuteThreat: boolean;
+  trashCost: number;
+  generalCreditCost: number;
+  dedicatedTrashCredits: number;
+  creditsAfterGeneralTrash: number;
+  reserveTarget: number;
+  dropsBelowReserve: boolean;
+  deferredByBudget: boolean;
+  evidence: string[];
   role:
     | "economy"
     | "scoring_protection"
+    | "run_tax"
+    | "remote_capacity"
     | "tag_punish"
     | "ambush"
     | "low_value"
@@ -5449,16 +6664,98 @@ function currentRemoteTrashAccessContext(input: AiDecisionInput): {
   const run = input.playerView.run;
   const accessed = run?.accessedCard;
   if (!run || !run.attackedServerId.startsWith("remote_") || !accessed?.known) {
-    return { trashable: false, affordableRelevant: false, role: "unknown" };
+    return {
+      trashable: false,
+      affordableRelevant: false,
+      expensive: false,
+      highImpact: false,
+      acuteThreat: false,
+      trashCost: 0,
+      generalCreditCost: 0,
+      dedicatedTrashCredits: 0,
+      creditsAfterGeneralTrash: input.playerView.own.credits,
+      reserveTarget: runnerCreditReserveTargetForPlanInput(input),
+      dropsBelowReserve: false,
+      deferredByBudget: false,
+      evidence: ["remote_trash_access:none"],
+      role: "unknown",
+    };
   }
+  const trashAction = input.legalActions.find(
+    (action) => action.type === "trash_accessed_card",
+  );
+  const trashCost = trashAction
+    ? remoteTrashActionTotalCost(trashAction)
+    : (remoteRootTrashCost(accessed) ?? 0);
   const trashable = remoteRootTrashCost(accessed) !== undefined;
-  const role = remoteTrashRoleForCard(accessed);
+  const role = remoteTrashRoleForAccessedCard(input, accessed);
   const relevant = role !== "low_value" && role !== "unknown";
+  const dedicatedTrashCredits = trashAction
+    ? remoteTrashDedicatedCredits(input, trashAction, accessed)
+    : 0;
+  const generalCreditCost = Math.max(0, trashCost - dedicatedTrashCredits);
+  const reserveTarget = runnerCreditReserveTargetForPlanInput(input);
+  const creditsAfterGeneralTrash =
+    input.playerView.own.credits - generalCreditCost;
+  const dropsBelowReserve =
+    trashable && creditsAfterGeneralTrash < Math.max(2, reserveTarget - 1);
+  const expensive = trashCost >= 4 || generalCreditCost >= 4;
+  const highImpact =
+    relevant &&
+    (role === "scoring_protection" ||
+      role === "run_tax" ||
+      role === "remote_capacity" ||
+      role === "economy" ||
+      role === "tag_punish");
+  const acuteThreat = remoteTrashAccessProtectsAcuteThreat(input, run.attackedServerId);
+  const deferredByBudget =
+    trashable &&
+    highImpact &&
+    expensive &&
+    dropsBelowReserve &&
+    dedicatedTrashCredits <= 0 &&
+    !acuteThreat;
   const affordableRelevant =
     trashable &&
     relevant &&
-    input.legalActions.some((action) => action.type === "trash_accessed_card");
-  return { trashable, affordableRelevant, role };
+    trashAction !== undefined &&
+    !deferredByBudget;
+  return {
+    trashable,
+    affordableRelevant,
+    expensive,
+    highImpact,
+    acuteThreat,
+    trashCost,
+    generalCreditCost,
+    dedicatedTrashCredits,
+    creditsAfterGeneralTrash,
+    reserveTarget,
+    dropsBelowReserve,
+    deferredByBudget,
+    evidence: [
+      `remote_trash_role:${role}`,
+      `remote_trash_cost:${trashCost}`,
+      `remote_trash_general_credit_cost:${generalCreditCost}`,
+      `remote_trash_dedicated_credits:${dedicatedTrashCredits}`,
+      `remote_trash_credits_after:${creditsAfterGeneralTrash}`,
+      `remote_trash_reserve_target:${reserveTarget}`,
+      `remote_trash_drops_below_reserve:${dropsBelowReserve}`,
+      `remote_trash_acute_threat:${acuteThreat}`,
+      `remote_trash_deferred_by_budget:${deferredByBudget}`,
+    ],
+    role,
+  };
+}
+
+function remoteTrashRoleForAccessedCard(
+  input: AiDecisionInput,
+  card: VisibleCard,
+): ReturnType<typeof remoteTrashRoleForCard> {
+  const role = remoteTrashRoleForCard(card);
+  if (role !== "unknown") return role;
+  if (accessedCardContributesToVisibleRunTax(input, card)) return "run_tax";
+  return role;
 }
 
 function remoteTrashRoleForCard(
@@ -5466,12 +6763,31 @@ function remoteTrashRoleForCard(
 ):
   | "economy"
   | "scoring_protection"
+  | "run_tax"
+  | "remote_capacity"
   | "tag_punish"
   | "ambush"
   | "low_value"
   | "unknown" {
   if (card.definitionId === "simple_upgrade") return "low_value";
   const roles = rolesForCardId(card.definitionId);
+  const runtimeDefinition = card.definitionId
+    ? RUNTIME_CARDS[card.definitionId]
+    : undefined;
+  const demoDefinition = card.definitionId
+    ? DEMO_CARDS_BY_ID[card.definitionId]
+    : undefined;
+  const mechanics = [
+    ...("mechanics" in (runtimeDefinition ?? {})
+      ? (((runtimeDefinition as { mechanics?: string[] } | undefined)
+          ?.mechanics ?? []))
+      : []),
+    ...(demoDefinition?.mechanics ?? []),
+  ];
+  const subtypes = [
+    ...(runtimeDefinition?.subtypes ?? []),
+    ...(demoDefinition?.subtypes ?? []),
+  ];
   if (
     roles.some(
       (role) =>
@@ -5484,6 +6800,29 @@ function remoteTrashRoleForCard(
     )
   )
     return "scoring_protection";
+  if (
+    roles.some(
+      (role) =>
+        role.includes("run_tax") ||
+        role.includes("ice_tax") ||
+        role.includes("access_tax") ||
+        role.includes("server_tax"),
+    ) ||
+    mechanics.some(
+      (mechanic: string) =>
+        mechanic.includes("break_subroutine_cost") ||
+        mechanic.includes("trash_cost_modifier") ||
+        mechanic.includes("trace_bid_credit_source") ||
+        mechanic.includes("run_flow"),
+    ) ||
+    subtypes.some((subtype) => subtype.toLowerCase() === "region")
+  )
+    return "run_tax";
+  if (
+    roles.some((role) => role.includes("remote_capacity")) ||
+    mechanics.some((mechanic: string) => mechanic.includes("remote_capacity"))
+  )
+    return "remote_capacity";
   if (roles.some((role) => role.includes("economy"))) return "economy";
   if (
     roles.some(
@@ -5498,6 +6837,116 @@ function remoteTrashRoleForCard(
   if (roles.some((role) => role.includes("ambush") || role.includes("trap")))
     return "ambush";
   return "unknown";
+}
+
+function remoteTrashActionTotalCost(action: LegalAction): number {
+  const payloadCost = action.payload?.accessTrashTotalCost;
+  return typeof payloadCost === "number" && Number.isFinite(payloadCost)
+    ? payloadCost
+    : actionCreditCost(action);
+}
+
+function remoteTrashDedicatedCredits(
+  input: AiDecisionInput,
+  action: LegalAction,
+  accessed: VisibleCard,
+): number {
+  const scatter =
+    accessed.type === "upgrade" &&
+    typeof action.payload?.scatterShotRecurringCreditsAvailable === "number"
+      ? action.payload.scatterShotRecurringCreditsAvailable
+      : 0;
+  const poltergeist =
+    accessed.type === "asset" &&
+    typeof action.payload?.poltergeistRecurringCreditsAvailable === "number"
+      ? action.payload.poltergeistRecurringCreditsAvailable
+      : 0;
+  const payloadCredits = scatter + poltergeist;
+  const rigCredits = input.playerView.own.rig?.reduce((sum, card) => {
+    const runtimeDefinition = card.definitionId
+      ? RUNTIME_CARDS[card.definitionId]
+      : undefined;
+    const demoDefinition = card.definitionId
+      ? DEMO_CARDS_BY_ID[card.definitionId]
+      : undefined;
+    const mechanics = [
+      ...("mechanics" in (runtimeDefinition ?? {})
+        ? (((runtimeDefinition as { mechanics?: string[] } | undefined)
+            ?.mechanics ?? []))
+        : []),
+      ...(demoDefinition?.mechanics ?? []),
+    ];
+    const supportsUpgradeTrash =
+      accessed.type === "upgrade" &&
+      mechanics.some((mechanic: string) =>
+        mechanic.includes("upgrade_trash_payment"),
+      );
+    const supportsAssetTrash =
+      accessed.type === "asset" &&
+      mechanics.some((mechanic: string) =>
+        mechanic.includes("node_trash_recurring_credit"),
+      );
+    if (!supportsUpgradeTrash && !supportsAssetTrash) return sum;
+    return (
+      sum +
+      (card.counters?.recurring_credit ?? 0) +
+      (card.counters?.bit ?? 0)
+    );
+  }, 0) ?? 0;
+  return Math.min(
+    remoteTrashActionTotalCost(action),
+    Math.max(payloadCredits, rigCredits),
+  );
+}
+
+function remoteTrashAccessProtectsAcuteThreat(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) return false;
+  if (remoteServerHasVisibleScoreThreat(input, serverId)) return true;
+  return server.root.some(
+    (card) => {
+      if (!card.known || card.type !== "agenda" || !card.definitionId)
+        return false;
+      return (
+        input.playerView.own.agendaPoints +
+          (RUNTIME_CARDS[card.definitionId]?.numeric.agendaPoints ??
+            DEMO_CARDS_BY_ID[card.definitionId]?.agendaPoints ??
+            0) >=
+        input.playerView.agendaPointsToWin - 1
+      );
+    },
+  );
+}
+
+function accessedCardContributesToVisibleRunTax(
+  input: AiDecisionInput,
+  accessed: VisibleCard,
+): boolean {
+  const definitionId = accessed.definitionId;
+  if (!definitionId) return false;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === input.playerView.run?.attackedServerId,
+  );
+  return (
+    server?.ice.some((ice) =>
+      ice.effectiveRunQuote?.subroutines.some((subroutine) => {
+        const sourceDefinitionIds = [
+          subroutine.sourceDefinitionId,
+        ];
+        return sourceDefinitionIds.includes(definitionId);
+      }),
+    ) === true ||
+    server?.ice.some((ice) =>
+      ice.effectiveRunQuote?.breakSubroutineCostSourceDefinitionIds?.includes(
+        definitionId,
+      ),
+    ) === true
+  );
 }
 
 function runnerInstallPriority(
@@ -5611,8 +7060,12 @@ function assessVisibleBreakerPressure(
   const gripCards = input.playerView.own.gripOrHq.filter(
     (card) => card.known && card.definitionId,
   );
+  const heapCards = input.playerView.own.heapOrArchives.filter(
+    (card) => card.known && card.definitionId,
+  );
   const missingIceDefinitionIds = new Set<string>();
   const blockedServerIds = new Set<string>();
+  const knownIceBlockedServerIds = new Set<string>();
   for (const server of input.playerView.servers) {
     if (!isStrategicBreakerTarget(server)) continue;
     const assessment = assessKnownRezzedIcePath(
@@ -5621,14 +7074,13 @@ function assessVisibleBreakerPressure(
       input.playerView.own.credits,
       server.root,
     );
-    if (!assessment.blocked) continue;
-    const missingDefinitions = server.ice
+    const knownUnrezzedMissingDefinitions = server.ice
       .filter(
         (ice) =>
           ice.known &&
-          ice.rezzed === true &&
+          ice.rezzed !== true &&
           ice.definitionId &&
-          iceHasEndTheRun(ice.definitionId),
+          visibleIceCreatesBreakerCoverageNeed(ice),
       )
       .map((ice) => ice.definitionId!)
       .filter(
@@ -5639,12 +7091,45 @@ function assessVisibleBreakerPressure(
               canBreakerDefinitionBreakIce(card.definitionId, definitionId),
           ),
       );
+    const rezzedMissingDefinitions = assessment.blocked
+      ? server.ice
+          .filter(
+            (ice) =>
+              ice.known &&
+              ice.rezzed === true &&
+              ice.definitionId &&
+              visibleIceCreatesBreakerCoverageNeed(ice),
+          )
+          .map((ice) => ice.definitionId!)
+          .filter(
+            (definitionId) =>
+              !rigCards.some(
+                (card) =>
+                  card.definitionId &&
+                  canBreakerDefinitionBreakIce(card.definitionId, definitionId),
+              ),
+          )
+      : [];
+    const missingDefinitions = [
+      ...rezzedMissingDefinitions,
+      ...knownUnrezzedMissingDefinitions,
+    ];
     if (missingDefinitions.length === 0) continue;
-    blockedServerIds.add(server.id);
+    if (assessment.blocked) blockedServerIds.add(server.id);
+    if (knownUnrezzedMissingDefinitions.length > 0)
+      knownIceBlockedServerIds.add(server.id);
     for (const definitionId of missingDefinitions)
       missingIceDefinitionIds.add(definitionId);
   }
+  const missingBreakerRoles = new Set(
+    [...missingIceDefinitionIds].flatMap(missingBreakerRolesForIce),
+  );
   const matchingGripBreakers = gripCards.filter((card) =>
+    [...missingIceDefinitionIds].some((iceDefinitionId) =>
+      canBreakerDefinitionBreakIce(card.definitionId!, iceDefinitionId),
+    ),
+  );
+  const matchingHeapBreakers = heapCards.filter((card) =>
     [...missingIceDefinitionIds].some((iceDefinitionId) =>
       canBreakerDefinitionBreakIce(card.definitionId!, iceDefinitionId),
     ),
@@ -5662,12 +7147,63 @@ function assessVisibleBreakerPressure(
       )
       .map((action) => action.actionId),
   );
+  const searchActionIds = new Set(
+    input.legalActions
+      .filter((action) => runnerCoverageSearchAction(input, action))
+      .filter(
+        (action) =>
+          !runnerCoverageRecoveryAction(input, action) ||
+          matchingHeapBreakers.length > 0,
+      )
+      .map((action) => action.actionId),
+  );
+  const recoveryActionIds = new Set(
+    input.legalActions
+      .filter((action) => runnerCoverageRecoveryAction(input, action))
+      .filter(() => matchingHeapBreakers.length > 0)
+      .map((action) => action.actionId),
+  );
+  const deckAnswerCount = [...missingBreakerRoles].filter(
+    (role) => (input.ownDeckDoctrine?.roleCounts[role] ?? 0) > 0,
+  ).length;
+  const cheapestInstallCost =
+    matchingInstallActionIds.size > 0
+      ? Math.min(
+          ...input.legalActions
+            .filter((action) => matchingInstallActionIds.has(action.actionId))
+            .map(actionCreditCost),
+        )
+      : 3;
+  const searchCost =
+    searchActionIds.size > 0 || recoveryActionIds.size > 0
+      ? Math.min(
+          ...input.legalActions
+            .filter(
+              (action) =>
+                searchActionIds.has(action.actionId) ||
+                recoveryActionIds.has(action.actionId),
+            )
+            .map(actionCreditCost),
+        )
+      : 0;
   return {
     blockedServerIds,
+    knownIceBlockedServerIds,
+    missingBreakerRoles,
     matchingGripBreakerCount: matchingGripBreakers.length,
     matchingInstallActionIds,
+    searchActionIds,
+    recoveryActionIds,
+    heapMatchingBreakerCount: matchingHeapBreakers.length,
+    deckAnswerCount,
     missingAnswerCount:
-      matchingGripBreakers.length === 0 ? missingIceDefinitionIds.size : 0,
+      matchingGripBreakers.length === 0
+        ? Math.max(missingIceDefinitionIds.size, deckAnswerCount)
+        : 0,
+    requiredCoverageCredits:
+      matchingInstallActionIds.size > 0
+        ? cheapestInstallCost + 2
+        : searchCost + cheapestInstallCost + 2,
   };
 }
 
@@ -5676,6 +7212,119 @@ function isStrategicBreakerTarget(
 ): boolean {
   if (server.id === "rd" || server.id === "hq") return true;
   return server.id.startsWith("remote_") && server.root.length > 0;
+}
+
+function visibleIceCreatesBreakerCoverageNeed(
+  ice: Pick<VisibleCard, "definitionId" | "effectiveRunQuote">,
+): boolean {
+  if (!ice.definitionId) return false;
+  if (iceHasEndTheRun(ice.definitionId)) return true;
+  return (
+    ice.effectiveRunQuote?.subroutines.some((subroutine) => {
+      const effect = subroutine.unbrokenRunEffect;
+      return (
+        effect?.addsFutureEndTheRunSubroutines !== undefined ||
+        effect?.increasesFutureBreakCostPerSubroutine !== undefined ||
+        effect?.preventsFutureBreaking === true ||
+        effect?.causesDamageOrProgramTrash === true ||
+        effect?.createsRunLockOrActionTax !== undefined
+      );
+    }) === true
+  );
+}
+
+function missingBreakerRolesForIce(definitionId: string): string[] {
+  const definition =
+    RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId];
+  const subtypes = definition?.subtypes ?? [];
+  const roles = new Set<string>();
+  if (
+    subtypes.some((subtype) => subtypeKeyForRunnerCoverage(subtype) === "wall")
+  )
+    roles.add("breaker_fracter");
+  if (
+    subtypes.some(
+      (subtype) => subtypeKeyForRunnerCoverage(subtype) === "code_gate",
+    )
+  )
+    roles.add("breaker_decoder");
+  if (
+    subtypes.some(
+      (subtype) => subtypeKeyForRunnerCoverage(subtype) === "sentry",
+    )
+  )
+    roles.add("breaker_killer");
+  if (roles.size === 0) roles.add("breaker_generic");
+  return [...roles].sort();
+}
+
+function subtypeKeyForRunnerCoverage(subtype: string): string {
+  return subtype
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
+function runnerCoverageSearchAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.side !== "runner") return false;
+  if (
+    action.type !== "play_event" &&
+    action.type !== "resolve_choice" &&
+    action.type !== "trigger_ability" &&
+    action.type !== "activated_card_ability"
+  )
+    return false;
+  const roles = rolesForAction(input, action);
+  const sourceCard =
+    typeof action.source === "string"
+      ? findVisibleCard(input, action.source)
+      : undefined;
+  const sourceDefinition = sourceCard?.definitionId
+    ? (RUNTIME_CARDS[sourceCard.definitionId] ??
+      DEMO_CARDS_BY_ID[sourceCard.definitionId])
+    : undefined;
+  const mechanics =
+    sourceDefinition &&
+    "mechanics" in sourceDefinition &&
+    Array.isArray(sourceDefinition.mechanics)
+      ? sourceDefinition.mechanics
+      : [];
+  return (
+    roles.some(
+      (role) =>
+        role.includes("search") ||
+        role.includes("tutor") ||
+        role === "program_search" ||
+        role === "stack_search" ||
+        role === "search_stack" ||
+        role === "search_trash" ||
+        role === "setup_search" ||
+        role.includes("recovery") ||
+        role.includes("trash_recovery"),
+    ) ||
+    mechanics.some(
+      (mechanic: string) =>
+        mechanic.includes("search") ||
+        mechanic.includes("tutor") ||
+        mechanic.includes("hidden_zone_tool"),
+    )
+  );
+}
+
+function runnerCoverageRecoveryAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const roles = rolesForAction(input, action);
+  return roles.some(
+    (role) =>
+      role.includes("recovery") ||
+      role.includes("trash_recovery") ||
+      role === "search_trash",
+  );
 }
 
 function actionCreditCost(action: LegalAction): number {
@@ -5783,6 +7432,14 @@ function targetServerId(
       return action.payload.serverId;
   }
   return undefined;
+}
+
+function actionsForRunnerCandidate(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): LegalAction[] {
+  const actionIds = new Set(candidate.legalActionIds);
+  return input.legalActions.filter((action) => actionIds.has(action.actionId));
 }
 
 function publicServerMentions(

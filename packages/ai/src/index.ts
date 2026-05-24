@@ -28,7 +28,11 @@ import deckSnapshots08Data from "../../../data/decks/deck-snapshots-0.8.json";
 import exploitFixtures143Data from "../../../data/scenarios/ai-v143-exploit-regression-fixtures.json";
 import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
-import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
+import {
+  beliefDebugSummary,
+  reconstructBeliefState,
+  type RndTopFreshnessMemory,
+} from "./belief-state";
 import {
   buildDeckDoctrineProfile,
   evaluateCorpOpeningHand,
@@ -43,6 +47,7 @@ import {
 import {
   assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
+  cardDefinitionStrength,
   creditsToBreakEndTheRunSubroutinesWithBreaker,
   endTheRunSubroutineCount,
   iceHasEndTheRun,
@@ -67,6 +72,7 @@ import {
   type PublicGameEvent,
   type Side,
   type VisibleCard,
+  type VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 export {
   beliefDebugSummary,
@@ -305,6 +311,63 @@ export type AiMatchProgressionMetrics = {
   corpAdvanceConvertedToScoreOrProtectedWindow: number;
   corpEconomyConvertedToRezInstallScore: number;
   corpProtectionConvertedToScoreSafety: number;
+  runnerCentralSuccessFollowedByValue: number;
+  runnerCentralSuccessFollowedByRepeatNoValue: number;
+  runnerCentralNoValuePivoted: number;
+  runnerRemoteSuccessFollowedByValue: number;
+  runnerRemoteEmptyOrLowValuePivoted: number;
+  runnerJackOutRepeatedSameServerWithoutNewInfo: number;
+  runnerJackOutFollowedByEconomyOrRig: number;
+  runnerAccessNoValueRepeated: number;
+  runnerAccessNoValuePivoted: number;
+  runnerEconomyConvertedAfterOutcome: number;
+  runnerRigConvertedAfterOutcome: number;
+  corpRemoteStealFollowupProtectOrPivot: number;
+  corpRemoteStealFollowupRepeatedUnsafeLine: number;
+  corpCentralStealFollowupProtectCentral: number;
+  corpRunnerFailedRunFollowupScoreOrAdvance: number;
+  corpRunnerSuccessfulRunFollowupProtect: number;
+  corpAdvanceFollowupScore: number;
+  corpAdvanceFollowupProtect: number;
+  corpRemoteBuildFollowupAdvanceProtectScore: number;
+  corpRemoteBuildFollowupNoop: number;
+  outcomeFollowupOpportunities: number;
+  outcomeFollowupTaken: number;
+  outcomeFollowupRate: number;
+  outcomeFollowupApplied: number;
+  outcomeFollowupSuppressedByProgressionCost: number;
+  outcomeFollowupSuppressedByBetterImmediateValue: number;
+  outcomeFollowupLedToProgressWithin3: number;
+  outcomeFollowupLedToNoProgressChain: number;
+  outcomeFollowupDelayedScoreWindow: number;
+  outcomeFollowupPreservedScoreWindow: number;
+  outcomeFollowupDelayedStealOrTrash: number;
+  outcomeFollowupPreservedContestReserve: number;
+  runnerOutcomePivotConverted: number;
+  runnerOutcomePivotStalled: number;
+  corpOutcomePivotConverted: number;
+  corpOutcomePivotStalled: number;
+  corpScoreWindowOverriddenByFollowup: number;
+  scoreNowProtectedFromFollowup: number;
+  stealTrashProtectedFromFollowup: number;
+  effectiveRunQuoteBlockedFollowupRun: number;
+  unbrokenRunEffectChangedBreakDecision: number;
+  futureEffectSubroutinesEncountered: number;
+  futureEffectSubroutinesWithRemainingIce: number;
+  futureEffectSubroutinesWithoutRemainingIce: number;
+  futureEffectBreaksTaken: number;
+  futureEffectBreaksSkippedNoRemainingIce: number;
+  futureEffectBreaksTakenWithoutRemainingIce: number;
+  pumpActionsBeforeFutureEffectBreak: number;
+  pumpActionsThatCouldNotLeadToBreak: number;
+  pumpActionsThatDestroyedAccessReserve: number;
+  breakSkippedToPreserveTrashReserve: number;
+  unbrokenRunEffectIgnoredBecauseNoRemainingIce: number;
+  unbrokenRunEffectAppliedToRemainingPath: number;
+  badOutcomeRepeatedWithoutNewInfo: number;
+  goodOutcomeConverted: number;
+  outcomePivotWithReason: number;
+  outcomeIgnored: number;
   advancedAgendaSteals: number;
   advancedAgendaStealsFromRemote: number;
   advancedAgendaStealsFromCentral: number;
@@ -336,6 +399,146 @@ export type AiMatchProgressionMetrics = {
   repeatedLowValueCentralRuns: number;
   centralRunStreakWithoutValue: number;
   centralRunStartedWithInsufficientPostRunReserve: number;
+  hqKnownCards: number;
+  hqUnknownCards: number;
+  hqKnownFraction: number;
+  hqFullyKnown: number;
+  hqKnownAgendaCount: number;
+  hqKnownNonAgendaCount: number;
+  hqKnownAgendaPoints: number;
+  hqMemoryInvalidatedByDraw: number;
+  hqMemoryInvalidatedByInstall: number;
+  hqMemoryInvalidatedByPlay: number;
+  hqMemoryInvalidatedByDiscard: number;
+  hqMemoryInvalidatedByShuffleOrReorder: number;
+  hqRunValueFromKnownCards: number;
+  hqRunValueFromUnknownCards: number;
+  hqRunSuppressedBecauseFullyKnownNoAgenda: number;
+  hqRunBoostedBecauseKnownAgenda: number;
+  hqRunBoostedBecauseUnknownCardsRemain: number;
+  hqRunRepeatedWithoutNewHqInfo: number;
+  knownRndTopCard: number;
+  knownRndTopMovedToHq: number;
+  knownRndTopInvalidated: number;
+  hqKnownFromRndDraw: number;
+  hqRunBoostedByRndToHqAgenda: number;
+  hqRunSuppressedByRndToHqNonAgenda: number;
+  rndAccesses: number;
+  rndAccessRemovedTopCard: number;
+  rndAccessStoleAgenda: number;
+  rndAccessTrashedCard: number;
+  rndAccessLeftTopCardUnchanged: number;
+  rndTopFreshenedByRunnerAccess: number;
+  rndKnownTopAdvancedAfterAccess: number;
+  rndKnownTopSequenceAdvanced: number;
+  rndRepeatRunAfterTopRemoved: number;
+  rndRepeatRunAfterTopUnchanged: number;
+  rndRepeatRunBoostedByFreshTop: number;
+  rndRepeatRunSuppressedBecauseKnownStaleTop: number;
+  rndRepeatRunBoostedByKnownAgendaTop: number;
+  rndRepeatRunSuppressedBecauseKnownNonAgendaTop: number;
+  rndFreshTopPressureOpportunity: number;
+  rndFreshTopPressureTaken: number;
+  rndFreshTopPressureSkipped: number;
+  rndStaleTopRepeatMistake: number;
+  rndAccessNoValueRepeatStale: number;
+  rndCloseoutOpportunityAfterTopRemoved: number;
+  knownRemoteCards: number;
+  knownRemoteAgendas: number;
+  knownRemoteTrashableCards: number;
+  remoteMemoryRetainedAfterAccess: number;
+  remoteMemoryInvalidatedByInstallOrMove: number;
+  remoteRunBoostedByKnownRemoteAgenda: number;
+  remoteRunSuppressedByKnownLowValueRemote: number;
+  remoteTrashBoostedByKnownRemoteTrashable: number;
+  knownUnrezzedIceFromExpose: number;
+  knownUnrezzedIceRetained: number;
+  knownUnrezzedIceInvalidated: number;
+  runCostAdjustedByKnownUnrezzedIce: number;
+  jackOutInfluencedByKnownUnrezzedIce: number;
+  rigPlanInfluencedByKnownUnrezzedIce: number;
+  runnerMissingBreakerCoverageByType: number;
+  runnerVisibleIceBlockingByType: number;
+  runnerKnownIceBlockingByType: number;
+  runnerPathBlockedByMissingCoverage: number;
+  runnerInstallableBreakerForBlockedPath: number;
+  runnerSearchCardAvailableForMissingBreaker: number;
+  runnerSearchCardUsedForMissingBreaker: number;
+  runnerSearchCardAvailableButUnused: number;
+  runnerTutorConvertedToBreakerInstall: number;
+  runnerTutorConvertedToUsefulRun: number;
+  runnerBreakerInstallConvertedToUsefulRun: number;
+  runnerCoverageImproved: number;
+  runnerCoverageReadyButNoPressure: number;
+  runnerSetupContinuedAfterCoverageReady: number;
+  runnerPressureReadyWindows: number;
+  runnerPressureReadyTrue: number;
+  runnerPressureReadyFalsePositive: number;
+  runnerPressureReadyByTargetHq: number;
+  runnerPressureReadyByTargetRnd: number;
+  runnerPressureReadyByTargetArchives: number;
+  runnerPressureReadyByTargetRemote: number;
+  runnerSetupContinuedAfterPressureReady: number;
+  runnerPressureTakenAfterCoverageReady: number;
+  runnerPressureSkippedAfterCoverageReady: number;
+  runnerPressureSkippedInsufficientCredits: number;
+  runnerPressureSkippedMissingPostRunReserve: number;
+  runnerPressureSkippedStaleCentral: number;
+  runnerPressureSkippedRemoteTooDangerous: number;
+  runnerPressureSkippedNoValuableTarget: number;
+  runnerPressureSkippedBetterImmediateAction: number;
+  runnerCoverageImprovedThenPressureWithin1: number;
+  runnerCoverageImprovedThenPressureWithin2: number;
+  runnerCoverageImprovedThenPressureWithin3: number;
+  runnerEconomyReserveReachedThenPressureWithin2: number;
+  runnerSearchTutorThenPressureWithin3: number;
+  runnerSetupLoopAfterPressureReady: number;
+  runnerPhaseExitBlockedByCost: number;
+  runnerPhaseExitBlockedByCoverage: number;
+  runnerPhaseExitBlockedByTargetValue: number;
+  runnerProbeRevealedIceThenSearchedBreaker: number;
+  runnerProbeRevealedIceButDidNotReact: number;
+  runnerSetupBreakerSearchStalled: number;
+  runnerSetupEconomyStalled: number;
+  runnerPhaseExitToPressure: number;
+  actionLimitRootCauseByMatch: number;
+  actionLimitDominantSide: number;
+  actionLimitDominantSideRunner: number;
+  actionLimitDominantSideCorp: number;
+  actionLimitDominantSideBoth: number;
+  finalStrategicWindowNoProgressActions: number;
+  finalStrategicWindowRunnerNoProgressActions: number;
+  finalStrategicWindowCorpNoProgressActions: number;
+  finalWindowRunnerMeaningfulRunOpportunities: number;
+  finalWindowRunnerMeaningfulRunsTaken: number;
+  finalWindowCorpScorePathOpportunities: number;
+  finalWindowCorpScorePathTaken: number;
+  finalWindowKnownInfoExploitationOpportunities: number;
+  finalWindowKnownInfoExploitationTaken: number;
+  endgameCloseoutOpportunitiesRunner: number;
+  endgameCloseoutOpportunitiesRunnerRaw: number;
+  endgameCloseoutOpportunitiesRunnerDeduped: number;
+  endgameCloseoutOpportunitiesRunnerTrue: number;
+  endgameCloseoutOpportunitiesRunnerFalsePositive: number;
+  runnerCloseoutByKnownHqAgenda: number;
+  runnerCloseoutByKnownRndTopAgenda: number;
+  runnerCloseoutByKnownRemoteAgenda: number;
+  runnerCloseoutByPointsToWin: number;
+  runnerCloseoutBlockedByCredits: number;
+  runnerCloseoutBlockedByBreakerCoverage: number;
+  runnerCloseoutBlockedByPostRunReserve: number;
+  runnerCloseoutAttempted: number;
+  runnerCloseoutSkippedWithReason: number;
+  endgameCloseoutOpportunitiesCorp: number;
+  endgameCloseoutAttemptsRunner: number;
+  endgameCloseoutAttemptsCorp: number;
+  endgameScoreOrStealPressureActions: number;
+  endgameSetupOrEconomyActions: number;
+  endgameProtectionActions: number;
+  endgameLowValueRepeatActions: number;
+  actionLimitLikelyDeckPressureIssue: number;
+  actionLimitLikelyStrategyIssue: number;
+  actionLimitLikelyMetricArtifact: number;
   trueCentralCloseoutOpportunities: number;
   centralCloseoutOpportunitiesRaw: number;
   centralCloseoutOpportunitiesDeduped: number;
@@ -401,9 +604,33 @@ export type AiMatchProgressionMetrics = {
   remoteTrashTargetsUnknown: number;
   remoteTrashRoleEconomy: number;
   remoteTrashRoleScoringProtection: number;
+  remoteTrashRoleRunTax: number;
+  remoteTrashRoleRemoteCapacity: number;
   remoteTrashRoleTagPunish: number;
   remoteTrashRoleAmbush: number;
   remoteTrashRoleLowValue: number;
+  remoteTrashDeclined: number;
+  remoteTrashCostTotal: number;
+  expensiveRemoteTrashOpportunities: number;
+  expensiveRemoteTrashTaken: number;
+  expensiveRemoteTrashDeclined: number;
+  highImpactRemoteTrashTaken: number;
+  highImpactRemoteTrashDeferredByBudget: number;
+  highImpactRemoteTrashSkippedNoThreat: number;
+  lowValueRemoteTrashSkipped: number;
+  remoteTrashSpentEarlyGame: number;
+  runnerCreditsAfterRemoteTrash: number;
+  remoteTrashDroppedBelowReserve: number;
+  remoteTrashPreservedReserve: number;
+  remoteTrashProtectedScoreThreat: number;
+  remoteTrashWithoutImmediateThreat: number;
+  remoteTrashCostBucket0To1: number;
+  remoteTrashCostBucket2To3: number;
+  remoteTrashCostBucket4To5: number;
+  remoteTrashCostBucket6Plus: number;
+  dedicatedTrashCreditsUsed: number;
+  generalCreditsSpentOnTrash: number;
+  trashDecisionLeftRunnerUnableToContest: number;
   remoteRunOpportunitiesAgainstAdvancedRemote: number;
   remoteRunsAgainstAdvancedRemote: number;
   skippedAdvancedRemoteContest: number;
@@ -1096,6 +1323,25 @@ export type AiSimulationSummary = {
     runnerSkippedAffordableRelevantRemoteTrash?: boolean;
     runnerRemoteTrashTargetType?: RemoteTrashTargetType;
     runnerRemoteTrashRole?: RemoteTrashRole;
+    runnerRemoteTrashDeclined?: boolean;
+    runnerRemoteTrashCost?: number;
+    runnerExpensiveRemoteTrashOpportunity?: boolean;
+    runnerExpensiveRemoteTrashTaken?: boolean;
+    runnerExpensiveRemoteTrashDeclined?: boolean;
+    runnerHighImpactRemoteTrashTaken?: boolean;
+    runnerHighImpactRemoteTrashDeferredByBudget?: boolean;
+    runnerHighImpactRemoteTrashSkippedNoThreat?: boolean;
+    runnerLowValueRemoteTrashSkipped?: boolean;
+    runnerRemoteTrashSpentEarlyGame?: boolean;
+    runnerCreditsAfterRemoteTrash?: number;
+    runnerRemoteTrashDroppedBelowReserve?: boolean;
+    runnerRemoteTrashPreservedReserve?: boolean;
+    runnerRemoteTrashProtectedScoreThreat?: boolean;
+    runnerRemoteTrashWithoutImmediateThreat?: boolean;
+    runnerRemoteTrashCostBucket?: "0_1" | "2_3" | "4_5" | "6_plus";
+    dedicatedTrashCreditsUsed?: number;
+    generalCreditsSpentOnTrash?: number;
+    trashDecisionLeftRunnerUnableToContest?: boolean;
     runnerRemoteRunOpportunityAgainstAdvancedRemote?: boolean;
     runnerRemoteRunAgainstAdvancedRemote?: boolean;
     runnerSkippedAdvancedRemoteContest?: boolean;
@@ -1109,6 +1355,103 @@ export type AiSimulationSummary = {
     runnerRepeatedLowValueCentralRun?: boolean;
     runnerCentralRunStreakWithoutValue?: number;
     runnerCentralRunStartedWithInsufficientPostRunReserve?: boolean;
+    hqKnownCards?: number;
+    hqUnknownCards?: number;
+    hqKnownFraction?: number;
+    hqFullyKnown?: boolean;
+    hqKnownAgendaCount?: number;
+    hqKnownNonAgendaCount?: number;
+    hqKnownAgendaPoints?: number;
+    hqMemoryInvalidatedByDraw?: boolean;
+    hqMemoryInvalidatedByInstall?: boolean;
+    hqMemoryInvalidatedByPlay?: boolean;
+    hqMemoryInvalidatedByDiscard?: boolean;
+    hqMemoryInvalidatedByShuffleOrReorder?: boolean;
+    hqRunValueFromKnownCards?: number;
+    hqRunValueFromUnknownCards?: number;
+    hqRunSuppressedBecauseFullyKnownNoAgenda?: boolean;
+    hqRunBoostedBecauseKnownAgenda?: boolean;
+    hqRunBoostedBecauseUnknownCardsRemain?: boolean;
+    hqRunRepeatedWithoutNewHqInfo?: boolean;
+    knownRndTopCard?: boolean;
+    knownRndTopMovedToHq?: boolean;
+    knownRndTopInvalidated?: boolean;
+    hqKnownFromRndDraw?: boolean;
+    hqRunBoostedByRndToHqAgenda?: boolean;
+    hqRunSuppressedByRndToHqNonAgenda?: boolean;
+    rndAccessRemovedTopCard?: boolean;
+    rndAccessStoleAgenda?: boolean;
+    rndAccessTrashedCard?: boolean;
+    rndAccessLeftTopCardUnchanged?: boolean;
+    rndTopFreshenedByRunnerAccess?: boolean;
+    rndKnownTopAdvancedAfterAccess?: boolean;
+    rndKnownTopSequenceAdvanced?: boolean;
+    rndRepeatRunAfterTopRemoved?: boolean;
+    rndRepeatRunAfterTopUnchanged?: boolean;
+    rndRepeatRunBoostedByFreshTop?: boolean;
+    rndRepeatRunSuppressedBecauseKnownStaleTop?: boolean;
+    rndRepeatRunBoostedByKnownAgendaTop?: boolean;
+    rndRepeatRunSuppressedBecauseKnownNonAgendaTop?: boolean;
+    rndFreshTopPressureOpportunity?: boolean;
+    rndFreshTopPressureTaken?: boolean;
+    rndFreshTopPressureSkipped?: boolean;
+    rndStaleTopRepeatMistake?: boolean;
+    rndAccessNoValueRepeatStale?: boolean;
+    rndCloseoutOpportunityAfterTopRemoved?: boolean;
+    knownRemoteCards?: number;
+    knownRemoteAgendas?: number;
+    knownRemoteTrashableCards?: number;
+    remoteMemoryRetainedAfterAccess?: boolean;
+    remoteMemoryInvalidatedByInstallOrMove?: boolean;
+    remoteRunBoostedByKnownRemoteAgenda?: boolean;
+    remoteRunSuppressedByKnownLowValueRemote?: boolean;
+    remoteTrashBoostedByKnownRemoteTrashable?: boolean;
+    knownUnrezzedIceFromExpose?: number;
+    knownUnrezzedIceRetained?: boolean;
+    knownUnrezzedIceInvalidated?: boolean;
+    runCostAdjustedByKnownUnrezzedIce?: number;
+    jackOutInfluencedByKnownUnrezzedIce?: boolean;
+    rigPlanInfluencedByKnownUnrezzedIce?: boolean;
+    runnerMissingBreakerCoverageByType?: number;
+    runnerVisibleIceBlockingByType?: number;
+    runnerKnownIceBlockingByType?: number;
+    runnerPathBlockedByMissingCoverage?: boolean;
+    runnerInstallableBreakerForBlockedPath?: boolean;
+    runnerSearchCardAvailableForMissingBreaker?: boolean;
+    runnerSearchCardUsedForMissingBreaker?: boolean;
+    runnerSearchCardAvailableButUnused?: boolean;
+    runnerTutorConvertedToBreakerInstall?: boolean;
+    runnerTutorConvertedToUsefulRun?: boolean;
+    runnerBreakerInstallConvertedToUsefulRun?: boolean;
+    runnerCoverageImproved?: boolean;
+    runnerCoverageReadyButNoPressure?: boolean;
+    runnerSetupContinuedAfterCoverageReady?: boolean;
+    runnerPressureReadyWindow?: boolean;
+    runnerPressureReadyTrue?: boolean;
+    runnerPressureReadyFalsePositive?: boolean;
+    runnerPressureReadyByTargetHq?: boolean;
+    runnerPressureReadyByTargetRnd?: boolean;
+    runnerPressureReadyByTargetArchives?: boolean;
+    runnerPressureReadyByTargetRemote?: boolean;
+    runnerSetupContinuedAfterPressureReady?: boolean;
+    runnerPressureTakenAfterCoverageReady?: boolean;
+    runnerPressureSkippedAfterCoverageReady?: boolean;
+    runnerPressureSkippedReason?:
+      | "insufficient_credits"
+      | "missing_post_run_reserve"
+      | "stale_central"
+      | "remote_too_dangerous"
+      | "no_valuable_target"
+      | "better_immediate_action";
+    runnerSetupLoopAfterPressureReady?: boolean;
+    runnerPhaseExitBlockedByCost?: boolean;
+    runnerPhaseExitBlockedByCoverage?: boolean;
+    runnerPhaseExitBlockedByTargetValue?: boolean;
+    runnerProbeRevealedIceThenSearchedBreaker?: boolean;
+    runnerProbeRevealedIceButDidNotReact?: boolean;
+    runnerSetupBreakerSearchStalled?: boolean;
+    runnerSetupEconomyStalled?: boolean;
+    runnerPhaseExitToPressure?: boolean;
     runnerTrueCentralCloseoutOpportunity?: boolean;
     runnerCentralCloseoutOpportunityRaw?: boolean;
     runnerCentralCloseoutSkippedWithGoodReason?: boolean;
@@ -1206,6 +1549,8 @@ type RemoteTrashTargetType = "asset_node" | "upgrade" | "ice" | "unknown";
 type RemoteTrashRole =
   | "economy"
   | "scoring_protection"
+  | "run_tax"
+  | "remote_capacity"
   | "tag_punish"
   | "ambush"
   | "low_value"
@@ -1372,7 +1717,11 @@ function isRunnerReactiveBaselineDecision(decision: AiDecision): boolean {
     decision.reasonCode === "runner.access.open_card" ||
     decision.reasonCode === "runner.access.decline_trash" ||
     decision.reasonCode === "runner.encounter.break_etr" ||
+    decision.reasonCode === "runner.encounter.break_run_remainder_effect" ||
     decision.reasonCode === "runner.encounter.pump_breaker" ||
+    decision.reasonCode === "runner.encounter.pump_run_remainder_effect" ||
+    decision.reasonCode ===
+      "runner.encounter.continue_visible_future_path_risk" ||
     decision.reasonCode === "runner.tag.clear_visible_tag" ||
     decision.reasonCode === "runner.shell_traders.prepare_install" ||
     decision.reasonCode === "runner.shell_traders.remove_counter"
@@ -1631,6 +1980,11 @@ export function simulateAiGame(
         action,
         targetServerId,
       );
+    const runnerCoverage = runnerBreakerCoverageDiagnosticsForSimulationAction(
+      input,
+      action,
+      targetServerId,
+    );
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
@@ -1675,6 +2029,7 @@ export function simulateAiGame(
       ...runnerHandUse,
       ...runnerReserve,
       ...runnerCentralPressure,
+      ...runnerCoverage,
       ...(typeof action.payload?.placement === "string"
         ? { installPlacement: action.payload.placement }
         : {}),
@@ -2839,6 +3194,330 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.delta.sameStrategicPlanRepeatedWithoutProgress,
     ],
     [
+      "actionLimitRootCauseByMatch",
+      benchmark.baseline.actionLimitRootCauseByMatch,
+      benchmark.candidate.actionLimitRootCauseByMatch,
+      benchmark.delta.actionLimitRootCauseByMatch,
+    ],
+    [
+      "actionLimitDominantSideRunner",
+      benchmark.baseline.actionLimitDominantSideRunner,
+      benchmark.candidate.actionLimitDominantSideRunner,
+      benchmark.delta.actionLimitDominantSideRunner,
+    ],
+    [
+      "actionLimitDominantSideCorp",
+      benchmark.baseline.actionLimitDominantSideCorp,
+      benchmark.candidate.actionLimitDominantSideCorp,
+      benchmark.delta.actionLimitDominantSideCorp,
+    ],
+    [
+      "actionLimitDominantSideBoth",
+      benchmark.baseline.actionLimitDominantSideBoth,
+      benchmark.candidate.actionLimitDominantSideBoth,
+      benchmark.delta.actionLimitDominantSideBoth,
+    ],
+    [
+      "finalStrategicWindowNoProgressActions",
+      benchmark.baseline.finalStrategicWindowNoProgressActions,
+      benchmark.candidate.finalStrategicWindowNoProgressActions,
+      benchmark.delta.finalStrategicWindowNoProgressActions,
+    ],
+    [
+      "finalStrategicWindowRunnerNoProgressActions",
+      benchmark.baseline.finalStrategicWindowRunnerNoProgressActions,
+      benchmark.candidate.finalStrategicWindowRunnerNoProgressActions,
+      benchmark.delta.finalStrategicWindowRunnerNoProgressActions,
+    ],
+    [
+      "finalStrategicWindowCorpNoProgressActions",
+      benchmark.baseline.finalStrategicWindowCorpNoProgressActions,
+      benchmark.candidate.finalStrategicWindowCorpNoProgressActions,
+      benchmark.delta.finalStrategicWindowCorpNoProgressActions,
+    ],
+    [
+      "finalWindowRunnerMeaningfulRunOpportunities",
+      benchmark.baseline.finalWindowRunnerMeaningfulRunOpportunities,
+      benchmark.candidate.finalWindowRunnerMeaningfulRunOpportunities,
+      benchmark.delta.finalWindowRunnerMeaningfulRunOpportunities,
+    ],
+    [
+      "finalWindowRunnerMeaningfulRunsTaken",
+      benchmark.baseline.finalWindowRunnerMeaningfulRunsTaken,
+      benchmark.candidate.finalWindowRunnerMeaningfulRunsTaken,
+      benchmark.delta.finalWindowRunnerMeaningfulRunsTaken,
+    ],
+    [
+      "finalWindowCorpScorePathOpportunities",
+      benchmark.baseline.finalWindowCorpScorePathOpportunities,
+      benchmark.candidate.finalWindowCorpScorePathOpportunities,
+      benchmark.delta.finalWindowCorpScorePathOpportunities,
+    ],
+    [
+      "finalWindowCorpScorePathTaken",
+      benchmark.baseline.finalWindowCorpScorePathTaken,
+      benchmark.candidate.finalWindowCorpScorePathTaken,
+      benchmark.delta.finalWindowCorpScorePathTaken,
+    ],
+    [
+      "finalWindowKnownInfoExploitationOpportunities",
+      benchmark.baseline.finalWindowKnownInfoExploitationOpportunities,
+      benchmark.candidate.finalWindowKnownInfoExploitationOpportunities,
+      benchmark.delta.finalWindowKnownInfoExploitationOpportunities,
+    ],
+    [
+      "finalWindowKnownInfoExploitationTaken",
+      benchmark.baseline.finalWindowKnownInfoExploitationTaken,
+      benchmark.candidate.finalWindowKnownInfoExploitationTaken,
+      benchmark.delta.finalWindowKnownInfoExploitationTaken,
+    ],
+    [
+      "endgameCloseoutOpportunitiesRunner",
+      benchmark.baseline.endgameCloseoutOpportunitiesRunner,
+      benchmark.candidate.endgameCloseoutOpportunitiesRunner,
+      benchmark.delta.endgameCloseoutOpportunitiesRunner,
+    ],
+    [
+      "endgameCloseoutOpportunitiesRunnerRaw",
+      benchmark.baseline.endgameCloseoutOpportunitiesRunnerRaw,
+      benchmark.candidate.endgameCloseoutOpportunitiesRunnerRaw,
+      benchmark.delta.endgameCloseoutOpportunitiesRunnerRaw,
+    ],
+    [
+      "endgameCloseoutOpportunitiesRunnerDeduped",
+      benchmark.baseline.endgameCloseoutOpportunitiesRunnerDeduped,
+      benchmark.candidate.endgameCloseoutOpportunitiesRunnerDeduped,
+      benchmark.delta.endgameCloseoutOpportunitiesRunnerDeduped,
+    ],
+    [
+      "endgameCloseoutOpportunitiesRunnerTrue",
+      benchmark.baseline.endgameCloseoutOpportunitiesRunnerTrue,
+      benchmark.candidate.endgameCloseoutOpportunitiesRunnerTrue,
+      benchmark.delta.endgameCloseoutOpportunitiesRunnerTrue,
+    ],
+    [
+      "endgameCloseoutOpportunitiesRunnerFalsePositive",
+      benchmark.baseline.endgameCloseoutOpportunitiesRunnerFalsePositive,
+      benchmark.candidate.endgameCloseoutOpportunitiesRunnerFalsePositive,
+      benchmark.delta.endgameCloseoutOpportunitiesRunnerFalsePositive,
+    ],
+    [
+      "runnerCloseoutAttempted",
+      benchmark.baseline.runnerCloseoutAttempted,
+      benchmark.candidate.runnerCloseoutAttempted,
+      benchmark.delta.runnerCloseoutAttempted,
+    ],
+    [
+      "runnerMissingBreakerCoverageByType",
+      benchmark.baseline.runnerMissingBreakerCoverageByType,
+      benchmark.candidate.runnerMissingBreakerCoverageByType,
+      benchmark.delta.runnerMissingBreakerCoverageByType,
+    ],
+    [
+      "runnerSearchCardAvailableForMissingBreaker",
+      benchmark.baseline.runnerSearchCardAvailableForMissingBreaker,
+      benchmark.candidate.runnerSearchCardAvailableForMissingBreaker,
+      benchmark.delta.runnerSearchCardAvailableForMissingBreaker,
+    ],
+    [
+      "runnerSearchCardUsedForMissingBreaker",
+      benchmark.baseline.runnerSearchCardUsedForMissingBreaker,
+      benchmark.candidate.runnerSearchCardUsedForMissingBreaker,
+      benchmark.delta.runnerSearchCardUsedForMissingBreaker,
+    ],
+    [
+      "runnerSearchCardAvailableButUnused",
+      benchmark.baseline.runnerSearchCardAvailableButUnused,
+      benchmark.candidate.runnerSearchCardAvailableButUnused,
+      benchmark.delta.runnerSearchCardAvailableButUnused,
+    ],
+    [
+      "runnerTutorConvertedToUsefulRun",
+      benchmark.baseline.runnerTutorConvertedToUsefulRun,
+      benchmark.candidate.runnerTutorConvertedToUsefulRun,
+      benchmark.delta.runnerTutorConvertedToUsefulRun,
+    ],
+    [
+      "runnerBreakerInstallConvertedToUsefulRun",
+      benchmark.baseline.runnerBreakerInstallConvertedToUsefulRun,
+      benchmark.candidate.runnerBreakerInstallConvertedToUsefulRun,
+      benchmark.delta.runnerBreakerInstallConvertedToUsefulRun,
+    ],
+    [
+      "runnerSetupBreakerSearchStalled",
+      benchmark.baseline.runnerSetupBreakerSearchStalled,
+      benchmark.candidate.runnerSetupBreakerSearchStalled,
+      benchmark.delta.runnerSetupBreakerSearchStalled,
+    ],
+    [
+      "runnerSetupEconomyStalled",
+      benchmark.baseline.runnerSetupEconomyStalled,
+      benchmark.candidate.runnerSetupEconomyStalled,
+      benchmark.delta.runnerSetupEconomyStalled,
+    ],
+    [
+      "runnerSetupContinuedAfterCoverageReady",
+      benchmark.baseline.runnerSetupContinuedAfterCoverageReady,
+      benchmark.candidate.runnerSetupContinuedAfterCoverageReady,
+      benchmark.delta.runnerSetupContinuedAfterCoverageReady,
+    ],
+    [
+      "runnerPressureReadyTrue",
+      benchmark.baseline.runnerPressureReadyTrue,
+      benchmark.candidate.runnerPressureReadyTrue,
+      benchmark.delta.runnerPressureReadyTrue,
+    ],
+    [
+      "runnerPressureReadyFalsePositive",
+      benchmark.baseline.runnerPressureReadyFalsePositive,
+      benchmark.candidate.runnerPressureReadyFalsePositive,
+      benchmark.delta.runnerPressureReadyFalsePositive,
+    ],
+    [
+      "runnerPressureTakenAfterCoverageReady",
+      benchmark.baseline.runnerPressureTakenAfterCoverageReady,
+      benchmark.candidate.runnerPressureTakenAfterCoverageReady,
+      benchmark.delta.runnerPressureTakenAfterCoverageReady,
+    ],
+    [
+      "runnerPressureSkippedAfterCoverageReady",
+      benchmark.baseline.runnerPressureSkippedAfterCoverageReady,
+      benchmark.candidate.runnerPressureSkippedAfterCoverageReady,
+      benchmark.delta.runnerPressureSkippedAfterCoverageReady,
+    ],
+    [
+      "runnerCoverageImprovedThenPressureWithin3",
+      benchmark.baseline.runnerCoverageImprovedThenPressureWithin3,
+      benchmark.candidate.runnerCoverageImprovedThenPressureWithin3,
+      benchmark.delta.runnerCoverageImprovedThenPressureWithin3,
+    ],
+    [
+      "runnerSearchTutorThenPressureWithin3",
+      benchmark.baseline.runnerSearchTutorThenPressureWithin3,
+      benchmark.candidate.runnerSearchTutorThenPressureWithin3,
+      benchmark.delta.runnerSearchTutorThenPressureWithin3,
+    ],
+    [
+      "runnerEconomyReserveReachedThenPressureWithin2",
+      benchmark.baseline.runnerEconomyReserveReachedThenPressureWithin2,
+      benchmark.candidate.runnerEconomyReserveReachedThenPressureWithin2,
+      benchmark.delta.runnerEconomyReserveReachedThenPressureWithin2,
+    ],
+    [
+      "runnerSetupLoopAfterPressureReady",
+      benchmark.baseline.runnerSetupLoopAfterPressureReady,
+      benchmark.candidate.runnerSetupLoopAfterPressureReady,
+      benchmark.delta.runnerSetupLoopAfterPressureReady,
+    ],
+    [
+      "runnerPhaseExitToPressure",
+      benchmark.baseline.runnerPhaseExitToPressure,
+      benchmark.candidate.runnerPhaseExitToPressure,
+      benchmark.delta.runnerPhaseExitToPressure,
+    ],
+    [
+      "endgameCloseoutAttemptsRunner",
+      benchmark.baseline.endgameCloseoutAttemptsRunner,
+      benchmark.candidate.endgameCloseoutAttemptsRunner,
+      benchmark.delta.endgameCloseoutAttemptsRunner,
+    ],
+    [
+      "endgameCloseoutOpportunitiesCorp",
+      benchmark.baseline.endgameCloseoutOpportunitiesCorp,
+      benchmark.candidate.endgameCloseoutOpportunitiesCorp,
+      benchmark.delta.endgameCloseoutOpportunitiesCorp,
+    ],
+    [
+      "endgameCloseoutAttemptsCorp",
+      benchmark.baseline.endgameCloseoutAttemptsCorp,
+      benchmark.candidate.endgameCloseoutAttemptsCorp,
+      benchmark.delta.endgameCloseoutAttemptsCorp,
+    ],
+    [
+      "endgameScoreOrStealPressureActions",
+      benchmark.baseline.endgameScoreOrStealPressureActions,
+      benchmark.candidate.endgameScoreOrStealPressureActions,
+      benchmark.delta.endgameScoreOrStealPressureActions,
+    ],
+    [
+      "endgameSetupOrEconomyActions",
+      benchmark.baseline.endgameSetupOrEconomyActions,
+      benchmark.candidate.endgameSetupOrEconomyActions,
+      benchmark.delta.endgameSetupOrEconomyActions,
+    ],
+    [
+      "endgameProtectionActions",
+      benchmark.baseline.endgameProtectionActions,
+      benchmark.candidate.endgameProtectionActions,
+      benchmark.delta.endgameProtectionActions,
+    ],
+    [
+      "endgameLowValueRepeatActions",
+      benchmark.baseline.endgameLowValueRepeatActions,
+      benchmark.candidate.endgameLowValueRepeatActions,
+      benchmark.delta.endgameLowValueRepeatActions,
+    ],
+    [
+      "outcomeFollowupRate",
+      benchmark.baseline.outcomeFollowupRate,
+      benchmark.candidate.outcomeFollowupRate,
+      benchmark.delta.outcomeFollowupRate,
+    ],
+    [
+      "outcomeFollowupApplied",
+      benchmark.baseline.outcomeFollowupApplied,
+      benchmark.candidate.outcomeFollowupApplied,
+      benchmark.delta.outcomeFollowupApplied,
+    ],
+    [
+      "outcomeFollowupSuppressedByProgressionCost",
+      benchmark.baseline.outcomeFollowupSuppressedByProgressionCost,
+      benchmark.candidate.outcomeFollowupSuppressedByProgressionCost,
+      benchmark.delta.outcomeFollowupSuppressedByProgressionCost,
+    ],
+    [
+      "outcomeFollowupLedToProgressWithin3",
+      benchmark.baseline.outcomeFollowupLedToProgressWithin3,
+      benchmark.candidate.outcomeFollowupLedToProgressWithin3,
+      benchmark.delta.outcomeFollowupLedToProgressWithin3,
+    ],
+    [
+      "outcomeFollowupLedToNoProgressChain",
+      benchmark.baseline.outcomeFollowupLedToNoProgressChain,
+      benchmark.candidate.outcomeFollowupLedToNoProgressChain,
+      benchmark.delta.outcomeFollowupLedToNoProgressChain,
+    ],
+    [
+      "outcomeFollowupPreservedScoreWindow",
+      benchmark.baseline.outcomeFollowupPreservedScoreWindow,
+      benchmark.candidate.outcomeFollowupPreservedScoreWindow,
+      benchmark.delta.outcomeFollowupPreservedScoreWindow,
+    ],
+    [
+      "corpScoreWindowOverriddenByFollowup",
+      benchmark.baseline.corpScoreWindowOverriddenByFollowup,
+      benchmark.candidate.corpScoreWindowOverriddenByFollowup,
+      benchmark.delta.corpScoreWindowOverriddenByFollowup,
+    ],
+    [
+      "scoreNowProtectedFromFollowup",
+      benchmark.baseline.scoreNowProtectedFromFollowup,
+      benchmark.candidate.scoreNowProtectedFromFollowup,
+      benchmark.delta.scoreNowProtectedFromFollowup,
+    ],
+    [
+      "badOutcomeRepeatedWithoutNewInfo",
+      benchmark.baseline.badOutcomeRepeatedWithoutNewInfo,
+      benchmark.candidate.badOutcomeRepeatedWithoutNewInfo,
+      benchmark.delta.badOutcomeRepeatedWithoutNewInfo,
+    ],
+    [
+      "goodOutcomeConverted",
+      benchmark.baseline.goodOutcomeConverted,
+      benchmark.candidate.goodOutcomeConverted,
+      benchmark.delta.goodOutcomeConverted,
+    ],
+    [
       "actionsUntilNextScoreOrSteal",
       benchmark.baseline.actionsUntilNextScoreOrSteal,
       benchmark.candidate.actionsUntilNextScoreOrSteal,
@@ -3065,6 +3744,42 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.baseline.remoteTrashActions,
       benchmark.candidate.remoteTrashActions,
       benchmark.delta.remoteTrashActions,
+    ],
+    [
+      "expensiveRemoteTrashTaken",
+      benchmark.baseline.expensiveRemoteTrashTaken,
+      benchmark.candidate.expensiveRemoteTrashTaken,
+      benchmark.delta.expensiveRemoteTrashTaken,
+    ],
+    [
+      "highImpactRemoteTrashDeferredByBudget",
+      benchmark.baseline.highImpactRemoteTrashDeferredByBudget,
+      benchmark.candidate.highImpactRemoteTrashDeferredByBudget,
+      benchmark.delta.highImpactRemoteTrashDeferredByBudget,
+    ],
+    [
+      "highImpactRemoteTrashSkippedNoThreat",
+      benchmark.baseline.highImpactRemoteTrashSkippedNoThreat,
+      benchmark.candidate.highImpactRemoteTrashSkippedNoThreat,
+      benchmark.delta.highImpactRemoteTrashSkippedNoThreat,
+    ],
+    [
+      "remoteTrashDroppedBelowReserve",
+      benchmark.baseline.remoteTrashDroppedBelowReserve,
+      benchmark.candidate.remoteTrashDroppedBelowReserve,
+      benchmark.delta.remoteTrashDroppedBelowReserve,
+    ],
+    [
+      "remoteTrashWithoutImmediateThreat",
+      benchmark.baseline.remoteTrashWithoutImmediateThreat,
+      benchmark.candidate.remoteTrashWithoutImmediateThreat,
+      benchmark.delta.remoteTrashWithoutImmediateThreat,
+    ],
+    [
+      "trashDecisionLeftRunnerUnableToContest",
+      benchmark.baseline.trashDecisionLeftRunnerUnableToContest,
+      benchmark.candidate.trashDecisionLeftRunnerUnableToContest,
+      benchmark.delta.trashDecisionLeftRunnerUnableToContest,
     ],
     [
       "remoteContestActions",
@@ -5429,6 +6144,9 @@ function scoreRunnerAction(
       reasonCode = "runner.access.steal_agenda";
       explanation = "Eine sichtbare Agenda kann legal gestohlen werden.";
       evidence.push("access_agenda_visible");
+      if (input.profileId.includes("v1.4.2") && input.ownDeckDoctrine) {
+        evidence.push("steal_trash_protected_from_followup:true");
+      }
       break;
     case "access_card":
       score = 850;
@@ -5439,26 +6157,40 @@ function scoreRunnerAction(
     case "trash_accessed_card":
       {
         const trashContext = runnerRemoteTrashAccessContext(input, action);
-        score = trashContext.affordableRelevant
-          ? trashContext.role === "scoring_protection"
-            ? 940
-            : 890
+        score = trashContext.deferredByBudget
+          ? trashContext.acuteThreat
+            ? 640
+            : 360
+          : trashContext.affordableRelevant
+            ? trashContext.role === "scoring_protection"
+              ? 940
+              : trashContext.role === "run_tax"
+                ? 875
+                : 890
           : trashContext.trashable && trashContext.role === "low_value"
             ? 430
             : 780;
+        if (trashContext.dedicatedTrashCredits > 0) score += 80;
+        evidence.push(...trashContext.evidence);
       }
       reasonCode = "runner.access.trash_value";
       explanation = "Eine zugreifbare Karte kann legal entfernt werden.";
       evidence.push("trash_legal");
+      if (input.profileId.includes("v1.4.2") && input.ownDeckDoctrine) {
+        evidence.push("steal_trash_protected_from_followup:true");
+      }
       break;
     case "decline_trash":
       {
         const trashContext = runnerRemoteTrashAccessContext(input, action);
-        score = trashContext.affordableRelevant
+        score = trashContext.deferredByBudget
+          ? 900
+          : trashContext.affordableRelevant
           ? 120
           : trashContext.trashable && trashContext.role === "low_value"
             ? 760
             : 650;
+        evidence.push(...trashContext.evidence);
       }
       reasonCode = "runner.access.decline_trash";
       explanation =
@@ -5466,32 +6198,87 @@ function scoreRunnerAction(
       evidence.push("decline_trash_legal");
       break;
     case "break_subroutine":
-      score = 740;
-      reasonCode = "runner.encounter.break_etr";
-      explanation = "Eine sichtbare Subroutine kann legal gebrochen werden.";
-      evidence.push("encounter_solution");
+      {
+        const runEffect = encounterRunRemainderEffectAssessment(input, action);
+        const reserveContext = encounterBreakReserveContext(input, action);
+        score = runEffect.ignoredBecauseNoRemainingIce
+          ? 115
+          : reserveContext.preserveReserve &&
+              runEffect.hasRunRemainderEffect &&
+              !runEffect.mustBreak
+            ? 260
+            : runEffect.mustBreak
+          ? 940
+          : runEffect.hasRunRemainderEffect
+            ? 805
+            : 740;
+        reasonCode = runEffect.ignoredBecauseNoRemainingIce
+          ? "runner.encounter.skip_irrelevant_future_effect_break"
+          : runEffect.hasRunRemainderEffect
+          ? "runner.encounter.break_run_remainder_effect"
+          : "runner.encounter.break_etr";
+        explanation = runEffect.ignoredBecauseNoRemainingIce
+          ? "Eine sichtbare Subroutine wirkt nur auf spätere ICE; im aktuellen Run gibt es danach kein ICE mehr."
+          : runEffect.hasRunRemainderEffect
+          ? "Eine sichtbare Subroutine wuerde den restlichen Run verteuern oder gefaehrlicher machen."
+          : "Eine sichtbare Subroutine kann legal gebrochen werden.";
+        evidence.push(
+          "encounter_solution",
+          ...runEffect.evidence,
+          ...reserveContext.evidence,
+        );
+      }
       break;
     case "pump_breaker":
-      if (pumpCanLeadToBreak(input, action)) {
-        score = 690;
-        reasonCode = "runner.encounter.pump_breaker";
+      {
+        const pumpAssessment = pumpViabilityAssessment(input, action);
+        if (pumpAssessment.canLeadToBreak) {
+        const runEffect = encounterRunRemainderEffectAssessment(input);
+        score = runEffect.mustBreak ? 760 : 690;
+        reasonCode = runEffect.mustBreak
+          ? "runner.encounter.pump_run_remainder_effect"
+          : "runner.encounter.pump_breaker";
         explanation =
           "Ein installierter Breaker kann die Begegnung verbessern.";
-        evidence.push("breaker_visible", "pump_can_enable_break");
+        evidence.push(
+          "breaker_visible",
+          "pump_can_enable_break",
+          ...pumpAssessment.evidence,
+          ...runEffect.evidence,
+        );
       } else {
         score = 90;
         reasonCode = "runner.encounter.pump_without_matching_breaker";
         explanation =
           "Der sichtbare Breaker passt nicht zu diesem ICE; Pumpen verbessert die Begegnung nicht.";
-        evidence.push("breaker_visible", "pump_cannot_break_encountered_ice");
+        evidence.push(
+          "breaker_visible",
+          "pump_cannot_break_encountered_ice",
+          ...pumpAssessment.evidence,
+        );
+      }
       }
       break;
     case "continue_run":
-      score = input.difficulty === "easy" ? 360 : 520;
-      reasonCode = "runner.encounter.continue";
-      explanation =
-        "Der Run kann nach sichtbarer Bewertung fortgesetzt werden.";
-      evidence.push("continue_legal");
+      {
+        const runEffect = encounterRunRemainderEffectAssessment(input);
+        score = runEffect.mustBreak
+          ? 180
+          : runEffect.hasRunRemainderEffect
+            ? input.difficulty === "easy"
+              ? 330
+              : 470
+            : input.difficulty === "easy"
+              ? 360
+              : 520;
+        reasonCode = runEffect.mustBreak
+          ? "runner.encounter.continue_visible_future_path_risk"
+          : "runner.encounter.continue";
+        explanation = runEffect.mustBreak
+          ? "Eine ungelöste sichtbare Subroutine wuerde den restlichen Run stark verschlechtern."
+          : "Der Run kann nach sichtbarer Bewertung fortgesetzt werden.";
+        evidence.push("continue_legal", ...runEffect.evidence);
+      }
       break;
     case "jack_out":
       if (runnerReachedAccessMovement(input)) {
@@ -5608,6 +6395,7 @@ function scoreRunnerAction(
         staleKnownHqRepeatRunPenalty(input, action) +
         staleKnownArchivesRepeatRunPenalty(input, action) +
         recentRemoteJackOutRepeatRunPenalty(input, action);
+      const rndRepeatPressureBoost = rndFreshRepeatRunBoost(input, action);
       score = scoreRunTarget(
         action,
         features,
@@ -5615,6 +6403,7 @@ function scoreRunnerAction(
         input.difficulty,
         staleCentralRepeatPenalty,
       );
+      score += rndRepeatPressureBoost;
       reasonCode = runnerRunReasonCode(action, features);
       explanation =
         reasonCode === "runner.run.blocked_by_rezzed_ice"
@@ -5628,6 +6417,9 @@ function scoreRunnerAction(
         ...runTargetEvidence(action, features),
         ...(staleCentralRepeatPenalty > 0
           ? [`known_stale_central_repeat_penalty:${staleCentralRepeatPenalty}`]
+          : []),
+        ...(rndRepeatPressureBoost > 0
+          ? [`rnd_repeat_pressure_boost:${rndRepeatPressureBoost}`]
           : []),
       );
       break;
@@ -6246,7 +7038,51 @@ function staleKnownRndRepeatRunPenalty(
   const freshness =
     reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness;
   // Public-event belief marks this only after Runner already accessed R&D and no visible draw, shuffle, reorder, swap, steal, or trash changed the top card.
-  return freshness?.freshness === "stale_known_same_top" ? 420 : 0;
+  if (freshness?.freshness !== "stale_known_same_top") return 0;
+  if (rndKnownTopIsAgendaForAi(freshness)) return 0;
+  return rndKnownTopIsLowValueForAi(freshness) || !freshness.knownTopDefinitionId
+    ? 420
+    : 0;
+}
+
+function rndFreshRepeatRunBoost(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  if (
+    input.side !== "runner" ||
+    action.type !== "start_run" ||
+    action.payload?.serverId !== "rd"
+  )
+    return 0;
+  const freshness =
+    reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness;
+  if (rndKnownTopIsAgendaForAi(freshness)) return 520;
+  return freshness?.freshness === "fresh_after_top_removed" ? 170 : 0;
+}
+
+function rndKnownTopIsAgendaForAi(
+  freshness: RndTopFreshnessMemory | undefined,
+): boolean {
+  const definitionId = freshness?.knownTopDefinitionId;
+  if (!definitionId) return false;
+  return (
+    freshness.knownTopIsAgenda === true ||
+    RUNTIME_CARDS[definitionId]?.type === "agenda" ||
+    DEMO_CARDS_BY_ID[definitionId]?.type === "agenda"
+  );
+}
+
+function rndKnownTopIsLowValueForAi(
+  freshness: RndTopFreshnessMemory | undefined,
+): boolean {
+  const definitionId = freshness?.knownTopDefinitionId;
+  if (!definitionId) return false;
+  const type =
+    RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type;
+  if (type === "agenda" || type === "asset" || type === "upgrade")
+    return false;
+  return freshness.knownTopIsLowValue === true || type !== undefined;
 }
 
 function staleKnownHqRepeatRunPenalty(
@@ -6532,20 +7368,24 @@ function isBlockedByKnownRezzedIce(
   );
 }
 
-function pumpCanLeadToBreak(
+function pumpViabilityAssessment(
   input: AiDecisionInput,
   action: LegalAction,
-): boolean {
+): { canLeadToBreak: boolean; evidence: string[] } {
   const breaker = findVisibleCard(input, action.source);
   const encounteredIce = input.playerView.run?.encounteredIce;
-  if (!breaker?.definitionId || !encounteredIce?.definitionId) return true;
+  if (!breaker?.definitionId || !encounteredIce?.definitionId)
+    return { canLeadToBreak: true, evidence: [] };
   if (
     !canBreakerDefinitionBreakIce(
       breaker.definitionId,
       encounteredIce.definitionId,
     )
   )
-    return false;
+    return {
+      canLeadToBreak: false,
+      evidence: ["pump_cannot_break_encountered_ice:true"],
+    };
 
   const breakerId = breakerIdForEncounterAction(action);
   const targetIceId =
@@ -6558,44 +7398,439 @@ function pumpCanLeadToBreak(
       breakerIdForEncounterAction(candidate) === breakerId &&
       (!targetIceId || candidate.payload?.iceId === targetIceId),
   );
-  if (directBreakIsLegal) return false;
+  if (directBreakIsLegal)
+    return {
+      canLeadToBreak: false,
+      evidence: ["pump_direct_break_already_legal:true"],
+    };
 
   const encounterContinue = input.legalActions.find(
     (candidate) =>
       candidate.type === "continue_run" &&
       candidate.payload?.encounterContinue === true,
   );
-  if (encounterContinue?.payload?.unbrokenSubroutineCount === 0) return false;
+  if (encounterContinue?.payload?.unbrokenSubroutineCount === 0)
+    return {
+      canLeadToBreak: false,
+      evidence: ["pump_no_unbroken_subroutines:true"],
+    };
   if (
     typeof breaker.strength === "number" &&
     typeof encounteredIce.strength === "number" &&
     breaker.strength >= encounteredIce.strength
   )
-    return false;
+    return {
+      canLeadToBreak: false,
+      evidence: ["pump_strength_already_sufficient:true"],
+    };
 
   const endTheRunCount = endTheRunSubroutineCount(encounteredIce.definitionId);
+  const runEffect = encounterRunRemainderEffectAssessment(input);
+  const hasUsefulRunRemainderEffect =
+    runEffect.hasRunRemainderEffect &&
+    (runEffect.mustBreak ||
+      runEffect.futurePathBlocked ||
+      runEffect.futureCostDelta > 0);
+  const hasImmediateThreat = encounterHasImmediateUnbrokenThreat(input);
   if (
-    endTheRunCount > 0 &&
-    encounterContinue?.payload?.encounterWillEndRun === true
+    endTheRunCount === 0 &&
+    !hasUsefulRunRemainderEffect &&
+    !hasImmediateThreat
   ) {
-    const pumpCost = creditCostForAiAction(action);
-    const remainingCreditsAfterPump = input.playerView.own.credits - pumpCost;
-    if (remainingCreditsAfterPump < 0) return false;
-    const strengthAfterThisPump =
-      (breaker.strength ?? 0) +
-      pumpStrengthAmountForAction(action, breaker.definitionId);
-    const postPumpBreakAssessment =
-      creditsToBreakEndTheRunSubroutinesWithBreaker(
-        breaker,
-        encounteredIce,
-        endTheRunCount,
-        strengthAfterThisPump,
-      );
-    if (!postPumpBreakAssessment) return false;
-    if (postPumpBreakAssessment.cost > remainingCreditsAfterPump) return false;
+    return {
+      canLeadToBreak: false,
+      evidence: [
+        "pump_cannot_lead_to_useful_break:true",
+        ...runEffect.evidence,
+      ],
+    };
   }
 
-  return true;
+  const pumpCost = creditCostForAiAction(action);
+  const pumpAmount = pumpStrengthAmountForAction(action, breaker.definitionId);
+  if (pumpCost < 0 || pumpAmount <= 0)
+    return {
+      canLeadToBreak: false,
+      evidence: ["pump_cannot_reach_break_strength:true"],
+    };
+  const requiredStrength =
+    encounteredIce.effectiveRunQuote?.effectiveStrength ??
+    encounteredIce.strength ??
+    cardDefinitionStrength(encounteredIce.definitionId);
+  const missingStrength = Math.max(0, requiredStrength - (breaker.strength ?? 0));
+  const requiredPumps = Math.max(1, Math.ceil(missingStrength / pumpAmount));
+  const totalPumpCost = requiredPumps * pumpCost;
+  const remainingCreditsAfterPumps =
+    input.playerView.own.credits - totalPumpCost;
+  if (remainingCreditsAfterPumps < 0)
+    return {
+      canLeadToBreak: false,
+      evidence: [
+        "pump_cannot_reach_break_strength:true",
+        `pump_required_count:${requiredPumps}`,
+      ],
+    };
+
+  const estimatedBreakCost =
+    endTheRunCount > 0 && encounterContinue?.payload?.encounterWillEndRun === true
+      ? creditsToBreakEndTheRunSubroutinesWithBreaker(
+          breaker,
+          encounteredIce,
+          endTheRunCount,
+          (breaker.strength ?? 0) + requiredPumps * pumpAmount,
+        )?.cost
+      : estimatedEncounterBreakCost(input, action);
+  if (
+    estimatedBreakCost === undefined ||
+    estimatedBreakCost > remainingCreditsAfterPumps
+  )
+    return {
+      canLeadToBreak: false,
+      evidence: [
+        "pump_cannot_lead_to_useful_break:true",
+        `pump_required_count:${requiredPumps}`,
+      ],
+    };
+
+  const creditsAfterPumpAndBreak =
+    remainingCreditsAfterPumps - estimatedBreakCost;
+  const reserveTarget = runnerCreditReserveTargetForInput(input);
+  if (
+    !runEffect.mustBreak &&
+    !hasImmediateThreat &&
+    creditsAfterPumpAndBreak < Math.max(2, reserveTarget - 1)
+  ) {
+    return {
+      canLeadToBreak: false,
+      evidence: [
+        "pump_would_destroy_access_reserve:true",
+        `pump_credits_after_break:${creditsAfterPumpAndBreak}`,
+        `pump_reserve_target:${reserveTarget}`,
+      ],
+    };
+  }
+
+  return {
+    canLeadToBreak: true,
+    evidence: [
+      "pump_can_reach_useful_break:true",
+      `pump_required_count:${requiredPumps}`,
+      ...runEffect.evidence,
+    ],
+  };
+}
+
+function encounterRunRemainderEffectAssessment(
+  input: AiDecisionInput,
+  action?: LegalAction,
+): {
+  hasRunRemainderEffect: boolean;
+  mustBreak: boolean;
+  futurePathBlocked: boolean;
+  futureCostDelta: number;
+  ignoredBecauseNoRemainingIce: boolean;
+  remainingIceCount: number;
+  remainingVisibleIceCount: number;
+  evidence: string[];
+} {
+  const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+  const targetIndexes =
+    action?.type === "break_subroutine" &&
+    typeof action.payload?.subroutineIndex === "number"
+      ? [action.payload.subroutineIndex]
+      : (quote?.subroutines
+          .map((subroutine, index) =>
+            subroutine.unbrokenRunEffect ? index : undefined,
+          )
+          .filter((index): index is number => index !== undefined) ?? []);
+  const effects = targetIndexes.flatMap((index) => {
+    const effect = quote?.subroutines[index]?.unbrokenRunEffect;
+    return effect ? [{ index, effect }] : [];
+  });
+  if (!quote || effects.length === 0) {
+    return {
+      hasRunRemainderEffect: false,
+      mustBreak: false,
+      futurePathBlocked: false,
+      futureCostDelta: 0,
+      ignoredBecauseNoRemainingIce: false,
+      remainingIceCount: 0,
+      remainingVisibleIceCount: 0,
+      evidence: [],
+    };
+  }
+
+  const remainingIce = currentRunRemainingIce(input);
+  const remainingIceCount = remainingIce.length;
+  const remainingVisibleIceCount = remainingIce.filter(
+    (ice) => ice.known && ice.rezzed === true,
+  ).length;
+  const seriousNonCostRisk = effects.some(
+    ({ effect }) =>
+      effect.causesDamageOrProgramTrash === true ||
+      effect.preventsJackOut === true ||
+      (effect.createsRunLockOrActionTax ?? 0) > 0,
+  );
+  const ignoredBecauseNoRemainingIce =
+    remainingIceCount === 0 && !seriousNonCostRisk;
+  const basePath = currentRunFuturePathAssessment(input);
+  const projectedPath = currentRunFuturePathAssessment(input, effects);
+  const futureCostDelta = Math.max(
+    0,
+    (projectedPath.visibleBreakCost ?? 0) - (basePath.visibleBreakCost ?? 0),
+  );
+  const createsHardLock = effects.some(
+    ({ effect }) => effect.preventsFutureBreaking === true,
+  );
+  const mustBreak =
+    (!ignoredBecauseNoRemainingIce && projectedPath.blocked) ||
+    (!ignoredBecauseNoRemainingIce &&
+      createsHardLock &&
+      currentRunHasFutureVisibleIce(input)) ||
+    (seriousNonCostRisk && !basePath.blocked);
+  const evidence = [
+    "run_remainder_subroutine_effect:true",
+    `run_remainder_effect_subroutines:${effects.map(({ index }) => index).join(",")}`,
+    `future_effect_remaining_ice:${remainingIceCount}`,
+    `future_effect_remaining_visible_ice:${remainingVisibleIceCount}`,
+    `future_path_blocked_if_unbroken:${projectedPath.blocked}`,
+    `future_path_cost_delta_if_unbroken:${futureCostDelta}`,
+    ...(ignoredBecauseNoRemainingIce
+      ? ["unbroken_run_effect_ignored_because_no_remaining_ice:true"]
+      : []),
+    ...(!ignoredBecauseNoRemainingIce && remainingIceCount > 0
+      ? ["unbroken_run_effect_applied_to_remaining_path:true"]
+      : []),
+    ...(effects.some(
+      ({ effect }) => (effect.addsFutureEndTheRunSubroutines ?? 0) > 0,
+    )
+      ? ["adds_future_end_the_run_subroutines:true"]
+      : []),
+    ...(effects.some(
+      ({ effect }) => (effect.increasesFutureBreakCostPerSubroutine ?? 0) > 0,
+    )
+      ? ["increases_future_break_cost:true"]
+      : []),
+    ...(effects.some(
+      ({ effect }) => (effect.increasesFutureIceStrength ?? 0) > 0,
+    )
+      ? ["increases_future_ice_strength:true"]
+      : []),
+    ...(mustBreak ? ["run_remainder_effect_must_break:true"] : []),
+  ];
+  return {
+    hasRunRemainderEffect: !ignoredBecauseNoRemainingIce,
+    mustBreak,
+    futurePathBlocked: projectedPath.blocked,
+    futureCostDelta,
+    ignoredBecauseNoRemainingIce,
+    remainingIceCount,
+    remainingVisibleIceCount,
+    evidence,
+  };
+}
+
+function currentEncounteredIceCard(
+  input: AiDecisionInput,
+): VisibleCard | undefined {
+  const run = input.playerView.run;
+  if (!run) return undefined;
+  if (run.encounteredIce?.effectiveRunQuote) return run.encounteredIce;
+  if (run.position?.kind !== "ice") return run.encounteredIce;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === run.position?.serverId,
+  );
+  return server?.ice[run.position.iceIndex] ?? run.encounteredIce;
+}
+
+function encounterHasImmediateUnbrokenThreat(input: AiDecisionInput): boolean {
+  const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+  return Boolean(
+    quote?.subroutines.some((subroutine) => {
+      const type = subroutine.type.toLowerCase();
+      return (
+        type === "end_the_run" ||
+        type === "end_the_run_unless_runner_pays" ||
+        type === "secret_spend_compare_end_run_unless_corp_spent_at_least_runner" ||
+        type === "do_damage" ||
+        type === "give_runner_tag" ||
+        type === "initiate_trace" ||
+        type === "trash_installed_program" ||
+        subroutine.unbrokenRunEffect?.causesDamageOrProgramTrash === true ||
+        subroutine.unbrokenRunEffect?.preventsJackOut === true ||
+        (subroutine.unbrokenRunEffect?.createsRunLockOrActionTax ?? 0) > 0
+      );
+    }),
+  );
+}
+
+function estimatedEncounterBreakCost(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number | undefined {
+  const breakerId = breakerIdForEncounterAction(action);
+  const targetIceId =
+    typeof action.payload?.iceId === "string"
+      ? action.payload.iceId
+      : undefined;
+  const currentBreakCosts = input.legalActions
+    .filter(
+      (candidate) =>
+        candidate.type === "break_subroutine" &&
+        breakerIdForEncounterAction(candidate) === breakerId &&
+        (!targetIceId || candidate.payload?.iceId === targetIceId),
+    )
+    .map((candidate) => creditCostForAiAction(candidate));
+  if (currentBreakCosts.length > 0) return Math.min(...currentBreakCosts);
+  const breaker = findVisibleCard(input, action.source);
+  if (!breaker?.definitionId) return 1;
+  const abilityCosts =
+    DEMO_CARDS_BY_ID[breaker.definitionId]?.abilities
+      ?.filter((ability) => ability.type === "break_subroutine")
+      .map((ability) =>
+        typeof ability.cost?.credits === "number" ? ability.cost.credits : 1,
+      ) ?? [];
+  return abilityCosts.length > 0 ? Math.min(...abilityCosts) : 1;
+}
+
+function encounterBreakReserveContext(
+  input: AiDecisionInput,
+  action: LegalAction,
+): { preserveReserve: boolean; evidence: string[] } {
+  const reserveTarget = runnerCreditReserveTargetForInput(input);
+  const creditsAfterBreak = input.playerView.own.credits - creditCostForAiAction(action);
+  const preserveReserve = creditsAfterBreak < Math.max(2, reserveTarget - 1);
+  return {
+    preserveReserve,
+    evidence: preserveReserve
+      ? [
+          "break_skipped_to_preserve_trash_reserve:true",
+          `break_credits_after:${creditsAfterBreak}`,
+          `break_reserve_target:${reserveTarget}`,
+        ]
+      : [],
+  };
+}
+
+function currentRunFuturePathAssessment(
+  input: AiDecisionInput,
+  effects: Array<{
+    effect: NonNullable<
+      NonNullable<
+        VisibleCard["effectiveRunQuote"]
+      >["subroutines"][number]["unbrokenRunEffect"]
+    >;
+  }> = [],
+): { blocked: boolean; visibleBreakCost?: number } {
+  const run = input.playerView.run;
+  if (!run || run.position?.kind !== "ice") return { blocked: false };
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === run.position?.serverId,
+  );
+  if (!server) return { blocked: false };
+  const futureIce = server.ice
+    .slice(0, Math.max(0, run.position.iceIndex))
+    .map((ice) => projectFutureIceForUnbrokenEffects(ice, effects));
+  const assessment = assessKnownRezzedIcePath(
+    futureIce,
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+    server.root,
+  );
+  const encounterTax = effects.reduce((sum, { effect }) => {
+    const perIce = Math.max(0, Math.floor(effect.addsFutureEncounterCost ?? 0));
+    return (
+      sum + perIce * futureIce.filter((ice) => ice.known && ice.rezzed).length
+    );
+  }, 0);
+  const visibleBreakCost = (assessment.visibleBreakCost ?? 0) + encounterTax;
+  return {
+    blocked:
+      assessment.blocked || visibleBreakCost > input.playerView.own.credits,
+    ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
+  };
+}
+
+function projectFutureIceForUnbrokenEffects(
+  ice: VisibleCard,
+  effects: Array<{
+    effect: NonNullable<
+      NonNullable<
+        VisibleCard["effectiveRunQuote"]
+      >["subroutines"][number]["unbrokenRunEffect"]
+    >;
+  }>,
+): VisibleCard {
+  if (!ice.known || ice.rezzed !== true || !ice.definitionId) return ice;
+  const quote = ice.effectiveRunQuote;
+  const baseQuote: VisibleEffectiveIceRunQuote = quote ?? {
+    iceInstanceId: ice.instanceId,
+    iceDefinitionId: ice.definitionId,
+    effectiveStrength: ice.strength ?? cardDefinitionStrength(ice.definitionId),
+    subroutines:
+      DEMO_CARDS_BY_ID[ice.definitionId]?.subroutines?.map((subroutine) => ({
+        id: subroutine.id,
+        type: subroutine.type,
+        ...(subroutine.amount !== undefined
+          ? { amount: subroutine.amount }
+          : {}),
+        ...(subroutine.breakTags
+          ? { breakTags: subroutine.breakTags.slice() }
+          : {}),
+      })) ?? [],
+  };
+  let effectiveStrength = baseQuote.effectiveStrength;
+  let breakSubroutineAdditionalCostPerSubroutine =
+    baseQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0;
+  const subroutines = baseQuote.subroutines.map((subroutine) => ({
+    ...subroutine,
+  }));
+  for (const { effect } of effects) {
+    const addedEndTheRun = Math.max(
+      0,
+      Math.floor(effect.addsFutureEndTheRunSubroutines ?? 0),
+    );
+    for (let index = 0; index < addedEndTheRun; index += 1) {
+      subroutines.push({
+        id: `visible_projection.future_end_the_run.${index + 1}`,
+        type: "end_the_run",
+      });
+    }
+    effectiveStrength += Math.max(
+      0,
+      Math.floor(effect.increasesFutureIceStrength ?? 0),
+    );
+    breakSubroutineAdditionalCostPerSubroutine += Math.max(
+      0,
+      Math.floor(effect.increasesFutureBreakCostPerSubroutine ?? 0),
+    );
+  }
+  return {
+    ...ice,
+    effectiveRunQuote: {
+      ...baseQuote,
+      effectiveStrength,
+      subroutines,
+      ...(breakSubroutineAdditionalCostPerSubroutine > 0
+        ? { breakSubroutineAdditionalCostPerSubroutine }
+        : {}),
+    },
+  };
+}
+
+function currentRunHasFutureVisibleIce(input: AiDecisionInput): boolean {
+  return currentRunRemainingIce(input).some(
+    (ice) => ice.known && ice.rezzed === true,
+  );
+}
+
+function currentRunRemainingIce(input: AiDecisionInput): VisibleCard[] {
+  const run = input.playerView.run;
+  if (!run || run.position?.kind !== "ice") return [];
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === run.position?.serverId,
+  );
+  return server?.ice.slice(0, Math.max(0, run.position.iceIndex)) ?? [];
 }
 
 function breakerIdForEncounterAction(action: LegalAction): string | undefined {
@@ -6736,6 +7971,63 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpAdvanceConvertedToScoreOrProtectedWindow",
   "corpEconomyConvertedToRezInstallScore",
   "corpProtectionConvertedToScoreSafety",
+  "runnerCentralSuccessFollowedByValue",
+  "runnerCentralSuccessFollowedByRepeatNoValue",
+  "runnerCentralNoValuePivoted",
+  "runnerRemoteSuccessFollowedByValue",
+  "runnerRemoteEmptyOrLowValuePivoted",
+  "runnerJackOutRepeatedSameServerWithoutNewInfo",
+  "runnerJackOutFollowedByEconomyOrRig",
+  "runnerAccessNoValueRepeated",
+  "runnerAccessNoValuePivoted",
+  "runnerEconomyConvertedAfterOutcome",
+  "runnerRigConvertedAfterOutcome",
+  "corpRemoteStealFollowupProtectOrPivot",
+  "corpRemoteStealFollowupRepeatedUnsafeLine",
+  "corpCentralStealFollowupProtectCentral",
+  "corpRunnerFailedRunFollowupScoreOrAdvance",
+  "corpRunnerSuccessfulRunFollowupProtect",
+  "corpAdvanceFollowupScore",
+  "corpAdvanceFollowupProtect",
+  "corpRemoteBuildFollowupAdvanceProtectScore",
+  "corpRemoteBuildFollowupNoop",
+  "outcomeFollowupOpportunities",
+  "outcomeFollowupTaken",
+  "outcomeFollowupRate",
+  "outcomeFollowupApplied",
+  "outcomeFollowupSuppressedByProgressionCost",
+  "outcomeFollowupSuppressedByBetterImmediateValue",
+  "outcomeFollowupLedToProgressWithin3",
+  "outcomeFollowupLedToNoProgressChain",
+  "outcomeFollowupDelayedScoreWindow",
+  "outcomeFollowupPreservedScoreWindow",
+  "outcomeFollowupDelayedStealOrTrash",
+  "outcomeFollowupPreservedContestReserve",
+  "runnerOutcomePivotConverted",
+  "runnerOutcomePivotStalled",
+  "corpOutcomePivotConverted",
+  "corpOutcomePivotStalled",
+  "corpScoreWindowOverriddenByFollowup",
+  "scoreNowProtectedFromFollowup",
+  "stealTrashProtectedFromFollowup",
+  "effectiveRunQuoteBlockedFollowupRun",
+  "unbrokenRunEffectChangedBreakDecision",
+  "futureEffectSubroutinesEncountered",
+  "futureEffectSubroutinesWithRemainingIce",
+  "futureEffectSubroutinesWithoutRemainingIce",
+  "futureEffectBreaksTaken",
+  "futureEffectBreaksSkippedNoRemainingIce",
+  "futureEffectBreaksTakenWithoutRemainingIce",
+  "pumpActionsBeforeFutureEffectBreak",
+  "pumpActionsThatCouldNotLeadToBreak",
+  "pumpActionsThatDestroyedAccessReserve",
+  "breakSkippedToPreserveTrashReserve",
+  "unbrokenRunEffectIgnoredBecauseNoRemainingIce",
+  "unbrokenRunEffectAppliedToRemainingPath",
+  "badOutcomeRepeatedWithoutNewInfo",
+  "goodOutcomeConverted",
+  "outcomePivotWithReason",
+  "outcomeIgnored",
   "advancedAgendaSteals",
   "advancedAgendaStealsFromRemote",
   "advancedAgendaStealsFromCentral",
@@ -6767,6 +8059,146 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "repeatedLowValueCentralRuns",
   "centralRunStreakWithoutValue",
   "centralRunStartedWithInsufficientPostRunReserve",
+  "hqKnownCards",
+  "hqUnknownCards",
+  "hqKnownFraction",
+  "hqFullyKnown",
+  "hqKnownAgendaCount",
+  "hqKnownNonAgendaCount",
+  "hqKnownAgendaPoints",
+  "hqMemoryInvalidatedByDraw",
+  "hqMemoryInvalidatedByInstall",
+  "hqMemoryInvalidatedByPlay",
+  "hqMemoryInvalidatedByDiscard",
+  "hqMemoryInvalidatedByShuffleOrReorder",
+  "hqRunValueFromKnownCards",
+  "hqRunValueFromUnknownCards",
+  "hqRunSuppressedBecauseFullyKnownNoAgenda",
+  "hqRunBoostedBecauseKnownAgenda",
+  "hqRunBoostedBecauseUnknownCardsRemain",
+  "hqRunRepeatedWithoutNewHqInfo",
+  "knownRndTopCard",
+  "knownRndTopMovedToHq",
+  "knownRndTopInvalidated",
+  "hqKnownFromRndDraw",
+  "hqRunBoostedByRndToHqAgenda",
+  "hqRunSuppressedByRndToHqNonAgenda",
+  "rndAccesses",
+  "rndAccessRemovedTopCard",
+  "rndAccessStoleAgenda",
+  "rndAccessTrashedCard",
+  "rndAccessLeftTopCardUnchanged",
+  "rndTopFreshenedByRunnerAccess",
+  "rndKnownTopAdvancedAfterAccess",
+  "rndKnownTopSequenceAdvanced",
+  "rndRepeatRunAfterTopRemoved",
+  "rndRepeatRunAfterTopUnchanged",
+  "rndRepeatRunBoostedByFreshTop",
+  "rndRepeatRunSuppressedBecauseKnownStaleTop",
+  "rndRepeatRunBoostedByKnownAgendaTop",
+  "rndRepeatRunSuppressedBecauseKnownNonAgendaTop",
+  "rndFreshTopPressureOpportunity",
+  "rndFreshTopPressureTaken",
+  "rndFreshTopPressureSkipped",
+  "rndStaleTopRepeatMistake",
+  "rndAccessNoValueRepeatStale",
+  "rndCloseoutOpportunityAfterTopRemoved",
+  "knownRemoteCards",
+  "knownRemoteAgendas",
+  "knownRemoteTrashableCards",
+  "remoteMemoryRetainedAfterAccess",
+  "remoteMemoryInvalidatedByInstallOrMove",
+  "remoteRunBoostedByKnownRemoteAgenda",
+  "remoteRunSuppressedByKnownLowValueRemote",
+  "remoteTrashBoostedByKnownRemoteTrashable",
+  "knownUnrezzedIceFromExpose",
+  "knownUnrezzedIceRetained",
+  "knownUnrezzedIceInvalidated",
+  "runCostAdjustedByKnownUnrezzedIce",
+  "jackOutInfluencedByKnownUnrezzedIce",
+  "rigPlanInfluencedByKnownUnrezzedIce",
+  "runnerMissingBreakerCoverageByType",
+  "runnerVisibleIceBlockingByType",
+  "runnerKnownIceBlockingByType",
+  "runnerPathBlockedByMissingCoverage",
+  "runnerInstallableBreakerForBlockedPath",
+  "runnerSearchCardAvailableForMissingBreaker",
+  "runnerSearchCardUsedForMissingBreaker",
+  "runnerSearchCardAvailableButUnused",
+  "runnerTutorConvertedToBreakerInstall",
+  "runnerTutorConvertedToUsefulRun",
+  "runnerBreakerInstallConvertedToUsefulRun",
+  "runnerCoverageImproved",
+  "runnerCoverageReadyButNoPressure",
+  "runnerSetupContinuedAfterCoverageReady",
+  "runnerPressureReadyWindows",
+  "runnerPressureReadyTrue",
+  "runnerPressureReadyFalsePositive",
+  "runnerPressureReadyByTargetHq",
+  "runnerPressureReadyByTargetRnd",
+  "runnerPressureReadyByTargetArchives",
+  "runnerPressureReadyByTargetRemote",
+  "runnerSetupContinuedAfterPressureReady",
+  "runnerPressureTakenAfterCoverageReady",
+  "runnerPressureSkippedAfterCoverageReady",
+  "runnerPressureSkippedInsufficientCredits",
+  "runnerPressureSkippedMissingPostRunReserve",
+  "runnerPressureSkippedStaleCentral",
+  "runnerPressureSkippedRemoteTooDangerous",
+  "runnerPressureSkippedNoValuableTarget",
+  "runnerPressureSkippedBetterImmediateAction",
+  "runnerCoverageImprovedThenPressureWithin1",
+  "runnerCoverageImprovedThenPressureWithin2",
+  "runnerCoverageImprovedThenPressureWithin3",
+  "runnerEconomyReserveReachedThenPressureWithin2",
+  "runnerSearchTutorThenPressureWithin3",
+  "runnerSetupLoopAfterPressureReady",
+  "runnerPhaseExitBlockedByCost",
+  "runnerPhaseExitBlockedByCoverage",
+  "runnerPhaseExitBlockedByTargetValue",
+  "runnerProbeRevealedIceThenSearchedBreaker",
+  "runnerProbeRevealedIceButDidNotReact",
+  "runnerSetupBreakerSearchStalled",
+  "runnerSetupEconomyStalled",
+  "runnerPhaseExitToPressure",
+  "actionLimitRootCauseByMatch",
+  "actionLimitDominantSide",
+  "actionLimitDominantSideRunner",
+  "actionLimitDominantSideCorp",
+  "actionLimitDominantSideBoth",
+  "finalStrategicWindowNoProgressActions",
+  "finalStrategicWindowRunnerNoProgressActions",
+  "finalStrategicWindowCorpNoProgressActions",
+  "finalWindowRunnerMeaningfulRunOpportunities",
+  "finalWindowRunnerMeaningfulRunsTaken",
+  "finalWindowCorpScorePathOpportunities",
+  "finalWindowCorpScorePathTaken",
+  "finalWindowKnownInfoExploitationOpportunities",
+  "finalWindowKnownInfoExploitationTaken",
+  "endgameCloseoutOpportunitiesRunner",
+  "endgameCloseoutOpportunitiesRunnerRaw",
+  "endgameCloseoutOpportunitiesRunnerDeduped",
+  "endgameCloseoutOpportunitiesRunnerTrue",
+  "endgameCloseoutOpportunitiesRunnerFalsePositive",
+  "runnerCloseoutByKnownHqAgenda",
+  "runnerCloseoutByKnownRndTopAgenda",
+  "runnerCloseoutByKnownRemoteAgenda",
+  "runnerCloseoutByPointsToWin",
+  "runnerCloseoutBlockedByCredits",
+  "runnerCloseoutBlockedByBreakerCoverage",
+  "runnerCloseoutBlockedByPostRunReserve",
+  "runnerCloseoutAttempted",
+  "runnerCloseoutSkippedWithReason",
+  "endgameCloseoutOpportunitiesCorp",
+  "endgameCloseoutAttemptsRunner",
+  "endgameCloseoutAttemptsCorp",
+  "endgameScoreOrStealPressureActions",
+  "endgameSetupOrEconomyActions",
+  "endgameProtectionActions",
+  "endgameLowValueRepeatActions",
+  "actionLimitLikelyDeckPressureIssue",
+  "actionLimitLikelyStrategyIssue",
+  "actionLimitLikelyMetricArtifact",
   "trueCentralCloseoutOpportunities",
   "centralCloseoutOpportunitiesRaw",
   "centralCloseoutOpportunitiesDeduped",
@@ -6832,9 +8264,33 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "remoteTrashTargetsUnknown",
   "remoteTrashRoleEconomy",
   "remoteTrashRoleScoringProtection",
+  "remoteTrashRoleRunTax",
+  "remoteTrashRoleRemoteCapacity",
   "remoteTrashRoleTagPunish",
   "remoteTrashRoleAmbush",
   "remoteTrashRoleLowValue",
+  "remoteTrashDeclined",
+  "remoteTrashCostTotal",
+  "expensiveRemoteTrashOpportunities",
+  "expensiveRemoteTrashTaken",
+  "expensiveRemoteTrashDeclined",
+  "highImpactRemoteTrashTaken",
+  "highImpactRemoteTrashDeferredByBudget",
+  "highImpactRemoteTrashSkippedNoThreat",
+  "lowValueRemoteTrashSkipped",
+  "remoteTrashSpentEarlyGame",
+  "runnerCreditsAfterRemoteTrash",
+  "remoteTrashDroppedBelowReserve",
+  "remoteTrashPreservedReserve",
+  "remoteTrashProtectedScoreThreat",
+  "remoteTrashWithoutImmediateThreat",
+  "remoteTrashCostBucket0To1",
+  "remoteTrashCostBucket2To3",
+  "remoteTrashCostBucket4To5",
+  "remoteTrashCostBucket6Plus",
+  "dedicatedTrashCreditsUsed",
+  "generalCreditsSpentOnTrash",
+  "trashDecisionLeftRunnerUnableToContest",
   "remoteRunOpportunitiesAgainstAdvancedRemote",
   "remoteRunsAgainstAdvancedRemote",
   "skippedAdvancedRemoteContest",
@@ -7153,6 +8609,8 @@ export function summarizeMatchProgressionMetrics(
   const centralCloseoutRepeatMetrics =
     summarizeCentralCloseoutRepeatMetrics(summaries);
   const planConversionMetrics = summarizePlanConversionMetrics(summaries);
+  const actionLimitEndgameMetrics =
+    summarizeActionLimitEndgameMetrics(summaries);
   const runnerHandUseOpportunityWindows = actionSequence.filter(
     (entry) => entry.runnerHandUseOpportunity === true,
   ).length;
@@ -7177,6 +8635,10 @@ export function summarizeMatchProgressionMetrics(
     .filter((value): value is number => typeof value === "number");
   const runnerKnownPathRunEntries = runnerRuns.filter(
     (entry) => typeof entry.runKnownPathCostAtStart === "number",
+  );
+  const hqMemoryEntries = actionSequence.filter(
+    (entry) =>
+      entry.side === "runner" && typeof entry.hqKnownCards === "number",
   );
   return {
     games,
@@ -7212,6 +8674,7 @@ export function summarizeMatchProgressionMetrics(
       (runnerSteals + corpScores) / Math.max(games, 1),
     ),
     ...planConversionMetrics,
+    ...actionLimitEndgameMetrics,
     advancedAgendaSteals,
     advancedAgendaStealsFromRemote,
     advancedAgendaStealsFromCentral,
@@ -7303,6 +8766,357 @@ export function summarizeMatchProgressionMetrics(
       (entry) =>
         entry.runnerCentralRunStartedWithInsufficientPostRunReserve === true,
     ).length,
+    hqKnownCards: Math.max(
+      0,
+      ...hqMemoryEntries.map((entry) => entry.hqKnownCards ?? 0),
+    ),
+    hqUnknownCards: Math.max(
+      0,
+      ...hqMemoryEntries.map((entry) => entry.hqUnknownCards ?? 0),
+    ),
+    hqKnownFraction: round(
+      averageNumber(
+        hqMemoryEntries
+          .map((entry) => entry.hqKnownFraction)
+          .filter((value): value is number => typeof value === "number"),
+      ),
+    ),
+    hqFullyKnown: hqMemoryEntries.filter((entry) => entry.hqFullyKnown === true)
+      .length,
+    hqKnownAgendaCount: Math.max(
+      0,
+      ...hqMemoryEntries.map((entry) => entry.hqKnownAgendaCount ?? 0),
+    ),
+    hqKnownNonAgendaCount: Math.max(
+      0,
+      ...hqMemoryEntries.map((entry) => entry.hqKnownNonAgendaCount ?? 0),
+    ),
+    hqKnownAgendaPoints: Math.max(
+      0,
+      ...hqMemoryEntries.map((entry) => entry.hqKnownAgendaPoints ?? 0),
+    ),
+    hqMemoryInvalidatedByDraw: hqMemoryEntries.filter(
+      (entry) => entry.hqMemoryInvalidatedByDraw === true,
+    ).length,
+    hqMemoryInvalidatedByInstall: hqMemoryEntries.filter(
+      (entry) => entry.hqMemoryInvalidatedByInstall === true,
+    ).length,
+    hqMemoryInvalidatedByPlay: hqMemoryEntries.filter(
+      (entry) => entry.hqMemoryInvalidatedByPlay === true,
+    ).length,
+    hqMemoryInvalidatedByDiscard: hqMemoryEntries.filter(
+      (entry) => entry.hqMemoryInvalidatedByDiscard === true,
+    ).length,
+    hqMemoryInvalidatedByShuffleOrReorder: hqMemoryEntries.filter(
+      (entry) => entry.hqMemoryInvalidatedByShuffleOrReorder === true,
+    ).length,
+    hqRunValueFromKnownCards: Math.max(
+      0,
+      ...runnerRuns.map((entry) => entry.hqRunValueFromKnownCards ?? 0),
+    ),
+    hqRunValueFromUnknownCards: Math.max(
+      0,
+      ...runnerRuns.map((entry) => entry.hqRunValueFromUnknownCards ?? 0),
+    ),
+    hqRunSuppressedBecauseFullyKnownNoAgenda: runnerRuns.filter(
+      (entry) => entry.hqRunSuppressedBecauseFullyKnownNoAgenda === true,
+    ).length,
+    hqRunBoostedBecauseKnownAgenda: runnerRuns.filter(
+      (entry) => entry.hqRunBoostedBecauseKnownAgenda === true,
+    ).length,
+    hqRunBoostedBecauseUnknownCardsRemain: runnerRuns.filter(
+      (entry) => entry.hqRunBoostedBecauseUnknownCardsRemain === true,
+    ).length,
+    hqRunRepeatedWithoutNewHqInfo: runnerRuns.filter(
+      (entry) => entry.hqRunRepeatedWithoutNewHqInfo === true,
+    ).length,
+    knownRndTopCard: actionSequence.filter(
+      (entry) => entry.knownRndTopCard === true,
+    ).length,
+    knownRndTopMovedToHq: actionSequence.filter(
+      (entry) => entry.knownRndTopMovedToHq === true,
+    ).length,
+    knownRndTopInvalidated: actionSequence.filter(
+      (entry) => entry.knownRndTopInvalidated === true,
+    ).length,
+    hqKnownFromRndDraw: hqMemoryEntries.filter(
+      (entry) => entry.hqKnownFromRndDraw === true,
+    ).length,
+    hqRunBoostedByRndToHqAgenda: runnerRuns.filter(
+      (entry) => entry.hqRunBoostedByRndToHqAgenda === true,
+    ).length,
+    hqRunSuppressedByRndToHqNonAgenda: runnerRuns.filter(
+      (entry) => entry.hqRunSuppressedByRndToHqNonAgenda === true,
+    ).length,
+    rndAccesses: actionSequence.filter(
+      (entry) =>
+        entry.side === "runner" &&
+        entry.actionType === "access_card" &&
+        entry.targetServerId === "rd",
+    ).length,
+    rndAccessRemovedTopCard: actionSequence.filter(
+      (entry) => entry.rndAccessRemovedTopCard === true,
+    ).length,
+    rndAccessStoleAgenda: actionSequence.filter(
+      (entry) => entry.rndAccessStoleAgenda === true,
+    ).length,
+    rndAccessTrashedCard: actionSequence.filter(
+      (entry) => entry.rndAccessTrashedCard === true,
+    ).length,
+    rndAccessLeftTopCardUnchanged: actionSequence.filter(
+      (entry) => entry.rndAccessLeftTopCardUnchanged === true,
+    ).length,
+    rndTopFreshenedByRunnerAccess: actionSequence.filter(
+      (entry) => entry.rndTopFreshenedByRunnerAccess === true,
+    ).length,
+    rndKnownTopAdvancedAfterAccess: actionSequence.filter(
+      (entry) => entry.rndKnownTopAdvancedAfterAccess === true,
+    ).length,
+    rndKnownTopSequenceAdvanced: actionSequence.filter(
+      (entry) => entry.rndKnownTopSequenceAdvanced === true,
+    ).length,
+    rndRepeatRunAfterTopRemoved: runnerRuns.filter(
+      (entry) => entry.rndRepeatRunAfterTopRemoved === true,
+    ).length,
+    rndRepeatRunAfterTopUnchanged: runnerRuns.filter(
+      (entry) => entry.rndRepeatRunAfterTopUnchanged === true,
+    ).length,
+    rndRepeatRunBoostedByFreshTop: runnerRuns.filter(
+      (entry) => entry.rndRepeatRunBoostedByFreshTop === true,
+    ).length,
+    rndRepeatRunSuppressedBecauseKnownStaleTop: runnerRuns.filter(
+      (entry) => entry.rndRepeatRunSuppressedBecauseKnownStaleTop === true,
+    ).length,
+    rndRepeatRunBoostedByKnownAgendaTop: runnerRuns.filter(
+      (entry) => entry.rndRepeatRunBoostedByKnownAgendaTop === true,
+    ).length,
+    rndRepeatRunSuppressedBecauseKnownNonAgendaTop: runnerRuns.filter(
+      (entry) => entry.rndRepeatRunSuppressedBecauseKnownNonAgendaTop === true,
+    ).length,
+    rndFreshTopPressureOpportunity: actionSequence.filter(
+      (entry) => entry.rndFreshTopPressureOpportunity === true,
+    ).length,
+    rndFreshTopPressureTaken: runnerRuns.filter(
+      (entry) => entry.rndFreshTopPressureTaken === true,
+    ).length,
+    rndFreshTopPressureSkipped: actionSequence.filter(
+      (entry) => entry.rndFreshTopPressureSkipped === true,
+    ).length,
+    rndStaleTopRepeatMistake: runnerRuns.filter(
+      (entry) => entry.rndStaleTopRepeatMistake === true,
+    ).length,
+    rndAccessNoValueRepeatStale: runnerRuns.filter(
+      (entry) => entry.rndAccessNoValueRepeatStale === true,
+    ).length,
+    rndCloseoutOpportunityAfterTopRemoved: actionSequence.filter(
+      (entry) => entry.rndCloseoutOpportunityAfterTopRemoved === true,
+    ).length,
+    knownRemoteCards: Math.max(
+      0,
+      ...actionSequence.map((entry) => entry.knownRemoteCards ?? 0),
+    ),
+    knownRemoteAgendas: Math.max(
+      0,
+      ...actionSequence.map((entry) => entry.knownRemoteAgendas ?? 0),
+    ),
+    knownRemoteTrashableCards: Math.max(
+      0,
+      ...actionSequence.map((entry) => entry.knownRemoteTrashableCards ?? 0),
+    ),
+    remoteMemoryRetainedAfterAccess: actionSequence.filter(
+      (entry) => entry.remoteMemoryRetainedAfterAccess === true,
+    ).length,
+    remoteMemoryInvalidatedByInstallOrMove: actionSequence.filter(
+      (entry) => entry.remoteMemoryInvalidatedByInstallOrMove === true,
+    ).length,
+    remoteRunBoostedByKnownRemoteAgenda: runnerRuns.filter(
+      (entry) => entry.remoteRunBoostedByKnownRemoteAgenda === true,
+    ).length,
+    remoteRunSuppressedByKnownLowValueRemote: runnerRuns.filter(
+      (entry) => entry.remoteRunSuppressedByKnownLowValueRemote === true,
+    ).length,
+    remoteTrashBoostedByKnownRemoteTrashable: runnerRuns.filter(
+      (entry) => entry.remoteTrashBoostedByKnownRemoteTrashable === true,
+    ).length,
+    knownUnrezzedIceFromExpose: Math.max(
+      0,
+      ...actionSequence.map((entry) => entry.knownUnrezzedIceFromExpose ?? 0),
+    ),
+    knownUnrezzedIceRetained: actionSequence.filter(
+      (entry) => entry.knownUnrezzedIceRetained === true,
+    ).length,
+    knownUnrezzedIceInvalidated: actionSequence.filter(
+      (entry) => entry.knownUnrezzedIceInvalidated === true,
+    ).length,
+    runCostAdjustedByKnownUnrezzedIce: Math.max(
+      0,
+      ...runnerRuns.map(
+        (entry) => entry.runCostAdjustedByKnownUnrezzedIce ?? 0,
+      ),
+    ),
+    jackOutInfluencedByKnownUnrezzedIce: actionSequence.filter(
+      (entry) => entry.jackOutInfluencedByKnownUnrezzedIce === true,
+    ).length,
+    rigPlanInfluencedByKnownUnrezzedIce: actionSequence.filter(
+      (entry) => entry.rigPlanInfluencedByKnownUnrezzedIce === true,
+    ).length,
+    runnerMissingBreakerCoverageByType: Math.max(
+      0,
+      ...actionSequence.map(
+        (entry) => entry.runnerMissingBreakerCoverageByType ?? 0,
+      ),
+    ),
+    runnerVisibleIceBlockingByType: Math.max(
+      0,
+      ...actionSequence.map(
+        (entry) => entry.runnerVisibleIceBlockingByType ?? 0,
+      ),
+    ),
+    runnerKnownIceBlockingByType: Math.max(
+      0,
+      ...actionSequence.map((entry) => entry.runnerKnownIceBlockingByType ?? 0),
+    ),
+    runnerPathBlockedByMissingCoverage: actionSequence.filter(
+      (entry) => entry.runnerPathBlockedByMissingCoverage === true,
+    ).length,
+    runnerInstallableBreakerForBlockedPath: actionSequence.filter(
+      (entry) => entry.runnerInstallableBreakerForBlockedPath === true,
+    ).length,
+    runnerSearchCardAvailableForMissingBreaker: actionSequence.filter(
+      (entry) => entry.runnerSearchCardAvailableForMissingBreaker === true,
+    ).length,
+    runnerSearchCardUsedForMissingBreaker: actionSequence.filter(
+      (entry) => entry.runnerSearchCardUsedForMissingBreaker === true,
+    ).length,
+    runnerSearchCardAvailableButUnused: actionSequence.filter(
+      (entry) => entry.runnerSearchCardAvailableButUnused === true,
+    ).length,
+    runnerTutorConvertedToBreakerInstall: actionSequence.filter(
+      (entry) => entry.runnerTutorConvertedToBreakerInstall === true,
+    ).length,
+    runnerTutorConvertedToUsefulRun: countRunnerCoverageConversions(
+      actionSequence,
+      (entry) => entry.runnerSearchCardUsedForMissingBreaker === true,
+    ),
+    runnerBreakerInstallConvertedToUsefulRun: countRunnerCoverageConversions(
+      actionSequence,
+      (entry) => entry.runnerCoverageImproved === true,
+    ),
+    runnerCoverageImproved: actionSequence.filter(
+      (entry) => entry.runnerCoverageImproved === true,
+    ).length,
+    runnerCoverageReadyButNoPressure: actionSequence.filter(
+      (entry) => entry.runnerCoverageReadyButNoPressure === true,
+    ).length,
+    runnerSetupContinuedAfterCoverageReady: actionSequence.filter(
+      (entry) => entry.runnerSetupContinuedAfterCoverageReady === true,
+    ).length,
+    runnerPressureReadyWindows: actionSequence.filter(
+      (entry) => entry.runnerPressureReadyWindow === true,
+    ).length,
+    runnerPressureReadyTrue: actionSequence.filter(
+      (entry) => entry.runnerPressureReadyTrue === true,
+    ).length,
+    runnerPressureReadyFalsePositive: actionSequence.filter(
+      (entry) => entry.runnerPressureReadyFalsePositive === true,
+    ).length,
+    runnerPressureReadyByTargetHq: actionSequence.filter(
+      (entry) => entry.runnerPressureReadyByTargetHq === true,
+    ).length,
+    runnerPressureReadyByTargetRnd: actionSequence.filter(
+      (entry) => entry.runnerPressureReadyByTargetRnd === true,
+    ).length,
+    runnerPressureReadyByTargetArchives: actionSequence.filter(
+      (entry) => entry.runnerPressureReadyByTargetArchives === true,
+    ).length,
+    runnerPressureReadyByTargetRemote: actionSequence.filter(
+      (entry) => entry.runnerPressureReadyByTargetRemote === true,
+    ).length,
+    runnerSetupContinuedAfterPressureReady: actionSequence.filter(
+      (entry) => entry.runnerSetupContinuedAfterPressureReady === true,
+    ).length,
+    runnerPressureTakenAfterCoverageReady: actionSequence.filter(
+      (entry) => entry.runnerPressureTakenAfterCoverageReady === true,
+    ).length,
+    runnerPressureSkippedAfterCoverageReady: actionSequence.filter(
+      (entry) => entry.runnerPressureSkippedAfterCoverageReady === true,
+    ).length,
+    runnerPressureSkippedInsufficientCredits: actionSequence.filter(
+      (entry) => entry.runnerPressureSkippedReason === "insufficient_credits",
+    ).length,
+    runnerPressureSkippedMissingPostRunReserve: actionSequence.filter(
+      (entry) =>
+        entry.runnerPressureSkippedReason === "missing_post_run_reserve",
+    ).length,
+    runnerPressureSkippedStaleCentral: actionSequence.filter(
+      (entry) => entry.runnerPressureSkippedReason === "stale_central",
+    ).length,
+    runnerPressureSkippedRemoteTooDangerous: actionSequence.filter(
+      (entry) => entry.runnerPressureSkippedReason === "remote_too_dangerous",
+    ).length,
+    runnerPressureSkippedNoValuableTarget: actionSequence.filter(
+      (entry) => entry.runnerPressureSkippedReason === "no_valuable_target",
+    ).length,
+    runnerPressureSkippedBetterImmediateAction: actionSequence.filter(
+      (entry) =>
+        entry.runnerPressureSkippedReason === "better_immediate_action",
+    ).length,
+    runnerCoverageImprovedThenPressureWithin1:
+      countRunnerPressureWithinOwnActions(
+        actionSequence,
+        (entry) => entry.runnerCoverageImproved === true,
+        1,
+      ),
+    runnerCoverageImprovedThenPressureWithin2:
+      countRunnerPressureWithinOwnActions(
+        actionSequence,
+        (entry) => entry.runnerCoverageImproved === true,
+        2,
+      ),
+    runnerCoverageImprovedThenPressureWithin3:
+      countRunnerPressureWithinOwnActions(
+        actionSequence,
+        (entry) => entry.runnerCoverageImproved === true,
+        3,
+      ),
+    runnerEconomyReserveReachedThenPressureWithin2:
+      countRunnerPressureWithinOwnActions(
+        actionSequence,
+        (entry) => entry.runnerEconomyActionTaken === true,
+        2,
+      ),
+    runnerSearchTutorThenPressureWithin3: countRunnerPressureWithinOwnActions(
+      actionSequence,
+      (entry) => entry.runnerSearchCardUsedForMissingBreaker === true,
+      3,
+    ),
+    runnerSetupLoopAfterPressureReady: actionSequence.filter(
+      (entry) => entry.runnerSetupLoopAfterPressureReady === true,
+    ).length,
+    runnerPhaseExitBlockedByCost: actionSequence.filter(
+      (entry) => entry.runnerPhaseExitBlockedByCost === true,
+    ).length,
+    runnerPhaseExitBlockedByCoverage: actionSequence.filter(
+      (entry) => entry.runnerPhaseExitBlockedByCoverage === true,
+    ).length,
+    runnerPhaseExitBlockedByTargetValue: actionSequence.filter(
+      (entry) => entry.runnerPhaseExitBlockedByTargetValue === true,
+    ).length,
+    runnerProbeRevealedIceThenSearchedBreaker: actionSequence.filter(
+      (entry) => entry.runnerProbeRevealedIceThenSearchedBreaker === true,
+    ).length,
+    runnerProbeRevealedIceButDidNotReact: actionSequence.filter(
+      (entry) => entry.runnerProbeRevealedIceButDidNotReact === true,
+    ).length,
+    runnerSetupBreakerSearchStalled: actionSequence.filter(
+      (entry) => entry.runnerSetupBreakerSearchStalled === true,
+    ).length,
+    runnerSetupEconomyStalled: actionSequence.filter(
+      (entry) => entry.runnerSetupEconomyStalled === true,
+    ).length,
+    runnerPhaseExitToPressure: actionSequence.filter(
+      (entry) => entry.runnerPhaseExitToPressure === true,
+    ).length,
     ...centralCloseoutRepeatMetrics,
     interfaceInstallOpportunities: actionSequence.filter(
       (entry) => entry.runnerInterfaceInstallOpportunity === true,
@@ -7348,6 +9162,12 @@ export function summarizeMatchProgressionMetrics(
     remoteTrashRoleScoringProtection: actionSequence.filter(
       (entry) => entry.runnerRemoteTrashRole === "scoring_protection",
     ).length,
+    remoteTrashRoleRunTax: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashRole === "run_tax",
+    ).length,
+    remoteTrashRoleRemoteCapacity: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashRole === "remote_capacity",
+    ).length,
     remoteTrashRoleTagPunish: actionSequence.filter(
       (entry) => entry.runnerRemoteTrashRole === "tag_punish",
     ).length,
@@ -7356,6 +9176,77 @@ export function summarizeMatchProgressionMetrics(
     ).length,
     remoteTrashRoleLowValue: actionSequence.filter(
       (entry) => entry.runnerRemoteTrashRole === "low_value",
+    ).length,
+    remoteTrashDeclined: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashDeclined === true,
+    ).length,
+    remoteTrashCostTotal: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerRemoteTrashCost ?? 0),
+      0,
+    ),
+    expensiveRemoteTrashOpportunities: actionSequence.filter(
+      (entry) => entry.runnerExpensiveRemoteTrashOpportunity === true,
+    ).length,
+    expensiveRemoteTrashTaken: actionSequence.filter(
+      (entry) => entry.runnerExpensiveRemoteTrashTaken === true,
+    ).length,
+    expensiveRemoteTrashDeclined: actionSequence.filter(
+      (entry) => entry.runnerExpensiveRemoteTrashDeclined === true,
+    ).length,
+    highImpactRemoteTrashTaken: actionSequence.filter(
+      (entry) => entry.runnerHighImpactRemoteTrashTaken === true,
+    ).length,
+    highImpactRemoteTrashDeferredByBudget: actionSequence.filter(
+      (entry) => entry.runnerHighImpactRemoteTrashDeferredByBudget === true,
+    ).length,
+    highImpactRemoteTrashSkippedNoThreat: actionSequence.filter(
+      (entry) => entry.runnerHighImpactRemoteTrashSkippedNoThreat === true,
+    ).length,
+    lowValueRemoteTrashSkipped: actionSequence.filter(
+      (entry) => entry.runnerLowValueRemoteTrashSkipped === true,
+    ).length,
+    remoteTrashSpentEarlyGame: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashSpentEarlyGame === true,
+    ).length,
+    runnerCreditsAfterRemoteTrash: minDefined(
+      actionSequence
+        .map((entry) => entry.runnerCreditsAfterRemoteTrash)
+        .filter((value): value is number => typeof value === "number"),
+    ),
+    remoteTrashDroppedBelowReserve: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashDroppedBelowReserve === true,
+    ).length,
+    remoteTrashPreservedReserve: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashPreservedReserve === true,
+    ).length,
+    remoteTrashProtectedScoreThreat: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashProtectedScoreThreat === true,
+    ).length,
+    remoteTrashWithoutImmediateThreat: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashWithoutImmediateThreat === true,
+    ).length,
+    remoteTrashCostBucket0To1: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashCostBucket === "0_1",
+    ).length,
+    remoteTrashCostBucket2To3: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashCostBucket === "2_3",
+    ).length,
+    remoteTrashCostBucket4To5: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashCostBucket === "4_5",
+    ).length,
+    remoteTrashCostBucket6Plus: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashCostBucket === "6_plus",
+    ).length,
+    dedicatedTrashCreditsUsed: actionSequence.reduce(
+      (sum, entry) => sum + (entry.dedicatedTrashCreditsUsed ?? 0),
+      0,
+    ),
+    generalCreditsSpentOnTrash: actionSequence.reduce(
+      (sum, entry) => sum + (entry.generalCreditsSpentOnTrash ?? 0),
+      0,
+    ),
+    trashDecisionLeftRunnerUnableToContest: actionSequence.filter(
+      (entry) => entry.trashDecisionLeftRunnerUnableToContest === true,
     ).length,
     remoteRunOpportunitiesAgainstAdvancedRemote,
     remoteRunsAgainstAdvancedRemote,
@@ -7834,6 +9725,63 @@ function summarizePlanConversionMetrics(
   | "corpAdvanceConvertedToScoreOrProtectedWindow"
   | "corpEconomyConvertedToRezInstallScore"
   | "corpProtectionConvertedToScoreSafety"
+  | "runnerCentralSuccessFollowedByValue"
+  | "runnerCentralSuccessFollowedByRepeatNoValue"
+  | "runnerCentralNoValuePivoted"
+  | "runnerRemoteSuccessFollowedByValue"
+  | "runnerRemoteEmptyOrLowValuePivoted"
+  | "runnerJackOutRepeatedSameServerWithoutNewInfo"
+  | "runnerJackOutFollowedByEconomyOrRig"
+  | "runnerAccessNoValueRepeated"
+  | "runnerAccessNoValuePivoted"
+  | "runnerEconomyConvertedAfterOutcome"
+  | "runnerRigConvertedAfterOutcome"
+  | "corpRemoteStealFollowupProtectOrPivot"
+  | "corpRemoteStealFollowupRepeatedUnsafeLine"
+  | "corpCentralStealFollowupProtectCentral"
+  | "corpRunnerFailedRunFollowupScoreOrAdvance"
+  | "corpRunnerSuccessfulRunFollowupProtect"
+  | "corpAdvanceFollowupScore"
+  | "corpAdvanceFollowupProtect"
+  | "corpRemoteBuildFollowupAdvanceProtectScore"
+  | "corpRemoteBuildFollowupNoop"
+  | "outcomeFollowupOpportunities"
+  | "outcomeFollowupTaken"
+  | "outcomeFollowupRate"
+  | "outcomeFollowupApplied"
+  | "outcomeFollowupSuppressedByProgressionCost"
+  | "outcomeFollowupSuppressedByBetterImmediateValue"
+  | "outcomeFollowupLedToProgressWithin3"
+  | "outcomeFollowupLedToNoProgressChain"
+  | "outcomeFollowupDelayedScoreWindow"
+  | "outcomeFollowupPreservedScoreWindow"
+  | "outcomeFollowupDelayedStealOrTrash"
+  | "outcomeFollowupPreservedContestReserve"
+  | "runnerOutcomePivotConverted"
+  | "runnerOutcomePivotStalled"
+  | "corpOutcomePivotConverted"
+  | "corpOutcomePivotStalled"
+  | "corpScoreWindowOverriddenByFollowup"
+  | "scoreNowProtectedFromFollowup"
+  | "stealTrashProtectedFromFollowup"
+  | "effectiveRunQuoteBlockedFollowupRun"
+  | "unbrokenRunEffectChangedBreakDecision"
+  | "futureEffectSubroutinesEncountered"
+  | "futureEffectSubroutinesWithRemainingIce"
+  | "futureEffectSubroutinesWithoutRemainingIce"
+  | "futureEffectBreaksTaken"
+  | "futureEffectBreaksSkippedNoRemainingIce"
+  | "futureEffectBreaksTakenWithoutRemainingIce"
+  | "pumpActionsBeforeFutureEffectBreak"
+  | "pumpActionsThatCouldNotLeadToBreak"
+  | "pumpActionsThatDestroyedAccessReserve"
+  | "breakSkippedToPreserveTrashReserve"
+  | "unbrokenRunEffectIgnoredBecauseNoRemainingIce"
+  | "unbrokenRunEffectAppliedToRemainingPath"
+  | "badOutcomeRepeatedWithoutNewInfo"
+  | "goodOutcomeConverted"
+  | "outcomePivotWithReason"
+  | "outcomeIgnored"
 > {
   let actionLedToProgressWithin1 = 0;
   let actionLedToProgressWithin2 = 0;
@@ -7974,7 +9922,705 @@ function summarizePlanConversionMetrics(
       boardProgressDistances,
     ),
     ...summarizeStrategicPlanConversionMetrics(summaries),
+    ...summarizeOutcomeFollowupMetrics(summaries),
   };
+}
+
+function summarizeActionLimitEndgameMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "actionLimitRootCauseByMatch"
+  | "actionLimitDominantSide"
+  | "actionLimitDominantSideRunner"
+  | "actionLimitDominantSideCorp"
+  | "actionLimitDominantSideBoth"
+  | "finalStrategicWindowNoProgressActions"
+  | "finalStrategicWindowRunnerNoProgressActions"
+  | "finalStrategicWindowCorpNoProgressActions"
+  | "finalWindowRunnerMeaningfulRunOpportunities"
+  | "finalWindowRunnerMeaningfulRunsTaken"
+  | "finalWindowCorpScorePathOpportunities"
+  | "finalWindowCorpScorePathTaken"
+  | "finalWindowKnownInfoExploitationOpportunities"
+  | "finalWindowKnownInfoExploitationTaken"
+  | "endgameCloseoutOpportunitiesRunner"
+  | "endgameCloseoutOpportunitiesRunnerRaw"
+  | "endgameCloseoutOpportunitiesRunnerDeduped"
+  | "endgameCloseoutOpportunitiesRunnerTrue"
+  | "endgameCloseoutOpportunitiesRunnerFalsePositive"
+  | "runnerCloseoutByKnownHqAgenda"
+  | "runnerCloseoutByKnownRndTopAgenda"
+  | "runnerCloseoutByKnownRemoteAgenda"
+  | "runnerCloseoutByPointsToWin"
+  | "runnerCloseoutBlockedByCredits"
+  | "runnerCloseoutBlockedByBreakerCoverage"
+  | "runnerCloseoutBlockedByPostRunReserve"
+  | "runnerCloseoutAttempted"
+  | "runnerCloseoutSkippedWithReason"
+  | "endgameCloseoutOpportunitiesCorp"
+  | "endgameCloseoutAttemptsRunner"
+  | "endgameCloseoutAttemptsCorp"
+  | "endgameScoreOrStealPressureActions"
+  | "endgameSetupOrEconomyActions"
+  | "endgameProtectionActions"
+  | "endgameLowValueRepeatActions"
+  | "actionLimitLikelyDeckPressureIssue"
+  | "actionLimitLikelyStrategyIssue"
+  | "actionLimitLikelyMetricArtifact"
+> {
+  let actionLimitRootCauseByMatch = 0;
+  let actionLimitDominantSideRunner = 0;
+  let actionLimitDominantSideCorp = 0;
+  let actionLimitDominantSideBoth = 0;
+  let finalStrategicWindowNoProgressActions = 0;
+  let finalStrategicWindowRunnerNoProgressActions = 0;
+  let finalStrategicWindowCorpNoProgressActions = 0;
+  let finalWindowRunnerMeaningfulRunOpportunities = 0;
+  let finalWindowRunnerMeaningfulRunsTaken = 0;
+  let finalWindowCorpScorePathOpportunities = 0;
+  let finalWindowCorpScorePathTaken = 0;
+  let finalWindowKnownInfoExploitationOpportunities = 0;
+  let finalWindowKnownInfoExploitationTaken = 0;
+  let endgameCloseoutOpportunitiesRunner = 0;
+  let endgameCloseoutOpportunitiesRunnerRaw = 0;
+  let endgameCloseoutOpportunitiesRunnerDeduped = 0;
+  let endgameCloseoutOpportunitiesRunnerTrue = 0;
+  let endgameCloseoutOpportunitiesRunnerFalsePositive = 0;
+  let runnerCloseoutByKnownHqAgenda = 0;
+  let runnerCloseoutByKnownRndTopAgenda = 0;
+  let runnerCloseoutByKnownRemoteAgenda = 0;
+  let runnerCloseoutByPointsToWin = 0;
+  let runnerCloseoutBlockedByCredits = 0;
+  let runnerCloseoutBlockedByBreakerCoverage = 0;
+  let runnerCloseoutBlockedByPostRunReserve = 0;
+  let runnerCloseoutAttempted = 0;
+  let runnerCloseoutSkippedWithReason = 0;
+  let endgameCloseoutOpportunitiesCorp = 0;
+  let endgameCloseoutAttemptsRunner = 0;
+  let endgameCloseoutAttemptsCorp = 0;
+  let endgameScoreOrStealPressureActions = 0;
+  let endgameSetupOrEconomyActions = 0;
+  let endgameProtectionActions = 0;
+  let endgameLowValueRepeatActions = 0;
+  let actionLimitLikelyDeckPressureIssue = 0;
+  let actionLimitLikelyStrategyIssue = 0;
+  let actionLimitLikelyMetricArtifact = 0;
+
+  for (const summary of summaries) {
+    if (summary.winner !== "action_limit_reached") continue;
+    actionLimitRootCauseByMatch += 1;
+    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
+    const strategicWindow = sequence.filter(isStrategicPlanDecision).slice(-30);
+    const windowNoProgress = strategicWindow.filter(
+      (entry) => !isMeaningfulBoardProgress(entry),
+    );
+    const runnerNoProgress = windowNoProgress.filter(
+      (entry) => entry.side === "runner",
+    );
+    const corpNoProgress = windowNoProgress.filter(
+      (entry) => entry.side === "corp",
+    );
+    const runnerRunOpportunities = strategicWindow.filter(
+      isRunnerEndgameMeaningfulRunOpportunity,
+    );
+    const runnerRunsTaken = strategicWindow.filter(
+      isRunnerEndgameMeaningfulRunTaken,
+    );
+    const corpScorePathOpportunities = strategicWindow.filter(
+      isCorpEndgameScorePathOpportunity,
+    );
+    const corpScorePathTaken = strategicWindow.filter(
+      isCorpEndgameScorePathTaken,
+    );
+    const knownInfoOpportunities = strategicWindow.filter(
+      isEndgameKnownInfoOpportunity,
+    );
+    const knownInfoTaken = strategicWindow.filter(isEndgameKnownInfoTaken);
+    const runnerNearWin = summary.finalAgendaPoints.runner >= 5;
+    const corpNearWin = summary.finalAgendaPoints.corp >= 5;
+    const runnerCloseoutSummary = summarizeRunnerEndgameCloseoutWindow(
+      strategicWindow,
+      runnerNearWin,
+    );
+    const runnerCloseoutOpportunities = runnerCloseoutSummary.trueOpportunities;
+    const corpCloseoutOpportunities = corpNearWin
+      ? corpScorePathOpportunities.length
+      : strategicWindow.filter(
+          (entry) =>
+            entry.side === "corp" && (entry.scoreActionsAvailable ?? 0) > 0,
+        ).length;
+    const runnerCloseoutAttempts = runnerCloseoutSummary.attempted;
+    const corpCloseoutAttempts = strategicWindow.filter(
+      (entry) =>
+        entry.side === "corp" &&
+        (entry.actionType === "score_agenda" ||
+          (corpNearWin && isCorpEndgameScorePathTaken(entry))),
+    ).length;
+    const pressureActions = strategicWindow.filter(
+      isEndgameScoreOrStealPressureAction,
+    );
+    const setupOrEconomyActions = strategicWindow.filter(
+      isEndgameSetupOrEconomyAction,
+    );
+    const protectionActions = strategicWindow.filter(isEndgameProtectionAction);
+    const lowValueRepeatActions =
+      strategicWindow.filter(isEndgameLowValueRepeatAction).length +
+      countSameStrategicPlanRepeatsWithoutProgress(strategicWindow);
+
+    finalStrategicWindowNoProgressActions += windowNoProgress.length;
+    finalStrategicWindowRunnerNoProgressActions += runnerNoProgress.length;
+    finalStrategicWindowCorpNoProgressActions += corpNoProgress.length;
+    finalWindowRunnerMeaningfulRunOpportunities +=
+      runnerRunOpportunities.length;
+    finalWindowRunnerMeaningfulRunsTaken += runnerRunsTaken.length;
+    finalWindowCorpScorePathOpportunities += corpScorePathOpportunities.length;
+    finalWindowCorpScorePathTaken += corpScorePathTaken.length;
+    finalWindowKnownInfoExploitationOpportunities +=
+      knownInfoOpportunities.length;
+    finalWindowKnownInfoExploitationTaken += knownInfoTaken.length;
+    endgameCloseoutOpportunitiesRunner += runnerCloseoutOpportunities;
+    endgameCloseoutOpportunitiesRunnerRaw += runnerCloseoutSummary.raw;
+    endgameCloseoutOpportunitiesRunnerDeduped += runnerCloseoutSummary.deduped;
+    endgameCloseoutOpportunitiesRunnerTrue +=
+      runnerCloseoutSummary.trueOpportunities;
+    endgameCloseoutOpportunitiesRunnerFalsePositive +=
+      runnerCloseoutSummary.falsePositive;
+    runnerCloseoutByKnownHqAgenda += runnerCloseoutSummary.byKnownHqAgenda;
+    runnerCloseoutByKnownRndTopAgenda +=
+      runnerCloseoutSummary.byKnownRndTopAgenda;
+    runnerCloseoutByKnownRemoteAgenda +=
+      runnerCloseoutSummary.byKnownRemoteAgenda;
+    runnerCloseoutByPointsToWin += runnerCloseoutSummary.byPointsToWin;
+    runnerCloseoutBlockedByCredits += runnerCloseoutSummary.blockedByCredits;
+    runnerCloseoutBlockedByBreakerCoverage +=
+      runnerCloseoutSummary.blockedByBreakerCoverage;
+    runnerCloseoutBlockedByPostRunReserve +=
+      runnerCloseoutSummary.blockedByPostRunReserve;
+    runnerCloseoutAttempted += runnerCloseoutSummary.attempted;
+    runnerCloseoutSkippedWithReason += runnerCloseoutSummary.skippedWithReason;
+    endgameCloseoutOpportunitiesCorp += corpCloseoutOpportunities;
+    endgameCloseoutAttemptsRunner += runnerCloseoutAttempts;
+    endgameCloseoutAttemptsCorp += corpCloseoutAttempts;
+    endgameScoreOrStealPressureActions += pressureActions.length;
+    endgameSetupOrEconomyActions += setupOrEconomyActions.length;
+    endgameProtectionActions += protectionActions.length;
+    endgameLowValueRepeatActions += lowValueRepeatActions;
+
+    const runnerSymptoms =
+      runnerNoProgress.length +
+      strategicWindow.filter(isRunnerEndgameStallSymptom).length +
+      Math.max(0, runnerRunOpportunities.length - runnerRunsTaken.length) +
+      Math.max(0, knownInfoOpportunities.length - knownInfoTaken.length) +
+      Math.max(0, runnerCloseoutOpportunities - runnerCloseoutAttempts);
+    const corpSymptoms =
+      corpNoProgress.length +
+      strategicWindow.filter(isCorpEndgameStallSymptom).length +
+      Math.max(
+        0,
+        corpScorePathOpportunities.length - corpScorePathTaken.length,
+      ) +
+      Math.max(0, corpCloseoutOpportunities - corpCloseoutAttempts);
+    const likelyMetricArtifact =
+      strategicWindow.length === 0 ||
+      (windowNoProgress.length <= 2 &&
+        sequence.filter((entry) => !isStrategicPlanDecision(entry)).length >
+          strategicWindow.length);
+    const likelyDeckPressureIssue =
+      pressureActions.length <= 1 &&
+      runnerCloseoutOpportunities === 0 &&
+      corpCloseoutOpportunities === 0 &&
+      setupOrEconomyActions.length + protectionActions.length >=
+        Math.max(3, windowNoProgress.length);
+
+    if (likelyMetricArtifact) actionLimitLikelyMetricArtifact += 1;
+    else if (likelyDeckPressureIssue) actionLimitLikelyDeckPressureIssue += 1;
+    else actionLimitLikelyStrategyIssue += 1;
+
+    if (runnerSymptoms > 0 || corpSymptoms > 0) {
+      if (
+        runnerSymptoms > 0 &&
+        corpSymptoms > 0 &&
+        Math.abs(runnerSymptoms - corpSymptoms) <= 3
+      ) {
+        actionLimitDominantSideBoth += 1;
+      } else if (runnerSymptoms > corpSymptoms) {
+        actionLimitDominantSideRunner += 1;
+      } else {
+        actionLimitDominantSideCorp += 1;
+      }
+    }
+  }
+
+  return {
+    actionLimitRootCauseByMatch,
+    actionLimitDominantSide:
+      actionLimitDominantSideRunner +
+      actionLimitDominantSideCorp +
+      actionLimitDominantSideBoth,
+    actionLimitDominantSideRunner,
+    actionLimitDominantSideCorp,
+    actionLimitDominantSideBoth,
+    finalStrategicWindowNoProgressActions,
+    finalStrategicWindowRunnerNoProgressActions,
+    finalStrategicWindowCorpNoProgressActions,
+    finalWindowRunnerMeaningfulRunOpportunities,
+    finalWindowRunnerMeaningfulRunsTaken,
+    finalWindowCorpScorePathOpportunities,
+    finalWindowCorpScorePathTaken,
+    finalWindowKnownInfoExploitationOpportunities,
+    finalWindowKnownInfoExploitationTaken,
+    endgameCloseoutOpportunitiesRunner,
+    endgameCloseoutOpportunitiesRunnerRaw,
+    endgameCloseoutOpportunitiesRunnerDeduped,
+    endgameCloseoutOpportunitiesRunnerTrue,
+    endgameCloseoutOpportunitiesRunnerFalsePositive,
+    runnerCloseoutByKnownHqAgenda,
+    runnerCloseoutByKnownRndTopAgenda,
+    runnerCloseoutByKnownRemoteAgenda,
+    runnerCloseoutByPointsToWin,
+    runnerCloseoutBlockedByCredits,
+    runnerCloseoutBlockedByBreakerCoverage,
+    runnerCloseoutBlockedByPostRunReserve,
+    runnerCloseoutAttempted,
+    runnerCloseoutSkippedWithReason,
+    endgameCloseoutOpportunitiesCorp,
+    endgameCloseoutAttemptsRunner,
+    endgameCloseoutAttemptsCorp,
+    endgameScoreOrStealPressureActions,
+    endgameSetupOrEconomyActions,
+    endgameProtectionActions,
+    endgameLowValueRepeatActions,
+    actionLimitLikelyDeckPressureIssue,
+    actionLimitLikelyStrategyIssue,
+    actionLimitLikelyMetricArtifact,
+  };
+}
+
+type RunnerEndgameCloseoutWindowSummary = {
+  raw: number;
+  deduped: number;
+  trueOpportunities: number;
+  falsePositive: number;
+  byKnownHqAgenda: number;
+  byKnownRndTopAgenda: number;
+  byKnownRemoteAgenda: number;
+  byPointsToWin: number;
+  blockedByCredits: number;
+  blockedByBreakerCoverage: number;
+  blockedByPostRunReserve: number;
+  attempted: number;
+  skippedWithReason: number;
+};
+
+type RunnerEndgameCloseoutReason =
+  | "known_hq_agenda"
+  | "known_rnd_top_agenda"
+  | "known_remote_agenda"
+  | "points_to_win";
+
+type RunnerEndgameCloseoutCandidate = {
+  key: string;
+  reasons: Set<RunnerEndgameCloseoutReason>;
+  blockedByCredits: boolean;
+  blockedByBreakerCoverage: boolean;
+  blockedByPostRunReserve: boolean;
+  attempted: boolean;
+};
+
+function summarizeRunnerEndgameCloseoutWindow(
+  strategicWindow: PlanConversionActionEntry[],
+  runnerNearWin: boolean,
+): RunnerEndgameCloseoutWindowSummary {
+  const candidates: RunnerEndgameCloseoutCandidate[] = [];
+  for (const entry of strategicWindow) {
+    const candidate = runnerEndgameCloseoutCandidateForEntry(
+      entry,
+      runnerNearWin,
+    );
+    if (candidate) candidates.push(candidate);
+  }
+
+  const byKey = new Map<string, RunnerEndgameCloseoutCandidate>();
+  for (const candidate of candidates) {
+    const existing = byKey.get(candidate.key);
+    if (!existing) {
+      byKey.set(candidate.key, candidate);
+      continue;
+    }
+    for (const reason of candidate.reasons) existing.reasons.add(reason);
+    existing.blockedByCredits ||= candidate.blockedByCredits;
+    existing.blockedByBreakerCoverage ||= candidate.blockedByBreakerCoverage;
+    existing.blockedByPostRunReserve ||= candidate.blockedByPostRunReserve;
+    existing.attempted ||= candidate.attempted;
+  }
+
+  const deduped = [...byKey.values()];
+  const trueCandidates = deduped.filter(
+    (candidate) =>
+      !candidate.blockedByCredits &&
+      !candidate.blockedByBreakerCoverage &&
+      !candidate.blockedByPostRunReserve,
+  );
+  const blockedCandidates = deduped.filter(
+    (candidate) =>
+      candidate.blockedByCredits ||
+      candidate.blockedByBreakerCoverage ||
+      candidate.blockedByPostRunReserve,
+  );
+
+  return {
+    raw: candidates.length,
+    deduped: deduped.length,
+    trueOpportunities: trueCandidates.length,
+    falsePositive: deduped.length - trueCandidates.length,
+    byKnownHqAgenda: countRunnerCloseoutReason(
+      trueCandidates,
+      "known_hq_agenda",
+    ),
+    byKnownRndTopAgenda: countRunnerCloseoutReason(
+      trueCandidates,
+      "known_rnd_top_agenda",
+    ),
+    byKnownRemoteAgenda: countRunnerCloseoutReason(
+      trueCandidates,
+      "known_remote_agenda",
+    ),
+    byPointsToWin: countRunnerCloseoutReason(trueCandidates, "points_to_win"),
+    blockedByCredits: blockedCandidates.filter(
+      (candidate) => candidate.blockedByCredits,
+    ).length,
+    blockedByBreakerCoverage: blockedCandidates.filter(
+      (candidate) => candidate.blockedByBreakerCoverage,
+    ).length,
+    blockedByPostRunReserve: blockedCandidates.filter(
+      (candidate) => candidate.blockedByPostRunReserve,
+    ).length,
+    attempted: trueCandidates.filter((candidate) => candidate.attempted).length,
+    skippedWithReason: blockedCandidates.length,
+  };
+}
+
+function countRunnerCloseoutReason(
+  candidates: RunnerEndgameCloseoutCandidate[],
+  reason: RunnerEndgameCloseoutReason,
+): number {
+  return candidates.filter((candidate) => candidate.reasons.has(reason)).length;
+}
+
+function runnerEndgameCloseoutCandidateForEntry(
+  entry: PlanConversionActionEntry,
+  runnerNearWin: boolean,
+): RunnerEndgameCloseoutCandidate | undefined {
+  if (entry.side !== "runner") return undefined;
+
+  const reasons = new Set<RunnerEndgameCloseoutReason>();
+  if (
+    (entry.hqKnownAgendaCount ?? 0) > 0 ||
+    entry.hqRunBoostedBecauseKnownAgenda === true
+  ) {
+    reasons.add("known_hq_agenda");
+  }
+  if (entry.hqRunBoostedByRndToHqAgenda === true) {
+    reasons.add("known_rnd_top_agenda");
+  }
+  if (
+    (entry.knownRemoteAgendas ?? 0) > 0 ||
+    entry.remoteRunBoostedByKnownRemoteAgenda === true
+  ) {
+    reasons.add("known_remote_agenda");
+  }
+  if (
+    runnerNearWin &&
+    (entry.runnerTrueCentralCloseoutOpportunity === true ||
+      entry.runnerCentralCloseoutRunTaken === true ||
+      entry.runnerCentralRunWithMultiaccess === true ||
+      entry.runnerCentralRunWithInterfaceInstalled === true ||
+      entry.runnerCentralRunEventWithGoodTarget === true ||
+      (entry.hqKnownAgendaCount ?? 0) > 0 ||
+      (entry.knownRemoteAgendas ?? 0) > 0)
+  ) {
+    reasons.add("points_to_win");
+  }
+  if (reasons.size === 0) return undefined;
+
+  const target = runnerCloseoutTargetForEntry(entry, reasons);
+  const key = `${target}:${[...reasons].sort().join("+")}`;
+  return {
+    key,
+    reasons,
+    blockedByCredits: runnerCloseoutBlockedByCredits(entry),
+    blockedByBreakerCoverage: runnerCloseoutBlockedByBreakerCoverage(entry),
+    blockedByPostRunReserve: runnerCloseoutBlockedByPostRunReserve(entry),
+    attempted: runnerCloseoutAttemptedByEntry(entry),
+  };
+}
+
+function runnerCloseoutTargetForEntry(
+  entry: PlanConversionActionEntry,
+  reasons: Set<RunnerEndgameCloseoutReason>,
+): string {
+  if (entry.targetServerId) return entry.targetServerId;
+  if (reasons.has("known_hq_agenda") || reasons.has("known_rnd_top_agenda"))
+    return "hq";
+  if (reasons.has("known_remote_agenda")) return "remote";
+  return "central";
+}
+
+function runnerCloseoutBlockedByCredits(
+  entry: PlanConversionActionEntry,
+): boolean {
+  return (
+    entry.runnerContestBlockedByCredits === true ||
+    entry.runnerRemoteContestBlockedByCredits === true ||
+    entry.runnerStealBlockedByCredits === true ||
+    (entry.runCreditsMissingForKnownPath ?? 0) > 0
+  );
+}
+
+function runnerCloseoutBlockedByBreakerCoverage(
+  entry: PlanConversionActionEntry,
+): boolean {
+  return (
+    entry.runnerRemoteContestBlockedByBreakerCoverage === true ||
+    entry.runnerRemoteContestBlockedByKnownIceCost === true ||
+    entry.runStartedAgainstKnownUnaffordablePath === true ||
+    entry.remoteRunStartedAgainstKnownUnaffordablePath === true ||
+    entry.centralRunStartedAgainstKnownUnaffordablePath === true
+  );
+}
+
+function runnerCloseoutBlockedByPostRunReserve(
+  entry: PlanConversionActionEntry,
+): boolean {
+  return (
+    entry.runnerRemoteContestBlockedByPostRunReserve === true ||
+    entry.runnerCentralRunStartedWithInsufficientPostRunReserve === true ||
+    entry.runnerRemoteRunStartedWithInsufficientPostRunReserve === true ||
+    entry.runnerCentralRunBurnedRemoteContestReserve === true ||
+    entry.runStartedWithInsufficientStealOrTrashReserve === true
+  );
+}
+
+function runnerCloseoutAttemptedByEntry(
+  entry: PlanConversionActionEntry,
+): boolean {
+  return (
+    entry.actionType === "start_run" ||
+    entry.actionType === "trash_accessed_card" ||
+    entry.runnerCentralCloseoutRunTaken === true ||
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerRelevantRemoteTrashTaken === true
+  );
+}
+
+function isRunnerEndgameMeaningfulRunOpportunity(
+  entry: PlanConversionActionEntry,
+): boolean {
+  if (entry.side !== "runner") return false;
+  return (
+    entry.runnerRemoteRunOpportunityAgainstAdvancedRemote === true ||
+    entry.runnerTrueCentralCloseoutOpportunity === true ||
+    (entry.hqKnownAgendaCount ?? 0) > 0 ||
+    (entry.knownRemoteAgendas ?? 0) > 0 ||
+    (entry.knownRemoteTrashableCards ?? 0) > 0 ||
+    entry.runnerCentralRunWithMultiaccess === true ||
+    entry.runnerCentralRunWithInterfaceInstalled === true ||
+    entry.runnerCentralRunEventWithGoodTarget === true
+  );
+}
+
+function isRunnerEndgameMeaningfulRunTaken(
+  entry: PlanConversionActionEntry,
+): boolean {
+  if (entry.side !== "runner") return false;
+  if (entry.actionType === "steal_agenda") return true;
+  if (
+    entry.actionType === "trash_accessed_card" ||
+    entry.runnerRelevantRemoteTrashTaken === true
+  )
+    return true;
+  if (entry.actionType !== "start_run") return false;
+  return (
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralCloseoutRunTaken === true ||
+    entry.runnerCentralRunWithMultiaccess === true ||
+    entry.runnerCentralRunWithInterfaceInstalled === true ||
+    entry.runnerCentralRunEventWithGoodTarget === true ||
+    entry.hqRunBoostedBecauseKnownAgenda === true ||
+    entry.hqRunBoostedByRndToHqAgenda === true ||
+    entry.remoteRunBoostedByKnownRemoteAgenda === true ||
+    entry.remoteTrashBoostedByKnownRemoteTrashable === true
+  );
+}
+
+function isCorpEndgameScorePathOpportunity(
+  entry: PlanConversionActionEntry,
+): boolean {
+  if (entry.side !== "corp") return false;
+  return (
+    (entry.scoreActionsAvailable ?? 0) > 0 ||
+    entry.finalAdvance === true ||
+    entry.protectedFinalAdvance === true ||
+    entry.protectBeforeAdvance === true ||
+    isCorpRemoteAdvancementProgress(entry) ||
+    (isCorpRemoteBuildAction(entry) && entry.targetCardType === "agenda")
+  );
+}
+
+function isCorpEndgameScorePathTaken(
+  entry: PlanConversionActionEntry,
+): boolean {
+  if (entry.side !== "corp") return false;
+  return (
+    entry.actionType === "score_agenda" ||
+    isCorpRemoteAdvancementProgress(entry) ||
+    entry.protectedFinalAdvance === true ||
+    entry.protectBeforeAdvance === true
+  );
+}
+
+function isEndgameKnownInfoOpportunity(
+  entry: PlanConversionActionEntry,
+): boolean {
+  return (
+    entry.side === "runner" &&
+    ((entry.hqKnownAgendaCount ?? 0) > 0 ||
+      (entry.knownRemoteAgendas ?? 0) > 0 ||
+      (entry.knownRemoteTrashableCards ?? 0) > 0 ||
+      (entry.knownUnrezzedIceFromExpose ?? 0) > 0 ||
+      entry.hqRunBoostedBecauseKnownAgenda === true ||
+      entry.hqRunBoostedByRndToHqAgenda === true ||
+      entry.remoteRunBoostedByKnownRemoteAgenda === true ||
+      entry.remoteTrashBoostedByKnownRemoteTrashable === true)
+  );
+}
+
+function isEndgameKnownInfoTaken(entry: PlanConversionActionEntry): boolean {
+  return (
+    entry.side === "runner" &&
+    (entry.actionType === "steal_agenda" ||
+      entry.actionType === "trash_accessed_card" ||
+      (entry.actionType === "start_run" &&
+        (entry.hqRunBoostedBecauseKnownAgenda === true ||
+          entry.hqRunBoostedByRndToHqAgenda === true ||
+          entry.remoteRunBoostedByKnownRemoteAgenda === true ||
+          entry.remoteTrashBoostedByKnownRemoteTrashable === true ||
+          (entry.knownUnrezzedIceFromExpose ?? 0) > 0)))
+  );
+}
+
+function isEndgameScoreOrStealPressureAction(
+  entry: PlanConversionActionEntry,
+): boolean {
+  return (
+    entry.actionType === "score_agenda" ||
+    entry.actionType === "steal_agenda" ||
+    entry.actionType === "trash_accessed_card" ||
+    isCorpRemoteAdvancementProgress(entry) ||
+    (entry.side === "runner" && entry.actionType === "start_run")
+  );
+}
+
+function isEndgameSetupOrEconomyAction(
+  entry: PlanConversionActionEntry,
+): boolean {
+  const planKind = planKindForConversion(entry);
+  return (
+    isRunnerSetupAction(entry) ||
+    isRunnerEconomyProgressAction(entry) ||
+    entry.actionType === "gain_credit" ||
+    entry.actionType === "draw_card" ||
+    planKind?.includes("economy") === true ||
+    planKind?.includes("setup") === true
+  );
+}
+
+function isEndgameProtectionAction(entry: PlanConversionActionEntry): boolean {
+  const planKind = planKindForConversion(entry);
+  return (
+    entry.side === "corp" &&
+    (entry.protectBeforeAdvance === true ||
+      entry.protectedFinalAdvance === true ||
+      (entry.actionType === "install_card" &&
+        entry.installPlacement === "ice") ||
+      entry.actionType === "rez_ice" ||
+      planKind?.includes("protect") === true)
+  );
+}
+
+function isEndgameLowValueRepeatAction(
+  entry: PlanConversionActionEntry,
+): boolean {
+  return (
+    entry.runnerRepeatedLowValueCentralRun === true ||
+    entry.runnerNoFreshCentralRunTaken === true ||
+    entry.runnerRepeatedCentralRunWithoutFreshValue === true ||
+    hasEvidenceFlag(entry, "runner_access_no_value_repeated:true") ||
+    hasEvidenceFlag(
+      entry,
+      "runner_central_success_followed_by_repeat_no_value:true",
+    ) ||
+    hasEvidenceFlag(
+      entry,
+      "runner_jack_out_repeated_same_server_without_new_info:true",
+    )
+  );
+}
+
+function isRunnerEndgameStallSymptom(
+  entry: PlanConversionActionEntry,
+): boolean {
+  return (
+    entry.runnerContestBlockedByCredits === true ||
+    entry.runnerRemoteContestBlockedByCredits === true ||
+    entry.runnerRemoteContestBlockedByPostRunReserve === true ||
+    entry.runnerRemoteContestBlockedByBreakerCoverage === true ||
+    entry.runnerRemoteContestBlockedByKnownIceCost === true ||
+    entry.runStartedAgainstKnownUnaffordablePath === true ||
+    entry.runnerSkippedAdvancedRemoteContest === true ||
+    entry.runnerCentralRunBurnedRemoteContestReserve === true ||
+    isEndgameLowValueRepeatAction(entry)
+  );
+}
+
+function isCorpEndgameStallSymptom(entry: PlanConversionActionEntry): boolean {
+  const planKind = planKindForConversion(entry);
+  return (
+    hasEvidenceFlag(entry, "corp_remote_build_followup_noop:true") ||
+    hasEvidenceFlag(entry, "corp_score_window_overridden_by_followup:true") ||
+    hasEvidenceFlag(entry, "outcome_followup_delayed_score_window:true") ||
+    (entry.side === "corp" &&
+      !isMeaningfulBoardProgress(entry) &&
+      (planKind?.includes("remote_build") === true ||
+        planKind?.includes("protect") === true ||
+        planKind?.includes("economy") === true))
+  );
+}
+
+function countSameStrategicPlanRepeatsWithoutProgress(
+  strategicWindow: PlanConversionActionEntry[],
+): number {
+  let repeats = 0;
+  const lastPlanBySide: Partial<Record<Side, string>> = {};
+  const progressSinceLastPlanBySide: Partial<Record<Side, boolean>> = {};
+  for (const entry of strategicWindow) {
+    const planKind = planKindForConversion(entry);
+    if (!planKind) continue;
+    if (
+      lastPlanBySide[entry.side] === planKind &&
+      progressSinceLastPlanBySide[entry.side] === false
+    ) {
+      repeats += 1;
+    }
+    lastPlanBySide[entry.side] = planKind;
+    progressSinceLastPlanBySide[entry.side] = isMeaningfulBoardProgress(entry);
+    if (isMeaningfulBoardProgress(entry)) {
+      progressSinceLastPlanBySide.runner = true;
+      progressSinceLastPlanBySide.corp = true;
+    }
+  }
+  return repeats;
 }
 
 function summarizeStrategicPlanConversionMetrics(
@@ -8191,6 +10837,452 @@ function summarizeStrategicPlanConversionMetrics(
     corpEconomyConvertedToRezInstallScore,
     corpProtectionConvertedToScoreSafety,
   };
+}
+
+function summarizeOutcomeFollowupMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "runnerCentralSuccessFollowedByValue"
+  | "runnerCentralSuccessFollowedByRepeatNoValue"
+  | "runnerCentralNoValuePivoted"
+  | "runnerRemoteSuccessFollowedByValue"
+  | "runnerRemoteEmptyOrLowValuePivoted"
+  | "runnerJackOutRepeatedSameServerWithoutNewInfo"
+  | "runnerJackOutFollowedByEconomyOrRig"
+  | "runnerAccessNoValueRepeated"
+  | "runnerAccessNoValuePivoted"
+  | "runnerEconomyConvertedAfterOutcome"
+  | "runnerRigConvertedAfterOutcome"
+  | "corpRemoteStealFollowupProtectOrPivot"
+  | "corpRemoteStealFollowupRepeatedUnsafeLine"
+  | "corpCentralStealFollowupProtectCentral"
+  | "corpRunnerFailedRunFollowupScoreOrAdvance"
+  | "corpRunnerSuccessfulRunFollowupProtect"
+  | "corpAdvanceFollowupScore"
+  | "corpAdvanceFollowupProtect"
+  | "corpRemoteBuildFollowupAdvanceProtectScore"
+  | "corpRemoteBuildFollowupNoop"
+  | "outcomeFollowupOpportunities"
+  | "outcomeFollowupTaken"
+  | "outcomeFollowupRate"
+  | "outcomeFollowupApplied"
+  | "outcomeFollowupSuppressedByProgressionCost"
+  | "outcomeFollowupSuppressedByBetterImmediateValue"
+  | "outcomeFollowupLedToProgressWithin3"
+  | "outcomeFollowupLedToNoProgressChain"
+  | "outcomeFollowupDelayedScoreWindow"
+  | "outcomeFollowupPreservedScoreWindow"
+  | "outcomeFollowupDelayedStealOrTrash"
+  | "outcomeFollowupPreservedContestReserve"
+  | "runnerOutcomePivotConverted"
+  | "runnerOutcomePivotStalled"
+  | "corpOutcomePivotConverted"
+  | "corpOutcomePivotStalled"
+  | "corpScoreWindowOverriddenByFollowup"
+  | "scoreNowProtectedFromFollowup"
+  | "stealTrashProtectedFromFollowup"
+  | "effectiveRunQuoteBlockedFollowupRun"
+  | "unbrokenRunEffectChangedBreakDecision"
+  | "futureEffectSubroutinesEncountered"
+  | "futureEffectSubroutinesWithRemainingIce"
+  | "futureEffectSubroutinesWithoutRemainingIce"
+  | "futureEffectBreaksTaken"
+  | "futureEffectBreaksSkippedNoRemainingIce"
+  | "futureEffectBreaksTakenWithoutRemainingIce"
+  | "pumpActionsBeforeFutureEffectBreak"
+  | "pumpActionsThatCouldNotLeadToBreak"
+  | "pumpActionsThatDestroyedAccessReserve"
+  | "breakSkippedToPreserveTrashReserve"
+  | "unbrokenRunEffectIgnoredBecauseNoRemainingIce"
+  | "unbrokenRunEffectAppliedToRemainingPath"
+  | "badOutcomeRepeatedWithoutNewInfo"
+  | "goodOutcomeConverted"
+  | "outcomePivotWithReason"
+  | "outcomeIgnored"
+> {
+  let runnerCentralSuccessFollowedByValue = 0;
+  let runnerCentralSuccessFollowedByRepeatNoValue = 0;
+  let runnerCentralNoValuePivoted = 0;
+  let runnerRemoteSuccessFollowedByValue = 0;
+  let runnerRemoteEmptyOrLowValuePivoted = 0;
+  let runnerJackOutRepeatedSameServerWithoutNewInfo = 0;
+  let runnerJackOutFollowedByEconomyOrRig = 0;
+  let runnerAccessNoValueRepeated = 0;
+  let runnerAccessNoValuePivoted = 0;
+  let runnerEconomyConvertedAfterOutcome = 0;
+  let runnerRigConvertedAfterOutcome = 0;
+  let corpRemoteStealFollowupProtectOrPivot = 0;
+  let corpRemoteStealFollowupRepeatedUnsafeLine = 0;
+  let corpCentralStealFollowupProtectCentral = 0;
+  let corpRunnerFailedRunFollowupScoreOrAdvance = 0;
+  let corpRunnerSuccessfulRunFollowupProtect = 0;
+  let corpAdvanceFollowupScore = 0;
+  let corpAdvanceFollowupProtect = 0;
+  let corpRemoteBuildFollowupAdvanceProtectScore = 0;
+  let corpRemoteBuildFollowupNoop = 0;
+  let outcomeFollowupOpportunities = 0;
+  let outcomeFollowupTaken = 0;
+  let outcomeFollowupApplied = 0;
+  let outcomeFollowupSuppressedByProgressionCost = 0;
+  let outcomeFollowupSuppressedByBetterImmediateValue = 0;
+  let outcomeFollowupLedToProgressWithin3 = 0;
+  let outcomeFollowupLedToNoProgressChain = 0;
+  let outcomeFollowupDelayedScoreWindow = 0;
+  let outcomeFollowupPreservedScoreWindow = 0;
+  let outcomeFollowupDelayedStealOrTrash = 0;
+  let outcomeFollowupPreservedContestReserve = 0;
+  let runnerOutcomePivotConverted = 0;
+  let runnerOutcomePivotStalled = 0;
+  let corpOutcomePivotConverted = 0;
+  let corpOutcomePivotStalled = 0;
+  let corpScoreWindowOverriddenByFollowup = 0;
+  let scoreNowProtectedFromFollowup = 0;
+  let stealTrashProtectedFromFollowup = 0;
+  let effectiveRunQuoteBlockedFollowupRun = 0;
+  let unbrokenRunEffectChangedBreakDecision = 0;
+  let futureEffectSubroutinesEncountered = 0;
+  let futureEffectSubroutinesWithRemainingIce = 0;
+  let futureEffectSubroutinesWithoutRemainingIce = 0;
+  let futureEffectBreaksTaken = 0;
+  let futureEffectBreaksSkippedNoRemainingIce = 0;
+  let futureEffectBreaksTakenWithoutRemainingIce = 0;
+  let pumpActionsBeforeFutureEffectBreak = 0;
+  let pumpActionsThatCouldNotLeadToBreak = 0;
+  let pumpActionsThatDestroyedAccessReserve = 0;
+  let breakSkippedToPreserveTrashReserve = 0;
+  let unbrokenRunEffectIgnoredBecauseNoRemainingIce = 0;
+  let unbrokenRunEffectAppliedToRemainingPath = 0;
+  let badOutcomeRepeatedWithoutNewInfo = 0;
+  let goodOutcomeConverted = 0;
+  let outcomePivotWithReason = 0;
+  let outcomeIgnored = 0;
+
+  for (const summary of summaries) {
+    for (const [index, entry] of summary.actionSequence.entries()) {
+      if (hasEvidenceFlag(entry, "outcome_followup_opportunity:true"))
+        outcomeFollowupOpportunities += 1;
+      if (hasEvidenceFlag(entry, "outcome_followup_taken:true"))
+        outcomeFollowupTaken += 1;
+      if (hasEvidenceFlag(entry, "outcome_followup_applied:true")) {
+        outcomeFollowupApplied += 1;
+        const progressedWithin3 = hasMeaningfulProgressWithin(
+          summary.actionSequence,
+          index,
+          3,
+        );
+        if (progressedWithin3) {
+          outcomeFollowupLedToProgressWithin3 += 1;
+          if (entry.side === "runner") runnerOutcomePivotConverted += 1;
+          if (entry.side === "corp") corpOutcomePivotConverted += 1;
+        } else {
+          outcomeFollowupLedToNoProgressChain += 1;
+          if (entry.side === "runner") runnerOutcomePivotStalled += 1;
+          if (entry.side === "corp") corpOutcomePivotStalled += 1;
+        }
+      }
+      if (
+        hasEvidenceFlag(
+          entry,
+          "outcome_followup_suppressed_by_progression_cost:true",
+        )
+      )
+        outcomeFollowupSuppressedByProgressionCost += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "outcome_followup_suppressed_by_better_immediate_value:true",
+        )
+      )
+        outcomeFollowupSuppressedByBetterImmediateValue += 1;
+      if (hasEvidenceFlag(entry, "outcome_followup_delayed_score_window:true"))
+        outcomeFollowupDelayedScoreWindow += 1;
+      if (
+        hasEvidenceFlag(entry, "outcome_followup_preserved_score_window:true")
+      )
+        outcomeFollowupPreservedScoreWindow += 1;
+      if (
+        hasEvidenceFlag(entry, "outcome_followup_delayed_steal_or_trash:true")
+      )
+        outcomeFollowupDelayedStealOrTrash += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "outcome_followup_preserved_contest_reserve:true",
+        )
+      )
+        outcomeFollowupPreservedContestReserve += 1;
+      if (
+        hasEvidenceFlag(entry, "corp_score_window_overridden_by_followup:true")
+      )
+        corpScoreWindowOverriddenByFollowup += 1;
+      if (hasEvidenceFlag(entry, "score_now_protected_from_followup:true"))
+        scoreNowProtectedFromFollowup += 1;
+      if (hasEvidenceFlag(entry, "steal_trash_protected_from_followup:true"))
+        stealTrashProtectedFromFollowup += 1;
+      if (
+        hasEvidenceFlag(entry, "effective_run_quote_blocked_followup_run:true")
+      )
+        effectiveRunQuoteBlockedFollowupRun += 1;
+      if (hasEvidenceFlag(entry, "run_remainder_effect_must_break:true"))
+        unbrokenRunEffectChangedBreakDecision += 1;
+      if (hasEvidenceFlag(entry, "run_remainder_subroutine_effect:true")) {
+        futureEffectSubroutinesEncountered += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "unbroken_run_effect_applied_to_remaining_path:true",
+          )
+        ) {
+          futureEffectSubroutinesWithRemainingIce += 1;
+          unbrokenRunEffectAppliedToRemainingPath += 1;
+        }
+        if (
+          hasEvidenceFlag(
+            entry,
+            "unbroken_run_effect_ignored_because_no_remaining_ice:true",
+          )
+        ) {
+          futureEffectSubroutinesWithoutRemainingIce += 1;
+          unbrokenRunEffectIgnoredBecauseNoRemainingIce += 1;
+        }
+      }
+      if (
+        entry.actionType === "break_subroutine" &&
+        hasEvidenceFlag(entry, "run_remainder_subroutine_effect:true")
+      )
+        futureEffectBreaksTaken += 1;
+      if (
+        entry.actionType === "continue_run" &&
+        hasEvidenceFlag(
+          entry,
+          "unbroken_run_effect_ignored_because_no_remaining_ice:true",
+        )
+      )
+        futureEffectBreaksSkippedNoRemainingIce += 1;
+      if (
+        entry.actionType === "break_subroutine" &&
+        hasEvidenceFlag(
+          entry,
+          "unbroken_run_effect_ignored_because_no_remaining_ice:true",
+        )
+      )
+        futureEffectBreaksTakenWithoutRemainingIce += 1;
+      if (
+        entry.actionType === "pump_breaker" &&
+        hasEvidenceFlag(entry, "run_remainder_subroutine_effect:true")
+      )
+        pumpActionsBeforeFutureEffectBreak += 1;
+      if (hasEvidenceFlag(entry, "pump_cannot_lead_to_useful_break:true"))
+        pumpActionsThatCouldNotLeadToBreak += 1;
+      if (hasEvidenceFlag(entry, "pump_would_destroy_access_reserve:true"))
+        pumpActionsThatDestroyedAccessReserve += 1;
+      if (hasEvidenceFlag(entry, "break_skipped_to_preserve_trash_reserve:true"))
+        breakSkippedToPreserveTrashReserve += 1;
+      if (hasEvidenceFlag(entry, "bad_outcome_repeated_without_new_info:true"))
+        badOutcomeRepeatedWithoutNewInfo += 1;
+      if (hasEvidenceFlag(entry, "good_outcome_converted:true"))
+        goodOutcomeConverted += 1;
+      if (hasEvidenceFlag(entry, "outcome_pivot_with_reason:true"))
+        outcomePivotWithReason += 1;
+      if (hasEvidenceFlag(entry, "outcome_ignored:true")) outcomeIgnored += 1;
+      if (
+        hasEvidenceFlag(entry, "runner_central_success_followed_by_value:true")
+      )
+        runnerCentralSuccessFollowedByValue += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "runner_central_success_followed_by_repeat_no_value:true",
+        )
+      )
+        runnerCentralSuccessFollowedByRepeatNoValue += 1;
+      if (hasEvidenceFlag(entry, "runner_central_no_value_pivoted:true"))
+        runnerCentralNoValuePivoted += 1;
+      if (
+        hasEvidenceFlag(entry, "runner_remote_success_followed_by_value:true")
+      )
+        runnerRemoteSuccessFollowedByValue += 1;
+      if (
+        hasEvidenceFlag(entry, "runner_remote_empty_or_low_value_pivoted:true")
+      )
+        runnerRemoteEmptyOrLowValuePivoted += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "runner_jack_out_repeated_same_server_without_new_info:true",
+        )
+      )
+        runnerJackOutRepeatedSameServerWithoutNewInfo += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "runner_jack_out_followed_by_economy_or_rig:true",
+        )
+      )
+        runnerJackOutFollowedByEconomyOrRig += 1;
+      if (hasEvidenceFlag(entry, "runner_access_no_value_repeated:true"))
+        runnerAccessNoValueRepeated += 1;
+      if (hasEvidenceFlag(entry, "runner_access_no_value_pivoted:true"))
+        runnerAccessNoValuePivoted += 1;
+      if (hasEvidenceFlag(entry, "runner_economy_converted_after_outcome:true"))
+        runnerEconomyConvertedAfterOutcome += 1;
+      if (hasEvidenceFlag(entry, "runner_rig_converted_after_outcome:true"))
+        runnerRigConvertedAfterOutcome += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_remote_steal_followup_protect_or_pivot:true",
+        )
+      )
+        corpRemoteStealFollowupProtectOrPivot += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_remote_steal_followup_repeated_unsafe_line:true",
+        )
+      )
+        corpRemoteStealFollowupRepeatedUnsafeLine += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_central_steal_followup_protect_central:true",
+        )
+      )
+        corpCentralStealFollowupProtectCentral += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_runner_failed_run_followup_score_or_advance:true",
+        )
+      )
+        corpRunnerFailedRunFollowupScoreOrAdvance += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_runner_successful_run_followup_protect:true",
+        )
+      )
+        corpRunnerSuccessfulRunFollowupProtect += 1;
+      if (hasEvidenceFlag(entry, "corp_advance_followup_score:true"))
+        corpAdvanceFollowupScore += 1;
+      if (hasEvidenceFlag(entry, "corp_advance_followup_protect:true"))
+        corpAdvanceFollowupProtect += 1;
+      if (
+        hasEvidenceFlag(
+          entry,
+          "corp_remote_build_followup_advance_protect_score:true",
+        )
+      )
+        corpRemoteBuildFollowupAdvanceProtectScore += 1;
+      if (hasEvidenceFlag(entry, "corp_remote_build_followup_noop:true"))
+        corpRemoteBuildFollowupNoop += 1;
+    }
+  }
+
+  return {
+    runnerCentralSuccessFollowedByValue,
+    runnerCentralSuccessFollowedByRepeatNoValue,
+    runnerCentralNoValuePivoted,
+    runnerRemoteSuccessFollowedByValue,
+    runnerRemoteEmptyOrLowValuePivoted,
+    runnerJackOutRepeatedSameServerWithoutNewInfo,
+    runnerJackOutFollowedByEconomyOrRig,
+    runnerAccessNoValueRepeated,
+    runnerAccessNoValuePivoted,
+    runnerEconomyConvertedAfterOutcome,
+    runnerRigConvertedAfterOutcome,
+    corpRemoteStealFollowupProtectOrPivot,
+    corpRemoteStealFollowupRepeatedUnsafeLine,
+    corpCentralStealFollowupProtectCentral,
+    corpRunnerFailedRunFollowupScoreOrAdvance,
+    corpRunnerSuccessfulRunFollowupProtect,
+    corpAdvanceFollowupScore,
+    corpAdvanceFollowupProtect,
+    corpRemoteBuildFollowupAdvanceProtectScore,
+    corpRemoteBuildFollowupNoop,
+    outcomeFollowupOpportunities,
+    outcomeFollowupTaken,
+    outcomeFollowupRate:
+      outcomeFollowupOpportunities > 0
+        ? round(outcomeFollowupTaken / outcomeFollowupOpportunities)
+        : 0,
+    outcomeFollowupApplied,
+    outcomeFollowupSuppressedByProgressionCost,
+    outcomeFollowupSuppressedByBetterImmediateValue,
+    outcomeFollowupLedToProgressWithin3,
+    outcomeFollowupLedToNoProgressChain,
+    outcomeFollowupDelayedScoreWindow,
+    outcomeFollowupPreservedScoreWindow,
+    outcomeFollowupDelayedStealOrTrash,
+    outcomeFollowupPreservedContestReserve,
+    runnerOutcomePivotConverted,
+    runnerOutcomePivotStalled,
+    corpOutcomePivotConverted,
+    corpOutcomePivotStalled,
+    corpScoreWindowOverriddenByFollowup,
+    scoreNowProtectedFromFollowup,
+    stealTrashProtectedFromFollowup,
+    effectiveRunQuoteBlockedFollowupRun,
+    unbrokenRunEffectChangedBreakDecision,
+    futureEffectSubroutinesEncountered,
+    futureEffectSubroutinesWithRemainingIce,
+    futureEffectSubroutinesWithoutRemainingIce,
+    futureEffectBreaksTaken,
+    futureEffectBreaksSkippedNoRemainingIce,
+    futureEffectBreaksTakenWithoutRemainingIce,
+    pumpActionsBeforeFutureEffectBreak,
+    pumpActionsThatCouldNotLeadToBreak,
+    pumpActionsThatDestroyedAccessReserve,
+    breakSkippedToPreserveTrashReserve,
+    unbrokenRunEffectIgnoredBecauseNoRemainingIce,
+    unbrokenRunEffectAppliedToRemainingPath,
+    badOutcomeRepeatedWithoutNewInfo,
+    goodOutcomeConverted,
+    outcomePivotWithReason,
+    outcomeIgnored,
+  };
+}
+
+function countRunnerCoverageConversions(
+  sequence: PlanConversionActionEntry[],
+  predicate: (entry: PlanConversionActionEntry) => boolean,
+): number {
+  return sequence.filter((entry, index) => {
+    if (entry.side !== "runner" || !predicate(entry)) return false;
+    return nextEntries(sequence, index, 6).some(
+      (later) =>
+        later.side === "runner" &&
+        later.actionType === "start_run" &&
+        (isMeaningfulBoardProgress(later) ||
+          later.runnerPhaseExitToPressure === true ||
+          later.runnerRemoteRunAgainstAdvancedRemote === true ||
+          later.runnerCentralCloseoutRunTaken === true),
+    );
+  }).length;
+}
+
+function countRunnerPressureWithinOwnActions(
+  sequence: PlanConversionActionEntry[],
+  predicate: (entry: PlanConversionActionEntry) => boolean,
+  ownActionWindow: number,
+): number {
+  return sequence.filter((entry, index) => {
+    if (entry.side !== "runner" || !predicate(entry)) return false;
+    let ownActions = 0;
+    for (
+      let candidateIndex = index + 1;
+      candidateIndex < sequence.length;
+      candidateIndex += 1
+    ) {
+      const candidate = sequence[candidateIndex]!;
+      if (candidate.side !== "runner") continue;
+      ownActions += 1;
+      if (candidate.runnerPressureTakenAfterCoverageReady === true) return true;
+      if (ownActions >= ownActionWindow) return false;
+    }
+    return false;
+  }).length;
 }
 
 function hasMeaningfulProgressWithin(
@@ -9262,6 +12354,549 @@ function selectedChoiceTargetCardIds(
     .filter(Boolean);
 }
 
+type RunnerCoveragePressureForMetrics = {
+  blockedServers: Set<string>;
+  knownIceBlockedServers: Set<string>;
+  missingBreakerRoles: Set<string>;
+  matchingInstallActionIds: Set<string>;
+  searchActionIds: Set<string>;
+  recoveryActionIds: Set<string>;
+  heapMatchingBreakerCount: number;
+};
+
+type RunnerPressureReadyTargetForMetrics = {
+  serverId: string;
+  targetType: "hq" | "rnd" | "archives" | "remote";
+};
+
+type RunnerPressureReadyForMetrics = {
+  broadReady: boolean;
+  readyTargets: RunnerPressureReadyTargetForMetrics[];
+  falsePositive: boolean;
+  blockers: Set<
+    | "insufficient_credits"
+    | "missing_post_run_reserve"
+    | "stale_central"
+    | "remote_too_dangerous"
+    | "no_valuable_target"
+  >;
+};
+
+function runnerBreakerCoverageDiagnosticsForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  targetServerId: string | undefined,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  if (input.side !== "runner" || action.side !== "runner") return {};
+  const pressure = assessRunnerCoveragePressureForMetrics(input);
+  const pressureReady = assessRunnerPressureReadyForMetrics(input);
+  const pressureReadyTargetTypes = new Set(
+    pressureReady.readyTargets.map((target) => target.targetType),
+  );
+  const selectedPressureReadyTarget =
+    action.type === "start_run" &&
+    targetServerId !== undefined &&
+    pressureReady.readyTargets.some(
+      (target) => target.serverId === targetServerId,
+    );
+  const setupContinuation =
+    action.type === "draw_card" ||
+    action.type === "gain_credit" ||
+    isRunnerEconomyAction(input, action) ||
+    runnerCoverageSearchActionForMetrics(input, action) ||
+    (action.type === "install_card" && isRunnerRigInstallAction(input, action));
+  const pressureReadyFlags = {
+    ...(pressureReady.broadReady ? { runnerPressureReadyWindow: true } : {}),
+    ...(pressureReady.readyTargets.length > 0
+      ? { runnerPressureReadyTrue: true }
+      : {}),
+    ...(pressureReady.falsePositive
+      ? { runnerPressureReadyFalsePositive: true }
+      : {}),
+    ...(pressureReadyTargetTypes.has("hq")
+      ? { runnerPressureReadyByTargetHq: true }
+      : {}),
+    ...(pressureReadyTargetTypes.has("rnd")
+      ? { runnerPressureReadyByTargetRnd: true }
+      : {}),
+    ...(pressureReadyTargetTypes.has("archives")
+      ? { runnerPressureReadyByTargetArchives: true }
+      : {}),
+    ...(pressureReadyTargetTypes.has("remote")
+      ? { runnerPressureReadyByTargetRemote: true }
+      : {}),
+    ...(pressureReady.readyTargets.length > 0 && setupContinuation
+      ? {
+          runnerSetupContinuedAfterPressureReady: true,
+          runnerSetupLoopAfterPressureReady: true,
+        }
+      : {}),
+    ...(selectedPressureReadyTarget
+      ? { runnerPressureTakenAfterCoverageReady: true }
+      : {}),
+    ...(pressureReady.readyTargets.length > 0 && !selectedPressureReadyTarget
+      ? {
+          runnerPressureSkippedAfterCoverageReady: true,
+          runnerPressureSkippedReason: setupContinuation
+            ? ("better_immediate_action" as const)
+            : ("no_valuable_target" as const),
+        }
+      : {}),
+    ...(pressureReady.blockers.has("insufficient_credits")
+      ? { runnerPhaseExitBlockedByCost: true }
+      : {}),
+    ...(pressureReady.blockers.has("missing_post_run_reserve")
+      ? { runnerPhaseExitBlockedByCost: true }
+      : {}),
+    ...(pressure.missingBreakerRoles.size > 0
+      ? { runnerPhaseExitBlockedByCoverage: true }
+      : {}),
+    ...(pressureReady.falsePositive ||
+    pressureReady.blockers.has("no_valuable_target")
+      ? { runnerPhaseExitBlockedByTargetValue: true }
+      : {}),
+  };
+  if (pressure.missingBreakerRoles.size === 0) {
+    const pressureRun =
+      action.type === "start_run" &&
+      targetServerId !== undefined &&
+      selectedPressureReadyTarget;
+    return {
+      ...pressureReadyFlags,
+      ...(pressureReady.readyTargets.length > 0 && setupContinuation
+        ? {
+            runnerCoverageReadyButNoPressure: true,
+            runnerSetupContinuedAfterCoverageReady: true,
+          }
+        : {}),
+      ...(pressureRun ? { runnerPhaseExitToPressure: true } : {}),
+    };
+  }
+  const searchAvailable = pressure.searchActionIds.size > 0;
+  const searchUsed =
+    pressure.searchActionIds.has(action.actionId) ||
+    pressure.recoveryActionIds.has(action.actionId);
+  const installable = pressure.matchingInstallActionIds.size > 0;
+  const breakerInstall =
+    action.type === "install_card" &&
+    pressure.matchingInstallActionIds.has(action.actionId);
+  const pathBlocked = pressure.blockedServers.size > 0;
+  const runTaken =
+    action.type === "start_run" &&
+    targetServerId !== undefined &&
+    pressure.blockedServers.has(targetServerId);
+  const setupAction =
+    action.type === "draw_card" ||
+    action.type === "gain_credit" ||
+    isRunnerEconomyAction(input, action) ||
+    (action.type === "install_card" && isRunnerRigInstallAction(input, action));
+  const pressureRun =
+    action.type === "start_run" &&
+    targetServerId !== undefined &&
+    selectedPressureReadyTarget;
+
+  return {
+    ...pressureReadyFlags,
+    runnerMissingBreakerCoverageByType: pressure.missingBreakerRoles.size,
+    runnerVisibleIceBlockingByType: pressure.blockedServers.size,
+    runnerKnownIceBlockingByType: pressure.knownIceBlockedServers.size,
+    ...(pathBlocked ? { runnerPathBlockedByMissingCoverage: true } : {}),
+    ...(installable ? { runnerInstallableBreakerForBlockedPath: true } : {}),
+    ...(searchAvailable
+      ? { runnerSearchCardAvailableForMissingBreaker: true }
+      : {}),
+    ...(searchUsed ? { runnerSearchCardUsedForMissingBreaker: true } : {}),
+    ...(searchAvailable && !searchUsed
+      ? { runnerSearchCardAvailableButUnused: true }
+      : {}),
+    ...(searchUsed && pressure.recoveryActionIds.has(action.actionId)
+      ? { runnerTutorConvertedToBreakerInstall: true }
+      : {}),
+    ...(breakerInstall ? { runnerCoverageImproved: true } : {}),
+    ...(breakerInstall ? { runnerTutorConvertedToBreakerInstall: true } : {}),
+    ...(runTaken && pathBlocked
+      ? { runnerProbeRevealedIceButDidNotReact: true }
+      : {}),
+    ...(searchUsed && pathBlocked
+      ? { runnerProbeRevealedIceThenSearchedBreaker: true }
+      : {}),
+    ...(setupAction && pathBlocked
+      ? { runnerSetupBreakerSearchStalled: true }
+      : {}),
+    ...(isRunnerEconomyAction(input, action) && pathBlocked
+      ? { runnerSetupEconomyStalled: true }
+      : {}),
+    ...(pressureRun ? { runnerPhaseExitToPressure: true } : {}),
+  };
+}
+
+function runnerHasReadyPressureRunForMetrics(input: AiDecisionInput): boolean {
+  return input.legalActions.some((action) => {
+    if (
+      action.type !== "start_run" ||
+      typeof action.payload?.serverId !== "string"
+    )
+      return false;
+    const serverId = action.payload.serverId;
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
+    if (!server || !runnerStrategicBreakerTargetForMetrics(server))
+      return false;
+    const assessment = assessKnownRezzedIcePath(
+      server.ice,
+      input.playerView.own.rig ?? [],
+      input.playerView.own.credits,
+      server.root,
+    );
+    return !assessment.blocked;
+  });
+}
+
+function assessRunnerPressureReadyForMetrics(
+  input: AiDecisionInput,
+): RunnerPressureReadyForMetrics {
+  const readyTargets: RunnerPressureReadyTargetForMetrics[] = [];
+  const blockers = new Set<
+    | "insufficient_credits"
+    | "missing_post_run_reserve"
+    | "stale_central"
+    | "remote_too_dangerous"
+    | "no_valuable_target"
+  >();
+  let broadReady = false;
+  const seen = new Set<string>();
+  for (const action of input.legalActions) {
+    if (
+      action.type !== "start_run" ||
+      typeof action.payload?.serverId !== "string"
+    )
+      continue;
+    const serverId = action.payload.serverId;
+    if (seen.has(serverId)) continue;
+    seen.add(serverId);
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
+    if (!server || !runnerStrategicBreakerTargetForMetrics(server)) continue;
+    const assessment = assessKnownRezzedIcePath(
+      server.ice,
+      input.playerView.own.rig ?? [],
+      input.playerView.own.credits,
+      server.root,
+    );
+    const visibleBreakCost = assessment.visibleBreakCost ?? 0;
+    const creditsAfterPath = input.playerView.own.credits - visibleBreakCost;
+    if (!assessment.blocked) broadReady = true;
+    if (assessment.blocked) {
+      blockers.add(
+        visibleBreakCost > input.playerView.own.credits
+          ? "insufficient_credits"
+          : "no_valuable_target",
+      );
+      continue;
+    }
+    if (serverId.startsWith("remote_")) {
+      const remoteReady = runnerRemotePressureReadyForMetrics(
+        input,
+        server,
+        creditsAfterPath,
+      );
+      if (remoteReady) readyTargets.push({ serverId, targetType: "remote" });
+      else blockers.add("no_valuable_target");
+      continue;
+    }
+    const central = centralServerId(serverId);
+    if (!central) continue;
+    if (creditsAfterPath < 1) {
+      blockers.add("missing_post_run_reserve");
+      continue;
+    }
+    if (!centralPressureTargetIsGoodForMetrics(input, central)) {
+      blockers.add("stale_central");
+      continue;
+    }
+    readyTargets.push({
+      serverId,
+      targetType: central === "rd" ? "rnd" : central,
+    });
+  }
+  return {
+    broadReady,
+    readyTargets,
+    falsePositive: broadReady && readyTargets.length === 0,
+    blockers,
+  };
+}
+
+function runnerRemotePressureReadyForMetrics(
+  input: AiDecisionInput,
+  server: AiDecisionInput["playerView"]["servers"][number],
+  creditsAfterPath: number,
+): boolean {
+  const hasVisibleScoreThreat = server.root.some(
+    (card) =>
+      (card.advancementCounters ?? 0) > 0 ||
+      (card.known && card.type === "agenda"),
+  );
+  const knownMemory =
+    reconstructBeliefState(input).runnerOpponentModel?.knownPositionMemory ??
+    [];
+  const knownRemoteEntries = knownMemory.filter(
+    (entry) =>
+      entry.zone === server.id && entry.positionKey.startsWith("root:"),
+  );
+  const knownAgenda = knownRemoteEntries.some(
+    (entry) => definitionTypeForMetrics(entry.definitionId) === "agenda",
+  );
+  const relevantTrash = server.root.some((card) => {
+    if (!card.known) return false;
+    const trashCost = remoteRootTrashCostForMetrics(card);
+    if (trashCost === undefined || creditsAfterPath < trashCost + 1)
+      return false;
+    if (!card.definitionId) return false;
+    const type = definitionTypeForMetrics(card.definitionId);
+    return type === "asset" || type === "upgrade";
+  });
+  return (
+    creditsAfterPath >= (hasVisibleScoreThreat || knownAgenda ? 1 : 2) &&
+    (hasVisibleScoreThreat || knownAgenda || relevantTrash)
+  );
+}
+
+function assessRunnerCoveragePressureForMetrics(
+  input: AiDecisionInput,
+): RunnerCoveragePressureForMetrics {
+  const rigCards = input.playerView.own.rig ?? [];
+  const gripCards = input.playerView.own.gripOrHq.filter(
+    (card) => card.known && card.definitionId,
+  );
+  const heapCards = input.playerView.own.heapOrArchives.filter(
+    (card) => card.known && card.definitionId,
+  );
+  const missingIceDefinitionIds = new Set<string>();
+  const blockedServers = new Set<string>();
+  const knownIceBlockedServers = new Set<string>();
+  for (const server of input.playerView.servers) {
+    if (!runnerStrategicBreakerTargetForMetrics(server)) continue;
+    const assessment = assessKnownRezzedIcePath(
+      server.ice,
+      rigCards,
+      input.playerView.own.credits,
+      server.root,
+    );
+    const rezzedMissing = assessment.blocked
+      ? server.ice
+          .filter(
+            (ice) =>
+              ice.known &&
+              ice.rezzed === true &&
+              ice.definitionId &&
+              runnerVisibleIceCreatesCoverageNeedForMetrics(ice),
+          )
+          .map((ice) => ice.definitionId!)
+          .filter(
+            (definitionId) =>
+              !rigCards.some(
+                (card) =>
+                  card.definitionId &&
+                  canBreakerDefinitionBreakIce(card.definitionId, definitionId),
+              ),
+          )
+      : [];
+    const knownUnrezzedMissing = server.ice
+      .filter(
+        (ice) =>
+          ice.known &&
+          ice.rezzed !== true &&
+          ice.definitionId &&
+          runnerVisibleIceCreatesCoverageNeedForMetrics(ice),
+      )
+      .map((ice) => ice.definitionId!)
+      .filter(
+        (definitionId) =>
+          !rigCards.some(
+            (card) =>
+              card.definitionId &&
+              canBreakerDefinitionBreakIce(card.definitionId, definitionId),
+          ),
+      );
+    if (rezzedMissing.length > 0) blockedServers.add(server.id);
+    if (knownUnrezzedMissing.length > 0) knownIceBlockedServers.add(server.id);
+    for (const definitionId of [...rezzedMissing, ...knownUnrezzedMissing])
+      missingIceDefinitionIds.add(definitionId);
+  }
+  const missingBreakerRoles = new Set(
+    [...missingIceDefinitionIds].flatMap(runnerMissingBreakerRolesForMetrics),
+  );
+  const matchingGripIds = new Set(
+    gripCards
+      .filter((card) =>
+        [...missingIceDefinitionIds].some((iceDefinitionId) =>
+          canBreakerDefinitionBreakIce(card.definitionId!, iceDefinitionId),
+        ),
+      )
+      .map((card) => card.instanceId),
+  );
+  const heapMatchingBreakerCount = heapCards.filter((card) =>
+    [...missingIceDefinitionIds].some((iceDefinitionId) =>
+      canBreakerDefinitionBreakIce(card.definitionId!, iceDefinitionId),
+    ),
+  ).length;
+  const matchingInstallActionIds = new Set(
+    input.legalActions
+      .filter(
+        (candidate) =>
+          candidate.type === "install_card" &&
+          typeof candidate.source === "string" &&
+          matchingGripIds.has(candidate.source),
+      )
+      .map((candidate) => candidate.actionId),
+  );
+  const searchActionIds = new Set(
+    input.legalActions
+      .filter((candidate) =>
+        runnerCoverageSearchActionForMetrics(input, candidate),
+      )
+      .map((candidate) => candidate.actionId),
+  );
+  const recoveryActionIds = new Set(
+    input.legalActions
+      .filter((candidate) =>
+        runnerCoverageRecoveryActionForMetrics(input, candidate),
+      )
+      .filter(() => heapMatchingBreakerCount > 0)
+      .map((candidate) => candidate.actionId),
+  );
+  return {
+    blockedServers,
+    knownIceBlockedServers,
+    missingBreakerRoles,
+    matchingInstallActionIds,
+    searchActionIds,
+    recoveryActionIds,
+    heapMatchingBreakerCount,
+  };
+}
+
+function runnerStrategicBreakerTargetForMetrics(
+  server: AiDecisionInput["playerView"]["servers"][number],
+): boolean {
+  if (server.id === "rd" || server.id === "hq") return true;
+  return isRemoteServerTarget(server.id) && server.root.length > 0;
+}
+
+function runnerVisibleIceCreatesCoverageNeedForMetrics(
+  ice: Pick<VisibleCard, "definitionId" | "effectiveRunQuote">,
+): boolean {
+  if (!ice.definitionId) return false;
+  if (iceHasEndTheRun(ice.definitionId)) return true;
+  return (
+    ice.effectiveRunQuote?.subroutines.some((subroutine) => {
+      const effect = subroutine.unbrokenRunEffect;
+      return (
+        effect?.addsFutureEndTheRunSubroutines !== undefined ||
+        effect?.increasesFutureBreakCostPerSubroutine !== undefined ||
+        effect?.preventsFutureBreaking === true ||
+        effect?.causesDamageOrProgramTrash === true ||
+        effect?.createsRunLockOrActionTax !== undefined
+      );
+    }) === true
+  );
+}
+
+function runnerMissingBreakerRolesForMetrics(definitionId: string): string[] {
+  const definition =
+    RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId];
+  const subtypes = definition?.subtypes ?? [];
+  const roles = new Set<string>();
+  if (
+    subtypes.some((subtype) => runnerSubtypeKeyForMetrics(subtype) === "wall")
+  )
+    roles.add("breaker_fracter");
+  if (
+    subtypes.some(
+      (subtype) => runnerSubtypeKeyForMetrics(subtype) === "code_gate",
+    )
+  )
+    roles.add("breaker_decoder");
+  if (
+    subtypes.some((subtype) => runnerSubtypeKeyForMetrics(subtype) === "sentry")
+  )
+    roles.add("breaker_killer");
+  if (roles.size === 0) roles.add("breaker_generic");
+  return [...roles].sort();
+}
+
+function runnerSubtypeKeyForMetrics(subtype: string): string {
+  return subtype
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
+function runnerCoverageSearchActionForMetrics(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.side !== "runner") return false;
+  if (
+    action.type !== "play_event" &&
+    action.type !== "resolve_choice" &&
+    action.type !== "trigger_ability" &&
+    action.type !== "activated_card_ability"
+  )
+    return false;
+  const roles = rolesForAction(input, action);
+  const sourceCard =
+    typeof action.source === "string"
+      ? findVisibleCard(input, action.source)
+      : undefined;
+  const sourceDefinition = sourceCard?.definitionId
+    ? (RUNTIME_CARDS[sourceCard.definitionId] ??
+      DEMO_CARDS_BY_ID[sourceCard.definitionId])
+    : undefined;
+  const mechanics =
+    sourceDefinition &&
+    "mechanics" in sourceDefinition &&
+    Array.isArray(sourceDefinition.mechanics)
+      ? sourceDefinition.mechanics
+      : [];
+  return (
+    roles.some(
+      (role) =>
+        role.includes("search") ||
+        role.includes("tutor") ||
+        role === "program_search" ||
+        role === "stack_search" ||
+        role === "search_stack" ||
+        role === "search_trash" ||
+        role === "setup_search" ||
+        role.includes("recovery") ||
+        role.includes("trash_recovery"),
+    ) ||
+    mechanics.some(
+      (mechanic: string) =>
+        mechanic.includes("search") ||
+        mechanic.includes("tutor") ||
+        mechanic.includes("hidden_zone_tool"),
+    )
+  );
+}
+
+function runnerCoverageRecoveryActionForMetrics(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const roles = rolesForAction(input, action);
+  return roles.some(
+    (role) =>
+      role.includes("recovery") ||
+      role.includes("trash_recovery") ||
+      role === "search_trash",
+  );
+}
+
 function runnerHandUseDiagnosticsForSimulationAction(
   input: AiDecisionInput,
   decision: AiDecision,
@@ -9375,6 +13010,71 @@ function runnerHandUseDiagnosticsForSimulationAction(
       ? { runnerRemoteTrashTargetType: remoteTrash.targetType }
       : {}),
     ...(remoteTrash.role ? { runnerRemoteTrashRole: remoteTrash.role } : {}),
+    ...(remoteTrash.trashable && action.type === "decline_trash"
+      ? { runnerRemoteTrashDeclined: true }
+      : {}),
+    ...(remoteTrash.trashable
+      ? {
+          runnerRemoteTrashCost: remoteTrash.trashCost,
+          runnerRemoteTrashCostBucket: remoteTrashCostBucket(
+            remoteTrash.trashCost,
+          ),
+        }
+      : {}),
+    ...(remoteTrash.expensive
+      ? { runnerExpensiveRemoteTrashOpportunity: true }
+      : {}),
+    ...(remoteTrash.expensive && remoteTrashTaken
+      ? { runnerExpensiveRemoteTrashTaken: true }
+      : {}),
+    ...(remoteTrash.expensive &&
+    remoteTrash.trashable &&
+    action.type === "decline_trash"
+      ? { runnerExpensiveRemoteTrashDeclined: true }
+      : {}),
+    ...(remoteTrash.highImpact && remoteTrashTaken
+      ? { runnerHighImpactRemoteTrashTaken: true }
+      : {}),
+    ...(remoteTrash.deferredByBudget
+      ? { runnerHighImpactRemoteTrashDeferredByBudget: true }
+      : {}),
+    ...(remoteTrash.highImpact &&
+    remoteTrash.expensive &&
+    !remoteTrash.acuteThreat &&
+    action.type === "decline_trash"
+      ? { runnerHighImpactRemoteTrashSkippedNoThreat: true }
+      : {}),
+    ...(remoteTrash.role === "low_value" && action.type === "decline_trash"
+      ? { runnerLowValueRemoteTrashSkipped: true }
+      : {}),
+    ...(remoteTrashTaken && input.actionNumber <= 20
+      ? { runnerRemoteTrashSpentEarlyGame: true }
+      : {}),
+    ...(remoteTrashTaken
+      ? {
+          runnerCreditsAfterRemoteTrash:
+            remoteTrash.creditsAfterGeneralTrash,
+          dedicatedTrashCreditsUsed: remoteTrash.dedicatedTrashCredits,
+          generalCreditsSpentOnTrash: remoteTrash.generalCreditCost,
+        }
+      : {}),
+    ...(remoteTrashTaken && remoteTrash.dropsBelowReserve
+      ? { runnerRemoteTrashDroppedBelowReserve: true }
+      : {}),
+    ...(remoteTrashTaken && !remoteTrash.dropsBelowReserve
+      ? { runnerRemoteTrashPreservedReserve: true }
+      : {}),
+    ...(remoteTrashTaken && remoteTrash.acuteThreat
+      ? { runnerRemoteTrashProtectedScoreThreat: true }
+      : {}),
+    ...(remoteTrashTaken && !remoteTrash.acuteThreat
+      ? { runnerRemoteTrashWithoutImmediateThreat: true }
+      : {}),
+    ...(remoteTrashTaken &&
+    remoteTrash.dropsBelowReserve &&
+    !remoteTrash.acuteThreat
+      ? { trashDecisionLeftRunnerUnableToContest: true }
+      : {}),
     ...(advancedRemoteContest.opportunity
       ? { runnerRemoteRunOpportunityAgainstAdvancedRemote: true }
       : {}),
@@ -9511,7 +13211,16 @@ function runnerCentralPressureDiagnosticsForSimulationAction(
   const insufficientReserve =
     centralRun &&
     input.playerView.own.credits - visibleBreakCost < reserveTarget;
+  const hqMemoryDiagnostics = runnerHqMemoryDiagnosticsForMetrics(
+    input,
+    centralRun,
+    centralTarget,
+  );
+  const knownCardPositionDiagnostics =
+    runnerKnownCardPositionDiagnosticsForMetrics(input, action, targetServerId);
   return {
+    ...hqMemoryDiagnostics,
+    ...knownCardPositionDiagnostics,
     ...(centralRun && (matchingInterface || anyMultiaccessInstalled)
       ? { runnerCentralRunWithMultiaccess: true }
       : {}),
@@ -9608,6 +13317,378 @@ function runnerCentralPressureDiagnosticsForSimulationAction(
       ? { runnerInterfaceInstalledButUnusedTurn: true }
       : {}),
   };
+}
+
+function runnerHqMemoryDiagnosticsForMetrics(
+  input: AiDecisionInput,
+  centralRun: boolean,
+  centralTarget: "hq" | "rd" | "archives" | undefined,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  const memory =
+    reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory;
+  if (!memory) return {};
+  const knownAgendaDefinitions = memory.knownDefinitions.filter(
+    (definitionId) => definitionTypeForMetrics(definitionId) === "agenda",
+  );
+  const knownAgendaPoints = knownAgendaDefinitions.reduce(
+    (sum, definitionId) => sum + agendaPointsForMetrics(definitionId),
+    0,
+  );
+  const knownNonAgendaCount =
+    memory.knownDefinitions.length - knownAgendaDefinitions.length;
+  const unknownCount = Math.max(0, memory.handCount - memory.knownCount);
+  const knownFraction =
+    memory.handCount > 0 ? round(memory.knownCount / memory.handCount) : 0;
+  const fullyKnownNoAgenda =
+    memory.allCardsKnown &&
+    memory.knownCount > 0 &&
+    knownAgendaDefinitions.length === 0 &&
+    memory.knownDefinitions.every((definitionId) =>
+      isLowValueKnownAccessCard(definitionId, input.playerView.own.credits),
+    );
+  const knownCardValue =
+    centralRun && centralTarget === "hq"
+      ? knownAgendaDefinitions.length * 520 + knownAgendaPoints * 80
+      : 0;
+  const unknownCardValue =
+    centralRun && centralTarget === "hq" ? Math.min(140, unknownCount * 55) : 0;
+  const invalidationText = memory.invalidationReasons.join("|");
+  return {
+    hqKnownCards: memory.knownCount,
+    hqUnknownCards: unknownCount,
+    hqKnownFraction: knownFraction,
+    ...(memory.allCardsKnown ? { hqFullyKnown: true } : {}),
+    hqKnownAgendaCount: knownAgendaDefinitions.length,
+    hqKnownNonAgendaCount: knownNonAgendaCount,
+    hqKnownAgendaPoints: knownAgendaPoints,
+    ...(invalidationText.includes("corp_draw_added_unknown_hq_card")
+      ? { hqMemoryInvalidatedByDraw: true }
+      : {}),
+    ...(invalidationText.includes("known_hq_card_installed") ||
+    invalidationText.includes("corp_installed_hidden_hq_card")
+      ? { hqMemoryInvalidatedByInstall: true }
+      : {}),
+    ...(invalidationText.includes("known_hq_card_played") ||
+    invalidationText.includes("corp_played_unknown_hq_card")
+      ? { hqMemoryInvalidatedByPlay: true }
+      : {}),
+    ...(invalidationText.includes("corp_discarded_hq_card")
+      ? { hqMemoryInvalidatedByDiscard: true }
+      : {}),
+    ...(invalidationText.includes("shuffle_changed_hq_hand") ||
+    invalidationText.includes("arrange_changed_hq_hand") ||
+    invalidationText.includes("swap_changed_hq_hand")
+      ? { hqMemoryInvalidatedByShuffleOrReorder: true }
+      : {}),
+    ...(knownCardValue > 0 ? { hqRunValueFromKnownCards: knownCardValue } : {}),
+    ...(unknownCardValue > 0
+      ? { hqRunValueFromUnknownCards: unknownCardValue }
+      : {}),
+    ...(centralRun && centralTarget === "hq" && fullyKnownNoAgenda
+      ? { hqRunSuppressedBecauseFullyKnownNoAgenda: true }
+      : {}),
+    ...(centralRun &&
+    centralTarget === "hq" &&
+    knownAgendaDefinitions.length > 0
+      ? { hqRunBoostedBecauseKnownAgenda: true }
+      : {}),
+    ...(centralRun && centralTarget === "hq" && unknownCount > 0
+      ? { hqRunBoostedBecauseUnknownCardsRemain: true }
+      : {}),
+    ...(centralRun &&
+    centralTarget === "hq" &&
+    isRepeatedLowValueCentralRunForMetrics(input, "hq") &&
+    !input.eventTail.some(eventMayChangeHqPressureForMetrics)
+      ? { hqRunRepeatedWithoutNewHqInfo: true }
+      : {}),
+  };
+}
+
+function runnerKnownCardPositionDiagnosticsForMetrics(
+  input: AiDecisionInput,
+  action: LegalAction,
+  targetServerId: string | undefined,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  if (input.side !== "runner" || action.side !== "runner") return {};
+  const belief = reconstructBeliefState(input);
+  const memory = belief.runnerOpponentModel?.knownPositionMemory ?? [];
+  const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
+  const invalidationText = [
+    ...(belief.runnerOpponentModel?.rndTopFreshness.invalidationReasons ?? []),
+    ...(hqMemory?.invalidationReasons ?? []),
+  ].join("|");
+  const knownRemote = memory.filter(
+    (entry) =>
+      entry.zone.startsWith("remote_") && entry.positionKey.startsWith("root:"),
+  );
+  const knownRemoteAgendas = knownRemote.filter(
+    (entry) => definitionTypeForMetrics(entry.definitionId) === "agenda",
+  );
+  const knownRemoteTrashable = knownRemote.filter((entry) => {
+    const type = definitionTypeForMetrics(entry.definitionId);
+    return (
+      (type === "asset" || type === "upgrade") &&
+      trashCostForDefinitionForMetrics(entry.definitionId) !== undefined
+    );
+  });
+  const knownUnrezzedIce = memory.filter((entry) =>
+    entry.positionKey.startsWith("ice:"),
+  );
+  const runTarget =
+    action.type === "start_run"
+      ? (targetServerId ??
+        (typeof action.payload?.serverId === "string"
+          ? action.payload.serverId
+          : undefined))
+      : undefined;
+  const targetKnownRemote = runTarget
+    ? knownRemote.filter((entry) => entry.zone === runTarget)
+    : [];
+  const targetKnownUnrezzedIce = runTarget
+    ? knownUnrezzedIce.filter((entry) => entry.zone === runTarget)
+    : [];
+  const runCostAdjusted = targetKnownUnrezzedIce.reduce(
+    (sum, entry) =>
+      sum + visibleBreakCostForKnownIceDefinition(input, entry.definitionId),
+    0,
+  );
+  const hqKnownFromRndDraw =
+    hqMemory?.invalidationReasons.some((reason) =>
+      reason.includes("known_rnd_top_moved_to_hq"),
+    ) ?? false;
+  const hqKnownAgendaFromRnd =
+    hqKnownFromRndDraw &&
+    (hqMemory?.knownDefinitions ?? []).some(
+      (definitionId) => definitionTypeForMetrics(definitionId) === "agenda",
+    );
+  const rndFreshness = belief.runnerOpponentModel?.rndTopFreshness;
+  const rndTopRemoved = rndFreshness?.freshness === "fresh_after_top_removed";
+  const rndKnownTopAgenda =
+    rndFreshness?.knownTopDefinitionId !== undefined &&
+    definitionTypeForMetrics(rndFreshness.knownTopDefinitionId) === "agenda";
+  const rndKnownTopNonAgenda =
+    rndFreshness?.knownTopDefinitionId !== undefined && !rndKnownTopAgenda;
+  const rndStaleKnownTop =
+    rndFreshness?.freshness === "stale_known_same_top";
+  const isRndRun = action.type === "start_run" && runTarget === "rd";
+  const rndFreshOpportunity =
+    rndTopRemoved || rndKnownTopAgenda || rndFreshness?.freshenedByRunnerAccess === true;
+  return {
+    ...(memory.some(
+      (entry) => entry.zone === "rd" && entry.positionKey === "top",
+    )
+      ? { knownRndTopCard: true }
+      : {}),
+    ...(invalidationText.includes("known_rnd_top_moved_to_hq")
+      ? { knownRndTopMovedToHq: true, hqKnownFromRndDraw: true }
+      : {}),
+    ...(invalidationText.includes("corp_draw_from_rd") ||
+    invalidationText.includes("shuffle_changed_rd_top") ||
+    invalidationText.includes("arrange_changed_rd_top") ||
+    invalidationText.includes("swap_changed_rd_top")
+      ? { knownRndTopInvalidated: true }
+      : {}),
+    ...(action.type === "start_run" &&
+    runTarget === "hq" &&
+    hqKnownAgendaFromRnd
+      ? { hqRunBoostedByRndToHqAgenda: true }
+      : {}),
+    ...(action.type === "start_run" &&
+    runTarget === "hq" &&
+    hqKnownFromRndDraw &&
+    !hqKnownAgendaFromRnd
+      ? { hqRunSuppressedByRndToHqNonAgenda: true }
+      : {}),
+    ...(["steal_agenda", "trash_accessed_card", "move_to_removed_from_game", "move_to_set_aside"].includes(action.type) &&
+    targetServerId === "rd"
+      ? { rndAccessRemovedTopCard: true }
+      : {}),
+    ...(action.type === "steal_agenda" && targetServerId === "rd"
+      ? { rndAccessStoleAgenda: true }
+      : {}),
+    ...(action.type === "trash_accessed_card" && targetServerId === "rd"
+      ? { rndAccessTrashedCard: true }
+      : {}),
+    ...(action.type === "access_card" &&
+    targetServerId === "rd" &&
+    !input.legalActions.some(
+      (candidate) =>
+        candidate.type === "steal_agenda" ||
+        candidate.type === "trash_accessed_card",
+    )
+      ? { rndAccessLeftTopCardUnchanged: true }
+      : {}),
+    ...(rndFreshness?.freshenedByRunnerAccess === true
+      ? { rndTopFreshenedByRunnerAccess: true }
+      : {}),
+    ...(rndFreshness?.invalidationReasons.some((reason) =>
+      reason.includes("rd_known_top_sequence_advanced"),
+    )
+      ? {
+          rndKnownTopAdvancedAfterAccess: true,
+          rndKnownTopSequenceAdvanced: true,
+        }
+      : {}),
+    ...(isRndRun && rndTopRemoved ? { rndRepeatRunAfterTopRemoved: true } : {}),
+    ...(isRndRun && rndStaleKnownTop ? { rndRepeatRunAfterTopUnchanged: true } : {}),
+    ...(isRndRun && rndTopRemoved ? { rndRepeatRunBoostedByFreshTop: true } : {}),
+    ...(isRndRun && rndStaleKnownTop
+      ? { rndRepeatRunSuppressedBecauseKnownStaleTop: true }
+      : {}),
+    ...(isRndRun && rndKnownTopAgenda
+      ? { rndRepeatRunBoostedByKnownAgendaTop: true }
+      : {}),
+    ...(isRndRun && rndStaleKnownTop && rndKnownTopNonAgenda
+      ? { rndRepeatRunSuppressedBecauseKnownNonAgendaTop: true }
+      : {}),
+    ...(rndFreshOpportunity ? { rndFreshTopPressureOpportunity: true } : {}),
+    ...(isRndRun && rndFreshOpportunity ? { rndFreshTopPressureTaken: true } : {}),
+    ...(rndFreshOpportunity && !isRndRun
+      ? { rndFreshTopPressureSkipped: true }
+      : {}),
+    ...(isRndRun && rndStaleKnownTop && rndKnownTopNonAgenda
+      ? {
+          rndStaleTopRepeatMistake: true,
+          rndAccessNoValueRepeatStale: true,
+        }
+      : {}),
+    ...(rndTopRemoved &&
+    input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints <= 2
+      ? { rndCloseoutOpportunityAfterTopRemoved: true }
+      : {}),
+    ...(knownRemote.length > 0 ? { knownRemoteCards: knownRemote.length } : {}),
+    ...(knownRemoteAgendas.length > 0
+      ? { knownRemoteAgendas: knownRemoteAgendas.length }
+      : {}),
+    ...(knownRemoteTrashable.length > 0
+      ? { knownRemoteTrashableCards: knownRemoteTrashable.length }
+      : {}),
+    ...(knownRemote.length > 0
+      ? { remoteMemoryRetainedAfterAccess: true }
+      : {}),
+    ...(invalidationText.includes("remote_state_changed") ||
+    memory.some((entry) =>
+      entry.invalidatedBy.some(
+        (reason) => reason.includes("install") || reason.includes("move"),
+      ),
+    )
+      ? { remoteMemoryInvalidatedByInstallOrMove: true }
+      : {}),
+    ...(action.type === "start_run" &&
+    targetKnownRemote.some(
+      (entry) => definitionTypeForMetrics(entry.definitionId) === "agenda",
+    )
+      ? { remoteRunBoostedByKnownRemoteAgenda: true }
+      : {}),
+    ...(action.type === "start_run" &&
+    targetKnownRemote.some((entry) =>
+      isLowValueKnownAccessCard(
+        entry.definitionId,
+        input.playerView.own.credits,
+      ),
+    )
+      ? { remoteRunSuppressedByKnownLowValueRemote: true }
+      : {}),
+    ...(action.type === "start_run" &&
+    targetKnownRemote.some((entry) => {
+      const type = definitionTypeForMetrics(entry.definitionId);
+      return (
+        (type === "asset" || type === "upgrade") &&
+        trashCostForDefinitionForMetrics(entry.definitionId) !== undefined
+      );
+    })
+      ? { remoteTrashBoostedByKnownRemoteTrashable: true }
+      : {}),
+    ...(knownUnrezzedIce.length > 0
+      ? {
+          knownUnrezzedIceFromExpose: knownUnrezzedIce.length,
+          knownUnrezzedIceRetained: true,
+        }
+      : {}),
+    ...(invalidationText.includes("conceal") ||
+    invalidationText.includes("reorder")
+      ? { knownUnrezzedIceInvalidated: true }
+      : {}),
+    ...(runCostAdjusted > 0
+      ? { runCostAdjustedByKnownUnrezzedIce: runCostAdjusted }
+      : {}),
+    ...(action.type === "jack_out" && knownUnrezzedIce.length > 0
+      ? { jackOutInfluencedByKnownUnrezzedIce: true }
+      : {}),
+    ...(action.type === "install_card" && knownUnrezzedIce.length > 0
+      ? { rigPlanInfluencedByKnownUnrezzedIce: true }
+      : {}),
+  };
+}
+
+function definitionTypeForMetrics(definitionId: string): string | undefined {
+  return (
+    DEMO_CARDS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type
+  );
+}
+
+function agendaPointsForMetrics(definitionId: string): number {
+  return (
+    RUNTIME_CARDS[definitionId]?.numeric.agendaPoints ??
+    DEMO_CARDS_BY_ID[definitionId]?.agendaPoints ??
+    0
+  );
+}
+
+function trashCostForDefinitionForMetrics(
+  definitionId: string,
+): number | undefined {
+  return (
+    RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
+    DEMO_CARDS_BY_ID[definitionId]?.trashCost
+  );
+}
+
+function remoteRootTrashCostForMetrics(card: VisibleCard): number | undefined {
+  if (!card.definitionId) return undefined;
+  return trashCostForDefinitionForMetrics(card.definitionId);
+}
+
+function visibleBreakCostForKnownIceDefinition(
+  input: AiDecisionInput,
+  definitionId: string,
+): number {
+  const definition = DEMO_CARDS_BY_ID[definitionId];
+  if (!definition) return 0;
+  const assessment = assessKnownRezzedIcePath(
+    [
+      {
+        instanceId: `known_unrezzed_${definitionId}`,
+        known: true,
+        definitionId,
+        type: "ice",
+        subtypes: definition.subtypes ?? [],
+        rezzed: true,
+        strength: definition.strength,
+        subroutines: definition.subroutines ?? [],
+        owner: "corp",
+        controller: "corp",
+      } as VisibleCard,
+    ],
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+  );
+  return assessment.visibleBreakCost ?? 0;
+}
+
+function eventMayChangeHqPressureForMetrics(event: PublicGameEvent): boolean {
+  const actionType =
+    typeof event.publicPayload.actionType === "string"
+      ? event.publicPayload.actionType
+      : event.type;
+  return (
+    actionType === "draw_card" ||
+    actionType === "mandatory_draw" ||
+    actionType === "install_card" ||
+    actionType === "play_operation" ||
+    actionType === "discard_card" ||
+    actionType === "resolve_choice"
+  );
 }
 
 function centralServerId(
@@ -10778,6 +14859,17 @@ function runnerRemoteTrashAccessContext(
   affordableRelevant: boolean;
   relevantTaken: boolean;
   skippedAffordableRelevant: boolean;
+  expensive: boolean;
+  highImpact: boolean;
+  acuteThreat: boolean;
+  trashCost: number;
+  generalCreditCost: number;
+  dedicatedTrashCredits: number;
+  creditsAfterGeneralTrash: number;
+  reserveTarget: number;
+  dropsBelowReserve: boolean;
+  deferredByBudget: boolean;
+  evidence: string[];
   targetType?: RemoteTrashTargetType;
   role?: RemoteTrashRole;
 } {
@@ -10790,19 +14882,64 @@ function runnerRemoteTrashAccessContext(
       affordableRelevant: false,
       relevantTaken: false,
       skippedAffordableRelevant: false,
+      expensive: false,
+      highImpact: false,
+      acuteThreat: false,
+      trashCost: 0,
+      generalCreditCost: 0,
+      dedicatedTrashCredits: 0,
+      creditsAfterGeneralTrash: input.playerView.own.credits,
+      reserveTarget: runnerCreditReserveTargetForInput(input),
+      dropsBelowReserve: false,
+      deferredByBudget: false,
+      evidence: ["remote_trash_access:none"],
     };
   }
   const targetType = remoteTrashTargetTypeForVisibleCard(accessed);
-  const role = remoteTrashRoleForVisibleCard(accessed);
+  const role = remoteTrashRoleForAccessedVisibleCard(input, accessed);
+  const trashAction = input.legalActions.find(
+    (candidate) => candidate.type === "trash_accessed_card",
+  );
+  const trashCost = trashAction
+    ? remoteTrashActionTotalCostForMetrics(trashAction)
+    : (remoteTrashCostForVisibleCard(accessed) ?? 0);
   const trashable =
     targetType !== "unknown" &&
     remoteTrashCostForVisibleCard(accessed) !== undefined;
   const relevant = trashable && role !== "low_value" && role !== "unknown";
+  const dedicatedTrashCredits =
+    trashAction !== undefined
+      ? remoteTrashDedicatedCreditsForMetrics(input, trashAction, accessed)
+      : 0;
+  const generalCreditCost = Math.max(0, trashCost - dedicatedTrashCredits);
+  const reserveTarget = runnerCreditReserveTargetForInput(input);
+  const creditsAfterGeneralTrash =
+    input.playerView.own.credits - generalCreditCost;
+  const dropsBelowReserve =
+    trashable && creditsAfterGeneralTrash < Math.max(2, reserveTarget - 1);
+  const expensive = trashCost >= 4 || generalCreditCost >= 4;
+  const highImpact =
+    relevant &&
+    (role === "scoring_protection" ||
+      role === "run_tax" ||
+      role === "remote_capacity" ||
+      role === "economy" ||
+      role === "tag_punish");
+  const acuteThreat = remoteTrashAccessProtectsAcuteThreatForMetrics(
+    input,
+    run.attackedServerId,
+  );
+  const deferredByBudget =
+    trashable &&
+    highImpact &&
+    expensive &&
+    dropsBelowReserve &&
+    dedicatedTrashCredits <= 0 &&
+    !acuteThreat;
   const affordableRelevant =
     relevant &&
-    input.legalActions.some(
-      (candidate) => candidate.type === "trash_accessed_card",
-    );
+    trashAction !== undefined &&
+    !deferredByBudget;
   const relevantTaken =
     affordableRelevant && action.type === "trash_accessed_card";
   return {
@@ -10812,6 +14949,27 @@ function runnerRemoteTrashAccessContext(
     relevantTaken,
     skippedAffordableRelevant:
       affordableRelevant && action.type !== "trash_accessed_card",
+    expensive,
+    highImpact,
+    acuteThreat,
+    trashCost,
+    generalCreditCost,
+    dedicatedTrashCredits,
+    creditsAfterGeneralTrash,
+    reserveTarget,
+    dropsBelowReserve,
+    deferredByBudget,
+    evidence: [
+      `remote_trash_role:${role}`,
+      `remote_trash_cost:${trashCost}`,
+      `remote_trash_general_credit_cost:${generalCreditCost}`,
+      `remote_trash_dedicated_credits:${dedicatedTrashCredits}`,
+      `remote_trash_credits_after:${creditsAfterGeneralTrash}`,
+      `remote_trash_reserve_target:${reserveTarget}`,
+      `remote_trash_drops_below_reserve:${dropsBelowReserve}`,
+      `remote_trash_acute_threat:${acuteThreat}`,
+      `remote_trash_deferred_by_budget:${deferredByBudget}`,
+    ],
     ...(trashable ? { targetType } : {}),
     ...(trashable ? { role } : {}),
   };
@@ -10982,9 +15140,37 @@ function remoteTrashTargetTypeForVisibleCard(
   return "unknown";
 }
 
+function remoteTrashRoleForAccessedVisibleCard(
+  input: AiDecisionInput,
+  card: VisibleCard,
+): RemoteTrashRole {
+  const role = remoteTrashRoleForVisibleCard(card);
+  if (role !== "unknown") return role;
+  if (accessedCardContributesToVisibleRunTaxForMetrics(input, card))
+    return "run_tax";
+  return role;
+}
+
 function remoteTrashRoleForVisibleCard(card: VisibleCard): RemoteTrashRole {
   if (card.definitionId === "simple_upgrade") return "low_value";
   const roles = rolesForCardId(card.definitionId);
+  const runtimeDefinition = card.definitionId
+    ? RUNTIME_CARDS[card.definitionId]
+    : undefined;
+  const demoDefinition = card.definitionId
+    ? DEMO_CARDS_BY_ID[card.definitionId]
+    : undefined;
+  const mechanics = [
+    ...("mechanics" in (runtimeDefinition ?? {})
+      ? (((runtimeDefinition as { mechanics?: string[] } | undefined)
+          ?.mechanics ?? []))
+      : []),
+    ...(demoDefinition?.mechanics ?? []),
+  ];
+  const subtypes = [
+    ...(runtimeDefinition?.subtypes ?? []),
+    ...(demoDefinition?.subtypes ?? []),
+  ];
   if (
     roles.some(
       (role) =>
@@ -10997,6 +15183,29 @@ function remoteTrashRoleForVisibleCard(card: VisibleCard): RemoteTrashRole {
     )
   )
     return "scoring_protection";
+  if (
+    roles.some(
+      (role) =>
+        role.includes("run_tax") ||
+        role.includes("ice_tax") ||
+        role.includes("access_tax") ||
+        role.includes("server_tax"),
+    ) ||
+    mechanics.some(
+      (mechanic: string) =>
+        mechanic.includes("break_subroutine_cost") ||
+        mechanic.includes("trash_cost_modifier") ||
+        mechanic.includes("trace_bid_credit_source") ||
+        mechanic.includes("run_flow"),
+    ) ||
+    subtypes.some((subtype) => subtype.toLowerCase() === "region")
+  )
+    return "run_tax";
+  if (
+    roles.some((role) => role.includes("remote_capacity")) ||
+    mechanics.some((mechanic: string) => mechanic.includes("remote_capacity"))
+  )
+    return "remote_capacity";
   if (roles.some((role) => role.includes("economy"))) return "economy";
   if (
     roles.some(
@@ -11015,6 +15224,114 @@ function remoteTrashRoleForVisibleCard(card: VisibleCard): RemoteTrashRole {
   return "unknown";
 }
 
+function remoteTrashActionTotalCostForMetrics(action: LegalAction): number {
+  const payloadCost = action.payload?.accessTrashTotalCost;
+  return typeof payloadCost === "number" && Number.isFinite(payloadCost)
+    ? payloadCost
+    : actionCreditCost(action);
+}
+
+function remoteTrashDedicatedCreditsForMetrics(
+  input: AiDecisionInput,
+  action: LegalAction,
+  accessed: VisibleCard,
+): number {
+  const scatter =
+    accessed.type === "upgrade" &&
+    typeof action.payload?.scatterShotRecurringCreditsAvailable === "number"
+      ? action.payload.scatterShotRecurringCreditsAvailable
+      : 0;
+  const poltergeist =
+    accessed.type === "asset" &&
+    typeof action.payload?.poltergeistRecurringCreditsAvailable === "number"
+      ? action.payload.poltergeistRecurringCreditsAvailable
+      : 0;
+  const payloadCredits = scatter + poltergeist;
+  const rigCredits =
+    input.playerView.own.rig?.reduce((sum, card) => {
+      const runtimeDefinition = card.definitionId
+        ? RUNTIME_CARDS[card.definitionId]
+        : undefined;
+      const demoDefinition = card.definitionId
+        ? DEMO_CARDS_BY_ID[card.definitionId]
+        : undefined;
+      const mechanics = [
+        ...("mechanics" in (runtimeDefinition ?? {})
+          ? (((runtimeDefinition as { mechanics?: string[] } | undefined)
+              ?.mechanics ?? []))
+          : []),
+        ...(demoDefinition?.mechanics ?? []),
+      ];
+      const supportsUpgradeTrash =
+        accessed.type === "upgrade" &&
+        mechanics.some((mechanic: string) =>
+          mechanic.includes("upgrade_trash_payment"),
+        );
+      const supportsAssetTrash =
+        accessed.type === "asset" &&
+        mechanics.some((mechanic: string) =>
+          mechanic.includes("node_trash_recurring_credit"),
+        );
+      if (!supportsUpgradeTrash && !supportsAssetTrash) return sum;
+      return (
+        sum +
+        (card.counters?.recurring_credit ?? 0) +
+        (card.counters?.bit ?? 0)
+      );
+    }, 0) ?? 0;
+  return Math.min(
+    remoteTrashActionTotalCostForMetrics(action),
+    Math.max(payloadCredits, rigCredits),
+  );
+}
+
+function remoteTrashAccessProtectsAcuteThreatForMetrics(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) return false;
+  if (remoteServerHasScoreThreat(input, serverId)) return true;
+  return server.root.some(
+    (card) => {
+      if (!card.known || card.type !== "agenda" || !card.definitionId)
+        return false;
+      return (
+        input.playerView.own.agendaPoints +
+          (RUNTIME_CARDS[card.definitionId]?.numeric.agendaPoints ??
+            DEMO_CARDS_BY_ID[card.definitionId]?.agendaPoints ??
+            0) >=
+        input.playerView.agendaPointsToWin - 1
+      );
+    },
+  );
+}
+
+function accessedCardContributesToVisibleRunTaxForMetrics(
+  input: AiDecisionInput,
+  accessed: VisibleCard,
+): boolean {
+  const definitionId = accessed.definitionId;
+  if (!definitionId) return false;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === input.playerView.run?.attackedServerId,
+  );
+  return (
+    server?.ice.some((ice) =>
+      ice.effectiveRunQuote?.subroutines.some(
+        (subroutine) => subroutine.sourceDefinitionId === definitionId,
+      ),
+    ) === true ||
+    server?.ice.some((ice) =>
+      ice.effectiveRunQuote?.breakSubroutineCostSourceDefinitionIds?.includes(
+        definitionId,
+      ),
+    ) === true
+  );
+}
+
 function remoteTrashCostForVisibleCard(card: VisibleCard): number | undefined {
   if (!card.known || !card.definitionId) return undefined;
   return (
@@ -11022,6 +15339,13 @@ function remoteTrashCostForVisibleCard(card: VisibleCard): number | undefined {
     RUNTIME_CARDS[card.definitionId]?.numeric.trashCost ??
     DEMO_CARDS_BY_ID[card.definitionId]?.trashCost
   );
+}
+
+function remoteTrashCostBucket(cost: number): "0_1" | "2_3" | "4_5" | "6_plus" {
+  if (cost <= 1) return "0_1";
+  if (cost <= 3) return "2_3";
+  if (cost <= 5) return "4_5";
+  return "6_plus";
 }
 
 function actionCreditCost(action: LegalAction): number {
@@ -11892,6 +16216,10 @@ function fnv1a(value: string): string {
 
 function round(value: number): number {
   return Math.round(value * 1000) / 1000;
+}
+
+function minDefined(values: number[]): number {
+  return values.length > 0 ? Math.min(...values) : 0;
 }
 
 function roundScore(value: number): number {
