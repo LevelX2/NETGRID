@@ -46,6 +46,8 @@ Blocker 2026-05-24: Phase 1c ist in `docs/activities/in-progress/act-2026-05-24-
 
 Blocker 2026-05-24: Phase 1e ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1e-hidden-fort-manipulation-access.md` blockiert. `Pavit Bharat` braucht einen Hidden-HQ-to-Fort-Installationsvertrag für Typfilter, Slots, Kosten und öffentliche Count-/Positionsredaction; `Simon Francisco` braucht einen Central-Access-Reihenfolge-/Queue-Vertrag für Access-Count-Reduktion nach Access. Bis zur Quellen-/Scope-Entscheidung werden `Herman Revista` und `Marcel DeSoleil` nicht isoliert aus diesem gemeinsamen Slice promotet.
 
+Blocker 2026-05-24: Phase 1f ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1f-run-spend-cap.md` blockiert. `Obfuscated Fortress` braucht einen verbindlichen Run-Payment-Source-Vertrag, bevor Ansage, Spend-Cap, Ledger und End-of-run-Shortfall in `spendRunnerRunCredits` und RunState umgesetzt werden können.
+
 Activity-Zuschnitt: Die bestehenden Phase-1a bis Phase-1g Activities sind die kleinsten Umsetzungseinheiten. Das alte Phase-1-Sammelpaket bleibt blockiert/ersetzt.
 
 ## Phase 2: Bad Publicity

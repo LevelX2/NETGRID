@@ -1,20 +1,23 @@
 ---
 activityId: act-2026-05-24-proteus-phase-1f-run-spend-cap
-status: inbox
-kind: concept
+status: blocked
+kind: implementation
 area: cards
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
-startedAt:
+startedAt: 2026-05-24
 completedAt:
-branch:
+branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1f
 blockedBy:
-  - act-2026-05-24-proteus-phase-1a-reuse-only-baseline
-resultArtifacts: []
-checks: []
+  - payment-source-contract-obfuscated-fortress-run-spend-cap
+resultArtifacts:
+  - docs/activities/in-progress/act-2026-05-24-proteus-phase-1f-run-spend-cap.md
+checks:
+  - Lokale Quellenprüfung `data/cards/proteus-cards.json` für `Obfuscated Fortress`
+  - Codepfadprüfung `packages/engine/src/game/run/run-duration-payment.ts` und `packages/shared/src/index.ts` für bestehende Run-Zahlungsquellen
 ---
 
 # Proteus Phase 1f: Run Spend Cap
@@ -73,4 +76,13 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Blockiert am 2026-05-24.
+
+`Obfuscated Fortress` kann nicht legal-action-stabil vollständig umgesetzt werden, solange der Run-weite Zahlungsquellenvertrag offen ist. Der lokale Text verlangt, dass Runner die Anzahl der Bits ansagt, die während des Runs ausgegeben werden, danach nicht mehr ausgeben darf und am Run-Ende die nicht ausgegebene Differenz verliert. Der aktuelle Engine-Pfad zählt und validiert Runner-Run-Zahlungen aber über mehrere Quellen: normale Runner-Credits, Bad-Publicity-Run-Credits, temporäre Run-Credits, Hosted-/Recurring-Credits und Stealth-/zweckgebundene Bits. Die Activity verlangt ausdrücklich, diese Quellen vor Codearbeit einzuschließen oder auszunehmen.
+
+Ohne verbindliche Entscheidung würde ein Resolver entweder zu eng sein und legale Spezialcredits fälschlich blockieren, oder zu weit sein und die Ansage durch nicht gezählte Quellen umgehen. Zusätzlich braucht der Start-of-run-Rezpfad einen engen Vertrag, weil der vorhandene Root-Rez-Laufzeitpfad Root-Karten primär in Run-Fenstern behandelt und `Obfuscated Fortress` nur am Start eines Runs auf diesem Fort rezzen darf.
+
+Entblockung:
+
+- Dokumentieren, ob normale Credits, Bad-Publicity-Credits, temporäre Run-Credits, Hosted-/Recurring-Credits und Stealth-Bits in die Ansage und den Spend-Ledger zählen.
+- Danach einen generischen all-run payment cap in `spendRunnerRunCredits`/RunState mit Start-of-run-Rezfenster, Runner-Declaration, Ledger, End-of-run-Shortfall und Replay-/StateHash-Test umsetzen.

@@ -58,5 +58,5 @@ Die konkrete Board-Zerlegung liegt in:
 - `docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md`
 - `docs/activities/done/act-2026-05-24-proteus-phase-1d-public-fort-pass-windows.md`
 - `docs/activities/in-progress/act-2026-05-24-proteus-phase-1e-hidden-fort-manipulation-access.md`
-- `docs/activities/inbox/act-2026-05-24-proteus-phase-1f-run-spend-cap.md`
+- `docs/activities/in-progress/act-2026-05-24-proteus-phase-1f-run-spend-cap.md`
 - `docs/activities/inbox/act-2026-05-24-proteus-phase-1g-post-pass-derez-utility.md`
