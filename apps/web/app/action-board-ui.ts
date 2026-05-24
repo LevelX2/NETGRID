@@ -870,6 +870,7 @@ export function hasLegalAction(actions: LegalAction[], type: LegalAction["type"]
 
 export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
   if (choice.kind !== "select_cards") return false;
+  if (cardChoiceIsReadonlyPrivateLook(choice)) return true;
   if (choice.source.startsWith("v1922.corp_archives_to_hq")) return true;
   if (isHiddenZoneReadableCardChoiceSource(choice.source)) return true;
   if (choice.cardSearchPresentation || choice.stackSearchResolution || choice.source.includes("search_stack")) return true;
@@ -883,13 +884,30 @@ export function cardChoiceUsesReadableCards(choice: NonNullable<PlayerView["pend
   return (
     choice.kind === "select_cards" &&
     Boolean(
-      choice.cardSearchPresentation ||
+      cardChoiceIsReadonlyPrivateLook(choice) ||
+        choice.cardSearchPresentation ||
         choice.stackSearchResolution ||
         choice.source.includes("search_stack") ||
         isHiddenZoneReadableCardChoiceSource(choice.source) ||
         choice.options.some((option) => option.card),
     )
   );
+}
+
+export function cardChoiceIsReadonlyPrivateLook(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
+  if (choice.kind !== "select_cards" || !choice.source.startsWith("p3_33.private_look:")) return false;
+  const doneOptions = choice.options.filter((option) => option.id === "done" && option.selectable !== false);
+  const cardOptions = choice.options.filter((option) => option.id !== "done");
+  return (
+    doneOptions.length === 1 &&
+    cardOptions.length > 0 &&
+    cardOptions.every((option) => option.selectable === false && Boolean(option.card))
+  );
+}
+
+export function cardChoiceReadonlyConfirmationOptionId(choice: NonNullable<PlayerView["pendingChoice"]>): string | null {
+  if (!cardChoiceIsReadonlyPrivateLook(choice)) return null;
+  return choice.options.find((option) => option.id === "done" && option.selectable !== false)?.id ?? null;
 }
 
 export function cardChoiceUsesOrderedSelection(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {

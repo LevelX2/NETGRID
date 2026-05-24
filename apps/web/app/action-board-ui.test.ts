@@ -18,6 +18,8 @@ import {
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   breachProgressLabel,
+  cardChoiceIsReadonlyPrivateLook,
+  cardChoiceReadonlyConfirmationOptionId,
   cardCreditCounterVisual,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
@@ -569,6 +571,38 @@ describe("V1.0.5 action board UI helpers", () => {
       minSelections: 2,
       maxSelections: 2
     };
+    const technicianPrivateLookChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...exactSingleChoice,
+      choiceId: "p3_33_private_look_rd_7",
+      source: "p3_33.private_look:ability:runner_resource_1:rd:7",
+      prompt: "R&D ansehen (1)",
+      options: [
+        {
+          id: "card_corp_rd_1",
+          label: "Agenda",
+          value: "corp_rd_1",
+          selectable: false,
+          card: card("corp_rd_1", "Agenda", "agenda", false)
+        },
+        { id: "done", label: "Fertig", value: "done" }
+      ]
+    };
+    const protocolFilesPrivateLookChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...technicianPrivateLookChoice,
+      choiceId: "p3_33_private_look_rd_9",
+      prompt: "R&D ansehen (2)",
+      options: [
+        ...technicianPrivateLookChoice.options.slice(0, 1),
+        {
+          id: "card_corp_rd_2",
+          label: "ICE",
+          value: "corp_rd_2",
+          selectable: false,
+          card: card("corp_rd_2", "ICE", "ice", false)
+        },
+        { id: "done", label: "Fertig", value: "done" }
+      ]
+    };
 
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
@@ -576,10 +610,16 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseCardChoicePanel(heapSearchChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(offSiteBackupsChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(stackTopFiveChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(technicianPrivateLookChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(protocolFilesPrivateLookChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(organDonorChoice)).toBe(false);
     expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(heapSearchChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(stackTopFiveChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(technicianPrivateLookChoice)).toBe(true);
+    expect(cardChoiceIsReadonlyPrivateLook(technicianPrivateLookChoice)).toBe(true);
+    expect(cardChoiceIsReadonlyPrivateLook(protocolFilesPrivateLookChoice)).toBe(true);
+    expect(cardChoiceReadonlyConfirmationOptionId(technicianPrivateLookChoice)).toBe("done");
     expect(cardChoiceUsesOrderedSelection(stackTopFiveChoice)).toBe(true);
     expect(cardChoiceUsesOrderedSelection(organDonorChoice)).toBe(false);
   });

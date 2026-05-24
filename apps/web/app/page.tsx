@@ -134,6 +134,8 @@ import {
   baseActionSlotCapacity,
   breachProgressLabel,
   cardCreditCounterVisual,
+  cardChoiceIsReadonlyPrivateLook,
+  cardChoiceReadonlyConfirmationOptionId,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   counterDisplaysForRendering,
@@ -8723,19 +8725,27 @@ function CardChoicePanel({
   const [showOnlySelectable, setShowOnlySelectable] = useState(false);
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
   const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
-  const hasDisplayOnlyOptions = choice.options.some((option) => option.selectable === false);
-  const visibleOptions = showOnlySelectable ? choice.options.filter(cardChoiceOptionSelectable) : choice.options;
+  const readonlyPrivateLook = cardChoiceIsReadonlyPrivateLook(choice);
+  const readonlyConfirmationOptionId = readonlyPrivateLook ? cardChoiceReadonlyConfirmationOptionId(choice) : null;
+  const hasDisplayOnlyOptions = !readonlyPrivateLook && choice.options.some((option) => option.selectable === false);
+  const visibleOptions = readonlyPrivateLook
+    ? choice.options.filter((option) => option.id !== readonlyConfirmationOptionId)
+    : showOnlySelectable
+      ? choice.options.filter(cardChoiceOptionSelectable)
+      : choice.options;
   const rows = cardChoiceRows(visibleOptions);
   const selectedOptions = selected
     .map((optionId) => choice.options.find((option) => option.id === optionId))
     .filter((option): option is VisibleChoiceOption => Boolean(option));
   const programInstallTrashInfo = runnerProgramInstallTrashChoiceInfo(choice, view, selected);
   const canSubmit =
-    selected.length >= minSelections &&
-    selected.length <= maxSelections &&
-    (programInstallTrashInfo?.canSubmit ?? true);
+    readonlyPrivateLook && readonlyConfirmationOptionId
+      ? true
+      : selected.length >= minSelections &&
+        selected.length <= maxSelections &&
+        (programInstallTrashInfo?.canSubmit ?? true);
   const singleSelection = maxSelections === 1;
-  const title = programInstallTrashInfo?.title ?? cardChoiceTitle(choice);
+  const title = programInstallTrashInfo?.title ?? cardChoiceReadonlyPrivateLookTitle(choice, view) ?? cardChoiceTitle(choice);
   const prompt = choice.prompt.trim();
   const effectHint = programInstallTrashInfo?.effectHint ?? cardChoiceEffectHint(choice);
   const readableCards = cardChoiceUsesReadableCards(choice);
@@ -8778,7 +8788,7 @@ function CardChoicePanel({
                 </button>
               </div>
             ) : null}
-            <span className="cardChoiceCounter">{choiceSelectionRangeLabel(minSelections, maxSelections)}</span>
+            {readonlyPrivateLook ? null : <span className="cardChoiceCounter">{choiceSelectionRangeLabel(minSelections, maxSelections)}</span>}
           </div>
         </header>
         <div className="cardChoiceRows">
@@ -8811,19 +8821,21 @@ function CardChoicePanel({
                         <span className="actionButtonLabel">{option.label}</span>
                       </button>
                     )}
-                    <button
-                      className={`button cardChoiceSelectButton ${active ? "primary" : ""}`}
-                      onClick={() => toggleOption(option.id)}
-                      disabled={disabled || !selectable}
-                      type="button"
-                      aria-label={selectable ? active ? "Auswahl entfernen" : "Karte auswählen" : "Nur ansehen"}
-                      title={selectable ? active ? "Auswahl entfernen" : "Karte auswählen" : "Nur ansehen"}
-                      aria-pressed={active}
-                      data-testid="card-choice-option"
-                    >
-                      {selectable ? active ? <Check size={14} /> : <Plus size={14} /> : <Eye size={14} />}
-                      <span className="srOnly">{selectable ? active ? "Gewählt" : "Wählen" : "Nur ansehen"}</span>
-                    </button>
+                    {readonlyPrivateLook ? null : (
+                      <button
+                        className={`button cardChoiceSelectButton ${active ? "primary" : ""}`}
+                        onClick={() => toggleOption(option.id)}
+                        disabled={disabled || !selectable}
+                        type="button"
+                        aria-label={selectable ? active ? "Auswahl entfernen" : "Karte auswählen" : "Nur ansehen"}
+                        title={selectable ? active ? "Auswahl entfernen" : "Karte auswählen" : "Nur ansehen"}
+                        aria-pressed={active}
+                        data-testid="card-choice-option"
+                      >
+                        {selectable ? active ? <Check size={14} /> : <Plus size={14} /> : <Eye size={14} />}
+                        <span className="srOnly">{selectable ? active ? "Gewählt" : "Wählen" : "Nur ansehen"}</span>
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -8833,11 +8845,17 @@ function CardChoicePanel({
         <footer className="cardChoiceFooter">
           <div className="cardChoiceFooterText">
             {effectHint ? <p className="cardChoiceEffectHint">{effectHint}</p> : null}
-            <p className="cardChoiceQuestion">{programInstallTrashInfo?.question ?? cardChoiceQuestion(choice, selectedOptions)}</p>
+            <p className="cardChoiceQuestion">{readonlyPrivateLook ? "Diese Karten wurden nur dir angezeigt." : programInstallTrashInfo?.question ?? cardChoiceQuestion(choice, selectedOptions)}</p>
           </div>
-          <button className="button primary cardChoiceSubmit" onClick={() => onChoiceOptions(action, choice.choiceId, selected)} disabled={disabled || !canSubmit} type="button" data-testid="card-choice-submit">
+          <button
+            className="button primary cardChoiceSubmit"
+            onClick={() => onChoiceOptions(action, choice.choiceId, readonlyPrivateLook && readonlyConfirmationOptionId ? [readonlyConfirmationOptionId] : selected)}
+            disabled={disabled || !canSubmit}
+            type="button"
+            data-testid="card-choice-submit"
+          >
             <Check size={15} />
-            {programInstallTrashInfo?.submitLabel ?? cardChoiceSubmitLabel(choice, selected.length)}
+            {readonlyPrivateLook ? "Fertig" : programInstallTrashInfo?.submitLabel ?? cardChoiceSubmitLabel(choice, selected.length)}
           </button>
         </footer>
       </div>
@@ -8858,6 +8876,22 @@ function cardChoiceRows(options: VisibleChoiceOption[]): VisibleChoiceOption[][]
   const rows: VisibleChoiceOption[][] = [];
   for (let index = 0; index < options.length; index += rowSize) rows.push(options.slice(index, index + rowSize));
   return rows;
+}
+
+function cardChoiceReadonlyPrivateLookTitle(choice: VisibleChoice, view: PlayerView): string | null {
+  if (!cardChoiceIsReadonlyPrivateLook(choice)) return null;
+  const [, , sourceCardId, zone] = choice.source.split(":");
+  const sourceTitle = sourceCardId ? visibleCardsByInstanceId(view).get(sourceCardId)?.title : null;
+  const shownCards = choice.options.filter((option) => option.id !== "done").length;
+  const zoneLabel =
+    zone === "rd"
+      ? shownCards === 1
+        ? "oberste R&D-Karte"
+        : "R&D-Karten ansehen"
+      : zone === "hq"
+        ? "HQ-Karten ansehen"
+        : "Karten ansehen";
+  return sourceTitle ? `${sourceTitle}: ${zoneLabel}` : zoneLabel;
 }
 
 function cardChoiceTitle(choice: VisibleChoice): string {
