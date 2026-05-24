@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "localized-card-frame-v1",
+  "frameId": "project-frame-v1",
+  "status": "draft_visual_test",
+  "locale": "de",
+  "cardType": "project",
+  "physicalSizeMm": {
+    "width": 63,
+    "height": 88
+  },
+  "canvas": {
+    "width": 1488,
+    "height": 2079,
+    "dpiApprox": 600,
+    "aspectRatio": 0.715729
+  },
+  "derivedSizes": {
+    "full": {
+      "width": 1488,
+      "height": 2079
+    },
+    "preview": {
+      "width": 372,
+      "height": 520
+    },
+    "thumb": {
+      "width": 186,
+      "height": 260
+    }
+  },
+  "zones": {
+    "card": {
+      "x": 0,
+      "y": 0,
+      "width": 1488,
+      "height": 2079,
+      "cornerRadius": 70
+    },
+    "safeArea": {
+      "x": 72,
+      "y": 72,
+      "width": 1344,
+      "height": 1935
+    },
+    "title": {
+      "x": 120,
+      "y": 86,
+      "width": 1030,
+      "height": 146,
+      "fontFamily": "Arial, Helvetica, sans-serif",
+      "fontSize": 70,
+      "fontWeight": 800
+    },
+    "developmentCost": {
+      "cx": 1262,
+      "cy": 154,
+      "radius": 92,
+      "fontFamily": "Arial, Helvetica, sans-serif",
+      "fontSize": 94,
+      "fontWeight": 900
+    },
+    "art": {
+      "x": 118,
+      "y": 255,
+      "width": 1252,
+      "height": 1140
+    },
+    "rulesText": {
+      "x": 138,
+      "y": 1435,
+      "width": 1060,
+      "height": 405,
+      "fontFamily": "Arial, Helvetica, sans-serif",
+      "fontSize": 50,
+      "fontWeight": 650,
+      "lineHeight": 62
+    },
+    "projectPoints": {
+      "x": 1224,
+      "y": 1708,
+      "width": 145,
+      "height": 145,
+      "fontFamily": "Arial, Helvetica, sans-serif",
+      "fontSize": 96,
+      "fontWeight": 900
+    }
+  },
+  "assetBoundaries": {
+    "artHasNoTextOrFrame": true,
+    "frameHasNoGameRules": true,
+    "renderedCardIsDisplayOnly": true,
+    "engineStateHashLegalActionsAiReplay": "forbidden"
+  }
+}
