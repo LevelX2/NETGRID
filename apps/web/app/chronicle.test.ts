@@ -340,6 +340,27 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify([paid, startTurn])).not.toContain("von The Shell Traders entfernt");
   });
 
+  it("keeps end-turn entries and shows card credit payouts as separate economy entries", () => {
+    const event = makeEvent("end_turn", {
+      actor: "runner",
+      gainedCredits: 2,
+      runnerCreditsAfter: 12,
+      corpRezzedIceThisTurnCount: 2,
+      sourceDefinitionId: "onr_v1_162_field-reporter-for-ice-and-data"
+    });
+    const item = formatChronicleEvent(event, "runner");
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Du hast den Zug beendet.");
+    expect(item.category).toBe("turn");
+    expect(effects).toHaveLength(1);
+    expect(effects[0]?.title).toBe("Die Korp hat in diesem Zug 2 ICE gerezzt. Du erhältst durch Field Reporter for Ice and Data 2 Credits.");
+    expect(effects[0]?.category).toBe("economy");
+    expect(effects[0]?.importance).toBe("important");
+    expect(effects[0]?.cardDefinitionId).toBe("onr_v1_162_field-reporter-for-ice-and-data");
+    expect(effects[0]?.chips).toEqual(expect.arrayContaining(["Zugende", "+2 Credits", "2 ICE gerezzt", "Field Reporter for Ice and Data"]));
+  });
+
   it("names generic card abilities from their public action label", () => {
     const item = formatChronicleEvent(
       makeEvent("trigger_ability", {

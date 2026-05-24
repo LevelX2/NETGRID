@@ -1329,9 +1329,11 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
 
 export function formatChronicleEffectItems(event: PublicGameEvent, side: Side): ChronicleItem[] {
   const effects = resolvedEffectsFromPayload(event.publicPayload.resolvedEffects);
-  return effects
+  const effectItems = effects
     .filter((effect) => !shouldMergeCardResolverEffect(event, effect))
     .map((effect, index) => formatChronicleEffect(event, effect, index, side));
+  const payloadItem = endTurnCreditPayoutChronicleItem(event, side);
+  return payloadItem ? [payloadItem, ...effectItems] : effectItems;
 }
 
 export function shouldSuppressChronicleEventItem(event: PublicGameEvent): boolean {
@@ -1683,6 +1685,46 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     ...(displayCardTitle ? { cardTitle: displayCardTitle } : {}),
     cardDetailLines: [],
     groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
+  };
+}
+
+function endTurnCreditPayoutChronicleItem(event: PublicGameEvent, side: Side): ChronicleItem | undefined {
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  if (actionType !== "end_turn") return undefined;
+  const gainedCredits = numberValue(payload.gainedCredits) ?? numberValue(payload.gainCreditsAmount);
+  if (gainedCredits === undefined || gainedCredits <= 0) return undefined;
+  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  const sourceTitle = titleForDefinitionId(sourceDefinitionId) ?? stringValue(payload.sourceTitle) ?? stringValue(payload.title);
+  const actor = sideValue(payload.actor);
+  const recipient = subjectFor(actor, side, false);
+  const rezzedIceCount = numberValue(payload.corpRezzedIceThisTurnCount) ?? numberValueFromRecord(payload.amounts, "corpRezzedIceThisTurnCount");
+  const iceClause =
+    rezzedIceCount !== undefined && rezzedIceCount > 0
+      ? `Die Korp hat in diesem Zug ${rezzedIceCount} ICE gerezzt. `
+      : "Die Korp hat in diesem Zug ICE gerezzt. ";
+  const recipientClause =
+    recipient === "Du"
+      ? "Du erhältst"
+      : `${recipient} erhält`;
+  const sourceClause = sourceTitle ? ` durch ${sourceTitle}` : "";
+  return {
+    id: `${event.eventId}:end-turn-credit-payout`,
+    category: "economy",
+    importance: "important",
+    visibility: "public",
+    ...(actor ? { actor } : {}),
+    title: `${iceClause}${recipientClause}${sourceClause} ${creditText(gainedCredits)}.`,
+    chips: uniqueChips([
+      "Zugende",
+      `+${gainedCredits} ${creditLabel(gainedCredits)}`,
+      ...(rezzedIceCount !== undefined && rezzedIceCount > 0 ? [`${rezzedIceCount} ICE gerezzt`] : []),
+      ...(sourceTitle ? [sourceTitle] : []),
+    ]),
+    ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
+    ...(sourceTitle ? { cardTitle: sourceTitle } : {}),
+    cardDetailLines: [],
+    groupLabel: groupLabelFor("economy", actor, undefined, undefined, undefined),
   };
 }
 
@@ -2212,6 +2254,11 @@ function stringValue(value: unknown): string | undefined {
 
 function numberValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function numberValueFromRecord(value: unknown, key: string): number | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  return numberValue((value as Record<string, unknown>)[key]);
 }
 
 function numberArrayValue(value: unknown): number[] {

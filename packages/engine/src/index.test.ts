@@ -8087,6 +8087,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.runner.credits).toBe(creditsBeforeEnd + 1);
     expect(state.runner.coreDamage).toBe(coreBeforeEnd + 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      gainedCredits: 1,
+      corpRezzedIceThisTurnCount: 1,
       damageType: "core",
       damageAmount: 1,
     });
