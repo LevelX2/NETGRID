@@ -247,9 +247,20 @@ import {
   resolveMicrotechAiInterfacePreAccessChoice,
   resolvePriorityWreckSpendChoice,
   sourcePayloadForSuccessfulRunReplacement,
-  type SuccessfulRunInterventionKind,
   type RunAccessTransitionHost,
 } from "./game/run/run-access-transition";
+import {
+  applyBodyweightDataCrecheSuccessfulRun,
+  applyDirectSuccessfulRunTriggers,
+  buildSuccessfulRunFollowupActions,
+  cleanupDelayedSuccessfulRunTemporaryIce,
+  finalizeDelayedSuccessfulRunAfterPassedIce,
+  resolveSuccessfulRunFollowupAbility,
+  resolveSuccessfulRunInterventionChoice as resolveSuccessfulRunInterventionChoiceInRunModule,
+  successfulRunInterventionCost,
+  successfulRunInterventionKindForDefinition,
+  type SuccessfulRunInterventionHost,
+} from "./game/run/successful-run-interventions";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -369,12 +380,10 @@ import {
   CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
   COROLLA_SPEED_CHIP_STRENGTH_HARDWARE_ID,
   EDGERUNNER_TEMPS_INSTALL_OPERATION_ID,
-  FALSE_ECHO_FORCE_REZ_PROGRAM_ID,
   FORGED_ACTIVATION_ORDERS_FORCE_REZ_EVENT_ID,
   JAPANESE_WATER_TORTURE_BREAKER_ID,
   MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
   MISC_FOR_SALE_TRASH_INSTALLED_EVENT_ID,
-  NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID,
   OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID,
   RABBIT_HQ_INTERFACE_PROGRAM_ID,
   SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
@@ -4879,30 +4888,6 @@ function isTokyoUnsuccessfulRunSource(
   return Boolean(tokyoUnsuccessfulRunWindowForCard(state, cardId));
 }
 
-function hasSuccessfulRunForceRezFollowup(
-  definitionId: CardDefinitionId,
-): boolean {
-  return (
-    cardImplementationForDefinitionId(definitionId)?.successfulRunFollowups?.some(
-      (followup) =>
-        followup.kind === "force_rez_ice_outermost_inward_after_successful_run",
-    ) ?? false
-  );
-}
-
-function successfulRunForceRezFollowupCreditCost(
-  definitionId: CardDefinitionId,
-): number {
-  const implementation =
-    cardImplementationForDefinitionId(definitionId)?.successfulRunFollowups?.find(
-      (followup) =>
-        followup.kind === "force_rez_ice_outermost_inward_after_successful_run",
-    );
-  if (implementation?.kind !== "force_rez_ice_outermost_inward_after_successful_run")
-    return 0;
-  return implementation.cost.amount;
-}
-
 function installedRunnerVirusSourceIds(
   state: GameState,
   predicate?: (implementation: CardVirusCounterImplementation) => boolean,
@@ -6743,126 +6728,6 @@ function availableRunnerRunStartCredits(state: GameState): number {
   return state.runner.credits + runnerRunRecurringCredits(state);
 }
 
-function successfulRunProgramActions(
-  state: GameState,
-  run: ActiveRun,
-): LegalAction[] {
-  if (!run.successful || run.phase !== "access") return [];
-  const used = new Set(run.successfulRunAbilityUsedSourceIds ?? []);
-  const actions: LegalAction[] = [];
-  for (const sourceCardId of state.runner.rig.programs.slice().sort()) {
-    if (used.has(sourceCardId)) continue;
-    const definition = definitionFor(state, sourceCardId);
-    const forceRezFollowup =
-      hasSuccessfulRunForceRezFollowup(definition.id) ||
-      (!cardImplementationForDefinitionId(definition.id) &&
-        definition.id === FALSE_ECHO_FORCE_REZ_PROGRAM_ID);
-    if (forceRezFollowup) {
-      const server = mustServer(state, run.attackedServerId);
-      const unrezzedCount = server.ice.filter(
-        (iceId) => !mustInstance(state.cardInstances, iceId).rezzed,
-      ).length;
-      if (unrezzedCount <= 0) continue;
-      const abilityCost = successfulRunForceRezFollowupCreditCost(definition.id);
-      if (state.runner.credits < abilityCost) continue;
-      actions.push(
-        action(
-          state,
-          "runner",
-          "trigger_ability",
-          `${definition.title}: ICE rezzen lassen`,
-          sourceCardId,
-          abilityCost > 0 ? [{ credits: abilityCost }] : [],
-          {
-            cardId: sourceCardId,
-            serverId: server.id,
-            v1922RunnerProgramAbility: "false_echo_force_rez",
-            falseEchoCreditCost: abilityCost,
-            unrezzedIceCount: unrezzedCount,
-          },
-        ),
-      );
-    }
-    const successfulRunFollowups =
-      cardImplementationForDefinitionId(definition.id)?.successfulRunFollowups ??
-      [];
-    if (
-      successfulRunFollowups.some(
-        (followup) => followup.kind === "reverse_ice_on_successful_run_fort",
-      ) ||
-      (!cardImplementationForDefinitionId(definition.id) &&
-        definition.id === NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID)
-    ) {
-      const server = mustServer(state, run.attackedServerId);
-      if (server.kind === "archives" || server.ice.length <= 1) continue;
-      actions.push(
-        action(
-          state,
-          "runner",
-          "trigger_ability",
-          `${definition.title}: ICE-Reihenfolge umkehren`,
-          sourceCardId,
-          [],
-          {
-            cardId: sourceCardId,
-            serverId: server.id,
-            v1922RunnerProgramAbility: "netspace_inverter_reverse_ice",
-            iceCount: server.ice.length,
-          },
-        ),
-      );
-    }
-    if (
-      definition.id === FAIT_ACCOMPLI_COUNTER_PROGRAM_ID &&
-      !cardImplementationForDefinitionId(definition.id)?.virusCounter
-    ) {
-      const server = mustServer(state, run.attackedServerId);
-      if (server.kind !== "remote") continue;
-      actions.push(
-        action(
-          state,
-          "runner",
-          "trigger_ability",
-          `${definition.title}: Remote mit Power-Counter markieren`,
-          sourceCardId,
-          [],
-          {
-            cardId: sourceCardId,
-            serverId: server.id,
-            v1919RunnerProgramAbility: "fait_accompli_successful_run_counter",
-            counterType: "power",
-            addCounterAmount: 1,
-          },
-        ),
-      );
-    }
-    if (
-      runnerUtilityLongtailKindForCard(state, sourceCardId) ===
-      "i_spy_successful_run_fort_counter_expose"
-    ) {
-      const server = mustServer(state, run.attackedServerId);
-      if (server.kind === "archives") continue;
-      actions.push(
-        action(
-          state,
-          "runner",
-          "trigger_ability",
-          `${definition.title}: Spy-Counter platzieren`,
-          sourceCardId,
-          [],
-          {
-            cardId: sourceCardId,
-            serverId: server.id,
-            runnerUtilityAbility: "i_spy_put_spy_counter",
-            counterType: "spy",
-          },
-        ),
-      );
-    }
-  }
-  return actions;
-}
-
 function spendRunnerAccessTrashCredits(
   state: GameState,
   amount: number,
@@ -7968,24 +7833,13 @@ function performAction(
         };
         return;
       }
-      if (legalAction.payload?.v1922RunnerProgramAbility === "false_echo_force_rez") {
-        resolveFalseEchoForceRez(state, legalAction);
-        return;
-      }
       if (
-        legalAction.payload?.v1922RunnerProgramAbility ===
-        "netspace_inverter_reverse_ice"
-      ) {
-        resolveNetspaceInverterReverseIce(state, legalAction);
+        resolveSuccessfulRunFollowupAbility(
+          successfulRunInterventionHost(state),
+          legalAction,
+        ).handled
+      )
         return;
-      }
-      if (
-        legalAction.payload?.v1919RunnerProgramAbility ===
-        "fait_accompli_successful_run_counter"
-      ) {
-        resolveFaitAccompliSuccessfulRunCounter(state, legalAction);
-        return;
-      }
       if (
         legalAction.payload?.v1922RunnerProgramAbility ===
         "startup_immolator_trash_ice"
@@ -8011,10 +7865,6 @@ function performAction(
       }
       if (legalAction.payload?.runnerUtilityAbility === "preying_mantis_gain_action") {
         resolvePreyingMantisGainAction(state, legalAction);
-        return;
-      }
-      if (legalAction.payload?.runnerUtilityAbility === "i_spy_put_spy_counter") {
-        resolveISpyPutSpyCounter(state, legalAction);
         return;
       }
       if (legalAction.payload?.corpAbility === "remove_spy_counter") {
@@ -8488,170 +8338,6 @@ function applyShellTradersStartOfTurn(
   }
 }
 
-function resolveFalseEchoForceRez(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf False Echo nutzen.");
-  const run = mustRun(state);
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
-    ServerId,
-    "new_remote"
-  >;
-  if (
-    !run.successful ||
-    run.phase !== "access" ||
-    serverId !== run.attackedServerId
-  )
-    throw new Error("False Echo ist nur direkt nach erfolgreichem Run legal.");
-  if (!state.runner.rig.programs.includes(sourceCardId))
-    throw new Error("False Echo ist nicht installiert.");
-  const sourceDefinitionId = definitionFor(state, sourceCardId).id;
-  if (
-    !hasSuccessfulRunForceRezFollowup(sourceDefinitionId) &&
-    !(
-      !cardImplementationForDefinitionId(sourceDefinitionId) &&
-      sourceDefinitionId === FALSE_ECHO_FORCE_REZ_PROGRAM_ID
-    )
-  )
-    throw new Error("Die False-Echo-Faehigkeit passt nicht zur Karte.");
-  const abilityCost = successfulRunForceRezFollowupCreditCost(sourceDefinitionId);
-  if (creditCostForAction(legalAction) !== abilityCost)
-    throw new Error("False Echo hat nicht mehr die erwarteten Kosten.");
-  if (state.runner.credits < abilityCost)
-    throw new Error("Runner kann False Echo nicht bezahlen.");
-  const used = run.successfulRunAbilityUsedSourceIds ?? [];
-  if (used.includes(sourceCardId))
-    throw new Error("False Echo wurde fuer diesen Run bereits genutzt.");
-  const server = mustServer(state, serverId);
-  if (abilityCost > 0) spendCredits(state, "runner", abilityCost);
-  const checkedIceIds = server.ice.slice();
-  let rezzedCount = 0;
-  let rezCostPaid = 0;
-  for (const iceId of checkedIceIds) {
-    const instance = mustInstance(state.cardInstances, iceId);
-    if (instance.rezzed) continue;
-    const cost = rezCostForCard(state, iceId);
-    if (state.corp.credits < cost) continue;
-    spendCredits(state, "corp", cost);
-    state.cardInstances[iceId] = {
-      ...instance,
-      rezzed: true,
-      faceup: true,
-    };
-    rezzedCount += 1;
-    rezCostPaid += cost;
-  }
-  run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId,
-    falseEchoCreditCost: abilityCost,
-    serverLabel: publicServerLabel(state, server.id) ?? server.id,
-    checkedIceCount: checkedIceIds.length,
-    rezzedIceCount: rezzedCount,
-    rezCostPaid,
-    corpCreditsAfter: state.corp.credits,
-    runnerCreditsAfter: state.runner.credits,
-  };
-}
-
-function resolveNetspaceInverterReverseIce(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Netspace Inverter nutzen.");
-  const run = mustRun(state);
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
-    ServerId,
-    "new_remote"
-  >;
-  if (
-    !run.successful ||
-    run.phase !== "access" ||
-    serverId !== run.attackedServerId
-  )
-    throw new Error(
-      "Netspace Inverter ist nur direkt nach erfolgreichem Run legal.",
-    );
-  if (!state.runner.rig.programs.includes(sourceCardId))
-    throw new Error("Netspace Inverter ist nicht installiert.");
-  const sourceDefinition = definitionFor(state, sourceCardId);
-  const reverseFollowup =
-    cardImplementationForDefinitionId(sourceDefinition.id)?.successfulRunFollowups?.some(
-      (followup) => followup.kind === "reverse_ice_on_successful_run_fort",
-    ) ?? false;
-  if (
-    !reverseFollowup &&
-    sourceDefinition.id !== NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID
-  )
-    throw new Error("Die Netspace-Inverter-Faehigkeit passt nicht zur Karte.");
-  const used = run.successfulRunAbilityUsedSourceIds ?? [];
-  if (used.includes(sourceCardId))
-    throw new Error("Netspace Inverter wurde fuer diesen Run bereits genutzt.");
-  const server = mustServer(state, serverId);
-  if (server.kind === "archives" || server.ice.length <= 1)
-    throw new Error("Dieses Remote kann nicht umgekehrt werden.");
-  server.ice.reverse();
-  run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: sourceDefinition.id,
-    serverLabel: publicServerLabel(state, server.id) ?? server.id,
-    iceCount: server.ice.length,
-    serverIceOrderReversed: true,
-  };
-}
-
-function resolveFaitAccompliSuccessfulRunCounter(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Fait Accompli nutzen.");
-  const run = mustRun(state);
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
-    ServerId,
-    "new_remote"
-  >;
-  if (
-    !run.successful ||
-    run.phase !== "access" ||
-    serverId !== run.attackedServerId
-  )
-    throw new Error("Fait Accompli ist nur direkt nach erfolgreichem Run legal.");
-  const server = mustServer(state, serverId);
-  if (server.kind !== "remote")
-    throw new Error("Fait Accompli markiert nur subsidiary data forts.");
-  if (!state.runner.rig.programs.includes(sourceCardId))
-    throw new Error("Fait Accompli ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== FAIT_ACCOMPLI_COUNTER_PROGRAM_ID)
-    throw new Error("Die Fait-Accompli-Faehigkeit passt nicht zur Karte.");
-  const used = run.successfulRunAbilityUsedSourceIds ?? [];
-  if (used.includes(sourceCardId))
-    throw new Error("Fait Accompli wurde fuer diesen Run bereits genutzt.");
-  addCardCounter(state, sourceCardId, "power", 1);
-  state.faitAccompliCountersByServer ??= {};
-  state.faitAccompliCountersByServer[serverId] =
-    Math.max(0, Math.floor(state.faitAccompliCountersByServer[serverId] ?? 0)) +
-    1;
-  run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
-    serverLabel: publicServerLabel(state, server.id) ?? server.id,
-    addedCounterAmount: 1,
-    remainingCounters: cardCounter(state, sourceCardId, "power"),
-    faitAccompliServerCounters:
-      state.faitAccompliCountersByServer[serverId] ?? 0,
-  };
-}
-
 function resolveStartupImmolatorTrashIce(
   state: GameState,
   legalAction: LegalAction,
@@ -8778,55 +8464,6 @@ function resolvePreyingMantisGainAction(
     gainedActions: 1,
     runnerClicksAfter: state.runner.clicks,
     unpreventableDamageDueAtEndOfTurn: true,
-  };
-}
-
-function resolveISpyPutSpyCounter(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf I Spy nutzen.");
-  const run = mustRun(state);
-  if (!run.successful || run.phase !== "access")
-    throw new Error("I Spy ist nur direkt nach einem erfolgreichen Run legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
-    ServerId,
-    "new_remote"
-  >;
-  if (!state.runner.rig.programs.includes(sourceCardId))
-    throw new Error("I Spy ist nicht installiert.");
-  if (
-    runnerUtilityLongtailKindForCard(state, sourceCardId) !==
-    "i_spy_successful_run_fort_counter_expose"
-  )
-    throw new Error("Die I-Spy-Faehigkeit passt nicht zur Karte.");
-  if (serverId !== run.attackedServerId)
-    throw new Error("I Spy kann nur den gerade erfolgreichen Fort markieren.");
-  const server = mustServer(state, serverId);
-  if (server.kind === "archives")
-    throw new Error("I Spy kann nur einen Data Fort markieren.");
-  const used = run.successfulRunAbilityUsedSourceIds ?? [];
-  if (used.includes(sourceCardId))
-    throw new Error("I Spy wurde fuer diesen Run bereits genutzt.");
-  trashRunnerInstalledCardToHeap(state, sourceCardId, legalAction);
-  state.spyCountersByServer = {
-    ...(state.spyCountersByServer ?? {}),
-    [server.id]: spyCountersForServer(state, server.id) + 1,
-  };
-  run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId].sort();
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    serverId: server.id,
-    serverLabel: publicServerLabel(state, server.id) ?? server.id,
-    counterType: "spy",
-    addedCounterAmount: 1,
-    spyCounterFort: server.id,
-    spyCountersAfter: spyCountersForServer(state, server.id),
-    exposedServerId: server.id,
-    exposedCount: server.ice.length + server.root.length,
   };
 }
 
@@ -10664,48 +10301,6 @@ function beginEncounter(
   state.activeSide = "runner";
 }
 
-function finalizeDelayedSuccessfulRunAfterPassedIce(
-  state: GameState,
-  passedIceId: CardInstanceId,
-  legalAction?: LegalAction,
-): void {
-  const run = state.run;
-  const delayed = run?.delayedSuccessfulRun;
-  if (!run || !delayed) return;
-  const matched =
-    delayed.temporaryIceId === passedIceId || delayed.installedIceId === passedIceId;
-  if (!matched) return;
-  if (delayed.temporaryIceId) {
-    const instance = state.cardInstances[delayed.temporaryIceId];
-    if (instance?.zone.side === "corp" && instance.zone.zone === "serverIce") {
-      trashCorpInstalledCardToArchives(state, delayed.temporaryIceId, legalAction);
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          temporaryEncounterTrashed: true,
-          temporaryIceSourceTitle: definitionFor(
-            state,
-            delayed.interventionSourceId,
-          ).title,
-        };
-      }
-    }
-  }
-  const { delayedSuccessfulRun: _delayed, ...runWithoutDelayed } = run;
-  void _delayed;
-  state.run = {
-    ...runWithoutDelayed,
-    successfulRunInterventionWindowClosed: true,
-  };
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      successfulRunFinalizedAfterIntervention: true,
-      delayedSuccessfulRun: false,
-    };
-  }
-}
-
 function continueRun(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
   if (run.phase === "movement") {
@@ -11145,7 +10740,11 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   }
   applyBartmossPostEncounterTrigger(state, run, legalAction);
   if (encounteredIceId)
-    finalizeDelayedSuccessfulRunAfterPassedIce(state, encounteredIceId, legalAction);
+    finalizeDelayedSuccessfulRunAfterPassedIce(
+      successfulRunInterventionHost(state),
+      encounteredIceId,
+      legalAction,
+    );
   movePastCurrentIce(state, legalAction);
 }
 
@@ -12105,45 +11704,6 @@ function continueFromMovement(state: GameState, legalAction?: LegalAction): void
   enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction);
 }
 
-function applyUniqueDirectSuccessfulRunTriggers(
-  state: GameState,
-  legalAction?: LegalAction,
-): void {
-  const karlSources = state.runner.rig.resources
-    .slice()
-    .sort()
-    .filter(
-      (cardId) =>
-        uniqueDirectLongtailKindForCard(state, cardId) ===
-        "karl_successful_run_credit",
-    );
-  if (karlSources.length === 0) return;
-  let gainedCredits = 0;
-  const sourceDefinitionIds: CardDefinitionId[] = [];
-  for (const sourceId of karlSources) {
-    const implementation = uniqueDirectLongtailImplementationForCard(
-      state,
-      sourceId,
-    );
-    if (implementation?.kind !== "karl_successful_run_credit") continue;
-    credits(state, "runner", implementation.amount);
-    gainedCredits += implementation.amount;
-    sourceDefinitionIds.push(definitionFor(state, sourceId).id);
-  }
-  if (gainedCredits <= 0 || !legalAction) return;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    successfulRunRunnerCreditGain:
-      Number(legalAction.payload?.successfulRunRunnerCreditGain ?? 0) +
-      gainedCredits,
-    gainedCredits:
-      Number(legalAction.payload?.gainedCredits ?? 0) + gainedCredits,
-    karlSuccessfulRunCreditGain: gainedCredits,
-    karlSuccessfulRunSourceDefinitionIds: sourceDefinitionIds.sort().join(","),
-    runnerCreditsAfter: state.runner.credits,
-  };
-}
-
 function archivesAccessRequiresDecisionOrEffect(
   state: GameState,
   cardId: CardInstanceId,
@@ -12883,9 +12443,11 @@ function finishRun(
   if (run) derezOliviaSalazarTemporaryIce(state, run, legalAction);
   if (run && successful)
     applyV181SuccessfulRunCounterTriggers(state, run, legalAction);
-  if (run && successful) {
-    applyBodyweightDataCrecheSuccessfulRun(state, run, legalAction);
-  }
+  if (run && successful)
+    applyBodyweightDataCrecheSuccessfulRun(
+      successfulRunInterventionHost(state),
+      legalAction,
+    );
   if (run && successful) {
     const flags = ensureRunnerTurnFlags(state);
     flags.successfulRunThisTurn = true;
@@ -12896,19 +12458,11 @@ function finishRun(
     run?.grantAllNighterBonusRunOnFinish === true;
   const bonus = successful ? (run?.pendingSuccessBonusCredits ?? 0) : 0;
   const corpBonus = tokyoChibaUnsuccessfulRunBonus(state, run, successful);
-  if (run?.delayedSuccessfulRun?.temporaryIceId) {
-    const temporaryIceId = run.delayedSuccessfulRun.temporaryIceId;
-    const instance = state.cardInstances[temporaryIceId];
-    if (instance?.zone.side === "corp" && instance.zone.zone === "serverIce") {
-      trashCorpInstalledCardToArchives(state, temporaryIceId, legalAction);
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          temporaryEncounterTrashed: true,
-        };
-      }
-    }
-  }
+  cleanupDelayedSuccessfulRunTemporaryIce(
+    successfulRunInterventionHost(state),
+    run,
+    legalAction,
+  );
   state.runner.credits += bonus;
   state.corp.credits += corpBonus.amount;
   if (run && corpBonus.amount > 0 && legalAction) {
@@ -13036,41 +12590,6 @@ function applyDupreRunEndCounters(state: GameState, run: ActiveRun): void {
       selectedServerId: run.attackedServerId,
     };
     addCardCounter(state, breakerId, "power", 1);
-  }
-}
-
-function applyBodyweightDataCrecheSuccessfulRun(
-  state: GameState,
-  _run: ActiveRun,
-  legalAction?: LegalAction,
-): void {
-  const sourceId = state.runner.rig.hardware
-    .slice()
-    .sort()
-    .find((cardId) => {
-      const definition = definitionFor(state, cardId);
-      const implementation = cardImplementationForDefinitionId(definition.id);
-      return implementation?.successfulRunFollowups?.some(
-        (followup) => followup.kind === "optional_make_run_after_successful_run",
-      );
-    });
-  if (!sourceId) return;
-  const sourceDefinitionId = definitionFor(state, sourceId).id;
-  const flags = ensureRunnerTurnFlags(state);
-  if (
-    flags.bodyweightDataCrecheExtraRunUsedThisTurn ||
-    flags.bodyweightDataCrecheExtraRunPending
-  )
-    return;
-  flags.bodyweightDataCrecheExtraRunPending = true;
-  flags.bodyweightDataCrecheExtraRunUsedThisTurn = true;
-  flags.allNighterBonusRunPending = true;
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      bodyweightDataCrecheExtraRunPending: true,
-      sourceDefinitionId,
-    };
   }
 }
 
@@ -18764,10 +18283,68 @@ function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
         cardCounter(state, cardId, counterType as CounterType),
     },
     callbacks: {
-      successfulRunProgramActions: (run) => successfulRunProgramActions(state, run),
+      successfulRunProgramActions: (run) =>
+        buildSuccessfulRunFollowupActions(successfulRunInterventionHost(state), run),
       runnerDuringRunCardImplementationActions: () =>
         runnerDuringRunCardImplementationActions(state),
       mysteryBoxRunActions: (run) => mysteryBoxRunActions(state, run),
+    },
+  };
+}
+
+function successfulRunInterventionHost(
+  state: GameState,
+): SuccessfulRunInterventionHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+    },
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
+    },
+    actions: {
+      createRunnerTriggerAction: (label, sourceCardId, costs, payload) =>
+        action(state, "runner", "trigger_ability", label, sourceCardId, costs, payload),
+    },
+    choices: {
+      selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
+    },
+    costs: {
+      creditCostForAction: (legalAction) => creditCostForAction(legalAction),
+      rezCostForCard: (cardId) => rezCostForCard(state, cardId),
+    },
+    credits: {
+      spend: (side, amount) => spendCredits(state, side, amount),
+      gainRunner: (amount) => credits(state, "runner", amount),
+    },
+    counters: {
+      cardCounter: (cardId, counterType) =>
+        cardCounter(state, cardId, counterType as CounterType),
+      addCardCounter: (cardId, counterType, amount) =>
+        addCardCounter(state, cardId, counterType as CounterType, amount),
+    },
+    runner: {
+      ensureTurnFlags: () => ensureRunnerTurnFlags(state),
+    },
+    zones: {
+      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+      trashCorpInstalledCardToArchives: (cardId, legalAction) =>
+        trashCorpInstalledCardToArchives(state, cardId, legalAction),
+      trashRunnerInstalledCardToHeap: (cardId, legalAction) =>
+        trashRunnerInstalledCardToHeap(state, cardId, legalAction),
+    },
+    encounter: {
+      beginEncounter: (iceId, legalAction) =>
+        beginEncounter(state, iceId, legalAction),
+      approachOrEncounterIce: (iceId, legalAction) =>
+        approachOrEncounterIce(state, iceId, legalAction),
+    },
+    access: {
+      startAccessFromSuccessfulRun: (legalAction) =>
+        enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction),
     },
   };
 }
@@ -18914,23 +18491,22 @@ function runAccessTransitionHost(state: GameState): RunAccessTransitionHost {
       finishRun: (successful, legalAction) =>
         finishRun(state, successful, legalAction),
       applyUniqueDirectSuccessfulRunTriggers: (legalAction) =>
-        applyUniqueDirectSuccessfulRunTriggers(state, legalAction),
+        applyDirectSuccessfulRunTriggers(
+          successfulRunInterventionHost(state),
+          legalAction,
+        ),
       successfulRunInterventionKindForSource: (sourceCardId) => {
-        const window = fortRunWindowImplementationsForDefinition(
+        return successfulRunInterventionKindForDefinition(
           definitionFor(state, sourceCardId).id,
-        ).find(
-          (candidate) =>
-            candidate.kind ===
-              "temporary_hq_ice_encounter_after_successful_run" ||
-            candidate.kind === "install_hq_ice_innermost_after_successful_run",
         );
-        return window?.kind as SuccessfulRunInterventionKind | undefined;
       },
-      successfulRunInterventionCost: (kind, serverId, hqIceId) => {
-        if (kind === "temporary_hq_ice_encounter_after_successful_run")
-          return Math.max(0, Math.floor(rezCostForCard(state, hqIceId) / 2));
-        return Math.max(0, Math.floor(mustServer(state, serverId).ice.length));
-      },
+      successfulRunInterventionCost: (kind, serverId, hqIceId) =>
+        successfulRunInterventionCost(
+          successfulRunInterventionHost(state),
+          kind,
+          serverId,
+          hqIceId,
+        ),
     },
     choices: {
       selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
@@ -19276,7 +18852,11 @@ function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_54.delayed_success")) {
-    resolveSuccessfulRunInterventionChoice(state, legalAction, playerAction);
+    resolveSuccessfulRunInterventionChoiceInRunModule(
+      successfulRunInterventionHost(state),
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (state.pendingChoice.source.startsWith("v199.chimera_daemon_trash")) {
@@ -20735,149 +20315,6 @@ function resolveAardvarkInterceptionChoice(
   }
 
   delete state.pendingChoice;
-}
-
-function resolveSuccessfulRunInterventionChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_54.delayed_success"))
-    throw new Error("Es ist keine Delayed-Success-Choice offen.");
-  const [, sourceCardId = "", kind = "", serverId = ""] = choice.source.split(":");
-  if (
-    kind !== "temporary_hq_ice_encounter_after_successful_run" &&
-    kind !== "install_hq_ice_innermost_after_successful_run"
-  )
-    throw new Error("Die Delayed-Success-Choice ist ungueltig.");
-  const run = mustRun(state);
-  if (
-    !sourceCardId ||
-    !state.cardInstances[sourceCardId] ||
-    run.attackedServerId !== serverId ||
-    run.position.kind !== "server" ||
-    run.delayedSuccessfulRun
-  )
-    throw new Error("Der Delayed-Success-Kontext ist nicht mehr gueltig.");
-  const server = mustServer(state, run.attackedServerId);
-  if (!server.root.includes(sourceCardId) || !mustInstance(state.cardInstances, sourceCardId).rezzed)
-    throw new Error("Die Delayed-Success-Quelle ist nicht mehr gueltig.");
-  const transitionHost = runAccessTransitionHost(state);
-  const interventionKind = kind as SuccessfulRunInterventionKind;
-  if (
-    transitionHost.run.successfulRunInterventionKindForSource(sourceCardId) !==
-    interventionKind
-  )
-    throw new Error("Die Delayed-Success-Quelle passt nicht zur Karte.");
-  const used = run.successfulRunInterventionUsedSourceIds ?? [];
-  if (used.includes(sourceCardId))
-    throw new Error("Diese Delayed-Success-Quelle wurde bereits genutzt.");
-
-  const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const option = choice.options.find((candidate) => candidate.id === selectedId);
-  if (!option) throw new Error("Die Delayed-Success-Auswahl ist ungueltig.");
-  const definition = definitionFor(state, sourceCardId);
-  if (option.value === "decline") {
-    run.successfulRunInterventionWindowClosed = true;
-    delete state.pendingChoice;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      delayedSuccessfulRun: false,
-      fortWindowSourceTitle: definition.title,
-      sourceDefinitionId: definition.id,
-      sourceCardId,
-      serverId: run.attackedServerId,
-    };
-    enterAccessFromSuccessfulRun(transitionHost, legalAction);
-    return;
-  }
-
-  const hqIceId = typeof option.value === "string" ? option.value : "";
-  if (!hqIceId || !state.corp.hq.includes(hqIceId))
-    throw new Error("Das gewaehlte HQ-ICE ist nicht mehr in HQ.");
-  if (definitionFor(state, hqIceId).type !== "ice")
-    throw new Error("Delayed Success darf nur ICE aus HQ waehlen.");
-  const cost = transitionHost.run.successfulRunInterventionCost(
-    interventionKind,
-    server.id,
-    hqIceId,
-  );
-  spendCredits(state, "corp", cost);
-  removeFromAllZones(state, hqIceId);
-  server.ice.unshift(hqIceId);
-  run.successfulRunInterventionUsedSourceIds = [...used, sourceCardId];
-  run.successfulRunInterventionWindowClosed = true;
-  delete state.pendingChoice;
-
-  if (kind === "temporary_hq_ice_encounter_after_successful_run") {
-    state.cardInstances[hqIceId] = {
-      ...mustInstance(state.cardInstances, hqIceId),
-      faceup: true,
-      rezzed: true,
-      zone: { side: "corp", zone: "serverIce", serverId: server.id },
-    };
-    state.run = {
-      ...run,
-      phase: "encounter_ice",
-      position: { kind: "ice", serverId: server.id, iceIndex: 0 },
-      approachedIceId: hqIceId,
-      delayedSuccessfulRun: {
-        originalServerId: server.id,
-        interventionSourceId: sourceCardId,
-        pendingMode: "temporary_hq_ice_encounter",
-        temporaryIceId: hqIceId,
-      },
-    };
-    beginEncounter(state, hqIceId, legalAction);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      delayedSuccessfulRun: true,
-      temporaryEncounter: true,
-      temporaryIceSourceTitle: definition.title,
-      fortWindowSourceTitle: definition.title,
-      sourceDefinitionId: definition.id,
-      sourceCardId,
-      selectedIceDefinitionId: definitionFor(state, hqIceId).id,
-      rezCostPaid: cost,
-      serverId: server.id,
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_54_dr_dreff_temporary_encounter",
-    };
-    return;
-  }
-
-  state.cardInstances[hqIceId] = {
-    ...mustInstance(state.cardInstances, hqIceId),
-    faceup: false,
-    rezzed: false,
-    zone: { side: "corp", zone: "serverIce", serverId: server.id },
-  };
-  state.run = {
-    ...run,
-    phase: "approach_ice",
-    position: { kind: "ice", serverId: server.id, iceIndex: 0 },
-    approachedIceId: hqIceId,
-    delayedSuccessfulRun: {
-      originalServerId: server.id,
-      interventionSourceId: sourceCardId,
-      pendingMode: "installed_ice_immediate_approach",
-      installedIceId: hqIceId,
-    },
-  };
-  approachOrEncounterIce(state, hqIceId, legalAction);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    delayedSuccessfulRun: true,
-    installedInnermost: true,
-    fortWindowSourceTitle: definition.title,
-    sourceDefinitionId: definition.id,
-    sourceCardId,
-    installCostPaid: cost,
-    serverId: server.id,
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_54_jenny_jett_install_approach",
-  };
 }
 
 function resolveChimeraDaemonTrashChoice(
