@@ -220,6 +220,14 @@ import {
   type CorpSpecialDamageAbilityHost,
 } from "./game/corp/special-damage-abilities";
 import {
+  availableRunnerAccessTrashCredits,
+  buildRunnerAccessActions,
+  canFreeTrashCurrentAccessCard,
+  effectiveAccessTrashCost,
+  runnerAccessTrashRecurringCreditSourceIds,
+  type RunnerAccessActionHost,
+} from "./game/access/access-actions";
+import {
   handleAccessEffectsForCard,
   resolveAccessPaymentChoice,
   resolveChimeraDaemonTrashChoice as resolveAccessChimeraDaemonTrashChoice,
@@ -273,7 +281,6 @@ import {
   type RuntimeIcebreakerAbility,
 } from "./ability-engine/icebreaker-abilities";
 import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
-import { quoteAccessTrashCost } from "./ability-engine/trash-cost-modifiers";
 import {
   CARD_IMPLEMENTATIONS,
   cardImplementationForDefinitionId,
@@ -354,7 +361,6 @@ import {
   NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID,
   OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID,
   RABBIT_HQ_INTERFACE_PROGRAM_ID,
-  SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID,
   SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
   SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID,
   STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID,
@@ -408,7 +414,6 @@ import {
   NEVINYRRAL_ID,
   PATTELS_VIRUS_ID,
   PILE_DRIVER_ID,
-  POLTERGEIST_ID,
   POX_ID,
   RAMMING_PISTON_ID,
   RONIN_AROUND_ID,
@@ -444,10 +449,7 @@ import {
   RUN_TAX_UPGRADE_CARD_IDS,
   TAG_CONDITION_UPGRADE_CARD_IDS,
 } from "./mechanics/trace-tags";
-import {
-  quoteStealCostForAccessedAgenda,
-  snapshotPersistentStealCostModifiersForSource,
-} from "./ability-engine/steal-cost-modifiers";
+import { snapshotPersistentStealCostModifiersForSource } from "./ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "./ability-engine/card-implementation-effect-adapters";
 import {
   canPlayPrintedCostOnPlayImplementation,
@@ -2188,7 +2190,9 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
     return side === "runner" ? runnerMovementActions(state) : [];
   }
   if (state.timingPoint === "access.resolve_card")
-    return side === "runner" ? runnerAccessActions(state) : [];
+    return side === "runner"
+      ? buildRunnerAccessActions(runnerAccessActionHost(state)).legalActions
+      : [];
   return [];
 }
 
@@ -6833,358 +6837,18 @@ function successfulRunProgramActions(
   return actions;
 }
 
-function runnerAccessActions(state: GameState): LegalAction[] {
-  const run = mustRun(state);
-  const successfulRunActions = successfulRunProgramActions(state, run);
-  if (successfulRunActions.length > 0) return successfulRunActions;
-  if (!run.accessedCardId) {
-    const mysteryBoxActions = [
-      ...runnerDuringRunCardImplementationActions(state),
-      ...mysteryBoxRunActions(state, run),
-    ];
-    if (hasPendingAccessCandidate(state, run))
-      return [
-        ...mysteryBoxActions,
-        action(state, "runner", "access_card", "Karte accessen", "game_rule"),
-      ];
-    if (mysteryBoxActions.length > 0) return mysteryBoxActions;
-    return [
-      action(
-        state,
-        "runner",
-        "continue_run",
-        "Zugriff abschließen",
-        "game_rule",
-      ),
-    ];
-  }
-  const definition = definitionFor(state, run.accessedCardId);
-  const freeTrashEnabled = canFreeTrashCurrentAccessCard(
-    state,
-    run,
-    definition,
-  );
-  const accessedFromArchives = isCurrentAccessFromArchives(state, run);
-  if (definition.type === "agenda") {
-    const accessServerId =
-      run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
-    const stealCostQuote = quoteStealCostForAccessedAgenda(
-      state,
-      accessServerId,
-      definition,
-    );
-    if (stealCostQuote.totalCost > 0) {
-      if (state.runner.credits < stealCostQuote.totalCost) {
-        return [
-          action(
-            state,
-            "runner",
-            "decline_trash",
-            `${definition.title} nicht stehlen`,
-            "game_rule",
-            [],
-            {
-              cardId: run.accessedCardId,
-              ...stealCostQuote.publicPayload,
-              stealBlockedByCost: true,
-            },
-          ),
-        ];
-      }
-      return [
-        action(
-          state,
-          "runner",
-          "steal_agenda",
-          `${definition.title} stehlen`,
-          run.accessedCardId,
-          [{ credits: stealCostQuote.totalCost }],
-          {
-            cardId: run.accessedCardId,
-            ...stealCostQuote.publicPayload,
-          },
-        ),
-      ];
-    }
-    return [
-      action(
-        state,
-        "runner",
-        "steal_agenda",
-        `${definition.title} stehlen`,
-        run.accessedCardId,
-      ),
-    ];
-  }
-  if (accessedFromArchives) {
-    return [action(state, "runner", "decline_trash", run.breach ? "Weiter accessen" : "Zugriff abschließen", "game_rule")];
-  }
-  if (definition.type === "asset" || definition.type === "upgrade") {
-    const actions: LegalAction[] = [];
-    const trashCost = effectiveAccessTrashCost(state, run.accessedCardId);
-    if (freeTrashEnabled) {
-      actions.push(
-        action(
-          state,
-          "runner",
-          "trash_accessed_card",
-          `${definition.title} kostenlos trashen`,
-          run.accessedCardId,
-          [],
-          {
-            accessTrashCostOverride: 0,
-            freeAccessTrash: true,
-          },
-        ),
-      );
-    } else if (
-      availableRunnerAccessTrashCredits(state, run.accessedCardId) >=
-      trashCost.totalCost
-    ) {
-      const scatterShotRecurringCreditsAvailable =
-        scatterShotRecurringCreditSourceIds(state, run.accessedCardId).reduce(
-          (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
-          0,
-        );
-      const poltergeistRecurringCreditsAvailable =
-        poltergeistRecurringCreditSourceIds(state, run.accessedCardId).reduce(
-          (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
-          0,
-        );
-      actions.push(
-        action(
-          state,
-          "runner",
-          "trash_accessed_card",
-          `${definition.title} trashen`,
-          run.accessedCardId,
-          [{ credits: trashCost.totalCost }],
-          {
-            accessTrashBaseCost: trashCost.baseCost,
-            accessTrashCostModifier: trashCost.modifier,
-            accessTrashTotalCost: trashCost.totalCost,
-            ...(trashCost.sourceDefinitionIds.length > 0
-              ? {
-                  accessTrashCostSourceDefinitionIds:
-                    trashCost.sourceDefinitionIds.join(","),
-                  accessTrashCostSourceTitles: trashCost.sourceTitles.join(","),
-                }
-              : {}),
-            ...(scatterShotRecurringCreditsAvailable > 0 &&
-            definition.type === "upgrade"
-              ? {
-                  v1922RunnerProgramAbility:
-                    "scatter_shot_upgrade_trash_recurring_credit",
-                  scatterShotRecurringCreditsAvailable,
-                }
-              : {}),
-            ...(poltergeistRecurringCreditsAvailable > 0 &&
-            definition.type === "asset"
-              ? {
-                  v1922RunnerProgramAbility:
-                    "poltergeist_node_trash_recurring_credit",
-                  poltergeistRecurringCreditsAvailable,
-                }
-              : {}),
-          },
-        ),
-      );
-    }
-    actions.push(
-      action(state, "runner", "decline_trash", "Nicht trashen", "game_rule"),
-    );
-    return actions;
-  }
-  if (freeTrashEnabled) {
-    return [
-      action(
-        state,
-        "runner",
-        "trash_accessed_card",
-        `${definition.title} kostenlos trashen`,
-        run.accessedCardId,
-        [],
-        {
-          accessTrashCostOverride: 0,
-          freeAccessTrash: true,
-        },
-      ),
-      action(
-        state,
-        "runner",
-        "decline_trash",
-        run.breach ? "Weiter accessen" : "Access abschließen",
-        "game_rule",
-      ),
-    ];
-  }
-  return [
-    action(
-      state,
-      "runner",
-      "decline_trash",
-      run.breach ? "Weiter accessen" : "Access abschließen",
-      "game_rule",
-    ),
-  ];
-}
-
-function hasPendingAccessCandidate(state: GameState, run: ActiveRun): boolean {
-  if (run.breach)
-    return run.breach.queue[run.breach.currentIndex]?.status === "pending";
-  const server = mustServer(state, run.attackedServerId);
-  if (server.id === "rd") return state.corp.rd.length > 0;
-  if (server.id === "hq") return state.corp.hq.length > 0;
-  if (server.id === "archives") return state.corp.archives.length > 0;
-  return server.root.length > 0;
-}
-
-function canFreeTrashCurrentAccessCard(
-  state: GameState,
-  run: ActiveRun,
-  definition: CardDefinition,
-): boolean {
-  if (definition.type === "agenda") return false;
-  const allowedZones = run.freeTrashAccessZones ?? [];
-  if (allowedZones.length === 0) return false;
-  const currentZone =
-    run.breach?.queue[run.breach.currentIndex]?.zone ??
-    accessQueueZone(run.accessServerOverride ?? run.attackedServerId);
-  if (currentZone !== "rd" && currentZone !== "hq") return false;
-  return allowedZones.includes(currentZone);
-}
-
-function isCurrentAccessFromArchives(
-  state: GameState,
-  run: ActiveRun,
-): boolean {
-  const cardId = run.accessedCardId;
-  if (!cardId) return false;
-  const currentEntry = run.breach?.queue[run.breach.currentIndex];
-  if (currentEntry?.cardInstanceId === cardId)
-    return currentEntry.zone === "archives";
-  const zone = mustInstance(state.cardInstances, cardId).zone;
-  return zone.side === "corp" && zone.zone === "archives";
-}
-
-function effectiveAccessTrashCost(
-  state: GameState,
-  cardId: CardInstanceId,
-): {
-  baseCost: number;
-  modifier: number;
-  totalCost: number;
-  sourceDefinitionIds: CardDefinitionId[];
-  sourceTitles: string[];
-} {
-  const definition = definitionFor(state, cardId);
-  const baseCost = definition.trashCost ?? 0;
-  const zone = mustInstance(state.cardInstances, cardId).zone;
-  if (
-    zone.side === "corp" &&
-    zone.zone === "serverRoot" &&
-    (definition.type === "asset" || definition.type === "upgrade")
-  ) {
-    const quote = quoteAccessTrashCost(state, cardId, definition, baseCost);
-    return {
-      ...quote,
-      sourceDefinitionIds: quote.modifiers.map(
-        (modifier) => modifier.sourceDefinitionId,
-      ),
-      sourceTitles: quote.modifiers.map((modifier) => modifier.sourceTitle),
-    };
-  }
-  return {
-    baseCost,
-    modifier: 0,
-    totalCost: baseCost,
-    sourceDefinitionIds: [],
-    sourceTitles: [],
-  };
-}
-
-function scatterShotRecurringCreditSourceIds(
-  state: GameState,
-  accessedCardId: CardInstanceId,
-): CardInstanceId[] {
-  const accessedDefinition = definitionFor(state, accessedCardId);
-  if (accessedDefinition.type !== "upgrade") return [];
-  return [
-    ...restrictedHostedCreditSourceIds(state, "trash_upgrades", {
-      accessedCardId,
-    }),
-    ...state.runner.rig.programs.filter(
-      (cardId) =>
-        !isRestrictedHostedCreditSource(definitionFor(state, cardId)) &&
-        definitionFor(state, cardId).id === SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID &&
-        cardCounter(state, cardId, "recurring_credit") > 0,
-    ),
-  ].sort();
-}
-
-function poltergeistRecurringCreditSourceIds(
-  state: GameState,
-  accessedCardId: CardInstanceId,
-): CardInstanceId[] {
-  const accessedDefinition = definitionFor(state, accessedCardId);
-  if (accessedDefinition.type !== "asset") return [];
-  return [
-    ...restrictedHostedCreditSourceIds(state, "trash_nodes", {
-      accessedCardId,
-    }),
-    ...state.runner.rig.programs.filter(
-      (cardId) =>
-        !isRestrictedHostedCreditSource(definitionFor(state, cardId)) &&
-        definitionFor(state, cardId).id === POLTERGEIST_ID &&
-        cardCounter(state, cardId, "recurring_credit") > 0,
-    ),
-  ].sort();
-}
-
-function runnerAccessTrashRecurringCreditSourceIds(
-  state: GameState,
-  accessedCardId: CardInstanceId,
-): CardInstanceId[] {
-  return [
-    ...scatterShotRecurringCreditSourceIds(state, accessedCardId),
-    ...poltergeistRecurringCreditSourceIds(state, accessedCardId),
-  ].sort();
-}
-
-function runnerAccessTrashRecurringCredits(
-  state: GameState,
-  accessedCardId: CardInstanceId,
-): number {
-  return runnerAccessTrashRecurringCreditSourceIds(state, accessedCardId).reduce(
-    (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
-    0,
-  );
-}
-
-function availableRunnerAccessTrashCredits(
-  state: GameState,
-  accessedCardId: CardInstanceId,
-): number {
-  return (
-    state.runner.credits +
-    runnerAccessTrashRecurringCredits(state, accessedCardId)
-  );
-}
-
 function spendRunnerAccessTrashCredits(
   state: GameState,
   amount: number,
   accessedCardId: CardInstanceId,
 ): { recurringSpent: number; runnerCreditsSpent: number } {
   if (amount <= 0) return { recurringSpent: 0, runnerCreditsSpent: 0 };
-  if (availableRunnerAccessTrashCredits(state, accessedCardId) < amount)
+  const host = runnerAccessActionHost(state);
+  if (availableRunnerAccessTrashCredits(host, accessedCardId) < amount)
     throw new Error("Der Runner kann die Trashkosten nicht bezahlen.");
   let remaining = amount;
   let recurringSpent = 0;
-  for (const cardId of runnerAccessTrashRecurringCreditSourceIds(
-    state,
-    accessedCardId,
-  )) {
+  for (const cardId of runnerAccessTrashRecurringCreditSourceIds(host, accessedCardId)) {
     if (remaining <= 0) break;
     const available = hostedPaymentCredits(state, cardId);
     const spent = Math.min(available, remaining);
@@ -13453,7 +13117,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     handleAccessEffectsForCard(accessEffectHandlerHost(state, legalAction), cardId);
     const definition = definitionFor(state, cardId);
     const freeTrashAccess = canFreeTrashCurrentAccessCard(
-      state,
+      runnerAccessActionHost(state),
       run,
       definition,
     );
@@ -13496,7 +13160,11 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   resolveAmbushOnAccessFoundation(state, cardId, legalAction);
   handleAccessEffectsForCard(accessEffectHandlerHost(state, legalAction), cardId);
   const definition = definitionFor(state, cardId);
-  const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
+  const freeTrashAccess = canFreeTrashCurrentAccessCard(
+    runnerAccessActionHost(state),
+    run,
+    definition,
+  );
   if (
     definition.type !== "agenda" &&
     definition.type !== "asset" &&
@@ -13664,7 +13332,7 @@ function trashAccessedCard(
       ? Math.max(0, Math.floor(rawOverride))
       : undefined;
   const effectiveCost = effectiveAccessTrashCost(
-    state,
+    runnerAccessActionHost(state),
     cardId as CardInstanceId,
   );
   const trashCost = overrideCost ?? effectiveCost.totalCost;
@@ -20171,6 +19839,41 @@ function corpSpecialDamageAbilityHost(
     trash: {
       trashCorpInstalledCardToArchives: (cardId) =>
         trashCorpInstalledCardToArchives(state, cardId),
+    },
+  };
+}
+
+function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+      cardHasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
+    },
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+    },
+    actions: {
+      buildLegalAction: (side, type, label, source, costs, payload) =>
+        action(state, side, type, label, source, costs, payload),
+    },
+    payment: {
+      hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
+      restrictedHostedCreditSourceIds: (use, options) =>
+        restrictedHostedCreditSourceIds(state, use, options),
+      isRestrictedHostedCreditSource: (definition) =>
+        isRestrictedHostedCreditSource(definition),
+    },
+    counters: {
+      cardCounter: (cardId, counterType) =>
+        cardCounter(state, cardId, counterType as CounterType),
+    },
+    callbacks: {
+      successfulRunProgramActions: (run) => successfulRunProgramActions(state, run),
+      runnerDuringRunCardImplementationActions: () =>
+        runnerDuringRunCardImplementationActions(state),
+      mysteryBoxRunActions: (run) => mysteryBoxRunActions(state, run),
     },
   };
 }
