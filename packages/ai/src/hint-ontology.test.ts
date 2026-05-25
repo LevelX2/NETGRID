@@ -23,6 +23,33 @@ describe("AI hint ontology validation", () => {
     expect(failures).toEqual([]);
   });
 
+  it("keeps the Phase 2 high-impact pilot cards structured and valid", () => {
+    const pilotCardIds = [
+      "onr_v1_210_political-overthrow",
+      "onr_v1_037_japanese-water-torture",
+      "onr_v1_059_self-modifying-code",
+      "onr_v1_043_mystery-box",
+      "onr_v1_057_scatter-shot",
+      "onr_v1_355_crystal-palace-station-grid",
+      "onr_v1_366_red-herrings",
+      "onr_v1_274_tutor",
+      "onr_v1_277_virizz",
+      "onr_v1_302_scorched-earth",
+    ];
+    const hintsByCard = new Map(
+      activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
+    );
+
+    for (const cardId of pilotCardIds) {
+      const hint = hintsByCard.get(cardId);
+      expect(hint, cardId).toBeDefined();
+      expect(validateAiHintOntologyFields(hint).errors, cardId).toEqual([]);
+      expect(hint?.effects?.length, cardId).toBeGreaterThan(0);
+      expect(hint?.quality?.hintReviewed, cardId).toBe(true);
+      expect(hint?.quality?.strategyCovered, cardId).toBe(false);
+    }
+  });
+
   it("accepts a scored-agenda economy structured effect", () => {
     const result = validateAiHintOntologyFields({
       effects: [
