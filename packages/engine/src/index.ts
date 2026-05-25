@@ -75,6 +75,10 @@ import {
   traceBaseLinkChoicePublicPayload,
 } from "./game/trace/base-link";
 import {
+  resolvePendingChoice,
+  type PendingChoiceResolutionHost,
+} from "./game/choices/pending-choice-resolution";
+import {
   requireTracePhase,
   traceIsInPhase,
   tracePostBidLinkSourceUsed,
@@ -5712,7 +5716,11 @@ function performAction(
       changeCardControl(state, legalAction);
       return;
     case "resolve_choice":
-      resolvePendingChoice(state, legalAction, playerAction);
+      resolvePendingChoice(
+        pendingChoiceResolutionHost(state),
+        legalAction,
+        playerAction,
+      );
       return;
     case "end_turn":
       endTurn(state, legalAction.side, legalAction);
@@ -15500,325 +15508,101 @@ function pushCorpTraceDamageOrCardImplementationActions(
   );
 }
 
-function resolvePendingChoice(
+function pendingChoiceResolutionHost(
   state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choiceId = String(legalAction.payload?.choiceId ?? "");
-  if (!state.pendingChoice || state.pendingChoice.choiceId !== choiceId)
-    throw new Error("Diese Choice ist nicht offen.");
-  if (state.pendingChoice.source === "setup.mulligan") {
-    resolveSetupMulliganChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source === "discard_phase") {
-    resolveDiscardChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v121.replacement")) {
-    resolveReplacementChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v120.event_modification")) {
-    resolveEventModificationChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.trace) {
-    if (traceIsInPhase(state, "corp_bid")) {
-      resolveTraceCorpBid(state, legalAction, playerAction);
-      return;
-    }
-    if (traceIsInPhase(state, "base_link")) {
-      resolveTraceBaseLinkChoice(state, legalAction, playerAction);
-      return;
-    }
-    if (traceIsInPhase(state, "post_bid_link")) {
-      resolveTracePostBidLinkChoice(state, legalAction, playerAction);
-      return;
-    }
-    resolveTraceRunnerBid(state, legalAction, playerAction);
-    return;
-  }
-  const hiddenZoneArrangeChoice = handleHiddenZoneArrangeChoice(
-    hiddenZoneArrangeChoiceHandlerHost(state, legalAction, playerAction),
-  );
-  if (hiddenZoneArrangeChoice.handled) return;
-  const hiddenZoneNonSearchChoice = handleHiddenZoneNonSearchChoice(
-    hiddenZoneNonSearchChoiceHandlerHost(state, legalAction, playerAction),
-  );
-  if (hiddenZoneNonSearchChoice.handled) return;
-  const corpZoneChoice = handleCorpZoneChoice(
-    corpZoneChoiceHandlerHost(state, legalAction, playerAction),
-  );
-  if (corpZoneChoice.handled) return;
-  const corpInstallRezSequenceChoice = handleCorpInstallRezSequenceChoice(
-    corpInstallRezSequenceHandlerHost(state, legalAction, playerAction),
-  );
-  if (corpInstallRezSequenceChoice.handled) return;
-  const scoredAgendaFlowChoice = handleScoredAgendaFlowChoice(
-    scoredAgendaFlowHost(state, legalAction, playerAction),
-  );
-  if (scoredAgendaFlowChoice.handled) return;
-  if (
-    isP358HiddenReplacementCompatibilityChoiceSource(
-      state.pendingChoice.source,
-    )
-  ) {
-    resolveP358HiddenReplacementChoice(state, legalAction, playerAction);
-    return;
-  }
-  const hiddenZoneSearchChoice = handleHiddenZoneSearchChoice(
-    hiddenZoneSearchChoiceHandlerHost(state, legalAction, playerAction),
-  );
-  if (hiddenZoneSearchChoice.handled) {
-    if (hiddenZoneSearchChoice.deletePendingChoice) delete state.pendingChoice;
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("runner_program_trash_before_install")
-  ) {
-    resolveRunnerProgramTrashBeforeInstallChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1912.hunt_club_bbs_expose")) {
-    resolveHuntClubBbsExposeChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("p3_36.expose_installed_cards")) {
-    resolveExposeInstalledCorpCardsChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
-    resolveInvestmentFirmCreditChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("p3_61.crash_draw")) {
-    resolveCrashEverettDrawChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1914.power_grid_overload")) {
-    resolvePowerGridOverloadChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith(
-      "v1919.systematic_layoffs_advancement",
-    )
-  ) {
-    resolveSystematicLayoffsAdvancementChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1918.singapore_city_grid")) {
-    resolveSingaporeCityGridSwapChoice(
-      fortPassWindowHostForState(state),
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("v1922.anonymous_tip_derez_black_ice")
-  ) {
-    resolveAnonymousTipDerezBlackIceChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("v1922.core_command_jettison_ice")
-  ) {
-    resolveCoreCommandJettisonIceChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith(
-      "v1922.forged_activation_orders_target",
-    )
-  ) {
-    resolveForgedActivationOrdersTargetChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("v1922.forged_activation_orders_corp")
-  ) {
-    resolveForgedActivationOrdersCorpChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1922.security_code_worm_chip")) {
-    resolveSecurityCodeWormChipTrashIceChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1921.playful_ai")) {
-    resolveV1921PlayfulAiChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith(
-      `${RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE}:`,
-    )
-  ) {
-    resolveRunnerInstalledConnectionTrashBadPublicityChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("p3_56.too_many_doors_secret_spend")
-  ) {
-    resolveTooManyDoorsSecretSpendChoiceInRunModule(
-      encounterSpecialWindowHostForState(state),
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("v1922.open_ended_mileage_return")
-  ) {
-    resolveOpenEndedMileageProgramReturnChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("v1922.hammer_stealth_loss")
-  ) {
-    resolveHammerStealthLossChoice(
-      fortRunSideFamiliesHostForState(state),
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("v1922.viral_15_program_trash")
-  ) {
-    resolveViral15ProgramTrashChoiceInRunModule(
-      encounterResolutionHostForState(state),
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (
-    state.pendingChoice.source.startsWith("p3_56.pass_ice_program_trash")
-  ) {
-    resolvePassRezzedIceProgramTrashChoiceInRunModule(
-      encounterResolutionHostForState(state),
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1922.speed_trap")) {
-    resolveSpeedTrapRezInterruptChoice(
-      runRezWindowHostForState(state),
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v099.host_program")) {
-    resolveRunnerHostingChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v191.incubator_transform")) {
-    resolveIncubatorTransformChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v181.pattels_virus")) {
-    resolvePattelsVirusCounterChoice(
-      runEndCleanupHost(state),
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1913.code_viral_cache_purge")) {
-    resolveCodeViralCachePurgeChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v199.aardvark")) {
-    resolveAardvarkInterceptionChoice(
-      fortRunSideFamiliesHostForState(state),
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("p3_54.delayed_success")) {
-    resolveSuccessfulRunInterventionChoiceInRunModule(
-      successfulRunInterventionHost(state),
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v199.chimera_daemon_trash")) {
-    resolveChimeraDaemonTrashChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("proteus.return_runner_programs")) {
-    resolveProteusRunnerProgramReturnChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("p3_35.access_payment")) {
-    resolveCardImplementationAccessPaymentChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("p3_33.priority_wreck")) {
-    resolvePriorityWreckSpendChoice(
-      runAccessTransitionHost(state),
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("p3_33.private_look")) {
-    resolveRunnerPrivateLookChoice(state, legalAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("p3_33.microtech_ai_interface")) {
-    resolveMicrotechAiInterfacePreAccessChoice(
-      runAccessTransitionHost(state),
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("p3_34.distribute_advancement")) {
-    resolveCardImplementationAdvancementDistributionChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("p3_34.move_advancement")) {
-    resolveCardImplementationMoveAdvancementChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
-    return;
-  }
-  delete state.pendingChoice;
+): PendingChoiceResolutionHost {
+  return {
+    state,
+    setup: {
+      resolveSetupMulliganChoice,
+      resolveDiscardChoice,
+    },
+    replacement: {
+      resolveReplacementChoice,
+      resolveEventModificationChoice,
+    },
+    trace: {
+      traceIsInPhase,
+      resolveTraceCorpBid,
+      resolveTraceBaseLinkChoice,
+      resolveTracePostBidLinkChoice,
+      resolveTraceRunnerBid,
+    },
+    hiddenZone: {
+      handleHiddenZoneArrangeChoice,
+      hiddenZoneArrangeChoiceHandlerHost,
+      handleHiddenZoneNonSearchChoice,
+      hiddenZoneNonSearchChoiceHandlerHost,
+      handleCorpZoneChoice,
+      corpZoneChoiceHandlerHost,
+      isP358HiddenReplacementCompatibilityChoiceSource,
+      resolveP358HiddenReplacementChoice,
+      handleHiddenZoneSearchChoice,
+      hiddenZoneSearchChoiceHandlerHost,
+      resolveHuntClubBbsExposeChoice,
+      resolveExposeInstalledCorpCardsChoice,
+      resolveInvestmentFirmCreditChoice,
+      resolveCrashEverettDrawChoice,
+      resolvePowerGridOverloadChoice,
+      resolveSystematicLayoffsAdvancementChoice,
+      resolveAnonymousTipDerezBlackIceChoice,
+      resolveCoreCommandJettisonIceChoice,
+      resolveForgedActivationOrdersTargetChoice,
+      resolveForgedActivationOrdersCorpChoice,
+      resolveSecurityCodeWormChipTrashIceChoice,
+      resolveV1921PlayfulAiChoice,
+      resolveRunnerInstalledConnectionTrashBadPublicityChoice,
+      resolveOpenEndedMileageProgramReturnChoice,
+      resolveRunnerHostingChoice,
+      resolveIncubatorTransformChoice,
+      resolveCodeViralCachePurgeChoice,
+      resolveChimeraDaemonTrashChoice,
+      resolveProteusRunnerProgramReturnChoice,
+      resolveRunnerPrivateLookChoice,
+    },
+    corp: {
+      handleCorpInstallRezSequenceChoice,
+      corpInstallRezSequenceHandlerHost,
+      handleScoredAgendaFlowChoice,
+      scoredAgendaFlowHost,
+    },
+    runner: {
+      resolveRunnerProgramTrashBeforeInstallChoice,
+    },
+    run: {
+      resolveSingaporeCityGridSwapChoice,
+      fortPassWindowHostForState,
+      resolveTooManyDoorsSecretSpendChoiceInRunModule,
+      encounterSpecialWindowHostForState,
+      resolveHammerStealthLossChoice,
+      fortRunSideFamiliesHostForState,
+      resolveViral15ProgramTrashChoiceInRunModule,
+      encounterResolutionHostForState,
+      resolvePassRezzedIceProgramTrashChoiceInRunModule,
+      resolveSpeedTrapRezInterruptChoice,
+      runRezWindowHostForState,
+      resolvePattelsVirusCounterChoice,
+      runEndCleanupHost,
+      resolveAardvarkInterceptionChoice,
+      resolveSuccessfulRunInterventionChoiceInRunModule,
+      successfulRunInterventionHost,
+    },
+    access: {
+      resolvePriorityWreckSpendChoice,
+      runAccessTransitionHost,
+      resolveMicrotechAiInterfacePreAccessChoice,
+    },
+    cardImplementation: {
+      resolveCardImplementationAccessPaymentChoice,
+      resolveCardImplementationAdvancementDistributionChoice,
+      resolveCardImplementationMoveAdvancementChoice,
+    },
+    constants: {
+      RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE,
+    },
+  };
 }
+
 
 function setupMulliganChoice(
   state: GameState,
