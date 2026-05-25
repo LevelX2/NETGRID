@@ -165,6 +165,8 @@ Phase 9 ist explizit keine Implementierungseinheit. Sie enthält mehrere tiefe R
 
 Activity-Zuschnitt: 9a bis 9e müssen als getrennte Activities angelegt werden. `Ice and Data Special Report` bleibt blockiert, bis eine dokumentierte Quellen-/Regelentscheidung existiert.
 
+Status 2026-05-24: 9a ist als gemeinsamer Random/Dice-Implementierungsslice blockiert, weil `Roadblock`, `Executive Boot Camp` und `Lisa Blight` unterschiedliche fehlende generische Engine-Verträge benötigen. Details stehen in `docs/activities/in-progress/act-2026-05-24-proteus-phase-9a-random-dice-foundation.md`.
+
 ## Abhängigkeitsmatrix
 
 | Vorlauf | Entsperrt                                                                                                              |
