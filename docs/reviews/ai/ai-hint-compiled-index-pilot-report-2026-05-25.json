@@ -1,0 +1,973 @@
+{
+  "schemaVersion": "ai-hint-compiled-index-pilot-v1",
+  "generatedAt": "2026-05-25",
+  "source": {
+    "activeHintsPath": "data/ai/ai-card-hints-active.json",
+    "derivedFactsReportPath": "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json",
+    "overlayPaths": [
+      "data/ai/hints/overlays/onr-v1/corp/upgrades.json",
+      "data/ai/hints/overlays/onr-v1/runner/programs.json"
+    ],
+    "mode": "read-only comparison index; does not replace ai-card-hints-active.json"
+  },
+  "compiledCardCount": 6,
+  "hardErrorCount": 0,
+  "warningCount": 33,
+  "cards": [
+    {
+      "cardId": "onr_v1_017_deep-thought",
+      "title": "Deep Thought",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": true,
+      "compiledPreview": {
+        "cardId": "onr_v1_017_deep-thought",
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "hidden_zone_tool",
+          "program",
+          "rd_run_reward",
+          "virus"
+        ],
+        "planRoles": [
+          "build_rig"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "resource": "cards",
+            "scope": "rnd",
+            "source": "implementation.effect.private_look_top_rd",
+            "timing": "start_of_turn"
+          }
+        ],
+        "lineSupport": [
+          "early_rnd_pressure",
+          "interface_pressure"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "strategicNotes": [
+          "Repeated R&D topdeck knowledge is strategic pressure, not a mechanical basic fact."
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "effect:topdeck_info"
+      ],
+      "strategyFieldsFromOverlay": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "activeMonolithOnlyFields": [
+        "aiSupportStatus",
+        "conditions",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [
+        "strategicNotes"
+      ],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_017_deep-thought",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_or_differs_in_active",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_017_deep-thought",
+          "field": "effects"
+        },
+        {
+          "kind": "overlay_field_missing_or_differs_in_active",
+          "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
+          "cardId": "onr_v1_017_deep-thought",
+          "field": "strategicNotes"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": true,
+      "compiledPreview": {
+        "cardId": "onr_v1_037_japanese-water-torture",
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "per_card_longtail",
+          "program",
+          "runner"
+        ],
+        "planRoles": [
+          "runner_install_program",
+          "runner_program_ability"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities",
+            "timing": "persistent"
+          }
+        ],
+        "breakerProfile": {
+          "breakCost": 0,
+          "confidence": "medium",
+          "coverage": [
+            "wall"
+          ],
+          "pumpCost": 1,
+          "sideEffects": [
+            "forgo_actions"
+          ],
+          "source": "implementation.icebreakerAbilities"
+        },
+        "lineSupport": [
+          "rig_first"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "manualNotes": [
+          "Future action debt still needs a structured resolver descriptor; breaker coverage remains mechanical."
+        ],
+        "descriptorGaps": [
+          "future_action_debt_not_structured"
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "strategyFieldsFromOverlay": [
+        "lineSupport",
+        "quality",
+        "manualNotes",
+        "descriptorGaps"
+      ],
+      "activeMonolithOnlyFields": [
+        "aiSupportStatus",
+        "costProfile",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayOnlyFields": [
+        "manualNotes",
+        "descriptorGaps"
+      ],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field breakerProfile; long-term source should be generated facts.",
+          "cardId": "onr_v1_037_japanese-water-torture",
+          "field": "breakerProfile"
+        },
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_037_japanese-water-torture",
+          "field": "effects"
+        },
+        {
+          "kind": "descriptor_gap_remaining",
+          "message": "Manual overlay keeps an open descriptor gap.",
+          "cardId": "onr_v1_037_japanese-water-torture"
+        },
+        {
+          "kind": "generated_fact_missing_or_differs_in_active",
+          "message": "Generated mechanical field breakerProfile is absent from or differs from active monolith.",
+          "cardId": "onr_v1_037_japanese-water-torture",
+          "field": "breakerProfile"
+        },
+        {
+          "kind": "overlay_field_missing_or_differs_in_active",
+          "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
+          "cardId": "onr_v1_037_japanese-water-torture",
+          "field": "descriptorGaps"
+        },
+        {
+          "kind": "overlay_field_missing_or_differs_in_active",
+          "message": "Overlay field manualNotes is absent from or differs from active monolith.",
+          "cardId": "onr_v1_037_japanese-water-torture",
+          "field": "manualNotes"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": true,
+      "compiledPreview": {
+        "cardId": "onr_v1_043_mystery-box",
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "hidden_zone_tool",
+          "hidden_zone",
+          "program",
+          "stack_search"
+        ],
+        "planRoles": [
+          "build_rig",
+          "information",
+          "recover_rig"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "install_discount",
+            "scope": "runner",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching.installCost",
+            "timing": "during_run"
+          },
+          {
+            "confidence": "high",
+            "kind": "search",
+            "scope": "runner",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
+            "timing": "during_run"
+          },
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "resource": "cards",
+            "scope": "runner",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
+            "timing": "during_run"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.ability.timing.during_run"
+          }
+        ],
+        "targetProfiles": [
+          {
+            "installCost": "free",
+            "installsTarget": true,
+            "lookCount": 5,
+            "showToOpponent": true,
+            "shuffleAfter": true,
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
+            "targetCardType": "program",
+            "zone": "stack_top"
+          }
+        ],
+        "lineSupport": [
+          "breaker_search_first",
+          "rig_first"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "manualNotes": [
+          "The once-per-run limit remains descriptor work; search and install target profile stay mechanical."
+        ],
+        "descriptorGaps": [
+          "once_per_run_not_structured"
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_during_run",
+        "effect:install_discount",
+        "effect:search",
+        "effect:topdeck_info",
+        "targetProfiles"
+      ],
+      "strategyFieldsFromOverlay": [
+        "lineSupport",
+        "quality",
+        "manualNotes",
+        "descriptorGaps"
+      ],
+      "activeMonolithOnlyFields": [
+        "aiSupportStatus",
+        "costProfile",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects",
+        "conditions",
+        "targetProfiles"
+      ],
+      "overlayOnlyFields": [
+        "manualNotes",
+        "descriptorGaps"
+      ],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_043_mystery-box",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_043_mystery-box",
+          "field": "effects"
+        },
+        {
+          "kind": "descriptor_gap_remaining",
+          "message": "Manual overlay keeps an open descriptor gap.",
+          "cardId": "onr_v1_043_mystery-box"
+        },
+        {
+          "kind": "generated_fact_missing_or_differs_in_active",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_043_mystery-box",
+          "field": "conditions"
+        },
+        {
+          "kind": "generated_fact_missing_or_differs_in_active",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_043_mystery-box",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_or_differs_in_active",
+          "message": "Generated mechanical field targetProfiles is absent from or differs from active monolith.",
+          "cardId": "onr_v1_043_mystery-box",
+          "field": "targetProfiles"
+        },
+        {
+          "kind": "overlay_field_missing_or_differs_in_active",
+          "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
+          "cardId": "onr_v1_043_mystery-box",
+          "field": "descriptorGaps"
+        },
+        {
+          "kind": "overlay_field_missing_or_differs_in_active",
+          "message": "Overlay field manualNotes is absent from or differs from active monolith.",
+          "cardId": "onr_v1_043_mystery-box",
+          "field": "manualNotes"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": true,
+      "compiledPreview": {
+        "cardId": "onr_v1_059_self-modifying-code",
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "hidden_zone_tool",
+          "program",
+          "stack_search"
+        ],
+        "planRoles": [
+          "build_rig",
+          "recover_rig"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "search",
+            "scope": "runner",
+            "source": "implementation.effect.search_stack_install",
+            "timing": "during_run"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.ability.timing.during_run"
+          }
+        ],
+        "targetProfiles": [
+          {
+            "installCost": "normal",
+            "installsTarget": true,
+            "shuffleAfter": true,
+            "source": "implementation.effect.search_stack_install",
+            "targetCardType": "program",
+            "zone": "stack"
+          }
+        ],
+        "lineSupport": [
+          "breaker_search_first",
+          "rig_first"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "manualNotes": [
+          "The install target profile is mechanical; any install-discount mismatch belongs in hint cleanup, not in this overlay."
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_during_run",
+        "effect:search",
+        "targetProfiles"
+      ],
+      "strategyFieldsFromOverlay": [
+        "lineSupport",
+        "quality",
+        "manualNotes"
+      ],
+      "activeMonolithOnlyFields": [
+        "aiSupportStatus",
+        "costProfile",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects",
+        "conditions",
+        "targetProfiles"
+      ],
+      "overlayOnlyFields": [
+        "manualNotes"
+      ],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_059_self-modifying-code",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_059_self-modifying-code",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_or_differs_in_active",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_059_self-modifying-code",
+          "field": "conditions"
+        },
+        {
+          "kind": "generated_fact_missing_or_differs_in_active",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_059_self-modifying-code",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_or_differs_in_active",
+          "message": "Generated mechanical field targetProfiles is absent from or differs from active monolith.",
+          "cardId": "onr_v1_059_self-modifying-code",
+          "field": "targetProfiles"
+        },
+        {
+          "kind": "overlay_field_missing_or_differs_in_active",
+          "message": "Overlay field manualNotes is absent from or differs from active monolith.",
+          "cardId": "onr_v1_059_self-modifying-code",
+          "field": "manualNotes"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "title": "Crystal Palace Station Grid",
+      "side": "corp",
+      "cardType": "upgrade",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": true,
+      "compiledPreview": {
+        "cardId": "onr_v1_355_crystal-palace-station-grid",
+        "side": "corp",
+        "cardType": "upgrade",
+        "roles": [
+          "city_grid",
+          "region",
+          "run_tax",
+          "upgrade"
+        ],
+        "planRoles": [
+          "remote_upgrade_support"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 1,
+            "confidence": "high",
+            "kind": "run_tax",
+            "resource": "credits",
+            "scope": "fort",
+            "source": "implementation.modifiers.break_subroutine_cost",
+            "timing": "persistent"
+          }
+        ],
+        "remoteRole": {
+          "confidence": "high",
+          "kind": "run_tax",
+          "serverScope": "fort",
+          "source": "implementation.modifiers.break_subroutine_cost",
+          "threatLevel": "medium"
+        },
+        "lineSupport": [
+          "ice_tax_glacier",
+          "remote_scoring_build"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "strategicNotes": [
+          "Remote protection is context-dependent strategic overlay; the run tax stays mechanical."
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "effect:run_tax",
+        "remoteRole:run_tax"
+      ],
+      "strategyFieldsFromOverlay": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "activeMonolithOnlyFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [
+        "strategicNotes"
+      ],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "field": "effects"
+        },
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "field": "remoteRole"
+        },
+        {
+          "kind": "generated_fact_missing_or_differs_in_active",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "field": "effects"
+        },
+        {
+          "kind": "overlay_field_missing_or_differs_in_active",
+          "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "field": "strategicNotes"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "title": "Red Herrings",
+      "side": "corp",
+      "cardType": "upgrade",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": true,
+      "compiledPreview": {
+        "cardId": "onr_v1_366_red-herrings",
+        "side": "corp",
+        "cardType": "upgrade",
+        "roles": [
+          "access_tax",
+          "agenda_steal_tax",
+          "remote_agenda_protection",
+          "upgrade"
+        ],
+        "planRoles": [
+          "build_scoring_remote",
+          "protect_remote",
+          "remote_upgrade_tax"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 5,
+            "confidence": "high",
+            "kind": "run_tax",
+            "resource": "credits",
+            "scope": "accessed_card",
+            "source": "implementation.modifiers.steal_cost",
+            "timing": "on_access"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_accessed_card",
+            "source": "implementation.modifiers.steal_cost.appliesTo.agenda"
+          }
+        ],
+        "remoteRole": {
+          "confidence": "high",
+          "kind": "agenda_steal_tax",
+          "serverScope": "remote",
+          "source": "implementation.modifiers.steal_cost",
+          "threatLevel": "high"
+        },
+        "lineSupport": [
+          "ice_tax_glacier",
+          "remote_scoring_build",
+          "score_closeout"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "hintReviewed": true,
+          "needsHumanReview": false,
+          "strategyCovered": false
+        },
+        "strategicNotes": [
+          "Remote protection is context-dependent strategic overlay; agenda steal tax and access condition stay mechanical."
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_accessed_card",
+        "effect:run_tax",
+        "remoteRole:agenda_steal_tax"
+      ],
+      "strategyFieldsFromOverlay": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "activeMonolithOnlyFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "overlayOnlyFields": [
+        "strategicNotes"
+      ],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_366_red-herrings",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_366_red-herrings",
+          "field": "effects"
+        },
+        {
+          "kind": "active_mechanical_field_should_be_generated",
+          "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
+          "cardId": "onr_v1_366_red-herrings",
+          "field": "remoteRole"
+        },
+        {
+          "kind": "generated_fact_missing_or_differs_in_active",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_366_red-herrings",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_or_differs_in_active",
+          "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+          "cardId": "onr_v1_366_red-herrings",
+          "field": "remoteRole"
+        },
+        {
+          "kind": "overlay_field_missing_or_differs_in_active",
+          "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
+          "cardId": "onr_v1_366_red-herrings",
+          "field": "strategicNotes"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_017_deep-thought",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_or_differs_in_active",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_017_deep-thought",
+      "field": "effects"
+    },
+    {
+      "kind": "overlay_field_missing_or_differs_in_active",
+      "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
+      "cardId": "onr_v1_017_deep-thought",
+      "field": "strategicNotes"
+    },
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field breakerProfile; long-term source should be generated facts.",
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "field": "breakerProfile"
+    },
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "field": "effects"
+    },
+    {
+      "kind": "descriptor_gap_remaining",
+      "message": "Manual overlay keeps an open descriptor gap.",
+      "cardId": "onr_v1_037_japanese-water-torture"
+    },
+    {
+      "kind": "generated_fact_missing_or_differs_in_active",
+      "message": "Generated mechanical field breakerProfile is absent from or differs from active monolith.",
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "field": "breakerProfile"
+    },
+    {
+      "kind": "overlay_field_missing_or_differs_in_active",
+      "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "field": "descriptorGaps"
+    },
+    {
+      "kind": "overlay_field_missing_or_differs_in_active",
+      "message": "Overlay field manualNotes is absent from or differs from active monolith.",
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "field": "manualNotes"
+    },
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_043_mystery-box",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_043_mystery-box",
+      "field": "effects"
+    },
+    {
+      "kind": "descriptor_gap_remaining",
+      "message": "Manual overlay keeps an open descriptor gap.",
+      "cardId": "onr_v1_043_mystery-box"
+    },
+    {
+      "kind": "generated_fact_missing_or_differs_in_active",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_043_mystery-box",
+      "field": "conditions"
+    },
+    {
+      "kind": "generated_fact_missing_or_differs_in_active",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_043_mystery-box",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_or_differs_in_active",
+      "message": "Generated mechanical field targetProfiles is absent from or differs from active monolith.",
+      "cardId": "onr_v1_043_mystery-box",
+      "field": "targetProfiles"
+    },
+    {
+      "kind": "overlay_field_missing_or_differs_in_active",
+      "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
+      "cardId": "onr_v1_043_mystery-box",
+      "field": "descriptorGaps"
+    },
+    {
+      "kind": "overlay_field_missing_or_differs_in_active",
+      "message": "Overlay field manualNotes is absent from or differs from active monolith.",
+      "cardId": "onr_v1_043_mystery-box",
+      "field": "manualNotes"
+    },
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_059_self-modifying-code",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_059_self-modifying-code",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_or_differs_in_active",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_059_self-modifying-code",
+      "field": "conditions"
+    },
+    {
+      "kind": "generated_fact_missing_or_differs_in_active",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_059_self-modifying-code",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_or_differs_in_active",
+      "message": "Generated mechanical field targetProfiles is absent from or differs from active monolith.",
+      "cardId": "onr_v1_059_self-modifying-code",
+      "field": "targetProfiles"
+    },
+    {
+      "kind": "overlay_field_missing_or_differs_in_active",
+      "message": "Overlay field manualNotes is absent from or differs from active monolith.",
+      "cardId": "onr_v1_059_self-modifying-code",
+      "field": "manualNotes"
+    },
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "field": "effects"
+    },
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "field": "remoteRole"
+    },
+    {
+      "kind": "generated_fact_missing_or_differs_in_active",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "field": "effects"
+    },
+    {
+      "kind": "overlay_field_missing_or_differs_in_active",
+      "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "field": "strategicNotes"
+    },
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_366_red-herrings",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_366_red-herrings",
+      "field": "effects"
+    },
+    {
+      "kind": "active_mechanical_field_should_be_generated",
+      "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
+      "cardId": "onr_v1_366_red-herrings",
+      "field": "remoteRole"
+    },
+    {
+      "kind": "generated_fact_missing_or_differs_in_active",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_366_red-herrings",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_or_differs_in_active",
+      "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+      "cardId": "onr_v1_366_red-herrings",
+      "field": "remoteRole"
+    },
+    {
+      "kind": "overlay_field_missing_or_differs_in_active",
+      "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
+      "cardId": "onr_v1_366_red-herrings",
+      "field": "strategicNotes"
+    }
+  ]
+}
