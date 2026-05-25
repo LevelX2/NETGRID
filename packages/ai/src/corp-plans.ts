@@ -42,6 +42,7 @@ import {
   structuredRemoteRoleConflictWithLegacy,
   structuredRemoteRoleSafetyBonusForServer,
 } from "./remote-role-ontology-consumer";
+import { classifyTagPunishLegalActionFromOntology } from "./tag-punish-ontology-consumer";
 
 export type CorpPlanKind =
   | "score_now"
@@ -1810,13 +1811,15 @@ function selectCorpStrategicLine(
         (role) => role.includes("economy") || role.includes("draw"),
       ),
   ).length;
-  const tagTraceActions = input.legalActions.filter((action) =>
-    rolesForAction(input, action).some(
-      (role) =>
-        role.includes("tag") ||
-        role.includes("trace") ||
-        role.includes("punish"),
-    ),
+  const tagTraceActions = input.legalActions.filter(
+    (action) =>
+      corpTagPunishOntologyAssessmentForAction(input, action) ||
+      rolesForAction(input, action).some(
+        (role) =>
+          role.includes("tag") ||
+          role.includes("trace") ||
+          role.includes("punish"),
+      ),
   ).length;
   const baitActions = input.legalActions.filter((action) =>
     rolesForAction(input, action).some(
@@ -2001,13 +2004,15 @@ function corpCandidateMatchesStrategicLine(
         candidate.kind === "score_next_turn" || candidate.kind === "score_now"
       );
     case "tag_trace_punish":
-      return actionsForCandidate(input, candidate).some((action) =>
-        rolesForAction(input, action).some(
-          (role) =>
-            role.includes("tag") ||
-            role.includes("trace") ||
-            role.includes("punish"),
-        ),
+      return actionsForCandidate(input, candidate).some(
+        (action) =>
+          corpTagPunishOntologyAssessmentForAction(input, action) ||
+          rolesForAction(input, action).some(
+            (role) =>
+              role.includes("tag") ||
+              role.includes("trace") ||
+              role.includes("punish"),
+          ),
       );
     case "bait_and_punish":
       return candidate.kind === "bait_runner";
@@ -6957,6 +6962,32 @@ function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
     return [];
   const visible = findVisibleCard(input, action.source);
   return rolesForCardId(visible?.definitionId);
+}
+
+function corpTagPunishOntologyAssessmentForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+) {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  const sourceCard =
+    action.source === "basic_action" || action.source === "game_rule"
+      ? undefined
+      : findVisibleCard(input, action.source);
+  const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+  return classifyTagPunishLegalActionFromOntology(
+    action,
+    sourceCard?.definitionId,
+    {
+      runnerTagged: input.playerView.opponent.tags > 0,
+      legacyRoles: rolesForAction(input, action),
+      scoredAgendaKind:
+        scoredAgenda?.kind === "scored_agenda_trace_tag"
+          ? "trace_tag"
+          : scoredAgenda?.kind === "scored_agenda_damage_punish"
+            ? "damage_punish"
+            : undefined,
+    },
+  );
 }
 
 function findVisibleCard(

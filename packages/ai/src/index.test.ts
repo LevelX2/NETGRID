@@ -34,6 +34,7 @@ import {
   chooseCorpBaselineAction,
   chooseCorpAction,
   chooseCorpPlanDecision,
+  classifyTagPunishLegalActionFromOntology,
   classifyScoredAgendaActionFromOntology,
   estimateBreakerCostProfileFromOntology,
   estimateStructuredBreakerCostForIce,
@@ -8358,6 +8359,71 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
+  it("classifies tag source and payoff LegalActions from structured ontology only when legal and visible", () => {
+    const operation = (source: string): LegalAction =>
+      ({
+        actionId: `test.${source}`,
+        type: "play_operation",
+        side: "corp",
+        source: "corp_hq_card",
+        label: source,
+        timingPoint: "corp_action",
+        costs: [],
+      }) as unknown as LegalAction;
+
+    const audit = classifyTagPunishLegalActionFromOntology(
+      operation("Audit of Call Records"),
+      "onr_v1_283_audit-of-call-records",
+      { runnerTagged: false, legacyRoles: ["trace_operation"] },
+    );
+    expect(audit?.isTagSource).toBe(true);
+    expect(audit?.isTraceTagSource).toBe(true);
+    expect(audit?.isPunishPayoff).toBe(false);
+    expect(audit?.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_tag_source_legal_action_classified_by_ontology:true",
+        "corp_tag_punish_ontology_kind:tag_source",
+        "corp_tag_punish_condition:requires_trace_success",
+      ]),
+    );
+
+    const taggedDatapool = classifyTagPunishLegalActionFromOntology(
+      operation("Datapool by Zetatech"),
+      "onr_v1_287_datapool-by-zetatech",
+      { runnerTagged: true, legacyRoles: ["operation"] },
+    );
+    expect(taggedDatapool?.isPunishPayoff).toBe(true);
+    expect(taggedDatapool?.blockedByMissingTag).toBe(false);
+    expect(taggedDatapool?.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_punish_legal_action_classified_by_ontology:true",
+        "corp_punish_opportunity_confirmed_by_ontology:true",
+        "corp_tag_punish_condition:requires_runner_tagged",
+      ]),
+    );
+
+    const untaggedDatapool = classifyTagPunishLegalActionFromOntology(
+      operation("Datapool by Zetatech"),
+      "onr_v1_287_datapool-by-zetatech",
+      { runnerTagged: false, legacyRoles: ["operation"] },
+    );
+    expect(untaggedDatapool?.isPunishPayoff).toBe(false);
+    expect(untaggedDatapool?.blockedByMissingTag).toBe(true);
+    expect(untaggedDatapool?.evidence).toContain(
+      "corp_tag_punish_payoff_blocked_by_missing_visible_tag:true",
+    );
+    const noLegalCarrier = classifyTagPunishLegalActionFromOntology(
+      {
+        ...operation("Datapool by Zetatech"),
+        type: "end_turn",
+        source: "game_rule",
+      } as LegalAction,
+      "onr_v1_287_datapool-by-zetatech",
+      { runnerTagged: true, legacyRoles: [] },
+    );
+    expect(noLegalCarrier).toBeUndefined();
+  });
+
   it("uses tag punishment operations when the Runner is visibly tagged", () => {
     if (!createRuntimeCardsById()["onr_v1_287_datapool-by-zetatech"]) return;
     let state = createGameAfterSetup({
@@ -8417,10 +8483,13 @@ describe("V1.4.0 plan-based Corp AI", () => {
       "onr_v1_287_datapool-by-zetatech",
       "onr_v1_293_netwatch-credit-voucher",
     ]).toContain(selectedDefinition);
-    expect([
-      "corp.plan.recover_economy",
-      "corp.tag.punish_visible_tag",
-    ]).toContain(decision.reasonCode);
+    expect(["corp.tag.punish_visible_tag"]).toContain(decision.reasonCode);
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_tag_punish_payoff_ontology_used:true",
+        "corp_punish_opportunity_confirmed_by_ontology:true",
+      ]),
+    );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|simple_run_event|Simple Run Event/,
     );
@@ -16241,6 +16310,13 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             corpTraceTagOpportunity: true,
             corpTraceTagTaken: true,
             corpTraceTagExpectedSuccess: 1,
+            corpTagPunishOntologyProfilesSeen: true,
+            corpTagSourceOntologyProfilesSeen: true,
+            corpTagSourceOntologyUsed: true,
+            corpTagSourceLegalActionClassifiedByOntology: true,
+            corpTagSourceTakenWithOntologyPayoffAvailable: true,
+            corpTagPunishOntologyKinds: ["tag_source", "trace"],
+            corpTagPunishConditionKinds: ["requires_trace_success"],
           }),
           progressionAction("runner", 2, "resolve_choice", undefined, 1, {
             runnerTagsBeforeAction: 0,
@@ -16261,6 +16337,14 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             corpPunishOpportunity: true,
             corpPunishTaken: true,
             corpPunishKind: "scorched_earth_like",
+            corpTagPunishOntologyProfilesSeen: true,
+            corpTagPunishPayoffOntologyProfilesSeen: true,
+            corpTagPunishPayoffOntologyUsed: true,
+            corpPunishLegalActionClassifiedByOntology: true,
+            corpPunishOpportunityConfirmedByOntology: true,
+            corpOntologyPunishOpportunityConverted: true,
+            corpTagPunishOntologyKinds: ["tag_punish_payoff", "damage"],
+            corpTagPunishConditionKinds: ["requires_runner_tagged"],
           }),
           progressionAction("runner", 5, "resolve_choice", undefined, 2, {
             runnerTagsBeforeAction: 0,
@@ -16283,6 +16367,11 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             corpPunishOpportunity: true,
             corpPunishKind: "urban_renewal_like",
             corpPunishSkippedReason: "economy",
+            corpPunishOpportunityConfirmedByOntology: true,
+            corpPunishSkippedDespiteOntologyOpportunity: true,
+            corpTagPunishOntologyProfilesSeen: true,
+            corpTagPunishPayoffOntologyProfilesSeen: true,
+            corpTagPunishOntologyKinds: ["tag_punish_payoff"],
           }),
           progressionAction("corp", 9, "install_card", "hq", 4, {
             runnerTagsBeforeAction: 1,
@@ -16349,6 +16438,19 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.corpTagPunishFunnelPunishOpportunity).toBe(4);
     expect(metrics.corpTagPunishFunnelPunishTaken).toBe(2);
     expect(metrics.corpTagPunishFunnelTerminalDamageOrEconomicHit).toBe(2);
+    expect(metrics.corpTagPunishOntologyProfilesSeen).toBe(3);
+    expect(metrics.corpTagSourceOntologyUsed).toBe(1);
+    expect(metrics.corpTagPunishPayoffOntologyUsed).toBe(1);
+    expect(metrics.corpPunishOpportunityConfirmedByOntology).toBe(2);
+    expect(metrics.corpPunishSkippedDespiteOntologyOpportunity).toBe(1);
+    expect(metrics.corpTagSourceTakenWithOntologyPayoffAvailable).toBe(1);
+    expect(metrics.corpTagSourceConvertedToOntologyPunishOpportunity).toBe(1);
+    expect(metrics.corpOntologyPunishOpportunityConverted).toBe(1);
+    expect(metrics.corpTagPunishOntologyKindTagSource).toBe(1);
+    expect(metrics.corpTagPunishOntologyKindTagPunishPayoff).toBe(2);
+    expect(metrics.corpTagPunishOntologyKindTrace).toBe(1);
+    expect(metrics.corpTagPunishConditionRequiresRunnerTagged).toBe(1);
+    expect(metrics.corpTagPunishConditionRequiresTraceSuccess).toBe(1);
   });
 
   it("keeps tag/punish diagnostics invariant to hidden runner zones", () => {
