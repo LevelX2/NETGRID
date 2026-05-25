@@ -216,7 +216,9 @@ import {
   CATALOG_RARITY_FILTERS,
   catalogCardMatchesTypeFilters,
   catalogRarityLabel,
+  catalogSetDetailLabel,
   catalogSetFilterOptions,
+  catalogSetShortLabelForSetId,
   filterCatalogCardsByRarity,
   filterCatalogCardsBySetId,
   catalogTypeKeysForCard,
@@ -538,6 +540,11 @@ type CatalogListResponse = {
 type DisplayVisibleCard = VisibleCard & {
   imageUrl?: string;
   strengthModifier?: number;
+  setId?: string;
+  setName?: string;
+  collectorNumber?: string;
+  setShortLabel?: string;
+  setDetailLabel?: string;
 };
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
@@ -1133,6 +1140,7 @@ function OperationImageOverlay({
 
 function catalogDetailLines(card: CatalogCardDetail): string[] {
   const typeLine = [card.side, formatCatalogTypeLine(card)].filter(Boolean).join(" · ");
+  const setLine = catalogSetDetailLabel(card);
   const numberLine = Object.entries(CATALOG_NUMERIC_LABELS)
     .map(([key, label]) => {
       const value = card.numeric[key];
@@ -1140,7 +1148,7 @@ function catalogDetailLines(card: CatalogCardDetail): string[] {
     })
     .filter(Boolean)
     .join(" · ");
-  return [typeLine, numberLine].filter(Boolean);
+  return [typeLine, setLine, numberLine].filter((line): line is string => Boolean(line));
 }
 
 function catalogNumericLabel(key: string, label: string, value: number | null | undefined): string | null {
@@ -1198,6 +1206,7 @@ function enrichVisibleCard(card: VisibleCard, detailsById: Record<string, Catalo
     ...(imageUrl ? { imageUrl } : {})
   };
   if (!detail) return enriched;
+  addCatalogSetDisplay(enriched, detail);
   const rulesText = visibleKnownCardRulesText({
     catalogText: detail.text,
     visibleRulesText: card.rulesText ?? null,
@@ -1227,6 +1236,7 @@ function visibleCardFromCatalogDetail(card: CatalogCardDetail): DisplayVisibleCa
     rulesText: card.text
   };
   visible.type = card.type as NonNullable<VisibleCard["type"]>;
+  addCatalogSetDisplay(visible, card);
   const imageUrl = localCardImageUrl(card.catalogCardId);
   if (imageUrl) visible.imageUrl = imageUrl;
   addNumeric(visible, "cost", undefined, card.numeric.cost);
@@ -1238,6 +1248,16 @@ function visibleCardFromCatalogDetail(card: CatalogCardDetail): DisplayVisibleCa
   addNumeric(visible, "advancementRequirement", undefined, card.numeric.advancementRequirement);
   addNumeric(visible, "agendaPoints", undefined, card.numeric.agendaPoints);
   return visible;
+}
+
+function addCatalogSetDisplay(target: DisplayVisibleCard, detail: Pick<CatalogCardDetail, "setId" | "setName" | "collectorNumber">): void {
+  const shortLabel = catalogSetShortLabelForSetId(detail.setId);
+  const detailLabel = catalogSetDetailLabel(detail);
+  if (detail.setId) target.setId = detail.setId;
+  if (detail.setName) target.setName = detail.setName;
+  if (detail.collectorNumber) target.collectorNumber = detail.collectorNumber;
+  if (shortLabel) target.setShortLabel = shortLabel;
+  if (detailLabel) target.setDetailLabel = detailLabel;
 }
 
 function addNumeric(target: VisibleCard, key: keyof Pick<VisibleCard, "cost" | "installCost" | "memoryCost" | "strength" | "rezCost" | "trashCost" | "advancementRequirement" | "agendaPoints">, current: number | undefined, fallback: number | null | undefined): void {
@@ -1453,7 +1473,7 @@ function catalogImageMetricTooltip(detail: CatalogCardDetail | null | undefined)
 }
 
 function deckBuilderCardTooltip(card: CatalogCardSummary, detail: CatalogCardDetail | undefined): string {
-  return [card.title, formatCatalogTypeLine(card), detail ? deckBuilderMetricLine(detail) : "", detail?.text ?? ""].filter(Boolean).join("\n");
+  return [card.title, formatCatalogTypeLine(card), detail ? catalogSetDetailLabel(detail) : "", detail ? deckBuilderMetricLine(detail) : "", detail?.text ?? ""].filter(Boolean).join("\n");
 }
 
 function deckFingerprint(deck: EditableDeck): string {
@@ -5570,6 +5590,8 @@ export default function Page() {
                       owner: "corp"
                     }));
                     const serverCollapsed = boardZoneCollapsedFor(`corp:${server.id}`);
+                    const laneClassName = (lane: { kind: "ice" | "root"; cards: VisibleCard[] }) =>
+                      `lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}${lane.kind === "ice" && lane.cards.length >= 7 ? " scrollableIceLane" : ""}`;
                     const renderLaneCards = (lane: { kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }) => {
                       if (server.id === "archives" && lane.kind === "root") {
                         return (
@@ -5710,7 +5732,7 @@ export default function Page() {
                                   <div className="pairedServerLanes corpHqServerLanes">
                                     {lanes.map((lane) => (
                                       <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-                                        <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
+                                        <div className={laneClassName(lane)} style={boardLaneStyle}>
                                           {renderLaneCards(lane)}
                                         </div>
                                       </div>
@@ -5741,7 +5763,7 @@ export default function Page() {
                                   <div className="pairedServerLanes corpHqServerLanes">
                                     {lanes.map((lane) => (
                                       <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-                                        <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
+                                        <div className={laneClassName(lane)} style={boardLaneStyle}>
                                           {renderLaneCards(lane)}
                                         </div>
                                       </div>
@@ -5751,7 +5773,7 @@ export default function Page() {
                               ) : (
                                 lanes.map((lane) => (
                                   <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-                                    <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
+                                    <div className={laneClassName(lane)} style={boardLaneStyle}>
                                       {renderLaneCards(lane)}
                                     </div>
                                   </div>
@@ -13116,12 +13138,15 @@ function CardView({
   const cardStateAria = cardStateAriaText ? `, ${cardStateAriaText}` : "";
   const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
+  const setBadgeLabel = card.known ? card.setShortLabel : undefined;
+  const setBadgeTitle = card.known ? card.setDetailLabel : undefined;
+  const setBadgeAriaSuffix = setBadgeTitle ? `, Set ${setBadgeTitle}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}, ${advancementLabel}${setBadgeAriaSuffix}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}${setBadgeAriaSuffix}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte${inactiveZoneAriaSuffix}${modifierBadgeAriaSuffix}`;
 
   const estimatedTooltipHeight = (): number => {
@@ -13484,6 +13509,11 @@ function CardView({
         data-inactive-zone={inactiveZone}
       >
         {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} fallbackSrc={preferredImageFallbackUrl} decorative /> : null}
+        {setBadgeLabel ? (
+          <span className="cardSetBadge" title={setBadgeTitle} aria-hidden="true">
+            {setBadgeLabel}
+          </span>
+        ) : null}
         {isHardwareImageCard ? (
           <HardwareImageOverlay
             title={card.title ?? "Hardware"}
@@ -13888,6 +13918,7 @@ function hashString(value: string): number {
 
 function cardDetailLines(card: VisibleCard): string[] {
   const typeLine = [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ");
+  const setLine = "setDetailLabel" in card && typeof card.setDetailLabel === "string" ? card.setDetailLabel : null;
   const numberLine = [
     card.advancementCounters && card.advancementCounters > 0 ? developmentCountLabel(card.advancementCounters) : null,
     valueLabel("Kosten", card.cost),
@@ -13903,7 +13934,7 @@ function cardDetailLines(card: VisibleCard): string[] {
   ]
     .filter(Boolean)
     .join(" · ");
-  return [typeLine, numberLine].filter(Boolean);
+  return [typeLine, setLine, numberLine].filter((line): line is string => Boolean(line));
 }
 
 function selectedServerLabel(card: VisibleCard): string | null {

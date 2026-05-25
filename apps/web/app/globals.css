@@ -4460,7 +4460,7 @@ select {
 }
 
 .server {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   width: fit-content;
   max-width: 100%;
   min-height: 0;
@@ -4910,8 +4910,14 @@ select {
   flex-wrap: nowrap;
   gap: 0;
   align-items: flex-start;
+  overflow: visible;
+}
+
+.iceLane.scrollableIceLane {
+  max-width: min(100%, calc(430px * var(--lane-card-scale, 1)));
   overflow-x: auto;
-  overflow-y: visible;
+  overflow-y: hidden;
+  padding-bottom: calc(10px * var(--lane-card-scale, 1));
 }
 
 .iceLane .iceCardSlot {
@@ -5742,8 +5748,39 @@ select {
   height: 15px;
 }
 
+.cardSetBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 7;
+  max-width: 46px;
+  min-width: 26px;
+  min-height: 18px;
+  padding: 3px 5px;
+  border: 1px solid color-mix(in srgb, var(--text), transparent 78%);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--section-bg), black 18%);
+  color: color-mix(in srgb, var(--text), white 8%);
+  box-shadow: 0 5px 12px rgb(0 0 0 / 0.28);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.1;
+  overflow: hidden;
+  pointer-events: none;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .card.hiddenBack.inactiveZoneCard::after,
 .card.hiddenBack .cardInactiveZoneBadge {
+  display: none;
+}
+
+.card.hiddenBack .cardSetBadge,
+.card.hidden .cardSetBadge {
   display: none;
 }
 
