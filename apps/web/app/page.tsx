@@ -5490,7 +5490,6 @@ export default function Page() {
             agendaPointsToWin={effectiveAgendaTarget}
             scoreAreaHighlighted={zoneHighlighted(activeCueHighlight, opponentSide(activeView.side), "scoreArea")}
             onToggleScoreArea={() => toggleScoreAreaOverlay(opponentSide(activeView.side))}
-            connected={payload.opponentStatus.connected}
             {...(payload.opponentStatus.displayName ? { displayName: payload.opponentStatus.displayName } : {})}
           />
           {showAiPacingFallbackControls ? (
@@ -12488,7 +12487,6 @@ function IdentityCounterStrip({ displays, side }: { displays: VisibleCard["count
 
 function OpponentPanel({
   view,
-  connected,
   displayName,
   agendaPointsToWin,
   scoreAreaCards,
@@ -12497,7 +12495,6 @@ function OpponentPanel({
   onToggleScoreArea
 }: {
   view: PlayerView;
-  connected: boolean;
   displayName?: string;
   agendaPointsToWin: number;
   scoreAreaCards: VisibleCard[];
@@ -12525,7 +12522,7 @@ function OpponentPanel({
         {side === "runner" ? <Stat value={view.opponent.coreDamage ?? 0} icon={<CoreDamageIcon size={14} />} helpText="Core Damage ist dauerhafter Schaden am Runner. Er senkt die maximale Handkartenzahl und entsteht durch Effekte, die ausdrücklich Core Damage verursachen." /> : null}
       </div>
       <IdentityCounterStrip displays={view.opponent.identity.counterDisplays} side={side} />
-      <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {isTurn ? "Am Zug" : "Wartet"}</p>
+      <p className="meta statusLine">{isTurn ? "Am Zug" : "Wartet"}</p>
     </section>
   );
 }
