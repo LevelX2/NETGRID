@@ -10,6 +10,7 @@ import {
 import {
   apply,
   applyChoice,
+  installRunnerHardwareForTest,
   installRunnerProgramForTest,
   mustAction,
   moveCorpCardToHq,
@@ -21,6 +22,8 @@ import {
 
 const PROTEUS_ENTERPRISE_SHIELDS = "onr_proteus_086_enterprise-inc-shields";
 const PROTEUS_SKULLCAP = "onr_proteus_096_skullcap";
+const PROTEUS_CORTICAL_STIMULATORS =
+  "onr_proteus_135_cortical-stimulators";
 
 function ensureProteusProtectionCardDefinitions(): void {
   DEMO_CARDS_BY_ID[PROTEUS_ENTERPRISE_SHIELDS] ??= {
@@ -47,6 +50,17 @@ function ensureProteusProtectionCardDefinitions(): void {
     rulesText: "T: Prevent any amount of Net or brain damage.",
     mechanics: ["install_program", "memory", "damage_prevention"],
   };
+  DEMO_CARDS_BY_ID[PROTEUS_CORTICAL_STIMULATORS] ??= {
+    id: PROTEUS_CORTICAL_STIMULATORS,
+    title: "Cortical Stimulators",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["cybernetics"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "Prevents 1 Net or brain damage each turn.",
+    mechanics: ["install_hardware", "damage_prevention"],
+  };
 }
 
 function proteusProtectionRunnerDeck() {
@@ -59,6 +73,7 @@ function proteusProtectionRunnerDeck() {
       ...V094_RUNNER_DECK.cards,
       { id: PROTEUS_ENTERPRISE_SHIELDS, quantity: 1 },
       { id: PROTEUS_SKULLCAP, quantity: 1 },
+      { id: PROTEUS_CORTICAL_STIMULATORS, quantity: 1 },
     ],
   };
 }
@@ -406,6 +421,91 @@ describe("Proteus Phase 5b Runner Protection Programs", () => {
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("uses Cortical Stimulators as public once-per-turn Net/core prevention", () => {
+    let state = createGameAfterSetup({
+      seed: "proteus-phase-7c-cortical-stimulators",
+      runnerDeck: proteusProtectionRunnerDeck(),
+      corpDeck: V111_CORP_DECK,
+      agendaPointsToWin: 7,
+    });
+    const stimulatorsId = installRunnerHardwareForTest(
+      state,
+      PROTEUS_CORTICAL_STIMULATORS,
+    );
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(state, "v111_core_damage_operation");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "v111_core_damage_operation",
+    );
+    const stimulatorOption = state.pendingChoice?.options.find((option) =>
+      option.label.includes("Cortical Stimulators"),
+    )?.id;
+    expect(stimulatorOption).toBeDefined();
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const legal = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [String(stimulatorOption)],
+      },
+    });
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [String(stimulatorOption)],
+      },
+    });
+    expect(wrongSide.ok).toBe(false);
+    expect(stale.ok).toBe(false);
+
+    state = applyChoice(state, "runner", String(stimulatorOption));
+
+    expect(state.runner.coreDamage).toBe(0);
+    expect(state.runner.rig.hardware).toContain(stimulatorsId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "prevented",
+      preventedAmount: 1,
+      sourceDefinitionId: PROTEUS_CORTICAL_STIMULATORS,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    moveCorpCardToHq(state, "v111_core_damage_operation");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "v111_core_damage_operation",
+    );
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.coreDamage).toBe(1);
   });
 });
 

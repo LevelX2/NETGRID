@@ -787,6 +787,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/skullcap.ts",
   "onr_proteus_134_cortical-cybermodem":
     "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-cybermodem.ts",
+  "onr_proteus_135_cortical-stimulators":
+    "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-stimulators.ts",
   "onr_proteus_138_deck-the":
     "packages/engine/src/card-implementations/proteus/runner/hardware/deck-the.ts",
   "onr_proteus_151_sunburst-cranial-interface":

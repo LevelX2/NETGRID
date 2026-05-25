@@ -9438,6 +9438,22 @@ const PROTEUS_CYBERNETICS_DECK_CARDS: CardDefinition[] = [
     ],
   },
   {
+    id: "onr_proteus_135_cortical-stimulators",
+    title: "Cortical Stimulators",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["cybernetics"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "Prevents 1 Net or brain damage each turn.",
+    mechanics: [
+      "install_hardware",
+      "damage_prevention",
+      "damage_prevention_turn_limit",
+      "proteus_cybernetics_deck_hardware",
+    ],
+  },
+  {
     id: "onr_proteus_138_deck-the",
     title: "Deck, The",
     side: "runner",

@@ -407,6 +407,7 @@ import { proteusResearchBunkerImplementation } from "./proteus/corp/upgrades/res
 import { proteusWeaponsDepotImplementation } from "./proteus/corp/upgrades/weapons-depot";
 import { proteusFakedHitImplementation } from "./proteus/runner/events/faked-hit";
 import { proteusCorticalCybermodemImplementation } from "./proteus/runner/hardware/cortical-cybermodem";
+import { proteusCorticalStimulatorsImplementation } from "./proteus/runner/hardware/cortical-stimulators";
 import { proteusDeckTheImplementation } from "./proteus/runner/hardware/deck-the";
 import { proteusSunburstCranialInterfaceImplementation } from "./proteus/runner/hardware/sunburst-cranial-interface";
 import { proteusPoisonedWaterSupplyImplementation } from "./proteus/runner/events/poisoned-water-supply";
@@ -818,6 +819,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusCharityTakeoverImplementation,
   proteusFakedHitImplementation,
   proteusCorticalCybermodemImplementation,
+  proteusCorticalStimulatorsImplementation,
   proteusDeckTheImplementation,
   proteusSunburstCranialInterfaceImplementation,
   proteusPoisonedWaterSupplyImplementation,
