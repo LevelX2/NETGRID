@@ -36,6 +36,12 @@ import {
   estimateStructuredBreakerCostForIce,
   getStructuredBreakerProfileForCard,
 } from "./breaker-ontology-consumer";
+import {
+  getStructuredRemoteRoleForCard,
+  remoteRoleIsScoringProtectionKind,
+  structuredRemoteRoleConflictWithLegacy,
+  structuredRemoteRoleSafetyBonusForServer,
+} from "./remote-role-ontology-consumer";
 
 export type CorpPlanKind =
   | "score_now"
@@ -317,6 +323,8 @@ type CorpEffectiveRemoteSafetyAssessment = {
   knownPathCost?: number;
   contestCapacity: RunnerContestCapacity["capacity"];
   rootProtectionCount: number;
+  structuredRemoteRoleProtectionCount: number;
+  structuredRemoteRoleSafetyBonus: number;
   effectiveProtectionScore: number;
   runnerCanContestWithCredits: boolean;
   runnerCanContestForActionOnly: boolean;
@@ -2366,6 +2374,16 @@ function evaluateCorpRemotePortfolioDiscipline(
   const choosesConsolidation = actions.some((action) =>
     portfolio.existingRemoteStrengthenActionIds.includes(action.actionId),
   );
+  const structuredRemoteRoleInPortfolio = actions.some((action) => {
+    const serverId =
+      typeof action.payload?.serverId === "string"
+        ? action.payload.serverId
+        : remoteServerIdForAction(input, action);
+    return Boolean(
+      serverId?.startsWith("remote_") &&
+      remoteServerHasStructuredRemoteRole(input, serverId),
+    );
+  });
   const features = extractCorpPlanFeatures(input);
 
   const score =
@@ -2394,8 +2412,29 @@ function evaluateCorpRemotePortfolioDiscipline(
       }`,
       `corp_remote_portfolio_overexpanded:${portfolio.overExpanded && choosesNewRemote}`,
       `corp_one_ice_remote_cheaply_contestable:${portfolio.cheapOneIceRemoteIds.length > 0}`,
+      `corp_remote_role_used_for_portfolio:${structuredRemoteRoleInPortfolio}`,
+      `corp_remote_role_helped_choose_existing_remote:${structuredRemoteRoleInPortfolio && !choosesNewRemote}`,
+      `corp_remote_role_helped_avoid_new_empty_remote:${
+        structuredRemoteRoleInPortfolio &&
+        !choosesNewRemote &&
+        portfolio.newRemoteWithoutPlanActionIds.length > 0
+      }`,
     ],
   };
+}
+
+function remoteServerHasStructuredRemoteRole(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  return Boolean(
+    server?.root.some((card) =>
+      Boolean(getStructuredRemoteRoleForCard(card.definitionId)),
+    ),
+  );
 }
 
 function evaluateCorpHqAgendaDensity(
@@ -4995,13 +5034,32 @@ function assessCorpEffectiveRemoteSafety(
   const knownPathCost = contest.visibleBreakCost;
   const runnerCreditsAfterKnownPath =
     knownPathCost === undefined ? undefined : runnerCredits - knownPathCost;
-  const rootProtectionCount =
-    server?.root.filter((card) => isVisibleRemoteProtectionCard(card)).length ??
-    0;
   const sameTurnScoreAllowed =
     action !== undefined &&
     action.type !== "install_card" &&
     actionOpensSameTurnScoreWindow(input, action);
+  const agendaContext =
+    action !== undefined &&
+    (isRemoteAgendaSetupAction(input, action) ||
+      action.type === "score_agenda");
+  const structuredRemoteRoleSafety = structuredRemoteRoleSafetyBonusForServer(
+    server?.root ?? [],
+    { agendaContext, runnerCreditsAfterKnownPath },
+  );
+  const rootProtectionCount =
+    server?.root.filter(
+      (card) =>
+        card.rezzed === true &&
+        !getStructuredRemoteRoleForCard(card.definitionId) &&
+        isVisibleRemoteProtectionCard(card, agendaContext),
+    ).length ?? 0;
+  const remoteRoleLegacyConflict =
+    server?.root.some((card) =>
+      structuredRemoteRoleConflictWithLegacy(
+        getStructuredRemoteRoleForCard(card.definitionId),
+        rolesForCardId(card.definitionId),
+      ),
+    ) ?? false;
   const hasIce = (server?.ice.length ?? 0) > 0;
   const runnerCanContestWithCredits =
     contest.capacity === "high" &&
@@ -5009,7 +5067,9 @@ function assessCorpEffectiveRemoteSafety(
     runnerCreditsAfterKnownPath !== undefined &&
     runnerCreditsAfterKnownPath >= 1;
   const runnerCanContestForActionOnly =
-    runnerCanContestWithCredits && knownPathCost <= 1;
+    runnerCanContestWithCredits &&
+    knownPathCost <= 1 &&
+    !structuredRemoteRoleSafety.blocksAgendaSteal;
   const cheaplyContestable =
     hasIce &&
     runnerCanContestForActionOnly &&
@@ -5018,6 +5078,7 @@ function assessCorpEffectiveRemoteSafety(
   const effectiveProtectionScore =
     (hasIce ? 18 : -80) +
     rootProtectionCount * 45 +
+    structuredRemoteRoleSafety.safetyBonus +
     (contest.capacity === "low"
       ? 85
       : contest.capacity === "medium"
@@ -5029,6 +5090,8 @@ function assessCorpEffectiveRemoteSafety(
     sameTurnScoreAllowed ||
     contest.capacity === "low" ||
     rootProtectionCount > 0 ||
+    (structuredRemoteRoleSafety.activeProtectionCount > 0 &&
+      !runnerCanContestForActionOnly) ||
     (!runnerCanContestWithCredits && contest.capacity !== "high") ||
     effectiveProtectionScore >= 60;
   const protectionOverestimatedByIcePresence =
@@ -5038,6 +5101,9 @@ function assessCorpEffectiveRemoteSafety(
     ...(effectivelyProtected ? ["remote_effectively_protected"] : []),
     ...(sameTurnScoreAllowed ? ["same_turn_score_allowed"] : []),
     ...(rootProtectionCount > 0 ? ["visible_remote_root_protection"] : []),
+    ...(structuredRemoteRoleSafety.activeProtectionCount > 0
+      ? ["structured_remote_role_safety"]
+      : []),
   ];
   return {
     serverId,
@@ -5049,6 +5115,9 @@ function assessCorpEffectiveRemoteSafety(
     ...(knownPathCost !== undefined ? { knownPathCost } : {}),
     contestCapacity: contest.capacity,
     rootProtectionCount,
+    structuredRemoteRoleProtectionCount:
+      structuredRemoteRoleSafety.activeProtectionCount,
+    structuredRemoteRoleSafetyBonus: structuredRemoteRoleSafety.safetyBonus,
     effectiveProtectionScore,
     runnerCanContestWithCredits,
     runnerCanContestForActionOnly,
@@ -5066,8 +5135,23 @@ function assessCorpEffectiveRemoteSafety(
       `runner_can_contest_scoring_remote_for_action_only:${runnerCanContestForActionOnly}`,
       `runner_can_contest_scoring_remote_with_credits:${runnerCanContestWithCredits}`,
       `corp_remote_effective_protection_score:${effectiveProtectionScore}`,
+      `corp_remote_role_safety_bonus:${structuredRemoteRoleSafety.safetyBonus}`,
       `corp_remote_protection_overestimated_by_ice_presence:${protectionOverestimatedByIcePresence}`,
       `corp_same_turn_score_allowed_despite_cheap_contest:${sameTurnScoreAllowed && runnerCanContestForActionOnly}`,
+      ...(remoteRoleLegacyConflict
+        ? ["corp_remote_role_conflict_with_legacy:true"]
+        : []),
+      ...(structuredRemoteRoleSafety.safetyBonus > 0
+        ? ["corp_remote_role_raised_safety_score:true"]
+        : []),
+      ...(structuredRemoteRoleSafety.safetyBonus > 0 && agendaContext
+        ? ["corp_remote_role_used_for_scoring_remote:true"]
+        : []),
+      ...(structuredRemoteRoleSafety.safetyBonus > 0 &&
+      runnerCanContestForActionOnly
+        ? ["corp_remote_role_did_not_raise_safety_because_cheap_contest:true"]
+        : []),
+      ...structuredRemoteRoleSafety.evidence,
     ],
   };
 }
@@ -5123,14 +5207,18 @@ function remoteProtectionScoreForServer(
     !reserve ||
     reserve.reserveTarget <= 0 ||
     creditsAfterAction >= reserve.reserveTarget;
-  const rootProtection = server.root.filter((card) =>
-    isVisibleRemoteProtectionCard(card),
+  const rootProtection = server.root.filter(
+    (card) =>
+      card.rezzed === true &&
+      !getStructuredRemoteRoleForCard(card.definitionId) &&
+      isVisibleRemoteProtectionCard(card),
   ).length;
   return (
     Math.min(server.ice.length, 3) * 22 +
     rezzedIce * 32 +
     (unrezzedIce > 0 && reserveOk ? 28 : 0) +
     rootProtection * 35 +
+    effectiveSafety.structuredRemoteRoleSafetyBonus +
     (contest.capacity === "low"
       ? 35
       : contest.capacity === "medium"
@@ -5177,8 +5265,18 @@ function isRemoteProtectionAction(
   return false;
 }
 
-function isVisibleRemoteProtectionCard(card: VisibleCard): boolean {
+function isVisibleRemoteProtectionCard(
+  card: VisibleCard,
+  agendaContext = true,
+): boolean {
   if (!card.definitionId) return false;
+  const structuredRole = getStructuredRemoteRoleForCard(card.definitionId);
+  if (structuredRole) {
+    return (
+      remoteRoleIsScoringProtectionKind(structuredRole.kind) &&
+      (structuredRole.kind !== "agenda_steal_tax" || agendaContext)
+    );
+  }
   const id = card.definitionId.toLocaleLowerCase("en-US");
   const title = (card.title ?? "").toLocaleLowerCase("en-US");
   const roles = rolesForCardId(card.definitionId);

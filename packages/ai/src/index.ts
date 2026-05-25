@@ -58,6 +58,11 @@ import {
   endTheRunSubroutineCount,
   iceHasEndTheRun,
 } from "./visible-run-analysis";
+import {
+  getStructuredRemoteRoleForCard,
+  remoteRoleIsNonScoringProtectionKind,
+  remoteRoleIsScoringProtectionKind,
+} from "./remote-role-ontology-consumer";
 import { buildAiDecisionInputDto } from "./input-dto";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
@@ -175,6 +180,12 @@ export {
   getStructuredBreakerProfileForCard,
   structuredBreakerProfileCoversIce,
 } from "./breaker-ontology-consumer";
+export {
+  classifyRemoteRoleFromOntology,
+  getStructuredRemoteRoleForCard,
+  remoteRoleIsScoringProtectionKind,
+  structuredRemoteRoleSafetyAssessmentForCard,
+} from "./remote-role-ontology-consumer";
 export { buildAiDeckOntologySummary } from "./hint-ontology-doctrine";
 export type {
   AiDeckOntologyBreakerCoverageSummary,
@@ -420,6 +431,51 @@ export type AiMatchProgressionMetrics = {
   breakerOntologyCostProfileSeen: number;
   breakerOntologyFallbackEvidenceCount: number;
   breakerOntologyEffectiveQuoteOverrideCount: number;
+  corpRemoteRoleProfilesSeen: number;
+  corpRemoteRoleUsedForSafety: number;
+  corpRemoteRoleUsedForScoringRemote: number;
+  corpRemoteRoleUsedForPortfolio: number;
+  corpRemoteRoleConflictWithLegacy: number;
+  corpRemoteRoleConflictWithBoardState: number;
+  corpScoringProtectionRemoteRoleSeen: number;
+  corpAgendaStealTaxRemoteRoleSeen: number;
+  corpRunTaxRemoteRoleSeen: number;
+  corpRemoteCapacityRoleSeen: number;
+  corpAssetEconomyRemoteRoleSeen: number;
+  corpBaitRemoteRoleSeen: number;
+  corpAmbushRemoteRoleSeen: number;
+  corpIceModifierRemoteRoleSeen: number;
+  corpRemoteRoleRaisedSafetyScore: number;
+  corpRemoteRoleDidNotRaiseSafetyBecauseInactive: number;
+  corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest: number;
+  corpRemoteRolePreventedBaitAsScoringProtection: number;
+  corpRemoteRolePreventedAssetAsScoringProtection: number;
+  corpRemoteRoleHelpedChooseExistingRemote: number;
+  corpRemoteRoleHelpedAvoidNewEmptyRemote: number;
+  runnerRemoteRoleProfilesSeen: number;
+  runnerRemoteRoleUsedForTrashValue: number;
+  runnerRemoteRoleUsedForContestValue: number;
+  runnerRemoteRoleTrashBudgetPreserved: number;
+  runnerRemoteRoleConflictWithHiddenStateGuard: number;
+  runnerRunTaxRemoteRoleAccessed: number;
+  runnerAgendaStealTaxRemoteRoleAccessed: number;
+  runnerAssetEconomyRemoteRoleAccessed: number;
+  remoteRoleByKind: number;
+  remoteRoleKindScoringProtection: number;
+  remoteRoleKindAgendaStealTax: number;
+  remoteRoleKindRunTax: number;
+  remoteRoleKindRemoteCapacity: number;
+  remoteRoleKindAssetEconomy: number;
+  remoteRoleKindBait: number;
+  remoteRoleKindAmbush: number;
+  remoteRoleKindIceModifier: number;
+  remoteRoleKindTaxFort: number;
+  remoteRoleByServerScope: number;
+  remoteRoleServerScopeFort: number;
+  remoteRoleServerScopeRemote: number;
+  remoteRoleServerScopeCentral: number;
+  remoteRoleServerScopeServer: number;
+  remoteRoleSafetyDedupeCount: number;
   unbrokenRunEffectIgnoredBecauseNoRemainingIce: number;
   unbrokenRunEffectAppliedToRemainingPath: number;
   badOutcomeRepeatedWithoutNewInfo: number;
@@ -4971,6 +5027,28 @@ export function formatMatchProgressionBenchmarkSuiteReport(
         metrics.breakerOntologyEffectiveQuoteOverrideCount,
       ]),
     );
+  const remoteRoleRows = suite.slots
+    .filter((slot) => slot.status === "runnable" && slot.benchmark)
+    .flatMap((slot) =>
+      slot.benchmark!.profileComparisons.map(({ profile, metrics }) => [
+        slot.slotId,
+        slot.tuningUse,
+        profile,
+        metrics.corpRemoteRoleProfilesSeen,
+        metrics.corpRemoteRoleUsedForSafety,
+        metrics.corpRemoteRoleUsedForScoringRemote,
+        metrics.corpRemoteRoleRaisedSafetyScore,
+        metrics.corpRemoteRoleDidNotRaiseSafetyBecauseInactive,
+        metrics.corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest,
+        metrics.corpRemoteRoleConflictWithLegacy,
+        metrics.corpRemoteRolePreventedBaitAsScoringProtection,
+        metrics.corpRemoteRolePreventedAssetAsScoringProtection,
+        metrics.runnerRemoteRoleProfilesSeen,
+        metrics.runnerRemoteRoleUsedForTrashValue,
+        metrics.remoteRoleByKind,
+        metrics.remoteRoleByServerScope,
+      ]),
+    );
   const sectionRows = (slotTypes: AiBenchmarkDeckSlotType[]) =>
     runnableRows
       .filter((row) => slotTypes.includes(row[1]))
@@ -5051,6 +5129,32 @@ export function formatMatchProgressionBenchmarkSuiteReport(
         effectiveQuoteOverride,
       ]) =>
         `| ${slotId} | ${tuningUse} | ${profile} | ${runnerProfilesSeen} | ${runnerCoverageUsed} | ${runnerFallback} | ${runnerInstallRanked} | ${runnerSearchRanked} | ${corpVisibleProfiles} | ${corpRemoteSafetyUsed} | ${corpCheapContest} | ${quoteConflict} | ${coverageSignals} | ${fallbackEvidence} | ${effectiveQuoteOverride} |`,
+    ),
+    "",
+    "## RemoteRole Ontology Metrics",
+    "",
+    "| Slot | Use | Profile | Corp Profiles Seen | Corp Safety Used | Corp Scoring Used | Raised Safety | Inactive | Cheap Contest Blocked | Legacy Conflict | Bait Not Protection | Asset Not Protection | Runner Profiles Seen | Runner Trash Value | Kinds | Scopes |",
+    "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ...remoteRoleRows.map(
+      ([
+        slotId,
+        tuningUse,
+        profile,
+        corpProfilesSeen,
+        corpSafetyUsed,
+        corpScoringUsed,
+        raisedSafety,
+        inactive,
+        cheapContestBlocked,
+        legacyConflict,
+        baitNotProtection,
+        assetNotProtection,
+        runnerProfilesSeen,
+        runnerTrashValue,
+        kinds,
+        scopes,
+      ]) =>
+        `| ${slotId} | ${tuningUse} | ${profile} | ${corpProfilesSeen} | ${corpSafetyUsed} | ${corpScoringUsed} | ${raisedSafety} | ${inactive} | ${cheapContestBlocked} | ${legacyConflict} | ${baitNotProtection} | ${assetNotProtection} | ${runnerProfilesSeen} | ${runnerTrashValue} | ${kinds} | ${scopes} |`,
     ),
     "",
     "## Metric Notes",
@@ -9286,6 +9390,51 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "breakerOntologyCostProfileSeen",
   "breakerOntologyFallbackEvidenceCount",
   "breakerOntologyEffectiveQuoteOverrideCount",
+  "corpRemoteRoleProfilesSeen",
+  "corpRemoteRoleUsedForSafety",
+  "corpRemoteRoleUsedForScoringRemote",
+  "corpRemoteRoleUsedForPortfolio",
+  "corpRemoteRoleConflictWithLegacy",
+  "corpRemoteRoleConflictWithBoardState",
+  "corpScoringProtectionRemoteRoleSeen",
+  "corpAgendaStealTaxRemoteRoleSeen",
+  "corpRunTaxRemoteRoleSeen",
+  "corpRemoteCapacityRoleSeen",
+  "corpAssetEconomyRemoteRoleSeen",
+  "corpBaitRemoteRoleSeen",
+  "corpAmbushRemoteRoleSeen",
+  "corpIceModifierRemoteRoleSeen",
+  "corpRemoteRoleRaisedSafetyScore",
+  "corpRemoteRoleDidNotRaiseSafetyBecauseInactive",
+  "corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest",
+  "corpRemoteRolePreventedBaitAsScoringProtection",
+  "corpRemoteRolePreventedAssetAsScoringProtection",
+  "corpRemoteRoleHelpedChooseExistingRemote",
+  "corpRemoteRoleHelpedAvoidNewEmptyRemote",
+  "runnerRemoteRoleProfilesSeen",
+  "runnerRemoteRoleUsedForTrashValue",
+  "runnerRemoteRoleUsedForContestValue",
+  "runnerRemoteRoleTrashBudgetPreserved",
+  "runnerRemoteRoleConflictWithHiddenStateGuard",
+  "runnerRunTaxRemoteRoleAccessed",
+  "runnerAgendaStealTaxRemoteRoleAccessed",
+  "runnerAssetEconomyRemoteRoleAccessed",
+  "remoteRoleByKind",
+  "remoteRoleKindScoringProtection",
+  "remoteRoleKindAgendaStealTax",
+  "remoteRoleKindRunTax",
+  "remoteRoleKindRemoteCapacity",
+  "remoteRoleKindAssetEconomy",
+  "remoteRoleKindBait",
+  "remoteRoleKindAmbush",
+  "remoteRoleKindIceModifier",
+  "remoteRoleKindTaxFort",
+  "remoteRoleByServerScope",
+  "remoteRoleServerScopeFort",
+  "remoteRoleServerScopeRemote",
+  "remoteRoleServerScopeCentral",
+  "remoteRoleServerScopeServer",
+  "remoteRoleSafetyDedupeCount",
   "unbrokenRunEffectIgnoredBecauseNoRemainingIce",
   "unbrokenRunEffectAppliedToRemainingPath",
   "badOutcomeRepeatedWithoutNewInfo",
@@ -10100,6 +10249,8 @@ export function summarizeMatchProgressionMetrics(
     summarizeActionLimitEndgameMetrics(summaries);
   const tagPunishWindowMetrics = summarizeTagPunishWindowMetrics(summaries);
   const breakerOntologyMetrics = summarizeBreakerOntologyMetrics(summaries);
+  const remoteRoleOntologyMetrics =
+    summarizeRemoteRoleOntologyMetrics(summaries);
   const runnerHandUseOpportunityWindows = actionSequence.filter(
     (entry) => entry.runnerHandUseOpportunity === true,
   ).length;
@@ -10169,6 +10320,7 @@ export function summarizeMatchProgressionMetrics(
     ...actionLimitEndgameMetrics,
     ...tagPunishWindowMetrics,
     ...breakerOntologyMetrics,
+    ...remoteRoleOntologyMetrics,
     advancedAgendaSteals,
     advancedAgendaStealsFromRemote,
     advancedAgendaStealsFromCentral,
@@ -12871,6 +13023,45 @@ const BREAKER_ONTOLOGY_COVERAGE_METRIC_KEYS: Record<
   unknown_special: "breakerOntologyCoverageUnknownSpecial",
 };
 
+type RemoteRoleKindMetricKey =
+  | "remoteRoleKindScoringProtection"
+  | "remoteRoleKindAgendaStealTax"
+  | "remoteRoleKindRunTax"
+  | "remoteRoleKindRemoteCapacity"
+  | "remoteRoleKindAssetEconomy"
+  | "remoteRoleKindBait"
+  | "remoteRoleKindAmbush"
+  | "remoteRoleKindIceModifier"
+  | "remoteRoleKindTaxFort";
+
+const REMOTE_ROLE_KIND_METRIC_KEYS: Record<string, RemoteRoleKindMetricKey> = {
+  scoring_protection: "remoteRoleKindScoringProtection",
+  agenda_steal_tax: "remoteRoleKindAgendaStealTax",
+  run_tax: "remoteRoleKindRunTax",
+  remote_capacity: "remoteRoleKindRemoteCapacity",
+  asset_economy: "remoteRoleKindAssetEconomy",
+  bait: "remoteRoleKindBait",
+  ambush: "remoteRoleKindAmbush",
+  ice_modifier: "remoteRoleKindIceModifier",
+  tax_fort: "remoteRoleKindTaxFort",
+};
+
+type RemoteRoleServerScopeMetricKey =
+  | "remoteRoleServerScopeFort"
+  | "remoteRoleServerScopeRemote"
+  | "remoteRoleServerScopeCentral"
+  | "remoteRoleServerScopeServer";
+
+const REMOTE_ROLE_SERVER_SCOPE_METRIC_KEYS: Record<
+  string,
+  RemoteRoleServerScopeMetricKey
+> = {
+  fort: "remoteRoleServerScopeFort",
+  remote: "remoteRoleServerScopeRemote",
+  central: "remoteRoleServerScopeCentral",
+  server: "remoteRoleServerScopeServer",
+};
+
 function summarizeBreakerOntologyMetrics(
   summaries: AiSimulationSummary[],
 ): Pick<
@@ -13126,6 +13317,264 @@ function summarizeBreakerOntologyMetrics(
         metrics.breakerOntologyFallbackEvidenceCount += 1;
       if (effectiveQuoteOverride)
         metrics.breakerOntologyEffectiveQuoteOverrideCount += 1;
+    }
+  }
+
+  return metrics;
+}
+
+function summarizeRemoteRoleOntologyMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "corpRemoteRoleProfilesSeen"
+  | "corpRemoteRoleUsedForSafety"
+  | "corpRemoteRoleUsedForScoringRemote"
+  | "corpRemoteRoleUsedForPortfolio"
+  | "corpRemoteRoleConflictWithLegacy"
+  | "corpRemoteRoleConflictWithBoardState"
+  | "corpScoringProtectionRemoteRoleSeen"
+  | "corpAgendaStealTaxRemoteRoleSeen"
+  | "corpRunTaxRemoteRoleSeen"
+  | "corpRemoteCapacityRoleSeen"
+  | "corpAssetEconomyRemoteRoleSeen"
+  | "corpBaitRemoteRoleSeen"
+  | "corpAmbushRemoteRoleSeen"
+  | "corpIceModifierRemoteRoleSeen"
+  | "corpRemoteRoleRaisedSafetyScore"
+  | "corpRemoteRoleDidNotRaiseSafetyBecauseInactive"
+  | "corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest"
+  | "corpRemoteRolePreventedBaitAsScoringProtection"
+  | "corpRemoteRolePreventedAssetAsScoringProtection"
+  | "corpRemoteRoleHelpedChooseExistingRemote"
+  | "corpRemoteRoleHelpedAvoidNewEmptyRemote"
+  | "runnerRemoteRoleProfilesSeen"
+  | "runnerRemoteRoleUsedForTrashValue"
+  | "runnerRemoteRoleUsedForContestValue"
+  | "runnerRemoteRoleTrashBudgetPreserved"
+  | "runnerRemoteRoleConflictWithHiddenStateGuard"
+  | "runnerRunTaxRemoteRoleAccessed"
+  | "runnerAgendaStealTaxRemoteRoleAccessed"
+  | "runnerAssetEconomyRemoteRoleAccessed"
+  | "remoteRoleByKind"
+  | "remoteRoleKindScoringProtection"
+  | "remoteRoleKindAgendaStealTax"
+  | "remoteRoleKindRunTax"
+  | "remoteRoleKindRemoteCapacity"
+  | "remoteRoleKindAssetEconomy"
+  | "remoteRoleKindBait"
+  | "remoteRoleKindAmbush"
+  | "remoteRoleKindIceModifier"
+  | "remoteRoleKindTaxFort"
+  | "remoteRoleByServerScope"
+  | "remoteRoleServerScopeFort"
+  | "remoteRoleServerScopeRemote"
+  | "remoteRoleServerScopeCentral"
+  | "remoteRoleServerScopeServer"
+  | "remoteRoleSafetyDedupeCount"
+> {
+  const metrics = {
+    corpRemoteRoleProfilesSeen: 0,
+    corpRemoteRoleUsedForSafety: 0,
+    corpRemoteRoleUsedForScoringRemote: 0,
+    corpRemoteRoleUsedForPortfolio: 0,
+    corpRemoteRoleConflictWithLegacy: 0,
+    corpRemoteRoleConflictWithBoardState: 0,
+    corpScoringProtectionRemoteRoleSeen: 0,
+    corpAgendaStealTaxRemoteRoleSeen: 0,
+    corpRunTaxRemoteRoleSeen: 0,
+    corpRemoteCapacityRoleSeen: 0,
+    corpAssetEconomyRemoteRoleSeen: 0,
+    corpBaitRemoteRoleSeen: 0,
+    corpAmbushRemoteRoleSeen: 0,
+    corpIceModifierRemoteRoleSeen: 0,
+    corpRemoteRoleRaisedSafetyScore: 0,
+    corpRemoteRoleDidNotRaiseSafetyBecauseInactive: 0,
+    corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest: 0,
+    corpRemoteRolePreventedBaitAsScoringProtection: 0,
+    corpRemoteRolePreventedAssetAsScoringProtection: 0,
+    corpRemoteRoleHelpedChooseExistingRemote: 0,
+    corpRemoteRoleHelpedAvoidNewEmptyRemote: 0,
+    runnerRemoteRoleProfilesSeen: 0,
+    runnerRemoteRoleUsedForTrashValue: 0,
+    runnerRemoteRoleUsedForContestValue: 0,
+    runnerRemoteRoleTrashBudgetPreserved: 0,
+    runnerRemoteRoleConflictWithHiddenStateGuard: 0,
+    runnerRunTaxRemoteRoleAccessed: 0,
+    runnerAgendaStealTaxRemoteRoleAccessed: 0,
+    runnerAssetEconomyRemoteRoleAccessed: 0,
+    remoteRoleByKind: 0,
+    remoteRoleKindScoringProtection: 0,
+    remoteRoleKindAgendaStealTax: 0,
+    remoteRoleKindRunTax: 0,
+    remoteRoleKindRemoteCapacity: 0,
+    remoteRoleKindAssetEconomy: 0,
+    remoteRoleKindBait: 0,
+    remoteRoleKindAmbush: 0,
+    remoteRoleKindIceModifier: 0,
+    remoteRoleKindTaxFort: 0,
+    remoteRoleByServerScope: 0,
+    remoteRoleServerScopeFort: 0,
+    remoteRoleServerScopeRemote: 0,
+    remoteRoleServerScopeCentral: 0,
+    remoteRoleServerScopeServer: 0,
+    remoteRoleSafetyDedupeCount: 0,
+  };
+
+  for (const summary of summaries) {
+    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
+    for (const entry of sequence) {
+      const roleKinds = new Set<string>();
+      const serverScopes = new Set<string>();
+      for (const evidence of entry.evidence) {
+        if (evidence.startsWith("corp_remote_role_kind:"))
+          roleKinds.add(evidence.slice("corp_remote_role_kind:".length));
+        if (evidence.startsWith("runner_remote_role_kind:"))
+          roleKinds.add(evidence.slice("runner_remote_role_kind:".length));
+        if (evidence.startsWith("corp_remote_role_server_scope:"))
+          serverScopes.add(
+            evidence.slice("corp_remote_role_server_scope:".length),
+          );
+        if (evidence.startsWith("runner_remote_role_server_scope:"))
+          serverScopes.add(
+            evidence.slice("runner_remote_role_server_scope:".length),
+          );
+      }
+
+      for (const roleKind of roleKinds) {
+        const key = REMOTE_ROLE_KIND_METRIC_KEYS[roleKind];
+        if (!key) continue;
+        metrics.remoteRoleByKind += 1;
+        metrics[key] += 1;
+      }
+      for (const serverScope of serverScopes) {
+        const key = REMOTE_ROLE_SERVER_SCOPE_METRIC_KEYS[serverScope];
+        if (!key) continue;
+        metrics.remoteRoleByServerScope += 1;
+        metrics[key] += 1;
+      }
+
+      if (entry.side === "corp") {
+        if (hasEvidenceFlag(entry, "corp_remote_role_profile_seen:true"))
+          metrics.corpRemoteRoleProfilesSeen += 1;
+        if (hasEvidenceFlag(entry, "corp_remote_role_used_for_safety:true")) {
+          metrics.corpRemoteRoleUsedForSafety += 1;
+          metrics.remoteRoleSafetyDedupeCount += 1;
+        }
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_used_for_scoring_remote:true",
+          )
+        )
+          metrics.corpRemoteRoleUsedForScoringRemote += 1;
+        if (hasEvidenceFlag(entry, "corp_remote_role_used_for_portfolio:true"))
+          metrics.corpRemoteRoleUsedForPortfolio += 1;
+        if (
+          hasEvidenceFlag(entry, "corp_remote_role_conflict_with_legacy:true")
+        )
+          metrics.corpRemoteRoleConflictWithLegacy += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_conflict_with_board_state:true",
+          )
+        )
+          metrics.corpRemoteRoleConflictWithBoardState += 1;
+        if (roleKinds.has("scoring_protection"))
+          metrics.corpScoringProtectionRemoteRoleSeen += 1;
+        if (roleKinds.has("agenda_steal_tax"))
+          metrics.corpAgendaStealTaxRemoteRoleSeen += 1;
+        if (roleKinds.has("run_tax")) metrics.corpRunTaxRemoteRoleSeen += 1;
+        if (roleKinds.has("remote_capacity"))
+          metrics.corpRemoteCapacityRoleSeen += 1;
+        if (roleKinds.has("asset_economy"))
+          metrics.corpAssetEconomyRemoteRoleSeen += 1;
+        if (roleKinds.has("bait")) metrics.corpBaitRemoteRoleSeen += 1;
+        if (roleKinds.has("ambush")) metrics.corpAmbushRemoteRoleSeen += 1;
+        if (roleKinds.has("ice_modifier"))
+          metrics.corpIceModifierRemoteRoleSeen += 1;
+        if (hasEvidenceFlag(entry, "corp_remote_role_raised_safety_score:true"))
+          metrics.corpRemoteRoleRaisedSafetyScore += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_did_not_raise_safety_because_inactive:true",
+          )
+        )
+          metrics.corpRemoteRoleDidNotRaiseSafetyBecauseInactive += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_did_not_raise_safety_because_cheap_contest:true",
+          )
+        )
+          metrics.corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_prevented_bait_as_scoring_protection:true",
+          )
+        )
+          metrics.corpRemoteRolePreventedBaitAsScoringProtection += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_prevented_asset_as_scoring_protection:true",
+          )
+        )
+          metrics.corpRemoteRolePreventedAssetAsScoringProtection += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_helped_choose_existing_remote:true",
+          )
+        )
+          metrics.corpRemoteRoleHelpedChooseExistingRemote += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_helped_avoid_new_empty_remote:true",
+          )
+        )
+          metrics.corpRemoteRoleHelpedAvoidNewEmptyRemote += 1;
+      }
+
+      if (entry.side === "runner") {
+        if (hasEvidenceFlag(entry, "runner_remote_role_profile_seen:true"))
+          metrics.runnerRemoteRoleProfilesSeen += 1;
+        if (
+          hasEvidenceFlag(entry, "runner_remote_role_used_for_trash_value:true")
+        )
+          metrics.runnerRemoteRoleUsedForTrashValue += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "runner_remote_role_used_for_contest_value:true",
+          )
+        )
+          metrics.runnerRemoteRoleUsedForContestValue += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "runner_remote_role_trash_budget_preserved:true",
+          )
+        )
+          metrics.runnerRemoteRoleTrashBudgetPreserved += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "runner_remote_role_conflict_with_hidden_state_guard:true",
+          )
+        )
+          metrics.runnerRemoteRoleConflictWithHiddenStateGuard += 1;
+        if (roleKinds.has("run_tax"))
+          metrics.runnerRunTaxRemoteRoleAccessed += 1;
+        if (roleKinds.has("agenda_steal_tax"))
+          metrics.runnerAgendaStealTaxRemoteRoleAccessed += 1;
+        if (roleKinds.has("asset_economy"))
+          metrics.runnerAssetEconomyRemoteRoleAccessed += 1;
+      }
     }
   }
 
@@ -18360,6 +18809,9 @@ function runnerRemoteTrashAccessContext(
     };
   }
   const targetType = remoteTrashTargetTypeForVisibleCard(accessed);
+  const structuredRemoteRole = getStructuredRemoteRoleForCard(
+    accessed.definitionId,
+  );
   const role = remoteTrashRoleForAccessedVisibleCard(input, accessed);
   const trashAction = input.legalActions.find(
     (candidate) => candidate.type === "trash_accessed_card",
@@ -18423,6 +18875,23 @@ function runnerRemoteTrashAccessContext(
     deferredByBudget,
     evidence: [
       `remote_trash_role:${role}`,
+      ...(structuredRemoteRole
+        ? [
+            "runner_remote_role_profile_seen:true",
+            `runner_remote_role_kind:${structuredRemoteRole.kind}`,
+            ...(structuredRemoteRole.serverScope
+              ? [
+                  `runner_remote_role_server_scope:${structuredRemoteRole.serverScope}`,
+                ]
+              : []),
+            ...(relevant
+              ? ["runner_remote_role_used_for_trash_value:true"]
+              : []),
+            ...(deferredByBudget
+              ? ["runner_remote_role_trash_budget_preserved:true"]
+              : []),
+          ]
+        : []),
       `remote_trash_cost:${trashCost}`,
       `remote_trash_general_credit_cost:${generalCreditCost}`,
       `remote_trash_dedicated_credits:${dedicatedTrashCredits}`,
@@ -18615,6 +19084,24 @@ function remoteTrashRoleForAccessedVisibleCard(
 
 function remoteTrashRoleForVisibleCard(card: VisibleCard): RemoteTrashRole {
   if (card.definitionId === "simple_upgrade") return "low_value";
+  const structuredRole = getStructuredRemoteRoleForCard(card.definitionId);
+  if (structuredRole) {
+    if (structuredRole.kind === "remote_capacity") return "remote_capacity";
+    if (structuredRole.kind === "asset_economy") return "economy";
+    if (structuredRole.kind === "bait" || structuredRole.kind === "ambush")
+      return "ambush";
+    if (
+      structuredRole.kind === "run_tax" ||
+      structuredRole.kind === "tax_fort" ||
+      structuredRole.kind === "ice_modifier"
+    )
+      return "run_tax";
+    if (
+      remoteRoleIsScoringProtectionKind(structuredRole.kind) &&
+      !remoteRoleIsNonScoringProtectionKind(structuredRole.kind)
+    )
+      return "scoring_protection";
+  }
   const roles = rolesForCardId(card.definitionId);
   const runtimeDefinition = card.definitionId
     ? RUNTIME_CARDS[card.definitionId]

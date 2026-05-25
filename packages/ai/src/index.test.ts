@@ -37,6 +37,8 @@ import {
   classifyScoredAgendaActionFromOntology,
   estimateBreakerCostProfileFromOntology,
   estimateStructuredBreakerCostForIce,
+  getStructuredRemoteRoleForCard,
+  structuredRemoteRoleSafetyAssessmentForCard,
   chooseRunnerBaselineAction,
   corpPlanUsesOnlyAiSupportedCards,
   chooseRunnerPlanDecision,
@@ -4839,7 +4841,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
-  it("allows agenda install when visible remote tax makes the remote effectively protected", () => {
+  it("recognizes run-tax RemoteRole without treating it as agenda-steal protection", () => {
     const input = corpEffectiveRemoteSafetyInput(
       "ai-corp-tax-protected-remote",
       { runnerCredits: 8, includeTaxUpgrade: true },
@@ -4860,12 +4862,163 @@ describe("V1.4.0 plan-based Corp AI", () => {
       throw new Error("Missing tax-protected remote fixture actions");
 
     const scopedInput = { ...input, legalActions: [agendaInstall, gain] };
+    const score = evaluateRemoteScoreHorizon(scopedInput, {
+      planId: "remote-role-run-tax-fixture",
+      kind: "build_scoring_remote",
+      legalActionIds: [agendaInstall.actionId],
+      steps: [],
+      expectedBenefits: [],
+      visibleRisks: [],
+      requiredRoles: [],
+    });
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(decision.selectedActionId).not.toBe(agendaInstall.actionId);
+    expect(score.evidence).toContain("corp_remote_role_kind:run_tax");
+    expect(score.evidence).toContain("corp_remote_role_used_for_safety:true");
+    expect(score.evidence).toContain(
+      "corp_remote_role_did_not_raise_safety_because_cheap_contest:true",
+    );
+    expect(score.evidence).not.toContain("corp_remote_role_kind:asset_economy");
+  });
+
+  it("uses agenda-steal-tax RemoteRole to raise scoring remote safety when the Runner cannot pay", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-red-herrings-remote-role",
+      { runnerCredits: 4, includeAgendaStealTaxUpgrade: true },
+    );
+    const agendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(agendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!agendaInstall || !gain)
+      throw new Error("Missing agenda-steal-tax fixture actions");
+
+    const scopedInput = { ...input, legalActions: [agendaInstall, gain] };
     const decision = chooseCorpPlanDecision(scopedInput);
 
     expect(decision.selectedActionId).toBe(agendaInstall.actionId);
     expect(decision.score.evidence).toContain(
-      "corp_score_line_continued_when_remote_effectively_protected:true",
+      "corp_remote_role_kind:agenda_steal_tax",
     );
+    expect(decision.score.evidence).toContain(
+      "corp_remote_role_agenda_steal_tax_blocks_steal:true",
+    );
+    expect(decision.score.evidence).toContain(
+      "corp_remote_role_used_for_scoring_remote:true",
+    );
+  });
+
+  it("classifies structured remote roles without treating capacity, asset or bait as scoring protection", () => {
+    const redHerrings = getStructuredRemoteRoleForCard(
+      "onr_v1_366_red-herrings",
+    );
+    const namatoki = getStructuredRemoteRoleForCard(
+      "onr_v1_361_namatoki-plaza",
+    );
+    const assetEconomy = getStructuredRemoteRoleForCard(
+      "onr_v1_309_bbs-whispering-campaign",
+    );
+
+    expect(redHerrings?.kind).toBe("agenda_steal_tax");
+    expect(namatoki?.kind).toBe("remote_capacity");
+    expect(assetEconomy?.kind).toBe("asset_economy");
+
+    const activeRedHerrings = structuredRemoteRoleSafetyAssessmentForCard(
+      {
+        definitionId: "onr_v1_366_red-herrings",
+        known: true,
+        rezzed: true,
+      },
+      { agendaContext: true, runnerCreditsAfterKnownPath: 2 },
+    );
+    const activeCapacity = structuredRemoteRoleSafetyAssessmentForCard(
+      {
+        definitionId: "onr_v1_361_namatoki-plaza",
+        known: true,
+        rezzed: true,
+      },
+      { agendaContext: true, runnerCreditsAfterKnownPath: 2 },
+    );
+    const inactiveTax = structuredRemoteRoleSafetyAssessmentForCard(
+      {
+        definitionId: "onr_v1_355_crystal-palace-station-grid",
+        known: true,
+        rezzed: false,
+      },
+      { agendaContext: true, runnerCreditsAfterKnownPath: 2 },
+    );
+
+    expect(activeRedHerrings.raisesSafety).toBe(true);
+    expect(activeRedHerrings.blocksAgendaSteal).toBe(true);
+    expect(activeCapacity.raisesSafety).toBe(false);
+    expect(activeCapacity.evidence).toContain(
+      "corp_remote_role_kind:remote_capacity",
+    );
+    expect(inactiveTax.raisesSafety).toBe(false);
+    expect(inactiveTax.evidence).toContain(
+      "corp_remote_role_did_not_raise_safety_because_inactive:true",
+    );
+  });
+
+  it("summarizes RemoteRole ontology evidence as first-class metrics", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "install_card", "remote_1", 1, {
+            evidence: [
+              "corp_remote_role_profile_seen:true",
+              "corp_remote_role_kind:agenda_steal_tax",
+              "corp_remote_role_server_scope:fort",
+              "corp_remote_role_used_for_safety:true",
+              "corp_remote_role_used_for_scoring_remote:true",
+              "corp_remote_role_raised_safety_score:true",
+            ],
+          }),
+          progressionAction("corp", 2, "install_card", "remote_1", 1, {
+            evidence: [
+              "corp_remote_role_profile_seen:true",
+              "corp_remote_role_kind:remote_capacity",
+              "corp_remote_role_server_scope:remote",
+              "corp_remote_role_conflict_with_legacy:true",
+            ],
+          }),
+          progressionAction("runner", 3, "trash_accessed_card", "remote_1", 1, {
+            evidence: [
+              "runner_remote_role_profile_seen:true",
+              "runner_remote_role_kind:run_tax",
+              "runner_remote_role_server_scope:fort",
+              "runner_remote_role_used_for_trash_value:true",
+            ],
+          }),
+        ],
+        "remote-role-metric-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpRemoteRoleProfilesSeen).toBe(2);
+    expect(metrics.corpRemoteRoleUsedForSafety).toBe(1);
+    expect(metrics.corpRemoteRoleUsedForScoringRemote).toBe(1);
+    expect(metrics.corpRemoteRoleRaisedSafetyScore).toBe(1);
+    expect(metrics.corpRemoteRoleConflictWithLegacy).toBe(1);
+    expect(metrics.corpAgendaStealTaxRemoteRoleSeen).toBe(1);
+    expect(metrics.corpRemoteCapacityRoleSeen).toBe(1);
+    expect(metrics.runnerRemoteRoleProfilesSeen).toBe(1);
+    expect(metrics.runnerRemoteRoleUsedForTrashValue).toBe(1);
+    expect(metrics.runnerRunTaxRemoteRoleAccessed).toBe(1);
+    expect(metrics.remoteRoleKindAgendaStealTax).toBe(1);
+    expect(metrics.remoteRoleKindRemoteCapacity).toBe(1);
+    expect(metrics.remoteRoleKindRunTax).toBe(1);
+    expect(metrics.remoteRoleServerScopeFort).toBe(2);
+    expect(metrics.remoteRoleServerScopeRemote).toBe(1);
   });
 
   it("allows same-turn score setup despite cheap contest when Runner has no response window", () => {
@@ -18762,6 +18915,7 @@ function corpEffectiveRemoteSafetyInput(
   options: {
     runnerCredits: number;
     includeTaxUpgrade?: boolean;
+    includeAgendaStealTaxUpgrade?: boolean;
     installedAgendaCounters?: number;
     agendaInHq?: boolean;
     assetInHq?: boolean;
@@ -18796,6 +18950,7 @@ function corpEffectiveRemoteSafetyInput(
         { id: "simple_code_gate_ice", quantity: 2 },
         { id: "simple_barrier_ice", quantity: 2 },
         { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+        { id: "onr_v1_366_red-herrings", quantity: 1 },
       ],
     },
     agendaPointsToWin: 7,
@@ -18818,6 +18973,14 @@ function corpEffectiveRemoteSafetyInput(
       "onr_v1_355_crystal-palace-station-grid",
       0,
     );
+    state.cardInstances[taxId] = {
+      ...state.cardInstances[taxId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+  if (options.includeAgendaStealTaxUpgrade) {
+    const taxId = putCorpRootInRemote(state, "onr_v1_366_red-herrings", 0);
     state.cardInstances[taxId] = {
       ...state.cardInstances[taxId]!,
       faceup: true,
@@ -18871,6 +19034,7 @@ function corpEffectiveRemoteSafetyInput(
       { cardId: "simple_barrier_ice", quantity: 2 },
       { cardId: "simple_economy_operation", quantity: 4 },
       { cardId: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+      { cardId: "onr_v1_366_red-herrings", quantity: 1 },
     ],
   });
   return buildAiDecisionInput(state, "corp", {
