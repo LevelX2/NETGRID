@@ -109,6 +109,10 @@ export type CardImplementationEffectAdapterHost = {
   ) => CardInstance;
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
   runnerInstalledCardIds: (state: GameState) => CardInstanceId[];
+  hiddenRunnerResourceRevealPayload?: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+  ) => PublicEffectPayload;
   trashCorpInstalledCardToArchives: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -332,6 +336,8 @@ export function createCardImplementationEffectAdapters(
   ): CardEffectTrashSourceResult {
     const instance = host.mustInstance(state.cardInstances, sourceCardId);
     const definition = host.definitionFor(state, sourceCardId);
+    const hiddenRevealPayload =
+      host.hiddenRunnerResourceRevealPayload?.(state, sourceCardId) ?? {};
     if (
       instance.controller === "corp" &&
       (instance.zone.zone === "serverRoot" ||
@@ -349,6 +355,7 @@ export function createCardImplementationEffectAdapters(
     return {
       sourceTrashed: true,
       publicPayload: {
+        ...hiddenRevealPayload,
         sourceTrashed: true,
         trashedCardDefinitionId: definition.id,
       },

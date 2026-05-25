@@ -605,6 +605,7 @@ const cardImplementationEffectAdapters = createCardImplementationEffectAdapters(
   mustInstance,
   definitionFor,
   runnerInstalledCardIds,
+  hiddenRunnerResourceRevealPayload,
   trashCorpInstalledCardToArchives,
   trashRunnerInstalledCardToHeap,
 });
@@ -15352,8 +15353,13 @@ function applyRuntimeDamagePreventionCost(
   if (implementationSource) {
     if (implementationSource.cost.kind === "none") return {};
     if (implementationSource.cost.kind === "trash_source") {
+      const hiddenRevealPayload = hiddenRunnerResourceRevealPayload(
+        state,
+        sourceCardId,
+      );
       trashRunnerInstalledCardToHeap(state, sourceCardId);
       return {
+        ...hiddenRevealPayload,
         sourceTrashed: true,
         trashedCardDefinitionId: definition.id,
       };
@@ -15419,8 +15425,13 @@ function applyRuntimeTagPreventionCost(
   );
   if (!source) return {};
   if (source.cost.kind === "trash_source") {
+    const hiddenRevealPayload = hiddenRunnerResourceRevealPayload(
+      state,
+      sourceCardId,
+    );
     trashRunnerInstalledCardToHeap(state, sourceCardId);
     return {
+      ...hiddenRevealPayload,
       sourceTrashed: true,
       trashedCardDefinitionId: definition.id,
     };
@@ -15451,8 +15462,13 @@ function applyRuntimeTrashPreventionCost(
   );
   if (!source) return {};
   if (source.cost.kind === "trash_source") {
+    const hiddenRevealPayload = hiddenRunnerResourceRevealPayload(
+      state,
+      sourceCardId,
+    );
     trashRunnerInstalledCardToHeap(state, sourceCardId);
     return {
+      ...hiddenRevealPayload,
       sourceTrashed: true,
       trashedCardDefinitionId: definition.id,
     };
@@ -15463,6 +15479,20 @@ function applyRuntimeTrashPreventionCost(
     paidCredits: source.cost.amount,
     returnedSourceToGrip: true,
     runnerCreditsAfter: state.runner.credits,
+  };
+}
+
+function hiddenRunnerResourceRevealPayload(
+  state: GameState,
+  cardId: CardInstanceId,
+): Record<string, string | number | boolean> {
+  if (!isConcealedRunnerResource(state, cardId)) return {};
+  const definition = definitionFor(state, cardId);
+  return {
+    hiddenRunnerResource: true,
+    hiddenRunnerResourceRevealed: true,
+    hiddenResourceSlotId: hiddenRunnerResourceSlotId(cardId),
+    publicRevealDefinitionId: definition.id,
   };
 }
 

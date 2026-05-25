@@ -1283,7 +1283,8 @@ function payActivatedCardImplementationCosts(
   side: Side,
   cardId: CardInstanceId,
   ability: ActivatedCardAbilityImplementation,
-): void {
+): Record<string, string | number | boolean> {
+  const publicPayload: Record<string, string | number | boolean> = {};
   const legalCosts = activatedAbilityLegalActionCosts(ability);
   const clicks = legalCosts[0]?.clicks ?? 0;
   const creditCost = legalCosts[0]?.credits ?? 0;
@@ -1312,7 +1313,9 @@ function payActivatedCardImplementationCosts(
     const trashResult = deps.trashSource(state, cardId);
     if (!trashResult.sourceTrashed)
       throw new Error("Die Quelle konnte nicht getrasht werden.");
+    Object.assign(publicPayload, trashResult.publicPayload);
   }
+  return publicPayload;
 }
 
 function activatedAbilityPayload(
@@ -1656,7 +1659,7 @@ export function resolveActivatedCardImplementationAbility(
   const match = activatedAbilityForLegalAction(deps, state, legalAction);
   if (!match) return false;
   validateActivatedCardImplementationAbility(deps, state, legalAction, match);
-  payActivatedCardImplementationCosts(
+  const costPublicPayload = payActivatedCardImplementationCosts(
     deps,
     state,
     legalAction.side,
@@ -1897,6 +1900,7 @@ export function resolveActivatedCardImplementationAbility(
           cardImplementationSourceAbilityUsedThisTurn: true,
         }
       : {}),
+    ...costPublicPayload,
     ...result.publicPayload,
   };
   deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);

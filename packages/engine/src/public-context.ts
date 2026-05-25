@@ -425,6 +425,11 @@ export function publicContextForAction(
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
     }
+    if (legalAction.payload?.hiddenRunnerResourceRevealed === true) {
+      context.hiddenRunnerResourceRevealed = true;
+      if (typeof legalAction.payload.hiddenResourceSlotId === "string")
+        context.hiddenResourceSlotId = legalAction.payload.hiddenResourceSlotId;
+    }
     for (const key of [
       "replacementWindowId",
       "replacementDecision",
@@ -915,6 +920,11 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.publicRevealDefinitionId === "string")
     context.publicRevealDefinitionId =
       legalAction.payload.publicRevealDefinitionId;
+  if (legalAction.payload?.hiddenRunnerResourceRevealed === true) {
+    context.hiddenRunnerResourceRevealed = true;
+    if (typeof legalAction.payload.hiddenResourceSlotId === "string")
+      context.hiddenResourceSlotId = legalAction.payload.hiddenResourceSlotId;
+  }
   if (typeof legalAction.payload?.exposedServerId === "string")
     context.exposedServerId = legalAction.payload.exposedServerId;
   if (
