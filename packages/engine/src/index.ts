@@ -79,6 +79,12 @@ import {
   type PendingChoiceResolutionHost,
 } from "./game/choices/pending-choice-resolution";
 import {
+  configureLegalActionGenerationHost,
+  getLegalActions as getLegalActionsFromGame,
+  legalActionsFor as legalActionsForFromGame,
+  type LegalActionGenerationHost,
+} from "./game/legal-actions";
+import {
   requireTracePhase,
   traceIsInPhase,
   tracePostBidLinkSourceUsed,
@@ -2397,104 +2403,44 @@ function runnerDrawSummaryPublicPayload(
 }
 
 export function getLegalActions(state: GameState, side: Side): LegalAction[] {
-  if (state.winner || state.phase === "game_over") return [];
-  if (state.pendingChoice)
-    return side === state.pendingChoice.side
-      ? [choiceAction(state, state.pendingChoice)]
-      : [];
-  if (state.run?.postPassPayOrEndRun)
-    return side === "runner"
-      ? buildRunnerMovementActions(
-          runnerEncounterActionHostForState(state),
-        ).legalActions
-      : [];
-  if (state.runnerVirusPurgeWindow)
-    return side === "corp" && purgeableRunnerVirusCounterTotal(state) > 0
-      ? [buildPurgeableRunnerVirusPurgeAction(state)]
-      : [];
-  const sharedRunWindow =
-    state.timingPoint === "run.approach_ice" ||
-    state.timingPoint === "run.jack_out_window";
-  const inactiveCorpRunnerActionPaidWindow =
-    state.timingPoint === "runner_action.main" && side === "corp";
-  const inactiveCorpEncounterPaidWindow =
-    state.timingPoint === "run.encounter_ice" && side === "corp";
-  if (
-    side !== state.activeSide &&
-    !sharedRunWindow &&
-    !inactiveCorpRunnerActionPaidWindow &&
-    !inactiveCorpEncounterPaidWindow
-  )
-    return [];
-
-  if (state.timingPoint === "corp_draw.mandatory_draw") {
-    return side === "corp"
-      ? [
-          action(
-            state,
-            "corp",
-            "mandatory_draw",
-            "Korp Pflichtkarte ziehen",
-            "game_rule",
-          ),
-        ]
-      : [];
-  }
-
-  if (state.timingPoint === "corp_action.main")
-    return side === "corp"
-      ? buildCorpMainActions(corpMainActionGenerationHost(state))
-      : [];
-  if (state.timingPoint === "runner_action.main") {
-    if (side === "runner")
-      return buildRunnerMainActions(runnerMainActionGenerationHost(state));
-    return side === "corp" ? corpRunnerActionPaidWindowActions(state) : [];
-  }
-  if (state.timingPoint === "run.approach_ice") {
-    const encounterEntryHost = encounterEntryHostForState(state);
-    if (isApproachIceExposeViewingWindowOpen(encounterEntryHost))
-      return side === "runner"
-        ? runnerApproachIceExposeViewingActions(encounterEntryHost)
-        : [];
-    if (isApproachIceExposeWindowOpen(encounterEntryHost))
-      return side === "runner"
-        ? runnerApproachIceExposeActions(encounterEntryHost)
-        : [];
-    return side === "corp"
-      ? buildCorpApproachActions(runRezWindowHostForState(state))
-      : [];
-  }
-  if (state.timingPoint === "run.encounter_ice") {
-    if (side === "runner")
-      return buildRunnerEncounterActions(
-        runnerEncounterActionHostForState(state),
-      ).legalActions;
-    return side === "corp"
-      ? buildCorpEncounterCardImplementationActions(
-          runCardImplementationActionHost(state),
-        ).legalActions
-      : [];
-  }
-  if (state.timingPoint === "run.jack_out_window") {
-    if (side === "corp")
-      return buildCorpRunRootRezWindowActions(runRezWindowHostForState(state));
-    if (isCorpRunRootRezWindowOpen(runRezWindowHostForState(state))) return [];
-    return side === "runner"
-      ? buildRunnerMovementActions(
-          runnerEncounterActionHostForState(state),
-        ).legalActions
-      : [];
-  }
-  if (state.timingPoint === "access.resolve_card")
-    return side === "runner"
-      ? buildRunnerAccessActions(runnerAccessActionHost(state)).legalActions
-      : [];
-  return [];
+  return getLegalActionsFromGame(state, side);
 }
 
 export function legalActionsFor(state: GameState, side: Side): LegalAction[] {
-  return getLegalActions(state, side);
+  return legalActionsForFromGame(state, side);
 }
+
+function legalActionGenerationHost(state: GameState): LegalActionGenerationHost {
+  return {
+    state,
+    actions: {
+      buildMandatoryDrawAction: () =>
+        action(state, "corp", "mandatory_draw", "Korp Pflichtkarte ziehen", "game_rule"),
+      buildChoiceAction: (choice) => choiceAction(state, choice),
+      buildPurgeableRunnerVirusPurgeAction: () =>
+        buildPurgeableRunnerVirusPurgeAction(state),
+      corpRunnerActionPaidWindowActions: () =>
+        corpRunnerActionPaidWindowActions(state),
+    },
+    counters: {
+      purgeableRunnerVirusCounterTotal: () =>
+        purgeableRunnerVirusCounterTotal(state),
+    },
+    hosts: {
+      corpMainActionGenerationHost: () => corpMainActionGenerationHost(state),
+      runnerMainActionGenerationHost: () =>
+        runnerMainActionGenerationHost(state),
+      runnerEncounterActionHost: () => runnerEncounterActionHostForState(state),
+      encounterEntryHost: () => encounterEntryHostForState(state),
+      runRezWindowHost: () => runRezWindowHostForState(state),
+      runCardImplementationActionHost: () =>
+        runCardImplementationActionHost(state),
+      runnerAccessActionHost: () => runnerAccessActionHost(state),
+    },
+  };
+}
+
+configureLegalActionGenerationHost(legalActionGenerationHost);
 
 export function applyAction(
   state: GameState,
