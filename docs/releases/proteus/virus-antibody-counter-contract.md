@@ -1,11 +1,11 @@
 # Proteus Virus-/Antibody-Counter Contract
 
 Stand: 2026-05-17
-Status: planning contract; Phase 8a runtime foundation for purgefähige Runner-Virus-Counter exists; Phase 8b Corp-Antibody-Access target cards are implemented
+Status: planning contract; Phase 8a runtime foundation for purgefähige Runner-Virus-Counter exists; Phase 8b and 8c target cards are implemented
 
 ## Scope und Quellen
 
-Dieses Artefakt schneidet den Proteus-Cluster `virus_antibody_counter_family` aus `data/rules/proteus-mechanics-coverage-2026-05-17.json` in kleine Vertragsfamilien. Seit Phase 8a gibt es eine generische Runtime-Grundlage für purgefähige Runner-Virus-Counter, Proteus-Purge-Action-Debt und öffentliche Corp-/Server-CounterDisplays. Seit Phase 8b sind `Bel-Digmo Antibody`, `Doppelganger Antibody`, `Pattel Antibody` und `Stereogram Antibody` als `human_playable` Runtime-Karten umgesetzt; Proteus bleibt weiterhin nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`.
+Dieses Artefakt schneidet den Proteus-Cluster `virus_antibody_counter_family` aus `data/rules/proteus-mechanics-coverage-2026-05-17.json` in kleine Vertragsfamilien. Seit Phase 8a gibt es eine generische Runtime-Grundlage für purgefähige Runner-Virus-Counter, Proteus-Purge-Action-Debt und öffentliche Corp-/Server-CounterDisplays. Seit Phase 8b sind `Bel-Digmo Antibody`, `Doppelganger Antibody`, `Pattel Antibody` und `Stereogram Antibody` als `human_playable` Runtime-Karten umgesetzt. Seit Phase 8c ist `Viral Breeding Ground` als Score-/Access-Agenda umgesetzt; Proteus bleibt weiterhin nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`.
 
 Lokale Quellen:
 
@@ -74,6 +74,8 @@ PublicPayload:
 ## Slice 2: Viral Breeding Ground
 
 Karte: `Viral Breeding Ground`.
+
+Umsetzungsstatus: abgeschlossen in Phase 8c. Die Zielkarte verwendet eine eigene CardImplementation-Datei, einen generischen Score-Fort-Trash-Effekt und eine generische Corp-Access-Choice zum Zurückgeben installierter Runner-Programme inklusive Hosted-Program-Cleanup.
 
 Vertrag:
 

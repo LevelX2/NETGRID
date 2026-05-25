@@ -771,6 +771,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/ice/toughonium-wall.ts",
   "onr_proteus_044_walking-wall":
     "packages/engine/src/card-implementations/proteus/corp/ice/walking-wall.ts",
+  "onr_proteus_009_viral-breeding-ground":
+    "packages/engine/src/card-implementations/proteus/corp/agendas/viral-breeding-ground.ts",
   "onr_proteus_054_bel-digmo-antibody":
     "packages/engine/src/card-implementations/proteus/corp/assets/bel-digmo-antibody.ts",
   "onr_proteus_057_doppelganger-antibody":

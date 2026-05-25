@@ -9252,6 +9252,26 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
     ],
   },
   {
+    id: "onr_proteus_009_viral-breeding-ground",
+    title: "Viral Breeding Ground",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["ambush", "research", "virus"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 2,
+    rulesText:
+      "When you score Viral Breeding Ground, trash all cards installed in or on the fort it was installed in. When Runner accesses Viral Breeding Ground, choose up to two installed programs for each advancement counter on it; Runner brings those programs into their grip.",
+    mechanics: [
+      "score_agenda",
+      "access_ambush",
+      "advancement_counter",
+      "trash_installed_card",
+      "return_installed_program_to_grip",
+      "proteus_antibody_counter_family",
+    ],
+  },
+  {
     id: "onr_proteus_031_minotaur",
     title: "Minotaur",
     side: "corp",

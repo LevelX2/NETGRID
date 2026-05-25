@@ -117,6 +117,16 @@ export function scoreAgenda(
   const requiredDifficulty = host.cards.effectiveAgendaDifficulty(cardId);
   if (instanceBefore.advancementCounters < requiredDifficulty)
     throw new Error("Agenda hat nicht genug Advancements.");
+  if (
+    legalAction &&
+    instanceBefore.zone.side === "corp" &&
+    instanceBefore.zone.zone === "serverRoot"
+  ) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      scoredFromServerId: instanceBefore.zone.serverId,
+    };
+  }
   host.zones.removeFromAllZones(cardId);
   state.corp.scoreArea.push(cardId);
   state.cardInstances[cardId] = {

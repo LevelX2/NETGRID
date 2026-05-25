@@ -108,6 +108,11 @@ export type AccessEffectHandlerHost = {
       sourceDefinitionId: CardDefinitionId,
     ) => { publicPayload: Record<string, string | number | boolean> };
   };
+  runnerCards: {
+    returnInstalledProgramsToGrip: (cardIds: readonly CardInstanceId[]) => {
+      publicPayload: Record<string, string | number | boolean>;
+    };
+  };
   payment: {
     spendCorpCredits: (amount: number) => void;
   };
@@ -306,6 +311,73 @@ export function resolveChimeraDaemonTrashChoice(
   };
 }
 
+export function resolveAccessInstalledRunnerProgramReturnChoice(
+  host: AccessEffectHandlerHost,
+  selectedOptionIds: readonly string[],
+): AccessEffectHandlerResult {
+  const legalAction = requireLegalAction(host);
+  const choice = host.state.pendingChoice;
+  if (!choice || !choice.source.startsWith("proteus.return_runner_programs"))
+    throw new Error("Es ist keine Runner-Program-Return-Choice offen.");
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf diese Access-Choice resolven.");
+  const [, sourceCardId = "", effectIndexRaw = "", accessZoneRaw = ""] =
+    choice.source.split(":");
+  const effectIndex = Number(effectIndexRaw);
+  if (
+    !sourceCardId ||
+    host.state.run?.accessedCardId !== sourceCardId ||
+    !Number.isInteger(effectIndex) ||
+    effectIndex < 0
+  )
+    throw new Error("Die Runner-Program-Return-Choice ist nicht mehr gueltig.");
+  const sourceId = sourceCardId as CardInstanceId;
+  const definition = host.cards.definitionFor(sourceId);
+  const effect = host.cards.accessEffectsForDefinition(definition.id)[effectIndex];
+  const accessZone = cardImplementationAccessZone(host, sourceId);
+  if (
+    accessZone !== accessZoneRaw ||
+    !effect ||
+    !accessEffectApplies(host, sourceId, effect, accessZone)
+  )
+    throw new Error("Der Access-Return-Kontext ist nicht mehr gueltig.");
+  const returnStep = effect.effects.find(
+    (step) => step.kind === "return_installed_runner_programs_to_grip",
+  );
+  if (!returnStep)
+    throw new Error("Die Access-Choice passt nicht zur Kartenimplementierung.");
+  const selectedIds = selectedCardIdsFromChoice(choice, selectedOptionIds);
+  const maxSelections = maxRunnerProgramReturnCount(host, sourceId, returnStep);
+  if (selectedIds.length > maxSelections)
+    throw new Error("Zu viele Runner-Programme gewaehlt.");
+  for (const selectedId of selectedIds) {
+    if (!runnerInstalledProgramReturnCandidates(host).includes(selectedId))
+      throw new Error("Das gewaehlte Runner-Programm ist nicht mehr installiert.");
+  }
+  const result = host.runnerCards.returnInstalledProgramsToGrip(selectedIds);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "proteus_return_installed_runner_programs_to_grip",
+    accessEffectSourceDefinitionId: definition.id,
+    ambushDefinitionId: definition.id,
+    accessedFromZone: accessZone,
+    advancementCounterCount: host.cards.mustInstance(sourceId).advancementCounters,
+    maxReturnedProgramCount: maxSelections,
+    ...result.publicPayload,
+  };
+  delete host.state.pendingChoice;
+  return {
+    handled: true,
+    sourceCardId: sourceId,
+    sourceDefinitionId: definition.id,
+    accessZone,
+    deletePendingChoice: true,
+    resolvedPayload: legalAction.payload as AccessPayload,
+    stateChanged: true,
+  };
+}
+
 function cardHasImplementationAccessEffects(
   host: AccessEffectHandlerHost,
   definition: CardDefinition,
@@ -401,6 +473,12 @@ function accessEffectHiddenZoneAction(
     return "proteus_pattel_antibody_access_counters";
   if (effect.effects.some((step) => step.kind === "shuffle_source_into_corp_rd"))
     return "proteus_antibody_shuffle_into_rd";
+  if (
+    effect.effects.some(
+      (step) => step.kind === "return_installed_runner_programs_to_grip",
+    )
+  )
+    return "proteus_return_installed_runner_programs_to_grip";
   if (effect.effects.some((step) => step.kind === "trash_installed_runner_cards"))
     return "v1919_access_ambush_trash_installed";
   if (
@@ -551,6 +629,7 @@ function executeCardImplementationAccessEffectSteps(
       host,
       cardId,
       definition,
+      effect,
       step,
       index,
       resolvedEffects,
@@ -577,6 +656,7 @@ function executeCardImplementationAccessEffectStep(
   host: AccessEffectHandlerHost,
   cardId: CardInstanceId,
   definition: CardDefinition,
+  effect: CardAccessEffectImplementation,
   step: CardAccessEffectStepImplementation,
   index: number,
   resolvedEffects: ResolvedGameEffect[],
@@ -773,6 +853,17 @@ function executeCardImplementationAccessEffectStep(
       };
       return;
     }
+    case "return_installed_runner_programs_to_grip": {
+      startInstalledRunnerProgramReturnChoice(
+        host,
+        cardId,
+        definition,
+        effect,
+        step,
+        index,
+      );
+      return;
+    }
     case "trash_installed_runner_cards": {
       const amount =
         typeof step.amount === "number"
@@ -800,6 +891,122 @@ function executeCardImplementationAccessEffectStep(
       );
     }
   }
+}
+
+function runnerInstalledProgramReturnCandidates(
+  host: AccessEffectHandlerHost,
+): CardInstanceId[] {
+  return host.state.runner.rig.programs
+    .filter((cardId) => host.cards.definitionFor(cardId).type === "program")
+    .slice()
+    .sort((left, right) => {
+      const leftDefinition = host.cards.definitionFor(left);
+      const rightDefinition = host.cards.definitionFor(right);
+      return (
+        leftDefinition.title.localeCompare(rightDefinition.title) ||
+        left.localeCompare(right)
+      );
+    });
+}
+
+function maxRunnerProgramReturnCount(
+  host: AccessEffectHandlerHost,
+  sourceCardId: CardInstanceId,
+  step: Extract<
+    CardAccessEffectStepImplementation,
+    { kind: "return_installed_runner_programs_to_grip" }
+  >,
+): number {
+  const counters = Math.max(
+    0,
+    Math.floor(host.cards.mustInstance(sourceCardId).advancementCounters),
+  );
+  return Math.max(0, counters * step.amount.multiplier);
+}
+
+function startInstalledRunnerProgramReturnChoice(
+  host: AccessEffectHandlerHost,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  effect: CardAccessEffectImplementation,
+  step: Extract<
+    CardAccessEffectStepImplementation,
+    { kind: "return_installed_runner_programs_to_grip" }
+  >,
+  effectIndex: number,
+): void {
+  const legalAction = requireLegalAction(host);
+  if (step.chooser !== "corp")
+    throw new Error("return_installed_runner_programs_to_grip supports only Corp choice.");
+  const accessZone = cardImplementationAccessZone(host, cardId);
+  const maxSelections = Math.min(
+    maxRunnerProgramReturnCount(host, cardId, step),
+    runnerInstalledProgramReturnCandidates(host).length,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    advancementCounterCount: host.cards.mustInstance(cardId).advancementCounters,
+    maxReturnedProgramCount: maxSelections,
+  };
+  if (maxSelections <= 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      returnProgramChoiceSkipped: true,
+      returnedProgramCount: 0,
+      eligibleProgramCount: runnerInstalledProgramReturnCandidates(host).length,
+    };
+    return;
+  }
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Access-Choice offen.");
+  const candidates = runnerInstalledProgramReturnCandidates(host);
+  host.state.pendingChoice = {
+    choiceId: `proteus_return_runner_programs_${host.state.stateVersion + 1}`,
+    side: "corp",
+    source: `proteus.return_runner_programs:${cardId}:${effectIndex}:${accessZone}:${host.state.stateVersion + 1}`,
+    prompt: `${definition.title}: Runner-Programme zurueckgeben`,
+    kind: "select_cards",
+    minSelections: 0,
+    maxSelections,
+    stateVersion: host.state.stateVersion + 1,
+    visibility: effect.visibility,
+    options: candidates.map((candidateId) => {
+      const candidateDefinition = host.cards.definitionFor(candidateId);
+      return {
+        id: `card_${candidateId}`,
+        label: candidateDefinition.title,
+        publicLabel: candidateDefinition.title,
+        value: candidateId,
+      };
+    }),
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    returnProgramChoiceOpened: true,
+    eligibleProgramCount: candidates.length,
+  };
+}
+
+function selectedCardIdsFromChoice(
+  choice: ChoiceRequest,
+  selectedOptionIds: readonly string[],
+): CardInstanceId[] {
+  if (
+    selectedOptionIds.length < choice.minSelections ||
+    selectedOptionIds.length > choice.maxSelections
+  )
+    throw new Error("Die Anzahl der gewaehlten Karten ist ungueltig.");
+  const optionIds = new Set(choice.options.map((option) => option.id));
+  if (selectedOptionIds.some((optionId) => !optionIds.has(optionId)))
+    throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
+  if (new Set(selectedOptionIds).size !== selectedOptionIds.length)
+    throw new Error("Kartenoptionen duerfen nicht doppelt gewaehlt werden.");
+  return selectedOptionIds.map((optionId) => {
+    const option = choice.options.find((candidate) => candidate.id === optionId);
+    if (typeof option?.value !== "string")
+      throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
+    return option.value as CardInstanceId;
+  });
 }
 
 function runnerInstalledTrashCandidatesForAccessEffect(

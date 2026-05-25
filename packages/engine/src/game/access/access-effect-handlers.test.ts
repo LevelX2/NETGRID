@@ -286,6 +286,15 @@ function makeHost(legalAction: LegalAction) {
         },
       }),
     },
+    runnerCards: {
+      returnInstalledProgramsToGrip: (cardIds) => ({
+        publicPayload: {
+          returnedProgramCount: cardIds.length,
+          returnedProgramDefinitionIds: cardIds.join(","),
+          daemonHostedTrashCount: 0,
+        },
+      }),
+    },
     payment: {
       spendCorpCredits: (amount) => {
         calls.spentCredits.push(amount);

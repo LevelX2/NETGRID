@@ -229,6 +229,7 @@ import {
 } from "./game/access/access-actions";
 import {
   handleAccessEffectsForCard,
+  resolveAccessInstalledRunnerProgramReturnChoice,
   resolveAccessPaymentChoice,
   resolveChimeraDaemonTrashChoice as resolveAccessChimeraDaemonTrashChoice,
   type AccessEffectHandlerHost,
@@ -1176,6 +1177,18 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     addCounterToAllInstalledRunnerIcebreakers(state, counterType, amount),
   shuffleSourceIntoCorpRd: (state, sourceCardId, sourceDefinitionId) =>
     shuffleCorpCardIntoRd(state, sourceCardId, sourceDefinitionId, "lifecycle"),
+  trashCorpInstalledCardsInSourceServer: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+  ) =>
+    trashCorpInstalledCardsInScoredSourceServer(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+    ),
   gainRunnerEventAgendaPoint: (
     state,
     legalAction,
@@ -12253,6 +12266,34 @@ function returnRunnerInstalledCardToGrip(
   clearCardCounters(state, cardId);
 }
 
+function returnRunnerInstalledProgramsToGripForAccess(
+  state: GameState,
+  cardIds: readonly CardInstanceId[],
+): { publicPayload: Record<string, string | number | boolean> } {
+  let daemonHostedTrashCount = 0;
+  const returnedDefinitionIds: string[] = [];
+  for (const cardId of cardIds) {
+    if (!state.runner.rig.programs.includes(cardId)) continue;
+    if (definitionFor(state, cardId).type !== "program") continue;
+    const hostedIds = hostedCardsOn(state, cardId);
+    for (const hostedId of hostedIds) {
+      if (!state.runner.rig.programs.includes(hostedId)) continue;
+      trashRunnerInstalledCardToHeap(state, hostedId);
+      daemonHostedTrashCount += 1;
+    }
+    returnedDefinitionIds.push(definitionFor(state, cardId).id);
+    returnRunnerInstalledCardToGrip(state, cardId);
+  }
+  return {
+    publicPayload: {
+      returnedProgramCount: returnedDefinitionIds.length,
+      returnedProgramDefinitionIds: returnedDefinitionIds.join(","),
+      daemonHostedTrashCount,
+      runnerGripAfter: state.runner.grip.length,
+    },
+  };
+}
+
 function trashCorpInstalledCardToArchives(
   state: GameState,
   cardId: CardInstanceId,
@@ -18561,6 +18602,10 @@ function accessEffectHandlerHost(
       shuffleCorpCardIntoRd: (cardId, sourceDefinitionId) =>
         shuffleCorpCardIntoRd(state, cardId, sourceDefinitionId, "access"),
     },
+    runnerCards: {
+      returnInstalledProgramsToGrip: (cardIds) =>
+        returnRunnerInstalledProgramsToGripForAccess(state, cardIds),
+    },
     payment: {
       spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
     },
@@ -18859,6 +18904,10 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v199.chimera_daemon_trash")) {
     resolveChimeraDaemonTrashChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("proteus.return_runner_programs")) {
+    resolveProteusRunnerProgramReturnChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_35.access_payment")) {
@@ -20337,6 +20386,17 @@ function resolveCardImplementationAccessPaymentChoice(
   );
 }
 
+function resolveProteusRunnerProgramReturnChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  resolveAccessInstalledRunnerProgramReturnChoice(
+    accessEffectHandlerHost(state, legalAction),
+    selectedChoiceIds(playerAction.selectedChoices),
+  );
+}
+
 function selectedChoiceCardIds(
   choice: ChoiceRequest,
   playerAction: PlayerAction,
@@ -21199,6 +21259,41 @@ function shuffleCorpCardIntoRd(
       hiddenZoneAction: "shuffle_source_into_corp_rd",
       movedCardCount: 1,
       sourceDefinitionId,
+    },
+  };
+}
+
+function trashCorpInstalledCardsInScoredSourceServer(
+  state: GameState,
+  legalAction: LegalAction | undefined,
+  _sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+): { publicPayload: Record<string, string | number | boolean> } {
+  const serverId =
+    typeof legalAction?.payload?.scoredFromServerId === "string"
+      ? legalAction.payload.scoredFromServerId
+      : undefined;
+  if (!serverId || serverId === "new_remote")
+    throw new Error("Die gescorte Agenda hat keinen gueltigen Installationsserver.");
+  const server = mustServer(state, serverId as Exclude<ServerId, "new_remote">);
+  const targetIds = [...server.root, ...server.ice].sort();
+  const publicDefinitionIds = targetIds
+    .filter((targetId) => {
+      const instance = mustInstance(state.cardInstances, targetId);
+      return instance.rezzed === true || instance.faceup === true;
+    })
+    .map((targetId) => definitionFor(state, targetId).id);
+  for (const targetId of targetIds) {
+    trashCorpInstalledCardToArchives(state, targetId, legalAction);
+  }
+  return {
+    publicPayload: {
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "proteus_trash_source_server_installed_corp_cards",
+      sourceDefinitionId,
+      scoredFromServerId: server.id,
+      trashedInstalledCount: targetIds.length,
+      publicTrashedCardDefinitionIds: publicDefinitionIds.join(","),
     },
   };
 }

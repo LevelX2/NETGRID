@@ -720,6 +720,27 @@ export function publicContextForAction(
     if (typeof legalAction.payload.trashedCardDefinitionIds === "string")
       context.trashedCardDefinitionIds =
         legalAction.payload.trashedCardDefinitionIds;
+    if (typeof legalAction.payload.publicTrashedCardDefinitionIds === "string")
+      context.publicTrashedCardDefinitionIds =
+        legalAction.payload.publicTrashedCardDefinitionIds;
+    if (typeof legalAction.payload.returnedProgramDefinitionIds === "string")
+      context.returnedProgramDefinitionIds =
+        legalAction.payload.returnedProgramDefinitionIds;
+    if (typeof legalAction.payload.returnedProgramCount === "number")
+      context.returnedProgramCount = legalAction.payload.returnedProgramCount;
+    if (typeof legalAction.payload.maxReturnedProgramCount === "number")
+      context.maxReturnedProgramCount =
+        legalAction.payload.maxReturnedProgramCount;
+    if (typeof legalAction.payload.eligibleProgramCount === "number")
+      context.eligibleProgramCount = legalAction.payload.eligibleProgramCount;
+    if (typeof legalAction.payload.daemonHostedTrashCount === "number")
+      context.daemonHostedTrashCount =
+        legalAction.payload.daemonHostedTrashCount;
+    if (typeof legalAction.payload.trashedInstalledCount === "number")
+      context.trashedInstalledCount =
+        legalAction.payload.trashedInstalledCount;
+    if (typeof legalAction.payload.scoredFromServerId === "string")
+      context.scoredFromServerId = legalAction.payload.scoredFromServerId;
     if (typeof legalAction.payload.installedCount === "number")
       context.installedCount = legalAction.payload.installedCount;
     if (typeof legalAction.payload.installedIceCount === "number")

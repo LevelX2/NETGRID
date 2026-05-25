@@ -84,6 +84,9 @@ export type CardEffectExecutionContext = {
   shuffleSourceIntoCorpRd?: (
     sourceCardId: CardInstanceId,
   ) => CardEffectHiddenInfoResult;
+  trashCorpInstalledCardsInSourceServer?: (
+    sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
   gainRunnerEventAgendaPoint?: (amount: 1) => CardEffectHiddenInfoResult;
   runnerLiberatedAgendaSubtypeThisTurn?: (
     subtype: "research" | "gray_ops" | "black_ops",
@@ -909,6 +912,25 @@ export function executeCardImplementationEffects(
           );
         const moveResult = context.shuffleSourceIntoCorpRd(context.sourceCardId);
         mergePublicPayload(publicPayload, moveResult.publicPayload);
+        return;
+      }
+      case "trash_corp_installed_cards_in_source_server": {
+        assertHiddenInfoBarrierVisibility(
+          "trash_corp_installed_cards_in_source_server",
+          effect.visibility,
+        );
+        if (effect.include !== "root_and_ice")
+          throw new Error(
+            "trash_corp_installed_cards_in_source_server supports only root_and_ice.",
+          );
+        if (!context.trashCorpInstalledCardsInSourceServer)
+          throw new Error(
+            "trash_corp_installed_cards_in_source_server requires a server trash context.",
+          );
+        const trashResult = context.trashCorpInstalledCardsInSourceServer(
+          context.sourceCardId,
+        );
+        mergePublicPayload(publicPayload, trashResult.publicPayload);
         return;
       }
       case "gain_runner_event_agenda_point": {

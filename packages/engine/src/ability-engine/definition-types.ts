@@ -250,6 +250,15 @@ export type CardAccessEffectStepImplementation =
             kind: "source_advancement_counter_count";
           };
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "return_installed_runner_programs_to_grip";
+      chooser: "corp";
+      amount: {
+        kind: "source_advancement_counter_count";
+        multiplier: number;
+      };
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
 export type CardSuccessfulRunFollowupImplementation =
@@ -877,6 +886,7 @@ export type CardEffectImplementation =
   | GainRunnerEventAgendaPointEffectImplementation
   | GainRunnerEventAgendaPointIfLiberatedAgendaSubtypeEffectImplementation
   | ShuffleSourceIntoCorpRdEffectImplementation
+  | TrashCorpInstalledCardsInSourceServerEffectImplementation
   | CorpRandomDiscardFromHqEffectImplementation
   | CorpDiscardHqWithRetainPaymentEffectImplementation
   | DerezRezzedBlackIceEffectImplementation
@@ -915,6 +925,12 @@ export type AddCounterToAllInstalledRunnerIcebreakersEffectImplementation = {
 
 export type ShuffleSourceIntoCorpRdEffectImplementation = {
   kind: "shuffle_source_into_corp_rd";
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type TrashCorpInstalledCardsInSourceServerEffectImplementation = {
+  kind: "trash_corp_installed_cards_in_source_server";
+  include: "root_and_ice";
   visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
 

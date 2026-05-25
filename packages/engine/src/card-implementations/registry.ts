@@ -380,6 +380,7 @@ import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team"
 import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella-policy";
 import { wilsonWeeflerunnerApprenticeImplementation } from "./onr-v1/runner/resources/wilson-weeflerunner-apprentice";
 import { proteusCharityTakeoverImplementation } from "./proteus/corp/agendas/charity-takeover";
+import { proteusViralBreedingGroundImplementation } from "./proteus/corp/agendas/viral-breeding-ground";
 import { belDigmoAntibodyImplementation } from "./proteus/corp/assets/bel-digmo-antibody";
 import { doppelgangerAntibodyImplementation } from "./proteus/corp/assets/doppelganger-antibody";
 import { pattelAntibodyImplementation } from "./proteus/corp/assets/pattel-antibody";
@@ -821,6 +822,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusResearchBunkerImplementation,
   proteusWeaponsDepotImplementation,
   proteusCharityTakeoverImplementation,
+  proteusViralBreedingGroundImplementation,
   belDigmoAntibodyImplementation,
   doppelgangerAntibodyImplementation,
   pattelAntibodyImplementation,

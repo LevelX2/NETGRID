@@ -355,6 +355,12 @@ export type CardImplementationRuntimeDependencies = {
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinition["id"],
   ) => CardEffectHiddenInfoResult;
+  trashCorpInstalledCardsInSourceServer: (
+    state: GameState,
+    legalAction: LegalAction | undefined,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+  ) => CardEffectHiddenInfoResult;
   gainRunnerEventAgendaPoint: (
     state: GameState,
     legalAction: LegalAction,
@@ -750,6 +756,13 @@ export function executeCardImplementationLifecycleEffects(
         deps.trashSource(state, sourceCardId, legalAction),
       shuffleSourceIntoCorpRd: (sourceCardId) =>
         deps.shuffleSourceIntoCorpRd(state, sourceCardId, definition.id),
+      trashCorpInstalledCardsInSourceServer: (sourceCardId) =>
+        deps.trashCorpInstalledCardsInSourceServer(
+          state,
+          legalAction,
+          sourceCardId,
+          definition.id,
+        ),
       ...(reason ? { reason } : {}),
     },
     effects,
