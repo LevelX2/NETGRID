@@ -162,6 +162,31 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
   });
 
+  it("keeps release-default profile policy stable", () => {
+    const state = createGameAfterSetup({ seed: "ai-release-default-policy" });
+    const corpInput = buildAiDecisionInput(state, "corp");
+    const runnerInput = buildAiDecisionInput(state, "runner");
+    const benchmarkProfiles = listV143BenchmarkProfiles().map(
+      (profile) => profile.benchmarkProfileId,
+    );
+    const benchmark = runMatchProgressionBenchmark({
+      includeHoldout: false,
+      maxActions: 1,
+      comparisonProfiles: ["belief_ai_v1_4_2", "current_candidate"],
+    });
+
+    expect(corpInput.profileId).toBe("corp-ai-v0.9-normal");
+    expect(runnerInput.profileId).toBe("runner-ai-v0.9-normal");
+    expect(benchmarkProfiles).toContain("belief_ai_v1_4_2");
+    expect(benchmarkProfiles).toContain("current_candidate");
+    expect(benchmark.baselineProfile).toBe("belief_ai_v1_4_2");
+    expect(benchmark.candidateProfile).toBe("current_candidate");
+    expect(benchmark.profileComparisons.map((entry) => entry.profile)).toEqual([
+      "belief_ai_v1_4_2",
+      "current_candidate",
+    ]);
+  });
+
   it("redacts hidden Runner Resources in Corp AIInput before reveal", () => {
     const hiddenResourceDefinitionId = "test_hidden_runner_resource_harness";
     const hiddenResourceTitle = "Hidden Resource Harness";
