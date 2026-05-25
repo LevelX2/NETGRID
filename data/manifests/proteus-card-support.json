@@ -2542,24 +2542,26 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/crumble.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/access/access-actions.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_085_disintegrator",
@@ -2685,24 +2687,27 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/garbage-in.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/access/access-actions.test.ts",
+          "packages/engine/src/game/access/access-flow.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_090_highlighter",
@@ -2711,24 +2716,27 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/access/breach-state.test.ts",
+          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_091_lockjaw",
@@ -2893,24 +2901,26 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/taxman.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_098_vienna-22",
@@ -2919,24 +2929,26 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/vienna-22.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/access/breach-state.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_099_viral-pipeline",
@@ -2945,24 +2957,26 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/viral-pipeline.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_100_wrecking-ball",

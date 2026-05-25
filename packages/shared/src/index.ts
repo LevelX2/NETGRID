@@ -9511,6 +9511,25 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
     ],
   },
   {
+    id: "onr_proteus_084_crumble",
+    title: "Crumble",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on HQ, give the Corp a Crumble counter. Two or more Crumble counters allow you trash, at no cost, any cards accessed from HQ, even if the cards cannot normally be trashed. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_counter",
+      "free_access_trash",
+      "proteus_runner_virus_access_trash",
+    ],
+  },
+  {
     id: "onr_proteus_085_disintegrator",
     title: "Disintegrator",
     side: "runner",
@@ -9527,6 +9546,26 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
       "derez_ice",
       "end_run",
       "proteus_post_pass_derez_utility",
+    ],
+  },
+  {
+    id: "onr_proteus_089_garbage-in",
+    title: "Garbage In",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on R&D, give the Corp a Garbage counter. Two or more Garbage counters allow you to trash, at no cost, any cards accessed from R&D, even if the cards cannot normally be trashed. The Corp loses two Garbage counters after any run during which this ability is used. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_counter",
+      "free_access_trash",
+      "counter_spend",
+      "proteus_runner_virus_access_trash",
     ],
   },
   {

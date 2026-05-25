@@ -138,7 +138,7 @@ Activity-Zuschnitt: 7a ist Pflichtvorlauf. Bei `Deck, The` kann 7a und 7d zusamm
 
 Phase 8 braucht eine klare Counter-Taxonomie vor Kartenarbeit. Der Virus-/Antibody-Vertrag und der Purge-/Action-Debt-Vertrag sind führend.
 
-Status 2026-05-24: Phase 8a bis 8d sind umgesetzt. 8d promotet `Highlighter`, `Taxman`, `Vienna 22` und `Viral Pipeline` als `human_playable`, ohne Decklegalität, Formatlegalität oder AI-Support zu ändern.
+Status 2026-05-24: Phase 8a bis 8e sind umgesetzt. 8d promotet `Highlighter`, `Taxman`, `Vienna 22` und `Viral Pipeline`, 8e promotet `Crumble` und `Garbage In` als `human_playable`, ohne Decklegalität, Formatlegalität oder AI-Support zu ändern.
 
 | Slice                                  | Zielkarten                                                                              | Benötigte Funktionsbausteine                                                                                                           |
 | -------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |

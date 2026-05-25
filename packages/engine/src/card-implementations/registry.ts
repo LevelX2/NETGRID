@@ -416,8 +416,10 @@ import { proteusCorticalStimulatorsImplementation } from "./proteus/runner/hardw
 import { proteusDeckTheImplementation } from "./proteus/runner/hardware/deck-the";
 import { proteusSunburstCranialInterfaceImplementation } from "./proteus/runner/hardware/sunburst-cranial-interface";
 import { proteusPoisonedWaterSupplyImplementation } from "./proteus/runner/events/poisoned-water-supply";
+import { proteusCrumbleImplementation } from "./proteus/runner/programs/crumble";
 import { proteusDisintegratorImplementation } from "./proteus/runner/programs/disintegrator";
 import { proteusEnterpriseIncShieldsImplementation } from "./proteus/runner/programs/enterprise-inc-shields";
+import { proteusGarbageInImplementation } from "./proteus/runner/programs/garbage-in";
 import { proteusHighlighterImplementation } from "./proteus/runner/programs/highlighter";
 import { proteusSkullcapImplementation } from "./proteus/runner/programs/skullcap";
 import { proteusTaxmanImplementation } from "./proteus/runner/programs/taxman";
@@ -837,8 +839,10 @@ export const CARD_IMPLEMENTATIONS = [
   proteusDeckTheImplementation,
   proteusSunburstCranialInterfaceImplementation,
   proteusPoisonedWaterSupplyImplementation,
+  proteusCrumbleImplementation,
   proteusDisintegratorImplementation,
   proteusEnterpriseIncShieldsImplementation,
+  proteusGarbageInImplementation,
   proteusHighlighterImplementation,
   proteusSkullcapImplementation,
   proteusTaxmanImplementation,

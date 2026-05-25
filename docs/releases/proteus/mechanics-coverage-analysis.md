@@ -154,12 +154,12 @@ Maschinenlesbare Matrix: `data/rules/proteus-mechanics-coverage-2026-05-17.json`
 | onr_proteus_081_boring-bit | Boring Bit | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |
 | onr_proteus_082_bulldozer | Bulldozer | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |
 | onr_proteus_083_corrosion | Corrosion | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |
-| onr_proteus_084_crumble | Crumble | runner | program | Mechanikvertiefung nötig | `runner_program_install`, `virus_antibody_counter_family`, `trash_forfeit_sabotage`, `run_event_basics` |
+| onr_proteus_084_crumble | Crumble | runner | program | umgesetzt in Phase 8e | `runner_program_install`, `virus_antibody_counter_family`, `trash_forfeit_sabotage`, `run_event_basics` |
 | onr_proteus_085_disintegrator | Disintegrator | runner | program | wahrscheinlich abgedeckt | `runner_program_install` |
 | onr_proteus_086_enterprise-inc-shields | Enterprise, Inc., Shields | runner | program | kleiner Resolver nötig | `runner_program_install`, `damage_prevention_and_core_hand_size`, `prevention_avoid_replacement` |
 | onr_proteus_087_forwards-legacy | Forward's Legacy | runner | program | Mechanikvertiefung nötig | `runner_program_install`, `random_die_resolution`, `icebreaker_breaker_pump` |
 | onr_proteus_088_fubar | Fubar | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |
-| onr_proteus_089_garbage-in | Garbage In | runner | program | Mechanikvertiefung nötig | `runner_program_install`, `access_breach_multiaccess_ambush`, `virus_antibody_counter_family`, `trash_forfeit_sabotage`, `run_event_basics` |
+| onr_proteus_089_garbage-in | Garbage In | runner | program | umgesetzt in Phase 8e | `runner_program_install`, `access_breach_multiaccess_ambush`, `virus_antibody_counter_family`, `trash_forfeit_sabotage`, `run_event_basics` |
 | onr_proteus_090_highlighter | Highlighter | runner | program | umgesetzt in Phase 8d | `runner_program_install`, `virus_antibody_counter_family`, `run_event_basics` |
 | onr_proteus_091_lockjaw | Lockjaw | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |
 | onr_proteus_092_morphing-tool | Morphing Tool | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |

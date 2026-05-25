@@ -486,6 +486,8 @@ export type CardVirusCounterKindImplementation =
   | "butcher_boy"
   | "cockroach"
   | "cascade"
+  | "crumble"
+  | "garbage"
   | "highlighter"
   | "thought"
   | "fait"

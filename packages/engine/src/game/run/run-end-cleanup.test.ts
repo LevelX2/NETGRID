@@ -416,6 +416,55 @@ describe("run end cleanup", () => {
     });
   });
 
+  it("adds Proteus access-trash counters after matching successful runs", () => {
+    const fixture = makeHost({
+      run: {
+        runId: "run_garbage",
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+      } as unknown as NonNullable<GameState["run"]>,
+      runnerPrograms: ["garbage"],
+      instances: {
+        garbage: instance(
+          "garbage",
+          "onr_proteus_089_garbage-in",
+          { side: "runner", zone: "rig" },
+          { faceup: true, rezzed: true },
+        ),
+      },
+      definitions: {
+        "onr_proteus_089_garbage-in": definition(
+          "onr_proteus_089_garbage-in",
+          "program",
+        ),
+      },
+      virusImplementations: {
+        garbage: {
+          counterKind: "garbage",
+          addOnSuccessfulRun: {
+            server: "rd",
+            target: "corp_purgeable_runner_virus_counter",
+            amount: 1,
+            visibility: "public",
+          },
+        },
+      },
+    });
+
+    handleRunEndCleanup(fixture.host, true, fixture.legalAction);
+
+    expect(fixture.state.purgeableRunnerVirusCounters?.corp).toMatchObject({
+      garbage: 1,
+    });
+    expect(fixture.legalAction.payload).toMatchObject({
+      proteusRunnerVirusCounter: true,
+      serverId: "rd",
+      counterType: "garbage",
+      sourceCardDefinitionId: "onr_proteus_089_garbage-in",
+    });
+  });
+
   it("adds central socket counters and converts complete Viral Pipeline sets to Pipe", () => {
     const fixture = makeHost({
       run: {

@@ -21,7 +21,7 @@ type RunnerTurnFlags = NonNullable<GameState["runnerTurnFlags"]>;
 
 const CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS = new Set<
   PurgeableRunnerVirusCounterType
->(["highlighter", "tax", "vienna"]);
+>(["crumble", "garbage", "highlighter", "tax", "vienna"]);
 
 export type RunEndDamageSummary = {
   damageType: DamageType;
