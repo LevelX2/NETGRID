@@ -32,7 +32,10 @@ import {
   minimumCreditsToBreakEndTheRunSubroutines,
   serverIdFromEvent,
 } from "./visible-run-analysis";
-import { estimateStructuredBreakerCostForIce } from "./breaker-ontology-consumer";
+import {
+  estimateStructuredBreakerCostForIce,
+  getStructuredBreakerProfileForCard,
+} from "./breaker-ontology-consumer";
 
 export type CorpPlanKind =
   | "score_now"
@@ -4554,16 +4557,44 @@ function computeRunnerContestCapacity(
     rigCards,
     runnerCredits,
   );
+  const visibleBreakerOntologyProfiles = rigCards.filter(
+    (card) =>
+      card.known &&
+      Boolean(getStructuredBreakerProfileForCard(card.definitionId)),
+  );
+  const visibleBreakerCoverage = [
+    ...new Set(
+      visibleBreakerOntologyProfiles.flatMap(
+        (card) =>
+          getStructuredBreakerProfileForCard(card.definitionId)?.coverage ?? [],
+      ),
+    ),
+  ].sort();
   const evidence = [
     `runner_contest_capacity:${knownPath.capacity}`,
     `runner_credits_visible:${runnerCredits}`,
     `runner_breakers_visible:${installedBreakers}`,
+    `visible_runner_breaker_ontology_profiles:${visibleBreakerOntologyProfiles.length}`,
+    ...visibleBreakerCoverage.map(
+      (coverage) => `structured_breaker_visible_coverage:${coverage}`,
+    ),
     `remote_ice:${server.ice.length}`,
     `remote_rezzed_ice:${server.ice.filter((ice) => ice.rezzed === true).length}`,
     `remote_unrezzed_ice:${server.ice.filter((ice) => ice.rezzed !== true).length}`,
     `visible_break_cost:${knownPath.visibleBreakCost ?? "unknown"}`,
     `runner_remote_pressure:${round(remotePressure)}`,
     `structured_breaker_profile_contest_fallback:${knownPath.reasons.includes("structured_breaker_profile_contest_fallback")}`,
+    ...(knownPath.reasons.includes(
+      "structured_breaker_effective_quote_override",
+    )
+      ? ["structured_breaker_effective_quote_override:true"]
+      : []),
+    ...knownPath.reasons.filter(
+      (reason) =>
+        reason.startsWith("structured_breaker_coverage:") ||
+        reason.startsWith("structured_breaker_cost:") ||
+        reason.startsWith("structured_breaker_side_effect_penalty:"),
+    ),
   ];
   return runnerContestCapacityResult(
     serverId,
@@ -5775,6 +5806,7 @@ function assessKnownIcePathForRunnerContest(
   let visibleBreakCost = 0;
   let relevantKnownIce = 0;
   let structuredBreakerFallback = false;
+  const structuredBreakerEvidence = new Set<string>();
   const breakerStrengths = new Map(
     rigCards.map((card) => [
       card.instanceId,
@@ -5831,6 +5863,12 @@ function assessKnownIcePathForRunnerContest(
     } else if (structuredBreakAssessment) {
       structuredBreakerFallback = true;
       visibleBreakCost += structuredBreakAssessment.cost;
+      for (const evidence of structuredBreakAssessment.evidence)
+        structuredBreakerEvidence.add(evidence);
+      if (quote)
+        structuredBreakerEvidence.add(
+          "structured_breaker_effective_quote_override",
+        );
     }
     if (breakAssessment?.carriesStrengthAcrossIce) {
       breakerStrengths.set(
@@ -5872,7 +5910,10 @@ function assessKnownIcePathForRunnerContest(
       reasons: [
         "runner_remote_contest_low_break_cost",
         ...(structuredBreakerFallback
-          ? ["structured_breaker_profile_contest_fallback"]
+          ? [
+              "structured_breaker_profile_contest_fallback",
+              ...structuredBreakerEvidence,
+            ]
           : []),
       ],
     };
@@ -5887,7 +5928,10 @@ function assessKnownIcePathForRunnerContest(
       reasons: [
         "runner_remote_contest_high_visible_breaker",
         ...(structuredBreakerFallback
-          ? ["structured_breaker_profile_contest_fallback"]
+          ? [
+              "structured_breaker_profile_contest_fallback",
+              ...structuredBreakerEvidence,
+            ]
           : []),
       ],
     };
@@ -5903,7 +5947,10 @@ function assessKnownIcePathForRunnerContest(
     reasons: [
       "runner_remote_contest_medium_uncertain",
       ...(structuredBreakerFallback
-        ? ["structured_breaker_profile_contest_fallback"]
+        ? [
+            "structured_breaker_profile_contest_fallback",
+            ...structuredBreakerEvidence,
+          ]
         : []),
     ],
   };
@@ -5920,6 +5967,7 @@ function minimumStructuredBreakerCostForIce(
       cost: number;
       breakerInstanceId: string;
       sideEffectPenalty: number;
+      evidence: string[];
     }
   | undefined {
   const estimates = rigCards
@@ -5937,6 +5985,7 @@ function minimumStructuredBreakerCostForIce(
             cost: estimate.cost,
             breakerInstanceId: card.instanceId,
             sideEffectPenalty: estimate.sideEffectPenalty,
+            evidence: estimate.evidence,
           }
         : undefined;
     })

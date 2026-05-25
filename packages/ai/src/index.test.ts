@@ -15532,6 +15532,162 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     });
   });
 
+  it("summarizes first-class breaker ontology metrics from action evidence", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary([
+        progressionAction("runner", 1, "install_card", undefined, 1, {
+          runnerPathBlockedByMissingCoverage: true,
+          evidence: [
+            "visible_breaker_pressure:true",
+            "matching_grip_breakers:0",
+            "structured_matching_grip_breakers:1",
+            "structured_heap_matching_breakers:0",
+            "coverage_search_actions:0",
+            "structured_breaker_cost_profile:true",
+            "structured_breaker_install_credits:2",
+            "structured_breaker_memory:1",
+            "structured_breaker_coverage:wall",
+            "structured_breaker_coverage:wall",
+            "structured_breaker_side_effect_penalty:12",
+            "runner_missing_coverage_resolved_by_ontology:true",
+          ],
+        }),
+        progressionAction("runner", 2, "play_event", undefined, 1, {
+          evidence: [
+            "visible_breaker_pressure:true",
+            "matching_grip_breakers:0",
+            "structured_matching_grip_breakers:0",
+            "structured_heap_matching_breakers:1",
+            "coverage_search_actions:1",
+            "runner_search_target_ranked_by_ontology:true",
+          ],
+        }),
+        progressionAction("runner", 3, "draw_card", undefined, 1, {
+          evidence: [
+            "runner_breaker_ontology_profile_seen:true",
+            "runner_breaker_ontology_conflict:true",
+            "runner_breaker_ontology_setup_suppressed_pressure_ready:true",
+          ],
+        }),
+        progressionAction("corp", 4, "install_card", "remote_1", 2, {
+          evidence: [
+            "runner_contest_capacity:high",
+            "visible_runner_breaker_ontology_profiles:1",
+            "structured_breaker_visible_coverage:wall",
+            "structured_breaker_profile_contest_fallback:true",
+            "structured_breaker_coverage:wall",
+            "structured_breaker_cost:0",
+            "structured_breaker_effective_quote_override:true",
+            "corp_agenda_install_blocked_by_ontology_cheap_contest:true",
+          ],
+        }),
+        progressionAction("corp", 5, "advance_card", "remote_1", 2, {
+          evidence: [
+            "runner_contest_capacity:medium",
+            "visible_runner_breaker_ontology_profiles:1",
+            "structured_breaker_profile_contest_fallback:true",
+            "structured_breaker_coverage:sentry",
+            "structured_breaker_side_effect_penalty:5",
+            "corp_remote_safety_ontology_conflict_with_effective_quote:true",
+            "corp_advance_blocked_by_ontology_cheap_contest:true",
+          ],
+        }),
+      ]),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerBreakerOntologyProfilesSeen: 3,
+      runnerBreakerOntologyCoverageUsed: 2,
+      runnerBreakerOntologyFallbackUsed: 1,
+      runnerBreakerOntologyConflict: 1,
+      runnerInstallableBreakerRankedByOntology: 1,
+      runnerSearchTargetRankedByOntology: 1,
+      runnerMissingCoverageResolvedByOntology: 1,
+      runnerBreakerOntologySetupSuppressedBecausePressureReady: 1,
+      corpVisibleRunnerBreakerOntologyProfilesSeen: 2,
+      corpRemoteSafetyUsedRunnerBreakerOntology: 2,
+      corpCheapContestDetectedByBreakerOntology: 1,
+      corpRemoteSafetyOntologyConflictWithEffectiveQuote: 2,
+      corpAgendaInstallBlockedByOntologyCheapContest: 1,
+      corpAdvanceBlockedByOntologyCheapContest: 1,
+      breakerOntologyCoverageByType: 3,
+      breakerOntologyCoverageWall: 2,
+      breakerOntologyCoverageSentry: 1,
+      breakerOntologySideEffectsSeen: 2,
+      breakerOntologyCostProfileSeen: 2,
+      breakerOntologyFallbackEvidenceCount: 2,
+      breakerOntologyEffectiveQuoteOverrideCount: 1,
+    });
+  });
+
+  it("does not report breaker ontology metrics for legacy-only evidence", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary([
+        progressionAction("runner", 1, "install_card", undefined, 1, {
+          evidence: [
+            "visible_breaker_pressure:true",
+            "matching_grip_breakers:1",
+            "structured_matching_grip_breakers:0",
+          ],
+        }),
+        progressionAction("corp", 2, "install_card", "remote_1", 1, {
+          evidence: [
+            "runner_contest_capacity:medium",
+            "visible_runner_breaker_ontology_profiles:0",
+            "structured_breaker_profile_contest_fallback:false",
+          ],
+        }),
+      ]),
+    ]);
+
+    expect(metrics.runnerBreakerOntologyProfilesSeen).toBe(0);
+    expect(metrics.runnerBreakerOntologyCoverageUsed).toBe(0);
+    expect(metrics.corpVisibleRunnerBreakerOntologyProfilesSeen).toBe(0);
+    expect(metrics.corpRemoteSafetyUsedRunnerBreakerOntology).toBe(0);
+    expect(metrics.breakerOntologyFallbackEvidenceCount).toBe(0);
+  });
+
+  it("keeps breaker ontology metric aggregation hidden-state invariant", () => {
+    const visibleActions = [
+      progressionAction("corp", 1, "advance_card", "remote_1", 1, {
+        evidence: [
+          "runner_contest_capacity:high",
+          "visible_runner_breaker_ontology_profiles:1",
+          "structured_breaker_profile_contest_fallback:true",
+          "structured_breaker_coverage:wall",
+        ],
+      }),
+    ];
+
+    const first = summarizeMatchProgressionMetrics([
+      progressionSummary(visibleActions, "breaker-visible-a"),
+    ]);
+    const second = summarizeMatchProgressionMetrics([
+      {
+        ...progressionSummary(visibleActions, "breaker-visible-b"),
+        finalStateHash: "fnv1a:different-hidden-state",
+      },
+    ]);
+
+    expect({
+      corpVisibleRunnerBreakerOntologyProfilesSeen:
+        first.corpVisibleRunnerBreakerOntologyProfilesSeen,
+      corpRemoteSafetyUsedRunnerBreakerOntology:
+        first.corpRemoteSafetyUsedRunnerBreakerOntology,
+      corpCheapContestDetectedByBreakerOntology:
+        first.corpCheapContestDetectedByBreakerOntology,
+      breakerOntologyCoverageWall: first.breakerOntologyCoverageWall,
+    }).toEqual({
+      corpVisibleRunnerBreakerOntologyProfilesSeen:
+        second.corpVisibleRunnerBreakerOntologyProfilesSeen,
+      corpRemoteSafetyUsedRunnerBreakerOntology:
+        second.corpRemoteSafetyUsedRunnerBreakerOntology,
+      corpCheapContestDetectedByBreakerOntology:
+        second.corpCheapContestDetectedByBreakerOntology,
+      breakerOntologyCoverageWall: second.breakerOntologyCoverageWall,
+    });
+  });
+
   it("summarizes short-horizon plan conversion metrics from action traces", () => {
     const metrics = summarizeMatchProgressionMetrics([
       progressionSummary([
