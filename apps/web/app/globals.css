@@ -5776,7 +5776,7 @@ select {
 
 .cardImageSetBadge {
   position: absolute;
-  top: clamp(11px, 13cqw, 52px);
+  top: clamp(13px, 16cqw, 64px);
   left: clamp(2px, 2cqw, 8px);
   z-index: 4;
   display: inline-flex;
@@ -9757,7 +9757,7 @@ select,
 
 .hardwareImageOverlaySetBadge {
   position: absolute;
-  top: clamp(11px, 13cqw, 52px);
+  top: clamp(13px, 16cqw, 64px);
   left: clamp(2px, 2cqw, 8px);
   z-index: 3;
   display: inline-flex;
