@@ -357,6 +357,7 @@ type CardTooltipSettings = {
 
 type CardImagePreferenceSettings = {
   preferGermanCardImages: boolean;
+  showSetBadges: boolean;
 };
 
 type CardScaleSettings = {
@@ -383,7 +384,8 @@ const CardScaleSettingsContext = createContext<CardScaleSettings>({
 });
 
 const CardImagePreferenceContext = createContext<CardImagePreferenceSettings>({
-  preferGermanCardImages: false
+  preferGermanCardImages: false,
+  showSetBadges: true
 });
 
 function useCardTooltipSettings(): CardTooltipSettings {
@@ -1052,6 +1054,8 @@ function CardImageOverlay({
   kindLabel,
   rulesText,
   cost,
+  setBadgeLabel,
+  setBadgeTitle,
   variantClassName,
   className,
   maxLines = 2
@@ -1060,6 +1064,8 @@ function CardImageOverlay({
   kindLabel: string;
   rulesText?: string;
   cost?: number;
+  setBadgeLabel?: string;
+  setBadgeTitle?: string;
   variantClassName?: string;
   className?: string;
   maxLines?: number;
@@ -1072,6 +1078,11 @@ function CardImageOverlay({
       <span className="hardwareImageOverlayTop">
         <span className="hardwareImageOverlayName">{title}</span>
       </span>
+      {setBadgeLabel ? (
+        <span className="hardwareImageOverlaySetBadge" title={setBadgeTitle}>
+          {setBadgeLabel}
+        </span>
+      ) : null}
       {cost != null ? <span className="hardwareImageOverlayCost">{cost}</span> : null}
       <span className="hardwareImageOverlayFrame">
         <span className="hardwareImageOverlayKind">{kindLabel}</span>
@@ -1091,12 +1102,16 @@ function HardwareImageOverlay({
   title,
   rulesText,
   installCost,
+  setBadgeLabel,
+  setBadgeTitle,
   className,
   maxLines = 2
 }: {
   title: string;
   rulesText?: string;
   installCost?: number | null | undefined;
+  setBadgeLabel?: string;
+  setBadgeTitle?: string;
   className?: string;
   maxLines?: number;
 }) {
@@ -1107,6 +1122,8 @@ function HardwareImageOverlay({
       maxLines={maxLines}
       {...(rulesText ? { rulesText } : {})}
       {...(installCost != null ? { cost: installCost } : {})}
+      {...(setBadgeLabel ? { setBadgeLabel } : {})}
+      {...(setBadgeTitle ? { setBadgeTitle } : {})}
       {...(className ? { className } : {})}
     />
   );
@@ -1116,12 +1133,16 @@ function OperationImageOverlay({
   title,
   rulesText,
   cost,
+  setBadgeLabel,
+  setBadgeTitle,
   className,
   maxLines = 2
 }: {
   title: string;
   rulesText?: string;
   cost?: number | null | undefined;
+  setBadgeLabel?: string;
+  setBadgeTitle?: string;
   className?: string;
   maxLines?: number;
 }) {
@@ -1133,6 +1154,8 @@ function OperationImageOverlay({
       maxLines={maxLines}
       {...(rulesText ? { rulesText } : {})}
       {...(cost != null ? { cost } : {})}
+      {...(setBadgeLabel ? { setBadgeLabel } : {})}
+      {...(setBadgeTitle ? { setBadgeTitle } : {})}
       {...(className ? { className } : {})}
     />
   );
@@ -2057,6 +2080,7 @@ export default function Page() {
   const [deckExportText, setDeckExportText] = useState("");
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
   const [preferGermanCardImages, setPreferGermanCardImages] = useState(false);
+  const [showSetBadges, setShowSetBadges] = useState(true);
   const [cardPreviewCollapsed, setCardPreviewCollapsed] = useState(false);
   const [boardZoneCollapsed, setBoardZoneCollapsed] = useState<Record<string, boolean>>({});
   const [scoreAreaOverlays, setScoreAreaOverlays] = useState<Record<Side, boolean>>({ runner: false, corp: false });
@@ -2341,8 +2365,9 @@ export default function Page() {
     const stored = readLocalStorageWithLegacy(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY, LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { preferGermanCardImages?: unknown };
+        const parsed = JSON.parse(stored) as { preferGermanCardImages?: unknown; showSetBadges?: unknown };
         if (typeof parsed.preferGermanCardImages === "boolean") setPreferGermanCardImages(parsed.preferGermanCardImages);
+        if (typeof parsed.showSetBadges === "boolean") setShowSetBadges(parsed.showSetBadges);
       } catch {
         removeLocalStorageKeys(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY, LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY);
       }
@@ -2352,8 +2377,8 @@ export default function Page() {
 
   useEffect(() => {
     if (!cardImageSkinSettingsLoaded) return;
-    window.localStorage.setItem(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY, JSON.stringify({ preferGermanCardImages }));
-  }, [cardImageSkinSettingsLoaded, preferGermanCardImages]);
+    window.localStorage.setItem(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY, JSON.stringify({ preferGermanCardImages, showSetBadges }));
+  }, [cardImageSkinSettingsLoaded, preferGermanCardImages, showSetBadges]);
 
   useEffect(() => {
     setChronicleDetailMode(normalizeChronicleDetailMode(readLocalStorageWithLegacy(CHRONICLE_DETAIL_MODE_STORAGE_KEY, LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY)));
@@ -4572,7 +4597,7 @@ export default function Page() {
           rigPercent: cardRigScalePercent
         }}
       >
-      <CardImagePreferenceContext.Provider value={{ preferGermanCardImages }}>
+      <CardImagePreferenceContext.Provider value={{ preferGermanCardImages, showSetBadges }}>
       <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
       <main className="app" data-theme={colorScheme}>
         <header className="topbar">
@@ -5179,6 +5204,7 @@ export default function Page() {
               cardRigScalePercent={cardRigScalePercent}
               cardDisplayMode={cardDisplayMode}
               preferGermanCardImages={preferGermanCardImages}
+              showSetBadges={showSetBadges}
               chronicleDetailMode={chronicleDetailMode}
               colorScheme={colorScheme}
               cuePosition={cuePosition}
@@ -5204,6 +5230,7 @@ export default function Page() {
               onCardRigScalePercent={setCardRigScalePercent}
               onCardDisplayMode={setCardDisplayMode}
               onPreferGermanCardImages={setPreferGermanCardImages}
+              onShowSetBadges={setShowSetBadges}
               onChronicleDetailMode={setChronicleDetailMode}
               onColorScheme={setColorScheme}
               onCuePosition={setCuePosition}
@@ -5230,7 +5257,7 @@ export default function Page() {
         rigPercent: cardRigScalePercent
       }}
     >
-    <CardImagePreferenceContext.Provider value={{ preferGermanCardImages }}>
+    <CardImagePreferenceContext.Provider value={{ preferGermanCardImages, showSetBadges }}>
     <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
     <main className={activeMatchClassName} data-theme={colorScheme}>
       <header className="topbar" ref={topbarRef}>
@@ -6076,6 +6103,7 @@ export default function Page() {
               cardRigScalePercent={cardRigScalePercent}
               cardDisplayMode={cardDisplayMode}
               preferGermanCardImages={preferGermanCardImages}
+              showSetBadges={showSetBadges}
               chronicleDetailMode={chronicleDetailMode}
               colorScheme={colorScheme}
               cuePosition={cuePosition}
@@ -6102,6 +6130,7 @@ export default function Page() {
               onCardRigScalePercent={setCardRigScalePercent}
               onCardDisplayMode={setCardDisplayMode}
               onPreferGermanCardImages={setPreferGermanCardImages}
+              onShowSetBadges={setShowSetBadges}
               onChronicleDetailMode={setChronicleDetailMode}
               onColorScheme={setColorScheme}
               onCuePosition={setCuePosition}
@@ -6168,6 +6197,7 @@ export default function Page() {
             cardRigScalePercent={cardRigScalePercent}
             cardDisplayMode={cardDisplayMode}
             preferGermanCardImages={preferGermanCardImages}
+            showSetBadges={showSetBadges}
             chronicleDetailMode={chronicleDetailMode}
             colorScheme={colorScheme}
             cuePosition={cuePosition}
@@ -6195,6 +6225,7 @@ export default function Page() {
             onCardRigScalePercent={setCardRigScalePercent}
             onCardDisplayMode={setCardDisplayMode}
             onPreferGermanCardImages={setPreferGermanCardImages}
+            onShowSetBadges={setShowSetBadges}
             onChronicleDetailMode={setChronicleDetailMode}
             onColorScheme={setColorScheme}
             onCuePosition={setCuePosition}
@@ -6896,6 +6927,7 @@ function OptionsPanel({
   cardRigScalePercent,
   cardDisplayMode,
   preferGermanCardImages,
+  showSetBadges,
   chronicleDetailMode,
   colorScheme,
   cuePosition,
@@ -6923,6 +6955,7 @@ function OptionsPanel({
   onCardRigScalePercent,
   onCardDisplayMode,
   onPreferGermanCardImages,
+  onShowSetBadges,
   onChronicleDetailMode,
   onColorScheme,
   onCuePosition,
@@ -6951,6 +6984,7 @@ function OptionsPanel({
   cardRigScalePercent: number;
   cardDisplayMode: CardDisplayMode;
   preferGermanCardImages: boolean;
+  showSetBadges: boolean;
   chronicleDetailMode: ChronicleDetailMode;
   colorScheme: ColorScheme;
   cuePosition: CuePositionPreference;
@@ -6978,6 +7012,7 @@ function OptionsPanel({
   onCardRigScalePercent(value: number): void;
   onCardDisplayMode(value: CardDisplayMode): void;
   onPreferGermanCardImages(value: boolean): void;
+  onShowSetBadges(value: boolean): void;
   onChronicleDetailMode(value: ChronicleDetailMode): void;
   onColorScheme(value: ColorScheme): void;
   onCuePosition(value: CuePositionPreference): void;
@@ -7000,7 +7035,7 @@ function OptionsPanel({
         {session ? <SessionAccessSettings session={session} onCopyReconnectLink={onCopyReconnectLink} onDiscardLocalSession={onDiscardLocalSession} /> : null}
         <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
         <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
-        <CardImageSkinSettings preferGermanCardImages={preferGermanCardImages} onPreferGermanCardImages={onPreferGermanCardImages} />
+        <CardImageSkinSettings preferGermanCardImages={preferGermanCardImages} showSetBadges={showSetBadges} onPreferGermanCardImages={onPreferGermanCardImages} onShowSetBadges={onShowSetBadges} />
         <ChronicleDetailSettings mode={chronicleDetailMode} onChange={onChronicleDetailMode} />
         <CardTooltipSettings mode={cardTooltipMode} hoverOpenDelayMs={cardTooltipHoverDelayMs} onMode={onCardTooltipMode} onHoverOpenDelayMs={onCardTooltipHoverDelayMs} />
         <CardSizeSettings
@@ -7178,10 +7213,14 @@ function CardDisplayModeSelector({ mode, onChange, iconOnly = false }: { mode: C
 
 function CardImageSkinSettings({
   preferGermanCardImages,
-  onPreferGermanCardImages
+  showSetBadges,
+  onPreferGermanCardImages,
+  onShowSetBadges
 }: {
   preferGermanCardImages: boolean;
+  showSetBadges: boolean;
   onPreferGermanCardImages(value: boolean): void;
+  onShowSetBadges(value: boolean): void;
 }) {
   return (
     <div className="cardImageSkinSettings">
@@ -7192,6 +7231,10 @@ function CardImageSkinSettings({
       <label className={`deckBuilderToggle ${preferGermanCardImages ? "checked" : ""}`}>
         <input checked={preferGermanCardImages} onChange={(event) => onPreferGermanCardImages(event.target.checked)} type="checkbox" />
         Deutsche Kartenbilder bevorzugen
+      </label>
+      <label className={`deckBuilderToggle ${showSetBadges ? "checked" : ""}`}>
+        <input checked={showSetBadges} onChange={(event) => onShowSetBadges(event.target.checked)} type="checkbox" />
+        Set-Badges anzeigen
       </label>
     </div>
   );
@@ -13096,6 +13139,7 @@ function CardView({
   const preferredImageUrl = preferredImageSource.src ?? card.imageUrl;
   const preferredImageFallbackUrl = preferredImageSource.fallbackSrc;
   const tooltipImageUrl = card.known ? preferredImageUrl : undefined;
+  const { showSetBadges } = useCardImagePreference();
   const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
   const hasTooltipTextContent = Boolean(card.title) || detailLines.length > 0 || hasRulesLines;
   const tooltipAvailable = card.known && !showCardActions && (showImageTooltip || hasTooltipTextContent);
@@ -13138,8 +13182,8 @@ function CardView({
   const cardStateAria = cardStateAriaText ? `, ${cardStateAriaText}` : "";
   const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
-  const setBadgeLabel = card.known ? card.setShortLabel : undefined;
-  const setBadgeTitle = card.known ? card.setDetailLabel : undefined;
+  const setBadgeLabel = card.known && showSetBadges ? card.setShortLabel : undefined;
+  const setBadgeTitle = card.known && showSetBadges ? card.setDetailLabel : undefined;
   const setBadgeAriaSuffix = setBadgeTitle ? `, Set ${setBadgeTitle}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
@@ -13509,22 +13553,30 @@ function CardView({
         data-inactive-zone={inactiveZone}
       >
         {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} fallbackSrc={preferredImageFallbackUrl} decorative /> : null}
-        {setBadgeLabel ? (
-          <span className="cardSetBadge" title={setBadgeTitle} aria-hidden="true">
-            {setBadgeLabel}
-          </span>
-        ) : null}
         {isHardwareImageCard ? (
           <HardwareImageOverlay
             title={card.title ?? "Hardware"}
             rulesText={rulesText}
+            {...(setBadgeLabel ? { setBadgeLabel } : {})}
+            {...(setBadgeTitle ? { setBadgeTitle } : {})}
             {...(card.installCost !== undefined ? { installCost: card.installCost } : {})}
           />
         ) : isOperationImageCard ? (
-          <OperationImageOverlay title={card.title ?? "Operation"} rulesText={rulesText} {...(card.cost !== undefined ? { cost: card.cost } : {})} />
+          <OperationImageOverlay
+            title={card.title ?? "Operation"}
+            rulesText={rulesText}
+            {...(setBadgeLabel ? { setBadgeLabel } : {})}
+            {...(setBadgeTitle ? { setBadgeTitle } : {})}
+            {...(card.cost !== undefined ? { cost: card.cost } : {})}
+          />
         ) : null}
         {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
         {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
+        {!visualImageUrl && setBadgeLabel ? (
+          <span className="cardSetBadge" title={setBadgeTitle} aria-hidden="true">
+            {setBadgeLabel}
+          </span>
+        ) : null}
         {inactiveZoneBadge ? (
           <span className="cardInactiveZoneBadge" aria-hidden="true">
             {inactiveZone === "heap" ? <Trash2 size={10} strokeWidth={2.4} /> : <Clipboard size={10} strokeWidth={2.4} />}

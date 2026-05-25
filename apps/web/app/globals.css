@@ -5749,20 +5749,20 @@ select {
 }
 
 .cardSetBadge {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  z-index: 7;
-  max-width: 46px;
-  min-width: 26px;
-  min-height: 18px;
-  padding: 3px 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 42px;
+  min-width: 22px;
+  min-height: 15px;
+  margin-top: 3px;
+  padding: 1px 4px;
   border: 1px solid color-mix(in srgb, var(--text), transparent 78%);
-  border-radius: 4px;
+  border-radius: 3px;
   background: color-mix(in srgb, var(--section-bg), black 18%);
   color: color-mix(in srgb, var(--text), white 8%);
-  box-shadow: 0 5px 12px rgb(0 0 0 / 0.28);
-  font-size: 9px;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 0.18);
+  font-size: 8px;
   font-weight: 800;
   letter-spacing: 0;
   line-height: 1.1;
@@ -5772,6 +5772,13 @@ select {
   text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.card.compactCard .cardSetBadge {
+  max-width: 36px;
+  min-height: 13px;
+  margin-top: 2px;
+  font-size: 7px;
 }
 
 .card.hiddenBack.inactiveZoneCard::after,
@@ -9714,6 +9721,34 @@ select,
   box-shadow:
     inset 0 1px 0 rgb(255 245 211 / 0.55),
     0 2px 5px rgb(0 0 0 / 0.38);
+}
+
+.hardwareImageOverlaySetBadge {
+  position: absolute;
+  top: 31px;
+  left: 8px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 38px;
+  min-width: 20px;
+  min-height: 14px;
+  padding: 1px 4px;
+  border: 1px solid rgb(238 222 180 / 0.55);
+  border-radius: 3px;
+  background: rgb(18 23 30 / 0.78);
+  color: #f7efdc;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.05;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .hardwareImageOverlayFrame {
