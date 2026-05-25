@@ -270,7 +270,6 @@ import {
   type SuccessfulRunInterventionHost,
 } from "./game/run/successful-run-interventions";
 import {
-  clearEncounterTemporaryTraceCredits,
   handleRunEndCleanup,
   recordDupreBreakUsage,
   resetBreakerStrength,
@@ -284,7 +283,6 @@ import {
   hostedPaymentCredits,
   isRestrictedHostedCreditSource,
   payEncounterTaxForFutureIce,
-  payJackOutAdditionalCost,
   payRunStartTaxCredits,
   recordWilsonRunCapSpend,
   restrictedHostedCreditSourceForDefinition,
@@ -301,12 +299,7 @@ import {
 import {
   appendUnpaidPayOrEndRunEffects,
   cleanupEncounterDurationMarkers,
-  clearFullyBrokenPassedIcePostPassMarker,
-  clearStartupImmolatorPostPassMarker,
-  consumeForcedJackOutAfterEncounter,
   encounterResolutionHost,
-  handlePostPassProgramTrashChoices,
-  passedIceFollowupMarkersForCurrentIce,
   preparePayOrEndRunSubroutinePayment,
   resolveFatalAttractorPostEncounter,
   resolvePassRezzedIceProgramTrashChoice as resolvePassRezzedIceProgramTrashChoiceInRunModule,
@@ -348,6 +341,13 @@ import {
   buildRunnerMovementActions,
   type RunnerEncounterActionHost,
 } from "./game/run/encounter-actions";
+import {
+  approachOrEncounterIce,
+  handleRunMovementAction,
+  movePastCurrentIce,
+  passApproachedIce,
+  type RunMovementHost,
+} from "./game/run/run-movement";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -7521,26 +7521,7 @@ function performAction(
       payRunStartTaxCredits(runDurationPaymentHost(state), legalAction);
       return;
     case "jack_out":
-      {
-        const jackOutAdditionalCost = legalAction.costs.reduce(
-          (sum, cost) => sum + (cost.credits ?? 0),
-          0,
-        );
-        const run = state.run;
-        const serverLabel = run ? publicServerLabel(state, run.attackedServerId) : undefined;
-        const reachedServerBeforeAccess = run?.position.kind === "server";
-        const jackOutPayload = {
-          ...(legalAction.payload ?? {}),
-          ...(serverLabel ? { serverLabel } : {}),
-          ...(reachedServerBeforeAccess ? { jackOutBeforeAccess: true } : {}),
-        };
-        payJackOutAdditionalCost(
-          runDurationPaymentHost(state),
-          legalAction,
-          jackOutPayload,
-        );
-      }
-      finishRun(state, false);
+      handleRunMovementAction(runMovementHostForState(state), legalAction);
       return;
     case "rez_ice":
       rezCard(
@@ -7557,7 +7538,7 @@ function performAction(
         passCorpRunRootRezWindow(state, legalAction);
         return;
       }
-      passApproachedIce(state);
+      passApproachedIce(runMovementHostForState(state));
       return;
     case "pump_breaker":
       {
@@ -7719,6 +7700,8 @@ function performAction(
       return;
     }
     case "continue_run":
+      if (handleRunMovementAction(runMovementHostForState(state), legalAction).handled)
+        return;
       continueRun(state, legalAction);
       return;
     case "access_card":
@@ -9506,7 +9489,11 @@ function startRun(
       "Server has no approached ice.",
     );
     state.run.approachedIceId = approachedIceId;
-    approachOrEncounterIce(state, approachedIceId, legalAction);
+    approachOrEncounterIce(
+      runMovementHostForState(state),
+      approachedIceId,
+      legalAction,
+    );
   } else {
     enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction);
   }
@@ -10256,71 +10243,6 @@ function startSpeedTrapRezInterruptChoice(
   return true;
 }
 
-function passApproachedIce(state: GameState): void {
-  const run = mustRun(state);
-  if (!run.approachedIceId) throw new Error("Kein ICE wird approached.");
-  const ice = mustInstance(state.cardInstances, run.approachedIceId);
-  if (ice.rezzed) {
-    beginEncounter(state, run.approachedIceId);
-    return;
-  }
-  movePastCurrentIce(state);
-}
-
-function approachOrEncounterIce(
-  state: GameState,
-  approachedIceId: CardInstanceId,
-  legalAction?: LegalAction,
-): void {
-  const run = mustRun(state);
-  const ice = mustInstance(state.cardInstances, approachedIceId);
-  run.approachedIceId = approachedIceId;
-  if (run.socialEngineeringAutoPassIceId === approachedIceId) {
-    delete run.socialEngineeringAutoPassIceId;
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        autoPassChosenIce: true,
-        socialEngineeringAutoPassedIce: true,
-      };
-    }
-    movePastCurrentIce(state);
-    return;
-  }
-  if (run.bypassFirstIceRemaining) {
-    run.bypassFirstIceRemaining = false;
-    movePastCurrentIce(state);
-    return;
-  }
-  if (ice.rezzed) {
-    if (corpRunRootRezActions(state).length > 0) {
-      const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
-      void _encounteredIceId;
-      state.run = {
-        ...runWithoutEncounter,
-        phase: "approach_ice",
-        approachedIceId,
-      };
-      state.timingPoint = "run.approach_ice";
-      state.activeSide = "corp";
-      return;
-    }
-    beginEncounter(state, approachedIceId, legalAction);
-    return;
-  }
-  const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
-  void _encounteredIceId;
-  state.run = {
-    ...runWithoutEncounter,
-    phase: "approach_ice",
-    approachedIceId,
-  };
-  state.timingPoint = "run.approach_ice";
-  state.activeSide = approachIceExposeCanBeOfferedForCurrentIce(state)
-    ? "runner"
-    : "corp";
-}
-
 function beginEncounter(
   state: GameState,
   encounteredIceId: CardInstanceId,
@@ -10397,10 +10319,6 @@ function beginEncounter(
 
 function continueRun(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
-  if (run.phase === "movement") {
-    continueFromMovement(state, legalAction);
-    return;
-  }
   if (run.phase !== "encounter_ice" || !run.encounteredIceId) {
     if (run.phase === "access") {
       finishRun(state, true, legalAction);
@@ -10520,7 +10438,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       encounteredIceId,
       legalAction,
     );
-  movePastCurrentIce(state, legalAction);
+  movePastCurrentIce(runMovementHostForState(state), legalAction);
 }
 
 function applyBartmossPostEncounterTrigger(
@@ -10855,208 +10773,6 @@ function traceBidChoice(
     stateVersion: state.stateVersion + 1,
     visibility: "public",
   };
-}
-
-function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
-  const run = mustRun(state);
-  if (run.position.kind !== "ice")
-    throw new Error("Runner ist nicht an ICE positioniert.");
-  const server = mustServer(state, run.position.serverId);
-  const nextIndex = run.position.iceIndex - 1;
-  const passedIceId = run.encounteredIceId ?? run.approachedIceId;
-  clearEncounterTemporaryTraceCredits(run, legalAction);
-  const passedIceFollowups = passedIceFollowupMarkersForCurrentIce(
-    encounterResolutionHostForState(state),
-  );
-  if (
-    passedIceId &&
-    mustInstance(state.cardInstances, passedIceId).rezzed &&
-    applyRioDeJaneiroCityGridPassedIceTrigger(
-      encounterSpecialWindowHostForState(state),
-      passedIceId,
-      legalAction,
-    ).runShouldEnd
-  ) {
-    return;
-  }
-  const forcedJackOut = consumeForcedJackOutAfterEncounter(
-    encounterResolutionHostForState(state),
-    legalAction,
-  );
-  if (forcedJackOut.runShouldEnd) {
-    finishRun(state, false, legalAction);
-    return;
-  }
-  if (nextIndex >= 0) {
-    const approachedIceId = mustArrayValue(
-      server.ice,
-      nextIndex,
-      "Naechstes ICE fehlt.",
-    );
-    if (isV097OrLater(state)) {
-      const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } =
-        run;
-      void _encounteredIceId;
-      state.run = {
-        ...runWithoutEncounter,
-        phase: "movement",
-        position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
-        approachedIceId,
-        ...passedIceFollowups,
-        ...fortPassFollowupsForPassedIce(state, server, passedIceId),
-        brokenSubroutineIndexes: [],
-        resolvedSubroutineIndexes: [],
-      };
-      state.timingPoint = "run.jack_out_window";
-      state.activeSide = "runner";
-      return;
-    }
-    state.run = {
-      ...run,
-      phase: "approach_ice",
-      position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
-      approachedIceId,
-      ...passedIceFollowups,
-      ...fortPassFollowupsForPassedIce(state, server, passedIceId),
-      brokenSubroutineIndexes: [],
-      resolvedSubroutineIndexes: [],
-    };
-    approachOrEncounterIce(state, approachedIceId);
-    return;
-  }
-  if (isV097OrLater(state)) {
-    const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
-    void _encounteredIceId;
-    state.run = {
-      ...runWithoutEncounter,
-      position: { kind: "server", serverId: server.id },
-      phase: "movement",
-      ...passedIceFollowups,
-      ...fortPassFollowupsForPassedIce(state, server, passedIceId),
-    };
-    state.timingPoint = "run.jack_out_window";
-    state.activeSide = "runner";
-    return;
-  }
-  state.run = {
-    ...run,
-    position: { kind: "server", serverId: server.id },
-    phase: "access",
-  };
-  enterAccessFromSuccessfulRun(runAccessTransitionHost(state));
-}
-
-function fortPassFollowupsForPassedIce(
-  state: GameState,
-  server: CorpServer,
-  passedIceId: CardInstanceId | undefined,
-): Pick<RunState, "lastPassedIceId" | "postPassPayOrEndRun"> {
-  if (!passedIceId) return {};
-  const payOrEndSources = server.root
-    .filter((cardId) => {
-      const instance = state.cardInstances[cardId];
-      if (instance?.rezzed !== true) return false;
-      const implementation = fortRunWindowImplementationForCard(
-        state,
-        cardId,
-        "runner_pay_or_end_run_after_passing_ice_on_this_fort",
-      );
-      return Boolean(implementation);
-    })
-    .sort();
-  if (payOrEndSources.length === 0) return { lastPassedIceId: passedIceId };
-  const amount = payOrEndSources.reduce((sum, cardId) => {
-    const implementation = fortRunWindowImplementationForCard(
-      state,
-      cardId,
-      "runner_pay_or_end_run_after_passing_ice_on_this_fort",
-    );
-    return sum + Math.max(0, Math.floor(implementation?.amount ?? 0));
-  }, 0);
-  if (amount <= 0) return { lastPassedIceId: passedIceId };
-  return {
-    lastPassedIceId: passedIceId,
-    postPassPayOrEndRun: {
-      sourceCardInstanceIds: payOrEndSources,
-      sourceDefinitionIds: payOrEndSources.map(
-        (cardId) => definitionFor(state, cardId).id,
-      ),
-      passedIceId,
-      serverId: server.id,
-      amount,
-    },
-  };
-}
-
-function continueFromMovement(state: GameState, legalAction?: LegalAction): void {
-  const run = mustRun(state);
-  if (resolvePostPassPayOrEndRun(state, legalAction)) return;
-  if (
-    handlePostPassProgramTrashChoices(
-      encounterResolutionHostForState(state),
-      legalAction,
-    ).choiceOpened
-  )
-    return;
-  clearStartupImmolatorPostPassMarker(encounterResolutionHostForState(state));
-  clearFullyBrokenPassedIcePostPassMarker(encounterResolutionHostForState(state));
-  if (run.position.kind === "ice") {
-    const server = mustServer(state, run.position.serverId);
-    const approachedIceId =
-      run.approachedIceId ??
-      mustArrayValue(server.ice, run.position.iceIndex, "Naechstes ICE fehlt.");
-    state.run = { ...run, phase: "approach_ice", approachedIceId };
-    approachOrEncounterIce(state, approachedIceId);
-    return;
-  }
-  enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction);
-}
-
-function resolvePostPassPayOrEndRun(
-  state: GameState,
-  legalAction: LegalAction | undefined,
-): boolean {
-  const run = mustRun(state);
-  const pending = run.postPassPayOrEndRun;
-  if (!pending) return false;
-  if (!legalAction)
-    throw new Error("Fort-Pass-Zahlungsfenster braucht eine LegalAction.");
-  if (
-    legalAction.payload?.fortRunWindowAbility !==
-    "runner_pay_or_end_run_after_passing_ice_on_this_fort"
-  )
-    throw new Error("Die Fort-Pass-Aktion passt nicht zum offenen Fenster.");
-  const decision = String(legalAction.payload?.decision ?? "");
-  const amount = Math.max(0, Math.floor(pending.amount));
-  const actionAmount = Number(legalAction.payload?.paymentAmount ?? amount);
-  if (!Number.isInteger(actionAmount) || actionAmount !== amount)
-    throw new Error("Die Fort-Pass-Kosten passen nicht mehr.");
-  if (String(legalAction.payload?.passedIceId ?? "") !== pending.passedIceId)
-    throw new Error("Das passierte ICE passt nicht mehr zum Fort-Pass-Fenster.");
-  if (String(legalAction.payload?.serverId ?? "") !== pending.serverId)
-    throw new Error("Der Fort-Pass-Server passt nicht mehr.");
-  if (decision === "pay") {
-    spendRunnerRunCredits(runDurationPaymentHost(state), amount);
-    delete run.postPassPayOrEndRun;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      paidCredits: amount,
-      endedRun: false,
-      runnerCreditsAfter: state.runner.credits,
-    };
-    return true;
-  }
-  if (decision === "end_run") {
-    delete run.postPassPayOrEndRun;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      paidCredits: 0,
-      endedRun: true,
-    };
-    finishRun(state, false, legalAction);
-    return true;
-  }
-  throw new Error("Die Fort-Pass-Entscheidung ist ungueltig.");
 }
 
 function resolveFortPassAdvancementWindow(
@@ -17662,6 +17378,36 @@ function runnerEncounterActionHostForState(
   };
 }
 
+function runMovementHostForState(state: GameState): RunMovementHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+    },
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
+    },
+    rules: {
+      isV097OrLater: () => isV097OrLater(state),
+      corpRunRootRezActionsAvailable: () => corpRunRootRezActions(state).length > 0,
+      approachIceExposeCanBeOfferedForCurrentIce: () => approachIceExposeCanBeOfferedForCurrentIce(state),
+    },
+    encounter: {
+      encounterResolutionHost: () => encounterResolutionHostForState(state),
+      encounterSpecialWindowHost: () => encounterSpecialWindowHostForState(state),
+      beginEncounter: (iceId, legalAction) => beginEncounter(state, iceId, legalAction),
+    },
+    access: {
+      startAccessFromSuccessfulRun: (legalAction) => enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction),
+    },
+    cleanup: {
+      finishRun: (successful, legalAction) => finishRun(state, successful, legalAction),
+    },
+  };
+}
+
 function successfulRunInterventionHost(
   state: GameState,
 ): SuccessfulRunInterventionHost {
@@ -17710,7 +17456,11 @@ function successfulRunInterventionHost(
       beginEncounter: (iceId, legalAction) =>
         beginEncounter(state, iceId, legalAction),
       approachOrEncounterIce: (iceId, legalAction) =>
-        approachOrEncounterIce(state, iceId, legalAction),
+        approachOrEncounterIce(
+          runMovementHostForState(state),
+          iceId,
+          legalAction,
+        ),
     },
     access: {
       startAccessFromSuccessfulRun: (legalAction) =>
