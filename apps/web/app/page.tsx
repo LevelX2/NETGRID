@@ -66,6 +66,7 @@ import type {
   ApiLobbyParticipantPayload,
   ApiLobbyPayload,
   ApiMatchFormat,
+  ApiMatchCardPool,
   ApiMatchStartLobbyPayload,
   ApiMatchStatus,
   ApiPlayerClockSnapshot,
@@ -191,6 +192,7 @@ import { CardImage, isGeneratedCardImageId, localCardImageUrl } from "./card-ima
 import {
   deriveMatchStart,
   humanAiSideLabel,
+  matchCardPoolCardLabel,
   matchFormatCardLabel,
   matchStartLobbyBlocksSetup,
   matchStartPlayerClockLabel,
@@ -199,6 +201,7 @@ import {
   playModeCardLabel,
   sideSelectionLabel,
   type MatchFormatSelection,
+  type MatchCardPoolSelection,
   type HumanAiSideSelection,
   type HumanSideSelection,
   type PlayMode
@@ -289,6 +292,9 @@ const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
 const DEFAULT_DECK_FORMAT_PROFILE_VERSION = "1.3.0";
+const PROTEUS_DECK_CARD_POOL_VERSION = "private-local-onr-v1-plus-proteus-playtest";
+const PROTEUS_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_proteus_playtest_v1";
+const PROTEUS_DECK_FORMAT_PROFILE_VERSION = "1.0.0";
 const APP_NAME = "NETGRID";
 const APP_STATUS_LABEL = "V1.9.22";
 const APP_BRAND_ASSET_VERSION = "2026-05-10-brand-fix-2";
@@ -313,6 +319,7 @@ let sharedAudioContext: AudioContext | null = null;
 type MatchStatus = ApiMatchStatus;
 type GameMode = ApiClientGameMode;
 type MatchFormat = ApiMatchFormat;
+type MatchCardPool = ApiMatchCardPool;
 type AiDifficulty = "easy" | "normal" | "hard";
 type AiDeckPolicy = "fixed" | "selected" | "seeded_random";
 type AiPacingMode = ApiAiPacingMode;
@@ -1755,6 +1762,23 @@ function deckMetadataFromEditable(deck: EditableDeck | null): DeckPublicMetadata
   };
 }
 
+function snapshotAllowedForMatchCardPool(snapshot: DeckSnapshot, matchCardPool: MatchCardPoolSelection): boolean {
+  if (matchCardPool === "originalset_proteus") return true;
+  return snapshot.formatProfileId !== PROTEUS_DECK_FORMAT_PROFILE_ID && !snapshot.cards.some((entry) => entry.cardId.startsWith("onr_proteus_"));
+}
+
+function editableDeckAllowedForMatchCardPool(deck: EditableDeck, matchCardPool: MatchCardPoolSelection): boolean {
+  if (matchCardPool === "originalset_proteus") return true;
+  return deck.formatProfileId !== PROTEUS_DECK_FORMAT_PROFILE_ID && !deck.cards.some((entry) => entry.cardId.startsWith("onr_proteus_"));
+}
+
+function catalogCardAllowedForDeckEditor(card: CatalogCardSummary, deck: EditableDeck | null): boolean {
+  if (deck && card.side !== deck.side) return false;
+  if (card.type === "identity") return false;
+  if (deck?.formatProfileId === PROTEUS_DECK_FORMAT_PROFILE_ID) return card.statuses.catalog_ready;
+  return card.statuses.playable && card.statuses.deck_legal;
+}
+
 function serverLanesForSide(_side: Side, server: PlayerView["servers"][number]): Array<{ kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }> {
   const iceLane = { kind: "ice" as const, label: "ICE" as const, cards: server.ice };
   const rootLane = { kind: "root" as const, label: "Root" as const, cards: corpRootCardsForDisplay(_side, server.id, server.root) };
@@ -1939,6 +1963,7 @@ export default function Page() {
   const [humanSideSelection, setHumanSideSelection] = useState<HumanSideSelection>("random");
   const [humanAiSideSelection, setHumanAiSideSelection] = useState<HumanAiSideSelection>("random");
   const [matchFormat, setMatchFormat] = useState<MatchFormat>("rules_match");
+  const [matchCardPool, setMatchCardPool] = useState<MatchCardPool>("originalset");
   const [playerClockMode, setPlayerClockMode] = useState<MatchStartPlayerClockMode>("none");
   const [playerClockMinutes, setPlayerClockMinutes] = useState<MatchStartPlayerClockMinutes>(10);
   const [playerClockGraceSeconds, setPlayerClockGraceSeconds] = useState<MatchStartPlayerClockGraceSeconds>(10);
@@ -2152,6 +2177,7 @@ export default function Page() {
       if (storedMatchStartSettings.humanSideSelection) setHumanSideSelection(storedMatchStartSettings.humanSideSelection);
       if (storedMatchStartSettings.humanAiSideSelection) setHumanAiSideSelection(storedMatchStartSettings.humanAiSideSelection);
       if (storedMatchStartSettings.matchFormat) setMatchFormat(storedMatchStartSettings.matchFormat);
+      if (storedMatchStartSettings.matchCardPool) setMatchCardPool(storedMatchStartSettings.matchCardPool);
       if (storedMatchStartSettings.playerClockMode) setPlayerClockMode(storedMatchStartSettings.playerClockMode);
       if (storedMatchStartSettings.playerClockMinutes) setPlayerClockMinutes(storedMatchStartSettings.playerClockMinutes);
       if (storedMatchStartSettings.playerClockGraceSeconds !== undefined) setPlayerClockGraceSeconds(storedMatchStartSettings.playerClockGraceSeconds);
@@ -2490,6 +2516,7 @@ export default function Page() {
         humanSideSelection,
         humanAiSideSelection,
         matchFormat: matchFormat === "two_game_side_swap" ? "two_game_side_swap" : "rules_match",
+        matchCardPool,
         playerClockMode,
         playerClockMinutes,
         playerClockGraceSeconds,
@@ -2520,6 +2547,7 @@ export default function Page() {
     humanSideSelection,
     humanAiSideSelection,
     matchFormat,
+    matchCardPool,
     playerClockMode,
     playerClockMinutes,
     playerClockGraceSeconds,
@@ -2718,17 +2746,18 @@ export default function Page() {
   const selectedFieldCardChoiceOptionIdSet = useMemo(() => new Set(selectedFieldCardChoiceOptionIds), [selectedFieldCardChoiceOptionIds.join("|")]);
   const latestEventId = payload?.eventTail.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
-  const runnerSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "runner" && snapshot.validation.ok);
-  const corpSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "corp" && snapshot.validation.ok);
+  const runnerSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "runner" && snapshot.validation.ok && snapshotAllowedForMatchCardPool(snapshot, matchCardPool));
+  const corpSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "corp" && snapshot.validation.ok && snapshotAllowedForMatchCardPool(snapshot, matchCardPool));
+  const matchStartLocalDecks = localDecks.filter((deck) => editableDeckAllowedForMatchCardPool(deck, matchCardPool));
   const defaultCorpSnapshot = corpSnapshots.find((snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID) ?? corpSnapshots[0] ?? null;
-  const selectedRunnerSnapshot = deckSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedRunnerSnapshotId) ?? runnerSnapshots[0] ?? null;
-  const selectedCorpSnapshot = deckSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedCorpSnapshotId) ?? defaultCorpSnapshot;
-  const selectedParticipantBRunnerSnapshot = deckSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedParticipantBRunnerSnapshotId) ?? runnerSnapshots[0] ?? null;
-  const selectedParticipantBCorpSnapshot = deckSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedParticipantBCorpSnapshotId) ?? corpSnapshots[0] ?? null;
-  const runnerLocalDeck = localDecks.find((deck) => deck.deckId === selectedRunnerLocalDeckId && deck.side === "runner") ?? null;
-  const corpLocalDeck = localDecks.find((deck) => deck.deckId === selectedCorpLocalDeckId && deck.side === "corp") ?? null;
-  const participantBRunnerLocalDeck = localDecks.find((deck) => deck.deckId === selectedParticipantBRunnerLocalDeckId && deck.side === "runner") ?? null;
-  const participantBCorpLocalDeck = localDecks.find((deck) => deck.deckId === selectedParticipantBCorpLocalDeckId && deck.side === "corp") ?? null;
+  const selectedRunnerSnapshot = runnerSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedRunnerSnapshotId) ?? runnerSnapshots[0] ?? null;
+  const selectedCorpSnapshot = corpSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedCorpSnapshotId) ?? defaultCorpSnapshot;
+  const selectedParticipantBRunnerSnapshot = runnerSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedParticipantBRunnerSnapshotId) ?? runnerSnapshots[0] ?? null;
+  const selectedParticipantBCorpSnapshot = corpSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedParticipantBCorpSnapshotId) ?? corpSnapshots[0] ?? null;
+  const runnerLocalDeck = matchStartLocalDecks.find((deck) => deck.deckId === selectedRunnerLocalDeckId && deck.side === "runner") ?? null;
+  const corpLocalDeck = matchStartLocalDecks.find((deck) => deck.deckId === selectedCorpLocalDeckId && deck.side === "corp") ?? null;
+  const participantBRunnerLocalDeck = matchStartLocalDecks.find((deck) => deck.deckId === selectedParticipantBRunnerLocalDeckId && deck.side === "runner") ?? null;
+  const participantBCorpLocalDeck = matchStartLocalDecks.find((deck) => deck.deckId === selectedParticipantBCorpLocalDeckId && deck.side === "corp") ?? null;
   const participantARunnerMetadata = runnerDeckSource === "local" ? deckMetadataFromEditable(runnerLocalDeck) : selectedRunnerSnapshot?.publicMetadata;
   const participantACorpMetadata = corpDeckSource === "local" ? deckMetadataFromEditable(corpLocalDeck) : selectedCorpSnapshot?.publicMetadata;
   const participantBRunnerMetadata = participantBRunnerDeckSource === "local" ? deckMetadataFromEditable(participantBRunnerLocalDeck) : selectedParticipantBRunnerSnapshot?.publicMetadata;
@@ -2745,6 +2774,7 @@ export default function Page() {
   const startSummary = matchStartSummary({
     playMode,
     matchFormat: matchFormat === "two_game_side_swap" ? "two_game_side_swap" : "rules_match",
+    matchCardPool,
     humanSideSelection,
     humanAiSideSelection,
     aiDeckPolicy,
@@ -2779,8 +2809,8 @@ export default function Page() {
   const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const selectedDeckDirty = selectedLocalDeck ? savedDeckFingerprints[selectedLocalDeck.deckId] !== deckFingerprint(selectedLocalDeck) : false;
   const playableCatalogCards = useMemo(
-    () => allCatalogCards.filter((card) => card.statuses.playable && card.statuses.deck_legal && (!selectedLocalDeck || card.side === selectedLocalDeck.side) && card.type !== "identity"),
-    [allCatalogCards, selectedLocalDeck?.side]
+    () => allCatalogCards.filter((card) => catalogCardAllowedForDeckEditor(card, selectedLocalDeck)),
+    [allCatalogCards, selectedLocalDeck?.formatProfileId, selectedLocalDeck?.side]
   );
   const gripPreviewCard = activeView?.own.gripOrHq.find((card) => card.known) ?? null;
   const rigPreviewCard = activeView?.own.rig?.find((card) => card.known) ?? null;
@@ -3308,6 +3338,7 @@ export default function Page() {
         ...(isHumanVsHuman ? { discoverableInLan } : {}),
         settings: {
           matchFormat,
+          cardPool: matchCardPool,
           agendaPointsToWin: effectiveAgendaTarget,
           playerClock:
             playerClockMode === "player_clock"
@@ -3401,6 +3432,7 @@ export default function Page() {
         runnerDifficulty,
         corpDifficulty,
         ...deckPayload,
+        settings: { cardPool: matchCardPool },
         agendaPointsToWin: effectiveAgendaTarget,
         maxActions: 120
       });
@@ -4096,6 +4128,7 @@ export default function Page() {
   const createEmptyDeck = (side: Side) => {
     const now = new Date().toISOString();
     const templateIdentity = deckTemplates.find((candidate) => candidate.side === side)?.identityCardId;
+    const useProteusProfile = matchCardPool === "originalset_proteus";
     const deck: EditableDeck = {
       deckId: `local_${side}_${runtimeRandomId().slice(0, 8)}`,
       deckVersion: "0.6.0-local",
@@ -4103,9 +4136,9 @@ export default function Page() {
       side,
       identityCardId: templateIdentity ?? DEFAULT_IDENTITY_BY_SIDE[side],
       cardPoolSnapshotId: DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID,
-      cardPoolVersion: DEFAULT_DECK_CARD_POOL_VERSION,
-      formatProfileId: DEFAULT_DECK_FORMAT_PROFILE_ID,
-      formatProfileVersion: DEFAULT_DECK_FORMAT_PROFILE_VERSION,
+      cardPoolVersion: useProteusProfile ? PROTEUS_DECK_CARD_POOL_VERSION : DEFAULT_DECK_CARD_POOL_VERSION,
+      formatProfileId: useProteusProfile ? PROTEUS_DECK_FORMAT_PROFILE_ID : DEFAULT_DECK_FORMAT_PROFILE_ID,
+      formatProfileVersion: useProteusProfile ? PROTEUS_DECK_FORMAT_PROFILE_VERSION : DEFAULT_DECK_FORMAT_PROFILE_VERSION,
       validationStatus: "needs_revalidation",
       cards: [],
       createdAt: now,
@@ -4317,7 +4350,7 @@ export default function Page() {
     const result = await fetch("/api/decks/validate", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ deck })
+      body: JSON.stringify({ deck, matchCardPool })
     }).then((response) => response.json() as Promise<DeckValidationResponse>);
     if (result.error) throw new Error(result.error.message);
     if (!result.validation.ok || !result.snapshot) {
@@ -4700,6 +4733,30 @@ export default function Page() {
                     })}
                   </div>
                 </section>
+                <section className="matchStartSection" aria-label="Kartenpool">
+                  <p className="eyebrow">Kartenpool</p>
+                  <div className="choiceCardGrid formatCards">
+                    {(["originalset", "originalset_proteus"] as MatchCardPoolSelection[]).map((option) => {
+                      const label = matchCardPoolCardLabel(option);
+                      return (
+                        <button
+                          key={option}
+                          className={`choiceCard ${matchCardPool === option ? "active" : ""}`}
+                          onClick={() => setMatchCardPool(option)}
+                          type="button"
+                          aria-pressed={matchCardPool === option}
+                          data-testid={option === "originalset" ? "match-card-pool-originalset" : "match-card-pool-originalset-proteus"}
+                        >
+                          <Layers3 size={18} />
+                          <span>
+                            <strong>{label.title}</strong>
+                            <small>{label.description}</small>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
                 <div className="formGrid primaryStartGrid">
                 <label>
                   Name
@@ -4741,7 +4798,7 @@ export default function Page() {
                     <DeckSlotSelect
                       label={gameMode === "ai_vs_ai" ? "Runner-KI · Runner-Deck" : "Teilnehmer A · Runner-Deck"}
                       snapshots={runnerSnapshots}
-                      localDecks={localDecks.filter((deck) => deck.side === "runner")}
+                      localDecks={matchStartLocalDecks.filter((deck) => deck.side === "runner")}
                       source={runnerDeckSource}
                       selectedSnapshotId={selectedRunnerSnapshotId}
                       selectedLocalDeckId={selectedRunnerLocalDeckId}
@@ -4752,7 +4809,7 @@ export default function Page() {
                     <DeckSlotSelect
                       label={gameMode === "ai_vs_ai" ? "Korp-KI · Korp-Deck" : "Teilnehmer A · Korp-Deck"}
                       snapshots={corpSnapshots}
-                      localDecks={localDecks.filter((deck) => deck.side === "corp")}
+                      localDecks={matchStartLocalDecks.filter((deck) => deck.side === "corp")}
                       source={corpDeckSource}
                       selectedSnapshotId={selectedCorpSnapshotId}
                       selectedLocalDeckId={selectedCorpLocalDeckId}
@@ -4895,7 +4952,7 @@ export default function Page() {
                       <DeckSlotSelect
                         label={hasAiOpponent ? "KI · Runner-Deck" : "Teilnehmer B · Runner-Deck"}
                         snapshots={runnerSnapshots}
-                        localDecks={localDecks.filter((deck) => deck.side === "runner")}
+                        localDecks={matchStartLocalDecks.filter((deck) => deck.side === "runner")}
                         source={participantBRunnerDeckSource}
                         selectedSnapshotId={selectedParticipantBRunnerSnapshotId}
                         selectedLocalDeckId={selectedParticipantBRunnerLocalDeckId}
@@ -4907,7 +4964,7 @@ export default function Page() {
                       <DeckSlotSelect
                         label={hasAiOpponent ? "KI · Korp-Deck" : "Teilnehmer B · Korp-Deck"}
                         snapshots={corpSnapshots}
-                        localDecks={localDecks.filter((deck) => deck.side === "corp")}
+                        localDecks={matchStartLocalDecks.filter((deck) => deck.side === "corp")}
                         source={participantBCorpDeckSource}
                         selectedSnapshotId={selectedParticipantBCorpSnapshotId}
                         selectedLocalDeckId={selectedParticipantBCorpLocalDeckId}
@@ -4975,7 +5032,7 @@ export default function Page() {
                   <DeckSlotSelect
                     label="Dein Runner-Deck"
                     snapshots={runnerSnapshots}
-                    localDecks={localDecks.filter((deck) => deck.side === "runner")}
+                    localDecks={matchStartLocalDecks.filter((deck) => deck.side === "runner")}
                     source={participantBRunnerDeckSource}
                     selectedSnapshotId={selectedParticipantBRunnerSnapshotId}
                     selectedLocalDeckId={selectedParticipantBRunnerLocalDeckId}
@@ -4986,7 +5043,7 @@ export default function Page() {
                   <DeckSlotSelect
                     label="Dein Korp-Deck"
                     snapshots={corpSnapshots}
-                    localDecks={localDecks.filter((deck) => deck.side === "corp")}
+                    localDecks={matchStartLocalDecks.filter((deck) => deck.side === "corp")}
                     source={participantBCorpDeckSource}
                     selectedSnapshotId={selectedParticipantBCorpSnapshotId}
                     selectedLocalDeckId={selectedParticipantBCorpLocalDeckId}

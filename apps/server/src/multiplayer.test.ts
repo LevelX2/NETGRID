@@ -2903,6 +2903,34 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
   });
 
+  it("enforces the selected match card pool for Proteus playtest snapshots", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "mp-proteus-card-pool" });
+
+    await expect(
+      service.createMatch({
+        hostSide: "corp",
+        seed: "mp-proteus-blocked-originalset",
+        runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+        corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+        settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset" }
+      })
+    ).rejects.toThrow("deck_snapshot_card_pool_mismatch");
+
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "mp-proteus-allowed",
+      runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+      corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_proteus" }
+    });
+
+    expect(created.playerView.deckMetadata?.opponent.formatProfileId).toBe("netgrid_private_local_proteus_playtest_v1");
+    expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe("1.0.0");
+    expect(JSON.stringify(created)).not.toContain("onr_proteus_084_crumble");
+    const record = await service.loadForTest(created.matchId);
+    expect(record?.match.settings.cardPool).toBe("originalset_proteus");
+  });
+
   it("handles V1.1.1 Discard and Core-Damage status through side-safe multiplayer payloads", async () => {
     const match = await joinedMatch("mp-v111-discard");
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "v111-mandatory");

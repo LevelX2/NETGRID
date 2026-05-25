@@ -2,6 +2,7 @@ export {
   LEGACY_ABILITY_PAYLOAD_FIELDS,
   type LegacyAbilityPayloadField,
 } from "./ability-payload";
+import proteusCardsData from "../../../data/cards/proteus-cards.json";
 export type {
   ApiAiPacingMode,
   ApiAiTurnPresentationState,
@@ -15,6 +16,7 @@ export type {
   ApiLobbyChatMessage,
   ApiLobbyParticipantPayload,
   ApiLobbyPayload,
+  ApiMatchCardPool,
   ApiMatchFormat,
   ApiMatchMode,
   ApiMatchStartLobbyPayload,
@@ -11246,4 +11248,54 @@ export const DEMO_CARDS: CardDefinition[] = [
 ];
 
 export const DEMO_CARDS_BY_ID: Record<CardDefinitionId, CardDefinition> =
-  Object.fromEntries(DEMO_CARDS.map((card) => [card.id, card]));
+  Object.fromEntries([
+    ...proteusCatalogFallbackCards().map((card) => [card.id, card] as const),
+    ...DEMO_CARDS.map((card) => [card.id, card] as const),
+  ]);
+
+type ProteusCatalogCard = {
+  cardId: string;
+  title: string;
+  side: Side;
+  type: CardType;
+  subtypes?: string[];
+  numeric?: {
+    cost?: number | null;
+    installCost?: number | null;
+    memoryCost?: number | null;
+    strength?: number | null;
+    rezCost?: number | null;
+    trashCost?: number | null;
+    advancementRequirement?: number | null;
+    agendaPoints?: number | null;
+  };
+  text?: string;
+};
+
+function proteusCatalogFallbackCards(): CardDefinition[] {
+  return (proteusCardsData.cards as ProteusCatalogCard[]).map((card) => {
+    const numeric = card.numeric ?? {};
+    return {
+      id: card.cardId,
+      title: card.title,
+      side: card.side,
+      type: card.type,
+      subtypes: card.subtypes ?? [],
+      implementationStatus: "playable_mvp",
+      ...numberField("cost", numeric.cost),
+      ...numberField("installCost", numeric.installCost),
+      ...numberField("memoryCost", numeric.memoryCost),
+      ...numberField("strength", numeric.strength),
+      ...numberField("rezCost", numeric.rezCost),
+      ...numberField("trashCost", numeric.trashCost),
+      ...numberField("advancementRequirement", numeric.advancementRequirement),
+      ...numberField("agendaPoints", numeric.agendaPoints),
+      rulesText: card.text ?? "",
+      mechanics: ["proteus_catalog_fallback"],
+    };
+  });
+}
+
+function numberField<K extends keyof CardDefinition>(key: K, value: number | null | undefined): Partial<Pick<CardDefinition, K>> {
+  return typeof value === "number" ? ({ [key]: value } as Partial<Pick<CardDefinition, K>>) : {};
+}

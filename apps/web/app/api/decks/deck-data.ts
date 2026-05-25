@@ -17,6 +17,8 @@ import { createRuntimeCardsById } from "../card-pool-runtime";
 
 const profiles = [...(profilesData.profiles as DeckFormatProfile[]), ...(profilesData130.profiles as DeckFormatProfile[])];
 const profile = profiles.find((candidate) => candidate.profileId === "local-demo-v0.8") ?? profiles[0]!;
+const privateLocalProfile = profiles.find((candidate) => candidate.profileId === "netgrid_private_local_v1");
+const proteusPlaytestProfile = profiles.find((candidate) => candidate.profileId === "netgrid_private_local_proteus_playtest_v1");
 const templates = templatesData.templates as DeckTemplate[];
 const snapshots = snapshotsData.snapshots as DeckSnapshot[];
 
@@ -41,8 +43,9 @@ export function deckSnapshotsResponse() {
   });
 }
 
-export function deckValidationResponse(deck: EditableDeck) {
-  const selectedProfile = profiles.find((candidate) => candidate.profileId === deck.formatProfileId);
+export function deckValidationResponse(deck: EditableDeck, options: { matchCardPool?: "originalset" | "originalset_proteus" } = {}) {
+  const deckForValidation = deckForMatchCardPool(deck, options.matchCardPool);
+  const selectedProfile = profiles.find((candidate) => candidate.profileId === deckForValidation.formatProfileId);
   if (!selectedProfile) {
     return safeDeckPayload({
       validation: {
@@ -50,18 +53,31 @@ export function deckValidationResponse(deck: EditableDeck) {
         errors: ["Deck format profile is not supported."],
         errorCodes: ["format_profile_unsupported"],
         warnings: [],
-        totalCards: deck.cards?.reduce((sum, entry) => sum + (Number.isFinite(entry.quantity) ? entry.quantity : 0), 0) ?? 0,
+        totalCards: deckForValidation.cards?.reduce((sum, entry) => sum + (Number.isFinite(entry.quantity) ? entry.quantity : 0), 0) ?? 0,
         agendaPoints: null
       },
       snapshot: null
     });
   }
   const context = contextForProfile(selectedProfile);
-  const validation = validateEditableDeck(deck, context);
+  const validation = validateEditableDeck(deckForValidation, context);
   return safeDeckPayload({
     validation,
-    snapshot: validation.ok ? createDeckSnapshot(deck, context, { rulesBaselineId: rulesBaselineForDeck(deck) }) : null
+    snapshot: validation.ok ? createDeckSnapshot(deckForValidation, context, { rulesBaselineId: rulesBaselineForDeck(deckForValidation) }) : null
   });
+}
+
+function deckForMatchCardPool(deck: EditableDeck, matchCardPool: "originalset" | "originalset_proteus" | undefined): EditableDeck {
+  if (!matchCardPool) return deck;
+  const selectedProfile = matchCardPool === "originalset_proteus" ? proteusPlaytestProfile : privateLocalProfile;
+  if (!selectedProfile) return deck;
+  return {
+    ...deck,
+    cardPoolSnapshotId: selectedProfile.cardPoolSnapshotId,
+    ...(selectedProfile.cardPoolVersion ? { cardPoolVersion: selectedProfile.cardPoolVersion } : {}),
+    formatProfileId: selectedProfile.profileId,
+    ...(selectedProfile.version ? { formatProfileVersion: selectedProfile.version } : {})
+  };
 }
 
 function safeDeckPayload(payload: unknown) {

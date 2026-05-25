@@ -17,6 +17,7 @@ import {
   type ApiLobbyChatMessage,
   type ApiLobbyParticipantPayload,
   type ApiLobbyPayload,
+  type ApiMatchCardPool,
   type ApiMatchFormat,
   type ApiMatchMode,
   type ApiMatchStartLobbyPayload,
@@ -86,6 +87,7 @@ export type MatchStatus = ApiMatchStatus;
 export type HostSideSelection = Side | "random";
 export type MatchMode = ApiMatchMode;
 export type MatchFormat = ApiMatchFormat;
+export type MatchCardPool = ApiMatchCardPool;
 export type AiPacingMode = ApiAiPacingMode;
 export type AiDecisionTraceMode = "off" | "summary" | "detailed";
 export type TokenKind = "join" | "session" | "reconnect";
@@ -97,6 +99,7 @@ export type ConnectionQuality = ApiConnectionQuality;
 export type MatchSettings = {
   agendaPointsToWin: number;
   matchFormat: MatchFormat;
+  cardPool?: MatchCardPool;
   playerClock?: ApiPlayerClockConfig;
 };
 
@@ -145,6 +148,7 @@ export type MatchStartLobbyState = {
   countdownEndsAt?: string;
   agendaPointsToWin: number;
   matchFormat: MatchFormat;
+  cardPool: MatchCardPool;
   sideAssignment: {
     runnerPlayer: SeriesPlayerSlot;
     corpPlayer: SeriesPlayerSlot;
@@ -698,11 +702,12 @@ export class MultiplayerService {
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
     const matchFormat = normalizeMatchFormat(input.settings?.matchFormat);
+    const cardPool = normalizeMatchCardPool(input.settings?.cardPool);
     const playerClockConfig = normalizePlayerClockConfig(input.settings?.playerClock);
     const countdownSeconds = normalizeCountdownSeconds(input.countdownSeconds);
     const pendingDeckHandshake = mode === "human_vs_human" && Boolean(input.participantADecks) && !input.participantBDecks;
     if (pendingDeckHandshake) {
-      const hostDeckPair = resolveParticipantDeckPair(input.participantADecks ?? legacyParticipantDeckPair(input));
+      const hostDeckPair = resolveParticipantDeckPair(input.participantADecks ?? legacyParticipantDeckPair(input), { cardPool });
       const pendingAgendaPointsToWin = agendaPointsToWinFor(matchFormat, input.settings?.agendaPointsToWin);
       const session: SessionRecord = {
         sessionId: randomId("session"),
@@ -726,6 +731,7 @@ export class MultiplayerService {
           settings: {
             agendaPointsToWin: pendingAgendaPointsToWin,
             matchFormat,
+            cardPool,
             ...(playerClockConfig.mode === "player_clock" ? { playerClock: playerClockConfig } : {})
           },
           ...(playerClockConfig.mode === "player_clock" ? { playerClock: initialPlayerClockState(playerClockConfig) } : {}),
@@ -778,6 +784,7 @@ export class MultiplayerService {
           countdownSeconds,
           agendaPointsToWin: pendingAgendaPointsToWin,
           matchFormat,
+          cardPool,
           sideAssignment: { runnerPlayer, corpPlayer },
           chatMessages: []
         },
@@ -806,11 +813,12 @@ export class MultiplayerService {
         ...(lobbyPayload.startLobby ? { lobby: lobbyPayload.startLobby } : {})
       };
     }
-    const participantDecks = resolveParticipantDeckSetup(input, { seed, ...(aiPlayer ? { aiPlayer } : {}), ...(aiDeckPolicy ? { aiDeckPolicy } : {}) });
+    const participantDecks = resolveParticipantDeckSetup(input, { seed, ...(aiPlayer ? { aiPlayer } : {}), ...(aiDeckPolicy ? { aiDeckPolicy } : {}), cardPool });
     const deckSetup = deckSetupForParticipants(participantDecks, { runnerPlayer, corpPlayer });
     const settings: MatchSettings = {
       agendaPointsToWin: agendaPointsToWinFor(matchFormat, input.settings?.agendaPointsToWin),
       matchFormat,
+      cardPool,
       ...(playerClockConfig.mode === "player_clock" ? { playerClock: playerClockConfig } : {})
     };
     const baseline = baselineForMode(mode, deckSetup);
@@ -2040,7 +2048,8 @@ export class MultiplayerService {
   private activatePendingDeckHandshake(record: StoredMatch, joinerDecks: ParticipantDeckPairInput): void {
     const hostDecks = record.privateDeckSnapshots?.participants?.player_a;
     if (!hostDecks) throw new Error("host_decks_missing");
-    const joinerPair = resolveParticipantDeckPair(joinerDecks);
+    const cardPool = normalizeMatchCardPool(record.match.settings.cardPool);
+    const joinerPair = resolveParticipantDeckPair(joinerDecks, { cardPool });
     const participants: ResolvedParticipantDeckSetup = {
       player_a: {
         runnerSnapshot: clone(hostDecks.runner),
@@ -2060,7 +2069,7 @@ export class MultiplayerService {
     record.gameState = undefined as unknown as GameState;
     record.match.baseline = baseline;
     record.match.status = "ready_check";
-    record.match.settings = { ...record.match.settings, agendaPointsToWin, matchFormat };
+    record.match.settings = { ...record.match.settings, agendaPointsToWin, matchFormat, cardPool };
     record.match.playerClock = initialPlayerClockState(normalizePlayerClockConfig(record.match.settings.playerClock));
     record.match.deckSetup = {
       runnerSnapshotId: deckSetup.runnerSnapshot.deckSnapshotId,
@@ -2085,6 +2094,7 @@ export class MultiplayerService {
       countdownSeconds: record.startLobby?.countdownSeconds ?? 3,
       agendaPointsToWin,
       matchFormat,
+      cardPool,
       sideAssignment: { runnerPlayer, corpPlayer },
       chatMessages: record.startLobby?.chatMessages ?? []
     };
@@ -2279,6 +2289,7 @@ export class MultiplayerService {
       ...(lobby.countdownEndsAt ? { countdownEndsAt: lobby.countdownEndsAt } : {}),
       agendaPointsToWin: lobby.agendaPointsToWin,
       matchFormat: lobby.matchFormat,
+      cardPool: lobby.cardPool,
       sideAssignment: { ...lobby.sideAssignment },
       participants: {
         player_a: this.publicLobbyParticipantFor(record, lobby, "player_a"),
@@ -2393,7 +2404,7 @@ export class MultiplayerService {
     record.gameState = gameState;
     record.match.status = "active";
     record.match.baseline = baseline;
-    record.match.settings = { ...record.match.settings, agendaPointsToWin: lobby.agendaPointsToWin, matchFormat: lobby.matchFormat };
+    record.match.settings = { ...record.match.settings, agendaPointsToWin: lobby.agendaPointsToWin, matchFormat: lobby.matchFormat, cardPool: lobby.cardPool };
     record.eventLog = gameState.eventLog.map((event) => toEventRecord(record.match.matchId, event, false));
     record.stateSnapshots = [this.snapshotFor(record.match.matchId, gameState, record.match.matchVersion, "snap_initial", false)];
     delete record.startLobby;
@@ -2685,6 +2696,11 @@ function isHostSession(record: StoredMatch, session: SessionRecord): boolean {
 function normalizeMatchFormat(matchFormat: MatchFormat | undefined): MatchFormat {
   if (matchFormat === "two_game_side_swap") return "two_game_side_swap";
   return "rules_match";
+}
+
+function normalizeMatchCardPool(cardPool: MatchCardPool | undefined): MatchCardPool {
+  if (cardPool === "originalset_proteus") return "originalset_proteus";
+  return "originalset";
 }
 
 function normalizePlayerClockConfig(config: ApiPlayerClockConfig | undefined): ApiPlayerClockConfig {
@@ -3294,6 +3310,7 @@ function deckErrorMessage(error: unknown): string {
   const code = error instanceof Error ? error.message : String(error);
   if (code === "deck_snapshot_wrong_side") return "Das gewählte Deck hat die falsche Seite.";
   if (code === "deck_snapshot_not_validated" || code === "deck_snapshot_invalid") return "Das gewählte Deck ist nicht matchstartfähig. Bitte prüfe die Validierungsfehler.";
+  if (code === "deck_snapshot_card_pool_mismatch") return "Das gewählte Deck passt nicht zum Kartenpool dieses Spiels.";
   if (code === "ai_deck_snapshot_not_supported") return "Das gewählte KI-Deck ist nicht KI-freigegeben. Bitte nutze feste Standard-Decks, deterministisch zufällige KI-Decks oder ein KI-sicheres Snapshot-Deck.";
   if (code === "deck_snapshot_needs_revalidation") return "Das gewählte Deck muss nach der aktuellen Formatversion neu validiert werden.";
   if (code === "deck_snapshot_not_found") return "Das gewählte Deck wurde nicht gefunden.";

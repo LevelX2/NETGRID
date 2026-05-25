@@ -32,7 +32,7 @@ export type CuePositionPreference =
 
 export const DEFAULT_CUE_POSITION: CuePositionPreference = { kind: "preset", preset: "top-right" };
 
-const BASE_ACTION_TYPES = new Set<LegalAction["type"]>(["mandatory_draw", "gain_credit", "draw_card", "start_run", "remove_tag", "purge_virus_counters", "end_turn"]);
+const BASE_ACTION_TYPES = new Set<LegalAction["type"]>(["mandatory_draw", "gain_credit", "draw_card", "start_run", "remove_tag", "purge_virus_counters", "purge_runner_virus_counters", "forgo_action", "end_turn"]);
 const DECISION_ACTION_TYPES = new Set<LegalAction["type"]>([
   "resolve_choice",
   "access_card",
@@ -75,6 +75,8 @@ const ACTION_GROUP_LABELS: Record<LegalAction["type"], string> = {
   decline_trash: "Zugriff",
   remove_tag: "Tags/Ressourcen",
   purge_virus_counters: "Virus-Counter",
+  purge_runner_virus_counters: "Virus-Counter",
+  forgo_action: "Zug",
   move_to_set_aside: "Spezialzonen",
   move_to_removed_from_game: "Spezialzonen",
   return_from_set_aside: "Spezialzonen",

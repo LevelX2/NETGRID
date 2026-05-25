@@ -26,6 +26,7 @@ export type ApiMatchMode =
 
 export type ApiClientGameMode = ApiMatchMode | "ai_vs_ai";
 export type ApiMatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
+export type ApiMatchCardPool = "originalset" | "originalset_proteus";
 export type ApiAiPacingMode = "fast" | "paced" | "manual";
 export type ApiSeriesPlayerSlot = "player_a" | "player_b";
 export type ApiSeriesStatus = "active" | "between_games" | "finished";
@@ -161,6 +162,7 @@ export type ApiMatchStartLobbyPayload = {
   countdownEndsAt?: string;
   agendaPointsToWin: number;
   matchFormat: ApiMatchFormat;
+  cardPool: ApiMatchCardPool;
   sideAssignment: {
     runnerPlayer: ApiSeriesPlayerSlot;
     corpPlayer: ApiSeriesPlayerSlot;
