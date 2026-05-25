@@ -12,6 +12,8 @@ import { replayGameEvents } from "../replay";
 import { toPublicEvent } from "../view/public-event-view";
 import {
   buildEvent,
+  buildEventWithHost,
+  configureBuildEventHost,
   eventVisibilityForAction,
   isHiddenInfoBarrierEvent,
   type BuildEventHost,
@@ -29,7 +31,7 @@ describe("game event builder", () => {
     const stateHash = hashState(next);
     const before = JSON.stringify(state);
 
-    const event = buildEvent(
+    const event = buildEventWithHost(
       testBuildEventHost({ testContext: "kept" }),
       state.stateVersion,
       next.stateVersion,
@@ -80,7 +82,7 @@ describe("game event builder", () => {
       },
     } satisfies LegalAction;
 
-    const event = buildEvent(
+    const event = buildEventWithHost(
       testBuildEventHost({
         sourceVisibility: "redacted",
         sourceCardDefinitionId: "hidden_source",
@@ -118,7 +120,7 @@ describe("game event builder", () => {
     } satisfies LegalAction;
     const next = nextState(state);
 
-    const event = buildEvent(
+    const event = buildEventWithHost(
       testBuildEventHost(),
       state.stateVersion,
       next.stateVersion,
@@ -151,6 +153,57 @@ describe("game event builder", () => {
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(result.stateHash);
     expect(hashState(replay.state)).toBe(result.stateHash);
+  });
+
+  it("uses a configured EventHost and can restore the previous test host", () => {
+    const state = createGame({
+      seed: "arch-63-configured-event-host",
+      setupMode: "completed",
+    });
+    const legalAction = mandatoryDrawLegalAction(state);
+    const next = nextState(state);
+    const host = testBuildEventHost({ configuredContext: true });
+    const previousHost = configureBuildEventHost(host);
+    try {
+      const event = buildEvent(
+        state.stateVersion,
+        next.stateVersion,
+        hashState(next),
+        state,
+        next,
+        legalAction,
+        playerActionFor(state, legalAction),
+      );
+
+      expect(event.publicPayload.configuredContext).toBe(true);
+    } finally {
+      configureBuildEventHost(previousHost);
+    }
+  });
+
+  it("throws clearly without a configured EventHost", () => {
+    const state = createGame({
+      seed: "arch-63-unconfigured-event-host",
+      setupMode: "completed",
+    });
+    const legalAction = mandatoryDrawLegalAction(state);
+    const next = nextState(state);
+    const previousHost = configureBuildEventHost(undefined);
+    try {
+      expect(() =>
+        buildEvent(
+          state.stateVersion,
+          next.stateVersion,
+          hashState(next),
+          state,
+          next,
+          legalAction,
+          playerActionFor(state, legalAction),
+        ),
+      ).toThrow("BuildEvent-Host ist nicht initialisiert.");
+    } finally {
+      configureBuildEventHost(previousHost);
+    }
   });
 });
 

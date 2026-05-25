@@ -31,7 +31,40 @@ export type BuildEventHost = {
   };
 };
 
+let defaultBuildEventHost: BuildEventHost | undefined;
+
+export function configureBuildEventHost(
+  host: BuildEventHost | undefined,
+): BuildEventHost | undefined {
+  const previous = defaultBuildEventHost;
+  defaultBuildEventHost = host;
+  return previous;
+}
+
 export function buildEvent(
+  before: number,
+  after: number,
+  stateHashAfter: StateHash,
+  previousState: GameState,
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): GameEvent {
+  if (!defaultBuildEventHost)
+    throw new Error("BuildEvent-Host ist nicht initialisiert.");
+  return buildEventWithHost(
+    defaultBuildEventHost,
+    before,
+    after,
+    stateHashAfter,
+    previousState,
+    state,
+    legalAction,
+    playerAction,
+  );
+}
+
+export function buildEventWithHost(
   host: BuildEventHost,
   before: number,
   after: number,

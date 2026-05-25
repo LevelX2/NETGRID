@@ -85,7 +85,7 @@ import {
   type LegalActionGenerationHost,
 } from "./game/legal-actions";
 import {
-  buildEvent,
+  configureBuildEventHost,
   type BuildEventHost,
 } from "./game/events/build-event";
 export {
@@ -1471,6 +1471,8 @@ const buildEventHost: BuildEventHost = {
   },
 };
 
+configureBuildEventHost(buildEventHost);
+
 export {
   DEMO_CARDS,
   DEMO_CARDS_BY_ID,
@@ -2468,9 +2470,6 @@ configureLegalActionGenerationHost(legalActionGenerationHost);
 const applyActionCoreHost: ApplyActionCoreHost = {
   actions: {
     performAction,
-  },
-  events: {
-    buildEventHost,
   },
 };
 

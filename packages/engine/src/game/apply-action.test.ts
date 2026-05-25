@@ -17,7 +17,6 @@ import {
 import { createGame } from "./create-game";
 import { hashState } from "./hash";
 import { replayGameEvents } from "./replay";
-import type { PublicContextForActionDependencies } from "../public-context";
 
 describe("game apply-action core", () => {
   it("matches the public Engine API for a simple Corp action", () => {
@@ -61,9 +60,6 @@ describe("game apply-action core", () => {
         performAction: (_state, _legalAction, playerAction) => {
           calls.push(playerAction);
         },
-      },
-      events: {
-        buildEventHost: testBuildEventHost(),
       },
     };
 
@@ -188,17 +184,5 @@ function playerActionFor(
     side: legalAction.side,
     actionId: legalAction.actionId,
     clientKnownStateVersion: state.stateVersion,
-  };
-}
-
-function testBuildEventHost() {
-  return {
-    publicContext: {
-      publicContextForAction: () => ({}),
-      deps: {} as PublicContextForActionDependencies,
-    },
-    constants: {
-      badPublicityLossThreshold: 7,
-    },
   };
 }

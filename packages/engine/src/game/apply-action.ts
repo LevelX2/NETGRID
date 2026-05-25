@@ -7,7 +7,7 @@ import type {
   PlayerAction,
 } from "@netgrid/shared";
 import { validateChoiceAction } from "./choices/choice-validation";
-import { buildEvent, type BuildEventHost } from "./events/build-event";
+import { buildEvent } from "./events/build-event";
 import { getLegalActions } from "./legal-actions";
 import { cloneGameStateForAction } from "./apply-action-state";
 import { hashState } from "./hash";
@@ -22,9 +22,6 @@ export type ApplyActionCoreHost = {
       legalAction: LegalAction,
       playerAction: PlayerAction,
     ) => void;
-  };
-  events: {
-    buildEventHost: BuildEventHost;
   };
 };
 
@@ -117,7 +114,6 @@ export function buildApplyAction(
 
   const stateHash = hashState(next);
   const event = buildEvent(
-    host.events.buildEventHost,
     before,
     next.stateVersion,
     stateHash,
