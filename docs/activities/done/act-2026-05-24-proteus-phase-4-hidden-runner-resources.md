@@ -1,20 +1,27 @@
 ---
 activityId: act-2026-05-24-proteus-phase-4-hidden-runner-resources
-status: inbox
+status: done
 kind: concept
 area: cards
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-05-24
+completedAt: 2026-05-24
+branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 4
 blockedBy:
   - act-2026-05-24-proteus-phase-3-variable-complex-ice
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-4a-hidden-resource-activation-foundation.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-4b-hidden-economy-bank-resources.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-4c-hidden-access-mole-resources.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-4d-hidden-prevention-damage-tag-resources.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-4e-hidden-trash-sabotage-cost-penalty.md
+checks:
+  - rg -n "Phase 4: Hidden Runner Resources|4a Hidden Resource Activation Foundation|4e Hidden Trash/Sabotage/Cost Penalty" docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md docs/activities
+  - git diff --check
 ---
 
 # Proteus Phase 4: Hidden Runner Resources
@@ -80,4 +87,6 @@ Die 16 Proteus-Hidden-Runner-Resources auf der vorhandenen Hidden-Resource-Found
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt am 2026-05-24 als Planungsschnitt. Das Umbrella-Paket wurde vor Codearbeit gemäß `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md` in die Detail-Activities 4a bis 4e zerlegt.
+
+Die Umsetzung beginnt mit `act-2026-05-24-proteus-phase-4a-hidden-resource-activation-foundation`; 4b bis 4e bleiben abhängig von 4a.
