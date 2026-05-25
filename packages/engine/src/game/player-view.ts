@@ -1,10 +1,13 @@
-// ARCH-2 game facade: expose player view projection under a game-oriented name.
-// Public payload redaction remains centralized in the existing engine code.
-import { getPlayerView } from "../index";
+import type { GameState, PlayerView, Side } from "@netgrid/shared";
+import { legalActionsFor } from "./legal-actions";
+import { buildPlayerViewProjection } from "./view/player-view-projection";
+
 export { buildPlayerViewProjection } from "./view/player-view-projection";
 
-export function playerViewFor(
-  ...args: Parameters<typeof getPlayerView>
-): ReturnType<typeof getPlayerView> {
-  return getPlayerView(...args);
+export function getPlayerView(state: GameState, side: Side): PlayerView {
+  return buildPlayerViewProjection(state, side, legalActionsFor(state, side));
+}
+
+export function playerViewFor(state: GameState, side: Side): PlayerView {
+  return getPlayerView(state, side);
 }

@@ -3,7 +3,11 @@
 export { createGame, createGameAfterSetup } from "./create-game";
 export { applyGameAction } from "./apply-game-action";
 export { legalActionsFor } from "./legal-actions";
-export { buildPlayerViewProjection, playerViewFor } from "./player-view";
+export {
+  buildPlayerViewProjection,
+  getPlayerView,
+  playerViewFor,
+} from "./player-view";
 export { hashGameState, hashState } from "./hash";
 export { replayGameEvents } from "./replay";
 export { validateGameState, validateGameStateForDebug } from "./validation";

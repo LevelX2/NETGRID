@@ -27,7 +27,6 @@ import {
   type LegacyAbilityPayloadField,
   type PlayerAction,
   type PlayerController,
-  type PlayerView,
   type PublicGameEvent,
   type PurgeableRunnerVirusCounterBucket,
   type PurgeableRunnerVirusCounterType,
@@ -428,7 +427,7 @@ export {
   createGameAfterSetup,
 } from "./game/create-game";
 import { hashState } from "./game/hash";
-import { buildPlayerViewProjection } from "./game/view/player-view-projection";
+export { getPlayerView, playerViewFor } from "./game/player-view";
 import {
   hiddenRunnerResourceSlotId,
   isConcealedRunnerResource,
@@ -2538,14 +2537,6 @@ export function applyGameAction(
   options: ApplyActionOptions = {},
 ): EngineResult {
   return applyAction(state, playerAction, options);
-}
-
-export function getPlayerView(state: GameState, side: Side): PlayerView {
-  return buildPlayerViewProjection(state, side, getLegalActions(state, side));
-}
-
-export function playerViewFor(state: GameState, side: Side): PlayerView {
-  return getPlayerView(state, side);
 }
 
 export function validateDeckDefinition(
