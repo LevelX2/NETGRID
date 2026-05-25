@@ -350,6 +350,15 @@ export type CardFortRunWindowImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "move_self_to_different_position_on_same_fort";
+      timing: "start_of_run_on_this_fort";
+      cost: { kind: "credit"; amount: number };
+      target: "different_position_on_same_fort";
+      revealIfUnrezzed: true;
+      limit: "once_per_run_per_source";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "can_run_fort_only_if_last_corp_turn_activity_on_fort";
       timing: "run_start_legal";
       activity: "corp_installed_or_advanced_inside_or_on_fort_during_last_turn";

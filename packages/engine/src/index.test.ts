@@ -1608,6 +1608,238 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
   });
 });
 
+describe("Proteus Phase 3e ICE Repositioning", () => {
+  const MOBILE_BARRICADE = "onr_proteus_033_mobile-barricade";
+  const WALKING_WALL = "onr_proteus_044_walking-wall";
+  const INNER_ICE = "onr_proteus_024_gatekeeper";
+  const MIDDLE_ICE = "onr_proteus_036_sandstorm";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusPhase3eGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: `${seed}_runner`,
+          name: "Proteus Phase 3e Runner",
+        },
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          id: `${seed}_corp`,
+          name: "Proteus Phase 3e Corp",
+          cards: [
+            { id: MOBILE_BARRICADE, quantity: 1 },
+            { id: WALKING_WALL, quantity: 1 },
+            { id: INNER_ICE, quantity: 1 },
+            { id: MIDDLE_ICE, quantity: 1 },
+            ...ONR_V1_1_2K_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  it("moves unrezzed Mobile Barricade within the attacked fort and reveals only that source", () => {
+    let state = proteusPhase3eGame("proteus-phase-3e-mobile-barricade");
+    state.corp.credits = 5;
+    const innerId = putCorpIceOnServer(state, "rd", INNER_ICE);
+    const middleId = putCorpIceOnServer(state, "rd", MIDDLE_ICE);
+    const mobileId = putCorpIceOnServer(state, "rd", MOBILE_BARRICADE);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const reposition = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.fortRunWindowAbility ===
+          "move_self_to_different_position_on_same_fort" &&
+        action.payload?.cardId === mobileId &&
+        action.payload?.targetIceIndex === 0,
+    );
+    expect(reposition.costs).toEqual([{ credits: 1 }]);
+
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: reposition.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "proteus-phase-3e-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: reposition.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "proteus-phase-3e-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const cannotPay = structuredClone(state);
+    cannotPay.corp.credits = 0;
+    expect(
+      applyAction(cannotPay, {
+        matchId: cannotPay.matchId,
+        side: "corp",
+        actionId: reposition.actionId,
+        clientKnownStateVersion: cannotPay.stateVersion,
+        idempotencyKey: "proteus-phase-3e-cannot-pay",
+      }).ok,
+    ).toBe(false);
+
+    const drifted = structuredClone(state);
+    const server = drifted.corp.servers.find((candidate) => candidate.id === "rd");
+    if (!server) throw new Error("Missing R&D server");
+    server.ice = [innerId, middleId];
+    drifted.corp.hq.push(mobileId);
+    drifted.cardInstances[mobileId] = {
+      ...drifted.cardInstances[mobileId]!,
+      zone: { side: "corp", zone: "hq" },
+      faceup: false,
+      rezzed: false,
+    };
+    expect(
+      applyAction(drifted, {
+        matchId: drifted.matchId,
+        side: "corp",
+        actionId: reposition.actionId,
+        clientKnownStateVersion: drifted.stateVersion,
+        idempotencyKey: "proteus-phase-3e-position-drift",
+      }).ok,
+    ).toBe(false);
+
+    state = apply(state, "corp", (action) => action.actionId === reposition.actionId);
+    const rd = state.corp.servers.find((candidate) => candidate.id === "rd");
+    expect(rd?.ice).toEqual([mobileId, innerId, middleId]);
+    expect(state.cardInstances[mobileId]).toMatchObject({
+      faceup: true,
+      rezzed: false,
+    });
+    expect(state.cardInstances[innerId]?.faceup).toBe(false);
+    expect(state.cardInstances[middleId]?.faceup).toBe(false);
+    expect(state.run).toMatchObject({
+      phase: "approach_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 2 },
+      approachedIceId: middleId,
+    });
+    const runnerRd = getPlayerView(state, "runner").servers.find(
+      (candidate) => candidate.id === "rd",
+    );
+    expect(runnerRd?.ice[0]).toMatchObject({
+      known: true,
+      definitionId: MOBILE_BARRICADE,
+      title: "Mobile Barricade",
+      rezzed: false,
+    });
+    expect(runnerRd?.ice[1]?.known).toBe(false);
+    expect(runnerRd?.ice[2]?.known).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      cardDefinitionId: MOBILE_BARRICADE,
+      title: "Mobile Barricade",
+      sourceDefinitionId: MOBILE_BARRICADE,
+      amounts: expect.objectContaining({
+        movedIceCount: 1,
+        sourceIceIndex: 2,
+        targetIceIndex: 0,
+        newApproachIceIndex: 2,
+      }),
+      targets: expect.objectContaining({
+        revealedSource: true,
+        newApproachIceRevealed: false,
+      }),
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      INNER_ICE,
+    );
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      MIDDLE_ICE,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("moves rezzed Walking Wall once per run without creating a hidden reveal", () => {
+    let state = proteusPhase3eGame("proteus-phase-3e-walking-wall");
+    state.corp.credits = 5;
+    const walkingId = putCorpIceOnServer(state, "rd", WALKING_WALL);
+    const middleId = putCorpIceOnServer(state, "rd", MIDDLE_ICE);
+    const outerId = putCorpIceOnServer(state, "rd", INNER_ICE);
+    state.cardInstances[walkingId] = {
+      ...state.cardInstances[walkingId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const reposition = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.cardId === walkingId &&
+        action.payload?.targetIceIndex === 2,
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.actionId === reposition.actionId);
+    expect(state.corp.servers.find((server) => server.id === "rd")?.ice).toEqual([
+      middleId,
+      outerId,
+      walkingId,
+    ]);
+    expect(state.run?.approachedIceId).toBe(walkingId);
+    expect(state.cardInstances[walkingId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      sourceDefinitionId: WALKING_WALL,
+      amounts: expect.objectContaining({
+        movedIceCount: 1,
+      }),
+      targets: expect.objectContaining({
+        revealedSource: false,
+        newApproachIceRevealed: true,
+      }),
+    });
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.payload?.fortRunWindowAbility ===
+            "move_self_to_different_position_on_same_fort" &&
+          action.payload?.cardId === walkingId,
+      ),
+    ).toBe(false);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("Proteus Dynamic Public ETR ICE", () => {
   const MINOTAUR = "onr_proteus_031_minotaur";
   const RIDDLER = "onr_proteus_034_riddler";

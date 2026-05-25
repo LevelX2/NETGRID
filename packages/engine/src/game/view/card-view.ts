@@ -517,6 +517,7 @@ export function visibleCorpCard(
     viewer === "runner" && state.run?.approachIceExposeViewingIceId === id;
   const visible =
     viewer === "corp" ||
+    instance.faceup ||
     instance.rezzed ||
     exposedBySpyCounter ||
     accessed ||

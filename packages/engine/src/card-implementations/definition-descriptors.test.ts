@@ -1599,6 +1599,28 @@ describe("CardImplementation definition descriptors", () => {
     }
   });
 
+  it("describes Proteus Phase 3e ICE repositioning implementations", () => {
+    for (const definitionId of [
+      "onr_proteus_033_mobile-barricade",
+      "onr_proteus_044_walking-wall",
+    ] as const) {
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.fortRunWindows?.[0],
+      ).toEqual({
+        kind: "move_self_to_different_position_on_same_fort",
+        timing: "start_of_run_on_this_fort",
+        cost: { kind: "credit", amount: 1 },
+        target: "different_position_on_same_fort",
+        revealIfUnrezzed: true,
+        limit: "once_per_run_per_source",
+        visibility: "public",
+      });
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

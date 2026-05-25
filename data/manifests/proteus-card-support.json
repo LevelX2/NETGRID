@@ -1021,24 +1021,29 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_033_mobile-barricade",
+        "coverage": [
+          "card_implementation",
+          "engine_tests",
+          "catalog_gate"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "data/scenarios/proteus-phase-3e-ice-repositioning-smoke-2026-05-24.json#mobile_barricade_unrezzed_reveal_reposition"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": [],
+      "notes": "Proteus Phase 3e: Mobile Barricade is implemented through a generic start-of-run same-fort self-ICE reposition window with unrezzed public reveal."
     },
     {
       "cardId": "onr_proteus_034_riddler",
@@ -1364,24 +1369,29 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_044_walking-wall",
+        "coverage": [
+          "card_implementation",
+          "engine_tests",
+          "catalog_gate"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "data/scenarios/proteus-phase-3e-ice-repositioning-smoke-2026-05-24.json#walking_wall_rezzed_reposition_once_per_run"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": [],
+      "notes": "Proteus Phase 3e: Walking Wall is implemented through a generic start-of-run same-fort self-ICE reposition window with once-per-run source use."
     },
     {
       "cardId": "onr_proteus_045_washed-up-solo-construct",

@@ -763,10 +763,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/washington-d-c-city-grid.ts",
   "onr_proteus_031_minotaur":
     "packages/engine/src/card-implementations/proteus/corp/ice/minotaur.ts",
+  "onr_proteus_033_mobile-barricade":
+    "packages/engine/src/card-implementations/proteus/corp/ice/mobile-barricade.ts",
   "onr_proteus_034_riddler":
     "packages/engine/src/card-implementations/proteus/corp/ice/riddler.ts",
   "onr_proteus_041_toughoniumtm-wall":
     "packages/engine/src/card-implementations/proteus/corp/ice/toughonium-wall.ts",
+  "onr_proteus_044_walking-wall":
+    "packages/engine/src/card-implementations/proteus/corp/ice/walking-wall.ts",
   "onr_proteus_062_lesley-major":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/lesley-major.ts",
   "onr_proteus_065_networked-center":

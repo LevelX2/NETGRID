@@ -5007,6 +5007,17 @@ function isFortIceSwapSource(state: GameState, cardId: CardInstanceId): boolean 
   return hasFortRunWindowKind(state, cardId, "swap_unrezzed_fort_ice_with_hq_ice");
 }
 
+function isStartRunIceRepositionSource(
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  return hasFortRunWindowKind(
+    state,
+    cardId,
+    "move_self_to_different_position_on_same_fort",
+  );
+}
+
 function isAardvarkSource(state: GameState, cardId: CardInstanceId): boolean {
   return hasFortRunWindowKind(state, cardId, "aardvark_worm_lock_and_reaction");
 }
@@ -5775,6 +5786,7 @@ function corpRunRootRezActions(state: GameState): LegalAction[] {
     );
   }
   actions.push(...singaporeCityGridRunActions(state, run, server));
+  actions.push(...startRunIceRepositionActions(state, run, server));
   return actions;
 }
 
@@ -5944,6 +5956,58 @@ function singaporeCityGridRunActions(
           },
         ),
       );
+    });
+}
+
+function startRunIceRepositionActions(
+  state: GameState,
+  run: ActiveRun,
+  server: CorpServer,
+): LegalAction[] {
+  if (state.timingPoint !== "run.approach_ice") return [];
+  if (run.attackedServerId !== server.id) return [];
+  if (run.phase !== "approach_ice" || run.position.kind !== "ice") return [];
+  if (run.position.iceIndex !== outermostIceIndex(server)) return [];
+  if (server.ice.length < 2) return [];
+  const used = new Set(run.iceRepositionUsedSourceIdsThisRun ?? []);
+  return server.ice
+    .map((sourceCardId, sourceIceIndex) => ({ sourceCardId, sourceIceIndex }))
+    .filter(({ sourceCardId }) => !used.has(sourceCardId))
+    .filter(({ sourceCardId }) => isStartRunIceRepositionSource(state, sourceCardId))
+    .flatMap(({ sourceCardId, sourceIceIndex }) => {
+      const implementation = fortRunWindowImplementationForCard(
+        state,
+        sourceCardId,
+        "move_self_to_different_position_on_same_fort",
+      );
+      if (!implementation) return [];
+      const cost = Math.max(0, Math.floor(implementation.cost.amount));
+      if (state.corp.credits < cost) return [];
+      const definition = definitionFor(state, sourceCardId);
+      return server.ice
+        .map((_cardId, targetIceIndex) => targetIceIndex)
+        .filter((targetIceIndex) => targetIceIndex !== sourceIceIndex)
+        .map((targetIceIndex) =>
+          action(
+            state,
+            "corp",
+            "trigger_ability",
+            `${definition.title}: ICE in ${server.label} bewegen`,
+            sourceCardId,
+            cost > 0 ? [{ credits: cost }] : [],
+            {
+              cardId: sourceCardId,
+              sourceDefinitionId: definition.id,
+              serverId: server.id,
+              serverLabel: server.label,
+              sourceIceIndex,
+              targetIceIndex,
+              creditCost: cost,
+              fortRunWindowAbility:
+                "move_self_to_different_position_on_same_fort",
+            },
+          ),
+        );
     });
 }
 
@@ -8290,6 +8354,13 @@ function performAction(
         "add_advancement_counters_after_passing_last_ice_on_this_fort"
       ) {
         resolveFortPassAdvancementWindow(state, legalAction);
+        return;
+      }
+      if (
+        legalAction.payload?.fortRunWindowAbility ===
+        "move_self_to_different_position_on_same_fort"
+      ) {
+        resolveStartRunIceRepositionWindow(state, legalAction);
         return;
       }
       if (legalAction.payload?.runnerUtilityAbility === "preying_mantis_gain_action") {
@@ -11497,6 +11568,106 @@ function resolveFortPassAdvancementWindow(
     addedCounterAmount: amount,
     advancementCountersAfter: mustInstance(state.cardInstances, targetCardId)
       .advancementCounters,
+    corpCreditsAfter: state.corp.credits,
+  };
+}
+
+function resolveStartRunIceRepositionWindow(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf ICE am Run-Start bewegen.");
+  if (state.timingPoint !== "run.approach_ice")
+    throw new Error("Das ICE-Bewegungsfenster ist nicht offen.");
+  const run = mustRun(state);
+  if (run.phase !== "approach_ice" || run.position.kind !== "ice")
+    throw new Error("Runner ist nicht am Run-Start eines ICE-Forts.");
+  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
+    ServerId,
+    "new_remote"
+  >;
+  if (serverId !== run.attackedServerId)
+    throw new Error("Die ICE-Bewegung gehoert zu einem anderen Run.");
+  const server = mustServer(state, serverId);
+  if (run.position.iceIndex !== outermostIceIndex(server))
+    throw new Error("ICE-Bewegung ist nur am Start des Runs legal.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const sourceIceIndex = Number(legalAction.payload?.sourceIceIndex ?? -1);
+  const targetIceIndex = Number(legalAction.payload?.targetIceIndex ?? -1);
+  if (
+    !Number.isInteger(sourceIceIndex) ||
+    sourceIceIndex < 0 ||
+    server.ice[sourceIceIndex] !== sourceCardId
+  )
+    throw new Error("Die ICE-Quellposition ist nicht mehr legal.");
+  if (
+    !Number.isInteger(targetIceIndex) ||
+    targetIceIndex < 0 ||
+    targetIceIndex >= server.ice.length ||
+    targetIceIndex === sourceIceIndex
+  )
+    throw new Error("Die ICE-Zielposition ist nicht legal.");
+  if (run.iceRepositionUsedSourceIdsThisRun?.includes(sourceCardId))
+    throw new Error("Diese ICE-Bewegungsquelle wurde in diesem Run bereits genutzt.");
+  const implementation = fortRunWindowImplementationForCard(
+    state,
+    sourceCardId,
+    "move_self_to_different_position_on_same_fort",
+  );
+  if (!implementation)
+    throw new Error("Die ICE-Quelle hat keine passende Bewegungsfaehigkeit.");
+  const cost = Math.max(0, Math.floor(implementation.cost.amount));
+  if (creditCostForAction(legalAction) !== cost)
+    throw new Error("Die ICE-Bewegungskosten passen nicht mehr.");
+  spendCredits(state, "corp", cost);
+  const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
+  const wasRevealed = sourceInstance.faceup || sourceInstance.rezzed;
+  const [movedIceId] = server.ice.splice(sourceIceIndex, 1);
+  if (movedIceId !== sourceCardId)
+    throw new Error("Die ICE-Quellposition ist nicht mehr stabil.");
+  server.ice.splice(targetIceIndex, 0, sourceCardId);
+  if (!sourceInstance.rezzed && implementation.revealIfUnrezzed) {
+    state.cardInstances[sourceCardId] = {
+      ...sourceInstance,
+      faceup: true,
+    };
+  }
+  const newApproachIndex = outermostIceIndex(server);
+  const approachedIceId = mustArrayValue(
+    server.ice,
+    newApproachIndex,
+    "Server hat kein ICE.",
+  );
+  run.position = { kind: "ice", serverId: server.id, iceIndex: newApproachIndex };
+  run.approachedIceId = approachedIceId;
+  delete run.encounteredIceId;
+  run.iceRepositionUsedSourceIdsThisRun = [
+    ...(run.iceRepositionUsedSourceIdsThisRun ?? []),
+    sourceCardId,
+  ].sort();
+  state.activeSide = "corp";
+  state.timingPoint = "run.approach_ice";
+  const revealPayload =
+    !wasRevealed && implementation.revealIfUnrezzed
+      ? {
+          publicRevealDefinitionId: definitionFor(state, sourceCardId).id,
+        }
+      : {};
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    serverLabel: server.label,
+    movedIceCount: 1,
+    sourceIceIndex,
+    targetIceIndex,
+    newApproachIceIndex: newApproachIndex,
+    newApproachIceRevealed: publicInstalledCorpCardIdentityKnown(
+      state,
+      approachedIceId,
+    ),
+    revealedSource: !wasRevealed && implementation.revealIfUnrezzed,
+    ...revealPayload,
     corpCreditsAfter: state.corp.credits,
   };
 }

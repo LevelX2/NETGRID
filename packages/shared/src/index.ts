@@ -913,6 +913,7 @@ export type RunState = {
     >
   >;
   singaporeCityGridUsedSourceIdsThisRun?: CardInstanceId[];
+  iceRepositionUsedSourceIdsThisRun?: CardInstanceId[];
   oliviaSalazarUsedSourceIdsThisRun?: CardInstanceId[];
   oliviaSalazarTemporaryRezzedIceIds?: CardInstanceId[];
   successfulRunInterventionUsedSourceIds?: CardInstanceId[];
@@ -9708,6 +9709,38 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
     ],
   },
   {
+    id: "onr_proteus_033_mobile-barricade",
+    title: "Mobile Barricade",
+    side: "corp",
+    type: "ice",
+    subtypes: ["wall"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 3,
+    rulesText:
+      "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.\n[1]: Move Mobile Barricade and insert it in a different position on this data fort. Use this ability only at the start of a run on this data fort. You may use this ability even if Mobile Barricade is unrezzed, in which case, you reveal it.",
+    subroutines: [
+      {
+        id: "onr_proteus_033_mobile_barricade_net_damage",
+        type: "do_damage",
+        damageType: "net",
+        amount: 1,
+      },
+      {
+        id: "onr_proteus_033_mobile_barricade_etr",
+        type: "end_the_run",
+      },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "ice_repositioning",
+      "reveal",
+      "end_the_run",
+    ],
+  },
+  {
     id: "onr_proteus_036_sandstorm",
     title: "Sandstorm",
     side: "corp",
@@ -9767,6 +9800,29 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
       "encounter_ice",
       "variable_rez",
       "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_044_walking-wall",
+    title: "Walking Wall",
+    side: "corp",
+    type: "ice",
+    subtypes: ["wall"],
+    implementationStatus: "playable_mvp",
+    rezCost: 5,
+    strength: 3,
+    rulesText:
+      "[Subroutine] End the run.\n[1]: Move Walking Wall and insert it in a different position on this data fort. Use this ability only at the start of a run on this data fort. You may use this ability even if Walking Wall is unrezzed, in which case, you reveal it.",
+    subroutines: [
+      { id: "onr_proteus_044_walking_wall_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "ice_repositioning",
+      "reveal",
+      "end_the_run",
     ],
   },
 ];

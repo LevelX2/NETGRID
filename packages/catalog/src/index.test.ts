@@ -198,11 +198,13 @@ describe("card set support catalog source", () => {
       "onr_proteus_028_lesser-arcana",
       "onr_proteus_030_mastermind",
       "onr_proteus_031_minotaur",
+      "onr_proteus_033_mobile-barricade",
       "onr_proteus_034_riddler",
       "onr_proteus_036_sandstorm",
       "onr_proteus_039_sphinx-2006",
       "onr_proteus_040_sumo-2008",
       "onr_proteus_041_toughoniumtm-wall",
+      "onr_proteus_044_walking-wall",
       "onr_proteus_062_lesley-major",
       "onr_proteus_065_networked-center",
       "onr_proteus_070_rasmin-bridger",
@@ -227,7 +229,7 @@ describe("card set support catalog source", () => {
         card.catalogCardId.startsWith("onr_proteus_") &&
         !PROTEUS_VISIBLE_BASELINE_CARD_IDS.includes(card.catalogCardId),
     );
-    expect(blockedProteus).toHaveLength(126);
+    expect(blockedProteus).toHaveLength(124);
     expect(blockedProteus.every((card) => card.statuses.blocked)).toBe(true);
   });
 

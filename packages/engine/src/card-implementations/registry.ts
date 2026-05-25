@@ -392,10 +392,12 @@ import { proteusHomingMissileImplementation } from "./proteus/corp/ice/homing-mi
 import { proteusHuntingPackImplementation } from "./proteus/corp/ice/hunting-pack";
 import { proteusLesserArcanaImplementation } from "./proteus/corp/ice/lesser-arcana";
 import { proteusMastermindImplementation } from "./proteus/corp/ice/mastermind";
+import { proteusMobileBarricadeImplementation } from "./proteus/corp/ice/mobile-barricade";
 import { proteusSandstormImplementation } from "./proteus/corp/ice/sandstorm";
 import { proteusSphinx2006Implementation } from "./proteus/corp/ice/sphinx-2006";
 import { proteusSumo2008Implementation } from "./proteus/corp/ice/sumo-2008";
 import { proteusToughoniumWallImplementation } from "./proteus/corp/ice/toughonium-wall";
+import { proteusWalkingWallImplementation } from "./proteus/corp/ice/walking-wall";
 import { proteusMinotaurImplementation } from "./proteus/corp/ice/minotaur";
 import { proteusRiddlerImplementation } from "./proteus/corp/ice/riddler";
 import { proteusLesleyMajorImplementation } from "./proteus/corp/upgrades/lesley-major";
@@ -796,9 +798,11 @@ export const CARD_IMPLEMENTATIONS = [
   proteusHuntingPackImplementation,
   proteusLesserArcanaImplementation,
   proteusMastermindImplementation,
+  proteusMobileBarricadeImplementation,
   proteusSandstormImplementation,
   proteusSphinx2006Implementation,
   proteusSumo2008Implementation,
+  proteusWalkingWallImplementation,
   proteusMinotaurImplementation,
   proteusRiddlerImplementation,
   proteusLesleyMajorImplementation,

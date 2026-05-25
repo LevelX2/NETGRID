@@ -107,6 +107,10 @@ export function makeActionId(
     parts.push(String(payload.subroutineId));
   if (payload?.subroutineIndexes !== undefined)
     parts.push(String(payload.subroutineIndexes));
+  if (payload?.sourceIceIndex !== undefined)
+    parts.push(String(payload.sourceIceIndex));
+  if (payload?.targetIceIndex !== undefined)
+    parts.push(String(payload.targetIceIndex));
   if (payload?.pumpAmount !== undefined) parts.push(String(payload.pumpAmount));
   if (payload?.variableRezKind !== undefined)
     parts.push(String(payload.variableRezKind));

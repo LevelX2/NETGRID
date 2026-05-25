@@ -798,6 +798,28 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
   });
 
+  it("migrates Proteus Phase 3e ICE repositioning into CardImplementation coverage", () => {
+    const cases = [
+      "onr_proteus_033_mobile-barricade",
+      "onr_proteus_044_walking-wall",
+    ] as const;
+
+    for (const definitionId of cases) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.fortRunWindows?.[0],
+      ).toMatchObject({
+        kind: "move_self_to_different_position_on_same_fort",
+        timing: "start_of_run_on_this_fort",
+        target: "different_position_on_same_fort",
+      });
+    }
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",
@@ -1007,11 +1029,11 @@ describe("CardImplementation coverage and registry invariants", () => {
     );
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
-    expect(outsideScopeDefinitionIds).toHaveLength(55);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(373);
-    expect(coverageByStatus.get("implemented")).toBe(373);
+    expect(outsideScopeDefinitionIds).toHaveLength(82);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(403);
+    expect(coverageByStatus.get("implemented")).toBe(403);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(55);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(52);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);
@@ -1028,14 +1050,17 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
 
     for (const definitionId of outsideScopeDefinitionIds) {
-      expect(
-        cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
-      ).toBe("outside_current_release_scope");
-      expect(
-        CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId],
-        definitionId,
-      ).toBeUndefined();
+      if (CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId]) {
+        expect(
+          cardImplementationCoverageForDefinitionId(definitionId)?.status,
+          definitionId,
+        ).toBe("implemented");
+      } else {
+        expect(
+          cardImplementationCoverageForDefinitionId(definitionId)?.status,
+          definitionId,
+        ).toBe("outside_current_release_scope");
+      }
     }
   });
 

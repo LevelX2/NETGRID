@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "scenario-pack-v1",
+  "id": "proteus-phase-3e-ice-repositioning-smoke-2026-05-24",
+  "title": "Proteus Phase 3e ICE repositioning smoke",
+  "releaseTarget": "Proteus Phase 3e",
+  "coversCards": [
+    "onr_proteus_033_mobile-barricade",
+    "onr_proteus_044_walking-wall"
+  ],
+  "assertions": [
+    "Start-of-run Corp actions can move only the source ICE to a different position on the attacked fort.",
+    "Using an unrezzed source reveals only that source and keeps other unrezzed ICE hidden in Runner PlayerViews and PublicEvents.",
+    "Position, side, stale state and cost drift are revalidated through LegalActions and applyAction.",
+    "Replay and StateHash stay stable after same-fort ICE reordering."
+  ],
+  "scenarios": [
+    {
+      "id": "mobile_barricade_unrezzed_reveal_reposition",
+      "cardId": "onr_proteus_033_mobile-barricade",
+      "coveredBy": [
+        "packages/engine/src/index.test.ts::moves unrezzed Mobile Barricade within the attacked fort and reveals only that source"
+      ]
+    },
+    {
+      "id": "walking_wall_rezzed_reposition_once_per_run",
+      "cardId": "onr_proteus_044_walking-wall",
+      "coveredBy": [
+        "packages/engine/src/index.test.ts::moves rezzed Walking Wall once per run without creating a hidden reveal"
+      ]
+    }
+  ]
+}
