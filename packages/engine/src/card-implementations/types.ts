@@ -28,6 +28,7 @@ import type {
   CardTagPreventionSourceImplementation,
   CardTrashPreventionSourceImplementation,
   CardUniqueDirectLongtailImplementation,
+  CardVariableRezImplementation,
   CardVirusCounterImplementation,
   HostedProgramCapacityImplementation,
   HostedProgramModifierImplementation,
@@ -65,6 +66,7 @@ export type CardImplementationDefinition = {
   installCapabilities?: readonly CardInstallCapabilityImplementation[];
   fortCapacityModifiers?: readonly CardFortCapacityModifierImplementation[];
   leavePlayCleanup?: readonly CardLeavePlayCleanupImplementation[];
+  variableRez?: CardVariableRezImplementation;
   virusCounter?: CardVirusCounterImplementation;
   scoredAgenda?: CardScoredAgendaImplementation;
   corpUtility?: CardCorpUtilityImplementation;

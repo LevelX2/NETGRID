@@ -719,8 +719,8 @@ export type CardInstance = {
   counters?: Partial<Record<CounterType, number>>;
   hostedOn?: CardInstanceId;
   selectedServerId?: Exclude<ServerId, "new_remote">;
-  proteusVariableIceState?: {
-    family: "x_strength" | "paid_etr_subroutines";
+  variableIceState?: {
+    family: "x_strength" | "paid_end_the_run_subroutines";
     additionalCostPaid: number;
     value: number;
     cap?: number;
@@ -9409,7 +9409,7 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
   },
 ];
 
-const PROTEUS_VARIABLE_ICE_HARNESS_CARDS: CardDefinition[] = [
+const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
   {
     id: "onr_proteus_020_digiconda",
     title: "Digiconda",
@@ -9434,8 +9434,8 @@ const PROTEUS_VARIABLE_ICE_HARNESS_CARDS: CardDefinition[] = [
       "install_ice",
       "rez_ice",
       "encounter_ice",
-      "variable_rez_harness",
-      "proteus_planning_harness",
+      "variable_rez",
+      "variable_ice_state",
     ],
   },
   {
@@ -9454,8 +9454,8 @@ const PROTEUS_VARIABLE_ICE_HARNESS_CARDS: CardDefinition[] = [
       "install_ice",
       "rez_ice",
       "encounter_ice",
-      "variable_rez_harness",
-      "proteus_planning_harness",
+      "variable_rez",
+      "variable_ice_state",
     ],
   },
 ];
@@ -10472,7 +10472,7 @@ export const DEMO_CARDS: CardDefinition[] = [
   },
   ...ONR_V1_LIMITED_PLAYABLE_CARDS,
   ...PROTEUS_VISIBLE_BASELINE_CARDS,
-  ...PROTEUS_VARIABLE_ICE_HARNESS_CARDS,
+  ...PROTEUS_VARIABLE_ICE_CARDS,
 ];
 
 export const DEMO_CARDS_BY_ID: Record<CardDefinitionId, CardDefinition> =

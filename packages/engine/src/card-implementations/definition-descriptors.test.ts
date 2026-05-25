@@ -1460,6 +1460,36 @@ describe("CardImplementation definition descriptors", () => {
     ).toBe("implemented");
   });
 
+  it("describes Proteus Phase 3a variable ICE implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_020_digiconda")
+        ?.variableRez,
+    ).toEqual({
+      kind: "x_strength",
+      additionalCostPerValue: 1,
+      minValue: 0,
+      maxValue: 6,
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_022_food-fight")
+        ?.variableRez,
+    ).toEqual({
+      kind: "paid_end_the_run_subroutines",
+      additionalCostPerSubroutine: 2,
+      minSubroutines: 0,
+      visibility: "public",
+    });
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_proteus_020_digiconda")
+        ?.status,
+    ).toBe("implemented");
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_proteus_022_food-fight")
+        ?.status,
+    ).toBe("implemented");
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

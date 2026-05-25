@@ -258,7 +258,7 @@ export function publicContextForAction(
       "rezCostReductionAmount",
       "rezCostReductionSourceDefinitionIds",
       "baseRezCost",
-      "proteusVariableRez",
+      "variableRezKind",
       "variableRezAdditionalCost",
       "variableRezValue",
       "variableRezCap",

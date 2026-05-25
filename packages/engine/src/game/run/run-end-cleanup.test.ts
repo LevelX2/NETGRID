@@ -149,9 +149,9 @@ function makeHost(options: {
         if (!found) throw new Error(`missing instance ${cardId}`);
         return found;
       },
-      withoutProteusVariableIceState: (card) => {
-        const { proteusVariableIceState: _ignored, ...rest } =
-          card as CardInstance & { proteusVariableIceState?: unknown };
+      withoutVariableIceState: (card) => {
+        const { variableIceState: _ignored, ...rest } =
+          card as CardInstance & { variableIceState?: unknown };
         return rest as CardInstance;
       },
     },

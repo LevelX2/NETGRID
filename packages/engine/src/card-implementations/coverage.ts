@@ -96,6 +96,9 @@ const IMPLEMENTED_FORT_RUN_WINDOW_LOCATION =
 const IMPLEMENTED_RUN_ENCOUNTER_INTERVENTION_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_VARIABLE_REZ_LOCATION =
+  "packages/engine/src/card-implementations";
+
 const IMPLEMENTED_HIDDEN_REPLACEMENT_LONGTAIL_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
@@ -1027,6 +1030,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for run/encounter intervention behavior.",
     );
     currentLocations.add(IMPLEMENTED_RUN_ENCOUNTER_INTERVENTION_LOCATION);
+  }
+  if (implementation.variableRez) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for variable rez and persistent variable ICE state behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_VARIABLE_REZ_LOCATION);
   }
   if (implementation.virusCounter) {
     reasons.push(

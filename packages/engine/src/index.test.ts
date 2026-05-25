@@ -957,7 +957,7 @@ describe("Proteus Visible Baseline", () => {
   });
 });
 
-describe("Proteus variable ICE harness", () => {
+describe("Proteus Phase 3a Variable ICE Foundation", () => {
   const DIGICONDA = "onr_proteus_020_digiconda";
   const FOOD_FIGHT = "onr_proteus_022_food-fight";
   const hiddenPayloadMarkers =
@@ -1006,7 +1006,7 @@ describe("Proteus variable ICE harness", () => {
         (action) =>
           action.type === "rez_ice" &&
           action.source === iceId &&
-          action.payload?.proteusVariableRez === "x_strength",
+          action.payload?.variableRezKind === "x_strength",
       );
       expect(
         rezActions.map((action) => action.payload?.variableRezValue),
@@ -1055,7 +1055,7 @@ describe("Proteus variable ICE harness", () => {
         "corp",
         (action) => action.actionId === rezAction.actionId,
       );
-      expect(state.cardInstances[iceId]?.proteusVariableIceState).toEqual({
+      expect(state.cardInstances[iceId]?.variableIceState).toEqual({
         family: "x_strength",
         additionalCostPaid: x,
         value: x,
@@ -1122,8 +1122,8 @@ describe("Proteus variable ICE harness", () => {
         matchId: state.matchId,
         side: "corp",
         actionId: rezAction.actionId.replace(
-          `.paid_etr_subroutines.${additionalCost}.${subroutineCount}`,
-          `.paid_etr_subroutines.${additionalCost + 1}.${subroutineCount}`,
+          `.paid_end_the_run_subroutines.${additionalCost}.${subroutineCount}`,
+          `.paid_end_the_run_subroutines.${additionalCost + 1}.${subroutineCount}`,
         ),
         clientKnownStateVersion: state.stateVersion,
       });
@@ -1136,8 +1136,8 @@ describe("Proteus variable ICE harness", () => {
         "corp",
         (action) => action.actionId === rezAction.actionId,
       );
-      expect(state.cardInstances[iceId]?.proteusVariableIceState).toEqual({
-        family: "paid_etr_subroutines",
+      expect(state.cardInstances[iceId]?.variableIceState).toEqual({
+        family: "paid_end_the_run_subroutines",
         additionalCostPaid: additionalCost,
         value: subroutineCount,
         subroutineCount,

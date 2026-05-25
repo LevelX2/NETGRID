@@ -569,6 +569,7 @@ import type {
   CardTraceSuccessEffectImplementation,
   CardTrashPreventionSourceImplementation,
   CardUniqueDirectLongtailImplementation,
+  CardVariableRezImplementation,
   CardVirusCounterImplementation,
   IncreaseTraceLinkEffectImplementation,
   MakeRunEffectImplementation,
@@ -1436,6 +1437,12 @@ function runnerEventLongtailForDefinition(
   return cardImplementationForDefinitionId(definition.id)?.runnerEventLongtail;
 }
 
+function variableRezForDefinition(
+  definition: CardDefinition,
+): CardVariableRezImplementation | undefined {
+  return cardImplementationForDefinitionId(definition.id)?.variableRez;
+}
+
 function runnerEventLongtailKindForDefinition(
   definition: CardDefinition,
 ): CardRunnerEventLongtailImplementation["kind"] | undefined {
@@ -1549,8 +1556,6 @@ type DamageSummary = {
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
 const INITIAL_HAND_SIZE = 5;
-const PROTEUS_DIGICONDA_ID = "onr_proteus_020_digiconda";
-const PROTEUS_FOOD_FIGHT_ID = "onr_proteus_022_food-fight";
 const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
   ARMADILLO_ARMORED_ROAD_HOME_ID,
   DRIFTER_MOBILE_ENVIRONMENT_ID,
@@ -4670,9 +4675,9 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
       : 0;
   const pattelsReduction = cardCounter(state, iceId, "virus");
   const baseStrength =
-    instance.proteusVariableIceState?.family === "x_strength" &&
-    typeof instance.proteusVariableIceState.strength === "number"
-      ? instance.proteusVariableIceState.strength
+    instance.variableIceState?.family === "x_strength" &&
+    typeof instance.variableIceState.strength === "number"
+      ? instance.variableIceState.strength
       : (definition.strength ?? 0);
   const total =
     baseStrength +
@@ -5492,7 +5497,7 @@ function corpApproachActions(state: GameState): LegalAction[] {
     (modifier) => modifier.sourceDefinitionId,
   );
   if (!ice.rezzed && rezQuote.canPay) {
-    const variableRezActions = proteusVariableIceRezActions(
+    const variableRezActions = variableIceRezActions(
       state,
       run.approachedIceId,
       definition,
@@ -5517,8 +5522,7 @@ function corpApproachActions(state: GameState): LegalAction[] {
   }
   if (
     !ice.rezzed &&
-    definition.id !== PROTEUS_DIGICONDA_ID &&
-    definition.id !== PROTEUS_FOOD_FIGHT_ID
+    !variableRezForDefinition(definition)
   ) {
     for (const sourceId of oliviaSalazarRezSourcesForRunIce(
       state,
@@ -5548,24 +5552,27 @@ function corpApproachActions(state: GameState): LegalAction[] {
   return [...actions, ...corpRunRootRezActions(state)];
 }
 
-function proteusVariableIceRezActions(
+function variableIceRezActions(
   state: GameState,
   iceId: CardInstanceId,
   definition: CardDefinition,
   baseRezCost: number,
   rezCostReductionSourceDefinitionIds: string[],
 ): LegalAction[] {
-  if (
-    definition.id !== PROTEUS_DIGICONDA_ID &&
-    definition.id !== PROTEUS_FOOD_FIGHT_ID
-  )
-    return [];
+  const variableRez = variableRezForDefinition(definition);
+  if (!variableRez) return [];
   const availableAdditionalCredits = state.corp.credits - baseRezCost;
   if (availableAdditionalCredits < 0) return [];
-  if (definition.id === PROTEUS_DIGICONDA_ID) {
-    const maxX = Math.min(6, availableAdditionalCredits);
-    return Array.from({ length: maxX + 1 }, (_, x) => {
-      const totalCost = baseRezCost + x;
+  if (variableRez.kind === "x_strength") {
+    const maxX = Math.min(
+      variableRez.maxValue,
+      Math.floor(availableAdditionalCredits / variableRez.additionalCostPerValue),
+    );
+    return Array.from(
+      { length: Math.max(0, maxX - variableRez.minValue + 1) },
+      (_, offset) => variableRez.minValue + offset,
+    ).map((x) => {
+      const totalCost = baseRezCost + x * variableRez.additionalCostPerValue;
       return action(
         state,
         "corp",
@@ -5575,11 +5582,11 @@ function proteusVariableIceRezActions(
         [{ credits: totalCost }],
         {
           cardId: iceId,
-          proteusVariableRez: "x_strength",
+          variableRezKind: variableRez.kind,
           baseRezCost,
-          variableRezAdditionalCost: x,
+          variableRezAdditionalCost: x * variableRez.additionalCostPerValue,
           variableRezValue: x,
-          variableRezCap: 6,
+          variableRezCap: variableRez.maxValue,
           rezCostPaid: totalCost,
           effectiveStrengthAfterRez: x,
           ...(rezCostReductionSourceDefinitionIds.length > 0
@@ -5593,9 +5600,12 @@ function proteusVariableIceRezActions(
       );
     });
   }
-  const maxSubroutineCount = Math.floor(availableAdditionalCredits / 2);
+  const maxSubroutineCount = Math.floor(
+    availableAdditionalCredits / variableRez.additionalCostPerSubroutine,
+  );
   return Array.from({ length: maxSubroutineCount + 1 }, (_, subroutineCount) => {
-    const additionalCost = subroutineCount * 2;
+    const additionalCost =
+      subroutineCount * variableRez.additionalCostPerSubroutine;
     const totalCost = baseRezCost + additionalCost;
     return action(
       state,
@@ -5606,7 +5616,7 @@ function proteusVariableIceRezActions(
       [{ credits: totalCost }],
       {
         cardId: iceId,
-        proteusVariableRez: "paid_etr_subroutines",
+        variableRezKind: variableRez.kind,
         baseRezCost,
         variableRezAdditionalCost: additionalCost,
         variableRezValue: subroutineCount,
@@ -6681,15 +6691,15 @@ function subroutinesForCurrentEncounter(
   }
   if (run?.encounteredIceId) {
     const variableIceState =
-      state.cardInstances[run.encounteredIceId]?.proteusVariableIceState;
-    if (variableIceState?.family === "paid_etr_subroutines") {
+      state.cardInstances[run.encounteredIceId]?.variableIceState;
+    if (variableIceState?.family === "paid_end_the_run_subroutines") {
       const subroutineCount = Math.max(
         0,
         Math.floor(variableIceState.subroutineCount ?? 0),
       );
       for (let index = 0; index < subroutineCount; index += 1) {
         subroutines.push({
-          id: `onr_proteus_022_food_fight_etr_${index + 1}`,
+          id: `variable_ice_paid_end_the_run_${index + 1}`,
           type: "end_the_run",
         });
       }
@@ -9969,21 +9979,21 @@ function rezCard(
 ): void {
   const definition = definitionFor(state, cardId);
   let creditCost = rezCostForCard(state, cardId);
-  const proteusVariableIceState = proteusVariableIceStateForRezAction(
+  const variableIceState = variableIceStateForRezAction(
     state,
     cardId,
     definition,
     creditCost,
     legalAction,
   );
-  if (proteusVariableIceState) {
-    creditCost += proteusVariableIceState.additionalCostPaid;
+  if (variableIceState) {
+    creditCost += variableIceState.additionalCostPaid;
   }
   const shouldUseCorpRezCostQuote =
     legalAction?.type === "rez_ice" &&
     !rootRez &&
     definition.type === "ice" &&
-    !legalAction.payload?.proteusVariableRez;
+    !legalAction.payload?.variableRezKind;
   if (shouldUseCorpRezCostQuote && legalAction) {
     const iceId = cardId as CardInstanceId;
     const quote = assertCorpRezCostQuoteValid(state, iceId, legalAction);
@@ -10042,7 +10052,7 @@ function rezCard(
     ...mustInstance(state.cardInstances, cardId),
     rezzed: true,
     faceup: true,
-    ...(proteusVariableIceState ? { proteusVariableIceState } : {}),
+    ...(variableIceState ? { variableIceState } : {}),
   };
   if (definition.type === "ice") {
     const flags = ensureRunnerTurnFlags(state);
@@ -10104,22 +10114,19 @@ function continueAfterCorpRootRezIfWindowIsComplete(
   beginEncounter(state, run.approachedIceId, legalAction);
 }
 
-function proteusVariableIceStateForRezAction(
+function variableIceStateForRezAction(
   state: GameState,
   cardId: string,
   definition: CardDefinition,
   baseRezCost: number,
   legalAction?: LegalAction,
-): CardInstance["proteusVariableIceState"] | undefined {
-  if (
-    definition.id !== PROTEUS_DIGICONDA_ID &&
-    definition.id !== PROTEUS_FOOD_FIGHT_ID
-  )
-    return undefined;
+): CardInstance["variableIceState"] | undefined {
+  const variableRez = variableRezForDefinition(definition);
+  if (!variableRez) return undefined;
   if (!legalAction)
-    throw new Error("Proteus-variable ICE brauchen eine LegalAction.");
+    throw new Error("Variable ICE brauchen eine LegalAction.");
   if (legalAction.payload?.cardId !== cardId)
-    throw new Error("Proteus-variable Rez-Zielkarte ist ungueltig.");
+    throw new Error("Variable Rez-Zielkarte ist ungueltig.");
   const additionalCost = Number(legalAction.payload.variableRezAdditionalCost);
   const value = Number(legalAction.payload.variableRezValue);
   const rezCostPaid = Number(legalAction.payload.rezCostPaid);
@@ -10133,33 +10140,35 @@ function proteusVariableIceStateForRezAction(
     actionCreditCost !== rezCostPaid ||
     state.corp.credits < rezCostPaid
   )
-    throw new Error("Proteus-variable Rez-Kosten sind nicht mehr gueltig.");
-  if (definition.id === PROTEUS_DIGICONDA_ID) {
+    throw new Error("Variable Rez-Kosten sind nicht mehr gueltig.");
+  if (variableRez.kind === "x_strength") {
     if (
-      legalAction.payload.proteusVariableRez !== "x_strength" ||
-      additionalCost !== value ||
-      value > 6 ||
-      legalAction.payload.variableRezCap !== 6 ||
+      legalAction.payload.variableRezKind !== variableRez.kind ||
+      additionalCost !== value * variableRez.additionalCostPerValue ||
+      value < variableRez.minValue ||
+      value > variableRez.maxValue ||
+      legalAction.payload.variableRezCap !== variableRez.maxValue ||
       legalAction.payload.effectiveStrengthAfterRez !== value
     )
-      throw new Error("Digiconda-X ist nicht legal.");
+      throw new Error("Variable X-Staerke ist nicht legal.");
     return {
       family: "x_strength",
       additionalCostPaid: additionalCost,
       value,
-      cap: 6,
+      cap: variableRez.maxValue,
       strength: value,
     };
   }
   if (
-    legalAction.payload.proteusVariableRez !== "paid_etr_subroutines" ||
-    additionalCost % 2 !== 0 ||
-    value !== additionalCost / 2 ||
+    legalAction.payload.variableRezKind !== variableRez.kind ||
+    additionalCost % variableRez.additionalCostPerSubroutine !== 0 ||
+    value !== additionalCost / variableRez.additionalCostPerSubroutine ||
+    value < variableRez.minSubroutines ||
     legalAction.payload.effectiveSubroutineCountAfterRez !== value
   )
-    throw new Error("Food-Fight-Zusatzkosten sind nicht legal.");
+    throw new Error("Variable ETR-Zusatzkosten sind nicht legal.");
   return {
-    family: "paid_etr_subroutines",
+    family: "paid_end_the_run_subroutines",
     additionalCostPaid: additionalCost,
     value,
     subroutineCount: value,
@@ -11789,7 +11798,7 @@ function trashCorpInstalledCardToArchives(
   removeFromAllZones(state, cardId);
   state.corp.archives.push(cardId);
   state.cardInstances[cardId] = {
-    ...withoutProteusVariableIceState(withoutHost),
+    ...withoutVariableIceState(withoutHost),
     faceup: true,
     rezzed: true,
     zone: { side: "corp", zone: "archives" },
@@ -17541,7 +17550,7 @@ function encounterSpecialWindowHostForState(
   return encounterSpecialWindowHost(state, {
     derezCorpInstalledCard: (cardId) => {
       state.cardInstances[cardId] = {
-        ...withoutProteusVariableIceState(mustInstance(state.cardInstances, cardId)),
+        ...withoutVariableIceState(mustInstance(state.cardInstances, cardId)),
         faceup: false,
         rezzed: false,
       };
@@ -17616,7 +17625,7 @@ function runEndCleanupHost(state: GameState): RunEndCleanupHost {
     cards: {
       definitionFor: (cardId) => definitionFor(state, cardId),
       cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-      withoutProteusVariableIceState,
+      withoutVariableIceState,
     },
     servers: {
       mustServer: (serverId) => mustServer(state, serverId),
@@ -18842,7 +18851,7 @@ function resolveAnonymousTipDerezBlackIceChoice(
     throw new Error("Das Anonymous-Tip-Ziel ist keine gerezzte Black ICE.");
   const targetDefinition = definitionFor(state, selectedId);
   state.cardInstances[selectedId] = {
-    ...withoutProteusVariableIceState(
+    ...withoutVariableIceState(
       mustInstance(state.cardInstances, selectedId),
     ),
     faceup: false,
@@ -19410,7 +19419,7 @@ function resolveSingaporeCityGridSwapChoice(
   state.corp.hq[hqIndex] = targetIceId;
   server.ice[iceIndex] = hqIceId;
   state.cardInstances[targetIceId] = {
-    ...withoutProteusVariableIceState(targetInstance),
+    ...withoutVariableIceState(targetInstance),
     faceup: false,
     rezzed: false,
     zone: { side: "corp", zone: "hq" },
@@ -21660,10 +21669,10 @@ function assertPositiveIntegerAmount(amount: number): void {
     throw new Error("Damage amount ist ungueltig.");
 }
 
-function withoutProteusVariableIceState(instance: CardInstance): CardInstance {
-  const { proteusVariableIceState: _proteusVariableIceState, ...rest } =
+function withoutVariableIceState(instance: CardInstance): CardInstance {
+  const { variableIceState: _variableIceState, ...rest } =
     instance;
-  void _proteusVariableIceState;
+  void _variableIceState;
   return rest;
 }
 

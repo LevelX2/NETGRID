@@ -380,6 +380,8 @@ import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team"
 import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella-policy";
 import { wilsonWeeflerunnerApprenticeImplementation } from "./onr-v1/runner/resources/wilson-weeflerunner-apprentice";
 import { proteusCharityTakeoverImplementation } from "./proteus/corp/agendas/charity-takeover";
+import { proteusDigicondaImplementation } from "./proteus/corp/ice/digiconda";
+import { proteusFoodFightImplementation } from "./proteus/corp/ice/food-fight";
 import { proteusToughoniumWallImplementation } from "./proteus/corp/ice/toughonium-wall";
 import { proteusMinotaurImplementation } from "./proteus/corp/ice/minotaur";
 import { proteusRiddlerImplementation } from "./proteus/corp/ice/riddler";
@@ -769,6 +771,8 @@ export const CARD_IMPLEMENTATIONS = [
   turbeauDelacroixImplementation,
   washingtonDcCityGridImplementation,
   proteusToughoniumWallImplementation,
+  proteusDigicondaImplementation,
+  proteusFoodFightImplementation,
   proteusMinotaurImplementation,
   proteusRiddlerImplementation,
   proteusLesleyMajorImplementation,

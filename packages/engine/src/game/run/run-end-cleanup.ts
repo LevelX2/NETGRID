@@ -75,7 +75,7 @@ export type RunEndCleanupHost = {
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     cardInstanceFor: (cardId: CardInstanceId) => CardInstance;
-    withoutProteusVariableIceState: (instance: CardInstance) => CardInstance;
+    withoutVariableIceState: (instance: CardInstance) => CardInstance;
   };
   servers: {
     mustServer: (serverId: Exclude<ServerId, "new_remote">) => GameState["corp"]["servers"][number];
@@ -405,7 +405,7 @@ function derezOliviaSalazarTemporaryIce(
     )
       continue;
     host.state.cardInstances[iceId] = {
-      ...host.cards.withoutProteusVariableIceState(instance),
+      ...host.cards.withoutVariableIceState(instance),
       faceup: false,
       rezzed: false,
     };

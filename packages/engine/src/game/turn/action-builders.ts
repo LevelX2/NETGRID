@@ -108,8 +108,8 @@ export function makeActionId(
   if (payload?.subroutineIndexes !== undefined)
     parts.push(String(payload.subroutineIndexes));
   if (payload?.pumpAmount !== undefined) parts.push(String(payload.pumpAmount));
-  if (payload?.proteusVariableRez !== undefined)
-    parts.push(String(payload.proteusVariableRez));
+  if (payload?.variableRezKind !== undefined)
+    parts.push(String(payload.variableRezKind));
   if (payload?.variableRezAdditionalCost !== undefined)
     parts.push(String(payload.variableRezAdditionalCost));
   if (payload?.variableRezValue !== undefined)

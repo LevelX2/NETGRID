@@ -707,9 +707,9 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
       : 0;
   const pattelsReduction = cardCounter(state, iceId, "virus");
   const baseStrength =
-    instance.proteusVariableIceState?.family === "x_strength" &&
-    typeof instance.proteusVariableIceState.strength === "number"
-      ? instance.proteusVariableIceState.strength
+    instance.variableIceState?.family === "x_strength" &&
+    typeof instance.variableIceState.strength === "number"
+      ? instance.variableIceState.strength
       : (definition.strength ?? 0);
   const total =
     baseStrength +

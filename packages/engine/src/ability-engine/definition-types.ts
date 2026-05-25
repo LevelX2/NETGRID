@@ -395,6 +395,21 @@ export type CardLeavePlayCleanupImplementation = {
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
+export type CardVariableRezImplementation =
+  | {
+      kind: "x_strength";
+      additionalCostPerValue: 1;
+      minValue: 0;
+      maxValue: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "paid_end_the_run_subroutines";
+      additionalCostPerSubroutine: 2;
+      minSubroutines: 0;
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
+
 export type CardRunEncounterInterventionImplementation =
   | {
       kind: "approach_ice_expose_then_jack_out_before_rez";
