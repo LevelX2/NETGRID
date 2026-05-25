@@ -16,6 +16,7 @@ import {
   resolvePattelsVirusCounterChoice,
   type RunEndCleanupHost,
 } from "./run-end-cleanup";
+import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
 
 function definition(id: string, type: CardDefinition["type"]): CardDefinition {
   return { id: id as CardDefinitionId, title: id, type } as CardDefinition;
@@ -50,6 +51,7 @@ function makeHost(options: {
   tokyoSourceIds?: CardInstanceId[];
   tokyoAmount?: number;
   dupreSourceIds?: CardInstanceId[];
+  virusImplementations?: Record<string, CardVirusCounterImplementation>;
 } = {}): {
   host: RunEndCleanupHost;
   state: GameState;
@@ -136,6 +138,7 @@ function makeHost(options: {
   const legalAction = { payload: {} } as LegalAction;
   const tokyoSourceIds = new Set(options.tokyoSourceIds ?? ["tokyo"]);
   const dupreSourceIds = new Set(options.dupreSourceIds ?? ["dupre"]);
+  const virusImplementations = options.virusImplementations ?? {};
   const host: RunEndCleanupHost = {
     state,
     cards: {
@@ -255,8 +258,13 @@ function makeHost(options: {
       icebreakerHasSpecial: (breakerId) => dupreSourceIds.has(breakerId),
     },
     virus: {
-      installedRunnerVirusSourceIds: () => [],
-      virusCounterImplementationForCard: () => undefined,
+      installedRunnerVirusSourceIds: (predicate) =>
+        (options.runnerPrograms ?? ["dupre"]).filter((cardId) => {
+          const implementation = virusImplementations[cardId];
+          return implementation && (!predicate || predicate(implementation));
+        }),
+      virusCounterImplementationForCard: (cardId) =>
+        virusImplementations[cardId],
     },
     aftermath: {
       tokyoUnsuccessfulRunAmountForCard: (cardId) =>
@@ -354,6 +362,119 @@ describe("run end cleanup", () => {
       expect(result.followupRunChoiceStarted).toBe(true);
       expect(fixture.state.runnerTurnFlags?.allNighterBonusRunPending).toBe(true);
     }
+  });
+
+  it("adds Proteus purgeable Corp-bucket counters after successful central runs", () => {
+    const fixture = makeHost({
+      run: {
+        runId: "run_highlighter",
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+      } as unknown as NonNullable<GameState["run"]>,
+      runnerPrograms: ["highlighter"],
+      instances: {
+        highlighter: instance(
+          "highlighter",
+          "onr_proteus_090_highlighter",
+          { side: "runner", zone: "rig" },
+          { faceup: true, rezzed: true },
+        ),
+      },
+      definitions: {
+        onr_proteus_090_highlighter: definition(
+          "onr_proteus_090_highlighter",
+          "program",
+        ),
+      },
+      virusImplementations: {
+        highlighter: {
+          counterKind: "highlighter",
+          addOnSuccessfulRun: {
+            server: "rd",
+            target: "corp_purgeable_runner_virus_counter",
+            amount: 1,
+            visibility: "public",
+          },
+        },
+      },
+    });
+
+    handleRunEndCleanup(fixture.host, true, fixture.legalAction);
+
+    expect(fixture.state.purgeableRunnerVirusCounters?.corp).toMatchObject({
+      highlighter: 1,
+    });
+    expect(fixture.legalAction.payload).toMatchObject({
+      proteusRunnerVirusCounter: true,
+      runId: "run_highlighter",
+      serverId: "rd",
+      counterType: "highlighter",
+      counterDelta: 1,
+      counterTotalAfter: 1,
+      sourceCardDefinitionId: "onr_proteus_090_highlighter",
+    });
+  });
+
+  it("adds central socket counters and converts complete Viral Pipeline sets to Pipe", () => {
+    const fixture = makeHost({
+      run: {
+        runId: "run_pipeline",
+        attackedServerId: "archives",
+        phase: "movement",
+        position: { kind: "server", serverId: "archives" },
+      } as unknown as NonNullable<GameState["run"]>,
+      runnerPrograms: ["viral_pipeline"],
+      instances: {
+        viral_pipeline: instance(
+          "viral_pipeline",
+          "onr_proteus_099_viral-pipeline",
+          { side: "runner", zone: "rig" },
+          { faceup: true, rezzed: true },
+        ),
+      },
+      definitions: {
+        "onr_proteus_099_viral-pipeline": definition(
+          "onr_proteus_099_viral-pipeline",
+          "program",
+        ),
+      },
+      virusImplementations: {
+        viral_pipeline: {
+          counterKind: "pipe",
+          addOnSuccessfulRun: {
+            server: "central",
+            target: "central_server_socket_counters",
+            amount: 1,
+            visibility: "public",
+          },
+        },
+      },
+    });
+    fixture.state.purgeableRunnerVirusCounters = {
+      servers: {
+        hq: { socket_hq: 1 },
+        rd: { socket_rd: 1 },
+      },
+    };
+
+    handleRunEndCleanup(fixture.host, true, fixture.legalAction);
+
+    expect(fixture.state.purgeableRunnerVirusCounters).toMatchObject({
+      corp: { pipe: 1 },
+    });
+    expect(fixture.state.purgeableRunnerVirusCounters?.servers).toBeUndefined();
+    expect(fixture.legalAction.payload).toMatchObject({
+      proteusRunnerVirusCounter: true,
+      runId: "run_pipeline",
+      serverId: "archives",
+      counterType: "socket_archives",
+      counterDelta: 1,
+      counterTotalAfter: 0,
+      sourceCardDefinitionId: "onr_proteus_099_viral-pipeline",
+      pipeCounterAdded: 1,
+      pipeCounterTotalAfter: 1,
+    });
   });
 
   it("derezzes Olivia Salazar temporary rezzed ICE at run end", () => {

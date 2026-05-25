@@ -1,11 +1,11 @@
 # Proteus Virus-/Antibody-Counter Contract
 
 Stand: 2026-05-17
-Status: planning contract; Phase 8a runtime foundation for purgefähige Runner-Virus-Counter exists; Phase 8b and 8c target cards are implemented
+Status: planning contract; Phase 8a runtime foundation for purgefähige Runner-Virus-Counter exists; Phase 8b, 8c and 8d target cards are implemented
 
 ## Scope und Quellen
 
-Dieses Artefakt schneidet den Proteus-Cluster `virus_antibody_counter_family` aus `data/rules/proteus-mechanics-coverage-2026-05-17.json` in kleine Vertragsfamilien. Seit Phase 8a gibt es eine generische Runtime-Grundlage für purgefähige Runner-Virus-Counter, Proteus-Purge-Action-Debt und öffentliche Corp-/Server-CounterDisplays. Seit Phase 8b sind `Bel-Digmo Antibody`, `Doppelganger Antibody`, `Pattel Antibody` und `Stereogram Antibody` als `human_playable` Runtime-Karten umgesetzt. Seit Phase 8c ist `Viral Breeding Ground` als Score-/Access-Agenda umgesetzt; Proteus bleibt weiterhin nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`.
+Dieses Artefakt schneidet den Proteus-Cluster `virus_antibody_counter_family` aus `data/rules/proteus-mechanics-coverage-2026-05-17.json` in kleine Vertragsfamilien. Seit Phase 8a gibt es eine generische Runtime-Grundlage für purgefähige Runner-Virus-Counter, Proteus-Purge-Action-Debt und öffentliche Corp-/Server-CounterDisplays. Seit Phase 8b sind `Bel-Digmo Antibody`, `Doppelganger Antibody`, `Pattel Antibody` und `Stereogram Antibody` als `human_playable` Runtime-Karten umgesetzt. Seit Phase 8c ist `Viral Breeding Ground` als Score-/Access-Agenda umgesetzt. Seit Phase 8d sind `Highlighter`, `Taxman`, `Vienna 22` und `Viral Pipeline` als erfolgreiche-Run-Virusprogramme umgesetzt; Proteus bleibt weiterhin nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`.
 
 Lokale Quellen:
 
@@ -92,6 +92,8 @@ PublicPayload:
 ## Slice 3: Erfolgreicher Run erzeugt Virus-Counter
 
 Karten: `Crumble`, `Garbage In`, `Highlighter`, `Scaldan`, `Taxman`, `Vienna 22`, `Viral Pipeline`.
+
+Umsetzungsstatus: Phase 8d deckt `Highlighter`, `Taxman`, `Vienna 22` und `Viral Pipeline` ab. Die Karten verwenden eigene CardImplementation-Dateien, generische Successful-Run-Trigger, purgefähige Corp-/Server-Counter, Highlighter-/Vienna-Access-Boni, Tax-Creditverlust und Pipe-Action-Debt. `Crumble`, `Garbage In`, `Scaldan` und `Armageddon` bleiben den Folgeslices 8e/8f vorbehalten.
 
 Vertrag:
 

@@ -134,7 +134,14 @@ export function installedAccessBonusForServer(
   host: BreachStateHost,
   serverId: Exclude<ServerId, "new_remote">,
 ): number {
-  return installedAccessBonusSourceDefinitionIdsForServer(host, serverId).length;
+  const installedBonus =
+    installedAccessBonusSourceDefinitionIdsForServer(host, serverId).length;
+  if (serverId !== "rd") return installedBonus;
+  const highlighterCounters = Math.max(
+    0,
+    Math.floor(host.state.purgeableRunnerVirusCounters?.corp?.highlighter ?? 0),
+  );
+  return installedBonus + Math.max(0, highlighterCounters - 1);
 }
 
 export function installedAccessBonusSourceDefinitionIdsForServer(
@@ -146,7 +153,11 @@ export function installedAccessBonusSourceDefinitionIdsForServer(
 }
 
 export function runnerHqAccessBonus(host: BreachStateHost): number {
-  return quoteAccessCountModifiers(host.state, "hq").amount;
+  const viennaCounters = Math.max(
+    0,
+    Math.floor(host.state.purgeableRunnerVirusCounters?.corp?.vienna ?? 0),
+  );
+  return quoteAccessCountModifiers(host.state, "hq").amount + viennaCounters;
 }
 
 function isBreachEntryHidden(

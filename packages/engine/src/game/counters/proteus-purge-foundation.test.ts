@@ -220,4 +220,51 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
       "end_turn",
     ]);
   });
+
+  it("applies Tax and Pipe counters at Corp start of turn", () => {
+    let state = createGame({
+      seed: "proteus-8d-tax-pipe-start",
+      setupMode: "completed",
+    });
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 0;
+    state.corp.credits = 5;
+    state.purgeableRunnerVirusCounters = {
+      corp: { tax: 5, pipe: 2 },
+    };
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    expect(state.activeSide).toBe("corp");
+    expect(state.timingPoint).toBe("corp_draw.mandatory_draw");
+    expect(state.corp.credits).toBe(3);
+    expect(state.corpActionDebt).toMatchObject({
+      forgoActionsPending: 2,
+      entries: [
+        {
+          reason: "pipe_counter",
+          remaining: 2,
+          source: "start_of_turn_effect",
+        },
+      ],
+    });
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "lose_credits",
+          side: "corp",
+          amount: 2,
+          sourceDefinitionId: "onr_proteus_097_taxman",
+        }),
+        expect.objectContaining({
+          kind: "counter_change",
+          counterType: "pipe",
+          amount: 2,
+          sourceDefinitionId: "onr_proteus_099_viral-pipeline",
+        }),
+      ]),
+    );
+  });
 });

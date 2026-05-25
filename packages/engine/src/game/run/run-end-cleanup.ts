@@ -8,6 +8,8 @@ import type {
   GameState,
   LegalAction,
   PlayerAction,
+  PurgeableRunnerVirusCounterBucket,
+  PurgeableRunnerVirusCounterType,
   ServerId,
 } from "@netgrid/shared";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
@@ -16,6 +18,10 @@ import type { SuccessfulRunFollowupExecutionResult } from "./successful-run-inte
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type RunnerTurnFlags = NonNullable<GameState["runnerTurnFlags"]>;
+
+const CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS = new Set<
+  PurgeableRunnerVirusCounterType
+>(["highlighter", "tax", "vienna"]);
 
 export type RunEndDamageSummary = {
   damageType: DamageType;
@@ -153,6 +159,107 @@ export type RunEndCleanupHost = {
     cleanupEmptyRemotes: () => void;
   };
 };
+
+function purgeableRunnerVirusCounterAmount(
+  bucket: PurgeableRunnerVirusCounterBucket | undefined,
+  counterType: PurgeableRunnerVirusCounterType,
+): number {
+  return Math.max(0, Math.floor(Number(bucket?.[counterType] ?? 0)));
+}
+
+function setPurgeableRunnerVirusCounterAmount(
+  bucket: PurgeableRunnerVirusCounterBucket,
+  counterType: PurgeableRunnerVirusCounterType,
+  amount: number,
+): void {
+  const normalized = Math.max(0, Math.floor(amount));
+  if (normalized > 0) bucket[counterType] = normalized;
+  else delete bucket[counterType];
+}
+
+function compactPurgeableRunnerVirusCounters(state: GameState): void {
+  const counters = state.purgeableRunnerVirusCounters;
+  if (!counters) return;
+  if (counters.corp && Object.keys(counters.corp).length === 0)
+    delete counters.corp;
+  if (counters.servers) {
+    for (const [serverId, bucket] of Object.entries(counters.servers)) {
+      if (!bucket || Object.keys(bucket).length === 0)
+        delete counters.servers[serverId as Exclude<ServerId, "new_remote">];
+    }
+    if (Object.keys(counters.servers).length === 0) delete counters.servers;
+  }
+  if (counters.effects && Object.keys(counters.effects).length === 0)
+    delete counters.effects;
+  if (!counters.corp && !counters.servers && !counters.effects)
+    delete state.purgeableRunnerVirusCounters;
+}
+
+function addPurgeableRunnerVirusCounter(
+  state: GameState,
+  scope:
+    | { kind: "corp" }
+    | { kind: "server"; serverId: Exclude<ServerId, "new_remote"> },
+  counterType: PurgeableRunnerVirusCounterType,
+  amount: number,
+): number {
+  const normalized = Math.max(0, Math.floor(amount));
+  if (normalized <= 0) return 0;
+  const counters = (state.purgeableRunnerVirusCounters ??= {});
+  const bucket =
+    scope.kind === "corp"
+      ? (counters.corp ??= {})
+      : ((counters.servers ??= {})[scope.serverId] ??= {});
+  const next = purgeableRunnerVirusCounterAmount(bucket, counterType) + normalized;
+  setPurgeableRunnerVirusCounterAmount(bucket, counterType, next);
+  return normalized;
+}
+
+function socketCounterTypeForServer(
+  serverId: Exclude<ServerId, "new_remote">,
+): Extract<
+  PurgeableRunnerVirusCounterType,
+  "socket_archives" | "socket_hq" | "socket_rd"
+> | undefined {
+  if (serverId === "archives") return "socket_archives";
+  if (serverId === "hq") return "socket_hq";
+  if (serverId === "rd") return "socket_rd";
+  return undefined;
+}
+
+function convertCompleteSocketSetsToPipeCounters(state: GameState): number {
+  const servers = state.purgeableRunnerVirusCounters?.servers;
+  if (!servers) return 0;
+  const archives = servers.archives;
+  const hq = servers.hq;
+  const rd = servers.rd;
+  const completeSets = Math.min(
+    purgeableRunnerVirusCounterAmount(archives, "socket_archives"),
+    purgeableRunnerVirusCounterAmount(hq, "socket_hq"),
+    purgeableRunnerVirusCounterAmount(rd, "socket_rd"),
+  );
+  if (completeSets <= 0) return 0;
+  if (!archives || !hq || !rd)
+    throw new Error("Viral-Pipeline-Socket-Counter fehlen.");
+  setPurgeableRunnerVirusCounterAmount(
+    archives,
+    "socket_archives",
+    purgeableRunnerVirusCounterAmount(archives, "socket_archives") - completeSets,
+  );
+  setPurgeableRunnerVirusCounterAmount(
+    hq,
+    "socket_hq",
+    purgeableRunnerVirusCounterAmount(hq, "socket_hq") - completeSets,
+  );
+  setPurgeableRunnerVirusCounterAmount(
+    rd,
+    "socket_rd",
+    purgeableRunnerVirusCounterAmount(rd, "socket_rd") - completeSets,
+  );
+  addPurgeableRunnerVirusCounter(state, { kind: "corp" }, "pipe", completeSets);
+  compactPurgeableRunnerVirusCounters(state);
+  return completeSets;
+}
 
 export function clearEncounterTemporaryTraceCredits(
   run: ActiveRun,
@@ -510,6 +617,73 @@ function applyV181SuccessfulRunCounterTriggers(
     if (!implementation || !trigger || trigger.target === "chosen_fully_broken_ice")
       continue;
     const definition = host.cards.definitionFor(cardId);
+    if (
+      trigger.target === "corp_purgeable_runner_virus_counter" &&
+      CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS.has(
+        implementation.counterKind as PurgeableRunnerVirusCounterType,
+      )
+    ) {
+      const counterType =
+        implementation.counterKind as PurgeableRunnerVirusCounterType;
+      const added = addPurgeableRunnerVirusCounter(
+        host.state,
+        { kind: "corp" },
+        counterType,
+        trigger.amount,
+      );
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          proteusRunnerVirusCounter: true,
+          runId: run.runId,
+          serverId: run.attackedServerId,
+          counterType,
+          counterDelta: added,
+          counterTotalAfter: purgeableRunnerVirusCounterAmount(
+            host.state.purgeableRunnerVirusCounters?.corp,
+            counterType,
+          ),
+          sourceCardDefinitionId: definition.id,
+        };
+      }
+      continue;
+    }
+    if (trigger.target === "central_server_socket_counters") {
+      const socketCounterType = socketCounterTypeForServer(run.attackedServerId);
+      if (!socketCounterType) continue;
+      const added = addPurgeableRunnerVirusCounter(
+        host.state,
+        { kind: "server", serverId: run.attackedServerId },
+        socketCounterType,
+        trigger.amount,
+      );
+      const pipeCounterAdded = convertCompleteSocketSetsToPipeCounters(host.state);
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          proteusRunnerVirusCounter: true,
+          runId: run.runId,
+          serverId: run.attackedServerId,
+          counterType: socketCounterType,
+          counterDelta: added,
+          counterTotalAfter: purgeableRunnerVirusCounterAmount(
+            host.state.purgeableRunnerVirusCounters?.servers?.[run.attackedServerId],
+            socketCounterType,
+          ),
+          sourceCardDefinitionId: definition.id,
+          ...(pipeCounterAdded > 0
+            ? {
+                pipeCounterAdded,
+                pipeCounterTotalAfter: purgeableRunnerVirusCounterAmount(
+                  host.state.purgeableRunnerVirusCounters?.corp,
+                  "pipe",
+                ),
+              }
+            : {}),
+        };
+      }
+      continue;
+    }
     if (trigger.target === "source") {
       const added = host.counters.addVirusCounterWithDisinfectantPrevention(
         cardId,
@@ -589,8 +763,18 @@ function successfulRunMatchesVirusTrigger(
   const trigger = implementation.addOnSuccessfulRun;
   if (!trigger) return false;
   if (trigger.server === "any") return true;
-  if (trigger.server === "hq" || trigger.server === "rd")
+  if (
+    trigger.server === "hq" ||
+    trigger.server === "rd" ||
+    trigger.server === "archives"
+  )
     return run.attackedServerId === trigger.server;
+  if (trigger.server === "central")
+    return (
+      run.attackedServerId === "archives" ||
+      run.attackedServerId === "hq" ||
+      run.attackedServerId === "rd"
+    );
   if (trigger.server === "subsidiary_data_fort") {
     return host.servers.mustServer(run.attackedServerId).kind === "remote";
   }

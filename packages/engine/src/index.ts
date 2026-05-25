@@ -579,6 +579,9 @@ import type {
 } from "./ability-engine/definition-types";
 
 type AutomaticEffectCollector = ResolvedGameEffect[];
+const PROTEUS_TAXMAN_ID = "onr_proteus_097_taxman" as CardDefinitionId;
+const PROTEUS_VIRAL_PIPELINE_ID =
+  "onr_proteus_099_viral-pipeline" as CardDefinitionId;
 
 // Effective-value helpers are pure/read-only. Legacy agenda-difficulty pieces
 // are still injected from index.ts so the extracted module avoids index imports
@@ -13169,6 +13172,7 @@ function applyCorpStartOfTurnEffects(
   state: GameState,
   effects?: AutomaticEffectCollector,
 ): void {
+  applyProteusPurgeableRunnerVirusCorpStartEffects(state, effects);
   const skivvissDraws = virusCounterDrawsAtCorpStart(state);
   if (skivvissDraws > 0) {
     drawCorpCards(state, skivvissDraws);
@@ -13280,6 +13284,46 @@ function applyCorpStartOfTurnEffects(
     );
   if (!state.pendingChoice)
     startEmployeeEmpowermentStartDrawChoice(scoredAgendaFlowHost(state));
+}
+
+function applyProteusPurgeableRunnerVirusCorpStartEffects(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  const corpCounters = state.purgeableRunnerVirusCounters?.corp;
+  const taxCounters = purgeableRunnerVirusCounterAmount(corpCounters, "tax");
+  const taxLoss = Math.min(state.corp.credits, Math.floor(taxCounters / 2));
+  if (taxLoss > 0) {
+    state.corp.credits -= taxLoss;
+    effects?.push(
+      automaticLoseCreditsEffect(
+        "corp.start.proteus.taxman",
+        "corp",
+        taxLoss,
+        PROTEUS_TAXMAN_ID,
+      ),
+    );
+  }
+
+  const pipeCounters = purgeableRunnerVirusCounterAmount(corpCounters, "pipe");
+  if (pipeCounters <= 0) return;
+  addCorpActionDebt(state, {
+    amount: pipeCounters,
+    reason: "pipe_counter",
+    source: "start_of_turn_effect",
+  });
+  effects?.push({
+    effectId: "corp.start.proteus.viral_pipeline.pipe",
+    kind: "counter_change",
+    visibility: "public",
+    side: "corp",
+    amount: pipeCounters,
+    reason: "start_of_turn",
+    counterType: "pipe",
+    remainingCounters: pipeCounters,
+    sourceDefinitionId: PROTEUS_VIRAL_PIPELINE_ID,
+    sourceTitle: publicCardTitle(PROTEUS_VIRAL_PIPELINE_ID),
+  });
 }
 
 function virusCounterDrawsAtCorpStart(state: GameState): number {

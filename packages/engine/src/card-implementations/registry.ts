@@ -418,7 +418,11 @@ import { proteusSunburstCranialInterfaceImplementation } from "./proteus/runner/
 import { proteusPoisonedWaterSupplyImplementation } from "./proteus/runner/events/poisoned-water-supply";
 import { proteusDisintegratorImplementation } from "./proteus/runner/programs/disintegrator";
 import { proteusEnterpriseIncShieldsImplementation } from "./proteus/runner/programs/enterprise-inc-shields";
+import { proteusHighlighterImplementation } from "./proteus/runner/programs/highlighter";
 import { proteusSkullcapImplementation } from "./proteus/runner/programs/skullcap";
+import { proteusTaxmanImplementation } from "./proteus/runner/programs/taxman";
+import { proteusVienna22Implementation } from "./proteus/runner/programs/vienna-22";
+import { proteusViralPipelineImplementation } from "./proteus/runner/programs/viral-pipeline";
 import { proteusStreetwareDistributorImplementation } from "./proteus/runner/resources/streetware-distributor";
 import type { CardImplementationDefinition } from "./types";
 
@@ -835,7 +839,11 @@ export const CARD_IMPLEMENTATIONS = [
   proteusPoisonedWaterSupplyImplementation,
   proteusDisintegratorImplementation,
   proteusEnterpriseIncShieldsImplementation,
+  proteusHighlighterImplementation,
   proteusSkullcapImplementation,
+  proteusTaxmanImplementation,
+  proteusVienna22Implementation,
+  proteusViralPipelineImplementation,
   proteusStreetwareDistributorImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 

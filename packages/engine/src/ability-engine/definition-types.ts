@@ -486,19 +486,31 @@ export type CardVirusCounterKindImplementation =
   | "butcher_boy"
   | "cockroach"
   | "cascade"
+  | "highlighter"
   | "thought"
   | "fait"
   | "gremlin"
   | "incubate"
   | "pattel"
+  | "pipe"
   | "pox"
-  | "skivviss";
+  | "skivviss"
+  | "socket_archives"
+  | "socket_hq"
+  | "socket_rd"
+  | "tax"
+  | "vienna";
 
 export type CardVirusCounterImplementation = {
   counterKind: CardVirusCounterKindImplementation;
   addOnSuccessfulRun?: {
-    server: "hq" | "rd" | "any" | "subsidiary_data_fort";
-    target: "source" | "successful_run_server" | "chosen_fully_broken_ice";
+    server: "hq" | "rd" | "archives" | "central" | "any" | "subsidiary_data_fort";
+    target:
+      | "source"
+      | "successful_run_server"
+      | "chosen_fully_broken_ice"
+      | "corp_purgeable_runner_virus_counter"
+      | "central_server_socket_counters";
     amount: 1;
     visibility: Extract<EventVisibilityClass, "public">;
   };

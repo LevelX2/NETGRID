@@ -160,16 +160,16 @@ Maschinenlesbare Matrix: `data/rules/proteus-mechanics-coverage-2026-05-17.json`
 | onr_proteus_087_forwards-legacy | Forward's Legacy | runner | program | Mechanikvertiefung nötig | `runner_program_install`, `random_die_resolution`, `icebreaker_breaker_pump` |
 | onr_proteus_088_fubar | Fubar | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |
 | onr_proteus_089_garbage-in | Garbage In | runner | program | Mechanikvertiefung nötig | `runner_program_install`, `access_breach_multiaccess_ambush`, `virus_antibody_counter_family`, `trash_forfeit_sabotage`, `run_event_basics` |
-| onr_proteus_090_highlighter | Highlighter | runner | program | Mechanikvertiefung nötig | `runner_program_install`, `virus_antibody_counter_family`, `run_event_basics` |
+| onr_proteus_090_highlighter | Highlighter | runner | program | umgesetzt in Phase 8d | `runner_program_install`, `virus_antibody_counter_family`, `run_event_basics` |
 | onr_proteus_091_lockjaw | Lockjaw | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |
 | onr_proteus_092_morphing-tool | Morphing Tool | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |
 | onr_proteus_093_redecorator | Redecorator | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |
 | onr_proteus_094_scaldan | Scaldan | runner | program | Mechanikvertiefung nötig | `runner_program_install`, `bad_publicity_loss_gate`, `random_die_resolution`, `virus_antibody_counter_family`, `run_event_basics` |
 | onr_proteus_095_skeleton-passkeys | Skeleton Passkeys | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |
 | onr_proteus_096_skullcap | Skullcap | runner | program | kleiner Resolver nötig | `runner_program_install`, `damage_prevention_and_core_hand_size`, `prevention_avoid_replacement` |
-| onr_proteus_097_taxman | Taxman | runner | program | Mechanikvertiefung nötig | `runner_program_install`, `virus_antibody_counter_family`, `run_event_basics` |
-| onr_proteus_098_vienna-22 | Vienna 22 | runner | program | Mechanikvertiefung nötig | `runner_program_install`, `virus_antibody_counter_family`, `run_event_basics` |
-| onr_proteus_099_viral-pipeline | Viral Pipeline | runner | program | Mechanikvertiefung nötig | `runner_program_install`, `virus_antibody_counter_family` |
+| onr_proteus_097_taxman | Taxman | runner | program | umgesetzt in Phase 8d | `runner_program_install`, `virus_antibody_counter_family`, `run_event_basics` |
+| onr_proteus_098_vienna-22 | Vienna 22 | runner | program | umgesetzt in Phase 8d | `runner_program_install`, `virus_antibody_counter_family`, `run_event_basics` |
+| onr_proteus_099_viral-pipeline | Viral Pipeline | runner | program | umgesetzt in Phase 8d | `runner_program_install`, `virus_antibody_counter_family` |
 | onr_proteus_100_wrecking-ball | Wrecking Ball | runner | program | kleiner Resolver nötig | `runner_program_install`, `icebreaker_breaker_pump` |
 | onr_proteus_101_all-hands | All-Hands | runner | event | kleiner Resolver nötig | `runner_prep_play`, `access_breach_multiaccess_ambush`, `icebreaker_breaker_pump`, `run_event_basics` |
 | onr_proteus_102_blackmail | Blackmail | runner | event | Mechanikvertiefung nötig | `runner_prep_play`, `agenda_point_modification_overadvance`, `run_event_basics` |

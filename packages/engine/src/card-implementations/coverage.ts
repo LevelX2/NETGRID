@@ -793,8 +793,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/upgrades/weapons-depot.ts",
   "onr_proteus_086_enterprise-inc-shields":
     "packages/engine/src/card-implementations/proteus/runner/programs/enterprise-inc-shields.ts",
+  "onr_proteus_090_highlighter":
+    "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
   "onr_proteus_096_skullcap":
     "packages/engine/src/card-implementations/proteus/runner/programs/skullcap.ts",
+  "onr_proteus_097_taxman":
+    "packages/engine/src/card-implementations/proteus/runner/programs/taxman.ts",
+  "onr_proteus_098_vienna-22":
+    "packages/engine/src/card-implementations/proteus/runner/programs/vienna-22.ts",
+  "onr_proteus_099_viral-pipeline":
+    "packages/engine/src/card-implementations/proteus/runner/programs/viral-pipeline.ts",
   "onr_proteus_134_cortical-cybermodem":
     "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-cybermodem.ts",
   "onr_proteus_135_cortical-stimulators":
