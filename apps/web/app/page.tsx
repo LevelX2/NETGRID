@@ -584,6 +584,7 @@ type AccessReveal = {
   card: DisplayVisibleCard;
   actions: LegalAction[];
   trashStatus: string;
+  followupStatus?: string;
 };
 
 type ExposeReview = {
@@ -1313,13 +1314,14 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
   };
 }
 
-function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null, eventId?: string): AccessReveal | null {
+function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null, events: PublicGameEvent[], accessEvent: PublicGameEvent | null, eventId?: string): AccessReveal | null {
   const accessedCard = view.run?.accessedCard;
   if (!accessedCard?.known || !accessedCard.title) return null;
   const actorSide: Side = "runner";
   const serverLabel = serverDisplayLabel(view.run?.breach?.serverId ?? view.run?.attackedServerId ?? "einen Server");
   const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
   const card = enrichVisibleCard(accessedCard, detailsById);
+  const followupStatus = latestAccessAmbushPaymentStatus(events, accessEvent, card.definitionId);
   return {
     eventId: eventId ?? `current-access:${view.stateVersion}:${accessedCard.instanceId}`,
     actorSide,
@@ -1330,7 +1332,8 @@ function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string
     description: accessRevealDescription(actorSide, viewerSide, serverLabel, archivesRevealCount),
     card,
     actions,
-    trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel)
+    trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel),
+    ...(followupStatus ? { followupStatus } : {})
   };
 }
 
@@ -1498,6 +1501,22 @@ function catalogImageMetricTooltip(detail: CatalogCardDetail | null | undefined)
 
 function deckBuilderCardTooltip(card: CatalogCardSummary, detail: CatalogCardDetail | undefined): string {
   return [card.title, formatCatalogTypeLine(card), detail ? catalogSetDetailLabel(detail) : "", detail ? deckBuilderMetricLine(detail) : "", detail?.text ?? ""].filter(Boolean).join("\n");
+}
+
+function latestAccessAmbushPaymentStatus(events: PublicGameEvent[], accessEvent: PublicGameEvent | null, cardDefinitionId?: string): string | undefined {
+  if (!accessEvent || !cardDefinitionId) return undefined;
+  const accessIndex = events.findIndex((event) => event.eventId === accessEvent.eventId);
+  if (accessIndex < 0) return undefined;
+  for (let index = events.length - 1; index > accessIndex; index -= 1) {
+    const payload = events[index]?.publicPayload;
+    if (!payload || payload.actionType !== "resolve_choice") continue;
+    const ambushDefinitionId = payloadString(payload, "ambushDefinitionId") ?? payloadString(payload, "accessEffectSourceDefinitionId");
+    if (ambushDefinitionId !== cardDefinitionId) continue;
+    const paidCost = payloadPositiveInteger(payload, "ambushPaidCost");
+    if (paidCost) return `Die Korp hat ${paidCost} ${paidCost === 1 ? "Credit" : "Credits"} für den Access-Ambush bezahlt.`;
+    if (payload.ambushPaymentDeclined === true) return "Die Korp hat den Access-Ambush nicht bezahlt.";
+  }
+  return undefined;
 }
 
 function deckFingerprint(deck: EditableDeck): string {
@@ -2942,7 +2961,7 @@ export default function Page() {
   const latestAccessRevealEvent = payload ? latestRetainableAccessRevealEvent(payload.eventTail) : null;
   const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, dismissedAccessEventId) : null;
   const archivesRevealCount = payload ? latestArchivesRevealCount(payload.eventTail, latestAccessRevealEvent) : null;
-  const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount, latestAccessRevealEvent?.eventId) : null;
+  const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount, payload.eventTail, latestAccessRevealEvent) : null;
   const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount) : null;
   const accessReveal = currentAccessReveal ?? retainedEventAccessReveal;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
@@ -6575,6 +6594,7 @@ function AccessRevealModal({
             <CardView card={reveal.card} displayMode={displayMode} preview />
           </div>
           <div className="accessRevealDecision">
+            {reveal.followupStatus ? <p className="accessRevealStatus">{reveal.followupStatus}</p> : null}
             <p className="accessRevealStatus">{reveal.trashStatus}</p>
             <div className="accessRevealActions">
               {primaryActions.map((action) => (

@@ -599,6 +599,85 @@ describe("formatChronicleEvent", () => {
     expect(memoryResolved.description).toBe("Für MU getrasht: Simple Fracter.");
   });
 
+  it("shows access ambush payment choices in the chronicle", () => {
+    const paid = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+        ambushPaidCost: 2
+      }),
+      "runner"
+    );
+    const declined = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+        ambushPaidCost: 0,
+        ambushPaymentDeclined: true
+      }),
+      "runner"
+    );
+
+    expect(paid.title).toBe("Die Korp hat 2 Credits für den Access-Ambush von Doppelganger Antibody bezahlt.");
+    expect(paid.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Doppelganger Antibody", "2 Credits"]));
+    expect(paid.title).not.toContain("Entscheidung beantwortet");
+    expect(declined.title).toBe("Die Korp hat den Access-Ambush von Doppelganger Antibody nicht bezahlt.");
+    expect(declined.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Nicht bezahlt"]));
+  });
+
+  it("names access ambush choices from resolved effects when payment payload is missing", () => {
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "doppelganger_counter",
+            kind: "counter_change",
+            visibility: "hidden_info_barrier",
+            side: "runner",
+            counterType: "doppelganger_antibody",
+            addedCounterAmount: 1,
+            remainingCounters: 1,
+            sourceDefinitionId: "onr_proteus_057_doppelganger-antibody",
+            sourceTitle: "Doppelganger Antibody"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(resolved.title).toBe("Die Korp hat den Access-Ambush von Doppelganger Antibody ausgelöst.");
+    expect(resolved.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Doppelganger Antibody", "Ausgelöst"]));
+    expect(resolved.title).not.toContain("Entscheidung");
+  });
+
+  it("shows access ambush counter effects in the chronicle", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "corp",
+      ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      ambushPaidCost: 2,
+      resolvedEffects: [
+        {
+          effectId: "doppelganger_counter",
+          kind: "counter_change",
+          visibility: "hidden_info_barrier",
+          side: "runner",
+          counterType: "doppelganger_antibody",
+          addedCounterAmount: 1,
+          remainingCounters: 1,
+          sourceDefinitionId: "onr_proteus_057_doppelganger-antibody",
+          sourceTitle: "Doppelganger Antibody"
+        }
+      ]
+    });
+
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(effects[0]?.title).toBe("Du hast 1 Doppelganger-Counter durch Doppelganger Antibody erhalten.");
+    expect(effects[0]?.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Doppelganger Antibody", "+1 Doppelganger-Counter"]));
+    expect(effects[0]?.title).not.toContain("verdeckter Effekt");
+  });
+
   it("shows Playful AI die results and follow-up choices in the chronicle", () => {
     const played = formatChronicleEvent(
       makeEvent("play_event", {

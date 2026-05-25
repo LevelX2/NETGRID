@@ -225,6 +225,44 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Setup", "Starthand", setupDecision === "keep" ? "Behalten" : setupDecision === "mulligan" ? "Mulligan" : "Entscheidung");
         break;
       }
+      {
+        const ambushEffect = resolvedEffectsFromPayload(payload.resolvedEffects).find(
+          (effect) =>
+            (effect.visibility === "hidden_info_barrier" ||
+              stringValue(effect.reason) === "access_effect") &&
+            (stringValue(effect.sourceDefinitionId) ||
+              stringValue(effect.sourceTitle)),
+        );
+        const ambushDefinitionId =
+          stringValue(payload.ambushDefinitionId) ??
+          stringValue(payload.accessEffectSourceDefinitionId) ??
+          stringValue(ambushEffect?.sourceDefinitionId);
+        const ambushPaidCost = numberValue(payload.ambushPaidCost);
+        if (ambushDefinitionId && (ambushPaidCost !== undefined || payload.ambushPaymentDeclined === true || ambushEffect)) {
+          const source = titleForDefinitionId(ambushDefinitionId) ?? stringValue(ambushEffect?.sourceTitle) ?? sourceTitle ?? cardTitle ?? "Access-Ambush";
+          category = "run";
+          importance = ambushPaidCost === 0 || payload.ambushPaymentDeclined === true ? "normal" : "important";
+          visibility = "public";
+          cardDefinitionId = cardDefinitionId ?? ambushDefinitionId;
+          cardTitle = cardTitle ?? source;
+          title =
+            ambushPaidCost && ambushPaidCost > 0
+              ? phrase(subject, `${creditText(ambushPaidCost)} für den Access-Ambush von ${source} bezahlt`)
+              : payload.ambushPaymentDeclined === true
+                ? phrase(subject, `den Access-Ambush von ${source} nicht bezahlt`)
+                : phrase(subject, `den Access-Ambush von ${source} ausgelöst`);
+          chips.push(
+            "Access-Ambush",
+            source,
+            ambushPaidCost && ambushPaidCost > 0
+              ? `${ambushPaidCost} ${creditLabel(ambushPaidCost)}`
+              : payload.ambushPaymentDeclined === true
+                ? "Nicht bezahlt"
+                : "Ausgelöst",
+          );
+          break;
+        }
+      }
       if (sourceDefinitionId === "onr_v1_199_employee-empowerment") {
         const decision = stringValue(payload.employeeEmpowermentStartDrawDecision);
         const drawn = numberValue(payload.drawnCards) ?? numberValue(payload.drawnCount) ?? 0;
@@ -1536,6 +1574,14 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
   const through = sourceTitle && sourceTitle !== cardTitle ? ` durch ${sourceTitle}` : "";
 
   if (visibility === "redacted") {
+    const redactedAccessAmbushCounter = redactedAccessAmbushCounterChronicleItem(
+      event,
+      effect,
+      index,
+      actor,
+      subject,
+    );
+    if (redactedAccessAmbushCounter) return redactedAccessAmbushCounter;
     return redactedChronicleEffectItem(event, effect, index, actor, subject, amount);
   }
 
@@ -1841,6 +1887,50 @@ function chronicleEffectVisibility(effect: ResolvedGameEffect, viewerSide: Side)
   if (effect.visibility === "public") return "public";
   if (effect.visibility === "private_to_side" && effect.side === viewerSide) return "side";
   return "redacted";
+}
+
+function redactedAccessAmbushCounterChronicleItem(
+  event: PublicGameEvent,
+  effect: ResolvedGameEffect,
+  index: number,
+  actor: Side | undefined,
+  subject: string,
+): ChronicleItem | null {
+  if (effect.kind !== "counter_change") return null;
+  const payload = event.publicPayload ?? {};
+  const sourceDefinitionId =
+    stringValue(effect.sourceDefinitionId) ??
+    stringValue(payload.ambushDefinitionId) ??
+    stringValue(payload.accessEffectSourceDefinitionId);
+  if (!sourceDefinitionId) return null;
+  const source = stringValue(effect.sourceTitle) ?? titleForDefinitionId(sourceDefinitionId) ?? "Access-Ambush";
+  const counterText = counterLabel(effect.counterType);
+  const added = numberValue(effect.addedCounterAmount) ?? numberValue(effect.amount) ?? 0;
+  if (added <= 0) return null;
+  const remaining = numberValue(effect.remainingCounters);
+  const title =
+    subject === "Du"
+      ? `Du hast ${added} ${counterText} durch ${source} erhalten`
+      : `${subject} hat ${added} ${counterText} durch ${source} erhalten`;
+  return {
+    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    category: "card",
+    importance: "important",
+    visibility: "public",
+    ...(actor ? { actor } : {}),
+    title: ensurePeriod(title),
+    chips: uniqueChips([
+      ...baseChips(actor, false),
+      "Access-Ambush",
+      source,
+      `+${added} ${counterText}`,
+      ...(remaining !== undefined ? [`${remaining} gesamt`] : []),
+    ]),
+    cardDefinitionId: sourceDefinitionId,
+    cardTitle: source,
+    cardDetailLines: [],
+    groupLabel: groupLabelFor("card", actor, undefined, displayServerLabel(effect.serverLabel), undefined),
+  };
 }
 
 function redactedChronicleEffectItem(
@@ -2357,6 +2447,9 @@ function counterLabel(counterType: unknown): string {
   if (counterType === "data_raven") return "Data-Raven-Counter";
   if (counterType === "cerberus") return "Cerberus-Counter";
   if (counterType === "mastiff") return "Mastiff-Counter";
+  if (counterType === "crying") return "Crying-Counter";
+  if (counterType === "doppelganger_antibody") return "Doppelganger-Counter";
+  if (counterType === "pattel_antibody") return "Pattel-Counter";
   if (counterType === "recurring_credit") return "Recurring Credits";
   if (counterType === "bit") return "Bit";
   if (counterType === "shell") return "Shell-Counter";

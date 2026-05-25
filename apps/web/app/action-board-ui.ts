@@ -771,6 +771,7 @@ export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashC
   }
   if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
   if (actions.some((action) => action.type === "access_card")) return "Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.";
+  if (actions.length === 0) return "Es ist gerade keine Runner-Entscheidung in diesem Zugriffsfenster offen. Danach kannst du den Zugriff fortsetzen.";
   if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
   if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
   return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
@@ -851,6 +852,12 @@ export function approachIceExposeViewingIceId(actions: LegalAction[]): string | 
 function accessRevealCanBeRetainedPast(newerEvent: PublicGameEvent, accessEvent: PublicGameEvent): boolean {
   if (newerEvent.stateVersionAfter === accessEvent.stateVersionAfter) return true;
   const actionType = String(newerEvent.publicPayload.actionType ?? "");
+  if (
+    actionType === "resolve_choice" &&
+    (typeof newerEvent.publicPayload.ambushDefinitionId === "string" ||
+      typeof newerEvent.publicPayload.accessEffectSourceDefinitionId === "string")
+  )
+    return true;
   return ["continue_run", "decline_trash", "steal_agenda", "trash_accessed_card", "end_turn"].includes(actionType);
 }
 

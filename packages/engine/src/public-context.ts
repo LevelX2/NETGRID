@@ -440,6 +440,12 @@ export function publicContextForAction(
       "runnerCreditsAfter",
       "passIceTrashProgramPrompt",
       "programTrashCount",
+      "ambushDefinitionId",
+      "accessEffectSourceDefinitionId",
+      "accessedFromZone",
+      "ambushPaymentAmount",
+      "ambushPaidCost",
+      "ambushPaymentDeclined",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;

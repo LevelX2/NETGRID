@@ -1875,6 +1875,13 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(accessRevealStatusLabel(accessedUpgrade, [decline], "runner", "runner", "Remote 1")).toBe("Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.");
   });
 
+  it("does not describe missing local access actions as insufficient credits", () => {
+    const accessedAsset = card("asset_1", "Doppelganger Antibody", "asset");
+    accessedAsset.trashCost = 0;
+
+    expect(accessRevealStatusLabel(accessedAsset, [], "runner", "runner", "R&D")).toBe("Es ist gerade keine Runner-Entscheidung in diesem Zugriffsfenster offen. Danach kannst du den Zugriff fortsetzen.");
+  });
+
   it("retains the latest visible access reveal after later cleanup events until it is dismissed", () => {
     const hqReveal = publicEvent("evt_access", "action", {
       actionType: "access_card",
@@ -1891,6 +1898,24 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], null)?.eventId).toBe("evt_access");
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], "evt_access")).toBeNull();
     expect(latestRetainableAccessRevealEvent([hqReveal, runCleanup])?.eventId).toBe("evt_access");
+  });
+
+  it("retains access reveal after an access ambush payment choice resolves", () => {
+    const rdReveal = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "R&D",
+      cardDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      title: "Doppelganger Antibody"
+    });
+    const ambushPayment = publicEvent("evt_ambush", "action", {
+      actionType: "resolve_choice",
+      actor: "corp",
+      ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      ambushPaidCost: 2
+    });
+
+    expect(latestRetainableAccessRevealEvent([rdReveal, ambushPayment])?.eventId).toBe("evt_access");
   });
 
   it("retains a visible access reveal across turn end until it is dismissed", () => {

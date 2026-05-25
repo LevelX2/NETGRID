@@ -141,6 +141,8 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
       state.cardInstances[state.runner.identity]?.counters?.doppelganger_antibody,
     ).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      ambushPaidCost: 2,
       counterType: "doppelganger_antibody",
       addedCounterAmount: 1,
       remainingCounters: 1,
@@ -149,6 +151,11 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
       replayEvents(initial, state.eventLog.slice(initial.eventLog.length))
         .actualFinalStateHash,
     ).toBe(hashState(state));
+    const trashAction = getLegalActions(state, "runner").find(
+      (action) => action.type === "trash_accessed_card",
+    );
+    expect(trashAction).toBeDefined();
+    expect(trashAction?.costs).toEqual([{ credits: 0 }]);
 
     state.runner.credits = 4;
     state.activeSide = "runner";
