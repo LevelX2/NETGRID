@@ -75,6 +75,8 @@ const ACTION_GROUP_LABELS: Record<LegalAction["type"], string> = {
   decline_trash: "Zugriff",
   remove_tag: "Tags/Ressourcen",
   purge_virus_counters: "Virus-Counter",
+  purge_runner_virus_counters: "Virus-Counter",
+  forgo_action: "Zug",
   move_to_set_aside: "Spezialzonen",
   move_to_removed_from_game: "Spezialzonen",
   return_from_set_aside: "Spezialzonen",
