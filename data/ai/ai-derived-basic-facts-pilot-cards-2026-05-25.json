@@ -1,0 +1,275 @@
+{
+  "schemaVersion": "ai-derived-basic-facts-pilot-cards-v1",
+  "scope": "Read-only 24-card pilot for mechanically derivable AI basic facts from CardImplementation files. No automatic expansion in this slice.",
+  "cards": [
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Breaker coverage is derivable, while the future action-debt side effect still needs descriptor or overlay review."
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/krash.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:universal"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Universal breaker profile and costs are directly represented in CardImplementation icebreaker abilities."
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/self-modifying-code.ts",
+      "expectedDerivableKinds": [
+        "effect:search",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Search timing is derivable, but installed-program and discount semantics remain overlay/schema-granularity gaps."
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/mystery-box.ts",
+      "expectedDerivableKinds": [
+        "effect:search",
+        "effect:topdeck_info",
+        "effect:install_discount",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Top-of-stack search and install are derivable, but target granularity is still more precise than the current ontology."
+    },
+    {
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/poltergeist.ts",
+      "expectedDerivableKinds": ["effect:trash_credit"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Restricted hosted trash-credit source is directly represented."
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/scatter-shot.ts",
+      "expectedDerivableKinds": ["effect:trash_credit"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Restricted hosted trash-credit source is directly represented."
+    },
+    {
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "title": "R&D-Protocol Files",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/r-d-protocol-files.ts",
+      "expectedDerivableKinds": [
+        "effect:topdeck_info",
+        "effect:access_replacement",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-run access replacement and private R&D look are directly represented."
+    },
+    {
+      "cardId": "onr_v1_017_deep-thought",
+      "title": "Deep Thought",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/deep-thought.ts",
+      "expectedDerivableKinds": ["effect:topdeck_info"],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Topdeck information is derivable; R&D-pressure conditions remain strategic overlay."
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "title": "Political Overthrow",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda activated economy is directly represented."
+    },
+    {
+      "cardId": "onr_v1_193_corporate-coup",
+      "title": "Corporate Coup",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-coup.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:counter_economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda hosted-credit economy is directly represented."
+    },
+    {
+      "cardId": "onr_v1_192_corporate-boon",
+      "title": "Corporate Boon",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-boon.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:extra_action",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda extra-action activation is directly represented."
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "title": "Employee Empowerment",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/employee-empowerment.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:draw",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda draw activation is directly represented."
+    },
+    {
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "title": "Netwatch Operations Office",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/netwatch-operations-office.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_scored_agenda",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Trace tag-source mechanics are derivable; legacy tag effect alignment remains manual overlay."
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "title": "On-Call Solo Team",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/on-call-solo-team.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_scored_agenda",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda tagged-runner damage payoff is directly represented."
+    },
+    {
+      "cardId": "onr_v1_217_strike-force-kali",
+      "title": "Strike Force Kali",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/strike-force-kali.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_scored_agenda",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda tagged-runner damage payoff is directly represented."
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/tutor.ts",
+      "expectedDerivableKinds": [
+        "effect:future_run_effect",
+        "effect:remote_protection",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Future-run additional-subroutine semantics are derivable at a coarse level."
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/virizz.ts",
+      "expectedDerivableKinds": [
+        "effect:future_run_effect",
+        "effect:run_tax",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Future-run break-cost modifier semantics are derivable at a coarse level."
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/viral-15.ts",
+      "expectedDerivableKinds": [
+        "effect:future_run_effect",
+        "effect:program_trash",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Future-run and program-trash semantics are derivable; jack-out tax remains overlay/schema work."
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "title": "Crystal Palace Station Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
+      "expectedDerivableKinds": ["effect:run_tax", "remoteRole:run_tax"],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays."
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "title": "Red Herrings",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/red-herrings.ts",
+      "expectedDerivableKinds": [
+        "effect:run_tax",
+        "remoteRole:agenda_steal_tax"
+      ],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Agenda steal tax is derivable; access-condition and protection interpretation remain overlay/schema gaps."
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/scorched-earth.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner damage payoff is directly represented."
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/closed-accounts.ts",
+      "expectedDerivableKinds": [
+        "effect:counter_economy",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Tagged-runner payoff is represented; counter-economy classification was not manually mirrored."
+    },
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/audit-of-call-records.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag source is directly represented."
+    },
+    {
+      "cardId": "onr_v1_284_chance-observation",
+      "title": "Chance Observation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/chance-observation.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag source is directly represented."
+    }
+  ]
+}
