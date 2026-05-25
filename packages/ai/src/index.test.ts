@@ -35,6 +35,8 @@ import {
   chooseCorpAction,
   chooseCorpPlanDecision,
   classifyScoredAgendaActionFromOntology,
+  estimateBreakerCostProfileFromOntology,
+  estimateStructuredBreakerCostForIce,
   chooseRunnerBaselineAction,
   corpPlanUsesOnlyAiSupportedCards,
   chooseRunnerPlanDecision,
@@ -10312,6 +10314,96 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(decision.reasonCode).toBe("runner.plan.build_rig");
     expect(buildScore.reasons).toContain(
       "visible_missing_breaker_search_available",
+    );
+  });
+
+  it("uses structured breaker ontology to recognize installable wall coverage", () => {
+    const costProfile = estimateBreakerCostProfileFromOntology(
+      "onr_v1_037_japanese-water-torture",
+    );
+    const wallCost = estimateStructuredBreakerCostForIce(
+      "onr_v1_037_japanese-water-torture",
+      { definitionId: "onr_v1_237_data-wall", strength: 0 },
+    );
+    expect(costProfile).toEqual(
+      expect.objectContaining({
+        installCredits: 7,
+        memory: 1,
+      }),
+    );
+    expect(costProfile?.sideEffectPenalty).toBeGreaterThan(0);
+    expect(wallCost).toEqual(
+      expect.objectContaining({
+        coverage: "wall",
+        cost: 0,
+      }),
+    );
+
+    const input = runnerActionPhaseInput(
+      "ai-runner-structured-breaker-coverage",
+      (state) => {
+        state.runner.credits = 8;
+        moveRunnerCardToGrip(state, "onr_v1_037_japanese-water-torture");
+        const iceId = putCorpIceOnServer(state, "rd", "onr_v1_237_data-wall");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      {
+        runnerDeck: {
+          id: "ai_structured_breaker_runner",
+          name: "AI Structured Breaker Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_037_japanese-water-torture", quantity: 2 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+        corpDeck: {
+          id: "ai_structured_breaker_corp",
+          name: "AI Structured Breaker Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 4 },
+            { id: "onr_v1_237_data-wall", quantity: 2 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const install = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_037_japanese-water-torture",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(install).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!install || !gain)
+      throw new Error("Missing structured breaker coverage actions");
+
+    const scopedInput = { ...input, legalActions: [install, gain] };
+    const buildCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "build_rig",
+    );
+    expect(buildCandidate).toBeDefined();
+    if (!buildCandidate)
+      throw new Error("Missing structured breaker coverage candidate");
+    const buildScore = evaluateRunnerPlan(scopedInput, buildCandidate);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(buildCandidate.legalActionIds).toContain(install.actionId);
+    expect(decision.actionId).toBe(install.actionId);
+    expect(buildScore.score).toBeGreaterThan(0);
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /privatePayload|FullState|runnerHiddenStackOrder/i,
     );
   });
 

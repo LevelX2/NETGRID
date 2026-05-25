@@ -32,6 +32,7 @@ import {
   minimumCreditsToBreakEndTheRunSubroutines,
   serverIdFromEvent,
 } from "./visible-run-analysis";
+import { estimateStructuredBreakerCostForIce } from "./breaker-ontology-consumer";
 
 export type CorpPlanKind =
   | "score_now"
@@ -4562,6 +4563,7 @@ function computeRunnerContestCapacity(
     `remote_unrezzed_ice:${server.ice.filter((ice) => ice.rezzed !== true).length}`,
     `visible_break_cost:${knownPath.visibleBreakCost ?? "unknown"}`,
     `runner_remote_pressure:${round(remotePressure)}`,
+    `structured_breaker_profile_contest_fallback:${knownPath.reasons.includes("structured_breaker_profile_contest_fallback")}`,
   ];
   return runnerContestCapacityResult(
     serverId,
@@ -5772,6 +5774,7 @@ function assessKnownIcePathForRunnerContest(
 
   let visibleBreakCost = 0;
   let relevantKnownIce = 0;
+  let structuredBreakerFallback = false;
   const breakerStrengths = new Map(
     rigCards.map((card) => [
       card.instanceId,
@@ -5807,7 +5810,17 @@ function assessKnownIcePathForRunnerContest(
       breakerStrengths,
       additionalBreakCostPerSubroutine,
     );
-    if (endTheRunCount > 0 && !breakAssessment)
+    const structuredBreakAssessment =
+      endTheRunCount > 0 && !breakAssessment
+        ? minimumStructuredBreakerCostForIce(
+            effectiveIce,
+            rigCards,
+            endTheRunCount,
+            breakerStrengths,
+            additionalBreakCostPerSubroutine,
+          )
+        : undefined;
+    if (endTheRunCount > 0 && !breakAssessment && !structuredBreakAssessment)
       return {
         capacity: "low",
         ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
@@ -5815,6 +5828,9 @@ function assessKnownIcePathForRunnerContest(
       };
     if (breakAssessment) {
       visibleBreakCost += breakAssessment.cost;
+    } else if (structuredBreakAssessment) {
+      structuredBreakerFallback = true;
+      visibleBreakCost += structuredBreakAssessment.cost;
     }
     if (breakAssessment?.carriesStrengthAcrossIce) {
       breakerStrengths.set(
@@ -5853,7 +5869,12 @@ function assessKnownIcePathForRunnerContest(
     return {
       capacity: "low",
       visibleBreakCost,
-      reasons: ["runner_remote_contest_low_break_cost"],
+      reasons: [
+        "runner_remote_contest_low_break_cost",
+        ...(structuredBreakerFallback
+          ? ["structured_breaker_profile_contest_fallback"]
+          : []),
+      ],
     };
   if (
     relevantKnownIce > 0 &&
@@ -5863,7 +5884,12 @@ function assessKnownIcePathForRunnerContest(
     return {
       capacity: "high",
       visibleBreakCost,
-      reasons: ["runner_remote_contest_high_visible_breaker"],
+      reasons: [
+        "runner_remote_contest_high_visible_breaker",
+        ...(structuredBreakerFallback
+          ? ["structured_breaker_profile_contest_fallback"]
+          : []),
+      ],
     };
   if (installedBreakers === 0 || runnerCredits <= 3)
     return {
@@ -5874,8 +5900,57 @@ function assessKnownIcePathForRunnerContest(
   return {
     capacity: "medium",
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
-    reasons: ["runner_remote_contest_medium_uncertain"],
+    reasons: [
+      "runner_remote_contest_medium_uncertain",
+      ...(structuredBreakerFallback
+        ? ["structured_breaker_profile_contest_fallback"]
+        : []),
+    ],
   };
+}
+
+function minimumStructuredBreakerCostForIce(
+  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  rigCards: VisibleCard[],
+  endTheRunCount: number,
+  breakerStrengths: Map<string, number>,
+  additionalBreakCostPerSubroutine = 0,
+):
+  | {
+      cost: number;
+      breakerInstanceId: string;
+      sideEffectPenalty: number;
+    }
+  | undefined {
+  const estimates = rigCards
+    .filter((card) => card.known && card.definitionId)
+    .map((card) => {
+      const estimate = estimateStructuredBreakerCostForIce(
+        card.definitionId,
+        ice,
+        endTheRunCount,
+        breakerStrengths.get(card.instanceId),
+        additionalBreakCostPerSubroutine,
+      );
+      return estimate
+        ? {
+            cost: estimate.cost,
+            breakerInstanceId: card.instanceId,
+            sideEffectPenalty: estimate.sideEffectPenalty,
+          }
+        : undefined;
+    })
+    .filter((estimate): estimate is NonNullable<typeof estimate> =>
+      Boolean(estimate),
+    )
+    .sort(
+      (left, right) =>
+        left.cost +
+          left.sideEffectPenalty / 10 -
+          (right.cost + right.sideEffectPenalty / 10) ||
+        left.breakerInstanceId.localeCompare(right.breakerInstanceId),
+    );
+  return estimates[0];
 }
 
 function remoteServerIdForAction(

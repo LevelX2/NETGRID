@@ -167,6 +167,14 @@ export type {
   OpeningHandEvaluation,
   RunnerOpeningHandEvaluation,
 } from "./deck-doctrine";
+export {
+  classifyBreakerCoverageFromOntology,
+  compareBreakerProfilesForCoverage,
+  estimateBreakerCostProfileFromOntology,
+  estimateStructuredBreakerCostForIce,
+  getStructuredBreakerProfileForCard,
+  structuredBreakerProfileCoversIce,
+} from "./breaker-ontology-consumer";
 export { buildAiDeckOntologySummary } from "./hint-ontology-doctrine";
 export type {
   AiDeckOntologyBreakerCoverageSummary,
