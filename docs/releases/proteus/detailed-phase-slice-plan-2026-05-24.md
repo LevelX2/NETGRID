@@ -173,6 +173,8 @@ Status 2026-05-24: 9c ist blockiert, weil `Hijack` einen Grip-Installationschoic
 
 Status 2026-05-24: 9d ist erledigt. `Precision Bribery` nutzt einen generischen `new_data_fort_creation_lock`-Modifier, filtert Korp-Installationen in neue Remotes aus LegalActions, revalidiert stale Aktionen über `applyAction` und bietet der Korp eine öffentliche Trash-Action für 1 Aktion und 4 Credits. Details stehen in `docs/activities/done/act-2026-05-24-proteus-phase-9d-data-fort-creation-lock.md`.
 
+Status 2026-05-24: 9e bleibt blockiert. `Ice and Data Special Report` hat lokal `Cost: 3 (0)` und ist in Import/Kartendaten mit `numeric.cost: null` modelliert; vor Runtime-Umsetzung braucht es eine dokumentierte Kostenentscheidung. Details stehen in `docs/activities/in-progress/act-2026-05-24-proteus-phase-9e-rule-blocked-preflight.md`.
+
 ## Abhängigkeitsmatrix
 
 | Vorlauf | Entsperrt                                                                                                              |
