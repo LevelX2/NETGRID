@@ -43,16 +43,11 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 49,
+  "warningCount": 42,
   "warnings": [
     {
       "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_017_deep-thought"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison.",
+      "message": "Intentionally manual strategic overlay is not derived: condition:requires_rnd_pressure, condition:requires_successful_run.",
       "cardId": "onr_v1_017_deep-thought"
     },
     {
@@ -92,27 +87,7 @@
     },
     {
       "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_043_mystery-box"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_043_mystery-box"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison.",
-      "cardId": "onr_v1_043_mystery-box"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:topdeck_info has no manual ontology match.",
-      "cardId": "onr_v1_043_mystery-box"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual condition:requires_installed_program has no generated basic fact match.",
+      "message": "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field.",
       "cardId": "onr_v1_043_mystery-box"
     },
     {
@@ -138,16 +113,6 @@
     {
       "kind": "descriptor_or_overlay_gap",
       "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_059_self-modifying-code"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison.",
-      "cardId": "onr_v1_059_self-modifying-code"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual condition:requires_installed_program has no generated basic fact match.",
       "cardId": "onr_v1_059_self-modifying-code"
     },
     {
@@ -262,7 +227,7 @@
     },
     {
       "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
+      "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
       "cardId": "onr_v1_355_crystal-palace-station-grid"
     },
     {
@@ -277,7 +242,7 @@
     },
     {
       "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
+      "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
       "cardId": "onr_v1_366_red-herrings"
     },
     {
@@ -299,7 +264,7 @@
       "implementationFound": true,
       "expectedDerivableKinds": ["effect:topdeck_info"],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Topdeck information is derivable; R&D-pressure conditions remain strategic overlay.",
+      "rationale": "Topdeck information is derivable; R&D-pressure and interface-pressure conditions remain intentionally manual strategic overlay.",
       "derivedFacts": {
         "effects": [
           {
@@ -361,18 +326,13 @@
         "condition:requires_successful_run"
       ],
       "descriptorGaps": [
-        "Manual ontology contains fields not currently derivable.",
-        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+        "Intentionally manual strategic overlay is not derived: condition:requires_rnd_pressure, condition:requires_successful_run."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+          "message": "Intentionally manual strategic overlay is not derived: condition:requires_rnd_pressure, condition:requires_successful_run."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -395,7 +355,7 @@
       "implementationFound": true,
       "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Breaker coverage is derivable, while the future action-debt side effect still needs descriptor or overlay review.",
+      "rationale": "Breaker coverage and the manual forgo_actions side-effect comparison are derivable, while future action-debt is still not structured in a resolver descriptor.",
       "derivedFacts": {
         "effects": [
           {
@@ -460,7 +420,11 @@
         }
       },
       "overlap": {
-        "matches": ["breakerCoverage:wall", "effect:breaker"],
+        "matches": [
+          "breakerCoverage:wall",
+          "breakerSideEffect:forgo_actions",
+          "effect:breaker"
+        ],
         "generatedOnly": [],
         "manualOnly": []
       },
@@ -589,7 +553,7 @@
         "condition:requires_during_run"
       ],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Top-of-stack search and install are derivable, but target granularity is still more precise than the current ontology.",
+      "rationale": "Top-of-stack search, show-to-Corp target profile and free program install are derivable; the once-per-run limit is not structured in a resolver descriptor.",
       "derivedFacts": {
         "effects": [
           {
@@ -624,7 +588,9 @@
         ],
         "costProfile": {},
         "derivationNotes": [],
-        "needsManualOverlayReasons": [],
+        "needsManualOverlayReasons": [
+          "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field."
+        ],
         "targetProfiles": [
           {
             "zone": "stack_top",
@@ -632,7 +598,8 @@
             "targetCardType": "program",
             "installsTarget": true,
             "installCost": "free",
-            "shuffleAfterwards": true,
+            "shuffleAfter": true,
+            "showToOpponent": true,
             "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
           }
         ]
@@ -680,42 +647,24 @@
       "overlap": {
         "matches": [
           "condition:requires_during_run",
+          "condition:requires_installed_program",
           "effect:install_discount",
           "effect:search"
         ],
-        "generatedOnly": ["effect:topdeck_info"],
-        "manualOnly": ["condition:requires_installed_program"]
+        "generatedOnly": [],
+        "manualOnly": []
       },
       "missingManualOverlay": [
-        "condition:requires_installed_program",
-        "effect:topdeck_info"
+        "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field."
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually.",
-        "Manual ontology contains fields not currently derivable.",
-        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+        "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:topdeck_info has no manual ontology match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_installed_program has no generated basic fact match."
+          "message": "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field."
         },
         {
           "kind": "text_pattern_derivation",
@@ -987,7 +936,7 @@
         "condition:requires_during_run"
       ],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Search timing is derivable, but installed-program and discount semantics remain overlay/schema-granularity gaps.",
+      "rationale": "Search timing and target profile are derivable; the manual install_discount field is not generated because the implementation uses normal install cost.",
       "derivedFacts": {
         "effects": [
           {
@@ -1014,7 +963,7 @@
             "targetCardType": "program",
             "installsTarget": true,
             "installCost": "normal",
-            "shuffleAfterwards": true,
+            "shuffleAfter": true,
             "source": "implementation.effect.search_stack_install"
           }
         ]
@@ -1060,34 +1009,23 @@
         }
       },
       "overlap": {
-        "matches": ["condition:requires_during_run", "effect:search"],
-        "generatedOnly": [],
-        "manualOnly": [
+        "matches": [
+          "condition:requires_during_run",
           "condition:requires_installed_program",
-          "effect:install_discount"
-        ]
+          "effect:search"
+        ],
+        "generatedOnly": [],
+        "manualOnly": ["effect:install_discount"]
       },
-      "missingManualOverlay": [
-        "condition:requires_installed_program",
-        "effect:install_discount"
-      ],
+      "missingManualOverlay": ["effect:install_discount"],
       "descriptorGaps": [
-        "Manual ontology contains fields not currently derivable.",
-        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_installed_program has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -2651,7 +2589,7 @@
       "implementationFound": true,
       "expectedDerivableKinds": ["effect:run_tax", "remoteRole:run_tax"],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays.",
+      "rationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays; remote_protection remains intentionally manual strategic overlay.",
       "derivedFacts": {
         "effects": [
           {
@@ -2720,13 +2658,13 @@
       },
       "missingManualOverlay": ["effect:remote_protection"],
       "descriptorGaps": [
-        "Manual ontology contains fields not currently derivable."
+        "Intentionally manual strategic overlay is not derived: effect:remote_protection."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
+          "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -2748,7 +2686,7 @@
         "remoteRole:agenda_steal_tax"
       ],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Agenda steal tax is derivable; access-condition and protection interpretation remain overlay/schema gaps.",
+      "rationale": "Agenda steal tax and accessed-card condition are derivable; remote_protection remains intentionally manual strategic overlay.",
       "derivedFacts": {
         "effects": [
           {
@@ -2844,13 +2782,13 @@
       },
       "missingManualOverlay": ["effect:remote_protection"],
       "descriptorGaps": [
-        "Manual ontology contains fields not currently derivable."
+        "Intentionally manual strategic overlay is not derived: effect:remote_protection."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
+          "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection."
         },
         {
           "kind": "manual_ontology_without_generated_match",

@@ -58,12 +58,12 @@ Warnings blockieren nicht. Sie markieren bekannten Descriptor-/Overlay-Bedarf:
 
 Aktueller Stand:
 
-- Warnings: 49
+- Warnings: 42
 - `text_pattern_derivation`: 24
-- `descriptor_or_overlay_gap`: 13
-- `manual_ontology_without_generated_match`: 7
+- `descriptor_or_overlay_gap`: 9
+- `manual_ontology_without_generated_match`: 5
 - `confidence_mismatch`: 4
-- `generated_fact_without_manual_match`: 1
+- `generated_fact_without_manual_match`: 0
 
 ## Pilotkartenumfang
 
@@ -121,11 +121,22 @@ Nach der fachlichen Gap-Triage bleiben sechs stabile Manual-Overlay-/Descriptor-
 - `onr_v1_355_crystal-palace-station-grid`
 - `onr_v1_366_red-herrings`
 
-Geschlossen wurden `Netwatch Operations Office`, `Viral 15` und `Closed Accounts`; Details stehen in `ai-derived-basic-facts-gap-triage-2026-05-25.md`. Wichtig: Die verbleibenden Lücken sind keine AI-Support-Demotion. Sie zeigen nur, wo generierte mechanische Facts und manuelle strategische Ontology noch nicht deckungsgleich sind oder wo Descriptor-Granularität fehlt.
+Geschlossen wurden `Netwatch Operations Office`, `Viral 15` und `Closed Accounts`; Details stehen in `ai-derived-basic-facts-gap-triage-2026-05-25.md`. Die Folge-Triage `ai-derived-basic-facts-descriptor-schema-slice-2026-05-25.md` ergänzt eine read-only TargetProfile-Schema-Erweiterung für `Self-Modifying Code` und `Mystery Box`, hält die sechs Karten aber bewusst offen, weil dort weiterhin strategisches Overlay, ein falsches manuelles Mechanikfeld oder fehlende strukturierte Resolver-Descriptoren bestehen. Wichtig: Die verbleibenden Lücken sind keine AI-Support-Demotion.
 
 ## Ontology-Validation
 
 Das Gate spiegelt die Known-Lists aus `packages/ai/src/hint-ontology.ts` bewusst klein in MJS, statt das TypeScript-Modul direkt aus einem Root-Node-Script zu laden. Begründung: Eine direkte TS-/loader-Brücke wäre für dieses read-only Gate fragiler als der Nutzen. Die eigentliche TS-Ontology-Validation bleibt zusätzlich über den AI-Testpfad abgesichert.
+
+Der Descriptor-Schema-Slice ergänzt read-only `targetProfiles` in `packages/ai/src/hint-ontology.ts`. Die Felder sind validiert, aber nicht konsumiert:
+
+- `zone`
+- `targetCardType`
+- `installsTarget`
+- `installCost`
+- `shuffleAfter`
+- `showToOpponent`
+- `oncePerRun`
+- `lookCount`
 
 ## Read-Only-Grenze
 

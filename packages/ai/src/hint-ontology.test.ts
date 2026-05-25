@@ -94,6 +94,30 @@ describe("AI hint ontology validation", () => {
     expect(result.errors).toEqual([]);
   });
 
+  it("accepts read-only target profiles for search/install effects", () => {
+    const result = validateAiHintOntologyFields({
+      effects: [
+        {
+          kind: "search",
+          timing: "during_run",
+          scope: "runner",
+        },
+      ],
+      targetProfiles: [
+        {
+          zone: "stack_top",
+          lookCount: 5,
+          targetCardType: "program",
+          installsTarget: true,
+          installCost: "free",
+          shuffleAfter: true,
+          showToOpponent: true,
+        },
+      ],
+    });
+    expect(result.errors).toEqual([]);
+  });
+
   it("rejects an unknown effect kind", () => {
     const result = validateAiHintOntologyFields({
       effects: [
@@ -115,6 +139,28 @@ describe("AI hint ontology validation", () => {
     });
     expect(result.errors.map((issue) => issue.kind)).toContain(
       "unknown_condition_kind",
+    );
+  });
+
+  it("rejects unknown target profile values", () => {
+    const result = validateAiHintOntologyFields({
+      targetProfiles: [
+        {
+          zone: "private_runner_stack_order",
+          targetCardType: "scheme",
+          installCost: "discounted_by_guess",
+          shuffleAfter: true,
+        },
+      ],
+    });
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ kind: "unknown_target_zone" }),
+    );
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ kind: "unknown_target_card_type" }),
+    );
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ kind: "unknown_target_install_cost" }),
     );
   });
 

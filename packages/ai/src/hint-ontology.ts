@@ -133,6 +133,22 @@ export const KNOWN_HINT_REMOTE_THREAT_LEVELS = [
   "high",
 ] as const;
 
+export const KNOWN_HINT_TARGET_ZONES = ["stack", "stack_top"] as const;
+
+export const KNOWN_HINT_TARGET_CARD_TYPES = [
+  "agenda",
+  "asset",
+  "event",
+  "hardware",
+  "ice",
+  "operation",
+  "program",
+  "resource",
+  "upgrade",
+] as const;
+
+export const KNOWN_HINT_TARGET_INSTALL_COSTS = ["free", "normal"] as const;
+
 export const KNOWN_HINT_LINE_SUPPORT = [
   "rig_first",
   "economy_first",
@@ -197,6 +213,11 @@ export type KnownHintRemoteRoleKind =
   (typeof KNOWN_HINT_REMOTE_ROLE_KINDS)[number];
 export type KnownHintRemoteThreatLevel =
   (typeof KNOWN_HINT_REMOTE_THREAT_LEVELS)[number];
+export type KnownHintTargetZone = (typeof KNOWN_HINT_TARGET_ZONES)[number];
+export type KnownHintTargetCardType =
+  (typeof KNOWN_HINT_TARGET_CARD_TYPES)[number];
+export type KnownHintTargetInstallCost =
+  (typeof KNOWN_HINT_TARGET_INSTALL_COSTS)[number];
 export type KnownHintLineSupport = (typeof KNOWN_HINT_LINE_SUPPORT)[number];
 export type KnownHintOpponentSignalKind =
   (typeof KNOWN_HINT_OPPONENT_SIGNAL_KINDS)[number];
@@ -241,6 +262,17 @@ export type AiHintRemoteRole = {
   serverScope?: "fort" | "remote" | "central" | "server";
 };
 
+export type AiHintEffectTargetProfile = {
+  zone: KnownHintTargetZone;
+  targetCardType?: KnownHintTargetCardType;
+  installsTarget?: boolean;
+  installCost?: KnownHintTargetInstallCost;
+  shuffleAfter?: boolean;
+  showToOpponent?: boolean;
+  oncePerRun?: boolean;
+  lookCount?: number;
+};
+
 export type AiHintOpponentSignal = {
   kind: KnownHintOpponentSignalKind;
   visibleEvidenceOnly: true;
@@ -263,6 +295,7 @@ export type AiHintOntologyExtension = {
   costProfile?: AiHintCostProfile;
   breakerProfile?: AiHintBreakerProfile;
   remoteRole?: AiHintRemoteRole;
+  targetProfiles?: AiHintEffectTargetProfile[];
   lineSupport?: KnownHintLineSupport[];
   opponentSignals?: AiHintOpponentSignal[];
   quality?: AiHintQuality;
@@ -279,6 +312,9 @@ export type AiHintOntologyIssueKind =
   | "unknown_breaker_coverage"
   | "unknown_breaker_side_effect"
   | "unknown_remote_role"
+  | "unknown_target_zone"
+  | "unknown_target_card_type"
+  | "unknown_target_install_cost"
   | "unknown_line_support"
   | "hidden_info_risk"
   | "invalid_shape"
@@ -331,6 +367,11 @@ function validateExtensionFields(
     issues,
   );
   validateRemoteRole(input.remoteRole, `${path}.remoteRole`, issues);
+  validateTargetProfiles(
+    input.targetProfiles,
+    `${path}.targetProfiles`,
+    issues,
+  );
   validateLineSupport(input.lineSupport, `${path}.lineSupport`, issues);
   validateOpponentSignals(
     input.opponentSignals,
@@ -535,6 +576,70 @@ function validateRemoteRole(
     "invalid_shape",
     issues,
   );
+}
+
+function validateTargetProfiles(
+  targetProfiles: unknown,
+  path: string,
+  issues: AiHintOntologyIssue[],
+): void {
+  if (targetProfiles === undefined) return;
+  if (!Array.isArray(targetProfiles)) {
+    addIssue(issues, "error", "invalid_shape", path, "Expected array.");
+    return;
+  }
+  targetProfiles.forEach((targetProfile, index) => {
+    const targetPath = `${path}[${index}]`;
+    if (!isRecord(targetProfile)) {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        targetPath,
+        "Expected object.",
+      );
+      return;
+    }
+    requireKnownField(
+      targetProfile.zone,
+      KNOWN_HINT_TARGET_ZONES,
+      `${targetPath}.zone`,
+      "unknown_target_zone",
+      issues,
+      true,
+    );
+    validateOptionalKnown(
+      targetProfile.targetCardType,
+      KNOWN_HINT_TARGET_CARD_TYPES,
+      `${targetPath}.targetCardType`,
+      "unknown_target_card_type",
+      issues,
+    );
+    validateOptionalKnown(
+      targetProfile.installCost,
+      KNOWN_HINT_TARGET_INSTALL_COSTS,
+      `${targetPath}.installCost`,
+      "unknown_target_install_cost",
+      issues,
+    );
+    for (const key of [
+      "installsTarget",
+      "shuffleAfter",
+      "showToOpponent",
+      "oncePerRun",
+    ]) {
+      validateOptionalBoolean(
+        targetProfile[key],
+        `${targetPath}.${key}`,
+        issues,
+      );
+    }
+    validateOptionalNumber(
+      targetProfile.lookCount,
+      `${targetPath}.lookCount`,
+      issues,
+    );
+  });
 }
 
 function validateLineSupport(

@@ -141,6 +141,22 @@ const KNOWN_REMOTE_ROLES = new Set([
   "agenda_steal_tax",
 ]);
 
+const KNOWN_TARGET_ZONES = new Set(["stack", "stack_top"]);
+
+const KNOWN_TARGET_CARD_TYPES = new Set([
+  "agenda",
+  "asset",
+  "event",
+  "hardware",
+  "ice",
+  "operation",
+  "program",
+  "resource",
+  "upgrade",
+]);
+
+const KNOWN_TARGET_INSTALL_COSTS = new Set(["free", "normal"]);
+
 const HIDDEN_INFO_RISK_FIELDS = new Set([
   "opponentDeckList",
   "corpHiddenRndOrder",
@@ -660,7 +676,7 @@ function deriveFromImplementation(card, implementationText, hint) {
         targetCardType: valueNear(implementationText, "filter") ?? "program",
         installsTarget: true,
         installCost: valueNear(implementationText, "installCost"),
-        shuffleAfterwards: /shuffleAfterwards:\s*true/.test(implementationText),
+        shuffleAfter: /shuffleAfterwards:\s*true/.test(implementationText),
         source: "implementation.effect.search_stack_install",
       });
     }
@@ -698,10 +714,16 @@ function deriveFromImplementation(card, implementationText, hint) {
         arrayFirstNear(implementationText, "allowedTypes") ?? "program",
       installsTarget: true,
       installCost: valueNear(implementationText, "installCost"),
-      shuffleAfterwards: /shuffleAfterwards:\s*true/.test(implementationText),
+      shuffleAfter: /shuffleAfterwards:\s*true/.test(implementationText),
+      showToOpponent: true,
       source:
         "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
     });
+    if (/only once each run/i.test(implementationText)) {
+      facts.needsManualOverlayReasons.push(
+        "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field.",
+      );
+    }
   }
 
   if (/private_look_top_rd/.test(implementationText)) {
@@ -944,6 +966,12 @@ function compareFacts(derived, manual) {
   );
   const manualCoverage = new Set(manual.breakerProfile?.coverage ?? []);
   const derivedCoverage = new Set(derived.breakerProfile?.coverage ?? []);
+  const manualBreakerSideEffects = new Set(
+    manual.breakerProfile?.sideEffects ?? [],
+  );
+  const derivedBreakerSideEffects = new Set(
+    derived.breakerProfile?.sideEffects ?? [],
+  );
   const manualRemoteRole = manual.remoteRole?.kind;
   const derivedRemoteRole = derived.remoteRole?.kind;
 
@@ -953,7 +981,9 @@ function compareFacts(derived, manual) {
 
   for (const kind of derivedEffects) {
     if (manualEffects.has(kind)) matches.push(`effect:${kind}`);
-    else generatedOnly.push(`effect:${kind}`);
+    else if (!derivedEffectIsSelfDescribing(kind, derived)) {
+      generatedOnly.push(`effect:${kind}`);
+    }
   }
   for (const kind of manualEffects) {
     if (
@@ -971,7 +1001,14 @@ function compareFacts(derived, manual) {
     else generatedOnly.push(`condition:${kind}`);
   }
   for (const kind of manualConditions) {
-    if (!derivedConditions.has(kind)) manualOnly.push(`condition:${kind}`);
+    if (
+      !derivedConditions.has(kind) &&
+      !derivedCoversManualCondition(kind, derived)
+    ) {
+      manualOnly.push(`condition:${kind}`);
+    } else if (!derivedConditions.has(kind)) {
+      matches.push(`condition:${kind}`);
+    }
   }
 
   for (const coverage of derivedCoverage) {
@@ -982,6 +1019,19 @@ function compareFacts(derived, manual) {
   for (const coverage of manualCoverage) {
     if (!derivedCoverage.has(coverage))
       manualOnly.push(`breakerCoverage:${coverage}`);
+  }
+
+  for (const sideEffect of derivedBreakerSideEffects) {
+    if (manualBreakerSideEffects.has(sideEffect)) {
+      matches.push(`breakerSideEffect:${sideEffect}`);
+    } else {
+      generatedOnly.push(`breakerSideEffect:${sideEffect}`);
+    }
+  }
+  for (const sideEffect of manualBreakerSideEffects) {
+    if (!derivedBreakerSideEffects.has(sideEffect)) {
+      manualOnly.push(`breakerSideEffect:${sideEffect}`);
+    }
   }
 
   if (derivedRemoteRole || manualRemoteRole) {
@@ -1008,6 +1058,25 @@ function derivedCoversManualEffect(kind, derived) {
   return false;
 }
 
+function derivedCoversManualCondition(kind, derived) {
+  if (kind === "requires_installed_program") {
+    return (derived.targetProfiles ?? []).some(
+      (profile) =>
+        profile.installsTarget === true && profile.targetCardType === "program",
+    );
+  }
+  return false;
+}
+
+function derivedEffectIsSelfDescribing(kind, derived) {
+  if (kind === "topdeck_info") {
+    return (derived.targetProfiles ?? []).some(
+      (profile) => profile.zone === "stack_top" && profile.showToOpponent,
+    );
+  }
+  return false;
+}
+
 function descriptorGapsForCard(derivedFacts, overlap) {
   const gaps = [];
   if (derivedFacts.needsManualOverlayReasons.length > 0) {
@@ -1021,16 +1090,24 @@ function descriptorGapsForCard(derivedFacts, overlap) {
     );
   }
   if (
-    derivedFacts.effects.some(
-      (effect) => effect.kind === "search" || effect.kind === "topdeck_info",
-    ) &&
+    derivedFacts.effects.some((effect) => effect.kind === "search") &&
+    !derivedFacts.targetProfiles &&
     (overlap.generatedOnly.length > 0 || overlap.manualOnly.length > 0)
   ) {
     gaps.push(
       "Search/topdeck target granularity is not fully expressible in the current ontology comparison.",
     );
   }
-  if (overlap.manualOnly.length > 0) {
+  const manualOnlyStrategic = overlap.manualOnly.filter(isStrategicManualOnly);
+  const manualOnlyNonStrategic = overlap.manualOnly.filter(
+    (item) => !isStrategicManualOnly(item),
+  );
+  if (manualOnlyStrategic.length > 0) {
+    gaps.push(
+      `Intentionally manual strategic overlay is not derived: ${manualOnlyStrategic.join(", ")}.`,
+    );
+  }
+  if (manualOnlyNonStrategic.length > 0) {
     gaps.push("Manual ontology contains fields not currently derivable.");
   }
   if (overlap.generatedOnly.length > 0) {
@@ -1039,6 +1116,14 @@ function descriptorGapsForCard(derivedFacts, overlap) {
     );
   }
   return [...new Set(gaps)].sort();
+}
+
+function isStrategicManualOnly(item) {
+  return new Set([
+    "condition:requires_rnd_pressure",
+    "condition:requires_successful_run",
+    "effect:remote_protection",
+  ]).has(item);
 }
 
 function warningsForCard({
@@ -1190,6 +1275,60 @@ function validateDerivedFacts(derivedFacts) {
       "unknown_remote_role",
       issues,
     );
+  }
+  for (const [index, targetProfile] of (
+    derivedFacts.targetProfiles ?? []
+  ).entries()) {
+    validateKnown(
+      targetProfile.zone,
+      KNOWN_TARGET_ZONES,
+      `targetProfiles[${index}].zone`,
+      "unknown_target_zone",
+      issues,
+    );
+    if (targetProfile.targetCardType !== undefined) {
+      validateKnown(
+        targetProfile.targetCardType,
+        KNOWN_TARGET_CARD_TYPES,
+        `targetProfiles[${index}].targetCardType`,
+        "unknown_target_card_type",
+        issues,
+      );
+    }
+    if (targetProfile.installCost !== undefined) {
+      validateKnown(
+        targetProfile.installCost,
+        KNOWN_TARGET_INSTALL_COSTS,
+        `targetProfiles[${index}].installCost`,
+        "unknown_target_install_cost",
+        issues,
+      );
+    }
+    for (const field of [
+      "installsTarget",
+      "shuffleAfter",
+      "showToOpponent",
+      "oncePerRun",
+    ]) {
+      if (
+        targetProfile[field] !== undefined &&
+        typeof targetProfile[field] !== "boolean"
+      ) {
+        issues.push({
+          kind: "invalid_target_profile_shape",
+          message: `Expected boolean at targetProfiles[${index}].${field}.`,
+        });
+      }
+    }
+    if (
+      targetProfile.lookCount !== undefined &&
+      (!Number.isFinite(targetProfile.lookCount) || targetProfile.lookCount < 1)
+    ) {
+      issues.push({
+        kind: "invalid_target_profile_shape",
+        message: `Expected positive number at targetProfiles[${index}].lookCount.`,
+      });
+    }
   }
   return issues;
 }

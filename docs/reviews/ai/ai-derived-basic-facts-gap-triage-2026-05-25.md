@@ -40,7 +40,7 @@ Aktueller Gap: `search` und `requires_during_run` sind ableitbar. Zieltyp, Stack
 
 Entscheidung: Derived-Facts-Verbesserung plus verbleibender Schema-Gap.
 
-Änderung: Der Report enthält jetzt `targetProfiles` mit `zone: "stack"`, `targetCardType: "program"`, `installsTarget: true`, `installCost: "normal"` und `shuffleAfterwards: true`. `install_discount` wird nicht künstlich aus `installCost: "normal"` erzeugt.
+Änderung: Der Report enthält jetzt `targetProfiles` mit `zone: "stack"`, `targetCardType: "program"`, `installsTarget: true`, `installCost: "normal"` und `shuffleAfter: true`. `install_discount` wird nicht künstlich aus `installCost: "normal"` erzeugt.
 
 ### Mystery Box
 
@@ -48,7 +48,7 @@ Aktueller Gap: Search, Topdeck-Info, Install und During-Run sind ableitbar; Top-
 
 Entscheidung: Derived-Facts-Verbesserung plus verbleibender Schema-Gap.
 
-Änderung: Der Report enthält jetzt `targetProfiles` mit `zone: "stack_top"`, `lookCount: 5`, `targetCardType: "program"`, `installsTarget: true`, `installCost: "free"` und `shuffleAfterwards: true`. Das ersetzt keine strategischen Hints und wird nicht konsumiert.
+Änderung: Der Report enthält jetzt `targetProfiles` mit `zone: "stack_top"`, `lookCount: 5`, `targetCardType: "program"`, `installsTarget: true`, `installCost: "free"` und `shuffleAfter: true`. Das ersetzt keine strategischen Hints und wird nicht konsumiert.
 
 ### Deep Thought
 

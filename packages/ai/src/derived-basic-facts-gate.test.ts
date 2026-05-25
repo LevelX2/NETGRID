@@ -46,6 +46,8 @@ type DerivedFactsReport = {
         lookCount?: number;
         targetCardType?: string;
         installsTarget?: boolean;
+        shuffleAfter?: boolean;
+        showToOpponent?: boolean;
       }>;
     };
     overlap: {
@@ -108,6 +110,7 @@ describe("derived basic facts gate report", () => {
         zone: "stack",
         targetCardType: "program",
         installsTarget: true,
+        shuffleAfter: true,
       }),
     );
 
@@ -118,6 +121,8 @@ describe("derived basic facts gate report", () => {
         lookCount: 5,
         targetCardType: "program",
         installsTarget: true,
+        shuffleAfter: true,
+        showToOpponent: true,
       }),
     );
 

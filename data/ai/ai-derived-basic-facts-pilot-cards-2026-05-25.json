@@ -8,7 +8,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
       "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Breaker coverage is derivable, while the future action-debt side effect still needs descriptor or overlay review."
+      "rationale": "Breaker coverage and the manual forgo_actions side-effect comparison are derivable, while future action-debt is still not structured in a resolver descriptor."
     },
     {
       "cardId": "onr_v1_039_krash",
@@ -27,7 +27,7 @@
         "condition:requires_during_run"
       ],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Search timing is derivable, but installed-program and discount semantics remain overlay/schema-granularity gaps."
+      "rationale": "Search timing and target profile are derivable; the manual install_discount field is not generated because the implementation uses normal install cost."
     },
     {
       "cardId": "onr_v1_043_mystery-box",
@@ -40,7 +40,7 @@
         "condition:requires_during_run"
       ],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Top-of-stack search and install are derivable, but target granularity is still more precise than the current ontology."
+      "rationale": "Top-of-stack search, show-to-Corp target profile and free program install are derivable; the once-per-run limit is not structured in a resolver descriptor."
     },
     {
       "cardId": "onr_v1_048_poltergeist",
@@ -76,7 +76,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/deep-thought.ts",
       "expectedDerivableKinds": ["effect:topdeck_info"],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Topdeck information is derivable; R&D-pressure conditions remain strategic overlay."
+      "rationale": "Topdeck information is derivable; R&D-pressure and interface-pressure conditions remain intentionally manual strategic overlay."
     },
     {
       "cardId": "onr_v1_210_political-overthrow",
@@ -211,7 +211,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
       "expectedDerivableKinds": ["effect:run_tax", "remoteRole:run_tax"],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays."
+      "rationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays; remote_protection remains intentionally manual strategic overlay."
     },
     {
       "cardId": "onr_v1_366_red-herrings",
@@ -222,7 +222,7 @@
         "remoteRole:agenda_steal_tax"
       ],
       "expectedManualOverlayNeeded": true,
-      "rationale": "Agenda steal tax is derivable; access-condition and protection interpretation remain overlay/schema gaps."
+      "rationale": "Agenda steal tax and accessed-card condition are derivable; remote_protection remains intentionally manual strategic overlay."
     },
     {
       "cardId": "onr_v1_302_scorched-earth",
