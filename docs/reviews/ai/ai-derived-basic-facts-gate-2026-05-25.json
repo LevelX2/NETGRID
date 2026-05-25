@@ -10,7 +10,7 @@
   "implementationFoundCount": 24,
   "cardsWithDerivedFacts": 24,
   "cardsWithManualOntologyOverlap": 24,
-  "cardsNeedingManualOverlay": 9,
+  "cardsNeedingManualOverlay": 6,
   "effectKindCounts": {
     "access_replacement": 1,
     "breaker": 2,
@@ -23,7 +23,7 @@
     "install_discount": 1,
     "program_trash": 1,
     "remote_protection": 1,
-    "run_tax": 3,
+    "run_tax": 4,
     "scored_agenda_action": 7,
     "search": 2,
     "tag_punish_payoff": 4,
@@ -33,6 +33,7 @@
     "trash_credit": 2
   },
   "conditionKindCounts": {
+    "requires_accessed_card": 1,
     "requires_during_run": 5,
     "requires_runner_tagged": 4,
     "requires_scored_agenda": 7,
@@ -42,7 +43,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 56,
+  "warningCount": 49,
   "warnings": [
     {
       "kind": "descriptor_or_overlay_gap",
@@ -175,16 +176,6 @@
       "cardId": "onr_v1_199_employee-empowerment"
     },
     {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_207_netwatch-operations-office"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual effect:tag has no generated basic fact match.",
-      "cardId": "onr_v1_207_netwatch-operations-office"
-    },
-    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_207_netwatch-operations-office"
@@ -230,16 +221,6 @@
       "cardId": "onr_v1_276_viral-15"
     },
     {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_276_viral-15"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual effect:run_tax has no generated basic fact match.",
-      "cardId": "onr_v1_276_viral-15"
-    },
-    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_276_viral-15"
@@ -270,16 +251,6 @@
       "cardId": "onr_v1_284_chance-observation"
     },
     {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_285_closed-accounts"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:counter_economy has no manual ontology match.",
-      "cardId": "onr_v1_285_closed-accounts"
-    },
-    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_285_closed-accounts"
@@ -307,11 +278,6 @@
     {
       "kind": "descriptor_or_overlay_gap",
       "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_366_red-herrings"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual condition:requires_accessed_card has no generated basic fact match.",
       "cardId": "onr_v1_366_red-herrings"
     },
     {
@@ -658,7 +624,18 @@
         ],
         "costProfile": {},
         "derivationNotes": [],
-        "needsManualOverlayReasons": []
+        "needsManualOverlayReasons": [],
+        "targetProfiles": [
+          {
+            "zone": "stack_top",
+            "lookCount": 5,
+            "targetCardType": "program",
+            "installsTarget": true,
+            "installCost": "free",
+            "shuffleAfterwards": true,
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
+          }
+        ]
       },
       "manualOntologySummary": {
         "hintPresent": true,
@@ -1030,7 +1007,17 @@
         ],
         "costProfile": {},
         "derivationNotes": [],
-        "needsManualOverlayReasons": []
+        "needsManualOverlayReasons": [],
+        "targetProfiles": [
+          {
+            "zone": "stack",
+            "targetCardType": "program",
+            "installsTarget": true,
+            "installCost": "normal",
+            "shuffleAfterwards": true,
+            "source": "implementation.effect.search_stack_install"
+          }
+        ]
       },
       "manualOntologySummary": {
         "hintPresent": true,
@@ -1431,8 +1418,8 @@
         "condition:requires_scored_agenda",
         "condition:requires_trace_success"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Trace tag-source mechanics are derivable; legacy tag effect alignment remains manual overlay.",
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace tag-source mechanics are derivable; legacy tag effect alignment is covered by the generated tag_source fact.",
       "derivedFacts": {
         "effects": [
           {
@@ -1535,26 +1522,17 @@
           "condition:requires_scored_agenda",
           "condition:requires_trace_success",
           "effect:scored_agenda_action",
+          "effect:tag",
           "effect:tag_source",
           "effect:trace"
         ],
         "generatedOnly": [],
-        "manualOnly": ["effect:tag"]
+        "manualOnly": []
       },
-      "missingManualOverlay": ["effect:tag"],
-      "descriptorGaps": [
-        "Manual ontology contains fields not currently derivable."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:tag has no generated basic fact match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -2027,11 +2005,12 @@
       "implementationFound": true,
       "expectedDerivableKinds": [
         "effect:future_run_effect",
+        "effect:run_tax",
         "effect:program_trash",
         "condition:requires_during_run"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Future-run and program-trash semantics are derivable; jack-out tax remains overlay/schema work.",
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Future-run, jack-out tax and program-trash semantics are mechanically derivable at coarse gate granularity.",
       "derivedFacts": {
         "effects": [
           {
@@ -2047,6 +2026,15 @@
             "timing": "encounter",
             "scope": "runner",
             "source": "implementation.printedSubroutines.run_duration_trash_program"
+          },
+          {
+            "confidence": "medium",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "source": "implementation.printedSubroutines.run_duration_jack_out_cost"
           }
         ],
         "conditions": [
@@ -2107,15 +2095,15 @@
         "matches": [
           "condition:requires_during_run",
           "effect:future_run_effect",
-          "effect:program_trash"
+          "effect:program_trash",
+          "effect:run_tax"
         ],
         "generatedOnly": [],
-        "manualOnly": ["effect:run_tax"]
+        "manualOnly": []
       },
-      "missingManualOverlay": ["effect:run_tax"],
+      "missingManualOverlay": [],
       "descriptorGaps": [
-        "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
-        "Manual ontology contains fields not currently derivable."
+        "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
       ],
       "confidence": "medium",
       "warnings": [
@@ -2126,14 +2114,6 @@
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:run_tax has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -2471,8 +2451,8 @@
         "effect:tag_punish_payoff",
         "condition:requires_runner_tagged"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Tagged-runner payoff is represented; counter-economy classification was not manually mirrored.",
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner payoff and counter-economy classification are directly represented.",
       "derivedFacts": {
         "effects": [
           {
@@ -2511,6 +2491,12 @@
         "planRoles": ["bait_runner", "recover_economy"],
         "effects": [
           {
+            "kind": "counter_economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits"
+          },
+          {
             "kind": "tag_punish_payoff",
             "timing": "action",
             "scope": "runner",
@@ -2539,25 +2525,16 @@
       "overlap": {
         "matches": [
           "condition:requires_runner_tagged",
+          "effect:counter_economy",
           "effect:tag_punish_payoff"
         ],
-        "generatedOnly": ["effect:counter_economy"],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": ["effect:counter_economy"],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:counter_economy has no manual ontology match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -2777,14 +2754,20 @@
           {
             "confidence": "high",
             "kind": "run_tax",
-            "timing": "persistent",
-            "scope": "remote",
+            "timing": "on_access",
+            "scope": "accessed_card",
             "resource": "credits",
             "amount": 5,
             "source": "implementation.modifiers.steal_cost"
           }
         ],
-        "conditions": [],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_accessed_card",
+            "source": "implementation.modifiers.steal_cost.appliesTo.agenda"
+          }
+        ],
         "costProfile": {},
         "derivationNotes": [
           "Active board-state still belongs to engine/runtime; derived facts only describe the mechanical class."
@@ -2851,17 +2834,15 @@
         }
       },
       "overlap": {
-        "matches": ["effect:run_tax", "remoteRole:agenda_steal_tax"],
-        "generatedOnly": [],
-        "manualOnly": [
+        "matches": [
           "condition:requires_accessed_card",
-          "effect:remote_protection"
-        ]
+          "effect:run_tax",
+          "remoteRole:agenda_steal_tax"
+        ],
+        "generatedOnly": [],
+        "manualOnly": ["effect:remote_protection"]
       },
-      "missingManualOverlay": [
-        "condition:requires_accessed_card",
-        "effect:remote_protection"
-      ],
+      "missingManualOverlay": ["effect:remote_protection"],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
       ],
@@ -2870,10 +2851,6 @@
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_accessed_card has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",

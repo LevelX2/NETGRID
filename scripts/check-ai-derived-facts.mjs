@@ -654,6 +654,16 @@ function deriveFromImplementation(card, implementationText, hint) {
         source: "implementation.ability.timing.during_run",
       });
     }
+    if (/kind:\s*"search_stack_install"/.test(implementationText)) {
+      addTargetProfile(facts, {
+        zone: "stack",
+        targetCardType: valueNear(implementationText, "filter") ?? "program",
+        installsTarget: true,
+        installCost: valueNear(implementationText, "installCost"),
+        shuffleAfterwards: /shuffleAfterwards:\s*true/.test(implementationText),
+        source: "implementation.effect.search_stack_install",
+      });
+    }
   }
 
   if (
@@ -677,6 +687,20 @@ function deriveFromImplementation(card, implementationText, hint) {
       scope: "runner",
       source:
         "implementation.effect.look_top_stack_show_to_corp_then_install_matching.installCost",
+    });
+    addTargetProfile(facts, {
+      zone: "stack_top",
+      lookCount: countNear(
+        implementationText,
+        "look_top_stack_show_to_corp_then_install_matching",
+      ),
+      targetCardType:
+        arrayFirstNear(implementationText, "allowedTypes") ?? "program",
+      installsTarget: true,
+      installCost: valueNear(implementationText, "installCost"),
+      shuffleAfterwards: /shuffleAfterwards:\s*true/.test(implementationText),
+      source:
+        "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
     });
   }
 
@@ -728,6 +752,17 @@ function deriveFromImplementation(card, implementationText, hint) {
           "implementation.printedSubroutines.run_duration_break_subroutine_cost",
       });
     }
+    if (/run_duration_jack_out_cost/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "run_tax",
+        timing: "encounter",
+        scope: "run_path",
+        resource: "credits",
+        amount: amountNear(implementationText, "run_duration_jack_out_cost"),
+        confidence: "medium",
+        source: "implementation.printedSubroutines.run_duration_jack_out_cost",
+      });
+    }
     if (/run_duration_trash_program/.test(implementationText)) {
       addEffect(facts, {
         kind: "program_trash",
@@ -770,11 +805,15 @@ function deriveFromImplementation(card, implementationText, hint) {
   if (/kind:\s*"steal_cost"/.test(implementationText)) {
     addEffect(facts, {
       kind: "run_tax",
-      timing: "persistent",
-      scope: "remote",
+      timing: "on_access",
+      scope: "accessed_card",
       resource: "credits",
       amount: amountNear(implementationText, "steal_cost"),
       source: "implementation.modifiers.steal_cost",
+    });
+    addCondition(facts, {
+      kind: "requires_accessed_card",
+      source: "implementation.modifiers.steal_cost.appliesTo.agenda",
     });
     facts.remoteRole = {
       kind: "agenda_steal_tax",
@@ -805,6 +844,19 @@ function deriveFromImplementation(card, implementationText, hint) {
   if (facts.breakerProfile?.coverage) facts.breakerProfile.coverage.sort();
   if (facts.breakerProfile?.sideEffects)
     facts.breakerProfile.sideEffects.sort();
+  if (facts.targetProfiles) {
+    facts.targetProfiles = uniqueBy(
+      facts.targetProfiles,
+      (targetProfile) =>
+        `${targetProfile.zone ?? ""}:${targetProfile.targetCardType ?? ""}:${
+          targetProfile.installsTarget ?? ""
+        }:${targetProfile.lookCount ?? ""}`,
+    ).sort((a, b) =>
+      `${a.zone ?? ""}:${a.targetCardType ?? ""}`.localeCompare(
+        `${b.zone ?? ""}:${b.targetCardType ?? ""}`,
+      ),
+    );
+  }
 
   return facts;
 }
@@ -821,6 +873,11 @@ function addCondition(facts, condition) {
     confidence: "high",
     ...condition,
   });
+}
+
+function addTargetProfile(facts, targetProfile) {
+  facts.targetProfiles ??= [];
+  facts.targetProfiles.push(targetProfile);
 }
 
 function summarizeManualOntology(hint) {
@@ -899,7 +956,14 @@ function compareFacts(derived, manual) {
     else generatedOnly.push(`effect:${kind}`);
   }
   for (const kind of manualEffects) {
-    if (!derivedEffects.has(kind)) manualOnly.push(`effect:${kind}`);
+    if (
+      !derivedEffects.has(kind) &&
+      !derivedCoversManualEffect(kind, derived)
+    ) {
+      manualOnly.push(`effect:${kind}`);
+    } else if (!derivedEffects.has(kind)) {
+      matches.push(`effect:${kind}`);
+    }
   }
 
   for (const kind of derivedConditions) {
@@ -935,6 +999,13 @@ function compareFacts(derived, manual) {
     generatedOnly: generatedOnly.sort(),
     manualOnly: manualOnly.sort(),
   };
+}
+
+function derivedCoversManualEffect(kind, derived) {
+  if (kind === "tag") {
+    return derived.effects.some((effect) => effect.kind === "tag_source");
+  }
+  return false;
 }
 
 function descriptorGapsForCard(derivedFacts, overlap) {
@@ -1202,6 +1273,23 @@ function amountNear(text, kind) {
     new RegExp(`kind:\\s*"${kind}"[\\s\\S]{0,240}?amount:\\s*(\\d+)`),
   );
   return match ? Number(match[1]) : undefined;
+}
+
+function countNear(text, kind) {
+  const match = text.match(
+    new RegExp(`kind:\\s*"${kind}"[\\s\\S]{0,240}?count:\\s*(\\d+)`),
+  );
+  return match ? Number(match[1]) : undefined;
+}
+
+function valueNear(text, field) {
+  const match = text.match(new RegExp(`${field}:\\s*"([^"]+)"`));
+  return match?.[1];
+}
+
+function arrayFirstNear(text, field) {
+  const match = text.match(new RegExp(`${field}:\\s*\\[\\s*"([^"]+)"`));
+  return match?.[1];
 }
 
 function uniqueBy(items, keyFn) {

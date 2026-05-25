@@ -41,6 +41,12 @@ type DerivedFactsReport = {
       conditions?: unknown[];
       breakerProfile?: unknown;
       remoteRole?: unknown;
+      targetProfiles?: Array<{
+        zone?: string;
+        lookCount?: number;
+        targetCardType?: string;
+        installsTarget?: boolean;
+      }>;
     };
     overlap: {
       matches: string[];
@@ -62,7 +68,7 @@ describe("derived basic facts gate report", () => {
     expect(report.implementationFoundCount).toBe(24);
     expect(report.cardsWithDerivedFacts).toBe(24);
     expect(report.cardsWithManualOntologyOverlap).toBe(24);
-    expect(report.cardsNeedingManualOverlay).toBe(9);
+    expect(report.cardsNeedingManualOverlay).toBe(6);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
       report.cards.every(
@@ -91,6 +97,45 @@ describe("derived basic facts gate report", () => {
     expect(report.hardConflicts).toEqual([]);
   });
 
+  it("captures the triaged mechanical gap improvements", () => {
+    const report = readReport();
+    const selfModifyingCode = cardById(
+      report,
+      "onr_v1_059_self-modifying-code",
+    );
+    expect(selfModifyingCode.derivedFacts.targetProfiles).toContainEqual(
+      expect.objectContaining({
+        zone: "stack",
+        targetCardType: "program",
+        installsTarget: true,
+      }),
+    );
+
+    const mysteryBox = cardById(report, "onr_v1_043_mystery-box");
+    expect(mysteryBox.derivedFacts.targetProfiles).toContainEqual(
+      expect.objectContaining({
+        zone: "stack_top",
+        lookCount: 5,
+        targetCardType: "program",
+        installsTarget: true,
+      }),
+    );
+
+    const viral15 = cardById(report, "onr_v1_276_viral-15");
+    expect(viral15.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "run_tax",
+        amount: 1,
+        source: "implementation.printedSubroutines.run_duration_jack_out_cost",
+      }),
+    );
+
+    const redHerrings = cardById(report, "onr_v1_366_red-herrings");
+    expect(redHerrings.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_accessed_card" }),
+    );
+  });
+
   it("does not emit hidden-info fields in generated facts", () => {
     const serialized = JSON.stringify(
       readReport().cards.map((card) => card.derivedFacts),
@@ -116,4 +161,10 @@ function runGateJson(): DerivedFactsReport {
 
 function readReport(): DerivedFactsReport {
   return JSON.parse(fs.readFileSync(reportPath, "utf8")) as DerivedFactsReport;
+}
+
+function cardById(report: DerivedFactsReport, cardId: string) {
+  const card = report.cards.find((candidate) => candidate.cardId === cardId);
+  expect(card).toBeDefined();
+  return card!;
 }

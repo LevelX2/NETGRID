@@ -9606,6 +9606,13 @@
       },
       "effects": [
         {
+          "kind": "counter_economy",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "credits",
+          "finite": true
+        },
+        {
           "kind": "tag_punish_payoff",
           "timing": "action",
           "scope": "runner",

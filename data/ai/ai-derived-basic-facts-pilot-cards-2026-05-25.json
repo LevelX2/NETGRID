@@ -137,8 +137,8 @@
         "condition:requires_scored_agenda",
         "condition:requires_trace_success"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Trace tag-source mechanics are derivable; legacy tag effect alignment remains manual overlay."
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace tag-source mechanics are derivable; legacy tag effect alignment is covered by the generated tag_source fact."
     },
     {
       "cardId": "onr_v1_208_on-call-solo-team",
@@ -198,11 +198,12 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/viral-15.ts",
       "expectedDerivableKinds": [
         "effect:future_run_effect",
+        "effect:run_tax",
         "effect:program_trash",
         "condition:requires_during_run"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Future-run and program-trash semantics are derivable; jack-out tax remains overlay/schema work."
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Future-run, jack-out tax and program-trash semantics are mechanically derivable at coarse gate granularity."
     },
     {
       "cardId": "onr_v1_355_crystal-palace-station-grid",
@@ -244,8 +245,8 @@
         "effect:tag_punish_payoff",
         "condition:requires_runner_tagged"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Tagged-runner payoff is represented; counter-economy classification was not manually mirrored."
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner payoff and counter-economy classification are directly represented."
     },
     {
       "cardId": "onr_v1_283_audit-of-call-records",

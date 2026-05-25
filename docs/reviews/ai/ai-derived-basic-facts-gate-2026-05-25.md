@@ -58,12 +58,12 @@ Warnings blockieren nicht. Sie markieren bekannten Descriptor-/Overlay-Bedarf:
 
 Aktueller Stand:
 
-- Warnings: 56
+- Warnings: 49
 - `text_pattern_derivation`: 24
-- `descriptor_or_overlay_gap`: 16
-- `manual_ontology_without_generated_match`: 10
+- `descriptor_or_overlay_gap`: 13
+- `manual_ontology_without_generated_match`: 7
 - `confidence_mismatch`: 4
-- `generated_fact_without_manual_match`: 2
+- `generated_fact_without_manual_match`: 1
 
 ## Pilotkartenumfang
 
@@ -77,7 +77,7 @@ Kennzahlen:
 - Implementations gefunden: 24
 - Karten mit Derived Facts: 24
 - Karten mit manueller Ontology-Überschneidung: 24
-- Karten mit Manual-Overlay-/Descriptor-Bedarf: 9
+- Karten mit Manual-Overlay-/Descriptor-Bedarf: 6
 
 Effect-Kinds:
 
@@ -92,7 +92,7 @@ Effect-Kinds:
 - `install_discount`: 1
 - `program_trash`: 1
 - `remote_protection`: 1
-- `run_tax`: 3
+- `run_tax`: 4
 - `scored_agenda_action`: 7
 - `search`: 2
 - `tag_punish_payoff`: 4
@@ -103,6 +103,7 @@ Effect-Kinds:
 
 Condition-Kinds:
 
+- `requires_accessed_card`: 1
 - `requires_during_run`: 5
 - `requires_runner_tagged`: 4
 - `requires_scored_agenda`: 7
@@ -111,19 +112,16 @@ Condition-Kinds:
 
 ## Bekannte Lücken
 
-Die neun stabilen Manual-Overlay-/Descriptor-Kandidaten sind:
+Nach der fachlichen Gap-Triage bleiben sechs stabile Manual-Overlay-/Descriptor-Kandidaten:
 
 - `onr_v1_017_deep-thought`
 - `onr_v1_037_japanese-water-torture`
 - `onr_v1_043_mystery-box`
 - `onr_v1_059_self-modifying-code`
-- `onr_v1_207_netwatch-operations-office`
-- `onr_v1_276_viral-15`
-- `onr_v1_285_closed-accounts`
 - `onr_v1_355_crystal-palace-station-grid`
 - `onr_v1_366_red-herrings`
 
-Wichtig: Diese Lücken sind keine AI-Support-Demotion. Sie zeigen nur, wo generierte mechanische Facts und manuelle strategische Ontology noch nicht deckungsgleich sind oder wo Descriptor-Granularität fehlt.
+Geschlossen wurden `Netwatch Operations Office`, `Viral 15` und `Closed Accounts`; Details stehen in `ai-derived-basic-facts-gap-triage-2026-05-25.md`. Wichtig: Die verbleibenden Lücken sind keine AI-Support-Demotion. Sie zeigen nur, wo generierte mechanische Facts und manuelle strategische Ontology noch nicht deckungsgleich sind oder wo Descriptor-Granularität fehlt.
 
 ## Ontology-Validation
 
@@ -148,4 +146,4 @@ Die Engine bleibt Regelautorität. Generated Facts bleiben mechanische Klassifik
 
 ## Nächster Schritt
 
-Der nächste praktische Schritt ist ein kleinerer Deriver-Hardening-Slice: nicht die Planer anbinden, sondern die Text-/Pattern-Ableitung durch stabilere Descriptor-Inputs ersetzen oder gezielt neue CardImplementation-Descriptoren für die neun Overlay-/Gap-Kandidaten ergänzen.
+Der nächste praktische Schritt ist ein kleinerer Deriver-Hardening-Slice: nicht die Planer anbinden, sondern die Text-/Pattern-Ableitung durch stabilere Descriptor-Inputs ersetzen oder gezielt neue CardImplementation-Descriptoren für die sechs verbleibenden Overlay-/Gap-Kandidaten ergänzen.
