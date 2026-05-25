@@ -132,7 +132,6 @@ import {
 } from "./game/turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "./game/turn/runner-hidden-zone-search-actions";
 import {
-  buildRunnerSelfModifyingCodeInstallAction,
   buildRunnerShellTradersRemoveCounterAction,
   buildRunnerShellTradersSetAsideAction,
   buildRunnerValuPakInstallAction,
@@ -341,6 +340,14 @@ import {
   resolveEncounterPrintedNonTraceEffect,
   type EncounterPrintedNonTraceHost,
 } from "./game/run/encounter-printed-nontrace-effects";
+import {
+  breakAbilityMatchesIce,
+  breakAbilityMatchesSubroutine,
+  buildMysteryBoxRunActions,
+  buildRunnerEncounterActions,
+  buildRunnerMovementActions,
+  type RunnerEncounterActionHost,
+} from "./game/run/encounter-actions";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -365,7 +372,6 @@ export {
 import {
   additionalSubroutinesForIce,
   currentEncounterAdditionalSubroutinesForIce,
-  dynamicSubroutineAttributionFor,
 } from "./ability-engine/additional-subroutine-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "./ability-engine/break-subroutine-cost-modifiers";
 import { runnerCardImplementationAbilityLimitHost } from "./ability-engine/card-implementation-ability-limits";
@@ -526,7 +532,6 @@ import {
   TOO_MANY_DOORS_ID,
 } from "./compatibility/runtime-compatibility";
 import {
-  AI_BOON_RANDOM_BREAKER_CARD_ID,
   BOARDWALK_RANDOM_PROGRAM_CARD_ID,
   QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
   RUNNER_RANDOM_PROGRAM_CARD_IDS,
@@ -2357,7 +2362,11 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
       ? [choiceAction(state, state.pendingChoice)]
       : [];
   if (state.run?.postPassPayOrEndRun)
-    return side === "runner" ? postPassPayOrEndRunActions(state) : [];
+    return side === "runner"
+      ? buildRunnerMovementActions(
+          runnerEncounterActionHostForState(state),
+        ).legalActions
+      : [];
   if (state.runnerVirusPurgeWindow)
     return side === "corp" && purgeableRunnerVirusCounterTotal(state) > 0
       ? [buildPurgeableRunnerVirusPurgeAction(state)]
@@ -2405,13 +2414,20 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
     return side === "corp" ? corpApproachActions(state) : [];
   }
   if (state.timingPoint === "run.encounter_ice") {
-    if (side === "runner") return runnerEncounterActions(state);
+    if (side === "runner")
+      return buildRunnerEncounterActions(
+        runnerEncounterActionHostForState(state),
+      ).legalActions;
     return side === "corp" ? corpEncounterActions(state) : [];
   }
   if (state.timingPoint === "run.jack_out_window") {
     if (side === "corp") return corpRunRootRezWindowActions(state);
     if (isCorpRunRootRezWindowOpen(state)) return [];
-    return side === "runner" ? runnerMovementActions(state) : [];
+    return side === "runner"
+      ? buildRunnerMovementActions(
+          runnerEncounterActionHostForState(state),
+        ).legalActions
+      : [];
   }
   if (state.timingPoint === "access.resolve_card")
     return side === "runner"
@@ -6262,393 +6278,6 @@ function runnerApproachIceExposeViewingActions(state: GameState): LegalAction[] 
   ];
 }
 
-function selfModifyingCodeEncounterActions(state: GameState): LegalAction[] {
-  if (
-    state.timingPoint !== "run.encounter_ice" ||
-    state.activeSide !== "runner" ||
-    !state.run?.encounteredIceId ||
-    !state.runner.stack.some((cardId) => definitionFor(state, cardId).type === "program")
-  )
-    return [];
-  return state.runner.rig.programs
-    .slice()
-    .sort()
-    .filter((cardId) => definitionFor(state, cardId).id === SELF_MODIFYING_CODE_ID)
-    .filter(
-      (cardId) =>
-        !cardImplementationForDefinitionId(definitionFor(state, cardId).id),
-    )
-    .map((cardId) =>
-      buildRunnerSelfModifyingCodeInstallAction(state, cardId),
-    );
-}
-
-function runnerEncounterActions(state: GameState): LegalAction[] {
-  const run = mustRun(state);
-  if (!run.encounteredIceId) return [];
-  const encounteredIceId = run.encounteredIceId;
-  const iceDefinition = definitionFor(state, run.encounteredIceId);
-  const encounterSubroutines = subroutinesForCurrentEncounter(
-    state,
-    iceDefinition,
-  );
-  const encounteredIceSubtypes = effectiveSubtypesForCard(
-    state,
-    encounteredIceId,
-    iceDefinition,
-  );
-  const encounteredIceStrength = iceStrengthFor(state, encounteredIceId);
-  const actions: LegalAction[] = [];
-  actions.push(...runnerDuringRunCardImplementationActions(state));
-  actions.push(...selfModifyingCodeEncounterActions(state));
-  for (const breakerId of state.runner.rig.programs) {
-    const breaker = definitionFor(state, breakerId);
-    if (!runnerCanUseBreakerOnCurrentFort(state, breakerId)) continue;
-    const breakerBaseStrength =
-      typeof run.aiBoonRunStrengthByBreaker?.[breakerId] === "number"
-        ? run.aiBoonRunStrengthByBreaker[breakerId]
-        : breaker.id === AI_BOON_RANDOM_BREAKER_CARD_ID &&
-            typeof run.aiBoonRunStrength === "number"
-          ? run.aiBoonRunStrength
-        : (breaker.strength ?? 0);
-    const breakerStrength =
-      breakerBaseStrength +
-      mustInstance(state.cardInstances, breakerId).strengthModifier +
-      hostedProgramStrengthModifier(state, breakerId) +
-      cardCounter(state, breakerId, "militech") +
-      cardCounter(state, breakerId, "pattel_antibody") * -1 +
-      dupreStrengthCounterBonus(state, breakerId) +
-      runRemainderStrengthBonusForBreaker(run, breakerId);
-    const breakerAbilities = icebreakerAbilitiesForDefinition(breaker);
-    const breakAbilities = breakerAbilities.filter(
-      (ability) =>
-        ability.type === "break_subroutine" &&
-        breakAbilityMatchesIce(ability, encounteredIceSubtypes),
-    );
-    const hasEligibleBreakTarget = breakAbilities.some((ability) =>
-      encounterSubroutines.some(
-        (subroutine, index) =>
-          breakAbilityMatchesSubroutine(ability, subroutine) &&
-          !run.brokenSubroutineIndexes.includes(index) &&
-          !run.resolvedSubroutineIndexes.includes(index),
-      ),
-    );
-    const pump = breakerAbilities.find(
-      (ability) => ability.type === "pump_strength",
-    );
-    if (
-      pump &&
-      !run.noBreakSubroutinesActive &&
-      hasEligibleBreakTarget &&
-      availableRunnerRunCredits(runDurationPaymentHost(state), breakerId) >=
-      pump.cost.credits
-    ) {
-      const variableStrength = pump.variableStrength;
-      if (variableStrength) {
-        const maxAmount = Math.max(
-          0,
-          Math.floor(
-            availableRunnerRunCredits(runDurationPaymentHost(state), breakerId),
-          ),
-        );
-        for (
-          let amount = Math.max(1, Math.floor(variableStrength.min));
-          amount <= maxAmount;
-          amount += 1
-        ) {
-          actions.push(
-            action(
-              state,
-              "runner",
-              "pump_breaker",
-              `${breaker.title}: Stärke +${amount}`,
-              breakerId,
-              [{ credits: amount }],
-              {
-                breakerId,
-                iceId: encounteredIceId,
-                pumpAmount: amount,
-                futureActionDebtAdded: amount,
-              },
-              abilityMetadata(breakerId, pump.id, encounteredIceId),
-            ),
-          );
-        }
-      } else {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "pump_breaker",
-            `${breaker.title}: Stärke +${pump.amount ?? 1}`,
-            breakerId,
-            [{ credits: pump.cost.credits }],
-            { breakerId, iceId: encounteredIceId },
-            abilityMetadata(breakerId, pump.id, encounteredIceId),
-          ),
-        );
-      }
-    }
-    const canPayAtLeastOneBreakAbility = breakAbilities.some((ability) => {
-      const cost = breakSubroutineCostBreakdown(state, ability.cost.credits, 1);
-      return (
-        availableRunnerRunCredits(runDurationPaymentHost(state), breakerId) >=
-        cost.totalCost
-      );
-    });
-    if (
-      !run.noBreakSubroutinesActive &&
-      breakAbilities.length > 0 &&
-      breakerStrength >= encounteredIceStrength &&
-      canPayAtLeastOneBreakAbility &&
-      breakAbilities.every(
-        (ability) =>
-          breaker.id !== PILE_DRIVER_ID ||
-          ability.postBreakStealthLossMode !== "total_if_available" ||
-          runnerStealthRecurringCredits(state) >=
-            (ability.postBreakStealthLoss ?? 0),
-      )
-    ) {
-      const blinkUsedSubroutines =
-        run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
-      const subroutines = encounterSubroutines;
-      if (breakAbilities.some((ability) => (ability.count ?? 1) > 1)) {
-        const breakAbility = breakAbilities[0];
-        if (!breakAbility) continue;
-        actions.push(
-          ...pileDriverBreakActions(
-            state,
-            breakerId,
-            encounteredIceId,
-            iceDefinition,
-            subroutines,
-            breakAbility,
-          ),
-        );
-        continue;
-      }
-      subroutines.forEach((subroutine, index) => {
-        if (breaker.id === BLINK_ID && blinkUsedSubroutines.includes(index))
-          return;
-        const breakAbility = breakAbilities.find((candidate) =>
-          breakAbilityMatchesSubroutine(candidate, subroutine),
-        );
-        if (!breakAbility) return;
-        const singleBreakCost = breakSubroutineCostBreakdown(
-          state,
-          breakAbility.cost.credits,
-          1,
-        );
-        if (
-          availableRunnerRunCredits(runDurationPaymentHost(state), breakerId) <
-          singleBreakCost.totalCost
-        )
-          return;
-        if (
-          !run.brokenSubroutineIndexes.includes(index) &&
-          !run.resolvedSubroutineIndexes.includes(index)
-        ) {
-          const subroutineLabel =
-            subroutines.length > 1
-              ? `Subroutine ${index + 1} brechen`
-              : "Subroutine brechen";
-          actions.push(
-            action(
-              state,
-              "runner",
-              "break_subroutine",
-              `${breaker.title}: ${subroutineLabel}`,
-              breakerId,
-              [{ credits: singleBreakCost.totalCost }],
-              {
-                breakerId,
-                iceId: encounteredIceId,
-                subroutineIndex: index,
-                subroutineId: subroutine.id,
-                targetIceDefinitionId: iceDefinition.id,
-                targetIceTitle: iceDefinition.title,
-                ...dynamicSubroutinePayload(subroutine),
-                ...(singleBreakCost?.publicPayload ?? {
-                  breakSubroutineBaseCost: breakAbility.cost.credits,
-                }),
-              },
-              abilityMetadata(breakerId, breakAbility.id, encounteredIceId),
-            ),
-          );
-        }
-      });
-    }
-  }
-  const nextSubroutines = encounterSubroutinesForNextContinue(
-    run,
-    encounterSubroutines,
-  );
-  const nextSubroutineIndexes = encounterSubroutineIndexesForNextContinue(
-    run,
-    encounterSubroutines,
-  );
-  const willEndRun = nextSubroutines.some(
-    (subroutine) =>
-      subroutine.type === "end_the_run" ||
-      subroutine.type === "end_the_run_unless_runner_pays",
-  );
-  const hardEndRun = nextSubroutines.some(
-    (subroutine) => subroutine.type === "end_the_run",
-  );
-  const payOrEndRunEntries = nextSubroutineIndexes
-    .map((index) => ({ index, subroutine: encounterSubroutines[index] }))
-    .filter(
-      (
-        entry,
-      ): entry is {
-        index: number;
-        subroutine: NonNullable<CardDefinition["subroutines"]>[number];
-      } => entry.subroutine?.type === "end_the_run_unless_runner_pays",
-    );
-  const payOrEndRunAmount = payOrEndRunEntries.reduce(
-    (sum, entry) => sum + Math.max(0, Math.floor(entry.subroutine.amount ?? 0)),
-    0,
-  );
-  const encounterSubroutineIds = nextSubroutines
-    .map((subroutine) => subroutine.id)
-    .join(",");
-  const continueLabel =
-    nextSubroutines.length === 0
-      ? "ICE passieren"
-      : willEndRun
-        ? "Subroutinen auslösen (Run endet)"
-        : "Subroutinen auslösen";
-  if (
-    payOrEndRunAmount > 0 &&
-    !hardEndRun &&
-    availableRunnerRunCredits(runDurationPaymentHost(state)) >= payOrEndRunAmount
-  ) {
-    actions.push(
-      action(
-        state,
-        "runner",
-        "continue_run",
-        `Subroutinen auslösen (Runner zahlt ${payOrEndRunAmount} Credit)`,
-        "game_rule",
-        [{ credits: payOrEndRunAmount }],
-        {
-          encounterContinue: true,
-          sourceDefinitionId: iceDefinition.id,
-          unbrokenSubroutineCount: nextSubroutines.length,
-          encounterWillEndRun: false,
-          encounterSubroutineIds,
-          payOrEndRunSubroutineIndexes: payOrEndRunEntries
-            .map((entry) => entry.index)
-            .join(","),
-          payOrEndRunSubroutinePayment: payOrEndRunAmount,
-        },
-      ),
-    );
-  }
-  actions.push(
-    action(state, "runner", "continue_run", continueLabel, "game_rule", [], {
-      encounterContinue: true,
-      sourceDefinitionId: iceDefinition.id,
-      unbrokenSubroutineCount: nextSubroutines.length,
-      encounterWillEndRun: willEndRun,
-      encounterSubroutineIds,
-    }),
-  );
-  return actions;
-}
-
-function pileDriverBreakActions(
-  state: GameState,
-  breakerId: CardInstanceId,
-  encounteredIceId: CardInstanceId,
-  iceDefinition: CardDefinition,
-  subroutines: NonNullable<CardDefinition["subroutines"]>,
-  breakAbility: RuntimeIcebreakerAbility,
-): LegalAction[] {
-  const run = mustRun(state);
-  const eligibleIndexes = subroutines
-    .map((subroutine, index) => ({ subroutine, index }))
-    .filter(
-      ({ subroutine, index }) =>
-        breakAbilityMatchesSubroutine(breakAbility, subroutine) &&
-        !run.brokenSubroutineIndexes.includes(index) &&
-        !run.resolvedSubroutineIndexes.includes(index),
-    )
-    .map(({ index }) => index);
-  const maxCount = Math.min(4, breakAbility.count ?? 4, eligibleIndexes.length);
-  const actions: LegalAction[] = [];
-  const selected: number[] = [];
-  const visit = (start: number): void => {
-    if (selected.length > 0) {
-      const subroutineIndexes = [...selected];
-      const firstIndex = subroutineIndexes[0] ?? 0;
-      const label =
-        subroutineIndexes.length === 1
-          ? `Pile Driver: Subroutine ${firstIndex + 1} brechen`
-          : `Pile Driver: ${subroutineIndexes.length} Subroutinen brechen`;
-      const breakCost = breakSubroutineCostBreakdown(
-        state,
-        breakAbility.cost.credits,
-        subroutineIndexes.length,
-      );
-      if (
-        availableRunnerRunCredits(runDurationPaymentHost(state), breakerId) <
-        breakCost.totalCost
-      )
-        return;
-      actions.push(
-        action(
-          state,
-          "runner",
-          "break_subroutine",
-          label,
-          breakerId,
-          [{ credits: breakCost.totalCost }],
-          {
-            breakerId,
-            iceId: encounteredIceId,
-            subroutineIndexes: subroutineIndexes.join(","),
-            breakSubroutineCount: subroutineIndexes.length,
-            pileDriverMultiBreak: true,
-            targetIceDefinitionId: iceDefinition.id,
-            targetIceTitle: iceDefinition.title,
-            ...breakCost.publicPayload,
-          },
-          abilityMetadata(breakerId, breakAbility.id, encounteredIceId),
-        ),
-      );
-    }
-    if (selected.length >= maxCount) return;
-    for (let index = start; index < eligibleIndexes.length; index += 1) {
-      selected.push(eligibleIndexes[index]!);
-      visit(index + 1);
-      selected.pop();
-    }
-  };
-  visit(0);
-  return actions;
-}
-
-function breakAbilityMatchesIce(
-  ability: RuntimeIcebreakerAbility,
-  iceSubtypes: readonly string[],
-): boolean {
-  if (ability.type !== "break_subroutine") return false;
-  if (
-    ability.iceSubtype &&
-    !iceSubtypes.includes(normalizeSubtypeLabel(ability.iceSubtype))
-  )
-    return false;
-  if (
-    ability.iceSubtypes?.length &&
-    !ability.iceSubtypes.some((subtype) =>
-      iceSubtypes.includes(normalizeSubtypeLabel(subtype)),
-    )
-  )
-    return false;
-  return true;
-}
-
 function dupreStrengthCounterBonus(
   state: GameState,
   breakerId: CardInstanceId,
@@ -6742,30 +6371,6 @@ function pumpDurationForLegalAction(
       )
     : undefined;
   return ability?.strengthDuration ?? "current_encounter";
-}
-
-function breakAbilityMatchesSubroutine(
-  ability: RuntimeIcebreakerAbility,
-  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
-): boolean {
-  const tags = ability.subroutineBreakTags ?? [];
-  if (tags.length === 0) return true;
-  if (tags.includes("trace") && subroutine.type === "initiate_trace") return true;
-  const subroutineTags = subroutine.breakTags ?? [];
-  return tags.some((tag) => subroutineTags.includes(tag));
-}
-
-function dynamicSubroutinePayload(
-  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
-): NonNullable<LegalAction["payload"]> {
-  const attribution = dynamicSubroutineAttributionFor(subroutine);
-  if (!attribution) return {};
-  return {
-    dynamicSourceDefinitionId: attribution.sourceDefinitionId,
-    dynamicSourceTitle: attribution.sourceTitle,
-    dynamicSourceKind: attribution.modifierKind,
-    dynamicSubroutineKind: attribution.subroutineKind,
-  };
 }
 
 function assertCurrentSubroutineMatchesLegalAction(
@@ -7044,186 +6649,6 @@ function relativeTraceSubroutinesForCurrentEncounter(
     baseTraceStrength: dynamicTrace.baseTraceStrength,
     traceSuccessEffect: dynamicTrace.traceSuccessEffect,
   }));
-}
-
-function encounterSubroutinesForNextContinue(
-  run: RunState,
-  subroutines: NonNullable<CardDefinition["subroutines"]>,
-): NonNullable<CardDefinition["subroutines"]> {
-  return encounterSubroutineIndexesForNextContinue(run, subroutines).flatMap(
-    (index) => {
-      const subroutine = subroutines[index];
-      return subroutine ? [subroutine] : [];
-    },
-  );
-}
-
-function encounterSubroutineIndexesForNextContinue(
-  run: RunState,
-  subroutines: NonNullable<CardDefinition["subroutines"]>,
-): number[] {
-  const indexes: number[] = [];
-  for (let index = 0; index < subroutines.length; index += 1) {
-    const subroutine = subroutines[index];
-    if (
-      !subroutine ||
-      run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index)
-    )
-      continue;
-    indexes.push(index);
-    if (subroutine.type === "initiate_trace") break;
-  }
-  return indexes;
-}
-
-function runnerMovementActions(state: GameState): LegalAction[] {
-  const run = mustRun(state);
-  if (run.postPassPayOrEndRun) return postPassPayOrEndRunActions(state);
-  if (
-    run.jackOutLockedUntilEncounterEnds ||
-    run.nextEncounterJackOutLock ||
-    run.jackOutLockedForRun
-  ) {
-    return [
-      action(state, "runner", "continue_run", "Run fortsetzen", "game_rule"),
-    ];
-  }
-  const actions: LegalAction[] = [];
-  actions.push(...runnerDuringRunCardImplementationActions(state));
-  actions.push(...fullyBrokenPassedIcePostPassActions(encounterSpecialWindowHostForState(state)));
-  actions.push(...startupImmolatorPostPassActions(encounterSpecialWindowHostForState(state)));
-  actions.push(...mysteryBoxRunActions(state, run));
-  const jackOutAdditionalCost = runJackOutAdditionalCost(run);
-  if (availableRunnerRunCredits(runDurationPaymentHost(state)) >= jackOutAdditionalCost) {
-    actions.push(
-      action(
-        state,
-        "runner",
-        "jack_out",
-        jackOutAdditionalCost > 0
-          ? `Jack-out (${jackOutAdditionalCost} Credit)`
-          : "Jack-out",
-        "game_rule",
-        jackOutAdditionalCost > 0 ? [{ credits: jackOutAdditionalCost }] : [],
-        jackOutAdditionalCost > 0
-          ? {
-              v1922CorpIceAbility: "viral_15_jack_out_tax",
-              jackOutAdditionalCost,
-              ...(run.viral15ActiveSourceIceId
-                ? {
-                    sourceDefinitionId: definitionFor(
-                      state,
-                      run.viral15ActiveSourceIceId,
-                    ).id,
-                  }
-                : {}),
-            }
-          : undefined,
-      ),
-    );
-  }
-  actions.push(
-    action(state, "runner", "continue_run", "Run fortsetzen", "game_rule"),
-  );
-  return actions;
-}
-
-function postPassPayOrEndRunActions(state: GameState): LegalAction[] {
-  const run = mustRun(state);
-  const pending = run.postPassPayOrEndRun;
-  if (!pending) return [];
-  const amount = Math.max(0, Math.floor(pending.amount));
-  const serverLabel = publicServerLabel(state, pending.serverId);
-  const payload = {
-    fortRunWindowAbility: "runner_pay_or_end_run_after_passing_ice_on_this_fort",
-    ...(pending.sourceDefinitionIds[0]
-      ? { sourceDefinitionId: pending.sourceDefinitionIds[0] }
-      : {}),
-    sourceDefinitionIds: pending.sourceDefinitionIds.join(","),
-    sourceCardIds: pending.sourceCardInstanceIds.join(","),
-    passedIceId: pending.passedIceId,
-    passedIceDefinitionId: definitionFor(state, pending.passedIceId).id,
-    serverId: pending.serverId,
-    ...(serverLabel ? { serverLabel } : {}),
-    paymentAmount: amount,
-  };
-  const actions: LegalAction[] = [];
-  if (availableRunnerRunCredits(runDurationPaymentHost(state)) >= amount) {
-    actions.push(
-      action(
-        state,
-        "runner",
-        "continue_run",
-        amount > 0
-          ? `Fort-Pass-Kosten zahlen (${amount} Credit)`
-          : "Fort-Pass-Kosten zahlen",
-        "game_rule",
-        amount > 0 ? [{ credits: amount }] : [],
-        {
-          ...payload,
-          decision: "pay",
-        },
-      ),
-    );
-  }
-  actions.push(
-    action(
-      state,
-      "runner",
-      "continue_run",
-      "Run beenden",
-      "game_rule",
-      [],
-      {
-        ...payload,
-        decision: "end_run",
-      },
-    ),
-  );
-  return actions;
-}
-
-function mysteryBoxRunActions(
-  state: GameState,
-  run: ActiveRun,
-): LegalAction[] {
-  const used = new Set(run.mysteryBoxUsedSourceIdsThisRun ?? []);
-  if (state.runner.stack.length === 0) return [];
-  return state.runner.rig.programs
-    .slice()
-    .sort()
-    .filter((cardId) => !used.has(cardId))
-    .filter((cardId) => definitionFor(state, cardId).id === MYSTERY_BOX_ID)
-    .filter(
-      (cardId) =>
-        !cardImplementationForDefinitionId(definitionFor(state, cardId).id),
-    )
-    .map((sourceCardId) => {
-      const topCards = state.runner.stack.slice(0, 5);
-      const programCount = topCards.filter(
-        (cardId) => definitionFor(state, cardId).type === "program",
-      ).length;
-      return action(
-        state,
-        "runner",
-        "trigger_ability",
-        `${definitionFor(state, sourceCardId).title}: Stack-Spitze pruefen`,
-        sourceCardId,
-        [],
-        {
-          cardId: sourceCardId,
-          v1915RunnerProgramAbility: "mystery_box_top5_program_install",
-          revealCount: topCards.length,
-          revealedCardDefinitionIds: topCards
-            .map((cardId) => definitionFor(state, cardId).id)
-            .join(","),
-          revealedProgramCount: programCount,
-          hiddenZoneBarrier: true,
-          hiddenZoneAction: "mystery_box_stack_top5_reveal",
-        },
-      );
-    });
 }
 
 function runnerDuringRunCardImplementationActions(
@@ -18168,7 +17593,71 @@ function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
         buildSuccessfulRunFollowupActions(successfulRunInterventionHost(state), run),
       runnerDuringRunCardImplementationActions: () =>
         runnerDuringRunCardImplementationActions(state),
-      mysteryBoxRunActions: (run) => mysteryBoxRunActions(state, run),
+      mysteryBoxRunActions: (run) =>
+        buildMysteryBoxRunActions(runnerEncounterActionHostForState(state), run),
+    },
+  };
+}
+
+function runnerEncounterActionHostForState(
+  state: GameState,
+): RunnerEncounterActionHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+      cardCounter: (cardId, counterType) =>
+        cardCounter(state, cardId, counterType as CounterType),
+      effectiveSubtypesForCard: (cardId, definition) =>
+        effectiveSubtypesForCard(state, cardId, definition),
+      hostedProgramStrengthModifier: (cardId) =>
+        hostedProgramStrengthModifier(state, cardId),
+      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
+    },
+    run: {
+      currentRun: () => mustRun(state),
+      currentEncounterSubroutines: (iceDefinition) =>
+        subroutinesForCurrentEncounter(state, iceDefinition),
+      runnerDuringRunCardImplementationActions: () =>
+        runnerDuringRunCardImplementationActions(state),
+      runRemainderStrengthBonusForBreaker: (breakerId) =>
+        runRemainderStrengthBonusForBreaker(state.run, breakerId),
+      canUseBreakerOnCurrentFort: (breakerId) =>
+        runnerCanUseBreakerOnCurrentFort(state, breakerId),
+    },
+    ice: {
+      strengthForIce: (iceId) => iceStrengthFor(state, iceId),
+    },
+    breaker: {
+      dupreStrengthCounterBonus: (breakerId) =>
+        dupreStrengthCounterBonus(state, breakerId),
+      runnerStealthRecurringCredits: () => runnerStealthRecurringCredits(state),
+    },
+    payment: {
+      availableRunnerRunCredits: (breakerId) =>
+        availableRunnerRunCredits(runDurationPaymentHost(state), breakerId),
+      runJackOutAdditionalCost: (run) => runJackOutAdditionalCost(run),
+    },
+    actions: {
+      buildLegalAction: (type, label, source, costs, payload, metadata) =>
+        action(state, "runner", type, label, source, costs, payload, metadata),
+      abilityMetadata: (sourceCardInstanceId, abilityId, encounteredIceId) =>
+        abilityMetadata(sourceCardInstanceId, abilityId, encounteredIceId),
+    },
+    costs: {
+      breakSubroutineCostBreakdown: (baseCost, subroutineCount) =>
+        breakSubroutineCostBreakdown(state, baseCost, subroutineCount),
+    },
+    callbacks: {
+      postPassSpecialWindowActions: () => [
+        ...fullyBrokenPassedIcePostPassActions(
+          encounterSpecialWindowHostForState(state),
+        ),
+        ...startupImmolatorPostPassActions(
+          encounterSpecialWindowHostForState(state),
+        ),
+      ],
     },
   };
 }
