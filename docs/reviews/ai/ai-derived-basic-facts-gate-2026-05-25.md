@@ -58,9 +58,9 @@ Warnings blockieren nicht. Sie markieren bekannten Descriptor-/Overlay-Bedarf:
 
 Aktueller Stand:
 
-- Warnings: 42
+- Warnings: 40
 - `text_pattern_derivation`: 24
-- `descriptor_or_overlay_gap`: 9
+- `descriptor_or_overlay_gap`: 7
 - `manual_ontology_without_generated_match`: 5
 - `confidence_mismatch`: 4
 - `generated_fact_without_manual_match`: 0
@@ -77,7 +77,7 @@ Kennzahlen:
 - Implementations gefunden: 24
 - Karten mit Derived Facts: 24
 - Karten mit manueller Ontology-Überschneidung: 24
-- Karten mit Manual-Overlay-/Descriptor-Bedarf: 6
+- Karten mit Manual-Overlay-/Descriptor-Bedarf: 4
 
 Effect-Kinds:
 
@@ -112,16 +112,14 @@ Condition-Kinds:
 
 ## Bekannte Lücken
 
-Nach der fachlichen Gap-Triage bleiben sechs stabile Manual-Overlay-/Descriptor-Kandidaten:
+Nach Descriptor-/Schema-Slice und Gap-Closeout bleiben vier stabile Manual-Overlay-/Descriptor-Kandidaten:
 
 - `onr_v1_017_deep-thought`
-- `onr_v1_037_japanese-water-torture`
-- `onr_v1_043_mystery-box`
 - `onr_v1_059_self-modifying-code`
 - `onr_v1_355_crystal-palace-station-grid`
 - `onr_v1_366_red-herrings`
 
-Geschlossen wurden `Netwatch Operations Office`, `Viral 15` und `Closed Accounts`; Details stehen in `ai-derived-basic-facts-gap-triage-2026-05-25.md`. Die Folge-Triage `ai-derived-basic-facts-descriptor-schema-slice-2026-05-25.md` ergänzt eine read-only TargetProfile-Schema-Erweiterung für `Self-Modifying Code` und `Mystery Box`, hält die sechs Karten aber bewusst offen, weil dort weiterhin strategisches Overlay, ein falsches manuelles Mechanikfeld oder fehlende strukturierte Resolver-Descriptoren bestehen. Wichtig: Die verbleibenden Lücken sind keine AI-Support-Demotion.
+Geschlossen wurden `Netwatch Operations Office`, `Viral 15` und `Closed Accounts`; Details stehen in `ai-derived-basic-facts-gap-triage-2026-05-25.md`. Die Folge-Triage `ai-derived-basic-facts-descriptor-schema-slice-2026-05-25.md` ergänzt eine read-only TargetProfile-Schema-Erweiterung für `Self-Modifying Code` und `Mystery Box`. Der Closeout `ai-derived-basic-facts-descriptor-gap-closeout-2026-05-25.md` schließt zusätzlich `Japanese Water Torture` über `breakerProfile.sideEffects = ["forgo_actions"]` und `Mystery Box` über `targetProfiles.oncePerRun = true`. Wichtig: Die verbleibenden Lücken sind keine AI-Support-Demotion.
 
 ## Ontology-Validation
 

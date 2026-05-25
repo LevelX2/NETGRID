@@ -10,7 +10,7 @@
   "implementationFoundCount": 24,
   "cardsWithDerivedFacts": 24,
   "cardsWithManualOntologyOverlap": 24,
-  "cardsNeedingManualOverlay": 6,
+  "cardsNeedingManualOverlay": 4,
   "effectKindCounts": {
     "access_replacement": 1,
     "breaker": 2,
@@ -43,7 +43,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 42,
+  "warningCount": 40,
   "warnings": [
     {
       "kind": "descriptor_or_overlay_gap",
@@ -71,11 +71,6 @@
       "cardId": "onr_v1_037_japanese-water-torture"
     },
     {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Japanese-Water-Torture-style future action debt is visible in text/comment but not in a structured resolver field.",
-      "cardId": "onr_v1_037_japanese-water-torture"
-    },
-    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_037_japanese-water-torture"
@@ -84,11 +79,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_039_krash"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field.",
-      "cardId": "onr_v1_043_mystery-box"
     },
     {
       "kind": "text_pattern_derivation",
@@ -354,8 +344,8 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
       "implementationFound": true,
       "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Breaker coverage and the manual forgo_actions side-effect comparison are derivable, while future action-debt is still not structured in a resolver descriptor.",
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Breaker coverage and the forgo_actions side-effect comparison are derivable; future action debt is represented as a structured breaker side effect for the read-only gate.",
       "derivedFacts": {
         "effects": [
           {
@@ -368,10 +358,10 @@
         ],
         "conditions": [],
         "costProfile": {},
-        "derivationNotes": [],
-        "needsManualOverlayReasons": [
-          "Japanese-Water-Torture-style future action debt is visible in text/comment but not in a structured resolver field."
+        "derivationNotes": [
+          "Future action debt is represented as the structured breaker side effect forgo_actions; no planner/runtime consumption is implied."
         ],
+        "needsManualOverlayReasons": [],
         "breakerProfile": {
           "coverage": ["wall"],
           "pumpCost": 1,
@@ -428,21 +418,13 @@
         "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "Japanese-Water-Torture-style future action debt is visible in text/comment but not in a structured resolver field."
-      ],
-      "descriptorGaps": [
-        "Japanese-Water-Torture-style future action debt is visible in text/comment but not in a structured resolver field."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "medium",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence medium differs from manual confidence high."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Japanese-Water-Torture-style future action debt is visible in text/comment but not in a structured resolver field."
         },
         {
           "kind": "text_pattern_derivation",
@@ -552,8 +534,8 @@
         "effect:install_discount",
         "condition:requires_during_run"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Top-of-stack search, show-to-Corp target profile and free program install are derivable; the once-per-run limit is not structured in a resolver descriptor.",
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Top-of-stack search, show-to-Corp target profile, free program install and once-per-run usage limit are derivable in the read-only target profile.",
       "derivedFacts": {
         "effects": [
           {
@@ -588,9 +570,7 @@
         ],
         "costProfile": {},
         "derivationNotes": [],
-        "needsManualOverlayReasons": [
-          "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field."
-        ],
+        "needsManualOverlayReasons": [],
         "targetProfiles": [
           {
             "zone": "stack_top",
@@ -600,6 +580,7 @@
             "installCost": "free",
             "shuffleAfter": true,
             "showToOpponent": true,
+            "oncePerRun": true,
             "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
           }
         ]
@@ -654,18 +635,10 @@
         "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field."
-      ],
-      "descriptorGaps": [
-        "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."

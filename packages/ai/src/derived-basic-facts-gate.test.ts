@@ -53,6 +53,8 @@ type DerivedFactsReport = {
     overlap: {
       matches: string[];
     };
+    descriptorGaps: string[];
+    missingManualOverlay: string[];
   }>;
 };
 
@@ -70,7 +72,7 @@ describe("derived basic facts gate report", () => {
     expect(report.implementationFoundCount).toBe(24);
     expect(report.cardsWithDerivedFacts).toBe(24);
     expect(report.cardsWithManualOntologyOverlap).toBe(24);
-    expect(report.cardsNeedingManualOverlay).toBe(6);
+    expect(report.cardsNeedingManualOverlay).toBe(4);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
       report.cards.every(
@@ -123,8 +125,22 @@ describe("derived basic facts gate report", () => {
         installsTarget: true,
         shuffleAfter: true,
         showToOpponent: true,
+        oncePerRun: true,
       }),
     );
+
+    const japaneseWaterTorture = cardById(
+      report,
+      "onr_v1_037_japanese-water-torture",
+    );
+    expect(japaneseWaterTorture.derivedFacts.breakerProfile).toEqual(
+      expect.objectContaining({
+        coverage: ["wall"],
+        sideEffects: ["forgo_actions"],
+      }),
+    );
+    expect(japaneseWaterTorture.descriptorGaps).toEqual([]);
+    expect(mysteryBox.descriptorGaps).toEqual([]);
 
     const viral15 = cardById(report, "onr_v1_276_viral-15");
     expect(viral15.derivedFacts.effects).toContainEqual(

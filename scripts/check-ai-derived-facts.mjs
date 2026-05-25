@@ -632,8 +632,8 @@ function deriveFromImplementation(card, implementationText, hint) {
     if (/forgo your next/i.test(implementationText)) {
       facts.breakerProfile.sideEffects = ["forgo_actions"];
       facts.breakerProfile.confidence = "medium";
-      facts.needsManualOverlayReasons.push(
-        "Japanese-Water-Torture-style future action debt is visible in text/comment but not in a structured resolver field.",
+      facts.derivationNotes.push(
+        "Future action debt is represented as the structured breaker side effect forgo_actions; no planner/runtime consumption is implied.",
       );
     }
   }
@@ -716,14 +716,10 @@ function deriveFromImplementation(card, implementationText, hint) {
       installCost: valueNear(implementationText, "installCost"),
       shuffleAfter: /shuffleAfterwards:\s*true/.test(implementationText),
       showToOpponent: true,
+      oncePerRun: /only once each run/i.test(implementationText),
       source:
         "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
     });
-    if (/only once each run/i.test(implementationText)) {
-      facts.needsManualOverlayReasons.push(
-        "Mystery-Box-style once-per-run limit is visible in text/comment but not in a structured resolver field.",
-      );
-    }
   }
 
   if (/private_look_top_rd/.test(implementationText)) {

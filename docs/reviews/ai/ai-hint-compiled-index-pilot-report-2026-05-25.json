@@ -15,12 +15,11 @@
   "overlayCardCount": 6,
   "cardsWithoutOverlay": 18,
   "hardErrorCount": 0,
-  "warningCount": 84,
+  "warningCount": 80,
   "warningCountsByKind": {
     "active_monolith_mechanical_duplication": 46,
-    "descriptor_gap_remaining": 2,
     "generated_fact_missing_from_active_monolith": 28,
-    "manual_overlay_strategy_field_missing_from_active": 8
+    "manual_overlay_strategy_field_missing_from_active": 6
   },
   "cards": [
     {
@@ -123,7 +122,7 @@
       "activeHintFound": true,
       "derivedFactsFound": true,
       "manualOverlayFound": true,
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "compiledPreview": {
         "cardId": "onr_v1_037_japanese-water-torture",
         "side": "runner",
@@ -170,10 +169,7 @@
           "strategyCovered": false
         },
         "manualNotes": [
-          "Future action debt still needs a structured resolver descriptor; breaker coverage remains mechanical."
-        ],
-        "descriptorGaps": [
-          "future_action_debt_not_structured"
+          "Future action debt is represented mechanically as breakerProfile.sideEffects forgo_actions; breaker coverage remains generated."
         ]
       },
       "mechanicalFactsFromGenerated": [
@@ -183,8 +179,7 @@
       "strategyFieldsFromOverlay": [
         "lineSupport",
         "quality",
-        "manualNotes",
-        "descriptorGaps"
+        "manualNotes"
       ],
       "activeMonolithOnlyFields": [
         "costProfile",
@@ -197,8 +192,7 @@
         "breakerProfile"
       ],
       "overlayOnlyFields": [
-        "manualNotes",
-        "descriptorGaps"
+        "manualNotes"
       ],
       "conflicts": [],
       "warnings": [
@@ -215,21 +209,10 @@
           "field": "effects"
         },
         {
-          "kind": "descriptor_gap_remaining",
-          "message": "Manual overlay keeps an open descriptor gap.",
-          "cardId": "onr_v1_037_japanese-water-torture"
-        },
-        {
           "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field breakerProfile is absent from or differs from active monolith.",
           "cardId": "onr_v1_037_japanese-water-torture",
           "field": "breakerProfile"
-        },
-        {
-          "kind": "manual_overlay_strategy_field_missing_from_active",
-          "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
-          "cardId": "onr_v1_037_japanese-water-torture",
-          "field": "descriptorGaps"
         },
         {
           "kind": "manual_overlay_strategy_field_missing_from_active",
@@ -238,7 +221,7 @@
           "field": "manualNotes"
         }
       ],
-      "recommendedNextAction": "schema_gap"
+      "recommendedNextAction": "generated_fact_candidate"
     },
     {
       "cardId": "onr_v1_039_krash",
@@ -335,7 +318,7 @@
       "activeHintFound": true,
       "derivedFactsFound": true,
       "manualOverlayFound": true,
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "compiledPreview": {
         "cardId": "onr_v1_043_mystery-box",
         "side": "runner",
@@ -388,6 +371,7 @@
             "installCost": "free",
             "installsTarget": true,
             "lookCount": 5,
+            "oncePerRun": true,
             "showToOpponent": true,
             "shuffleAfter": true,
             "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
@@ -407,10 +391,7 @@
           "strategyCovered": false
         },
         "manualNotes": [
-          "The once-per-run limit remains descriptor work; search and install target profile stay mechanical."
-        ],
-        "descriptorGaps": [
-          "once_per_run_not_structured"
+          "The once-per-run limit is represented mechanically as targetProfiles.oncePerRun; search and install target profile stay generated."
         ]
       },
       "mechanicalFactsFromGenerated": [
@@ -423,8 +404,7 @@
       "strategyFieldsFromOverlay": [
         "lineSupport",
         "quality",
-        "manualNotes",
-        "descriptorGaps"
+        "manualNotes"
       ],
       "activeMonolithOnlyFields": [
         "costProfile",
@@ -439,8 +419,7 @@
         "targetProfiles"
       ],
       "overlayOnlyFields": [
-        "manualNotes",
-        "descriptorGaps"
+        "manualNotes"
       ],
       "conflicts": [],
       "warnings": [
@@ -455,11 +434,6 @@
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_043_mystery-box",
           "field": "effects"
-        },
-        {
-          "kind": "descriptor_gap_remaining",
-          "message": "Manual overlay keeps an open descriptor gap.",
-          "cardId": "onr_v1_043_mystery-box"
         },
         {
           "kind": "generated_fact_missing_from_active_monolith",
@@ -481,18 +455,12 @@
         },
         {
           "kind": "manual_overlay_strategy_field_missing_from_active",
-          "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
-          "cardId": "onr_v1_043_mystery-box",
-          "field": "descriptorGaps"
-        },
-        {
-          "kind": "manual_overlay_strategy_field_missing_from_active",
           "message": "Overlay field manualNotes is absent from or differs from active monolith.",
           "cardId": "onr_v1_043_mystery-box",
           "field": "manualNotes"
         }
       ],
-      "recommendedNextAction": "schema_gap"
+      "recommendedNextAction": "generated_fact_candidate"
     },
     {
       "cardId": "onr_v1_048_poltergeist",
@@ -2444,21 +2412,10 @@
       "field": "effects"
     },
     {
-      "kind": "descriptor_gap_remaining",
-      "message": "Manual overlay keeps an open descriptor gap.",
-      "cardId": "onr_v1_037_japanese-water-torture"
-    },
-    {
       "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field breakerProfile is absent from or differs from active monolith.",
       "cardId": "onr_v1_037_japanese-water-torture",
       "field": "breakerProfile"
-    },
-    {
-      "kind": "manual_overlay_strategy_field_missing_from_active",
-      "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
-      "cardId": "onr_v1_037_japanese-water-torture",
-      "field": "descriptorGaps"
     },
     {
       "kind": "manual_overlay_strategy_field_missing_from_active",
@@ -2497,11 +2454,6 @@
       "field": "effects"
     },
     {
-      "kind": "descriptor_gap_remaining",
-      "message": "Manual overlay keeps an open descriptor gap.",
-      "cardId": "onr_v1_043_mystery-box"
-    },
-    {
       "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
       "cardId": "onr_v1_043_mystery-box",
@@ -2518,12 +2470,6 @@
       "message": "Generated mechanical field targetProfiles is absent from or differs from active monolith.",
       "cardId": "onr_v1_043_mystery-box",
       "field": "targetProfiles"
-    },
-    {
-      "kind": "manual_overlay_strategy_field_missing_from_active",
-      "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
-      "cardId": "onr_v1_043_mystery-box",
-      "field": "descriptorGaps"
     },
     {
       "kind": "manual_overlay_strategy_field_missing_from_active",

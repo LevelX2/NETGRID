@@ -31,7 +31,7 @@ Der Derived-Basic-Facts-Pfad kann mechanische Facts aus CardImplementations able
 - `confidence`
 - `needsHumanReview`
 - strategische Notizen
-- erklärte Descriptor-Gaps
+- erklärte Descriptor-Gaps, falls sie noch offen sind
 
 Das Overlay-Layout trennt diese Ebene sichtbar von mechanischen Facts wie `effects`, `conditions`, `breakerProfile`, `remoteRole` oder `targetProfiles`.
 
@@ -54,8 +54,8 @@ Damit bleiben die Overlays nach Set, Side und CardType strukturiert, decken aber
 Runner-Programme:
 
 - `Deep Thought`: strategische R&D-/Interface-Pressure-Bewertung; Topdeck-Info bleibt mechanisch.
-- `Japanese Water Torture`: Descriptor-Gap `future_action_debt_not_structured`; Breaker-Coverage bleibt mechanisch.
-- `Mystery Box`: Descriptor-Gap `once_per_run_not_structured`; Search-/Install-Target bleibt mechanisch.
+- `Japanese Water Torture`: erklärende Manual Note; Breaker-Coverage und `forgo_actions` bleiben mechanisch.
+- `Mystery Box`: erklärende Manual Note; Search-/Install-Target und `oncePerRun` bleiben mechanisch.
 - `Self-Modifying Code`: Install-Target-Profil bleibt mechanisch; mögliche Monolith-Bereinigung bleibt getrennt.
 
 Corp-Upgrades:

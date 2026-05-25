@@ -112,6 +112,7 @@ describe("AI hint ontology validation", () => {
           installCost: "free",
           shuffleAfter: true,
           showToOpponent: true,
+          oncePerRun: true,
         },
       ],
     });

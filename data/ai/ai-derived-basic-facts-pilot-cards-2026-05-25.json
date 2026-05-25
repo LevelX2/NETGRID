@@ -7,8 +7,8 @@
       "title": "Japanese Water Torture",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
       "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Breaker coverage and the manual forgo_actions side-effect comparison are derivable, while future action-debt is still not structured in a resolver descriptor."
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Breaker coverage and the forgo_actions side-effect comparison are derivable; future action debt is represented as a structured breaker side effect for the read-only gate."
     },
     {
       "cardId": "onr_v1_039_krash",
@@ -39,8 +39,8 @@
         "effect:install_discount",
         "condition:requires_during_run"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Top-of-stack search, show-to-Corp target profile and free program install are derivable; the once-per-run limit is not structured in a resolver descriptor."
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Top-of-stack search, show-to-Corp target profile, free program install and once-per-run usage limit are derivable in the read-only target profile."
     },
     {
       "cardId": "onr_v1_048_poltergeist",

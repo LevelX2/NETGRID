@@ -34,9 +34,8 @@
           "confidence": "high",
           "needsHumanReview": false
         },
-        "descriptorGaps": ["future_action_debt_not_structured"],
         "manualNotes": [
-          "Future action debt still needs a structured resolver descriptor; breaker coverage remains mechanical."
+          "Future action debt is represented mechanically as breakerProfile.sideEffects forgo_actions; breaker coverage remains generated."
         ]
       }
     },
@@ -51,9 +50,8 @@
           "confidence": "high",
           "needsHumanReview": false
         },
-        "descriptorGaps": ["once_per_run_not_structured"],
         "manualNotes": [
-          "The once-per-run limit remains descriptor work; search and install target profile stay mechanical."
+          "The once-per-run limit is represented mechanically as targetProfiles.oncePerRun; search and install target profile stay generated."
         ]
       }
     },

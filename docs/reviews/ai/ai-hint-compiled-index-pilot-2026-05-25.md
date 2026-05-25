@@ -12,13 +12,13 @@ Der read-only Compiler-Prototyp umfasst jetzt alle 24 Derived-Basic-Facts-Pilotk
 
 Der Report bleibt ein Vergleichsartefakt: `data/ai/ai-card-hints-active.json` wird nicht ersetzt, nicht überschrieben und weiterhin als einzige Runtime-Quelle genutzt.
 
-Aktueller Gate-Befund:
+Aktueller Gate-Befund nach Descriptor-Gap-Closeout:
 
 - Compiled Pilot Cards: 24
 - Karten mit Overlay: 6
 - Karten ohne Overlay: 18
 - Harte Errors: 0
-- Warnings: 84
+- Warnings: 80
 
 ## Was der Compiler-Prototyp macht
 
@@ -103,14 +103,14 @@ Abgesicherte Error-Klassen:
 - Derived-Facts-Quellreport hat harte Errors.
 - `--check` weicht vom committed Report ab.
 
-Warnings aktuell: 84.
+Warnings aktuell: 80.
 
 Warning-Verteilung:
 
 - `active_monolith_mechanical_duplication`: 46
 - `generated_fact_missing_from_active_monolith`: 28
-- `manual_overlay_strategy_field_missing_from_active`: 8
-- `descriptor_gap_remaining`: 2
+- `manual_overlay_strategy_field_missing_from_active`: 6
+- `descriptor_gap_remaining`: 0
 
 Fehlende Overlays sind nur dann Warnings, wenn eine Karte in der Pilotliste oder im Derived-Facts-Report einen Manual-Overlay-Bedarf hat. Aktuell gibt es keine `overlay_missing_for_manual_gap`-Warnings, weil die sechs erwarteten Overlaykarten abgedeckt sind.
 
@@ -123,10 +123,7 @@ Fehlende Overlays sind nur dann Warnings, wenn eine Karte in der Pilotliste oder
 - `Crystal Palace Station Grid`
 - `Red Herrings`
 
-Diese Karten behalten strategische/manual Informationen im Overlay. Zwei davon bleiben als Schema-/Descriptor-Gap markiert:
-
-- `Japanese Water Torture`: `future_action_debt_not_structured`
-- `Mystery Box`: `once_per_run_not_structured`
+Diese Karten behalten strategische/manual Informationen im Overlay. Nach dem Closeout gibt es keine `descriptor_gap_remaining`-Warnings mehr. `Japanese Water Torture` nutzt `breakerProfile.sideEffects = ["forgo_actions"]`; `Mystery Box` nutzt `targetProfiles.oncePerRun = true`.
 
 ## Karten ohne Overlay
 
@@ -155,12 +152,7 @@ Für diese Karten ist im aktuellen Pilot kein Manual Overlay erforderlich. Die W
 
 ## Karten, für die Overlay sinnvoll wäre
 
-Aktuell fehlt kein erwartetes Overlay. Die nächsten fachlichen Overlay-Kandidaten bleiben deshalb nicht neue Pflichtkarten, sondern vorhandene Schema-/Descriptor-Themen:
-
-- `Japanese Water Torture`: strukturierter Future-Action-Debt-Descriptor.
-- `Mystery Box`: strukturierter Once-per-Run-Descriptor.
-
-`Deep Thought`, `Crystal Palace Station Grid` und `Red Herrings` haben bereits strategische Overlays; ihr verbleibender Unterschied zum Monolithen ist erwartbar, weil `strategicNotes` nur im Overlay existieren.
+Aktuell fehlt kein erwartetes Overlay. Die nächsten fachlichen Overlay-Kandidaten sind nicht durch Descriptor-Gaps getrieben. `Deep Thought`, `Crystal Palace Station Grid` und `Red Herrings` haben bereits strategische Overlays; ihr verbleibender Unterschied zum Monolithen ist erwartbar, weil `strategicNotes` nur im Overlay existieren.
 
 ## Karten, für die Generated Facts reichen
 
@@ -196,12 +188,12 @@ Langfristig Overlay:
 - `strategicNotes`
 - `descriptorGaps`
 
-Die 8 `manual_overlay_strategy_field_missing_from_active`-Warnings sind erwartbar: `manualNotes`, `strategicNotes` und `descriptorGaps` sind bewusst nur im modularen Overlay-Pilot vorhanden und nicht im aktiven Monolithen.
+Die 6 `manual_overlay_strategy_field_missing_from_active`-Warnings sind erwartbar: `manualNotes` und `strategicNotes` sind bewusst nur im modularen Overlay-Pilot vorhanden und nicht im aktiven Monolithen.
 
 ## Empfehlung
 
-Der Ansatz ist tragfähig: Der Compiler kann die 24 Derived-Facts-Pilotkarten deterministisch aus Active Monolith, Generated Facts und optionalem Overlay zusammenführen. Der nächste praktische Schritt sollte kein Runtime-Compile sein, sondern eine fachliche Erweiterung der Overlay-/Descriptor-Abdeckung:
+Der Ansatz ist tragfähig: Der Compiler kann die 24 Derived-Facts-Pilotkarten deterministisch aus Active Monolith, Generated Facts und optionalem Overlay zusammenführen. Der nächste praktische Schritt sollte kein Runtime-Compile sein, sondern eine Klassifikation der verbleibenden Monolith-vs-Generated-Warnings:
 
-1. `Japanese Water Torture` und `Mystery Box` als Descriptor-Themen schneiden.
-2. Danach ein weiteres kleines Overlaysegment nur dann anlegen, wenn eine echte strategische Lücke entsteht.
-3. Erst anschließend prüfen, ob der Compiler-Report auf weitere Benchmarkkarten vorbereitet werden sollte.
+1. mechanische Monolith-Felder priorisieren, die langfristig generated werden könnten.
+2. ein weiteres kleines Overlaysegment nur dann anlegen, wenn eine echte strategische Lücke entsteht.
+3. erst anschließend prüfen, ob der Compiler-Report auf weitere Benchmarkkarten vorbereitet werden sollte.
