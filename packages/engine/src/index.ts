@@ -369,6 +369,27 @@ import {
   type FortPassWindowHost,
 } from "./game/run/fort-pass-window";
 import {
+  applyPostBreakStealthLoss,
+  clearRovingSubmarineActivityMarkers,
+  isRovingSubmarineRunBlocked,
+  isParisTracePoolSource,
+  markRovingSubmarineActivityForServer,
+  parisCityGridTracePoolSource,
+  parisCityGridTracePoolTotal,
+  parisTracePoolCapacityForCard,
+  resolveAardvarkInterceptionChoice,
+  resolveHammerStealthLossChoice,
+  runnerCanUseBreakerOnCurrentFort,
+  runnerStealthRecurringCredits,
+  shouldOpenAardvarkInterception,
+  spendParisCityGridTracePool,
+  startAardvarkInterceptionChoice,
+  isTokyoUnsuccessfulRunSource,
+  tokyoUnsuccessfulRunAmountForCard,
+  validateRovingSubmarineRunGate,
+  type FortRunSideFamiliesHost,
+} from "./game/run/fort-run-side-families";
+import {
   approachOrEncounterIce,
   handleRunMovementAction,
   movePastCurrentIce,
@@ -545,9 +566,7 @@ import {
   MYSTERY_BOX_ID,
   NEVINYRRAL_ID,
   PATTELS_VIRUS_ID,
-  PILE_DRIVER_ID,
   POX_ID,
-  RAMMING_PISTON_ID,
   RONIN_AROUND_ID,
   SELF_MODIFYING_CODE_ID,
   SHELL_TRADERS_ID,
@@ -600,7 +619,6 @@ import type {
   CardCorpUtilityImplementation,
   CardDamagePreventionSourceImplementation,
   CardEffectImplementation,
-  CardFortRunWindowImplementation,
   CardFlatlineReplacementSourceImplementation,
   CardHiddenReplacementLongtailImplementation,
   CardRemainingReplacementLongtailImplementation,
@@ -1618,7 +1636,6 @@ const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
   ARMADILLO_ARMORED_ROAD_HOME_ID,
   DRIFTER_MOBILE_ENVIRONMENT_ID,
 ]);
-const PARIS_CITY_GRID_TRACE_POOL_BITS = 3;
 
 function scoredAgendaImplementationForDefinitionId(
   definitionId: CardDefinitionId,
@@ -4379,11 +4396,10 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
   }
   for (const server of state.corp.servers) {
-    const rovingRunBlocked =
-      rovingSubmarineIdsForServer(state, server.id).length > 0 &&
-      !rovingSubmarineIdsForServer(state, server.id).some(
-        (rovingId) => cardCounter(state, rovingId, "mark") > 0,
-      );
+    const rovingRunBlocked = isRovingSubmarineRunBlocked(
+      fortRunSideFamiliesHostForState(state),
+      server.id,
+    );
     const upgradeRunStartTax = runStartTaxForServerUpgrades(state, server.id);
     const newsgroupRunTax = newsgroupTauntingRunStartTax(state);
     const runStartTaxCredits =
@@ -5011,37 +5027,6 @@ function hasCorpUtilityKind(
   return corpUtilityImplementationForCard(state, cardId)?.kind === kind;
 }
 
-function fortRunWindowImplementationsForDefinition(
-  definitionId: CardDefinitionId,
-): readonly CardFortRunWindowImplementation[] {
-  return cardImplementationForDefinitionId(definitionId)?.fortRunWindows ?? [];
-}
-
-function hasFortRunWindowKind(
-  state: GameState,
-  cardId: CardInstanceId,
-  kind: CardFortRunWindowImplementation["kind"],
-): boolean {
-  return fortRunWindowImplementationsForDefinition(
-    definitionFor(state, cardId).id,
-  ).some((window) => window.kind === kind);
-}
-
-function fortRunWindowImplementationForCard<
-  K extends CardFortRunWindowImplementation["kind"],
->(
-  state: GameState,
-  cardId: CardInstanceId,
-  kind: K,
-): Extract<CardFortRunWindowImplementation, { kind: K }> | undefined {
-  return fortRunWindowImplementationsForDefinition(
-    definitionFor(state, cardId).id,
-  ).find(
-    (window): window is Extract<CardFortRunWindowImplementation, { kind: K }> =>
-      window.kind === kind,
-  );
-}
-
 function cardInstallCapabilitiesForDefinition(
   definitionId: CardDefinitionId,
 ) {
@@ -5093,91 +5078,6 @@ function leavePlayCleanupImplementationsForCard(
     cardImplementationForDefinitionId(definitionFor(state, cardId).id)
       ?.leavePlayCleanup ?? []
   );
-}
-
-function isAardvarkSource(state: GameState, cardId: CardInstanceId): boolean {
-  return hasFortRunWindowKind(state, cardId, "aardvark_worm_lock_and_reaction");
-}
-
-function hasStealthPaymentBlockOnServer(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): boolean {
-  return mustServer(state, serverId).root.some((cardId) => {
-    const instance = mustInstance(state.cardInstances, cardId);
-    return (
-      instance.rezzed &&
-      hasFortRunWindowKind(
-        state,
-        cardId,
-        "block_stealth_bits_during_runs_on_this_fort",
-      )
-    );
-  });
-}
-
-function parisTracePoolImplementationForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-):
-  | Extract<
-      CardFortRunWindowImplementation,
-      { kind: "corp_trace_bits_during_runs_on_this_fort" }
-    >
-  | undefined {
-  return fortRunWindowImplementationForCard(
-    state,
-    cardId,
-    "corp_trace_bits_during_runs_on_this_fort",
-  );
-}
-
-function isParisTracePoolSource(state: GameState, cardId: CardInstanceId): boolean {
-  return Boolean(parisTracePoolImplementationForCard(state, cardId));
-}
-
-function parisTracePoolCapacityForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-): number {
-  return (
-    parisTracePoolImplementationForCard(state, cardId)?.amount ??
-    PARIS_CITY_GRID_TRACE_POOL_BITS
-  );
-}
-
-function isRovingRunRestrictionSource(
-  state: GameState,
-  cardId: CardInstanceId,
-): boolean {
-  return hasFortRunWindowKind(
-    state,
-    cardId,
-    "can_run_fort_only_if_last_corp_turn_activity_on_fort",
-  );
-}
-
-function tokyoUnsuccessfulRunWindowForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-):
-  | Extract<
-      CardFortRunWindowImplementation,
-      { kind: "gain_credits_after_unsuccessful_run_on_same_fort" }
-    >
-  | undefined {
-  return fortRunWindowImplementationForCard(
-    state,
-    cardId,
-    "gain_credits_after_unsuccessful_run_on_same_fort",
-  );
-}
-
-function isTokyoUnsuccessfulRunSource(
-  state: GameState,
-  cardId: CardInstanceId,
-): boolean {
-  return Boolean(tokyoUnsuccessfulRunWindowForCard(state, cardId));
 }
 
 function installedRunnerVirusSourceIds(
@@ -5381,109 +5281,6 @@ function unrezzedRootCardIdOnServer(
         !instance.rezzed && definitionFor(state, cardId).id === definitionId
       );
     });
-}
-
-function isWormBreaker(state: GameState, breakerId: CardInstanceId): boolean {
-  const definition = definitionFor(state, breakerId);
-  return definition.type === "program" && cardHasSubtype(definition, "worm");
-}
-
-function runnerCanUseBreakerOnCurrentFort(
-  state: GameState,
-  breakerId: CardInstanceId,
-): boolean {
-  const run = state.run;
-  if (!run || !isWormBreaker(state, breakerId)) return true;
-  return !mustServer(state, run.attackedServerId).root.some((cardId) => {
-    const instance = mustInstance(state.cardInstances, cardId);
-    return instance.rezzed && isAardvarkSource(state, cardId);
-  });
-}
-
-function shouldOpenAardvarkInterception(
-  state: GameState,
-  breakerId: CardInstanceId,
-): boolean {
-  const run = state.run;
-  if (!run?.encounteredIceId || !isWormBreaker(state, breakerId)) return false;
-  if (
-    mustServer(state, run.attackedServerId).root.some((cardId) => {
-      const instance = mustInstance(state.cardInstances, cardId);
-      return instance.rezzed && isAardvarkSource(state, cardId);
-    })
-  )
-    return false;
-  if (run.aardvarkInterceptionIceIds?.includes(run.encounteredIceId))
-    return false;
-  const aardvarkId = mustServer(state, run.attackedServerId)
-    .root.slice()
-    .sort()
-    .find((cardId) => {
-      const instance = mustInstance(state.cardInstances, cardId);
-      return !instance.rezzed && isAardvarkSource(state, cardId);
-    });
-  if (!aardvarkId) return false;
-  return state.corp.credits >= rezCostForCard(state, aardvarkId);
-}
-
-function startAardvarkInterceptionChoice(
-  state: GameState,
-  breakerId: CardInstanceId,
-  actionType: "pump_breaker" | "break_subroutine",
-  legalAction: LegalAction,
-): void {
-  const run = mustRun(state);
-  if (!run.encounteredIceId)
-    throw new Error("Aardvark benötigt ein aktives Encounter-ICE.");
-  const aardvarkId = mustServer(state, run.attackedServerId)
-    .root.slice()
-    .sort()
-    .find((cardId) => {
-      const instance = mustInstance(state.cardInstances, cardId);
-      return !instance.rezzed && isAardvarkSource(state, cardId);
-    });
-  if (!aardvarkId)
-    throw new Error("Aardvark ist auf diesem Server nicht verfügbar.");
-  const cost = Math.max(0, Math.floor(legalAction.costs[0]?.credits ?? 0));
-  const subroutineIndex =
-    legalAction.payload?.subroutineIndex === undefined
-      ? "none"
-      : String(legalAction.payload.subroutineIndex);
-  const usedIceIds = run.aardvarkInterceptionIceIds ?? [];
-  if (!usedIceIds.includes(run.encounteredIceId))
-    usedIceIds.push(run.encounteredIceId);
-  run.aardvarkInterceptionIceIds = usedIceIds;
-  state.pendingChoice = {
-    choiceId: `v199_aardvark_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v199.aardvark:${aardvarkId}:${breakerId}:${run.encounteredIceId}:${actionType}:${subroutineIndex}:${cost}`,
-    prompt: "Aardvark rezzen und Worm trashen?",
-    kind: "select_option",
-    options: [
-      {
-        id: "rez_trash_worm",
-        label: "Aardvark rezzen",
-        publicLabel: "Aardvark wird gerezzt",
-        value: "rez_trash_worm",
-      },
-      {
-        id: "decline",
-        label: "Nicht rezzen",
-        publicLabel: "Aardvark wird nicht gerezzt",
-        value: "decline",
-      },
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "private_to_side",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "aardvark_interception_window",
-    aardvarkWindowOpened: true,
-  };
 }
 
 function specialZoneHarnessActions(
@@ -5810,7 +5607,7 @@ function resolvePileDriverBreakSubroutinesAction(
     }
   }
   const stealthLoss = ability.postBreakStealthLoss ?? 0;
-  if (runnerStealthRecurringCredits(state) < stealthLoss)
+  if (runnerStealthRecurringCredits(fortRunSideFamiliesHostForState(state)) < stealthLoss)
     throw new Error("Nicht genug Stealth-Credits fuer Multi-Break.");
   const expectedCost = breakSubroutineCostBreakdown(
     state,
@@ -5833,7 +5630,11 @@ function resolvePileDriverBreakSubroutinesAction(
     pileDriverMultiBreak: true,
     sourceDefinitionId: breakerDefinition.id,
   };
-  applyPostBreakStealthLoss(state, breakerId, legalAction);
+  applyPostBreakStealthLoss(
+    fortRunSideFamiliesHostForState(state),
+    breakerId,
+    legalAction,
+  );
 }
 
 function assertBreakSubroutineCostQuoteValid(
@@ -6806,7 +6607,11 @@ function performAction(
         mustInstance(state.cardInstances, advancedCardId).advancementCounters += 1;
         const zone = mustInstance(state.cardInstances, advancedCardId).zone;
         if (zone.side === "corp" && zone.zone === "serverRoot")
-          markRovingSubmarineActivityForServer(state, zone.serverId, legalAction);
+          markRovingSubmarineActivityForServer(
+            fortRunSideFamiliesHostForState(state),
+            zone.serverId,
+            legalAction,
+          );
       }
       return;
     case "score_agenda":
@@ -6817,7 +6622,7 @@ function performAction(
       return;
     case "start_run":
       validateRovingSubmarineRunGate(
-        state,
+        fortRunSideFamiliesHostForState(state),
         String(legalAction.payload?.serverId) as Exclude<
           ServerId,
           "new_remote"
@@ -6907,9 +6712,15 @@ function performAction(
           legalAction.costs[0]?.credits ?? 1,
           breakerId,
         );
-        if (breakerId && shouldOpenAardvarkInterception(state, breakerId)) {
+        if (
+          breakerId &&
+          shouldOpenAardvarkInterception(
+            fortRunSideFamiliesHostForState(state),
+            breakerId,
+          )
+        ) {
           startAardvarkInterceptionChoice(
-            state,
+            fortRunSideFamiliesHostForState(state),
             breakerId,
             "pump_breaker",
             legalAction,
@@ -7009,9 +6820,15 @@ function performAction(
         legalAction.costs[0]?.credits ?? 1,
         breakerId,
       );
-      if (breakerId && shouldOpenAardvarkInterception(state, breakerId)) {
+      if (
+        breakerId &&
+        shouldOpenAardvarkInterception(
+          fortRunSideFamiliesHostForState(state),
+          breakerId,
+        )
+      ) {
         startAardvarkInterceptionChoice(
-          state,
+          fortRunSideFamiliesHostForState(state),
           breakerId,
           "break_subroutine",
           legalAction,
@@ -7037,7 +6854,11 @@ function performAction(
         },
       ]);
       if (breakerId) {
-        applyPostBreakStealthLoss(state, breakerId, legalAction);
+        applyPostBreakStealthLoss(
+          fortRunSideFamiliesHostForState(state),
+          breakerId,
+          legalAction,
+        );
         recordBartmossEncounterUsage(state, breakerId);
         recordDupreBreakUsage(runEndCleanupHost(state), breakerId);
         recordSnowballBreakUsage(state, breakerId);
@@ -8455,7 +8276,11 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       rezzed: false,
       zone: { side: "corp", zone: "serverIce", serverId: server.id },
     };
-    markRovingSubmarineActivityForServer(state, server.id, legalAction);
+    markRovingSubmarineActivityForServer(
+      fortRunSideFamiliesHostForState(state),
+      server.id,
+      legalAction,
+    );
     consumeEdgerunnerTempsInstallAction(state, legalAction);
     applyArmageddonDoomCounterInstallRolls(state, cardId, legalAction);
     return;
@@ -8506,8 +8331,14 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     rezzed: rootRezOnInstall,
     zone: { side: "corp", zone: "serverRoot", serverId: server.id },
   };
-  if (rootRezOnInstall && isParisTracePoolSource(state, cardId)) {
-    const capacity = parisTracePoolCapacityForCard(state, cardId);
+  if (
+    rootRezOnInstall &&
+    isParisTracePoolSource(fortRunSideFamiliesHostForState(state), cardId)
+  ) {
+    const capacity = parisTracePoolCapacityForCard(
+      fortRunSideFamiliesHostForState(state),
+      cardId,
+    );
     setCardCounter(state, cardId, "bit", capacity);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -8528,7 +8359,11 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   if (isRegionUpgrade(definition)) {
     trashOlderRegionUpgradesInServer(state, server, cardId, legalAction);
   }
-  markRovingSubmarineActivityForServer(state, server.id, legalAction);
+  markRovingSubmarineActivityForServer(
+    fortRunSideFamiliesHostForState(state),
+    server.id,
+    legalAction,
+  );
   consumeEdgerunnerTempsInstallAction(state, legalAction);
   applyArmageddonDoomCounterInstallRolls(state, cardId, legalAction);
 }
@@ -9226,8 +9061,16 @@ function rezCard(
   ) {
     setCardCounter(state, cardId as CardInstanceId, "bit", 1);
   }
-  if (isParisTracePoolSource(state, cardId as CardInstanceId)) {
-    const capacity = parisTracePoolCapacityForCard(state, cardId as CardInstanceId);
+  if (
+    isParisTracePoolSource(
+      fortRunSideFamiliesHostForState(state),
+      cardId as CardInstanceId,
+    )
+  ) {
+    const capacity = parisTracePoolCapacityForCard(
+      fortRunSideFamiliesHostForState(state),
+      cardId as CardInstanceId,
+    );
     setCardCounter(state, cardId as CardInstanceId, "bit", capacity);
     if (legalAction) {
       legalAction.payload = {
@@ -9728,7 +9571,9 @@ function startTraceFromOperation(
   if (!sourceCardInstanceId || !state.cardInstances[sourceCardInstanceId])
     throw new Error("Trace-Operation hat keine gueltige Quellenkarte.");
   const traceId = `op_trace.${state.stateVersion + 1}.${sanitizeId(sourceDefinitionId)}.${sourceCardInstanceId}`;
-  const parisPoolSource = parisCityGridTracePoolSource(state);
+  const parisPoolSource = parisCityGridTracePoolSource(
+    fortRunSideFamiliesHostForState(state),
+  );
   state.trace = {
     traceId,
     sourceCardInstanceId,
@@ -10450,62 +10295,6 @@ function appendRegionReplacementTrashEffect(
   ];
 }
 
-function rovingSubmarineIdsForServer(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): CardInstanceId[] {
-  return mustServer(state, serverId).root
-    .filter((cardId) => {
-      const instance = state.cardInstances[cardId];
-      return (
-        instance?.rezzed === true &&
-        isRovingRunRestrictionSource(state, cardId)
-      );
-    })
-    .sort();
-}
-
-function clearRovingSubmarineActivityMarkers(state: GameState): void {
-  for (const server of state.corp.servers) {
-    for (const rovingId of rovingSubmarineIdsForServer(state, server.id)) {
-      setCardCounter(state, rovingId, "mark", 0);
-    }
-  }
-}
-
-function markRovingSubmarineActivityForServer(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-  legalAction?: LegalAction,
-): void {
-  const rovingIds = rovingSubmarineIdsForServer(state, serverId);
-  if (rovingIds.length === 0) return;
-  for (const rovingId of rovingIds) setCardCounter(state, rovingId, "mark", 1);
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      rovingSubmarineActivityMarked: true,
-      rovingSubmarineSourceCount: rovingIds.length,
-      targetServerLabel: publicServerLabel(state, serverId) ?? serverId,
-    };
-  }
-}
-
-function validateRovingSubmarineRunGate(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): void {
-  const rovingIds = rovingSubmarineIdsForServer(state, serverId);
-  if (rovingIds.length === 0) return;
-  const hasActivity = rovingIds.some(
-    (rovingId) => cardCounter(state, rovingId, "mark") > 0,
-  );
-  if (!hasActivity)
-    throw new Error(
-      "Roving Submarine erlaubt Runs auf dieses Remote nur nach Korp-Aktivitaet im letzten Korpzug.",
-    );
-}
-
 function finishRun(
   state: GameState,
   successful: boolean,
@@ -11051,7 +10840,7 @@ function startCorpTurn(
   state.corp.clicks = 3;
   state.runner.clicks = 0;
   clearValuPakProgramInstallFlags(state);
-  clearRovingSubmarineActivityMarkers(state);
+  clearRovingSubmarineActivityMarkers(fortRunSideFamiliesHostForState(state));
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
   ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
   ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
@@ -11216,8 +11005,11 @@ function applyCorpStartOfTurnEffects(
         ),
       );
     }
-    if (isParisTracePoolSource(state, cardId)) {
-      const capacity = parisTracePoolCapacityForCard(state, cardId);
+    if (isParisTracePoolSource(fortRunSideFamiliesHostForState(state), cardId)) {
+      const capacity = parisTracePoolCapacityForCard(
+        fortRunSideFamiliesHostForState(state),
+        cardId,
+      );
       if (cardCounter(state, cardId, "bit") < capacity)
         setCardCounter(state, cardId, "bit", capacity);
     }
@@ -16196,7 +15988,10 @@ function runnerEncounterActionHostForState(
       runRemainderStrengthBonusForBreaker: (breakerId) =>
         runRemainderStrengthBonusForBreaker(state.run, breakerId),
       canUseBreakerOnCurrentFort: (breakerId) =>
-        runnerCanUseBreakerOnCurrentFort(state, breakerId),
+        runnerCanUseBreakerOnCurrentFort(
+          fortRunSideFamiliesHostForState(state),
+          breakerId,
+        ),
     },
     ice: {
       strengthForIce: (iceId) => iceStrengthFor(state, iceId),
@@ -16204,7 +15999,8 @@ function runnerEncounterActionHostForState(
     breaker: {
       dupreStrengthCounterBonus: (breakerId) =>
         dupreStrengthCounterBonus(state, breakerId),
-      runnerStealthRecurringCredits: () => runnerStealthRecurringCredits(state),
+      runnerStealthRecurringCredits: () =>
+        runnerStealthRecurringCredits(fortRunSideFamiliesHostForState(state)),
     },
     payment: {
       availableRunnerRunCredits: (breakerId) =>
@@ -16317,6 +16113,47 @@ function fortPassWindowHostForState(state: GameState): FortPassWindowHost {
     },
     payment: {
       spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
+    },
+  };
+}
+
+function fortRunSideFamiliesHostForState(
+  state: GameState,
+): FortRunSideFamiliesHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+      cardHasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
+      runnerInstalledCardIds: () => runnerInstalledCardIds(state),
+    },
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
+    },
+    counters: {
+      cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
+      setCardCounter: (cardId, counterType, amount) =>
+        setCardCounter(state, cardId, counterType, amount),
+      spendCardCounter: (cardId, counterType, amount) =>
+        spendCardCounter(state, cardId, counterType, amount),
+    },
+    payment: {
+      hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
+      spendHostedPaymentCredits: (cardId, amount) =>
+        spendHostedPaymentCredits(state, cardId, amount),
+      rezCostForCard: (cardId) => rezCostForCard(state, cardId),
+      spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
+    },
+    breaker: {
+      breakAbilityForLegalAction: (legalAction) =>
+        breakAbilityForLegalAction(state, legalAction),
+    },
+    effects: {
+      executeEffectCommands: (commands) => executeEffectCommands(state, commands),
+      trashRunnerInstalledProgram: (cardId) =>
+        trashRunnerInstalledProgram(state, cardId),
     },
   };
 }
@@ -16458,7 +16295,8 @@ function encounterPrintedEffectHostForState(
       openEventModificationWindow(state, event, action),
     openReplacementWindow: (event, action) =>
       openReplacementWindow(state, event, action),
-    parisCityGridTracePoolSource: () => parisCityGridTracePoolSource(state),
+    parisCityGridTracePoolSource: () =>
+      parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state)),
     rabbitTraceLimitReductionForIceTrace: () =>
       rabbitTraceLimitReductionForIceTrace(state),
     resolveDamageImminentEvent: (event) =>
@@ -16607,9 +16445,15 @@ function runEndCleanupHost(state: GameState): RunEndCleanupHost {
     },
     aftermath: {
       tokyoUnsuccessfulRunAmountForCard: (cardId) =>
-        tokyoUnsuccessfulRunWindowForCard(state, cardId)?.amount,
+        tokyoUnsuccessfulRunAmountForCard(
+          fortRunSideFamiliesHostForState(state),
+          cardId,
+        ),
       isTokyoUnsuccessfulRunSource: (cardId) =>
-        isTokyoUnsuccessfulRunSource(state, cardId),
+        isTokyoUnsuccessfulRunSource(
+          fortRunSideFamiliesHostForState(state),
+          cardId,
+        ),
     },
     followups: {
       applyBodyweightDataCrecheSuccessfulRun: (legalAction) =>
@@ -17123,7 +16967,11 @@ function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith("v1922.hammer_stealth_loss")
   ) {
-    resolveHammerStealthLossChoice(state, legalAction, playerAction);
+    resolveHammerStealthLossChoice(
+      fortRunSideFamiliesHostForState(state),
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (
@@ -17175,7 +17023,11 @@ function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("v199.aardvark")) {
-    resolveAardvarkInterceptionChoice(state, legalAction, playerAction);
+    resolveAardvarkInterceptionChoice(
+      fortRunSideFamiliesHostForState(state),
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_54.delayed_success")) {
@@ -18423,81 +18275,6 @@ function resolveIncubatorTransformChoice(
   applyRunnerStartOfTurnEffects(state);
 }
 
-function resolveAardvarkInterceptionChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v199.aardvark"))
-    throw new Error("Es ist keine Aardvark-Choice offen.");
-  const [, aardvarkId, breakerId, iceId, actionType, subroutineIndexRaw] =
-    choice.source.split(":");
-  if (
-    !aardvarkId ||
-    !breakerId ||
-    !iceId ||
-    (actionType !== "pump_breaker" && actionType !== "break_subroutine")
-  ) {
-    throw new Error("Die Aardvark-Choice ist ungueltig.");
-  }
-  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  if (selected !== "rez_trash_worm" && selected !== "decline")
-    throw new Error("Die Aardvark-Auswahl ist ungueltig.");
-  const run = mustRun(state);
-  if (run.encounteredIceId !== iceId)
-    throw new Error("Die Aardvark-Choice gehoert nicht mehr zu diesem ICE.");
-  if (!isWormBreaker(state, breakerId))
-    throw new Error("Aardvark kann nur einen Worm abfangen.");
-
-  if (selected === "rez_trash_worm") {
-    const aardvark = mustInstance(state.cardInstances, aardvarkId);
-    if (!isAardvarkSource(state, aardvarkId))
-      throw new Error("Aardvark-Ziel ist ungueltig.");
-    if (aardvark.rezzed) throw new Error("Aardvark ist bereits gerezzt.");
-    spendCredits(state, "corp", rezCostForCard(state, aardvarkId));
-    state.cardInstances[aardvarkId] = {
-      ...aardvark,
-      rezzed: true,
-      faceup: true,
-    };
-    trashRunnerInstalledProgram(state, breakerId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      publicRevealDefinitionId: definitionFor(state, aardvarkId).id,
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "aardvark_rez_trash_worm",
-      aardvarkRezzed: true,
-      aardvarkWormTrashed: true,
-    };
-  } else if (actionType === "pump_breaker") {
-    executeEffectCommands(state, [
-      { type: "change_breaker_strength", breakerId, amount: 1 },
-    ]);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "aardvark_declined_worm_use",
-      aardvarkRezzed: false,
-    };
-  } else {
-    const subroutineIndex = Number(subroutineIndexRaw);
-    if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
-      throw new Error("Die Aardvark-Subroutine ist ungueltig.");
-    executeEffectCommands(state, [
-      { type: "break_subroutine", subroutineIndex },
-    ]);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "aardvark_declined_worm_use",
-      aardvarkRezzed: false,
-    };
-  }
-
-  delete state.pendingChoice;
-}
-
 function resolveChimeraDaemonTrashChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -19707,56 +19484,6 @@ function spendKrumzTraceBits(state: GameState, amount: number): number {
   return spent;
 }
 
-function parisCityGridTracePoolSource(
-  state: GameState,
-): { cardId: CardInstanceId; serverId: Exclude<ServerId, "new_remote"> } | undefined {
-  const run = state.run;
-  if (!run) return undefined;
-  const server = mustServer(state, run.attackedServerId);
-  const cardId = server.root
-    .slice()
-    .sort()
-    .find((rootId) => {
-      const instance = state.cardInstances[rootId];
-      return (
-        instance?.rezzed === true &&
-        isParisTracePoolSource(state, rootId) &&
-        cardCounter(state, rootId, "bit") > 0
-      );
-    });
-  return cardId ? { cardId, serverId: server.id } : undefined;
-}
-
-function parisCityGridTracePoolTotal(state: GameState): number {
-  const source = parisCityGridTracePoolSource(state);
-  return source ? cardCounter(state, source.cardId, "bit") : 0;
-}
-
-function spendParisCityGridTracePool(
-  state: GameState,
-  sourceCardId: CardInstanceId | undefined,
-  serverId: Exclude<ServerId, "new_remote"> | undefined,
-  amount: number,
-): number {
-  if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Paris-City-Grid-Bit-Ausgabe ist ungueltig.");
-  if (amount <= 0) return 0;
-  const current = parisCityGridTracePoolSource(state);
-  if (
-    !current ||
-    current.cardId !== sourceCardId ||
-    current.serverId !== serverId ||
-    !state.run ||
-    state.run.attackedServerId !== serverId
-  ) {
-    throw new Error("Paris City Grid ist fuer diesen Trace nicht verfuegbar.");
-  }
-  if (cardCounter(state, current.cardId, "bit") < amount)
-    throw new Error("Paris City Grid hat nicht genug Bits.");
-  spendCardCounter(state, current.cardId, "bit", amount);
-  return amount;
-}
-
 function runnerInstalledHardwareTrashTarget(
   state: GameState,
 ): CardInstanceId | undefined {
@@ -19838,8 +19565,15 @@ function spendEncounterTemporaryTraceCredits(
 const corpTracePaymentDeps: CorpTracePaymentDependencies = {
   encounterTemporaryTraceCreditsAvailable,
   spendEncounterTemporaryTraceCredits,
-  parisCityGridTracePoolTotal,
-  spendParisCityGridTracePool,
+  parisCityGridTracePoolTotal: (state) =>
+    parisCityGridTracePoolTotal(fortRunSideFamiliesHostForState(state)),
+  spendParisCityGridTracePool: (state, sourceCardId, serverId, amount) =>
+    spendParisCityGridTracePool(
+      fortRunSideFamiliesHostForState(state),
+      sourceCardId,
+      serverId,
+      amount,
+    ),
   corpCreditsAvailable: (state) => state.corp.credits,
   spendCorpCredits: (state, amount) => spendCredits(state, "corp", amount),
   krumzTraceBitTotal,
@@ -21536,165 +21270,6 @@ function spendRunnerTagRemovalCredits(
             recurringSourceDefinitionIds.join(","),
         }
       : {}),
-  };
-}
-
-function applyPostBreakStealthLoss(
-  state: GameState,
-  breakerId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const breakerDefinition = definitionFor(state, breakerId);
-  const ability = breakAbilityForLegalAction(state, legalAction);
-  const lossAmount = ability?.postBreakStealthLoss ?? 0;
-  if (lossAmount <= 0) return;
-  const stealthSources = runnerStealthRecurringCreditSources(state);
-  const availableStealth = stealthSources.reduce(
-    (sum, source) => sum + source.available,
-    0,
-  );
-  const exactStealthLoss = breakerDefinition.id === PILE_DRIVER_ID;
-  if (exactStealthLoss && availableStealth < lossAmount)
-    throw new Error("Nicht genug Stealth-Credits fuer den Break-Folgeverlust.");
-  const requiredLoss = exactStealthLoss
-    ? lossAmount
-    : Math.min(lossAmount, availableStealth);
-  if (requiredLoss <= 0) return;
-  if (stealthSources.length > 1) {
-    startHammerStealthLossChoice(
-      state,
-      breakerId,
-      requiredLoss,
-      stealthSources,
-    );
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      postBreakStealthLossPending: requiredLoss,
-    };
-    return;
-  }
-  let remaining = lossAmount;
-  let spent = 0;
-  for (const { cardId } of stealthSources) {
-    if (remaining <= 0) break;
-    const available = hostedPaymentCredits(state, cardId);
-    const cardSpent = Math.min(available, remaining);
-    if (cardSpent > 0) {
-      spendHostedPaymentCredits(state, cardId, cardSpent);
-      remaining -= cardSpent;
-      spent += cardSpent;
-    }
-  }
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    postBreakStealthLoss: spent,
-    ...(breakerDefinition.id === RAMMING_PISTON_ID
-      ? { v1922RunnerProgramAbility: "ramming_piston_stealth_loss" }
-      : {}),
-    ...(breakerDefinition.id === PILE_DRIVER_ID
-      ? { v1922RunnerProgramAbility: "pile_driver_stealth_loss" }
-      : {}),
-  };
-}
-
-function runnerStealthRecurringCreditSources(
-  state: GameState,
-): { cardId: CardInstanceId; available: number }[] {
-  const runnerRig = [
-    ...state.runner.rig.hardware,
-    ...state.runner.rig.programs,
-    ...state.runner.rig.resources,
-  ];
-  const sources: { cardId: CardInstanceId; available: number }[] = [];
-  for (const cardId of runnerRig) {
-    if (!cardHasSubtype(definitionFor(state, cardId), "stealth")) continue;
-    const available = hostedPaymentCredits(state, cardId);
-    if (available > 0) sources.push({ cardId, available });
-  }
-  return sources;
-}
-
-function runnerStealthRecurringCredits(state: GameState): number {
-  return runnerStealthRecurringCreditSources(state).reduce(
-    (sum, source) => sum + source.available,
-    0,
-  );
-}
-
-function startHammerStealthLossChoice(
-  state: GameState,
-  breakerId: CardInstanceId,
-  requiredLoss: number,
-  sources: { cardId: CardInstanceId; available: number }[],
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const options: ChoiceRequest["options"] = [];
-  for (const source of sources) {
-    const definition = definitionFor(state, source.cardId);
-    for (
-      let creditIndex = 0;
-      creditIndex < Math.min(source.available, requiredLoss);
-      creditIndex += 1
-    ) {
-      options.push({
-        id: `stealth_${source.cardId}_${creditIndex + 1}`,
-        label: `${definition.title}: 1 Stealth-Credit verlieren`,
-        value: source.cardId,
-      });
-    }
-  }
-  state.pendingChoice = {
-    choiceId: `choice_v1922_hammer_stealth_loss_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `v1922.hammer_stealth_loss:${breakerId}:${state.stateVersion + 1}`,
-    prompt: "Stealth-Verlust verteilen.",
-    kind: "select_cards",
-    options,
-    minSelections: requiredLoss,
-    maxSelections: requiredLoss,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-}
-
-function resolveHammerStealthLossChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.hammer_stealth_loss"))
-    throw new Error("Hammer-Stealth-Choice ist nicht offen.");
-  const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
-  if (new Set(selectedOptionIds).size !== selectedOptionIds.length)
-    throw new Error("Hammer-Stealth-Auswahl enthaelt doppelte Optionen.");
-  const lossByCardId = new Map<CardInstanceId, number>();
-  for (const optionId of selectedOptionIds) {
-    const option = choice.options.find((candidate) => candidate.id === optionId);
-    const cardId =
-      typeof option?.value === "string"
-        ? (option.value as CardInstanceId)
-        : undefined;
-    if (!cardId) throw new Error("Ungueltige Hammer-Stealth-Auswahl.");
-    lossByCardId.set(cardId, (lossByCardId.get(cardId) ?? 0) + 1);
-  }
-  const installed = runnerInstalledCardIds(state);
-  for (const [cardId, amount] of lossByCardId) {
-    if (!installed.includes(cardId))
-      throw new Error("Die Stealth-Quelle ist nicht mehr installiert.");
-    if (!cardHasSubtype(definitionFor(state, cardId), "stealth"))
-      throw new Error("Nur Stealth-Karten koennen gewaehlt werden.");
-    if (hostedPaymentCredits(state, cardId) < amount)
-      throw new Error("Nicht genug Stealth-Credits fuer die Auswahl.");
-    spendHostedPaymentCredits(state, cardId, amount);
-  }
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_hammer_stealth_loss_distribution",
-    selectedCount: selectedOptionIds.length,
-    postBreakStealthLoss: selectedOptionIds.length,
   };
 }
 
