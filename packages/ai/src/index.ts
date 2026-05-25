@@ -166,6 +166,20 @@ export type {
   OpeningHandEvaluation,
   RunnerOpeningHandEvaluation,
 } from "./deck-doctrine";
+export { buildAiDeckOntologySummary } from "./hint-ontology-doctrine";
+export type {
+  AiDeckOntologyBreakerCoverageSummary,
+  AiDeckOntologyConditionCounts,
+  AiDeckOntologyDeckSnapshot,
+  AiDeckOntologyEffectCounts,
+  AiDeckOntologyLineSupportCounts,
+  AiDeckOntologyQualitySummary,
+  AiDeckOntologyRemoteRoleSummary,
+  AiDeckOntologyScoredAgendaActionSummary,
+  AiDeckOntologySummary,
+  AiDeckOntologyTagPunishSummary,
+  AiDeckOntologyValidationSummary,
+} from "./hint-ontology-doctrine";
 
 type RankedChoice = {
   action: LegalAction | undefined;

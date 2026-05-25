@@ -13,6 +13,7 @@
 - `ai-hint-ontology-redesign-proposal-2026-05-25.md`: langfristiger Redesign-Vorschlag für AI-Hints als strategische, side-safe Ontologie mit Schema, Beispielkarten, Verbraucherarchitektur, Migration und Risiken.
 - `ai-hint-ontology-phase1-validation-2026-05-25.md`: Phase-1-Umsetzung der read-only Hint-Ontology-Validation mit Union Types, Hidden-Info-Safety und Legacy-Compatibility-Ergebnis.
 - `ai-benchmark-card-hint-ontology-pilot-2026-05-25.md`: Phase-2-Pilotmigration strukturierter, read-only Ontology-Felder für Benchmark- und High-Impact-Karten ohne Planerwirkung.
+- `ai-hint-ontology-phase3a-doctrine-diagnostics-2026-05-25.md`: Phase-3a-Umsetzung einer zentralen read-only Deck-Ontology-Summary für Diagnose ohne Action-Score- oder Planerwirkung.
 - `ai-benchmark-deck-basis-review-2026-05-23.md`: Klassifikation der aktuell genutzten AI-Smoke-/Soak-/League-/Progression-Decks und Empfehlung für eine kuratierte Benchmark-Decksuite.
 - `ai-strategy-slices-consolidation-review-2026-05-23.md`: konsolidierte Bilanz der letzten AI-Strategie-/Diagnose-Slices inklusive aktueller Baseline-vs-Candidate-Suite, Ablation-light und Empfehlungen.
 - `ai-plan-conversion-diagnosis-2026-05-23.md`: Planfolge-/Conversion-Diagnose für aktuelle KI-Slices mit neuen Short-Horizon-Metriken, Slotanalyse und Empfehlungen ohne neue Strategie-Heuristik.
