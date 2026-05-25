@@ -78,6 +78,18 @@ Die späte Proteus-Longtail-Phase in kleine Umsetzungsschritte zerlegen und dana
 - Phase 9 ist bewusst kein einzelnes großes Implementierungspaket. Der erste Bearbeiter soll sie in kleinere Activities schneiden, wenn mehr als eine Mechanikfamilie gleichzeitig betroffen wäre.
 - `Precision Bribery` braucht Data-Fort-Creation-Lock; nicht nebenbei in Run-/Access-Logik verstecken.
 
+## Split-Stand 2026-05-24
+
+Phase 9 wurde in die Detail-Activities 9a bis 9e zerlegt:
+
+- `docs/activities/inbox/act-2026-05-24-proteus-phase-9a-random-dice-foundation.md`
+- `docs/activities/inbox/act-2026-05-24-proteus-phase-9b-action-economy-debt.md`
+- `docs/activities/inbox/act-2026-05-24-proteus-phase-9c-hidden-zone-search-install-tutor.md`
+- `docs/activities/inbox/act-2026-05-24-proteus-phase-9d-data-fort-creation-lock.md`
+- `docs/activities/inbox/act-2026-05-24-proteus-phase-9e-rule-blocked-preflight.md`
+
+Dieses Umbrella-Paket bleibt als historische Klammer und Planungsreferenz erhalten; Codearbeit erfolgt nur in den Detail-Activities.
+
 ## Ergebnisnotiz
 
-Noch offen.
+Am 2026-05-24 in Detail-Slices 9a bis 9e zerlegt. Dieses Umbrella-Paket bleibt nur als historische Klammer erhalten.
