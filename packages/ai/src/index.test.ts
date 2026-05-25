@@ -15779,6 +15779,158 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.basicDrawTakenWhileBetterAgendaDrawAvailable).toBe(1);
   });
 
+  it("summarizes tag/punish terminal-window diagnostics", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "play_operation", undefined, 1, {
+            corpTagSourceOpportunity: true,
+            corpTagSourceTaken: true,
+            corpTraceTagOpportunity: true,
+            corpTraceTagTaken: true,
+            corpTraceTagExpectedSuccess: 1,
+          }),
+          progressionAction("runner", 2, "resolve_choice", undefined, 1, {
+            runnerTagsBeforeAction: 0,
+            runnerTagsAfterAction: 1,
+            runnerTagAddedByAction: true,
+            runnerTaggedAfterTraceDuringRun: true,
+          }),
+          progressionAction("runner", 3, "end_turn", undefined, 1, {
+            runnerTagsBeforeAction: 1,
+            runnerTagsAfterAction: 1,
+            runnerTaggedAtEndOfRunnerTurn: true,
+          }),
+          progressionAction("corp", 4, "mandatory_draw", undefined, 2, {
+            runnerTagsBeforeAction: 1,
+            runnerTagsAfterAction: 1,
+            runnerTaggedAtCorpDecision: true,
+            runnerTaggedAtStartOfCorpTurn: true,
+            corpPunishOpportunity: true,
+            corpPunishTaken: true,
+            corpPunishKind: "scorched_earth_like",
+          }),
+          progressionAction("runner", 5, "resolve_choice", undefined, 2, {
+            runnerTagsBeforeAction: 0,
+            runnerTagsAfterAction: 1,
+            runnerTagAddedByAction: true,
+            runnerTaggedAfterTraceDuringRun: true,
+          }),
+          progressionAction("runner", 6, "remove_tag", undefined, 2, {
+            runnerTagsBeforeAction: 1,
+            runnerTagsAfterAction: 0,
+            runnerTagClearedByAction: true,
+          }),
+          progressionAction("corp", 7, "mandatory_draw", undefined, 3, {
+            runnerTagsBeforeAction: 0,
+            runnerTagsAfterAction: 0,
+          }),
+          progressionAction("corp", 8, "gain_credit", undefined, 4, {
+            runnerTagsBeforeAction: 1,
+            runnerTaggedAtCorpDecision: true,
+            corpPunishOpportunity: true,
+            corpPunishKind: "urban_renewal_like",
+            corpPunishSkippedReason: "economy",
+          }),
+          progressionAction("corp", 9, "install_card", "hq", 4, {
+            runnerTagsBeforeAction: 1,
+            runnerTaggedAtCorpDecision: true,
+            corpPunishOpportunity: true,
+            corpPunishKind: "punitive_counterstrike_like",
+            corpPunishSkippedReason: "protection",
+            corpTraceTagOpportunity: true,
+            corpTraceTagSkippedReason: "protection",
+          }),
+          progressionAction(
+            "corp",
+            10,
+            "activated_card_ability",
+            undefined,
+            4,
+            {
+              runnerTagsBeforeAction: 1,
+              runnerTaggedAtCorpDecision: true,
+              corpPunishOpportunity: true,
+              corpPunishTaken: true,
+              corpPunishKind: "scored_agenda_damage_like",
+            },
+          ),
+        ],
+        "tag-punish-window-metric-fixture",
+      ),
+    ]);
+
+    expect(metrics.runnerTaggedAtCorpDecision).toBe(4);
+    expect(metrics.runnerTaggedAtCorpDecisionTurns).toBe(2);
+    expect(metrics.runnerTaggedAtCorpDecisionActions).toBe(4);
+    expect(metrics.runnerTaggedAtStartOfCorpTurn).toBe(1);
+    expect(metrics.runnerTaggedAtEndOfRunnerTurn).toBe(1);
+    expect(metrics.runnerTaggedAfterTraceDuringRun).toBe(2);
+    expect(metrics.runnerTagClearedSameRunnerTurn).toBe(1);
+    expect(metrics.runnerTagClearedBeforeCorpDecision).toBe(1);
+    expect(metrics.runnerTagWindowExpiredBeforeCorpTurn).toBe(1);
+    expect(metrics.corpPunishOpportunities).toBe(4);
+    expect(metrics.corpPunishTaken).toBe(2);
+    expect(metrics.corpPunishSkipped).toBe(2);
+    expect(metrics.corpPunishTakeRate).toBe(0.5);
+    expect(metrics.corpPunishOpportunityScorchedEarthLike).toBe(1);
+    expect(metrics.corpPunishOpportunityUrbanRenewalLike).toBe(1);
+    expect(metrics.corpPunishOpportunityPunitiveCounterstrikeLike).toBe(1);
+    expect(metrics.corpPunishOpportunityScoredAgendaDamageLike).toBe(1);
+    expect(metrics.corpPunishSkippedForEconomy).toBe(1);
+    expect(metrics.corpPunishSkippedForProtection).toBe(1);
+    expect(metrics.corpPunishWindowExpiredBeforeCorpTurn).toBe(1);
+    expect(metrics.corpTagSourceOpportunities).toBe(1);
+    expect(metrics.corpTagSourceTaken).toBe(1);
+    expect(metrics.corpTraceTagOpportunities).toBe(2);
+    expect(metrics.corpTraceTagTaken).toBe(1);
+    expect(metrics.corpTraceTagSkipped).toBe(1);
+    expect(metrics.corpTraceTagExpectedSuccess).toBe(1);
+    expect(metrics.corpTraceTagSkippedForProtection).toBe(1);
+    expect(metrics.corpTagSourceConvertedToRunnerTagged).toBe(1);
+    expect(metrics.corpTagSourceConvertedToPunishOpportunity).toBe(1);
+    expect(metrics.corpTagSourceConvertedToPunishTaken).toBe(1);
+    expect(metrics.corpTagPunishFunnelTagSourceOpportunity).toBe(1);
+    expect(metrics.corpTagPunishFunnelTagSourceTaken).toBe(1);
+    expect(metrics.corpTagPunishFunnelRunnerTagged).toBe(1);
+    expect(metrics.corpTagPunishFunnelRunnerTaggedAtCorpDecision).toBe(4);
+    expect(metrics.corpTagPunishFunnelPunishOpportunity).toBe(4);
+    expect(metrics.corpTagPunishFunnelPunishTaken).toBe(2);
+    expect(metrics.corpTagPunishFunnelTerminalDamageOrEconomicHit).toBe(2);
+  });
+
+  it("keeps tag/punish diagnostics invariant to hidden runner zones", () => {
+    const visibleActions = [
+      progressionAction("corp", 1, "gain_credit", undefined, 1, {
+        runnerTagsBeforeAction: 1,
+        runnerTaggedAtCorpDecision: true,
+        corpPunishOpportunity: true,
+        corpPunishKind: "closed_accounts_like",
+        corpPunishSkippedReason: "economy",
+      }),
+    ];
+    const first = summarizeMatchProgressionMetrics([
+      progressionSummary(visibleActions, "tag-punish-hidden-a"),
+    ]);
+    const second = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        visibleActions.map((entry) => ({
+          ...entry,
+          evidence: ["hidden_runner_hand_variant_not_used"],
+        })),
+        "tag-punish-hidden-b",
+      ),
+    ]);
+
+    expect(second.corpPunishOpportunities).toBe(first.corpPunishOpportunities);
+    expect(second.corpPunishSkippedForEconomy).toBe(
+      first.corpPunishSkippedForEconomy,
+    );
+    expect(second.runnerTaggedAtCorpDecision).toBe(
+      first.runnerTaggedAtCorpDecision,
+    );
+  });
+
   it("does not count generic central endgame runs as true runner closeout", () => {
     const metrics = summarizeMatchProgressionMetrics([
       {

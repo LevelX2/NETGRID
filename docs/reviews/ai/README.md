@@ -19,6 +19,7 @@
 - `ai-advance-to-score-window-compression-2026-05-24.md`: enger Corp-Slice zur Advance-to-Score-Window-Kompression mit neuen Verzögerungsmetriken, 8-Slot-Benchmark und Bewertung der verbleibenden Corp-Score-Schwächen.
 - `ai-local-pair2-actionlimit-and-remote-portfolio-diagnosis-2026-05-24.md`: Diagnose der verbleibenden ActionLimit-/Stagnationssignale nach Remote-Portfolio-/HQ-Density-Slice mit Fokus auf Local Pair 2 und Remote-Ice-Consolidation-Metrik.
 - `ai-tag-punish-terminal-conversion-diagnosis-2026-05-24.md`: gezielte Diagnose zu Tag-/Trace-/Punish-Terminalkonversion mit Local-Pair-2-Repro-Traces, Snapshot-Holdout-/Real-Scene-Vergleich und Metriklücken.
+- `ai-tag-punish-terminal-window-metrics-2026-05-24.md`: reiner Diagnose-Metrik-Slice für Tag/Punish-Terminalfenster mit neuen Funnel-Metriken und 8-Slot-Suite-Auswertung.
 - `match-progression-deck-suite-benchmark-2026-05-23.md`: deckseitig getrennte Progression-Suite mit Demo-Smoke, kuratierten Snapshot-Tuning-/Holdout-Paaren und pending Real-Scene-Holdouts.
 - `match-progression-benchmark-2026-05-23.md`: erweiterter Progression-Benchmark mit Tuning- plus Holdout-Seeds, Profilvergleich und Stagnationsbefund zu Remote-Advances/Trash.
 - `ai-hints-role-gap-report-2026-05-17.md`: Rollenlücken in AI-Hints und Folgepakete.
