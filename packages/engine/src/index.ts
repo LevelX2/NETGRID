@@ -282,7 +282,6 @@ import {
   availableRunnerRunStartCredits,
   hostedPaymentCredits,
   isRestrictedHostedCreditSource,
-  payEncounterTaxForFutureIce,
   payRunStartTaxCredits,
   recordWilsonRunCapSpend,
   restrictedHostedCreditSourceForDefinition,
@@ -341,6 +340,20 @@ import {
   buildRunnerMovementActions,
   type RunnerEncounterActionHost,
 } from "./game/run/encounter-actions";
+import {
+  approachIceExposeCanBeOfferedForCurrentIce,
+  beginEncounter,
+  continueAfterCorpRootRezIfWindowIsComplete,
+  isApproachIceExposeViewingWindowOpen,
+  isApproachIceExposeWindowOpen,
+  resolveApproachIceExposeAbility,
+  resolveApproachIceExposeViewingDecision,
+  resolveSpeedTrapRezInterruptChoice,
+  runnerApproachIceExposeActions,
+  runnerApproachIceExposeViewingActions,
+  startSpeedTrapRezInterruptChoice,
+  type EncounterEntryHost,
+} from "./game/run/encounter-entry";
 import {
   approachOrEncounterIce,
   handleRunMovementAction,
@@ -473,7 +486,6 @@ import {
   OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID,
   RABBIT_HQ_INTERFACE_PROGRAM_ID,
   SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
-  SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID,
   SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID,
   VALU_PAK_SOFTWARE_BUNDLE_INSTALL_EVENT_ID,
   ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
@@ -578,7 +590,6 @@ import type {
   CardFlatlineReplacementSourceImplementation,
   CardHiddenReplacementLongtailImplementation,
   CardRemainingReplacementLongtailImplementation,
-  CardRunEncounterInterventionImplementation,
   CardRunnerEventLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
   CardScoredAgendaImplementation,
@@ -2407,10 +2418,15 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
     return side === "corp" ? corpRunnerActionPaidWindowActions(state) : [];
   }
   if (state.timingPoint === "run.approach_ice") {
-    if (isApproachIceExposeViewingWindowOpen(state))
-      return side === "runner" ? runnerApproachIceExposeViewingActions(state) : [];
-    if (isApproachIceExposeWindowOpen(state))
-      return side === "runner" ? runnerApproachIceExposeActions(state) : [];
+    const encounterEntryHost = encounterEntryHostForState(state);
+    if (isApproachIceExposeViewingWindowOpen(encounterEntryHost))
+      return side === "runner"
+        ? runnerApproachIceExposeViewingActions(encounterEntryHost)
+        : [];
+    if (isApproachIceExposeWindowOpen(encounterEntryHost))
+      return side === "runner"
+        ? runnerApproachIceExposeActions(encounterEntryHost)
+        : [];
     return side === "corp" ? corpApproachActions(state) : [];
   }
   if (state.timingPoint === "run.encounter_ice") {
@@ -5082,25 +5098,6 @@ function leavePlayCleanupImplementationsForCard(
   );
 }
 
-function runEncounterInterventionsForDefinition(
-  definitionId: CardDefinitionId,
-): readonly CardRunEncounterInterventionImplementation[] {
-  return (
-    cardImplementationForDefinitionId(definitionId)?.runEncounterInterventions ??
-    []
-  );
-}
-
-function hasRunEncounterInterventionKind(
-  state: GameState,
-  cardId: CardInstanceId,
-  kind: CardRunEncounterInterventionImplementation["kind"],
-): boolean {
-  return runEncounterInterventionsForDefinition(
-    definitionFor(state, cardId).id,
-  ).some((intervention) => intervention.kind === kind);
-}
-
 function isFortIceSwapSource(state: GameState, cardId: CardInstanceId): boolean {
   return hasFortRunWindowKind(state, cardId, "swap_unrezzed_fort_ice_with_hq_ice");
 }
@@ -6107,175 +6104,6 @@ function startRunIceRepositionActions(
           ),
         );
     });
-}
-
-function isApproachIceExposeWindowOpen(state: GameState): boolean {
-  return Boolean(
-    state.timingPoint === "run.approach_ice" &&
-    state.activeSide === "runner" &&
-    approachIceExposeCanBeOfferedForCurrentIce(state),
-  );
-}
-
-function isApproachIceExposeViewingWindowOpen(state: GameState): boolean {
-  return Boolean(
-    state.timingPoint === "run.approach_ice" &&
-    state.activeSide === "runner" &&
-    state.run?.approachIceExposeViewingIceId &&
-    state.run?.approachIceExposeViewingSourceCardId,
-  );
-}
-
-function approachIceExposeCanBeOfferedForCurrentIce(state: GameState): boolean {
-  const run = state.run;
-  const approachedIceId = run?.approachedIceId;
-  if (!run || !approachedIceId) return false;
-  if (run.approachIceExposeViewingIceId) return false;
-  if (run.approachIceExposeSkippedIceIdsThisRun?.includes(approachedIceId))
-    return false;
-  if (installedApproachIceExposeSources(state).length === 0) return false;
-  const ice = state.cardInstances[approachedIceId];
-  return Boolean(ice && !ice.rezzed);
-}
-
-function installedApproachIceExposeSources(state: GameState): CardInstanceId[] {
-  const used = new Set(state.run?.approachIceExposeUsedSourceIdsThisRun ?? []);
-  return runnerInstalledCardIds(state)
-    .slice()
-    .sort()
-    .filter((cardId) => {
-      if (used.has(cardId)) return false;
-      const definition = definitionFor(state, cardId);
-      if (
-        hasRunEncounterInterventionKind(
-          state,
-          cardId,
-          "approach_ice_expose_then_jack_out_before_rez",
-        )
-      )
-        return true;
-      if (cardImplementationForDefinitionId(definition.id)) return false;
-      return definition.abilities?.some(
-        (ability) =>
-          ability.type === "approach_ice_expose" &&
-          ability.timingPoint === "run.approach_ice" &&
-          ability.publicActionType === "trigger_ability",
-      );
-    });
-}
-
-function approachIceExposeAbilityIdForSource(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-): string {
-  const definition = definitionFor(state, sourceCardId);
-  if (
-    hasRunEncounterInterventionKind(
-      state,
-      sourceCardId,
-      "approach_ice_expose_then_jack_out_before_rez",
-    )
-  )
-    return `card_implementation.${definition.id}.approach_ice_expose`;
-  const ability = definition.abilities?.find(
-    (candidate) =>
-      candidate.type === "approach_ice_expose" &&
-      candidate.timingPoint === "run.approach_ice",
-  );
-  if (!ability)
-    throw new Error("Diese Karte hat keine Approach-Expose-Faehigkeit.");
-  return ability.id;
-}
-
-function runnerApproachIceExposeActions(state: GameState): LegalAction[] {
-  const run = mustRun(state);
-  const approachedIceId = run.approachedIceId;
-  if (!approachedIceId) return [];
-  const sources = installedApproachIceExposeSources(state);
-  if (sources.length === 0) return [];
-  const primarySource = sources[0]!;
-  const exposeActions = sources.map((sourceCardId) => {
-    const definition = definitionFor(state, sourceCardId);
-    const abilityId = approachIceExposeAbilityIdForSource(state, sourceCardId);
-    return action(
-      state,
-      "runner",
-      "trigger_ability",
-      `${definition.title}: ICE ansehen`,
-      sourceCardId,
-      [],
-      {
-        cardId: sourceCardId,
-        iceId: approachedIceId,
-        approachIceExposeDecision: "expose",
-      },
-      {
-        abilityRef: { sourceCardInstanceId: sourceCardId, abilityId },
-        effectRef: `effect.${abilityId}`,
-        targetRequirements: [
-          {
-            id: "approachedIce",
-            kind: "card",
-            side: "corp",
-            zoneScope: ["corp.servers.ice"],
-            visibility: "public",
-          },
-        ],
-      },
-    );
-  });
-  return [
-    ...exposeActions,
-    action(
-      state,
-      "runner",
-      "trigger_ability",
-      `${definitionFor(state, primarySource).title}: Ansehen überspringen`,
-      primarySource,
-      [],
-      {
-        cardId: primarySource,
-        iceId: approachedIceId,
-        approachIceExposeDecision: "decline",
-      },
-    ),
-  ];
-}
-
-function runnerApproachIceExposeViewingActions(state: GameState): LegalAction[] {
-  const run = mustRun(state);
-  const sourceCardId = run.approachIceExposeViewingSourceCardId;
-  const viewedIceId = run.approachIceExposeViewingIceId;
-  if (!sourceCardId || !viewedIceId) return [];
-  const definition = definitionFor(state, sourceCardId);
-  return [
-    action(
-      state,
-      "runner",
-      "trigger_ability",
-      `${definition.title}: Ansehen beenden`,
-      sourceCardId,
-      [],
-      {
-        cardId: sourceCardId,
-        iceId: viewedIceId,
-        approachIceExposeViewDecision: "finish",
-      },
-    ),
-    action(
-      state,
-      "runner",
-      "jack_out",
-      "Jack-out",
-      "game_rule",
-      [],
-      {
-        cardId: sourceCardId,
-        iceId: viewedIceId,
-        approachIceExposeJackOut: true,
-      },
-    ),
-  ];
 }
 
 function dupreStrengthCounterBonus(
@@ -8034,11 +7862,17 @@ function performAction(
         return;
       }
       if (legalAction.payload?.approachIceExposeDecision) {
-        resolveApproachIceExposeAbility(state, legalAction);
+        resolveApproachIceExposeAbility(
+          encounterEntryHostForState(state),
+          legalAction,
+        );
         return;
       }
       if (legalAction.payload?.approachIceExposeViewDecision) {
-        resolveApproachIceExposeViewingDecision(state, legalAction);
+        resolveApproachIceExposeViewingDecision(
+          encounterEntryHostForState(state),
+          legalAction,
+        );
         return;
       }
       if (
@@ -9771,105 +9605,6 @@ function applyAiBoonRunStart(
   }
 }
 
-function markApproachIceExposeSkippedForIce(
-  run: ActiveRun,
-  approachedIceId: CardInstanceId,
-): void {
-  const skipped = run.approachIceExposeSkippedIceIdsThisRun ?? [];
-  if (!skipped.includes(approachedIceId))
-    run.approachIceExposeSkippedIceIdsThisRun = [...skipped, approachedIceId];
-}
-
-function markApproachIceExposeUsedForSource(
-  run: ActiveRun,
-  sourceCardId: CardInstanceId,
-): void {
-  const used = run.approachIceExposeUsedSourceIdsThisRun ?? [];
-  if (!used.includes(sourceCardId))
-    run.approachIceExposeUsedSourceIdsThisRun = [...used, sourceCardId];
-}
-
-function resolveApproachIceExposeAbility(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Approach-Expose nutzen.");
-  const run = mustRun(state);
-  const approachedIceId = run.approachedIceId;
-  if (
-    !approachedIceId ||
-    String(legalAction.payload?.iceId) !== approachedIceId
-  )
-    throw new Error("Approach-Expose passt nicht zum aktuellen ICE.");
-  if (!isApproachIceExposeWindowOpen(state))
-    throw new Error("Approach-Expose ist in diesem Fenster nicht legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  const availableSources = installedApproachIceExposeSources(state);
-  const decision = String(legalAction.payload?.approachIceExposeDecision ?? "");
-  if (decision === "expose") {
-    if (!availableSources.includes(sourceCardId))
-      throw new Error("Die Approach-Expose-Quelle ist nicht installiert.");
-    const definition = definitionFor(state, approachedIceId);
-    markApproachIceExposeUsedForSource(run, sourceCardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "approach_ice_expose",
-      publicRevealKind: "expose",
-      publicRevealDefinitionId: definition.id,
-      exposedCardDefinitionId: definition.id,
-    };
-  } else if (decision === "decline") {
-    markApproachIceExposeSkippedForIce(run, approachedIceId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "approach_ice_expose_decline",
-    };
-  } else {
-    throw new Error("Approach-Expose-Entscheidung ist ungueltig.");
-  }
-
-  if (decision === "expose") {
-    run.approachIceExposeViewingIceId = approachedIceId;
-    run.approachIceExposeViewingSourceCardId = sourceCardId;
-    state.activeSide = "runner";
-  } else {
-    state.activeSide = "corp";
-  }
-  state.timingPoint = "run.approach_ice";
-}
-
-function resolveApproachIceExposeViewingDecision(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf das Ansehen beenden.");
-  if (!isApproachIceExposeViewingWindowOpen(state))
-    throw new Error("Es ist kein Ansehen-Fenster offen.");
-  const run = mustRun(state);
-  const viewedIceId = run.approachIceExposeViewingIceId;
-  const sourceCardId = run.approachIceExposeViewingSourceCardId;
-  if (
-    String(legalAction.payload?.iceId) !== viewedIceId ||
-    String(legalAction.payload?.cardId) !== sourceCardId
-  )
-    throw new Error("Das Ansehen passt nicht mehr zum aktuellen ICE.");
-  if (legalAction.payload?.approachIceExposeViewDecision !== "finish")
-    throw new Error("Die Ansehen-Entscheidung ist ungueltig.");
-  delete run.approachIceExposeViewingIceId;
-  delete run.approachIceExposeViewingSourceCardId;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "approach_ice_expose_finish",
-  };
-  state.activeSide = "corp";
-  state.timingPoint = "run.approach_ice";
-}
-
 function rezCard(
   state: GameState,
   cardId: string,
@@ -9986,31 +9721,28 @@ function rezCard(
       cardId as CardInstanceId,
       "on_rez",
     );
-  if (rootRez && startSpeedTrapRezInterruptChoice(state, cardId, legalAction))
+  if (
+    rootRez &&
+    startSpeedTrapRezInterruptChoice(
+      encounterEntryHostForState(state),
+      cardId,
+      legalAction,
+    ).handled
+  )
     return;
   if (rootRez && resolveCorpRootRezEffect(state, cardId, legalAction)) return;
   if (rootRez) {
-    continueAfterCorpRootRezIfWindowIsComplete(state, legalAction);
+    continueAfterCorpRootRezIfWindowIsComplete(
+      encounterEntryHostForState(state),
+      legalAction,
+    );
     return;
   }
-  beginEncounter(state, cardId as CardInstanceId, legalAction);
-}
-
-function continueAfterCorpRootRezIfWindowIsComplete(
-  state: GameState,
-  legalAction?: LegalAction,
-): void {
-  const run = state.run;
-  if (
-    state.timingPoint !== "run.approach_ice" ||
-    run?.phase !== "approach_ice" ||
-    !run.approachedIceId ||
-    corpRunRootRezActions(state).length > 0
-  )
-    return;
-  const approachedIce = mustInstance(state.cardInstances, run.approachedIceId);
-  if (!approachedIce.rezzed) return;
-  beginEncounter(state, run.approachedIceId, legalAction);
+  beginEncounter(
+    encounterEntryHostForState(state),
+    cardId as CardInstanceId,
+    legalAction,
+  );
 }
 
 function variableIceStateForRezAction(
@@ -10161,160 +9893,6 @@ function resolveCorpRootRezEffect(
     }
   }
   return true;
-}
-
-function installedSpeedTrapIds(state: GameState): CardInstanceId[] {
-  return state.runner.rig.programs
-    .filter((cardId) => {
-      const definitionId = definitionFor(state, cardId).id;
-      if (
-        hasRunEncounterInterventionKind(
-          state,
-          cardId,
-          "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
-        )
-      )
-        return true;
-      return (
-        !cardImplementationForDefinitionId(definitionId) &&
-        definitionId === SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID
-      );
-    })
-    .sort();
-}
-
-function startSpeedTrapRezInterruptChoice(
-  state: GameState,
-  rezzedCardId: string,
-  legalAction?: LegalAction,
-): boolean {
-  const run = state.run;
-  if (!run) return false;
-  const definition = definitionFor(state, rezzedCardId);
-  if (definition.type !== "asset" && definition.type !== "upgrade")
-    return false;
-  const speedTrapId = installedSpeedTrapIds(state)[0];
-  if (!speedTrapId) return false;
-  if (!mustServer(state, run.attackedServerId).root.includes(rezzedCardId))
-    return false;
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  run.speedTrapPendingRezCardId = rezzedCardId as CardInstanceId;
-  run.speedTrapPendingRezTimingPoint = state.timingPoint;
-  run.speedTrapPendingRezActiveSide = state.activeSide;
-  state.pendingChoice = {
-    choiceId: `v1922_speed_trap_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `v1922.speed_trap:${speedTrapId}:${rezzedCardId}:${state.stateVersion + 1}`,
-    prompt: "Speed Trap: Nach dem Rez jack out?",
-    kind: "select_option",
-    options: [
-      {
-        id: "jack_out",
-        label: "Jack out",
-        publicLabel: "Speed Trap nutzen",
-        value: "jack_out",
-      },
-      {
-        id: "pass",
-        label: "Nicht nutzen",
-        publicLabel: "Speed Trap nicht nutzen",
-        value: "pass",
-      },
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
-  state.activeSide = "runner";
-  if (legalAction) {
-    const serverLabel = publicServerLabel(state, run.attackedServerId);
-    const speedTrapDefinitionId = definitionFor(state, speedTrapId).id;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      v1922RunnerProgramAbility: "speed_trap_rez_interrupt_choice",
-      sourceDefinitionId: speedTrapDefinitionId,
-      speedTrapSourceCardId: speedTrapId,
-      rezzedCardDefinitionId: definition.id,
-      ...(serverLabel ? { serverLabel } : {}),
-      speedTrapChoiceOpened: true,
-    };
-  }
-  return true;
-}
-
-function beginEncounter(
-  state: GameState,
-  encounteredIceId: CardInstanceId,
-  legalAction?: LegalAction,
-): void {
-  const run = mustRun(state);
-  run.phase = "encounter_ice";
-  run.encounteredIceId = encounteredIceId;
-  run.brokenSubroutineIndexes = [];
-  run.resolvedSubroutineIndexes = [];
-  run.traceSuccessBySubroutineIndex = {};
-  delete run.encounterTemporaryTraceCredits;
-  delete run.encounterAdditionalSubroutines;
-  run.bartmossUsedBreakerIdsThisEncounter = [];
-  run.blinkUsedSubroutinesByBreakerThisEncounter = {};
-  if (run.nextEncounterNoBreakSubroutines) {
-    run.noBreakSubroutinesActive = true;
-    run.nextEncounterNoBreakSubroutines = false;
-  } else {
-    run.noBreakSubroutinesActive = false;
-  }
-  if (run.nextEncounterJackOutLock) {
-    run.jackOutLockedUntilEncounterEnds = true;
-    run.nextEncounterJackOutLock = false;
-  } else {
-    run.jackOutLockedUntilEncounterEnds = false;
-  }
-  const queuedFatalDamage = Math.max(
-    0,
-    Math.floor(run.nextEncounterFatalDamage ?? 0),
-  );
-  run.fatalDamageActiveForEncounter = queuedFatalDamage > 0;
-  if (queuedFatalDamage > 0)
-    run.fatalDamageAmountForEncounter = queuedFatalDamage;
-  else delete run.fatalDamageAmountForEncounter;
-  run.nextEncounterFatalDamage = 0;
-  const encounterTaxPayment = payEncounterTaxForFutureIce(
-    runDurationPaymentHost(state),
-    legalAction,
-  );
-  if (encounterTaxPayment.runShouldEnd) {
-    finishRun(state, false, legalAction);
-    return;
-  }
-  const encounteredDefinition = definitionFor(state, encounteredIceId);
-  const iceEncounter = cardImplementationForDefinitionId(
-    encounteredDefinition.id,
-  )?.iceEncounter;
-  if (iceEncounter?.kind === "add_encounter_temporary_credits") {
-    const amount = Math.max(0, Math.floor(iceEncounter.amount));
-    if (
-      amount > 0 &&
-      iceEncounter.side === "corp" &&
-      iceEncounter.usableFor === "this_ice_printed_trace_subroutines"
-    ) {
-      run.encounterTemporaryTraceCredits = {
-        sourceIceId: encounteredIceId,
-        sourceDefinitionId: encounteredDefinition.id,
-        remaining: amount,
-        usableFor: iceEncounter.usableFor,
-      };
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          temporaryTraceCredits: amount,
-          temporaryTraceCreditsSourceDefinitionId: encounteredDefinition.id,
-        };
-      }
-    }
-  }
-  state.timingPoint = "run.encounter_ice";
-  state.activeSide = "runner";
 }
 
 function continueRun(state: GameState, legalAction?: LegalAction): void {
@@ -17392,18 +16970,49 @@ function runMovementHostForState(state: GameState): RunMovementHost {
     rules: {
       isV097OrLater: () => isV097OrLater(state),
       corpRunRootRezActionsAvailable: () => corpRunRootRezActions(state).length > 0,
-      approachIceExposeCanBeOfferedForCurrentIce: () => approachIceExposeCanBeOfferedForCurrentIce(state),
+      approachIceExposeCanBeOfferedForCurrentIce: () =>
+        approachIceExposeCanBeOfferedForCurrentIce(
+          encounterEntryHostForState(state),
+        ),
     },
     encounter: {
       encounterResolutionHost: () => encounterResolutionHostForState(state),
       encounterSpecialWindowHost: () => encounterSpecialWindowHostForState(state),
-      beginEncounter: (iceId, legalAction) => beginEncounter(state, iceId, legalAction),
+      beginEncounter: (iceId, legalAction) =>
+        beginEncounter(encounterEntryHostForState(state), iceId, legalAction),
     },
     access: {
       startAccessFromSuccessfulRun: (legalAction) => enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction),
     },
     cleanup: {
       finishRun: (successful, legalAction) => finishRun(state, successful, legalAction),
+    },
+  };
+}
+
+function encounterEntryHostForState(state: GameState): EncounterEntryHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+      runnerInstalledCardIds: () => runnerInstalledCardIds(state),
+    },
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
+    },
+    run: {
+      corpRootRezActionsAvailable: () => corpRunRootRezActions(state).length > 0,
+    },
+    choices: {
+      selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
+    },
+    callbacks: {
+      finishRun: (successful, legalAction) =>
+        finishRun(state, successful, legalAction),
+      resolveCorpRootRezEffect: (cardId, legalAction) =>
+        resolveCorpRootRezEffect(state, cardId, legalAction),
     },
   };
 }
@@ -17454,7 +17063,7 @@ function successfulRunInterventionHost(
     },
     encounter: {
       beginEncounter: (iceId, legalAction) =>
-        beginEncounter(state, iceId, legalAction),
+        beginEncounter(encounterEntryHostForState(state), iceId, legalAction),
       approachOrEncounterIce: (iceId, legalAction) =>
         approachOrEncounterIce(
           runMovementHostForState(state),
@@ -18207,7 +17816,11 @@ function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("v1922.speed_trap")) {
-    resolveSpeedTrapRezInterruptChoice(state, legalAction, playerAction);
+    resolveSpeedTrapRezInterruptChoice(
+      encounterEntryHostForState(state),
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
@@ -22902,83 +22515,6 @@ function resolveHammerStealthLossChoice(
     selectedCount: selectedOptionIds.length,
     postBreakStealthLoss: selectedOptionIds.length,
   };
-}
-
-function resolveSpeedTrapRezInterruptChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.speed_trap"))
-    throw new Error("Speed-Trap-Choice ist nicht offen.");
-  const [, speedTrapId, rezzedCardId] = choice.source.split(":");
-  if (
-    !speedTrapId ||
-    !state.runner.rig.programs.includes(speedTrapId)
-  )
-    throw new Error("Speed Trap ist nicht mehr installiert.");
-  const speedTrapDefinitionId = definitionFor(state, speedTrapId).id;
-  if (
-    !hasRunEncounterInterventionKind(
-      state,
-      speedTrapId,
-      "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
-    ) &&
-    (cardImplementationForDefinitionId(speedTrapDefinitionId) ||
-      speedTrapDefinitionId !== SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID)
-  )
-    throw new Error("Speed Trap ist nicht mehr installiert.");
-  const run = mustRun(state);
-  if (
-    !rezzedCardId ||
-    run.speedTrapPendingRezCardId !== rezzedCardId ||
-    !mustServer(state, run.attackedServerId).root.includes(rezzedCardId)
-  )
-    throw new Error("Das Speed-Trap-Rezziel ist nicht mehr gueltig.");
-  const rezzedDefinition = definitionFor(state, rezzedCardId);
-  if (rezzedDefinition.type !== "asset" && rezzedDefinition.type !== "upgrade")
-    throw new Error("Speed Trap reagiert nur auf Nodes oder Upgrades.");
-  if (!mustInstance(state.cardInstances, rezzedCardId).rezzed)
-    throw new Error("Das Speed-Trap-Rezziel ist nicht gerezzt.");
-  const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const useSpeedTrap = selectedId === "jack_out";
-  const pass = selectedId === "pass";
-  if (!useSpeedTrap && !pass)
-    throw new Error("Die Speed-Trap-Auswahl ist ungueltig.");
-  const successfulRunWithoutAccess =
-    useSpeedTrap && run.position.kind === "server";
-  const serverLabel = publicServerLabel(state, run.attackedServerId);
-  const pendingTimingPoint = run.speedTrapPendingRezTimingPoint;
-  const pendingActiveSide = run.speedTrapPendingRezActiveSide;
-  delete run.speedTrapPendingRezCardId;
-  delete run.speedTrapPendingRezTimingPoint;
-  delete run.speedTrapPendingRezActiveSide;
-  delete state.pendingChoice;
-
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1922RunnerProgramAbility: "speed_trap_rez_interrupt",
-    sourceDefinitionId: speedTrapDefinitionId,
-    speedTrapSourceCardId: speedTrapId,
-    rezzedCardDefinitionId: rezzedDefinition.id,
-    ...(serverLabel ? { serverLabel } : {}),
-    speedTrapUsed: useSpeedTrap,
-    successfulRunWithoutAccess,
-  };
-
-  if (useSpeedTrap) {
-    finishRun(state, successfulRunWithoutAccess, legalAction);
-    return;
-  }
-
-  resolveCorpRootRezEffect(state, rezzedCardId, legalAction);
-  if (state.run) {
-    state.timingPoint =
-      (pendingTimingPoint as GameState["timingPoint"] | undefined) ??
-      "run.jack_out_window";
-    state.activeSide = pendingActiveSide ?? "runner";
-  }
 }
 
 function refreshRecurringCredits(
