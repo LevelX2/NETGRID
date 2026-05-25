@@ -9,7 +9,7 @@ export {
   playerViewFor,
 } from "./player-view";
 export { hashGameState, hashState } from "./hash";
-export { replayGameEvents } from "./replay";
+export { replayEvents, replayGameEvents } from "./replay";
 export { validateGameState, validateGameStateForDebug } from "./validation";
 export {
   buildCorpDrawAction,

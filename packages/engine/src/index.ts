@@ -428,6 +428,8 @@ export {
 } from "./game/create-game";
 import { hashState } from "./game/hash";
 export { getPlayerView, playerViewFor } from "./game/player-view";
+import { configureReplayHost } from "./game/replay";
+export { replayEvents, replayGameEvents } from "./game/replay";
 import {
   hiddenRunnerResourceSlotId,
   isConcealedRunnerResource,
@@ -562,7 +564,6 @@ import {
 } from "./mechanics/public-payload-schema";
 import {
   isP358HiddenReplacementCompatibilityChoiceSource,
-  isReplayCompatibilityActionPayload,
 } from "./compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
@@ -2539,6 +2540,12 @@ export function applyGameAction(
   return applyAction(state, playerAction, options);
 }
 
+configureReplayHost({
+  actions: {
+    applyAction,
+  },
+});
+
 export function validateDeckDefinition(
   deck: DeckDefinition,
   options: {
@@ -2633,51 +2640,6 @@ export function checkWinConditions(state: GameState): Winner | null {
     state.timingPoint = "game.checkpoint";
   }
   return state.winner;
-}
-
-export function replayEvents(
-  initialState: GameState,
-  eventLog: GameEvent[],
-): ReplayResult {
-  let current = cloneState({
-    ...initialState,
-    eventLog: initialState.eventLog.slice(0, 1),
-  });
-  const errors: string[] = [];
-  for (const event of eventLog) {
-    if (event.type === "game_created") continue;
-    const actionPayload =
-      event.privatePayload?.[event.publicPayload.actor as Side]?.action;
-    if (!isReplayCompatibilityActionPayload(actionPayload)) {
-      errors.push(`Event ${event.eventId} has no replayable action.`);
-      continue;
-    }
-    const result = applyAction(current, actionPayload);
-    if (!result.ok) {
-      errors.push(`Replay failed at ${event.eventId}: ${result.error.code}`);
-      break;
-    }
-    current = result.state;
-    if (result.stateHash !== event.stateHashAfter) {
-      errors.push(`StateHash mismatch at ${event.eventId}.`);
-      break;
-    }
-  }
-  const lastHash = eventLog.at(-1)?.stateHashAfter;
-  return {
-    ok: errors.length === 0,
-    state: current,
-    ...(lastHash ? { expectedFinalStateHash: lastHash } : {}),
-    actualFinalStateHash: hashState(current),
-    errors,
-  };
-}
-
-export function replayGameEvents(
-  initialState: GameState,
-  eventLog: GameEvent[],
-): ReplayResult {
-  return replayEvents(initialState, eventLog);
 }
 
 export function applyEffectCommands(
