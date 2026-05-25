@@ -7,6 +7,7 @@
 - `capability-deep-analysis-2026-05-17.md`: übergreifende KI-Fähigkeitsanalyse mit Prioritäten.
 - `current-ai-logic-documentation-prompt-2026-05-22.md`: Prompt für eine umfassende, aktuelle Ist-Dokumentation der bestehenden KI-Logik als Grundlage für spätere Prüfung und Verbesserungsvorschläge.
 - `ai-hints-support-contract-review-2026-05-22.md`: aktueller 410/411-Support-Contract, Toughonium-Wall-Entscheidung und priorisierte schwache AI-Hints.
+- `ai-hint-consumer-contract-audit-2026-05-25.md` / `ai-hint-consumer-contract-inventory-2026-05-25.json`: Audit der AI-Hint-Verbraucherseite mit vollständigem Rollen-/Planrollen-Inventar, Entscheidungswirksamkeit, Lückenanalyse und rückwärtskompatiblem Ontologie-Vorschlag.
 - `ai-benchmark-deck-basis-review-2026-05-23.md`: Klassifikation der aktuell genutzten AI-Smoke-/Soak-/League-/Progression-Decks und Empfehlung für eine kuratierte Benchmark-Decksuite.
 - `ai-strategy-slices-consolidation-review-2026-05-23.md`: konsolidierte Bilanz der letzten AI-Strategie-/Diagnose-Slices inklusive aktueller Baseline-vs-Candidate-Suite, Ablation-light und Empfehlungen.
 - `ai-plan-conversion-diagnosis-2026-05-23.md`: Planfolge-/Conversion-Diagnose für aktuelle KI-Slices mit neuen Short-Horizon-Metriken, Slotanalyse und Empfehlungen ohne neue Strategie-Heuristik.
