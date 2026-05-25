@@ -96,6 +96,8 @@ export type ActionType =
   | "decline_trash"
   | "remove_tag"
   | "purge_virus_counters"
+  | "purge_runner_virus_counters"
+  | "forgo_action"
   | "move_to_set_aside"
   | "move_to_removed_from_game"
   | "return_from_set_aside"
@@ -137,6 +139,19 @@ export type DamageType = "net" | "meat" | "core";
 export type CounterType =
   | "advancement"
   | "virus"
+  | "doom"
+  | "crumble"
+  | "garbage"
+  | "highlighter"
+  | "scaldan"
+  | "tax"
+  | "vienna"
+  | "socket_archives"
+  | "socket_hq"
+  | "socket_rd"
+  | "pipe"
+  | "doppelganger_antibody"
+  | "pattel_antibody"
   | "cerberus"
   | "data_raven"
   | "mastiff"
@@ -214,6 +229,57 @@ export type EventVisibilityClass =
   | "private_to_side"
   | "hidden_info_barrier"
   | "replay_only";
+
+export type PurgeableRunnerVirusCounterType =
+  | "doom"
+  | "crumble"
+  | "garbage"
+  | "highlighter"
+  | "scaldan"
+  | "tax"
+  | "vienna"
+  | "socket_archives"
+  | "socket_hq"
+  | "socket_rd"
+  | "pipe";
+
+export type PurgeableRunnerVirusCounterBucket = Partial<
+  Record<PurgeableRunnerVirusCounterType, number>
+>;
+
+export type PurgeableRunnerVirusCounterState = {
+  corp?: PurgeableRunnerVirusCounterBucket;
+  servers?: Partial<
+    Record<Exclude<ServerId, "new_remote">, PurgeableRunnerVirusCounterBucket>
+  >;
+  effects?: Record<
+    string,
+    {
+      counterType: PurgeableRunnerVirusCounterType;
+      amount: number;
+      publicLabel?: string;
+      sourceDefinitionId?: CardDefinitionId;
+      serverId?: Exclude<ServerId, "new_remote">;
+    }
+  >;
+};
+
+export type CorpActionDebtEntry = {
+  reason: "proteus_virus_purge" | "pipe_counter" | string;
+  remaining: number;
+  createdAtStateVersion: number;
+  source: "proteus_purge" | "start_of_turn_effect" | string;
+};
+
+export type CorpActionDebtState = {
+  forgoActionsPending: number;
+  entries: CorpActionDebtEntry[];
+};
+
+export type RunnerVirusPurgeWindowState = {
+  windowId: string;
+  timingFamily: "run_special_effect" | "corp_start_of_turn_between_effects";
+};
 
 export type ResolvedGameEffectKind =
   | "gain_credits"
@@ -1135,6 +1201,9 @@ export type GameState = {
     Record<Exclude<ServerId, "new_remote">, number>
   >;
   spyCountersByServer?: Partial<Record<Exclude<ServerId, "new_remote">, number>>;
+  purgeableRunnerVirusCounters?: PurgeableRunnerVirusCounterState;
+  corpActionDebt?: CorpActionDebtState;
+  runnerVirusPurgeWindow?: RunnerVirusPurgeWindowState;
   runnerAgendaPointsToForfeit?: number;
   cancelledDamagePreventionSourceIdsUntilEndOfTurn?: CardInstanceId[];
 };

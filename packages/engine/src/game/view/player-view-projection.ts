@@ -13,6 +13,7 @@ import {
   agendaPoints,
   counterDisplaysField,
   poxCounterDisplaysForServer,
+  purgeableRunnerVirusCounterDisplaysForServer,
   visibleCorpArchives,
   visibleCorpCard,
   visibleCorpIdentityCard,
@@ -49,7 +50,10 @@ export function buildPlayerViewProjection(
         server.id === "archives"
           ? visibleCorpArchives(state, side)
           : server.root.map((id) => visibleCorpCard(state, id, side, "root")),
-      ...counterDisplaysField(poxCounterDisplaysForServer(state, server.id)),
+      ...counterDisplaysField([
+        ...(poxCounterDisplaysForServer(state, server.id) ?? []),
+        ...(purgeableRunnerVirusCounterDisplaysForServer(state, server.id) ?? []),
+      ]),
     };
   });
 

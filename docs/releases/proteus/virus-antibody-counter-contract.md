@@ -1,11 +1,11 @@
 # Proteus Virus-/Antibody-Counter Contract
 
 Stand: 2026-05-17
-Status: planning contract, no runtime implementation
+Status: planning contract; Phase 8a runtime foundation for purgefähige Runner-Virus-Counter exists, no target-card promotion
 
 ## Scope und Quellen
 
-Dieses Artefakt schneidet den Proteus-Cluster `virus_antibody_counter_family` aus `data/rules/proteus-mechanics-coverage-2026-05-17.json` in kleine Vertragsfamilien. Es ist Planungsinput für spätere Engine-Arbeit und promotet keine Proteus-Karte zu `human_playable`, `deck_legal`, `ai_supported` oder Runtime-Resolver.
+Dieses Artefakt schneidet den Proteus-Cluster `virus_antibody_counter_family` aus `data/rules/proteus-mechanics-coverage-2026-05-17.json` in kleine Vertragsfamilien. Seit Phase 8a gibt es eine generische Runtime-Grundlage für purgefähige Runner-Virus-Counter, Proteus-Purge-Action-Debt und öffentliche Corp-/Server-CounterDisplays. Das Artefakt bleibt Planungsinput für die Zielkarten und promotet keine Proteus-Karte zu `human_playable`, `deck_legal`, `ai_supported` oder Runtime-Resolver.
 
 Lokale Quellen:
 

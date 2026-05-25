@@ -62,6 +62,12 @@ const AMOUNT_KEYS = [
   "codeViralCacheEligibleCounterCount",
   "codeViralCacheMaxPreserveCounters",
   "codeViralCachePreservedCounters",
+  "purgedVirusCounters",
+  "purgedRunnerVirusCounters",
+  "actionDebtAdded",
+  "actionDebtPaid",
+  "corpActionDebtTotalBefore",
+  "corpActionDebtTotalAfter",
   "cerberusCounterCount",
   "parisCityGridPoolAvailable",
   "parisCityGridPoolSpent",
@@ -133,6 +139,11 @@ const TARGET_KEYS = [
   "redactedKind",
   "sourceTrashed",
   "karlSuccessfulRunSourceDefinitionIds",
+  "purgedCounterType",
+  "purgedCounterSummary",
+  "purgeModel",
+  "timingWindowId",
+  "timingFamily",
 ] as const;
 
 export function legacyAbilityPayloadEntries(

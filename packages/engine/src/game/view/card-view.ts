@@ -10,6 +10,8 @@ import {
   type CorpServer,
   type GameState,
   type PlayerView,
+  type PurgeableRunnerVirusCounterBucket,
+  type PurgeableRunnerVirusCounterType,
   type ServerId,
   type Side,
   type VisibleCard,
@@ -125,6 +127,10 @@ export function visibleCorpIdentityCard(state: GameState): VisibleCard {
     ...counterDisplaysField([
       ...(card.counterDisplays ?? []),
       ...(skivvissCorpCounterDisplays(state) ?? []),
+      ...(purgeableRunnerVirusCounterDisplaysForBucket(
+        state.purgeableRunnerVirusCounters?.corp,
+        "corp",
+      ) ?? []),
     ]),
   };
 }
@@ -418,6 +424,72 @@ export function poxCounterDisplaysForServer(
       usageHint: "status_marker",
     },
   ];
+}
+
+export function purgeableRunnerVirusCounterDisplaysForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): VisibleCard["counterDisplays"] {
+  return purgeableRunnerVirusCounterDisplaysForBucket(
+    state.purgeableRunnerVirusCounters?.servers?.[serverId],
+    `server_${serverId}`,
+  );
+}
+
+const PURGEABLE_RUNNER_VIRUS_COUNTER_DISPLAY_ORDER: readonly PurgeableRunnerVirusCounterType[] =
+  [
+    "doom",
+    "crumble",
+    "garbage",
+    "highlighter",
+    "scaldan",
+    "tax",
+    "vienna",
+    "socket_archives",
+    "socket_hq",
+    "socket_rd",
+    "pipe",
+  ];
+
+function purgeableRunnerVirusCounterDisplaysForBucket(
+  bucket: PurgeableRunnerVirusCounterBucket | undefined,
+  scopeId: string,
+): VisibleCard["counterDisplays"] {
+  if (!bucket) return undefined;
+  const displays = PURGEABLE_RUNNER_VIRUS_COUNTER_DISPLAY_ORDER.flatMap(
+    (counterType) => {
+      const amount = Math.max(0, Math.floor(Number(bucket[counterType] ?? 0)));
+      if (amount <= 0) return [];
+      const label = purgeableRunnerVirusCounterLabel(counterType);
+      return [
+        {
+          id: `runner_virus_${scopeId}_${counterType}`,
+          amount,
+          displayKind: "virus" as const,
+          label,
+          ariaLabel: `${amount} ${label}`,
+          counterType,
+          usageHint: "status_marker" as const,
+        },
+      ];
+    },
+  );
+  return displays.length > 0 ? displays : undefined;
+}
+
+function purgeableRunnerVirusCounterLabel(
+  counterType: PurgeableRunnerVirusCounterType,
+): string {
+  switch (counterType) {
+    case "socket_archives":
+      return "Socket-Counter Archives";
+    case "socket_hq":
+      return "Socket-Counter HQ";
+    case "socket_rd":
+      return "Socket-Counter R&D";
+    default:
+      return `${counterType[0]?.toUpperCase() ?? ""}${counterType.slice(1)}-Counter`;
+  }
 }
 
 function singleCounterDisplay(

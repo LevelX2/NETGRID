@@ -29,6 +29,8 @@ import {
   type PlayerController,
   type PlayerView,
   type PublicGameEvent,
+  type PurgeableRunnerVirusCounterBucket,
+  type PurgeableRunnerVirusCounterType,
   type ReplacementCandidate,
   type ReplacementWindow,
   type ResolvedGameEffect,
@@ -2326,6 +2328,10 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
       : [];
   if (state.run?.postPassPayOrEndRun)
     return side === "runner" ? postPassPayOrEndRunActions(state) : [];
+  if (state.runnerVirusPurgeWindow)
+    return side === "corp" && purgeableRunnerVirusCounterTotal(state) > 0
+      ? [buildPurgeableRunnerVirusPurgeAction(state)]
+      : [];
   const sharedRunWindow =
     state.timingPoint === "run.approach_ice" ||
     state.timingPoint === "run.jack_out_window";
@@ -2698,6 +2704,8 @@ export function eventVisibilityForAction(
   if (["mandatory_draw", "draw_card"].includes(legalAction.type))
     return "private_to_side";
   if (legalAction.type === "purge_virus_counters") return "public";
+  if (legalAction.type === "purge_runner_virus_counters") return "public";
+  if (legalAction.type === "forgo_action") return "public";
   if (legalAction.type === "decline_rez") return "public";
   if (legalAction.type === "jack_out") return "public";
   if (legalAction.visibility === "public") return "public";
@@ -2829,6 +2837,9 @@ function corpMainActions(state: GameState): LegalAction[] {
   if (state.corp.clicks <= 0) {
     actions.push(buildCorpEndTurnAction(state));
     return actions;
+  }
+  if (corpActionDebtPending(state) > 0) {
+    return [buildCorpForgoActionDebtAction(state)];
   }
   if (state.corp.clicks >= 3 && totalCounters(state, "virus") > 0) {
     actions.push(buildCorpPurgeVirusAction(state));
@@ -3415,6 +3426,43 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
   }
   return actions;
+}
+
+function buildPurgeableRunnerVirusPurgeAction(state: GameState): LegalAction {
+  const window = state.runnerVirusPurgeWindow;
+  if (!window)
+    throw new Error("Runner-Virus-Purge braucht ein offenes Timingfenster.");
+  return action(
+    state,
+    "corp",
+    "purge_runner_virus_counters",
+    "Runner-Virus-Counter purgen",
+    "game_rule",
+    [],
+    {
+      purgeModel: "future_action_debt",
+      actionDebtAdded: 3,
+      timingWindowId: window.windowId,
+      timingFamily: window.timingFamily,
+    },
+    { targetRequirements: [] },
+  );
+}
+
+function buildCorpForgoActionDebtAction(state: GameState): LegalAction {
+  return action(
+    state,
+    "corp",
+    "forgo_action",
+    "Aktionsschuld abtragen",
+    "game_rule",
+    [{ clicks: 1 }],
+    {
+      actionDebtPaid: 1,
+      corpActionDebtTotalBefore: corpActionDebtPending(state),
+    },
+    { targetRequirements: [] },
+  );
 }
 
 function expireCorporateRetreatInstallCreditAbilities(state: GameState): void {
@@ -8266,6 +8314,48 @@ function performAction(
       };
       return;
     }
+    case "purge_runner_virus_counters": {
+      if (legalAction.side !== "corp")
+        throw new Error("Nur die Korp darf Runner-Virus-Counter purgen.");
+      const window = state.runnerVirusPurgeWindow;
+      if (!window)
+        throw new Error("Runner-Virus-Purge ist im aktuellen Fenster nicht legal.");
+      const summary = purgePurgeableRunnerVirusCounters(state);
+      const pendingDebt = addCorpActionDebt(state, {
+        amount: 3,
+        reason: "proteus_virus_purge",
+        source: "proteus_purge",
+      });
+      delete state.runnerVirusPurgeWindow;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        purgeModel: "future_action_debt",
+        purgedRunnerVirusCounters: summary.total,
+        purgedCounterSummary: summary.publicSummary,
+        actionDebtAdded: 3,
+        corpActionDebtTotalAfter: pendingDebt,
+        timingWindowId: window.windowId,
+        timingFamily: window.timingFamily,
+      };
+      return;
+    }
+    case "forgo_action": {
+      if (legalAction.side !== "corp")
+        throw new Error("Nur die Korp darf Korp-Aktionsschuld abtragen.");
+      const beforeDebt = corpActionDebtPending(state);
+      if (beforeDebt <= 0)
+        throw new Error("Es gibt keine Korp-Aktionsschuld.");
+      spendClick(state, "corp");
+      const paid = consumeCorpActionDebt(state, 1);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        actionDebtPaid: paid,
+        corpActionDebtTotalBefore: beforeDebt,
+        corpActionDebtTotalAfter: corpActionDebtPending(state),
+        corpClicksAfter: state.corp.clicks,
+      };
+      return;
+    }
     case "move_to_set_aside":
       moveToSpecialZone(state, legalAction, "set_aside");
       return;
@@ -12825,6 +12915,60 @@ function addRunnerFutureActionDebt(state: GameState, amount: number): void {
   const flags = ensureRunnerTurnFlags(state);
   flags.forgoNextActionsPending =
     Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + amount;
+}
+
+function corpActionDebtPending(state: GameState): number {
+  return Math.max(0, Math.floor(state.corpActionDebt?.forgoActionsPending ?? 0));
+}
+
+function addCorpActionDebt(
+  state: GameState,
+  input: {
+    amount: number;
+    reason: string;
+    source: string;
+  },
+): number {
+  const amount = Math.max(0, Math.floor(input.amount));
+  if (amount <= 0) return corpActionDebtPending(state);
+  const debt = (state.corpActionDebt ??= {
+    forgoActionsPending: 0,
+    entries: [],
+  });
+  debt.forgoActionsPending = corpActionDebtPending(state) + amount;
+  debt.entries = [
+    ...(debt.entries ?? []),
+    {
+      reason: input.reason,
+      remaining: amount,
+      createdAtStateVersion: state.stateVersion,
+      source: input.source,
+    },
+  ];
+  return debt.forgoActionsPending;
+}
+
+function consumeCorpActionDebt(state: GameState, amount: number): number {
+  const requested = Math.max(0, Math.floor(amount));
+  if (requested <= 0 || !state.corpActionDebt) return 0;
+  const consumed = Math.min(corpActionDebtPending(state), requested);
+  let remainingToConsume = consumed;
+  const entries = [...(state.corpActionDebt.entries ?? [])]
+    .map((entry) => ({ ...entry, remaining: Math.max(0, Math.floor(entry.remaining)) }))
+    .filter((entry) => entry.remaining > 0);
+  for (const entry of entries) {
+    if (remainingToConsume <= 0) break;
+    const entryConsumed = Math.min(entry.remaining, remainingToConsume);
+    entry.remaining -= entryConsumed;
+    remainingToConsume -= entryConsumed;
+  }
+  state.corpActionDebt = {
+    forgoActionsPending: Math.max(0, corpActionDebtPending(state) - consumed),
+    entries: entries.filter((entry) => entry.remaining > 0),
+  };
+  if (state.corpActionDebt.forgoActionsPending <= 0)
+    delete state.corpActionDebt;
+  return consumed;
 }
 
 function consumeRunnerFutureActionDebt(state: GameState): number {
@@ -22527,6 +22671,101 @@ function totalCounters(state: GameState, counterType: CounterType): number {
     faitTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
   }
   return cardCounterTotal + poxTotal + faitTotal;
+}
+
+const PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES: readonly PurgeableRunnerVirusCounterType[] =
+  [
+    "doom",
+    "crumble",
+    "garbage",
+    "highlighter",
+    "scaldan",
+    "tax",
+    "vienna",
+    "socket_archives",
+    "socket_hq",
+    "socket_rd",
+    "pipe",
+  ];
+
+function purgeableRunnerVirusCounterAmount(
+  bucket: PurgeableRunnerVirusCounterBucket | undefined,
+  counterType: PurgeableRunnerVirusCounterType,
+): number {
+  return Math.max(0, Math.floor(Number(bucket?.[counterType] ?? 0)));
+}
+
+function purgeableRunnerVirusBucketTotal(
+  bucket: PurgeableRunnerVirusCounterBucket | undefined,
+): number {
+  return PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES.reduce(
+    (sum, counterType) =>
+      sum + purgeableRunnerVirusCounterAmount(bucket, counterType),
+    0,
+  );
+}
+
+function purgeableRunnerVirusCounterTotal(state: GameState): number {
+  const counters = state.purgeableRunnerVirusCounters;
+  if (!counters) return 0;
+  let total = purgeableRunnerVirusBucketTotal(counters.corp);
+  for (const bucket of Object.values(counters.servers ?? {})) {
+    total += purgeableRunnerVirusBucketTotal(bucket);
+  }
+  for (const effect of Object.values(counters.effects ?? {})) {
+    total += Math.max(0, Math.floor(Number(effect.amount ?? 0)));
+  }
+  return total;
+}
+
+function compactPurgeableRunnerVirusBucket(
+  bucket: PurgeableRunnerVirusCounterBucket | undefined,
+): PurgeableRunnerVirusCounterBucket | undefined {
+  const compact: PurgeableRunnerVirusCounterBucket = {};
+  for (const counterType of PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES) {
+    const amount = purgeableRunnerVirusCounterAmount(bucket, counterType);
+    if (amount > 0) compact[counterType] = amount;
+  }
+  return Object.keys(compact).length > 0 ? compact : undefined;
+}
+
+function purgePurgeableRunnerVirusCounters(state: GameState): {
+  total: number;
+  publicSummary: string;
+} {
+  const counters = state.purgeableRunnerVirusCounters;
+  const summary: string[] = [];
+  const addSummary = (
+    scope: string,
+    bucket: PurgeableRunnerVirusCounterBucket | undefined,
+  ) => {
+    const compact = compactPurgeableRunnerVirusBucket(bucket);
+    if (!compact) return;
+    for (const counterType of PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES) {
+      const amount = compact[counterType];
+      if (amount && amount > 0) summary.push(`${scope}:${counterType}=${amount}`);
+    }
+  };
+
+  addSummary("corp", counters?.corp);
+  for (const [serverId, bucket] of Object.entries(counters?.servers ?? {}).sort(
+    ([left], [right]) => left.localeCompare(right),
+  )) {
+    addSummary(`server:${serverId}`, bucket);
+  }
+  for (const [effectId, effect] of Object.entries(counters?.effects ?? {}).sort(
+    ([left], [right]) => left.localeCompare(right),
+  )) {
+    const amount = Math.max(0, Math.floor(Number(effect.amount ?? 0)));
+    if (amount > 0)
+      summary.push(`effect:${effectId}:${effect.counterType}=${amount}`);
+  }
+
+  const total = purgeableRunnerVirusCounterTotal(state);
+  if (total <= 0)
+    throw new Error("Es gibt keine purgefaehigen Runner-Virus-Counter.");
+  delete state.purgeableRunnerVirusCounters;
+  return { total, publicSummary: summary.join(";") };
 }
 
 function purgeVirusCounters(state: GameState): number {

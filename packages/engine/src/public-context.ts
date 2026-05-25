@@ -665,6 +665,26 @@ export function publicContextForAction(
     context.purgedCounterType = "virus";
     context.purgedVirusCounters = legalAction.payload?.purgedVirusCounters ?? 0;
   }
+  if (legalAction.type === "purge_runner_virus_counters") {
+    context.purgedCounterType = "runner_virus";
+    context.purgeModel = legalAction.payload?.purgeModel;
+    context.purgedRunnerVirusCounters =
+      legalAction.payload?.purgedRunnerVirusCounters ?? 0;
+    context.purgedCounterSummary = legalAction.payload?.purgedCounterSummary;
+    context.actionDebtAdded = legalAction.payload?.actionDebtAdded;
+    context.corpActionDebtTotalAfter =
+      legalAction.payload?.corpActionDebtTotalAfter;
+    context.timingWindowId = legalAction.payload?.timingWindowId;
+    context.timingFamily = legalAction.payload?.timingFamily;
+  }
+  if (legalAction.type === "forgo_action") {
+    context.actionDebtPaid = legalAction.payload?.actionDebtPaid;
+    context.corpActionDebtTotalBefore =
+      legalAction.payload?.corpActionDebtTotalBefore;
+    context.corpActionDebtTotalAfter =
+      legalAction.payload?.corpActionDebtTotalAfter;
+    context.corpClicksAfter = legalAction.payload?.corpClicksAfter;
+  }
   if (legalAction.payload?.hiddenZoneBarrier === true) {
     context.hiddenZoneBarrier = true;
     context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
