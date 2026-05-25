@@ -169,6 +169,8 @@ Status 2026-05-24: 9a ist als gemeinsamer Random/Dice-Implementierungsslice bloc
 
 Status 2026-05-24: 9b ist als gemeinsamer Action-Economy-/Action-Debt-Slice blockiert, weil zusätzliche turngebundene Actions, forced/restricted Actions, Action-Forfeit-Penalties und Korp-Agenda-Damage-Replacements noch keinen gemeinsamen generischen Runtime-Vertrag haben. Details stehen in `docs/activities/in-progress/act-2026-05-24-proteus-phase-9b-action-economy-debt.md`.
 
+Status 2026-05-24: 9c ist blockiert, weil `Hijack` einen Grip-Installationschoice mit temporären Install-Credits und `Test Spin` einen Search-Install-Run-Followup mit Return-or-Penalty-Cleanup benötigen. Details stehen in `docs/activities/in-progress/act-2026-05-24-proteus-phase-9c-hidden-zone-search-install-tutor.md`.
+
 ## Abhängigkeitsmatrix
 
 | Vorlauf | Entsperrt                                                                                                              |
