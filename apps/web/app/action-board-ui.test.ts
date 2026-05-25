@@ -38,6 +38,7 @@ import {
   currentRunTimelineStep,
   groupRunnerRigCards,
   iceModifierBadgesForServer,
+  identityCounterChipsForDisplays,
   inactiveCardZoneAriaSuffix,
   inactiveCardZoneBadgeLabel,
   inactiveCardZoneClassName,
@@ -1172,6 +1173,76 @@ describe("V1.0.6 resource and card-display helpers", () => {
       overflowLabel: "10"
     });
     expect(advancementCounterDisplay({ known: false, advancementCounters: 0 })).toBeNull();
+  });
+
+  it("maps public identity CounterDisplays to narrow status chips", () => {
+    expect(
+      identityCounterChipsForDisplays([
+        {
+          id: "runner_virus_corp_highlighter",
+          amount: 2,
+          displayKind: "virus",
+          label: "Highlighter-Counter",
+          ariaLabel: "2 Highlighter-Counter",
+          counterType: "highlighter",
+          usageHint: "status_marker"
+        },
+        {
+          id: "runner_virus_corp_tax",
+          amount: 1,
+          displayKind: "virus",
+          label: "Tax-Counter",
+          ariaLabel: "1 Tax-Counter",
+          counterType: "tax",
+          usageHint: "status_marker"
+        },
+        {
+          id: "bad_publicity",
+          amount: 6,
+          displayKind: "bad_publicity",
+          label: "Bad Publicity",
+          ariaLabel: "6 Bad Publicity",
+          counterType: "bad_publicity",
+          usageHint: "status_marker"
+        },
+        {
+          id: "advancement",
+          amount: 3,
+          displayKind: "advancement",
+          label: "Entwicklung",
+          ariaLabel: "3 öffentliche Advancement-Counter",
+          usageHint: "score_modifier"
+        },
+        {
+          id: "runner_virus_corp_empty",
+          amount: 0,
+          displayKind: "virus",
+          label: "Empty-Counter",
+          ariaLabel: "0 Empty-Counter",
+          counterType: "highlighter",
+          usageHint: "status_marker"
+        }
+      ])
+    ).toEqual([
+      {
+        key: "runner_virus_corp_highlighter",
+        amount: 2,
+        label: "Highlighter",
+        ariaLabel: "2 Highlighter-Counter"
+      },
+      {
+        key: "runner_virus_corp_tax",
+        amount: 1,
+        label: "Tax",
+        ariaLabel: "1 Tax-Counter"
+      },
+      {
+        key: "bad_publicity",
+        amount: 6,
+        label: "Bad Publicity",
+        ariaLabel: "6 Bad Publicity"
+      }
+    ]);
   });
 
   it("renders low credit-counter amounts as separate icons", () => {

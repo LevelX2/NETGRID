@@ -1305,6 +1305,7 @@ export type CounterDisplayKind =
   | "trace"
   | "shell"
   | "damage_prevention"
+  | "bad_publicity"
   | "restricted_pool"
   | "generic_counter";
 

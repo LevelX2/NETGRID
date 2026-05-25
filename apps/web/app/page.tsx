@@ -152,6 +152,7 @@ import {
   groupRunnerRigCards,
   hasLegalAction,
   iceModifierBadgesForServer,
+  identityCounterChipsForDisplays,
   inactiveCardZoneAriaSuffix,
   inactiveCardZoneBadgeLabel,
   inactiveCardZoneClassName,
@@ -12450,6 +12451,21 @@ function ConnectionBadge({ text, state }: { text: string; state: "offline" | "co
   return <span className={`connection ${state}`}>{text}</span>;
 }
 
+function IdentityCounterStrip({ displays, side }: { displays: VisibleCard["counterDisplays"]; side: Side }) {
+  const chips = identityCounterChipsForDisplays(displays);
+  if (chips.length === 0) return null;
+  return (
+    <div className="identityCounterStrip" role="list" aria-label={`${sideLabel(side)}-Counter`}>
+      {chips.map((chip) => (
+        <span className="identityCounterChip" role="listitem" key={chip.key} title={chip.ariaLabel} aria-label={chip.ariaLabel}>
+          <span className="identityCounterChipLabel">{chip.label}</span>
+          <strong>{chip.amount}</strong>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function OpponentPanel({
   view,
   connected,
@@ -12488,6 +12504,7 @@ function OpponentPanel({
         {side === "runner" ? <Stat value={view.opponent.tags} icon={<TagIcon size={14} />} helpText="Tags markieren den Runner. Viele Tags erlauben der Korp stärkere Folgeaktionen gegen den Runner oder seine Ressourcen." /> : null}
         {side === "runner" ? <Stat value={view.opponent.coreDamage ?? 0} icon={<CoreDamageIcon size={14} />} helpText="Core Damage ist dauerhafter Schaden am Runner. Er senkt die maximale Handkartenzahl und entsteht durch Effekte, die ausdrücklich Core Damage verursachen." /> : null}
       </div>
+      <IdentityCounterStrip displays={view.opponent.identity.counterDisplays} side={side} />
       <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {isTurn ? "Am Zug" : "Wartet"}</p>
     </section>
   );
@@ -12528,6 +12545,7 @@ function PlayerPanel({
         {view.side === "runner" ? <Stat value={view.own.tags} icon={<TagIcon size={14} />} helpText="Tags markieren den Runner. Viele Tags erlauben der Korp stärkere Folgeaktionen gegen den Runner oder seine Ressourcen." /> : null}
         {view.side === "runner" ? <Stat value={view.own.coreDamage ?? 0} icon={<CoreDamageIcon size={14} />} helpText="Core Damage ist dauerhafter Schaden am Runner. Er senkt die maximale Handkartenzahl und entsteht durch Effekte, die ausdrücklich Core Damage verursachen." /> : null}
       </div>
+      <IdentityCounterStrip displays={view.own.identity.counterDisplays} side={view.side} />
       <p className="meta statusLine">{isTurn ? "Am Zug" : "Wartet"}</p>
     </section>
   );

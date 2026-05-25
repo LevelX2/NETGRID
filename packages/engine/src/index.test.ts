@@ -38320,6 +38320,19 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
       expect(view.winner).toBe("runner");
       expect(view.gameEndReason).toBe("bad_publicity_7");
       expect(view.legalActions).toHaveLength(0);
+      const corpIdentity =
+        side === "runner" ? view.opponent.identity : view.own.identity;
+      expect(corpIdentity.counterDisplays).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: "bad_publicity",
+            amount: 7,
+            displayKind: "bad_publicity",
+            counterType: "bad_publicity",
+            label: "Bad Publicity",
+          }),
+        ]),
+      );
       const viewJson = JSON.stringify(view);
       expect(viewJson).not.toContain("onr_proteus_");
       expect(viewJson).not.toContain("cardInstances");

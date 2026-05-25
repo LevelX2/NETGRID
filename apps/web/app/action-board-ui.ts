@@ -136,6 +136,13 @@ export type CardCounterBadgeView = {
   testId: string;
 };
 
+export type IdentityCounterChipView = {
+  key: string;
+  amount: number;
+  label: string;
+  ariaLabel: string;
+};
+
 export type RunnerProgramInstallTrashChoiceInfo = {
   title: string;
   question: string;
@@ -227,6 +234,21 @@ export function counterDisplaysForRendering(card: Pick<VisibleCard, "counterDisp
       display.displayKind !== "advancement" &&
       safeCounterDisplayAmount(display.amount) > 0,
   );
+}
+
+export function identityCounterChipsForDisplays(counterDisplays: VisibleCard["counterDisplays"]): IdentityCounterChipView[] {
+  return (counterDisplays ?? [])
+    .filter(
+      (display) =>
+        display.displayKind !== "advancement" &&
+        safeCounterDisplayAmount(display.amount) > 0,
+    )
+    .map((display) => ({
+      key: display.id,
+      amount: safeCounterDisplayAmount(display.amount),
+      label: counterDisplayShortLabel(display.label),
+      ariaLabel: display.ariaLabel,
+    }));
 }
 
 export function safeCounterDisplayAmount(amount: number): number {
