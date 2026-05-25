@@ -436,6 +436,8 @@ export function publicContextForAction(
       "secretSpendCorp",
       "secretSpendRunner",
       "tooManyDoorsEndRun",
+      "corpCreditsAfter",
+      "runnerCreditsAfter",
       "passIceTrashProgramPrompt",
       "programTrashCount",
     ]) {

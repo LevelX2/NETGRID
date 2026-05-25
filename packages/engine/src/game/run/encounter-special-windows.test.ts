@@ -200,6 +200,8 @@ describe("encounter special windows boundary", () => {
       secretSpendCorp: 1,
       secretSpendRunner: 2,
       tooManyDoorsEndRun: true,
+      corpCreditsAfter: 4,
+      runnerCreditsAfter: 4,
     });
   });
 

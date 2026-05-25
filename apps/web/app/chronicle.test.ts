@@ -1910,6 +1910,31 @@ describe("formatChronicleEvent", () => {
     }
   });
 
+  it("shows Too Many Doors as paid by both sides after reveal", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "runner",
+      sourceDefinitionId: "onr_v1_272_too-many-doors",
+      secretSpendRevealed: true,
+      secretSpendCorp: 1,
+      secretSpendRunner: 2,
+      tooManyDoorsEndRun: true,
+      corpCreditsAfter: 4,
+      runnerCreditsAfter: 3
+    });
+
+    const item = formatChronicleEvent(event, "runner");
+
+    expect(item.title).toBe(
+      "Too Many Doors aufgedeckt: Korp 1 Credit, Runner 2 Credits; Run endet."
+    );
+    expect(item.description).toBe(
+      "Nach der Zahlung: Korp 4 Credits, Runner 3 Credits."
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Too Many Doors", "Korp -1", "Runner -2", "Run endet"])
+    );
+  });
+
   it("merges Silicon Saloon Franchise ordered gain and draw effects without revealing drawn cards", () => {
     const event = makeEvent("activated_card_ability", {
       actor: "runner",

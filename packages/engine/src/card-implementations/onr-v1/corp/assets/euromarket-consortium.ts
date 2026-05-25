@@ -29,7 +29,7 @@ export const euromarketConsortiumImplementation: CardImplementationDefinition = 
           kind: "draw_cards",
           recipient: "corp",
           amount: 2,
-          visibility: "hidden_info_barrier",
+          visibility: "public",
         },
       ],
     },

@@ -239,6 +239,30 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Employee Empowerment", "Start-of-turn", decision === "draw" ? "Zusatzkarte" : "Übersprungen");
         break;
       }
+      if (payload.secretSpendRevealed === true) {
+        const corpSpend = numberValue(payload.secretSpendCorp) ?? 0;
+        const runnerSpend = numberValue(payload.secretSpendRunner) ?? 0;
+        const endRun = payload.tooManyDoorsEndRun === true;
+        const corpCreditsAfter = numberValue(payload.corpCreditsAfter);
+        const runnerCreditsAfter = numberValue(payload.runnerCreditsAfter);
+        category = "run";
+        importance = endRun ? "important" : "normal";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = cardTitle ?? titleForDefinitionId(sourceDefinitionId) ?? "Too Many Doors";
+        title = `Too Many Doors aufgedeckt: Korp ${creditText(corpSpend)}, Runner ${creditText(runnerSpend)}; ${endRun ? "Run endet" : "Run läuft weiter"}`;
+        description =
+          corpCreditsAfter !== undefined && runnerCreditsAfter !== undefined
+            ? `Nach der Zahlung: Korp ${creditText(corpCreditsAfter)}, Runner ${creditText(runnerCreditsAfter)}.`
+            : undefined;
+        chips.push(
+          "Too Many Doors",
+          `Korp -${corpSpend}`,
+          `Runner -${runnerSpend}`,
+          endRun ? "Run endet" : "Weiter",
+        );
+        break;
+      }
       if (payload.traceStep === "corp_bid") {
         const corpBid = numberValue(payload.corpBid) ?? 0;
         const hackerTrackerCountersSpent = numberValue(payload.hackerTrackerCountersSpent) ?? 0;

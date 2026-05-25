@@ -214,6 +214,8 @@ export function resolveTooManyDoorsSecretSpendChoice(
     secretSpendCorp: corpSpend,
     secretSpendRunner: selected,
     tooManyDoorsEndRun: endRun,
+    corpCreditsAfter: state.corp.credits,
+    runnerCreditsAfter: state.runner.credits,
     sourceDefinitionId: definitionFor(state, comparison.sourceIceId).id,
   };
   return {
