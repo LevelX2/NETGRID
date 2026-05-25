@@ -42,6 +42,8 @@ import {
   inactiveCardZoneBadgeLabel,
   inactiveCardZoneClassName,
   latestRetainableAccessRevealEvent,
+  newBloodReorderTargetLabel,
+  newBloodReorderTargetSequenceHint,
   orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
@@ -622,6 +624,47 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(cardChoiceReadonlyConfirmationOptionId(technicianPrivateLookChoice)).toBe("done");
     expect(cardChoiceUsesOrderedSelection(stackTopFiveChoice)).toBe(true);
     expect(cardChoiceUsesOrderedSelection(organDonorChoice)).toBe(false);
+  });
+
+  it("derives explicit target slots for New Blood ordered ICE choices", () => {
+    const newBloodChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      choiceId: "p3_58_new_blood_reorder_7",
+      side: "corp",
+      source: "p3_58.new_blood_reorder:new_blood_1:7",
+      prompt: "Installierte ICE neu anordnen.",
+      kind: "select_cards",
+      options: [
+        {
+          id: "card_hq_ice",
+          label: "Quandary (HQ ICE 1)",
+          publicLabel: "HQ ICE 1",
+          value: "hq_ice"
+        },
+        {
+          id: "card_rd_ice",
+          label: "Data Wall (R&D ICE 1)",
+          publicLabel: "R&D ICE 1",
+          value: "rd_ice"
+        },
+        {
+          id: "card_remote_ice",
+          label: "Iceberg (Remote 1 ICE 1)",
+          value: "remote_ice"
+        }
+      ],
+      minSelections: 3,
+      maxSelections: 3,
+      stateVersion: 7,
+      visibility: "hidden_info_barrier"
+    };
+
+    expect(shouldUseCardChoicePanel(newBloodChoice)).toBe(true);
+    expect(cardChoiceUsesOrderedSelection(newBloodChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(newBloodChoice)).toBe(false);
+    expect(newBloodReorderTargetLabel(newBloodChoice, 0)).toBe("HQ ICE 1");
+    expect(newBloodReorderTargetLabel(newBloodChoice, 1)).toBe("R&D ICE 1");
+    expect(newBloodReorderTargetLabel(newBloodChoice, 2)).toBe("Remote 1 ICE 1");
+    expect(newBloodReorderTargetSequenceHint(newBloodChoice)).toBe("Wähle die ICE in Zielslot-Reihenfolge: HQ ICE 1 -> R&D ICE 1 -> Remote 1 ICE 1.");
   });
 
   it("detects field-card choices for installed board cards only", () => {

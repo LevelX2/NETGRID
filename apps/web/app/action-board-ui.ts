@@ -923,6 +923,33 @@ export function cardChoiceUsesOrderedSelection(choice: NonNullable<PlayerView["p
   );
 }
 
+export function newBloodReorderTargetLabel(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  selectionIndex: number,
+): string | null {
+  if (choice.kind !== "select_cards" || !choice.source.startsWith("p3_58.new_blood_reorder")) return null;
+  if (!Number.isInteger(selectionIndex) || selectionIndex < 0) return null;
+  const targetOption = choice.options[selectionIndex];
+  if (!targetOption) return null;
+  const publicLabel = typeof targetOption.publicLabel === "string" ? targetOption.publicLabel.trim() : "";
+  if (publicLabel) return normalizeVisibleTerms(publicLabel);
+  const label = targetOption.label.trim();
+  const parenthetical = /\(([^()]+)\)\s*$/.exec(label)?.[1]?.trim();
+  if (parenthetical) return normalizeVisibleTerms(parenthetical);
+  return `Zielslot ${selectionIndex + 1}`;
+}
+
+export function newBloodReorderTargetSequenceHint(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+): string | null {
+  if (choice.kind !== "select_cards" || !choice.source.startsWith("p3_58.new_blood_reorder")) return null;
+  const labels = choice.options
+    .map((_, index) => newBloodReorderTargetLabel(choice, index))
+    .filter((label): label is string => Boolean(label));
+  if (labels.length === 0) return null;
+  return `Wähle die ICE in Zielslot-Reihenfolge: ${labels.join(" -> ")}.`;
+}
+
 function isHiddenZoneReadableCardChoiceSource(source: string): boolean {
   return (
     source.startsWith("v098.arrange_stack_top2") ||

@@ -155,6 +155,8 @@ import {
   inactiveCardZoneAriaSuffix,
   inactiveCardZoneBadgeLabel,
   inactiveCardZoneClassName,
+  newBloodReorderTargetLabel,
+  newBloodReorderTargetSequenceHint,
   orderedCardContextActions,
   parseCuePositionPreference,
   normalizeVisibleTerms,
@@ -8980,6 +8982,7 @@ function cardChoiceTitle(choice: VisibleChoice): string {
   if (choice.cardSearchPresentation?.sourceZone === "heap") return "Heap durchsuchen";
   if (choice.cardSearchPresentation?.sourceZone === "stack") return "Stack durchsuchen";
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) return "Stack-Spitze wählen und anordnen";
+  if (choice.source.startsWith("p3_58.new_blood_reorder")) return "New Blood: ICE neu anordnen";
   if (choice.source.includes("corp_rd_arrange")) return "R&D-Spitze anordnen";
   if (choice.source.includes("self_modifying_code_free_mu")) return "MU freimachen";
   if (choice.source.includes("sneak_preview_source")) return "Quelle wählen";
@@ -9003,6 +9006,7 @@ function cardChoiceQuestion(choice: VisibleChoice, selectedOptions: VisibleChoic
     if (selectedOptions.length < choice.maxSelections) return `${firstTitle} wird in den Grip genommen.`;
     return `${firstTitle} in den Grip nehmen und den Rest anordnen?`;
   }
+  if (choice.source.startsWith("p3_58.new_blood_reorder")) return `${selectedOptions.length} ICE in Zielslot-Reihenfolge übernehmen?`;
   if (cardChoiceUsesOrderedSelection(choice)) return `${selectedOptions.length} Karten in dieser Reihenfolge übernehmen?`;
   if (choice.cardSearchPresentation || choice.source.includes("search_stack")) {
     return selectedOptions.length === 1 ? "Diese Auswahl für den Sucheffekt übernehmen?" : `${selectedOptions.length} Karten für den Sucheffekt übernehmen?`;
@@ -9021,6 +9025,13 @@ function cardChoiceOrderBadge(choice: VisibleChoice, selectionIndex: number): { 
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice) && selectionIndex === 0) {
     return { label: "Grip", ariaLabel: "Erste Auswahl: in den Grip nehmen" };
   }
+  const newBloodTarget = newBloodReorderTargetLabel(choice, selectionIndex);
+  if (newBloodTarget) {
+    return {
+      label: newBloodTarget,
+      ariaLabel: `Zielslot ${selectionIndex + 1}: ${newBloodTarget}`,
+    };
+  }
   const position = selectionIndex + 1;
   return {
     label: String(position),
@@ -9029,6 +9040,8 @@ function cardChoiceOrderBadge(choice: VisibleChoice, selectionIndex: number): { 
 }
 
 function cardChoiceEffectHint(choice: VisibleChoice): string | null {
+  const newBloodHint = newBloodReorderTargetSequenceHint(choice);
+  if (newBloodHint) return newBloodHint;
   const presentation = choice.cardSearchPresentation;
   const resolution = presentation ?? choice.stackSearchResolution;
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) {

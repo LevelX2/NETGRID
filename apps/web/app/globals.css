@@ -3592,6 +3592,7 @@ select {
   left: 8px;
   z-index: 86;
   min-width: 28px;
+  max-width: 120px;
   height: 28px;
   padding: 0 7px;
   display: inline-flex;
@@ -3605,7 +3606,10 @@ select {
   font-size: 11px;
   font-weight: 900;
   line-height: 1;
+  overflow: hidden;
   pointer-events: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cardChoiceDialog.readableCards {

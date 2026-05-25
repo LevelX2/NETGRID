@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-05-24-new-blood-explicit-ice-reorder-ui
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
-startedAt:
-completedAt:
+startedAt: 2026-05-25
+completedAt: 2026-05-25
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/globals.css
+  - apps/web/app/action-board-ui.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web test -- action-board-ui.test.ts -t "New Blood|card choice"
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/hidden-zone/arrange-choice-handlers.test.ts -t "New Blood"
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t "New Blood"
+  - git diff --check
 ---
 
 # New Blood ICE-Neuordnung explizit steuerbar machen
@@ -51,14 +60,14 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] Bei drei installierten ICE auf unterschiedlichen Servern kann die Korp ausdrücklich bestimmen, welches ICE nach der Auflösung vor welchem Server und an welcher ICE-Position liegt.
-- [ ] Die UI zeigt Auswahlreihenfolge, Zielslots oder Swap-Paare so klar, dass das Ergebnis vor dem Bestätigen vorhersagbar ist.
-- [ ] Die Korp muss nicht blind alle ICE anklicken, ohne zu wissen, welche Slot-Zuordnung daraus entsteht.
-- [ ] Rezzed/Unrezzed und verdeckt/offen bleiben nach der Neuordnung korrekt erhalten; zusätzlich werden vorher aufgedeckte unrezzte ICE verdeckt.
-- [ ] Der Runner erhält keine verdeckten ICE-Identitäten und keine Zielreihenfolge, die Hidden Info leakt.
-- [ ] Replay/StateHash bleiben deterministisch.
-- [ ] Tests oder Browser-Smoke decken mindestens den Nutzerfall mit drei ICE, einem gerezzten ICE und zwei unrezzten ICE ab.
-- [ ] Checks: passende Web-/Engine-Tests, Typecheck, `git diff --check`.
+- [x] Bei drei installierten ICE auf unterschiedlichen Servern kann die Korp ausdrücklich bestimmen, welches ICE nach der Auflösung vor welchem Server und an welcher ICE-Position liegt.
+- [x] Die UI zeigt Auswahlreihenfolge, Zielslots oder Swap-Paare so klar, dass das Ergebnis vor dem Bestätigen vorhersagbar ist.
+- [x] Die Korp muss nicht blind alle ICE anklicken, ohne zu wissen, welche Slot-Zuordnung daraus entsteht.
+- [x] Rezzed/Unrezzed und verdeckt/offen bleiben nach der Neuordnung korrekt erhalten; zusätzlich werden vorher aufgedeckte unrezzte ICE verdeckt.
+- [x] Der Runner erhält keine verdeckten ICE-Identitäten und keine Zielreihenfolge, die Hidden Info leakt.
+- [x] Replay/StateHash bleiben deterministisch.
+- [x] Tests oder Browser-Smoke decken mindestens den Nutzerfall mit drei ICE, einem gerezzten ICE und zwei unrezzten ICE ab.
+- [x] Checks: passende Web-/Engine-Tests, Typecheck, `git diff --check`.
 
 ## Umsetzungshinweise
 
@@ -69,4 +78,6 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt: Der bestehende Engine-Vertrag bleibt unverändert als vollständige Neuordnung über die deterministische installierte ICE-Slotliste. Die Web-UI zeigt `p3_58.new_blood_reorder:*` jetzt als `New Blood: ICE neu anordnen`, erklärt die Zielslot-Reihenfolge explizit und zeigt bei gewählten ICE den konkreten Zielslot wie `HQ ICE 1`, `R&D ICE 1` oder `Remote 1 ICE 1` statt nur einer abstrakten Auswahlnummer. Dadurch kann die Korp vor dem Bestätigen sehen, welche gewählte Karte in welchen Slot gelegt wird. Hidden-Info-, Engine-, Replay- und StateHash-Verträge wurden nicht erweitert.
+
+Verifikation: Die fokussierten Web-Tests und der Web-Typecheck sind grün. Die New-Blood-Engine-Regressionen wurden direkt per Vitest fokussiert und sind grün. Ein vorheriger Engine-Testaufruf über das Paket-Script startete breiter als beabsichtigt und scheiterte an bestehenden unrelated Release-/Coverage-Erwartungen; dieser Lauf wurde nicht als Paketcheck gewertet.
