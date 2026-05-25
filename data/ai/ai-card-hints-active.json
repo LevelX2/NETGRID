@@ -1405,11 +1405,14 @@
       "cardType": "program",
       "roles": [
         "program",
-        "hidden_zone"
+        "hidden_zone",
+        "hidden_zone_tool",
+        "stack_search"
       ],
       "planRoles": [
         "build_rig",
-        "information"
+        "information",
+        "recover_rig"
       ],
       "requiredMechanics": [
         "install_program",
@@ -1873,11 +1876,14 @@
       "roles": [
         "runner",
         "program",
-        "per_card_longtail"
+        "per_card_longtail",
+        "recurring_credit",
+        "trash_cost_payment"
       ],
       "planRoles": [
         "runner_install_program",
-        "runner_program_ability"
+        "runner_program_ability",
+        "runner_access_trash_economy"
       ],
       "requiredMechanics": [
         "per_card_longtail_resolver_gate",
@@ -11154,26 +11160,30 @@
         "upgrade",
         "region",
         "city_grid",
-        "counter"
+        "run_tax"
       ],
       "planRoles": [
-        "remote_upgrade_economy"
+        "remote_upgrade_support"
       ],
       "requiredMechanics": [
         "install_upgrade",
         "rez_card",
         "city_grid",
-        "power_counter"
+        "persistent_modifier"
       ],
       "valueHints": {
-        "economy": 1
+        "remote": 2,
+        "tax": 2
       },
       "riskTags": [
-        "region_unique_server"
+        "region_unique_server",
+        "fort_ice_modifier",
+        "runner_trash_value"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_city_grid_counter"
+        "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_city_grid_counter",
+        "data/scenarios/v1918-generic-upgrade-root-server-release-smoke.json"
       ]
     },
     {
