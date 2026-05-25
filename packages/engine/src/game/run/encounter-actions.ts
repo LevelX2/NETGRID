@@ -54,7 +54,7 @@ export type RunnerEncounterActionHost = {
     currentEncounterSubroutines: (
       iceDefinition: CardDefinition,
     ) => NonNullable<CardDefinition["subroutines"]>;
-    runnerDuringRunCardImplementationActions: () => LegalAction[];
+    runnerDuringRunCardImplementationLegalActions: () => LegalAction[];
     runRemainderStrengthBonusForBreaker: (breakerId: CardInstanceId) => number;
     canUseBreakerOnCurrentFort: (breakerId: CardInstanceId) => boolean;
   };
@@ -124,7 +124,7 @@ export function buildRunnerEncounterActions(
   );
   const encounteredIceStrength = host.ice.strengthForIce(encounteredIceId);
   const actions: LegalAction[] = [];
-  actions.push(...host.run.runnerDuringRunCardImplementationActions());
+  actions.push(...host.run.runnerDuringRunCardImplementationLegalActions());
   actions.push(...selfModifyingCodeEncounterActions(host));
   for (const breakerId of host.state.runner.rig.programs) {
     const breaker = host.cards.definitionFor(breakerId);
@@ -408,7 +408,7 @@ export function buildRunnerMovementActions(
     };
   }
   const actions: LegalAction[] = [];
-  actions.push(...host.run.runnerDuringRunCardImplementationActions());
+  actions.push(...host.run.runnerDuringRunCardImplementationLegalActions());
   actions.push(...host.callbacks.postPassSpecialWindowActions());
   actions.push(...buildMysteryBoxRunActions(host, run));
   const jackOutAdditionalCost = host.payment.runJackOutAdditionalCost(run);

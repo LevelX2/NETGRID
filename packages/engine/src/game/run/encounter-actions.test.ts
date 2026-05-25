@@ -143,7 +143,7 @@ function hostFor(
     run: {
       currentRun: () => state.run!,
       currentEncounterSubroutines: (definition) => definition.subroutines ?? [],
-      runnerDuringRunCardImplementationActions: () => [],
+      runnerDuringRunCardImplementationLegalActions: () => [],
       runRemainderStrengthBonusForBreaker: () => 0,
       canUseBreakerOnCurrentFort: () => true,
     },

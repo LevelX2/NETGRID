@@ -338,6 +338,10 @@ import {
   type RunnerEncounterActionHost,
 } from "./game/run/encounter-actions";
 import {
+  buildCorpEncounterCardImplementationActions,
+  buildRunnerDuringRunCardImplementationActions,
+} from "./game/run/card-implementation-run-actions";
+import {
   approachIceExposeCanBeOfferedForCurrentIce,
   beginEncounter,
   continueAfterCorpRootRezIfWindowIsComplete,
@@ -2447,7 +2451,11 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
       return buildRunnerEncounterActions(
         runnerEncounterActionHostForState(state),
       ).legalActions;
-    return side === "corp" ? corpEncounterActions(state) : [];
+    return side === "corp"
+      ? buildCorpEncounterCardImplementationActions(
+          runCardImplementationActionHost(state),
+        ).legalActions
+      : [];
   }
   if (state.timingPoint === "run.jack_out_window") {
     if (side === "corp")
@@ -5798,48 +5806,33 @@ function relativeTraceSubroutinesForCurrentEncounter(
   }));
 }
 
-function runnerDuringRunCardImplementationActions(
-  state: GameState,
-): LegalAction[] {
-  if (!state.run) return [];
-  const actions: LegalAction[] = [];
-  for (const cardId of runnerInstalledCardIds(state).slice().sort()) {
-    const definition = definitionFor(state, cardId);
-    pushActivatedCardImplementationActionsForTiming(
-      cardImplementationRuntimeDeps,
-      state,
-      actions,
-      "runner",
-      cardId,
-      definition,
-      "during_run",
-    );
-  }
-  return actions;
-}
-
-function corpEncounterActions(state: GameState): LegalAction[] {
-  const run = state.run;
-  if (
-    state.timingPoint !== "run.encounter_ice" ||
-    run?.phase !== "encounter_ice" ||
-    !run.encounteredIceId
-  )
-    return [];
-  const instance = state.cardInstances[run.encounteredIceId];
-  if (!instance?.rezzed || instance.controller !== "corp") return [];
-  const definition = definitionFor(state, run.encounteredIceId);
-  const actions: LegalAction[] = [];
-  pushActivatedCardImplementationActionsForTiming(
-    cardImplementationRuntimeDeps,
+function runCardImplementationActionHost(state: GameState) {
+  return {
     state,
-    actions,
-    "corp",
-    run.encounteredIceId,
-    definition,
-    "corp_encounter",
-  );
-  return actions;
+    cards: {
+      cardInstanceFor: (cardId: CardInstanceId) => state.cardInstances[cardId],
+      definitionFor: (cardId: CardInstanceId) => definitionFor(state, cardId),
+      runnerInstalledCardIds: () => runnerInstalledCardIds(state),
+    },
+    runtime: {
+      pushActivatedActionsForTiming: (
+        actions: LegalAction[],
+        side: Side,
+        sourceCardId: CardInstanceId,
+        definition: CardDefinition,
+        timing: ActivatedCardAbilityImplementation["timing"],
+      ) =>
+        pushActivatedCardImplementationActionsForTiming(
+          cardImplementationRuntimeDeps,
+          state,
+          actions,
+          side,
+          sourceCardId,
+          definition,
+          timing,
+        ),
+    },
+  };
 }
 
 function runStartTaxForServerUpgrades(
@@ -15955,8 +15948,7 @@ function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
     callbacks: {
       successfulRunProgramActions: (run) =>
         buildSuccessfulRunFollowupActions(successfulRunInterventionHost(state), run),
-      runnerDuringRunCardImplementationActions: () =>
-        runnerDuringRunCardImplementationActions(state),
+      runnerDuringRunCardImplementationLegalActions: () => buildRunnerDuringRunCardImplementationActions(runCardImplementationActionHost(state)).legalActions,
       mysteryBoxRunActions: (run) =>
         buildMysteryBoxRunActions(runnerEncounterActionHostForState(state), run),
     },
@@ -15983,8 +15975,7 @@ function runnerEncounterActionHostForState(
       currentRun: () => mustRun(state),
       currentEncounterSubroutines: (iceDefinition) =>
         subroutinesForCurrentEncounter(state, iceDefinition),
-      runnerDuringRunCardImplementationActions: () =>
-        runnerDuringRunCardImplementationActions(state),
+      runnerDuringRunCardImplementationLegalActions: () => buildRunnerDuringRunCardImplementationActions(runCardImplementationActionHost(state)).legalActions,
       runRemainderStrengthBonusForBreaker: (breakerId) =>
         runRemainderStrengthBonusForBreaker(state.run, breakerId),
       canUseBreakerOnCurrentFort: (breakerId) =>
