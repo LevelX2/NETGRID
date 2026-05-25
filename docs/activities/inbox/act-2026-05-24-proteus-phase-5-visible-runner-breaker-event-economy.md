@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-5-visible-runner-breaker-event-economy
-status: inbox
+status: superseded
 kind: concept
 area: cards
 priority: normal
@@ -13,8 +13,14 @@ branch:
 releaseTarget: Proteus Phase 5
 blockedBy:
   - act-2026-05-24-proteus-phase-4-hidden-runner-resources
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-5a-icebreaker-core-matchers-pump-break.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-5c-simple-runner-economy-draw-setup.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-5d-visible-runner-run-events.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-5e-icebreaker-modifier-support-hardware.md
+checks:
+  - "Get-Content -LiteralPath 'docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md' | Select-Object -Skip 96 -First 36"
 ---
 
 # Proteus Phase 5: Sichtbare Runner-Breaker, Events und Economy
@@ -26,6 +32,7 @@ Die sichtbaren Runner-Programme, Events, Economy-Karten und kleinen Ressourcen a
 ## Kontext und Quellen
 
 - `docs/releases/proteus/release-slicing-plan.md`, Abschnitte `Phase 5`, `Slice 5` und `Ability-Bedarf nach Phase`.
+- `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md`, Abschnitt `Phase 5: Visible Runner Breaker, Event, Economy`; dieses Paket ist vor Codearbeit in die dort beschriebenen Slices 5a bis 5e zu zerlegen.
 - `docs/releases/proteus/mechanics-coverage-analysis.md`.
 - `docs/architecture/ability-engine/card-implementation-v1-pattern-catalog.md`.
 - V1.9.x-Completion-Artefakte zu Icebreakern, Hidden-Zone, Run/Access, Damage/Prevention und Trace/Tags.
@@ -93,4 +100,4 @@ Die sichtbaren Runner-Programme, Events, Economy-Karten und kleinen Ressourcen a
 
 ## Ergebnisnotiz
 
-Noch offen.
+Am 2026-05-24 in die Detail-Activities 5a bis 5e aus `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md` zerlegt. Dieses Umbrella-Paket wird nicht direkt implementiert.

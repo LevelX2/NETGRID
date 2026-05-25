@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "scenario-pack-v1",
+  "scenarioId": "proteus-phase-2b-scored-agenda-bad-publicity-smoke-2026-05-24",
+  "release": "Proteus Phase 2b Scored-Agenda Bad Publicity",
+  "coversCards": ["onr_proteus_002_charity-takeover"],
+  "assertions": [
+    "Charity Takeover has an engine-local per-card CardImplementation file.",
+    "Scoring Charity Takeover executes an ordered on_score sequence: gain 9 credits, then add 1 Bad Publicity through the generic add_bad_publicity effect.",
+    "The score LegalAction revalidates side and state version through applyAction.",
+    "When the score both reaches Corp agenda victory and Bad-Publicity-7, bad_publicity_7 remains the primary game-end reason and Runner wins.",
+    "PublicPayload includes public credit and Bad Publicity before/after counters without hidden zone data.",
+    "Replay and StateHash remain stable for the scoring sequence."
+  ],
+  "checks": [
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/coverage.test.ts -t \"Proteus Phase 2b\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts -t \"Proteus Phase 2b\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t \"Proteus Phase 2b\"",
+    "corepack pnpm --filter @netgrid/catalog exec vitest run src/index.test.ts -t \"Proteus\"",
+    "corepack pnpm --filter @netgrid/web exec vitest run app/api/cards/catalog-data.test.ts -t \"Proteus\""
+  ]
+}

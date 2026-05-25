@@ -96,6 +96,8 @@ export type ActionType =
   | "decline_trash"
   | "remove_tag"
   | "purge_virus_counters"
+  | "purge_runner_virus_counters"
+  | "forgo_action"
   | "move_to_set_aside"
   | "move_to_removed_from_game"
   | "return_from_set_aside"
@@ -137,6 +139,19 @@ export type DamageType = "net" | "meat" | "core";
 export type CounterType =
   | "advancement"
   | "virus"
+  | "doom"
+  | "crumble"
+  | "garbage"
+  | "highlighter"
+  | "scaldan"
+  | "tax"
+  | "vienna"
+  | "socket_archives"
+  | "socket_hq"
+  | "socket_rd"
+  | "pipe"
+  | "doppelganger_antibody"
+  | "pattel_antibody"
   | "cerberus"
   | "data_raven"
   | "mastiff"
@@ -203,6 +218,7 @@ export type SubroutineDefinition = {
   amount?: number;
   damageType?: DamageType;
   baseTraceStrength?: number;
+  traceBidLimit?: number;
   traceSuccessEffect?: TraceSuccessEffect;
   requiresSuccessfulTraceSubroutineIndex?: number;
   breakTags?: string[];
@@ -214,8 +230,60 @@ export type EventVisibilityClass =
   | "hidden_info_barrier"
   | "replay_only";
 
+export type PurgeableRunnerVirusCounterType =
+  | "doom"
+  | "crumble"
+  | "garbage"
+  | "highlighter"
+  | "scaldan"
+  | "tax"
+  | "vienna"
+  | "socket_archives"
+  | "socket_hq"
+  | "socket_rd"
+  | "pipe";
+
+export type PurgeableRunnerVirusCounterBucket = Partial<
+  Record<PurgeableRunnerVirusCounterType, number>
+>;
+
+export type PurgeableRunnerVirusCounterState = {
+  corp?: PurgeableRunnerVirusCounterBucket;
+  servers?: Partial<
+    Record<Exclude<ServerId, "new_remote">, PurgeableRunnerVirusCounterBucket>
+  >;
+  effects?: Record<
+    string,
+    {
+      counterType: PurgeableRunnerVirusCounterType;
+      amount: number;
+      publicLabel?: string;
+      sourceDefinitionId?: CardDefinitionId;
+      serverId?: Exclude<ServerId, "new_remote">;
+    }
+  >;
+};
+
+export type CorpActionDebtEntry = {
+  reason: "proteus_virus_purge" | "pipe_counter" | string;
+  remaining: number;
+  createdAtStateVersion: number;
+  source: "proteus_purge" | "start_of_turn_effect" | string;
+};
+
+export type CorpActionDebtState = {
+  forgoActionsPending: number;
+  entries: CorpActionDebtEntry[];
+};
+
+export type RunnerVirusPurgeWindowState = {
+  windowId: string;
+  timingFamily: "run_special_effect" | "corp_start_of_turn_between_effects";
+};
+
 export type ResolvedGameEffectKind =
   | "gain_credits"
+  | "add_bad_publicity"
   | "draw_cards"
   | "lose_credits"
   | "rez_card"
@@ -254,6 +322,7 @@ export type ResolvedGameEffect = {
   cardsTrashed?: number;
   endedRun?: boolean;
   paidCredits?: number;
+  preventable?: boolean;
   gameLost?: boolean;
   winner?: Winner;
   sourceDefinitionId?: CardDefinitionId;
@@ -717,13 +786,18 @@ export type CardInstance = {
   counters?: Partial<Record<CounterType, number>>;
   hostedOn?: CardInstanceId;
   selectedServerId?: Exclude<ServerId, "new_remote">;
-  proteusVariableIceState?: {
-    family: "x_strength" | "paid_etr_subroutines";
+  variableIceState?: {
+    family:
+      | "x_strength"
+      | "paid_end_the_run_subroutines"
+      | "alternate_subtype";
     additionalCostPaid: number;
     value: number;
     cap?: number;
     strength?: number;
     subroutineCount?: number;
+    selectedSubtypes?: string[];
+    traceBidLimit?: number;
   };
 };
 
@@ -856,6 +930,22 @@ export type RunState = {
     remaining: number;
     usableFor: "this_ice_printed_trace_subroutines";
   };
+  encounterAdditionalSubroutines?: Array<{
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    sourceTitle: string;
+    subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
+    amount?: number;
+  }>;
+  lastPassedIceId?: CardInstanceId;
+  fortPassWindowUsedSourceIdsThisRun?: CardInstanceId[];
+  postPassPayOrEndRun?: {
+    sourceCardInstanceIds: CardInstanceId[];
+    sourceDefinitionIds: CardDefinitionId[];
+    passedIceId: CardInstanceId;
+    serverId: Exclude<ServerId, "new_remote">;
+    amount: number;
+  };
   aiBoonSourceCardId?: CardInstanceId;
   aiBoonRunStrength?: number;
   aiBoonRunStrengthByBreaker?: Partial<Record<CardInstanceId, number>>;
@@ -869,6 +959,7 @@ export type RunState = {
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
+  fullyBrokenPassedIcePendingId?: CardInstanceId;
   startupImmolatorPendingPassedIceId?: CardInstanceId;
   forceJackOutAfterEncounterSourceId?: CardInstanceId;
   dupreUsedBreakerIdsThisRun?: CardInstanceId[];
@@ -888,6 +979,7 @@ export type RunState = {
     >
   >;
   singaporeCityGridUsedSourceIdsThisRun?: CardInstanceId[];
+  iceRepositionUsedSourceIdsThisRun?: CardInstanceId[];
   oliviaSalazarUsedSourceIdsThisRun?: CardInstanceId[];
   oliviaSalazarTemporaryRezzedIceIds?: CardInstanceId[];
   successfulRunInterventionUsedSourceIds?: CardInstanceId[];
@@ -950,6 +1042,7 @@ export type TraceState = {
   sourceDefinitionId: CardDefinitionId;
   subroutineIndex?: number;
   baseTraceStrength: number;
+  traceBidLimit?: number;
   corpBidMax?: number;
   rabbitTraceLimitReduction?: number;
   parisCityGridPoolSourceCardInstanceId?: CardInstanceId;
@@ -1108,6 +1201,9 @@ export type GameState = {
     Record<Exclude<ServerId, "new_remote">, number>
   >;
   spyCountersByServer?: Partial<Record<Exclude<ServerId, "new_remote">, number>>;
+  purgeableRunnerVirusCounters?: PurgeableRunnerVirusCounterState;
+  corpActionDebt?: CorpActionDebtState;
+  runnerVirusPurgeWindow?: RunnerVirusPurgeWindowState;
   runnerAgendaPointsToForfeit?: number;
   cancelledDamagePreventionSourceIdsUntilEndOfTurn?: CardInstanceId[];
 };
@@ -7408,8 +7504,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_234_data-darts",
     title: "Data Darts",
     subtypes: ["sentry", "ap", "hellbolt"],
-    rezCost: 5,
-    strength: 3,
+    rezCost: 6,
+    strength: 2,
     rulesText:
       "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
     subroutines: [
@@ -7496,7 +7592,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_239_endless-corridor",
     title: "Endless Corridor",
     subtypes: ["code_gate"],
-    rezCost: 4,
+    rezCost: 5,
     strength: 2,
     rulesText: "End the run.\nEnd the run.",
     subroutines: [
@@ -7537,7 +7633,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_245_fire-wall",
     title: "Fire Wall",
     subtypes: ["wall"],
-    rezCost: 5,
+    rezCost: 1,
     strength: 4,
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_245_fire_wall_etr")],
@@ -7670,7 +7766,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_257_nerve-labyrinth",
     title: "Nerve Labyrinth",
     subtypes: ["code_gate"],
-    rezCost: 6,
+    rezCost: 7,
     strength: 4,
     rulesText: "Do 2 net damage. End the run.",
     subroutines: [
@@ -9138,6 +9234,201 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
 
 const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
   {
+    id: "onr_proteus_002_charity-takeover",
+    title: "Charity Takeover",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["bad_publicity", "black_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 1,
+    rulesText:
+      "Gain [9] and 1 Bad Publicity point. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+    mechanics: [
+      "score_agenda",
+      "gain_credits",
+      "bad_publicity",
+      "bad_publicity_loss_gate",
+    ],
+  },
+  {
+    id: "onr_proteus_009_viral-breeding-ground",
+    title: "Viral Breeding Ground",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["ambush", "research", "virus"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 2,
+    rulesText:
+      "When you score Viral Breeding Ground, trash all cards installed in or on the fort it was installed in. When Runner accesses Viral Breeding Ground, choose up to two installed programs for each advancement counter on it; Runner brings those programs into their grip.",
+    mechanics: [
+      "score_agenda",
+      "access_ambush",
+      "advancement_counter",
+      "trash_installed_card",
+      "return_installed_program_to_grip",
+      "proteus_antibody_counter_family",
+    ],
+  },
+  {
+    id: "onr_proteus_031_minotaur",
+    title: "Minotaur",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 4,
+    rulesText:
+      'For each rezzed code gate or wall installed outside Minotaur, Minotaur has one "[Subroutine] End the run" subroutine.',
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "dynamic_subroutine",
+      "end_the_run",
+      "proteus_dynamic_public_etr_ice",
+    ],
+  },
+  {
+    id: "onr_proteus_054_bel-digmo-antibody",
+    title: "Bel-Digmo Antibody",
+    side: "corp",
+    type: "asset",
+    subtypes: ["node", "ambush", "virus"],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 0,
+    rulesText:
+      "Shuffle Bel-Digmo Antibody into R&D when it is rezzed. When Runner accesses Bel-Digmo Antibody from R&D, do 1 Net damage, and Runner must show it to you.",
+    mechanics: [
+      "install_remote",
+      "rez_asset",
+      "access_ambush",
+      "net_damage",
+      "shuffle_into_rd",
+      "proteus_antibody_counter_family",
+    ],
+  },
+  {
+    id: "onr_proteus_057_doppelganger-antibody",
+    title: "Doppelganger Antibody",
+    side: "corp",
+    type: "asset",
+    subtypes: ["node", "ambush", "virus"],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 0,
+    rulesText:
+      "When Runner accesses Doppelganger Antibody, you may pay [2] to give Runner a Doppelganger counter, even if Doppelganger is not installed. Ignore this effect if Runner accesses Doppelganger from the Archives. Each Doppelganger counter causes Runner to lose [1] at the start of each of his or her turns. Runner may take an action to pay [4] to remove a Doppelganger counter. If Doppelganger is accessed from R&D, Runner must show it to you.",
+    mechanics: [
+      "install_remote",
+      "rez_asset",
+      "access_ambush",
+      "runner_status_counter",
+      "lose_credits",
+      "proteus_antibody_counter_family",
+    ],
+  },
+  {
+    id: "onr_proteus_068_pattel-antibody",
+    title: "Pattel Antibody",
+    side: "corp",
+    type: "asset",
+    subtypes: ["node", "ambush", "virus"],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 0,
+    rulesText:
+      "When Runner accesses Pattel Antibody, you may pay [3] to put a Pattel counter on all installed icebreakers, even if Pattel Antibody is not installed. Ignore this effect if Runner accesses Pattel Antibody from the Archives. Each Pattel counter on an icebreaker reduces its strength by 1. If Pattel Antibody is accessed from R&D, Runner must show it to you.",
+    mechanics: [
+      "install_remote",
+      "rez_asset",
+      "access_ambush",
+      "icebreaker_counter",
+      "icebreaker_strength",
+      "proteus_antibody_counter_family",
+    ],
+  },
+  {
+    id: "onr_proteus_075_stereogram-antibody",
+    title: "Stereogram Antibody",
+    side: "corp",
+    type: "asset",
+    subtypes: ["node", "ambush", "virus"],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 0,
+    rulesText:
+      "When Runner accesses Stereogram Antibody from the Archives, do 1 Net damage and shuffle Stereogram Antibody into R&D.",
+    mechanics: [
+      "access_archives",
+      "access_ambush",
+      "net_damage",
+      "shuffle_into_rd",
+      "proteus_antibody_counter_family",
+    ],
+  },
+  {
+    id: "onr_proteus_034_riddler",
+    title: "Riddler",
+    side: "corp",
+    type: "ice",
+    subtypes: ["code_gate"],
+    implementationStatus: "playable_mvp",
+    rezCost: 2,
+    strength: 4,
+    rulesText:
+      '[2]: Riddler has one "[Subroutine] End the run" subroutine for the present encounter. Use this ability only when Runner encounters Riddler.',
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "dynamic_subroutine",
+      "end_the_run",
+      "proteus_dynamic_public_etr_ice",
+    ],
+  },
+  {
+    id: "onr_proteus_062_lesley-major",
+    title: "Lesley Major",
+    side: "corp",
+    type: "upgrade",
+    subtypes: ["sysop"],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 0,
+    rulesText:
+      "Install Lesley Major only in a subsidiary data fort. [5]: Add two advancement counters, at no cost, to a card installed in this data fort. Use this ability only when Runner passes the last piece of ice on this fort, and only once per run.",
+    mechanics: [
+      "install_remote",
+      "rez_upgrade",
+      "fort_run_window",
+      "advancement_counter",
+      "proteus_public_fort_pass_window",
+    ],
+  },
+  {
+    id: "onr_proteus_070_rasmin-bridger",
+    title: "Rasmin Bridger",
+    side: "corp",
+    type: "upgrade",
+    subtypes: ["sysop"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    trashCost: 2,
+    rulesText:
+      "After Runner passes each piece of ice on this fort, Runner must pay [1] or end the run.",
+    mechanics: [
+      "install_remote",
+      "rez_upgrade",
+      "fort_run_window",
+      "run_tax",
+      "proteus_public_fort_pass_window",
+    ],
+  },
+  {
     id: "onr_proteus_041_toughoniumtm-wall",
     title: "Toughonium™ Wall",
     side: "corp",
@@ -9162,9 +9453,443 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
       "proteus_visible_baseline",
     ],
   },
+  {
+    id: "onr_proteus_065_networked-center",
+    title: "Networked Center",
+    side: "corp",
+    type: "upgrade",
+    subtypes: ["asset", "region"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    trashCost: 3,
+    rulesText:
+      "The difficulty of Gray Ops agendas installed in this fort is reduced by 1. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+    mechanics: [
+      "install_remote",
+      "rez_upgrade",
+      "region",
+      "agenda_difficulty",
+      "proteus_visible_baseline",
+    ],
+  },
+  {
+    id: "onr_proteus_072_research-bunker",
+    title: "Research Bunker",
+    side: "corp",
+    type: "upgrade",
+    subtypes: ["asset", "region"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    trashCost: 3,
+    rulesText:
+      "The difficulty of research agendas installed in this fort is reduced by 1. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+    mechanics: [
+      "install_remote",
+      "rez_upgrade",
+      "region",
+      "agenda_difficulty",
+      "proteus_visible_baseline",
+    ],
+  },
+  {
+    id: "onr_proteus_077_weapons-depot",
+    title: "Weapons Depot",
+    side: "corp",
+    type: "upgrade",
+    subtypes: ["asset", "region"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    trashCost: 3,
+    rulesText:
+      "The difficulty of Black Ops agendas installed in this fort is reduced by 1. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+    mechanics: [
+      "install_remote",
+      "rez_upgrade",
+      "region",
+      "agenda_difficulty",
+      "proteus_visible_baseline",
+    ],
+  },
+  {
+    id: "onr_proteus_078_armageddon",
+    title: "Armageddon",
+    side: "runner",
+    type: "program",
+    subtypes: ["random", "virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on R&D, you may choose to give the Corp a Doom counter instead of accessing cards from R&D. Each Doom counter forces the Corp to roll a die whenever it installs a card. On a 6, the card is trashed after it is installed, and the Corp removes a Doom counter. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_replacement",
+      "random_die_resolution",
+      "corp_install_trigger",
+      "proteus_random_virus_longtail",
+    ],
+  },
+  {
+    id: "onr_proteus_084_crumble",
+    title: "Crumble",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on HQ, give the Corp a Crumble counter. Two or more Crumble counters allow you trash, at no cost, any cards accessed from HQ, even if the cards cannot normally be trashed. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_counter",
+      "free_access_trash",
+      "proteus_runner_virus_access_trash",
+    ],
+  },
+  {
+    id: "onr_proteus_085_disintegrator",
+    title: "Disintegrator",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 6,
+    memoryCost: 2,
+    rulesText:
+      "[2]: Derez a piece of ice and end your run. Use this ability only when you have just broken all the subroutines of that piece of ice and have successfully passed it.",
+    mechanics: [
+      "install_program",
+      "post_pass_fully_broken_ice",
+      "derez_ice",
+      "end_run",
+      "proteus_post_pass_derez_utility",
+    ],
+  },
+  {
+    id: "onr_proteus_089_garbage-in",
+    title: "Garbage In",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on R&D, give the Corp a Garbage counter. Two or more Garbage counters allow you to trash, at no cost, any cards accessed from R&D, even if the cards cannot normally be trashed. The Corp loses two Garbage counters after any run during which this ability is used. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_counter",
+      "free_access_trash",
+      "counter_spend",
+      "proteus_runner_virus_access_trash",
+    ],
+  },
+  {
+    id: "onr_proteus_090_highlighter",
+    title: "Highlighter",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on R&D, give the Corp a Highlighter counter. Each Highlighter counter after the first allows you to access an additional card from R&D whenever you access cards from R&D. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_counter",
+      "access_breach_multiaccess_ambush",
+      "proteus_runner_virus_run_counter",
+    ],
+  },
+  {
+    id: "onr_proteus_094_scaldan",
+    title: "Scaldan",
+    side: "runner",
+    type: "program",
+    subtypes: ["bad_publicity", "random", "virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on HQ, give the Corp a Scaldan counter. Each Scaldan counter forces the Corp to roll a die at the start of each of its turns. On a 5 or a 6, the Corp gains 1 Bad Publicity point. The Corp may remove all Virus counters at any time, but must then forgo its next three actions. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_counter",
+      "random_die_resolution",
+      "bad_publicity",
+      "proteus_random_virus_longtail",
+    ],
+  },
+  {
+    id: "onr_proteus_097_taxman",
+    title: "Taxman",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on HQ, give the Corp a Tax counter. Every two Tax counters cause the Corp to lose [1] at the start of each of its turns. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_counter",
+      "start_of_turn",
+      "corp_lose_credits",
+      "proteus_runner_virus_run_counter",
+    ],
+  },
+  {
+    id: "onr_proteus_098_vienna-22",
+    title: "Vienna 22",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on HQ, give the Corp a Vienna counter. Each Vienna counter allows you to access an additional card from HQ whenever you access cards from HQ. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_counter",
+      "access_breach_multiaccess_ambush",
+      "proteus_runner_virus_run_counter",
+    ],
+  },
+  {
+    id: "onr_proteus_099_viral-pipeline",
+    title: "Viral Pipeline",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on Archives, HQ, or R&D, put a Socket counter in that data fort. Socket counter from Archives, Socket counter from HQ, and Socket counter from R&D: Give the Corp a Pipe counter. Each Pipe counter causes the Corp to forgo an action at the start of each of its turns. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_counter",
+      "central_server_scope",
+      "action_debt",
+      "proteus_runner_virus_run_counter",
+    ],
+  },
+  {
+    id: "onr_proteus_108_faked-hit",
+    title: "Faked Hit",
+    side: "runner",
+    type: "event",
+    subtypes: ["bad_publicity"],
+    implementationStatus: "playable_mvp",
+    cost: 5,
+    rulesText:
+      "Give the Corp 1 Bad Publicity point. Take 2 brain damage. This damage cannot be prevented. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+    mechanics: [
+      "play_event",
+      "bad_publicity",
+      "bad_publicity_loss_gate",
+      "core_damage",
+      "flatline",
+    ],
+  },
+  {
+    id: "onr_proteus_117_poisoned-water-supply",
+    title: "Poisoned Water Supply",
+    side: "runner",
+    type: "event",
+    subtypes: ["bad_publicity"],
+    implementationStatus: "playable_mvp",
+    cost: 3,
+    rulesText:
+      "Play only if you have at least two connections in play. Trash two connections. Give the Corp 1 Bad Publicity point. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+    mechanics: [
+      "play_event",
+      "connection_condition",
+      "trash_installed_connection_cost",
+      "bad_publicity",
+      "bad_publicity_loss_gate",
+    ],
+  },
+  {
+    id: "onr_proteus_150_streetware-distributor",
+    title: "Streetware Distributor",
+    side: "runner",
+    type: "resource",
+    subtypes: ["bbs", "position"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText:
+      "Take [1] from Streetware Distributor, if it has any bits, at the start of each of your turns. A: Put [3] from the bank on Streetware Distributor.",
+    mechanics: [
+      "install_resource",
+      "counter",
+      "recurring_pool",
+      "gain_credits",
+      "proteus_visible_baseline",
+    ],
+  },
 ];
 
-const PROTEUS_VARIABLE_ICE_HARNESS_CARDS: CardDefinition[] = [
+const PROTEUS_CYBERNETICS_DECK_CARDS: CardDefinition[] = [
+  {
+    id: "onr_proteus_134_cortical-cybermodem",
+    title: "Cortical Cybermodem",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["cybernetics", "deck"],
+    implementationStatus: "playable_mvp",
+    installCost: 11,
+    rulesText:
+      "Provides +2 MU and +2 hand size. Put [2] from the bank on Cortical Cybermodem when it is installed. Use these bits only to pay for using icebreakers during runs. If you use any of these bits, replace them from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
+    mechanics: [
+      "install_hardware",
+      "hardware_deck",
+      "memory",
+      "max_hand_size",
+      "restricted_hosted_credits",
+      "proteus_cybernetics_deck_hardware",
+    ],
+  },
+  {
+    id: "onr_proteus_135_cortical-stimulators",
+    title: "Cortical Stimulators",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["cybernetics"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "Prevents 1 Net or brain damage each turn.",
+    mechanics: [
+      "install_hardware",
+      "damage_prevention",
+      "damage_prevention_turn_limit",
+      "proteus_cybernetics_deck_hardware",
+    ],
+  },
+  {
+    id: "onr_proteus_138_deck-the",
+    title: "Deck, The",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["base_link", "deck"],
+    implementationStatus: "playable_mvp",
+    installCost: 11,
+    rulesText:
+      "[0]: Base link 5. [1]: +1 link. Provides +1 MU. Use only one base link card for each trace attempt made against you. Only one deck can be in play at a time. Trash any older decks.",
+    mechanics: [
+      "install_hardware",
+      "hardware_deck",
+      "memory",
+      "base_link",
+      "trace",
+      "proteus_cybernetics_deck_hardware",
+    ],
+  },
+  {
+    id: "onr_proteus_151_sunburst-cranial-interface",
+    title: "Sunburst Cranial Interface",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["cybernetics", "deck", "stealth"],
+    implementationStatus: "playable_mvp",
+    installCost: 5,
+    rulesText:
+      "Provides +1 MU and +1 hand size. Put [1] from the bank on Cranial Interface when it is installed. Use this bit only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use the bit, replace it from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
+    mechanics: [
+      "install_hardware",
+      "hardware_deck",
+      "memory",
+      "max_hand_size",
+      "restricted_hosted_credits",
+      "subtype_noisy",
+      "proteus_cybernetics_deck_hardware",
+    ],
+  },
+];
+
+const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
+  {
+    id: "onr_proteus_012_bug-zapper",
+    title: "Bug Zapper",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry", "ap"],
+    implementationStatus: "playable_mvp",
+    rezCost: 5,
+    strength: 3,
+    rulesText:
+      "[Subroutine] Do 2 net damage for each rezzed piece of ice installed outside Bug Zapper.\n[Subroutine] End the run.",
+    subroutines: [
+      {
+        id: "onr_proteus_012_bug_zapper_net_damage",
+        type: "do_damage",
+        damageType: "net",
+        amount: 0,
+      },
+      { id: "onr_proteus_012_bug_zapper_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "relative_ice_count",
+      "dynamic_subroutine",
+    ],
+  },
+  {
+    id: "onr_proteus_013_caryatid",
+    title: "Caryatid",
+    side: "corp",
+    type: "ice",
+    subtypes: ["wall"],
+    implementationStatus: "playable_mvp",
+    rezCost: 7,
+    strength: 5,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Caryatid, you may pay 1 above the rez cost to make it a code gate instead of a wall.",
+    subroutines: [{ id: "onr_proteus_013_caryatid_etr", type: "end_the_run" }],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_017_credit-blocks",
+    title: "Credit Blocks",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 3,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Credit Blocks, you may pay 1 above the rez cost to make it a wall instead of a sentry.",
+    subroutines: [
+      { id: "onr_proteus_017_credit_blocks_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
   {
     id: "onr_proteus_020_digiconda",
     title: "Digiconda",
@@ -9189,8 +9914,37 @@ const PROTEUS_VARIABLE_ICE_HARNESS_CARDS: CardDefinition[] = [
       "install_ice",
       "rez_ice",
       "encounter_ice",
-      "variable_rez_harness",
-      "proteus_planning_harness",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_021_dog-pile",
+    title: "Dog Pile",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry", "ap"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    strength: 0,
+    rulesText:
+      "[Subroutine] Do 1 net damage for each rezzed piece of ice installed outside Dog Pile.\n[Subroutine] End the run.\nDog Pile has +1 strength for each rezzed piece of ice installed outside it.",
+    subroutines: [
+      {
+        id: "onr_proteus_021_dog_pile_net_damage",
+        type: "do_damage",
+        damageType: "net",
+        amount: 0,
+      },
+      { id: "onr_proteus_021_dog_pile_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "relative_ice_count",
+      "dynamic_strength",
+      "dynamic_subroutine",
     ],
   },
   {
@@ -9209,8 +9963,268 @@ const PROTEUS_VARIABLE_ICE_HARNESS_CARDS: CardDefinition[] = [
       "install_ice",
       "rez_ice",
       "encounter_ice",
-      "variable_rez_harness",
-      "proteus_planning_harness",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_023_galatea",
+    title: "Galatea",
+    side: "corp",
+    type: "ice",
+    subtypes: ["wall"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 4,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Galatea, you may pay 1 above the rez cost to make it a code gate instead of a wall.",
+    subroutines: [{ id: "onr_proteus_023_galatea_etr", type: "end_the_run" }],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_024_gatekeeper",
+    title: "Gatekeeper",
+    side: "corp",
+    type: "ice",
+    subtypes: ["code_gate"],
+    implementationStatus: "playable_mvp",
+    rezCost: 3,
+    strength: 4,
+    rulesText:
+      "Gatekeeper has one [Subroutine] End the run for every 2 credits you pay above the rez cost when you rez it.",
+    subroutines: [],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_025_homing-missile",
+    title: "Homing Missile",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    strength: 0,
+    rulesText:
+      "[Subroutine] Trace X. If successful, end the run and Runner cannot make another run until Runner takes an action to pay 2.\nPay X above the rez cost when you rez Homing Missile. X is Homing Missile's strength and trace limit, and X cannot be greater than 8.",
+    subroutines: [
+      {
+        id: "onr_proteus_025_homing_missile_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 0,
+        traceBidLimit: 0,
+        traceSuccessEffect: { type: "end_run_and_run_lock", amount: 2 },
+      },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+      "trace",
+      "run_lock",
+    ],
+  },
+  {
+    id: "onr_proteus_026_hunting-pack",
+    title: "Hunting Pack",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 5,
+    strength: 4,
+    rulesText:
+      "For each rezzed piece of ice installed outside Hunting Pack, Hunting Pack has one [Subroutine] Trace 5. If successful, give Runner a tag.",
+    subroutines: [],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "relative_ice_count",
+      "dynamic_subroutine",
+      "trace",
+      "add_tag",
+    ],
+  },
+  {
+    id: "onr_proteus_028_lesser-arcana",
+    title: "Lesser Arcana",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 7,
+    strength: 4,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Lesser Arcana, you may pay 1 above the rez cost to make it a wall instead of a sentry.",
+    subroutines: [
+      { id: "onr_proteus_028_lesser_arcana_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_030_mastermind",
+    title: "Mastermind",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry", "ap"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 0,
+    rulesText:
+      "[Subroutine] Do 1 core damage for each rezzed piece of ice installed outside Mastermind.\n[Subroutine] End the run.\nMastermind has +1 strength for each rezzed piece of ice installed outside it.",
+    subroutines: [
+      {
+        id: "onr_proteus_030_mastermind_core_damage",
+        type: "do_damage",
+        damageType: "core",
+        amount: 0,
+      },
+      { id: "onr_proteus_030_mastermind_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "relative_ice_count",
+      "dynamic_strength",
+      "dynamic_subroutine",
+    ],
+  },
+  {
+    id: "onr_proteus_033_mobile-barricade",
+    title: "Mobile Barricade",
+    side: "corp",
+    type: "ice",
+    subtypes: ["wall"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 3,
+    rulesText:
+      "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.\n[1]: Move Mobile Barricade and insert it in a different position on this data fort. Use this ability only at the start of a run on this data fort. You may use this ability even if Mobile Barricade is unrezzed, in which case, you reveal it.",
+    subroutines: [
+      {
+        id: "onr_proteus_033_mobile_barricade_net_damage",
+        type: "do_damage",
+        damageType: "net",
+        amount: 1,
+      },
+      {
+        id: "onr_proteus_033_mobile_barricade_etr",
+        type: "end_the_run",
+      },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "ice_repositioning",
+      "reveal",
+      "end_the_run",
+    ],
+  },
+  {
+    id: "onr_proteus_036_sandstorm",
+    title: "Sandstorm",
+    side: "corp",
+    type: "ice",
+    subtypes: ["wall"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    strength: 4,
+    rulesText:
+      "Sandstorm has one [Subroutine] End the run for every 2 credits you pay above the rez cost when you rez it.",
+    subroutines: [],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_039_sphinx-2006",
+    title: "Sphinx 2006",
+    side: "corp",
+    type: "ice",
+    subtypes: ["code_gate"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 5,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Sphinx 2006, you may pay 4 above the rez cost to make it a sentry instead of a code gate.",
+    subroutines: [
+      { id: "onr_proteus_039_sphinx_2006_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_040_sumo-2008",
+    title: "Sumo 2008",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 8,
+    strength: 5,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Sumo 2008, you may pay 1 above the rez cost to make it a wall instead of a sentry.",
+    subroutines: [{ id: "onr_proteus_040_sumo_2008_etr", type: "end_the_run" }],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_044_walking-wall",
+    title: "Walking Wall",
+    side: "corp",
+    type: "ice",
+    subtypes: ["wall"],
+    implementationStatus: "playable_mvp",
+    rezCost: 5,
+    strength: 3,
+    rulesText:
+      "[Subroutine] End the run.\n[1]: Move Walking Wall and insert it in a different position on this data fort. Use this ability only at the start of a run on this data fort. You may use this ability even if Walking Wall is unrezzed, in which case, you reveal it.",
+    subroutines: [
+      { id: "onr_proteus_044_walking_wall_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "ice_repositioning",
+      "reveal",
+      "end_the_run",
     ],
   },
 ];
@@ -10227,7 +11241,8 @@ export const DEMO_CARDS: CardDefinition[] = [
   },
   ...ONR_V1_LIMITED_PLAYABLE_CARDS,
   ...PROTEUS_VISIBLE_BASELINE_CARDS,
-  ...PROTEUS_VARIABLE_ICE_HARNESS_CARDS,
+  ...PROTEUS_CYBERNETICS_DECK_CARDS,
+  ...PROTEUS_VARIABLE_ICE_CARDS,
 ];
 
 export const DEMO_CARDS_BY_ID: Record<CardDefinitionId, CardDefinition> =

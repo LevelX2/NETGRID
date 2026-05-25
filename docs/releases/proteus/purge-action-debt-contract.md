@@ -1,11 +1,11 @@
 # Proteus Purge-/Action-Debt-Vertrag
 
 Stand: 2026-05-17
-Status: planning contract, no runtime implementation
+Status: planning contract; Phase 8a runtime foundation exists, no target-card promotion
 
 ## Zweck und Scope
 
-Dieses Artefakt schneidet den Proteus-spezifischen Virus-Purge als eigenen Timing- und Action-Debt-Vertrag aus dem allgemeinen Counter-/Virus-Cluster. Es ist Planungsinput fuer spaetere Engine-Arbeit und erzeugt keine Runtime-Implementierung, keine Proteus-Kartenpromotion, keine Decklegalitaet und keine AI-Hints.
+Dieses Artefakt schneidet den Proteus-spezifischen Virus-Purge als eigenen Timing- und Action-Debt-Vertrag aus dem allgemeinen Counter-/Virus-Cluster. Seit Phase 8a existiert eine generische Runtime-Grundlage mit eigener `purge_runner_virus_counters`-LegalAction, StateHash-relevantem `corpActionDebt` und deterministischem `forgo_action`-Abtrag. Das Artefakt bleibt Planungsinput fuer die Zielkarten und erzeugt keine Proteus-Kartenpromotion, keine Decklegalitaet und keine AI-Hints.
 
 Der Vertrag gilt fuer Proteus-Runner-Virus-Counter aus dem Cluster `virus_antibody_counter_family`, insbesondere `doom`, `crumble`, `garbage`, `highlighter`, `scaldan`, `tax`, `vienna`, `socket_*` und `pipe`.
 

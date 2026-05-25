@@ -11,6 +11,7 @@ import type {
 import {
   canFreeTrashCurrentAccessCard,
   effectiveAccessTrashCost,
+  freeTrashAccessSourceForCurrentAccessCard,
   type RunnerAccessActionHost,
 } from "./access-actions";
 
@@ -560,6 +561,7 @@ function trashAccessedCard(
     );
   }
   host.trash.trashCorpInstalledCardToArchives(cardId as CardInstanceId, legalAction);
+  consumeProteusAccessTrashCounters(host, definition, legalAction);
   if (host.state.run?.breach) {
     return {
       ...completeCurrentBreachAccess(host, "trashed", legalAction),
@@ -575,6 +577,46 @@ function trashAccessedCard(
     runFinished: true,
     ...resolvedPayloadFor(legalAction),
     stateChanged: true,
+  };
+}
+
+function consumeProteusAccessTrashCounters(
+  host: AccessFlowHost,
+  definition: CardDefinition,
+  legalAction?: LegalAction,
+): void {
+  const run = host.state.run;
+  if (!run || !legalAction?.payload?.freeAccessTrash) return;
+  const source = freeTrashAccessSourceForCurrentAccessCard(
+    host.accessActions,
+    run,
+    definition,
+  );
+  if (source.counterType !== "garbage") return;
+  const corpCounters = host.state.purgeableRunnerVirusCounters?.corp;
+  const before = Math.max(0, Math.floor(corpCounters?.garbage ?? 0));
+  const spent = Math.min(2, before);
+  if (!corpCounters || spent <= 0) return;
+  const after = before - spent;
+  if (after > 0) corpCounters.garbage = after;
+  else delete corpCounters.garbage;
+  if (
+    Object.keys(corpCounters).length === 0 &&
+    host.state.purgeableRunnerVirusCounters
+  )
+    delete host.state.purgeableRunnerVirusCounters.corp;
+  if (
+    host.state.purgeableRunnerVirusCounters &&
+    !host.state.purgeableRunnerVirusCounters.corp &&
+    !host.state.purgeableRunnerVirusCounters.servers &&
+    !host.state.purgeableRunnerVirusCounters.effects
+  )
+    delete host.state.purgeableRunnerVirusCounters;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    proteusRunnerVirusFreeTrashCounterType: "garbage",
+    garbageCountersSpent: spent,
+    garbageCountersAfter: after,
   };
 }
 

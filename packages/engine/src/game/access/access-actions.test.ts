@@ -49,6 +49,7 @@ function makeHost(overrides: {
   breach?: NonNullable<GameState["run"]>["breach"];
   corpArchives?: string[];
   runnerCredits?: number;
+  purgeableCorpCounters?: NonNullable<GameState["purgeableRunnerVirusCounters"]>["corp"];
 } = {}): RunnerAccessActionHost {
   const serverId = overrides.serverId ?? "remote_1";
   const cardType = overrides.cardType ?? "asset";
@@ -94,6 +95,9 @@ function makeHost(overrides: {
       servers,
     },
     cardInstances,
+    ...(overrides.purgeableCorpCounters
+      ? { purgeableRunnerVirusCounters: { corp: overrides.purgeableCorpCounters } }
+      : {}),
     run:
       overrides.accessedCardId === undefined && !overrides.breach
         ? {
@@ -224,6 +228,49 @@ describe("access action generation", () => {
     });
     expect(actions[1]!.payload).toBeUndefined();
     expect(JSON.stringify(host.state)).toBe(before);
+  });
+
+  it("builds Proteus counter-based free trash actions for current HQ/R&D access only", () => {
+    const host = makeHost({
+      accessedCardId: "ice",
+      cardType: "ice",
+      serverId: "hq",
+      purgeableCorpCounters: { crumble: 2 },
+      breach: {
+        breachId: "run_1.breach",
+        serverId: "hq",
+        accessMode: "single",
+        completed: false,
+        accessedSummaries: [],
+        currentIndex: 0,
+        queue: [
+          {
+            entryId: "entry_0",
+            serverId: "hq",
+            cardInstanceId: "ice",
+            status: "accessed",
+            zone: "hq",
+            hiddenInfo: true,
+          },
+        ],
+      } as NonNullable<GameState["run"]>["breach"],
+    });
+
+    const actions = buildRunnerAccessActions(host).legalActions;
+
+    expect(actions[0]).toMatchObject({
+      type: "trash_accessed_card",
+      costs: [],
+      payload: {
+        accessTrashCostOverride: 0,
+        freeAccessTrash: true,
+        proteusRunnerVirusFreeTrashCounterType: "crumble",
+      },
+    });
+    expect(actions.map((action) => action.type)).toEqual([
+      "trash_accessed_card",
+      "decline_trash",
+    ]);
   });
 
   it("does not build trash actions for Archives access", () => {

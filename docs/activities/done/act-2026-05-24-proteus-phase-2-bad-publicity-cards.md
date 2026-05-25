@@ -1,19 +1,25 @@
 ---
 activityId: act-2026-05-24-proteus-phase-2-bad-publicity-cards
-status: inbox
-kind: concept
+status: done
+kind: planning
 area: cards
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-05-24
+completedAt: 2026-05-24
+branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 2
 blockedBy:
   - act-2026-05-24-proteus-phase-1-visible-baseline-cards
-resultArtifacts: []
+resultArtifacts:
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-2a-bad-publicity-foundation.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-2b-scored-agenda-bad-publicity.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-2c-direct-runner-event-bp-damage.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-2d-installed-card-cost-bp.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-2e-run-access-history-bp.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-2f-replacement-choice-bp.md
 checks: []
 ---
 
@@ -26,6 +32,7 @@ Die Bad-Publicity-Phase nach vorhandenem `bad_publicity_7`-Harness als Karten-Sl
 ## Kontext und Quellen
 
 - `docs/releases/proteus/release-slicing-plan.md`, Abschnitte `Phase 2`, `Slice 2` und `Ability-Bedarf nach Phase`.
+- `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md`, Abschnitt `Phase 2: Bad Publicity`; dieses Paket ist vor Codearbeit in die dort beschriebenen Slices 2a bis 2f zu zerlegen.
 - `docs/releases/proteus/bad-publicity-loss-gate-contract.md`.
 - `docs/releases/proteus/mechanics-coverage-analysis.md`.
 - `docs/activities/done/act-2026-05-17-proteus-bad-publicity-loss-gate.md`.
@@ -58,6 +65,7 @@ Die Bad-Publicity-Phase nach vorhandenem `bad_publicity_7`-Harness als Karten-Sl
 
 ## Akzeptanzkriterien
 
+- [x] Umbrella-Paket wurde vor Codearbeit in Detail-Slices 2a bis 2f zerlegt.
 - [ ] Bad Publicity wird in Karten ausschließlich über generische Engine-/CardImplementation-Abstraktionen erhöht.
 - [ ] Alle acht Zielkarten haben eigene CardImplementation-Dateien, Registry-/Coverage- und Manifestnachweis.
 - [ ] `bad_publicity_7` bleibt Engine-autoritativ und gewinnt die dokumentierte Prioritätsmatrix.
@@ -71,4 +79,4 @@ Die Bad-Publicity-Phase nach vorhandenem `bad_publicity_7`-Harness als Karten-Sl
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt am 2026-05-24 als Planning-Zerlegung. Das Umbrella-Paket wurde ohne Runtime-Code in die Detail-Activities 2a bis 2f aus `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md` zerlegt. Umsetzung beginnt mit 2a als Pflicht-Foundation-Slice.

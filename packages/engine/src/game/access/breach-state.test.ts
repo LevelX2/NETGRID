@@ -10,6 +10,8 @@ import { describe, expect, it } from "vitest";
 import {
   accessQueueEntries,
   buildBreachState,
+  installedAccessBonusForServer,
+  runnerHqAccessBonus,
   type BreachStateHost,
 } from "./breach-state";
 
@@ -163,6 +165,34 @@ describe("breach state builder", () => {
     expect(queue).toEqual([
       { cardInstanceId: "hq_card_b", zone: "hq" },
       { cardInstanceId: "hq_upgrade", zone: "remote_root" },
+    ]);
+  });
+
+  it("applies Proteus Highlighter and Vienna counters without counting central roots", () => {
+    const host = makeHost();
+    host.state.purgeableRunnerVirusCounters = {
+      corp: { highlighter: 3, vienna: 1 },
+    };
+
+    expect(installedAccessBonusForServer(host, "rd")).toBe(2);
+    expect(runnerHqAccessBonus(host)).toBe(1);
+
+    const rd = buildBreachState(host, {
+      runId: "run_rd_highlighter",
+      attackedServerId: "rd",
+      accessCount: 3,
+    } as NonNullable<GameState["run"]>);
+    const hq = buildBreachState(host, {
+      runId: "run_hq_vienna",
+      attackedServerId: "hq",
+      accessCount: 1,
+    } as NonNullable<GameState["run"]>);
+
+    expect(rd.queue.map((entry) => entry.zone)).toEqual(["rd", "rd"]);
+    expect(hq.queue.map((entry) => entry.zone)).toEqual([
+      "hq",
+      "hq",
+      "remote_root",
     ]);
   });
 

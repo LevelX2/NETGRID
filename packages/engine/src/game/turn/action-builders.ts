@@ -29,6 +29,7 @@ export function buildLegalAction(
     type.startsWith("rez") ||
     type === "score_agenda" ||
     type === "trash_resource" ||
+    payload?.corpAbility ||
     payload?.v1917AssetAbility ||
     payload?.cardImplementationAbility ||
     payload?.resourceAbility ||
@@ -107,9 +108,13 @@ export function makeActionId(
     parts.push(String(payload.subroutineId));
   if (payload?.subroutineIndexes !== undefined)
     parts.push(String(payload.subroutineIndexes));
+  if (payload?.sourceIceIndex !== undefined)
+    parts.push(String(payload.sourceIceIndex));
+  if (payload?.targetIceIndex !== undefined)
+    parts.push(String(payload.targetIceIndex));
   if (payload?.pumpAmount !== undefined) parts.push(String(payload.pumpAmount));
-  if (payload?.proteusVariableRez !== undefined)
-    parts.push(String(payload.proteusVariableRez));
+  if (payload?.variableRezKind !== undefined)
+    parts.push(String(payload.variableRezKind));
   if (payload?.variableRezAdditionalCost !== undefined)
     parts.push(String(payload.variableRezAdditionalCost));
   if (payload?.variableRezValue !== undefined)

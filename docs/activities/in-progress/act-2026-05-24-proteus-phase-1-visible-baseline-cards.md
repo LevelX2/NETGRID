@@ -1,18 +1,28 @@
 ---
 activityId: act-2026-05-24-proteus-phase-1-visible-baseline-cards
-status: inbox
+status: blocked
 kind: concept
 area: cards
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
-startedAt:
+startedAt: 2026-05-24
 completedAt:
-branch:
+branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1
 blockedBy: []
+blockerReason: "Zielkartenliste ist breiter als die vorhandenen CardImplementation-Familien: nur Toughonium Wall, die drei Region-Agenda-Difficulty-Karten und Streetware Distributor sind ohne neue Mechanikfamilie abbildbar; die übrigen Zielkarten brauchen neue Timing-, Counter-, Hidden-Info-, Run- oder Encounter-Resolver und verletzen die Stop-Kriterien."
+nextAction: "Paket fachlich zurückschneiden in einen implementierbaren Phase-1a-Slice für Toughonium Wall, Networked Center, Research Bunker, Weapons Depot und Streetware Distributor; restliche Zielkarten in separate Folgepakete je Mechanikfamilie triagieren."
 resultArtifacts: []
+supersededBy:
+  - act-2026-05-24-proteus-phase-1a-reuse-only-baseline
+  - act-2026-05-24-proteus-phase-1b-dynamic-public-etr-ice
+  - act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle
+  - act-2026-05-24-proteus-phase-1d-public-fort-pass-windows
+  - act-2026-05-24-proteus-phase-1e-hidden-fort-manipulation-access
+  - act-2026-05-24-proteus-phase-1f-run-spend-cap
+  - act-2026-05-24-proteus-phase-1g-post-pass-derez-utility
 checks: []
 ---
 
@@ -82,4 +92,12 @@ Die sichtbare Proteus-Baseline aus Phase 1 als engen CardImplementation-Slice um
 
 ## Ergebnisnotiz
 
-Noch offen.
+Blockiert am 2026-05-24 vor Codeänderungen. Der Abgleich gegen `docs/releases/proteus/release-slicing-plan.md`, `packages/engine/src/ability-engine/definition-types.ts`, `packages/engine/src/card-implementations/registry.ts`, `data/cards/proteus-cards.json` und `data/manifests/proteus-card-support.json` zeigt einen Scope-Konflikt:
+
+- Bereits vorhandene Baseline: `onr_proteus_041_toughoniumtm-wall` ist im Manifest human-playable, aber noch ohne per-card CardImplementation-Datei.
+- Mit vorhandenen deklarativen Familien plausibel eng abbildbar: `Toughonium™ Wall` über `printedSubroutines`, `Networked Center`/`Research Bunker`/`Weapons Depot` über `agenda_difficulty` plus `regionBaseline`, `Streetware Distributor` über Hosted-Credits-Lifecycle und `activated` Runner-Main-Ability.
+- Nicht sauber in diesem Paket abbildbar ohne neue generische Mechanikfamilien: `Minotaur`, `Riddler`, `Emergency Rig`, `Rent-to-Own Contract`, `Herman Revista`, `Lesley Major`, `Marcel DeSoleil`, `Obfuscated Fortress`, `Pavit Bharat`, `Rasmin Bridger`, `Simon Francisco` und `Disintegrator`.
+
+Das Paket wurde nicht teilweise umgesetzt, weil die Akzeptanzkriterien eine eindeutige per-card Umsetzung oder eine begründete No-Engine-Einordnung für alle Zielkarten verlangen. Eine falsche Registry-/Coverage-Promotion würde Proteus-Karten als implementiert erscheinen lassen, obwohl LegalAction-, Revalidation-, Visibility-, Replay- und StateHash-Gates nicht erfüllt sind.
+
+Folgeplanung am 2026-05-24: Der Scope wurde planning-only in `docs/releases/proteus/phase-1-slice-handoff-2026-05-24.md` und sieben kleinere Inbox-Pakete aufgeteilt. Der kleinste direkte Umsetzungsschnitt ist `act-2026-05-24-proteus-phase-1a-reuse-only-baseline`; die übrigen Pakete schneiden die fehlenden Funktionsbausteine nach Mechanikfamilien.

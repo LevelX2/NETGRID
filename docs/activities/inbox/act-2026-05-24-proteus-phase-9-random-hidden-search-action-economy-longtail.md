@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-9-random-hidden-search-action-economy-longtail
-status: inbox
+status: superseded
 kind: concept
 area: cards
 priority: normal
@@ -14,7 +14,8 @@ releaseTarget: Proteus Phase 9
 blockedBy:
   - act-2026-05-24-proteus-phase-8-virus-antibody-purge
 resultArtifacts: []
-checks: []
+checks:
+  - "Get-ChildItem docs/activities/{done,in-progress} -Filter '*proteus-phase-9*'"
 ---
 
 # Proteus Phase 9: Random, Hidden-Zone-Search, Action-Economy und Longtail
@@ -26,6 +27,7 @@ Die späte Proteus-Longtail-Phase in kleine Umsetzungsschritte zerlegen und dana
 ## Kontext und Quellen
 
 - `docs/releases/proteus/release-slicing-plan.md`, Abschnitte `Phase 9`, `Slice 9` und `Ability-Bedarf nach Phase`.
+- `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md`, Abschnitt `Phase 9: Random, Hidden-Zone Search, Action Economy, Longtail`; dieses Paket ist vor Codearbeit in die dort beschriebenen Slices 9a bis 9e zu zerlegen.
 - `docs/releases/proteus/mechanics-coverage-analysis.md`.
 - `docs/releases/proteus/variable-ice-contract.md` für Random-/ICE-Nähe bei `Roadblock`.
 - `docs/releases/proteus/purge-action-debt-contract.md` für Future-/Forgo-Actions-Bezug.
@@ -77,6 +79,18 @@ Die späte Proteus-Longtail-Phase in kleine Umsetzungsschritte zerlegen und dana
 - Phase 9 ist bewusst kein einzelnes großes Implementierungspaket. Der erste Bearbeiter soll sie in kleinere Activities schneiden, wenn mehr als eine Mechanikfamilie gleichzeitig betroffen wäre.
 - `Precision Bribery` braucht Data-Fort-Creation-Lock; nicht nebenbei in Run-/Access-Logik verstecken.
 
+## Split-Stand 2026-05-24
+
+Phase 9 wurde in die Detail-Activities 9a bis 9e zerlegt:
+
+- `docs/activities/in-progress/act-2026-05-24-proteus-phase-9a-random-dice-foundation.md`
+- `docs/activities/in-progress/act-2026-05-24-proteus-phase-9b-action-economy-debt.md`
+- `docs/activities/in-progress/act-2026-05-24-proteus-phase-9c-hidden-zone-search-install-tutor.md`
+- `docs/activities/done/act-2026-05-24-proteus-phase-9d-data-fort-creation-lock.md`
+- `docs/activities/in-progress/act-2026-05-24-proteus-phase-9e-rule-blocked-preflight.md`
+
+Dieses Umbrella-Paket bleibt als historische Klammer und Planungsreferenz erhalten; Codearbeit erfolgt nur in den Detail-Activities.
+
 ## Ergebnisnotiz
 
-Noch offen.
+Am 2026-05-24 in Detail-Slices 9a bis 9e zerlegt. Dieses Umbrella-Paket bleibt nur als historische Klammer erhalten.

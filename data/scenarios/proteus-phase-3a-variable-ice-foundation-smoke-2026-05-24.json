@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "scenario-pack-v1",
+  "scenarioId": "proteus-phase-3a-variable-ice-foundation-smoke-2026-05-24",
+  "release": "Proteus Phase 3a Variable ICE Foundation",
+  "coversCards": [
+    "onr_proteus_020_digiconda",
+    "onr_proteus_022_food-fight"
+  ],
+  "assertions": [
+    "Digiconda and Food Fight have engine-local per-card CardImplementation files.",
+    "Variable rez variants are generated from generic variableRez declarations, not downstream card-id branches.",
+    "Digiconda stores x_strength variableIceState and exposes effective strength after rez.",
+    "Food Fight stores paid_end_the_run_subroutines variableIceState and uses it for views and break LegalActions.",
+    "applyAction revalidates side, stateVersion, target, costs and variable values from fresh LegalActions.",
+    "Public payloads contain public variable rez values without hidden zones or private state.",
+    "Replay and StateHash remain stable across variable rez and break resolution."
+  ],
+  "checks": [
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/coverage.test.ts -t \"Proteus Phase 3a\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts -t \"Proteus Phase 3a\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t \"Proteus Phase 3a\"",
+    "corepack pnpm --filter @netgrid/catalog exec vitest run src/index.test.ts -t \"Proteus\"",
+    "corepack pnpm --filter @netgrid/web exec vitest run app/api/cards/catalog-data.test.ts -t \"Proteus\""
+  ]
+}

@@ -379,6 +379,56 @@ import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/to
 import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team";
 import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella-policy";
 import { wilsonWeeflerunnerApprenticeImplementation } from "./onr-v1/runner/resources/wilson-weeflerunner-apprentice";
+import { proteusCharityTakeoverImplementation } from "./proteus/corp/agendas/charity-takeover";
+import { proteusViralBreedingGroundImplementation } from "./proteus/corp/agendas/viral-breeding-ground";
+import { belDigmoAntibodyImplementation } from "./proteus/corp/assets/bel-digmo-antibody";
+import { doppelgangerAntibodyImplementation } from "./proteus/corp/assets/doppelganger-antibody";
+import { pattelAntibodyImplementation } from "./proteus/corp/assets/pattel-antibody";
+import { stereogramAntibodyImplementation } from "./proteus/corp/assets/stereogram-antibody";
+import { proteusBugZapperImplementation } from "./proteus/corp/ice/bug-zapper";
+import { proteusCaryatidImplementation } from "./proteus/corp/ice/caryatid";
+import { proteusCreditBlocksImplementation } from "./proteus/corp/ice/credit-blocks";
+import { proteusDigicondaImplementation } from "./proteus/corp/ice/digiconda";
+import { proteusDogPileImplementation } from "./proteus/corp/ice/dog-pile";
+import { proteusFoodFightImplementation } from "./proteus/corp/ice/food-fight";
+import { proteusGalateaImplementation } from "./proteus/corp/ice/galatea";
+import { proteusGatekeeperImplementation } from "./proteus/corp/ice/gatekeeper";
+import { proteusHomingMissileImplementation } from "./proteus/corp/ice/homing-missile";
+import { proteusHuntingPackImplementation } from "./proteus/corp/ice/hunting-pack";
+import { proteusLesserArcanaImplementation } from "./proteus/corp/ice/lesser-arcana";
+import { proteusMastermindImplementation } from "./proteus/corp/ice/mastermind";
+import { proteusMobileBarricadeImplementation } from "./proteus/corp/ice/mobile-barricade";
+import { proteusSandstormImplementation } from "./proteus/corp/ice/sandstorm";
+import { proteusSphinx2006Implementation } from "./proteus/corp/ice/sphinx-2006";
+import { proteusSumo2008Implementation } from "./proteus/corp/ice/sumo-2008";
+import { proteusToughoniumWallImplementation } from "./proteus/corp/ice/toughonium-wall";
+import { proteusWalkingWallImplementation } from "./proteus/corp/ice/walking-wall";
+import { proteusMinotaurImplementation } from "./proteus/corp/ice/minotaur";
+import { proteusRiddlerImplementation } from "./proteus/corp/ice/riddler";
+import { proteusLesleyMajorImplementation } from "./proteus/corp/upgrades/lesley-major";
+import { proteusNetworkedCenterImplementation } from "./proteus/corp/upgrades/networked-center";
+import { proteusRasminBridgerImplementation } from "./proteus/corp/upgrades/rasmin-bridger";
+import { proteusResearchBunkerImplementation } from "./proteus/corp/upgrades/research-bunker";
+import { proteusWeaponsDepotImplementation } from "./proteus/corp/upgrades/weapons-depot";
+import { proteusFakedHitImplementation } from "./proteus/runner/events/faked-hit";
+import { proteusCorticalCybermodemImplementation } from "./proteus/runner/hardware/cortical-cybermodem";
+import { proteusCorticalStimulatorsImplementation } from "./proteus/runner/hardware/cortical-stimulators";
+import { proteusDeckTheImplementation } from "./proteus/runner/hardware/deck-the";
+import { proteusSunburstCranialInterfaceImplementation } from "./proteus/runner/hardware/sunburst-cranial-interface";
+import { proteusPoisonedWaterSupplyImplementation } from "./proteus/runner/events/poisoned-water-supply";
+import { proteusArmageddonImplementation } from "./proteus/runner/programs/armageddon";
+import { proteusCrumbleImplementation } from "./proteus/runner/programs/crumble";
+import { proteusDisintegratorImplementation } from "./proteus/runner/programs/disintegrator";
+import { proteusEnterpriseIncShieldsImplementation } from "./proteus/runner/programs/enterprise-inc-shields";
+import { proteusGarbageInImplementation } from "./proteus/runner/programs/garbage-in";
+import { proteusHighlighterImplementation } from "./proteus/runner/programs/highlighter";
+import { proteusScaldanImplementation } from "./proteus/runner/programs/scaldan";
+import { proteusSkullcapImplementation } from "./proteus/runner/programs/skullcap";
+import { proteusTaxmanImplementation } from "./proteus/runner/programs/taxman";
+import { proteusVienna22Implementation } from "./proteus/runner/programs/vienna-22";
+import { proteusViralPipelineImplementation } from "./proteus/runner/programs/viral-pipeline";
+import { proteusPrecisionBriberyImplementation } from "./proteus/runner/resources/precision-bribery";
+import { proteusStreetwareDistributorImplementation } from "./proteus/runner/resources/streetware-distributor";
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
@@ -755,6 +805,56 @@ export const CARD_IMPLEMENTATIONS = [
   tokyoChibaInfightingImplementation,
   turbeauDelacroixImplementation,
   washingtonDcCityGridImplementation,
+  proteusToughoniumWallImplementation,
+  proteusBugZapperImplementation,
+  proteusCaryatidImplementation,
+  proteusCreditBlocksImplementation,
+  proteusDigicondaImplementation,
+  proteusDogPileImplementation,
+  proteusFoodFightImplementation,
+  proteusGalateaImplementation,
+  proteusGatekeeperImplementation,
+  proteusHomingMissileImplementation,
+  proteusHuntingPackImplementation,
+  proteusLesserArcanaImplementation,
+  proteusMastermindImplementation,
+  proteusMobileBarricadeImplementation,
+  proteusSandstormImplementation,
+  proteusSphinx2006Implementation,
+  proteusSumo2008Implementation,
+  proteusWalkingWallImplementation,
+  proteusMinotaurImplementation,
+  proteusRiddlerImplementation,
+  proteusLesleyMajorImplementation,
+  proteusNetworkedCenterImplementation,
+  proteusRasminBridgerImplementation,
+  proteusResearchBunkerImplementation,
+  proteusWeaponsDepotImplementation,
+  proteusCharityTakeoverImplementation,
+  proteusViralBreedingGroundImplementation,
+  belDigmoAntibodyImplementation,
+  doppelgangerAntibodyImplementation,
+  pattelAntibodyImplementation,
+  stereogramAntibodyImplementation,
+  proteusFakedHitImplementation,
+  proteusCorticalCybermodemImplementation,
+  proteusCorticalStimulatorsImplementation,
+  proteusDeckTheImplementation,
+  proteusSunburstCranialInterfaceImplementation,
+  proteusPoisonedWaterSupplyImplementation,
+  proteusArmageddonImplementation,
+  proteusCrumbleImplementation,
+  proteusDisintegratorImplementation,
+  proteusEnterpriseIncShieldsImplementation,
+  proteusGarbageInImplementation,
+  proteusHighlighterImplementation,
+  proteusScaldanImplementation,
+  proteusSkullcapImplementation,
+  proteusTaxmanImplementation,
+  proteusVienna22Implementation,
+  proteusViralPipelineImplementation,
+  proteusPrecisionBriberyImplementation,
+  proteusStreetwareDistributorImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 
 export const CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: Partial<

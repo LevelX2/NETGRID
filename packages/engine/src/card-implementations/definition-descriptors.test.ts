@@ -1213,6 +1213,476 @@ describe("CardImplementation definition descriptors", () => {
     }
   });
 
+  it("describes Proteus Phase 1a reuse-only baseline implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_041_toughoniumtm-wall")
+        ?.printedSubroutines,
+    ).toEqual([
+      { kind: "end_the_run", text: "*End the run." },
+      { kind: "end_the_run", text: "*End the run." },
+      { kind: "end_the_run", text: "*End the run." },
+      { kind: "end_the_run", text: "*End the run." },
+    ]);
+
+    for (const [definitionId, subtype] of [
+      ["onr_proteus_065_networked-center", "gray_ops"],
+      ["onr_proteus_072_research-bunker", "research"],
+      ["onr_proteus_077_weapons-depot", "black_ops"],
+    ] as const) {
+      expect(cardImplementationForDefinitionId(definitionId)?.regionBaseline).toMatchObject({
+        kind: "region_baseline",
+        rezOnInstall: true,
+        installOnlyIfRezAffordable: true,
+        oneRegionPerFort: true,
+        trashOlderRegions: true,
+      });
+      expect(cardImplementationForDefinitionId(definitionId)?.modifiers).toContainEqual(
+        expect.objectContaining({
+          kind: "agenda_difficulty",
+          operation: "reduce",
+          amount: 1,
+          activeWhile: "rezzed",
+          sourceZone: "corp_root",
+          side: "corp",
+          visibility: "public",
+          appliesTo: {
+            cardType: "agenda",
+            subtype,
+            sameServerAsSource: true,
+          },
+        }),
+      );
+    }
+
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_150_streetware-distributor")
+        ?.lifecycle?.start_of_runner_turn,
+    ).toEqual([
+      {
+        condition: { kind: "source_has_hosted_credits" },
+        effects: [
+          {
+            kind: "take_hosted_credits",
+            source: "source",
+            recipient: "controller",
+            amount: 1,
+            mode: "up_to_amount_if_available",
+            visibility: "public",
+          },
+        ],
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_150_streetware-distributor")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "activated",
+      timing: "runner_main",
+      costs: [{ kind: "action", amount: 1 }],
+      effects: [
+        {
+          kind: "add_hosted_credits",
+          target: "source",
+          amount: 3,
+          visibility: "public",
+        },
+      ],
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_146_precision-bribery")
+        ?.modifiers?.[0],
+    ).toMatchObject({
+      kind: "new_data_fort_creation_lock",
+      activeWhile: "installed",
+      sourceZone: "runner_installed",
+      side: "corp",
+      visibility: "public",
+      blocks: "corp_new_remote_installs",
+      corpTrashSourceCost: {
+        clicks: 1,
+        credits: 4,
+      },
+    });
+  });
+
+  it("describes Proteus Phase 1b dynamic public ETR ICE implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_031_minotaur")
+        ?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "additional_subroutine",
+        activeWhile: "rezzed",
+        sourceZone: "corp_installed",
+        visibility: "public",
+        appliesTo: {
+          side: "corp",
+          cardType: "ice",
+          sourceCardOnly: true,
+        },
+        append: "after_existing",
+        repeat: {
+          kind: "for_each_rezzed_installed_ice",
+          subtypeAnyOf: ["code_gate", "wall"],
+          excludeSource: true,
+        },
+        subroutine: {
+          kind: "end_the_run",
+          text: "*End the run.",
+          visibility: "public",
+        },
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_034_riddler")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "activated",
+      timing: "corp_encounter",
+      costs: [{ kind: "credit", amount: 2 }],
+      effects: [
+        {
+          kind: "add_current_encounter_additional_subroutine",
+          target: "encountered_ice_self",
+          append: "after_existing",
+          subroutine: {
+            kind: "end_the_run",
+            text: "*End the run.",
+            visibility: "public",
+          },
+          visibility: "public",
+        },
+      ],
+    });
+  });
+
+  it("describes Proteus Phase 1d public fort pass window implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_062_lesley-major"),
+    ).toMatchObject({
+      installCapabilities: [
+        {
+          kind: "install_only_inside_subsidiary_data_fort",
+          visibility: "public",
+        },
+      ],
+      fortRunWindows: [
+        {
+          kind: "add_advancement_counters_after_passing_last_ice_on_this_fort",
+          timing: "pass_last_ice_on_this_fort",
+          cost: { kind: "credit", amount: 5 },
+          target: "advanceable_installed_card_in_this_fort",
+          amount: 2,
+          limit: "once_per_run_per_source",
+          visibility: "public",
+        },
+      ],
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_070_rasmin-bridger")
+        ?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+        timing: "pass_ice_on_this_fort",
+        amount: 1,
+        visibility: "public",
+      }),
+    );
+  });
+
+  it("describes Proteus Phase 1g post-pass derez utility implementation", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_085_disintegrator")
+        ?.runnerUtilityLongtail,
+    ).toMatchObject({
+      kind: "derez_fully_broken_passed_ice_and_end_run",
+      cost: { kind: "credit", amount: 2 },
+      timing: "after_passing_fully_broken_ice",
+      target: "that_ice",
+      visibility: "public",
+    });
+  });
+
+  it("describes Proteus Phase 2b Charity Takeover score implementation", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_002_charity-takeover")
+        ?.lifecycle?.on_score,
+    ).toEqual([
+      {
+        kind: "gain_credits",
+        recipient: "corp",
+        amount: 9,
+        visibility: "public",
+      },
+      {
+        kind: "add_bad_publicity",
+        amount: 1,
+        visibility: "public",
+      },
+    ]);
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_proteus_002_charity-takeover",
+      )?.status,
+    ).toBe("implemented");
+  });
+
+  it("describes Proteus Phase 2c Faked Hit event implementation", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_108_faked-hit")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "on_play",
+      costs: "printed",
+      effects: [
+        {
+          kind: "add_bad_publicity",
+          amount: 1,
+          visibility: "public",
+        },
+        {
+          kind: "damage",
+          recipient: "runner",
+          damageType: "core",
+          amount: 2,
+          preventable: false,
+          visibility: "public",
+        },
+      ],
+    });
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_proteus_108_faked-hit")
+        ?.status,
+    ).toBe("implemented");
+  });
+
+  it("describes Proteus Phase 2d Poisoned Water Supply event implementation", () => {
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_proteus_117_poisoned-water-supply",
+      )?.runnerEventLongtail,
+    ).toEqual({
+      kind: "trash_installed_runner_connections_then_add_bad_publicity",
+      count: 2,
+      badPublicity: 1,
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_proteus_117_poisoned-water-supply",
+      )?.status,
+    ).toBe("implemented");
+  });
+
+  it("describes Proteus Phase 5b runner protection programs", () => {
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_proteus_086_enterprise-inc-shields",
+      )?.damagePreventionSources,
+    ).toEqual([
+      {
+        kind: "damage_prevention",
+        damageTypes: ["net"],
+        amount: 2,
+        cost: { kind: "credit", amount: 1 },
+        priority: 100,
+        visibility: "public",
+      },
+      {
+        kind: "damage_prevention",
+        damageTypes: ["core"],
+        amount: 1,
+        cost: { kind: "credit", amount: 1 },
+        priority: 101,
+        visibility: "public",
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_096_skullcap")
+        ?.damagePreventionSources,
+    ).toEqual([
+      {
+        kind: "damage_prevention",
+        damageTypes: ["net", "core"],
+        amount: "all",
+        cost: { kind: "trash_source" },
+        priority: 102,
+        visibility: "public",
+      },
+    ]);
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_proteus_086_enterprise-inc-shields",
+      )?.status,
+    ).toBe("implemented");
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_proteus_096_skullcap")
+        ?.status,
+    ).toBe("implemented");
+  });
+
+  it("describes Proteus Phase 3a variable ICE implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_020_digiconda")
+        ?.variableRez,
+    ).toEqual({
+      kind: "x_strength",
+      additionalCostPerValue: 1,
+      minValue: 0,
+      maxValue: 6,
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_022_food-fight")
+        ?.variableRez,
+    ).toEqual({
+      kind: "paid_end_the_run_subroutines",
+      additionalCostPerSubroutine: 2,
+      minSubroutines: 0,
+      visibility: "public",
+    });
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_proteus_020_digiconda")
+        ?.status,
+    ).toBe("implemented");
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_proteus_022_food-fight")
+        ?.status,
+    ).toBe("implemented");
+  });
+
+  it("describes Proteus Phase 3b variable ICE implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_013_caryatid")
+        ?.variableRez,
+    ).toEqual({
+      kind: "alternate_subtype",
+      additionalCost: 1,
+      baseSubtypes: ["wall"],
+      alternateSubtypes: ["code_gate"],
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_017_credit-blocks")
+        ?.variableRez,
+    ).toEqual({
+      kind: "alternate_subtype",
+      additionalCost: 1,
+      baseSubtypes: ["sentry"],
+      alternateSubtypes: ["wall"],
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_025_homing-missile")
+        ?.variableRez,
+    ).toEqual({
+      kind: "x_strength",
+      additionalCostPerValue: 1,
+      minValue: 0,
+      maxValue: 8,
+      traceBaseFromValue: true,
+      traceBidLimitFromValue: true,
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_039_sphinx-2006")
+        ?.variableRez,
+    ).toEqual({
+      kind: "alternate_subtype",
+      additionalCost: 4,
+      baseSubtypes: ["code_gate"],
+      alternateSubtypes: ["sentry"],
+      visibility: "public",
+    });
+    for (const definitionId of [
+      "onr_proteus_013_caryatid",
+      "onr_proteus_017_credit-blocks",
+      "onr_proteus_023_galatea",
+      "onr_proteus_024_gatekeeper",
+      "onr_proteus_025_homing-missile",
+      "onr_proteus_028_lesser-arcana",
+      "onr_proteus_036_sandstorm",
+      "onr_proteus_039_sphinx-2006",
+      "onr_proteus_040_sumo-2008",
+    ] as const) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+  });
+
+  it("describes Proteus Phase 3c relative ICE implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_012_bug-zapper")
+        ?.relativeIce,
+    ).toEqual({
+      kind: "rezzed_ice_outside_this_ice",
+      dynamicDamageSubroutine: {
+        subroutineId: "onr_proteus_012_bug_zapper_net_damage",
+        amountPerCount: 2,
+        visibility: "public",
+      },
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_021_dog-pile")
+        ?.relativeIce,
+    ).toMatchObject({
+      kind: "rezzed_ice_outside_this_ice",
+      strengthBonusPerCount: 1,
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_026_hunting-pack")
+        ?.relativeIce,
+    ).toEqual({
+      kind: "rezzed_ice_outside_this_ice",
+      dynamicTraceSubroutines: {
+        baseTraceStrength: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        visibility: "public",
+      },
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_030_mastermind")
+        ?.relativeIce,
+    ).toMatchObject({
+      kind: "rezzed_ice_outside_this_ice",
+      strengthBonusPerCount: 1,
+    });
+    for (const definitionId of [
+      "onr_proteus_012_bug-zapper",
+      "onr_proteus_021_dog-pile",
+      "onr_proteus_026_hunting-pack",
+      "onr_proteus_030_mastermind",
+    ] as const) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+  });
+
+  it("describes Proteus Phase 3e ICE repositioning implementations", () => {
+    for (const definitionId of [
+      "onr_proteus_033_mobile-barricade",
+      "onr_proteus_044_walking-wall",
+    ] as const) {
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.fortRunWindows?.[0],
+      ).toEqual({
+        kind: "move_self_to_different_position_on_same_fort",
+        timing: "start_of_run_on_this_fort",
+        cost: { kind: "credit", amount: 1 },
+        target: "different_position_on_same_fort",
+        revealIfUnrezzed: true,
+        limit: "once_per_run_per_source",
+        visibility: "public",
+      });
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

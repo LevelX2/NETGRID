@@ -81,6 +81,10 @@ export type CardImplementationEffectAdapterHost = {
     state: GameState,
     event: ImminentEvent,
   ) => DamageSummaryForCardImplementation;
+  resolveUnpreventableDamage: (
+    state: GameState,
+    request: DamageRequestForCardImplementation,
+  ) => DamageSummaryForCardImplementation;
   addCardCounter: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -105,6 +109,10 @@ export type CardImplementationEffectAdapterHost = {
   ) => CardInstance;
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
   runnerInstalledCardIds: (state: GameState) => CardInstanceId[];
+  hiddenRunnerResourceRevealPayload?: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+  ) => PublicEffectPayload;
   trashCorpInstalledCardToArchives: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -121,6 +129,7 @@ export type CardImplementationEffectAdapters = Pick<
   CardImplementationRuntimeDependencies,
   | "drawCards"
   | "damageRunner"
+  | "unpreventableDamageRunner"
   | "addHostedCredits"
   | "addCountersToSource"
   | "takeHostedCredits"
@@ -213,6 +222,33 @@ export function createCardImplementationEffectAdapters(
     };
   }
 
+  function unpreventableDamageRunnerForCardImplementationEffect(
+    state: GameState,
+    legalAction: LegalAction,
+    sourceDefinitionId: CardDefinitionId,
+    damageType: Extract<DamageType, "meat" | "net" | "core">,
+    amount: number,
+  ): CardEffectDamageResult {
+    const summary = host.resolveUnpreventableDamage(state, {
+      damageId: `${state.matchId}.${state.stateVersion}.${sourceDefinitionId}.unpreventable`,
+      damageType,
+      amount,
+      source: `unpreventable:${sourceDefinitionId}`,
+    });
+    return {
+      resolved: true,
+      damageType: summary.damageType,
+      amount: summary.amount,
+      cardsTrashed: summary.cardsTrashed,
+      flatline: summary.flatline,
+      publicPayload: {
+        ...damageSummaryPublicPayload(summary),
+        preventableDamage: false,
+        unpreventableDamage: true,
+      },
+    };
+  }
+
   function addHostedCreditsForCardImplementationEffect(
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -300,6 +336,8 @@ export function createCardImplementationEffectAdapters(
   ): CardEffectTrashSourceResult {
     const instance = host.mustInstance(state.cardInstances, sourceCardId);
     const definition = host.definitionFor(state, sourceCardId);
+    const hiddenRevealPayload =
+      host.hiddenRunnerResourceRevealPayload?.(state, sourceCardId) ?? {};
     if (
       instance.controller === "corp" &&
       (instance.zone.zone === "serverRoot" ||
@@ -317,6 +355,7 @@ export function createCardImplementationEffectAdapters(
     return {
       sourceTrashed: true,
       publicPayload: {
+        ...hiddenRevealPayload,
         sourceTrashed: true,
         trashedCardDefinitionId: definition.id,
       },
@@ -326,6 +365,8 @@ export function createCardImplementationEffectAdapters(
   return {
     drawCards: drawCardsForCardImplementationEffect,
     damageRunner: damageRunnerForCardImplementationEffect,
+    unpreventableDamageRunner:
+      unpreventableDamageRunnerForCardImplementationEffect,
     addHostedCredits: addHostedCreditsForCardImplementationEffect,
     addCountersToSource: addCountersToSourceForCardImplementationEffect,
     takeHostedCredits: takeHostedCreditsForCardImplementationEffect,

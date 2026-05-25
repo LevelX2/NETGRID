@@ -511,6 +511,400 @@ describe("CardImplementation coverage and registry invariants", () => {
     ).toHaveLength(2);
   });
 
+  it("migrates Proteus Phase 1a reuse-only cards into CardImplementation coverage", () => {
+    const phase1aCards = [
+      "onr_proteus_041_toughoniumtm-wall",
+      "onr_proteus_065_networked-center",
+      "onr_proteus_072_research-bunker",
+      "onr_proteus_077_weapons-depot",
+      "onr_proteus_150_streetware-distributor",
+    ] as const;
+
+    for (const definitionId of phase1aCards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_041_toughoniumtm-wall")
+        ?.printedSubroutines,
+    ).toHaveLength(4);
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_150_streetware-distributor")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "activated",
+      timing: "runner_main",
+      costs: [{ kind: "action", amount: 1 }],
+    });
+  });
+
+  it("migrates Proteus Phase 1b dynamic public ETR ICE into CardImplementation coverage", () => {
+    const phase1bCards = [
+      "onr_proteus_031_minotaur",
+      "onr_proteus_034_riddler",
+    ] as const;
+
+    for (const definitionId of phase1bCards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_031_minotaur")
+        ?.modifiers?.[0],
+    ).toMatchObject({
+      kind: "additional_subroutine",
+      sourceZone: "corp_installed",
+      appliesTo: { sourceCardOnly: true },
+      repeat: {
+        kind: "for_each_rezzed_installed_ice",
+        subtypeAnyOf: ["code_gate", "wall"],
+        excludeSource: true,
+      },
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_034_riddler")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "activated",
+      timing: "corp_encounter",
+      costs: [{ kind: "credit", amount: 2 }],
+    });
+  });
+
+  it("migrates Proteus Phase 1d public fort pass windows into CardImplementation coverage", () => {
+    const phase1dCards = [
+      "onr_proteus_062_lesley-major",
+      "onr_proteus_070_rasmin-bridger",
+    ] as const;
+
+    for (const definitionId of phase1dCards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_062_lesley-major")
+        ?.fortRunWindows?.[0],
+    ).toMatchObject({
+      kind: "add_advancement_counters_after_passing_last_ice_on_this_fort",
+      timing: "pass_last_ice_on_this_fort",
+      target: "advanceable_installed_card_in_this_fort",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_070_rasmin-bridger")
+        ?.fortRunWindows?.[0],
+    ).toMatchObject({
+      kind: "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+      timing: "pass_ice_on_this_fort",
+      amount: 1,
+    });
+  });
+
+  it("migrates Proteus Phase 1g post-pass derez utility into CardImplementation coverage", () => {
+    const definitionId = "onr_proteus_085_disintegrator";
+    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      cardDefinitionId: definitionId,
+      status: "implemented",
+    });
+    expect(
+      cardImplementationForDefinitionId(definitionId)?.runnerUtilityLongtail,
+    ).toMatchObject({
+      kind: "derez_fully_broken_passed_ice_and_end_run",
+      cost: { kind: "credit", amount: 2 },
+      timing: "after_passing_fully_broken_ice",
+      target: "that_ice",
+    });
+  });
+
+  it("migrates Proteus Phase 8d runner virus run counters into CardImplementation coverage", () => {
+    const implemented = [
+      "onr_proteus_090_highlighter",
+      "onr_proteus_097_taxman",
+      "onr_proteus_098_vienna-22",
+      "onr_proteus_099_viral-pipeline",
+    ] as const;
+
+    for (const definitionId of implemented) {
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+        definitionId,
+      ).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+  });
+
+  it("migrates Proteus Phase 8e virus access-trash programs into CardImplementation coverage", () => {
+    const implemented = [
+      "onr_proteus_084_crumble",
+      "onr_proteus_089_garbage-in",
+    ] as const;
+
+    for (const definitionId of implemented) {
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+        definitionId,
+      ).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+  });
+
+  it("migrates Proteus Phase 8f random Bad-Publicity virus longtails into CardImplementation coverage", () => {
+    const implemented = [
+      "onr_proteus_078_armageddon",
+      "onr_proteus_094_scaldan",
+    ] as const;
+
+    for (const definitionId of implemented) {
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+        definitionId,
+      ).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+  });
+
+  it("migrates Proteus Phase 2b scored-agenda Bad Publicity into CardImplementation coverage", () => {
+    const definitionId = "onr_proteus_002_charity-takeover";
+    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      cardDefinitionId: definitionId,
+      status: "implemented",
+    });
+    expect(
+      cardImplementationForDefinitionId(definitionId)?.lifecycle?.on_score,
+    ).toEqual([
+      expect.objectContaining({
+        kind: "gain_credits",
+        recipient: "corp",
+        amount: 9,
+      }),
+      expect.objectContaining({
+        kind: "add_bad_publicity",
+        amount: 1,
+      }),
+    ]);
+  });
+
+  it("migrates Proteus Phase 2c direct runner event BP damage into CardImplementation coverage", () => {
+    const definitionId = "onr_proteus_108_faked-hit";
+    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      cardDefinitionId: definitionId,
+      status: "implemented",
+    });
+    expect(cardImplementationForDefinitionId(definitionId)?.abilities?.[0]).toMatchObject({
+      kind: "on_play",
+      costs: "printed",
+      effects: [
+        { kind: "add_bad_publicity", amount: 1 },
+        {
+          kind: "damage",
+          damageType: "core",
+          amount: 2,
+          preventable: false,
+        },
+      ],
+    });
+  });
+
+  it("migrates Proteus Phase 2d installed-connection BP cost into CardImplementation coverage", () => {
+    const definitionId = "onr_proteus_117_poisoned-water-supply";
+    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      cardDefinitionId: definitionId,
+      status: "implemented",
+    });
+    expect(
+      cardImplementationForDefinitionId(definitionId)?.runnerEventLongtail,
+    ).toMatchObject({
+      kind: "trash_installed_runner_connections_then_add_bad_publicity",
+      count: 2,
+      badPublicity: 1,
+      visibility: "hidden_info_barrier",
+    });
+  });
+
+  it("migrates Proteus Phase 3a variable ICE into CardImplementation coverage", () => {
+    const cases = [
+      {
+        definitionId: "onr_proteus_020_digiconda",
+        variableRez: {
+          kind: "x_strength",
+          additionalCostPerValue: 1,
+          minValue: 0,
+          maxValue: 6,
+        },
+      },
+      {
+        definitionId: "onr_proteus_022_food-fight",
+        variableRez: {
+          kind: "paid_end_the_run_subroutines",
+          additionalCostPerSubroutine: 2,
+          minSubroutines: 0,
+        },
+      },
+    ] as const;
+
+    for (const { definitionId, variableRez } of cases) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+      expect(cardImplementationForDefinitionId(definitionId)?.variableRez).toMatchObject(
+        variableRez,
+      );
+    }
+  });
+
+  it("migrates Proteus Phase 3b variable ICE into CardImplementation coverage", () => {
+    const cases = [
+      {
+        definitionId: "onr_proteus_013_caryatid",
+        variableRez: { kind: "alternate_subtype", additionalCost: 1 },
+      },
+      {
+        definitionId: "onr_proteus_017_credit-blocks",
+        variableRez: { kind: "alternate_subtype", additionalCost: 1 },
+      },
+      {
+        definitionId: "onr_proteus_023_galatea",
+        variableRez: { kind: "alternate_subtype", additionalCost: 1 },
+      },
+      {
+        definitionId: "onr_proteus_024_gatekeeper",
+        variableRez: { kind: "paid_end_the_run_subroutines" },
+      },
+      {
+        definitionId: "onr_proteus_025_homing-missile",
+        variableRez: {
+          kind: "x_strength",
+          maxValue: 8,
+          traceBaseFromValue: true,
+          traceBidLimitFromValue: true,
+        },
+      },
+      {
+        definitionId: "onr_proteus_028_lesser-arcana",
+        variableRez: { kind: "alternate_subtype", additionalCost: 1 },
+      },
+      {
+        definitionId: "onr_proteus_036_sandstorm",
+        variableRez: { kind: "paid_end_the_run_subroutines" },
+      },
+      {
+        definitionId: "onr_proteus_039_sphinx-2006",
+        variableRez: { kind: "alternate_subtype", additionalCost: 4 },
+      },
+      {
+        definitionId: "onr_proteus_040_sumo-2008",
+        variableRez: { kind: "alternate_subtype", additionalCost: 1 },
+      },
+    ] as const;
+
+    for (const { definitionId, variableRez } of cases) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+      expect(cardImplementationForDefinitionId(definitionId)?.variableRez).toMatchObject(
+        variableRez,
+      );
+    }
+  });
+
+  it("migrates Proteus Phase 3c relative ICE into CardImplementation coverage", () => {
+    const cases = [
+      "onr_proteus_012_bug-zapper",
+      "onr_proteus_021_dog-pile",
+      "onr_proteus_026_hunting-pack",
+      "onr_proteus_030_mastermind",
+    ] as const;
+
+    for (const definitionId of cases) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.relativeIce,
+      ).toMatchObject({
+        kind: "rezzed_ice_outside_this_ice",
+      });
+    }
+  });
+
+  it("migrates Proteus Phase 3e ICE repositioning into CardImplementation coverage", () => {
+    const cases = [
+      "onr_proteus_033_mobile-barricade",
+      "onr_proteus_044_walking-wall",
+    ] as const;
+
+    for (const definitionId of cases) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.fortRunWindows?.[0],
+      ).toMatchObject({
+        kind: "move_self_to_different_position_on_same_fort",
+        timing: "start_of_run_on_this_fort",
+        target: "different_position_on_same_fort",
+      });
+    }
+  });
+
+  it("migrates Proteus Phase 9d data-fort creation lock into CardImplementation coverage", () => {
+    const definitionId = "onr_proteus_146_precision-bribery";
+
+    expect(cardImplementationForDefinitionId(definitionId)).toMatchObject({
+      modifiers: [
+        {
+          kind: "new_data_fort_creation_lock",
+          activeWhile: "installed",
+          sourceZone: "runner_installed",
+          blocks: "corp_new_remote_installs",
+          corpTrashSourceCost: { clicks: 1, credits: 4 },
+        },
+      ],
+    });
+    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      cardDefinitionId: definitionId,
+      status: "implemented",
+    });
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",
@@ -720,11 +1114,11 @@ describe("CardImplementation coverage and registry invariants", () => {
     );
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
-    expect(outsideScopeDefinitionIds).toHaveLength(55);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(373);
-    expect(coverageByStatus.get("implemented")).toBe(373);
+    expect(outsideScopeDefinitionIds).toHaveLength(99);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(423);
+    expect(coverageByStatus.get("implemented")).toBe(423);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(55);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(52);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);
@@ -741,14 +1135,17 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
 
     for (const definitionId of outsideScopeDefinitionIds) {
-      expect(
-        cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
-      ).toBe("outside_current_release_scope");
-      expect(
-        CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId],
-        definitionId,
-      ).toBeUndefined();
+      if (CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId]) {
+        expect(
+          cardImplementationCoverageForDefinitionId(definitionId)?.status,
+          definitionId,
+        ).toBe("implemented");
+      } else {
+        expect(
+          cardImplementationCoverageForDefinitionId(definitionId)?.status,
+          definitionId,
+        ).toBe("outside_current_release_scope");
+      }
     }
   });
 

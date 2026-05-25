@@ -291,7 +291,7 @@ describe("access flow execution", () => {
       actionId: "runner.access_card",
       label: "Access",
       source: "run",
-    } as LegalAction;
+    } as unknown as LegalAction;
 
     const result = handleAccessExecution(host, legalAction);
 
@@ -363,7 +363,7 @@ describe("access flow execution", () => {
       actionId: "runner.trash_accessed_card.asset.3",
       label: "Trash",
       source: "asset",
-    } as LegalAction;
+    } as unknown as LegalAction;
 
     const result = handleAccessExecution(host, legalAction);
 
@@ -381,6 +381,74 @@ describe("access flow execution", () => {
       accessTrashTotalCost: 3,
     });
     expect(finishedRuns).toEqual([true]);
+  });
+
+  it("spends Garbage counters when Proteus free trash is used", () => {
+    const breach = {
+      breachId: "run_1.breach",
+      serverId: "rd" as Exclude<ServerId, "new_remote">,
+      accessMode: "single" as const,
+      queue: [
+        {
+          entryId: "entry_0",
+          cardInstanceId: "operation" as CardInstanceId,
+          serverId: "rd" as Exclude<ServerId, "new_remote">,
+          zone: "rd" as const,
+          status: "accessed" as const,
+          hiddenInfo: true,
+        },
+      ],
+      currentIndex: 0,
+      completed: false,
+      accessedSummaries: [],
+    };
+    const { host, state, trashPayments, trashedCards } = makeHost({
+      run: {
+        runId: "run_1",
+        attackedServerId: "rd",
+        accessedCardId: "operation",
+        breach,
+      } as unknown as NonNullable<GameState["run"]>,
+      definitions: {
+        operation: definition("operation_def", "operation"),
+      },
+      instances: {
+        operation: instance("operation", "operation_def", {
+          side: "corp",
+          zone: "rd",
+        }),
+      },
+      corpRd: ["operation"],
+    });
+    state.purgeableRunnerVirusCounters = { corp: { garbage: 3 } };
+    const legalAction = {
+      side: "runner",
+      type: "trash_accessed_card",
+      actionId: "runner.trash_accessed_card.operation.0",
+      label: "Trash",
+      source: "operation",
+      payload: {
+        accessTrashCostOverride: 0,
+        freeAccessTrash: true,
+        proteusRunnerVirusFreeTrashCounterType: "garbage",
+      },
+    } as unknown as LegalAction;
+
+    const result = handleAccessExecution(host, legalAction);
+
+    expect(result).toMatchObject({
+      handled: true,
+      trashedCardId: "operation",
+      runFinished: true,
+    });
+    expect(trashPayments).toEqual([{ amount: 0, cardId: "operation" }]);
+    expect(trashedCards).toEqual(["operation"]);
+    expect(state.purgeableRunnerVirusCounters?.corp?.garbage).toBe(1);
+    expect(legalAction.payload).toMatchObject({
+      proteusRunnerVirusFreeTrashCounterType: "garbage",
+      garbageCountersSpent: 2,
+      garbageCountersAfter: 1,
+    });
   });
 
   it("advances breach queue on decline without finishing the run", () => {

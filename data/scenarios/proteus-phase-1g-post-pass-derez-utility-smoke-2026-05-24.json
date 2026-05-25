@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "scenario-pack-v1",
+  "scenarioId": "proteus-phase-1g-post-pass-derez-utility-smoke-2026-05-24",
+  "release": "Proteus Phase 1g Post-Pass Derez Utility",
+  "coversCards": ["onr_proteus_085_disintegrator"],
+  "assertions": [
+    "Disintegrator has an engine-local per-card CardImplementation file.",
+    "The Runner ability is projected only after a rezzed ICE was passed and all of that ICE's subroutines were broken.",
+    "The LegalAction is bound to the just-passed ICE target and revalidates side, timing, source, target, stale state and credit cost in applyAction.",
+    "Resolving the ability costs [2], derezzes the target ICE, ends the current run and emits public redacted payload data.",
+    "Replay and StateHash remain stable for the ability resolution.",
+    "Disintegrator remains not deck_legal, not format_legal and not ai_supported."
+  ],
+  "checks": [
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/coverage.test.ts -t \"Proteus Phase 1g\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts -t \"Proteus Phase 1g\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t \"Proteus Phase 1g\"",
+    "corepack pnpm --filter @netgrid/catalog exec vitest run src/index.test.ts -t \"Proteus\"",
+    "corepack pnpm --filter @netgrid/web exec vitest run app/api/cards/catalog-data.test.ts -t \"Proteus\""
+  ]
+}

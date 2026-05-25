@@ -17,6 +17,7 @@ import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
 type AccessQueueZone = ActiveBreach["queue"][number]["zone"];
+type ProteusAccessTrashCounterType = "crumble" | "garbage";
 
 export type RunnerAccessActionHost = {
   state: GameState;
@@ -106,7 +107,12 @@ export function buildRunnerAccessActions(
     };
   }
   const definition = host.cards.definitionFor(run.accessedCardId);
-  const freeTrashEnabled = canFreeTrashCurrentAccessCard(host, run, definition);
+  const freeTrashSource = freeTrashAccessSourceForCurrentAccessCard(
+    host,
+    run,
+    definition,
+  );
+  const freeTrashEnabled = freeTrashSource.enabled;
   const accessedFromArchives = isCurrentAccessFromArchives(host, run);
   if (definition.type === "agenda") {
     const accessServerId =
@@ -192,6 +198,12 @@ export function buildRunnerAccessActions(
           {
             accessTrashCostOverride: 0,
             freeAccessTrash: true,
+            ...(freeTrashSource.counterType
+              ? {
+                  proteusRunnerVirusFreeTrashCounterType:
+                    freeTrashSource.counterType,
+                }
+              : {}),
           },
         ),
       );
@@ -270,6 +282,12 @@ export function buildRunnerAccessActions(
           {
             accessTrashCostOverride: 0,
             freeAccessTrash: true,
+            ...(freeTrashSource.counterType
+              ? {
+                  proteusRunnerVirusFreeTrashCounterType:
+                    freeTrashSource.counterType,
+                }
+              : {}),
           },
         ),
         host.actions.buildLegalAction(
@@ -299,14 +317,44 @@ export function canFreeTrashCurrentAccessCard(
   run: ActiveRun,
   definition: CardDefinition,
 ): boolean {
-  if (definition.type === "agenda") return false;
-  const allowedZones = run.freeTrashAccessZones ?? [];
-  if (allowedZones.length === 0) return false;
+  return freeTrashAccessSourceForCurrentAccessCard(host, run, definition).enabled;
+}
+
+export function freeTrashAccessSourceForCurrentAccessCard(
+  host: RunnerAccessActionHost,
+  run: ActiveRun,
+  definition: CardDefinition,
+): { enabled: boolean; counterType?: ProteusAccessTrashCounterType } {
+  if (definition.type === "agenda") return { enabled: false };
   const currentZone =
     run.breach?.queue[run.breach.currentIndex]?.zone ??
     accessQueueZone(run.accessServerOverride ?? run.attackedServerId);
-  if (currentZone !== "rd" && currentZone !== "hq") return false;
-  return allowedZones.includes(currentZone);
+  const accessServerId =
+    run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
+  const allowedZones = run.freeTrashAccessZones ?? [];
+  if (
+    (currentZone === "rd" || currentZone === "hq") &&
+    allowedZones.includes(currentZone)
+  )
+    return { enabled: true };
+  const corpCounters = host.state.purgeableRunnerVirusCounters?.corp;
+  const zoneMatchesProteusCounter =
+    currentZone === accessServerId ||
+    (currentZone === "remote_root" &&
+      definition.type === "upgrade" &&
+      (accessServerId === "hq" || accessServerId === "rd"));
+  if (!zoneMatchesProteusCounter) return { enabled: false };
+  if (
+    accessServerId === "hq" &&
+    Math.max(0, Math.floor(corpCounters?.crumble ?? 0)) >= 2
+  )
+    return { enabled: true, counterType: "crumble" };
+  if (
+    accessServerId === "rd" &&
+    Math.max(0, Math.floor(corpCounters?.garbage ?? 0)) >= 2
+  )
+    return { enabled: true, counterType: "garbage" };
+  return { enabled: false };
 }
 
 export function effectiveAccessTrashCost(

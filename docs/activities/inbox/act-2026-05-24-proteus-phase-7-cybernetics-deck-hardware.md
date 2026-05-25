@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-7-cybernetics-deck-hardware
-status: inbox
+status: superseded
 kind: concept
 area: cards
 priority: normal
@@ -13,7 +13,11 @@ branch:
 releaseTarget: Proteus Phase 7
 blockedBy:
   - act-2026-05-24-proteus-phase-6-agenda-ambush-access-corp-resolvers
-resultArtifacts: []
+resultArtifacts:
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-7a-hardware-deck-foundation.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-7b-icebreaker-credit-decks.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-7c-damage-prevention-hardware.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-7d-base-link-trace-deck.md
 checks: []
 ---
 
@@ -26,6 +30,7 @@ Die vier Cybernetics-/Deck-Hardware-Karten mit vorhandenen Hardware-, Modifier-,
 ## Kontext und Quellen
 
 - `docs/releases/proteus/release-slicing-plan.md`, Abschnitte `Phase 7`, `Slice 7` und `Ability-Bedarf nach Phase`.
+- `docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md`, Abschnitt `Phase 7: Cybernetics/Deck Hardware`; dieses Paket ist vor Codearbeit in die dort beschriebenen Slices 7a bis 7d zu zerlegen.
 - `docs/releases/proteus/cybernetics-deck-hardware-contract.md`.
 - `docs/releases/proteus/mechanics-coverage-analysis.md`.
 - `docs/activities/done/act-2026-05-17-proteus-cybernetics-deck-hardware-contract.md`.
@@ -68,4 +73,4 @@ Die vier Cybernetics-/Deck-Hardware-Karten mit vorhandenen Hardware-, Modifier-,
 
 ## Ergebnisnotiz
 
-Noch offen.
+Am 2026-05-24 in Detail-Slices 7a bis 7d zerlegt. Dieses Umbrella-Paket bleibt nur als historische Klammer erhalten.
