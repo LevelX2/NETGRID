@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-6-agenda-ambush-access-corp-resolvers
-status: inbox
+status: superseded
 kind: concept
 area: cards
 priority: normal
@@ -13,8 +13,14 @@ branch:
 releaseTarget: Proteus Phase 6
 blockedBy:
   - act-2026-05-24-proteus-phase-5-visible-runner-breaker-event-economy
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-6a-agenda-scoring-steal-baseline.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-6b-corp-ice-simple-resolver.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-6c-corp-operation-trace-tag-economy.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-6d-corp-asset-upgrade-utility.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-6e-runner-agenda-overadvance-events.md
+checks:
+  - "Get-Content docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md | Select-Object -Skip 106 -First 18"
 ---
 
 # Proteus Phase 6: Agenda, Ambush, Access und Korp-Resolver
