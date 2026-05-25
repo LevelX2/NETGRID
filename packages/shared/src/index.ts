@@ -9419,6 +9419,25 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
 
 const PROTEUS_CYBERNETICS_DECK_CARDS: CardDefinition[] = [
   {
+    id: "onr_proteus_134_cortical-cybermodem",
+    title: "Cortical Cybermodem",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["cybernetics", "deck"],
+    implementationStatus: "playable_mvp",
+    installCost: 11,
+    rulesText:
+      "Provides +2 MU and +2 hand size. Put [2] from the bank on Cortical Cybermodem when it is installed. Use these bits only to pay for using icebreakers during runs. If you use any of these bits, replace them from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
+    mechanics: [
+      "install_hardware",
+      "hardware_deck",
+      "memory",
+      "max_hand_size",
+      "restricted_hosted_credits",
+      "proteus_cybernetics_deck_hardware",
+    ],
+  },
+  {
     id: "onr_proteus_138_deck-the",
     title: "Deck, The",
     side: "runner",
@@ -9434,6 +9453,26 @@ const PROTEUS_CYBERNETICS_DECK_CARDS: CardDefinition[] = [
       "memory",
       "base_link",
       "trace",
+      "proteus_cybernetics_deck_hardware",
+    ],
+  },
+  {
+    id: "onr_proteus_151_sunburst-cranial-interface",
+    title: "Sunburst Cranial Interface",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["cybernetics", "deck", "stealth"],
+    implementationStatus: "playable_mvp",
+    installCost: 5,
+    rulesText:
+      "Provides +1 MU and +1 hand size. Put [1] from the bank on Cranial Interface when it is installed. Use this bit only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use the bit, replace it from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
+    mechanics: [
+      "install_hardware",
+      "hardware_deck",
+      "memory",
+      "max_hand_size",
+      "restricted_hosted_credits",
+      "subtype_noisy",
       "proteus_cybernetics_deck_hardware",
     ],
   },

@@ -785,8 +785,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/enterprise-inc-shields.ts",
   "onr_proteus_096_skullcap":
     "packages/engine/src/card-implementations/proteus/runner/programs/skullcap.ts",
+  "onr_proteus_134_cortical-cybermodem":
+    "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-cybermodem.ts",
   "onr_proteus_138_deck-the":
     "packages/engine/src/card-implementations/proteus/runner/hardware/deck-the.ts",
+  "onr_proteus_151_sunburst-cranial-interface":
+    "packages/engine/src/card-implementations/proteus/runner/hardware/sunburst-cranial-interface.ts",
   "onr_proteus_150_streetware-distributor":
     "packages/engine/src/card-implementations/proteus/runner/resources/streetware-distributor.ts",
 };

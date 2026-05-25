@@ -632,7 +632,10 @@ describe("Proteus Visible Baseline", () => {
   const RESEARCH_BUNKER = "onr_proteus_072_research-bunker";
   const WEAPONS_DEPOT = "onr_proteus_077_weapons-depot";
   const STREETWARE_DISTRIBUTOR = "onr_proteus_150_streetware-distributor";
+  const CORTICAL_CYBERMODEM = "onr_proteus_134_cortical-cybermodem";
   const DECK_THE = "onr_proteus_138_deck-the";
+  const SUNBURST_CRANIAL_INTERFACE =
+    "onr_proteus_151_sunburst-cranial-interface";
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
@@ -1109,6 +1112,221 @@ describe("Proteus Visible Baseline", () => {
     state = applyChoice(state, "runner", "pass");
     expect(state.trace).toBeUndefined();
     expect(validateGameState(state).ok).toBe(true);
+  });
+
+  it("uses Proteus Phase 7b deck bits for icebreaker costs and noisy restrictions", () => {
+    for (const [
+      definitionId,
+      expectedCost,
+      expectedMu,
+      expectedHandSize,
+      expectedBits,
+      expectedAfterPump,
+    ] of [
+      [CORTICAL_CYBERMODEM, 11, 2, 2, 2, 1],
+      [SUNBURST_CRANIAL_INTERFACE, 5, 1, 1, 1, 0],
+    ] as const) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `proteus-phase-7b-${definitionId}`,
+          runnerDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+            id: `proteus_phase_7b_${definitionId}_runner`,
+            name: "Proteus Phase 7b Deck Runner",
+            cards: [
+              { id: definitionId, quantity: 1 },
+              { id: "simple_decoder", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+                (card) => card.id !== "simple_decoder",
+              ),
+            ],
+          },
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+            id: `proteus_phase_7b_${definitionId}_corp`,
+            name: "Proteus Phase 7b Deck Corp",
+            cards: [
+              { id: "simple_code_gate_ice", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 30;
+      state.runner.memoryLimit = 4;
+      const deckId = moveRunnerCardToGrip(state, definitionId);
+      moveRunnerCardToGrip(state, "simple_decoder");
+      const iceId = putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+      const memoryBefore =
+        getPlayerView(state, "runner").own.memoryLimit ?? state.runner.memoryLimit;
+      const handSizeBefore = getPlayerView(state, "runner").own.maxHandSize;
+      const installDeck = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          String(action.payload?.cardId) === deckId,
+      );
+      expect(installDeck.costs).toEqual([
+        { clicks: 1, credits: expectedCost },
+      ]);
+
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: installDeck.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `proteus-phase-7b-${definitionId}-wrong-side`,
+      });
+      expect(wrongSide.ok).toBe(false);
+      if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: installDeck.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `proteus-phase-7b-${definitionId}-stale`,
+      });
+      expect(stale.ok).toBe(false);
+      if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+      const lowCredits = structuredClone(state);
+      lowCredits.runner.credits = expectedCost - 1;
+      const rejectedCost = applyAction(lowCredits, {
+        matchId: lowCredits.matchId,
+        side: "runner",
+        actionId: installDeck.actionId,
+        clientKnownStateVersion: lowCredits.stateVersion,
+        idempotencyKey: `proteus-phase-7b-${definitionId}-cost`,
+      });
+      expect(rejectedCost.ok).toBe(false);
+
+      const installInitial = structuredClone(state);
+      const installReplayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "runner",
+        (action) => action.actionId === installDeck.actionId,
+      );
+      expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
+        memoryBefore + expectedMu,
+      );
+      expect(getPlayerView(state, "runner").own.maxHandSize).toBe(
+        handSizeBefore + expectedHandSize,
+      );
+      expect(cardCounterAmount(state, deckId, "bit")).toBe(expectedBits);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "install_card",
+        cardDefinitionId: definitionId,
+        hostedCreditsAdded: expectedBits,
+        counterType: "bit",
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        hiddenPayloadMarkers,
+      );
+      const installReplay = replayEvents(
+        installInitial,
+        state.eventLog.slice(installReplayStart),
+      );
+      expect(installReplay.ok).toBe(true);
+      expect(hashState(installReplay.state)).toBe(hashState(state));
+
+      installRunnerProgramForTest(state, "simple_decoder");
+      state.runner.credits = 0;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "rez_ice" && action.source === iceId,
+      );
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "pump_breaker" &&
+          sourceDefinition(state, action) === "simple_decoder",
+      );
+      expect(state.runner.credits).toBe(0);
+      expect(cardCounterAmount(state, deckId, "bit")).toBe(expectedAfterPump);
+    }
+
+    let noisyState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "proteus-phase-7b-sunburst-noisy-negative",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "proteus_phase_7b_sunburst_noisy_runner",
+          name: "Proteus Phase 7b Sunburst Noisy Runner",
+          cards: [
+            { id: SUNBURST_CRANIAL_INTERFACE, quantity: 1 },
+            { id: "onr_v1_036_jackhammer", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+              (card) => card.id !== "onr_v1_036_jackhammer",
+            ),
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "proteus_phase_7b_sunburst_noisy_corp",
+          name: "Proteus Phase 7b Sunburst Noisy Corp",
+          cards: [
+            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+              (card) => card.id !== "onr_v1_232_crystal-wall",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    noisyState.runner.credits = 30;
+    noisyState.runner.memoryLimit = 4;
+    moveRunnerCardToGrip(noisyState, SUNBURST_CRANIAL_INTERFACE);
+    moveRunnerCardToGrip(noisyState, "onr_v1_036_jackhammer");
+    const wallId = putCorpIceOnServer(
+      noisyState,
+      "rd",
+      "onr_v1_232_crystal-wall",
+    );
+    noisyState = apply(
+      noisyState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(noisyState, action) === SUNBURST_CRANIAL_INTERFACE,
+    );
+    noisyState = apply(
+      noisyState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(noisyState, action) === "onr_v1_036_jackhammer",
+    );
+    noisyState.runner.credits = 0;
+    noisyState = apply(
+      noisyState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    noisyState = apply(
+      noisyState,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === wallId,
+    );
+    expect(
+      getLegalActions(noisyState, "runner").some(
+        (action) =>
+          action.type === "pump_breaker" &&
+          sourceDefinition(noisyState, action) === "onr_v1_036_jackhammer",
+      ),
+    ).toBe(false);
   });
 });
 
