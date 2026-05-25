@@ -167,6 +167,8 @@ Activity-Zuschnitt: 9a bis 9e müssen als getrennte Activities angelegt werden. 
 
 Status 2026-05-24: 9a ist als gemeinsamer Random/Dice-Implementierungsslice blockiert, weil `Roadblock`, `Executive Boot Camp` und `Lisa Blight` unterschiedliche fehlende generische Engine-Verträge benötigen. Details stehen in `docs/activities/in-progress/act-2026-05-24-proteus-phase-9a-random-dice-foundation.md`.
 
+Status 2026-05-24: 9b ist als gemeinsamer Action-Economy-/Action-Debt-Slice blockiert, weil zusätzliche turngebundene Actions, forced/restricted Actions, Action-Forfeit-Penalties und Korp-Agenda-Damage-Replacements noch keinen gemeinsamen generischen Runtime-Vertrag haben. Details stehen in `docs/activities/in-progress/act-2026-05-24-proteus-phase-9b-action-economy-debt.md`.
+
 ## Abhängigkeitsmatrix
 
 | Vorlauf | Entsperrt                                                                                                              |
