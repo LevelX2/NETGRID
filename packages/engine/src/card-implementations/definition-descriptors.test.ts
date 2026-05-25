@@ -1550,6 +1550,55 @@ describe("CardImplementation definition descriptors", () => {
     }
   });
 
+  it("describes Proteus Phase 3c relative ICE implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_012_bug-zapper")
+        ?.relativeIce,
+    ).toEqual({
+      kind: "rezzed_ice_outside_this_ice",
+      dynamicDamageSubroutine: {
+        subroutineId: "onr_proteus_012_bug_zapper_net_damage",
+        amountPerCount: 2,
+        visibility: "public",
+      },
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_021_dog-pile")
+        ?.relativeIce,
+    ).toMatchObject({
+      kind: "rezzed_ice_outside_this_ice",
+      strengthBonusPerCount: 1,
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_026_hunting-pack")
+        ?.relativeIce,
+    ).toEqual({
+      kind: "rezzed_ice_outside_this_ice",
+      dynamicTraceSubroutines: {
+        baseTraceStrength: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        visibility: "public",
+      },
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_030_mastermind")
+        ?.relativeIce,
+    ).toMatchObject({
+      kind: "rezzed_ice_outside_this_ice",
+      strengthBonusPerCount: 1,
+    });
+    for (const definitionId of [
+      "onr_proteus_012_bug-zapper",
+      "onr_proteus_021_dog-pile",
+      "onr_proteus_026_hunting-pack",
+      "onr_proteus_030_mastermind",
+    ] as const) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

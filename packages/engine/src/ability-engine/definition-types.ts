@@ -419,6 +419,21 @@ export type CardVariableRezImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     };
 
+export type CardRelativeIceImplementation = {
+  kind: "rezzed_ice_outside_this_ice";
+  strengthBonusPerCount?: number;
+  dynamicDamageSubroutine?: {
+    subroutineId: string;
+    amountPerCount: number;
+    visibility: Extract<EventVisibilityClass, "public">;
+  };
+  dynamicTraceSubroutines?: {
+    baseTraceStrength: number;
+    traceSuccessEffect: { type: "add_tag"; amount: number };
+    visibility: Extract<EventVisibilityClass, "public">;
+  };
+};
+
 export type CardRunEncounterInterventionImplementation =
   | {
       kind: "approach_ice_expose_then_jack_out_before_rez";

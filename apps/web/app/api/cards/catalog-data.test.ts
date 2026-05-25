@@ -182,14 +182,18 @@ describe("catalog API filters", () => {
   it("guards the Proteus visible baseline against decklegal, AI or broad promotion", () => {
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
       "onr_proteus_002_charity-takeover",
+      "onr_proteus_012_bug-zapper",
       "onr_proteus_013_caryatid",
       "onr_proteus_017_credit-blocks",
       "onr_proteus_020_digiconda",
+      "onr_proteus_021_dog-pile",
       "onr_proteus_022_food-fight",
       "onr_proteus_023_galatea",
       "onr_proteus_024_gatekeeper",
       "onr_proteus_025_homing-missile",
+      "onr_proteus_026_hunting-pack",
       "onr_proteus_028_lesser-arcana",
+      "onr_proteus_030_mastermind",
       "onr_proteus_031_minotaur",
       "onr_proteus_034_riddler",
       "onr_proteus_036_sandstorm",
@@ -256,7 +260,7 @@ describe("catalog API filters", () => {
     }
 
     const outsideResponse = catalogDetailResponse(
-      "onr_proteus_030_mastermind",
+      "onr_proteus_001_ai-board-member",
     );
     expect(outsideResponse.status).toBe(200);
     const outsideBody = outsideResponse.body as {

@@ -1,6 +1,6 @@
 # Proteus-Dokumentation
 
-`docs/releases/proteus/` bündelt die Artefakte für den importierten Proteus-Kartenstand. Import, Coverage, Slicing und Mechanikverträge bleiben die führenden Handoffs; seit den abgeschlossenen Detail-Slices bis Phase 3b gibt es zusätzlich eine eng begrenzte Runtime-Freigabe für 24 Karten. Proteus ist weiterhin nicht decklegal, nicht formatlegal und nicht AI-unterstützt.
+`docs/releases/proteus/` bündelt die Artefakte für den importierten Proteus-Kartenstand. Import, Coverage, Slicing und Mechanikverträge bleiben die führenden Handoffs; seit den abgeschlossenen Detail-Slices bis Phase 3c gibt es zusätzlich eine eng begrenzte Runtime-Freigabe für 28 Karten. Proteus ist weiterhin nicht decklegal, nicht formatlegal und nicht AI-unterstützt.
 
 ## Enthaltene Artefakte
 
@@ -18,7 +18,7 @@
 
 ## Gate
 
-Proteus bleibt außerhalb explizit abgeschlossener Implementierungsslices blockiert. Abgeschlossen sind die Done-Activities für Phase 1a, 1b, 1d, 1g, 2a bis 2d sowie 3a und 3b. Die freigegebenen Karten sind `human_playable`, aber nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`. Phase 3a ersetzt den alten Digiconda-/Food-Fight-Harness durch generische `variableRez`-/`variableIceState`-Bausteine; Phase 3b erweitert diese Familie um alternative öffentliche ICE-Subtypen, wiederverwendete bezahlte ETR-Subroutinen und Homing-Missile-Trace-Basis/-Limit. Jeder spätere Slice braucht eigene Requirements, Tests und Gate-Nachweise. Die übrigen Phase-Activities bleiben entlang von `detailed-phase-slice-plan-2026-05-24.md` weiter zu bearbeiten.
+Proteus bleibt außerhalb explizit abgeschlossener Implementierungsslices blockiert. Abgeschlossen sind die Done-Activities für Phase 1a, 1b, 1d, 1g, 2a bis 2d sowie 3a bis 3c. Die freigegebenen Karten sind `human_playable`, aber nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`. Phase 3a ersetzt den alten Digiconda-/Food-Fight-Harness durch generische `variableRez`-/`variableIceState`-Bausteine; Phase 3b erweitert diese Familie um alternative öffentliche ICE-Subtypen, wiederverwendete bezahlte ETR-Subroutinen und Homing-Missile-Trace-Basis/-Limit. Phase 3c ergänzt generische öffentliche Relative-ICE-Zählung für gerezzte ICE außerhalb der aktuellen ICE im selben Fort. Jeder spätere Slice braucht eigene Requirements, Tests und Gate-Nachweise. Die übrigen Phase-Activities bleiben entlang von `detailed-phase-slice-plan-2026-05-24.md` weiter zu bearbeiten.
 
 Phase 1c ist aktuell blockiert: `Emergency Rig` enthält in den lokalen Quellen eine positive, aber unbegrenzte `X`-Counter-Auswahl ohne Kosten- oder Wertbezug. Der Blocker ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md` dokumentiert; `Rent-to-Own Contract` wird nicht isoliert promotet, solange der gemeinsame Slice nicht vollständig erfüllbar ist.
 

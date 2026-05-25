@@ -380,14 +380,18 @@ import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team"
 import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella-policy";
 import { wilsonWeeflerunnerApprenticeImplementation } from "./onr-v1/runner/resources/wilson-weeflerunner-apprentice";
 import { proteusCharityTakeoverImplementation } from "./proteus/corp/agendas/charity-takeover";
+import { proteusBugZapperImplementation } from "./proteus/corp/ice/bug-zapper";
 import { proteusCaryatidImplementation } from "./proteus/corp/ice/caryatid";
 import { proteusCreditBlocksImplementation } from "./proteus/corp/ice/credit-blocks";
 import { proteusDigicondaImplementation } from "./proteus/corp/ice/digiconda";
+import { proteusDogPileImplementation } from "./proteus/corp/ice/dog-pile";
 import { proteusFoodFightImplementation } from "./proteus/corp/ice/food-fight";
 import { proteusGalateaImplementation } from "./proteus/corp/ice/galatea";
 import { proteusGatekeeperImplementation } from "./proteus/corp/ice/gatekeeper";
 import { proteusHomingMissileImplementation } from "./proteus/corp/ice/homing-missile";
+import { proteusHuntingPackImplementation } from "./proteus/corp/ice/hunting-pack";
 import { proteusLesserArcanaImplementation } from "./proteus/corp/ice/lesser-arcana";
+import { proteusMastermindImplementation } from "./proteus/corp/ice/mastermind";
 import { proteusSandstormImplementation } from "./proteus/corp/ice/sandstorm";
 import { proteusSphinx2006Implementation } from "./proteus/corp/ice/sphinx-2006";
 import { proteusSumo2008Implementation } from "./proteus/corp/ice/sumo-2008";
@@ -780,14 +784,18 @@ export const CARD_IMPLEMENTATIONS = [
   turbeauDelacroixImplementation,
   washingtonDcCityGridImplementation,
   proteusToughoniumWallImplementation,
+  proteusBugZapperImplementation,
   proteusCaryatidImplementation,
   proteusCreditBlocksImplementation,
   proteusDigicondaImplementation,
+  proteusDogPileImplementation,
   proteusFoodFightImplementation,
   proteusGalateaImplementation,
   proteusGatekeeperImplementation,
   proteusHomingMissileImplementation,
+  proteusHuntingPackImplementation,
   proteusLesserArcanaImplementation,
+  proteusMastermindImplementation,
   proteusSandstormImplementation,
   proteusSphinx2006Implementation,
   proteusSumo2008Implementation,

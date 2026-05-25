@@ -715,6 +715,7 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
     baseStrength +
     instance.strengthModifier +
     iceStrengthBonusFor(state, iceId) +
+    relativeIceStrengthBonusFor(state, iceId) +
     runEncounterBonus -
     pattelsReduction;
   return Math.max(0, total);
@@ -817,6 +818,35 @@ function effectiveSubtypesForCard(
   )
     return stableSubtypeList(selectedSubtypes);
   return stableSubtypeList(definition.subtypes ?? []);
+}
+
+function rezzedIceOutsideThisIceCount(
+  state: GameState,
+  iceId: CardInstanceId,
+): number {
+  const instance = state.cardInstances[iceId];
+  if (!instance || instance.zone.side !== "corp" || instance.zone.zone !== "serverIce")
+    return 0;
+  const serverId = instance.zone.serverId;
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) return 0;
+  const iceIndex = server.ice.indexOf(iceId);
+  if (iceIndex < 0) return 0;
+  return server.ice
+    .slice(iceIndex + 1)
+    .filter((candidateId) => state.cardInstances[candidateId]?.rezzed === true)
+    .length;
+}
+
+function relativeIceStrengthBonusFor(
+  state: GameState,
+  iceId: CardInstanceId,
+): number {
+  const relativeIce =
+    cardImplementationForDefinitionId(definitionFor(state, iceId).id)?.relativeIce;
+  const bonusPerCount = relativeIce?.strengthBonusPerCount;
+  if (!bonusPerCount) return 0;
+  return rezzedIceOutsideThisIceCount(state, iceId) * bonusPerCount;
 }
 
 export function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {

@@ -1037,6 +1037,12 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_VARIABLE_REZ_LOCATION);
   }
+  if (implementation.relativeIce) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for relative ICE count behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_VARIABLE_REZ_LOCATION);
+  }
   if (implementation.virusCounter) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for Virus-counter successful-run, start-of-turn and purge-linked behavior.",

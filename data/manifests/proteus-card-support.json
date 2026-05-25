@@ -305,24 +305,36 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_012_bug-zapper",
+        "coverage": [
+          "card_implementation",
+          "dynamic_damage_subroutine",
+          "legal_action",
+          "public_payload",
+          "relative_ice_count",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3c-relative-board-count-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3c: onr_proteus_012_bug-zapper is implemented through generic relative ICE counting for rezzed ICE installed outside the current ICE in the same fort."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_013_caryatid",
@@ -580,24 +592,37 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_021_dog-pile",
+        "coverage": [
+          "card_implementation",
+          "dynamic_damage_subroutine",
+          "dynamic_strength",
+          "legal_action",
+          "public_payload",
+          "relative_ice_count",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3c-relative-board-count-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3c: onr_proteus_021_dog-pile is implemented through generic relative ICE counting for rezzed ICE installed outside the current ICE in the same fort."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_022_food-fight",
@@ -766,24 +791,37 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_026_hunting-pack",
+        "coverage": [
+          "card_implementation",
+          "dynamic_trace_subroutines",
+          "legal_action",
+          "public_payload",
+          "relative_ice_count",
+          "replay_statehash",
+          "scenario",
+          "trace",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3c-relative-board-count-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3c: onr_proteus_026_hunting-pack is implemented through generic relative ICE counting for rezzed ICE installed outside the current ICE in the same fort."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_027_iceberg",
@@ -884,24 +922,37 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_030_mastermind",
+        "coverage": [
+          "card_implementation",
+          "dynamic_damage_subroutine",
+          "dynamic_strength",
+          "legal_action",
+          "public_payload",
+          "relative_ice_count",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3c-relative-board-count-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3c: onr_proteus_030_mastermind is implemented through generic relative ICE counting for rezzed ICE installed outside the current ICE in the same fort."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_031_minotaur",

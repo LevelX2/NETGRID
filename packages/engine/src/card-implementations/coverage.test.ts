@@ -776,6 +776,28 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
   });
 
+  it("migrates Proteus Phase 3c relative ICE into CardImplementation coverage", () => {
+    const cases = [
+      "onr_proteus_012_bug-zapper",
+      "onr_proteus_021_dog-pile",
+      "onr_proteus_026_hunting-pack",
+      "onr_proteus_030_mastermind",
+    ] as const;
+
+    for (const definitionId of cases) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.relativeIce,
+      ).toMatchObject({
+        kind: "rezzed_ice_outside_this_ice",
+      });
+    }
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",

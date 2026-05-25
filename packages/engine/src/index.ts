@@ -4476,6 +4476,33 @@ function effectiveSubtypesForCard(
   return stableSubtypeList(definition.subtypes);
 }
 
+function rezzedIceOutsideThisIceCount(
+  state: GameState,
+  iceId: CardInstanceId,
+): number {
+  const instance = state.cardInstances[iceId];
+  if (!instance || instance.zone.side !== "corp" || instance.zone.zone !== "serverIce")
+    return 0;
+  const server = mustServer(state, instance.zone.serverId);
+  const iceIndex = server.ice.indexOf(iceId);
+  if (iceIndex < 0) return 0;
+  return server.ice
+    .slice(iceIndex + 1)
+    .filter((candidateId) => state.cardInstances[candidateId]?.rezzed === true)
+    .length;
+}
+
+function relativeIceStrengthBonusFor(
+  state: GameState,
+  iceId: CardInstanceId,
+): number {
+  const relativeIce =
+    cardImplementationForDefinitionId(definitionFor(state, iceId).id)?.relativeIce;
+  const bonusPerCount = relativeIce?.strengthBonusPerCount;
+  if (!bonusPerCount) return 0;
+  return rezzedIceOutsideThisIceCount(state, iceId) * bonusPerCount;
+}
+
 function isRegionUpgrade(definition: CardDefinition): boolean {
   return definition.type === "upgrade" && cardHasSubtype(definition, "region");
 }
@@ -4705,6 +4732,7 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
     baseStrength +
     instance.strengthModifier +
     iceStrengthBonusFor(state, iceId) +
+    relativeIceStrengthBonusFor(state, iceId) +
     runEncounterBonus -
     pattelsReduction;
   return Math.max(0, total);
@@ -6768,10 +6796,14 @@ function subroutinesForCurrentEncounter(
       });
     }
     return copies.map((copy) =>
-      variableTraceSubroutineForCurrentEncounter(
+      relativeDamageSubroutineForCurrentEncounter(
         state,
         run?.encounteredIceId,
-        copy,
+        variableTraceSubroutineForCurrentEncounter(
+          state,
+          run?.encounteredIceId,
+          copy,
+        ),
       ),
     );
   });
@@ -6803,6 +6835,7 @@ function subroutinesForCurrentEncounter(
     subroutines.push(
       ...currentEncounterAdditionalSubroutinesForIce(state, run.encounteredIceId),
     );
+    subroutines.push(...relativeTraceSubroutinesForCurrentEncounter(state, run.encounteredIceId));
     subroutines.push(...additionalSubroutinesForIce(state, run.encounteredIceId));
   }
   return subroutines;
@@ -6826,6 +6859,43 @@ function variableTraceSubroutineForCurrentEncounter(
     ...(variableRez.traceBaseFromValue ? { baseTraceStrength: value } : {}),
     ...(variableRez.traceBidLimitFromValue ? { traceBidLimit: value } : {}),
   };
+}
+
+function relativeDamageSubroutineForCurrentEncounter(
+  state: GameState,
+  iceId: CardInstanceId | undefined,
+  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
+): NonNullable<CardDefinition["subroutines"]>[number] {
+  if (!iceId || subroutine.type !== "do_damage") return subroutine;
+  const relativeIce =
+    cardImplementationForDefinitionId(definitionFor(state, iceId).id)?.relativeIce;
+  const dynamicDamage = relativeIce?.dynamicDamageSubroutine;
+  if (!dynamicDamage || dynamicDamage.subroutineId !== subroutine.id)
+    return subroutine;
+  return {
+    ...subroutine,
+    amount:
+      rezzedIceOutsideThisIceCount(state, iceId) *
+      dynamicDamage.amountPerCount,
+  };
+}
+
+function relativeTraceSubroutinesForCurrentEncounter(
+  state: GameState,
+  iceId: CardInstanceId,
+): NonNullable<CardDefinition["subroutines"]> {
+  const definition = definitionFor(state, iceId);
+  const dynamicTrace =
+    cardImplementationForDefinitionId(definition.id)?.relativeIce
+      ?.dynamicTraceSubroutines;
+  if (!dynamicTrace) return [];
+  const count = rezzedIceOutsideThisIceCount(state, iceId);
+  return Array.from({ length: count }, (_, index) => ({
+    id: `relative_ice_outside_${definition.id}.trace.${index + 1}`,
+    type: "initiate_trace",
+    baseTraceStrength: dynamicTrace.baseTraceStrength,
+    traceSuccessEffect: dynamicTrace.traceSuccessEffect,
+  }));
 }
 
 function encounterSubroutinesForNextContinue(

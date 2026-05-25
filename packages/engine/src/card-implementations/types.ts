@@ -20,6 +20,7 @@ import type {
   CardPrintedSubroutineImplementation,
   CardRegionBaselineImplementation,
   CardRemainingReplacementLongtailImplementation,
+  CardRelativeIceImplementation,
   CardRunEncounterInterventionImplementation,
   CardRunnerEventLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
@@ -67,6 +68,7 @@ export type CardImplementationDefinition = {
   fortCapacityModifiers?: readonly CardFortCapacityModifierImplementation[];
   leavePlayCleanup?: readonly CardLeavePlayCleanupImplementation[];
   variableRez?: CardVariableRezImplementation;
+  relativeIce?: CardRelativeIceImplementation;
   virusCounter?: CardVirusCounterImplementation;
   scoredAgenda?: CardScoredAgendaImplementation;
   corpUtility?: CardCorpUtilityImplementation;

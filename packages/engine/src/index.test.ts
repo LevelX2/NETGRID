@@ -1451,6 +1451,163 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
   });
 });
 
+describe("Proteus Phase 3c Relative Board-Count ICE", () => {
+  const BUG_ZAPPER = "onr_proteus_012_bug-zapper";
+  const DOG_PILE = "onr_proteus_021_dog-pile";
+  const HUNTING_PACK = "onr_proteus_026_hunting-pack";
+  const MASTERMIND = "onr_proteus_030_mastermind";
+  const OUTER_BLANK_ICE_A = "onr_proteus_024_gatekeeper";
+  const OUTER_BLANK_ICE_B = "onr_proteus_036_sandstorm";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusPhase3cGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: `${seed}_runner`,
+          name: "Proteus Phase 3c Runner",
+        },
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          id: `${seed}_corp`,
+          name: "Proteus Phase 3c Corp",
+          cards: [
+            { id: BUG_ZAPPER, quantity: 1 },
+            { id: DOG_PILE, quantity: 1 },
+            { id: HUNTING_PACK, quantity: 1 },
+            { id: MASTERMIND, quantity: 1 },
+            { id: OUTER_BLANK_ICE_A, quantity: 1 },
+            { id: OUTER_BLANK_ICE_B, quantity: 1 },
+            ...ONR_V1_1_2K_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  function setRezzedForRelativeTest(
+    state: GameState,
+    cardId: CardInstanceId,
+  ): void {
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+
+  function encounterInnerRelativeIce(
+    state: GameState,
+    targetDefinitionId: string,
+  ): { state: GameState; targetId: CardInstanceId } {
+    const targetId = putCorpIceOnServer(state, "rd", targetDefinitionId);
+    const outerOne = putCorpIceOnServer(state, "rd", OUTER_BLANK_ICE_A);
+    const outerTwo = putCorpIceOnServer(state, "rd", OUTER_BLANK_ICE_B);
+    for (const cardId of [targetId, outerOne, outerTwo]) {
+      setRezzedForRelativeTest(state, cardId);
+    }
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    while (state.run?.encounteredIceId !== targetId) {
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+    }
+    return { state, targetId };
+  }
+
+  function resolveOpenTraceWithDefaultChoices(state: GameState): GameState {
+    while (state.trace) {
+      const option =
+        state.pendingChoice?.options.find((candidate) => candidate.id === "bid_0") ??
+        state.pendingChoice?.options.find((candidate) => candidate.id === "pass") ??
+        state.pendingChoice?.options[0];
+      if (!option) throw new Error("Trace choice option missing.");
+      state = applyChoice(state, state.activeSide, option.id);
+    }
+    return state;
+  }
+
+  it("counts only rezzed ICE outside the current ICE for strength and damage", () => {
+    for (const definitionId of [
+      BUG_ZAPPER,
+      DOG_PILE,
+      MASTERMIND,
+    ] as const) {
+      let state = proteusPhase3cGame(`proteus-phase-3c-${definitionId}`);
+      const setup = encounterInnerRelativeIce(state, definitionId);
+      state = setup.state;
+      const beforeGrip = state.runner.grip.length;
+      const beforeCoreDamage = state.runner.coreDamage;
+      if (definitionId === DOG_PILE || definitionId === MASTERMIND) {
+        expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(2);
+      }
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      if (definitionId === BUG_ZAPPER) {
+        expect(beforeGrip - state.runner.grip.length).toBe(4);
+      } else if (definitionId === DOG_PILE) {
+        expect(beforeGrip - state.runner.grip.length).toBe(2);
+      } else {
+        expect(state.runner.coreDamage - beforeCoreDamage).toBe(2);
+      }
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        hiddenPayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("creates one public Hunting Pack trace subroutine per rezzed outside ICE", () => {
+    let state = proteusPhase3cGame("proteus-phase-3c-hunting-pack");
+    const setup = encounterInnerRelativeIce(state, HUNTING_PACK);
+    state = setup.state;
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(continueAction.payload).toMatchObject({
+      unbrokenSubroutineCount: 1,
+      encounterWillEndRun: false,
+    });
+    expect(String(continueAction.payload?.encounterSubroutineIds)).toContain(
+      "relative_ice_outside_onr_proteus_026_hunting-pack.trace.1",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.actionId === continueAction.actionId);
+    expect(state.trace).toMatchObject({
+      sourceCardInstanceId: setup.targetId,
+      baseTraceStrength: 5,
+    });
+    state = resolveOpenTraceWithDefaultChoices(state);
+    const secondTraceAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(secondTraceAction.payload?.encounterSubroutineIds).toBe(
+      "relative_ice_outside_onr_proteus_026_hunting-pack.trace.2",
+    );
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("Proteus Dynamic Public ETR ICE", () => {
   const MINOTAUR = "onr_proteus_031_minotaur";
   const RIDDLER = "onr_proteus_034_riddler";

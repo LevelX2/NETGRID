@@ -7434,8 +7434,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_234_data-darts",
     title: "Data Darts",
     subtypes: ["sentry", "ap", "hellbolt"],
-    rezCost: 5,
-    strength: 3,
+    rezCost: 6,
+    strength: 2,
     rulesText:
       "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
     subroutines: [
@@ -7522,7 +7522,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_239_endless-corridor",
     title: "Endless Corridor",
     subtypes: ["code_gate"],
-    rezCost: 4,
+    rezCost: 5,
     strength: 2,
     rulesText: "End the run.\nEnd the run.",
     subroutines: [
@@ -7563,7 +7563,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_245_fire-wall",
     title: "Fire Wall",
     subtypes: ["wall"],
-    rezCost: 5,
+    rezCost: 1,
     strength: 4,
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_245_fire_wall_etr")],
@@ -7696,7 +7696,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_257_nerve-labyrinth",
     title: "Nerve Labyrinth",
     subtypes: ["code_gate"],
-    rezCost: 6,
+    rezCost: 7,
     strength: 4,
     rulesText: "Do 2 net damage. End the run.",
     subroutines: [
@@ -9418,6 +9418,34 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
 
 const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
   {
+    id: "onr_proteus_012_bug-zapper",
+    title: "Bug Zapper",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry", "ap"],
+    implementationStatus: "playable_mvp",
+    rezCost: 5,
+    strength: 3,
+    rulesText:
+      "[Subroutine] Do 2 net damage for each rezzed piece of ice installed outside Bug Zapper.\n[Subroutine] End the run.",
+    subroutines: [
+      {
+        id: "onr_proteus_012_bug_zapper_net_damage",
+        type: "do_damage",
+        damageType: "net",
+        amount: 0,
+      },
+      { id: "onr_proteus_012_bug_zapper_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "relative_ice_count",
+      "dynamic_subroutine",
+    ],
+  },
+  {
     id: "onr_proteus_013_caryatid",
     title: "Caryatid",
     side: "corp",
@@ -9485,6 +9513,35 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
       "encounter_ice",
       "variable_rez",
       "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_021_dog-pile",
+    title: "Dog Pile",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry", "ap"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    strength: 0,
+    rulesText:
+      "[Subroutine] Do 1 net damage for each rezzed piece of ice installed outside Dog Pile.\n[Subroutine] End the run.\nDog Pile has +1 strength for each rezzed piece of ice installed outside it.",
+    subroutines: [
+      {
+        id: "onr_proteus_021_dog_pile_net_damage",
+        type: "do_damage",
+        damageType: "net",
+        amount: 0,
+      },
+      { id: "onr_proteus_021_dog_pile_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "relative_ice_count",
+      "dynamic_strength",
+      "dynamic_subroutine",
     ],
   },
   {
@@ -9578,6 +9635,28 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
     ],
   },
   {
+    id: "onr_proteus_026_hunting-pack",
+    title: "Hunting Pack",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 5,
+    strength: 4,
+    rulesText:
+      "For each rezzed piece of ice installed outside Hunting Pack, Hunting Pack has one [Subroutine] Trace 5. If successful, give Runner a tag.",
+    subroutines: [],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "relative_ice_count",
+      "dynamic_subroutine",
+      "trace",
+      "add_tag",
+    ],
+  },
+  {
     id: "onr_proteus_028_lesser-arcana",
     title: "Lesser Arcana",
     side: "corp",
@@ -9597,6 +9676,35 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
       "encounter_ice",
       "variable_rez",
       "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_030_mastermind",
+    title: "Mastermind",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry", "ap"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 0,
+    rulesText:
+      "[Subroutine] Do 1 core damage for each rezzed piece of ice installed outside Mastermind.\n[Subroutine] End the run.\nMastermind has +1 strength for each rezzed piece of ice installed outside it.",
+    subroutines: [
+      {
+        id: "onr_proteus_030_mastermind_core_damage",
+        type: "do_damage",
+        damageType: "core",
+        amount: 0,
+      },
+      { id: "onr_proteus_030_mastermind_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "relative_ice_count",
+      "dynamic_strength",
+      "dynamic_subroutine",
     ],
   },
   {
