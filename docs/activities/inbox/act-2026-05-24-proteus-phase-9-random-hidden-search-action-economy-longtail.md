@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-9-random-hidden-search-action-economy-longtail
-status: inbox
+status: superseded
 kind: concept
 area: cards
 priority: normal
@@ -14,7 +14,8 @@ releaseTarget: Proteus Phase 9
 blockedBy:
   - act-2026-05-24-proteus-phase-8-virus-antibody-purge
 resultArtifacts: []
-checks: []
+checks:
+  - "Get-ChildItem docs/activities/{done,in-progress} -Filter '*proteus-phase-9*'"
 ---
 
 # Proteus Phase 9: Random, Hidden-Zone-Search, Action-Economy und Longtail
@@ -82,11 +83,11 @@ Die späte Proteus-Longtail-Phase in kleine Umsetzungsschritte zerlegen und dana
 
 Phase 9 wurde in die Detail-Activities 9a bis 9e zerlegt:
 
-- `docs/activities/inbox/act-2026-05-24-proteus-phase-9a-random-dice-foundation.md`
-- `docs/activities/inbox/act-2026-05-24-proteus-phase-9b-action-economy-debt.md`
-- `docs/activities/inbox/act-2026-05-24-proteus-phase-9c-hidden-zone-search-install-tutor.md`
-- `docs/activities/inbox/act-2026-05-24-proteus-phase-9d-data-fort-creation-lock.md`
-- `docs/activities/inbox/act-2026-05-24-proteus-phase-9e-rule-blocked-preflight.md`
+- `docs/activities/in-progress/act-2026-05-24-proteus-phase-9a-random-dice-foundation.md`
+- `docs/activities/in-progress/act-2026-05-24-proteus-phase-9b-action-economy-debt.md`
+- `docs/activities/in-progress/act-2026-05-24-proteus-phase-9c-hidden-zone-search-install-tutor.md`
+- `docs/activities/done/act-2026-05-24-proteus-phase-9d-data-fort-creation-lock.md`
+- `docs/activities/in-progress/act-2026-05-24-proteus-phase-9e-rule-blocked-preflight.md`
 
 Dieses Umbrella-Paket bleibt als historische Klammer und Planungsreferenz erhalten; Codearbeit erfolgt nur in den Detail-Activities.
 
