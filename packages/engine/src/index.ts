@@ -427,6 +427,8 @@ export {
   createGameAfterSetup,
 } from "./game/create-game";
 import { hashState } from "./game/hash";
+import { configureApplyGameActionHost } from "./game/apply-game-action";
+export { applyGameAction } from "./game/apply-game-action";
 export { getPlayerView, playerViewFor } from "./game/player-view";
 import { configureReplayHost } from "./game/replay";
 export { replayEvents, replayGameEvents } from "./game/replay";
@@ -2532,13 +2534,11 @@ export function applyAction(
   };
 }
 
-export function applyGameAction(
-  state: GameState,
-  playerAction: PlayerAction,
-  options: ApplyActionOptions = {},
-): EngineResult {
-  return applyAction(state, playerAction, options);
-}
+configureApplyGameActionHost({
+  actions: {
+    applyAction,
+  },
+});
 
 configureReplayHost({
   actions: {
