@@ -1,0 +1,283 @@
+{
+  "schemaVersion": "ai-hint-quality-gate-report-v1",
+  "generatedAt": "2026-05-25",
+  "hintCount": 410,
+  "roleContractCount": 251,
+  "planRoleContractCount": 102,
+  "errors": [],
+  "warnings": [
+    {
+      "kind": "suspicious_singleton_roles",
+      "count": 96,
+      "items": [
+        "access_ambush",
+        "access_punisher",
+        "action_loss_ice",
+        "agenda_1pt",
+        "agenda_4pt",
+        "agenda_delay",
+        "agenda_node_slot",
+        "agenda_point_cancel",
+        "agenda_point_cost",
+        "agenda_reward",
+        "barrier_breaker",
+        "bit_counter",
+        "bit_depot",
+        "bit_pool",
+        "black_ops",
+        "black_ops_punish_event",
+        "breaker_end_run",
+        "card_flow_agenda",
+        "click_economy",
+        "corp_draw_pressure",
+        "corp_identity",
+        "corp_pressure",
+        "corp_start_turn_pressure",
+        "counter_transform",
+        "daemon_host",
+        "daemon_trash",
+        "deck_reset_agenda",
+        "delayed_install",
+        "drip_economy",
+        "economy_denial",
+        "efficient_sentry_breaker",
+        "etr_tax",
+        "expensive_ice_synergy",
+        "free_rez_tempo",
+        "global_ice_strength_modifier",
+        "high_install_cost",
+        "high_strength_breaker",
+        "hq_agenda_reveal",
+        "hq_run_counter",
+        "hq_run_reward",
+        "install_cost_discount",
+        "install_cost_modifier",
+        "jack_out_lock_ice",
+        "killer_support",
+        "link_recurring_credit",
+        "low_install_breaker",
+        "no_ability_agenda",
+        "noisy",
+        "overadvance_agenda",
+        "persistent_counter",
+        "persistent_liability",
+        "random_discard_event",
+        "random_discard_pressure",
+        "random_ice",
+        "rd_multiaccess",
+        "rd_reorder",
+        "rd_reveal",
+        "rd_success_replacement",
+        "recursion",
+        "recycle_zones",
+        "repeatable_resource_ability",
+        "research",
+        "resource_trash_operation",
+        "restricted_breaker",
+        "rez_bonus",
+        "run_action",
+        "run_bypass",
+        "run_counter",
+        "run_drawback",
+        "run_modifier",
+        "run_rewind_ice",
+        "run_scaling",
+        "runner_identity",
+        "scored_trigger_agenda",
+        "scoring_remote_support",
+        "server_development",
+        "server_ice_install",
+        "set_aside_install",
+        "spy_counter",
+        "stack_reorder",
+        "successful_run_punish",
+        "successful_run_reward",
+        "tag_removal",
+        "tag_self",
+        "temporary_program_install",
+        "testset_baseline_agenda",
+        "trace_pool",
+        "trace_support",
+        "trace_tag_ice",
+        "trash_for_value",
+        "trash_tax",
+        "utility_resource",
+        "virus_counter_protection",
+        "wall_economy",
+        "wall_ice_armor",
+        "worm_hate"
+      ]
+    },
+    {
+      "kind": "suspicious_singleton_plan_roles",
+      "count": 45,
+      "items": [
+        "agenda_reward",
+        "build_economy",
+        "click_for_credits_when_safe",
+        "corp_after_pass_ice_random_end_run",
+        "corp_asset_tag_checked_damage",
+        "corp_rez_root_asset",
+        "corp_rez_root_upgrade",
+        "credit_swing",
+        "delayed_install",
+        "increase_link",
+        "managed_risk_economy",
+        "program_pressure",
+        "protect_virus_counters",
+        "punish_tagged_runner",
+        "recover_cards",
+        "recover_key_card",
+        "remote_asset_agenda_support",
+        "remote_asset_control",
+        "remote_asset_finisher",
+        "remote_asset_run_start_tax",
+        "remote_upgrade_reactive_defense",
+        "remote_upgrade_rez_support",
+        "remove_tags",
+        "resource_value_engine",
+        "rez_expensive_ice_after_score",
+        "run_punish",
+        "run_start_damage",
+        "runner_agenda_pressure",
+        "runner_choice_gain_all_default",
+        "runner_deck_memory_recurring_credit",
+        "runner_defensive_event",
+        "runner_event_playful_ai_dice_loop",
+        "runner_hq_run_counter",
+        "runner_install_resource",
+        "runner_killer_run_credit_support",
+        "runner_start_run_strength_roll",
+        "runner_start_turn_random_hq_reveal",
+        "runner_start_turn_random_resource",
+        "runner_trace_bid_support",
+        "successful_hq_run_payoff",
+        "survive_core_damage",
+        "survive_net_damage",
+        "trace_defense",
+        "trace_pressure",
+        "wall_remote_plan"
+      ]
+    },
+    {
+      "kind": "role_synonym_candidates",
+      "items": [
+        {
+          "group": [
+            "rd_pressure",
+            "pressure_rnd"
+          ],
+          "present": [
+            "rd_pressure",
+            "pressure_rnd"
+          ]
+        },
+        {
+          "group": [
+            "rd_run",
+            "pressure_rnd"
+          ],
+          "present": [
+            "rd_run",
+            "pressure_rnd"
+          ]
+        },
+        {
+          "group": [
+            "hq_run",
+            "pressure_hq"
+          ],
+          "present": [
+            "hq_run",
+            "pressure_hq"
+          ]
+        },
+        {
+          "group": [
+            "hq_pressure",
+            "pressure_hq"
+          ],
+          "present": [
+            "hq_pressure",
+            "pressure_hq"
+          ]
+        },
+        {
+          "group": [
+            "wall_breaker",
+            "breaker_fracter"
+          ],
+          "present": [
+            "wall_breaker",
+            "breaker_fracter"
+          ]
+        },
+        {
+          "group": [
+            "barrier_breaker",
+            "breaker_fracter"
+          ],
+          "present": [
+            "barrier_breaker",
+            "breaker_fracter"
+          ]
+        },
+        {
+          "group": [
+            "code_gate_breaker",
+            "breaker_decoder"
+          ],
+          "present": [
+            "code_gate_breaker",
+            "breaker_decoder"
+          ]
+        },
+        {
+          "group": [
+            "sentry_breaker",
+            "breaker_killer"
+          ],
+          "present": [
+            "sentry_breaker",
+            "breaker_killer"
+          ]
+        },
+        {
+          "group": [
+            "tag_remove",
+            "tag_removal",
+            "clear_tags",
+            "remove_tags"
+          ],
+          "present": [
+            "tag_remove",
+            "tag_removal",
+            "clear_tags",
+            "remove_tags"
+          ]
+        }
+      ]
+    }
+  ],
+  "errorCount": 0,
+  "warningCount": 150,
+  "gates": {
+    "unknownRolesFail": true,
+    "consumedRoleContractFail": true,
+    "benchmarkMissingHintFail": true,
+    "crystalPalaceDenylistFail": true,
+    "unusedSingletonRolesWarn": true,
+    "synonymGroupsWarn": true,
+    "benchmarkQualityRiskWarn": true
+  },
+  "benchmarkCoverage": {
+    "deckFiles": [
+      "data/decks/deck-snapshots-0.8.json",
+      "data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json",
+      "data/ai/ai-real-scene-benchmark-deck-snapshots-2026-05-24.json"
+    ],
+    "totalUniqueCards": 190,
+    "missingHintCards": [],
+    "riskCards": []
+  }
+}

@@ -9,6 +9,7 @@
 - `ai-hints-support-contract-review-2026-05-22.md`: aktueller 410/411-Support-Contract, Toughonium-Wall-Entscheidung und priorisierte schwache AI-Hints.
 - `ai-hint-consumer-contract-audit-2026-05-25.md` / `ai-hint-consumer-contract-inventory-2026-05-25.json`: Audit der AI-Hint-Verbraucherseite mit vollständigem Rollen-/Planrollen-Inventar, Entscheidungswirksamkeit, Lückenanalyse und rückwärtskompatiblem Ontologie-Vorschlag.
 - `ai-hints-semantic-quality-audit-2026-05-25.md`: semantischer Qualitätsaudit priorisierter AI-Hints gegen Kartentext, Implementation und tatsächliche KI-Verbraucherpfade inklusive drei fokussierter Hintkorrekturen.
+- `ai-hint-quality-gates-and-ontology-roadmap-2026-05-25.md` / `ai-hint-ontology-roadmap-2026-05-25.md`: kleiner maschinenlesbarer Hint-Quality-Gate-Slice mit Benchmark-Deck-Hint-Coverage und rückwärtskompatibler Ontologie-Roadmap.
 - `ai-benchmark-deck-basis-review-2026-05-23.md`: Klassifikation der aktuell genutzten AI-Smoke-/Soak-/League-/Progression-Decks und Empfehlung für eine kuratierte Benchmark-Decksuite.
 - `ai-strategy-slices-consolidation-review-2026-05-23.md`: konsolidierte Bilanz der letzten AI-Strategie-/Diagnose-Slices inklusive aktueller Baseline-vs-Candidate-Suite, Ablation-light und Empfehlungen.
 - `ai-plan-conversion-diagnosis-2026-05-23.md`: Planfolge-/Conversion-Diagnose für aktuelle KI-Slices mit neuen Short-Horizon-Metriken, Slotanalyse und Empfehlungen ohne neue Strategie-Heuristik.
