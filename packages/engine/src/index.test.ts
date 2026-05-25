@@ -26,6 +26,7 @@ import {
   cardImplementationForDefinitionId,
 } from "./card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
+import { publicContextForAction } from "./public-context";
 import {
   MECHANIC_SMOKE_CARD_IDS,
   MECHANIC_SMOKE_DECKS,
@@ -627,6 +628,14 @@ describe("MVP 0.1 engine foundation", () => {
 
 describe("Proteus Visible Baseline", () => {
   const TOUGHONIUM = "onr_proteus_041_toughoniumtm-wall";
+  const NETWORKED_CENTER = "onr_proteus_065_networked-center";
+  const RESEARCH_BUNKER = "onr_proteus_072_research-bunker";
+  const WEAPONS_DEPOT = "onr_proteus_077_weapons-depot";
+  const STREETWARE_DISTRIBUTOR = "onr_proteus_150_streetware-distributor";
+  const CORTICAL_CYBERMODEM = "onr_proteus_134_cortical-cybermodem";
+  const DECK_THE = "onr_proteus_138_deck-the";
+  const SUNBURST_CRANIAL_INTERFACE =
+    "onr_proteus_151_sunburst-cranial-interface";
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
@@ -710,7 +719,9 @@ describe("Proteus Visible Baseline", () => {
     expect(state.cardInstances[iceId]?.rezzed).toBe(true);
     expect(state.corp.credits).toBe(7);
     expect(state.run?.encounteredIceId).toBe(iceId);
-    expect(DEMO_CARDS_BY_ID[TOUGHONIUM]?.subroutines).toHaveLength(4);
+    expect(
+      cardImplementationForDefinitionId(TOUGHONIUM)?.printedSubroutines,
+    ).toHaveLength(4);
     expect(
       DEMO_CARDS_BY_ID[TOUGHONIUM]?.subroutines?.every(
         (subroutine) => subroutine.type === "end_the_run",
@@ -733,9 +744,593 @@ describe("Proteus Visible Baseline", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
+
+  it("applies Proteus Phase 1a region agenda-difficulty modifiers only in the same fort", () => {
+    const regionCases = [
+      {
+        regionId: NETWORKED_CENTER,
+        agendaId: "onr_v1_202_genetics-visionary-acquisition",
+        subtype: "gray_ops",
+      },
+      {
+        regionId: RESEARCH_BUNKER,
+        agendaId: "onr_v1_189_artificial-security-directors",
+        subtype: "research",
+      },
+      {
+        regionId: WEAPONS_DEPOT,
+        agendaId: "onr_v1_198_detroit-police-contract",
+        subtype: "black_ops",
+      },
+    ] as const;
+
+    for (const { regionId, agendaId, subtype } of regionCases) {
+      let state = createGameAfterSetup({
+        seed: `proteus-phase-1a-region-${subtype}`,
+        runnerDeck: ONR_V1_1_2K_RUNNER_DECK,
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          id: `proteus_phase_1a_region_${subtype}`,
+          name: "Proteus Phase 1a Region Corp",
+          cards: [
+            { id: regionId, quantity: 1 },
+            { id: agendaId, quantity: 1 },
+            ...ONR_V1_1_2K_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      });
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state.corp.credits = 20;
+      state.corp.clicks = 10;
+      const regionInstanceId = putCorpRootInRemote(state, regionId);
+      const agendaInstanceId = putCorpRootInRemote(state, agendaId);
+      const printedDifficulty =
+        DEMO_CARDS_BY_ID[agendaId]?.advancementRequirement ?? 0;
+      state.cardInstances[agendaInstanceId] = {
+        ...state.cardInstances[agendaInstanceId]!,
+        advancementCounters: printedDifficulty - 1,
+      };
+      expect(
+        getLegalActions(state, "corp").some(
+          (action) =>
+            action.type === "score_agenda" &&
+            action.payload?.cardId === agendaInstanceId,
+        ),
+      ).toBe(false);
+
+      state.cardInstances[regionInstanceId] = {
+        ...state.cardInstances[regionInstanceId]!,
+        faceup: true,
+        rezzed: true,
+      };
+      const scoreAction = mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "score_agenda" &&
+          action.payload?.cardId === agendaInstanceId,
+      );
+      expect(
+        collectActiveModifiers(state).filter(
+          (modifier) =>
+            modifier.kind === "agenda_difficulty" &&
+            modifier.sourceDefinitionId === regionId,
+        ),
+      ).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            amount: -1,
+            duration: "while_rezzed",
+            visibility: "public",
+          }),
+        ]),
+      );
+
+      const stale = structuredClone(state);
+      stale.cardInstances[regionInstanceId] = {
+        ...stale.cardInstances[regionInstanceId]!,
+        faceup: false,
+        rezzed: false,
+      };
+      expect(
+        applyAction(stale, {
+          matchId: stale.matchId,
+          side: "corp",
+          actionId: scoreAction.actionId,
+          clientKnownStateVersion: stale.stateVersion,
+          idempotencyKey: `proteus-phase-1a-region-stale-${subtype}`,
+        }).ok,
+      ).toBe(false);
+
+      const otherFort = structuredClone(state);
+      otherFort.corp.servers.push({
+        id: "remote_2",
+        kind: "remote",
+        label: "Remote 2",
+        ice: [],
+        root: [agendaInstanceId],
+      });
+      const remoteOne = otherFort.corp.servers.find(
+        (server) => server.id === "remote_1",
+      );
+      if (!remoteOne) throw new Error("remote_1 missing");
+      remoteOne.root = remoteOne.root.filter((id) => id !== agendaInstanceId);
+      otherFort.cardInstances[agendaInstanceId] = {
+        ...otherFort.cardInstances[agendaInstanceId]!,
+        zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+      };
+      expect(
+        getLegalActions(otherFort, "corp").some(
+          (action) =>
+            action.type === "score_agenda" &&
+            action.payload?.cardId === agendaInstanceId,
+        ),
+      ).toBe(false);
+    }
+  });
+
+  it("uses Streetware Distributor hosted credits through LegalActions and replay-safe start-turn lifecycle", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "proteus-phase-1a-streetware",
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: "proteus_phase_1a_streetware_runner",
+          name: "Proteus Phase 1a Streetware Runner",
+          cards: [
+            { id: STREETWARE_DISTRIBUTOR, quantity: 1 },
+            ...ONR_V1_1_2K_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_1_2K_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.clicks = 4;
+    state.runner.credits = 5;
+    const streetwareId = installRunnerResourceForTest(
+      state,
+      STREETWARE_DISTRIBUTOR,
+    );
+    const loadAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === streetwareId,
+    );
+    expect(loadAction.costs).toEqual([{ clicks: 1 }]);
+
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: loadAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "proteus-streetware-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: loadAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "proteus-streetware-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === loadAction.actionId,
+    );
+    expect(cardCounterAmount(state, streetwareId, "bit")).toBe(3);
+    expect(state.runner.credits).toBe(5);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: STREETWARE_DISTRIBUTOR,
+      hostedCreditsAdded: 3,
+      hostedCreditsAfter: 3,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBeforeStart = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = toRunnerTurn(state);
+
+    expect(cardCounterAmount(state, streetwareId, "bit")).toBe(2);
+    expect(state.runner.credits).toBe(creditsBeforeStart + 1);
+    expect(
+      state.eventLog
+        .slice(replayStart)
+        .flatMap((event) => event.publicPayload.resolvedEffects ?? [])
+        .some(
+          (effect) =>
+            (effect as { sourceDefinitionId?: string }).sourceDefinitionId ===
+            STREETWARE_DISTRIBUTOR,
+        ),
+    ).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("installs Deck, The as a public hardware deck and uses its trace link abilities", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "proteus-phase-7a-deck-the",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner,
+          id: "proteus_phase_7a_deck_runner",
+          name: "Proteus Phase 7a Deck Runner",
+          cards: [
+            { id: DECK_THE, quantity: 1 },
+            { id: "onr_v1_137_parraline-5750", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.programSubtypeHosting.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 30;
+    state.corp.credits = 8;
+    const oldDeckId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_137_parraline-5750",
+    );
+    const deckId = moveRunnerCardToGrip(state, DECK_THE);
+    const memoryBefore =
+      getPlayerView(state, "runner").own.memoryLimit ?? state.runner.memoryLimit;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === oldDeckId,
+    );
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
+      memoryBefore + 1,
+    );
+
+    const installDeck = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === deckId,
+    );
+    expect(installDeck.costs).toEqual([{ clicks: 1, credits: 11 }]);
+
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: installDeck.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "proteus-deck-the-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: installDeck.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "proteus-deck-the-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const lowCredits = structuredClone(state);
+    lowCredits.runner.credits = 10;
+    const rejectedCost = applyAction(lowCredits, {
+      matchId: lowCredits.matchId,
+      side: "runner",
+      actionId: installDeck.actionId,
+      clientKnownStateVersion: lowCredits.stateVersion,
+      idempotencyKey: "proteus-deck-the-cost",
+    });
+    expect(rejectedCost.ok).toBe(false);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === installDeck.actionId,
+    );
+    expect(state.runner.heap).toContain(oldDeckId);
+    expect(state.runner.rig.hardware).not.toContain(oldDeckId);
+    expect(state.runner.rig.hardware).toContain(deckId);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
+      memoryBefore + 1,
+    );
+    expect(cardImplementationForDefinitionId(DECK_THE)).toMatchObject({
+      hardwareDeck: true,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      cardDefinitionId: DECK_THE,
+      deckUniqueReplacement: true,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_0");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const beforeBaseCredits = state.runner.credits;
+    state = applyChoice(
+      state,
+      "runner",
+      traceChoiceOptionIdForDefinition(state, DECK_THE, "trace_base_link_"),
+    );
+    expect(state.runner.credits).toBe(beforeBaseCredits);
+    expect(state.trace).toMatchObject({
+      status: "runner_bid",
+      runnerLink: 5,
+      baseLinkValue: 5,
+    });
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.trace).toMatchObject({ status: "post_bid_link" });
+    const beforePumpCredits = state.runner.credits;
+    state = applyChoice(
+      state,
+      "runner",
+      traceChoiceOptionIdForDefinition(state, DECK_THE, "trace_link_"),
+    );
+    expect(state.runner.credits).toBe(beforePumpCredits - 1);
+    expect(state.trace).toMatchObject({
+      status: "post_bid_link",
+      runnerLink: 6,
+      postBidLinkBonus: 1,
+    });
+    state = applyChoice(state, "runner", "pass");
+    expect(state.trace).toBeUndefined();
+    expect(validateGameState(state).ok).toBe(true);
+  });
+
+  it("uses Proteus Phase 7b deck bits for icebreaker costs and noisy restrictions", () => {
+    for (const [
+      definitionId,
+      expectedCost,
+      expectedMu,
+      expectedHandSize,
+      expectedBits,
+      expectedAfterPump,
+    ] of [
+      [CORTICAL_CYBERMODEM, 11, 2, 2, 2, 1],
+      [SUNBURST_CRANIAL_INTERFACE, 5, 1, 1, 1, 0],
+    ] as const) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `proteus-phase-7b-${definitionId}`,
+          runnerDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+            id: `proteus_phase_7b_${definitionId}_runner`,
+            name: "Proteus Phase 7b Deck Runner",
+            cards: [
+              { id: definitionId, quantity: 1 },
+              { id: "simple_decoder", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+                (card) => card.id !== "simple_decoder",
+              ),
+            ],
+          },
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+            id: `proteus_phase_7b_${definitionId}_corp`,
+            name: "Proteus Phase 7b Deck Corp",
+            cards: [
+              { id: "simple_code_gate_ice", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 30;
+      state.runner.memoryLimit = 4;
+      const deckId = moveRunnerCardToGrip(state, definitionId);
+      moveRunnerCardToGrip(state, "simple_decoder");
+      const iceId = putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+      const memoryBefore =
+        getPlayerView(state, "runner").own.memoryLimit ?? state.runner.memoryLimit;
+      const handSizeBefore = getPlayerView(state, "runner").own.maxHandSize;
+      const installDeck = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          String(action.payload?.cardId) === deckId,
+      );
+      expect(installDeck.costs).toEqual([
+        { clicks: 1, credits: expectedCost },
+      ]);
+
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: installDeck.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `proteus-phase-7b-${definitionId}-wrong-side`,
+      });
+      expect(wrongSide.ok).toBe(false);
+      if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: installDeck.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `proteus-phase-7b-${definitionId}-stale`,
+      });
+      expect(stale.ok).toBe(false);
+      if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+      const lowCredits = structuredClone(state);
+      lowCredits.runner.credits = expectedCost - 1;
+      const rejectedCost = applyAction(lowCredits, {
+        matchId: lowCredits.matchId,
+        side: "runner",
+        actionId: installDeck.actionId,
+        clientKnownStateVersion: lowCredits.stateVersion,
+        idempotencyKey: `proteus-phase-7b-${definitionId}-cost`,
+      });
+      expect(rejectedCost.ok).toBe(false);
+
+      const installInitial = structuredClone(state);
+      const installReplayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "runner",
+        (action) => action.actionId === installDeck.actionId,
+      );
+      expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
+        memoryBefore + expectedMu,
+      );
+      expect(getPlayerView(state, "runner").own.maxHandSize).toBe(
+        handSizeBefore + expectedHandSize,
+      );
+      expect(cardCounterAmount(state, deckId, "bit")).toBe(expectedBits);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "install_card",
+        cardDefinitionId: definitionId,
+        hostedCreditsAdded: expectedBits,
+        counterType: "bit",
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        hiddenPayloadMarkers,
+      );
+      const installReplay = replayEvents(
+        installInitial,
+        state.eventLog.slice(installReplayStart),
+      );
+      expect(installReplay.ok).toBe(true);
+      expect(hashState(installReplay.state)).toBe(hashState(state));
+
+      installRunnerProgramForTest(state, "simple_decoder");
+      state.runner.credits = 0;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "rez_ice" && action.source === iceId,
+      );
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "pump_breaker" &&
+          sourceDefinition(state, action) === "simple_decoder",
+      );
+      expect(state.runner.credits).toBe(0);
+      expect(cardCounterAmount(state, deckId, "bit")).toBe(expectedAfterPump);
+    }
+
+    let noisyState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "proteus-phase-7b-sunburst-noisy-negative",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "proteus_phase_7b_sunburst_noisy_runner",
+          name: "Proteus Phase 7b Sunburst Noisy Runner",
+          cards: [
+            { id: SUNBURST_CRANIAL_INTERFACE, quantity: 1 },
+            { id: "onr_v1_036_jackhammer", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+              (card) => card.id !== "onr_v1_036_jackhammer",
+            ),
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "proteus_phase_7b_sunburst_noisy_corp",
+          name: "Proteus Phase 7b Sunburst Noisy Corp",
+          cards: [
+            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+              (card) => card.id !== "onr_v1_232_crystal-wall",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    noisyState.runner.credits = 30;
+    noisyState.runner.memoryLimit = 4;
+    moveRunnerCardToGrip(noisyState, SUNBURST_CRANIAL_INTERFACE);
+    moveRunnerCardToGrip(noisyState, "onr_v1_036_jackhammer");
+    const wallId = putCorpIceOnServer(
+      noisyState,
+      "rd",
+      "onr_v1_232_crystal-wall",
+    );
+    noisyState = apply(
+      noisyState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(noisyState, action) === SUNBURST_CRANIAL_INTERFACE,
+    );
+    noisyState = apply(
+      noisyState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(noisyState, action) === "onr_v1_036_jackhammer",
+    );
+    noisyState.runner.credits = 0;
+    noisyState = apply(
+      noisyState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    noisyState = apply(
+      noisyState,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === wallId,
+    );
+    expect(
+      getLegalActions(noisyState, "runner").some(
+        (action) =>
+          action.type === "pump_breaker" &&
+          sourceDefinition(noisyState, action) === "onr_v1_036_jackhammer",
+      ),
+    ).toBe(false);
+  });
 });
 
-describe("Proteus variable ICE harness", () => {
+describe("Proteus Phase 3a Variable ICE Foundation", () => {
   const DIGICONDA = "onr_proteus_020_digiconda";
   const FOOD_FIGHT = "onr_proteus_022_food-fight";
   const hiddenPayloadMarkers =
@@ -784,7 +1379,7 @@ describe("Proteus variable ICE harness", () => {
         (action) =>
           action.type === "rez_ice" &&
           action.source === iceId &&
-          action.payload?.proteusVariableRez === "x_strength",
+          action.payload?.variableRezKind === "x_strength",
       );
       expect(
         rezActions.map((action) => action.payload?.variableRezValue),
@@ -833,7 +1428,7 @@ describe("Proteus variable ICE harness", () => {
         "corp",
         (action) => action.actionId === rezAction.actionId,
       );
-      expect(state.cardInstances[iceId]?.proteusVariableIceState).toEqual({
+      expect(state.cardInstances[iceId]?.variableIceState).toEqual({
         family: "x_strength",
         additionalCostPaid: x,
         value: x,
@@ -900,8 +1495,8 @@ describe("Proteus variable ICE harness", () => {
         matchId: state.matchId,
         side: "corp",
         actionId: rezAction.actionId.replace(
-          `.paid_etr_subroutines.${additionalCost}.${subroutineCount}`,
-          `.paid_etr_subroutines.${additionalCost + 1}.${subroutineCount}`,
+          `.paid_end_the_run_subroutines.${additionalCost}.${subroutineCount}`,
+          `.paid_end_the_run_subroutines.${additionalCost + 1}.${subroutineCount}`,
         ),
         clientKnownStateVersion: state.stateVersion,
       });
@@ -914,8 +1509,8 @@ describe("Proteus variable ICE harness", () => {
         "corp",
         (action) => action.actionId === rezAction.actionId,
       );
-      expect(state.cardInstances[iceId]?.proteusVariableIceState).toEqual({
-        family: "paid_etr_subroutines",
+      expect(state.cardInstances[iceId]?.variableIceState).toEqual({
+        family: "paid_end_the_run_subroutines",
         additionalCostPaid: additionalCost,
         value: subroutineCount,
         subroutineCount,
@@ -973,6 +1568,1879 @@ describe("Proteus variable ICE harness", () => {
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
     }
+  });
+});
+
+describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+  const phase3bCards = [
+    "onr_proteus_013_caryatid",
+    "onr_proteus_017_credit-blocks",
+    "onr_proteus_023_galatea",
+    "onr_proteus_024_gatekeeper",
+    "onr_proteus_025_homing-missile",
+    "onr_proteus_028_lesser-arcana",
+    "onr_proteus_036_sandstorm",
+    "onr_proteus_039_sphinx-2006",
+    "onr_proteus_040_sumo-2008",
+  ];
+
+  function proteusPhase3bGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: `${seed}_runner`,
+          name: "Proteus Phase 3b Runner",
+          cards: [
+            { id: "simple_decoder", quantity: 1 },
+            { id: "simple_killer", quantity: 1 },
+            { id: "onr_v1_021_dwarf", quantity: 1 },
+            ...ONR_V1_1_2K_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          id: `${seed}_corp`,
+          name: "Proteus Phase 3b Corp",
+          cards: [
+            ...phase3bCards.map((id) => ({ id, quantity: 1 })),
+            ...ONR_V1_1_2K_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  function pumpUntilBreakerCanBreak(
+    state: GameState,
+    breakerId: CardInstanceId,
+  ): GameState {
+    while (
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "pump_breaker" &&
+          action.payload?.breakerId === breakerId,
+      ) &&
+      !getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.breakerId === breakerId,
+      )
+    ) {
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "pump_breaker" &&
+          action.payload?.breakerId === breakerId,
+      );
+    }
+    return state;
+  }
+
+  it("stores alternate subtype rez choices and uses them for views and break projection", () => {
+    const cases = [
+      ["onr_proteus_013_caryatid", "code_gate", "simple_decoder", 1],
+      ["onr_proteus_017_credit-blocks", "wall", "onr_v1_021_dwarf", 1],
+      ["onr_proteus_023_galatea", "code_gate", "simple_decoder", 1],
+      ["onr_proteus_028_lesser-arcana", "wall", "onr_v1_021_dwarf", 1],
+      ["onr_proteus_039_sphinx-2006", "sentry", "simple_killer", 4],
+      ["onr_proteus_040_sumo-2008", "wall", "onr_v1_021_dwarf", 1],
+    ] as const;
+
+    for (const [iceDefinitionId, selectedSubtype, breakerDefinitionId, extraCost] of cases) {
+      let state = proteusPhase3bGame(`proteus-phase-3b-subtype-${iceDefinitionId}`);
+      state.corp.credits = 20;
+      state.runner.credits = 20;
+      const breakerId = installRunnerProgramForTest(state, breakerDefinitionId);
+      const iceId = putCorpIceOnServer(state, "rd", iceDefinitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      const rezActions = getLegalActions(state, "corp").filter(
+        (action) =>
+          action.type === "rez_ice" &&
+          action.source === iceId &&
+          action.payload?.variableRezKind === "alternate_subtype",
+      );
+      expect(
+        rezActions.map((action) => action.payload?.selectedSubtypesAfterRez),
+      ).toContain(selectedSubtype);
+      const rezAction = mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          action.source === iceId &&
+          action.payload?.selectedSubtypesAfterRez === selectedSubtype,
+      );
+      expect(rezAction.payload?.variableRezAdditionalCost).toBe(extraCost);
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: rezAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+      });
+      expect(wrongSide.ok).toBe(false);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "corp",
+        (action) => action.actionId === rezAction.actionId,
+      );
+      expect(state.cardInstances[iceId]?.variableIceState).toMatchObject({
+        family: "alternate_subtype",
+        additionalCostPaid: extraCost,
+        value: 1,
+        selectedSubtypes: [selectedSubtype],
+      });
+      expect(
+        getPlayerView(state, "runner").run?.encounteredIce?.subtypes,
+      ).toEqual([selectedSubtype]);
+      state = pumpUntilBreakerCanBreak(state, breakerId);
+      const breakAction = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.breakerId === breakerId &&
+          action.payload?.iceId === iceId,
+      );
+      expect(breakAction.payload?.targetIceDefinitionId).toBe(iceDefinitionId);
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        hiddenPayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("reuses paid ETR variable rez for Gatekeeper and Sandstorm", () => {
+    for (const iceDefinitionId of [
+      "onr_proteus_024_gatekeeper",
+      "onr_proteus_036_sandstorm",
+    ] as const) {
+      let state = proteusPhase3bGame(`proteus-phase-3b-paid-etr-${iceDefinitionId}`);
+      state.corp.credits = 12;
+      const iceId = putCorpIceOnServer(state, "rd", iceDefinitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      const rezAction = mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          action.source === iceId &&
+          action.payload?.variableRezAdditionalCost === 4,
+      );
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "corp",
+        (action) => action.actionId === rezAction.actionId,
+      );
+      expect(state.cardInstances[iceId]?.variableIceState).toMatchObject({
+        family: "paid_end_the_run_subroutines",
+        additionalCostPaid: 4,
+        value: 2,
+        subroutineCount: 2,
+      });
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        variableRezKind: "paid_end_the_run_subroutines",
+        variableRezAdditionalCost: 4,
+        effectiveSubroutineCountAfterRez: 2,
+      });
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("stores Homing Missile X as strength, trace base and trace bid limit", () => {
+    let state = proteusPhase3bGame("proteus-phase-3b-homing-missile");
+    state.corp.credits = 20;
+    const iceId = putCorpIceOnServer(state, "rd", "onr_proteus_025_homing-missile");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const rezAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.source === iceId &&
+        action.payload?.variableRezKind === "x_strength" &&
+        action.payload?.variableRezValue === 5,
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.actionId === rezAction.actionId);
+    expect(state.cardInstances[iceId]?.variableIceState).toMatchObject({
+      family: "x_strength",
+      value: 5,
+      strength: 5,
+      traceBidLimit: 5,
+    });
+    expect(getPlayerView(state, "runner").run?.encounteredIce).toMatchObject({
+      definitionId: "onr_proteus_025_homing-missile",
+      strength: 5,
+    });
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.trace).toMatchObject({
+      sourceCardInstanceId: iceId,
+      baseTraceStrength: 5,
+      traceBidLimit: 5,
+      corpBidMax: 5,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceStarted: true,
+      baseTraceStrength: 5,
+      traceBidLimit: 5,
+      corpBidMax: 5,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
+describe("Proteus Phase 3c Relative Board-Count ICE", () => {
+  const BUG_ZAPPER = "onr_proteus_012_bug-zapper";
+  const DOG_PILE = "onr_proteus_021_dog-pile";
+  const HUNTING_PACK = "onr_proteus_026_hunting-pack";
+  const MASTERMIND = "onr_proteus_030_mastermind";
+  const OUTER_BLANK_ICE_A = "onr_proteus_024_gatekeeper";
+  const OUTER_BLANK_ICE_B = "onr_proteus_036_sandstorm";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusPhase3cGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: `${seed}_runner`,
+          name: "Proteus Phase 3c Runner",
+        },
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          id: `${seed}_corp`,
+          name: "Proteus Phase 3c Corp",
+          cards: [
+            { id: BUG_ZAPPER, quantity: 1 },
+            { id: DOG_PILE, quantity: 1 },
+            { id: HUNTING_PACK, quantity: 1 },
+            { id: MASTERMIND, quantity: 1 },
+            { id: OUTER_BLANK_ICE_A, quantity: 1 },
+            { id: OUTER_BLANK_ICE_B, quantity: 1 },
+            ...ONR_V1_1_2K_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  function setRezzedForRelativeTest(
+    state: GameState,
+    cardId: CardInstanceId,
+  ): void {
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+
+  function encounterInnerRelativeIce(
+    state: GameState,
+    targetDefinitionId: string,
+  ): { state: GameState; targetId: CardInstanceId } {
+    const targetId = putCorpIceOnServer(state, "rd", targetDefinitionId);
+    const outerOne = putCorpIceOnServer(state, "rd", OUTER_BLANK_ICE_A);
+    const outerTwo = putCorpIceOnServer(state, "rd", OUTER_BLANK_ICE_B);
+    for (const cardId of [targetId, outerOne, outerTwo]) {
+      setRezzedForRelativeTest(state, cardId);
+    }
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    while (state.run?.encounteredIceId !== targetId) {
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+    }
+    return { state, targetId };
+  }
+
+  function resolveOpenTraceWithDefaultChoices(state: GameState): GameState {
+    while (state.trace) {
+      const option =
+        state.pendingChoice?.options.find((candidate) => candidate.id === "bid_0") ??
+        state.pendingChoice?.options.find((candidate) => candidate.id === "pass") ??
+        state.pendingChoice?.options[0];
+      if (!option) throw new Error("Trace choice option missing.");
+      state = applyChoice(state, state.activeSide, option.id);
+    }
+    return state;
+  }
+
+  it("counts only rezzed ICE outside the current ICE for strength and damage", () => {
+    for (const definitionId of [
+      BUG_ZAPPER,
+      DOG_PILE,
+      MASTERMIND,
+    ] as const) {
+      let state = proteusPhase3cGame(`proteus-phase-3c-${definitionId}`);
+      const setup = encounterInnerRelativeIce(state, definitionId);
+      state = setup.state;
+      const beforeGrip = state.runner.grip.length;
+      const beforeCoreDamage = state.runner.coreDamage;
+      if (definitionId === DOG_PILE || definitionId === MASTERMIND) {
+        expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(2);
+      }
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      if (definitionId === BUG_ZAPPER) {
+        expect(beforeGrip - state.runner.grip.length).toBe(4);
+      } else if (definitionId === DOG_PILE) {
+        expect(beforeGrip - state.runner.grip.length).toBe(2);
+      } else {
+        expect(state.runner.coreDamage - beforeCoreDamage).toBe(2);
+      }
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        hiddenPayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("creates one public Hunting Pack trace subroutine per rezzed outside ICE", () => {
+    let state = proteusPhase3cGame("proteus-phase-3c-hunting-pack");
+    const setup = encounterInnerRelativeIce(state, HUNTING_PACK);
+    state = setup.state;
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(continueAction.payload).toMatchObject({
+      unbrokenSubroutineCount: 1,
+      encounterWillEndRun: false,
+    });
+    expect(String(continueAction.payload?.encounterSubroutineIds)).toContain(
+      "relative_ice_outside_onr_proteus_026_hunting-pack.trace.1",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.actionId === continueAction.actionId);
+    expect(state.trace).toMatchObject({
+      sourceCardInstanceId: setup.targetId,
+      baseTraceStrength: 5,
+    });
+    state = resolveOpenTraceWithDefaultChoices(state);
+    const secondTraceAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(secondTraceAction.payload?.encounterSubroutineIds).toBe(
+      "relative_ice_outside_onr_proteus_026_hunting-pack.trace.2",
+    );
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
+describe("Proteus Phase 3e ICE Repositioning", () => {
+  const MOBILE_BARRICADE = "onr_proteus_033_mobile-barricade";
+  const WALKING_WALL = "onr_proteus_044_walking-wall";
+  const INNER_ICE = "onr_proteus_024_gatekeeper";
+  const MIDDLE_ICE = "onr_proteus_036_sandstorm";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusPhase3eGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: `${seed}_runner`,
+          name: "Proteus Phase 3e Runner",
+        },
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          id: `${seed}_corp`,
+          name: "Proteus Phase 3e Corp",
+          cards: [
+            { id: MOBILE_BARRICADE, quantity: 1 },
+            { id: WALKING_WALL, quantity: 1 },
+            { id: INNER_ICE, quantity: 1 },
+            { id: MIDDLE_ICE, quantity: 1 },
+            ...ONR_V1_1_2K_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  it("moves unrezzed Mobile Barricade within the attacked fort and reveals only that source", () => {
+    let state = proteusPhase3eGame("proteus-phase-3e-mobile-barricade");
+    state.corp.credits = 5;
+    const innerId = putCorpIceOnServer(state, "rd", INNER_ICE);
+    const middleId = putCorpIceOnServer(state, "rd", MIDDLE_ICE);
+    const mobileId = putCorpIceOnServer(state, "rd", MOBILE_BARRICADE);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const reposition = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.fortRunWindowAbility ===
+          "move_self_to_different_position_on_same_fort" &&
+        action.payload?.cardId === mobileId &&
+        action.payload?.targetIceIndex === 0,
+    );
+    expect(reposition.costs).toEqual([{ credits: 1 }]);
+
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: reposition.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "proteus-phase-3e-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: reposition.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "proteus-phase-3e-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const cannotPay = structuredClone(state);
+    cannotPay.corp.credits = 0;
+    expect(
+      applyAction(cannotPay, {
+        matchId: cannotPay.matchId,
+        side: "corp",
+        actionId: reposition.actionId,
+        clientKnownStateVersion: cannotPay.stateVersion,
+        idempotencyKey: "proteus-phase-3e-cannot-pay",
+      }).ok,
+    ).toBe(false);
+
+    const drifted = structuredClone(state);
+    const server = drifted.corp.servers.find((candidate) => candidate.id === "rd");
+    if (!server) throw new Error("Missing R&D server");
+    server.ice = [innerId, middleId];
+    drifted.corp.hq.push(mobileId);
+    drifted.cardInstances[mobileId] = {
+      ...drifted.cardInstances[mobileId]!,
+      zone: { side: "corp", zone: "hq" },
+      faceup: false,
+      rezzed: false,
+    };
+    expect(
+      applyAction(drifted, {
+        matchId: drifted.matchId,
+        side: "corp",
+        actionId: reposition.actionId,
+        clientKnownStateVersion: drifted.stateVersion,
+        idempotencyKey: "proteus-phase-3e-position-drift",
+      }).ok,
+    ).toBe(false);
+
+    state = apply(state, "corp", (action) => action.actionId === reposition.actionId);
+    const rd = state.corp.servers.find((candidate) => candidate.id === "rd");
+    expect(rd?.ice).toEqual([mobileId, innerId, middleId]);
+    expect(state.cardInstances[mobileId]).toMatchObject({
+      faceup: true,
+      rezzed: false,
+    });
+    expect(state.cardInstances[innerId]?.faceup).toBe(false);
+    expect(state.cardInstances[middleId]?.faceup).toBe(false);
+    expect(state.run).toMatchObject({
+      phase: "approach_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 2 },
+      approachedIceId: middleId,
+    });
+    const runnerRd = getPlayerView(state, "runner").servers.find(
+      (candidate) => candidate.id === "rd",
+    );
+    expect(runnerRd?.ice[0]).toMatchObject({
+      known: true,
+      definitionId: MOBILE_BARRICADE,
+      title: "Mobile Barricade",
+      rezzed: false,
+    });
+    expect(runnerRd?.ice[1]?.known).toBe(false);
+    expect(runnerRd?.ice[2]?.known).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      cardDefinitionId: MOBILE_BARRICADE,
+      title: "Mobile Barricade",
+      sourceDefinitionId: MOBILE_BARRICADE,
+      amounts: expect.objectContaining({
+        movedIceCount: 1,
+        sourceIceIndex: 2,
+        targetIceIndex: 0,
+        newApproachIceIndex: 2,
+      }),
+      targets: expect.objectContaining({
+        revealedSource: true,
+        newApproachIceRevealed: false,
+      }),
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      INNER_ICE,
+    );
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      MIDDLE_ICE,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("moves rezzed Walking Wall once per run without creating a hidden reveal", () => {
+    let state = proteusPhase3eGame("proteus-phase-3e-walking-wall");
+    state.corp.credits = 5;
+    const walkingId = putCorpIceOnServer(state, "rd", WALKING_WALL);
+    const middleId = putCorpIceOnServer(state, "rd", MIDDLE_ICE);
+    const outerId = putCorpIceOnServer(state, "rd", INNER_ICE);
+    state.cardInstances[walkingId] = {
+      ...state.cardInstances[walkingId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const reposition = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.cardId === walkingId &&
+        action.payload?.targetIceIndex === 2,
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.actionId === reposition.actionId);
+    expect(state.corp.servers.find((server) => server.id === "rd")?.ice).toEqual([
+      middleId,
+      outerId,
+      walkingId,
+    ]);
+    expect(state.run?.approachedIceId).toBe(walkingId);
+    expect(state.cardInstances[walkingId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      sourceDefinitionId: WALKING_WALL,
+      amounts: expect.objectContaining({
+        movedIceCount: 1,
+      }),
+      targets: expect.objectContaining({
+        revealedSource: false,
+        newApproachIceRevealed: true,
+      }),
+    });
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.payload?.fortRunWindowAbility ===
+            "move_self_to_different_position_on_same_fort" &&
+          action.payload?.cardId === walkingId,
+      ),
+    ).toBe(false);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
+describe("Proteus Dynamic Public ETR ICE", () => {
+  const MINOTAUR = "onr_proteus_031_minotaur";
+  const RIDDLER = "onr_proteus_034_riddler";
+  const TOUGHONIUM = "onr_proteus_041_toughoniumtm-wall";
+  const CODE_GATE = "onr_v1_230_cortical-scanner";
+  const WALL = "onr_v1_232_crystal-wall";
+  const SENTRY = "onr_v1_231_cortical-scrub";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusDynamicIceGame(seed: string): GameState {
+    const corpOverrideIds = new Set([
+      MINOTAUR,
+      RIDDLER,
+      TOUGHONIUM,
+      CODE_GATE,
+      WALL,
+      SENTRY,
+    ]);
+    return createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        ...ONR_V1_6_2_RUNNER_DECK,
+        id: `${seed}_runner`,
+        cards: [
+          { id: "simple_killer", quantity: 1 },
+          ...ONR_V1_6_2_RUNNER_DECK.cards.filter(
+            (card) => card.id !== "simple_killer",
+          ),
+        ],
+      },
+      corpDeck: {
+        ...ONR_V1_6_2_CORP_DECK,
+        id: `${seed}_corp`,
+        cards: [
+          { id: MINOTAUR, quantity: 1 },
+          { id: RIDDLER, quantity: 2 },
+          { id: TOUGHONIUM, quantity: 1 },
+          { id: CODE_GATE, quantity: 1 },
+          { id: WALL, quantity: 2 },
+          { id: SENTRY, quantity: 1 },
+          ...ONR_V1_6_2_CORP_DECK.cards.filter(
+            (card) => !corpOverrideIds.has(card.id),
+          ),
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+  }
+
+  function setRezzed(state: GameState, cardId: CardInstanceId): void {
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+
+  function effectiveSubroutineIds(
+    state: GameState,
+    serverId: Exclude<ServerId, "new_remote">,
+    iceId: CardInstanceId,
+  ): string[] {
+    const ice = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === serverId)
+      ?.ice.find((card) => card.instanceId === iceId) as
+      | { effectiveRunQuote?: { subroutines: Array<{ id: string }> } }
+      | undefined;
+    return ice?.effectiveRunQuote?.subroutines.map((subroutine) => subroutine.id) ?? [];
+  }
+
+  function startEncounterWithRezzedIce(
+    state: GameState,
+    serverId: Exclude<ServerId, "new_remote">,
+  ): GameState {
+    return enterEncounterFromMovementWindow(
+      apply(
+        toRunnerTurnFromCorpMain(state),
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === serverId,
+      ),
+    );
+  }
+
+  it("counts only other rezzed installed code gates and walls for Minotaur", () => {
+    let state = proteusDynamicIceGame("proteus-phase-1b-minotaur");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 30;
+    state.runner.credits = 20;
+    const minotaurId = putCorpIceOnServer(state, "rd", MINOTAUR);
+    const codeGateId = putCorpIceOnServer(state, "hq", CODE_GATE);
+    const wallId = putCorpIceOnServer(state, "archives", WALL);
+    const sentryId = putCorpIceOnServer(state, "archives", SENTRY);
+    for (const cardId of [
+      minotaurId,
+      codeGateId,
+      wallId,
+      sentryId,
+    ]) {
+      setRezzed(state, cardId);
+    }
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = startEncounterWithRezzedIce(state, "rd");
+    const subroutineIds = effectiveSubroutineIds(state, "rd", minotaurId);
+    expect(subroutineIds).toEqual([
+      `card_implementation.${MINOTAUR}.additional_subroutine.1.repeat.1.end_the_run`,
+      `card_implementation.${MINOTAUR}.additional_subroutine.2.repeat.2.end_the_run`,
+    ]);
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(continueAction.payload).toMatchObject({
+      unbrokenSubroutineCount: 2,
+      encounterWillEndRun: true,
+    });
+    expect(JSON.stringify(continueAction.payload)).not.toContain(minotaurId);
+    expect(JSON.stringify(continueAction.payload)).not.toMatch(hiddenPayloadMarkers);
+
+    const stale = structuredClone(state);
+    stale.cardInstances[wallId] = {
+      ...stale.cardInstances[wallId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    const staleContinue = applyAction(stale, {
+      matchId: stale.matchId,
+      side: "runner",
+      actionId: continueAction.actionId,
+      clientKnownStateVersion: stale.stateVersion,
+      idempotencyKey: "proteus-minotaur-stale-continue",
+    });
+    expect(staleContinue.ok).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
+    expect(state.run).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        sourceDefinitionId: MINOTAUR,
+        subroutineIndex: 0,
+        cardDefinitionId: MINOTAUR,
+        cardTitle: "Minotaur",
+        endedRun: true,
+      }),
+    ]);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("lets Riddler add repeatable current-encounter ETR subroutines for [2]", () => {
+    let state = proteusDynamicIceGame("proteus-phase-1b-riddler");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 10;
+    state.runner.credits = 10;
+    const riddlerId = putCorpIceOnServer(state, "rd", RIDDLER);
+    setRezzed(state, riddlerId);
+    state = startEncounterWithRezzedIce(state, "rd");
+
+    const addAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.source === riddlerId,
+    );
+    expect(addAction.costs).toEqual([{ credits: 2 }]);
+    expect(addAction.payload).toMatchObject({
+      cardImplementationAbility: "activated",
+      cardImplementationAbilityTiming: "corp_encounter",
+    });
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: addAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-riddler-wrong-side",
+      }).ok,
+    ).toBe(false);
+    const lowCredits = structuredClone(state);
+    lowCredits.corp.credits = 1;
+    expect(
+      applyAction(lowCredits, {
+        matchId: lowCredits.matchId,
+        side: "corp",
+        actionId: addAction.actionId,
+        clientKnownStateVersion: lowCredits.stateVersion,
+        idempotencyKey: "proteus-riddler-cost",
+      }).ok,
+    ).toBe(false);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === addAction.actionId,
+    );
+    expect(state.corp.credits).toBe(8);
+    expect(effectiveSubroutineIds(state, "rd", riddlerId)).toEqual([
+      `card_implementation.${RIDDLER}.current_encounter_additional_subroutine.1.end_the_run`,
+    ]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+      sourceDefinitionId: RIDDLER,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    const staleAfterOne = structuredClone(state);
+    const staleContinue = mustAction(
+      staleAfterOne,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.source === riddlerId,
+    );
+    expect(state.corp.credits).toBe(6);
+    expect(effectiveSubroutineIds(state, "rd", riddlerId)).toHaveLength(2);
+    staleAfterOne.run!.encounterAdditionalSubroutines = [
+      ...(staleAfterOne.run!.encounterAdditionalSubroutines ?? []),
+      {
+        sourceCardInstanceId: riddlerId,
+        sourceDefinitionId: RIDDLER,
+        sourceTitle: "Riddler",
+        subroutineKind: "end_the_run",
+      },
+    ];
+    const staleResult = applyAction(staleAfterOne, {
+      matchId: staleAfterOne.matchId,
+      side: "runner",
+      actionId: staleContinue.actionId,
+      clientKnownStateVersion: staleAfterOne.stateVersion,
+      idempotencyKey: "proteus-riddler-stale-continue",
+    });
+    expect(staleResult.ok).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.unbrokenSubroutineCount === 2,
+    );
+    expect(state.run).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        sourceDefinitionId: RIDDLER,
+        subroutineIndex: 0,
+        cardDefinitionId: RIDDLER,
+        cardTitle: "Riddler",
+        endedRun: true,
+      }),
+    ]);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
+describe("Proteus Public Fort Pass Windows", () => {
+  const LESLEY = "onr_proteus_062_lesley-major";
+  const RASMIN = "onr_proteus_070_rasmin-bridger";
+  const AGENDA = "onr_v1_203_hostile-takeover";
+  const ICE = "simple_barrier_ice";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusFortPassGame(seed: string): GameState {
+    const corpOverrideIds = new Set([LESLEY, RASMIN, AGENDA, ICE]);
+    return createGameAfterSetup({
+      seed,
+      runnerDeck: ONR_V1_6_2_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_6_2_CORP_DECK,
+        id: `${seed}_corp`,
+        cards: [
+          { id: LESLEY, quantity: 1 },
+          { id: RASMIN, quantity: 1 },
+          { id: AGENDA, quantity: 1 },
+          { id: ICE, quantity: 1 },
+          ...ONR_V1_6_2_CORP_DECK.cards.filter(
+            (card) => !corpOverrideIds.has(card.id),
+          ),
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+  }
+
+  function setRezzed(state: GameState, cardId: CardInstanceId): void {
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+
+  function startRunAndPassUnrezzedIce(
+    state: GameState,
+  ): GameState {
+    state = apply(
+      toRunnerTurnFromCorpMain(state),
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    return apply(state, "corp", (action) => action.type === "decline_rez");
+  }
+
+  it("lets Lesley Major add counters after the last ICE is passed once per run", () => {
+    let state = proteusFortPassGame("proteus-phase-1d-lesley");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 10;
+    const lesleyId = putCorpRootInRemote(state, LESLEY);
+    const agendaId = putCorpRootInRemote(state, AGENDA);
+    putCorpIceOnServer(state, "remote_1", ICE);
+    setRezzed(state, lesleyId);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = startRunAndPassUnrezzedIce(state);
+    const lesleyAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.source === lesleyId &&
+        action.payload?.targetCardId === agendaId,
+    );
+    expect(lesleyAction.costs).toEqual([{ credits: 5 }]);
+    expect(lesleyAction.payload).toMatchObject({
+      fortRunWindowAbility:
+        "add_advancement_counters_after_passing_last_ice_on_this_fort",
+      serverId: "remote_1",
+      targetCardDefinitionId: AGENDA,
+    });
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: lesleyAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-lesley-wrong-side",
+      }).ok,
+    ).toBe(false);
+    const noCredits = structuredClone(state);
+    noCredits.corp.credits = 4;
+    expect(
+      applyAction(noCredits, {
+        matchId: noCredits.matchId,
+        side: "corp",
+        actionId: lesleyAction.actionId,
+        clientKnownStateVersion: noCredits.stateVersion,
+        idempotencyKey: "proteus-lesley-cost",
+      }).ok,
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === lesleyAction.actionId,
+    );
+    expect(state.cardInstances[agendaId]?.advancementCounters).toBe(2);
+    expect(state.corp.credits).toBe(5);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.source === lesleyId,
+      ),
+    ).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      sourceDefinitionId: LESLEY,
+      targets: { targetCardDefinitionId: AGENDA },
+      amounts: { addedCounterAmount: 2 },
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("forces Rasmin Bridger pay-or-end-run after each passed ICE", () => {
+    let state = proteusFortPassGame("proteus-phase-1d-rasmin");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.runner.credits = 2;
+    state.corp.credits = 10;
+    const rasminId = putCorpRootInRemote(state, RASMIN);
+    putCorpIceOnServer(state, "remote_1", ICE);
+    setRezzed(state, rasminId);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = startRunAndPassUnrezzedIce(state);
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    const payAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.fortRunWindowAbility ===
+          "runner_pay_or_end_run_after_passing_ice_on_this_fort" &&
+        action.payload?.decision === "pay",
+    );
+    expect(payAction.costs).toEqual([{ credits: 1 }]);
+    expect(payAction.payload).toMatchObject({
+      sourceDefinitionIds: RASMIN,
+      serverId: "remote_1",
+      paymentAmount: 1,
+    });
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: payAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-rasmin-wrong-side",
+      }).ok,
+    ).toBe(false);
+
+    const broke = structuredClone(state);
+    broke.runner.credits = 0;
+    expect(
+      getLegalActions(broke, "runner").some(
+        (action) => action.payload?.decision === "pay",
+      ),
+    ).toBe(false);
+    const endAction = mustAction(
+      broke,
+      "runner",
+      (action) => action.payload?.decision === "end_run",
+    );
+    const endResult = applyAction(broke, {
+      matchId: broke.matchId,
+      side: "runner",
+      actionId: endAction.actionId,
+      clientKnownStateVersion: broke.stateVersion,
+      idempotencyKey: "proteus-rasmin-end",
+    });
+    expect(endResult.ok).toBe(true);
+    expect(endResult.state.run).toBeUndefined();
+
+    state = apply(state, "runner", (action) => action.actionId === payAction.actionId);
+    expect(state.runner.credits).toBe(1);
+    expect(state.run).toBeDefined();
+    expect(state.run?.postPassPayOrEndRun).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      sourceDefinitionId: RASMIN,
+      amounts: { paidCredits: 1 },
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
+describe("Proteus Phase 1g Post-Pass Derez Utility", () => {
+  const DISINTEGRATOR = "onr_proteus_085_disintegrator";
+  const ICE = "simple_barrier_ice";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusDisintegratorGame(seed: string): GameState {
+    const runnerOverrideIds = new Set([DISINTEGRATOR, "simple_fracter"]);
+    const corpOverrideIds = new Set([ICE]);
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_6_2_RUNNER_DECK,
+          id: `${seed}_runner`,
+          cards: [
+            { id: DISINTEGRATOR, quantity: 1 },
+            { id: "simple_fracter", quantity: 1 },
+            ...ONR_V1_6_2_RUNNER_DECK.cards.filter(
+              (card) => !runnerOverrideIds.has(card.id),
+            ),
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_6_2_CORP_DECK,
+          id: `${seed}_corp`,
+          cards: [
+            { id: ICE, quantity: 1 },
+            ...ONR_V1_6_2_CORP_DECK.cards.filter(
+              (card) => !corpOverrideIds.has(card.id),
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  function passFullyBrokenIce(state: GameState): {
+    state: GameState;
+    iceId: CardInstanceId;
+  } {
+    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, DISINTEGRATOR);
+    const iceId = putCorpIceOnServer(state, "rd", ICE);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && sourceDefinition(state, action) === ICE,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(state, action) === "simple_fracter",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "simple_fracter",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    return { state, iceId };
+  }
+
+  it("derezzes the just-passed fully-broken ICE and ends the run", () => {
+    let state = proteusDisintegratorGame("proteus-phase-1g-disintegrator");
+    state.runner.credits = 10;
+    state.corp.credits = 10;
+
+    const passed = passFullyBrokenIce(state);
+    state = passed.state;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const disintegratorAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.runnerUtilityAbility ===
+          "derez_fully_broken_passed_ice_and_end_run",
+    );
+    expect(disintegratorAction.payload?.targetIceId).toBe(passed.iceId);
+    expect(disintegratorAction.costs).toEqual([{ credits: 2 }]);
+
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: disintegratorAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-disintegrator-wrong-side",
+      }).ok,
+    ).toBe(false);
+    const broke = structuredClone(state);
+    broke.runner.credits = 1;
+    expect(
+      applyAction(broke, {
+        matchId: broke.matchId,
+        side: "runner",
+        actionId: disintegratorAction.actionId,
+        clientKnownStateVersion: broke.stateVersion,
+        idempotencyKey: "proteus-disintegrator-cost",
+      }).ok,
+    ).toBe(false);
+    const staleTarget = structuredClone(state);
+    staleTarget.cardInstances[passed.iceId] = {
+      ...staleTarget.cardInstances[passed.iceId]!,
+      rezzed: false,
+    };
+    expect(
+      applyAction(staleTarget, {
+        matchId: staleTarget.matchId,
+        side: "runner",
+        actionId: disintegratorAction.actionId,
+        clientKnownStateVersion: staleTarget.stateVersion,
+        idempotencyKey: "proteus-disintegrator-stale-target",
+      }).ok,
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === disintegratorAction.actionId,
+    );
+    expect(state.run).toBeUndefined();
+    expect(state.cardInstances[passed.iceId]?.rezzed).toBe(false);
+    expect(state.runner.credits).toBe(6);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
+      sourceDefinitionId: DISINTEGRATOR,
+      targetCardDefinitionId: ICE,
+      derezzedCount: 1,
+      endedRun: true,
+      paidCredits: 2,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.errors).toEqual([]);
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("does not offer Disintegrator outside the fully-broken post-pass window", () => {
+    let state = proteusDisintegratorGame("proteus-phase-1g-disintegrator-window");
+    state.runner.credits = 10;
+    state.corp.credits = 10;
+    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, DISINTEGRATOR);
+    putCorpIceOnServer(state, "rd", ICE);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.payload?.runnerUtilityAbility ===
+          "derez_fully_broken_passed_ice_and_end_run",
+      ),
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && sourceDefinition(state, action) === ICE,
+    );
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.payload?.runnerUtilityAbility ===
+          "derez_fully_broken_passed_ice_and_end_run",
+      ),
+    ).toBe(false);
+  });
+});
+
+describe("Proteus Phase 2b Scored-Agenda Bad Publicity", () => {
+  const CHARITY_TAKEOVER = "onr_proteus_002_charity-takeover";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+  const internalViewMarkers = /"cardInstances"|"privatePayload"/;
+
+  function scoreCharityTakeover(
+    seed: string,
+    badPublicityBefore: number,
+    agendaPointsToWin: number,
+  ): {
+    initial: GameState;
+    beforeScore: GameState;
+    state: GameState;
+    scoreAction: LegalAction;
+  } {
+    let state = createGameAfterSetup({
+      seed,
+      runnerDeck: ONR_V1_1_2K_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_1_2K_CORP_DECK,
+        id: `${seed}_corp`,
+        cards: [
+          { id: CHARITY_TAKEOVER, quantity: 1 },
+          ...ONR_V1_1_2K_CORP_DECK.cards,
+        ],
+      },
+      agendaPointsToWin,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(state, CHARITY_TAKEOVER);
+    state.corp.credits = 20;
+    state.corp.clicks = 10;
+    state.corp.badPublicity = badPublicityBefore;
+    const initial = structuredClone(state);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === CHARITY_TAKEOVER,
+    );
+    for (let i = 0; i < 4; i += 1) {
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "advance_card" &&
+          sourceDefinition(state, action) === CHARITY_TAKEOVER,
+      );
+    }
+    const scoreAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(state, action) === CHARITY_TAKEOVER,
+    );
+    const beforeScore = structuredClone(state);
+    state = apply(state, "corp", (action) => action.actionId === scoreAction.actionId);
+    return { initial, beforeScore, state, scoreAction };
+  }
+
+  it("scores Charity Takeover for credits plus generic Bad Publicity", () => {
+    const { initial, beforeScore, state, scoreAction } = scoreCharityTakeover(
+      "proteus-phase-2b-charity-score",
+      0,
+      7,
+    );
+
+    expect(state.corp.credits).toBe(beforeScore.corp.credits + 9);
+    expect(state.corp.badPublicity).toBe(1);
+    expect(agendaPoints(state, "corp")).toBe(1);
+    expect(state.winner).toBeNull();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      cardDefinitionId: CHARITY_TAKEOVER,
+      sourceDefinitionId: CHARITY_TAKEOVER,
+      gainedCredits: 9,
+      corpCreditsAfter: state.corp.credits,
+      badPublicityAdded: 1,
+      corpBadPublicityBefore: 0,
+      corpBadPublicityAfter: 1,
+      sourceVisibility: "public",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload?.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "gain_credits",
+        sourceDefinitionId: CHARITY_TAKEOVER,
+        amount: 9,
+      }),
+      expect.objectContaining({
+        kind: "add_bad_publicity",
+        sourceDefinitionId: CHARITY_TAKEOVER,
+        amount: 1,
+      }),
+    ]);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    expect(
+      applyAction(beforeScore, {
+        matchId: beforeScore.matchId,
+        side: "runner",
+        actionId: scoreAction.actionId,
+        clientKnownStateVersion: beforeScore.stateVersion,
+        idempotencyKey: "proteus-charity-score-wrong-side",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(beforeScore, {
+        matchId: beforeScore.matchId,
+        side: "corp",
+        actionId: scoreAction.actionId,
+        clientKnownStateVersion: beforeScore.stateVersion - 1,
+        idempotencyKey: "proteus-charity-score-stale",
+      }).ok,
+    ).toBe(false);
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.errors).toEqual([]);
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps Bad-Publicity-7 primary over simultaneous Charity Takeover Corp win", () => {
+    const { initial, state } = scoreCharityTakeover(
+      "proteus-phase-2b-charity-bp-priority",
+      6,
+      1,
+    );
+
+    expect(agendaPoints(state, "corp")).toBeGreaterThanOrEqual(1);
+    expect(state.corp.badPublicity).toBe(7);
+    expect(state.phase).toBe("game_over");
+    expect(state.winner).toBe("runner");
+    expect(state.gameEndReason).toBe("bad_publicity_7");
+    expect(getLegalActions(state, "corp")).toHaveLength(0);
+    expect(getLegalActions(state, "runner")).toHaveLength(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      gameEndReason: "bad_publicity_7",
+      badPublicityThreshold: 7,
+      corpBadPublicityBefore: 6,
+      corpBadPublicityAfter: 7,
+      sourceVisibility: "public",
+      sourceDefinitionId: CHARITY_TAKEOVER,
+    });
+
+    for (const side of ["runner", "corp"] as const) {
+      const view = getPlayerView(state, side);
+      expect(view.winner).toBe("runner");
+      expect(view.gameEndReason).toBe("bad_publicity_7");
+      expect(JSON.stringify(view)).not.toMatch(internalViewMarkers);
+    }
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
+describe("Proteus Phase 2c Direct Runner Event BP Damage", () => {
+  const FAKED_HIT = "onr_proteus_108_faked-hit";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function fakedHitGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: `${seed}_runner`,
+          cards: [{ id: FAKED_HIT, quantity: 1 }, ...ONR_V1_1_2K_RUNNER_DECK.cards],
+        },
+        corpDeck: ONR_V1_1_2K_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  function playFakedHit(
+    seed: string,
+    badPublicityBefore: number,
+    emptyGripBeforePlay = false,
+  ): {
+    initial: GameState;
+    beforePlay: GameState;
+    state: GameState;
+    playAction: LegalAction;
+  } {
+    let state = fakedHitGame(seed);
+    if (emptyGripBeforePlay) emptyRunnerGripForTest(state);
+    moveRunnerCardToGrip(state, FAKED_HIT);
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    state.corp.badPublicity = badPublicityBefore;
+    const initial = structuredClone(state);
+    const playAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(state, action) === FAKED_HIT,
+    );
+    const beforePlay = structuredClone(state);
+    state = apply(state, "runner", (action) => action.actionId === playAction.actionId);
+    return { initial, beforePlay, state, playAction };
+  }
+
+  it("plays Faked Hit as Bad Publicity plus unpreventable core damage", () => {
+    const { initial, beforePlay, state, playAction } = playFakedHit(
+      "proteus-phase-2c-faked-hit",
+      0,
+    );
+
+    expect(state.corp.badPublicity).toBe(1);
+    expect(state.runner.coreDamage).toBe(beforePlay.runner.coreDamage + 2);
+    expect(state.runner.credits).toBe(beforePlay.runner.credits - 5);
+    expect(state.winner).toBeNull();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: FAKED_HIT,
+      badPublicityAdded: 1,
+      corpBadPublicityBefore: 0,
+      corpBadPublicityAfter: 1,
+      damageResolved: true,
+      damageType: "core",
+      damageAmount: 2,
+      unpreventableDamage: true,
+      preventableDamage: false,
+      coreDamageAfter: state.runner.coreDamage,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload?.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "add_bad_publicity",
+        sourceDefinitionId: FAKED_HIT,
+        amount: 1,
+      }),
+      expect.objectContaining({
+        kind: "damage",
+        sourceDefinitionId: FAKED_HIT,
+        damageType: "core",
+        amount: 2,
+        preventable: false,
+      }),
+    ]);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    expect(
+      applyAction(beforePlay, {
+        matchId: beforePlay.matchId,
+        side: "corp",
+        actionId: playAction.actionId,
+        clientKnownStateVersion: beforePlay.stateVersion,
+        idempotencyKey: "proteus-faked-hit-wrong-side",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(beforePlay, {
+        matchId: beforePlay.matchId,
+        side: "runner",
+        actionId: playAction.actionId,
+        clientKnownStateVersion: beforePlay.stateVersion - 1,
+        idempotencyKey: "proteus-faked-hit-stale",
+      }).ok,
+    ).toBe(false);
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.errors).toEqual([]);
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps Bad-Publicity-7 primary over simultaneous Faked Hit flatline", () => {
+    const { initial, state } = playFakedHit(
+      "proteus-phase-2c-faked-hit-bp-flatline-priority",
+      6,
+      true,
+    );
+
+    expect(state.corp.badPublicity).toBe(7);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      gameEndReason: "bad_publicity_7",
+      badPublicityThreshold: 7,
+      corpBadPublicityBefore: 6,
+      corpBadPublicityAfter: 7,
+      damageResolved: true,
+      damageType: "core",
+      damageAmount: 2,
+      flatline: true,
+      unpreventableDamage: true,
+    });
+    expect(state.phase).toBe("game_over");
+    expect(state.winner).toBe("runner");
+    expect(state.gameEndReason).toBe("bad_publicity_7");
+    expect(getLegalActions(state, "corp")).toHaveLength(0);
+    expect(getLegalActions(state, "runner")).toHaveLength(0);
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
+describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
+  const POISONED_WATER_SUPPLY = "onr_proteus_117_poisoned-water-supply";
+  const CONNECTION_A = "onr_v1_159_databroker";
+  const CONNECTION_B = "onr_v1_161_fall-guy";
+  const CONNECTION_C = "onr_v1_185_trauma-team";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function poisonedWaterSupplyGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: `${seed}_runner`,
+          cards: [
+            { id: POISONED_WATER_SUPPLY, quantity: 1 },
+            { id: CONNECTION_A, quantity: 1 },
+            { id: CONNECTION_B, quantity: 1 },
+            { id: CONNECTION_C, quantity: 1 },
+            ...ONR_V1_1_2K_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_1_2K_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  function preparePoisonedWaterSupply(
+    seed: string,
+    installedConnections: readonly string[],
+    badPublicityBefore = 0,
+  ): {
+    initial: GameState;
+    beforePlay: GameState;
+    state: GameState;
+    playAction: LegalAction;
+    installedIds: CardInstanceId[];
+  } {
+    let state = poisonedWaterSupplyGame(seed);
+    const installedIds = installedConnections.map((definitionId) =>
+      installRunnerResourceForTest(state, definitionId),
+    );
+    moveRunnerCardToGrip(state, POISONED_WATER_SUPPLY);
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    state.corp.badPublicity = badPublicityBefore;
+    const initial = structuredClone(state);
+    const playAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(state, action) === POISONED_WATER_SUPPLY,
+    );
+    const beforePlay = structuredClone(state);
+    state = apply(state, "runner", (action) => action.actionId === playAction.actionId);
+    return { initial, beforePlay, state, playAction, installedIds };
+  }
+
+  function selectedOptionIdsForCards(
+    state: GameState,
+    cardIds: readonly CardInstanceId[],
+  ): string[] {
+    const choice = state.pendingChoice;
+    if (!choice) throw new Error("Missing pending choice");
+    return cardIds.map((cardId) => {
+      const option = choice.options.find((candidate) => candidate.value === cardId);
+      expect(option).toBeDefined();
+      return option?.id ?? "";
+    });
+  }
+
+  it("requires two installed Runner connections before Poisoned Water Supply is legal", () => {
+    const state = poisonedWaterSupplyGame("proteus-phase-2d-poisoned-gate");
+    installRunnerResourceForTest(state, CONNECTION_A);
+    moveRunnerCardToGrip(state, POISONED_WATER_SUPPLY);
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(state, action) === POISONED_WATER_SUPPLY,
+      ),
+    ).toBe(false);
+  });
+
+  it("trashes exactly two installed connections before generic Bad Publicity", () => {
+    const { initial, beforePlay, playAction, installedIds } =
+      preparePoisonedWaterSupply(
+        "proteus-phase-2d-poisoned-water-supply",
+        [CONNECTION_A, CONNECTION_B],
+        0,
+      );
+    let state = apply(
+      beforePlay,
+      "runner",
+      (action) => action.actionId === playAction.actionId,
+    );
+
+    expect(state.runner.credits).toBe(beforePlay.runner.credits - 3);
+    expect(state.corp.badPublicity).toBe(0);
+    expect(state.pendingChoice?.source).toContain(
+      "card_implementation.runner_installed_connection_trash_bad_publicity",
+    );
+    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: POISONED_WATER_SUPPLY,
+      hiddenZoneBarrier: true,
+      hiddenZoneAction:
+        "card_implementation_runner_installed_connection_trash_bad_publicity",
+      sourceDefinitionId: POISONED_WATER_SUPPLY,
+      requiredConnectionTrashCount: 2,
+      eligibleConnectionCount: 2,
+      installedConnectionTrashChoiceOpened: true,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    const wrongSide = applyAction(beforePlay, {
+      matchId: beforePlay.matchId,
+      side: "corp",
+      actionId: playAction.actionId,
+      clientKnownStateVersion: beforePlay.stateVersion,
+      idempotencyKey: "proteus-poisoned-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(beforePlay, {
+      matchId: beforePlay.matchId,
+      side: "runner",
+      actionId: playAction.actionId,
+      clientKnownStateVersion: beforePlay.stateVersion - 1,
+      idempotencyKey: "proteus-poisoned-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = applyChoices(state, "runner", selectedOptionIdsForCards(state, installedIds));
+    expect(state.pendingChoice).toBeUndefined();
+    for (const cardId of installedIds) {
+      expect(state.runner.heap).toContain(cardId);
+      expect(state.runner.rig.resources).not.toContain(cardId);
+    }
+    expect(state.corp.badPublicity).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction:
+        "card_implementation_runner_installed_connection_trash_bad_publicity",
+      sourceDefinitionId: POISONED_WATER_SUPPLY,
+      trashedCount: 2,
+      installedConnectionTrashCount: 2,
+      badPublicityAdded: 1,
+      corpBadPublicityBefore: 0,
+      corpBadPublicityAfter: 1,
+      installedConnectionTrashChoiceResolved: true,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload?.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "add_bad_publicity",
+        sourceDefinitionId: POISONED_WATER_SUPPLY,
+        amount: 1,
+      }),
+    ]);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.errors).toEqual([]);
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("rejects invalid or drifted connection choices during revalidation", () => {
+    const { state, installedIds } = preparePoisonedWaterSupply(
+      "proteus-phase-2d-poisoned-choice-revalidation",
+      [CONNECTION_A, CONNECTION_B, CONNECTION_C],
+      0,
+    );
+    const choiceAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
+    const oneSelection = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "proteus-poisoned-one-selection",
+      selectedChoices: {
+        selectedOptionIds: selectedOptionIdsForCards(state, [installedIds[0]!]),
+      },
+    });
+    expect(oneSelection.ok).toBe(false);
+
+    const drifted = structuredClone(state);
+    removeEverywhere(drifted, installedIds[1]!);
+    const driftedSelection = applyAction(drifted, {
+      matchId: drifted.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: drifted.stateVersion,
+      idempotencyKey: "proteus-poisoned-drifted-selection",
+      selectedChoices: {
+        selectedOptionIds: selectedOptionIdsForCards(state, [
+          installedIds[0]!,
+          installedIds[1]!,
+        ]),
+      },
+    });
+    expect(driftedSelection.ok).toBe(false);
+  });
+
+  it("keeps Bad-Publicity-7 primary after Poisoned Water Supply choice resolves", () => {
+    const { initial, state: opened, installedIds } = preparePoisonedWaterSupply(
+      "proteus-phase-2d-poisoned-bp-priority",
+      [CONNECTION_A, CONNECTION_B],
+      6,
+    );
+    const state = applyChoices(
+      opened,
+      "runner",
+      selectedOptionIdsForCards(opened, installedIds),
+    );
+
+    expect(state.corp.badPublicity).toBe(7);
+    expect(state.phase).toBe("game_over");
+    expect(state.winner).toBe("runner");
+    expect(state.gameEndReason).toBe("bad_publicity_7");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      gameEndReason: "bad_publicity_7",
+      badPublicityThreshold: 7,
+      corpBadPublicityBefore: 6,
+      corpBadPublicityAfter: 7,
+      sourceDefinitionId: POISONED_WATER_SUPPLY,
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 });
 
@@ -2962,7 +5430,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("keeps Nasuko Cycle, Fall Guy and Nomad Allies source-bound across damage windows and removal drift", () => {
+  it("keeps Nasuko Cycle source-bound across damage windows and removal drift", () => {
     let state = createGameAfterSetup({
       seed: "spotcheck-prevention-sources",
       runnerDeck: {
@@ -3018,46 +5486,6 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       sourceDefinitionId: "onr_v1_135_nasuko-cycle",
     });
     expect(state.runner.rig.hardware).toContain(nasukoId);
-    for (const definitionId of ["onr_v1_161_fall-guy", "onr_v1_170_nomad-allies"]) {
-      let sourceState = createGameAfterSetup({
-        seed: `spotcheck-prevention-${definitionId}`,
-        runnerDeck: {
-          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          id: `spotcheck_prevention_${definitionId}`,
-          name: `Spotcheck Prevention ${definitionId}`,
-          cards: [
-            { id: definitionId, quantity: 1 },
-            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
-          ],
-        },
-        corpDeck: {
-          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
-          cards: [
-            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
-            { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
-          ],
-        },
-        agendaPointsToWin: 7,
-      });
-      sourceState = apply(sourceState, "corp", (action) => action.type === "mandatory_draw");
-      sourceState.runner.tags = 1;
-      sourceState.corp.credits = 10;
-      sourceState.corp.clicks = 3;
-      installRunnerResourceForTest(sourceState, definitionId);
-      moveCorpCardToHq(sourceState, "onr_v1_301_punitive-counterstrike");
-      sourceState = apply(
-        sourceState,
-        "corp",
-        (action) =>
-          action.type === "play_operation" &&
-          sourceDefinition(sourceState, action) ===
-            "onr_v1_301_punitive-counterstrike",
-      );
-      expect(
-        sourceState.eventModificationWindow?.candidates[0]?.sourceRef.definitionId,
-      ).toBe(definitionId);
-    }
-
     let removedSource = structuredClone(initial);
     moveCorpCardToHq(removedSource, "onr_v1_301_punitive-counterstrike");
     removedSource = apply(
@@ -9632,6 +12060,125 @@ describe("V1.6.2 Mechanikpaket B", () => {
         [{ kind: "unknown_effect", visibility: "public" } as never],
       ),
     ).toThrow(/Unsupported card implementation effect/);
+  });
+
+  it("executes typed add_bad_publicity card effects with redacted source projection", () => {
+    const state = createGameAfterSetup({ seed: "card-effect-add-bad-publicity" });
+    state.corp.badPublicity = 4;
+
+    const result = executeCardImplementationEffects(
+      state,
+      {
+        sourceCardId: state.corp.identity,
+        sourceDefinitionId: "synthetic_hidden_source" as CardDefinitionId,
+        sourceTitle: "Synthetic Hidden Source",
+        controller: "corp",
+      },
+      [
+        {
+          kind: "add_bad_publicity",
+          amount: 2,
+          visibility: "public",
+          sourceVisibility: "redacted",
+        },
+      ],
+    );
+
+    expect(state.corp.badPublicity).toBe(6);
+    expect(result.publicPayload).toMatchObject({
+      badPublicityAdded: 2,
+      corpBadPublicityBefore: 4,
+      corpBadPublicityAfter: 6,
+      sourceVisibility: "redacted",
+      redactedKind: "hidden_resource_source",
+    });
+    expect(result.publicPayload).not.toHaveProperty("sourceDefinitionId");
+    expect(result.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "add_bad_publicity",
+        visibility: "public",
+        side: "corp",
+        amount: 2,
+        reason: "card_resolver",
+        redactedKind: "hidden_resource_source",
+      }),
+    ]);
+    expect(result.resolvedEffects[0]).not.toHaveProperty("sourceDefinitionId");
+    expect(result.resolvedEffects[0]).not.toHaveProperty("sourceTitle");
+
+    const publicContext = publicContextForAction(
+      state,
+      {
+        actionId: "test_add_bad_publicity_redaction",
+        type: "play_operation",
+        side: "corp",
+        label: "Synthetic source",
+        source: state.corp.identity,
+        timingPoint: state.timingPoint,
+        costs: [],
+        targetRequirements: [],
+        visibility: "public",
+        expiresAtStateVersion: state.stateVersion,
+        payload: {
+          sourceDefinitionId: "synthetic_hidden_source",
+          ...result.publicPayload,
+        },
+        resolvedEffects: result.resolvedEffects,
+      } as LegalAction,
+      {
+        agendaPointsForScoredCard: () => 0,
+        cardCounter: () => 0,
+        cardStrengthModifier: () => 0,
+        creditCostForAction: () => 0,
+        definitionFor: () =>
+          DEMO_CARDS_BY_ID.simple_agenda ?? Object.values(DEMO_CARDS_BY_ID)[0]!,
+        pumpAmountForLegalAction: () => 0,
+        runnerHqAccessBonus: () => 0,
+        v1915InstalledAccessBonus: () => 0,
+      },
+    );
+    expect(publicContext).toMatchObject({
+      badPublicityAdded: 2,
+      corpBadPublicityBefore: 4,
+      corpBadPublicityAfter: 6,
+      sourceVisibility: "redacted",
+      redactedKind: "hidden_resource_source",
+    });
+    expect(publicContext).not.toHaveProperty("sourceDefinitionId");
+
+    const terminal = createGameAfterSetup({
+      seed: "card-effect-add-bad-publicity-terminal",
+    });
+    terminal.corp.badPublicity = 6;
+    executeCardImplementationEffects(
+      terminal,
+      { sourceCardId: terminal.corp.identity, controller: "corp" },
+      [
+        {
+          kind: "add_bad_publicity",
+          amount: 1,
+          visibility: "public",
+        },
+      ],
+    );
+    checkWinConditions(terminal);
+    expect(terminal.winner).toBe("runner");
+    expect(terminal.gameEndReason).toBe("bad_publicity_7");
+    expect(hashState(terminal)).toMatch(/^fnv1a:/);
+
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.corp.identity, controller: "corp" },
+        [
+          {
+            kind: "add_bad_publicity",
+            amount: 0,
+            visibility: "public",
+          },
+        ],
+      ),
+    ).toThrow(/positive integer/);
   });
 
   it("executes typed lose_credits card effects", () => {
@@ -42961,60 +45508,92 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     expect(hashState(topRunnersReplay.state)).toBe(hashState(topRunners));
   });
 
-  it("keeps Trauma Team and Umbrella Policy prevention choices source-safe", () => {
-    for (const [definitionId, preventedAmount] of [
-      ["onr_v1_185_trauma-team", 1],
-      ["onr_v1_186_umbrella-policy", 1],
-    ] as const) {
-      let state = toRunnerTurn(
-        MECHANIC_SMOKE_GAMES.damagePrevention(
-          `spotcheck-resource-scorearea-${definitionId}`,
-        ),
-      );
-      state.runner.credits = 30;
-      state.runner.clicks = 10;
-      state.corp.credits = 30;
-      moveRunnerCardToGrip(state, definitionId);
-      state = apply(
-        state,
-        "runner",
-        (action) =>
-          action.type === "install_card" &&
-          sourceDefinition(state, action) === definitionId,
-      );
-      state = apply(state, "runner", (action) => action.type === "end_turn");
-      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-      state.runner.tags = 1;
-      moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
-      const initial = structuredClone(state);
-      const replayStart = state.eventLog.length;
-      state = apply(
-        state,
-        "corp",
-        (action) =>
-          action.type === "play_operation" &&
-          sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
-      );
-      expect(state.pendingChoice?.side).toBe("runner");
-      const optionId = state.pendingChoice?.options.find(
-        (option) => option.id !== "pass",
-      )?.id;
-      expect(optionId).toBeDefined();
-      if (!optionId) throw new Error(`Missing prevention option for ${definitionId}`);
-      state = applyChoice(state, "runner", optionId);
-      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-        eventModificationDecision: "apply",
-        sourceDefinitionId: definitionId,
-        originalAmount: 2,
-        preventedAmount,
-      });
-      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-        privatePayloadMarkers,
-      );
-      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
-    }
+  it("keeps Trauma Team damage prevention choices source-safe", () => {
+    const definitionId = "onr_v1_185_trauma-team";
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.damagePrevention(
+        `spotcheck-resource-scorearea-${definitionId}`,
+      ),
+    );
+    state.runner.credits = 30;
+    state.runner.clicks = 10;
+    state.corp.credits = 30;
+    moveRunnerCardToGrip(state, definitionId);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === definitionId,
+    );
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.runner.tags = 1;
+    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+    );
+    expect(state.pendingChoice?.side).toBe("runner");
+    const optionId = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    )?.id;
+    expect(optionId).toBeDefined();
+    if (!optionId) throw new Error(`Missing prevention option for ${definitionId}`);
+    state = applyChoice(state, "runner", optionId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationDecision: "apply",
+      sourceDefinitionId: definitionId,
+      originalAmount: 2,
+      preventedAmount: 1,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("does not treat Umbrella Policy as Net Damage prevention during a run", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.damagePrevention("umbrella-data-darts-net-damage"),
+    );
+    state.runner.credits = 30;
+    state.runner.clicks = 10;
+    moveRunnerCardToGrip(state, "onr_v1_186_umbrella-policy");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_186_umbrella-policy",
+    );
+    putCorpIceOnServer(state, "rd", "onr_v1_234_data-darts");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "continue_run" && action.payload?.encounterContinue === true,
+    );
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.heap).toHaveLength(3);
+    expect(state.run?.phase).toBe("movement");
+    expect(getLegalActions(state, "runner").map((action) => action.type)).toContain(
+      "continue_run",
+    );
   });
 
   it("shows Trauma Team trauma counters after install and its add-counter action", () => {

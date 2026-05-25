@@ -9,24 +9,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_086_enterprise-inc-shields",
+        "coverage": [
+          "card_implementation",
+          "damage_prevention",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-5b-enterprise"
+        ],
+        "notes": "Proteus Phase 5b: Enterprise, Inc., Shields prevents up to 2 Net damage or 1 brain/core damage via paid public CardImplementation damage-prevention sources."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_002_charity-takeover",
@@ -35,24 +45,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_002_charity-takeover",
+        "coverage": [
+          "bad_publicity_loss_gate",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
-      },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+        "scenarioRefs": [
+          "proteus-phase-2b-scored-agenda-bad-publicity-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 2b: Charity Takeover scores through CardImplementation on_score effects, gains 9 credits, adds 1 Bad Publicity, and preserves bad_publicity_7 priority over simultaneous Corp agenda victory."
+      }
     },
     {
       "cardId": "onr_proteus_003_corporate-headhunters",
@@ -61,24 +81,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_096_skullcap",
+        "coverage": [
+          "card_implementation",
+          "damage_prevention",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "trash_source_cost",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-5b-skullcap"
+        ],
+        "notes": "Proteus Phase 5b: Skullcap prevents any amount of Net or brain/core damage by trashing the source through the generic CardImplementation damage-prevention cost path."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_004_fetal-ai",
@@ -87,24 +117,27 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/access/breach-state.test.ts",
+          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_005_marked-accounts",
@@ -113,24 +146,26 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/taxman.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_006_please-dont-choke-anyone",
@@ -139,24 +174,26 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/vienna-22.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/access/breach-state.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_007_project-venice",
@@ -165,24 +202,26 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/viral-pipeline.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_008_project-zurich",
@@ -191,24 +230,33 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:card-implementations/proteus/runner/programs/armageddon",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "random_draw_records",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-8f-random-bad-publicity-virus-longtail-2026-05-24"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_009_viral-breeding-ground",
@@ -217,24 +265,36 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_009_viral-breeding-ground",
+        "coverage": [
+          "card_implementation",
+          "access_effect",
+          "choice",
+          "hidden_zone_barrier",
+          "installed_program_return",
+          "public_payload",
+          "replay_statehash",
+          "score_effect",
+          "server_trash",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-8c-viral-breeding-ground"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_010_world-domination",
@@ -243,24 +303,33 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:card-implementations/proteus/runner/programs/scaldan",
+        "coverage": [
+          "bad_publicity_gate",
+          "card_implementation",
+          "legal_action",
+          "random_draw_records",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-8f-random-bad-publicity-virus-longtail-2026-05-24"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_011_brain-wash",
@@ -295,24 +364,36 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_012_bug-zapper",
+        "coverage": [
+          "card_implementation",
+          "dynamic_damage_subroutine",
+          "legal_action",
+          "public_payload",
+          "relative_ice_count",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3c-relative-board-count-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3c: onr_proteus_012_bug-zapper is implemented through generic relative ICE counting for rezzed ICE installed outside the current ICE in the same fort."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_013_caryatid",
@@ -321,24 +402,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_013_caryatid",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_013_caryatid is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_014_chihuahua",
@@ -425,24 +520,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_017_credit-blocks",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_017_credit-blocks is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_018_datacomb",
@@ -503,24 +612,37 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_020_digiconda",
+        "coverage": [
+          "card_implementation",
+          "effective_strength",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3a-variable-ice-foundation-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3a: Digiconda declares a generic x_strength variableRez CardImplementation; rez LegalActions bind X, persist variableIceState strength, and replay with stable StateHash."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_021_dog-pile",
@@ -529,24 +651,37 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_021_dog-pile",
+        "coverage": [
+          "card_implementation",
+          "dynamic_damage_subroutine",
+          "dynamic_strength",
+          "legal_action",
+          "public_payload",
+          "relative_ice_count",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3c-relative-board-count-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3c: onr_proteus_021_dog-pile is implemented through generic relative ICE counting for rezzed ICE installed outside the current ICE in the same fort."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_022_food-fight",
@@ -555,24 +690,37 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_022_food-fight",
+        "coverage": [
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3a-variable-ice-foundation-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3a: Food Fight declares a generic paid_end_the_run_subroutines variableRez CardImplementation; rez LegalActions bind 2-credit steps and persist subroutineCount for views, breaking, replay and StateHash."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_023_galatea",
@@ -581,24 +729,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_023_galatea",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_023_galatea is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_024_gatekeeper",
@@ -607,24 +769,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_024_gatekeeper",
+        "coverage": [
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_etr_subroutines",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_024_gatekeeper is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_025_homing-missile",
@@ -633,24 +809,39 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_025_homing-missile",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "trace_base",
+          "trace_bid_limit",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "variable_strength",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_025_homing-missile is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_026_hunting-pack",
@@ -659,24 +850,37 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_026_hunting-pack",
+        "coverage": [
+          "card_implementation",
+          "dynamic_trace_subroutines",
+          "legal_action",
+          "public_payload",
+          "relative_ice_count",
+          "replay_statehash",
+          "scenario",
+          "trace",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3c-relative-board-count-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3c: onr_proteus_026_hunting-pack is implemented through generic relative ICE counting for rezzed ICE installed outside the current ICE in the same fort."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_027_iceberg",
@@ -711,24 +915,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_028_lesser-arcana",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_028_lesser-arcana is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_029_marionette",
@@ -763,24 +981,37 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_030_mastermind",
+        "coverage": [
+          "card_implementation",
+          "dynamic_damage_subroutine",
+          "dynamic_strength",
+          "legal_action",
+          "public_payload",
+          "relative_ice_count",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3c-relative-board-count-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3c: onr_proteus_030_mastermind is implemented through generic relative ICE counting for rezzed ICE installed outside the current ICE in the same fort."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_031_minotaur",
@@ -789,24 +1020,32 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_031_minotaur",
+        "coverage": [
+          "card_implementation",
+          "dynamic_subroutine",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
-      },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+        "scenarioRefs": [
+          "proteus-phase-1b-dynamic-public-etr-ice-smoke-2026-05-24"
+        ]
+      }
     },
     {
       "cardId": "onr_proteus_032_misleading-access-menus",
@@ -841,24 +1080,29 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_033_mobile-barricade",
+        "coverage": [
+          "card_implementation",
+          "engine_tests",
+          "catalog_gate"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "data/scenarios/proteus-phase-3e-ice-repositioning-smoke-2026-05-24.json#mobile_barricade_unrezzed_reveal_reposition"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": [],
+      "notes": "Proteus Phase 3e: Mobile Barricade is implemented through a generic start-of-run same-fort self-ICE reposition window with unrezzed public reveal."
     },
     {
       "cardId": "onr_proteus_034_riddler",
@@ -867,24 +1111,32 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_034_riddler",
+        "coverage": [
+          "card_implementation",
+          "dynamic_subroutine",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
-      },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+        "scenarioRefs": [
+          "proteus-phase-1b-dynamic-public-etr-ice-smoke-2026-05-24"
+        ]
+      }
     },
     {
       "cardId": "onr_proteus_035_roadblock",
@@ -919,24 +1171,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_036_sandstorm",
+        "coverage": [
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_etr_subroutines",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_036_sandstorm is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_037_scaffolding",
@@ -997,24 +1263,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_039_sphinx-2006",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_039_sphinx-2006 is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_040_sumo-2008",
@@ -1023,24 +1303,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_040_sumo-2008",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_040_sumo-2008 is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_041_toughoniumtm-wall",
@@ -1061,6 +1355,7 @@
       "support": {
         "resolverRef": "engine:onr_proteus_041_toughoniumtm-wall",
         "coverage": [
+          "card_implementation",
           "legal_action",
           "replay_statehash",
           "scenario",
@@ -1069,7 +1364,9 @@
           "wrong_side_revalidation"
         ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24"
+        ]
       }
     },
     {
@@ -1131,24 +1428,29 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_044_walking-wall",
+        "coverage": [
+          "card_implementation",
+          "engine_tests",
+          "catalog_gate"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "data/scenarios/proteus-phase-3e-ice-repositioning-smoke-2026-05-24.json#walking_wall_rezzed_reposition_once_per_run"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": [],
+      "notes": "Proteus Phase 3e: Walking Wall is implemented through a generic start-of-run same-fort self-ICE reposition window with once-per-run source use."
     },
     {
       "cardId": "onr_proteus_045_washed-up-solo-construct",
@@ -1391,24 +1693,35 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_054_bel-digmo-antibody",
+        "coverage": [
+          "card_implementation",
+          "access_effect",
+          "damage",
+          "hidden_zone_barrier",
+          "lifecycle",
+          "public_payload",
+          "replay_statehash",
+          "shuffle_into_rd",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-8b-bel-digmo-antibody"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_055_cybertech-think-tank",
@@ -1469,24 +1782,35 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_057_doppelganger-antibody",
+        "coverage": [
+          "card_implementation",
+          "access_effect",
+          "choice",
+          "counter_display",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "runner_status_counter",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-8b-doppelganger-antibody"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_058_executive-boot-camp",
@@ -1599,20 +1923,32 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_062_lesley-major",
+        "coverage": [
+          "card_implementation",
+          "fort_run_window",
+          "legal_action",
+          "public_event_redaction",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-1d-public-fort-pass-windows-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 1d: public pass-last-ICE fort window adds advancement counters to an advanceable card in the same fort once per run."
       },
       "blockReasons": [
         "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
@@ -1677,24 +2013,31 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_065_networked-center",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
-      },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+        "scenarioRefs": [
+          "proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24"
+        ]
+      }
     },
     {
       "cardId": "onr_proteus_066_obfuscated-fortress",
@@ -1755,24 +2098,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_068_pattel-antibody",
+        "coverage": [
+          "card_implementation",
+          "access_effect",
+          "choice",
+          "counter_display",
+          "icebreaker_strength_modifier",
+          "public_payload",
+          "replay_statehash",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-8b-pattel-antibody"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_069_pavit-bharat",
@@ -1807,20 +2160,32 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_070_rasmin-bridger",
+        "coverage": [
+          "card_implementation",
+          "fort_run_window",
+          "legal_action",
+          "public_event_redaction",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-1d-public-fort-pass-windows-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 1d: public post-pass pay-or-end-run fort window after each passed ICE on the same fort."
       },
       "blockReasons": [
         "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
@@ -1859,24 +2224,31 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_072_research-bunker",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
-      },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+        "scenarioRefs": [
+          "proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24"
+        ]
+      }
     },
     {
       "cardId": "onr_proteus_073_simon-francisco",
@@ -1937,24 +2309,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_075_stereogram-antibody",
+        "coverage": [
+          "card_implementation",
+          "access_effect",
+          "damage",
+          "hidden_zone_barrier",
+          "public_payload",
+          "replay_statehash",
+          "shuffle_into_rd",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-8b-stereogram-antibody"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_076_syd-meyer-superstores",
@@ -1989,24 +2371,31 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_077_weapons-depot",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
-      },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+        "scenarioRefs": [
+          "proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24"
+        ]
+      }
     },
     {
       "cardId": "onr_proteus_078_armageddon",
@@ -2171,24 +2560,26 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/crumble.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/access/access-actions.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_085_disintegrator",
@@ -2197,20 +2588,33 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_085_disintegrator",
+        "coverage": [
+          "card_implementation",
+          "post_pass_fully_broken_ice",
+          "legal_action",
+          "apply_action_revalidation",
+          "public_event_redaction",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-1g-post-pass-derez-utility-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 1g: installed Runner program ability after passing a fully broken rezzed ICE; Runner pays 2, derezzes that ICE, and ends the run."
       },
       "blockReasons": [
         "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
@@ -2301,24 +2705,27 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/garbage-in.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/access/access-actions.test.ts",
+          "packages/engine/src/game/access/access-flow.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_090_highlighter",
@@ -2327,24 +2734,27 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/access/breach-state.test.ts",
+          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_091_lockjaw",
@@ -2509,24 +2919,26 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/taxman.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_098_vienna-22",
@@ -2535,24 +2947,26 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/vienna-22.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/access/breach-state.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_099_viral-pipeline",
@@ -2561,24 +2975,26 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/viral-pipeline.ts",
+        "coverage": [
+          "packages/engine/src/game/run/run-end-cleanup.test.ts",
+          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
+          "packages/engine/src/card-implementations/coverage.test.ts"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_100_wrecking-ball",
@@ -2795,24 +3211,35 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_108_faked-hit",
+        "coverage": [
+          "bad_publicity_loss_gate",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "unpreventable_damage",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
-      },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+        "scenarioRefs": [
+          "proteus-phase-2c-direct-runner-event-bp-damage-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 2c: Faked Hit plays through CardImplementation on_play effects, adds 1 Bad Publicity, then deals 2 unpreventable core damage while preserving bad_publicity_7 priority over simultaneous flatline."
+      }
     },
     {
       "cardId": "onr_proteus_109_frame-up",
@@ -3029,24 +3456,37 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_117_poisoned-water-supply",
+        "coverage": [
+          "bad_publicity_loss_gate",
+          "card_implementation",
+          "choice_revalidation",
+          "installed_connection_cost",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-2d-installed-connection-bp-cost-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 2d: Poisoned Water Supply plays through a CardImplementation runner event longtail, gates on two installed Runner connections, opens a hidden-info-barrier choice to trash exactly two installed connections, then reuses the generic add_bad_publicity effect."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_118_prearranged-drop",
@@ -3471,24 +3911,35 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_134_cortical-cybermodem",
+        "coverage": [
+          "card_implementation",
+          "hardware_deck",
+          "legal_action",
+          "modifier",
+          "public_payload",
+          "replay_statehash",
+          "restricted_hosted_credits",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-7b-cortical-cybermodem"
+        ],
+        "notes": "Proteus Phase 7b: Cortical Cybermodem is implemented as public Deck hardware with +2 MU, +2 max hand size, two source-bound icebreaker-run bits and start-of-turn refill through generic CardImplementation families."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_135_cortical-stimulators",
@@ -3497,24 +3948,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_135_cortical-stimulators",
+        "coverage": [
+          "card_implementation",
+          "damage_prevention",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "turn_limit",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-7c-cortical-stimulators"
+        ],
+        "notes": "Proteus Phase 7c: Cortical Stimulators prevents 1 Net or core/brain damage each turn through a public generic damagePreventionSources CardImplementation."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_136_credit-subversion",
@@ -3575,24 +4036,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_138_deck-the",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "modifier",
+          "public_payload",
+          "replay_statehash",
+          "trace_link",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-7a-deck-the"
+        ],
+        "notes": "Proteus Phase 7a: Deck, The is implemented as public Deck hardware with generic hardwareDeck uniqueness, +1 MU and existing base-link/trace-link CardImplementation abilities."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
@@ -3783,24 +4254,31 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_146_precision-bribery",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
-      },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+        "scenarioRefs": [
+          "proteus-phase-9d-data-fort-creation-lock-smoke-2026-05-24"
+        ]
+      }
     },
     {
       "cardId": "onr_proteus_147_r-and-d-mole",
@@ -3887,24 +4365,31 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_150_streetware-distributor",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
-      },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+        "scenarioRefs": [
+          "proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24"
+        ]
+      }
     },
     {
       "cardId": "onr_proteus_151_sunburst-cranial-interface",
@@ -3913,24 +4398,36 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_151_sunburst-cranial-interface",
+        "coverage": [
+          "card_implementation",
+          "hardware_deck",
+          "legal_action",
+          "modifier",
+          "noisy_icebreaker_restriction",
+          "public_payload",
+          "replay_statehash",
+          "restricted_hosted_credits",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-7b-sunburst-cranial-interface"
+        ],
+        "notes": "Proteus Phase 7b: Sunburst Cranial Interface is implemented as public Deck hardware with +1 MU, +1 max hand size and one source-bound non-noisy icebreaker-run bit through generic restricted hosted credit support."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_152_swiss-bank-account",

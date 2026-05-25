@@ -10,6 +10,8 @@ import {
   type CorpServer,
   type GameState,
   type PlayerView,
+  type PurgeableRunnerVirusCounterBucket,
+  type PurgeableRunnerVirusCounterType,
   type ServerId,
   type Side,
   type VisibleCard,
@@ -49,7 +51,7 @@ export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCar
     title: definition.title,
     definitionId: definition.id,
     type: definition.type,
-    subtypes: definition.subtypes,
+    subtypes: effectiveSubtypesForCard(state, id, definition),
     rulesText: definition.rulesText,
     ...(definition.cost !== undefined ? { cost: definition.cost } : {}),
     ...(definition.installCost !== undefined
@@ -92,7 +94,8 @@ export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCar
               : definition.strength +
                 instance.strengthModifier +
                 hostedProgramStrengthModifier(state, id) +
-                runRemainderStrengthBonus,
+                runRemainderStrengthBonus -
+                pattelAntibodyStrengthPenalty(instance),
         }
       : {}),
     ...(definition.agendaPoints !== undefined
@@ -125,6 +128,10 @@ export function visibleCorpIdentityCard(state: GameState): VisibleCard {
     ...counterDisplaysField([
       ...(card.counterDisplays ?? []),
       ...(skivvissCorpCounterDisplays(state) ?? []),
+      ...(purgeableRunnerVirusCounterDisplaysForBucket(
+        state.purgeableRunnerVirusCounters?.corp,
+        "corp",
+      ) ?? []),
     ]),
   };
 }
@@ -367,6 +374,22 @@ function specialCounterDisplays(
       counterType: "militech",
       usageHint: "spendable",
     }),
+    ...singleCounterDisplay(counters.doppelganger_antibody, {
+      id: "doppelganger_antibody",
+      displayKind: "generic_counter",
+      label: "Doppelganger-Counter",
+      ariaLabelName: "Doppelganger-Counter",
+      counterType: "doppelganger_antibody",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.pattel_antibody, {
+      id: "pattel_antibody",
+      displayKind: "generic_counter",
+      label: "Pattel-Counter",
+      ariaLabelName: "Pattel-Counter",
+      counterType: "pattel_antibody",
+      usageHint: "status_marker",
+    }),
     ...singleCounterDisplay(counters.mark, {
       id: "mark",
       displayKind: "generic_counter",
@@ -420,6 +443,72 @@ export function poxCounterDisplaysForServer(
   ];
 }
 
+export function purgeableRunnerVirusCounterDisplaysForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): VisibleCard["counterDisplays"] {
+  return purgeableRunnerVirusCounterDisplaysForBucket(
+    state.purgeableRunnerVirusCounters?.servers?.[serverId],
+    `server_${serverId}`,
+  );
+}
+
+const PURGEABLE_RUNNER_VIRUS_COUNTER_DISPLAY_ORDER: readonly PurgeableRunnerVirusCounterType[] =
+  [
+    "doom",
+    "crumble",
+    "garbage",
+    "highlighter",
+    "scaldan",
+    "tax",
+    "vienna",
+    "socket_archives",
+    "socket_hq",
+    "socket_rd",
+    "pipe",
+  ];
+
+function purgeableRunnerVirusCounterDisplaysForBucket(
+  bucket: PurgeableRunnerVirusCounterBucket | undefined,
+  scopeId: string,
+): VisibleCard["counterDisplays"] {
+  if (!bucket) return undefined;
+  const displays = PURGEABLE_RUNNER_VIRUS_COUNTER_DISPLAY_ORDER.flatMap(
+    (counterType) => {
+      const amount = Math.max(0, Math.floor(Number(bucket[counterType] ?? 0)));
+      if (amount <= 0) return [];
+      const label = purgeableRunnerVirusCounterLabel(counterType);
+      return [
+        {
+          id: `runner_virus_${scopeId}_${counterType}`,
+          amount,
+          displayKind: "virus" as const,
+          label,
+          ariaLabel: `${amount} ${label}`,
+          counterType,
+          usageHint: "status_marker" as const,
+        },
+      ];
+    },
+  );
+  return displays.length > 0 ? displays : undefined;
+}
+
+function purgeableRunnerVirusCounterLabel(
+  counterType: PurgeableRunnerVirusCounterType,
+): string {
+  switch (counterType) {
+    case "socket_archives":
+      return "Socket-Counter Archives";
+    case "socket_hq":
+      return "Socket-Counter HQ";
+    case "socket_rd":
+      return "Socket-Counter R&D";
+    default:
+      return `${counterType[0]?.toUpperCase() ?? ""}${counterType.slice(1)}-Counter`;
+  }
+}
+
 function singleCounterDisplay(
   rawAmount: number | undefined,
   display: {
@@ -448,6 +537,10 @@ function singleCounterDisplay(
       usageHint: display.usageHint,
     },
   ];
+}
+
+function pattelAntibodyStrengthPenalty(instance: CardInstance): number {
+  return Math.max(0, Math.floor(instance.counters?.pattel_antibody ?? 0));
 }
 
 export function visibleRunnerRigCardForViewer(
@@ -517,6 +610,7 @@ export function visibleCorpCard(
     viewer === "runner" && state.run?.approachIceExposeViewingIceId === id;
   const visible =
     viewer === "corp" ||
+    instance.faceup ||
     instance.rezzed ||
     exposedBySpyCounter ||
     accessed ||
@@ -707,14 +801,15 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
       : 0;
   const pattelsReduction = cardCounter(state, iceId, "virus");
   const baseStrength =
-    instance.proteusVariableIceState?.family === "x_strength" &&
-    typeof instance.proteusVariableIceState.strength === "number"
-      ? instance.proteusVariableIceState.strength
+    instance.variableIceState?.family === "x_strength" &&
+    typeof instance.variableIceState.strength === "number"
+      ? instance.variableIceState.strength
       : (definition.strength ?? 0);
   const total =
     baseStrength +
     instance.strengthModifier +
     iceStrengthBonusFor(state, iceId) +
+    relativeIceStrengthBonusFor(state, iceId) +
     runEncounterBonus -
     pattelsReduction;
   return Math.max(0, total);
@@ -722,6 +817,7 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
 
 function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   const iceDefinition = definitionFor(state, iceId);
+  const iceSubtypes = effectiveSubtypesForCard(state, iceId, iceDefinition);
   const iceServerId = corpServerIdForInstalledCard(state, iceId);
   let bonus = 0;
   for (const agendaId of state.corp.scoreArea) {
@@ -745,12 +841,12 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
         bonus += 1;
       if (
         agendaDefinition.id === ENCRYPTION_BREAKTHROUGH_ID &&
-        cardHasSubtype(iceDefinition, "code_gate")
+        iceSubtypes.includes("code_gate")
       )
         bonus += 1;
       if (
         agendaDefinition.id === SUPERIOR_NET_BARRIERS_ID &&
-        cardHasSubtype(iceDefinition, "wall")
+        iceSubtypes.includes("wall")
       )
         bonus += 1;
     }
@@ -787,6 +883,64 @@ function spyCountersForServer(
 
 function cardHasSubtype(definition: CardDefinition, subtype: string): boolean {
   return definition.subtypes?.includes(subtype) ?? false;
+}
+
+function normalizeSubtypeLabel(subtype: string): string {
+  return subtype
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function stableSubtypeList(subtypes: readonly string[]): string[] {
+  return [...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype)))]
+    .sort();
+}
+
+function effectiveSubtypesForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition = definitionFor(state, cardId),
+): string[] {
+  const instance = state.cardInstances[cardId];
+  const selectedSubtypes = instance?.variableIceState?.selectedSubtypes;
+  if (
+    definition.type === "ice" &&
+    instance?.rezzed &&
+    selectedSubtypes &&
+    selectedSubtypes.length > 0
+  )
+    return stableSubtypeList(selectedSubtypes);
+  return stableSubtypeList(definition.subtypes ?? []);
+}
+
+function rezzedIceOutsideThisIceCount(
+  state: GameState,
+  iceId: CardInstanceId,
+): number {
+  const instance = state.cardInstances[iceId];
+  if (!instance || instance.zone.side !== "corp" || instance.zone.zone !== "serverIce")
+    return 0;
+  const serverId = instance.zone.serverId;
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) return 0;
+  const iceIndex = server.ice.indexOf(iceId);
+  if (iceIndex < 0) return 0;
+  return server.ice
+    .slice(iceIndex + 1)
+    .filter((candidateId) => state.cardInstances[candidateId]?.rezzed === true)
+    .length;
+}
+
+function relativeIceStrengthBonusFor(
+  state: GameState,
+  iceId: CardInstanceId,
+): number {
+  const relativeIce =
+    cardImplementationForDefinitionId(definitionFor(state, iceId).id)?.relativeIce;
+  const bonusPerCount = relativeIce?.strengthBonusPerCount;
+  if (!bonusPerCount) return 0;
+  return rezzedIceOutsideThisIceCount(state, iceId) * bonusPerCount;
 }
 
 export function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {

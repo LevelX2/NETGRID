@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "scenario-pack-v1",
+  "scenarioId": "proteus-phase-3c-relative-board-count-ice-smoke-2026-05-24",
+  "release": "Proteus Phase 3c Relative Board-Count ICE",
+  "coversCards": [
+    "onr_proteus_012_bug-zapper",
+    "onr_proteus_021_dog-pile",
+    "onr_proteus_026_hunting-pack",
+    "onr_proteus_030_mastermind"
+  ],
+  "assertions": [
+    "All Phase 3c cards have engine-local per-card CardImplementation files.",
+    "Relative ICE count uses only rezzed ICE installed outside the current ICE in the same fort.",
+    "Bug Zapper, Dog Pile and Mastermind use the count for dynamic damage subroutines.",
+    "Dog Pile and Mastermind use the count for effective public strength.",
+    "Hunting Pack creates one Trace 5 tag subroutine per counted ICE.",
+    "Public payloads and player views expose counts only through public effects and do not leak unrezzed ICE identities.",
+    "Replay and StateHash remain stable across relative damage, strength and trace-subroutine resolution."
+  ],
+  "checks": [
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/coverage.test.ts -t \"Proteus Phase 3c\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts -t \"Proteus Phase 3c\"",
+    "corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t \"Proteus Phase 3c\"",
+    "corepack pnpm --filter @netgrid/catalog exec vitest run src/index.test.ts -t \"Proteus\"",
+    "corepack pnpm --filter @netgrid/web exec vitest run app/api/cards/catalog-data.test.ts -t \"Proteus\""
+  ]
+}

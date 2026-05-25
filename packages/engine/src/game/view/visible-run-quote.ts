@@ -9,6 +9,7 @@ import {
 } from "@netgrid/shared";
 import {
   additionalSubroutinesForIce,
+  currentEncounterAdditionalSubroutinesForIce,
   dynamicSubroutineAttributionFor,
 } from "../../ability-engine/additional-subroutine-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "../../ability-engine/break-subroutine-cost-modifiers";
@@ -30,6 +31,7 @@ export function visibleEffectiveIceRunQuote(
   const subroutines = [
     ...printedSubroutines,
     ...runDurationAdditionalSubroutinesForIce(state, iceId),
+    ...currentEncounterAdditionalSubroutinesForIce(state, iceId),
     ...additionalSubroutinesForIce(state, iceId),
   ].map(visibleEffectiveSubroutine);
   const breakCostQuote = quoteBreakSubroutineCostModifiers(state, iceId, 1);

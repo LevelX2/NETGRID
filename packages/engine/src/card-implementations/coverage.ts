@@ -96,6 +96,9 @@ const IMPLEMENTED_FORT_RUN_WINDOW_LOCATION =
 const IMPLEMENTED_RUN_ENCOUNTER_INTERVENTION_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_VARIABLE_REZ_LOCATION =
+  "packages/engine/src/card-implementations";
+
 const IMPLEMENTED_HIDDEN_REPLACEMENT_LONGTAIL_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
@@ -758,6 +761,68 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tesseract-fort-construction.ts",
   "onr_v1_374_washington-d-c-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/washington-d-c-city-grid.ts",
+  "onr_proteus_031_minotaur":
+    "packages/engine/src/card-implementations/proteus/corp/ice/minotaur.ts",
+  "onr_proteus_033_mobile-barricade":
+    "packages/engine/src/card-implementations/proteus/corp/ice/mobile-barricade.ts",
+  "onr_proteus_034_riddler":
+    "packages/engine/src/card-implementations/proteus/corp/ice/riddler.ts",
+  "onr_proteus_041_toughoniumtm-wall":
+    "packages/engine/src/card-implementations/proteus/corp/ice/toughonium-wall.ts",
+  "onr_proteus_044_walking-wall":
+    "packages/engine/src/card-implementations/proteus/corp/ice/walking-wall.ts",
+  "onr_proteus_009_viral-breeding-ground":
+    "packages/engine/src/card-implementations/proteus/corp/agendas/viral-breeding-ground.ts",
+  "onr_proteus_054_bel-digmo-antibody":
+    "packages/engine/src/card-implementations/proteus/corp/assets/bel-digmo-antibody.ts",
+  "onr_proteus_057_doppelganger-antibody":
+    "packages/engine/src/card-implementations/proteus/corp/assets/doppelganger-antibody.ts",
+  "onr_proteus_068_pattel-antibody":
+    "packages/engine/src/card-implementations/proteus/corp/assets/pattel-antibody.ts",
+  "onr_proteus_075_stereogram-antibody":
+    "packages/engine/src/card-implementations/proteus/corp/assets/stereogram-antibody.ts",
+  "onr_proteus_062_lesley-major":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/lesley-major.ts",
+  "onr_proteus_065_networked-center":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/networked-center.ts",
+  "onr_proteus_070_rasmin-bridger":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/rasmin-bridger.ts",
+  "onr_proteus_072_research-bunker":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/research-bunker.ts",
+  "onr_proteus_077_weapons-depot":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/weapons-depot.ts",
+  "onr_proteus_078_armageddon":
+    "packages/engine/src/card-implementations/proteus/runner/programs/armageddon.ts",
+  "onr_proteus_084_crumble":
+    "packages/engine/src/card-implementations/proteus/runner/programs/crumble.ts",
+  "onr_proteus_086_enterprise-inc-shields":
+    "packages/engine/src/card-implementations/proteus/runner/programs/enterprise-inc-shields.ts",
+  "onr_proteus_089_garbage-in":
+    "packages/engine/src/card-implementations/proteus/runner/programs/garbage-in.ts",
+  "onr_proteus_090_highlighter":
+    "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
+  "onr_proteus_094_scaldan":
+    "packages/engine/src/card-implementations/proteus/runner/programs/scaldan.ts",
+  "onr_proteus_096_skullcap":
+    "packages/engine/src/card-implementations/proteus/runner/programs/skullcap.ts",
+  "onr_proteus_097_taxman":
+    "packages/engine/src/card-implementations/proteus/runner/programs/taxman.ts",
+  "onr_proteus_098_vienna-22":
+    "packages/engine/src/card-implementations/proteus/runner/programs/vienna-22.ts",
+  "onr_proteus_099_viral-pipeline":
+    "packages/engine/src/card-implementations/proteus/runner/programs/viral-pipeline.ts",
+  "onr_proteus_134_cortical-cybermodem":
+    "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-cybermodem.ts",
+  "onr_proteus_135_cortical-stimulators":
+    "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-stimulators.ts",
+  "onr_proteus_138_deck-the":
+    "packages/engine/src/card-implementations/proteus/runner/hardware/deck-the.ts",
+  "onr_proteus_151_sunburst-cranial-interface":
+    "packages/engine/src/card-implementations/proteus/runner/hardware/sunburst-cranial-interface.ts",
+  "onr_proteus_146_precision-bribery":
+    "packages/engine/src/card-implementations/proteus/runner/resources/precision-bribery.ts",
+  "onr_proteus_150_streetware-distributor":
+    "packages/engine/src/card-implementations/proteus/runner/resources/streetware-distributor.ts",
 };
 
 const CURRENT_RELEASE_CARD_DEFINITION_ID_PATTERN = /^onr_v1_\d{3}_/;
@@ -795,6 +860,16 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for passive Corp install-cost modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_INSTALL_COST_MODIFIER_LOCATION);
+  }
+  if (
+    implementation.modifiers?.some(
+      (modifier) => modifier.kind === "new_data_fort_creation_lock",
+    )
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive new data-fort creation lock behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION);
   }
   if (
     implementation.modifiers?.some((modifier) => modifier.kind === "steal_cost")
@@ -1009,6 +1084,18 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for run/encounter intervention behavior.",
     );
     currentLocations.add(IMPLEMENTED_RUN_ENCOUNTER_INTERVENTION_LOCATION);
+  }
+  if (implementation.variableRez) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for variable rez and persistent variable ICE state behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_VARIABLE_REZ_LOCATION);
+  }
+  if (implementation.relativeIce) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for relative ICE count behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_VARIABLE_REZ_LOCATION);
   }
   if (implementation.virusCounter) {
     reasons.push(

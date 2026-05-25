@@ -1478,6 +1478,48 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionCostChips(searchInstall)).toEqual([]);
   });
 
+  it("mirrors pending run choices into the Run window", () => {
+    const pendingChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      choiceId: "v120_choice_damage",
+      side: "runner",
+      source: "v120.event_modification.prevent",
+      prompt: "Damage Prevention",
+      kind: "select_option",
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 1,
+      visibility: "hidden_info_barrier",
+      options: [
+        { id: "pass", label: "Nicht verhindern", publicLabel: "Event Modification" },
+        { id: "prevent_1", label: "Shield: 1 Schaden verhindern", publicLabel: "Event Modification" }
+      ]
+    };
+    const running = view("runner", {
+      pendingChoice,
+      run: {
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: card("ice_1", "Shotgun Wire", "ice"),
+        successful: false
+      }
+    });
+    const choiceAction = legalAction(
+      "runner",
+      "resolve_choice",
+      "game_rule",
+      "Damage Prevention",
+      {
+        choiceId: pendingChoice.choiceId,
+        choiceVisibility: "hidden_info_barrier",
+        choiceKind: "select_option"
+      },
+      "run.encounter_ice"
+    );
+
+    expect(runWindowActions(running, [choiceAction])).toEqual([choiceAction]);
+  });
+
   it("keeps long run-window breaker examples compact while leaving costs to chips", () => {
     const krash = card("krash_1", "Krash", "program");
     const running = view("runner", {

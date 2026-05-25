@@ -35,6 +35,10 @@ export type CardEffectExecutionContext = {
     damageType: Extract<DamageType, "meat" | "net" | "core">,
     amount: number,
   ) => CardEffectDamageResult;
+  unpreventableDamageRunner?: (
+    damageType: Extract<DamageType, "meat" | "net" | "core">,
+    amount: number,
+  ) => CardEffectDamageResult;
   addHostedCredits?: (
     sourceCardId: CardInstanceId,
     amount: number,
@@ -74,9 +78,15 @@ export type CardEffectExecutionContext = {
     options: CardEffectMakeRunOptions,
   ) => CardEffectMakeRunResult;
   addCounterToAllInstalledRunnerIcebreakers?: (
-    counterType: Extract<CounterType, "militech">,
+    counterType: CounterType,
     amount: number,
   ) => CardEffectCounterResult;
+  shuffleSourceIntoCorpRd?: (
+    sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
+  trashCorpInstalledCardsInSourceServer?: (
+    sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
   gainRunnerEventAgendaPoint?: (amount: 1) => CardEffectHiddenInfoResult;
   runnerLiberatedAgendaSubtypeThisTurn?: (
     subtype: "research" | "gray_ops" | "black_ops",
@@ -169,6 +179,10 @@ export type CardEffectExecutionContext = {
     source: "chosen_card" | "source_card",
     maxAmount: number | "all",
   ) => CardEffectAdvancementChoiceResult;
+  addCurrentEncounterAdditionalSubroutine?: (input: {
+    subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
+    amount?: number;
+  }) => CardEffectHiddenInfoResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -198,7 +212,10 @@ export type CardEffectHostedCreditsResult = {
 
 export type CardEffectCounterResult = {
   amount: number;
-  counterType: Extract<CounterType, "ablative" | "trauma" | "boon" | "militech">;
+  counterType: Extract<
+    CounterType,
+    "ablative" | "trauma" | "boon" | "militech" | "pattel_antibody"
+  >;
   countersAfter: number;
   publicPayload?: Record<string, string | number | boolean>;
 };
@@ -357,6 +374,11 @@ function assertPublicVisibility(kind: string, visibility: string): void {
     throw new Error(`${kind} effect visibility must be public.`);
 }
 
+function assertHiddenInfoBarrierVisibility(kind: string, visibility: string): void {
+  if (visibility !== "hidden_info_barrier")
+    throw new Error(`${kind} effect visibility must be hidden_info_barrier.`);
+}
+
 function mergePublicPayload(
   target: Record<string, string | number | boolean>,
   next: Record<string, string | number | boolean> | undefined,
@@ -421,6 +443,44 @@ export function executeCardImplementationEffects(
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),
           ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "add_bad_publicity": {
+        assertPositiveIntegerAmount("add_bad_publicity", effect.amount);
+        assertPublicVisibility("add_bad_publicity", effect.visibility);
+        const sourceVisibility = effect.sourceVisibility ?? "public";
+        if (sourceVisibility !== "public" && sourceVisibility !== "redacted")
+          throw new Error(
+            "add_bad_publicity sourceVisibility must be public or redacted.",
+          );
+        const before = state.corp.badPublicity;
+        state.corp.badPublicity += effect.amount;
+        publicPayload.badPublicityAdded =
+          Number(publicPayload.badPublicityAdded ?? 0) + effect.amount;
+        if (typeof publicPayload.corpBadPublicityBefore !== "number")
+          publicPayload.corpBadPublicityBefore = before;
+        publicPayload.corpBadPublicityAfter = state.corp.badPublicity;
+        publicPayload.sourceVisibility = sourceVisibility;
+        if (sourceVisibility === "redacted") {
+          publicPayload.redactedKind = "hidden_resource_source";
+        }
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "add_bad_publicity"),
+          kind: "add_bad_publicity",
+          visibility: effect.visibility,
+          side: "corp",
+          amount: effect.amount,
+          reason: effectReason(context),
+          ...(sourceVisibility === "redacted"
+            ? { redactedKind: "hidden_resource_source" }
+            : {}),
+          ...(sourceVisibility === "public" && context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(sourceVisibility === "public" && context.sourceTitle
+            ? { sourceTitle: context.sourceTitle }
+            : {}),
         });
         return;
       }
@@ -593,6 +653,36 @@ export function executeCardImplementationEffects(
         });
         return;
       }
+      case "add_current_encounter_additional_subroutine": {
+        assertPublicVisibility(
+          "add_current_encounter_additional_subroutine",
+          effect.visibility,
+        );
+        if (effect.target !== "encountered_ice_self")
+          throw new Error(
+            "add_current_encounter_additional_subroutine supports only encountered_ice_self.",
+          );
+        if (effect.append !== "after_existing")
+          throw new Error(
+            "add_current_encounter_additional_subroutine supports only after_existing append.",
+          );
+        if (effect.subroutine.visibility !== "public")
+          throw new Error(
+            "add_current_encounter_additional_subroutine requires a public subroutine.",
+          );
+        if (!context.addCurrentEncounterAdditionalSubroutine)
+          throw new Error(
+            "add_current_encounter_additional_subroutine requires an encounter execution context.",
+          );
+        const result = context.addCurrentEncounterAdditionalSubroutine({
+          subroutineKind: effect.subroutine.kind,
+          ...(effect.subroutine.kind === "end_the_run_unless_runner_pays"
+            ? { amount: effect.subroutine.amount }
+            : {}),
+        });
+        mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
       case "remove_tags": {
         assertPublicVisibility("remove_tags", effect.visibility);
         if (effect.recipient !== "runner")
@@ -715,13 +805,20 @@ export function executeCardImplementationEffects(
           )
         )
           throw new Error("damage effect damageType must be meat, net, or core.");
-        if ((effect as { preventable?: boolean }).preventable !== true)
-          throw new Error("damage effect must be preventable.");
-        if (!context.damageRunner)
+        const preventable = (effect as { preventable?: boolean }).preventable;
+        if (preventable !== true && preventable !== false)
+          throw new Error("damage effect preventable must be true or false.");
+        const damageRunner =
+          preventable === true
+            ? context.damageRunner
+            : context.unpreventableDamageRunner;
+        if (!damageRunner)
           throw new Error(
-            "damage effect requires a damageRunner execution context.",
+            preventable === true
+              ? "damage effect requires a damageRunner execution context."
+              : "unpreventable damage effect requires an unpreventableDamageRunner execution context.",
           );
-        const damageResult = context.damageRunner(
+        const damageResult = damageRunner(
           effect.damageType,
           effect.amount,
         );
@@ -735,6 +832,7 @@ export function executeCardImplementationEffects(
           amount: damageResult.amount,
           damageType: damageResult.damageType,
           cardsTrashed: damageResult.cardsTrashed,
+          preventable,
           reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
@@ -767,9 +865,12 @@ export function executeCardImplementationEffects(
           "add_counter_to_all_installed_runner_icebreakers",
           effect.visibility,
         );
-        if (effect.counterType !== "militech")
+        if (
+          effect.counterType !== "militech" &&
+          effect.counterType !== "pattel_antibody"
+        )
           throw new Error(
-            "add_counter_to_all_installed_runner_icebreakers supports only Militech counters.",
+            "add_counter_to_all_installed_runner_icebreakers supports only configured public icebreaker counters.",
           );
         if (!context.addCounterToAllInstalledRunnerIcebreakers)
           throw new Error(
@@ -798,6 +899,38 @@ export function executeCardImplementationEffects(
             : {}),
           ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
         });
+        return;
+      }
+      case "shuffle_source_into_corp_rd": {
+        assertHiddenInfoBarrierVisibility(
+          "shuffle_source_into_corp_rd",
+          effect.visibility,
+        );
+        if (!context.shuffleSourceIntoCorpRd)
+          throw new Error(
+            "shuffle_source_into_corp_rd requires a movement execution context.",
+          );
+        const moveResult = context.shuffleSourceIntoCorpRd(context.sourceCardId);
+        mergePublicPayload(publicPayload, moveResult.publicPayload);
+        return;
+      }
+      case "trash_corp_installed_cards_in_source_server": {
+        assertHiddenInfoBarrierVisibility(
+          "trash_corp_installed_cards_in_source_server",
+          effect.visibility,
+        );
+        if (effect.include !== "root_and_ice")
+          throw new Error(
+            "trash_corp_installed_cards_in_source_server supports only root_and_ice.",
+          );
+        if (!context.trashCorpInstalledCardsInSourceServer)
+          throw new Error(
+            "trash_corp_installed_cards_in_source_server requires a server trash context.",
+          );
+        const trashResult = context.trashCorpInstalledCardsInSourceServer(
+          context.sourceCardId,
+        );
+        mergePublicPayload(publicPayload, trashResult.publicPayload);
         return;
       }
       case "gain_runner_event_agenda_point": {

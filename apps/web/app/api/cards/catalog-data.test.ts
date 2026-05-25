@@ -180,35 +180,66 @@ describe("catalog API filters", () => {
   });
 
   it("guards the Proteus visible baseline against decklegal, AI or broad promotion", () => {
-    const [candidateId] = PROTEUS_VISIBLE_BASELINE_CARD_IDS;
-    expect(candidateId).toBeDefined();
-    if (!candidateId) throw new Error("Missing Proteus visible baseline card");
-    const candidateResponse = catalogDetailResponse(candidateId);
-    expect(candidateResponse.status).toBe(200);
-    const candidateBody = candidateResponse.body as {
-      card: {
-        catalogCardId: string;
-        statuses: {
-          human_playable: boolean;
-          deck_legal: boolean;
-          format_legal: boolean;
-          ai_supported: boolean;
-          blocked: boolean;
+    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
+      "onr_proteus_002_charity-takeover",
+      "onr_proteus_012_bug-zapper",
+      "onr_proteus_013_caryatid",
+      "onr_proteus_017_credit-blocks",
+      "onr_proteus_020_digiconda",
+      "onr_proteus_021_dog-pile",
+      "onr_proteus_022_food-fight",
+      "onr_proteus_023_galatea",
+      "onr_proteus_024_gatekeeper",
+      "onr_proteus_025_homing-missile",
+      "onr_proteus_026_hunting-pack",
+      "onr_proteus_028_lesser-arcana",
+      "onr_proteus_030_mastermind",
+      "onr_proteus_031_minotaur",
+      "onr_proteus_033_mobile-barricade",
+      "onr_proteus_034_riddler",
+      "onr_proteus_036_sandstorm",
+      "onr_proteus_039_sphinx-2006",
+      "onr_proteus_040_sumo-2008",
+      "onr_proteus_041_toughoniumtm-wall",
+      "onr_proteus_044_walking-wall",
+      "onr_proteus_062_lesley-major",
+      "onr_proteus_065_networked-center",
+      "onr_proteus_070_rasmin-bridger",
+      "onr_proteus_072_research-bunker",
+      "onr_proteus_077_weapons-depot",
+      "onr_proteus_085_disintegrator",
+      "onr_proteus_108_faked-hit",
+      "onr_proteus_117_poisoned-water-supply",
+      "onr_proteus_150_streetware-distributor",
+    ]);
+    for (const candidateId of PROTEUS_VISIBLE_BASELINE_CARD_IDS) {
+      const candidateResponse = catalogDetailResponse(candidateId);
+      expect(candidateResponse.status).toBe(200);
+      const candidateBody = candidateResponse.body as {
+        card: {
+          catalogCardId: string;
+          statuses: {
+            human_playable: boolean;
+            deck_legal: boolean;
+            format_legal: boolean;
+            ai_supported: boolean;
+            blocked: boolean;
+          };
+          aiHints: { aiSupportStatus: string } | null;
         };
-        aiHints: { aiSupportStatus: string } | null;
       };
-    };
-    expect(candidateBody.card).toMatchObject({
-      catalogCardId: candidateId,
-      statuses: {
-        human_playable: true,
-        deck_legal: false,
-        format_legal: false,
-        ai_supported: false,
-        blocked: false,
-      },
-      aiHints: null,
-    });
+      expect(candidateBody.card).toMatchObject({
+        catalogCardId: candidateId,
+        statuses: {
+          human_playable: true,
+          deck_legal: false,
+          format_legal: false,
+          ai_supported: false,
+          blocked: false,
+        },
+        aiHints: null,
+      });
+    }
 
     const humanPlayableResponse = catalogListResponse(
       new URLSearchParams({ status: "human_playable", q: "Toughonium" }),
@@ -218,7 +249,7 @@ describe("catalog API filters", () => {
       cards: Array<{ catalogCardId: string }>;
     };
     expect(humanPlayableBody.cards.map((card) => card.catalogCardId)).toEqual([
-      candidateId,
+      "onr_proteus_041_toughoniumtm-wall",
     ]);
 
     for (const status of ["deck_legal", "format_legal", "ai_supported"] as const) {
@@ -231,7 +262,7 @@ describe("catalog API filters", () => {
     }
 
     const outsideResponse = catalogDetailResponse(
-      "onr_proteus_031_minotaur",
+      "onr_proteus_001_ai-board-member",
     );
     expect(outsideResponse.status).toBe(200);
     const outsideBody = outsideResponse.body as {

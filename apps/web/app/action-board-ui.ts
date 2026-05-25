@@ -1180,6 +1180,7 @@ export function runAwareActionButtonLabel(view: PlayerView, action: LegalAction)
 export function runWindowActions(view: PlayerView, actions: LegalAction[]): LegalAction[] {
   if (!view.run) return [];
   return actions.filter((action) => {
+    if (action.type === "resolve_choice" && view.pendingChoice) return true;
     if (isAccessWindowAction(action)) return true;
     if (!action.timingPoint.startsWith("run.")) return false;
     if (action.type === "pump_breaker" || action.type === "break_subroutine") return action.payload?.iceId === activeRunIceInstanceId(view);

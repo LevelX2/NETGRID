@@ -1,6 +1,6 @@
 # Proteus Bad-Publicity-Loss-Gate Contract
 
-Status: planning contract, no runtime implementation
+Status: planning contract; generic Bad-Publicity-7-Gate and Scaldan random path are implemented
 Stand: 2026-05-17
 
 ## Scope und Quellen
@@ -22,13 +22,13 @@ Betroffene Planungs-Karten:
 | `onr_proteus_125_subliminal-corruption` | runner | event | Run-trash-basierte Bad-Publicity-Menge. |
 | `onr_proteus_129_back-door-to-netwatch` | runner | resource | Hidden-Resource-/Trace-Cancel-Pfad mit Redaction-Gate. |
 
-Kein Punkt in diesem Dokument promotet Proteus-Karten zu `human_playable`, `deck_legal`, `ai_supported` oder Runtime-Resolvern.
+Seit Phase 8f nutzt `Scaldan` diesen Vertrag im Runtime-Pfad für deterministische Start-of-turn-Würfe. Die übrigen hier genannten Karten bleiben ohne eigenen abgeschlossenen Slice nicht `human_playable`, nicht `deck_legal`, nicht `ai_supported` und ohne Runtime-Resolver.
 
 ## Game-End-Vertrag
 
 Bad Publicity bleibt oeffentliche Korp-Information in `corp.badPublicity`. Sobald ein erfolgreicher Engine-Uebergang den Wert auf mindestens 7 setzt oder ein spaeterer Check einen bereits erreichten Wert von mindestens 7 bestaetigt, verliert die Korp. Der Gewinner ist der Runner.
 
-Der neue Game-End-Grund soll als eigener Wert modelliert werden, empfohlen `bad_publicity_7`. Eine spaetere Implementierung muss den Wert konsistent durch `GameEndReason`, API-Ergebnisgrund, PublicEvent/Replay-Projektion und UI-Ergebnisanzeige fuehren. Bis dahin bleibt dies nur Vertragsvorgabe.
+Der Game-End-Grund ist als eigener Wert `bad_publicity_7` modelliert und muss konsistent durch `GameEndReason`, API-Ergebnisgrund, PublicEvent/Replay-Projektion und UI-Ergebnisanzeige laufen.
 
 Das Gate ist eine Engine-Regel, keine Kartenregel im UI oder in der KI. UI, Server, menschliche Controller und KI reichen weiterhin nur `PlayerActions` ein, die aus aktuellen `LegalActions` stammen. `applyAction` bleibt die finale Revalidierung fuer Seite, Action-ID, `stateVersion`, Timingpunkt, Kosten, Ziele und Choices.
 

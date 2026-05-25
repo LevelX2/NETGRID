@@ -119,6 +119,13 @@ export type CardImplementationRuntimeDependencies = {
     damageType: Extract<DamageType, "meat" | "net" | "core">,
     amount: number,
   ) => CardEffectDamageResult;
+  unpreventableDamageRunner: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceDefinitionId: CardDefinition["id"],
+    damageType: Extract<DamageType, "meat" | "net" | "core">,
+    amount: number,
+  ) => CardEffectDamageResult;
   startTrace: (
     state: GameState,
     legalAction: LegalAction,
@@ -340,9 +347,20 @@ export type CardImplementationRuntimeDependencies = {
   ) => CardEffectHiddenInfoResult;
   addCounterToAllInstalledRunnerIcebreakers: (
     state: GameState,
-    counterType: Extract<CounterType, "militech">,
+    counterType: CounterType,
     amount: number,
   ) => CardEffectCounterResult;
+  shuffleSourceIntoCorpRd: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+  ) => CardEffectHiddenInfoResult;
+  trashCorpInstalledCardsInSourceServer: (
+    state: GameState,
+    legalAction: LegalAction | undefined,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+  ) => CardEffectHiddenInfoResult;
   gainRunnerEventAgendaPoint: (
     state: GameState,
     legalAction: LegalAction,
@@ -411,6 +429,17 @@ export type CardImplementationRuntimeDependencies = {
     source: "chosen_card" | "source_card",
     maxAmount: number | "all",
   ) => CardEffectAdvancementChoiceResult;
+  addCurrentEncounterAdditionalSubroutine: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    sourceTitle: string,
+    input: {
+      subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
+      amount?: number;
+    },
+  ) => CardEffectHiddenInfoResult;
   abilityLimits: CardImplementationAbilityLimitHost;
 };
 
@@ -725,6 +754,15 @@ export function executeCardImplementationLifecycleEffects(
         deps.trashSourceWhenEmpty(state, sourceCardId),
       trashSource: (sourceCardId) =>
         deps.trashSource(state, sourceCardId, legalAction),
+      shuffleSourceIntoCorpRd: (sourceCardId) =>
+        deps.shuffleSourceIntoCorpRd(state, sourceCardId, definition.id),
+      trashCorpInstalledCardsInSourceServer: (sourceCardId) =>
+        deps.trashCorpInstalledCardsInSourceServer(
+          state,
+          legalAction,
+          sourceCardId,
+          definition.id,
+        ),
       ...(reason ? { reason } : {}),
     },
     effects,
@@ -1265,7 +1303,8 @@ function payActivatedCardImplementationCosts(
   side: Side,
   cardId: CardInstanceId,
   ability: ActivatedCardAbilityImplementation,
-): void {
+): Record<string, string | number | boolean> {
+  const publicPayload: Record<string, string | number | boolean> = {};
   const legalCosts = activatedAbilityLegalActionCosts(ability);
   const clicks = legalCosts[0]?.clicks ?? 0;
   const creditCost = legalCosts[0]?.credits ?? 0;
@@ -1294,7 +1333,9 @@ function payActivatedCardImplementationCosts(
     const trashResult = deps.trashSource(state, cardId);
     if (!trashResult.sourceTrashed)
       throw new Error("Die Quelle konnte nicht getrasht werden.");
+    Object.assign(publicPayload, trashResult.publicPayload);
   }
+  return publicPayload;
 }
 
 function activatedAbilityPayload(
@@ -1578,6 +1619,28 @@ function validateActivatedCardImplementationAbility(
     );
     return;
   }
+  if (ability.timing === "corp_encounter") {
+    if (legalAction.side !== "corp")
+      throw new Error("Nur die Korp darf diese Encounter-Kartenfaehigkeit nutzen.");
+    if (
+      state.timingPoint !== "run.encounter_ice" ||
+      state.run?.phase !== "encounter_ice" ||
+      state.run.encounteredIceId !== cardId
+    )
+      throw new Error(
+        "Diese Kartenfaehigkeit ist nur beim Encounter mit dieser ICE nutzbar.",
+      );
+    const instance = deps.mustInstance(state.cardInstances, cardId);
+    if (!instance.rezzed || match.definition.type !== "ice")
+      throw new Error("Die Encounter-Kartenfaehigkeit braucht gerezzte ICE.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf diese aktivierte Kartenfaehigkeit nutzen.");
   if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
@@ -1616,7 +1679,7 @@ export function resolveActivatedCardImplementationAbility(
   const match = activatedAbilityForLegalAction(deps, state, legalAction);
   if (!match) return false;
   validateActivatedCardImplementationAbility(deps, state, legalAction, match);
-  payActivatedCardImplementationCosts(
+  const costPublicPayload = payActivatedCardImplementationCosts(
     deps,
     state,
     legalAction.side,
@@ -1633,6 +1696,14 @@ export function resolveActivatedCardImplementationAbility(
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
         deps.damageRunner(
+          state,
+          legalAction,
+          match.definition.id,
+          damageType,
+          amount,
+        ),
+      unpreventableDamageRunner: (damageType, amount) =>
+        deps.unpreventableDamageRunner(
           state,
           legalAction,
           match.definition.id,
@@ -1821,6 +1892,15 @@ export function resolveActivatedCardImplementationAbility(
           source,
           maxAmount,
         ),
+      addCurrentEncounterAdditionalSubroutine: (input) =>
+        deps.addCurrentEncounterAdditionalSubroutine(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          match.definition.title,
+          input,
+        ),
     },
     match.ability.effects,
   );
@@ -1840,6 +1920,7 @@ export function resolveActivatedCardImplementationAbility(
           cardImplementationSourceAbilityUsedThisTurn: true,
         }
       : {}),
+    ...costPublicPayload,
     ...result.publicPayload,
   };
   deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
@@ -1872,6 +1953,14 @@ export function executeOnPlayCardImplementationAbility(
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
         deps.damageRunner(state, legalAction, definition.id, damageType, amount),
+      unpreventableDamageRunner: (damageType, amount) =>
+        deps.unpreventableDamageRunner(
+          state,
+          legalAction,
+          definition.id,
+          damageType,
+          amount,
+        ),
       startTrace: (sourceCardId, baseTraceStrength, successEffect) => ({
         ...deps.startTrace(
           state,
