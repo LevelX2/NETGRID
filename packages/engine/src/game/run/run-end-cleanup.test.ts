@@ -465,6 +465,58 @@ describe("run end cleanup", () => {
     });
   });
 
+  it("adds Scaldan purgeable counters after successful HQ runs", () => {
+    const fixture = makeHost({
+      run: {
+        runId: "run_scaldan",
+        attackedServerId: "hq",
+        phase: "movement",
+        position: { kind: "server", serverId: "hq" },
+      } as unknown as NonNullable<GameState["run"]>,
+      runnerPrograms: ["scaldan"],
+      instances: {
+        scaldan: instance(
+          "scaldan",
+          "onr_proteus_094_scaldan",
+          { side: "runner", zone: "rig" },
+          { faceup: true, rezzed: true },
+        ),
+      },
+      definitions: {
+        onr_proteus_094_scaldan: definition(
+          "onr_proteus_094_scaldan",
+          "program",
+        ),
+      },
+      virusImplementations: {
+        scaldan: {
+          counterKind: "scaldan",
+          addOnSuccessfulRun: {
+            server: "hq",
+            target: "corp_purgeable_runner_virus_counter",
+            amount: 1,
+            visibility: "public",
+          },
+        },
+      },
+    });
+
+    handleRunEndCleanup(fixture.host, true, fixture.legalAction);
+
+    expect(fixture.state.purgeableRunnerVirusCounters?.corp).toMatchObject({
+      scaldan: 1,
+    });
+    expect(fixture.legalAction.payload).toMatchObject({
+      proteusRunnerVirusCounter: true,
+      runId: "run_scaldan",
+      serverId: "hq",
+      counterType: "scaldan",
+      counterDelta: 1,
+      counterTotalAfter: 1,
+      sourceCardDefinitionId: "onr_proteus_094_scaldan",
+    });
+  });
+
   it("adds central socket counters and converts complete Viral Pipeline sets to Pipe", () => {
     const fixture = makeHost({
       run: {

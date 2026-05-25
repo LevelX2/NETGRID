@@ -278,6 +278,13 @@ export type CardSuccessfulRunFollowupImplementation =
       kind: "force_rez_ice_outermost_inward_after_successful_run";
       cost: { kind: "credit"; amount: number };
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "skip_rd_access_add_purgeable_runner_virus_counter";
+      counterType: "doom";
+      amount: 1;
+      cost: "none";
+      visibility: Extract<EventVisibilityClass, "public">;
     };
 
 export type CardFortRunWindowImplementation =
@@ -487,6 +494,7 @@ export type CardVirusCounterKindImplementation =
   | "cockroach"
   | "cascade"
   | "crumble"
+  | "doom"
   | "garbage"
   | "highlighter"
   | "thought"
@@ -496,6 +504,7 @@ export type CardVirusCounterKindImplementation =
   | "pattel"
   | "pipe"
   | "pox"
+  | "scaldan"
   | "skivviss"
   | "socket_archives"
   | "socket_hq"

@@ -78,6 +78,7 @@ export type SuccessfulRunInterventionHost = {
   };
   access: {
     startAccessFromSuccessfulRun: (legalAction?: LegalAction) => void;
+    finishSuccessfulRun: (legalAction?: LegalAction) => void;
   };
 };
 
@@ -174,6 +175,28 @@ export function buildSuccessfulRunFollowupActions(
       [];
     if (
       successfulRunFollowups.some(
+        (followup) =>
+          followup.kind === "skip_rd_access_add_purgeable_runner_virus_counter",
+      ) &&
+      run.attackedServerId === "rd"
+    ) {
+      actions.push(
+        host.actions.createRunnerTriggerAction(
+          `${definition.title}: Doom-Counter statt Zugriff`,
+          sourceCardId,
+          [],
+          {
+            cardId: sourceCardId,
+            serverId: run.attackedServerId,
+            proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
+            counterType: "doom",
+            counterDelta: 1,
+          },
+        ),
+      );
+    }
+    if (
+      successfulRunFollowups.some(
         (followup) => followup.kind === "reverse_ice_on_successful_run_fort",
       ) ||
       (!cardImplementationForDefinitionId(definition.id) &&
@@ -261,7 +284,59 @@ export function resolveSuccessfulRunFollowupAbility(
     return resolveFaitAccompliSuccessfulRunCounter(host, legalAction);
   if (legalAction.payload?.runnerUtilityAbility === "i_spy_put_spy_counter")
     return resolveISpyPutSpyCounter(host, legalAction);
+  if (
+    legalAction.payload?.proteusRunnerVirusFollowup ===
+    "doom_counter_instead_of_rd_access"
+  )
+    return resolveArmageddonDoomCounterInsteadOfAccess(host, legalAction);
   return { handled: false };
+}
+
+function resolveArmageddonDoomCounterInsteadOfAccess(
+  host: SuccessfulRunInterventionHost,
+  legalAction: LegalAction,
+): SuccessfulRunFollowupExecutionResult {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Armageddon nutzen.");
+  const run = mustRun(host);
+  if (!run.successful || run.phase !== "access" || run.attackedServerId !== "rd")
+    throw new Error("Armageddon ist nur statt Zugriff nach erfolgreichem R&D-Run legal.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  if (!host.state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Armageddon ist nicht installiert.");
+  const implementation = cardImplementationForDefinitionId(
+    host.cards.definitionFor(sourceCardId).id,
+  );
+  if (
+    !implementation?.successfulRunFollowups?.some(
+      (followup) =>
+        followup.kind === "skip_rd_access_add_purgeable_runner_virus_counter" &&
+        followup.counterType === "doom",
+    )
+  )
+    throw new Error("Die Armageddon-Faehigkeit passt nicht zur Karte.");
+  const counters = (host.state.purgeableRunnerVirusCounters ??= {});
+  const corpCounters = (counters.corp ??= {});
+  const before = Math.max(0, Math.floor(corpCounters.doom ?? 0));
+  corpCounters.doom = before + 1;
+  host.access.finishSuccessfulRun(legalAction);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
+    counterType: "doom",
+    counterDelta: 1,
+    counterTotalAfter: before + 1,
+    sourceCardDefinitionId: host.cards.definitionFor(sourceCardId).id,
+    serverId: "rd",
+  };
+  return {
+    handled: true,
+    sourceCardId,
+    sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
+    counterPlaced: true,
+    stateChanged: true,
+    ...resolvedPayloadFor(legalAction),
+  };
 }
 
 export function resolveSuccessfulRunInterventionChoice(

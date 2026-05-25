@@ -7,7 +7,7 @@ import {
   hashState,
   replayEvents,
 } from "../../index";
-import type { GameState, Side } from "@netgrid/shared";
+import type { CardInstanceId, GameState, Side } from "@netgrid/shared";
 
 function apply(
   state: GameState,
@@ -266,5 +266,113 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
         }),
       ]),
     );
+  });
+
+  it("resolves Scaldan start-of-turn dice through RandomDrawRecords and the Bad-Publicity gate", () => {
+    let state = createGame({
+      seed: "proteus-8f-scaldan-start",
+      setupMode: "completed",
+    });
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 0;
+    state.corp.badPublicity = 6;
+    state.purgeableRunnerVirusCounters = {
+      corp: { scaldan: 12 },
+    };
+    const initial = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    const resolvedEffects = state.eventLog.at(-1)?.publicPayload
+      .resolvedEffects as Array<{ counterType?: unknown; dieRoll?: unknown }> | undefined;
+    const scaldanEffects =
+      resolvedEffects?.filter((effect) => effect.counterType === "scaldan") ?? [];
+    const hitCount = scaldanEffects.filter(
+      (effect: { dieRoll?: unknown }) => Number(effect.dieRoll) >= 5,
+    ).length;
+
+    expect(scaldanEffects).toHaveLength(12);
+    expect(state.randomDrawRecords.slice(initial.randomDrawRecords.length)).toHaveLength(
+      12,
+    );
+    expect(scaldanEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          counterType: "scaldan",
+          dieSize: 6,
+          sourceDefinitionId: "onr_proteus_094_scaldan",
+        }),
+      ]),
+    );
+    expect(hitCount).toBeGreaterThan(0);
+    expect(state.corp.badPublicity).toBe(6 + hitCount);
+    expect(state.winner).toBe("runner");
+    expect(state.gameEndReason).toBe("bad_publicity_7");
+    expect(
+      replayEvents(initial, state.eventLog.slice(initial.eventLog.length))
+        .actualFinalStateHash,
+    ).toBe(hashState(state));
+  });
+
+  it("resolves Armageddon Doom install rolls through corp install LegalActions", () => {
+    let state = createGame({
+      seed: "proteus-8f-armageddon-install",
+      setupMode: "completed",
+    });
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 20;
+    state.purgeableRunnerVirusCounters = {
+      corp: { doom: 30 },
+    };
+    const initial = structuredClone(state);
+    const installAction = getLegalActions(state, "corp").find(
+      (action) =>
+        action.type === "install_card" &&
+        typeof action.payload?.cardId === "string",
+    );
+    expect(installAction).toBeDefined();
+    if (!installAction) throw new Error("Missing corp install action");
+    const installedCardId = installAction.payload?.cardId as CardInstanceId;
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === installAction.actionId,
+    );
+
+    const publicPayload = state.eventLog.at(-1)?.publicPayload;
+    const randomRecords = state.randomDrawRecords.slice(
+      initial.randomDrawRecords.length,
+    );
+    const rolls = randomRecords
+      .filter((record) =>
+        String(record.purpose).includes("proteus.armageddon.install"),
+      )
+      .map((record) => Math.floor(record.value * 6) + 1);
+    const hitCount = rolls.filter((roll) => roll === 6).length;
+
+    expect(rolls).toHaveLength(30);
+    expect(randomRecords).toHaveLength(30);
+    expect(publicPayload).toMatchObject({
+      actionType: "install_card",
+    });
+    expect(publicPayload).not.toHaveProperty("proteusDoomInstallRolls");
+    expect(publicPayload).not.toHaveProperty("proteusDoomRandomPurposes");
+    expect(hitCount).toBeGreaterThan(0);
+    expect(state.purgeableRunnerVirusCounters?.corp?.doom).toBe(30 - hitCount);
+    expect(state.cardInstances[installedCardId]?.zone).toMatchObject({
+      side: "corp",
+      zone: "archives",
+    });
+    expect(publicPayload).not.toHaveProperty("trashedInstalledCardDefinitionId");
+    expect(
+      replayEvents(initial, state.eventLog.slice(initial.eventLog.length))
+        .actualFinalStateHash,
+    ).toBe(hashState(state));
   });
 });

@@ -1,11 +1,11 @@
 # Proteus Virus-/Antibody-Counter Contract
 
 Stand: 2026-05-17
-Status: planning contract; Phase 8a runtime foundation for purgefähige Runner-Virus-Counter exists; Phase 8b, 8c, 8d and 8e target cards are implemented
+Status: planning contract; Phase 8a runtime foundation for purgefähige Runner-Virus-Counter exists; Phase 8b, 8c, 8d, 8e and 8f target cards are implemented
 
 ## Scope und Quellen
 
-Dieses Artefakt schneidet den Proteus-Cluster `virus_antibody_counter_family` aus `data/rules/proteus-mechanics-coverage-2026-05-17.json` in kleine Vertragsfamilien. Seit Phase 8a gibt es eine generische Runtime-Grundlage für purgefähige Runner-Virus-Counter, Proteus-Purge-Action-Debt und öffentliche Corp-/Server-CounterDisplays. Seit Phase 8b sind `Bel-Digmo Antibody`, `Doppelganger Antibody`, `Pattel Antibody` und `Stereogram Antibody` als `human_playable` Runtime-Karten umgesetzt. Seit Phase 8c ist `Viral Breeding Ground` als Score-/Access-Agenda umgesetzt. Seit Phase 8d sind `Highlighter`, `Taxman`, `Vienna 22` und `Viral Pipeline` als erfolgreiche-Run-Virusprogramme umgesetzt. Seit Phase 8e sind `Crumble` und `Garbage In` mit kostenlosen Access-Trash-Rechten umgesetzt; Proteus bleibt weiterhin nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`.
+Dieses Artefakt schneidet den Proteus-Cluster `virus_antibody_counter_family` aus `data/rules/proteus-mechanics-coverage-2026-05-17.json` in kleine Vertragsfamilien. Seit Phase 8a gibt es eine generische Runtime-Grundlage für purgefähige Runner-Virus-Counter, Proteus-Purge-Action-Debt und öffentliche Corp-/Server-CounterDisplays. Seit Phase 8b sind `Bel-Digmo Antibody`, `Doppelganger Antibody`, `Pattel Antibody` und `Stereogram Antibody` als `human_playable` Runtime-Karten umgesetzt. Seit Phase 8c ist `Viral Breeding Ground` als Score-/Access-Agenda umgesetzt. Seit Phase 8d sind `Highlighter`, `Taxman`, `Vienna 22` und `Viral Pipeline` als erfolgreiche-Run-Virusprogramme umgesetzt. Seit Phase 8e sind `Crumble` und `Garbage In` mit kostenlosen Access-Trash-Rechten umgesetzt. Seit Phase 8f sind `Armageddon` und `Scaldan` mit deterministic RandomDrawRecords, Bad-Publicity-Gate-Reuse und Hidden-Install-Redaction umgesetzt; Proteus bleibt weiterhin nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`.
 
 Lokale Quellen:
 
@@ -93,7 +93,7 @@ PublicPayload:
 
 Karten: `Crumble`, `Garbage In`, `Highlighter`, `Scaldan`, `Taxman`, `Vienna 22`, `Viral Pipeline`.
 
-Umsetzungsstatus: Phase 8d deckt `Highlighter`, `Taxman`, `Vienna 22` und `Viral Pipeline` ab; Phase 8e deckt `Crumble` und `Garbage In` ab. Die Karten verwenden eigene CardImplementation-Dateien, generische Successful-Run-Trigger, purgefähige Corp-/Server-Counter, Highlighter-/Vienna-Access-Boni, Tax-Creditverlust, Pipe-Action-Debt und kostenlose Access-Trash-Rechte. `Scaldan` und `Armageddon` bleiben dem Folgeslice 8f vorbehalten.
+Umsetzungsstatus: Phase 8d deckt `Highlighter`, `Taxman`, `Vienna 22` und `Viral Pipeline` ab; Phase 8e deckt `Crumble` und `Garbage In` ab; Phase 8f deckt `Scaldan` ab. Die Karten verwenden eigene CardImplementation-Dateien, generische Successful-Run-Trigger, purgefähige Corp-/Server-Counter, Highlighter-/Vienna-Access-Boni, Tax-Creditverlust, Pipe-Action-Debt, kostenlose Access-Trash-Rechte und Scaldan-HQ-Counter.
 
 Vertrag:
 
@@ -130,6 +130,8 @@ Hidden-Info-Risiken:
 ## Slice 5: Start-of-turn-Penalties und Zufall
 
 Karten: `Doppelganger Antibody`, `Taxman`, `Scaldan`, `Armageddon`, `Viral Pipeline`.
+
+Umsetzungsstatus: Phase 8b deckt Doppelganger-Runner-Start-of-turn-Creditverlust ab; Phase 8d deckt Taxman und Pipe ab; Phase 8f deckt Scaldan-Start-of-turn-Würfe und Armageddon-Doom-Installationswürfe ab. Ein Purge-Zwischenfenster zwischen einzelnen Scaldan-Frames bleibt ein späterer Härtungspunkt im Action-Debt-Vertrag.
 
 Vertrag:
 

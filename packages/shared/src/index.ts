@@ -9511,6 +9511,26 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
     ],
   },
   {
+    id: "onr_proteus_078_armageddon",
+    title: "Armageddon",
+    side: "runner",
+    type: "program",
+    subtypes: ["random", "virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on R&D, you may choose to give the Corp a Doom counter instead of accessing cards from R&D. Each Doom counter forces the Corp to roll a die whenever it installs a card. On a 6, the card is trashed after it is installed, and the Corp removes a Doom counter. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_replacement",
+      "random_die_resolution",
+      "corp_install_trigger",
+      "proteus_random_virus_longtail",
+    ],
+  },
+  {
     id: "onr_proteus_084_crumble",
     title: "Crumble",
     side: "runner",
@@ -9585,6 +9605,26 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
       "successful_run_counter",
       "access_breach_multiaccess_ambush",
       "proteus_runner_virus_run_counter",
+    ],
+  },
+  {
+    id: "onr_proteus_094_scaldan",
+    title: "Scaldan",
+    side: "runner",
+    type: "program",
+    subtypes: ["bad_publicity", "random", "virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText:
+      "After each successful run on HQ, give the Corp a Scaldan counter. Each Scaldan counter forces the Corp to roll a die at the start of each of its turns. On a 5 or a 6, the Corp gains 1 Bad Publicity point. The Corp may remove all Virus counters at any time, but must then forgo its next three actions. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+    mechanics: [
+      "install_program",
+      "virus",
+      "successful_run_counter",
+      "random_die_resolution",
+      "bad_publicity",
+      "proteus_random_virus_longtail",
     ],
   },
   {

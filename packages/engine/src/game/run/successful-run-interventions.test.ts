@@ -62,6 +62,7 @@ function makeHost(options: {
   startedAccessCount: number;
   trashedCorpIds: CardInstanceId[];
   trashedRunnerIds: CardInstanceId[];
+  finishedRuns: boolean[];
 } {
   const sourceDefinitionId =
     options.sourceDefinitionId ?? "onr_v1_358_dr-dreff";
@@ -96,6 +97,11 @@ function makeHost(options: {
       "onr_v1_166_karl-de-veres-corporate-stooge",
       "Karl de Veres",
       "resource",
+    ),
+    "onr_proteus_078_armageddon": definition(
+      "onr_proteus_078_armageddon",
+      "Armageddon",
+      "program",
     ),
   };
   const existingIceIds = Array.from(
@@ -146,6 +152,10 @@ function makeHost(options: {
       side: "runner",
       zone: "rig",
     }),
+    armageddon: instance("armageddon", "onr_proteus_078_armageddon", {
+      side: "runner",
+      zone: "rig",
+    }),
   };
   for (const iceId of existingIceIds) {
     cardInstances[iceId] = instance(
@@ -174,7 +184,7 @@ function makeHost(options: {
       credits: 5,
       tags: 0,
       rig: {
-        programs: ["false_echo", "netspace", "i_spy"],
+        programs: ["false_echo", "netspace", "i_spy", "armageddon"],
         hardware: ["bodyweight"],
         resources: ["karl"],
       },
@@ -193,6 +203,7 @@ function makeHost(options: {
   let startedAccessCount = 0;
   const trashedCorpIds: CardInstanceId[] = [];
   const trashedRunnerIds: CardInstanceId[] = [];
+  const finishedRuns: boolean[] = [];
   const host: SuccessfulRunInterventionHost = {
     state,
     cards: {
@@ -323,6 +334,10 @@ function makeHost(options: {
       startAccessFromSuccessfulRun: () => {
         startedAccessCount += 1;
       },
+      finishSuccessfulRun: () => {
+        finishedRuns.push(true);
+        delete state.run;
+      },
     },
   };
   return {
@@ -336,6 +351,7 @@ function makeHost(options: {
     },
     trashedCorpIds,
     trashedRunnerIds,
+    finishedRuns,
   };
 }
 
@@ -531,6 +547,70 @@ describe("successful run interventions", () => {
       counterType: "spy",
       addedCounterAmount: 1,
       exposedServerId: "remote_1",
+    });
+  });
+
+  it("builds and resolves Armageddon R&D access replacement through Runner followups", () => {
+    const fixture = makeHost();
+    fixture.state.run = {
+      ...(fixture.state.run as NonNullable<GameState["run"]>),
+      attackedServerId: "rd",
+      position: { kind: "server", serverId: "rd" },
+    };
+
+    const actions = buildSuccessfulRunFollowupActions(
+      fixture.host,
+      fixture.state.run as NonNullable<GameState["run"]>,
+    );
+    const armageddonAction = actions.find(
+      (action) =>
+        action.payload?.proteusRunnerVirusFollowup ===
+        "doom_counter_instead_of_rd_access",
+    );
+
+    expect(armageddonAction).toMatchObject({
+      side: "runner",
+      type: "trigger_ability",
+      source: "armageddon",
+      costs: [],
+      payload: {
+        cardId: "armageddon",
+        serverId: "rd",
+        counterType: "doom",
+        counterDelta: 1,
+      },
+    });
+    if (!armageddonAction) throw new Error("Missing Armageddon action");
+    expect(() =>
+      resolveSuccessfulRunFollowupAbility(fixture.host, {
+        ...armageddonAction,
+        side: "corp",
+      } as LegalAction),
+    ).toThrow("Nur der Runner");
+
+    const result = resolveSuccessfulRunFollowupAbility(
+      fixture.host,
+      armageddonAction,
+    );
+
+    expect(result).toMatchObject({
+      handled: true,
+      sourceCardId: "armageddon",
+      sourceDefinitionId: "onr_proteus_078_armageddon",
+      counterPlaced: true,
+    });
+    expect(fixture.state.purgeableRunnerVirusCounters?.corp).toMatchObject({
+      doom: 1,
+    });
+    expect(fixture.finishedRuns).toEqual([true]);
+    expect(fixture.state.run).toBeUndefined();
+    expect(armageddonAction.payload).toMatchObject({
+      proteusRunnerVirusFollowup: "doom_counter_instead_of_rd_access",
+      counterType: "doom",
+      counterDelta: 1,
+      counterTotalAfter: 1,
+      sourceCardDefinitionId: "onr_proteus_078_armageddon",
+      serverId: "rd",
     });
   });
 

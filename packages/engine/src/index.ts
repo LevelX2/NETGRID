@@ -580,8 +580,10 @@ import type {
 
 type AutomaticEffectCollector = ResolvedGameEffect[];
 const PROTEUS_TAXMAN_ID = "onr_proteus_097_taxman" as CardDefinitionId;
+const PROTEUS_SCALDAN_ID = "onr_proteus_094_scaldan" as CardDefinitionId;
 const PROTEUS_VIRAL_PIPELINE_ID =
   "onr_proteus_099_viral-pipeline" as CardDefinitionId;
+const PROTEUS_ARMAGEDDON_ID = "onr_proteus_078_armageddon" as CardDefinitionId;
 
 // Effective-value helpers are pure/read-only. Legacy agenda-difficulty pieces
 // are still injected from index.ts so the extracted module avoids index imports
@@ -9628,6 +9630,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     };
     markRovingSubmarineActivityForServer(state, server.id, legalAction);
     consumeEdgerunnerTempsInstallAction(state, legalAction);
+    applyArmageddonDoomCounterInstallRolls(state, cardId, legalAction);
     return;
   }
 
@@ -9700,6 +9703,62 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   }
   markRovingSubmarineActivityForServer(state, server.id, legalAction);
   consumeEdgerunnerTempsInstallAction(state, legalAction);
+  applyArmageddonDoomCounterInstallRolls(state, cardId, legalAction);
+}
+
+function applyArmageddonDoomCounterInstallRolls(
+  state: GameState,
+  installedCardId: CardInstanceId,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side && legalAction.side !== "corp") return;
+  const corpCounters = state.purgeableRunnerVirusCounters?.corp;
+  const doomCounters = purgeableRunnerVirusCounterAmount(corpCounters, "doom");
+  if (!corpCounters || doomCounters <= 0) return;
+  let hits = 0;
+  const dieRolls: number[] = [];
+  const randomPurposes: string[] = [];
+  for (let index = 0; index < doomCounters; index += 1) {
+    const randomPurpose = `proteus.armageddon.install.${state.stateVersion}.${installedCardId}.${index}`;
+    const dieRoll = rollDeterministicDie(state, randomPurpose);
+    randomPurposes.push(randomPurpose);
+    dieRolls.push(dieRoll);
+    if (dieRoll === 6) hits += 1;
+  }
+  if (hits > 0) {
+    setPurgeableRunnerVirusCounterAmount(
+      corpCounters,
+      "doom",
+      doomCounters - hits,
+    );
+    if (Object.keys(corpCounters).length === 0 && state.purgeableRunnerVirusCounters)
+      delete state.purgeableRunnerVirusCounters.corp;
+    if (
+      state.purgeableRunnerVirusCounters &&
+      !state.purgeableRunnerVirusCounters.corp &&
+      !state.purgeableRunnerVirusCounters.servers &&
+      !state.purgeableRunnerVirusCounters.effects
+    )
+      delete state.purgeableRunnerVirusCounters;
+    if (state.cardInstances[installedCardId])
+      trashCorpInstalledCardToArchives(state, installedCardId, legalAction);
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    proteusDoomInstallRolls: dieRolls.join(","),
+    proteusDoomRandomPurposes: randomPurposes.join(","),
+    proteusDoomHits: hits,
+    doomCountersBefore: doomCounters,
+    doomCountersAfter: purgeableRunnerVirusCounterAmount(
+      state.purgeableRunnerVirusCounters?.corp,
+      "doom",
+    ),
+    randomCounterAfter: state.randomCounter,
+    proteusDoomSourceDefinitionId: PROTEUS_ARMAGEDDON_ID,
+    ...(hits > 0
+      ? { trashedInstalledCardDefinitionId: definitionFor(state, installedCardId).id }
+      : {}),
+  };
 }
 
 function canInstallCorpRootCardInServer(
@@ -13291,6 +13350,38 @@ function applyProteusPurgeableRunnerVirusCorpStartEffects(
   effects?: AutomaticEffectCollector,
 ): void {
   const corpCounters = state.purgeableRunnerVirusCounters?.corp;
+  const scaldanCounters = purgeableRunnerVirusCounterAmount(
+    corpCounters,
+    "scaldan",
+  );
+  for (let index = 0; index < scaldanCounters; index += 1) {
+    const randomPurpose = `proteus.scaldan.corp_start.${state.stateVersion}.${index}`;
+    const dieRoll = rollDeterministicDie(state, randomPurpose);
+    const badPublicityAdded = dieRoll >= 5 ? 1 : 0;
+    if (badPublicityAdded > 0) state.corp.badPublicity += badPublicityAdded;
+    effects?.push({
+      effectId: `corp.start.proteus.scaldan.${index}`,
+      kind: badPublicityAdded > 0 ? "add_bad_publicity" : "counter_change",
+      visibility: "public",
+      side: "corp",
+      amount: badPublicityAdded,
+      reason: "start_of_turn",
+      counterType: "scaldan",
+      remainingCounters: scaldanCounters,
+      sourceDefinitionId: PROTEUS_SCALDAN_ID,
+      sourceTitle: publicCardTitle(PROTEUS_SCALDAN_ID),
+      randomPurpose,
+      dieSize: 6,
+      dieRoll,
+      randomCounterAfter: state.randomCounter,
+      ...(badPublicityAdded > 0
+        ? {
+            badPublicityAdded,
+            corpBadPublicityAfter: state.corp.badPublicity,
+          }
+        : {}),
+    } as ResolvedGameEffect);
+  }
   const taxCounters = purgeableRunnerVirusCounterAmount(corpCounters, "tax");
   const taxLoss = Math.min(state.corp.credits, Math.floor(taxCounters / 2));
   if (taxLoss > 0) {
@@ -18221,6 +18312,7 @@ function successfulRunInterventionHost(
     access: {
       startAccessFromSuccessfulRun: (legalAction) =>
         enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction),
+      finishSuccessfulRun: (legalAction) => finishRun(state, true, legalAction),
     },
   };
 }
@@ -22915,6 +23007,16 @@ function purgeableRunnerVirusCounterAmount(
   counterType: PurgeableRunnerVirusCounterType,
 ): number {
   return Math.max(0, Math.floor(Number(bucket?.[counterType] ?? 0)));
+}
+
+function setPurgeableRunnerVirusCounterAmount(
+  bucket: PurgeableRunnerVirusCounterBucket,
+  counterType: PurgeableRunnerVirusCounterType,
+  amount: number,
+): void {
+  const normalized = Math.max(0, Math.floor(amount));
+  if (normalized > 0) bucket[counterType] = normalized;
+  else delete bucket[counterType];
 }
 
 function purgeableRunnerVirusBucketTotal(

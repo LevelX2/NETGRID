@@ -791,6 +791,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/upgrades/research-bunker.ts",
   "onr_proteus_077_weapons-depot":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/weapons-depot.ts",
+  "onr_proteus_078_armageddon":
+    "packages/engine/src/card-implementations/proteus/runner/programs/armageddon.ts",
   "onr_proteus_084_crumble":
     "packages/engine/src/card-implementations/proteus/runner/programs/crumble.ts",
   "onr_proteus_086_enterprise-inc-shields":
@@ -799,6 +801,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/garbage-in.ts",
   "onr_proteus_090_highlighter":
     "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
+  "onr_proteus_094_scaldan":
+    "packages/engine/src/card-implementations/proteus/runner/programs/scaldan.ts",
   "onr_proteus_096_skullcap":
     "packages/engine/src/card-implementations/proteus/runner/programs/skullcap.ts",
   "onr_proteus_097_taxman":

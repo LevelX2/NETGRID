@@ -669,6 +669,27 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
   });
 
+  it("migrates Proteus Phase 8f random Bad-Publicity virus longtails into CardImplementation coverage", () => {
+    const implemented = [
+      "onr_proteus_078_armageddon",
+      "onr_proteus_094_scaldan",
+    ] as const;
+
+    for (const definitionId of implemented) {
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+        definitionId,
+      ).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+  });
+
   it("migrates Proteus Phase 2b scored-agenda Bad Publicity into CardImplementation coverage", () => {
     const definitionId = "onr_proteus_002_charity-takeover";
     expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
@@ -1073,9 +1094,9 @@ describe("CardImplementation coverage and registry invariants", () => {
     );
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
-    expect(outsideScopeDefinitionIds).toHaveLength(97);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(420);
-    expect(coverageByStatus.get("implemented")).toBe(420);
+    expect(outsideScopeDefinitionIds).toHaveLength(99);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(422);
+    expect(coverageByStatus.get("implemented")).toBe(422);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
     expect(coverageByStatus.get("outside_current_release_scope")).toBe(52);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
