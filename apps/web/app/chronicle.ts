@@ -229,7 +229,8 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const ambushEffect = resolvedEffectsFromPayload(payload.resolvedEffects).find(
           (effect) =>
             (effect.visibility === "hidden_info_barrier" ||
-              stringValue(effect.reason) === "access_effect") &&
+              stringValue(effect.reason) === "access_effect" ||
+              effect.counterType === "pattel_antibody") &&
             (stringValue(effect.sourceDefinitionId) ||
               stringValue(effect.sourceTitle)),
         );
@@ -237,7 +238,11 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           stringValue(payload.ambushDefinitionId) ??
           stringValue(payload.accessEffectSourceDefinitionId) ??
           stringValue(ambushEffect?.sourceDefinitionId);
-        const ambushPaidCost = numberValue(payload.ambushPaidCost);
+        const ambushPaidCost =
+          numberValue(payload.ambushPaidCost) ??
+          (ambushEffect?.counterType === "pattel_antibody" && payload.ambushPaymentDeclined !== true
+            ? 3
+            : undefined);
         if (ambushDefinitionId && (ambushPaidCost !== undefined || payload.ambushPaymentDeclined === true || ambushEffect)) {
           const source = titleForDefinitionId(ambushDefinitionId) ?? stringValue(ambushEffect?.sourceTitle) ?? sourceTitle ?? cardTitle ?? "Access-Ambush";
           category = "run";
@@ -1188,8 +1193,26 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     case "access_card":
       category = "run";
       importance = "important";
-      title = phrase(subject, `auf ${cardTitle ?? "eine Karte"} zugegriffen`);
-      chips.push("Zugriff", ...(serverLabel ? [serverLabel] : []));
+      {
+        const highlighterAccess = highlighterAccessExplanation(payload);
+        title = phrase(
+          subject,
+          `auf ${cardTitle ?? "eine Karte"} zugegriffen${highlighterAccess ? `, weil die Korp ${highlighterAccess.counterCount} Highlighter-Counter hat` : ""}`,
+        );
+        description = highlighterAccess
+          ? `Das ist Zugriff ${highlighterAccess.accessNumber} von ${highlighterAccess.totalAccesses}; Highlighter erlaubt diesen zusätzlichen R&D-Zugriff.`
+          : undefined;
+        chips.push(
+          "Zugriff",
+          ...(serverLabel ? [serverLabel] : []),
+          ...(highlighterAccess
+            ? [
+                `${highlighterAccess.counterCount} Highlighter`,
+                `Zugriff ${highlighterAccess.accessNumber}/${highlighterAccess.totalAccesses}`,
+              ]
+            : []),
+        );
+      }
       break;
     case "steal_agenda": {
       category = "agenda";
@@ -1203,7 +1226,15 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       category = "card";
       importance = "important";
       title = phrase(subject, `${cardTitle ?? "die zugegriffene Karte"} getrasht`);
-      chips.push("Trash");
+      {
+        const freeTrashSource = freeAccessTrashSourceLabel(payload);
+        if (freeTrashSource) {
+          description = `${freeTrashSource} erlaubt diesen kostenlosen Trash auch für Karten, die normalerweise nicht getrasht werden können.`;
+          chips.push("Trash", freeTrashSource, "Kostenlos");
+        } else {
+          chips.push("Trash");
+        }
+      }
       break;
     case "trash_resource":
       category = "danger";
@@ -1574,6 +1605,17 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
   const through = sourceTitle && sourceTitle !== cardTitle ? ` durch ${sourceTitle}` : "";
 
   if (visibility === "redacted") {
+    const accessDamage = accessEffectDamageChronicleItem(
+      event,
+      effect,
+      index,
+      actor,
+      subject,
+      sourceTitle,
+      sourceDefinitionId,
+      amount,
+    );
+    if (accessDamage) return accessDamage;
     const redactedAccessAmbushCounter = redactedAccessAmbushCounterChronicleItem(
       event,
       effect,
@@ -1690,6 +1732,39 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       const counterText = counterLabel(effect.counterType);
       const added = numberValue(effect.addedCounterAmount) ?? 0;
       const removed = numberValue(effect.removedCounterAmount) ?? 0;
+      const pattelAccessCounter = pattelAccessCounterChronicleText(event, effect);
+      if (pattelAccessCounter) {
+        category = "run";
+        importance = "important";
+        title = pattelAccessCounter.title;
+        description = pattelAccessCounter.description;
+        chips.push(
+          "Access-Ambush",
+          "Pattel Antibody",
+          counterText,
+          ...(pattelAccessCounter.targetChips ?? []),
+        );
+        break;
+      }
+      if (effect.reason === "proteus_runner_virus_successful_run" && added > 0) {
+        const source = sourceTitle ?? "Proteus-Virus";
+        const server = displayServerLabel(effect.serverLabel);
+        category = "run";
+        importance = "important";
+        if (isSocketCounterType(effect.counterType) && server) {
+          title = `${server} hat ${added} ${counterText} durch ${source} erhalten`;
+        } else {
+          title = phrase(subject, `${added} ${counterText} durch ${source} erhalten`);
+        }
+        chips.push(
+          source,
+          `+${added} ${counterText}`,
+          ...(server ? [server] : []),
+          ...(effect.remainingCounters !== undefined ? [`${effect.remainingCounters} gesamt`] : []),
+          "Erfolgreicher Run",
+        );
+        break;
+      }
       const shellTradersRemoval =
         sourceDefinitionId === SHELL_TRADERS_ID &&
         effect.counterType === "shell" &&
@@ -1787,8 +1862,19 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     case "damage":
       category = "danger";
       importance = "critical";
-      title = phrase(subject, `${amount} Schaden${through} erlitten`);
-      chips.push("Schaden");
+      {
+        const damageType = damageTypeLabel(stringValue(effect.damageType));
+        const cardsTrashed = numberValue(effect.cardsTrashed) ?? 0;
+        title = phrase(subject, `${amount} ${damageType}${through} erlitten`);
+        if (cardsTrashed > 0) description = `${cardCountText(cardsTrashed)} ${cardsTrashed === 1 ? "wurde" : "wurden"} dadurch in den Heap bewegt.`;
+        chips.push(
+          "Schaden",
+          damageType,
+          ...(sourceTitle ? [sourceTitle] : []),
+          ...(cardsTrashed > 0 ? [`${cardsTrashed} Heap`] : []),
+          ...(effect.reason === "access_effect" ? ["Access-Effekt"] : []),
+        );
+      }
       break;
     case "resolve_subroutine": {
       const source = sourceTitle ?? "ICE";
@@ -1840,6 +1926,92 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     ...(displayCardTitle ? { cardTitle: displayCardTitle } : {}),
     cardDetailLines: [],
     groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
+  };
+}
+
+function accessEffectDamageChronicleItem(
+  event: PublicGameEvent,
+  effect: ResolvedGameEffect,
+  index: number,
+  actor: Side | undefined,
+  subject: string,
+  sourceTitle: string | undefined,
+  sourceDefinitionId: string | undefined,
+  amount: number,
+): ChronicleItem | null {
+  if (effect.kind !== "damage" || effect.reason !== "access_effect") return null;
+  const source = sourceTitle ?? titleForDefinitionId(sourceDefinitionId) ?? "Access-Effekt";
+  const damageType = damageTypeLabel(stringValue(effect.damageType));
+  const cardsTrashed = numberValue(effect.cardsTrashed) ?? 0;
+  return {
+    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    category: "danger",
+    importance: "critical",
+    visibility: "public",
+    ...(actor ? { actor } : {}),
+    title: ensurePeriod(phrase(subject, `${amount} ${damageType} durch ${source} erlitten`)),
+    ...(cardsTrashed > 0
+      ? { description: ensurePeriod(`${cardCountText(cardsTrashed)} ${cardsTrashed === 1 ? "wurde" : "wurden"} dadurch in den Heap bewegt`) }
+      : {}),
+    chips: uniqueChips([
+      ...baseChips(actor, false),
+      "Access-Effekt",
+      source,
+      damageType,
+      ...(cardsTrashed > 0 ? [`${cardsTrashed} Heap`] : []),
+    ]),
+    ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
+    cardTitle: source,
+    cardDetailLines: [],
+    groupLabel: groupLabelFor("run", actor, undefined, displayServerLabel(effect.serverLabel), undefined),
+  };
+}
+
+function pattelAccessCounterChronicleText(
+  event: PublicGameEvent,
+  effect: ResolvedGameEffect,
+): { title: string; description?: string; targetChips?: string[] } | null {
+  if (
+    effect.kind !== "counter_change" ||
+    effect.counterType !== "pattel_antibody"
+  )
+    return null;
+  const payload = event.publicPayload ?? {};
+  const sourceDefinitionId =
+    stringValue(effect.sourceDefinitionId) ??
+    stringValue(payload.ambushDefinitionId) ??
+    stringValue(payload.accessEffectSourceDefinitionId);
+  const sourceTitle = stringValue(effect.sourceTitle) ?? titleForDefinitionId(sourceDefinitionId);
+  const isPattelAccessCounter =
+    effect.reason === "access_effect" ||
+    sourceDefinitionId === "onr_proteus_068_pattel-antibody" ||
+    sourceTitle === "Pattel Antibody" ||
+    stringValue(payload.hiddenZoneAction) === "proteus_pattel_antibody_access_counters";
+  if (!isPattelAccessCounter) return null;
+  const targetTitles = titlesForDefinitionIds(stringValue(payload.targetCardDefinitionIds));
+  const added = numberValue(effect.addedCounterAmount) ?? 0;
+  const targetCount = numberValue(payload.targetCount) ?? (targetTitles.length > 0 ? targetTitles.length : added);
+  if (targetCount <= 0 || added <= 0) {
+    return {
+      title: "Es wurden keine Pattel-Counter auf Icebrecher gelegt, da keine im Spiel waren",
+      targetChips: ["Keine Icebrecher"],
+    };
+  }
+  const targetText =
+    targetTitles.length > 0
+      ? joinChronicleParts(targetTitles)
+      : targetCount === 1
+        ? "einen Icebrecher"
+        : `${targetCount} Icebrecher`;
+  return {
+    title: `1 Pattel-Counter auf ${targetText} gelegt`,
+    ...(targetCount > 1
+      ? { description: `Jeder betroffene Icebrecher hat 1 Pattel-Counter erhalten.` }
+      : {}),
+    targetChips: [
+      targetCount === 1 ? "1 Icebrecher" : `${targetCount} Icebrecher`,
+      ...targetTitles,
+    ],
   };
 }
 
@@ -2131,6 +2303,39 @@ function shouldMergeCardResolverEffect(event: PublicGameEvent, effect: ResolvedG
   const sourceTitle = stringValue(effect.sourceTitle);
   if (!playedDefinitionId && !sourceDefinitionId && playedTitle && sourceTitle && playedTitle !== sourceTitle) return false;
   return true;
+}
+
+function highlighterAccessExplanation(payload: Record<string, unknown>): {
+  counterCount: number;
+  accessNumber: number;
+  totalAccesses: number;
+} | null {
+  const highlighterCounterCount = numberValue(payload.highlighterCounterCount) ?? 0;
+  const highlighterAccessBonus = numberValue(payload.highlighterAccessBonus) ?? Math.max(0, highlighterCounterCount - 1);
+  const accessIndex = numberValue(payload.accessIndex);
+  const baseAccessCount = numberValue(payload.baseAccessCount) ?? 1;
+  const effectiveAccessCount = numberValue(payload.effectiveAccessCount);
+  if (
+    highlighterCounterCount <= 1 ||
+    highlighterAccessBonus <= 0 ||
+    accessIndex === undefined ||
+    effectiveAccessCount === undefined ||
+    accessIndex < Math.max(1, baseAccessCount)
+  )
+    return null;
+  return {
+    counterCount: highlighterCounterCount,
+    accessNumber: accessIndex + 1,
+    totalAccesses: Math.max(accessIndex + 1, effectiveAccessCount),
+  };
+}
+
+function freeAccessTrashSourceLabel(payload: Record<string, unknown>): string | null {
+  if (payload.freeAccessTrash !== true) return null;
+  const counterType = stringValue(payload.proteusRunnerVirusFreeTrashCounterType);
+  if (counterType === "garbage") return "Garbage In";
+  if (counterType === "crumble") return "Crumble";
+  return "Gratis-Trash";
 }
 
 function rezSuffix(cardType: string | null | undefined, effect: EffectSummary): string {
@@ -2450,10 +2655,21 @@ function counterLabel(counterType: unknown): string {
   if (counterType === "crying") return "Crying-Counter";
   if (counterType === "doppelganger_antibody") return "Doppelganger-Counter";
   if (counterType === "pattel_antibody") return "Pattel-Counter";
+  if (counterType === "highlighter") return "Highlighter-Counter";
+  if (counterType === "garbage") return "Garbage-Counter";
+  if (counterType === "scaldan") return "Scaldan-Counter";
+  if (counterType === "tax") return "Tax-Counter";
+  if (counterType === "vienna") return "Vienna-Counter";
+  if (counterType === "pipe") return "Pipe-Counter";
+  if (isSocketCounterType(counterType)) return "Socket-Counter";
   if (counterType === "recurring_credit") return "Recurring Credits";
   if (counterType === "bit") return "Bit";
   if (counterType === "shell") return "Shell-Counter";
   return counterType === "virus" ? "Virus-Counter" : "Counter";
+}
+
+function isSocketCounterType(counterType: unknown): boolean {
+  return counterType === "socket_archives" || counterType === "socket_hq" || counterType === "socket_rd";
 }
 
 function stringValue(value: unknown): string | undefined {

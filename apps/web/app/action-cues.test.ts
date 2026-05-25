@@ -108,6 +108,42 @@ describe("deriveOpponentActionCues", () => {
     expect(cueHasHiddenLeak(corpCues[0]!)).toBe(false);
   });
 
+  it("shows access-effect damage cues for both players", () => {
+    const accessDamageEvent = event("evt_access_damage", "resolve_choice", {
+      actor: "corp",
+      resolvedEffects: [
+        {
+          effectId: "bel_digmo.access.damage",
+          kind: "damage",
+          visibility: "hidden_info_barrier",
+          side: "runner",
+          amount: 1,
+          damageType: "net",
+          cardsTrashed: 1,
+          reason: "access_effect",
+          sourceDefinitionId: "onr_proteus_071_bel-digmo-antibody",
+          sourceTitle: "Bel-Digmo Antibody"
+        }
+      ]
+    });
+
+    const runnerCues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [accessDamageEvent]
+    });
+    const corpCues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [accessDamageEvent]
+    });
+
+    expect(runnerCues.some((cue) => cue.title === "Du hast 1 Net Damage durch Bel-Digmo Antibody erlitten.")).toBe(true);
+    expect(corpCues.some((cue) => cue.title === "Der Runner hat 1 Net Damage durch Bel-Digmo Antibody erlitten.")).toBe(true);
+    expect(runnerCues.at(-1)?.source).toBe("system");
+    expect(runnerCues.at(-1)?.sound).toBe("tag_or_damage");
+  });
+
   it("adds related cards only when the card is visible to the viewer", () => {
     const visibleIce = { instanceId: "ice_1", known: true, title: "Gate ICE", definitionId: "gate_ice", type: "ice" as const };
     const playerView = view("runner", {

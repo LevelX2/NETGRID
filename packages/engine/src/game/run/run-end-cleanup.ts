@@ -10,6 +10,7 @@ import type {
   PlayerAction,
   PurgeableRunnerVirusCounterBucket,
   PurgeableRunnerVirusCounterType,
+  ResolvedGameEffect,
   ServerId,
 } from "@netgrid/shared";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
@@ -645,6 +646,19 @@ function applyV181SuccessfulRunCounterTriggers(
           ),
           sourceCardDefinitionId: definition.id,
         };
+        appendProteusRunnerVirusCounterEffect(legalAction, {
+          run,
+          sourceCardId: cardId,
+          sourceDefinitionId: definition.id,
+          sourceTitle: definition.title,
+          side: "corp",
+          counterType,
+          added,
+          remainingCounters: purgeableRunnerVirusCounterAmount(
+            host.state.purgeableRunnerVirusCounters?.corp,
+            counterType,
+          ),
+        });
       }
       continue;
     }
@@ -681,6 +695,38 @@ function applyV181SuccessfulRunCounterTriggers(
               }
             : {}),
         };
+        const socketEffectInput: Parameters<typeof appendProteusRunnerVirusCounterEffect>[1] = {
+          run,
+          sourceCardId: cardId,
+          sourceDefinitionId: definition.id,
+          sourceTitle: definition.title,
+          side: "corp",
+          counterType: socketCounterType,
+          added,
+          remainingCounters: purgeableRunnerVirusCounterAmount(
+            host.state.purgeableRunnerVirusCounters?.servers?.[run.attackedServerId],
+            socketCounterType,
+          ),
+          serverId: run.attackedServerId,
+        };
+        const socketServerLabel = host.servers.publicServerLabel(run.attackedServerId);
+        if (socketServerLabel) socketEffectInput.serverLabel = socketServerLabel;
+        appendProteusRunnerVirusCounterEffect(legalAction, socketEffectInput);
+        if (pipeCounterAdded > 0) {
+          appendProteusRunnerVirusCounterEffect(legalAction, {
+            run,
+            sourceCardId: cardId,
+            sourceDefinitionId: definition.id,
+            sourceTitle: definition.title,
+            side: "corp",
+            counterType: "pipe",
+            added: pipeCounterAdded,
+            remainingCounters: purgeableRunnerVirusCounterAmount(
+              host.state.purgeableRunnerVirusCounters?.corp,
+              "pipe",
+            ),
+          });
+        }
       }
       continue;
     }
@@ -753,6 +799,40 @@ function applyV181SuccessfulRunCounterTriggers(
       }
     }
   }
+}
+
+function appendProteusRunnerVirusCounterEffect(
+  legalAction: LegalAction,
+  input: {
+    run: ActiveRun;
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    sourceTitle: string;
+    side: "corp";
+    counterType: CounterType;
+    added: number;
+    remainingCounters: number;
+    serverId?: Exclude<ServerId, "new_remote">;
+    serverLabel?: string;
+  },
+): void {
+  if (input.added <= 0) return;
+  const effect: ResolvedGameEffect = {
+    effectId: `${input.run.runId}.${input.sourceCardId}.successful_run.${input.counterType}`,
+    kind: "counter_change",
+    visibility: "public",
+    side: input.side,
+    amount: input.remainingCounters,
+    counterType: input.counterType,
+    addedCounterAmount: input.added,
+    remainingCounters: input.remainingCounters,
+    reason: "proteus_runner_virus_successful_run",
+    sourceDefinitionId: input.sourceDefinitionId,
+    sourceTitle: input.sourceTitle,
+    ...(input.serverId ? { serverId: input.serverId } : {}),
+    ...(input.serverLabel ? { serverLabel: input.serverLabel } : {}),
+  };
+  legalAction.resolvedEffects = [...(legalAction.resolvedEffects ?? []), effect];
 }
 
 function successfulRunMatchesVirusTrigger(

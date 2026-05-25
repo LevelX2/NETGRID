@@ -17,6 +17,7 @@ import {
   armoredFridgeAblativeCounterBadge,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
+  breachHighlighterAccessHint,
   breachProgressLabel,
   cardChoiceIsReadonlyPrivateLook,
   cardChoiceReadonlyConfirmationOptionId,
@@ -354,6 +355,39 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(currentRunTimelineStep(secondAccess, [])).toBe("access");
     expect(breachProgressLabel(firstAccess)).toBe("Zugriff 1 von 2");
     expect(breachProgressLabel(secondAccess)).toBe("Zugriff 2 von 2");
+  });
+
+  it("explains additional R&D accesses from Highlighter counters", () => {
+    const corpIdentity = {
+      ...card("corp_identity", "Korp Identity", "identity"),
+      counterDisplays: [
+        {
+          id: "runner_virus_corp_highlighter",
+          amount: 3,
+          displayKind: "virus",
+          label: "Highlighter-Counter",
+          ariaLabel: "3 Highlighter-Counter",
+          counterType: "highlighter",
+          usageHint: "status_marker"
+        }
+      ]
+    } satisfies VisibleCard;
+    const secondAccess = view("runner", {
+      opponent: {
+        ...view("runner").opponent,
+        identity: corpIdentity
+      },
+      run: {
+        attackedServerId: "rd",
+        phase: "access",
+        successful: true,
+        breach: { breachId: "breach_1", serverId: "rd", currentIndex: 1, remainingCount: 2, completed: false }
+      }
+    });
+
+    expect(breachHighlighterAccessHint(secondAccess)).toBe(
+      "Zusätzlicher R&D-Zugriff 2 von 3: Die Korp hat 3 Highlighter-Counter."
+    );
   });
 
   it("groups public Runner rig cards without implying hidden cards", () => {
@@ -1880,6 +1914,27 @@ describe("V1.0.6 resource and card-display helpers", () => {
     accessedAsset.trashCost = 0;
 
     expect(accessRevealStatusLabel(accessedAsset, [], "runner", "runner", "R&D")).toBe("Es ist gerade keine Runner-Entscheidung in diesem Zugriffsfenster offen. Danach kannst du den Zugriff fortsetzen.");
+  });
+
+  it("explains Proteus free access trash for normally untrashable cards", () => {
+    const accessedIce = card("ice_1", "Dog Pile", "ice");
+    const trash = legalAction(
+      "runner",
+      "trash_accessed_card",
+      "ice_1",
+      "Dog Pile kostenlos trashen",
+      {
+        cardId: "ice_1",
+        freeAccessTrash: true,
+        proteusRunnerVirusFreeTrashCounterType: "garbage"
+      },
+      "access.resolve_card"
+    );
+    const decline = legalAction("runner", "decline_trash", "game_rule", "Weiter accessen", { cardId: "ice_1" }, "access.resolve_card");
+
+    expect(accessRevealStatusLabel(accessedIce, [trash, decline], "runner", "runner", "R&D")).toBe(
+      "Garbage In: Du kannst diese Karte kostenlos trashen, auch wenn sie normalerweise keine Trash-Kosten hat."
+    );
   });
 
   it("retains the latest visible access reveal after later cleanup events until it is dismissed", () => {

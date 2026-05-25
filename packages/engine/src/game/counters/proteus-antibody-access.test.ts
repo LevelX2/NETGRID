@@ -135,6 +135,10 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
       side: "corp",
       kind: "select_option",
     });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      ambushPaymentChoiceOpened: true,
+      ambushPaymentAmount: 2,
+    });
 
     state = apply(state, "corp", (action) => action.type === "resolve_choice");
     expect(

@@ -576,6 +576,24 @@ describe("run end cleanup", () => {
       pipeCounterAdded: 1,
       pipeCounterTotalAfter: 1,
     });
+    expect(fixture.legalAction.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "counter_change",
+          counterType: "socket_archives",
+          addedCounterAmount: 1,
+          reason: "proteus_runner_virus_successful_run",
+          sourceDefinitionId: "onr_proteus_099_viral-pipeline",
+        }),
+        expect.objectContaining({
+          kind: "counter_change",
+          counterType: "pipe",
+          addedCounterAmount: 1,
+          reason: "proteus_runner_virus_successful_run",
+          sourceDefinitionId: "onr_proteus_099_viral-pipeline",
+        }),
+      ]),
+    );
   });
 
   it("derezzes Olivia Salazar temporary rezzed ICE at run end", () => {

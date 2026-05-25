@@ -769,12 +769,28 @@ export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashC
   if (fromArchives && (card.type === "asset" || card.type === "upgrade")) {
     return "Du hast diese Karte im Archiv gesehen. Du kannst weiter zugreifen oder den Zugriff abschließen.";
   }
+  const freeTrashSource = accessFreeTrashSourceLabel(actions);
+  if (freeTrashSource)
+    return `${freeTrashSource}: Du kannst diese Karte kostenlos trashen, auch wenn sie normalerweise keine Trash-Kosten hat.`;
   if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
   if (actions.some((action) => action.type === "access_card")) return "Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.";
   if (actions.length === 0) return "Es ist gerade keine Runner-Entscheidung in diesem Zugriffsfenster offen. Danach kannst du den Zugriff fortsetzen.";
   if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
   if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
   return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
+}
+
+function accessFreeTrashSourceLabel(actions: LegalAction[]): string | null {
+  const freeTrashAction = actions.find(
+    (action) =>
+      action.type === "trash_accessed_card" &&
+      action.payload?.freeAccessTrash === true,
+  );
+  const counterType = freeTrashAction?.payload?.proteusRunnerVirusFreeTrashCounterType;
+  if (counterType === "garbage") return "Garbage In";
+  if (counterType === "crumble") return "Crumble";
+  if (freeTrashAction) return "Gratis-Trash";
+  return null;
 }
 
 function accessRevealStealCostStatus(actions: LegalAction[]): string | null {
@@ -1161,6 +1177,27 @@ export function breachProgressLabel(view: PlayerView): string | null {
   const current = breach.currentIndex + 1;
   const knownTotal = breach.completed ? current : breach.currentIndex + breach.remainingCount;
   return `Zugriff ${current} von ${Math.max(current, knownTotal)}`;
+}
+
+export function breachHighlighterAccessHint(view: PlayerView): string | null {
+  const run = view.run;
+  const breach = run?.breach;
+  if (!run || !breach || run.attackedServerId !== "rd" || breach.currentIndex <= 0) return null;
+  const highlighterCounters = corpHighlighterCounterAmount(view);
+  if (highlighterCounters <= 1) return null;
+  const current = breach.currentIndex + 1;
+  const knownTotal = Math.max(current, breach.completed ? current : breach.currentIndex + breach.remainingCount);
+  return `Zusätzlicher R&D-Zugriff ${current} von ${knownTotal}: Die Korp hat ${highlighterCounters} Highlighter-Counter.`;
+}
+
+function corpHighlighterCounterAmount(view: PlayerView): number {
+  const corpIdentity = view.side === "corp" ? view.own.identity : view.opponent.identity;
+  const display = corpIdentity.counterDisplays?.find(
+    (counter) =>
+      counter.counterType === "highlighter" ||
+      counter.id === "runner_virus_corp_highlighter",
+  );
+  return Math.max(0, Math.floor(display?.amount ?? 0));
 }
 
 export function activeRunIceInstanceId(view: PlayerView): string | null {

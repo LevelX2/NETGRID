@@ -133,6 +133,7 @@ import {
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   baseActionSlotCapacity,
+  breachHighlighterAccessHint,
   breachProgressLabel,
   cardCreditCounterVisual,
   cardChoiceIsReadonlyPrivateLook,
@@ -1300,6 +1301,8 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
   const card = detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, cardId, title);
   const serverLabel = serverDisplayLabel(payloadString(event.publicPayload, "serverLabel") ?? "einen Server");
   const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
+  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, event);
+  const highlighterStatus = accessHighlighterStatus(event.publicPayload);
   return {
     eventId: event.eventId,
     actorSide,
@@ -1310,7 +1313,8 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
     description: accessRevealDescription(actorSide, viewerSide, serverLabel, archivesRevealCount),
     card,
     actions,
-    trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel)
+    trashStatus: pendingAmbushStatus ?? accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel),
+    ...(highlighterStatus ? { followupStatus: highlighterStatus } : {})
   };
 }
 
@@ -1322,6 +1326,9 @@ function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string
   const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
   const card = enrichVisibleCard(accessedCard, detailsById);
   const followupStatus = latestAccessAmbushPaymentStatus(events, accessEvent, card.definitionId);
+  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, accessEvent, view);
+  const highlighterStatus = accessEvent ? accessHighlighterStatus(accessEvent.publicPayload) : null;
+  const accessFollowupStatus = highlighterStatus ?? followupStatus;
   return {
     eventId: eventId ?? `current-access:${view.stateVersion}:${accessedCard.instanceId}`,
     actorSide,
@@ -1332,8 +1339,8 @@ function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string
     description: accessRevealDescription(actorSide, viewerSide, serverLabel, archivesRevealCount),
     card,
     actions,
-    trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel),
-    ...(followupStatus ? { followupStatus } : {})
+    trashStatus: pendingAmbushStatus ?? accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel),
+    ...(accessFollowupStatus ? { followupStatus: accessFollowupStatus } : {})
   };
 }
 
@@ -1412,6 +1419,28 @@ function payloadSide(payload: Record<string, unknown>, key: string): Side | null
 function payloadPositiveInteger(payload: Record<string, unknown>, key: string): number | null {
   const value = payload[key];
   return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : null;
+}
+
+function payloadNumber(payload: Record<string, unknown>, key: string): number | null {
+  const value = payload[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function accessHighlighterStatus(payload: Record<string, unknown>): string | null {
+  const highlighterCounterCount = payloadPositiveInteger(payload, "highlighterCounterCount") ?? 0;
+  const highlighterAccessBonus = payloadPositiveInteger(payload, "highlighterAccessBonus") ?? Math.max(0, highlighterCounterCount - 1);
+  const accessIndex = payloadNumber(payload, "accessIndex");
+  const baseAccessCount = payloadPositiveInteger(payload, "baseAccessCount") ?? 1;
+  const effectiveAccessCount = payloadPositiveInteger(payload, "effectiveAccessCount");
+  if (
+    highlighterCounterCount <= 1 ||
+    highlighterAccessBonus <= 0 ||
+    accessIndex === null ||
+    effectiveAccessCount === null ||
+    accessIndex < Math.max(1, baseAccessCount)
+  )
+    return null;
+  return `Zusätzlicher R&D-Zugriff ${accessIndex + 1} von ${Math.max(accessIndex + 1, effectiveAccessCount)}: Die Korp hat ${highlighterCounterCount} Highlighter-Counter.`;
 }
 
 function accessRevealDescription(actorSide: Side, viewerSide: Side, serverLabel: string, archivesRevealCount: number | null): string {
@@ -1517,6 +1546,40 @@ function latestAccessAmbushPaymentStatus(events: PublicGameEvent[], accessEvent:
     if (payload.ambushPaymentDeclined === true) return "Die Korp hat den Access-Ambush nicht bezahlt.";
   }
   return undefined;
+}
+
+function accessAmbushPendingStatus(viewerSide: Side, accessEvent: PublicGameEvent | null | undefined, view?: PlayerView): string | undefined {
+  const eventAmount = accessEvent?.publicPayload.ambushPaymentChoiceOpened === true ? payloadPositiveInteger(accessEvent.publicPayload, "ambushPaymentAmount") : null;
+  const choiceAmount = view?.pendingChoice?.source.startsWith("p3_35.access_payment") ? accessAmbushChoiceAmount(view.pendingChoice) : null;
+  const amount = eventAmount ?? choiceAmount;
+  const pending = Boolean(amount || accessEvent?.publicPayload.ambushPaymentChoiceOpened === true || view?.pendingChoice?.source.startsWith("p3_35.access_payment"));
+  if (!pending) return undefined;
+  const amountText = amount ? `${amount} ${amount === 1 ? "Credit" : "Credits"}` : "Credits";
+  if (viewerSide === "corp" && view?.pendingChoice?.source.startsWith("p3_35.access_payment")) {
+    return `Du entscheidest jetzt, ob du ${amountText} für den Access-Ambush zahlst.`;
+  }
+  return `Die Korp entscheidet jetzt, ob sie ${amountText} für den Access-Ambush zahlt.`;
+}
+
+function accessAmbushChoiceAmount(choice: NonNullable<PlayerView["pendingChoice"]>): number | null {
+  for (const option of choice.options) {
+    const match = /^(\d+)\s+Credits?\s+zahlen$/i.exec(option.label.trim());
+    if (match?.[1]) return Number(match[1]);
+  }
+  return null;
+}
+
+function runChoiceStatusLabel(view: PlayerView, choice: NonNullable<PlayerView["pendingChoice"]>): string | null {
+  if (choice.source.startsWith("p3_35.access_payment")) {
+    const amount = accessAmbushChoiceAmount(choice);
+    const amountText = amount ? `${amount} ${amount === 1 ? "Credit" : "Credits"}` : "Credits";
+    return choice.side === view.side
+      ? `Du entscheidest jetzt, ob du ${amountText} für den Access-Ambush zahlst.`
+      : `${sideLabel(choice.side)} entscheidet jetzt, ob ${choice.side === "corp" ? "sie" : "er"} ${amountText} für den Access-Ambush zahlt.`;
+  }
+  const prompt = normalizeVisibleTerms(choice.prompt.trim());
+  if (!prompt) return null;
+  return prompt.endsWith(".") ? prompt : `${prompt}.`;
 }
 
 function deckFingerprint(deck: EditableDeck): string {
@@ -8194,12 +8257,14 @@ function RunTimelineOverlay({
   const runFocusIceFallback = approachedIce ? "Angesehenes ICE" : "Sichtbares ICE";
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
   const breachProgress = breachProgressLabel(view);
+  const breachHighlighterHint = breachHighlighterAccessHint(view);
   const headerStatus = runWindowStatusLabel(view);
   const breakerHint = runBreakerActionHint(view, legalActions);
   const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
   const choiceAction = view.pendingChoice ? runActions.find((action) => action.type === "resolve_choice" && action.payload?.choiceId === view.pendingChoice?.choiceId) : undefined;
   const regularRunActions = choiceAction ? runActions.filter((action) => action.actionId !== choiceAction.actionId) : runActions;
   const runChoice = view.pendingChoice && choiceAction && view.pendingChoice.minSelections === 1 && view.pendingChoice.maxSelections === 1 ? view.pendingChoice : null;
+  const runChoiceStatus = runChoice ? runChoiceStatusLabel(view, runChoice) : null;
 
   const overlay = (
     <div ref={overlayRef} className={`runTimelineOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} aria-live="polite" aria-atomic="true">
@@ -8229,6 +8294,7 @@ function RunTimelineOverlay({
         </div>
         {runChoice && choiceAction ? (
           <div className="runActionBar" aria-label={runChoice.prompt} data-testid="run-choice-action-bar">
+            {runChoiceStatus ? <p className="runHint runChoiceHint">{runChoiceStatus}</p> : null}
             {runChoice.options.map((option) => (
               <OverflowAwareActionButton
                 action={choiceAction}
@@ -8275,6 +8341,7 @@ function RunTimelineOverlay({
           <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p>
         ) : null}
         {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
+        {breachHighlighterHint ? <p className="runHint">{breachHighlighterHint}</p> : null}
         {breakerHint ? <p className="runHint runBreakerHint">{breakerHint}</p> : null}
         {runFocusIce ? (
           <div className="encounterFocus">
@@ -9656,11 +9723,33 @@ function chronicleEventBelongsToActiveRun(
   cardDetailsById: Record<string, CatalogCardDetail>
 ): boolean {
   if (actionType === "end_turn" || actionType === "mandatory_draw") return false;
+  if (actionType === "resolve_choice" && chronicleResolveChoiceBelongsToRun(event)) return true;
   if (actionType === "trigger_ability" || actionType === "activated_card_ability") {
     const card = eventCardDetail(event, cardDetailsById);
     return card?.type === "ice" || items.some((item) => chronicleGroupLabel(item).startsWith("Run") || item.category === "run");
   }
   return chronicleRunContextActionTypes.has(actionType) || items.some((item) => chronicleGroupLabel(item).startsWith("Run") || item.category === "run");
+}
+
+function chronicleResolveChoiceBelongsToRun(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload ?? {};
+  if (
+    payload.ambushDefinitionId ||
+    payload.accessEffectSourceDefinitionId ||
+    payload.ambushPaidCost !== undefined ||
+    payload.ambushPaymentDeclined === true ||
+    payload.hiddenZoneAction === "proteus_pattel_antibody_access_counters" ||
+    payload.counterType === "pattel_antibody"
+  )
+    return true;
+  const effects = Array.isArray(payload.resolvedEffects) ? payload.resolvedEffects : [];
+  return effects.some(
+    (effect) =>
+      effect &&
+      typeof effect === "object" &&
+      ((effect as Record<string, unknown>).reason === "access_effect" ||
+        (effect as Record<string, unknown>).counterType === "pattel_antibody"),
+  );
 }
 
 const chronicleRunContextActionTypes = new Set([
@@ -9678,7 +9767,7 @@ const chronicleRunContextActionTypes = new Set([
 ]);
 
 function chronicleActionContinuesCompletedRun(actionType: string): boolean {
-  return actionType === "access_card" || actionType === "trash_accessed_card" || actionType === "steal_agenda" || actionType === "decline_trash";
+  return actionType === "access_card" || actionType === "resolve_choice" || actionType === "trash_accessed_card" || actionType === "steal_agenda" || actionType === "decline_trash";
 }
 
 function chronicleActionCompletesRun(event: PublicGameEvent, actionType: string): boolean {
