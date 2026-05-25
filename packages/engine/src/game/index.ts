@@ -1,6 +1,7 @@
 // ARCH-2 game facade: wiring only, no gameplay or card logic lives here yet.
 // Later ARCH steps can move rule families behind this stable import edge.
 export { createGame, createGameAfterSetup } from "./create-game";
+export { applyAction } from "./apply-action";
 export { applyGameAction } from "./apply-game-action";
 export { legalActionsFor } from "./legal-actions";
 export {

@@ -435,6 +435,12 @@ export {
   createGameAfterSetup,
 } from "./game/create-game";
 import { hashState } from "./game/hash";
+import {
+  applyAction as applyActionFromGame,
+  configureApplyActionCoreHost,
+  type ApplyActionCoreHost,
+} from "./game/apply-action";
+export { applyAction } from "./game/apply-action";
 import { configureApplyGameActionHost } from "./game/apply-game-action";
 export { applyGameAction } from "./game/apply-game-action";
 export { getPlayerView, playerViewFor } from "./game/player-view";
@@ -2458,106 +2464,63 @@ function legalActionGenerationHost(state: GameState): LegalActionGenerationHost 
 
 configureLegalActionGenerationHost(legalActionGenerationHost);
 
-export function applyAction(
-  state: GameState,
-  playerAction: PlayerAction,
-  options: ApplyActionOptions = {},
-): EngineResult {
-  if (playerAction.matchId !== state.matchId) {
-    return fail(
+const applyActionCoreHost: ApplyActionCoreHost = {
+  legalActions: {
+    getLegalActions,
+  },
+  choices: {
+    validateChoiceAction,
+  },
+  state: {
+    cloneGameStateForAction,
+  },
+  actions: {
+    performAction,
+  },
+  win: {
+    checkWinConditions,
+  },
+  validation: {
+    validateGameState,
+  },
+  hash: {
+    hashState,
+  },
+  events: {
+    buildEvent: (
+      before,
+      after,
+      stateHashAfter,
+      previousState,
       state,
-      "ERR_INVALID_TARGET",
-      "Diese Aktion gehört nicht zu diesem Spiel.",
-    );
-  }
-  if (playerAction.clientKnownStateVersion !== state.stateVersion) {
-    return fail(
-      state,
-      "ERR_STALE_STATE",
-      "Der Spielzustand ist veraltet. Bitte aktualisiere die Ansicht.",
-    );
-  }
-
-  const legalActions = getLegalActions(state, playerAction.side);
-  const legalAction = legalActions.find(
-    (candidate) => candidate.actionId === playerAction.actionId,
-  );
-  if (!legalAction) {
-    return fail(
-      state,
-      playerAction.side === state.activeSide
-        ? "ERR_UNKNOWN_ACTION"
-        : "ERR_WRONG_SIDE",
-      "Diese Aktion ist im aktuellen Fenster nicht legal.",
-    );
-  }
-
-  const choiceError = validateChoiceAction(
-    state.pendingChoice,
-    legalAction,
-    playerAction,
-  );
-  if (choiceError) return fail(state, "ERR_INVALID_CHOICE", choiceError);
-
-  const next = cloneGameStateForAction(state);
-  const before = state.stateVersion;
-
-  try {
-    performAction(next, legalAction, playerAction);
-    checkWinConditions(next);
-    next.stateVersion = before + 1;
-    const validation = validateGameState(next);
-    if (!validation.ok) {
-      return fail(
+      legalAction,
+      playerAction,
+    ) =>
+      buildEvent(
+        buildEventHost,
+        before,
+        after,
+        stateHashAfter,
+        previousState,
         state,
-        "ERR_INVARIANT_FAILED",
-        `Der Spielzustand ist ungültig: ${validation.errors[0] ?? "unbekannter Fehler"}`,
-      );
-    }
-  } catch (error) {
-    return fail(
-      state,
-      "ERR_INVALID_TARGET",
-      error instanceof Error
-        ? error.message
-        : "Die Aktion konnte nicht ausgeführt werden.",
-    );
-  }
+        legalAction,
+        playerAction,
+      ),
+    toPublicEvent,
+  },
+};
 
-  const stateHash = hashState(next);
-  const event = buildEvent(
-    buildEventHost,
-    before,
-    next.stateVersion,
-    stateHash,
-    state,
-    next,
-    legalAction,
-    playerAction,
-  );
-  next.eventLog.push(event);
-
-  return {
-    ok: true,
-    state: next,
-    event,
-    publicEvents:
-      options.publicEventsMode === "latest"
-        ? [toPublicEvent(event)]
-        : next.eventLog.map(toPublicEvent),
-    stateHash,
-  };
-}
+configureApplyActionCoreHost(applyActionCoreHost);
 
 configureApplyGameActionHost({
   actions: {
-    applyAction,
+    applyAction: applyActionFromGame,
   },
 });
 
 configureReplayHost({
   actions: {
-    applyAction,
+    applyAction: applyActionFromGame,
   },
 });
 
@@ -20311,14 +20274,6 @@ function mustArrayValue<T>(values: T[], index: number, message: string): T {
   const value = values[index];
   if (value === undefined) throw new Error(message);
   return value;
-}
-
-function fail(
-  state: GameState,
-  code: EngineError["code"],
-  message: string,
-): EngineResult {
-  return { ok: false, error: { code, message }, state };
 }
 
 function cloneState<T>(state: T): T {
