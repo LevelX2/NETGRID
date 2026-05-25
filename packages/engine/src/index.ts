@@ -85,6 +85,10 @@ import {
   makeActionId,
 } from "./game/turn/action-builders";
 import {
+  buildCorpMainActions,
+  type CorpMainActionGenerationHost,
+} from "./game/turn/corp-main-actions";
+import {
   buildCorpDrawAction,
   buildCorpEndTurnAction,
   buildCorpGainCreditAction,
@@ -2430,7 +2434,9 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   }
 
   if (state.timingPoint === "corp_action.main")
-    return side === "corp" ? corpMainActions(state) : [];
+    return side === "corp"
+      ? buildCorpMainActions(corpMainActionGenerationHost(state))
+      : [];
   if (state.timingPoint === "runner_action.main") {
     if (side === "runner") return runnerMainActions(state);
     return side === "corp" ? corpRunnerActionPaidWindowActions(state) : [];
@@ -2875,648 +2881,109 @@ function corpRunnerActionPaidWindowActions(state: GameState): LegalAction[] {
   return actions;
 }
 
-function corpMainActions(state: GameState): LegalAction[] {
-  const actions: LegalAction[] = [];
-  for (const server of state.corp.servers) {
-    for (const id of server.root) {
-      const definition = definitionFor(state, id);
-      if (
-        definition.type === "agenda" &&
-        effectiveAgendaDifficulty(effectiveAgendaDifficultyDeps, state, id) <=
-          mustInstance(state.cardInstances, id).advancementCounters
-      ) {
-        if (
-          scoredAgendaKindForDefinition(definition) ===
-          "choose_fort_ice_strength_bonus"
-        ) {
-          for (const targetServer of state.corp.servers) {
-            actions.push(
-              action(
-                state,
-                "corp",
-                "score_agenda",
-                `Security Net Optimization scoren und ${serverChoiceDisplayLabel(
-                  state,
-                  targetServer.id,
-                )} wählen`,
-                id,
-                [],
-                { cardId: id, selectedServerId: targetServer.id },
-              ),
-            );
-          }
-        } else {
-          actions.push(
-            action(
-              state,
-              "corp",
-              "score_agenda",
-              `Agenda in ${server.label} scoren`,
-              id,
-              [],
-              { cardId: id },
-            ),
-          );
-        }
-      }
-    }
-  }
-  if (state.corp.clicks <= 0) {
-    actions.push(buildCorpEndTurnAction(state));
-    return actions;
-  }
-  if (corpActionDebtPending(state) > 0) {
-    return [buildCorpForgoActionDebtAction(state)];
-  }
-  if (state.corp.clicks >= 3 && totalCounters(state, "virus") > 0) {
-    actions.push(buildCorpPurgeVirusAction(state));
-  }
-  if (state.corp.credits >= 4) {
-    for (const server of state.corp.servers) {
-      const count = spyCountersForServer(state, server.id);
-      if (count <= 0) continue;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "trigger_ability",
-          `Spy-Counter in ${server.label} entfernen`,
-          "game_rule",
-          [{ clicks: 1, credits: 4 }],
-          {
-            serverId: server.id,
-            corpAbility: "remove_spy_counter",
-            counterType: "spy",
-            removedCounterAmount: 1,
-          },
-        ),
-      );
-    }
-  }
-  actions.push(buildCorpGainCreditAction(state));
-  if (acmeSavingsAndLoanObligationCount(state) > 0 && state.corp.credits >= 12) {
-    actions.push(
-      action(
-        state,
-        "corp",
-        "trigger_ability",
-        "ACME Savings and Loan: 12 Credits zahlen und 1 Agenda-Punkt scoren",
-        "game_rule",
-        [{ clicks: 1, credits: 12 }],
-        {
-          acmeSavingsAndLoanAbility: "remove_obligation",
-          acmeSavingsAndLoanCreditCost: 12,
-          acmeSavingsAndLoanScoreAgendaPoints: 1,
-          acmeSavingsAndLoanObligationsBefore:
-            acmeSavingsAndLoanObligationCount(state),
-        },
-      ),
-    );
-  }
-  if (state.corp.rd.length > 0)
-    actions.push(buildCorpDrawAction(state));
-  if (state.runner.tags > 0 && state.corp.credits >= 2) {
-    for (const id of state.runner.rig.resources) {
-      const hiddenResource = isConcealedRunnerResource(state, id);
-      const resourceSlotId = hiddenResource
-        ? hiddenRunnerResourceSlotId(id)
-        : id;
-      const definition = hiddenResource ? undefined : definitionFor(state, id);
-      actions.push(
-        action(
-          state,
-          "corp",
-          "trash_resource",
-          hiddenResource
-            ? "Verdeckte Runner-Resource trashen"
-            : `${definition?.title ?? "Resource"} trashen`,
-          "basic_action",
-          [{ clicks: 1, credits: 2 }],
-          hiddenResource
-            ? {
-                cardId: resourceSlotId,
-                resourceSlotId,
-                hiddenResourceSlotId: resourceSlotId,
-                hiddenRunnerResource: true,
-                redactedKind: "hidden_runner_resource",
-              }
-            : { cardId: id, resourceId: id },
-          {
-            targetRequirements: [
-              {
-                id: "resource",
-                kind: "card",
-                side: "runner",
-                zoneScope: ["runner.rig.resources"],
-                visibility: "public",
-              },
-            ],
-          },
-        ),
-      );
-    }
-  }
-  if (state.corp.credits >= 5) {
-    for (const id of state.runner.rig.resources.slice().sort()) {
-      if (definitionFor(state, id).id !== CODE_VIRAL_CACHE_ID) continue;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "trigger_ability",
-          "Code Viral Cache trashen",
-          id,
-          [{ clicks: 1, credits: 5 }],
-          {
-            cardId: id,
-            corpAbility: "trash_code_viral_cache",
-            sourceDefinitionId: CODE_VIRAL_CACHE_ID,
-            trashCostPaid: 5,
-          },
-          {
-            targetRequirements: [
-              {
-                id: "codeViralCache",
-                kind: "card",
-                side: "runner",
-                zoneScope: ["runner.rig.resources"],
-                visibility: "public",
-              },
-            ],
-          },
-        ),
-      );
-    }
-  }
-  actions.push(...buildCorpTrashNewDataFortCreationLockActions(state));
-  const newDataFortCreationLocked = corpNewDataFortCreationLocked(state);
-  for (const id of state.corp.hq) {
-    const definition = definitionFor(state, id);
-    if (
-      definition.type === "operation" &&
-      state.corp.credits >= (definition.cost ?? 0) &&
-      canPlayCorpOperation(state, definition)
-    ) {
-      if (
-        corpUtilityImplementationForDefinition(definition.id)?.kind ===
-        "power_grid_overload"
-      ) {
-        actions.push(...powerGridOverloadLegalActions(state, id, definition));
-        continue;
-      }
-      if (definition.id === SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID) {
-        actions.push(...systematicLayoffsLegalActions(state, id, definition));
-        continue;
-      }
-      actions.push(
-        action(
-          state,
-          "corp",
-          "play_operation",
-          `${definition.title} spielen`,
-          id,
-          [{ clicks: 1, credits: definition.cost ?? 0 }],
-          { cardId: id },
-        ),
-      );
-    }
-    if (definition.type === "ice") {
-      if (!newDataFortCreationLocked)
-        actions.push(buildCorpNewRemoteIceInstallAction(state, id));
-      for (const server of state.corp.servers) {
-        const {
-          baseCost,
-          additionalCost,
-          reduction,
-          reductionSourceDefinitionIds,
-          increaseSourceDefinitionIds,
-          totalCost,
-        } =
-          corpIceInstallTotalCost(state, id, server);
-        if (state.corp.credits < totalCost) continue;
-        actions.push(
-          buildCorpServerIceInstallAction(
-            state,
-            id,
-            server,
-            {
-              baseCost,
-              additionalCost,
-              reduction,
-              ...(reductionSourceDefinitionIds
-                ? { reductionSourceDefinitionIds }
-                : {}),
-              ...(increaseSourceDefinitionIds
-                ? { increaseSourceDefinitionIds }
-                : {}),
-              totalCost,
-            },
-          ),
-        );
-      }
-    }
-    if (
-      definition.type === "agenda" ||
-      definition.type === "asset" ||
-      definition.type === "upgrade"
-    ) {
-      if (
-        isUniqueCard(definition) &&
-        hasInstalledUniqueCardDefinition(state, "corp", definition.id)
-      )
-        continue;
-      const rootRezOnInstall = rootInstallRezzesOnInstall(definition);
-      const regionInstallCost = rootRezOnInstall
-        ? rezCostForCard(state, id)
-        : 0;
-      if (state.corp.credits >= regionInstallCost && !newDataFortCreationLocked) {
-        actions.push(
-          buildCorpNewRemoteRootInstallAction(state, id, regionInstallCost),
-        );
-      }
-      for (const server of state.corp.servers) {
-        if (
-          canInstallCorpRootCardInServer(state, definition, server) &&
-          state.corp.credits >= regionInstallCost
-        ) {
-          const replacesRegion =
-            isRegionUpgrade(definition) &&
-            corpRegionUpgradeIdsInServer(state, server).length > 0;
-          const rootCapacity = corpRootAgendaOrNodeCapacityInServer(state, server);
-          const replacesRootAsset =
-            definition.type === "agenda" &&
-            corpRootAssetIdsInServer(state, server).length > 0 &&
-            corpRootMainCardIdsInServer(state, server).length >= rootCapacity;
-          actions.push(
-            buildCorpServerRootInstallAction(
-              state,
-              id,
-              server,
-              regionInstallCost,
-              { replacesRootAsset, replacesRegion },
-            ),
-          );
-        }
-      }
-    }
-  }
-  for (const server of state.corp.servers) {
-    for (const id of server.root) {
-      const definition = definitionFor(state, id);
-      if (isInstalledCorpCardAdvanceable(state, id, definition)) {
-        if (state.corp.credits >= 1)
-          actions.push(
-            action(
-              state,
-              "corp",
-              "advance_card",
-              `${definition.title} in ${server.label} advancen`,
-              id,
-              [{ clicks: 1, credits: 1 }],
-              { cardId: id },
-            ),
-          );
-      }
-      const rezCost = rezCostForCard(state, id);
-      const rezCostReductionSourceDefinitionIds =
-        rezCostReductionSourceDefinitionIdsFor(state, id, definition);
-      if (
-        (definition.type === "asset" || definition.type === "upgrade") &&
-        !mustInstance(state.cardInstances, id).rezzed &&
-        state.corp.credits >= rezCost &&
-        (!isAcmeSavingsAndLoanDefinition(definition.id) ||
-          corpAgendaPointTotal(state) >= 1)
-      ) {
-        const acmeRezCost =
-          isAcmeSavingsAndLoanDefinition(definition.id)
-            ? {
-                agendaPointCost: 1,
-                acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
-              }
-            : {};
-        actions.push(
-          action(
-            state,
-            "corp",
-            "rez_ice",
-            `Karte in ${server.label} rezzen`,
-            id,
-            [{ credits: rezCost }],
-            {
-              cardId: id,
-              rootRez: true,
-              ...acmeRezCost,
-              ...(rezCostReductionSourceDefinitionIds.length > 0
-                ? {
-                    rezCostReductionSourceDefinitionIds:
-                      rezCostReductionSourceDefinitionIds.join(","),
-                    rezCostReductionAmount:
-                      (definition.rezCost ?? 0) - rezCost,
-                    rezCostPaid: rezCost,
-                  }
-                : {}),
-            },
-          ),
-        );
-      }
-    }
-  }
-  const corpTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);
-  const corpSpecialDamageAbilityActionsHost = corpSpecialDamageAbilityHost(state);
-  for (const assetId of rezzedCorpRootCardIds(state).sort()) {
-    const definition = definitionFor(state, assetId);
-    pushCorpTraceDamageOrCardImplementationActions(
-      state,
-      actions,
-      assetId,
-      corpTraceDamageAbilityActionsHost,
-    );
-    const specialDamageActions = buildCorpSpecialDamageAbilityActionsForCard(
-      corpSpecialDamageAbilityActionsHost,
-      assetId,
-    );
-    if (specialDamageActions.handled)
-      actions.push(...specialDamageActions.actions);
-    if (
-      HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS.has(definition.id) &&
-      state.corp.rd.length > 0
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: R&D-Spitze revealn`,
-          assetId,
-          [{ clicks: 1 }],
-          { cardId: assetId, v1917AssetAbility: "reveal_rd_top" },
-        ),
-      );
-    }
-    if (
-      HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(definition.id) &&
-      state.corp.rd.length >= 2
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: R&D-Spitze anordnen`,
-          assetId,
-          [{ clicks: 1 }],
-          { cardId: assetId, v1917AssetAbility: "reorder_rd_top2" },
-        ),
-      );
-    }
-    if (
-      definition.id === CORP_HQ_SHUFFLE_DRAW_CARD_ID ||
-      hasCorpUtilityKind(state, assetId, "rescheduler_hq_shuffle_draw")
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: HQ in R&D mischen und ziehen`,
-          assetId,
-          [{ clicks: 1 }],
-          { cardId: assetId, v1917AssetAbility: "rescheduler_hq_shuffle_draw" },
-        ),
-      );
-    }
-    if (
-      definition.id === COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID ||
-      hasCorpUtilityKind(state, assetId, "cowboy_sysop_uninstall_corp_card_to_hq")
-    ) {
-      for (const targetCardId of corpInstalledCardIds(state).sort()) {
-        const targetDefinition = definitionFor(state, targetCardId);
-        actions.push(
-          action(
-            state,
-            "corp",
-            "gain_credit",
-            `${definition.title}: ${targetDefinition.title} nach HQ nehmen`,
-            assetId,
-            [{ clicks: 1 }],
-            {
-              cardId: assetId,
-              v1951CorpUtilityAbility: "cowboy_sysop_uninstall_corp_card_to_hq",
-              targetCardId,
-            },
-          ),
-        );
-      }
-    }
-    if (
-      definition.id === DISINFECTANT_VIRUS_COUNTER_ASSET_ID &&
-      !hasCorpUtilityKind(state, assetId, "disinfectant_avoid_virus_counter")
-    ) {
-      for (const targetCardId of visibleVirusCounterTargetIds(state).sort()) {
-        const targetDefinition = definitionFor(state, targetCardId);
-        actions.push(
-          action(
-            state,
-            "corp",
-            "gain_credit",
-            `${definition.title}: Virus-Counter von ${targetDefinition.title} entfernen`,
-            assetId,
-            [{ clicks: 1 }],
-            {
-              cardId: assetId,
-              v1917AssetAbility: "remove_virus_counter",
-              targetCardId,
-              counterType: "virus",
-              removeCounterAmount: 1,
-            },
-          ),
-        );
-      }
-    }
-    if (COUNTER_UPGRADE_CARD_IDS.has(definition.id)) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: Power-Counter laden`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1918UpgradeAbility: "add_power_counter",
-            counterType: "power",
-            addCounterAmount: 1,
-          },
-        ),
-      );
-    }
-    if (
-      TAG_CONDITION_UPGRADE_CARD_IDS.has(definition.id) &&
-      !cardImplementationForDefinitionId(definition.id) &&
-      state.runner.tags > 0
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: getaggten Runner besteuern`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1918UpgradeAbility: "tag_condition_credit",
-            gainCreditsAmount: 1,
-          },
-        ),
-      );
-    }
-    if (
-      COUNTER_ASSET_CARD_IDS.has(definition.id) &&
-      !cardImplementationForDefinitionId(definition.id)
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: Power-Counter laden`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1919AssetAbility: "add_power_counter",
-            counterType: "power",
-            addCounterAmount: 1,
-          },
-        ),
-      );
-    }
-    if (
-      definition.id === INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID &&
-      !cardImplementationForDefinitionId(definition.id)
-    ) {
-      const advancementCounterCount = Math.max(
-        0,
-        Math.floor(mustInstance(state.cardInstances, assetId).advancementCounters),
-      );
-      const gainCreditsAmount = advancementCounterCount * 4;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: ${gainCreditsAmount} Credits und trashen`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1919AssetAbility: "gain_credits",
-            advancementCounterCount,
-            gainCreditsAmount,
-            trashOnUse: true,
-          },
-        ),
-      );
-    }
-    if (
-      ACTION_ASSET_CARD_IDS.has(definition.id) &&
-      !cardImplementationForDefinitionId(definition.id) &&
-      uniqueDirectLongtailKindForDefinition(definition.id) !==
-        "nevinyrral_action_and_lose_on_rezzed_leave"
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: 2 Aktionen nehmen`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1920AssetAbility: "gain_actions",
-            gainedActions: 2,
-          },
-        ),
-      );
-    }
-    const economyProfile = corpInstalledEconomyActionProfileForDefinition(
-      definition.id,
-    );
-    if (!economyProfile) continue;
-    const gainLabel =
-      `${definition.title}: ${economyProfile.creditGain} Credits` +
-      (economyProfile.trashSource ? " und trashen" : "");
-    actions.push(
-      action(
-        state,
-        "corp",
-        "gain_credit",
-        gainLabel,
-        assetId,
-        [
-          {
-            clicks: economyProfile.clickCost,
-            ...(economyProfile.creditCost > 0
-              ? { credits: economyProfile.creditCost }
-              : {}),
-          },
-        ],
-        corpInstalledEconomyActionPayload(economyProfile, assetId),
-      ),
-    );
-  }
-  const scoredAgendaAbilityActionsHost = scoredAgendaAbilityHost(state);
-  const scoredAgendaTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);
-  for (const agendaId of state.corp.scoreArea.slice().sort()) {
-    const scoredAgendaAbilityActions = buildScoredAgendaAbilityActionsForCard(
-      scoredAgendaAbilityActionsHost,
-      agendaId,
-    );
-    if (scoredAgendaAbilityActions.handled) {
-      actions.push(...scoredAgendaAbilityActions.actions);
-      continue;
-    }
-    pushCorpTraceDamageOrCardImplementationActions(
-      state,
-      actions,
-      agendaId,
-      scoredAgendaTraceDamageAbilityActionsHost,
-    );
-  }
-  actions.push(...specialZoneHarnessActions(state, "corp"));
-  actions.push(buildCorpEndTurnAction(state));
-  if (edgerunnerTempsInstallActionsRemaining(state) > 0) {
-    return actions
-      .filter(
-        (candidate) =>
-          candidate.type === "install_card" || candidate.type === "end_turn",
-      )
-      .map((candidate) =>
-        candidate.type === "install_card"
-          ? {
-              ...candidate,
-              payload: {
-                ...(candidate.payload ?? {}),
-                v1922EdgerunnerTempsInstallAction: true,
-              },
-              actionId: makeActionId(
-                candidate.type,
-                candidate.side,
-                {
-                  ...(candidate.payload ?? {}),
-                  v1922EdgerunnerTempsInstallAction: true,
-                },
-                candidate.source,
-              ),
-            }
-          : candidate,
-      );
-  }
-  return actions;
+function corpMainActionGenerationHost(
+  state: GameState,
+): CorpMainActionGenerationHost {
+  return {
+    state,
+    actions: {
+      buildLegalAction: action,
+      makeActionId,
+      buildEndTurnAction: buildCorpEndTurnAction,
+      buildForgoActionDebtAction: buildCorpForgoActionDebtAction,
+      buildPurgeVirusAction: buildCorpPurgeVirusAction,
+      buildGainCreditAction: buildCorpGainCreditAction,
+      buildDrawAction: buildCorpDrawAction,
+      buildTrashNewDataFortCreationLockActions:
+        buildCorpTrashNewDataFortCreationLockActions,
+      buildNewRemoteIceInstallAction: buildCorpNewRemoteIceInstallAction,
+      buildServerIceInstallAction: buildCorpServerIceInstallAction,
+      buildNewRemoteRootInstallAction: buildCorpNewRemoteRootInstallAction,
+      buildServerRootInstallAction: buildCorpServerRootInstallAction,
+    },
+    cards: {
+      definitionFor,
+      mustInstance,
+      isUniqueCard,
+      hasInstalledUniqueCardDefinition,
+      cardImplementationForDefinitionId,
+      rezzedCorpRootCardIds,
+      corpInstalledCardIds,
+      visibleVirusCounterTargetIds,
+    },
+    agenda: {
+      effectiveAgendaDifficulty,
+      effectiveAgendaDifficultyDeps,
+      scoredAgendaKindForDefinition,
+      serverChoiceDisplayLabel,
+      scoredAgendaAbilityHost,
+      buildScoredAgendaAbilityActionsForCard,
+    },
+    counters: {
+      totalCounters,
+      spyCountersForServer,
+    },
+    corp: {
+      corpActionDebtPending,
+      acmeSavingsAndLoanObligationCount,
+      canPlayCorpOperation,
+      corpUtilityImplementationForDefinition,
+      powerGridOverloadLegalActions,
+      systematicLayoffsLegalActions,
+      corpAgendaPointTotal,
+      hasCorpUtilityKind,
+      uniqueDirectLongtailKindForDefinition,
+      corpInstalledEconomyActionProfileForDefinition,
+      corpInstalledEconomyActionPayload,
+    },
+    runner: {
+      isConcealedRunnerResource,
+      hiddenRunnerResourceSlotId,
+    },
+    install: {
+      corpNewDataFortCreationLocked,
+      corpIceInstallTotalCost,
+      canInstallCorpRootCardInServer,
+      isRegionUpgrade,
+      corpRegionUpgradeIdsInServer,
+      corpRootAgendaOrNodeCapacityInServer,
+      corpRootAssetIdsInServer,
+      corpRootMainCardIdsInServer,
+      isInstalledCorpCardAdvanceable,
+    },
+    rez: {
+      rootInstallRezzesOnInstall,
+      rezCostForCard,
+      rezCostReductionSourceDefinitionIdsFor,
+      isAcmeSavingsAndLoanDefinition,
+    },
+    abilities: {
+      corpTraceDamageAbilityHost,
+      corpSpecialDamageAbilityHost,
+      pushCorpTraceDamageOrCardImplementationActions,
+      buildCorpSpecialDamageAbilityActionsForCard,
+    },
+    specialZones: {
+      specialZoneHarnessActions,
+      edgerunnerTempsInstallActionsRemaining,
+    },
+    constants: {
+      CODE_VIRAL_CACHE_ID,
+      HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS,
+      HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
+      CORP_HQ_SHUFFLE_DRAW_CARD_ID,
+      COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
+      DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
+      COUNTER_UPGRADE_CARD_IDS,
+      TAG_CONDITION_UPGRADE_CARD_IDS,
+      COUNTER_ASSET_CARD_IDS,
+      INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID,
+      ACTION_ASSET_CARD_IDS,
+      SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
+    },
+  };
 }
+
 
 function buildPurgeableRunnerVirusPurgeAction(state: GameState): LegalAction {
   const window = state.runnerVirusPurgeWindow;

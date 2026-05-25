@@ -5,6 +5,10 @@ export {
   type LegalActionMetadata,
 } from "./action-builders";
 export {
+  buildCorpMainActions,
+  type CorpMainActionGenerationHost,
+} from "./corp-main-actions";
+export {
   buildCorpDrawAction,
   buildCorpEndTurnAction,
   buildCorpGainCreditAction,
