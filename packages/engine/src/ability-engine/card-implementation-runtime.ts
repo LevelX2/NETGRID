@@ -347,9 +347,14 @@ export type CardImplementationRuntimeDependencies = {
   ) => CardEffectHiddenInfoResult;
   addCounterToAllInstalledRunnerIcebreakers: (
     state: GameState,
-    counterType: Extract<CounterType, "militech">,
+    counterType: CounterType,
     amount: number,
   ) => CardEffectCounterResult;
+  shuffleSourceIntoCorpRd: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+  ) => CardEffectHiddenInfoResult;
   gainRunnerEventAgendaPoint: (
     state: GameState,
     legalAction: LegalAction,
@@ -743,6 +748,8 @@ export function executeCardImplementationLifecycleEffects(
         deps.trashSourceWhenEmpty(state, sourceCardId),
       trashSource: (sourceCardId) =>
         deps.trashSource(state, sourceCardId, legalAction),
+      shuffleSourceIntoCorpRd: (sourceCardId) =>
+        deps.shuffleSourceIntoCorpRd(state, sourceCardId, definition.id),
       ...(reason ? { reason } : {}),
     },
     effects,

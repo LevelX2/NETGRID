@@ -221,7 +221,7 @@ export type CardAccessEffectStepImplementation =
   | CardEffectImplementation
   | {
       kind: "add_runner_counter";
-      counterType: Extract<CounterType, "crying">;
+      counterType: Extract<CounterType, "crying" | "doppelganger_antibody">;
       amount: number;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
@@ -876,6 +876,7 @@ export type CardEffectImplementation =
   | AddCounterToAllInstalledRunnerIcebreakersEffectImplementation
   | GainRunnerEventAgendaPointEffectImplementation
   | GainRunnerEventAgendaPointIfLiberatedAgendaSubtypeEffectImplementation
+  | ShuffleSourceIntoCorpRdEffectImplementation
   | CorpRandomDiscardFromHqEffectImplementation
   | CorpDiscardHqWithRetainPaymentEffectImplementation
   | DerezRezzedBlackIceEffectImplementation
@@ -907,9 +908,14 @@ export type GainCreditsPerAdvancementCounterOnSourceEffectImplementation = {
 
 export type AddCounterToAllInstalledRunnerIcebreakersEffectImplementation = {
   kind: "add_counter_to_all_installed_runner_icebreakers";
-  counterType: Extract<CounterType, "militech">;
+  counterType: Extract<CounterType, "militech" | "pattel_antibody">;
   amount: number;
   visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type ShuffleSourceIntoCorpRdEffectImplementation = {
+  kind: "shuffle_source_into_corp_rd";
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
 
 export type GainRunnerEventAgendaPointEffectImplementation = {
@@ -1763,14 +1769,20 @@ export type CardIceEncounterImplementation = {
 export type RunnerTraceCounterEffectImplementation = {
   counterType: Extract<
     CounterType,
-    "data_raven" | "cerberus" | "mastiff" | "crying"
+    "data_raven" | "cerberus" | "mastiff" | "crying" | "doppelganger_antibody"
   >;
   removeCost: number;
-  startOfRunnerTurn?: {
-    kind: "add_tags";
-    amountPerCounter: number;
-    visibility: EventVisibilityClass;
-  };
+  startOfRunnerTurn?:
+    | {
+        kind: "add_tags";
+        amountPerCounter: number;
+        visibility: EventVisibilityClass;
+      }
+    | {
+        kind: "lose_credits";
+        amountPerCounter: number;
+        visibility: EventVisibilityClass;
+      };
   runStart?: {
     kind: "damage";
     damageType: "net" | "brain";

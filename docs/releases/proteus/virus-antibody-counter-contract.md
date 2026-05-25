@@ -1,11 +1,11 @@
 # Proteus Virus-/Antibody-Counter Contract
 
 Stand: 2026-05-17
-Status: planning contract; Phase 8a runtime foundation for purgefähige Runner-Virus-Counter exists, no target-card promotion
+Status: planning contract; Phase 8a runtime foundation for purgefähige Runner-Virus-Counter exists; Phase 8b Corp-Antibody-Access target cards are implemented
 
 ## Scope und Quellen
 
-Dieses Artefakt schneidet den Proteus-Cluster `virus_antibody_counter_family` aus `data/rules/proteus-mechanics-coverage-2026-05-17.json` in kleine Vertragsfamilien. Seit Phase 8a gibt es eine generische Runtime-Grundlage für purgefähige Runner-Virus-Counter, Proteus-Purge-Action-Debt und öffentliche Corp-/Server-CounterDisplays. Das Artefakt bleibt Planungsinput für die Zielkarten und promotet keine Proteus-Karte zu `human_playable`, `deck_legal`, `ai_supported` oder Runtime-Resolver.
+Dieses Artefakt schneidet den Proteus-Cluster `virus_antibody_counter_family` aus `data/rules/proteus-mechanics-coverage-2026-05-17.json` in kleine Vertragsfamilien. Seit Phase 8a gibt es eine generische Runtime-Grundlage für purgefähige Runner-Virus-Counter, Proteus-Purge-Action-Debt und öffentliche Corp-/Server-CounterDisplays. Seit Phase 8b sind `Bel-Digmo Antibody`, `Doppelganger Antibody`, `Pattel Antibody` und `Stereogram Antibody` als `human_playable` Runtime-Karten umgesetzt; Proteus bleibt weiterhin nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`.
 
 Lokale Quellen:
 
@@ -52,6 +52,8 @@ Der vorhandene V0.99-Vertrag deckt nur den engen Main-Action-Purge und Karten-Co
 ## Slice 1: Korp-Antibody-Access
 
 Karten: `Bel-Digmo Antibody`, `Doppelganger Antibody`, `Pattel Antibody`, `Stereogram Antibody`.
+
+Umsetzungsstatus: abgeschlossen in Phase 8b. Die Zielkarten verwenden eigene CardImplementation-Dateien und generische Access-, Choice-, Antibody-Counter-, Strength-Modifier- und Hidden-Zone-Shuffle-Bausteine.
 
 Vertrag:
 

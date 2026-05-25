@@ -264,6 +264,27 @@ function makeHost(legalAction: LegalAction) {
       addCardCounter: (cardId, counterType, amount) => {
         calls.counters.push({ cardId, counterType, amount });
       },
+      addCounterToAllInstalledRunnerIcebreakers: (counterType, amount) => ({
+        amount,
+        counterType,
+        countersAfter: amount,
+        publicPayload: {
+          counterType,
+          addedCounterAmount: amount,
+          targetCount: 1,
+        },
+      }),
+    },
+    corpCards: {
+      shuffleCorpCardIntoRd: (cardId, sourceDefinitionId) => ({
+        publicPayload: {
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "shuffle_source_into_corp_rd",
+          movedCardCount: 1,
+          cardId,
+          sourceDefinitionId,
+        },
+      }),
     },
     payment: {
       spendCorpCredits: (amount) => {

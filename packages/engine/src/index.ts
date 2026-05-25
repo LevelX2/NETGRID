@@ -1174,6 +1174,8 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   },
   addCounterToAllInstalledRunnerIcebreakers: (state, counterType, amount) =>
     addCounterToAllInstalledRunnerIcebreakers(state, counterType, amount),
+  shuffleSourceIntoCorpRd: (state, sourceCardId, sourceDefinitionId) =>
+    shuffleCorpCardIntoRd(state, sourceCardId, sourceDefinitionId, "lifecycle"),
   gainRunnerEventAgendaPoint: (
     state,
     legalAction,
@@ -1327,7 +1329,8 @@ const publicContextDeps: PublicContextForActionDependencies = {
   cardCounter,
   cardStrengthModifier: (state, cardId) =>
     mustInstance(state.cardInstances, cardId).strengthModifier +
-    hostedProgramStrengthModifier(state, cardId),
+    hostedProgramStrengthModifier(state, cardId) -
+    cardCounter(state, cardId, "pattel_antibody"),
   creditCostForAction,
   definitionFor,
   pumpAmountForLegalAction,
@@ -6283,6 +6286,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       mustInstance(state.cardInstances, breakerId).strengthModifier +
       hostedProgramStrengthModifier(state, breakerId) +
       cardCounter(state, breakerId, "militech") +
+      cardCounter(state, breakerId, "pattel_antibody") * -1 +
       dupreStrengthCounterBonus(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
     const breakerAbilities = icebreakerAbilitiesForDefinition(breaker);
@@ -6791,6 +6795,7 @@ function resolvePileDriverBreakSubroutinesAction(
     mustInstance(state.cardInstances, breakerId).strengthModifier +
     hostedProgramStrengthModifier(state, breakerId) +
     cardCounter(state, breakerId, "militech") +
+    cardCounter(state, breakerId, "pattel_antibody") * -1 +
     dupreStrengthCounterBonus(state, breakerId) +
     runRemainderStrengthBonusForBreaker(run, breakerId);
   if (breakerStrength < iceStrengthFor(state, iceId))
@@ -9967,6 +9972,7 @@ function runnerCounterDisplayName(counterType: CounterType): string {
   if (counterType === "data_raven") return "Data-Raven-Counter";
   if (counterType === "cerberus") return "Cerberus-Counter";
   if (counterType === "mastiff") return "Mastiff-Counter";
+  if (counterType === "doppelganger_antibody") return "Doppelganger-Counter";
   return "Counter";
 }
 
@@ -12801,6 +12807,24 @@ function automaticGainCreditsEffect(
   };
 }
 
+function automaticLoseCreditsEffect(
+  effectId: string,
+  side: Side,
+  amount: number,
+  sourceDefinitionId: CardDefinitionId,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "lose_credits",
+    visibility: "public",
+    side,
+    amount,
+    reason: "start_of_turn",
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
 function automaticDrawCardsEffect(
   effectId: string,
   side: Side,
@@ -13285,16 +13309,29 @@ function applyRunnerStartOfTurnEffects(
       counterEffect.counterType,
     );
     if (counterCount <= 0) continue;
-    const tagsAdded =
-      counterCount * counterEffect.startOfRunnerTurn.amountPerCounter;
-    state.runner.tags += tagsAdded;
-    effects?.push(
-      automaticTagEffect(
-        `runner.start.${counterEffect.counterType}`,
-        tagsAdded,
-        counterEffect.sourceDefinitionId,
-      ),
-    );
+    const amount = counterCount * counterEffect.startOfRunnerTurn.amountPerCounter;
+    if (counterEffect.startOfRunnerTurn.kind === "add_tags") {
+      state.runner.tags += amount;
+      effects?.push(
+        automaticTagEffect(
+          `runner.start.${counterEffect.counterType}`,
+          amount,
+          counterEffect.sourceDefinitionId,
+        ),
+      );
+    }
+    if (counterEffect.startOfRunnerTurn.kind === "lose_credits") {
+      const lost = Math.min(state.runner.credits, amount);
+      state.runner.credits -= lost;
+      effects?.push(
+        automaticLoseCreditsEffect(
+          `runner.start.${counterEffect.counterType}`,
+          "runner",
+          lost,
+          counterEffect.sourceDefinitionId,
+        ),
+      );
+    }
   }
   executeCardImplementationStartOfRunnerTurnEffects(
     cardImplementationRuntimeDeps,
@@ -18517,6 +18554,12 @@ function accessEffectHandlerHost(
         cardCounter(state, cardId, counterType as CounterType),
       addCardCounter: (cardId, counterType, amount) =>
         addCardCounter(state, cardId, counterType as CounterType, amount),
+      addCounterToAllInstalledRunnerIcebreakers: (counterType, amount) =>
+        addCounterToAllInstalledRunnerIcebreakers(state, counterType, amount),
+    },
+    corpCards: {
+      shuffleCorpCardIntoRd: (cardId, sourceDefinitionId) =>
+        shuffleCorpCardIntoRd(state, cardId, sourceDefinitionId, "access"),
     },
     payment: {
       spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
@@ -21097,9 +21140,11 @@ function installedRunnerIcebreakerIds(state: GameState): CardInstanceId[] {
 
 function addCounterToAllInstalledRunnerIcebreakers(
   state: GameState,
-  counterType: Extract<CounterType, "militech">,
+  counterType: CounterType,
   amount: number,
-): { amount: number; counterType: Extract<CounterType, "militech">; countersAfter: number; publicPayload: Record<string, string | number | boolean> } {
+): { amount: number; counterType: Extract<CounterType, "militech" | "pattel_antibody">; countersAfter: number; publicPayload: Record<string, string | number | boolean> } {
+  if (counterType !== "militech" && counterType !== "pattel_antibody")
+    throw new Error("Dieser Icebreaker-Counter-Typ wird nicht unterstuetzt.");
   const targetIds = installedRunnerIcebreakerIds(state);
   for (const cardId of targetIds) addCardCounter(state, cardId, counterType, amount);
   return {
@@ -21116,6 +21161,44 @@ function addCounterToAllInstalledRunnerIcebreakers(
       targetCardDefinitionIds: targetIds
         .map((cardId) => definitionFor(state, cardId).id)
         .join(","),
+    },
+  };
+}
+
+function shuffleCorpCardIntoRd(
+  state: GameState,
+  cardId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+  reason: "lifecycle" | "access",
+): { publicPayload: Record<string, string | number | boolean> } {
+  const instance = mustInstance(state.cardInstances, cardId);
+  if (instance.owner !== "corp")
+    throw new Error("Nur Korp-Karten koennen in R&D gemischt werden.");
+  removeFromAllZones(state, cardId);
+  state.corp.rd.push(cardId);
+  state.cardInstances[cardId] = {
+    ...instance,
+    faceup: false,
+    rezzed: false,
+    zone: { side: "corp", zone: "rd" },
+  };
+  state.corp.rd = shuffleStateIds(
+    state,
+    state.corp.rd,
+    `card_implementation.${sourceDefinitionId}.${reason}.shuffle_into_rd`,
+  );
+  for (const rdCardId of state.corp.rd) {
+    state.cardInstances[rdCardId] = {
+      ...mustInstance(state.cardInstances, rdCardId),
+      zone: { side: "corp", zone: "rd" },
+    };
+  }
+  return {
+    publicPayload: {
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "shuffle_source_into_corp_rd",
+      movedCardCount: 1,
+      sourceDefinitionId,
     },
   };
 }

@@ -78,9 +78,12 @@ export type CardEffectExecutionContext = {
     options: CardEffectMakeRunOptions,
   ) => CardEffectMakeRunResult;
   addCounterToAllInstalledRunnerIcebreakers?: (
-    counterType: Extract<CounterType, "militech">,
+    counterType: CounterType,
     amount: number,
   ) => CardEffectCounterResult;
+  shuffleSourceIntoCorpRd?: (
+    sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
   gainRunnerEventAgendaPoint?: (amount: 1) => CardEffectHiddenInfoResult;
   runnerLiberatedAgendaSubtypeThisTurn?: (
     subtype: "research" | "gray_ops" | "black_ops",
@@ -206,7 +209,10 @@ export type CardEffectHostedCreditsResult = {
 
 export type CardEffectCounterResult = {
   amount: number;
-  counterType: Extract<CounterType, "ablative" | "trauma" | "boon" | "militech">;
+  counterType: Extract<
+    CounterType,
+    "ablative" | "trauma" | "boon" | "militech" | "pattel_antibody"
+  >;
   countersAfter: number;
   publicPayload?: Record<string, string | number | boolean>;
 };
@@ -363,6 +369,11 @@ function assertPositiveIntegerAmount(kind: string, amount: number): void {
 function assertPublicVisibility(kind: string, visibility: string): void {
   if (visibility !== "public")
     throw new Error(`${kind} effect visibility must be public.`);
+}
+
+function assertHiddenInfoBarrierVisibility(kind: string, visibility: string): void {
+  if (visibility !== "hidden_info_barrier")
+    throw new Error(`${kind} effect visibility must be hidden_info_barrier.`);
 }
 
 function mergePublicPayload(
@@ -851,9 +862,12 @@ export function executeCardImplementationEffects(
           "add_counter_to_all_installed_runner_icebreakers",
           effect.visibility,
         );
-        if (effect.counterType !== "militech")
+        if (
+          effect.counterType !== "militech" &&
+          effect.counterType !== "pattel_antibody"
+        )
           throw new Error(
-            "add_counter_to_all_installed_runner_icebreakers supports only Militech counters.",
+            "add_counter_to_all_installed_runner_icebreakers supports only configured public icebreaker counters.",
           );
         if (!context.addCounterToAllInstalledRunnerIcebreakers)
           throw new Error(
@@ -882,6 +896,19 @@ export function executeCardImplementationEffects(
             : {}),
           ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
         });
+        return;
+      }
+      case "shuffle_source_into_corp_rd": {
+        assertHiddenInfoBarrierVisibility(
+          "shuffle_source_into_corp_rd",
+          effect.visibility,
+        );
+        if (!context.shuffleSourceIntoCorpRd)
+          throw new Error(
+            "shuffle_source_into_corp_rd requires a movement execution context.",
+          );
+        const moveResult = context.shuffleSourceIntoCorpRd(context.sourceCardId);
+        mergePublicPayload(publicPayload, moveResult.publicPayload);
         return;
       }
       case "gain_runner_event_agenda_point": {

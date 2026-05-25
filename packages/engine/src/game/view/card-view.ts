@@ -94,7 +94,8 @@ export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCar
               : definition.strength +
                 instance.strengthModifier +
                 hostedProgramStrengthModifier(state, id) +
-                runRemainderStrengthBonus,
+                runRemainderStrengthBonus -
+                pattelAntibodyStrengthPenalty(instance),
         }
       : {}),
     ...(definition.agendaPoints !== undefined
@@ -373,6 +374,22 @@ function specialCounterDisplays(
       counterType: "militech",
       usageHint: "spendable",
     }),
+    ...singleCounterDisplay(counters.doppelganger_antibody, {
+      id: "doppelganger_antibody",
+      displayKind: "generic_counter",
+      label: "Doppelganger-Counter",
+      ariaLabelName: "Doppelganger-Counter",
+      counterType: "doppelganger_antibody",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.pattel_antibody, {
+      id: "pattel_antibody",
+      displayKind: "generic_counter",
+      label: "Pattel-Counter",
+      ariaLabelName: "Pattel-Counter",
+      counterType: "pattel_antibody",
+      usageHint: "status_marker",
+    }),
     ...singleCounterDisplay(counters.mark, {
       id: "mark",
       displayKind: "generic_counter",
@@ -520,6 +537,10 @@ function singleCounterDisplay(
       usageHint: display.usageHint,
     },
   ];
+}
+
+function pattelAntibodyStrengthPenalty(instance: CardInstance): number {
+  return Math.max(0, Math.floor(instance.counters?.pattel_antibody ?? 0));
 }
 
 export function visibleRunnerRigCardForViewer(

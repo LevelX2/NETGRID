@@ -3,6 +3,7 @@ import type {
   CardDefinitionId,
   CardInstance,
   CardInstanceId,
+  CounterType,
   ChoiceRequest,
   DamageType,
   GameState,
@@ -91,6 +92,21 @@ export type AccessEffectHandlerHost = {
       counterType: string,
       amount: number,
     ) => void;
+    addCounterToAllInstalledRunnerIcebreakers: (
+      counterType: CounterType,
+      amount: number,
+    ) => {
+      amount: number;
+      counterType: CounterType;
+      countersAfter: number;
+      publicPayload: Record<string, string | number | boolean>;
+    };
+  };
+  corpCards: {
+    shuffleCorpCardIntoRd: (
+      cardId: CardInstanceId,
+      sourceDefinitionId: CardDefinitionId,
+    ) => { publicPayload: Record<string, string | number | boolean> };
   };
   payment: {
     spendCorpCredits: (amount: number) => void;
@@ -369,6 +385,22 @@ function accessEffectHiddenZoneAction(
     )
   )
     return "v1918_crybaby_access_counter";
+  if (
+    effect.effects.some(
+      (step) =>
+        step.kind === "add_runner_counter" &&
+        step.counterType === "doppelganger_antibody",
+    )
+  )
+    return "proteus_doppelganger_antibody_access_counter";
+  if (
+    effect.effects.some(
+      (step) => step.kind === "add_counter_to_all_installed_runner_icebreakers",
+    )
+  )
+    return "proteus_pattel_antibody_access_counters";
+  if (effect.effects.some((step) => step.kind === "shuffle_source_into_corp_rd"))
+    return "proteus_antibody_shuffle_into_rd";
   if (effect.effects.some((step) => step.kind === "trash_installed_runner_cards"))
     return "v1919_access_ambush_trash_installed";
   if (
@@ -686,6 +718,11 @@ function executeCardImplementationAccessEffectStep(
               linkModifierAmount: -2 * remainingCounters,
             }
           : {}),
+        ...(step.counterType === "doppelganger_antibody"
+          ? {
+              doppelgangerCountersAfter: remainingCounters,
+            }
+          : {}),
       };
       resolvedEffects.push({
         effectId: accessEffectId(definition, cardId, index, "add_runner_counter"),
@@ -698,6 +735,42 @@ function executeCardImplementationAccessEffectStep(
         sourceDefinitionId: definition.id,
         sourceTitle: definition.title,
       });
+      return;
+    }
+    case "add_counter_to_all_installed_runner_icebreakers": {
+      const result = host.counters.addCounterToAllInstalledRunnerIcebreakers(
+        step.counterType,
+        step.amount,
+      );
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        ...result.publicPayload,
+      };
+      resolvedEffects.push({
+        effectId: accessEffectId(
+          definition,
+          cardId,
+          index,
+          "add_counter_to_all_installed_runner_icebreakers",
+        ),
+        kind: "counter_change",
+        visibility: step.visibility,
+        side: "runner",
+        amount: result.amount,
+        counterType: result.counterType,
+        addedCounterAmount: result.amount,
+        remainingCounters: result.countersAfter,
+        sourceDefinitionId: definition.id,
+        sourceTitle: definition.title,
+      });
+      return;
+    }
+    case "shuffle_source_into_corp_rd": {
+      const result = host.corpCards.shuffleCorpCardIntoRd(cardId, definition.id);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        ...result.publicPayload,
+      };
       return;
     }
     case "trash_installed_runner_cards": {

@@ -771,6 +771,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/ice/toughonium-wall.ts",
   "onr_proteus_044_walking-wall":
     "packages/engine/src/card-implementations/proteus/corp/ice/walking-wall.ts",
+  "onr_proteus_054_bel-digmo-antibody":
+    "packages/engine/src/card-implementations/proteus/corp/assets/bel-digmo-antibody.ts",
+  "onr_proteus_057_doppelganger-antibody":
+    "packages/engine/src/card-implementations/proteus/corp/assets/doppelganger-antibody.ts",
+  "onr_proteus_068_pattel-antibody":
+    "packages/engine/src/card-implementations/proteus/corp/assets/pattel-antibody.ts",
+  "onr_proteus_075_stereogram-antibody":
+    "packages/engine/src/card-implementations/proteus/corp/assets/stereogram-antibody.ts",
   "onr_proteus_062_lesley-major":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/lesley-major.ts",
   "onr_proteus_065_networked-center":

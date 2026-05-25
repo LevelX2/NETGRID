@@ -1364,6 +1364,8 @@ export function publicContextForAction(
         legalAction.payload.installedProgramDefinitionId;
     if (typeof legalAction.payload.installedProgramCount === "number")
       context.installedProgramCount = legalAction.payload.installedProgramCount;
+    if (typeof legalAction.payload.movedCardCount === "number")
+      context.movedCardCount = legalAction.payload.movedCardCount;
     if (typeof legalAction.payload.selfTrashed === "boolean")
       context.selfTrashed = legalAction.payload.selfTrashed;
     if (legalAction.payload.programFound === false)
