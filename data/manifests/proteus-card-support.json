@@ -9,24 +9,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_086_enterprise-inc-shields",
+        "coverage": [
+          "card_implementation",
+          "damage_prevention",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-5b-enterprise"
+        ],
+        "notes": "Proteus Phase 5b: Enterprise, Inc., Shields prevents up to 2 Net damage or 1 brain/core damage via paid public CardImplementation damage-prevention sources."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_002_charity-takeover",
@@ -71,24 +81,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_096_skullcap",
+        "coverage": [
+          "card_implementation",
+          "damage_prevention",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "trash_source_cost",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-5b-skullcap"
+        ],
+        "notes": "Proteus Phase 5b: Skullcap prevents any amount of Net or brain/core damage by trashing the source through the generic CardImplementation damage-prevention cost path."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_004_fetal-ai",

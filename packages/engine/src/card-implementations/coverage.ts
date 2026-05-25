@@ -781,6 +781,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/upgrades/research-bunker.ts",
   "onr_proteus_077_weapons-depot":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/weapons-depot.ts",
+  "onr_proteus_086_enterprise-inc-shields":
+    "packages/engine/src/card-implementations/proteus/runner/programs/enterprise-inc-shields.ts",
+  "onr_proteus_096_skullcap":
+    "packages/engine/src/card-implementations/proteus/runner/programs/skullcap.ts",
   "onr_proteus_150_streetware-distributor":
     "packages/engine/src/card-implementations/proteus/runner/resources/streetware-distributor.ts",
 };

@@ -1460,6 +1460,53 @@ describe("CardImplementation definition descriptors", () => {
     ).toBe("implemented");
   });
 
+  it("describes Proteus Phase 5b runner protection programs", () => {
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_proteus_086_enterprise-inc-shields",
+      )?.damagePreventionSources,
+    ).toEqual([
+      {
+        kind: "damage_prevention",
+        damageTypes: ["net"],
+        amount: 2,
+        cost: { kind: "credit", amount: 1 },
+        priority: 100,
+        visibility: "public",
+      },
+      {
+        kind: "damage_prevention",
+        damageTypes: ["core"],
+        amount: 1,
+        cost: { kind: "credit", amount: 1 },
+        priority: 101,
+        visibility: "public",
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_096_skullcap")
+        ?.damagePreventionSources,
+    ).toEqual([
+      {
+        kind: "damage_prevention",
+        damageTypes: ["net", "core"],
+        amount: "all",
+        cost: { kind: "trash_source" },
+        priority: 102,
+        visibility: "public",
+      },
+    ]);
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_proteus_086_enterprise-inc-shields",
+      )?.status,
+    ).toBe("implemented");
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_proteus_096_skullcap")
+        ?.status,
+    ).toBe("implemented");
+  });
+
   it("describes Proteus Phase 3a variable ICE implementations", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_020_digiconda")
