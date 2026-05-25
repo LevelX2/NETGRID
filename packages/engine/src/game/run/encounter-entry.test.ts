@@ -5,7 +5,6 @@ import type {
   CorpServer,
   GameState,
   LegalAction,
-  PlayerAction,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { buildLegalAction } from "../turn/action-builders";
@@ -17,10 +16,8 @@ import {
   isApproachIceExposeWindowOpen,
   resolveApproachIceExposeAbility,
   resolveApproachIceExposeViewingDecision,
-  resolveSpeedTrapRezInterruptChoice,
   runnerApproachIceExposeActions,
   runnerApproachIceExposeViewingActions,
-  startSpeedTrapRezInterruptChoice,
   type EncounterEntryHost,
 } from "./encounter-entry";
 
@@ -181,14 +178,12 @@ function hostFor(
   host: EncounterEntryHost;
   calls: {
     finish: Array<{ successful: boolean; legalAction?: LegalAction }>;
-    rootRezEffects: Array<{ cardId: CardInstanceId; legalAction?: LegalAction }>;
   };
 } {
   const definitions = definitionsFor(state);
   const calls: {
     finish: Array<{ successful: boolean; legalAction?: LegalAction }>;
-    rootRezEffects: Array<{ cardId: CardInstanceId; legalAction?: LegalAction }>;
-  } = { finish: [], rootRezEffects: [] };
+  } = { finish: [] };
   return {
     calls,
     host: {
@@ -217,14 +212,6 @@ function hostFor(
         corpRootRezActionsAvailable: () =>
           options.rootRezActionsAvailable ?? false,
       },
-      choices: {
-        selectedChoiceIds: (selectedChoices) => {
-          const raw = selectedChoices?.selectedOptionIds;
-          return Array.isArray(raw)
-            ? raw.filter((value): value is string => typeof value === "string")
-            : [];
-        },
-      },
       callbacks: {
         finishRun: (successful, legalAction) => {
           calls.finish.push({
@@ -232,13 +219,6 @@ function hostFor(
             ...(legalAction ? { legalAction } : {}),
           });
           delete state.run;
-        },
-        resolveCorpRootRezEffect: (cardId, legalAction) => {
-          calls.rootRezEffects.push({
-            cardId,
-            ...(legalAction ? { legalAction } : {}),
-          });
-          return true;
         },
       },
     },
@@ -258,19 +238,6 @@ function runnerAction(
     [],
     payload,
   );
-}
-
-function choiceAction(selectedOptionId: string): PlayerAction {
-  return {
-    matchId: "match_1",
-    side: "runner",
-    actionId: "choice",
-    clientKnownStateVersion: 8,
-    selectedChoices: {
-      choiceId: "choice",
-      selectedOptionIds: [selectedOptionId],
-    },
-  };
 }
 
 describe("encounter entry", () => {
@@ -398,78 +365,4 @@ describe("encounter entry", () => {
     expect(state.activeSide).toBe("corp");
   });
 
-  it("opens and resolves Speed Trap root-rez interrupt through callbacks", () => {
-    const state = makeState({
-      runnerProgramDefinitionId: "onr_v1_067_speed-trap",
-      positionKind: "server",
-      timingPoint: "run.jack_out_window",
-      activeSide: "corp",
-    });
-    const { host, calls } = hostFor(state);
-    const legalAction = buildLegalAction(
-      state,
-      "corp",
-      "rez_ice",
-      "Rez",
-      "root_1",
-      [],
-      { cardId: "root_1", rootRez: true },
-    );
-
-    const startResult = startSpeedTrapRezInterruptChoice(
-      host,
-      "root_1",
-      legalAction,
-    );
-
-    expect(startResult).toMatchObject({
-      handled: true,
-      choiceOpened: true,
-      sourceDefinitionId: "onr_v1_067_speed-trap",
-      sourceCardId: "program_1",
-    });
-    expect(state.pendingChoice).toMatchObject({
-      side: "runner",
-      source: expect.stringContaining("v1922.speed_trap:program_1:root_1"),
-      kind: "select_option",
-      visibility: "public",
-    });
-    expect(legalAction.payload).toMatchObject({
-      v1922RunnerProgramAbility: "speed_trap_rez_interrupt_choice",
-      sourceDefinitionId: "onr_v1_067_speed-trap",
-      speedTrapSourceCardId: "program_1",
-      rezzedCardDefinitionId: "simple_upgrade",
-      serverLabel: "R&D",
-      speedTrapChoiceOpened: true,
-    });
-
-    const resolveAction = buildLegalAction(
-      state,
-      "runner",
-      "resolve_choice",
-      "Resolve",
-      "game_rule",
-      [],
-    );
-    const result = resolveSpeedTrapRezInterruptChoice(
-      host,
-      resolveAction,
-      choiceAction("jack_out"),
-    );
-
-    expect(result).toMatchObject({
-      handled: true,
-      runnerJackedOut: true,
-      successfulRunWithoutAccess: true,
-    });
-    expect(calls.finish).toHaveLength(1);
-    expect(calls.finish[0]?.successful).toBe(true);
-    expect(calls.rootRezEffects).toEqual([]);
-    expect(resolveAction.payload).toMatchObject({
-      v1922RunnerProgramAbility: "speed_trap_rez_interrupt",
-      speedTrapUsed: true,
-      successfulRunWithoutAccess: true,
-      rezzedCardDefinitionId: "simple_upgrade",
-    });
-  });
 });

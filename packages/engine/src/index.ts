@@ -57,14 +57,11 @@ import {
   corpServerIdForInstalledCard,
   corpTracePaymentPublicPayload,
   costQuotePublicPayload,
-  costQuoteToLegalActionCosts,
-  oliviaSalazarRezSourcesForRunIce,
   payPostBidLinkPaymentQuote,
   payCorpTraceBidQuote,
   payRunnerTraceBidQuote,
   postBidLinkPaymentPublicPayload,
   quoteCorpIceInstallCost,
-  quoteCorpRezCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
   runnerTracePaymentPublicPayload,
@@ -348,12 +345,22 @@ import {
   isApproachIceExposeWindowOpen,
   resolveApproachIceExposeAbility,
   resolveApproachIceExposeViewingDecision,
-  resolveSpeedTrapRezInterruptChoice,
   runnerApproachIceExposeActions,
   runnerApproachIceExposeViewingActions,
-  startSpeedTrapRezInterruptChoice,
   type EncounterEntryHost,
 } from "./game/run/encounter-entry";
+import {
+  buildCorpApproachActions,
+  buildCorpRunRootRezWindowActions,
+  corpRunRootRezActionsAvailable,
+  corpRunRootRezWindowKey,
+  handleRunRootRezPostRez,
+  isCorpRunRootRezWindowOpen,
+  passCorpRunRootRezWindow,
+  resolveCorpRootRezEffect,
+  resolveSpeedTrapRezInterruptChoice,
+  type RunRezWindowHost,
+} from "./game/run/run-rez-window";
 import {
   approachOrEncounterIce,
   handleRunMovementAction,
@@ -1588,11 +1595,6 @@ type CorpOperationResolver = {
   resolve: (state: GameState, legalAction: LegalAction) => void;
 };
 
-type CorpRootRezResolver = {
-  name: string;
-  resolve: (state: GameState) => void;
-};
-
 type DamageSummary = {
   damageType: DamageType;
   amount: number;
@@ -2263,21 +2265,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   },
 };
 
-const CORP_ROOT_REZ_RESOLVERS: Record<string, CorpRootRezResolver> = {
-  simple_economy_asset: {
-    name: "corp_asset_rez_gain_3",
-    resolve: (state) => {
-      state.corp.credits += 3;
-    },
-  },
-  v08_cashout_asset: {
-    name: "corp_asset_rez_gain_4",
-    resolve: (state) => {
-      state.corp.credits += 4;
-    },
-  },
-};
-
 type RunnerDrawSummary = {
   drawnCount: number;
   drawnCardIds?: CardInstanceId[];
@@ -2427,7 +2414,9 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
       return side === "runner"
         ? runnerApproachIceExposeActions(encounterEntryHost)
         : [];
-    return side === "corp" ? corpApproachActions(state) : [];
+    return side === "corp"
+      ? buildCorpApproachActions(runRezWindowHostForState(state))
+      : [];
   }
   if (state.timingPoint === "run.encounter_ice") {
     if (side === "runner")
@@ -2437,8 +2426,9 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
     return side === "corp" ? corpEncounterActions(state) : [];
   }
   if (state.timingPoint === "run.jack_out_window") {
-    if (side === "corp") return corpRunRootRezWindowActions(state);
-    if (isCorpRunRootRezWindowOpen(state)) return [];
+    if (side === "corp")
+      return buildCorpRunRootRezWindowActions(runRezWindowHostForState(state));
+    if (isCorpRunRootRezWindowOpen(runRezWindowHostForState(state))) return [];
     return side === "runner"
       ? buildRunnerMovementActions(
           runnerEncounterActionHostForState(state),
@@ -5642,249 +5632,6 @@ function specialZoneHarnessActions(
   return actions;
 }
 
-function corpApproachActions(state: GameState): LegalAction[] {
-  const run = mustRun(state);
-  if (!run.approachedIceId) return [];
-  const ice = mustInstance(state.cardInstances, run.approachedIceId);
-  const definition = definitionFor(state, run.approachedIceId);
-  const actions: LegalAction[] = [];
-  const rezQuote = quoteCorpRezCost(state, run.approachedIceId);
-  const rezCostReductionSourceDefinitionIds = rezQuote.modifiers.map(
-    (modifier) => modifier.sourceDefinitionId,
-  );
-  if (!ice.rezzed && rezQuote.canPay) {
-    const variableRezActions = variableIceRezActions(
-      state,
-      run.approachedIceId,
-      definition,
-      rezQuote.finalCredits,
-      rezCostReductionSourceDefinitionIds,
-    );
-    if (variableRezActions.length > 0) {
-      actions.push(...variableRezActions);
-    } else {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "rez_ice",
-          `${definition.title} rezzen`,
-          run.approachedIceId,
-          costQuoteToLegalActionCosts(rezQuote),
-          costQuotePublicPayload(rezQuote),
-        ),
-      );
-    }
-  }
-  if (
-    !ice.rezzed &&
-    !variableRezForDefinition(definition)
-  ) {
-    for (const sourceId of oliviaSalazarRezSourcesForRunIce(
-      state,
-      run.approachedIceId,
-    )) {
-      const oliviaRezQuote = quoteCorpRezCost(state, run.approachedIceId, {
-        oliviaSalazarSourceCardId: sourceId,
-      });
-      if (!oliviaRezQuote.canPay) continue;
-      const oliviaRezCost = oliviaRezQuote.finalCredits;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "rez_ice",
-          `Olivia Salazar: ${definition.title} für ${oliviaRezCost} ${oliviaRezCost === 1 ? "Credit" : "Credits"} rezzen`,
-          run.approachedIceId,
-          costQuoteToLegalActionCosts(oliviaRezQuote),
-          costQuotePublicPayload(oliviaRezQuote),
-        ),
-      );
-    }
-  }
-  actions.push(
-    action(state, "corp", "decline_rez", "Nicht rezzen", "game_rule"),
-  );
-  return [...actions, ...corpRunRootRezActions(state)];
-}
-
-function variableIceRezActions(
-  state: GameState,
-  iceId: CardInstanceId,
-  definition: CardDefinition,
-  baseRezCost: number,
-  rezCostReductionSourceDefinitionIds: string[],
-): LegalAction[] {
-  const variableRez = variableRezForDefinition(definition);
-  if (!variableRez) return [];
-  const availableAdditionalCredits = state.corp.credits - baseRezCost;
-  if (availableAdditionalCredits < 0) return [];
-  if (variableRez.kind === "x_strength") {
-    const maxX = Math.min(
-      variableRez.maxValue,
-      Math.floor(availableAdditionalCredits / variableRez.additionalCostPerValue),
-    );
-    return Array.from(
-      { length: Math.max(0, maxX - variableRez.minValue + 1) },
-      (_, offset) => variableRez.minValue + offset,
-    ).map((x) => {
-      const totalCost = baseRezCost + x * variableRez.additionalCostPerValue;
-      return action(
-        state,
-        "corp",
-        "rez_ice",
-        `${definition.title} mit X=${x} rezzen`,
-        iceId,
-        [{ credits: totalCost }],
-        {
-          cardId: iceId,
-          variableRezKind: variableRez.kind,
-          baseRezCost,
-          variableRezAdditionalCost: x * variableRez.additionalCostPerValue,
-          variableRezValue: x,
-          variableRezCap: variableRez.maxValue,
-          rezCostPaid: totalCost,
-          effectiveStrengthAfterRez: x,
-          ...(variableRez.traceBaseFromValue
-            ? { effectiveTraceBaseAfterRez: x }
-            : {}),
-          ...(variableRez.traceBidLimitFromValue
-            ? { effectiveTraceBidLimitAfterRez: x }
-            : {}),
-          ...(rezCostReductionSourceDefinitionIds.length > 0
-            ? {
-                rezCostReductionSourceDefinitionIds:
-                  rezCostReductionSourceDefinitionIds.join(","),
-                rezCostReductionAmount: (definition.rezCost ?? 0) - baseRezCost,
-              }
-            : {}),
-        },
-      );
-    });
-  }
-  if (variableRez.kind === "paid_end_the_run_subroutines") {
-    const maxSubroutineCount = Math.floor(
-      availableAdditionalCredits / variableRez.additionalCostPerSubroutine,
-    );
-    return Array.from({ length: maxSubroutineCount + 1 }, (_, subroutineCount) => {
-      const additionalCost =
-        subroutineCount * variableRez.additionalCostPerSubroutine;
-      const totalCost = baseRezCost + additionalCost;
-      return action(
-        state,
-        "corp",
-        "rez_ice",
-        `${definition.title} mit ${subroutineCount} ETR-Subroutinen rezzen`,
-        iceId,
-        [{ credits: totalCost }],
-        {
-          cardId: iceId,
-          variableRezKind: variableRez.kind,
-          baseRezCost,
-          variableRezAdditionalCost: additionalCost,
-          variableRezValue: subroutineCount,
-          rezCostPaid: totalCost,
-          effectiveSubroutineCountAfterRez: subroutineCount,
-          ...(rezCostReductionSourceDefinitionIds.length > 0
-            ? {
-                rezCostReductionSourceDefinitionIds:
-                  rezCostReductionSourceDefinitionIds.join(","),
-                rezCostReductionAmount: (definition.rezCost ?? 0) - baseRezCost,
-              }
-            : {}),
-        },
-      );
-    });
-  }
-  const subtypeVariants = [
-    {
-      value: 0,
-      additionalCost: 0,
-      selectedSubtypes: stableSubtypeList(variableRez.baseSubtypes),
-    },
-    ...(availableAdditionalCredits >= variableRez.additionalCost
-      ? [
-          {
-            value: 1,
-            additionalCost: variableRez.additionalCost,
-            selectedSubtypes: stableSubtypeList(variableRez.alternateSubtypes),
-          },
-        ]
-      : []),
-  ];
-  return subtypeVariants.map((variant) => {
-    const totalCost = baseRezCost + variant.additionalCost;
-    return action(
-      state,
-      "corp",
-      "rez_ice",
-      `${definition.title} als ${variant.selectedSubtypes.join("/")} rezzen`,
-      iceId,
-      [{ credits: totalCost }],
-      {
-        cardId: iceId,
-        variableRezKind: variableRez.kind,
-        baseRezCost,
-        variableRezAdditionalCost: variant.additionalCost,
-        variableRezValue: variant.value,
-        rezCostPaid: totalCost,
-        selectedSubtypesAfterRez: variant.selectedSubtypes.join(","),
-        ...(rezCostReductionSourceDefinitionIds.length > 0
-          ? {
-              rezCostReductionSourceDefinitionIds:
-                rezCostReductionSourceDefinitionIds.join(","),
-              rezCostReductionAmount: (definition.rezCost ?? 0) - baseRezCost,
-            }
-          : {}),
-      },
-    );
-  });
-}
-
-function corpRunRootRezActions(state: GameState): LegalAction[] {
-  const run = state.run;
-  if (!run) return [];
-  const server = mustServer(state, run.attackedServerId);
-  const actions: LegalAction[] = [];
-  for (const cardId of server.root.slice().sort()) {
-    const instance = state.cardInstances[cardId];
-    if (!instance || instance.rezzed) continue;
-    const definition = definitionFor(state, cardId);
-    if (definition.type !== "asset" && definition.type !== "upgrade") continue;
-    const rezCost = rezCostForCard(state, cardId);
-    if (state.corp.credits < rezCost) continue;
-    const rezCostReductionSourceDefinitionIds =
-      rezCostReductionSourceDefinitionIdsFor(state, cardId, definition);
-    actions.push(
-      action(
-        state,
-        "corp",
-        "rez_ice",
-        `${definition.title} in ${server.label} rezzen`,
-        cardId,
-        [{ credits: rezCost }],
-        {
-          cardId,
-          rootRez: true,
-          speedTrapInterruptEligible: true,
-          serverId: server.id,
-          ...(rezCostReductionSourceDefinitionIds.length > 0
-            ? {
-                rezCostReductionSourceDefinitionIds:
-                  rezCostReductionSourceDefinitionIds.join(","),
-                rezCostReductionAmount: (definition.rezCost ?? 0) - rezCost,
-                rezCostPaid: rezCost,
-              }
-            : {}),
-        },
-      ),
-    );
-  }
-  actions.push(...singaporeCityGridRunActions(state, run, server));
-  actions.push(...startRunIceRepositionActions(state, run, server));
-  return actions;
-}
-
 function corpFortPassWindowActions(state: GameState): LegalAction[] {
   const run = state.run;
   if (!run || run.position.kind !== "server") return [];
@@ -5935,75 +5682,6 @@ function corpFortPassWindowActions(state: GameState): LegalAction[] {
     }
   }
   return actions;
-}
-
-function corpRunRootRezWindowActions(state: GameState): LegalAction[] {
-  const actions = [
-    ...corpRunRootRezActions(state),
-    ...corpFortPassWindowActions(state),
-  ];
-  if (actions.length === 0 || !isCorpRunRootRezWindowOpen(state)) return [];
-  const run = mustRun(state);
-  const server = mustServer(state, run.attackedServerId);
-  return [
-    ...actions,
-    action(
-      state,
-      "corp",
-      "decline_rez",
-      "Nichts rezzen / Weiter",
-      "game_rule",
-      [],
-      {
-        runRootRezPass: true,
-        serverId: server.id,
-        serverLabel: server.label,
-      },
-    ),
-  ];
-}
-
-function isCorpRunRootRezWindowOpen(state: GameState): boolean {
-  if (state.timingPoint !== "run.jack_out_window") return false;
-  const run = state.run;
-  if (!run) return false;
-  if (run.rootRezWindowPassedKeys?.includes(corpRunRootRezWindowKey(run)))
-    return false;
-  return (
-    corpRunRootRezActions(state).length > 0 ||
-    corpFortPassWindowActions(state).length > 0
-  );
-}
-
-function corpRunRootRezWindowKey(run: ActiveRun): string {
-  const position =
-    run.position.kind === "ice"
-      ? `ice:${run.position.serverId}:${run.position.iceIndex}`
-      : `server:${run.position.serverId}`;
-  return `${run.runId}:${position}`;
-}
-
-function passCorpRunRootRezWindow(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (state.timingPoint !== "run.jack_out_window")
-    throw new Error("Root-Rez-Fenster ist nicht offen.");
-  const run = mustRun(state);
-  if (!isCorpRunRootRezWindowOpen(state))
-    throw new Error("Root-Rez-Fenster wurde bereits geschlossen.");
-  const server = mustServer(state, run.attackedServerId);
-  const key = corpRunRootRezWindowKey(run);
-  run.rootRezWindowPassedKeys = Array.from(
-    new Set([...(run.rootRezWindowPassedKeys ?? []), key]),
-  ).sort();
-  state.activeSide = "runner";
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    runRootRezPass: true,
-    serverId: server.id,
-    serverLabel: server.label,
-  };
 }
 
 function singaporeCityGridRunActions(
@@ -7363,7 +7041,7 @@ function performAction(
       return;
     case "decline_rez":
       if (legalAction.payload?.runRootRezPass === true) {
-        passCorpRunRootRezWindow(state, legalAction);
+        passCorpRunRootRezWindow(runRezWindowHostForState(state), legalAction);
         return;
       }
       passApproachedIce(runMovementHostForState(state));
@@ -9721,19 +9399,10 @@ function rezCard(
       cardId as CardInstanceId,
       "on_rez",
     );
-  if (
-    rootRez &&
-    startSpeedTrapRezInterruptChoice(
-      encounterEntryHostForState(state),
-      cardId,
-      legalAction,
-    ).handled
-  )
-    return;
-  if (rootRez && resolveCorpRootRezEffect(state, cardId, legalAction)) return;
   if (rootRez) {
-    continueAfterCorpRootRezIfWindowIsComplete(
-      encounterEntryHostForState(state),
+    handleRunRootRezPostRez(
+      runRezWindowHostForState(state),
+      cardId as CardInstanceId,
       legalAction,
     );
     return;
@@ -9840,59 +9509,6 @@ function variableIceStateForRezAction(
     value,
     subroutineCount: value,
   };
-}
-
-function cardImplementationCorpRootRezResolver(
-  definition: CardDefinition,
-): CorpRootRezResolver | undefined {
-  const longtail = remainingReplacementLongtailImplementationForDefinition(
-    definition.id,
-  );
-  if (longtail?.kind === "acme_savings_and_loan_debt") {
-    return {
-      name: "card_implementation_corp_root_rez_acme_savings_and_loan_debt",
-      resolve: (state) => {
-        state.corp.credits += longtail.gainCreditsOnRez;
-      },
-    };
-  }
-  return undefined;
-}
-
-function resolveCorpRootRezEffect(
-  state: GameState,
-  cardId: string,
-  legalAction?: LegalAction,
-): boolean {
-  const definition = definitionFor(state, cardId);
-  const resolver =
-    cardImplementationCorpRootRezResolver(definition) ??
-    CORP_ROOT_REZ_RESOLVERS[definition.id];
-  if (!resolver) return false;
-  resolver.resolve(state);
-  if (isAcmeSavingsAndLoanDefinition(definition.id)) {
-    const acmeLongtail = remainingReplacementLongtailImplementationForDefinition(
-      definition.id,
-    );
-    const gainedCredits =
-      acmeLongtail?.kind === "acme_savings_and_loan_debt"
-        ? acmeLongtail.gainCreditsOnRez
-        : 12;
-    addAcmeSavingsAndLoanObligation(state, 1);
-    trashCorpInstalledCardToArchives(state, cardId as CardInstanceId);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        gainedCredits,
-        selfTrashed: true,
-        acmeDebtActive: acmeSavingsAndLoanObligationCount(state) > 0,
-        acmeSavingsAndLoanObligationsAfter:
-          acmeSavingsAndLoanObligationCount(state),
-        corpCreditsAfter: state.corp.credits,
-      };
-    }
-  }
-  return true;
 }
 
 function continueRun(state: GameState, legalAction?: LegalAction): void {
@@ -16579,11 +16195,7 @@ function corpInstallRezSequenceHandlerHost(
     },
     callbacks: {
       resolveCorpRootRez: (cardId) => {
-        const definition = definitionFor(state, cardId);
-        (
-          cardImplementationCorpRootRezResolver(definition) ??
-          CORP_ROOT_REZ_RESOLVERS[definition.id]
-        )?.resolve(state);
+        resolveCorpRootRezEffect(runRezWindowHostForState(state), cardId);
       },
     },
   };
@@ -16969,7 +16581,8 @@ function runMovementHostForState(state: GameState): RunMovementHost {
     },
     rules: {
       isV097OrLater: () => isV097OrLater(state),
-      corpRunRootRezActionsAvailable: () => corpRunRootRezActions(state).length > 0,
+      corpRunRootRezActionsAvailable: () =>
+        corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
       approachIceExposeCanBeOfferedForCurrentIce: () =>
         approachIceExposeCanBeOfferedForCurrentIce(
           encounterEntryHostForState(state),
@@ -16990,6 +16603,50 @@ function runMovementHostForState(state: GameState): RunMovementHost {
   };
 }
 
+function runRezWindowHostForState(state: GameState): RunRezWindowHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+      runnerInstalledProgramIds: () => state.runner.rig.programs,
+    },
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
+    },
+    windows: {
+      fortPassWindowActions: () => corpFortPassWindowActions(state),
+      singaporeCityGridRunActions: (run, server) =>
+        singaporeCityGridRunActions(state, run, server),
+      startRunIceRepositionActions: (run, server) =>
+        startRunIceRepositionActions(state, run, server),
+      fortRunWindowImplementationForCard: (cardId, kind) =>
+        fortRunWindowImplementationForCard(state, cardId, kind),
+      advanceableInstalledCardTargetsOnServer: (serverId) =>
+        advanceableInstalledCardTargetsOnServer(state, serverId),
+    },
+    choices: {
+      selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
+    },
+    callbacks: {
+      continueAfterRootRez: (legalAction) =>
+        continueAfterCorpRootRezIfWindowIsComplete(
+          encounterEntryHostForState(state),
+          legalAction,
+        ),
+      finishRun: (successful, legalAction) =>
+        finishRun(state, successful, legalAction),
+      trashCorpInstalledCardToArchives: (cardId, legalAction) =>
+        trashCorpInstalledCardToArchives(state, cardId, legalAction),
+      acmeSavingsAndLoanObligationCount: () =>
+        acmeSavingsAndLoanObligationCount(state),
+      addAcmeSavingsAndLoanObligation: (amount) =>
+        addAcmeSavingsAndLoanObligation(state, amount),
+    },
+  };
+}
+
 function encounterEntryHostForState(state: GameState): EncounterEntryHost {
   return {
     state,
@@ -17003,16 +16660,12 @@ function encounterEntryHostForState(state: GameState): EncounterEntryHost {
       publicServerLabel: (serverId) => publicServerLabel(state, serverId),
     },
     run: {
-      corpRootRezActionsAvailable: () => corpRunRootRezActions(state).length > 0,
-    },
-    choices: {
-      selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
+      corpRootRezActionsAvailable: () =>
+        corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
     },
     callbacks: {
       finishRun: (successful, legalAction) =>
         finishRun(state, successful, legalAction),
-      resolveCorpRootRezEffect: (cardId, legalAction) =>
-        resolveCorpRootRezEffect(state, cardId, legalAction),
     },
   };
 }
@@ -17817,7 +17470,7 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1922.speed_trap")) {
     resolveSpeedTrapRezInterruptChoice(
-      encounterEntryHostForState(state),
+      runRezWindowHostForState(state),
       legalAction,
       playerAction,
     );

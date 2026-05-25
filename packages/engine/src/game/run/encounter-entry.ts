@@ -5,12 +5,10 @@ import type {
   CorpServer,
   GameState,
   LegalAction,
-  PlayerAction,
   ServerId,
 } from "@netgrid/shared";
 import type { CardRunEncounterInterventionImplementation } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID } from "../../mechanics/longtail-card-effects";
 import { buildLegalAction } from "../turn/action-builders";
 import {
   payEncounterTaxForFutureIce,
@@ -35,15 +33,8 @@ export type EncounterEntryHost = {
   run: {
     corpRootRezActionsAvailable: () => boolean;
   };
-  choices: {
-    selectedChoiceIds: (selectedChoices: PlayerAction["selectedChoices"]) => string[];
-  };
   callbacks: {
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
-    resolveCorpRootRezEffect: (
-      rezzedCardId: CardInstanceId,
-      legalAction?: LegalAction,
-    ) => boolean;
   };
 };
 
@@ -62,13 +53,6 @@ export type ApproachExposeResult = EncounterEntryResult & {
   exposeWindowOpen?: boolean;
   viewingWindowOpen?: boolean;
   sourceCardId?: CardInstanceId;
-};
-
-export type SpeedTrapResult = EncounterEntryResult & {
-  choiceOpened?: boolean;
-  runnerJackedOut?: boolean;
-  sourceCardId?: CardInstanceId;
-  successfulRunWithoutAccess?: boolean;
 };
 
 export function beginEncounter(
@@ -386,171 +370,6 @@ export function resolveApproachIceExposeViewingDecision(
   };
 }
 
-export function startSpeedTrapRezInterruptChoice(
-  host: EncounterEntryHost,
-  rezzedCardId: string,
-  legalAction?: LegalAction,
-): SpeedTrapResult {
-  const run = host.state.run;
-  if (!run) return { handled: false };
-  const rezzedCardInstanceId = rezzedCardId as CardInstanceId;
-  const definition = host.cards.definitionFor(rezzedCardInstanceId);
-  if (definition.type !== "asset" && definition.type !== "upgrade")
-    return { handled: false };
-  const speedTrapId = installedSpeedTrapIds(host)[0];
-  if (!speedTrapId) return { handled: false };
-  if (
-    !host.servers
-      .mustServer(run.attackedServerId)
-      .root.includes(rezzedCardInstanceId)
-  )
-    return { handled: false };
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  run.speedTrapPendingRezCardId = rezzedCardInstanceId;
-  run.speedTrapPendingRezTimingPoint = host.state.timingPoint;
-  run.speedTrapPendingRezActiveSide = host.state.activeSide;
-  host.state.pendingChoice = {
-    choiceId: `v1922_speed_trap_${host.state.stateVersion + 1}`,
-    side: "runner",
-    source: `v1922.speed_trap:${speedTrapId}:${rezzedCardId}:${host.state.stateVersion + 1}`,
-    prompt: "Speed Trap: Nach dem Rez jack out?",
-    kind: "select_option",
-    options: [
-      {
-        id: "jack_out",
-        label: "Jack out",
-        publicLabel: "Speed Trap nutzen",
-        value: "jack_out",
-      },
-      {
-        id: "pass",
-        label: "Nicht nutzen",
-        publicLabel: "Speed Trap nicht nutzen",
-        value: "pass",
-      },
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: host.state.stateVersion + 1,
-    visibility: "public",
-  };
-  host.state.activeSide = "runner";
-  if (legalAction) {
-    const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
-    const speedTrapDefinitionId = host.cards.definitionFor(speedTrapId).id;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      v1922RunnerProgramAbility: "speed_trap_rez_interrupt_choice",
-      sourceDefinitionId: speedTrapDefinitionId,
-      speedTrapSourceCardId: speedTrapId,
-      rezzedCardDefinitionId: definition.id,
-      ...(serverLabel ? { serverLabel } : {}),
-      speedTrapChoiceOpened: true,
-    };
-  }
-  return {
-    handled: true,
-    choiceOpened: true,
-    sourceDefinitionId: host.cards.definitionFor(speedTrapId).id,
-    sourceCardId: speedTrapId,
-    resolvedPayload: legalAction?.payload,
-    stateChanged: true,
-  };
-}
-
-export function resolveSpeedTrapRezInterruptChoice(
-  host: EncounterEntryHost,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): SpeedTrapResult {
-  const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.speed_trap"))
-    throw new Error("Speed-Trap-Choice ist nicht offen.");
-  const [, speedTrapId, rezzedCardId] = choice.source.split(":");
-  if (
-    !speedTrapId ||
-    !host.state.runner.rig.programs.includes(speedTrapId as CardInstanceId)
-  )
-    throw new Error("Speed Trap ist nicht mehr installiert.");
-  const speedTrapCardId = speedTrapId as CardInstanceId;
-  const speedTrapDefinitionId = host.cards.definitionFor(speedTrapCardId).id;
-  if (
-    !hasRunEncounterInterventionKind(
-      host,
-      speedTrapCardId,
-      "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
-    ) &&
-    (cardImplementationForDefinitionId(speedTrapDefinitionId) ||
-      speedTrapDefinitionId !== SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID)
-  )
-    throw new Error("Speed Trap ist nicht mehr installiert.");
-  const run = mustRun(host.state);
-  if (
-    !rezzedCardId ||
-    run.speedTrapPendingRezCardId !== rezzedCardId ||
-    !host.servers
-      .mustServer(run.attackedServerId)
-      .root.includes(rezzedCardId as CardInstanceId)
-  )
-    throw new Error("Das Speed-Trap-Rezziel ist nicht mehr gueltig.");
-  const rezzedCardInstanceId = rezzedCardId as CardInstanceId;
-  const rezzedDefinition = host.cards.definitionFor(rezzedCardInstanceId);
-  if (rezzedDefinition.type !== "asset" && rezzedDefinition.type !== "upgrade")
-    throw new Error("Speed Trap reagiert nur auf Nodes oder Upgrades.");
-  if (!host.cards.cardInstanceFor(rezzedCardInstanceId).rezzed)
-    throw new Error("Das Speed-Trap-Rezziel ist nicht gerezzt.");
-  const selectedId = host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const useSpeedTrap = selectedId === "jack_out";
-  const pass = selectedId === "pass";
-  if (!useSpeedTrap && !pass)
-    throw new Error("Die Speed-Trap-Auswahl ist ungueltig.");
-  const successfulRunWithoutAccess =
-    useSpeedTrap && run.position.kind === "server";
-  const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
-  const pendingTimingPoint = run.speedTrapPendingRezTimingPoint;
-  const pendingActiveSide = run.speedTrapPendingRezActiveSide;
-  delete run.speedTrapPendingRezCardId;
-  delete run.speedTrapPendingRezTimingPoint;
-  delete run.speedTrapPendingRezActiveSide;
-  delete host.state.pendingChoice;
-
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1922RunnerProgramAbility: "speed_trap_rez_interrupt",
-    sourceDefinitionId: speedTrapDefinitionId,
-    speedTrapSourceCardId: speedTrapCardId,
-    rezzedCardDefinitionId: rezzedDefinition.id,
-    ...(serverLabel ? { serverLabel } : {}),
-    speedTrapUsed: useSpeedTrap,
-    successfulRunWithoutAccess,
-  };
-
-  if (useSpeedTrap) {
-    host.callbacks.finishRun(successfulRunWithoutAccess, legalAction);
-    return {
-      handled: true,
-      runnerJackedOut: true,
-      successfulRunWithoutAccess,
-      resolvedPayload: legalAction.payload,
-      stateChanged: true,
-    };
-  }
-
-  host.callbacks.resolveCorpRootRezEffect(rezzedCardInstanceId, legalAction);
-  if (host.state.run) {
-    host.state.timingPoint =
-      (pendingTimingPoint as GameState["timingPoint"] | undefined) ??
-      "run.jack_out_window";
-    host.state.activeSide = pendingActiveSide ?? "runner";
-  }
-  return {
-    handled: true,
-    successfulRunWithoutAccess,
-    resolvedPayload: legalAction.payload,
-    stateChanged: true,
-  };
-}
-
 function grantEncounterTemporaryTraceCredits(
   host: EncounterEntryHost,
   run: ActiveRun,
@@ -635,26 +454,6 @@ function approachIceExposeAbilityIdForSource(
   if (!ability)
     throw new Error("Diese Karte hat keine Approach-Expose-Faehigkeit.");
   return ability.id;
-}
-
-function installedSpeedTrapIds(host: EncounterEntryHost): CardInstanceId[] {
-  return host.state.runner.rig.programs
-    .filter((cardId) => {
-      const definitionId = host.cards.definitionFor(cardId).id;
-      if (
-        hasRunEncounterInterventionKind(
-          host,
-          cardId,
-          "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
-        )
-      )
-        return true;
-      return (
-        !cardImplementationForDefinitionId(definitionId) &&
-        definitionId === SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID
-      );
-    })
-    .sort();
 }
 
 function markApproachIceExposeSkippedForIce(
