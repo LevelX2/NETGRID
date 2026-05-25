@@ -342,6 +342,9 @@ import {
   buildRunnerDuringRunCardImplementationActions,
 } from "./game/run/card-implementation-run-actions";
 import {
+  handleActivatedCardImplementationAction,
+} from "./game/card-implementation/activated-action-execution";
+import {
   approachIceExposeCanBeOfferedForCurrentIce,
   beginEncounter,
   continueAfterCorpRootRezIfWindowIsComplete,
@@ -5909,26 +5912,17 @@ function performAction(
       state.activeSide = "corp";
       return;
     case "activated_card_ability":
-      if (
-        handleCorpTraceDamageActivatedAbility(
-          corpTraceDamageAbilityHost(state, legalAction),
-        ).handled
-      )
-        return;
-      if (
-        handleScoredAgendaActivatedAbilityAction(
-          scoredAgendaAbilityHost(state, legalAction),
-        ).handled
-      )
-        return;
-      if (
-        !resolveActivatedCardImplementationAbility(
-          cardImplementationRuntimeDeps,
+      handleActivatedCardImplementationAction(
+        {
           state,
-          legalAction,
-        )
-      )
-        throw new Error("Die aktivierte Kartenfaehigkeit ist nicht gueltig.");
+          action: { legalAction },
+          callbacks: {
+            handleCorpTraceDamageActivatedAbility: (actionToResolve) => handleCorpTraceDamageActivatedAbility(corpTraceDamageAbilityHost(state, actionToResolve)).handled,
+            handleScoredAgendaActivatedAbilityAction: (actionToResolve) => handleScoredAgendaActivatedAbilityAction(scoredAgendaAbilityHost(state, actionToResolve)).handled,
+            resolveActivatedCardImplementationAbility: (actionToResolve) => resolveActivatedCardImplementationAbility(cardImplementationRuntimeDeps, state, actionToResolve),
+          },
+        },
+      );
       return;
     case "gain_credit":
       spendClick(state, legalAction.side);
