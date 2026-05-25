@@ -20,6 +20,7 @@ import {
   RUNTIME_CARDS,
   createAiHintsByCard,
 } from "./ai-hints";
+import type { AiHintStructuredEffect } from "./hint-ontology";
 import {
   beliefDebugSummary,
   reconstructBeliefState,
@@ -197,6 +198,15 @@ export type CorpScoredAgendaAbilityAssessment = {
   storedCredits: number;
   valueOverBasic: number;
   tacticalValue: number;
+  evidence: string[];
+};
+
+export type CorpScoredAgendaOntologyAssessment = {
+  kind: CorpScoredAgendaAbilityKind;
+  immediateGain: number;
+  drawAmount: number;
+  gainedActions: number;
+  effectKinds: string[];
   evidence: string[];
 };
 
@@ -3836,6 +3846,9 @@ export function classifyCorpScoredAgendaAbility(
     )
   )
     return undefined;
+  const ontologyAssessment = classifyScoredAgendaActionFromOntology(
+    sourceCard.definitionId,
+  );
   const text = scoredAgendaAbilityText(sourceCard, action);
   const storedCredits = Math.max(
     0,
@@ -3850,41 +3863,57 @@ export function classifyCorpScoredAgendaAbility(
     numberPayload(action, "amount"),
   );
   const textGain = scoredAgendaCreditGainFromText(text);
-  const immediateGain = Math.max(payloadGain, textGain);
-  const drawAmount = Math.max(
+  const observedImmediateGain = Math.max(payloadGain, textGain);
+  const observedDrawAmount = Math.max(
     0,
     numberPayload(action, "drawCardsAmount"),
     scoredAgendaDrawAmountFromText(text),
   );
-  const gainedActions = scoredAgendaGainedActionsFromText(text);
-  const netCredits = Math.max(0, immediateGain - creditCost);
-  const valueOverBasic = Math.max(
-    0,
-    Math.max(netCredits - clickCost, drawAmount - clickCost, gainedActions),
-  );
+  const observedGainedActions = scoredAgendaGainedActionsFromText(text);
   const lowerText = text.toLowerCase();
   const counterEconomy =
-    immediateGain > 0 &&
+    observedImmediateGain > 0 &&
     (storedCredits > 0 ||
       numberPayload(action, "removePowerCounterAmount") > 0 ||
       /counter|coup|take\s+\[?\d+\]?.*from/i.test(text));
-  const kind: CorpScoredAgendaAbilityKind =
+  const heuristicKind: CorpScoredAgendaAbilityKind =
     action.payload?.agendaAbility === "ai_chief_financial_officer" ||
-    (lowerText.includes("shuffle") && drawAmount > 0)
+    (lowerText.includes("shuffle") && observedDrawAmount > 0)
       ? "scored_agenda_shuffle_draw"
       : counterEconomy
         ? "scored_agenda_counter_economy"
-        : immediateGain > 0
+        : observedImmediateGain > 0
           ? "scored_agenda_economy"
-          : drawAmount > 1
+          : observedDrawAmount > 1
             ? "scored_agenda_draw"
-            : gainedActions > 0
+            : observedGainedActions > 0
               ? "scored_agenda_extra_action"
               : lowerText.includes("trace") && lowerText.includes("tag")
                 ? "scored_agenda_trace_tag"
                 : lowerText.includes("damage")
                   ? "scored_agenda_damage_punish"
                   : "scored_agenda_utility";
+  const kind = resolveScoredAgendaOntologyKind(
+    heuristicKind,
+    ontologyAssessment?.kind,
+  );
+  const immediateGain =
+    kind === "scored_agenda_economy" || kind === "scored_agenda_counter_economy"
+      ? Math.max(observedImmediateGain, ontologyAssessment?.immediateGain ?? 0)
+      : observedImmediateGain;
+  const drawAmount =
+    kind === "scored_agenda_draw" || kind === "scored_agenda_shuffle_draw"
+      ? Math.max(observedDrawAmount, ontologyAssessment?.drawAmount ?? 0)
+      : observedDrawAmount;
+  const gainedActions =
+    kind === "scored_agenda_extra_action"
+      ? Math.max(observedGainedActions, ontologyAssessment?.gainedActions ?? 0)
+      : observedGainedActions;
+  const netCredits = Math.max(0, immediateGain - creditCost);
+  const valueOverBasic = Math.max(
+    0,
+    Math.max(netCredits - clickCost, drawAmount - clickCost, gainedActions),
+  );
   const tacticalValue =
     kind === "scored_agenda_damage_punish"
       ? input.playerView.opponent.tags > 0
@@ -3902,6 +3931,11 @@ export function classifyCorpScoredAgendaAbility(
           : kind === "scored_agenda_shuffle_draw"
             ? 120
             : valueOverBasic * 45;
+  const ontologyEvidence = scoredAgendaOntologyEvidence(
+    ontologyAssessment,
+    heuristicKind,
+    kind,
+  );
   return {
     kind,
     sourceDefinitionId: sourceCard.definitionId,
@@ -3915,21 +3949,149 @@ export function classifyCorpScoredAgendaAbility(
     storedCredits,
     valueOverBasic,
     tacticalValue,
-    evidence: scoredAgendaAbilityEvidence({
-      kind,
-      sourceDefinitionId: sourceCard.definitionId,
-      sourceTitle: sourceCard.title ?? sourceCard.definitionId,
-      immediateGain,
-      drawAmount,
-      gainedActions,
-      netCredits,
-      clickCost,
-      creditCost,
-      storedCredits,
-      valueOverBasic,
-      tacticalValue,
-    }),
+    evidence: [
+      ...scoredAgendaAbilityEvidence({
+        kind,
+        sourceDefinitionId: sourceCard.definitionId,
+        sourceTitle: sourceCard.title ?? sourceCard.definitionId,
+        immediateGain,
+        drawAmount,
+        gainedActions,
+        netCredits,
+        clickCost,
+        creditCost,
+        storedCredits,
+        valueOverBasic,
+        tacticalValue,
+      }),
+      ...ontologyEvidence,
+    ],
   };
+}
+
+export function classifyScoredAgendaActionFromOntology(
+  sourceDefinitionId: string | undefined,
+): CorpScoredAgendaOntologyAssessment | undefined {
+  if (!sourceDefinitionId) return undefined;
+  const hint = AI_HINTS.get(sourceDefinitionId);
+  const scoredEffects = (hint?.effects ?? []).filter(
+    isScoredAgendaOntologyEffect,
+  );
+  if (scoredEffects.length === 0) return undefined;
+
+  const effectKinds = sortedUnique(scoredEffects.map((effect) => effect.kind));
+  const immediateGain = maxEffectAmount(scoredEffects, (effect) =>
+    (effect.kind === "economy" || effect.kind === "counter_economy") &&
+    effect.resource === "credits"
+      ? effect.amount
+      : undefined,
+  );
+  const drawAmount = maxEffectAmount(scoredEffects, (effect) =>
+    effect.kind === "draw" && effect.resource === "cards"
+      ? effect.amount
+      : undefined,
+  );
+  const gainedActions = maxEffectAmount(scoredEffects, (effect) =>
+    effect.kind === "extra_action" && effect.resource === "actions"
+      ? effect.amount
+      : undefined,
+  );
+  const kind = scoredAgendaKindFromOntologyEffects(scoredEffects);
+  if (!kind) return undefined;
+  return {
+    kind,
+    immediateGain,
+    drawAmount,
+    gainedActions,
+    effectKinds,
+    evidence: [
+      "scored_agenda_ontology_present:true",
+      `scored_agenda_ontology_kind:${kind}`,
+      ...effectKinds.map(
+        (effectKind) => `scored_agenda_ontology_effect:${effectKind}`,
+      ),
+      ...(immediateGain > 0
+        ? [`scored_agenda_ontology_immediate_gain:${immediateGain}`]
+        : []),
+      ...(drawAmount > 0
+        ? [`scored_agenda_ontology_draw_amount:${drawAmount}`]
+        : []),
+      ...(gainedActions > 0
+        ? [`scored_agenda_ontology_gained_actions:${gainedActions}`]
+        : []),
+    ],
+  };
+}
+
+function isScoredAgendaOntologyEffect(effect: AiHintStructuredEffect): boolean {
+  return effect.timing === "scored_activated";
+}
+
+function maxEffectAmount(
+  effects: AiHintStructuredEffect[],
+  select: (effect: AiHintStructuredEffect) => number | undefined,
+): number {
+  return Math.max(
+    0,
+    ...effects
+      .map(select)
+      .filter((amount): amount is number => typeof amount === "number")
+      .filter((amount) => Number.isFinite(amount) && amount > 0),
+  );
+}
+
+function scoredAgendaKindFromOntologyEffects(
+  effects: AiHintStructuredEffect[],
+): CorpScoredAgendaAbilityKind | undefined {
+  const kinds = new Set(effects.map((effect) => effect.kind));
+  const hasScoredAction = kinds.has("scored_agenda_action");
+  if (kinds.has("zone_shuffle") && kinds.has("draw"))
+    return "scored_agenda_shuffle_draw";
+  if (kinds.has("counter_economy")) return "scored_agenda_counter_economy";
+  if (kinds.has("economy")) return "scored_agenda_economy";
+  if (kinds.has("draw")) return "scored_agenda_draw";
+  if (kinds.has("extra_action")) return "scored_agenda_extra_action";
+  if (kinds.has("trace") || kinds.has("tag") || kinds.has("tag_source"))
+    return "scored_agenda_trace_tag";
+  if (kinds.has("damage") || kinds.has("tag_punish_payoff"))
+    return "scored_agenda_damage_punish";
+  return hasScoredAction ? "scored_agenda_utility" : undefined;
+}
+
+function resolveScoredAgendaOntologyKind(
+  heuristicKind: CorpScoredAgendaAbilityKind,
+  ontologyKind: CorpScoredAgendaAbilityKind | undefined,
+): CorpScoredAgendaAbilityKind {
+  if (!ontologyKind) return heuristicKind;
+  if (
+    heuristicKind === "unknown_scored_agenda_ability" ||
+    heuristicKind === "scored_agenda_utility"
+  )
+    return ontologyKind;
+  return heuristicKind;
+}
+
+function scoredAgendaOntologyEvidence(
+  ontologyAssessment: CorpScoredAgendaOntologyAssessment | undefined,
+  heuristicKind: CorpScoredAgendaAbilityKind,
+  resolvedKind: CorpScoredAgendaAbilityKind,
+): string[] {
+  if (!ontologyAssessment) return [];
+  const ontologyUsed = resolvedKind === ontologyAssessment.kind;
+  const conflict =
+    !ontologyUsed &&
+    heuristicKind !== "scored_agenda_utility" &&
+    heuristicKind !== "unknown_scored_agenda_ability";
+  return [
+    ...ontologyAssessment.evidence,
+    `scored_agenda_ontology_used:${ontologyUsed}`,
+    ...(conflict
+      ? [
+          "scored_agenda_ontology_conflict:true",
+          `scored_agenda_heuristic_kind:${heuristicKind}`,
+        ]
+      : []),
+  ];
 }
 
 function activatedCardAbilityCreditGain(

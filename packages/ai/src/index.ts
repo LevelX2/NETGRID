@@ -106,6 +106,7 @@ export {
   chooseCorpPlanAction,
   chooseCorpPlanDecision,
   classifyCorpScoredAgendaAbility,
+  classifyScoredAgendaActionFromOntology,
   corpPlanUsesOnlyAiSupportedCards,
   evaluateAgendaRisk,
   evaluateCorpPlan,

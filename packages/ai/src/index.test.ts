@@ -34,6 +34,7 @@ import {
   chooseCorpBaselineAction,
   chooseCorpAction,
   chooseCorpPlanDecision,
+  classifyScoredAgendaActionFromOntology,
   chooseRunnerBaselineAction,
   corpPlanUsesOnlyAiSupportedCards,
   chooseRunnerPlanDecision,
@@ -4135,6 +4136,51 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(JSON.stringify(input)).not.toMatch(/cardInstances|privatePayload/i);
   });
 
+  it("classifies scored-agenda activated effects from read-only ontology hints", () => {
+    expect(
+      classifyScoredAgendaActionFromOntology("onr_v1_210_political-overthrow"),
+    ).toEqual(
+      expect.objectContaining({
+        kind: "scored_agenda_economy",
+        immediateGain: 3,
+      }),
+    );
+    expect(
+      classifyScoredAgendaActionFromOntology("onr_v1_193_corporate-coup"),
+    ).toEqual(
+      expect.objectContaining({
+        kind: "scored_agenda_counter_economy",
+        immediateGain: 3,
+      }),
+    );
+    expect(
+      classifyScoredAgendaActionFromOntology("onr_v1_199_employee-empowerment"),
+    ).toEqual(
+      expect.objectContaining({
+        kind: "scored_agenda_draw",
+        drawAmount: 2,
+      }),
+    );
+    expect(
+      classifyScoredAgendaActionFromOntology("onr_v1_192_corporate-boon"),
+    ).toEqual(
+      expect.objectContaining({
+        kind: "scored_agenda_extra_action",
+        gainedActions: 1,
+      }),
+    );
+    expect(
+      classifyScoredAgendaActionFromOntology(
+        "onr_v1_188_ai-chief-financial-officer",
+      ),
+    ).toEqual(
+      expect.objectContaining({
+        kind: "scored_agenda_shuffle_draw",
+        drawAmount: 5,
+      }),
+    );
+  });
+
   it("uses Political Overthrow scored-agenda economy before basic credit", () => {
     const { input } = corpScoredAgendaAbilityInput(
       "ai-political-overthrow-economy",
@@ -4166,6 +4212,11 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(debugText).toContain("scored_agenda_action_taken:true");
     expect(debugText).toContain("political_overthrow_taken:true");
     expect(debugText).toContain("scored_agenda_economy_taken:true");
+    expect(debugText).toContain("scored_agenda_ontology_present:true");
+    expect(debugText).toContain(
+      "scored_agenda_ontology_kind:scored_agenda_economy",
+    );
+    expect(debugText).toContain("scored_agenda_ontology_used:true");
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
   });
 
