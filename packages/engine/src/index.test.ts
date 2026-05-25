@@ -632,6 +632,7 @@ describe("Proteus Visible Baseline", () => {
   const RESEARCH_BUNKER = "onr_proteus_072_research-bunker";
   const WEAPONS_DEPOT = "onr_proteus_077_weapons-depot";
   const STREETWARE_DISTRIBUTOR = "onr_proteus_150_streetware-distributor";
+  const DECK_THE = "onr_proteus_138_deck-the";
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
@@ -954,6 +955,160 @@ describe("Proteus Visible Baseline", () => {
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("installs Deck, The as a public hardware deck and uses its trace link abilities", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "proteus-phase-7a-deck-the",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner,
+          id: "proteus_phase_7a_deck_runner",
+          name: "Proteus Phase 7a Deck Runner",
+          cards: [
+            { id: DECK_THE, quantity: 1 },
+            { id: "onr_v1_137_parraline-5750", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.programSubtypeHosting.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 30;
+    state.corp.credits = 8;
+    const oldDeckId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_137_parraline-5750",
+    );
+    const deckId = moveRunnerCardToGrip(state, DECK_THE);
+    const memoryBefore =
+      getPlayerView(state, "runner").own.memoryLimit ?? state.runner.memoryLimit;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === oldDeckId,
+    );
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
+      memoryBefore + 1,
+    );
+
+    const installDeck = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === deckId,
+    );
+    expect(installDeck.costs).toEqual([{ clicks: 1, credits: 11 }]);
+
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: installDeck.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "proteus-deck-the-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: installDeck.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "proteus-deck-the-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const lowCredits = structuredClone(state);
+    lowCredits.runner.credits = 10;
+    const rejectedCost = applyAction(lowCredits, {
+      matchId: lowCredits.matchId,
+      side: "runner",
+      actionId: installDeck.actionId,
+      clientKnownStateVersion: lowCredits.stateVersion,
+      idempotencyKey: "proteus-deck-the-cost",
+    });
+    expect(rejectedCost.ok).toBe(false);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === installDeck.actionId,
+    );
+    expect(state.runner.heap).toContain(oldDeckId);
+    expect(state.runner.rig.hardware).not.toContain(oldDeckId);
+    expect(state.runner.rig.hardware).toContain(deckId);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
+      memoryBefore + 1,
+    );
+    expect(cardImplementationForDefinitionId(DECK_THE)).toMatchObject({
+      hardwareDeck: true,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      cardDefinitionId: DECK_THE,
+      deckUniqueReplacement: true,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_0");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const beforeBaseCredits = state.runner.credits;
+    state = applyChoice(
+      state,
+      "runner",
+      traceChoiceOptionIdForDefinition(state, DECK_THE, "trace_base_link_"),
+    );
+    expect(state.runner.credits).toBe(beforeBaseCredits);
+    expect(state.trace).toMatchObject({
+      status: "runner_bid",
+      runnerLink: 5,
+      baseLinkValue: 5,
+    });
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.trace).toMatchObject({ status: "post_bid_link" });
+    const beforePumpCredits = state.runner.credits;
+    state = applyChoice(
+      state,
+      "runner",
+      traceChoiceOptionIdForDefinition(state, DECK_THE, "trace_link_"),
+    );
+    expect(state.runner.credits).toBe(beforePumpCredits - 1);
+    expect(state.trace).toMatchObject({
+      status: "post_bid_link",
+      runnerLink: 6,
+      postBidLinkBonus: 1,
+    });
+    state = applyChoice(state, "runner", "pass");
+    expect(state.trace).toBeUndefined();
+    expect(validateGameState(state).ok).toBe(true);
   });
 });
 

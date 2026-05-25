@@ -9417,6 +9417,28 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
   },
 ];
 
+const PROTEUS_CYBERNETICS_DECK_CARDS: CardDefinition[] = [
+  {
+    id: "onr_proteus_138_deck-the",
+    title: "Deck, The",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["base_link", "deck"],
+    implementationStatus: "playable_mvp",
+    installCost: 11,
+    rulesText:
+      "[0]: Base link 5. [1]: +1 link. Provides +1 MU. Use only one base link card for each trace attempt made against you. Only one deck can be in play at a time. Trash any older decks.",
+    mechanics: [
+      "install_hardware",
+      "hardware_deck",
+      "memory",
+      "base_link",
+      "trace",
+      "proteus_cybernetics_deck_hardware",
+    ],
+  },
+];
+
 const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
   {
     id: "onr_proteus_012_bug-zapper",
@@ -10839,6 +10861,7 @@ export const DEMO_CARDS: CardDefinition[] = [
   },
   ...ONR_V1_LIMITED_PLAYABLE_CARDS,
   ...PROTEUS_VISIBLE_BASELINE_CARDS,
+  ...PROTEUS_CYBERNETICS_DECK_CARDS,
   ...PROTEUS_VARIABLE_ICE_CARDS,
 ];
 

@@ -1029,9 +1029,9 @@ describe("CardImplementation coverage and registry invariants", () => {
     );
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
-    expect(outsideScopeDefinitionIds).toHaveLength(82);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(403);
-    expect(coverageByStatus.get("implemented")).toBe(403);
+    expect(outsideScopeDefinitionIds).toHaveLength(83);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(406);
+    expect(coverageByStatus.get("implemented")).toBe(406);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
     expect(coverageByStatus.get("outside_current_release_scope")).toBe(52);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);

@@ -406,6 +406,7 @@ import { proteusRasminBridgerImplementation } from "./proteus/corp/upgrades/rasm
 import { proteusResearchBunkerImplementation } from "./proteus/corp/upgrades/research-bunker";
 import { proteusWeaponsDepotImplementation } from "./proteus/corp/upgrades/weapons-depot";
 import { proteusFakedHitImplementation } from "./proteus/runner/events/faked-hit";
+import { proteusDeckTheImplementation } from "./proteus/runner/hardware/deck-the";
 import { proteusPoisonedWaterSupplyImplementation } from "./proteus/runner/events/poisoned-water-supply";
 import { proteusDisintegratorImplementation } from "./proteus/runner/programs/disintegrator";
 import { proteusEnterpriseIncShieldsImplementation } from "./proteus/runner/programs/enterprise-inc-shields";
@@ -814,6 +815,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusWeaponsDepotImplementation,
   proteusCharityTakeoverImplementation,
   proteusFakedHitImplementation,
+  proteusDeckTheImplementation,
   proteusPoisonedWaterSupplyImplementation,
   proteusDisintegratorImplementation,
   proteusEnterpriseIncShieldsImplementation,

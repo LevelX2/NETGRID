@@ -3920,24 +3920,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_138_deck-the",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "modifier",
+          "public_payload",
+          "replay_statehash",
+          "trace_link",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-7a-deck-the"
+        ],
+        "notes": "Proteus Phase 7a: Deck, The is implemented as public Deck hardware with generic hardwareDeck uniqueness, +1 MU and existing base-link/trace-link CardImplementation abilities."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
