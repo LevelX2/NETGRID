@@ -12,6 +12,7 @@ export {
 export { hashGameState, hashState } from "./hash";
 export { replayEvents, replayGameEvents } from "./replay";
 export { validateGameState, validateGameStateForDebug } from "./validation";
+export { checkWinConditions } from "./win-conditions";
 export {
   buildCorpDrawAction,
   buildCorpEndTurnAction,

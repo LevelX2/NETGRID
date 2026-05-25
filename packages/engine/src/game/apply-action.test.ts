@@ -1,10 +1,7 @@
 import type {
-  EngineResult,
-  GameEvent,
   GameState,
   LegalAction,
   PlayerAction,
-  PublicGameEvent,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
@@ -20,6 +17,7 @@ import {
 import { createGame } from "./create-game";
 import { hashState } from "./hash";
 import { replayGameEvents } from "./replay";
+import type { PublicContextForActionDependencies } from "../public-context";
 
 describe("game apply-action core", () => {
   it("matches the public Engine API for a simple Corp action", () => {
@@ -59,50 +57,13 @@ describe("game apply-action core", () => {
     const action = playerActionFor(state, legalAction);
     const calls: PlayerAction[] = [];
     const host: ApplyActionCoreHost = {
-      legalActions: {
-        getLegalActions: () => [legalAction],
-      },
-      choices: {
-        validateChoiceAction: () => undefined,
-      },
-      state: {
-        cloneGameStateForAction: cloneGameStateForAction,
-      },
       actions: {
         performAction: (_state, _legalAction, playerAction) => {
           calls.push(playerAction);
         },
       },
-      win: {
-        checkWinConditions: () => null,
-      },
-      validation: {
-        validateGameState: () => ({ ok: true, errors: [] }),
-      },
-      hash: {
-        hashState,
-      },
       events: {
-        buildEvent: (
-          before,
-          after,
-          stateHashAfter,
-          previousState,
-          nextState,
-          resolvedLegalAction,
-          resolvedPlayerAction,
-        ) =>
-          replayEvent(
-            "arch_61_apply_action_event",
-            before,
-            after,
-            stateHashAfter,
-            previousState,
-            nextState,
-            resolvedLegalAction,
-            resolvedPlayerAction,
-          ),
-        toPublicEvent,
+        buildEventHost: testBuildEventHost(),
       },
     };
 
@@ -118,7 +79,16 @@ describe("game apply-action core", () => {
     expect(result.event.stateVersionBefore).toBe(state.stateVersion);
     expect(result.event.stateVersionAfter).toBe(state.stateVersion + 1);
     expect(result.event.stateHashAfter).toBe(result.stateHash);
-    expect(result.publicEvents).toEqual([toPublicEvent(result.event)]);
+    expect(result.publicEvents).toHaveLength(1);
+    expect(result.publicEvents[0]).toEqual({
+      eventId: result.event.eventId,
+      type: result.event.type,
+      stateVersionBefore: result.event.stateVersionBefore,
+      stateVersionAfter: result.event.stateVersionAfter,
+      stateHashAfter: result.event.stateHashAfter,
+      visibilityClass: result.event.visibilityClass,
+      publicPayload: result.event.publicPayload,
+    });
   });
 
   it("keeps invalid and stale action behavior stable", () => {
@@ -221,50 +191,14 @@ function playerActionFor(
   };
 }
 
-function cloneGameStateForAction(state: GameState): GameState {
+function testBuildEventHost() {
   return {
-    ...structuredClone({ ...state, eventLog: [] }),
-    eventLog: state.eventLog.slice(),
-  };
-}
-
-function replayEvent(
-  eventId: string,
-  stateVersionBefore: number,
-  stateVersionAfter: number,
-  stateHashAfter: string,
-  _previousState: GameState,
-  _nextState: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): GameEvent {
-  return {
-    eventId,
-    type: legalAction.type,
-    stateVersionBefore,
-    stateVersionAfter,
-    stateHashAfter,
-    visibilityClass: "public",
-    publicPayload: {
-      actor: legalAction.side,
-      actionType: legalAction.type,
+    publicContext: {
+      publicContextForAction: () => ({}),
+      deps: {} as PublicContextForActionDependencies,
     },
-    privatePayload: {
-      [legalAction.side]: {
-        action: playerAction,
-        legalAction,
-      },
+    constants: {
+      badPublicityLossThreshold: 7,
     },
-  };
-}
-
-function toPublicEvent(event: GameEvent): PublicGameEvent {
-  return {
-    eventId: event.eventId,
-    type: event.type,
-    stateVersionBefore: event.stateVersionBefore,
-    stateVersionAfter: event.stateVersionAfter,
-    stateHashAfter: event.stateHashAfter,
-    publicPayload: event.publicPayload,
   };
 }

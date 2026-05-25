@@ -77,6 +77,7 @@ import {
   resolvePendingChoice,
   type PendingChoiceResolutionHost,
 } from "./game/choices/pending-choice-resolution";
+import { selectedChoiceIds } from "./game/choices/choice-validation";
 import {
   configureLegalActionGenerationHost,
   getLegalActions as getLegalActionsFromGame,
@@ -91,6 +92,8 @@ export {
   eventVisibilityForAction,
   isHiddenInfoBarrierEvent,
 } from "./game/events/build-event";
+import { BAD_PUBLICITY_LOSS_THRESHOLD } from "./game/win-conditions";
+export { checkWinConditions } from "./game/win-conditions";
 import {
   requireTracePhase,
   traceIsInPhase,
@@ -1458,8 +1461,6 @@ type VisibleCounterPayload = {
   remainingCounters: number;
 };
 
-const BAD_PUBLICITY_LOSS_THRESHOLD = 7;
-
 const buildEventHost: BuildEventHost = {
   publicContext: {
     publicContextForAction,
@@ -2465,48 +2466,11 @@ function legalActionGenerationHost(state: GameState): LegalActionGenerationHost 
 configureLegalActionGenerationHost(legalActionGenerationHost);
 
 const applyActionCoreHost: ApplyActionCoreHost = {
-  legalActions: {
-    getLegalActions,
-  },
-  choices: {
-    validateChoiceAction,
-  },
-  state: {
-    cloneGameStateForAction,
-  },
   actions: {
     performAction,
   },
-  win: {
-    checkWinConditions,
-  },
-  validation: {
-    validateGameState,
-  },
-  hash: {
-    hashState,
-  },
   events: {
-    buildEvent: (
-      before,
-      after,
-      stateHashAfter,
-      previousState,
-      state,
-      legalAction,
-      playerAction,
-    ) =>
-      buildEvent(
-        buildEventHost,
-        before,
-        after,
-        stateHashAfter,
-        previousState,
-        state,
-        legalAction,
-        playerAction,
-      ),
-    toPublicEvent,
+    buildEventHost,
   },
 };
 
@@ -2585,39 +2549,6 @@ export function validateDeckDefinition(
   }
 
   return { ok: errors.length === 0, errors };
-}
-
-export function checkWinConditions(state: GameState): Winner | null {
-  if (state.corp.badPublicity >= BAD_PUBLICITY_LOSS_THRESHOLD) {
-    state.winner = "runner";
-    state.gameEndReason = "bad_publicity_7";
-    state.phase = "game_over";
-    state.timingPoint = "game.checkpoint";
-    delete state.pendingChoice;
-    delete state.run;
-    return state.winner;
-  }
-  if (state.winner) {
-    state.phase = "game_over";
-    state.timingPoint = "game.checkpoint";
-    state.gameEndReason ??= "unknown";
-    return state.winner;
-  }
-  const runnerPoints = agendaPoints(state, "runner");
-  const corpPoints = agendaPoints(state, "corp");
-  if (
-    runnerPoints >= state.agendaPointsToWin &&
-    corpPoints >= state.agendaPointsToWin
-  )
-    state.winner = "draw";
-  else if (runnerPoints >= state.agendaPointsToWin) state.winner = "runner";
-  else if (corpPoints >= state.agendaPointsToWin) state.winner = "corp";
-  if (state.winner) {
-    state.gameEndReason = "agenda_points";
-    state.phase = "game_over";
-    state.timingPoint = "game.checkpoint";
-  }
-  return state.winner;
 }
 
 export function applyEffectCommands(
@@ -13578,56 +13509,6 @@ function abilityMetadata(
   };
 }
 
-function validateChoiceAction(
-  choice: ChoiceRequest | undefined,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): string | undefined {
-  if (!choice)
-    return legalAction.type === "resolve_choice"
-      ? "Es ist keine Choice offen."
-      : undefined;
-  if (legalAction.type !== "resolve_choice")
-    return "Solange eine Choice offen ist, sind keine anderen Aktionen legal.";
-  if (playerAction.side !== choice.side)
-    return "Diese Choice gehoert der anderen Seite.";
-  if (choice.stateVersion !== playerAction.clientKnownStateVersion)
-    return "Diese Choice gehoert zu einem anderen Spielzustand.";
-  if (playerAction.selectedChoices?.choiceId !== choice.choiceId)
-    return "Die ChoiceId ist ungueltig.";
-  const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
-  if (
-    selectedOptionIds.length < choice.minSelections ||
-    selectedOptionIds.length > choice.maxSelections
-  )
-    return "Die Anzahl der gewaehlten Optionen ist ungueltig.";
-  const optionIds = new Set(choice.options.map((option) => option.id));
-  if (selectedOptionIds.some((id) => !optionIds.has(id)))
-    return "Eine gewaehlte Option ist nicht legal.";
-  if (
-    selectedOptionIds.some(
-      (id) =>
-        choice.options.find((option) => option.id === id)?.selectable === false,
-    )
-  )
-    return "Eine gewaehlte Option ist fuer diesen Effekt nicht auswaehlbar.";
-  if (new Set(selectedOptionIds).size !== selectedOptionIds.length)
-    return "Eine Option wurde doppelt gewaehlt.";
-  return undefined;
-}
-
-function selectedChoiceIds(
-  selectedChoices: PlayerAction["selectedChoices"],
-): string[] {
-  const raw =
-    selectedChoices?.selectedOptionIds ??
-    selectedChoices?.optionIds ??
-    selectedChoices?.options ??
-    selectedChoices?.selectedOptions;
-  if (!Array.isArray(raw)) return [];
-  return raw.filter((value): value is string => typeof value === "string");
-}
-
 function resolveCorpInstalledEconomyAction(
   state: GameState,
   legalAction: LegalAction,
@@ -20278,11 +20159,4 @@ function mustArrayValue<T>(values: T[], index: number, message: string): T {
 
 function cloneState<T>(state: T): T {
   return structuredClone(state) as T;
-}
-
-function cloneGameStateForAction(state: GameState): GameState {
-  return {
-    ...cloneState({ ...state, eventLog: [] }),
-    eventLog: state.eventLog.slice(),
-  };
 }

@@ -2,30 +2,20 @@ import type {
   ApplyActionOptions,
   EngineError,
   EngineResult,
-  GameEvent,
   GameState,
   LegalAction,
   PlayerAction,
-  PublicGameEvent,
-  Side,
-  StateHash,
-  ValidationResult,
 } from "@netgrid/shared";
+import { validateChoiceAction } from "./choices/choice-validation";
+import { buildEvent, type BuildEventHost } from "./events/build-event";
+import { getLegalActions } from "./legal-actions";
+import { cloneGameStateForAction } from "./apply-action-state";
+import { hashState } from "./hash";
+import { validateGameState } from "./validation";
+import { toPublicEvent } from "./view/public-event-view";
+import { checkWinConditions } from "./win-conditions";
 
 export type ApplyActionCoreHost = {
-  legalActions: {
-    getLegalActions: (state: GameState, side: Side) => LegalAction[];
-  };
-  choices: {
-    validateChoiceAction: (
-      choice: GameState["pendingChoice"],
-      legalAction: LegalAction,
-      playerAction: PlayerAction,
-    ) => string | undefined;
-  };
-  state: {
-    cloneGameStateForAction: (state: GameState) => GameState;
-  };
   actions: {
     performAction: (
       state: GameState,
@@ -33,26 +23,8 @@ export type ApplyActionCoreHost = {
       playerAction: PlayerAction,
     ) => void;
   };
-  win: {
-    checkWinConditions: (state: GameState) => unknown;
-  };
-  validation: {
-    validateGameState: (state: GameState) => ValidationResult;
-  };
-  hash: {
-    hashState: (state: GameState) => StateHash;
-  };
   events: {
-    buildEvent: (
-      before: number,
-      after: number,
-      stateHashAfter: StateHash,
-      previousState: GameState,
-      state: GameState,
-      legalAction: LegalAction,
-      playerAction: PlayerAction,
-    ) => GameEvent;
-    toPublicEvent: (event: GameEvent) => PublicGameEvent;
+    buildEventHost: BuildEventHost;
   };
 };
 
@@ -97,7 +69,7 @@ export function buildApplyAction(
     );
   }
 
-  const legalActions = host.legalActions.getLegalActions(state, playerAction.side);
+  const legalActions = getLegalActions(state, playerAction.side);
   const legalAction = legalActions.find(
     (candidate) => candidate.actionId === playerAction.actionId,
   );
@@ -111,21 +83,21 @@ export function buildApplyAction(
     );
   }
 
-  const choiceError = host.choices.validateChoiceAction(
+  const choiceError = validateChoiceAction(
     state.pendingChoice,
     legalAction,
     playerAction,
   );
   if (choiceError) return fail(state, "ERR_INVALID_CHOICE", choiceError);
 
-  const next = host.state.cloneGameStateForAction(state);
+  const next = cloneGameStateForAction(state);
   const before = state.stateVersion;
 
   try {
     host.actions.performAction(next, legalAction, playerAction);
-    host.win.checkWinConditions(next);
+    checkWinConditions(next);
     next.stateVersion = before + 1;
-    const validation = host.validation.validateGameState(next);
+    const validation = validateGameState(next);
     if (!validation.ok) {
       return fail(
         state,
@@ -143,8 +115,9 @@ export function buildApplyAction(
     );
   }
 
-  const stateHash = host.hash.hashState(next);
-  const event = host.events.buildEvent(
+  const stateHash = hashState(next);
+  const event = buildEvent(
+    host.events.buildEventHost,
     before,
     next.stateVersion,
     stateHash,
@@ -161,8 +134,8 @@ export function buildApplyAction(
     event,
     publicEvents:
       options.publicEventsMode === "latest"
-        ? [host.events.toPublicEvent(event)]
-        : next.eventLog.map(host.events.toPublicEvent),
+        ? [toPublicEvent(event)]
+        : next.eventLog.map(toPublicEvent),
     stateHash,
   };
 }
