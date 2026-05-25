@@ -300,7 +300,6 @@ import {
   type RunDurationPaymentHost,
 } from "./game/run/run-duration-payment";
 import {
-  appendResolvedSubroutineEffect,
   appendUnpaidPayOrEndRunEffects,
   cleanupEncounterDurationMarkers,
   clearFullyBrokenPassedIcePostPassMarker,
@@ -312,7 +311,6 @@ import {
   preparePayOrEndRunSubroutinePayment,
   resolveFatalAttractorPostEncounter,
   resolvePassRezzedIceProgramTrashChoice as resolvePassRezzedIceProgramTrashChoiceInRunModule,
-  resolveRunDurationMarkerSubroutine,
   resolveViral15ProgramTrashChoice as resolveViral15ProgramTrashChoiceInRunModule,
   type EncounterResolutionHost,
 } from "./game/run/encounter-resolution";
@@ -337,6 +335,12 @@ import {
   startTraceFromPrintedSubroutine,
   type EncounterPrintedEffectHost,
 } from "./game/run/encounter-printed-effects";
+import {
+  encounterPrintedNonTraceHost,
+  resolveDirectTrashProgramSubroutine,
+  resolveEncounterPrintedNonTraceEffect,
+  type EncounterPrintedNonTraceHost,
+} from "./game/run/encounter-printed-nontrace-effects";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -502,7 +506,6 @@ import {
   GRUBB_ID,
   HELLS_RUN_ID,
   HUNT_CLUB_BBS_ID,
-  ICE_PICK_WILLIE_ID,
   INCUBATOR_ID,
   JUNKYARD_BBS_ID,
   MICROTECH_TRODE_SET_ID,
@@ -10993,6 +10996,10 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     payOrEndRunPayment.payOrEndRunIndexesForThisContinue ?? new Set<number>();
   const paidPayOrEndRunIndexes =
     payOrEndRunPayment.paidPayOrEndRunIndexes ?? new Set<number>();
+  const printedNonTraceHost = encounterPrintedNonTraceHostForState(
+    state,
+    legalAction,
+  );
   for (let index = 0; index < subroutines.length; index += 1) {
     const subroutine = subroutines[index];
     if (
@@ -11011,15 +11018,6 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
         continue;
       }
     }
-    if (subroutine.type === "corp_gain_credit")
-      state.corp.credits += subroutine.amount ?? 1;
-    if (subroutine.type === "runner_lose_credits")
-      state.runner.credits = Math.max(
-        0,
-        state.runner.credits - (subroutine.amount ?? 1),
-      );
-    if (subroutine.type === "give_runner_tag")
-      state.runner.tags += subroutine.amount ?? 1;
     if (subroutine.type === "initiate_trace") {
       startTraceFromPrintedSubroutine(
         encounterPrintedEffectHostForState(state, legalAction),
@@ -11046,116 +11044,23 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       if (damageResult.suspended) return;
       if (state.winner) return;
     }
-    if (subroutine.type === "trash_installed_program") {
-      const trashResult = resolveTrashInstalledProgramSubroutine(
-        state,
-        legalAction,
-      );
-      appendResolvedSubroutineEffect(
-        legalAction,
+    const nonTraceResult = resolveEncounterPrintedNonTraceEffect(
+      printedNonTraceHost,
+      {
         definition,
-        index,
         subroutine,
-        undefined,
-        trashResult
-          ? {
-              cardDefinitionId: trashResult.definitionId,
-              cardTitle: trashResult.title,
-              cardsTrashed: 1,
-            }
-          : { cardsTrashed: 0 },
-      );
-    }
-    resolveRunDurationMarkerSubroutine(encounterResolutionHostForState(state), {
-      definition,
-      subroutine,
-      legalAction,
-    });
-    if (subroutine.type === "set_runner_run_lock_actions") {
-      const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
-      const flags = ensureRunnerTurnFlags(state);
-      flags.runLockActionsPending =
-        Math.max(0, Math.floor(flags.runLockActionsPending ?? 0)) + amount;
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          v1922CorpIceAbility: "haunting_inquisition_run_lock",
-          runLockActionsAdded: amount,
-          runLockActionsPending: flags.runLockActionsPending,
-          sourceDefinitionId: definition.id,
-        };
-      }
-    }
-    if (subroutine.type === "reveal_corp_rd_top") {
-      if (definition.id !== ICE_PICK_WILLIE_ID)
-        throw new Error("Die R&D-Reveal-Subroutine passt nicht zum ICE.");
-      if (!legalAction)
-        throw new Error("Continue-Run LegalAction fehlt fuer R&D-Reveal.");
-      revealCorpRdTop(state, legalAction);
-    }
-    if (subroutine.type === "reorder_corp_rd_top2") {
-      if (definition.id !== TOO_MANY_DOORS_ID)
-        throw new Error("Die R&D-Reorder-Subroutine passt nicht zum ICE.");
-      const arrangeCount = state.corp.rd.slice(0, 2).length;
-      if (arrangeCount < 2) {
-        if (legalAction) {
-          legalAction.payload = {
-            ...(legalAction.payload ?? {}),
-            hiddenZoneBarrier: true,
-            hiddenZoneAction: "v1911_corp_reorder_rd_top2",
-            arrangedCount: arrangeCount,
-          };
-        }
-        if (!run.resolvedSubroutineIndexes.includes(index))
-          run.resolvedSubroutineIndexes.push(index);
-        continue;
-      }
-      if (!legalAction)
-        throw new Error("Continue-Run LegalAction fehlt fuer R&D-Reorder.");
-      startCorpRdArrangeChoice(
-        hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-        {
-          sourceIceId: run.encounteredIceId,
-          subroutineIndex: index,
-          updatePayload: true,
-        },
-      );
-      if (!run.resolvedSubroutineIndexes.includes(index))
-        run.resolvedSubroutineIndexes.push(index);
-      return;
-    }
+        subroutineIndex: index,
+        legalAction,
+        paidPayOrEndRunIndexes: paidPayOrEndRunIndexes,
+      },
+    );
+    if (nonTraceResult.suspended) return;
+    if (nonTraceResult.runShouldEnd) ended = true;
     const specialWindow = resolveEncounterSpecialWindowSubroutine(
       encounterSpecialWindowHostForState(state),
       { definition, subroutine, subroutineIndex: index, legalAction },
     );
     if (specialWindow.suspended) return;
-    if (subroutine.type === "end_the_run") {
-      appendResolvedSubroutineEffect(legalAction, definition, index, subroutine);
-      ended = true;
-    }
-    if (subroutine.type === "end_the_run_unless_runner_pays") {
-      const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
-      if (paidPayOrEndRunIndexes.has(index)) {
-        appendResolvedSubroutineEffect(
-          legalAction,
-          definition,
-          index,
-          subroutine,
-          undefined,
-          { paidCredits: amount, endedRun: false },
-        );
-      } else {
-        appendResolvedSubroutineEffect(
-          legalAction,
-          definition,
-          index,
-          subroutine,
-          undefined,
-          { paidCredits: 0, endedRun: true },
-        );
-        ended = true;
-      }
-    }
   }
   ended = appendUnpaidPayOrEndRunEffects({
     definition,
@@ -12165,52 +12070,6 @@ function trashResource(
       redactedKind: "hidden_runner_resource",
     };
   }
-}
-
-function pickRunnerProgramForUninstall(
-  state: GameState,
-): CardInstanceId | undefined {
-  return state.runner.rig.programs.slice().sort((left, right) => {
-    const leftDefinition = definitionFor(state, left);
-    const rightDefinition = definitionFor(state, right);
-    const byInstallCost =
-      (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
-    if (byInstallCost !== 0) return byInstallCost;
-    const byMemoryCost =
-      (rightDefinition.memoryCost ?? 0) - (leftDefinition.memoryCost ?? 0);
-    if (byMemoryCost !== 0) return byMemoryCost;
-    return left.localeCompare(right);
-  })[0];
-}
-
-function resolveTrashInstalledProgramSubroutine(
-  state: GameState,
-  legalAction?: LegalAction,
-): { definitionId: string; title: string } | undefined {
-  const targetProgramId = pickRunnerProgramForUninstall(state);
-  if (!targetProgramId) return undefined;
-  const targetDefinition = definitionFor(state, targetProgramId);
-  const targetDefinitionId = targetDefinition.id;
-  if (
-    legalAction &&
-    openRunnerInstalledTrashPreventionWindow(
-      state,
-      legalAction,
-      [targetProgramId],
-      "trash_program_subroutine",
-    )
-  )
-    return undefined;
-  trashRunnerInstalledProgram(state, targetProgramId);
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      trashedCardDefinitionId: targetDefinitionId,
-      trashedCardType: "program",
-      trashedCount: 1,
-    };
-  }
-  return { definitionId: targetDefinitionId, title: targetDefinition.title };
 }
 
 function trashRunnerInstalledProgram(
@@ -18440,8 +18299,19 @@ function encounterPrintedEffectHostForState(
         sourceCardInstanceId,
         traceId,
       ),
-    resolveTrashInstalledProgramSubroutine: (action = legalAction) =>
-      resolveTrashInstalledProgramSubroutine(state, action),
+    resolveTrashInstalledProgramSubroutine: (action = legalAction) => {
+      const trashResult = resolveDirectTrashProgramSubroutine(
+        encounterPrintedNonTraceHostForState(state, action),
+        { legalAction: action },
+      );
+      const trashedCardId = trashResult.trashedCardIds[0];
+      if (!trashedCardId) return undefined;
+      const trashedDefinition = definitionFor(state, trashedCardId);
+      return {
+        definitionId: trashedDefinition.id,
+        title: trashedDefinition.title,
+      };
+    },
     setDamagePayload: (summary) => {
       if (legalAction) setDamagePayload(legalAction, summary);
     },
@@ -18452,6 +18322,46 @@ function encounterPrintedEffectHostForState(
       ),
     traceBidChoice: (side, traceId, prompt, maxBid) =>
       traceBidChoice(state, side, traceId, prompt, maxBid),
+  });
+}
+
+function encounterPrintedNonTraceHostForState(
+  state: GameState,
+  legalAction?: LegalAction,
+): EncounterPrintedNonTraceHost {
+  return encounterPrintedNonTraceHost(state, {
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+    },
+    encounter: {
+      resolutionHost: encounterResolutionHostForState(state),
+    },
+    trash: {
+      openRunnerInstalledTrashPreventionWindow: (
+        targetCardIds,
+        source,
+        action,
+      ) =>
+        openRunnerInstalledTrashPreventionWindow(
+          state,
+          action,
+          targetCardIds,
+          source,
+        ),
+      trashRunnerInstalledProgram: (cardId) =>
+        trashRunnerInstalledProgram(state, cardId),
+    },
+    choices: {
+      revealCorpRdTop: (action) => revealCorpRdTop(state, action),
+      startCorpRdArrangeChoice: (input) => {
+        if (!legalAction)
+          throw new Error("Continue-Run LegalAction fehlt fuer R&D-Reorder.");
+        startCorpRdArrangeChoice(
+          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+          input,
+        );
+      },
+    },
   });
 }
 
