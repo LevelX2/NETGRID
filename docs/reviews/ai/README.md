@@ -18,6 +18,7 @@
 - `ai-breaker-ontology-first-class-metrics-2026-05-25.md`: reiner Diagnose-/Metrik-Slice, der BreakerProfile-/CostProfile-Nutzung als First-Class-Match-Progression-Metriken ausweist und Local Pair 2 neu einordnet.
 - `ai-hint-ontology-remote-role-consumer-2026-05-25.md`: enger Consumer-Slice für strukturierte `remoteRole`-/`run_tax`-/`scoring_protection`-Hints in Corp Remote-Safety und Remote-Portfolio-Diagnostik inklusive First-Class-Metriken und 8-Slot-Benchmark.
 - `ai-hint-ontology-tag-punish-consumer-2026-05-25.md`: enger Consumer-Slice für strukturierte Tag/Punish-Source-/Payoff-/Condition-Hints mit LegalAction-/Tag-State-Vorrang, First-Class-Metriken und 8-Slot-Benchmark.
+- `ai-release-default-readiness-review-2026-05-25.md`: konsolidierter Release-/Default-Review des aktuellen KI-Optimierungsstands mit Slice-Inventar, 8-Slot-Benchmark, Merge-/Default-Optionen und Release-Kriterien.
 - `ai-benchmark-deck-basis-review-2026-05-23.md`: Klassifikation der aktuell genutzten AI-Smoke-/Soak-/League-/Progression-Decks und Empfehlung für eine kuratierte Benchmark-Decksuite.
 - `ai-strategy-slices-consolidation-review-2026-05-23.md`: konsolidierte Bilanz der letzten AI-Strategie-/Diagnose-Slices inklusive aktueller Baseline-vs-Candidate-Suite, Ablation-light und Empfehlungen.
 - `ai-plan-conversion-diagnosis-2026-05-23.md`: Planfolge-/Conversion-Diagnose für aktuelle KI-Slices mit neuen Short-Horizon-Metriken, Slotanalyse und Empfehlungen ohne neue Strategie-Heuristik.
