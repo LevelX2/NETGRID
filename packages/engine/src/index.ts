@@ -362,6 +362,13 @@ import {
   type RunRezWindowHost,
 } from "./game/run/run-rez-window";
 import {
+  resolveFortPassAdvancementWindow,
+  resolveSingaporeCityGridSwapChoice,
+  resolveStartRunIceRepositionWindow,
+  startSingaporeCityGridSwapChoice,
+  type FortPassWindowHost,
+} from "./game/run/fort-pass-window";
+import {
   approachOrEncounterIce,
   handleRunMovementAction,
   movePastCurrentIce,
@@ -5088,21 +5095,6 @@ function leavePlayCleanupImplementationsForCard(
   );
 }
 
-function isFortIceSwapSource(state: GameState, cardId: CardInstanceId): boolean {
-  return hasFortRunWindowKind(state, cardId, "swap_unrezzed_fort_ice_with_hq_ice");
-}
-
-function isStartRunIceRepositionSource(
-  state: GameState,
-  cardId: CardInstanceId,
-): boolean {
-  return hasFortRunWindowKind(
-    state,
-    cardId,
-    "move_self_to_different_position_on_same_fort",
-  );
-}
-
 function isAardvarkSource(state: GameState, cardId: CardInstanceId): boolean {
   return hasFortRunWindowKind(state, cardId, "aardvark_worm_lock_and_reaction");
 }
@@ -5630,158 +5622,6 @@ function specialZoneHarnessActions(
     );
   }
   return actions;
-}
-
-function corpFortPassWindowActions(state: GameState): LegalAction[] {
-  const run = state.run;
-  if (!run || run.position.kind !== "server") return [];
-  if (!run.lastPassedIceId) return [];
-  const server = mustServer(state, run.position.serverId);
-  const used = new Set(run.fortPassWindowUsedSourceIdsThisRun ?? []);
-  const actions: LegalAction[] = [];
-  for (const sourceCardId of server.root.slice().sort()) {
-    if (used.has(sourceCardId)) continue;
-    const sourceInstance = state.cardInstances[sourceCardId];
-    if (!sourceInstance?.rezzed) continue;
-    const implementation = fortRunWindowImplementationForCard(
-      state,
-      sourceCardId,
-      "add_advancement_counters_after_passing_last_ice_on_this_fort",
-    );
-    if (!implementation) continue;
-    const cost = Math.max(0, Math.floor(implementation.cost.amount));
-    if (state.corp.credits < cost) continue;
-    const targets = advanceableInstalledCardTargetsOnServer(state, server.id);
-    for (const targetCardId of targets) {
-      const sourceDefinition = definitionFor(state, sourceCardId);
-      const targetDefinition = definitionFor(state, targetCardId);
-      actions.push(
-        action(
-          state,
-          "corp",
-          "trigger_ability",
-          `${sourceDefinition.title}: 2 Advancement-Counter auf ${targetDefinition.title}`,
-          sourceCardId,
-          cost > 0 ? [{ credits: cost }] : [],
-          {
-            cardId: sourceCardId,
-            sourceDefinitionId: sourceDefinition.id,
-            targetCardId,
-            targetCardDefinitionId: targetDefinition.id,
-            serverId: server.id,
-            serverLabel: server.label,
-            passedIceId: run.lastPassedIceId,
-            fortRunWindowAbility:
-              "add_advancement_counters_after_passing_last_ice_on_this_fort",
-            advancementCountersAdded: implementation.amount,
-            addedCounterAmount: implementation.amount,
-            creditCost: cost,
-          },
-        ),
-      );
-    }
-  }
-  return actions;
-}
-
-function singaporeCityGridRunActions(
-  state: GameState,
-  run: ActiveRun,
-  server: CorpServer,
-): LegalAction[] {
-  if (run.attackedServerId !== server.id) return [];
-  const hqIceIds = state.corp.hq
-    .filter((cardId) => definitionFor(state, cardId).type === "ice")
-    .sort();
-  if (hqIceIds.length === 0) return [];
-  const used = new Set(run.singaporeCityGridUsedSourceIdsThisRun ?? []);
-  const unrezzedIceTargets = server.ice
-    .map((cardId, iceIndex) => ({ cardId, iceIndex }))
-    .filter(({ cardId }) => !mustInstance(state.cardInstances, cardId).rezzed)
-    .sort((left, right) => left.iceIndex - right.iceIndex);
-  if (unrezzedIceTargets.length === 0) return [];
-  return server.root
-    .slice()
-    .sort()
-    .filter((cardId) => !used.has(cardId))
-    .filter((cardId) => {
-      const instance = mustInstance(state.cardInstances, cardId);
-      return instance.rezzed && isFortIceSwapSource(state, cardId);
-    })
-    .flatMap((sourceCardId) => {
-      const definition = definitionFor(state, sourceCardId);
-      return unrezzedIceTargets.map(({ cardId: targetIceId, iceIndex }) =>
-        action(
-          state,
-          "corp",
-          "trigger_ability",
-          `${definition.title}: ICE in ${server.label} austauschen`,
-          sourceCardId,
-          [],
-          {
-            cardId: sourceCardId,
-            targetIceId,
-            serverId: server.id,
-            iceIndex,
-            v1918UpgradeAbility: "singapore_city_grid_hq_ice_swap",
-            hiddenZoneBarrier: true,
-            hiddenZoneAction: "v1918_singapore_city_grid_choice",
-          },
-        ),
-      );
-    });
-}
-
-function startRunIceRepositionActions(
-  state: GameState,
-  run: ActiveRun,
-  server: CorpServer,
-): LegalAction[] {
-  if (state.timingPoint !== "run.approach_ice") return [];
-  if (run.attackedServerId !== server.id) return [];
-  if (run.phase !== "approach_ice" || run.position.kind !== "ice") return [];
-  if (run.position.iceIndex !== outermostIceIndex(server)) return [];
-  if (server.ice.length < 2) return [];
-  const used = new Set(run.iceRepositionUsedSourceIdsThisRun ?? []);
-  return server.ice
-    .map((sourceCardId, sourceIceIndex) => ({ sourceCardId, sourceIceIndex }))
-    .filter(({ sourceCardId }) => !used.has(sourceCardId))
-    .filter(({ sourceCardId }) => isStartRunIceRepositionSource(state, sourceCardId))
-    .flatMap(({ sourceCardId, sourceIceIndex }) => {
-      const implementation = fortRunWindowImplementationForCard(
-        state,
-        sourceCardId,
-        "move_self_to_different_position_on_same_fort",
-      );
-      if (!implementation) return [];
-      const cost = Math.max(0, Math.floor(implementation.cost.amount));
-      if (state.corp.credits < cost) return [];
-      const definition = definitionFor(state, sourceCardId);
-      return server.ice
-        .map((_cardId, targetIceIndex) => targetIceIndex)
-        .filter((targetIceIndex) => targetIceIndex !== sourceIceIndex)
-        .map((targetIceIndex) =>
-          action(
-            state,
-            "corp",
-            "trigger_ability",
-            `${definition.title}: ICE in ${server.label} bewegen`,
-            sourceCardId,
-            cost > 0 ? [{ credits: cost }] : [],
-            {
-              cardId: sourceCardId,
-              sourceDefinitionId: definition.id,
-              serverId: server.id,
-              serverLabel: server.label,
-              sourceIceIndex,
-              targetIceIndex,
-              creditCost: cost,
-              fortRunWindowAbility:
-                "move_self_to_different_position_on_same_fort",
-            },
-          ),
-        );
-    });
 }
 
 function dupreStrengthCounterBonus(
@@ -7400,14 +7240,20 @@ function performAction(
         legalAction.payload?.fortRunWindowAbility ===
         "add_advancement_counters_after_passing_last_ice_on_this_fort"
       ) {
-        resolveFortPassAdvancementWindow(state, legalAction);
+        resolveFortPassAdvancementWindow(
+          fortPassWindowHostForState(state),
+          legalAction,
+        );
         return;
       }
       if (
         legalAction.payload?.fortRunWindowAbility ===
         "move_self_to_different_position_on_same_fort"
       ) {
-        resolveStartRunIceRepositionWindow(state, legalAction);
+        resolveStartRunIceRepositionWindow(
+          fortPassWindowHostForState(state),
+          legalAction,
+        );
         return;
       }
       if (legalAction.payload?.runnerUtilityAbility === "preying_mantis_gain_action") {
@@ -7557,7 +7403,10 @@ function performAction(
         legalAction.payload?.v1918UpgradeAbility ===
         "singapore_city_grid_hq_ice_swap"
       ) {
-        startSingaporeCityGridSwapChoice(state, legalAction);
+        startSingaporeCityGridSwapChoice(
+          fortPassWindowHostForState(state),
+          legalAction,
+        );
         return;
       }
       throw new Error(
@@ -9966,176 +9815,6 @@ function traceBidChoice(
     maxSelections: 1,
     stateVersion: state.stateVersion + 1,
     visibility: "public",
-  };
-}
-
-function resolveFortPassAdvancementWindow(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf dieses Fort-Pass-Fenster nutzen.");
-  if (state.timingPoint !== "run.jack_out_window")
-    throw new Error("Das Fort-Pass-Fenster ist nicht offen.");
-  const run = mustRun(state);
-  if (run.position.kind !== "server" || !run.lastPassedIceId)
-    throw new Error("Runner hat nicht gerade das letzte ICE dieses Forts passiert.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  const targetCardId = String(legalAction.payload?.targetCardId ?? "") as CardInstanceId;
-  const serverId = String(legalAction.payload?.serverId ?? "");
-  if (serverId !== run.position.serverId)
-    throw new Error("Das Fort-Pass-Fenster gehoert zu einem anderen Fort.");
-  if (String(legalAction.payload?.passedIceId ?? "") !== run.lastPassedIceId)
-    throw new Error("Das passierte ICE passt nicht mehr zum Fort-Pass-Fenster.");
-  const server = mustServer(state, run.position.serverId);
-  if (!server.root.includes(sourceCardId))
-    throw new Error("Die Fort-Pass-Quelle liegt nicht in diesem Fort.");
-  if (!server.root.includes(targetCardId))
-    throw new Error("Das Advancement-Ziel liegt nicht in diesem Fort.");
-  const source = mustInstance(state.cardInstances, sourceCardId);
-  if (!source.rezzed)
-    throw new Error("Die Fort-Pass-Quelle ist nicht rezzed.");
-  const used = run.fortPassWindowUsedSourceIdsThisRun ?? [];
-  if (used.includes(sourceCardId))
-    throw new Error("Diese Fort-Pass-Quelle wurde in diesem Run bereits genutzt.");
-  const implementation = fortRunWindowImplementationForCard(
-    state,
-    sourceCardId,
-    "add_advancement_counters_after_passing_last_ice_on_this_fort",
-  );
-  if (!implementation)
-    throw new Error("Die Fort-Pass-Quelle hat keine passende Ability.");
-  if (
-    !isInstalledCorpCardAdvanceable(
-      state,
-      targetCardId,
-      definitionFor(state, targetCardId),
-    )
-  )
-    throw new Error("Das Fort-Pass-Ziel kann keine Advancement-Counter erhalten.");
-  const cost = Math.max(0, Math.floor(implementation.cost.amount));
-  if (creditCostForAction(legalAction) !== cost)
-    throw new Error("Die Fort-Pass-Kosten passen nicht mehr.");
-  spendCredits(state, "corp", cost);
-  const amount = Math.max(0, Math.floor(implementation.amount));
-  mustInstance(state.cardInstances, targetCardId).advancementCounters += amount;
-  run.fortPassWindowUsedSourceIdsThisRun = [
-    ...used,
-    sourceCardId,
-  ];
-  run.rootRezWindowPassedKeys = Array.from(
-    new Set([...(run.rootRezWindowPassedKeys ?? []), corpRunRootRezWindowKey(run)]),
-  ).sort();
-  state.activeSide = "runner";
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    targetCardDefinitionId: definitionFor(state, targetCardId).id,
-    advancementCountersAdded: amount,
-    addedCounterAmount: amount,
-    advancementCountersAfter: mustInstance(state.cardInstances, targetCardId)
-      .advancementCounters,
-    corpCreditsAfter: state.corp.credits,
-  };
-}
-
-function resolveStartRunIceRepositionWindow(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf ICE am Run-Start bewegen.");
-  if (state.timingPoint !== "run.approach_ice")
-    throw new Error("Das ICE-Bewegungsfenster ist nicht offen.");
-  const run = mustRun(state);
-  if (run.phase !== "approach_ice" || run.position.kind !== "ice")
-    throw new Error("Runner ist nicht am Run-Start eines ICE-Forts.");
-  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
-    ServerId,
-    "new_remote"
-  >;
-  if (serverId !== run.attackedServerId)
-    throw new Error("Die ICE-Bewegung gehoert zu einem anderen Run.");
-  const server = mustServer(state, serverId);
-  if (run.position.iceIndex !== outermostIceIndex(server))
-    throw new Error("ICE-Bewegung ist nur am Start des Runs legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  const sourceIceIndex = Number(legalAction.payload?.sourceIceIndex ?? -1);
-  const targetIceIndex = Number(legalAction.payload?.targetIceIndex ?? -1);
-  if (
-    !Number.isInteger(sourceIceIndex) ||
-    sourceIceIndex < 0 ||
-    server.ice[sourceIceIndex] !== sourceCardId
-  )
-    throw new Error("Die ICE-Quellposition ist nicht mehr legal.");
-  if (
-    !Number.isInteger(targetIceIndex) ||
-    targetIceIndex < 0 ||
-    targetIceIndex >= server.ice.length ||
-    targetIceIndex === sourceIceIndex
-  )
-    throw new Error("Die ICE-Zielposition ist nicht legal.");
-  if (run.iceRepositionUsedSourceIdsThisRun?.includes(sourceCardId))
-    throw new Error("Diese ICE-Bewegungsquelle wurde in diesem Run bereits genutzt.");
-  const implementation = fortRunWindowImplementationForCard(
-    state,
-    sourceCardId,
-    "move_self_to_different_position_on_same_fort",
-  );
-  if (!implementation)
-    throw new Error("Die ICE-Quelle hat keine passende Bewegungsfaehigkeit.");
-  const cost = Math.max(0, Math.floor(implementation.cost.amount));
-  if (creditCostForAction(legalAction) !== cost)
-    throw new Error("Die ICE-Bewegungskosten passen nicht mehr.");
-  spendCredits(state, "corp", cost);
-  const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
-  const wasRevealed = sourceInstance.faceup || sourceInstance.rezzed;
-  const [movedIceId] = server.ice.splice(sourceIceIndex, 1);
-  if (movedIceId !== sourceCardId)
-    throw new Error("Die ICE-Quellposition ist nicht mehr stabil.");
-  server.ice.splice(targetIceIndex, 0, sourceCardId);
-  if (!sourceInstance.rezzed && implementation.revealIfUnrezzed) {
-    state.cardInstances[sourceCardId] = {
-      ...sourceInstance,
-      faceup: true,
-    };
-  }
-  const newApproachIndex = outermostIceIndex(server);
-  const approachedIceId = mustArrayValue(
-    server.ice,
-    newApproachIndex,
-    "Server hat kein ICE.",
-  );
-  run.position = { kind: "ice", serverId: server.id, iceIndex: newApproachIndex };
-  run.approachedIceId = approachedIceId;
-  delete run.encounteredIceId;
-  run.iceRepositionUsedSourceIdsThisRun = [
-    ...(run.iceRepositionUsedSourceIdsThisRun ?? []),
-    sourceCardId,
-  ].sort();
-  state.activeSide = "corp";
-  state.timingPoint = "run.approach_ice";
-  const revealPayload =
-    !wasRevealed && implementation.revealIfUnrezzed
-      ? {
-          publicRevealDefinitionId: definitionFor(state, sourceCardId).id,
-        }
-      : {};
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    serverLabel: server.label,
-    movedIceCount: 1,
-    sourceIceIndex,
-    targetIceIndex,
-    newApproachIceIndex: newApproachIndex,
-    newApproachIceRevealed: publicInstalledCorpCardIdentityKnown(
-      state,
-      approachedIceId,
-    ),
-    revealedSource: !wasRevealed && implementation.revealIfUnrezzed,
-    ...revealPayload,
-    corpCreditsAfter: state.corp.credits,
   };
 }
 
@@ -15010,19 +14689,6 @@ function advanceableInstalledCardTargets(state: GameState): CardInstanceId[] {
     );
 }
 
-function advanceableInstalledCardTargetsOnServer(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): CardInstanceId[] {
-  return mustServer(state, serverId).root
-    .slice()
-    .sort()
-    .filter((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return isInstalledCorpCardAdvanceable(state, cardId, definition);
-    });
-}
-
 function isInstalledCorpCardAdvanceable(
   state: GameState,
   cardId: CardInstanceId,
@@ -16615,17 +16281,7 @@ function runRezWindowHostForState(state: GameState): RunRezWindowHost {
       mustServer: (serverId) => mustServer(state, serverId),
       publicServerLabel: (serverId) => publicServerLabel(state, serverId),
     },
-    windows: {
-      fortPassWindowActions: () => corpFortPassWindowActions(state),
-      singaporeCityGridRunActions: (run, server) =>
-        singaporeCityGridRunActions(state, run, server),
-      startRunIceRepositionActions: (run, server) =>
-        startRunIceRepositionActions(state, run, server),
-      fortRunWindowImplementationForCard: (cardId, kind) =>
-        fortRunWindowImplementationForCard(state, cardId, kind),
-      advanceableInstalledCardTargetsOnServer: (serverId) =>
-        advanceableInstalledCardTargetsOnServer(state, serverId),
-    },
+    fortPass: fortPassWindowHostForState(state),
     choices: {
       selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
     },
@@ -16643,6 +16299,24 @@ function runRezWindowHostForState(state: GameState): RunRezWindowHost {
         acmeSavingsAndLoanObligationCount(state),
       addAcmeSavingsAndLoanObligation: (amount) =>
         addAcmeSavingsAndLoanObligation(state, amount),
+    },
+  };
+}
+
+function fortPassWindowHostForState(state: GameState): FortPassWindowHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+      publicInstalledCorpCardIdentityKnown: (cardId) =>
+        publicInstalledCorpCardIdentityKnown(state, cardId),
+    },
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+    },
+    payment: {
+      spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
     },
   };
 }
@@ -17369,7 +17043,11 @@ function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("v1918.singapore_city_grid")) {
-    resolveSingaporeCityGridSwapChoice(state, legalAction, playerAction);
+    resolveSingaporeCityGridSwapChoice(
+      fortPassWindowHostForState(state),
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (
@@ -18560,156 +18238,6 @@ function chooseCorpAgendasForPointCost(
     if (total >= requiredPoints) return selected;
   }
   return [];
-}
-
-function startSingaporeCityGridSwapChoice(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf Singapore City Grid nutzen.");
-  const run = mustRun(state);
-  if (
-    state.timingPoint !== "run.approach_ice" &&
-    state.timingPoint !== "run.jack_out_window"
-  )
-    throw new Error("Singapore City Grid ist nur waehrend eines Runs legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
-    ServerId,
-    "new_remote"
-  >;
-  const targetIceId = String(legalAction.payload?.targetIceId ?? "");
-  const iceIndex = Number(legalAction.payload?.iceIndex ?? -1);
-  if (serverId !== run.attackedServerId)
-    throw new Error("Singapore City Grid ist nicht an diesen Run gebunden.");
-  const server = mustServer(state, serverId);
-  if (!server.root.includes(sourceCardId))
-    throw new Error("Singapore City Grid ist nicht im angegriffenen Remote.");
-  const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
-  if (
-    !sourceInstance.rezzed ||
-    !isFortIceSwapSource(state, sourceCardId)
-  )
-    throw new Error("Singapore City Grid ist nicht rezzed installiert.");
-  if (run.singaporeCityGridUsedSourceIdsThisRun?.includes(sourceCardId))
-    throw new Error("Singapore City Grid wurde in diesem Run bereits genutzt.");
-  if (
-    !Number.isInteger(iceIndex) ||
-    iceIndex < 0 ||
-    server.ice[iceIndex] !== targetIceId
-  )
-    throw new Error("Das Singapore-City-Grid-ICE-Ziel ist ungueltig.");
-  const targetInstance = mustInstance(state.cardInstances, targetIceId);
-  if (targetInstance.rezzed)
-    throw new Error("Singapore City Grid darf nur unrezzed ICE austauschen.");
-  const hqIceIds = state.corp.hq
-    .filter((cardId) => definitionFor(state, cardId).type === "ice")
-    .sort();
-  if (hqIceIds.length === 0)
-    throw new Error("In HQ liegt kein ICE fuer Singapore City Grid.");
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  state.pendingChoice = {
-    choiceId: `v1918_singapore_city_grid_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1918.singapore_city_grid:${sourceCardId}:${server.id}:${targetIceId}:${iceIndex}:${run.runId}`,
-    prompt: "Singapore City Grid: ICE aus HQ wählen.",
-    kind: "select_cards",
-    options: hqIceIds.map((cardId) => ({
-      id: `card_${cardId}`,
-      label: definitionFor(state, cardId).title,
-      publicLabel: "HQ-ICE",
-      value: cardId,
-    })),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1918_singapore_city_grid_choice",
-    choiceVisibility: "hidden_info_barrier",
-    selectedCount: 1,
-    serverLabel: server.label,
-    oncePerRunConsumed: false,
-  };
-}
-
-function resolveSingaporeCityGridSwapChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1918.singapore_city_grid"))
-    throw new Error("Es ist keine Singapore-City-Grid-Choice offen.");
-  const [, sourceCardId, serverIdRaw, targetIceId, iceIndexRaw, runId] =
-    choice.source.split(":");
-  if (!sourceCardId || !serverIdRaw || !targetIceId || !runId)
-    throw new Error("Die Singapore-City-Grid-Choice ist ungueltig.");
-  const serverId = serverIdRaw as Exclude<ServerId, "new_remote">;
-  const iceIndex = Number(iceIndexRaw ?? -1);
-  const run = mustRun(state);
-  if (run.runId !== runId || run.attackedServerId !== serverId)
-    throw new Error(
-      "Die Singapore-City-Grid-Choice gehoert nicht zu diesem Run.",
-    );
-  const server = mustServer(state, serverId);
-  if (!server.root.includes(sourceCardId))
-    throw new Error("Singapore City Grid ist nicht mehr im angegriffenen Remote.");
-  if (
-    !isFortIceSwapSource(state, sourceCardId) ||
-    !mustInstance(state.cardInstances, sourceCardId).rezzed
-  )
-    throw new Error("Singapore City Grid ist nicht mehr rezzed installiert.");
-  if (run.singaporeCityGridUsedSourceIdsThisRun?.includes(sourceCardId))
-    throw new Error("Singapore City Grid wurde in diesem Run bereits genutzt.");
-  if (
-    !Number.isInteger(iceIndex) ||
-    iceIndex < 0 ||
-    server.ice[iceIndex] !== targetIceId
-  )
-    throw new Error("Das Singapore-City-Grid-ICE-Ziel ist nicht mehr legal.");
-  const targetInstance = mustInstance(state.cardInstances, targetIceId);
-  if (targetInstance.rezzed)
-    throw new Error("Singapore City Grid darf nur unrezzed ICE austauschen.");
-  const hqIceId = selectedChoiceCardIds(choice, playerAction)[0];
-  if (!hqIceId || !state.corp.hq.includes(hqIceId))
-    throw new Error("Das Singapore-City-Grid-HQ-ICE ist nicht mehr in HQ.");
-  if (definitionFor(state, hqIceId).type !== "ice")
-    throw new Error("Singapore City Grid darf nur ICE aus HQ waehlen.");
-  const hqIndex = state.corp.hq.indexOf(hqIceId);
-  state.corp.hq[hqIndex] = targetIceId;
-  server.ice[iceIndex] = hqIceId;
-  state.cardInstances[targetIceId] = {
-    ...withoutVariableIceState(targetInstance),
-    faceup: false,
-    rezzed: false,
-    zone: { side: "corp", zone: "hq" },
-  };
-  state.cardInstances[hqIceId] = {
-    ...mustInstance(state.cardInstances, hqIceId),
-    faceup: false,
-    rezzed: false,
-    zone: { side: "corp", zone: "serverIce", serverId },
-  };
-  run.singaporeCityGridUsedSourceIdsThisRun = [
-    ...(run.singaporeCityGridUsedSourceIdsThisRun ?? []),
-    sourceCardId,
-  ];
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1918_singapore_city_grid_swap",
-    sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    serverLabel: server.label,
-    iceIndex,
-    swappedIceCount: 1,
-    oncePerRunConsumed: true,
-  };
 }
 
 function startRunnerHostingChoice(

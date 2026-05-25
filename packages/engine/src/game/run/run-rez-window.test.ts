@@ -206,12 +206,32 @@ function hostFor(state: GameState): {
         },
         publicServerLabel: () => "R&D",
       },
-      windows: {
-        fortPassWindowActions: () => [],
-        singaporeCityGridRunActions: () => [],
-        startRunIceRepositionActions: () => [],
-        fortRunWindowImplementationForCard: () => undefined,
-        advanceableInstalledCardTargetsOnServer: () => [],
+      fortPass: {
+        state,
+        cards: {
+          definitionFor: (cardId) =>
+            definitions[state.cardInstances[cardId]!.definitionId]!,
+          cardInstanceFor: (cardId) => state.cardInstances[cardId]!,
+          publicInstalledCorpCardIdentityKnown: (cardId) =>
+            Boolean(
+              state.cardInstances[cardId]?.faceup ||
+                state.cardInstances[cardId]?.rezzed,
+            ),
+        },
+        servers: {
+          mustServer: (serverId) => {
+            const server = state.corp.servers.find(
+              (candidate) => candidate.id === serverId,
+            );
+            if (!server) throw new Error(`Server fehlt: ${serverId}`);
+            return server as CorpServer;
+          },
+        },
+        payment: {
+          spendCorpCredits: (amount) => {
+            state.corp.credits -= amount;
+          },
+        },
       },
       choices: {
         selectedChoiceIds: (selectedChoices) => {

@@ -9,7 +9,6 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type {
-  CardFortRunWindowImplementation,
   CardRunEncounterInterventionImplementation,
   CardVariableRezImplementation,
 } from "../../ability-engine/definition-types";
@@ -24,6 +23,12 @@ import {
   rezCostReductionSourceDefinitionIdsFor,
 } from "../payment";
 import { buildLegalAction } from "../turn/action-builders";
+import {
+  buildCorpFortPassWindowActions,
+  buildSingaporeCityGridRunActions,
+  buildStartRunIceRepositionActions,
+  type FortPassWindowHost,
+} from "./fort-pass-window";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 
@@ -60,20 +65,7 @@ export type RunRezWindowHost = {
       serverId: Exclude<ServerId, "new_remote">,
     ) => string | undefined;
   };
-  windows: {
-    fortPassWindowActions: () => LegalAction[];
-    singaporeCityGridRunActions: (run: ActiveRun, server: CorpServer) => LegalAction[];
-    startRunIceRepositionActions: (run: ActiveRun, server: CorpServer) => LegalAction[];
-    fortRunWindowImplementationForCard: <
-      K extends CardFortRunWindowImplementation["kind"],
-    >(
-      cardId: CardInstanceId,
-      kind: K,
-    ) => Extract<CardFortRunWindowImplementation, { kind: K }> | undefined;
-    advanceableInstalledCardTargetsOnServer: (
-      serverId: Exclude<ServerId, "new_remote">,
-    ) => CardInstanceId[];
-  };
+  fortPass: FortPassWindowHost;
   choices: {
     selectedChoiceIds: (selectedChoices: PlayerAction["selectedChoices"]) => string[];
   };
@@ -219,8 +211,8 @@ export function buildCorpRunRootRezActions(
       ),
     );
   }
-  actions.push(...host.windows.singaporeCityGridRunActions(run, server));
-  actions.push(...host.windows.startRunIceRepositionActions(run, server));
+  actions.push(...buildSingaporeCityGridRunActions(host.fortPass, run, server));
+  actions.push(...buildStartRunIceRepositionActions(host.fortPass, run, server));
   return actions;
 }
 
@@ -229,7 +221,7 @@ export function buildCorpRunRootRezWindowActions(
 ): LegalAction[] {
   const actions = [
     ...buildCorpRunRootRezActions(host),
-    ...host.windows.fortPassWindowActions(),
+    ...buildCorpFortPassWindowActions(host.fortPass),
   ];
   if (actions.length === 0 || !isCorpRunRootRezWindowOpen(host)) return [];
   const run = mustRun(host.state);
@@ -266,7 +258,7 @@ export function isCorpRunRootRezWindowOpen(host: RunRezWindowHost): boolean {
     return false;
   return (
     buildCorpRunRootRezActions(host).length > 0 ||
-    host.windows.fortPassWindowActions().length > 0
+    buildCorpFortPassWindowActions(host.fortPass).length > 0
   );
 }
 
