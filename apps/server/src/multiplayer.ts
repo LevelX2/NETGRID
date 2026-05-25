@@ -149,6 +149,7 @@ export type MatchStartLobbyState = {
   agendaPointsToWin: number;
   matchFormat: MatchFormat;
   cardPool: MatchCardPool;
+  sideAssignmentMode?: "fixed" | "random_pending";
   sideAssignment: {
     runnerPlayer: SeriesPlayerSlot;
     corpPlayer: SeriesPlayerSlot;
@@ -705,6 +706,7 @@ export class MultiplayerService {
     const cardPool = normalizeMatchCardPool(input.settings?.cardPool);
     const playerClockConfig = normalizePlayerClockConfig(input.settings?.playerClock);
     const countdownSeconds = normalizeCountdownSeconds(input.countdownSeconds);
+    const sideAssignmentMode = mode === "human_vs_human" && input.hostSide === "random" ? "random_pending" : "fixed";
     const pendingDeckHandshake = mode === "human_vs_human" && Boolean(input.participantADecks) && !input.participantBDecks;
     if (pendingDeckHandshake) {
       const hostDeckPair = resolveParticipantDeckPair(input.participantADecks ?? legacyParticipantDeckPair(input), { cardPool });
@@ -785,6 +787,7 @@ export class MultiplayerService {
           agendaPointsToWin: pendingAgendaPointsToWin,
           matchFormat,
           cardPool,
+          sideAssignmentMode,
           sideAssignment: { runnerPlayer, corpPlayer },
           chatMessages: []
         },
@@ -2095,6 +2098,7 @@ export class MultiplayerService {
       agendaPointsToWin,
       matchFormat,
       cardPool,
+      sideAssignmentMode: record.startLobby?.sideAssignmentMode ?? "fixed",
       sideAssignment: { runnerPlayer, corpPlayer },
       chatMessages: record.startLobby?.chatMessages ?? []
     };
@@ -2290,6 +2294,7 @@ export class MultiplayerService {
       agendaPointsToWin: lobby.agendaPointsToWin,
       matchFormat: lobby.matchFormat,
       cardPool: lobby.cardPool,
+      ...(lobby.sideAssignmentMode ? { sideAssignmentMode: lobby.sideAssignmentMode } : {}),
       sideAssignment: { ...lobby.sideAssignment },
       participants: {
         player_a: this.publicLobbyParticipantFor(record, lobby, "player_a"),
@@ -2304,9 +2309,10 @@ export class MultiplayerService {
     const session = record.sessions.find((candidate) => candidate.side === side);
     const decks = record.privateDeckSnapshots?.participants?.[player];
     const hasParticipantSession = Boolean(session);
+    const hideSide = lobby.sideAssignmentMode === "random_pending";
     return {
       displayName: session?.displayName ?? (player === "player_a" ? "Teilnehmer A" : "Teilnehmer B"),
-      side,
+      ...(hideSide ? {} : { side }),
       runnerDeckReady: hasParticipantSession && Boolean(decks?.runner),
       corpDeckReady: hasParticipantSession && Boolean(decks?.corp),
       connected: session?.connected ?? false,

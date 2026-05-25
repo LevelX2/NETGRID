@@ -1704,6 +1704,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.pendingDeckHandshake).toBe(true);
     expect(created.lobby?.hostReady).toBe(false);
     expect(created.lobby?.joinerReady).toBe(false);
+    expect(created.lobby?.sideAssignmentMode).toBe("random_pending");
+    expect(created.lobby?.participants.player_a.side).toBeUndefined();
+    expect(created.lobby?.participants.player_b.side).toBeUndefined();
     expect(created.lobby?.participants.player_a.runnerDeckReady).toBe(true);
     expect(created.lobby?.participants.player_a.corpDeckReady).toBe(true);
     expect(created.lobby?.participants.player_b.connected).toBe(false);
@@ -1736,6 +1739,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(joined.lobby?.matchFormat).toBe("rules_match");
     expect(joined.lobby?.hostReady).toBe(false);
     expect(joined.lobby?.joinerReady).toBe(false);
+    expect(joined.lobby?.sideAssignmentMode).toBe("random_pending");
+    expect(joined.lobby?.participants.player_a.side).toBeUndefined();
+    expect(joined.lobby?.participants.player_b.side).toBeUndefined();
     expect(joined.lobby?.participants.player_a.runnerDeckReady).toBe(true);
     expect(joined.lobby?.participants.player_b.corpDeckReady).toBe(true);
     expect(JSON.stringify(joined.lobby)).not.toContain("deckName");

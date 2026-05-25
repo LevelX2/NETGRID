@@ -3379,7 +3379,8 @@ export default function Page() {
     if (created.lobby || created.pendingDeckHandshake || !created.playerView) {
       setPayload(null);
       setLobby(lobbyFromInitialResponse(created, created.hostSide));
-      setNotice(`Lobby erstellt. Du startest als ${sideLabel(created.hostSide)}.${aiTraceNotice}`);
+      const sideNotice = created.lobby?.sideAssignmentMode === "random_pending" ? "Seite wird beim Start ausgelost" : `Du startest als ${sideLabel(created.hostSide)}`;
+      setNotice(`Lobby erstellt. ${sideNotice}.${aiTraceNotice}`);
       return;
     }
     setPayload(fromInitialResponse(created, created.hostSide));
@@ -6348,11 +6349,11 @@ function StartLobbyPanel({
       <div className="startLobbyHeader">
         <div>
           <p className="eyebrow">{terminal ? "Terminaler Matchstatus" : "Startbereitschaftslobby"}</p>
-          <h2>{terminal ? terminalLobbyTitle(lobby.matchStatus, lobby.lifecycleResult) : start ? `Du startest als ${sideLabel(lobby.side)}` : "Match erstellt"}</h2>
+          <h2>{terminal ? terminalLobbyTitle(lobby.matchStatus, lobby.lifecycleResult) : start ? startLobbySideHeadline(lobby) : "Match erstellt"}</h2>
           <p className="meta">{opponentName ? `Gegenüber: ${opponentName}` : ""}</p>
         </div>
         <div className="startLobbyHeaderActions">
-          <span className={`statusPill ${connection}`}>{connection === "online" ? "online" : connection === "connecting" ? "verbindet" : "offline"}</span>
+          <span className={`statusPill ${connection}`}>{connection === "online" ? "Du: verbunden" : connection === "connecting" ? "Du: verbindest" : "Du: getrennt"}</span>
           {terminal ? (
             <>
               <button className="button primary" onClick={onRecreate} type="button" data-testid="recreate-match">
@@ -6474,7 +6475,7 @@ function LobbyParticipantCard({ title, participant }: { title: string; participa
     <div className="lobbyParticipantCard">
       <strong>{title}</strong>
       <span>{participant?.displayName ?? "Noch nicht verbunden"}</span>
-      <span>{participant?.side ? sideLabel(participant.side) : "Seite offen"}</span>
+      <span>{participant?.side ? sideLabel(participant.side) : "Seite wird beim Start ausgelost"}</span>
       <span>{participant?.runnerDeckReady && participant.corpDeckReady ? "Decks geprüft" : "Decks offen"}</span>
       <span>{participant?.ready ? "Status: bereit" : "Status: nicht bereit"}</span>
       <span>{connectionQualityLabel(participant?.connectionQuality)}</span>
@@ -14290,10 +14291,15 @@ function playerSlotForSide(lobby: MatchStartLobby, side: Side): "player_a" | "pl
   return lobby.sideAssignment.runnerPlayer === "player_a" && side === "runner" ? "player_a" : lobby.sideAssignment.corpPlayer === "player_a" && side === "corp" ? "player_a" : "player_b";
 }
 
+function startLobbySideHeadline(lobby: LobbyClientPayload): string {
+  if (lobby.startLobby?.sideAssignmentMode === "random_pending") return "Seite wird beim Start ausgelost";
+  return `Du startest als ${sideLabel(lobby.side)}`;
+}
+
 function connectionQualityLabel(quality: LobbyParticipant["connectionQuality"] | undefined): string {
-  if (quality === "online") return "online";
-  if (quality === "unstable") return "instabil";
-  return "offline";
+  if (quality === "online") return "Teilnehmer verbunden";
+  if (quality === "unstable") return "Verbindung instabil";
+  return "Wartet auf Verbindung";
 }
 
 function formatLobbyTime(value: string | undefined): string {

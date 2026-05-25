@@ -163,6 +163,7 @@ export type ApiMatchStartLobbyPayload = {
   agendaPointsToWin: number;
   matchFormat: ApiMatchFormat;
   cardPool: ApiMatchCardPool;
+  sideAssignmentMode?: "fixed" | "random_pending";
   sideAssignment: {
     runnerPlayer: ApiSeriesPlayerSlot;
     corpPlayer: ApiSeriesPlayerSlot;
