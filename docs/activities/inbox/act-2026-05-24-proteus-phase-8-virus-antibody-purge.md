@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-8-virus-antibody-purge
-status: inbox
+status: superseded
 kind: concept
 area: cards
 priority: normal
@@ -13,7 +13,13 @@ branch:
 releaseTarget: Proteus Phase 8
 blockedBy:
   - act-2026-05-24-proteus-phase-7-cybernetics-deck-hardware
-resultArtifacts: []
+resultArtifacts:
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-8a-counter-taxonomy-purge-foundation.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-8b-corp-antibody-access.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-8c-viral-breeding-ground-agenda.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-8d-runner-virus-run-counters.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-8e-virus-access-trash-program-effects.md
+  - docs/activities/inbox/act-2026-05-24-proteus-phase-8f-random-bad-publicity-virus-longtail.md
 checks: []
 ---
 
@@ -81,4 +87,4 @@ Die Proteus-Virus-/Antibody-/Purge-Familie mit klarer Counter-Taxonomie, purgef√
 
 ## Ergebnisnotiz
 
-Noch offen.
+Am 2026-05-24 in Detail-Slices 8a bis 8f zerlegt. Dieses Umbrella-Paket bleibt nur als historische Klammer erhalten.
