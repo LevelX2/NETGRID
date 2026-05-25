@@ -29,6 +29,7 @@ export function buildLegalAction(
     type.startsWith("rez") ||
     type === "score_agenda" ||
     type === "trash_resource" ||
+    payload?.corpAbility ||
     payload?.v1917AssetAbility ||
     payload?.cardImplementationAbility ||
     payload?.resourceAbility ||

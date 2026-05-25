@@ -1288,6 +1288,21 @@ describe("CardImplementation definition descriptors", () => {
         },
       ],
     });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_146_precision-bribery")
+        ?.modifiers?.[0],
+    ).toMatchObject({
+      kind: "new_data_fort_creation_lock",
+      activeWhile: "installed",
+      sourceZone: "runner_installed",
+      side: "corp",
+      visibility: "public",
+      blocks: "corp_new_remote_installs",
+      corpTrashSourceCost: {
+        clicks: 1,
+        credits: 4,
+      },
+    });
   });
 
   it("describes Proteus Phase 1b dynamic public ETR ICE implementations", () => {

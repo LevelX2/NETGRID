@@ -146,6 +146,7 @@ const TARGET_KEYS = [
   "socialEngineeringNoIceTarget",
   "redactedKind",
   "sourceTrashed",
+  "newDataFortCreationLockRemoved",
   "karlSuccessfulRunSourceDefinitionIds",
   "purgedCounterType",
   "purgedCounterSummary",

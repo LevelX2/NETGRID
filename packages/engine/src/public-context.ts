@@ -244,6 +244,23 @@ export function publicContextForAction(
         context.hiddenRunnerResourceRevealed = true;
     }
   }
+  if (
+    legalAction.type === "trigger_ability" &&
+    legalAction.payload?.corpAbility ===
+      "trash_new_data_fort_creation_lock_source"
+  ) {
+    context.zoneLabel = "Resource";
+    for (const key of [
+      "sourceDefinitionId",
+      "trashedCardDefinitionId",
+      "trashCostPaid",
+      "newDataFortCreationLockRemoved",
+      "corpCreditsAfter",
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
   if (legalAction.type === "rez_ice")
     context.zoneLabel =
       legalAction.payload?.rootRez === true ||

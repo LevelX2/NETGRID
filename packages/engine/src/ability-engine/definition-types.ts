@@ -17,6 +17,7 @@ import type {
 export type CardModifierImplementation =
   | CardRezCostModifierImplementation
   | CardInstallCostModifierImplementation
+  | CardNewDataFortCreationLockModifierImplementation
   | CardStealCostModifierImplementation
   | CardIceStrengthModifierImplementation
   | CardAdditionalSubroutineModifierImplementation
@@ -1389,6 +1390,19 @@ export type CardInstallCostModifierImplementation = {
     cardType: Extract<CardType, "ice">;
     sameServerAsSource?: boolean;
     selectedServerAsSource?: boolean;
+  };
+};
+
+export type CardNewDataFortCreationLockModifierImplementation = {
+  kind: "new_data_fort_creation_lock";
+  activeWhile: "installed";
+  sourceZone: "runner_installed";
+  side: Extract<Side, "corp">;
+  visibility: Extract<EventVisibilityClass, "public">;
+  blocks: "corp_new_remote_installs";
+  corpTrashSourceCost: {
+    clicks: 1;
+    credits: number;
   };
 };
 

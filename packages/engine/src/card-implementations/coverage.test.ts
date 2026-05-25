@@ -885,6 +885,26 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
   });
 
+  it("migrates Proteus Phase 9d data-fort creation lock into CardImplementation coverage", () => {
+    const definitionId = "onr_proteus_146_precision-bribery";
+
+    expect(cardImplementationForDefinitionId(definitionId)).toMatchObject({
+      modifiers: [
+        {
+          kind: "new_data_fort_creation_lock",
+          activeWhile: "installed",
+          sourceZone: "runner_installed",
+          blocks: "corp_new_remote_installs",
+          corpTrashSourceCost: { clicks: 1, credits: 4 },
+        },
+      ],
+    });
+    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      cardDefinitionId: definitionId,
+      status: "implemented",
+    });
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",
@@ -1095,8 +1115,8 @@ describe("CardImplementation coverage and registry invariants", () => {
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
     expect(outsideScopeDefinitionIds).toHaveLength(99);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(422);
-    expect(coverageByStatus.get("implemented")).toBe(422);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(423);
+    expect(coverageByStatus.get("implemented")).toBe(423);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
     expect(coverageByStatus.get("outside_current_release_scope")).toBe(52);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);

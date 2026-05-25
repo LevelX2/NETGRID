@@ -819,6 +819,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/hardware/deck-the.ts",
   "onr_proteus_151_sunburst-cranial-interface":
     "packages/engine/src/card-implementations/proteus/runner/hardware/sunburst-cranial-interface.ts",
+  "onr_proteus_146_precision-bribery":
+    "packages/engine/src/card-implementations/proteus/runner/resources/precision-bribery.ts",
   "onr_proteus_150_streetware-distributor":
     "packages/engine/src/card-implementations/proteus/runner/resources/streetware-distributor.ts",
 };
@@ -858,6 +860,16 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for passive Corp install-cost modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_INSTALL_COST_MODIFIER_LOCATION);
+  }
+  if (
+    implementation.modifiers?.some(
+      (modifier) => modifier.kind === "new_data_fort_creation_lock",
+    )
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive new data-fort creation lock behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION);
   }
   if (
     implementation.modifiers?.some((modifier) => modifier.kind === "steal_cost")

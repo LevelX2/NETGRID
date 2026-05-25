@@ -171,6 +171,8 @@ Status 2026-05-24: 9b ist als gemeinsamer Action-Economy-/Action-Debt-Slice bloc
 
 Status 2026-05-24: 9c ist blockiert, weil `Hijack` einen Grip-Installationschoice mit temporären Install-Credits und `Test Spin` einen Search-Install-Run-Followup mit Return-or-Penalty-Cleanup benötigen. Details stehen in `docs/activities/in-progress/act-2026-05-24-proteus-phase-9c-hidden-zone-search-install-tutor.md`.
 
+Status 2026-05-24: 9d ist erledigt. `Precision Bribery` nutzt einen generischen `new_data_fort_creation_lock`-Modifier, filtert Korp-Installationen in neue Remotes aus LegalActions, revalidiert stale Aktionen über `applyAction` und bietet der Korp eine öffentliche Trash-Action für 1 Aktion und 4 Credits. Details stehen in `docs/activities/done/act-2026-05-24-proteus-phase-9d-data-fort-creation-lock.md`.
+
 ## Abhängigkeitsmatrix
 
 | Vorlauf | Entsperrt                                                                                                              |

@@ -427,6 +427,7 @@ import { proteusSkullcapImplementation } from "./proteus/runner/programs/skullca
 import { proteusTaxmanImplementation } from "./proteus/runner/programs/taxman";
 import { proteusVienna22Implementation } from "./proteus/runner/programs/vienna-22";
 import { proteusViralPipelineImplementation } from "./proteus/runner/programs/viral-pipeline";
+import { proteusPrecisionBriberyImplementation } from "./proteus/runner/resources/precision-bribery";
 import { proteusStreetwareDistributorImplementation } from "./proteus/runner/resources/streetware-distributor";
 import type { CardImplementationDefinition } from "./types";
 
@@ -852,6 +853,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusTaxmanImplementation,
   proteusVienna22Implementation,
   proteusViralPipelineImplementation,
+  proteusPrecisionBriberyImplementation,
   proteusStreetwareDistributorImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 

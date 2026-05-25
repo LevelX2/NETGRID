@@ -100,6 +100,12 @@ import {
   buildCorpServerRootInstallAction,
 } from "./game/turn/corp-install-actions";
 import {
+  assertCorpCanCreateNewDataFort,
+  buildCorpTrashNewDataFortCreationLockActions,
+  corpNewDataFortCreationLocked,
+  newDataFortCreationLockForSource,
+} from "./game/turn/corp-data-fort-lock";
+import {
   buildRunnerEndTurnAction,
   buildRunnerGainCreditAction,
   buildRunnerRemoveTagAction,
@@ -2982,6 +2988,8 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
   }
+  actions.push(...buildCorpTrashNewDataFortCreationLockActions(state));
+  const newDataFortCreationLocked = corpNewDataFortCreationLocked(state);
   for (const id of state.corp.hq) {
     const definition = definitionFor(state, id);
     if (
@@ -3013,7 +3021,8 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
     if (definition.type === "ice") {
-      actions.push(buildCorpNewRemoteIceInstallAction(state, id));
+      if (!newDataFortCreationLocked)
+        actions.push(buildCorpNewRemoteIceInstallAction(state, id));
       for (const server of state.corp.servers) {
         const {
           baseCost,
@@ -3060,7 +3069,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       const regionInstallCost = rootRezOnInstall
         ? rezCostForCard(state, id)
         : 0;
-      if (state.corp.credits >= regionInstallCost) {
+      if (state.corp.credits >= regionInstallCost && !newDataFortCreationLocked) {
         actions.push(
           buildCorpNewRemoteRootInstallAction(state, id, regionInstallCost),
         );
@@ -8424,6 +8433,13 @@ function performAction(
         return;
       }
       if (
+        legalAction.payload?.corpAbility ===
+        "trash_new_data_fort_creation_lock_source"
+      ) {
+        resolveCorpTrashNewDataFortCreationLockSource(state, legalAction);
+        return;
+      }
+      if (
         resolveSuccessfulRunFollowupAbility(
           successfulRunInterventionHost(state),
           legalAction,
@@ -9057,6 +9073,39 @@ function resolveCorpRemoveSpyCounter(
   };
 }
 
+function resolveCorpTrashNewDataFortCreationLockSource(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf diese Lock-Quelle trashen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  if (!state.runner.rig.resources.includes(sourceCardId))
+    throw new Error("Die Lock-Quelle ist nicht als Runner-Resource installiert.");
+  const lock = newDataFortCreationLockForSource(state, sourceCardId);
+  if (!lock)
+    throw new Error("Diese Resource erzeugt aktuell keinen Data-Fort-Creation-Lock.");
+  const cost = lock.modifier.corpTrashSourceCost;
+  if (
+    clickCostForAction(legalAction) !== cost.clicks ||
+    creditCostForAction(legalAction) !== cost.credits
+  )
+    throw new Error("Die Lock-Quelle hat nicht die erwarteten Trash-Kosten.");
+  if (state.corp.clicks < cost.clicks || state.corp.credits < cost.credits)
+    throw new Error("Die Korp kann die Trash-Kosten nicht bezahlen.");
+  spendClicks(state, "corp", cost.clicks);
+  spendCredits(state, "corp", cost.credits);
+  trashRunnerInstalledCardToHeap(state, sourceCardId, legalAction);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: lock.sourceDefinitionId,
+    trashedCardDefinitionId: lock.sourceDefinitionId,
+    trashCostPaid: cost.credits,
+    newDataFortCreationLockRemoved: true,
+    corpCreditsAfter: state.corp.credits,
+  };
+}
+
 function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
   spendClick(state, "runner");
   spendCredits(state, "runner", legalAction.costs[0]?.credits ?? 0);
@@ -9365,6 +9414,12 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       runnerProgramTrashChoiceOpened: true,
     };
     return;
+  }
+  if (
+    legalAction.side === "corp" &&
+    legalAction.payload?.serverId === "new_remote"
+  ) {
+    assertCorpCanCreateNewDataFort(state);
   }
   spendClick(state, legalAction.side);
   if (legalAction.side === "corp") expireCorporateRetreatInstallCreditAbilities(state);
