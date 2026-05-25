@@ -416,6 +416,10 @@ export class NetgridRealtimeServer {
       await this.sendOpponentBootstrap(context.matchId, opposite(context.side), { side: context.side, connected: false });
       return;
     }
+    if (isTerminalSidePayload(disconnected)) {
+      await this.sendOpponentBootstrap(context.matchId, opposite(context.side), { side: context.side, connected: false });
+      return;
+    }
     this.sendOpponentStatus(context.matchId, opposite(context.side), { side: context.side, connected: false });
   }
 
@@ -1161,6 +1165,10 @@ function sendBootstrap(socket: WebSocket | undefined, payload: ServicePayload): 
 
 function isLobbyPayload(payload: ServicePayload): payload is LobbyPayload {
   return !("playerView" in payload);
+}
+
+function isTerminalSidePayload(payload: ServicePayload): payload is SidePayload {
+  return "playerView" in payload && (payload.matchStatus === "finished" || payload.matchStatus === "forfeited") && Boolean(payload.winner);
 }
 
 function send(socket: WebSocket | undefined, message: ServerWsMessage): void {

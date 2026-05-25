@@ -4634,6 +4634,67 @@ describe("MVP 0.2 multiplayer service", () => {
     }
   });
 
+  it("refreshes the opponent with a terminal forfeit payload when the forfeiting tab leaves immediately", async () => {
+    const match = await joinedMatch("ws-forfeit-close-refresh");
+    const handle = createNetgridHttpServer(match.service);
+    const baseUrl = await listen(handle);
+    const wsUrl = baseUrl.replace(/^http:/, "ws:") + "/ws";
+    const corpSocket = new WebSocket(wsUrl);
+    const runnerSocket = new WebSocket(wsUrl);
+
+    try {
+      await Promise.all([waitForOpen(corpSocket), waitForOpen(runnerSocket)]);
+      corpSocket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: match.matchId, sessionToken: match.corp.sessionToken, side: "corp" }
+        })
+      );
+      runnerSocket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: match.matchId, sessionToken: match.runner.sessionToken, side: "runner" }
+        })
+      );
+      await Promise.all([waitForMessage(corpSocket, "state_update"), waitForMessage(runnerSocket, "state_update")]);
+
+      const firstTerminal = waitForMessage(runnerSocket, "match_finished");
+      const response = await fetch(`${baseUrl}/api/matches/${encodeURIComponent(match.matchId)}/forfeit`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ side: "corp", sessionToken: match.corp.sessionToken })
+      });
+      expect(response.status).toBe(200);
+      const firstTerminalPayload = messagePayload(await firstTerminal) as {
+        matchStatus?: string;
+        winner?: Side | "draw";
+        resultSummary?: { reason?: string; winnerSide?: Side; loserSide?: Side };
+      };
+      expect(firstTerminalPayload).toMatchObject({
+        matchStatus: "forfeited",
+        winner: "runner",
+        resultSummary: { reason: "forfeit", winnerSide: "runner", loserSide: "corp" }
+      });
+
+      const refreshedTerminal = waitForMessage(runnerSocket, "match_finished");
+      corpSocket.close();
+      const refreshedPayload = messagePayload(await refreshedTerminal) as {
+        matchStatus?: string;
+        winner?: Side | "draw";
+        resultSummary?: { reason?: string; winnerSide?: Side; loserSide?: Side };
+      };
+      expect(refreshedPayload).toMatchObject({
+        matchStatus: "forfeited",
+        winner: "runner",
+        resultSummary: { reason: "forfeit", winnerSide: "runner", loserSide: "corp" }
+      });
+    } finally {
+      corpSocket.close();
+      runnerSocket.close();
+      await handle.close();
+    }
+  });
+
   it("keeps both browser tabs in the ready lobby after the joiner submits decks", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ws-join-deck-lobby",
