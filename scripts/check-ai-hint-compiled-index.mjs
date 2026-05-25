@@ -8,6 +8,8 @@ const REPO_ROOT = path.resolve(
   "..",
 );
 const ACTIVE_HINTS_PATH = "data/ai/ai-card-hints-active.json";
+const PILOT_CARDS_PATH =
+  "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json";
 const DERIVED_FACTS_REPORT_PATH =
   "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json";
 const OVERLAY_ROOT = "data/ai/hints/overlays";
@@ -239,6 +241,17 @@ function readOverlayEntries() {
   );
 }
 
+function readOverlayEntriesByCard() {
+  const entries = readOverlayEntries();
+  const byCard = new Map();
+  for (const entry of entries) {
+    if (!byCard.has(entry.cardId)) {
+      byCard.set(entry.cardId, entry);
+    }
+  }
+  return { entries, byCard };
+}
+
 function pushIssue(collection, kind, message, context) {
   collection.push({
     kind,
@@ -279,7 +292,7 @@ function compareFields(activeHint, generatedFacts, overlay) {
   const activeFields = Object.keys(activeHint ?? {}).sort();
   const activeMonolithOnlyFields = activeFields.filter(
     (field) =>
-      !["cardId", "side", "cardType"].includes(field) &&
+      !ACTIVE_BASIS_FIELDS.includes(field) &&
       !generatedFields.includes(field) &&
       !overlayFields.includes(field),
   );
@@ -294,6 +307,39 @@ function compareFields(activeHint, generatedFacts, overlay) {
     generatedOnlyFields,
     overlayOnlyFields,
   };
+}
+
+function addWarning(warnings, cardWarnings, warning) {
+  warnings.push(warning);
+  cardWarnings.push(warning);
+}
+
+function warningCountsByKind(warnings) {
+  const counts = {};
+  for (const warning of warnings) {
+    counts[warning.kind] = (counts[warning.kind] ?? 0) + 1;
+  }
+  return Object.fromEntries(
+    Object.entries(counts).sort(([left], [right]) => left.localeCompare(right)),
+  );
+}
+
+function recommendedNextAction({
+  cardErrors,
+  comparison,
+  expectedManualOverlayNeeded,
+  generatedFields,
+  manualOverlayFound,
+  overlay,
+}) {
+  if (cardErrors.length > 0) return "manual_review_needed";
+  if (expectedManualOverlayNeeded && !manualOverlayFound)
+    return "overlay_needed";
+  if (isMeaningful(overlay.descriptorGaps)) return "schema_gap";
+  if (comparison.generatedOnlyFields.length > 0)
+    return "generated_fact_candidate";
+  if (generatedFields.length > 0) return "monolith_mechanical_duplication";
+  return "overlay_not_needed";
 }
 
 function validateNoForbiddenOutput(compiledPreview, cardId, errors) {
@@ -385,11 +431,14 @@ function validateOverlayForCompiler({ cardId, overlay, overlayPath, errors }) {
 
 export function buildCompiledIndexReport(options = {}) {
   const activeHintsPath = options.activeHintsPath ?? ACTIVE_HINTS_PATH;
+  const pilotCardsPath = options.pilotCardsPath ?? PILOT_CARDS_PATH;
   const derivedFactsReportPath =
     options.derivedFactsReportPath ?? DERIVED_FACTS_REPORT_PATH;
   const activeHints = readJson(activeHintsPath);
+  const pilotCards = readJson(pilotCardsPath);
   const derivedReport = readJson(derivedFactsReportPath);
-  const overlayEntries = readOverlayEntries();
+  const { entries: overlayEntries, byCard: overlayEntriesByCard } =
+    readOverlayEntriesByCard();
   const activeHintsByCard = new Map(
     (activeHints.cards ?? []).map((hint) => [hint.cardId, hint]),
   );
@@ -412,44 +461,73 @@ export function buildCompiledIndexReport(options = {}) {
     );
   }
 
-  for (const entry of overlayEntries.sort((left, right) =>
+  const pilotCardIds = new Set(
+    (pilotCards.cards ?? []).map((card) => card.cardId),
+  );
+  for (const entry of overlayEntries) {
+    if (!pilotCardIds.has(entry.cardId)) {
+      pushIssue(
+        warnings,
+        "overlay_outside_compiled_pilot",
+        "Overlay card is outside the 24-card compiled pilot and is ignored by the compiled index.",
+        { cardId: entry.cardId, overlayPath: entry.overlayPath },
+      );
+    }
+  }
+
+  for (const pilotCard of (pilotCards.cards ?? []).sort((left, right) =>
     left.cardId.localeCompare(right.cardId),
   )) {
-    const { cardId, overlay, overlayPath } = entry;
+    const cardId = pilotCard.cardId;
+    const overlayEntry = overlayEntriesByCard.get(cardId);
+    const overlay = overlayEntry?.overlay ?? {};
+    const overlayPath = overlayEntry?.overlayPath ?? null;
     const activeHint = activeHintsByCard.get(cardId);
     const derivedCard = derivedCardsByCard.get(cardId);
     const derivedFacts = derivedCard?.derivedFacts ?? {};
     const generatedFacts = derivedMechanicalFacts(derivedFacts);
-    const manualOverlayFound = Boolean(overlay);
+    const manualOverlayFound = Boolean(overlayEntry);
+    const expectedManualOverlayNeeded = Boolean(
+      pilotCard.expectedManualOverlayNeeded,
+    );
     const conflicts = [];
     const cardWarnings = [];
+    const cardErrors = [];
 
     if (!activeHint) {
-      pushIssue(
-        errors,
-        "missing_active_hint",
-        "Overlay card is absent from active monolith.",
-        { cardId, overlayPath },
-      );
+      const error = {
+        kind: "missing_active_hint",
+        message: "Pilot card is absent from active monolith.",
+        cardId,
+      };
+      errors.push(error);
+      cardErrors.push(error);
     }
-    if (!derivedCard && isMeaningful(overlay.descriptorGaps)) {
-      pushIssue(
-        errors,
-        "missing_derived_facts_for_descriptor_gap",
-        "Overlay references descriptor gaps but the card is absent from derived facts report.",
-        { cardId, overlayPath },
-      );
+    if (!derivedCard) {
+      const error = {
+        kind: "missing_derived_facts_pilot_card",
+        message: "Pilot card is absent from derived facts report.",
+        cardId,
+      };
+      errors.push(error);
+      cardErrors.push(error);
     }
     for (const fieldPath of collectKeyPaths(derivedFacts, HIDDEN_INFO_FIELDS)) {
-      pushIssue(
-        errors,
-        "generated_hidden_info_field",
-        `Generated facts contain hidden-info field ${fieldPath}.`,
-        { cardId, fieldPath },
-      );
+      const error = {
+        kind: "generated_hidden_info_field",
+        message: `Generated facts contain hidden-info field ${fieldPath}.`,
+        cardId,
+        fieldPath,
+      };
+      errors.push(error);
+      cardErrors.push(error);
     }
 
-    validateOverlayForCompiler({ cardId, overlay, overlayPath, errors });
+    const errorCountBeforeOverlayValidation = errors.length;
+    if (manualOverlayFound) {
+      validateOverlayForCompiler({ cardId, overlay, overlayPath, errors });
+      cardErrors.push(...errors.slice(errorCountBeforeOverlayValidation));
+    }
 
     const compiledPreview = buildCompiledPreview(
       activeHint,
@@ -464,74 +542,72 @@ export function buildCompiledIndexReport(options = {}) {
     for (const field of generatedFields.filter((field) =>
       isMeaningful(activeHint?.[field]),
     )) {
-      const warning = {
-        kind: "active_mechanical_field_should_be_generated",
+      addWarning(warnings, cardWarnings, {
+        kind: "active_monolith_mechanical_duplication",
         message: `Active monolith already carries mechanical field ${field}; long-term source should be generated facts.`,
         cardId,
         field,
-      };
-      warnings.push(warning);
-      cardWarnings.push(warning);
+      });
     }
 
     for (const field of comparison.generatedOnlyFields) {
-      const warning = {
-        kind: "generated_fact_missing_or_differs_in_active",
+      addWarning(warnings, cardWarnings, {
+        kind: "generated_fact_missing_from_active_monolith",
         message: `Generated mechanical field ${field} is absent from or differs from active monolith.`,
         cardId,
         field,
-      };
-      warnings.push(warning);
-      cardWarnings.push(warning);
+      });
     }
 
     for (const field of comparison.overlayOnlyFields) {
-      const warning = {
-        kind: "overlay_field_missing_or_differs_in_active",
+      addWarning(warnings, cardWarnings, {
+        kind: "manual_overlay_strategy_field_missing_from_active",
         message: `Overlay field ${field} is absent from or differs from active monolith.`,
         cardId,
         field,
-      };
-      warnings.push(warning);
-      cardWarnings.push(warning);
+      });
     }
 
     if (overlay.quality?.needsHumanReview === true) {
-      const warning = {
+      addWarning(warnings, cardWarnings, {
         kind: "needs_human_review",
         message: "Manual overlay keeps needsHumanReview=true.",
         cardId,
-      };
-      warnings.push(warning);
-      cardWarnings.push(warning);
+      });
     }
     if (isMeaningful(overlay.descriptorGaps)) {
-      const warning = {
+      addWarning(warnings, cardWarnings, {
         kind: "descriptor_gap_remaining",
         message: "Manual overlay keeps an open descriptor gap.",
         cardId,
-      };
-      warnings.push(warning);
-      cardWarnings.push(warning);
+      });
       if (!isMeaningful(overlay.manualNotes)) {
-        const missingNoteWarning = {
+        addWarning(warnings, cardWarnings, {
           kind: "descriptor_gap_without_manual_note",
           message:
             "Pilot card has descriptorGap without manualNotes rationale.",
           cardId,
-        };
-        warnings.push(missingNoteWarning);
-        cardWarnings.push(missingNoteWarning);
+        });
       }
     }
     if (overlayFields.length > 0 && generatedFields.length === 0) {
-      const warning = {
+      addWarning(warnings, cardWarnings, {
         kind: "strategic_overlay_without_generated_facts",
         message: "Card has strategic overlay but no generated facts.",
         cardId,
-      };
-      warnings.push(warning);
-      cardWarnings.push(warning);
+      });
+    }
+    if (
+      !manualOverlayFound &&
+      (expectedManualOverlayNeeded ||
+        isMeaningful(derivedCard?.missingManualOverlay))
+    ) {
+      addWarning(warnings, cardWarnings, {
+        kind: "overlay_missing_for_manual_gap",
+        message:
+          "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+        cardId,
+      });
     }
 
     cards.push({
@@ -542,6 +618,7 @@ export function buildCompiledIndexReport(options = {}) {
       activeHintFound: Boolean(activeHint),
       derivedFactsFound: Boolean(derivedCard),
       manualOverlayFound,
+      expectedManualOverlayNeeded,
       compiledPreview,
       mechanicalFactsFromGenerated: generatedFactLabels(derivedFacts),
       strategyFieldsFromOverlay: overlayFields,
@@ -554,6 +631,14 @@ export function buildCompiledIndexReport(options = {}) {
           `${right.kind}:${right.field ?? ""}`,
         ),
       ),
+      recommendedNextAction: recommendedNextAction({
+        cardErrors,
+        comparison,
+        expectedManualOverlayNeeded,
+        generatedFields,
+        manualOverlayFound,
+        overlay,
+      }),
     });
   }
 
@@ -573,13 +658,18 @@ export function buildCompiledIndexReport(options = {}) {
     generatedAt: REVIEW_DATE,
     source: {
       activeHintsPath,
+      pilotCardsPath,
       derivedFactsReportPath,
       overlayPaths,
       mode: "read-only comparison index; does not replace ai-card-hints-active.json",
     },
     compiledCardCount: cards.length,
+    overlayCardCount: cards.filter((card) => card.manualOverlayFound).length,
+    cardsWithoutOverlay: cards.filter((card) => !card.manualOverlayFound)
+      .length,
     hardErrorCount: sortedErrors.length,
     warningCount: sortedWarnings.length,
+    warningCountsByKind: warningCountsByKind(sortedWarnings),
     cards,
     errors: sortedErrors,
     warnings: sortedWarnings,

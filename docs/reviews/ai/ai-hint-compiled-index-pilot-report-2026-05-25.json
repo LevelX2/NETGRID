@@ -3,6 +3,7 @@
   "generatedAt": "2026-05-25",
   "source": {
     "activeHintsPath": "data/ai/ai-card-hints-active.json",
+    "pilotCardsPath": "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json",
     "derivedFactsReportPath": "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json",
     "overlayPaths": [
       "data/ai/hints/overlays/onr-v1/corp/upgrades.json",
@@ -10,9 +11,17 @@
     ],
     "mode": "read-only comparison index; does not replace ai-card-hints-active.json"
   },
-  "compiledCardCount": 6,
+  "compiledCardCount": 24,
+  "overlayCardCount": 6,
+  "cardsWithoutOverlay": 18,
   "hardErrorCount": 0,
-  "warningCount": 33,
+  "warningCount": 84,
+  "warningCountsByKind": {
+    "active_monolith_mechanical_duplication": 46,
+    "descriptor_gap_remaining": 2,
+    "generated_fact_missing_from_active_monolith": 28,
+    "manual_overlay_strategy_field_missing_from_active": 8
+  },
   "cards": [
     {
       "cardId": "onr_v1_017_deep-thought",
@@ -22,6 +31,7 @@
       "activeHintFound": true,
       "derivedFactsFound": true,
       "manualOverlayFound": true,
+      "expectedManualOverlayNeeded": true,
       "compiledPreview": {
         "cardId": "onr_v1_017_deep-thought",
         "side": "runner",
@@ -70,12 +80,9 @@
         "strategicNotes"
       ],
       "activeMonolithOnlyFields": [
-        "aiSupportStatus",
         "conditions",
-        "planRoles",
         "requiredMechanics",
         "riskTags",
-        "roles",
         "scenarioRefs",
         "valueHints"
       ],
@@ -88,24 +95,25 @@
       "conflicts": [],
       "warnings": [
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_017_deep-thought",
           "field": "effects"
         },
         {
-          "kind": "generated_fact_missing_or_differs_in_active",
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_017_deep-thought",
           "field": "effects"
         },
         {
-          "kind": "overlay_field_missing_or_differs_in_active",
+          "kind": "manual_overlay_strategy_field_missing_from_active",
           "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
           "cardId": "onr_v1_017_deep-thought",
           "field": "strategicNotes"
         }
-      ]
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
     },
     {
       "cardId": "onr_v1_037_japanese-water-torture",
@@ -115,6 +123,7 @@
       "activeHintFound": true,
       "derivedFactsFound": true,
       "manualOverlayFound": true,
+      "expectedManualOverlayNeeded": true,
       "compiledPreview": {
         "cardId": "onr_v1_037_japanese-water-torture",
         "side": "runner",
@@ -178,12 +187,9 @@
         "descriptorGaps"
       ],
       "activeMonolithOnlyFields": [
-        "aiSupportStatus",
         "costProfile",
-        "planRoles",
         "requiredMechanics",
         "riskTags",
-        "roles",
         "scenarioRefs",
         "valueHints"
       ],
@@ -197,13 +203,13 @@
       "conflicts": [],
       "warnings": [
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field breakerProfile; long-term source should be generated facts.",
           "cardId": "onr_v1_037_japanese-water-torture",
           "field": "breakerProfile"
         },
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_037_japanese-water-torture",
           "field": "effects"
@@ -214,24 +220,112 @@
           "cardId": "onr_v1_037_japanese-water-torture"
         },
         {
-          "kind": "generated_fact_missing_or_differs_in_active",
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field breakerProfile is absent from or differs from active monolith.",
           "cardId": "onr_v1_037_japanese-water-torture",
           "field": "breakerProfile"
         },
         {
-          "kind": "overlay_field_missing_or_differs_in_active",
+          "kind": "manual_overlay_strategy_field_missing_from_active",
           "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
           "cardId": "onr_v1_037_japanese-water-torture",
           "field": "descriptorGaps"
         },
         {
-          "kind": "overlay_field_missing_or_differs_in_active",
+          "kind": "manual_overlay_strategy_field_missing_from_active",
           "message": "Overlay field manualNotes is absent from or differs from active monolith.",
           "cardId": "onr_v1_037_japanese-water-torture",
           "field": "manualNotes"
         }
-      ]
+      ],
+      "recommendedNextAction": "schema_gap"
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_039_krash",
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "breaker_decoder",
+          "breaker_fracter",
+          "breaker_killer",
+          "flex_breaker",
+          "icebreaker_support",
+          "icebreaker",
+          "program"
+        ],
+        "planRoles": [
+          "build_rig",
+          "safe_probe_run"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities",
+            "timing": "persistent"
+          }
+        ],
+        "breakerProfile": {
+          "breakCost": 2,
+          "confidence": "high",
+          "coverage": [
+            "universal"
+          ],
+          "pumpCost": 2,
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "mechanicalFactsFromGenerated": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field breakerProfile; long-term source should be generated facts.",
+          "cardId": "onr_v1_039_krash",
+          "field": "breakerProfile"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_039_krash",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field breakerProfile is absent from or differs from active monolith.",
+          "cardId": "onr_v1_039_krash",
+          "field": "breakerProfile"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
     },
     {
       "cardId": "onr_v1_043_mystery-box",
@@ -241,6 +335,7 @@
       "activeHintFound": true,
       "derivedFactsFound": true,
       "manualOverlayFound": true,
+      "expectedManualOverlayNeeded": true,
       "compiledPreview": {
         "cardId": "onr_v1_043_mystery-box",
         "side": "runner",
@@ -332,12 +427,9 @@
         "descriptorGaps"
       ],
       "activeMonolithOnlyFields": [
-        "aiSupportStatus",
         "costProfile",
-        "planRoles",
         "requiredMechanics",
         "riskTags",
-        "roles",
         "scenarioRefs",
         "valueHints"
       ],
@@ -353,13 +445,13 @@
       "conflicts": [],
       "warnings": [
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_043_mystery-box",
           "field": "conditions"
         },
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_043_mystery-box",
           "field": "effects"
@@ -370,36 +462,267 @@
           "cardId": "onr_v1_043_mystery-box"
         },
         {
-          "kind": "generated_fact_missing_or_differs_in_active",
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
           "cardId": "onr_v1_043_mystery-box",
           "field": "conditions"
         },
         {
-          "kind": "generated_fact_missing_or_differs_in_active",
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_043_mystery-box",
           "field": "effects"
         },
         {
-          "kind": "generated_fact_missing_or_differs_in_active",
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field targetProfiles is absent from or differs from active monolith.",
           "cardId": "onr_v1_043_mystery-box",
           "field": "targetProfiles"
         },
         {
-          "kind": "overlay_field_missing_or_differs_in_active",
+          "kind": "manual_overlay_strategy_field_missing_from_active",
           "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
           "cardId": "onr_v1_043_mystery-box",
           "field": "descriptorGaps"
         },
         {
-          "kind": "overlay_field_missing_or_differs_in_active",
+          "kind": "manual_overlay_strategy_field_missing_from_active",
           "message": "Overlay field manualNotes is absent from or differs from active monolith.",
           "cardId": "onr_v1_043_mystery-box",
           "field": "manualNotes"
         }
-      ]
+      ],
+      "recommendedNextAction": "schema_gap"
+    },
+    {
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_048_poltergeist",
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "program",
+          "recurring_credit",
+          "runner",
+          "trash_cost_payment"
+        ],
+        "planRoles": [
+          "runner_access_trash_economy",
+          "runner_install_program"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "source": "implementation.restrictedHostedCreditSource",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "effect:trash_credit"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_048_poltergeist",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_048_poltergeist",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "title": "R&D-Protocol Files",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_050_r-and-d-protocol-files",
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "access_replacement",
+          "hidden_zone_tool",
+          "program",
+          "rd_run"
+        ],
+        "planRoles": [
+          "information",
+          "pressure_rnd"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "access_replacement",
+            "scope": "rnd",
+            "source": "implementation.successfulRunAccessReplacement",
+            "timing": "successful_run"
+          },
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "resource": "cards",
+            "scope": "rnd",
+            "source": "implementation.effect.private_look_top_rd",
+            "timing": "successful_run"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_successful_run",
+            "source": "implementation.successfulRunAccessReplacement"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_successful_run",
+        "effect:access_replacement",
+        "effect:topdeck_info"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_050_r-and-d-protocol-files",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_050_r-and-d-protocol-files",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_050_r-and-d-protocol-files",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_057_scatter-shot",
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "per_card_longtail",
+          "program",
+          "recurring_credit",
+          "runner",
+          "trash_cost_payment"
+        ],
+        "planRoles": [
+          "runner_access_trash_economy",
+          "runner_install_program",
+          "runner_program_ability"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "source": "implementation.restrictedHostedCreditSource",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "effect:trash_credit"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_057_scatter-shot",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_057_scatter-shot",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
     },
     {
       "cardId": "onr_v1_059_self-modifying-code",
@@ -409,6 +732,7 @@
       "activeHintFound": true,
       "derivedFactsFound": true,
       "manualOverlayFound": true,
+      "expectedManualOverlayNeeded": true,
       "compiledPreview": {
         "cardId": "onr_v1_059_self-modifying-code",
         "side": "runner",
@@ -475,12 +799,9 @@
         "manualNotes"
       ],
       "activeMonolithOnlyFields": [
-        "aiSupportStatus",
         "costProfile",
-        "planRoles",
         "requiredMechanics",
         "riskTags",
-        "roles",
         "scenarioRefs",
         "valueHints"
       ],
@@ -495,42 +816,1363 @@
       "conflicts": [],
       "warnings": [
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_059_self-modifying-code",
           "field": "conditions"
         },
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_059_self-modifying-code",
           "field": "effects"
         },
         {
-          "kind": "generated_fact_missing_or_differs_in_active",
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
           "cardId": "onr_v1_059_self-modifying-code",
           "field": "conditions"
         },
         {
-          "kind": "generated_fact_missing_or_differs_in_active",
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_059_self-modifying-code",
           "field": "effects"
         },
         {
-          "kind": "generated_fact_missing_or_differs_in_active",
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field targetProfiles is absent from or differs from active monolith.",
           "cardId": "onr_v1_059_self-modifying-code",
           "field": "targetProfiles"
         },
         {
-          "kind": "overlay_field_missing_or_differs_in_active",
+          "kind": "manual_overlay_strategy_field_missing_from_active",
           "message": "Overlay field manualNotes is absent from or differs from active monolith.",
           "cardId": "onr_v1_059_self-modifying-code",
           "field": "manualNotes"
         }
-      ]
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_192_corporate-boon",
+      "title": "Corporate Boon",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_192_corporate-boon",
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": [
+          "action",
+          "agenda",
+          "corp"
+        ],
+        "planRoles": [
+          "corp_score_agenda"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 1,
+            "confidence": "high",
+            "kind": "extra_action",
+            "resource": "actions",
+            "scope": "corp",
+            "source": "implementation.effect.gain_actions",
+            "timing": "scored_activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area",
+            "timing": "scored_activated"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_scored_agenda",
+        "effect:extra_action",
+        "effect:scored_agenda_action"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_192_corporate-boon",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_192_corporate-boon",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_192_corporate-boon",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_193_corporate-coup",
+      "title": "Corporate Coup",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_193_corporate-coup",
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": [
+          "agenda_counters",
+          "agenda",
+          "economy_agenda",
+          "score_plan"
+        ],
+        "planRoles": [
+          "build_scoring_remote",
+          "score_next_turn",
+          "score_now"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 3,
+            "confidence": "high",
+            "kind": "counter_economy",
+            "resource": "credits",
+            "scope": "corp",
+            "source": "implementation.effect.take_hosted_credits",
+            "timing": "scored_activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area",
+            "timing": "scored_activated"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_scored_agenda",
+        "effect:counter_economy",
+        "effect:scored_agenda_action"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_193_corporate-coup",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_193_corporate-coup",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_193_corporate-coup",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "title": "Employee Empowerment",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_199_employee-empowerment",
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": [
+          "agenda",
+          "economy",
+          "recurring"
+        ],
+        "planRoles": [
+          "score_agenda"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 2,
+            "confidence": "high",
+            "kind": "draw",
+            "resource": "cards",
+            "scope": "corp",
+            "source": "implementation.effect.draw_cards",
+            "timing": "scored_activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area",
+            "timing": "scored_activated"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_scored_agenda",
+        "effect:draw",
+        "effect:scored_agenda_action"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_199_employee-empowerment",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_199_employee-empowerment",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_199_employee-empowerment",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "title": "Netwatch Operations Office",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_207_netwatch-operations-office",
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": [
+          "agenda",
+          "score_plan",
+          "tag_agenda",
+          "trace_agenda"
+        ],
+        "planRoles": [
+          "protect_hq",
+          "score_next_turn",
+          "score_now"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 1,
+            "confidence": "high",
+            "kind": "tag_source",
+            "resource": "tags",
+            "scope": "runner",
+            "source": "implementation.effect.trace.onSuccess.add_tags",
+            "timing": "scored_activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area",
+            "timing": "scored_activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "trace",
+            "scope": "corp",
+            "source": "implementation.effect.trace",
+            "timing": "scored_activated"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_trace_success",
+            "source": "implementation.effect.trace.onSuccess"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_scored_agenda",
+        "condition:requires_trace_success",
+        "effect:scored_agenda_action",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_207_netwatch-operations-office",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_207_netwatch-operations-office",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_207_netwatch-operations-office",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "title": "On-Call Solo Team",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_208_on-call-solo-team",
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": [
+          "agenda",
+          "score_plan",
+          "tag_damage_agenda"
+        ],
+        "planRoles": [
+          "bait_runner",
+          "score_next_turn",
+          "score_now"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 1,
+            "confidence": "high",
+            "kind": "damage",
+            "resource": "damage",
+            "scope": "runner",
+            "source": "implementation.effect.damage",
+            "timing": "scored_activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area",
+            "timing": "scored_activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "resource": "damage",
+            "scope": "runner",
+            "source": "implementation.condition.runner_is_tagged.effect.damage",
+            "timing": "scored_activated"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_runner_tagged",
+        "condition:requires_scored_agenda",
+        "effect:damage",
+        "effect:scored_agenda_action",
+        "effect:tag_punish_payoff"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_208_on-call-solo-team",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_208_on-call-solo-team",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_208_on-call-solo-team",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "title": "Political Overthrow",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_210_political-overthrow",
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": [
+          "agenda",
+          "corp",
+          "per_card_longtail"
+        ],
+        "planRoles": [
+          "corp_agenda_ability",
+          "corp_score_agenda"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 3,
+            "confidence": "high",
+            "kind": "economy",
+            "resource": "credits",
+            "scope": "corp",
+            "source": "implementation.effect.gain_credits",
+            "timing": "scored_activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area",
+            "timing": "scored_activated"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:scored_agenda_action"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_210_political-overthrow",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_210_political-overthrow",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_210_political-overthrow",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_217_strike-force-kali",
+      "title": "Strike Force Kali",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_217_strike-force-kali",
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": [
+          "agenda",
+          "score_plan",
+          "tag_damage_agenda"
+        ],
+        "planRoles": [
+          "bait_runner",
+          "score_next_turn",
+          "score_now"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 2,
+            "confidence": "high",
+            "kind": "damage",
+            "resource": "damage",
+            "scope": "runner",
+            "source": "implementation.effect.damage",
+            "timing": "scored_activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area",
+            "timing": "scored_activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "resource": "damage",
+            "scope": "runner",
+            "source": "implementation.condition.runner_is_tagged.effect.damage",
+            "timing": "scored_activated"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_runner_tagged",
+        "condition:requires_scored_agenda",
+        "effect:damage",
+        "effect:scored_agenda_action",
+        "effect:tag_punish_payoff"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_217_strike-force-kali",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_217_strike-force-kali",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_217_strike-force-kali",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "side": "corp",
+      "cardType": "ice",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_274_tutor",
+        "side": "corp",
+        "cardType": "ice",
+        "roles": [
+          "corp",
+          "ice",
+          "per_card_longtail"
+        ],
+        "planRoles": [
+          "corp_install_ice",
+          "corp_rez_ice"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "medium",
+            "kind": "future_run_effect",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration",
+            "timing": "encounter"
+          },
+          {
+            "confidence": "medium",
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration_additional_subroutine",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.printedSubroutines.run_duration"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_during_run",
+        "effect:future_run_effect",
+        "effect:remote_protection"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_274_tutor",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_274_tutor",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "monolith_mechanical_duplication"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "side": "corp",
+      "cardType": "ice",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_276_viral-15",
+        "side": "corp",
+        "cardType": "ice",
+        "roles": [
+          "corp",
+          "ice",
+          "per_card_longtail"
+        ],
+        "planRoles": [
+          "corp_install_ice",
+          "corp_rez_ice"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 1,
+            "confidence": "medium",
+            "kind": "run_tax",
+            "resource": "credits",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration_jack_out_cost",
+            "timing": "encounter"
+          },
+          {
+            "confidence": "medium",
+            "kind": "future_run_effect",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration",
+            "timing": "encounter"
+          },
+          {
+            "confidence": "medium",
+            "kind": "program_trash",
+            "scope": "runner",
+            "source": "implementation.printedSubroutines.run_duration_trash_program",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.printedSubroutines.run_duration"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_during_run",
+        "effect:future_run_effect",
+        "effect:program_trash",
+        "effect:run_tax"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_276_viral-15",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_276_viral-15",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_276_viral-15",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "side": "corp",
+      "cardType": "ice",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_277_virizz",
+        "side": "corp",
+        "cardType": "ice",
+        "roles": [
+          "corp",
+          "ice",
+          "per_card_longtail"
+        ],
+        "planRoles": [
+          "corp_install_ice",
+          "corp_rez_ice"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "medium",
+            "kind": "future_run_effect",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration",
+            "timing": "encounter"
+          },
+          {
+            "confidence": "medium",
+            "kind": "run_tax",
+            "resource": "credits",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration_break_subroutine_cost",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.printedSubroutines.run_duration"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_during_run",
+        "effect:future_run_effect",
+        "effect:run_tax"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_277_virizz",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_277_virizz",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_277_virizz",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_283_audit-of-call-records",
+        "side": "corp",
+        "cardType": "operation",
+        "roles": [
+          "operation",
+          "runner_activity_punish",
+          "tag_operation",
+          "trace_operation"
+        ],
+        "planRoles": [
+          "bait_runner",
+          "protect_hq",
+          "recover_economy"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 1,
+            "confidence": "high",
+            "kind": "tag_source",
+            "resource": "tags",
+            "scope": "runner",
+            "source": "implementation.effect.trace.onSuccess.add_tags",
+            "timing": "trace_success"
+          },
+          {
+            "confidence": "high",
+            "kind": "trace",
+            "scope": "corp",
+            "source": "implementation.effect.trace",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_trace_success",
+            "source": "implementation.effect.trace.onSuccess"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_trace_success",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_283_audit-of-call-records",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_283_audit-of-call-records",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_283_audit-of-call-records",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_284_chance-observation",
+      "title": "Chance Observation",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_284_chance-observation",
+        "side": "corp",
+        "cardType": "operation",
+        "roles": [
+          "operation",
+          "runner_activity_punish",
+          "tag_operation",
+          "trace_operation"
+        ],
+        "planRoles": [
+          "bait_runner",
+          "protect_hq",
+          "recover_economy"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 1,
+            "confidence": "high",
+            "kind": "tag_source",
+            "resource": "tags",
+            "scope": "runner",
+            "source": "implementation.effect.trace.onSuccess.add_tags",
+            "timing": "trace_success"
+          },
+          {
+            "confidence": "high",
+            "kind": "trace",
+            "scope": "corp",
+            "source": "implementation.effect.trace",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_trace_success",
+            "source": "implementation.effect.trace.onSuccess"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_trace_success",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_284_chance-observation",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_284_chance-observation",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_284_chance-observation",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_285_closed-accounts",
+        "side": "corp",
+        "cardType": "operation",
+        "roles": [
+          "economy_operation",
+          "operation",
+          "tag_punishment_operation"
+        ],
+        "planRoles": [
+          "bait_runner",
+          "recover_economy"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.effect.lose_credits",
+            "timing": "action"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.condition.runner_is_tagged.effect.lose_credits",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_runner_tagged",
+        "effect:counter_economy",
+        "effect:tag_punish_payoff"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_285_closed-accounts",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_285_closed-accounts",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_285_closed-accounts",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "compiledPreview": {
+        "cardId": "onr_v1_302_scorched-earth",
+        "side": "corp",
+        "cardType": "operation",
+        "roles": [
+          "damage_operation",
+          "operation",
+          "tag_punishment_operation"
+        ],
+        "planRoles": [
+          "bait_runner"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 4,
+            "confidence": "high",
+            "kind": "damage",
+            "resource": "damage",
+            "scope": "runner",
+            "source": "implementation.effect.damage",
+            "timing": "action"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "resource": "damage",
+            "scope": "runner",
+            "source": "implementation.condition.runner_is_tagged.effect.damage",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_runner_tagged",
+        "effect:damage",
+        "effect:tag_punish_payoff"
+      ],
+      "strategyFieldsFromOverlay": [],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_302_scorched-earth",
+          "field": "conditions"
+        },
+        {
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_302_scorched-earth",
+          "field": "effects"
+        },
+        {
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_302_scorched-earth",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
     },
     {
       "cardId": "onr_v1_355_crystal-palace-station-grid",
@@ -540,6 +2182,7 @@
       "activeHintFound": true,
       "derivedFactsFound": true,
       "manualOverlayFound": true,
+      "expectedManualOverlayNeeded": true,
       "compiledPreview": {
         "cardId": "onr_v1_355_crystal-palace-station-grid",
         "side": "corp",
@@ -597,11 +2240,8 @@
         "strategicNotes"
       ],
       "activeMonolithOnlyFields": [
-        "aiSupportStatus",
-        "planRoles",
         "requiredMechanics",
         "riskTags",
-        "roles",
         "scenarioRefs",
         "valueHints"
       ],
@@ -614,30 +2254,31 @@
       "conflicts": [],
       "warnings": [
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_355_crystal-palace-station-grid",
           "field": "effects"
         },
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
           "cardId": "onr_v1_355_crystal-palace-station-grid",
           "field": "remoteRole"
         },
         {
-          "kind": "generated_fact_missing_or_differs_in_active",
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_355_crystal-palace-station-grid",
           "field": "effects"
         },
         {
-          "kind": "overlay_field_missing_or_differs_in_active",
+          "kind": "manual_overlay_strategy_field_missing_from_active",
           "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
           "cardId": "onr_v1_355_crystal-palace-station-grid",
           "field": "strategicNotes"
         }
-      ]
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
     },
     {
       "cardId": "onr_v1_366_red-herrings",
@@ -647,6 +2288,7 @@
       "activeHintFound": true,
       "derivedFactsFound": true,
       "manualOverlayFound": true,
+      "expectedManualOverlayNeeded": true,
       "compiledPreview": {
         "cardId": "onr_v1_366_red-herrings",
         "side": "corp",
@@ -715,11 +2357,8 @@
         "strategicNotes"
       ],
       "activeMonolithOnlyFields": [
-        "aiSupportStatus",
-        "planRoles",
         "requiredMechanics",
         "riskTags",
-        "roles",
         "scenarioRefs",
         "valueHints"
       ],
@@ -733,72 +2372,73 @@
       "conflicts": [],
       "warnings": [
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_366_red-herrings",
           "field": "conditions"
         },
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_366_red-herrings",
           "field": "effects"
         },
         {
-          "kind": "active_mechanical_field_should_be_generated",
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
           "cardId": "onr_v1_366_red-herrings",
           "field": "remoteRole"
         },
         {
-          "kind": "generated_fact_missing_or_differs_in_active",
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_366_red-herrings",
           "field": "effects"
         },
         {
-          "kind": "generated_fact_missing_or_differs_in_active",
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
           "cardId": "onr_v1_366_red-herrings",
           "field": "remoteRole"
         },
         {
-          "kind": "overlay_field_missing_or_differs_in_active",
+          "kind": "manual_overlay_strategy_field_missing_from_active",
           "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
           "cardId": "onr_v1_366_red-herrings",
           "field": "strategicNotes"
         }
-      ]
+      ],
+      "recommendedNextAction": "generated_fact_candidate"
     }
   ],
   "errors": [],
   "warnings": [
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_017_deep-thought",
       "field": "effects"
     },
     {
-      "kind": "generated_fact_missing_or_differs_in_active",
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_017_deep-thought",
       "field": "effects"
     },
     {
-      "kind": "overlay_field_missing_or_differs_in_active",
+      "kind": "manual_overlay_strategy_field_missing_from_active",
       "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
       "cardId": "onr_v1_017_deep-thought",
       "field": "strategicNotes"
     },
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field breakerProfile; long-term source should be generated facts.",
       "cardId": "onr_v1_037_japanese-water-torture",
       "field": "breakerProfile"
     },
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_037_japanese-water-torture",
       "field": "effects"
@@ -809,31 +2449,49 @@
       "cardId": "onr_v1_037_japanese-water-torture"
     },
     {
-      "kind": "generated_fact_missing_or_differs_in_active",
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field breakerProfile is absent from or differs from active monolith.",
       "cardId": "onr_v1_037_japanese-water-torture",
       "field": "breakerProfile"
     },
     {
-      "kind": "overlay_field_missing_or_differs_in_active",
+      "kind": "manual_overlay_strategy_field_missing_from_active",
       "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
       "cardId": "onr_v1_037_japanese-water-torture",
       "field": "descriptorGaps"
     },
     {
-      "kind": "overlay_field_missing_or_differs_in_active",
+      "kind": "manual_overlay_strategy_field_missing_from_active",
       "message": "Overlay field manualNotes is absent from or differs from active monolith.",
       "cardId": "onr_v1_037_japanese-water-torture",
       "field": "manualNotes"
     },
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field breakerProfile; long-term source should be generated facts.",
+      "cardId": "onr_v1_039_krash",
+      "field": "breakerProfile"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_039_krash",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field breakerProfile is absent from or differs from active monolith.",
+      "cardId": "onr_v1_039_krash",
+      "field": "breakerProfile"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_043_mystery-box",
       "field": "conditions"
     },
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_043_mystery-box",
       "field": "effects"
@@ -844,127 +2502,415 @@
       "cardId": "onr_v1_043_mystery-box"
     },
     {
-      "kind": "generated_fact_missing_or_differs_in_active",
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
       "cardId": "onr_v1_043_mystery-box",
       "field": "conditions"
     },
     {
-      "kind": "generated_fact_missing_or_differs_in_active",
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_043_mystery-box",
       "field": "effects"
     },
     {
-      "kind": "generated_fact_missing_or_differs_in_active",
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field targetProfiles is absent from or differs from active monolith.",
       "cardId": "onr_v1_043_mystery-box",
       "field": "targetProfiles"
     },
     {
-      "kind": "overlay_field_missing_or_differs_in_active",
+      "kind": "manual_overlay_strategy_field_missing_from_active",
       "message": "Overlay field descriptorGaps is absent from or differs from active monolith.",
       "cardId": "onr_v1_043_mystery-box",
       "field": "descriptorGaps"
     },
     {
-      "kind": "overlay_field_missing_or_differs_in_active",
+      "kind": "manual_overlay_strategy_field_missing_from_active",
       "message": "Overlay field manualNotes is absent from or differs from active monolith.",
       "cardId": "onr_v1_043_mystery-box",
       "field": "manualNotes"
     },
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_048_poltergeist",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_048_poltergeist",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_057_scatter-shot",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_057_scatter-shot",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_059_self-modifying-code",
       "field": "conditions"
     },
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_059_self-modifying-code",
       "field": "effects"
     },
     {
-      "kind": "generated_fact_missing_or_differs_in_active",
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
       "cardId": "onr_v1_059_self-modifying-code",
       "field": "conditions"
     },
     {
-      "kind": "generated_fact_missing_or_differs_in_active",
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_059_self-modifying-code",
       "field": "effects"
     },
     {
-      "kind": "generated_fact_missing_or_differs_in_active",
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field targetProfiles is absent from or differs from active monolith.",
       "cardId": "onr_v1_059_self-modifying-code",
       "field": "targetProfiles"
     },
     {
-      "kind": "overlay_field_missing_or_differs_in_active",
+      "kind": "manual_overlay_strategy_field_missing_from_active",
       "message": "Overlay field manualNotes is absent from or differs from active monolith.",
       "cardId": "onr_v1_059_self-modifying-code",
       "field": "manualNotes"
     },
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_192_corporate-boon",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_192_corporate-boon",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_192_corporate-boon",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_193_corporate-coup",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_193_corporate-coup",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_193_corporate-coup",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_199_employee-empowerment",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_199_employee-empowerment",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_199_employee-empowerment",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_210_political-overthrow",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_210_political-overthrow",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_210_political-overthrow",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_217_strike-force-kali",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_217_strike-force-kali",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_217_strike-force-kali",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_274_tutor",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_274_tutor",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_276_viral-15",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_276_viral-15",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_276_viral-15",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_277_virizz",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_277_virizz",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_277_virizz",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_284_chance-observation",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_284_chance-observation",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_284_chance-observation",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_285_closed-accounts",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_285_closed-accounts",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_285_closed-accounts",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_302_scorched-earth",
+      "field": "conditions"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_302_scorched-earth",
+      "field": "effects"
+    },
+    {
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_302_scorched-earth",
+      "field": "effects"
+    },
+    {
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_355_crystal-palace-station-grid",
       "field": "effects"
     },
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
       "cardId": "onr_v1_355_crystal-palace-station-grid",
       "field": "remoteRole"
     },
     {
-      "kind": "generated_fact_missing_or_differs_in_active",
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_355_crystal-palace-station-grid",
       "field": "effects"
     },
     {
-      "kind": "overlay_field_missing_or_differs_in_active",
+      "kind": "manual_overlay_strategy_field_missing_from_active",
       "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
       "cardId": "onr_v1_355_crystal-palace-station-grid",
       "field": "strategicNotes"
     },
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_366_red-herrings",
       "field": "conditions"
     },
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_366_red-herrings",
       "field": "effects"
     },
     {
-      "kind": "active_mechanical_field_should_be_generated",
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
       "cardId": "onr_v1_366_red-herrings",
       "field": "remoteRole"
     },
     {
-      "kind": "generated_fact_missing_or_differs_in_active",
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_366_red-herrings",
       "field": "effects"
     },
     {
-      "kind": "generated_fact_missing_or_differs_in_active",
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
       "cardId": "onr_v1_366_red-herrings",
       "field": "remoteRole"
     },
     {
-      "kind": "overlay_field_missing_or_differs_in_active",
+      "kind": "manual_overlay_strategy_field_missing_from_active",
       "message": "Overlay field strategicNotes is absent from or differs from active monolith.",
       "cardId": "onr_v1_366_red-herrings",
       "field": "strategicNotes"

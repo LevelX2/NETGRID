@@ -16,10 +16,14 @@ const reportPath = path.join(
 
 type CompiledIndexReport = {
   compiledCardCount: number;
+  overlayCardCount: number;
+  cardsWithoutOverlay: number;
   hardErrorCount: number;
   warningCount: number;
+  warningCountsByKind: Record<string, number>;
   source: {
     activeHintsPath: string;
+    pilotCardsPath: string;
     derivedFactsReportPath: string;
     overlayPaths: string[];
   };
@@ -28,10 +32,12 @@ type CompiledIndexReport = {
     activeHintFound: boolean;
     derivedFactsFound: boolean;
     manualOverlayFound: boolean;
+    expectedManualOverlayNeeded: boolean;
     compiledPreview: Record<string, unknown>;
     mechanicalFactsFromGenerated: string[];
     strategyFieldsFromOverlay: string[];
     conflicts: unknown[];
+    recommendedNextAction: string;
   }>;
 };
 
@@ -43,12 +49,17 @@ describe("compiled hint index pilot report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("compiles the six overlay pilot cards without hard errors", () => {
+  it("compiles the full 24-card derived facts pilot without hard errors", () => {
     const report = readReport();
-    expect(report.compiledCardCount).toBe(6);
+    expect(report.compiledCardCount).toBe(24);
+    expect(report.overlayCardCount).toBe(6);
+    expect(report.cardsWithoutOverlay).toBe(18);
     expect(report.hardErrorCount).toBe(0);
     expect(report.source.activeHintsPath).toBe(
       "data/ai/ai-card-hints-active.json",
+    );
+    expect(report.source.pilotCardsPath).toBe(
+      "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json",
     );
     expect(report.source.derivedFactsReportPath).toBe(
       "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json",
@@ -59,7 +70,12 @@ describe("compiled hint index pilot report", () => {
     ]);
     expect(report.cards.every((card) => card.activeHintFound)).toBe(true);
     expect(report.cards.every((card) => card.derivedFactsFound)).toBe(true);
-    expect(report.cards.every((card) => card.manualOverlayFound)).toBe(true);
+    expect(report.cards.filter((card) => card.manualOverlayFound).length).toBe(
+      6,
+    );
+    expect(report.cards.filter((card) => !card.manualOverlayFound).length).toBe(
+      18,
+    );
   });
 
   it("keeps compiled previews free of blocked runtime and hidden fields", () => {
@@ -89,7 +105,9 @@ describe("compiled hint index pilot report", () => {
       ),
     ).toBe(true);
     expect(
-      report.cards.every((card) => card.strategyFieldsFromOverlay.length > 0),
+      report.cards
+        .filter((card) => card.manualOverlayFound)
+        .every((card) => card.strategyFieldsFromOverlay.length > 0),
     ).toBe(true);
     for (const card of report.cards) {
       expect(card.strategyFieldsFromOverlay).not.toContain("effects");
@@ -98,6 +116,30 @@ describe("compiled hint index pilot report", () => {
       expect(card.strategyFieldsFromOverlay).not.toContain("remoteRole");
       expect(card.strategyFieldsFromOverlay).not.toContain("targetProfiles");
     }
+  });
+
+  it("keeps missing overlays non-fatal when the pilot card does not need one", () => {
+    const report = readReport();
+    expect(report.warningCountsByKind.overlay_missing_for_manual_gap ?? 0).toBe(
+      0,
+    );
+    expect(
+      report.cards
+        .filter((card) => !card.manualOverlayFound)
+        .every((card) => !card.expectedManualOverlayNeeded),
+    ).toBe(true);
+    expect(
+      report.cards.every((card) =>
+        [
+          "generated_fact_candidate",
+          "manual_review_needed",
+          "monolith_mechanical_duplication",
+          "overlay_needed",
+          "overlay_not_needed",
+          "schema_gap",
+        ].includes(card.recommendedNextAction),
+      ),
+    ).toBe(true);
   });
 
   it("keeps Crystal Palace denylist protected in the compiled pilot", () => {
