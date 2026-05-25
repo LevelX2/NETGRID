@@ -12,6 +12,7 @@
     "test:e2e": "node scripts/run-e2e.mjs",
     "check:ai-approval-consistency": "node scripts/check-ai-approval-consistency.mjs",
     "check:ai-derived-facts": "node scripts/check-ai-derived-facts.mjs --check",
+    "check:ai-manual-overlays": "node scripts/check-ai-manual-overlays.mjs --check",
     "check:ai-hint-quality": "node scripts/check-ai-hint-quality.mjs --write-report",
     "storage:backup": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts backup",
     "storage:restore": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts restore",
