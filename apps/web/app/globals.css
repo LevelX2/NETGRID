@@ -5774,6 +5774,35 @@ select {
   white-space: nowrap;
 }
 
+.cardImageSetBadge {
+  position: absolute;
+  top: 31px;
+  left: 8px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 38px;
+  min-width: 20px;
+  min-height: 14px;
+  padding: 1px 4px;
+  border: 1px solid rgb(238 222 180 / 0.55);
+  border-radius: 3px;
+  background: rgb(18 23 30 / 0.78);
+  color: #f7efdc;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.05;
+  overflow: hidden;
+  pointer-events: none;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .card.compactCard .cardSetBadge {
   max-width: 36px;
   min-height: 13px;
@@ -5787,7 +5816,9 @@ select {
 }
 
 .card.hiddenBack .cardSetBadge,
-.card.hidden .cardSetBadge {
+.card.hidden .cardSetBadge,
+.card.hiddenBack .cardImageSetBadge,
+.card.hidden .cardImageSetBadge {
   display: none;
 }
 

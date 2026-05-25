@@ -13553,6 +13553,11 @@ function CardView({
         data-inactive-zone={inactiveZone}
       >
         {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} fallbackSrc={preferredImageFallbackUrl} decorative /> : null}
+        {visualImageUrl && setBadgeLabel && !isHardwareImageCard && !isOperationImageCard ? (
+          <span className="cardImageSetBadge" title={setBadgeTitle} aria-hidden="true">
+            {setBadgeLabel}
+          </span>
+        ) : null}
         {isHardwareImageCard ? (
           <HardwareImageOverlay
             title={card.title ?? "Hardware"}
