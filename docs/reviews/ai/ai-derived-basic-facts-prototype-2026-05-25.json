@@ -1,0 +1,2020 @@
+{
+  "schemaVersion": 1,
+  "aggregate": {
+    "generatedAt": "2026-05-25",
+    "prototypeScope": "Read-only pilot comparing mechanically derived basic AI facts against manual ontology fields.",
+    "pilotCards": 24,
+    "implementationFilesFound": 24,
+    "cardsWithDerivedFacts": 24,
+    "cardsWithExactOrPartialMatches": 24,
+    "cardsNeedingManualOverlay": 9,
+    "derivedEffectKinds": {
+      "breaker": 2,
+      "search": 2,
+      "topdeck_info": 3,
+      "install_discount": 1,
+      "trash_credit": 2,
+      "access_replacement": 1,
+      "scored_agenda_action": 7,
+      "economy": 1,
+      "counter_economy": 2,
+      "extra_action": 1,
+      "draw": 1,
+      "trace": 3,
+      "tag_source": 3,
+      "damage": 3,
+      "tag_punish_payoff": 4,
+      "future_run_effect": 3,
+      "remote_protection": 1,
+      "run_tax": 3,
+      "program_trash": 1
+    },
+    "derivedConditionKinds": {
+      "requires_during_run": 5,
+      "requires_successful_run": 1,
+      "requires_scored_agenda": 7,
+      "requires_trace_success": 3,
+      "requires_runner_tagged": 4
+    }
+  },
+  "cards": [
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "side": "runner",
+      "cardType": "program",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "breakerProfile": {
+          "coverage": ["wall"],
+          "pumpCost": 1,
+          "breakCost": 0,
+          "confidence": "medium",
+          "source": "implementation.icebreakerAbilities",
+          "sideEffects": ["forgo_actions"]
+        },
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [
+          "Japanese-Water-Torture-style future action debt is visible in text/comment but not in a structured resolver field."
+        ]
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 7,
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "high"
+        },
+        "breakerProfile": {
+          "coverage": ["wall"],
+          "baseStrength": 2,
+          "pumpCost": 0,
+          "breakCost": 0,
+          "sideEffects": ["forgo_actions"]
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex",
+          "focusedDecisionTest": "packages/ai/src/index.test.ts::keeps the Data Wall versus Japanese Water Torture repro generic through visible break cost"
+        }
+      },
+      "comparison": {
+        "matches": ["effect:breaker", "breakerCoverage:wall"],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": true
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "side": "runner",
+      "cardType": "program",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/krash.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "breakerProfile": {
+          "coverage": ["universal"],
+          "pumpCost": 2,
+          "breakCost": 2,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        },
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 0,
+          "memory": 1,
+          "reserveRisk": "high",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["universal"],
+          "baseStrength": 0,
+          "pumpCost": 2,
+          "breakCost": 2
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": ["effect:breaker", "breakerCoverage:universal"],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "side": "runner",
+      "cardType": "program",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/self-modifying-code.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner",
+            "source": "implementation.effect.search_stack_install"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.ability.timing.during_run"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner"
+          },
+          {
+            "kind": "install_discount",
+            "timing": "during_run",
+            "scope": "installed_card"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          },
+          {
+            "kind": "requires_installed_program"
+          }
+        ],
+        "costProfile": {
+          "clicks": 0,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["rig_first", "breaker_search_first"],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": ["effect:search", "condition:requires_during_run"],
+        "derivedOnly": [],
+        "manualOnly": [
+          "effect:install_discount",
+          "condition:requires_installed_program"
+        ]
+      },
+      "needsManualOverlay": true
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "side": "runner",
+      "cardType": "program",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/mystery-box.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
+          },
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "timing": "during_run",
+            "scope": "runner",
+            "resource": "cards",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
+          },
+          {
+            "confidence": "high",
+            "kind": "install_discount",
+            "timing": "during_run",
+            "scope": "runner",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching.installCost"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.ability.timing.during_run"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner"
+          },
+          {
+            "kind": "install_discount",
+            "timing": "during_run",
+            "scope": "installed_card"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          },
+          {
+            "kind": "requires_installed_program"
+          }
+        ],
+        "costProfile": {
+          "clicks": 0,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["rig_first", "breaker_search_first"],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:search",
+          "effect:install_discount",
+          "condition:requires_during_run"
+        ],
+        "derivedOnly": ["effect:topdeck_info"],
+        "manualOnly": ["condition:requires_installed_program"]
+      },
+      "needsManualOverlay": true
+    },
+    {
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
+      "side": "runner",
+      "cardType": "program",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/poltergeist.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "source": "implementation.restrictedHostedCreditSource"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "amount": 2
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "credits": 0,
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["remote_contest"],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": ["effect:trash_credit"],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "side": "runner",
+      "cardType": "program",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/scatter-shot.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "source": "implementation.restrictedHostedCreditSource"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "amount": 2
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "credits": 0,
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["remote_contest"],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": ["effect:trash_credit"],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "title": "R&D-Protocol Files",
+      "side": "runner",
+      "cardType": "program",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/r-d-protocol-files.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "timing": "successful_run",
+            "scope": "rnd",
+            "resource": "cards",
+            "source": "implementation.effect.private_look_top_rd"
+          },
+          {
+            "confidence": "high",
+            "kind": "access_replacement",
+            "timing": "successful_run",
+            "scope": "rnd",
+            "source": "implementation.successfulRunAccessReplacement"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_successful_run",
+            "source": "implementation.successfulRunAccessReplacement"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "access_replacement",
+            "timing": "successful_run",
+            "scope": "rnd"
+          },
+          {
+            "kind": "topdeck_info",
+            "timing": "successful_run",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 5
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "lineSupport": ["early_rnd_pressure", "interface_pressure"],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:topdeck_info",
+          "effect:access_replacement",
+          "condition:requires_successful_run"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_017_deep-thought",
+      "title": "Deep Thought",
+      "side": "runner",
+      "cardType": "program",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/deep-thought.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "timing": "start_of_turn",
+            "scope": "rnd",
+            "resource": "cards",
+            "source": "implementation.effect.private_look_top_rd"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "topdeck_info",
+            "timing": "start_of_turn",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          },
+          {
+            "kind": "requires_rnd_pressure"
+          }
+        ],
+        "lineSupport": ["early_rnd_pressure", "interface_pressure"],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": ["effect:topdeck_info"],
+        "derivedOnly": [],
+        "manualOnly": [
+          "condition:requires_successful_run",
+          "condition:requires_rnd_pressure"
+        ]
+      },
+      "needsManualOverlay": true
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "title": "Political Overthrow",
+      "side": "corp",
+      "cardType": "agenda",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          },
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "source": "implementation.effect.gain_credits"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["economy_rez_reserve", "score_closeout"],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex",
+          "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Political Overthrow scored-agenda economy before basic credit"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:scored_agenda_action",
+          "effect:economy",
+          "condition:requires_scored_agenda"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_193_corporate-coup",
+      "title": "Corporate Coup",
+      "side": "corp",
+      "cardType": "agenda",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-coup.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          },
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "source": "implementation.effect.take_hosted_credits"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "counter_economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["economy_rez_reserve", "score_closeout"],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:scored_agenda_action",
+          "effect:counter_economy",
+          "condition:requires_scored_agenda"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_192_corporate-boon",
+      "title": "Corporate Boon",
+      "side": "corp",
+      "cardType": "agenda",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-boon.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          },
+          {
+            "confidence": "high",
+            "kind": "extra_action",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "actions",
+            "amount": 1,
+            "source": "implementation.effect.gain_actions"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "extra_action",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "actions",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "counters": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["fast_advance_or_counter_ops", "score_closeout"],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex",
+          "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Corporate Boon extra-action ability as scored-agenda tempo"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:scored_agenda_action",
+          "effect:extra_action",
+          "condition:requires_scored_agenda"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "title": "Employee Empowerment",
+      "side": "corp",
+      "cardType": "agenda",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/employee-empowerment.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          },
+          {
+            "confidence": "high",
+            "kind": "draw",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 2,
+            "source": "implementation.effect.draw_cards"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "draw",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["economy_rez_reserve"],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:scored_agenda_action",
+          "effect:draw",
+          "condition:requires_scored_agenda"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "title": "Netwatch Operations Office",
+      "side": "corp",
+      "cardType": "agenda",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/netwatch-operations-office.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          },
+          {
+            "confidence": "high",
+            "kind": "trace",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "source": "implementation.effect.trace"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_source",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "source": "implementation.effect.trace.onSuccess.add_tags"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_trace_success",
+            "source": "implementation.effect.trace.onSuccess"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "trace",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "amount": 2
+          },
+          {
+            "kind": "tag",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:scored_agenda_action",
+          "effect:trace",
+          "effect:tag_source",
+          "condition:requires_scored_agenda",
+          "condition:requires_trace_success"
+        ],
+        "derivedOnly": [],
+        "manualOnly": ["effect:tag"]
+      },
+      "needsManualOverlay": true
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "title": "On-Call Solo Team",
+      "side": "corp",
+      "cardType": "agenda",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/on-call-solo-team.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          },
+          {
+            "confidence": "high",
+            "kind": "damage",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 1,
+            "source": "implementation.effect.damage"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "source": "implementation.condition.runner_is_tagged.effect.damage"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "damage",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 1
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          },
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:scored_agenda_action",
+          "effect:damage",
+          "effect:tag_punish_payoff",
+          "condition:requires_scored_agenda",
+          "condition:requires_runner_tagged"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_217_strike-force-kali",
+      "title": "Strike Force Kali",
+      "side": "corp",
+      "cardType": "agenda",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/strike-force-kali.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          },
+          {
+            "confidence": "high",
+            "kind": "damage",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2,
+            "source": "implementation.effect.damage"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "source": "implementation.condition.runner_is_tagged.effect.damage"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "damage",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          },
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:scored_agenda_action",
+          "effect:damage",
+          "effect:tag_punish_payoff",
+          "condition:requires_scored_agenda",
+          "condition:requires_runner_tagged"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "side": "corp",
+      "cardType": "ice",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/tutor.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          {
+            "confidence": "high",
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration_additional_subroutine"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.printedSubroutines.run_duration"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize",
+          "remote_scoring_build"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:future_run_effect",
+          "effect:remote_protection",
+          "condition:requires_during_run"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "side": "corp",
+      "cardType": "ice",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/virizz.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          {
+            "confidence": "high",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "source": "implementation.printedSubroutines.run_duration_break_subroutine_cost"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.printedSubroutines.run_duration"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize",
+          "remote_scoring_build"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:future_run_effect",
+          "effect:run_tax",
+          "condition:requires_during_run"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "side": "corp",
+      "cardType": "ice",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/viral-15.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          {
+            "confidence": "high",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "source": "implementation.printedSubroutines.run_duration_trash_program"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.printedSubroutines.run_duration"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1
+          },
+          {
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize",
+          "remote_scoring_build"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:future_run_effect",
+          "effect:program_trash",
+          "condition:requires_during_run"
+        ],
+        "derivedOnly": [],
+        "manualOnly": ["effect:run_tax"]
+      },
+      "needsManualOverlay": true
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "title": "Crystal Palace Station Grid",
+      "side": "corp",
+      "cardType": "upgrade",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "source": "implementation.modifiers.break_subroutine_cost"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "remoteRole": {
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort",
+          "confidence": "high",
+          "source": "implementation.modifiers.break_subroutine_cost"
+        },
+        "derivationNotes": [
+          "Active board-state still belongs to engine/runtime; derived facts only describe the mechanical class."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "fort"
+          }
+        ],
+        "conditions": [],
+        "remoteRole": {
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort"
+        },
+        "lineSupport": ["remote_scoring_build", "ice_tax_glacier"],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": ["effect:run_tax", "remoteRole:run_tax"],
+        "derivedOnly": [],
+        "manualOnly": ["effect:remote_protection"]
+      },
+      "needsManualOverlay": true
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "title": "Red Herrings",
+      "side": "corp",
+      "cardType": "upgrade",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/red-herrings.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "remote",
+            "resource": "credits",
+            "amount": 5,
+            "source": "implementation.modifiers.steal_cost"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "remoteRole": {
+          "kind": "agenda_steal_tax",
+          "threatLevel": "high",
+          "serverScope": "remote",
+          "confidence": "high",
+          "source": "implementation.modifiers.steal_cost"
+        },
+        "derivationNotes": [
+          "Active board-state still belongs to engine/runtime; derived facts only describe the mechanical class."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "fort"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          }
+        ],
+        "remoteRole": {
+          "kind": "agenda_steal_tax",
+          "threatLevel": "high",
+          "serverScope": "fort"
+        },
+        "lineSupport": [
+          "remote_scoring_build",
+          "ice_tax_glacier",
+          "score_closeout"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": ["effect:run_tax", "remoteRole:agenda_steal_tax"],
+        "derivedOnly": [],
+        "manualOnly": [
+          "effect:remote_protection",
+          "condition:requires_accessed_card"
+        ]
+      },
+      "needsManualOverlay": true
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "side": "corp",
+      "cardType": "operation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/scorched-earth.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 4,
+            "source": "implementation.effect.damage"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "source": "implementation.condition.runner_is_tagged.effect.damage"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 4
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 4
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:damage",
+          "effect:tag_punish_payoff",
+          "condition:requires_runner_tagged"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "side": "corp",
+      "cardType": "operation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/closed-accounts.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "source": "implementation.effect.lose_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "source": "implementation.condition.runner_is_tagged.effect.lose_credits"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:tag_punish_payoff",
+          "condition:requires_runner_tagged"
+        ],
+        "derivedOnly": ["effect:counter_economy"],
+        "manualOnly": []
+      },
+      "needsManualOverlay": true
+    },
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "side": "corp",
+      "cardType": "operation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/audit-of-call-records.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "trace",
+            "timing": "action",
+            "scope": "corp",
+            "source": "implementation.effect.trace"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "source": "implementation.effect.trace.onSuccess.add_tags"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_trace_success",
+            "source": "implementation.effect.trace.onSuccess"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 5
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:trace",
+          "effect:tag_source",
+          "condition:requires_trace_success"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    },
+    {
+      "cardId": "onr_v1_284_chance-observation",
+      "title": "Chance Observation",
+      "side": "corp",
+      "cardType": "operation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/chance-observation.ts",
+      "implementationExists": true,
+      "derivedBasicFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "trace",
+            "timing": "action",
+            "scope": "corp",
+            "source": "implementation.effect.trace"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "source": "implementation.effect.trace.onSuccess.add_tags"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_trace_success",
+            "source": "implementation.effect.trace.onSuccess"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntology": {
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 5
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "comparison": {
+        "matches": [
+          "effect:trace",
+          "effect:tag_source",
+          "condition:requires_trace_success"
+        ],
+        "derivedOnly": [],
+        "manualOnly": []
+      },
+      "needsManualOverlay": false
+    }
+  ]
+}

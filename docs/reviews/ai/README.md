@@ -20,6 +20,7 @@
 - `ai-hint-ontology-tag-punish-consumer-2026-05-25.md`: enger Consumer-Slice für strukturierte Tag/Punish-Source-/Payoff-/Condition-Hints mit LegalAction-/Tag-State-Vorrang, First-Class-Metriken und 8-Slot-Benchmark.
 - `ai-release-default-readiness-review-2026-05-25.md`: konsolidierter Release-/Default-Review des aktuellen KI-Optimierungsstands mit Slice-Inventar, 8-Slot-Benchmark, Merge-/Default-Optionen und Release-Kriterien.
 - `ai-release-default-gates-2026-05-25.md`: technische Release-/Default-Gate-Checkliste und Profilpolicy, die `belief_ai_v1_4_2` als stabile Benchmark-Baseline und `current_candidate` als profile-gated Candidate absichert.
+- `ai-derived-basic-facts-architecture-prototype-2026-05-25.md` / `ai-derived-basic-facts-prototype-2026-05-25.json`: read-only Architektur- und Prototype-Report zur Ableitung mechanischer Basic-AI-Facts aus CardImplementations, damit manuelle Hints langfristig strategisches Overlay bleiben.
 - `ai-benchmark-deck-basis-review-2026-05-23.md`: Klassifikation der aktuell genutzten AI-Smoke-/Soak-/League-/Progression-Decks und Empfehlung für eine kuratierte Benchmark-Decksuite.
 - `ai-strategy-slices-consolidation-review-2026-05-23.md`: konsolidierte Bilanz der letzten AI-Strategie-/Diagnose-Slices inklusive aktueller Baseline-vs-Candidate-Suite, Ablation-light und Empfehlungen.
 - `ai-plan-conversion-diagnosis-2026-05-23.md`: Planfolge-/Conversion-Diagnose für aktuelle KI-Slices mit neuen Short-Horizon-Metriken, Slotanalyse und Empfehlungen ohne neue Strategie-Heuristik.
