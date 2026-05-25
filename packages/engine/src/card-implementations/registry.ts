@@ -380,8 +380,17 @@ import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team"
 import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella-policy";
 import { wilsonWeeflerunnerApprenticeImplementation } from "./onr-v1/runner/resources/wilson-weeflerunner-apprentice";
 import { proteusCharityTakeoverImplementation } from "./proteus/corp/agendas/charity-takeover";
+import { proteusCaryatidImplementation } from "./proteus/corp/ice/caryatid";
+import { proteusCreditBlocksImplementation } from "./proteus/corp/ice/credit-blocks";
 import { proteusDigicondaImplementation } from "./proteus/corp/ice/digiconda";
 import { proteusFoodFightImplementation } from "./proteus/corp/ice/food-fight";
+import { proteusGalateaImplementation } from "./proteus/corp/ice/galatea";
+import { proteusGatekeeperImplementation } from "./proteus/corp/ice/gatekeeper";
+import { proteusHomingMissileImplementation } from "./proteus/corp/ice/homing-missile";
+import { proteusLesserArcanaImplementation } from "./proteus/corp/ice/lesser-arcana";
+import { proteusSandstormImplementation } from "./proteus/corp/ice/sandstorm";
+import { proteusSphinx2006Implementation } from "./proteus/corp/ice/sphinx-2006";
+import { proteusSumo2008Implementation } from "./proteus/corp/ice/sumo-2008";
 import { proteusToughoniumWallImplementation } from "./proteus/corp/ice/toughonium-wall";
 import { proteusMinotaurImplementation } from "./proteus/corp/ice/minotaur";
 import { proteusRiddlerImplementation } from "./proteus/corp/ice/riddler";
@@ -771,8 +780,17 @@ export const CARD_IMPLEMENTATIONS = [
   turbeauDelacroixImplementation,
   washingtonDcCityGridImplementation,
   proteusToughoniumWallImplementation,
+  proteusCaryatidImplementation,
+  proteusCreditBlocksImplementation,
   proteusDigicondaImplementation,
   proteusFoodFightImplementation,
+  proteusGalateaImplementation,
+  proteusGatekeeperImplementation,
+  proteusHomingMissileImplementation,
+  proteusLesserArcanaImplementation,
+  proteusSandstormImplementation,
+  proteusSphinx2006Implementation,
+  proteusSumo2008Implementation,
   proteusMinotaurImplementation,
   proteusRiddlerImplementation,
   proteusLesleyMajorImplementation,

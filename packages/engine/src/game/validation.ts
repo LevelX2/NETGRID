@@ -234,6 +234,12 @@ export function validateGameState(state: GameState): ValidationResult {
       state.trace.baseTraceStrength < 0
     )
       errors.push("Trace base strength is invalid.");
+    if (
+      state.trace.traceBidLimit !== undefined &&
+      (!Number.isInteger(state.trace.traceBidLimit) ||
+        state.trace.traceBidLimit < 0)
+    )
+      errors.push("Trace bid limit is invalid.");
     if (!isSupportedTraceSuccessEffect(state.trace.successEffect))
       errors.push("Trace success effect is outside supported scope.");
     if (!state.pendingChoice)

@@ -719,6 +719,63 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
   });
 
+  it("migrates Proteus Phase 3b variable ICE into CardImplementation coverage", () => {
+    const cases = [
+      {
+        definitionId: "onr_proteus_013_caryatid",
+        variableRez: { kind: "alternate_subtype", additionalCost: 1 },
+      },
+      {
+        definitionId: "onr_proteus_017_credit-blocks",
+        variableRez: { kind: "alternate_subtype", additionalCost: 1 },
+      },
+      {
+        definitionId: "onr_proteus_023_galatea",
+        variableRez: { kind: "alternate_subtype", additionalCost: 1 },
+      },
+      {
+        definitionId: "onr_proteus_024_gatekeeper",
+        variableRez: { kind: "paid_end_the_run_subroutines" },
+      },
+      {
+        definitionId: "onr_proteus_025_homing-missile",
+        variableRez: {
+          kind: "x_strength",
+          maxValue: 8,
+          traceBaseFromValue: true,
+          traceBidLimitFromValue: true,
+        },
+      },
+      {
+        definitionId: "onr_proteus_028_lesser-arcana",
+        variableRez: { kind: "alternate_subtype", additionalCost: 1 },
+      },
+      {
+        definitionId: "onr_proteus_036_sandstorm",
+        variableRez: { kind: "paid_end_the_run_subroutines" },
+      },
+      {
+        definitionId: "onr_proteus_039_sphinx-2006",
+        variableRez: { kind: "alternate_subtype", additionalCost: 4 },
+      },
+      {
+        definitionId: "onr_proteus_040_sumo-2008",
+        variableRez: { kind: "alternate_subtype", additionalCost: 1 },
+      },
+    ] as const;
+
+    for (const { definitionId, variableRez } of cases) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+      expect(cardImplementationForDefinitionId(definitionId)?.variableRez).toMatchObject(
+        variableRez,
+      );
+    }
+  });
+
   it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
     const p357Cards = [
       "onr_v1_077_anonymous-tip",

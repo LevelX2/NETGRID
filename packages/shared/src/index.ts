@@ -203,6 +203,7 @@ export type SubroutineDefinition = {
   amount?: number;
   damageType?: DamageType;
   baseTraceStrength?: number;
+  traceBidLimit?: number;
   traceSuccessEffect?: TraceSuccessEffect;
   requiresSuccessfulTraceSubroutineIndex?: number;
   breakTags?: string[];
@@ -720,12 +721,17 @@ export type CardInstance = {
   hostedOn?: CardInstanceId;
   selectedServerId?: Exclude<ServerId, "new_remote">;
   variableIceState?: {
-    family: "x_strength" | "paid_end_the_run_subroutines";
+    family:
+      | "x_strength"
+      | "paid_end_the_run_subroutines"
+      | "alternate_subtype";
     additionalCostPaid: number;
     value: number;
     cap?: number;
     strength?: number;
     subroutineCount?: number;
+    selectedSubtypes?: string[];
+    traceBidLimit?: number;
   };
 };
 
@@ -969,6 +975,7 @@ export type TraceState = {
   sourceDefinitionId: CardDefinitionId;
   subroutineIndex?: number;
   baseTraceStrength: number;
+  traceBidLimit?: number;
   corpBidMax?: number;
   rabbitTraceLimitReduction?: number;
   parisCityGridPoolSourceCardInstanceId?: CardInstanceId;
@@ -9411,6 +9418,48 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
 
 const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
   {
+    id: "onr_proteus_013_caryatid",
+    title: "Caryatid",
+    side: "corp",
+    type: "ice",
+    subtypes: ["wall"],
+    implementationStatus: "playable_mvp",
+    rezCost: 7,
+    strength: 5,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Caryatid, you may pay 1 above the rez cost to make it a code gate instead of a wall.",
+    subroutines: [{ id: "onr_proteus_013_caryatid_etr", type: "end_the_run" }],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_017_credit-blocks",
+    title: "Credit Blocks",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 3,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Credit Blocks, you may pay 1 above the rez cost to make it a wall instead of a sentry.",
+    subroutines: [
+      { id: "onr_proteus_017_credit_blocks_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
     id: "onr_proteus_020_digiconda",
     title: "Digiconda",
     side: "corp",
@@ -9450,6 +9499,160 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
     rulesText:
       "Food Fight has one [Subroutine] End the run for every 2 credits you pay above the rez cost when you rez it.",
     subroutines: [],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_023_galatea",
+    title: "Galatea",
+    side: "corp",
+    type: "ice",
+    subtypes: ["wall"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 4,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Galatea, you may pay 1 above the rez cost to make it a code gate instead of a wall.",
+    subroutines: [{ id: "onr_proteus_023_galatea_etr", type: "end_the_run" }],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_024_gatekeeper",
+    title: "Gatekeeper",
+    side: "corp",
+    type: "ice",
+    subtypes: ["code_gate"],
+    implementationStatus: "playable_mvp",
+    rezCost: 3,
+    strength: 4,
+    rulesText:
+      "Gatekeeper has one [Subroutine] End the run for every 2 credits you pay above the rez cost when you rez it.",
+    subroutines: [],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_025_homing-missile",
+    title: "Homing Missile",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    strength: 0,
+    rulesText:
+      "[Subroutine] Trace X. If successful, end the run and Runner cannot make another run until Runner takes an action to pay 2.\nPay X above the rez cost when you rez Homing Missile. X is Homing Missile's strength and trace limit, and X cannot be greater than 8.",
+    subroutines: [
+      {
+        id: "onr_proteus_025_homing_missile_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 0,
+        traceBidLimit: 0,
+        traceSuccessEffect: { type: "end_run_and_run_lock", amount: 2 },
+      },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+      "trace",
+      "run_lock",
+    ],
+  },
+  {
+    id: "onr_proteus_028_lesser-arcana",
+    title: "Lesser Arcana",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 7,
+    strength: 4,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Lesser Arcana, you may pay 1 above the rez cost to make it a wall instead of a sentry.",
+    subroutines: [
+      { id: "onr_proteus_028_lesser_arcana_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_036_sandstorm",
+    title: "Sandstorm",
+    side: "corp",
+    type: "ice",
+    subtypes: ["wall"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    strength: 4,
+    rulesText:
+      "Sandstorm has one [Subroutine] End the run for every 2 credits you pay above the rez cost when you rez it.",
+    subroutines: [],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_039_sphinx-2006",
+    title: "Sphinx 2006",
+    side: "corp",
+    type: "ice",
+    subtypes: ["code_gate"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 5,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Sphinx 2006, you may pay 4 above the rez cost to make it a sentry instead of a code gate.",
+    subroutines: [
+      { id: "onr_proteus_039_sphinx_2006_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez",
+      "variable_ice_state",
+    ],
+  },
+  {
+    id: "onr_proteus_040_sumo-2008",
+    title: "Sumo 2008",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 8,
+    strength: 5,
+    rulesText:
+      "[Subroutine] End the run.\nWhen you rez Sumo 2008, you may pay 1 above the rez cost to make it a wall instead of a sentry.",
+    subroutines: [{ id: "onr_proteus_040_sumo_2008_etr", type: "end_the_run" }],
     mechanics: [
       "install_ice",
       "rez_ice",

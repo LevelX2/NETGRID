@@ -401,12 +401,21 @@ export type CardVariableRezImplementation =
       additionalCostPerValue: 1;
       minValue: 0;
       maxValue: number;
+      traceBaseFromValue?: true;
+      traceBidLimitFromValue?: true;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
       kind: "paid_end_the_run_subroutines";
       additionalCostPerSubroutine: 2;
       minSubroutines: 0;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "alternate_subtype";
+      additionalCost: number;
+      baseSubtypes: readonly string[];
+      alternateSubtypes: readonly string[];
       visibility: Extract<EventVisibilityClass, "public">;
     };
 

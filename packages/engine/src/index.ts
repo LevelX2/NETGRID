@@ -4454,6 +4454,28 @@ function cardHasSubtype(definition: CardDefinition, subtype: string): boolean {
   );
 }
 
+function stableSubtypeList(subtypes: readonly string[]): string[] {
+  return [...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype)))]
+    .sort();
+}
+
+function effectiveSubtypesForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition = definitionFor(state, cardId),
+): string[] {
+  const instance = state.cardInstances[cardId];
+  const selectedSubtypes = instance?.variableIceState?.selectedSubtypes;
+  if (
+    definition.type === "ice" &&
+    instance?.rezzed &&
+    selectedSubtypes &&
+    selectedSubtypes.length > 0
+  )
+    return stableSubtypeList(selectedSubtypes);
+  return stableSubtypeList(definition.subtypes);
+}
+
 function isRegionUpgrade(definition: CardDefinition): boolean {
   return definition.type === "upgrade" && cardHasSubtype(definition, "region");
 }
@@ -5589,6 +5611,12 @@ function variableIceRezActions(
           variableRezCap: variableRez.maxValue,
           rezCostPaid: totalCost,
           effectiveStrengthAfterRez: x,
+          ...(variableRez.traceBaseFromValue
+            ? { effectiveTraceBaseAfterRez: x }
+            : {}),
+          ...(variableRez.traceBidLimitFromValue
+            ? { effectiveTraceBidLimitAfterRez: x }
+            : {}),
           ...(rezCostReductionSourceDefinitionIds.length > 0
             ? {
                 rezCostReductionSourceDefinitionIds:
@@ -5600,28 +5628,73 @@ function variableIceRezActions(
       );
     });
   }
-  const maxSubroutineCount = Math.floor(
-    availableAdditionalCredits / variableRez.additionalCostPerSubroutine,
-  );
-  return Array.from({ length: maxSubroutineCount + 1 }, (_, subroutineCount) => {
-    const additionalCost =
-      subroutineCount * variableRez.additionalCostPerSubroutine;
-    const totalCost = baseRezCost + additionalCost;
+  if (variableRez.kind === "paid_end_the_run_subroutines") {
+    const maxSubroutineCount = Math.floor(
+      availableAdditionalCredits / variableRez.additionalCostPerSubroutine,
+    );
+    return Array.from({ length: maxSubroutineCount + 1 }, (_, subroutineCount) => {
+      const additionalCost =
+        subroutineCount * variableRez.additionalCostPerSubroutine;
+      const totalCost = baseRezCost + additionalCost;
+      return action(
+        state,
+        "corp",
+        "rez_ice",
+        `${definition.title} mit ${subroutineCount} ETR-Subroutinen rezzen`,
+        iceId,
+        [{ credits: totalCost }],
+        {
+          cardId: iceId,
+          variableRezKind: variableRez.kind,
+          baseRezCost,
+          variableRezAdditionalCost: additionalCost,
+          variableRezValue: subroutineCount,
+          rezCostPaid: totalCost,
+          effectiveSubroutineCountAfterRez: subroutineCount,
+          ...(rezCostReductionSourceDefinitionIds.length > 0
+            ? {
+                rezCostReductionSourceDefinitionIds:
+                  rezCostReductionSourceDefinitionIds.join(","),
+                rezCostReductionAmount: (definition.rezCost ?? 0) - baseRezCost,
+              }
+            : {}),
+        },
+      );
+    });
+  }
+  const subtypeVariants = [
+    {
+      value: 0,
+      additionalCost: 0,
+      selectedSubtypes: stableSubtypeList(variableRez.baseSubtypes),
+    },
+    ...(availableAdditionalCredits >= variableRez.additionalCost
+      ? [
+          {
+            value: 1,
+            additionalCost: variableRez.additionalCost,
+            selectedSubtypes: stableSubtypeList(variableRez.alternateSubtypes),
+          },
+        ]
+      : []),
+  ];
+  return subtypeVariants.map((variant) => {
+    const totalCost = baseRezCost + variant.additionalCost;
     return action(
       state,
       "corp",
       "rez_ice",
-      `${definition.title} mit ${subroutineCount} ETR-Subroutinen rezzen`,
+      `${definition.title} als ${variant.selectedSubtypes.join("/")} rezzen`,
       iceId,
       [{ credits: totalCost }],
       {
         cardId: iceId,
         variableRezKind: variableRez.kind,
         baseRezCost,
-        variableRezAdditionalCost: additionalCost,
-        variableRezValue: subroutineCount,
+        variableRezAdditionalCost: variant.additionalCost,
+        variableRezValue: variant.value,
         rezCostPaid: totalCost,
-        effectiveSubroutineCountAfterRez: subroutineCount,
+        selectedSubtypesAfterRez: variant.selectedSubtypes.join(","),
         ...(rezCostReductionSourceDefinitionIds.length > 0
           ? {
               rezCostReductionSourceDefinitionIds:
@@ -6045,6 +6118,11 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     state,
     iceDefinition,
   );
+  const encounteredIceSubtypes = effectiveSubtypesForCard(
+    state,
+    encounteredIceId,
+    iceDefinition,
+  );
   const encounteredIceStrength = iceStrengthFor(state, encounteredIceId);
   const actions: LegalAction[] = [];
   actions.push(...runnerDuringRunCardImplementationActions(state));
@@ -6070,7 +6148,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     const breakAbilities = breakerAbilities.filter(
       (ability) =>
         ability.type === "break_subroutine" &&
-        breakAbilityMatchesIce(ability, iceDefinition),
+        breakAbilityMatchesIce(ability, encounteredIceSubtypes),
     );
     const hasEligibleBreakTarget = breakAbilities.some((ability) =>
       encounterSubroutines.some(
@@ -6378,18 +6456,18 @@ function pileDriverBreakActions(
 
 function breakAbilityMatchesIce(
   ability: RuntimeIcebreakerAbility,
-  iceDefinition: CardDefinition,
+  iceSubtypes: readonly string[],
 ): boolean {
   if (ability.type !== "break_subroutine") return false;
   if (
     ability.iceSubtype &&
-    !iceDefinition.subtypes.includes(ability.iceSubtype)
+    !iceSubtypes.includes(normalizeSubtypeLabel(ability.iceSubtype))
   )
     return false;
   if (
     ability.iceSubtypes?.length &&
     !ability.iceSubtypes.some((subtype) =>
-      iceDefinition.subtypes.includes(subtype),
+      iceSubtypes.includes(normalizeSubtypeLabel(subtype)),
     )
   )
     return false;
@@ -6559,7 +6637,13 @@ function resolvePileDriverBreakSubroutinesAction(
       candidate.id === legalAction.abilityRef?.abilityId &&
       candidate.type === "break_subroutine",
   );
-  if (!ability || !breakAbilityMatchesIce(ability, iceDefinition))
+  if (
+    !ability ||
+    !breakAbilityMatchesIce(
+      ability,
+      effectiveSubtypesForCard(state, iceId as CardInstanceId, iceDefinition),
+    )
+  )
     throw new Error("Der Icebreaker hat keine gueltige Multi-Break-Faehigkeit.");
   const breakerStrength =
     (breakerDefinition.strength ?? 0) +
@@ -6644,7 +6728,13 @@ function assertBreakSubroutineCostQuoteValid(
       candidate.id === legalAction.abilityRef?.abilityId &&
       candidate.type === "break_subroutine",
   );
-  if (!ability || !breakAbilityMatchesIce(ability, iceDefinition))
+  if (
+    !ability ||
+    !breakAbilityMatchesIce(
+      ability,
+      effectiveSubtypesForCard(state, run.encounteredIceId, iceDefinition),
+    )
+  )
     throw new Error("Breaker hat keine gueltige Break-Faehigkeit.");
   if (!breakAbilityMatchesSubroutine(ability, subroutine))
     throw new Error("Breaker kann diese Subroutine nicht brechen.");
@@ -6677,7 +6767,13 @@ function subroutinesForCurrentEncounter(
         id: `${subroutine.id}.v1920_ice_transmutation.${index + 1}`,
       });
     }
-    return copies;
+    return copies.map((copy) =>
+      variableTraceSubroutineForCurrentEncounter(
+        state,
+        run?.encounteredIceId,
+        copy,
+      ),
+    );
   });
   if (
     run?.encounteredIceId &&
@@ -6710,6 +6806,26 @@ function subroutinesForCurrentEncounter(
     subroutines.push(...additionalSubroutinesForIce(state, run.encounteredIceId));
   }
   return subroutines;
+}
+
+function variableTraceSubroutineForCurrentEncounter(
+  state: GameState,
+  iceId: CardInstanceId | undefined,
+  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
+): NonNullable<CardDefinition["subroutines"]>[number] {
+  if (!iceId || subroutine.type !== "initiate_trace") return subroutine;
+  const instance = state.cardInstances[iceId];
+  const variableRez = cardImplementationForDefinitionId(instance?.definitionId ?? "")
+    ?.variableRez;
+  const variableIceState = instance?.variableIceState;
+  if (variableRez?.kind !== "x_strength" || variableIceState?.family !== "x_strength")
+    return subroutine;
+  const value = Math.max(0, Math.floor(variableIceState.value));
+  return {
+    ...subroutine,
+    ...(variableRez.traceBaseFromValue ? { baseTraceStrength: value } : {}),
+    ...(variableRez.traceBidLimitFromValue ? { traceBidLimit: value } : {}),
+  };
 }
 
 function encounterSubroutinesForNextContinue(
@@ -10148,7 +10264,11 @@ function variableIceStateForRezAction(
       value < variableRez.minValue ||
       value > variableRez.maxValue ||
       legalAction.payload.variableRezCap !== variableRez.maxValue ||
-      legalAction.payload.effectiveStrengthAfterRez !== value
+      legalAction.payload.effectiveStrengthAfterRez !== value ||
+      (variableRez.traceBaseFromValue &&
+        legalAction.payload.effectiveTraceBaseAfterRez !== value) ||
+      (variableRez.traceBidLimitFromValue &&
+        legalAction.payload.effectiveTraceBidLimitAfterRez !== value)
     )
       throw new Error("Variable X-Staerke ist nicht legal.");
     return {
@@ -10157,6 +10277,38 @@ function variableIceStateForRezAction(
       value,
       cap: variableRez.maxValue,
       strength: value,
+      ...(variableRez.traceBidLimitFromValue ? { traceBidLimit: value } : {}),
+    };
+  }
+  if (variableRez.kind === "alternate_subtype") {
+    const selectedSubtypesRaw = String(
+      legalAction.payload.selectedSubtypesAfterRez ?? "",
+    );
+    const expectedBaseSubtypes = stableSubtypeList(variableRez.baseSubtypes);
+    const expectedAlternateSubtypes = stableSubtypeList(
+      variableRez.alternateSubtypes,
+    );
+    const selectedSubtypes = stableSubtypeList(
+      selectedSubtypesRaw ? selectedSubtypesRaw.split(",") : [],
+    );
+    const isBaseChoice =
+      value === 0 &&
+      additionalCost === 0 &&
+      selectedSubtypes.join(",") === expectedBaseSubtypes.join(",");
+    const isAlternateChoice =
+      value === 1 &&
+      additionalCost === variableRez.additionalCost &&
+      selectedSubtypes.join(",") === expectedAlternateSubtypes.join(",");
+    if (
+      legalAction.payload.variableRezKind !== variableRez.kind ||
+      (!isBaseChoice && !isAlternateChoice)
+    )
+      throw new Error("Variable Subtyp-Auswahl ist nicht legal.");
+    return {
+      family: "alternate_subtype",
+      additionalCostPaid: additionalCost,
+      value,
+      selectedSubtypes,
     };
   }
   if (

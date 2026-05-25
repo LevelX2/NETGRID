@@ -1198,6 +1198,259 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
   });
 });
 
+describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+  const phase3bCards = [
+    "onr_proteus_013_caryatid",
+    "onr_proteus_017_credit-blocks",
+    "onr_proteus_023_galatea",
+    "onr_proteus_024_gatekeeper",
+    "onr_proteus_025_homing-missile",
+    "onr_proteus_028_lesser-arcana",
+    "onr_proteus_036_sandstorm",
+    "onr_proteus_039_sphinx-2006",
+    "onr_proteus_040_sumo-2008",
+  ];
+
+  function proteusPhase3bGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: `${seed}_runner`,
+          name: "Proteus Phase 3b Runner",
+          cards: [
+            { id: "simple_decoder", quantity: 1 },
+            { id: "simple_killer", quantity: 1 },
+            { id: "onr_v1_021_dwarf", quantity: 1 },
+            ...ONR_V1_1_2K_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          id: `${seed}_corp`,
+          name: "Proteus Phase 3b Corp",
+          cards: [
+            ...phase3bCards.map((id) => ({ id, quantity: 1 })),
+            ...ONR_V1_1_2K_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  function pumpUntilBreakerCanBreak(
+    state: GameState,
+    breakerId: CardInstanceId,
+  ): GameState {
+    while (
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "pump_breaker" &&
+          action.payload?.breakerId === breakerId,
+      ) &&
+      !getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.breakerId === breakerId,
+      )
+    ) {
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "pump_breaker" &&
+          action.payload?.breakerId === breakerId,
+      );
+    }
+    return state;
+  }
+
+  it("stores alternate subtype rez choices and uses them for views and break projection", () => {
+    const cases = [
+      ["onr_proteus_013_caryatid", "code_gate", "simple_decoder", 1],
+      ["onr_proteus_017_credit-blocks", "wall", "onr_v1_021_dwarf", 1],
+      ["onr_proteus_023_galatea", "code_gate", "simple_decoder", 1],
+      ["onr_proteus_028_lesser-arcana", "wall", "onr_v1_021_dwarf", 1],
+      ["onr_proteus_039_sphinx-2006", "sentry", "simple_killer", 4],
+      ["onr_proteus_040_sumo-2008", "wall", "onr_v1_021_dwarf", 1],
+    ] as const;
+
+    for (const [iceDefinitionId, selectedSubtype, breakerDefinitionId, extraCost] of cases) {
+      let state = proteusPhase3bGame(`proteus-phase-3b-subtype-${iceDefinitionId}`);
+      state.corp.credits = 20;
+      state.runner.credits = 20;
+      const breakerId = installRunnerProgramForTest(state, breakerDefinitionId);
+      const iceId = putCorpIceOnServer(state, "rd", iceDefinitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      const rezActions = getLegalActions(state, "corp").filter(
+        (action) =>
+          action.type === "rez_ice" &&
+          action.source === iceId &&
+          action.payload?.variableRezKind === "alternate_subtype",
+      );
+      expect(
+        rezActions.map((action) => action.payload?.selectedSubtypesAfterRez),
+      ).toContain(selectedSubtype);
+      const rezAction = mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          action.source === iceId &&
+          action.payload?.selectedSubtypesAfterRez === selectedSubtype,
+      );
+      expect(rezAction.payload?.variableRezAdditionalCost).toBe(extraCost);
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: rezAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+      });
+      expect(wrongSide.ok).toBe(false);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "corp",
+        (action) => action.actionId === rezAction.actionId,
+      );
+      expect(state.cardInstances[iceId]?.variableIceState).toMatchObject({
+        family: "alternate_subtype",
+        additionalCostPaid: extraCost,
+        value: 1,
+        selectedSubtypes: [selectedSubtype],
+      });
+      expect(
+        getPlayerView(state, "runner").run?.encounteredIce?.subtypes,
+      ).toEqual([selectedSubtype]);
+      state = pumpUntilBreakerCanBreak(state, breakerId);
+      const breakAction = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.breakerId === breakerId &&
+          action.payload?.iceId === iceId,
+      );
+      expect(breakAction.payload?.targetIceDefinitionId).toBe(iceDefinitionId);
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        hiddenPayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("reuses paid ETR variable rez for Gatekeeper and Sandstorm", () => {
+    for (const iceDefinitionId of [
+      "onr_proteus_024_gatekeeper",
+      "onr_proteus_036_sandstorm",
+    ] as const) {
+      let state = proteusPhase3bGame(`proteus-phase-3b-paid-etr-${iceDefinitionId}`);
+      state.corp.credits = 12;
+      const iceId = putCorpIceOnServer(state, "rd", iceDefinitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      const rezAction = mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          action.source === iceId &&
+          action.payload?.variableRezAdditionalCost === 4,
+      );
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "corp",
+        (action) => action.actionId === rezAction.actionId,
+      );
+      expect(state.cardInstances[iceId]?.variableIceState).toMatchObject({
+        family: "paid_end_the_run_subroutines",
+        additionalCostPaid: 4,
+        value: 2,
+        subroutineCount: 2,
+      });
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        variableRezKind: "paid_end_the_run_subroutines",
+        variableRezAdditionalCost: 4,
+        effectiveSubroutineCountAfterRez: 2,
+      });
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("stores Homing Missile X as strength, trace base and trace bid limit", () => {
+    let state = proteusPhase3bGame("proteus-phase-3b-homing-missile");
+    state.corp.credits = 20;
+    const iceId = putCorpIceOnServer(state, "rd", "onr_proteus_025_homing-missile");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const rezAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.source === iceId &&
+        action.payload?.variableRezKind === "x_strength" &&
+        action.payload?.variableRezValue === 5,
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.actionId === rezAction.actionId);
+    expect(state.cardInstances[iceId]?.variableIceState).toMatchObject({
+      family: "x_strength",
+      value: 5,
+      strength: 5,
+      traceBidLimit: 5,
+    });
+    expect(getPlayerView(state, "runner").run?.encounteredIce).toMatchObject({
+      definitionId: "onr_proteus_025_homing-missile",
+      strength: 5,
+    });
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.trace).toMatchObject({
+      sourceCardInstanceId: iceId,
+      baseTraceStrength: 5,
+      traceBidLimit: 5,
+      corpBidMax: 5,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceStarted: true,
+      baseTraceStrength: 5,
+      traceBidLimit: 5,
+      corpBidMax: 5,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("Proteus Dynamic Public ETR ICE", () => {
   const MINOTAUR = "onr_proteus_031_minotaur";
   const RIDDLER = "onr_proteus_034_riddler";

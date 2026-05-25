@@ -263,7 +263,10 @@ export function publicContextForAction(
       "variableRezValue",
       "variableRezCap",
       "effectiveStrengthAfterRez",
+      "effectiveTraceBaseAfterRez",
+      "effectiveTraceBidLimitAfterRez",
       "effectiveSubroutineCountAfterRez",
+      "selectedSubtypesAfterRez",
       "oliviaSalazarRezSourceCardId",
       "oliviaSalazarRezSourceDefinitionId",
       "oliviaSalazarRezCostBase",
@@ -463,6 +466,7 @@ export function publicContextForAction(
       "traceId",
       "traceStep",
       "baseTraceStrength",
+      "traceBidLimit",
       "corpBidMax",
       "rabbitTraceLimitReduction",
       "sourceDefinitionId",
@@ -565,6 +569,8 @@ export function publicContextForAction(
     context.sourceCardId = legalAction.payload.sourceCardId;
     context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     context.baseTraceStrength = legalAction.payload.baseTraceStrength;
+    if (typeof legalAction.payload.traceBidLimit === "number")
+      context.traceBidLimit = legalAction.payload.traceBidLimit;
     if (typeof legalAction.payload.corpBidMax === "number")
       context.corpBidMax = legalAction.payload.corpBidMax;
     if (typeof legalAction.payload.rabbitTraceLimitReduction === "number")

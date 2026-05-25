@@ -237,6 +237,10 @@ export function startTraceFromPrintedSubroutine(
     subroutine.baseTraceStrength ?? subroutine.amount ?? 0;
   if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0)
     throw new Error("Trace strength ist ungueltig.");
+  const traceBidLimit =
+    typeof subroutine.traceBidLimit === "number"
+      ? Math.max(0, Math.floor(subroutine.traceBidLimit))
+      : undefined;
   const successEffect = subroutine.traceSuccessEffect;
   if (!successEffect || !host.callbacks.supportsTraceSuccessEffect(successEffect))
     throw new Error("Dieser Trace-Effekt ist nicht freigegeben.");
@@ -262,13 +266,18 @@ export function startTraceFromPrintedSubroutine(
     parisBits;
   const rabbitTraceLimitReduction =
     host.callbacks.rabbitTraceLimitReductionForIceTrace();
-  const corpBidMax = Math.max(0, baseCorpBidMax - rabbitTraceLimitReduction);
+  const corpBidMax = Math.max(
+    0,
+    Math.min(baseCorpBidMax, traceBidLimit ?? baseCorpBidMax) -
+      rabbitTraceLimitReduction,
+  );
   state.trace = {
     traceId,
     sourceCardInstanceId,
     sourceDefinitionId: sourceDefinition.id,
     subroutineIndex,
     baseTraceStrength,
+    ...(traceBidLimit !== undefined ? { traceBidLimit } : {}),
     corpBidMax,
     ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
     ...(parisPoolSource
@@ -302,6 +311,7 @@ export function startTraceFromPrintedSubroutine(
       sourceCardId: sourceCardInstanceId,
       sourceDefinitionId: sourceDefinition.id,
       baseTraceStrength,
+      ...(traceBidLimit !== undefined ? { traceBidLimit } : {}),
       corpBidMax,
       ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
       ...(parisPoolSource

@@ -49,7 +49,7 @@ export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCar
     title: definition.title,
     definitionId: definition.id,
     type: definition.type,
-    subtypes: definition.subtypes,
+    subtypes: effectiveSubtypesForCard(state, id, definition),
     rulesText: definition.rulesText,
     ...(definition.cost !== undefined ? { cost: definition.cost } : {}),
     ...(definition.installCost !== undefined
@@ -722,6 +722,7 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
 
 function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   const iceDefinition = definitionFor(state, iceId);
+  const iceSubtypes = effectiveSubtypesForCard(state, iceId, iceDefinition);
   const iceServerId = corpServerIdForInstalledCard(state, iceId);
   let bonus = 0;
   for (const agendaId of state.corp.scoreArea) {
@@ -745,12 +746,12 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
         bonus += 1;
       if (
         agendaDefinition.id === ENCRYPTION_BREAKTHROUGH_ID &&
-        cardHasSubtype(iceDefinition, "code_gate")
+        iceSubtypes.includes("code_gate")
       )
         bonus += 1;
       if (
         agendaDefinition.id === SUPERIOR_NET_BARRIERS_ID &&
-        cardHasSubtype(iceDefinition, "wall")
+        iceSubtypes.includes("wall")
       )
         bonus += 1;
     }
@@ -787,6 +788,35 @@ function spyCountersForServer(
 
 function cardHasSubtype(definition: CardDefinition, subtype: string): boolean {
   return definition.subtypes?.includes(subtype) ?? false;
+}
+
+function normalizeSubtypeLabel(subtype: string): string {
+  return subtype
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function stableSubtypeList(subtypes: readonly string[]): string[] {
+  return [...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype)))]
+    .sort();
+}
+
+function effectiveSubtypesForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition = definitionFor(state, cardId),
+): string[] {
+  const instance = state.cardInstances[cardId];
+  const selectedSubtypes = instance?.variableIceState?.selectedSubtypes;
+  if (
+    definition.type === "ice" &&
+    instance?.rezzed &&
+    selectedSubtypes &&
+    selectedSubtypes.length > 0
+  )
+    return stableSubtypeList(selectedSubtypes);
+  return stableSubtypeList(definition.subtypes ?? []);
 }
 
 export function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {

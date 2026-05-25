@@ -1490,6 +1490,66 @@ describe("CardImplementation definition descriptors", () => {
     ).toBe("implemented");
   });
 
+  it("describes Proteus Phase 3b variable ICE implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_013_caryatid")
+        ?.variableRez,
+    ).toEqual({
+      kind: "alternate_subtype",
+      additionalCost: 1,
+      baseSubtypes: ["wall"],
+      alternateSubtypes: ["code_gate"],
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_017_credit-blocks")
+        ?.variableRez,
+    ).toEqual({
+      kind: "alternate_subtype",
+      additionalCost: 1,
+      baseSubtypes: ["sentry"],
+      alternateSubtypes: ["wall"],
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_025_homing-missile")
+        ?.variableRez,
+    ).toEqual({
+      kind: "x_strength",
+      additionalCostPerValue: 1,
+      minValue: 0,
+      maxValue: 8,
+      traceBaseFromValue: true,
+      traceBidLimitFromValue: true,
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_039_sphinx-2006")
+        ?.variableRez,
+    ).toEqual({
+      kind: "alternate_subtype",
+      additionalCost: 4,
+      baseSubtypes: ["code_gate"],
+      alternateSubtypes: ["sentry"],
+      visibility: "public",
+    });
+    for (const definitionId of [
+      "onr_proteus_013_caryatid",
+      "onr_proteus_017_credit-blocks",
+      "onr_proteus_023_galatea",
+      "onr_proteus_024_gatekeeper",
+      "onr_proteus_025_homing-missile",
+      "onr_proteus_028_lesser-arcana",
+      "onr_proteus_036_sandstorm",
+      "onr_proteus_039_sphinx-2006",
+      "onr_proteus_040_sumo-2008",
+    ] as const) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(

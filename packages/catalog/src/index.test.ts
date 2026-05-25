@@ -185,10 +185,19 @@ describe("card set support catalog source", () => {
     const cardsById = createRuntimeCardsById();
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
       "onr_proteus_002_charity-takeover",
+      "onr_proteus_013_caryatid",
+      "onr_proteus_017_credit-blocks",
       "onr_proteus_020_digiconda",
       "onr_proteus_022_food-fight",
+      "onr_proteus_023_galatea",
+      "onr_proteus_024_gatekeeper",
+      "onr_proteus_025_homing-missile",
+      "onr_proteus_028_lesser-arcana",
       "onr_proteus_031_minotaur",
       "onr_proteus_034_riddler",
+      "onr_proteus_036_sandstorm",
+      "onr_proteus_039_sphinx-2006",
+      "onr_proteus_040_sumo-2008",
       "onr_proteus_041_toughoniumtm-wall",
       "onr_proteus_062_lesley-major",
       "onr_proteus_065_networked-center",
@@ -214,7 +223,7 @@ describe("card set support catalog source", () => {
         card.catalogCardId.startsWith("onr_proteus_") &&
         !PROTEUS_VISIBLE_BASELINE_CARD_IDS.includes(card.catalogCardId),
     );
-    expect(blockedProteus).toHaveLength(139);
+    expect(blockedProteus).toHaveLength(130);
     expect(blockedProteus.every((card) => card.statuses.blocked)).toBe(true);
   });
 

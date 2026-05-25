@@ -331,24 +331,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_013_caryatid",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_013_caryatid is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_014_chihuahua",
@@ -435,24 +449,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_017_credit-blocks",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_017_credit-blocks is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_018_datacomb",
@@ -617,24 +645,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_023_galatea",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_023_galatea is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_024_gatekeeper",
@@ -643,24 +685,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_024_gatekeeper",
+        "coverage": [
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_etr_subroutines",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_024_gatekeeper is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_025_homing-missile",
@@ -669,24 +725,39 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_025_homing-missile",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "trace_base",
+          "trace_bid_limit",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "variable_strength",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_025_homing-missile is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_026_hunting-pack",
@@ -747,24 +818,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_028_lesser-arcana",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_028_lesser-arcana is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_029_marionette",
@@ -971,24 +1056,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_036_sandstorm",
+        "coverage": [
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_etr_subroutines",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_036_sandstorm is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_037_scaffolding",
@@ -1049,24 +1148,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_039_sphinx-2006",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_039_sphinx-2006 is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_040_sumo-2008",
@@ -1075,24 +1188,38 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_040_sumo-2008",
+        "coverage": [
+          "alternate_subtype",
+          "break_projection",
+          "card_implementation",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "variable_ice_state",
+          "variable_rez",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-3b-variable-cost-strength-subtype-ice-smoke-2026-05-24"
+        ],
+        "notes": "Proteus Phase 3b: onr_proteus_040_sumo-2008 is implemented through generic variableRez/variableIceState support for variable cost, strength, subtype or trace projection."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_041_toughoniumtm-wall",
