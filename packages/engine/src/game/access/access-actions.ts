@@ -56,7 +56,7 @@ export type RunnerAccessActionHost = {
   };
   callbacks: {
     successfulRunProgramActions: (run: ActiveRun) => LegalAction[];
-    runnerDuringRunCardImplementationActions: () => LegalAction[];
+    runnerDuringRunCardImplementationLegalActions: () => LegalAction[];
     mysteryBoxRunActions: (run: ActiveRun) => LegalAction[];
   };
 };
@@ -76,7 +76,7 @@ export function buildRunnerAccessActions(
     return { handled: true, legalActions: successfulRunActions };
   if (!run.accessedCardId) {
     const mysteryBoxActions = [
-      ...host.callbacks.runnerDuringRunCardImplementationActions(),
+      ...host.callbacks.runnerDuringRunCardImplementationLegalActions(),
       ...host.callbacks.mysteryBoxRunActions(run),
     ];
     if (hasPendingAccessCandidate(host, run))

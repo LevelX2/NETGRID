@@ -9,34 +9,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": false
+        "blocked": true
       },
       "support": {
-        "resolverRef": "engine:onr_proteus_086_enterprise-inc-shields",
-        "coverage": [
-          "card_implementation",
-          "damage_prevention",
-          "legal_action",
-          "public_payload",
-          "replay_statehash",
-          "scenario",
-          "unit_test",
-          "wrong_side_revalidation"
-        ],
+        "resolverRef": null,
+        "coverage": [],
         "aiHintRef": null,
-        "scenarioRefs": [
-          "proteus-phase-5b-enterprise"
-        ],
-        "notes": "Proteus Phase 5b: Enterprise, Inc., Shields prevents up to 2 Net damage or 1 brain/core damage via paid public CardImplementation damage-prevention sources."
+        "scenarioRefs": []
       },
-      "blockReasons": []
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
     },
     {
       "cardId": "onr_proteus_002_charity-takeover",
@@ -72,7 +62,8 @@
           "proteus-phase-2b-scored-agenda-bad-publicity-smoke-2026-05-24"
         ],
         "notes": "Proteus Phase 2b: Charity Takeover scores through CardImplementation on_score effects, gains 9 credits, adds 1 Bad Publicity, and preserves bad_publicity_7 priority over simultaneous Corp agenda victory."
-      }
+      },
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_003_corporate-headhunters",
@@ -81,34 +72,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": false
+        "blocked": true
       },
       "support": {
-        "resolverRef": "engine:onr_proteus_096_skullcap",
-        "coverage": [
-          "card_implementation",
-          "damage_prevention",
-          "legal_action",
-          "public_payload",
-          "replay_statehash",
-          "scenario",
-          "trash_source_cost",
-          "unit_test"
-        ],
+        "resolverRef": null,
+        "coverage": [],
         "aiHintRef": null,
-        "scenarioRefs": [
-          "proteus-phase-5b-skullcap"
-        ],
-        "notes": "Proteus Phase 5b: Skullcap prevents any amount of Net or brain/core damage by trashing the source through the generic CardImplementation damage-prevention cost path."
+        "scenarioRefs": []
       },
-      "blockReasons": []
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
     },
     {
       "cardId": "onr_proteus_004_fetal-ai",
@@ -117,27 +98,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": false
+        "blocked": true
       },
       "support": {
-        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
-        "coverage": [
-          "packages/engine/src/game/run/run-end-cleanup.test.ts",
-          "packages/engine/src/game/access/breach-state.test.ts",
-          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
-          "packages/engine/src/card-implementations/coverage.test.ts"
-        ],
+        "resolverRef": null,
+        "coverage": [],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": []
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
     },
     {
       "cardId": "onr_proteus_005_marked-accounts",
@@ -146,26 +124,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": false
+        "blocked": true
       },
       "support": {
-        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/taxman.ts",
-        "coverage": [
-          "packages/engine/src/game/run/run-end-cleanup.test.ts",
-          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
-          "packages/engine/src/card-implementations/coverage.test.ts"
-        ],
+        "resolverRef": null,
+        "coverage": [],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": []
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
     },
     {
       "cardId": "onr_proteus_006_please-dont-choke-anyone",
@@ -174,26 +150,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": false
+        "blocked": true
       },
       "support": {
-        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/vienna-22.ts",
-        "coverage": [
-          "packages/engine/src/game/run/run-end-cleanup.test.ts",
-          "packages/engine/src/game/access/breach-state.test.ts",
-          "packages/engine/src/card-implementations/coverage.test.ts"
-        ],
+        "resolverRef": null,
+        "coverage": [],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": []
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
     },
     {
       "cardId": "onr_proteus_007_project-venice",
@@ -202,26 +176,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": false
+        "blocked": true
       },
       "support": {
-        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/viral-pipeline.ts",
-        "coverage": [
-          "packages/engine/src/game/run/run-end-cleanup.test.ts",
-          "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
-          "packages/engine/src/card-implementations/coverage.test.ts"
-        ],
+        "resolverRef": null,
+        "coverage": [],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": []
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
     },
     {
       "cardId": "onr_proteus_008_project-zurich",
@@ -230,33 +202,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": false
+        "blocked": true
       },
       "support": {
-        "resolverRef": "engine:card-implementations/proteus/runner/programs/armageddon",
-        "coverage": [
-          "card_implementation",
-          "legal_action",
-          "random_draw_records",
-          "replay_statehash",
-          "scenario",
-          "unit_test",
-          "visibility",
-          "wrong_side_revalidation"
-        ],
+        "resolverRef": null,
+        "coverage": [],
         "aiHintRef": null,
-        "scenarioRefs": [
-          "proteus-phase-8f-random-bad-publicity-virus-longtail-2026-05-24"
-        ]
+        "scenarioRefs": []
       },
-      "blockReasons": []
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
     },
     {
       "cardId": "onr_proteus_009_viral-breeding-ground",
@@ -303,33 +266,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": false
+        "blocked": true
       },
       "support": {
-        "resolverRef": "engine:card-implementations/proteus/runner/programs/scaldan",
-        "coverage": [
-          "bad_publicity_gate",
-          "card_implementation",
-          "legal_action",
-          "random_draw_records",
-          "replay_statehash",
-          "scenario",
-          "unit_test",
-          "visibility"
-        ],
+        "resolverRef": null,
+        "coverage": [],
         "aiHintRef": null,
-        "scenarioRefs": [
-          "proteus-phase-8f-random-bad-publicity-virus-longtail-2026-05-24"
-        ]
+        "scenarioRefs": []
       },
-      "blockReasons": []
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
     },
     {
       "cardId": "onr_proteus_011_brain-wash",
@@ -1045,7 +999,8 @@
         "scenarioRefs": [
           "proteus-phase-1b-dynamic-public-etr-ice-smoke-2026-05-24"
         ]
-      }
+      },
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_032_misleading-access-menus",
@@ -1136,7 +1091,8 @@
         "scenarioRefs": [
           "proteus-phase-1b-dynamic-public-etr-ice-smoke-2026-05-24"
         ]
-      }
+      },
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_035_roadblock",
@@ -1367,7 +1323,8 @@
         "scenarioRefs": [
           "proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24"
         ]
-      }
+      },
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_042_tumblers",
@@ -1950,9 +1907,7 @@
         ],
         "notes": "Proteus Phase 1d: public pass-last-ICE fort window adds advancement counters to an advanceable card in the same fort once per run."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_063_lisa-blight",
@@ -2037,7 +1992,8 @@
         "scenarioRefs": [
           "proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24"
         ]
-      }
+      },
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_066_obfuscated-fortress",
@@ -2187,9 +2143,7 @@
         ],
         "notes": "Proteus Phase 1d: public post-pass pay-or-end-run fort window after each passed ICE on the same fort."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_071_raymond-ellison",
@@ -2248,7 +2202,8 @@
         "scenarioRefs": [
           "proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24"
         ]
-      }
+      },
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_073_simon-francisco",
@@ -2395,7 +2350,8 @@
         "scenarioRefs": [
           "proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24"
         ]
-      }
+      },
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_078_armageddon",
@@ -2404,24 +2360,33 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_078_armageddon",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "random_draw_records",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-8f-random-bad-publicity-virus-longtail-2026-05-24"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_079_big-frackin-gun",
@@ -2570,7 +2535,7 @@
         "blocked": false
       },
       "support": {
-        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/crumble.ts",
+        "resolverRef": "engine:onr_proteus_084_crumble",
         "coverage": [
           "packages/engine/src/game/run/run-end-cleanup.test.ts",
           "packages/engine/src/game/access/access-actions.test.ts",
@@ -2616,9 +2581,7 @@
         ],
         "notes": "Proteus Phase 1g: installed Runner program ability after passing a fully broken rezzed ICE; Runner pays 2, derezzes that ICE, and ends the run."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_086_enterprise-inc-shields",
@@ -2627,24 +2590,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_086_enterprise-inc-shields",
+        "coverage": [
+          "card_implementation",
+          "damage_prevention",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-5b-enterprise"
+        ],
+        "notes": "Proteus Phase 5b: Enterprise, Inc., Shields prevents up to 2 Net damage or 1 brain/core damage via paid public CardImplementation damage-prevention sources."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_087_forwards-legacy",
@@ -2715,7 +2688,7 @@
         "blocked": false
       },
       "support": {
-        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/garbage-in.ts",
+        "resolverRef": "engine:onr_proteus_089_garbage-in",
         "coverage": [
           "packages/engine/src/game/run/run-end-cleanup.test.ts",
           "packages/engine/src/game/access/access-actions.test.ts",
@@ -2744,7 +2717,7 @@
         "blocked": false
       },
       "support": {
-        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
+        "resolverRef": "engine:onr_proteus_090_highlighter",
         "coverage": [
           "packages/engine/src/game/run/run-end-cleanup.test.ts",
           "packages/engine/src/game/access/breach-state.test.ts",
@@ -2841,24 +2814,33 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_094_scaldan",
+        "coverage": [
+          "bad_publicity_gate",
+          "card_implementation",
+          "legal_action",
+          "random_draw_records",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-8f-random-bad-publicity-virus-longtail-2026-05-24"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_095_skeleton-passkeys",
@@ -2893,24 +2875,34 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_096_skullcap",
+        "coverage": [
+          "card_implementation",
+          "damage_prevention",
+          "legal_action",
+          "public_payload",
+          "replay_statehash",
+          "scenario",
+          "trash_source_cost",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-phase-5b-skullcap"
+        ],
+        "notes": "Proteus Phase 5b: Skullcap prevents any amount of Net or brain/core damage by trashing the source through the generic CardImplementation damage-prevention cost path."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_097_taxman",
@@ -2929,7 +2921,7 @@
         "blocked": false
       },
       "support": {
-        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/taxman.ts",
+        "resolverRef": "engine:onr_proteus_097_taxman",
         "coverage": [
           "packages/engine/src/game/run/run-end-cleanup.test.ts",
           "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
@@ -2957,7 +2949,7 @@
         "blocked": false
       },
       "support": {
-        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/vienna-22.ts",
+        "resolverRef": "engine:onr_proteus_098_vienna-22",
         "coverage": [
           "packages/engine/src/game/run/run-end-cleanup.test.ts",
           "packages/engine/src/game/access/breach-state.test.ts",
@@ -2985,7 +2977,7 @@
         "blocked": false
       },
       "support": {
-        "resolverRef": "packages/engine/src/card-implementations/proteus/runner/programs/viral-pipeline.ts",
+        "resolverRef": "engine:onr_proteus_099_viral-pipeline",
         "coverage": [
           "packages/engine/src/game/run/run-end-cleanup.test.ts",
           "packages/engine/src/game/counters/proteus-purge-foundation.test.ts",
@@ -3239,7 +3231,8 @@
           "proteus-phase-2c-direct-runner-event-bp-damage-smoke-2026-05-24"
         ],
         "notes": "Proteus Phase 2c: Faked Hit plays through CardImplementation on_play effects, adds 1 Bad Publicity, then deals 2 unpreventable core damage while preserving bad_publicity_7 priority over simultaneous flatline."
-      }
+      },
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_109_frame-up",
@@ -4278,7 +4271,8 @@
         "scenarioRefs": [
           "proteus-phase-9d-data-fort-creation-lock-smoke-2026-05-24"
         ]
-      }
+      },
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_147_r-and-d-mole",
@@ -4389,7 +4383,8 @@
         "scenarioRefs": [
           "proteus-phase-1a-reuse-only-baseline-smoke-2026-05-24"
         ]
-      }
+      },
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_151_sunburst-cranial-interface",

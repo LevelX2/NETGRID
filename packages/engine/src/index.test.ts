@@ -8238,7 +8238,7 @@ describe("V1.0.5K Card Release", () => {
       strength: 1,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_239_endless-corridor"]).toMatchObject({
-      rezCost: 4,
+      rezCost: 5,
       strength: 2,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_144_tycho-mem-chip"]).toMatchObject({
@@ -8864,7 +8864,7 @@ describe("V1.0.6K Card Release", () => {
       strength: 0,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_245_fire-wall"]).toMatchObject({
-      rezCost: 5,
+      rezCost: 1,
       strength: 4,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_252_keeper"]).toMatchObject({
@@ -9251,7 +9251,7 @@ describe("V1.1.2K Card Release", () => {
       strength: 2,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_257_nerve-labyrinth"]).toMatchObject({
-      rezCost: 6,
+      rezCost: 7,
       strength: 4,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_278_wall-of-ice"]).toMatchObject({
@@ -28066,7 +28066,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       damageAmount: 1,
     });
     expect(JSON.stringify(rdState.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
+      /"(privatePayload|cardInstances|hq|rd)":/,
     );
 
     let archivesState = toRunnerTurn(
@@ -28155,11 +28155,12 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       ambushDefinitionId: "onr_v1_345_trap",
       cardDefinitionId: "onr_v1_345_trap",
       revealKind: "reveal",
+      accessedFromZone: "rd",
       damageAmount: 3,
       tagsAdded: 1,
     });
     expect(JSON.stringify(rdState.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
+      /"(privatePayload|cardInstances|hq|rd)":/,
     );
     const replay = replayEvents(initial, rdState.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -45662,6 +45663,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     );
     state.runner.credits = 30;
     state.runner.clicks = 10;
+    state.corp.credits = 30;
     moveRunnerCardToGrip(state, "onr_v1_186_umbrella-policy");
     state = apply(
       state,

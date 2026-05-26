@@ -1,7 +1,6 @@
 // ARCH-5R extracts only the read-only PlayerView projection.
 // This module creates no LegalActions, executes no actions, and mutates no
-// GameState. The host passes LegalActions in until getLegalActions itself moves
-// behind the game facade in a later ARCH step.
+// GameState. The host passes LegalActions in from the game legal-actions facade.
 import {
   type GameState,
   type LegalAction,

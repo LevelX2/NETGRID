@@ -108,6 +108,13 @@ PublicPayload:
 - Erlaubt: `runId`, `serverId`, `counterType`, `counterDelta`, `counterTotalAfter`, `sourceCardDefinitionId`, wenn das installierte Runner-Programm öffentlich ist.
 - Verboten: Access-Queue-Inhalte, nicht zugegriffene R&D-/HQ-Titel, Stack-/Grip-Daten, interne Random-Kandidaten.
 
+UI-Anzeige:
+
+- Servergebundene CounterDisplays wie `socket_archives`, `socket_hq` und `socket_rd` werden als eigene Counter-Zeile am betroffenen Fort angezeigt, oberhalb der Fort-Inhalte und nicht auf der Quellkarte `Viral Pipeline`.
+- Die sichtbaren Chips verwenden kurze Labels wie `Socket 1`; der Tooltip erklärt Umwandlung zu `pipe`, Purgefähigkeit und Kartenwirkung.
+- `pipe`-Counter sind nicht servergebunden und erscheinen in der Korp-/Identity-Counterzeile.
+- Purgefähige Runner-Virus-Counter erklären im Tooltip den Kostenvertrag: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen. Die normale Korp-Hauptaktionsphase bietet dafür eine `purge_runner_virus_counters`-LegalAction an, wenn solche Counter vorhanden sind.
+
 ## Slice 4: Access-Modifikatoren und Trash-Rechte
 
 Karten: `Crumble`, `Garbage In`, `Highlighter`, `Vienna 22`.

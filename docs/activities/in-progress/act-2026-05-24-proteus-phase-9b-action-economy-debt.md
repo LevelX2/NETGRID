@@ -11,6 +11,9 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 9b
+proReferences:
+  - PRO034
+  - PRO035
 blockedBy:
   - act-2026-05-24-proteus-phase-8a-counter-taxonomy-purge-foundation
   - agenda_damage_replacement_counter_contract

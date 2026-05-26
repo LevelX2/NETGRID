@@ -11,6 +11,9 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 6b
+proReferences:
+  - PRO006
+  - PRO025
 blockedBy:
   - Chihuahua needs a printed trace success effect that deals preventable Net damage; current trace success effects support tags, counters, end-run, hardware/program trash, run locks and unpreventable meat damage, but not preventable net/core damage.
   - Coyote needs a run-duration future-ICE strength modifier that the Runner may cancel by paying while passing the source ICE; current run-duration strength subroutines have no pass-window payment/cancel clause.

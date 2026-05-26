@@ -11,6 +11,9 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1c
+proReferences:
+  - PRO010
+  - PRO037
 blockedBy:
   - rule-source-clarification-emergency-rig-x
 resultArtifacts:
