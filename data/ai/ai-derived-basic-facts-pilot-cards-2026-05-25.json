@@ -26,8 +26,8 @@
         "effect:search",
         "condition:requires_during_run"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Search timing and target profile are derivable; the manual install_discount field is not generated because the implementation uses normal install cost."
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Search timing and target profile are derivable; installation uses normal cost handling, so this card does not carry an install_discount basic fact."
     },
     {
       "cardId": "onr_v1_043_mystery-box",

@@ -164,9 +164,9 @@ describe("compiled hint index pilot report", () => {
 
   it("classifies compiled-index warnings into non-blocking comparison groups", () => {
     const report = readReport();
-    expect(report.warningCount).toBe(80);
+    expect(report.warningCount).toBe(79);
     expect(report.warningClassificationCounts).toEqual({
-      generated_fact_absent_from_monolith: 28,
+      generated_fact_absent_from_monolith: 27,
       monolith_mechanical_duplication_candidate: 46,
       overlay_strategy_field_not_in_monolith: 6,
     });
@@ -201,21 +201,17 @@ describe("compiled hint index pilot report", () => {
     expect(report.overlayCandidates).toEqual([]);
   });
 
-  it("keeps semantic review candidates explicit without turning them into hard errors", () => {
+  it("keeps Self-Modifying Code out of semantic review after install-discount cleanup", () => {
     const report = readReport();
-    expect(report.reviewCandidates).toEqual([
-      expect.objectContaining({
-        cardId: "onr_v1_059_self-modifying-code",
-      }),
-    ]);
+    expect(report.reviewCandidates).toEqual([]);
     const selfModifyingCode = report.cards.find(
       (card) => card.cardId === "onr_v1_059_self-modifying-code",
     );
     expect(selfModifyingCode?.recommendedNextAction).toBe(
-      "manual_review_candidate",
+      "ready_for_overlay_only_strategy_fields",
     );
-    expect(selfModifyingCode?.migrationReadiness).toBe("needs_review");
-    expect(selfModifyingCode?.needsManualReview).toBe(true);
+    expect(selfModifyingCode?.migrationReadiness).toBe("ready");
+    expect(selfModifyingCode?.needsManualReview).toBe(false);
     expect(report.hardErrorCount).toBe(0);
   });
 

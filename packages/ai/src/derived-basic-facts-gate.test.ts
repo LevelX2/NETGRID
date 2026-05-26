@@ -72,7 +72,7 @@ describe("derived basic facts gate report", () => {
     expect(report.implementationFoundCount).toBe(24);
     expect(report.cardsWithDerivedFacts).toBe(24);
     expect(report.cardsWithManualOntologyOverlap).toBe(24);
-    expect(report.cardsNeedingManualOverlay).toBe(4);
+    expect(report.cardsNeedingManualOverlay).toBe(3);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
       report.cards.every(
@@ -115,6 +115,8 @@ describe("derived basic facts gate report", () => {
         shuffleAfter: true,
       }),
     );
+    expect(selfModifyingCode.missingManualOverlay).toEqual([]);
+    expect(selfModifyingCode.descriptorGaps).toEqual([]);
 
     const mysteryBox = cardById(report, "onr_v1_043_mystery-box");
     expect(mysteryBox.derivedFacts.targetProfiles).toContainEqual(

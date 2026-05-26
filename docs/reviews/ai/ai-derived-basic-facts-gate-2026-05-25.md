@@ -112,14 +112,13 @@ Condition-Kinds:
 
 ## Bekannte Lücken
 
-Nach Descriptor-/Schema-Slice und Gap-Closeout bleiben vier stabile Manual-Overlay-/Descriptor-Kandidaten:
+Nach Descriptor-/Schema-Slice, Gap-Closeout und Self-Modifying-Code-Review bleiben drei stabile Manual-Overlay-/Descriptor-Kandidaten:
 
 - `onr_v1_017_deep-thought`
-- `onr_v1_059_self-modifying-code`
 - `onr_v1_355_crystal-palace-station-grid`
 - `onr_v1_366_red-herrings`
 
-Geschlossen wurden `Netwatch Operations Office`, `Viral 15` und `Closed Accounts`; Details stehen in `ai-derived-basic-facts-gap-triage-2026-05-25.md`. Die Folge-Triage `ai-derived-basic-facts-descriptor-schema-slice-2026-05-25.md` ergänzt eine read-only TargetProfile-Schema-Erweiterung für `Self-Modifying Code` und `Mystery Box`. Der Closeout `ai-derived-basic-facts-descriptor-gap-closeout-2026-05-25.md` schließt zusätzlich `Japanese Water Torture` über `breakerProfile.sideEffects = ["forgo_actions"]` und `Mystery Box` über `targetProfiles.oncePerRun = true`. Wichtig: Die verbleibenden Lücken sind keine AI-Support-Demotion.
+Geschlossen wurden `Netwatch Operations Office`, `Viral 15` und `Closed Accounts`; Details stehen in `ai-derived-basic-facts-gap-triage-2026-05-25.md`. Die Folge-Triage `ai-derived-basic-facts-descriptor-schema-slice-2026-05-25.md` ergänzt eine read-only TargetProfile-Schema-Erweiterung für `Self-Modifying Code` und `Mystery Box`. Der Closeout `ai-derived-basic-facts-descriptor-gap-closeout-2026-05-25.md` schließt zusätzlich `Japanese Water Torture` über `breakerProfile.sideEffects = ["forgo_actions"]` und `Mystery Box` über `targetProfiles.oncePerRun = true`. Der SMC-Review entfernt den falschen aktiven `install_discount`-Hint; die Karte bleibt über `targetProfiles.installCost = "normal"` mechanisch beschrieben. Wichtig: Die verbleibenden Lücken sind keine AI-Support-Demotion.
 
 ## Ontology-Validation
 

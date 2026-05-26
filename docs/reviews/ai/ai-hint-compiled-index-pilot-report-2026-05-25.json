@@ -15,14 +15,14 @@
   "overlayCardCount": 6,
   "cardsWithoutOverlay": 18,
   "hardErrorCount": 0,
-  "warningCount": 80,
+  "warningCount": 79,
   "warningCountsByKind": {
     "active_monolith_mechanical_duplication": 46,
-    "generated_fact_missing_from_active_monolith": 28,
+    "generated_fact_missing_from_active_monolith": 27,
     "manual_overlay_strategy_field_missing_from_active": 6
   },
   "warningClassificationCounts": {
-    "generated_fact_absent_from_monolith": 28,
+    "generated_fact_absent_from_monolith": 27,
     "monolith_mechanical_duplication_candidate": 46,
     "overlay_strategy_field_not_in_monolith": 6
   },
@@ -124,10 +124,10 @@
     {
       "cardId": "onr_v1_059_self-modifying-code",
       "title": "Self-Modifying Code",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 3,
+        "generated_fact_absent_from_monolith": 2,
         "monolith_mechanical_duplication_candidate": 2,
         "overlay_strategy_field_not_in_monolith": 1
       },
@@ -465,15 +465,14 @@
     {
       "cardId": "onr_v1_059_self-modifying-code",
       "title": "Self-Modifying Code",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
+      "migrationReadiness": "ready",
       "generatedFields": [
         "conditions",
         "effects",
         "targetProfiles"
       ],
       "generatedOnlyFields": [
-        "effects",
         "conditions",
         "targetProfiles"
       ],
@@ -832,8 +831,8 @@
     {
       "cardId": "onr_v1_059_self-modifying-code",
       "title": "Self-Modifying Code",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "condition:requires_during_run",
         "effect:search",
@@ -1023,17 +1022,7 @@
       ]
     }
   ],
-  "reviewCandidates": [
-    {
-      "cardId": "onr_v1_059_self-modifying-code",
-      "title": "Self-Modifying Code",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "effect:install_discount"
-      ]
-    }
-  ],
+  "reviewCandidates": [],
   "infoCounts": {
     "info_no_overlay_needed": 18,
     "info_overlay_present": 6
@@ -1838,11 +1827,9 @@
       "activeHintFound": true,
       "derivedFactsFound": true,
       "manualOverlayFound": true,
-      "expectedManualOverlayNeeded": true,
-      "needsManualReview": true,
-      "missingManualOverlay": [
-        "effect:install_discount"
-      ],
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_059_self-modifying-code",
         "side": "runner",
@@ -1925,7 +1912,6 @@
         "valueHints"
       ],
       "generatedOnlyFields": [
-        "effects",
         "conditions",
         "targetProfiles"
       ],
@@ -1962,14 +1948,6 @@
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
-          "cardId": "onr_v1_059_self-modifying-code",
-          "field": "effects"
-        },
-        {
-          "classification": "generated_fact_absent_from_monolith",
-          "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field targetProfiles is absent from or differs from active monolith.",
           "cardId": "onr_v1_059_self-modifying-code",
           "field": "targetProfiles"
@@ -1983,8 +1961,8 @@
           "field": "manualNotes"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_192_corporate-boon",
@@ -4036,14 +4014,6 @@
       "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
       "cardId": "onr_v1_059_self-modifying-code",
       "field": "conditions"
-    },
-    {
-      "classification": "generated_fact_absent_from_monolith",
-      "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
-      "cardId": "onr_v1_059_self-modifying-code",
-      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",

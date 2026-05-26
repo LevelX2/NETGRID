@@ -10,7 +10,7 @@
   "implementationFoundCount": 24,
   "cardsWithDerivedFacts": 24,
   "cardsWithManualOntologyOverlap": 24,
-  "cardsNeedingManualOverlay": 4,
+  "cardsNeedingManualOverlay": 3,
   "effectKindCounts": {
     "access_replacement": 1,
     "breaker": 2,
@@ -43,7 +43,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 40,
+  "warningCount": 38,
   "warnings": [
     {
       "kind": "descriptor_or_overlay_gap",
@@ -99,16 +99,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_057_scatter-shot"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_059_self-modifying-code"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual effect:install_discount has no generated basic fact match.",
-      "cardId": "onr_v1_059_self-modifying-code"
     },
     {
       "kind": "text_pattern_derivation",
@@ -908,8 +898,8 @@
         "effect:search",
         "condition:requires_during_run"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Search timing and target profile are derivable; the manual install_discount field is not generated because the implementation uses normal install cost.",
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Search timing and target profile are derivable; installation uses normal cost handling, so this card does not carry an install_discount basic fact.",
       "derivedFacts": {
         "effects": [
           {
@@ -949,11 +939,6 @@
         "planRoles": ["build_rig", "recover_rig"],
         "effects": [
           {
-            "kind": "install_discount",
-            "timing": "during_run",
-            "scope": "installed_card"
-          },
-          {
             "kind": "search",
             "timing": "during_run",
             "scope": "runner"
@@ -988,22 +973,12 @@
           "effect:search"
         ],
         "generatedOnly": [],
-        "manualOnly": ["effect:install_discount"]
+        "manualOnly": []
       },
-      "missingManualOverlay": ["effect:install_discount"],
-      "descriptorGaps": [
-        "Manual ontology contains fields not currently derivable."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:install_discount has no generated basic fact match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."

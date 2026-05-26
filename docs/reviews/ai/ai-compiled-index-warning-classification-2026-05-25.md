@@ -4,7 +4,7 @@ Datum: 2026-05-25
 
 ## Kurzfazit
 
-Die 80 verbleibenden Warnings im read-only Compiled-Hint-Index sind jetzt fachlich klassifiziert. Es gibt weiterhin 0 Hard Errors, 0 `descriptor_gap_remaining`-Warnings und keine Runtime-, Planner- oder Consumer-Wirkung.
+Die nach dem Self-Modifying-Code-Review verbleibenden 79 Warnings im read-only Compiled-Hint-Index sind fachlich klassifiziert. Es gibt weiterhin 0 Hard Errors, 0 `descriptor_gap_remaining`-Warnings und keine Runtime-, Planner- oder Consumer-Wirkung.
 
 Die Klassifikation bestätigt: Die Warnings sind überwiegend erwartete Architektur-Differenzen zwischen aktivem Monolithen und Generated Basic Facts. Sie sind keine Legalitäts-, Engine- oder Runtimefehler.
 
@@ -14,12 +14,12 @@ Die Klassifikation bestätigt: Die Warnings sind überwiegend erwartete Architek
 - Karten mit Manual Overlay: 6
 - Karten ohne Overlay: 18
 - Hard Errors: 0
-- Warnings: 80
+- Warnings: 79
 
 Roh-Warning-Gruppen:
 
 - `active_monolith_mechanical_duplication`: 46
-- `generated_fact_missing_from_active_monolith`: 28
+- `generated_fact_missing_from_active_monolith`: 27
 - `manual_overlay_strategy_field_missing_from_active`: 6
 
 ## Neue Warning-Klassen
@@ -36,7 +36,7 @@ Roh-Warning-Gruppen:
 Warning-Klassifikation:
 
 - `monolith_mechanical_duplication_candidate`: 46
-- `generated_fact_absent_from_monolith`: 28
+- `generated_fact_absent_from_monolith`: 27
 - `overlay_strategy_field_not_in_monolith`: 6
 - `manual_review_candidate`: 0 Warnings
 - `schema_or_descriptor_candidate`: 0 Warnings
@@ -51,23 +51,20 @@ Kandidatenlisten:
 - `migrationCandidates`: 24
 - `generatedFactCandidates`: 24
 - `overlayCandidates`: 0
-- `reviewCandidates`: 1
+- `reviewCandidates`: 0
 
 ## Karten nach Recommended Action
 
 - `ready_for_generated_mechanical_fields`: 18
-- `ready_for_overlay_only_strategy_fields`: 5
-- `manual_review_candidate`: 1
-
-`manual_review_candidate`:
-
-- `Self-Modifying Code`: aktiver Monolith enthält weiterhin ein manuelles `install_discount`-Signal, während Generated Facts den normalen Install-Target-Pfad beschreiben. Das ist fachlich getrennt von der Compiler-/Overlay-Infrastruktur und sollte als späterer Hintdaten-Review geprüft werden.
+- `ready_for_overlay_only_strategy_fields`: 6
+- `manual_review_candidate`: 0
 
 `ready_for_overlay_only_strategy_fields`:
 
 - `Deep Thought`
 - `Japanese Water Torture`
 - `Mystery Box`
+- `Self-Modifying Code`
 - `Crystal Palace Station Grid`
 - `Red Herrings`
 
@@ -88,17 +85,17 @@ Erwartet und nicht blockierend:
 
 ## Echte Folgearbeit
 
-Die einzige fachliche Review-Spur ist `Self-Modifying Code`. Sie betrifft den aktiven manuellen Hintinhalt, nicht den Compiler selbst:
+Der frühere Review-Kandidat `Self-Modifying Code` ist geschlossen:
 
-- Generated Facts: `search`, `requires_during_run`, `targetProfiles`
-- Active Monolith: enthält weiterhin ein Install-Discount-Signal
-- Empfehlung: späterer fokussierter Hintdaten-Review, keine Runtime-Anbindung
+- Generated Facts: `search`, `requires_during_run`, `targetProfiles.installCost = "normal"`
+- Active Monolith: enthält kein `install_discount`-Signal mehr
+- Ergebnis: kein Human-Review-Kandidat im Compiled-Index
 
 Es gibt aktuell keine neuen Manual-Overlay-Kandidaten und keine neuen Schema-/Descriptor-Kandidaten.
 
 ## Bewusst nicht geändert
 
-- Keine Änderung an `data/ai/ai-card-hints-active.json`.
+- `data/ai/ai-card-hints-active.json` wurde nur für `Self-Modifying Code` korrigiert: der falsche `install_discount`-Effect wurde entfernt.
 - Keine Änderung an `aiSupportStatus`.
 - Keine Engine-, Runtime-, Planner- oder Consumer-Anbindung.
 - Keine aktive Hintmigration.
@@ -110,4 +107,4 @@ Nach dem Main-Merge enthielt `data/decks/deck-snapshots-0.8.json` zusätzlich Pr
 
 ## Nächster Schritt
 
-Der nächste praktische Schritt ist ein kleiner Review-Slice für `Self-Modifying Code`, der den aktiven manuellen `install_discount`-Hinweis gegen Generated Facts und Kartentext prüft. Danach kann entschieden werden, ob eine minimale Hintdaten-Korrektur nötig ist oder ob der Mismatch als dokumentierter Legacy-Hinweis stehen bleibt.
+Der nächste praktische Schritt ist kein weiterer SMC-Slice, sondern die Priorisierung der mechanischen Monolith-Felder, die langfristig aus Generated Facts kommen sollten.

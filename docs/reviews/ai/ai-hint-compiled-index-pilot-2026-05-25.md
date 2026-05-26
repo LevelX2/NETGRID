@@ -103,21 +103,21 @@ Abgesicherte Error-Klassen:
 - Derived-Facts-Quellreport hat harte Errors.
 - `--check` weicht vom committed Report ab.
 
-Warnings aktuell: 80.
+Warnings aktuell: 79.
 
 Warning-Verteilung:
 
 - `active_monolith_mechanical_duplication`: 46
-- `generated_fact_missing_from_active_monolith`: 28
+- `generated_fact_missing_from_active_monolith`: 27
 - `manual_overlay_strategy_field_missing_from_active`: 6
 - `descriptor_gap_remaining`: 0
 
 Klassifikation:
 
 - `monolith_mechanical_duplication_candidate`: 46
-- `generated_fact_absent_from_monolith`: 28
+- `generated_fact_absent_from_monolith`: 27
 - `overlay_strategy_field_not_in_monolith`: 6
-- `manual_review_candidate`: 0 Warnings, aber 1 expliziter Review-Kandidat in der Kandidatenliste
+- `manual_review_candidate`: 0
 - `schema_or_descriptor_candidate`: 0
 
 Fehlende Overlays sind nur dann Warnings, wenn eine Karte in der Pilotliste oder im Derived-Facts-Report einen Manual-Overlay-Bedarf hat. Aktuell gibt es keine `overlay_missing_for_manual_gap`-Warnings, weil die sechs erwarteten Overlaykarten abgedeckt sind.
@@ -131,7 +131,7 @@ Fehlende Overlays sind nur dann Warnings, wenn eine Karte in der Pilotliste oder
 - `Crystal Palace Station Grid`
 - `Red Herrings`
 
-Diese Karten behalten strategische/manual Informationen im Overlay. Nach dem Closeout gibt es keine `descriptor_gap_remaining`-Warnings mehr. `Japanese Water Torture` nutzt `breakerProfile.sideEffects = ["forgo_actions"]`; `Mystery Box` nutzt `targetProfiles.oncePerRun = true`.
+Diese Karten behalten strategische/manual Informationen im Overlay. Nach dem Closeout gibt es keine `descriptor_gap_remaining`-Warnings mehr. `Japanese Water Torture` nutzt `breakerProfile.sideEffects = ["forgo_actions"]`; `Mystery Box` nutzt `targetProfiles.oncePerRun = true`; `Self-Modifying Code` nutzt `targetProfiles.installCost = "normal"` und keinen `install_discount`-Effect.
 
 ## Karten ohne Overlay
 
@@ -200,9 +200,8 @@ Die 6 `manual_overlay_strategy_field_missing_from_active`-Warnings sind erwartba
 
 ## Empfehlung
 
-Der Ansatz ist tragfähig: Der Compiler kann die 24 Derived-Facts-Pilotkarten deterministisch aus Active Monolith, Generated Facts und optionalem Overlay zusammenführen. Der nächste praktische Schritt sollte kein Runtime-Compile sein, sondern eine Klassifikation der verbleibenden Monolith-vs-Generated-Warnings:
+Der Ansatz ist tragfähig: Der Compiler kann die 24 Derived-Facts-Pilotkarten deterministisch aus Active Monolith, Generated Facts und optionalem Overlay zusammenführen. Der nächste praktische Schritt sollte kein Runtime-Compile sein, sondern die Priorisierung der verbleibenden Monolith-vs-Generated-Warnings:
 
-1. `Self-Modifying Code` als fokussierten Hintdaten-Review prüfen.
-2. mechanische Monolith-Felder priorisieren, die langfristig generated werden könnten.
-3. ein weiteres kleines Overlaysegment nur dann anlegen, wenn eine echte strategische Lücke entsteht.
-4. erst anschließend prüfen, ob der Compiler-Report auf weitere Benchmarkkarten vorbereitet werden sollte.
+1. mechanische Monolith-Felder priorisieren, die langfristig generated werden könnten.
+2. ein weiteres kleines Overlaysegment nur dann anlegen, wenn eine echte strategische Lücke entsteht.
+3. erst anschließend prüfen, ob der Compiler-Report auf weitere Benchmarkkarten vorbereitet werden sollte.
