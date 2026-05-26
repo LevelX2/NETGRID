@@ -139,6 +139,10 @@ import {
   type CreditEconomyExecutionHost,
 } from "./game/economy/credit-economy-execution";
 import {
+  handleTriggerAbilityExecution,
+  type TriggerAbilityExecutionHost,
+} from "./game/abilities/trigger-ability-execution";
+import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "./game/install/install-card";
@@ -4567,6 +4571,96 @@ function creditEconomyExecutionHost(
   };
 }
 
+function triggerAbilityExecutionHost(
+  state: GameState,
+): TriggerAbilityExecutionHost {
+  return {
+    state,
+    actions: {
+      spendClick,
+    },
+    cards: {
+      definitionFor,
+      remainingReplacementLongtailKindForCard,
+    },
+    credits: {
+      spend: spendCredits,
+    },
+    runner: {
+      trashInstalledCardToHeap: trashRunnerInstalledCardToHeap,
+      ensureTurnFlags: ensureRunnerTurnFlags,
+    },
+    corp: {
+      acmeSavingsAndLoanObligationCount,
+      removeAcmeSavingsAndLoanObligation,
+    },
+    delegates: {
+      resolveSelfModifyingCodeAbility: (legalAction) => resolveSelfModifyingCodeAbility(state, legalAction),
+      resolveCorpTrashNewDataFortCreationLockSource: (legalAction) =>
+        resolveCorpTrashNewDataFortCreationLockSource(state, legalAction),
+      resolveSuccessfulRunFollowupAbility: (legalAction) =>
+        resolveSuccessfulRunFollowupAbility(
+          successfulRunInterventionHost(state),
+          legalAction,
+        ),
+      resolveFullyBrokenPassedIceDerezAndEndRun: (legalAction) =>
+        resolveFullyBrokenPassedIceDerezAndEndRunInRunModule(
+          encounterSpecialWindowHostForState(state),
+          legalAction,
+        ),
+      resolveStartupImmolatorTrashIce: (legalAction) =>
+        resolveStartupImmolatorTrashIceInRunModule(
+          encounterSpecialWindowHostForState(state),
+          legalAction,
+        ),
+      handleMysteryBoxTopFiveProgramInstallActivation: (legalAction) =>
+        handleMysteryBoxTopFiveProgramInstallActivation(
+          hiddenZoneSearchActivationHandlerHost(state, legalAction),
+        ),
+      resolveMicrotechBackupDriveReturnTopHosted: (legalAction) =>
+        resolveMicrotechBackupDriveReturnTopHosted(state, legalAction),
+      resolveFortPassAdvancementWindow: (legalAction) =>
+        resolveFortPassAdvancementWindow(
+          fortPassWindowHostForState(state),
+          legalAction,
+        ),
+      resolveStartRunIceRepositionWindow: (legalAction) =>
+        resolveStartRunIceRepositionWindow(
+          fortPassWindowHostForState(state),
+          legalAction,
+        ),
+      resolvePreyingMantisGainAction: (legalAction) => resolvePreyingMantisGainAction(state, legalAction),
+      resolveCorpRemoveSpyCounter: (legalAction) =>
+        resolveCorpRemoveSpyCounter(state, legalAction),
+      resolveJunkyardBbsAbility: (legalAction) => resolveJunkyardBbsAbility(state, legalAction),
+      resolveShellTradersSetAside: (legalAction) =>
+        resolveShellTradersSetAside(state, legalAction),
+      resolveShellTradersRemoveCounter: (legalAction) =>
+        resolveShellTradersRemoveCounter(state, legalAction),
+      resolveRemoveRunnerTraceCounter: (legalAction) =>
+        resolveRemoveRunnerTraceCounter(state, legalAction),
+      resolveApproachIceExposeAbility: (legalAction) =>
+        resolveApproachIceExposeAbility(
+          encounterEntryHostForState(state),
+          legalAction,
+        ),
+      resolveApproachIceExposeViewingDecision: (legalAction) =>
+        resolveApproachIceExposeViewingDecision(
+          encounterEntryHostForState(state),
+          legalAction,
+        ),
+      startSingaporeCityGridSwapChoice: (legalAction) =>
+        startSingaporeCityGridSwapChoice(
+          fortPassWindowHostForState(state),
+          legalAction,
+        ),
+    },
+    constants: {
+      CODE_VIRAL_CACHE_ID,
+    },
+  };
+}
+
 function installCardHost(state: GameState): InstallCardHost {
   return {
     state,
@@ -5212,254 +5306,8 @@ function performAction(
       );
       return;
     case "trigger_ability":
-      if (
-        legalAction.payload?.v1911HiddenZoneAbility ===
-        "self_modifying_code_install_program"
-      ) {
-        resolveSelfModifyingCodeAbility(state, legalAction);
-        return;
-      }
-      if (legalAction.payload?.corpAbility === "trash_code_viral_cache") {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf Code Viral Cache trashen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.runner.rig.resources.includes(sourceCardId))
-          throw new Error("Code Viral Cache ist nicht installiert.");
-        if (definitionFor(state, sourceCardId).id !== CODE_VIRAL_CACHE_ID)
-          throw new Error("Die Code-Viral-Cache-Faehigkeit passt nicht zur Karte.");
-        spendClick(state, "corp");
-        spendCredits(state, "corp", 5);
-        trashRunnerInstalledCardToHeap(state, sourceCardId);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          trashedCardDefinitionId: CODE_VIRAL_CACHE_ID,
-          corpCreditsAfter: state.corp.credits,
-        };
-        return;
-      }
-      if (
-        legalAction.payload?.corpAbility ===
-        "trash_new_data_fort_creation_lock_source"
-      ) {
-        resolveCorpTrashNewDataFortCreationLockSource(state, legalAction);
-        return;
-      }
-      if (
-        resolveSuccessfulRunFollowupAbility(
-          successfulRunInterventionHost(state),
-          legalAction,
-        ).handled
-      )
-        return;
-      if (
-        legalAction.payload?.runnerUtilityAbility ===
-        "derez_fully_broken_passed_ice_and_end_run"
-      ) {
-        resolveFullyBrokenPassedIceDerezAndEndRunInRunModule(
-          encounterSpecialWindowHostForState(state),
-          legalAction,
-        );
-        return;
-      }
-      if (
-        legalAction.payload?.v1922RunnerProgramAbility ===
-        "startup_immolator_trash_ice"
-      ) {
-        resolveStartupImmolatorTrashIceInRunModule(encounterSpecialWindowHostForState(state), legalAction);
-        return;
-      }
-      if (
-        legalAction.payload?.v1915RunnerProgramAbility ===
-        "mystery_box_top5_program_install"
-      ) {
-        handleMysteryBoxTopFiveProgramInstallActivation(
-          hiddenZoneSearchActivationHandlerHost(state, legalAction),
-        );
-        return;
-      }
-      if (
-        legalAction.payload?.v1922RunnerHardwareAbility ===
-        "microtech_backup_drive_return_top_hosted"
-      ) {
-        resolveMicrotechBackupDriveReturnTopHosted(state, legalAction);
-        return;
-      }
-      if (
-        legalAction.payload?.fortRunWindowAbility ===
-        "add_advancement_counters_after_passing_last_ice_on_this_fort"
-      ) {
-        resolveFortPassAdvancementWindow(
-          fortPassWindowHostForState(state),
-          legalAction,
-        );
-        return;
-      }
-      if (
-        legalAction.payload?.fortRunWindowAbility ===
-        "move_self_to_different_position_on_same_fort"
-      ) {
-        resolveStartRunIceRepositionWindow(
-          fortPassWindowHostForState(state),
-          legalAction,
-        );
-        return;
-      }
-      if (legalAction.payload?.runnerUtilityAbility === "preying_mantis_gain_action") {
-        resolvePreyingMantisGainAction(state, legalAction);
-        return;
-      }
-      if (legalAction.payload?.corpAbility === "remove_spy_counter") {
-        resolveCorpRemoveSpyCounter(state, legalAction);
-        return;
-      }
-      if (
-        legalAction.payload?.resourceAbility ===
-        "junkyard_bbs_return_top_heap"
-      ) {
-        resolveJunkyardBbsAbility(state, legalAction);
-        return;
-      }
-      if (
-        legalAction.payload?.shellTradersAbility === "set_aside_from_grip"
-      ) {
-        resolveShellTradersSetAside(state, legalAction);
-        return;
-      }
-      if (
-        legalAction.payload?.shellTradersAbility === "remove_shell_counter"
-      ) {
-        resolveShellTradersRemoveCounter(state, legalAction);
-        return;
-      }
-      if (legalAction.payload?.runnerAbility === "wilson_gain_run_action") {
-        if (legalAction.side !== "runner")
-          throw new Error("Nur der Runner darf Wilson nutzen.");
-        if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
-          throw new Error("Wilson ist nur im Runner-Zug nutzbar.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (
-          !state.runner.rig.resources.includes(sourceCardId as CardInstanceId) ||
-          remainingReplacementLongtailKindForCard(
-            state,
-            sourceCardId as CardInstanceId,
-          ) !== "wilson_run_action_spending_cap"
-        )
-          throw new Error("Wilson ist nicht installiert.");
-        const flags = ensureRunnerTurnFlags(state);
-        const used = flags.wilsonUsedSourceIdsThisTurn ?? [];
-        if (used.includes(sourceCardId as CardInstanceId))
-          throw new Error("Wilson wurde diesen Zug bereits genutzt.");
-        flags.wilsonUsedSourceIdsThisTurn = [
-          ...used,
-          sourceCardId as CardInstanceId,
-        ];
-        flags.wilsonRunOnlyActionsRemaining =
-          Math.max(0, Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0)) + 1;
-        state.runner.clicks += 1;
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          wilsonRunOnlyActionsRemaining: flags.wilsonRunOnlyActionsRemaining,
-          runnerClicksAfter: state.runner.clicks,
-        };
-        return;
-      }
-      if (legalAction.payload?.runnerAbility === "remove_runner_trace_counter") {
-        resolveRemoveRunnerTraceCounter(state, legalAction);
-        return;
-      }
-      if (
-        legalAction.payload?.v1920RunnerRunLockAbility ===
-        "fang_2_0_pay_to_run"
-      ) {
-        if (legalAction.side !== "runner")
-          throw new Error("Nur der Runner darf die Run-Sperre entfernen.");
-        spendClick(state, "runner");
-        const cost = Number(legalAction.payload?.fangRunLockCreditCost ?? 0);
-        const pendingCost = Math.max(
-          0,
-          Math.floor(state.runnerTurnFlags?.fangRunLockCreditCost ?? 0),
-        );
-        if (!Number.isInteger(cost) || cost <= 0 || cost !== pendingCost)
-          throw new Error("Die Run-Sperre verlangt den aktuellen Betrag.");
-        spendCredits(state, "runner", cost);
-        ensureRunnerTurnFlags(state).fangRunLockCreditCost = 0;
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          fangRunLockCleared: true,
-          runnerRunLockCleared: true,
-          runnerCreditsAfter: state.runner.credits,
-        };
-        return;
-      }
-      if (
-        legalAction.payload?.acmeSavingsAndLoanAbility ===
-        "remove_obligation"
-      ) {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf ACME Savings and Loan abloesen.");
-        const obligationsBefore = acmeSavingsAndLoanObligationCount(state);
-        if (obligationsBefore <= 0)
-          throw new Error(
-            "Es gibt keine aktive ACME-Savings-and-Loan-Verpflichtung.",
-          );
-        const creditCost = Number(
-          legalAction.payload?.acmeSavingsAndLoanCreditCost ?? 0,
-        );
-        if (!Number.isInteger(creditCost) || creditCost !== 12)
-          throw new Error("ACME Savings and Loan verlangt genau 12 Credits.");
-        const scorePoints = Number(
-          legalAction.payload?.acmeSavingsAndLoanScoreAgendaPoints ?? 0,
-        );
-        if (!Number.isInteger(scorePoints) || scorePoints !== 1)
-          throw new Error(
-            "ACME Savings and Loan scored genau 1 Agenda-Punkt.",
-          );
-        spendClick(state, "corp");
-        spendCredits(state, "corp", creditCost);
-        removeAcmeSavingsAndLoanObligation(state);
-        state.corpBonusAgendaPoints =
-          Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0)) +
-          scorePoints;
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          acmeSavingsAndLoanObligationsBefore: obligationsBefore,
-          acmeSavingsAndLoanObligationsAfter:
-            acmeSavingsAndLoanObligationCount(state),
-          acmeDebtActive: acmeSavingsAndLoanObligationCount(state) > 0,
-          acmeSavingsAndLoanPaymentPaid: creditCost,
-          gainedAgendaPoints: scorePoints,
-          corpBonusAgendaPointsAfter: state.corpBonusAgendaPoints,
-          corpCreditsAfter: state.corp.credits,
-        };
-        return;
-      }
-      if (legalAction.payload?.approachIceExposeDecision) {
-        resolveApproachIceExposeAbility(
-          encounterEntryHostForState(state),
-          legalAction,
-        );
-        return;
-      }
-      if (legalAction.payload?.approachIceExposeViewDecision) {
-        resolveApproachIceExposeViewingDecision(
-          encounterEntryHostForState(state),
-          legalAction,
-        );
-        return;
-      }
-      if (
-        legalAction.payload?.v1918UpgradeAbility ===
-        "singapore_city_grid_hq_ice_swap"
-      ) {
-        startSingaporeCityGridSwapChoice(
-          fortPassWindowHostForState(state),
-          legalAction,
-        );
-        return;
-      }
-      throw new Error(
-        "Generische Abilities sind vorbereitet, aber in V0.93 nicht sichtbar freigeschaltet.",
-      );
+      handleTriggerAbilityExecution(triggerAbilityExecutionHost(state), legalAction);
+      return;
   }
 }
 
