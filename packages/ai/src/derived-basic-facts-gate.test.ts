@@ -66,12 +66,12 @@ describe("derived basic facts gate report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("keeps the 32-card pilot complete", () => {
+  it("keeps the 50-card pilot complete", () => {
     const report = readReport();
-    expect(report.pilotCardCount).toBe(32);
-    expect(report.implementationFoundCount).toBe(32);
-    expect(report.cardsWithDerivedFacts).toBe(32);
-    expect(report.cardsWithManualOntologyOverlap).toBe(32);
+    expect(report.pilotCardCount).toBe(50);
+    expect(report.implementationFoundCount).toBe(50);
+    expect(report.cardsWithDerivedFacts).toBe(50);
+    expect(report.cardsWithManualOntologyOverlap).toBe(50);
     expect(report.cardsNeedingManualOverlay).toBe(3);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
@@ -205,6 +205,51 @@ describe("derived basic facts gate report", () => {
     const chicagoBranch = cardById(report, "onr_v1_312_chicago-branch");
     expect(chicagoBranch.derivedFacts.effects).toContainEqual(
       expect.objectContaining({ kind: "score_acceleration" }),
+    );
+
+    const pileDriver = cardById(report, "onr_v1_047_pile-driver");
+    expect(pileDriver.derivedFacts.breakerProfile).toEqual(
+      expect.objectContaining({
+        coverage: ["wall"],
+        sideEffects: ["stealth_loss"],
+      }),
+    );
+
+    const blink = cardById(report, "onr_v1_007_blink");
+    expect(blink.derivedFacts.breakerProfile).toEqual(
+      expect.objectContaining({
+        coverage: ["universal"],
+        sideEffects: ["once_per_subroutine", "random_failure"],
+      }),
+    );
+
+    const dropp = cardById(report, "onr_v1_019_dropp");
+    expect(dropp.derivedFacts.breakerProfile).toEqual(
+      expect.objectContaining({
+        coverage: ["universal"],
+        sideEffects: ["ends_run_after_use"],
+      }),
+    );
+
+    const bartmoss = cardById(
+      report,
+      "onr_v1_005_bartmoss-memorial-icebreaker",
+    );
+    expect(bartmoss.derivedFacts.breakerProfile).toEqual(
+      expect.objectContaining({
+        coverage: ["universal"],
+        sideEffects: ["program_trash_risk", "random_failure"],
+      }),
+    );
+
+    const replicator = cardById(report, "onr_v1_056_replicator");
+    expect(replicator.derivedFacts.breakerProfile).toEqual(
+      expect.objectContaining({ coverage: ["trace"] }),
+    );
+
+    const reflector = cardById(report, "onr_v1_055_reflector");
+    expect(reflector.derivedFacts.breakerProfile).toEqual(
+      expect.objectContaining({ coverage: ["ap"] }),
     );
   });
 

@@ -68,11 +68,11 @@ describe("compiled hint index pilot report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("compiles the full 32-card derived facts pilot without hard errors", () => {
+  it("compiles the full 50-card derived facts pilot without hard errors", () => {
     const report = readReport();
-    expect(report.compiledCardCount).toBe(32);
+    expect(report.compiledCardCount).toBe(50);
     expect(report.overlayCardCount).toBe(6);
-    expect(report.cardsWithoutOverlay).toBe(26);
+    expect(report.cardsWithoutOverlay).toBe(44);
     expect(report.hardErrorCount).toBe(0);
     expect(report.source.activeHintsPath).toBe(
       "data/ai/ai-card-hints-active.json",
@@ -93,7 +93,7 @@ describe("compiled hint index pilot report", () => {
       6,
     );
     expect(report.cards.filter((card) => !card.manualOverlayFound).length).toBe(
-      26,
+      44,
     );
   });
 
@@ -142,7 +142,7 @@ describe("compiled hint index pilot report", () => {
     expect(report.warningCountsByKind.overlay_missing_for_manual_gap ?? 0).toBe(
       0,
     );
-    expect(report.infoCounts.info_no_overlay_needed).toBe(26);
+    expect(report.infoCounts.info_no_overlay_needed).toBe(44);
     expect(
       report.cards
         .filter((card) => !card.manualOverlayFound)
@@ -164,10 +164,10 @@ describe("compiled hint index pilot report", () => {
 
   it("classifies compiled-index warnings into non-blocking comparison groups", () => {
     const report = readReport();
-    expect(report.warningCount).toBe(105);
+    expect(report.warningCount).toBe(158);
     expect(report.warningClassificationCounts).toEqual({
-      generated_fact_absent_from_monolith: 32,
-      monolith_mechanical_duplication_candidate: 67,
+      generated_fact_absent_from_monolith: 49,
+      monolith_mechanical_duplication_candidate: 103,
       overlay_strategy_field_not_in_monolith: 6,
     });
     expect(
@@ -196,8 +196,8 @@ describe("compiled hint index pilot report", () => {
         field: "strategicNotes",
       }),
     );
-    expect(report.migrationCandidates.length).toBe(32);
-    expect(report.generatedFactCandidates.length).toBe(32);
+    expect(report.migrationCandidates.length).toBe(50);
+    expect(report.generatedFactCandidates.length).toBe(50);
     expect(report.overlayCandidates).toEqual([]);
   });
 

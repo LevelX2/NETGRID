@@ -23,6 +23,7 @@
     "check:ai-generated-fact-batch3-diff-review": "node scripts/check-ai-generated-fact-batch3-diff-review.mjs --check",
     "check:ai-generated-fact-batch3-dry-run": "node scripts/check-ai-generated-fact-batch3-dry-run.mjs --check",
     "check:ai-generated-fact-batch4-corp-remote-closeout": "node scripts/check-ai-generated-fact-batch4-closeout.mjs --check",
+    "check:ai-generated-fact-batch5-breaker-closeout": "node scripts/check-ai-generated-fact-batch5-breaker-closeout.mjs --check",
     "check:ai-generated-fact-migration-dry-run": "node scripts/check-ai-generated-fact-migration-dry-run.mjs --check",
     "check:ai-generated-fact-migration-priority": "node scripts/check-ai-generated-fact-migration-priority.mjs --check",
     "check:ai-hint-compiled-index": "node scripts/check-ai-hint-compiled-index.mjs --check",

@@ -6,14 +6,14 @@
     "pilotCardsPath": "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json",
     "derivationMode": "read-only CardImplementation text/descriptor scan; no runtime, planner, or strategy consumption"
   },
-  "pilotCardCount": 32,
-  "implementationFoundCount": 32,
-  "cardsWithDerivedFacts": 32,
-  "cardsWithManualOntologyOverlap": 32,
+  "pilotCardCount": 50,
+  "implementationFoundCount": 50,
+  "cardsWithDerivedFacts": 50,
+  "cardsWithManualOntologyOverlap": 50,
   "cardsNeedingManualOverlay": 3,
   "effectKindCounts": {
     "access_replacement": 1,
-    "breaker": 2,
+    "breaker": 20,
     "counter_economy": 2,
     "damage": 3,
     "draw": 2,
@@ -47,8 +47,38 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 49,
+  "warningCount": 70,
   "warnings": [
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_002_ai-boon"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_005_bartmoss-memorial-icebreaker"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_006_black-dahlia"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_007_blink"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_014_codecracker"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_016_cyfermaster"
+    },
     {
       "kind": "descriptor_or_overlay_gap",
       "message": "Intentionally manual strategic overlay is not derived: condition:requires_rnd_pressure, condition:requires_successful_run.",
@@ -71,6 +101,16 @@
     },
     {
       "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_019_dropp"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_019_dropp"
+    },
+    {
+      "kind": "confidence_mismatch",
       "message": "Generated confidence medium differs from manual confidence high.",
       "cardId": "onr_v1_037_japanese-water-torture"
     },
@@ -87,7 +127,17 @@
     {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_040_loony-goon"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_043_mystery-box"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_047_pile-driver"
     },
     {
       "kind": "text_pattern_derivation",
@@ -102,12 +152,67 @@
     {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_052_raffles"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_054_raptor"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_055_reflector"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_055_reflector"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_056_replicator"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_057_scatter-shot"
     },
     {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_059_self-modifying-code"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_060_shaka"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_070_tinweasel"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_070_tinweasel"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_072_wild-card"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_073_wizards-book"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_074_worm"
     },
     {
       "kind": "text_pattern_derivation",
@@ -297,6 +402,553 @@
   ],
   "cards": [
     {
+      "cardId": "onr_v1_002_ai-boon",
+      "title": "AI Boon",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/ai-boon.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:sentry",
+        "breakerSideEffect:random_failure"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and random run-start strength context are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [
+          "Random breaker outcome is represented as a side effect only; generated facts do not imply deterministic break safety."
+        ],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "pumpCost": 1,
+          "breakCost": 1,
+          "confidence": "medium",
+          "source": "implementation.icebreakerAbilities",
+          "sideEffects": ["random_failure"]
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["program", "random", "runner"],
+        "planRoles": [
+          "runner_install_program",
+          "runner_start_run_strength_roll"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 12,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "pumpCost": 1,
+          "breakCost": 1,
+          "sideEffects": ["random_failure"],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [
+          "breakerCoverage:sentry",
+          "breakerSideEffect:random_failure",
+          "effect:breaker"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "medium",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+      "title": "Bartmoss Memorial Icebreaker",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/bartmoss-memorial-icebreaker.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:universal",
+        "breakerSideEffect:random_failure",
+        "breakerSideEffect:program_trash_risk"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Universal breaker coverage and post-encounter self-trash risk are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [
+          "Random breaker outcome is represented as a side effect only; generated facts do not imply deterministic break safety."
+        ],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["universal"],
+          "pumpCost": 1,
+          "breakCost": 1,
+          "confidence": "medium",
+          "source": "implementation.icebreakerAbilities",
+          "sideEffects": ["program_trash_risk", "random_failure"]
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["icebreaker", "program", "random_breaker", "run_support"],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 5,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["universal"],
+          "baseStrength": 0,
+          "pumpCost": 1,
+          "breakCost": 1,
+          "sideEffects": ["program_trash_risk", "random_failure"],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "breakerCoverage:universal",
+          "breakerSideEffect:program_trash_risk",
+          "breakerSideEffect:random_failure",
+          "effect:breaker"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "medium",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_006_black-dahlia",
+      "title": "Black Dahlia",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/black-dahlia.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "pumpCost": 2,
+          "breakCost": 2,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["breaker_killer", "high_strength_breaker"],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 10,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "baseStrength": 5,
+          "pumpCost": 2,
+          "breakCost": 2,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:sentry", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_007_blink",
+      "title": "Blink",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/blink.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:universal",
+        "breakerSideEffect:random_failure",
+        "breakerSideEffect:once_per_subroutine"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Universal random breaker coverage and once-per-subroutine/random-failure context are directly represented; generated facts do not imply deterministic break safety.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [
+          "Random breaker outcome is represented as a side effect only; generated facts do not imply deterministic break safety."
+        ],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["universal"],
+          "breakCost": 0,
+          "confidence": "medium",
+          "source": "implementation.icebreakerAbilities",
+          "sideEffects": ["once_per_subroutine", "random_failure"]
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["icebreaker", "program", "random_breaker", "run_support"],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 5,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["universal"],
+          "baseStrength": 5,
+          "breakCost": 0,
+          "sideEffects": ["once_per_subroutine", "random_failure"],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [
+          "breakerCoverage:universal",
+          "breakerSideEffect:once_per_subroutine",
+          "breakerSideEffect:random_failure",
+          "effect:breaker"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "medium",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_014_codecracker",
+      "title": "Codecracker",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/codecracker.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "pumpCost": 1,
+          "breakCost": 0,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "breaker_decoder",
+          "efficient_breaker",
+          "icebreaker",
+          "icebreaker_support",
+          "program"
+        ],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 2,
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "baseStrength": 0,
+          "pumpCost": 1,
+          "breakCost": 0,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:code_gate", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_016_cyfermaster",
+      "title": "Cyfermaster",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/cyfermaster.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented; catalog title uses the printed trademark suffix.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "pumpCost": 1,
+          "breakCost": 2,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "breaker_decoder",
+          "code_gate_breaker",
+          "efficient_breaker",
+          "icebreaker",
+          "program"
+        ],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 4,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "baseStrength": 5,
+          "pumpCost": 1,
+          "breakCost": 2,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:code_gate", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_017_deep-thought",
       "title": "Deep Thought",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/deep-thought.ts",
@@ -380,6 +1032,102 @@
         {
           "kind": "manual_ontology_without_generated_match",
           "message": "Manual condition:requires_successful_run has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_019_dropp",
+      "title": "Dropp",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/dropp.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:universal",
+        "breakerSideEffect:ends_run_after_use"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Universal breaker coverage and ends-run side effect are directly represented; catalog title uses the printed trademark suffix.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["universal"],
+          "pumpCost": 1,
+          "breakCost": 0,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities",
+          "sideEffects": ["ends_run_after_use"]
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["breaker_end_run", "icebreaker", "program", "run_pressure"],
+        "planRoles": ["build_rig", "contest_remote", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 3,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["universal"],
+          "baseStrength": 4,
+          "pumpCost": 1,
+          "breakCost": 0,
+          "sideEffects": ["ends_run_after_use"],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "breakerCoverage:universal",
+          "breakerSideEffect:ends_run_after_use",
+          "effect:breaker"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -573,6 +1321,89 @@
       ]
     },
     {
+      "cardId": "onr_v1_040_loony-goon",
+      "title": "Loony Goon",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/loony-goon.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "pumpCost": 1,
+          "breakCost": 1,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["breaker_killer", "efficient_breaker"],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 4,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "baseStrength": 0,
+          "pumpCost": 1,
+          "breakCost": 1,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:sentry", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_043_mystery-box",
       "title": "Mystery Box",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/mystery-box.ts",
@@ -680,6 +1511,106 @@
           "condition:requires_installed_program",
           "effect:install_discount",
           "effect:search"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_047_pile-driver",
+      "title": "Pile Driver",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/pile-driver.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:wall",
+        "breakerSideEffect:stealth_loss"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Wall breaker coverage and noisy stealth-loss side effect are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [
+          "Noisy breaker stealth loss is represented as a side effect only; payment and source selection remain engine/runtime context."
+        ],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["wall"],
+          "pumpCost": 1,
+          "breakCost": 3,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities",
+          "sideEffects": ["stealth_loss"]
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "breaker_fracter",
+          "icebreaker",
+          "program",
+          "stealth_loss",
+          "wall_breaker"
+        ],
+        "planRoles": ["break_walls", "build_rig", "run_support"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 1,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["wall"],
+          "baseStrength": 7,
+          "pumpCost": 1,
+          "breakCost": 3,
+          "sideEffects": ["stealth_loss"],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "breakerCoverage:wall",
+          "breakerSideEffect:stealth_loss",
+          "effect:breaker"
         ],
         "generatedOnly": [],
         "manualOnly": []
@@ -869,6 +1800,353 @@
       ]
     },
     {
+      "cardId": "onr_v1_052_raffles",
+      "title": "Raffles",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/raffles.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "pumpCost": 2,
+          "breakCost": 1,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "breaker_decoder",
+          "code_gate_breaker",
+          "efficient_breaker",
+          "high_install_cost",
+          "icebreaker",
+          "program"
+        ],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 7,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "baseStrength": 4,
+          "pumpCost": 2,
+          "breakCost": 1,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:code_gate", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_054_raptor",
+      "title": "Raptor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/raptor.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "pumpCost": 1,
+          "breakCost": 2,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "breaker_killer",
+          "icebreaker",
+          "low_install_breaker",
+          "program",
+          "sentry_breaker"
+        ],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 1,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "baseStrength": 1,
+          "pumpCost": 1,
+          "breakCost": 2,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:sentry", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_055_reflector",
+      "title": "Reflector",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/reflector.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:ap"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Stun/hellbolt/knockout breaker coverage is represented as AP-special coverage and must not be normalized to universal coverage.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["ap"],
+          "breakCost": 0,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["per_card_longtail", "program", "runner"],
+        "planRoles": ["runner_install_program", "runner_program_ability"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 2,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["ap"],
+          "baseStrength": 4,
+          "breakCost": 0,
+          "sideEffects": [],
+          "restrictions": ["stun_hellbolt_knockout_only"]
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:ap", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_056_replicator",
+      "title": "Replicator",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/replicator.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:trace"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-subroutine breaker coverage is directly represented and must not be normalized to universal coverage.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["trace"],
+          "pumpCost": 1,
+          "breakCost": 0,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["icebreaker", "program", "trace"],
+        "planRoles": ["build_rig", "run_support", "trace_bid_support"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 5,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["trace"],
+          "baseStrength": 2,
+          "pumpCost": 1,
+          "breakCost": 0,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:trace", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_057_scatter-shot",
       "title": "Scatter Shot",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/scatter-shot.ts",
@@ -1031,6 +2309,435 @@
           "condition:requires_installed_program",
           "effect:search"
         ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_060_shaka",
+      "title": "Shaka",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shaka.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "pumpCost": 2,
+          "breakCost": 1,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "breaker_killer",
+          "efficient_sentry_breaker",
+          "icebreaker",
+          "program",
+          "sentry_breaker"
+        ],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 4,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "baseStrength": 2,
+          "pumpCost": 2,
+          "breakCost": 1,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:sentry", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_070_tinweasel",
+      "title": "Tinweasel",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/tinweasel.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage is directly represented; no pump text is a mechanical restriction kept as comparison context.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "breakCost": 0,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["breaker_decoder", "efficient_breaker"],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 5,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "baseStrength": 3,
+          "breakCost": 0,
+          "sideEffects": [],
+          "restrictions": ["no_pump_text"]
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:code_gate", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_072_wild-card",
+      "title": "Wild Card",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/wild-card.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "pumpCost": 3,
+          "breakCost": 0,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["breaker_killer", "flex_breaker"],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 0,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "baseStrength": 0,
+          "pumpCost": 3,
+          "breakCost": 0,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:sentry", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_073_wizards-book",
+      "title": "Wizard's Book",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/wizards-book.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented; catalog title uses a typographic apostrophe.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "pumpCost": 2,
+          "breakCost": 0,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["breaker_decoder", "efficient_breaker"],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 5,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["code_gate"],
+          "baseStrength": 2,
+          "pumpCost": 2,
+          "breakCost": 0,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:code_gate", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_074_worm",
+      "title": "Worm",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/worm.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Wall breaker coverage and break/pump costs are directly represented in CardImplementation icebreaker abilities.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["wall"],
+          "pumpCost": 3,
+          "breakCost": 0,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "breaker_fracter",
+          "efficient_breaker",
+          "icebreaker",
+          "icebreaker_support",
+          "program"
+        ],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 4,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["wall"],
+          "baseStrength": 2,
+          "pumpCost": 3,
+          "breakCost": 0,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:wall", "effect:breaker"],
         "generatedOnly": [],
         "manualOnly": []
       },

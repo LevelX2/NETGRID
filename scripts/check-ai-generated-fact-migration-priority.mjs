@@ -65,6 +65,223 @@ const PRIORITY_POLICY = {
     rationale:
       "Universal breaker profile is an exact mechanical fact and should not need long-term manual duplication.",
   },
+  onr_v1_074_worm: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Wall breaker coverage and break/pump costs are stable generated facts; concrete encounter legality remains effectiveRunQuote context.",
+  },
+  "onr_v1_047_pile-driver": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Wall breaker coverage is stable, while stealth_loss must stay a side-effect fact rather than normal credit cost.",
+  },
+  onr_v1_014_codecracker: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Code-gate breaker coverage and costs are stable generated facts.",
+  },
+  onr_v1_016_cyfermaster: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Code-gate breaker coverage and costs are stable generated facts; printed trademark suffix is normalized by cardId.",
+  },
+  onr_v1_052_raffles: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Code-gate breaker coverage and costs are stable generated facts.",
+  },
+  onr_v1_054_raptor: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale: "Sentry breaker coverage and costs are stable generated facts.",
+  },
+  onr_v1_060_shaka: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale: "Sentry breaker coverage and costs are stable generated facts.",
+  },
+  "onr_v1_006_black-dahlia": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale: "Sentry breaker coverage and costs are stable generated facts.",
+  },
+  "onr_v1_040_loony-goon": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale: "Sentry breaker coverage and costs are stable generated facts.",
+  },
+  onr_v1_007_blink: {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Universal random breaker coverage is mechanically derivable, but random_failure and once-per-subroutine must not become deterministic break safety.",
+  },
+  onr_v1_019_dropp: {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Universal breaker coverage is derivable, but ends_run_after_use must remain a side effect and not be lost in normalization.",
+  },
+  onr_v1_056_replicator: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Trace-subroutine breaker coverage is stable and must remain distinct from universal coverage.",
+  },
+  onr_v1_055_reflector: {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "AP-special breaker coverage is derivable, but stun/hellbolt/knockout specificity remains a descriptor limitation.",
+  },
+  "onr_v1_002_ai-boon": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Sentry breaker coverage is derivable, but random run-start strength must remain random-context only.",
+  },
+  "onr_v1_005_bartmoss-memorial-icebreaker": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Universal breaker coverage is derivable, but random self-trash risk must remain a side effect and not deterministic safety.",
+  },
+  onr_v1_070_tinweasel: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Code-gate breaker coverage is stable; no-pump text remains comparison context.",
+  },
+  "onr_v1_073_wizards-book": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Code-gate breaker coverage and costs are stable generated facts.",
+  },
+  "onr_v1_072_wild-card": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale: "Sentry breaker coverage and costs are stable generated facts.",
+  },
   "onr_v1_043_mystery-box": {
     migrationPriority: "P1",
     migrationRisk: "medium",

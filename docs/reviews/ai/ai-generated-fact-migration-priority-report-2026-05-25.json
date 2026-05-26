@@ -14,23 +14,23 @@
     "activeHints": "data/ai/ai-card-hints-active.json"
   },
   "mode": "read-only prioritization; no active hint migration, no runtime compile, no planner or consumer binding",
-  "candidateCount": 32,
+  "candidateCount": 50,
   "priorityCounts": {
     "P0": 13,
-    "P1": 15,
+    "P1": 33,
     "P2": 4,
     "P3": 0
   },
   "fieldCategoryCounts": {
-    "generated_with_board_context": 27,
-    "generated_with_descriptor_limitations": 5,
-    "legacy_keep_for_compat": 32,
+    "generated_with_board_context": 45,
+    "generated_with_descriptor_limitations": 11,
+    "legacy_keep_for_compat": 50,
     "overlay_only": 6,
-    "safe_generated_now": 25
+    "safe_generated_now": 43
   },
   "riskCounts": {
-    "low": 15,
-    "medium": 17,
+    "low": 27,
+    "medium": 23,
     "high": 0
   },
   "batchPlan": [
@@ -84,8 +84,26 @@
       "batch": 5,
       "title": "Remaining longtail mechanical facts",
       "cardIds": [
+        "onr_v1_002_ai-boon",
+        "onr_v1_005_bartmoss-memorial-icebreaker",
+        "onr_v1_006_black-dahlia",
+        "onr_v1_007_blink",
+        "onr_v1_014_codecracker",
+        "onr_v1_016_cyfermaster",
         "onr_v1_017_deep-thought",
+        "onr_v1_019_dropp",
+        "onr_v1_040_loony-goon",
+        "onr_v1_047_pile-driver",
         "onr_v1_050_r-and-d-protocol-files",
+        "onr_v1_052_raffles",
+        "onr_v1_054_raptor",
+        "onr_v1_055_reflector",
+        "onr_v1_056_replicator",
+        "onr_v1_060_shaka",
+        "onr_v1_070_tinweasel",
+        "onr_v1_072_wild-card",
+        "onr_v1_073_wizards-book",
+        "onr_v1_074_worm",
         "onr_v1_312_chicago-branch",
         "onr_v1_317_data-masons",
         "onr_v1_350_antiquated-interface-routines",
@@ -98,6 +116,318 @@
     }
   ],
   "cards": [
+    {
+      "cardId": "onr_v1_002_ai-boon",
+      "title": "AI Boon",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Sentry breaker coverage is derivable, but random run-start strength must remain random-context only.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Sentry breaker coverage and random run-start strength context are directly represented."
+    },
+    {
+      "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+      "title": "Bartmoss Memorial Icebreaker",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Universal breaker coverage is derivable, but random self-trash risk must remain a side effect and not deterministic safety.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Universal breaker coverage and post-encounter self-trash risk are directly represented."
+    },
+    {
+      "cardId": "onr_v1_006_black-dahlia",
+      "title": "Black Dahlia",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Sentry breaker coverage and costs are stable generated facts.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_007_blink",
+      "title": "Blink",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Universal random breaker coverage is mechanically derivable, but random_failure and once-per-subroutine must not become deterministic break safety.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Universal random breaker coverage and once-per-subroutine/random-failure context are directly represented; generated facts do not imply deterministic break safety."
+    },
+    {
+      "cardId": "onr_v1_014_codecracker",
+      "title": "Codecracker",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Code-gate breaker coverage and costs are stable generated facts.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Code-gate breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_016_cyfermaster",
+      "title": "Cyfermaster",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Code-gate breaker coverage and costs are stable generated facts; printed trademark suffix is normalized by cardId.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Code-gate breaker coverage and costs are directly represented; catalog title uses the printed trademark suffix."
+    },
     {
       "cardId": "onr_v1_017_deep-thought",
       "title": "Deep Thought",
@@ -153,6 +483,59 @@
         "valueHints"
       ],
       "derivedRationale": "Topdeck information is derivable; R&D-pressure and interface-pressure conditions remain intentionally manual strategic overlay."
+    },
+    {
+      "cardId": "onr_v1_019_dropp",
+      "title": "Dropp",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Universal breaker coverage is derivable, but ends_run_after_use must remain a side effect and not be lost in normalization.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Universal breaker coverage and ends-run side effect are directly represented; catalog title uses the printed trademark suffix."
     },
     {
       "cardId": "onr_v1_037_japanese-water-torture",
@@ -266,6 +649,58 @@
       "derivedRationale": "Universal breaker profile and costs are directly represented in CardImplementation icebreaker abilities."
     },
     {
+      "cardId": "onr_v1_040_loony-goon",
+      "title": "Loony Goon",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Sentry breaker coverage and costs are stable generated facts.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
       "cardId": "onr_v1_043_mystery-box",
       "title": "Mystery Box",
       "side": "runner",
@@ -331,6 +766,59 @@
         "valueHints"
       ],
       "derivedRationale": "Top-of-stack search, show-to-Corp target profile, free program install and once-per-run usage limit are derivable in the read-only target profile."
+    },
+    {
+      "cardId": "onr_v1_047_pile-driver",
+      "title": "Pile Driver",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Wall breaker coverage is stable, while stealth_loss must stay a side-effect fact rather than normal credit cost.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Wall breaker coverage and noisy stealth-loss side effect are directly represented."
     },
     {
       "cardId": "onr_v1_048_poltergeist",
@@ -430,6 +918,215 @@
         "valueHints"
       ],
       "derivedRationale": "Successful-run access replacement and private R&D look are directly represented."
+    },
+    {
+      "cardId": "onr_v1_052_raffles",
+      "title": "Raffles",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Code-gate breaker coverage and costs are stable generated facts.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Code-gate breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_054_raptor",
+      "title": "Raptor",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Sentry breaker coverage and costs are stable generated facts.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_055_reflector",
+      "title": "Reflector",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "AP-special breaker coverage is derivable, but stun/hellbolt/knockout specificity remains a descriptor limitation.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Stun/hellbolt/knockout breaker coverage is represented as AP-special coverage and must not be normalized to universal coverage."
+    },
+    {
+      "cardId": "onr_v1_056_replicator",
+      "title": "Replicator",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Trace-subroutine breaker coverage is stable and must remain distinct from universal coverage.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-subroutine breaker coverage is directly represented and must not be normalized to universal coverage."
     },
     {
       "cardId": "onr_v1_057_scatter-shot",
@@ -541,6 +1238,266 @@
         "valueHints"
       ],
       "derivedRationale": "Search timing and target profile are derivable; installation uses normal cost handling, so this card does not carry an install_discount basic fact."
+    },
+    {
+      "cardId": "onr_v1_060_shaka",
+      "title": "Shaka",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Sentry breaker coverage and costs are stable generated facts.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_070_tinweasel",
+      "title": "Tinweasel",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Code-gate breaker coverage is stable; no-pump text remains comparison context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Code-gate breaker coverage is directly represented; no pump text is a mechanical restriction kept as comparison context."
+    },
+    {
+      "cardId": "onr_v1_072_wild-card",
+      "title": "Wild Card",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Sentry breaker coverage and costs are stable generated facts.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_073_wizards-book",
+      "title": "Wizard's Book",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Code-gate breaker coverage and costs are stable generated facts.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Code-gate breaker coverage and costs are directly represented; catalog title uses a typographic apostrophe."
+    },
+    {
+      "cardId": "onr_v1_074_worm",
+      "title": "Worm",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Wall breaker coverage and break/pump costs are stable generated facts; concrete encounter legality remains effectiveRunQuote context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Wall breaker coverage and break/pump costs are directly represented in CardImplementation icebreaker abilities."
     },
     {
       "cardId": "onr_v1_192_corporate-boon",

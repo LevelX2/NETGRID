@@ -616,7 +616,15 @@ function deriveFromImplementation(card, implementationText, hint) {
 
   if (/icebreakerAbilities:\s*\[/.test(implementationText)) {
     const coverage = [];
-    for (const subtype of ["wall", "sentry", "code_gate", "ap", "trace"]) {
+    for (const subtype of [
+      "wall",
+      "sentry",
+      "code_gate",
+      "ap",
+      "trace",
+      "watchdog",
+      "black_ice",
+    ]) {
       if (
         new RegExp(`subtype:\\s*"${subtype.replace("_", "[-_ ]?")}"`).test(
           implementationText,
@@ -624,6 +632,17 @@ function deriveFromImplementation(card, implementationText, hint) {
       ) {
         coverage.push(subtype);
       }
+    }
+    if (/subroutine_traces/.test(implementationText)) coverage.push("trace");
+    if (
+      /subroutine_tag[\s\S]{0,120}?(stun|hellbolt|knockout)/.test(
+        implementationText,
+      )
+    ) {
+      coverage.push("ap");
+    }
+    if (/subtypes:\s*\[[\s\S]{0,160}?"watchdog"/.test(implementationText)) {
+      coverage.push("watchdog");
     }
     if (/matches:\s*\{\s*kind:\s*"any"/.test(implementationText)) {
       coverage.push("universal");
@@ -649,6 +668,39 @@ function deriveFromImplementation(card, implementationText, hint) {
       facts.derivationNotes.push(
         "Future action debt is represented as the structured breaker side effect forgo_actions; no planner/runtime consumption is implied.",
       );
+    }
+    const sideEffects = new Set(facts.breakerProfile.sideEffects ?? []);
+    if (/lose_bits_from_stealth_sources/.test(implementationText)) {
+      sideEffects.add("stealth_loss");
+      facts.derivationNotes.push(
+        "Noisy breaker stealth loss is represented as a side effect only; payment and source selection remain engine/runtime context.",
+      );
+    }
+    if (
+      /blink_random_break_or_net_damage|ai_boon_run_start_random_strength|bartmoss_post_encounter_self_trash_check/.test(
+        implementationText,
+      )
+    ) {
+      sideEffects.add("random_failure");
+      facts.breakerProfile.confidence = "medium";
+      facts.derivationNotes.push(
+        "Random breaker outcome is represented as a side effect only; generated facts do not imply deterministic break safety.",
+      );
+    }
+    if (/blink_random_break_or_net_damage/.test(implementationText)) {
+      sideEffects.add("once_per_subroutine");
+    }
+    if (/bartmoss_post_encounter_self_trash_check/.test(implementationText)) {
+      sideEffects.add("program_trash_risk");
+    }
+    if (/kind:\s*"end_run"/.test(implementationText)) {
+      sideEffects.add("ends_run_after_use");
+    }
+    if (/snowball_run_strength_per_successful_break/.test(implementationText)) {
+      sideEffects.add("temporary_strength");
+    }
+    if (sideEffects.size > 0) {
+      facts.breakerProfile.sideEffects = [...sideEffects];
     }
   }
 
@@ -1612,6 +1664,9 @@ function derivedKindSet(derivedFacts) {
     ),
     ...(derivedFacts.breakerProfile?.coverage ?? []).map(
       (coverage) => `breakerCoverage:${coverage}`,
+    ),
+    ...(derivedFacts.breakerProfile?.sideEffects ?? []).map(
+      (sideEffect) => `breakerSideEffect:${sideEffect}`,
     ),
     ...(derivedFacts.remoteRole
       ? [`remoteRole:${derivedFacts.remoteRole.kind}`]
