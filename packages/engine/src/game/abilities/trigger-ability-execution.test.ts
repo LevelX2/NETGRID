@@ -117,9 +117,9 @@ describe("trigger ability execution", () => {
     });
   });
 
-  it("delegates Self-Modifying Code trigger without importing the engine index", () => {
+  it("delegates runner-special triggers without importing the engine index", () => {
     const state = createGame({
-      seed: "arch-70-trigger-ability-smc-delegate",
+      seed: "arch-70-trigger-ability-runner-special-delegate",
       setupMode: "completed",
     });
     const calls: string[] = [];
@@ -129,12 +129,15 @@ describe("trigger ability execution", () => {
 
     handleTriggerAbilityExecution(
       testHost(state, {
-        resolveSelfModifyingCodeAbility: () => calls.push("smc"),
+        handleRunnerSpecialTriggerExecution: () => {
+          calls.push("runner-special");
+          return { handled: true };
+        },
       }),
       action,
     );
 
-    expect(calls).toEqual(["smc"]);
+    expect(calls).toEqual(["runner-special"]);
   });
 
   it("keeps the legacy generic-trigger error for unsupported triggers", () => {
@@ -186,7 +189,10 @@ type TestHostOptions = {
   codeViralCacheId?: string;
   remainingReplacementKind?: string;
   trashRunnerInstalledCardToHeap?: (cardId: CardInstanceId) => void;
-  resolveSelfModifyingCodeAbility?: (legalAction: LegalAction) => void;
+  handleRunnerSpecialTriggerExecution?: (legalAction: LegalAction) => {
+    handled: boolean;
+    actionType?: LegalAction["type"];
+  };
 };
 
 function testHost(
@@ -241,9 +247,12 @@ function testHost(
       acmeSavingsAndLoanObligationCount: () => 0,
       removeAcmeSavingsAndLoanObligation: () => undefined,
     },
+    runnerSpecial: {
+      handleRunnerSpecialTriggerExecution:
+        options.handleRunnerSpecialTriggerExecution ??
+        (() => ({ handled: false })),
+    },
     delegates: {
-      resolveSelfModifyingCodeAbility:
-        options.resolveSelfModifyingCodeAbility ?? (() => undefined),
       resolveCorpTrashNewDataFortCreationLockSource: () => undefined,
       resolveSuccessfulRunFollowupAbility: () => ({ handled: false }),
       resolveFullyBrokenPassedIceDerezAndEndRun: () => undefined,
@@ -254,9 +263,6 @@ function testHost(
       resolveStartRunIceRepositionWindow: () => undefined,
       resolvePreyingMantisGainAction: () => undefined,
       resolveCorpRemoveSpyCounter: () => undefined,
-      resolveJunkyardBbsAbility: () => undefined,
-      resolveShellTradersSetAside: () => undefined,
-      resolveShellTradersRemoveCounter: () => undefined,
       resolveRemoveRunnerTraceCounter: () => undefined,
       resolveApproachIceExposeAbility: () => undefined,
       resolveApproachIceExposeViewingDecision: () => undefined,

@@ -5,6 +5,9 @@ import type {
   LegalAction,
   Side,
 } from "@netgrid/shared";
+import type {
+  RunnerSpecialTriggerExecutionResult,
+} from "./runner-special-trigger-execution";
 
 export type TriggerAbilityExecutionHost = {
   state: GameState;
@@ -35,8 +38,12 @@ export type TriggerAbilityExecutionHost = {
     acmeSavingsAndLoanObligationCount: (state: GameState) => number;
     removeAcmeSavingsAndLoanObligation: (state: GameState) => void;
   };
+  runnerSpecial: {
+    handleRunnerSpecialTriggerExecution: (
+      legalAction: LegalAction,
+    ) => RunnerSpecialTriggerExecutionResult;
+  };
   delegates: {
-    resolveSelfModifyingCodeAbility: (legalAction: LegalAction) => void;
     resolveCorpTrashNewDataFortCreationLockSource: (
       legalAction: LegalAction,
     ) => void;
@@ -57,9 +64,6 @@ export type TriggerAbilityExecutionHost = {
     resolveStartRunIceRepositionWindow: (legalAction: LegalAction) => void;
     resolvePreyingMantisGainAction: (legalAction: LegalAction) => void;
     resolveCorpRemoveSpyCounter: (legalAction: LegalAction) => void;
-    resolveJunkyardBbsAbility: (legalAction: LegalAction) => void;
-    resolveShellTradersSetAside: (legalAction: LegalAction) => void;
-    resolveShellTradersRemoveCounter: (legalAction: LegalAction) => void;
     resolveRemoveRunnerTraceCounter: (legalAction: LegalAction) => void;
     resolveApproachIceExposeAbility: (legalAction: LegalAction) => void;
     resolveApproachIceExposeViewingDecision: (
@@ -84,13 +88,8 @@ export function handleTriggerAbilityExecution(
   if (legalAction.type !== "trigger_ability") return { handled: false };
 
   const { state } = host;
-  if (
-    legalAction.payload?.v1911HiddenZoneAbility ===
-    "self_modifying_code_install_program"
-  ) {
-    host.delegates.resolveSelfModifyingCodeAbility(legalAction);
+  if (host.runnerSpecial.handleRunnerSpecialTriggerExecution(legalAction).handled)
     return handled(legalAction);
-  }
   if (legalAction.payload?.corpAbility === "trash_code_viral_cache") {
     if (legalAction.side !== "corp")
       throw new Error("Nur die Korp darf Code Viral Cache trashen.");
@@ -171,21 +170,6 @@ export function handleTriggerAbilityExecution(
   }
   if (legalAction.payload?.corpAbility === "remove_spy_counter") {
     host.delegates.resolveCorpRemoveSpyCounter(legalAction);
-    return handled(legalAction);
-  }
-  if (
-    legalAction.payload?.resourceAbility ===
-    "junkyard_bbs_return_top_heap"
-  ) {
-    host.delegates.resolveJunkyardBbsAbility(legalAction);
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.shellTradersAbility === "set_aside_from_grip") {
-    host.delegates.resolveShellTradersSetAside(legalAction);
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.shellTradersAbility === "remove_shell_counter") {
-    host.delegates.resolveShellTradersRemoveCounter(legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.runnerAbility === "wilson_gain_run_action") {
