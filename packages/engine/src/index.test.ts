@@ -28066,7 +28066,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       damageAmount: 1,
     });
     expect(JSON.stringify(rdState.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
+      /"(privatePayload|cardInstances|hq|rd)":/,
     );
 
     let archivesState = toRunnerTurn(
@@ -28159,7 +28159,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       tagsAdded: 1,
     });
     expect(JSON.stringify(rdState.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
+      /"(privatePayload|cardInstances|hq|rd)":/,
     );
     const replay = replayEvents(initial, rdState.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

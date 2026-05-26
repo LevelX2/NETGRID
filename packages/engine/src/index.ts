@@ -146,9 +146,12 @@ import {
   purgeableRunnerVirusCounterAmount,
   purgeableRunnerVirusCounterTotal,
   purgeVirusCounters,
-  setPurgeableRunnerVirusCounterAmount,
   type TurnBasicExecutionHost,
 } from "./game/turn/turn-basic-execution";
+import {
+  installCard as executeInstallCard,
+  type InstallCardHost,
+} from "./game/install/install-card";
 import {
   buildRunnerHardwareInstallAction,
   buildRunnerProgramInstallAction,
@@ -4413,6 +4416,124 @@ function turnBasicExecutionHost(state: GameState): TurnBasicExecutionHost {
   };
 }
 
+function installCardHost(state: GameState): InstallCardHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
+      isUniqueCard,
+      hasInstalledUniqueCardDefinition: (side, definitionId) =>
+        hasInstalledUniqueCardDefinition(state, side, definitionId),
+      cardHasSubtype,
+      isRunnerHardwareDeckDefinition,
+      hasCardImplementationMemoryUnitModifier,
+      shouldLoadLegacyRecurringCredits,
+      damagePreventionSourcesForDefinition,
+      cardImplementationAgendaPointInstallCost,
+    },
+    servers: {
+      assertCorpCanCreateNewDataFort: () => assertCorpCanCreateNewDataFort(state),
+      mustServer: (serverId) => mustServer(state, serverId),
+      createRemote: () => createRemote(state),
+      serverChoiceDisplayLabel: (serverId) =>
+        serverChoiceDisplayLabel(state, serverId),
+      canInstallCorpRootCardInServer: (definition, server) =>
+        canInstallCorpRootCardInServer(state, definition, server),
+      corpRootAgendaOrNodeCapacityInServer: (server) =>
+        corpRootAgendaOrNodeCapacityInServer(state, server),
+      corpRootAssetIdsInServer: (server) =>
+        corpRootAssetIdsInServer(state, server),
+      corpRootMainCardIdsInServer: (server) =>
+        corpRootMainCardIdsInServer(state, server),
+      rootInstallRezzesOnInstall,
+      trashOlderRegionUpgradesInServer: (server, keepCardId, legalAction) =>
+        trashOlderRegionUpgradesInServer(state, server, keepCardId, legalAction),
+      markRovingSubmarineActivityForServer: (serverId, legalAction) =>
+        markRovingSubmarineActivityForServer(
+          fortRunSideFamiliesHostForState(state),
+          serverId,
+          legalAction,
+        ),
+    },
+    zones: {
+      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+      trashRunnerInstalledCardToHeap: (cardId) =>
+        trashRunnerInstalledCardToHeap(state, cardId),
+      trashCorpInstalledCardToArchives: (cardId, legalAction) =>
+        trashCorpInstalledCardToArchives(state, cardId, legalAction),
+    },
+    runner: {
+      ensureTurnFlags: () => ensureRunnerTurnFlags(state),
+      requiresDataFortInstallTarget,
+      startRunnerProgramTrashBeforeInstallChoice: (cardId) =>
+        startRunnerProgramTrashBeforeInstallChoice(state, cardId),
+      forfeitRunnerAgendaForPointCost: (cardId) =>
+        forfeitRunnerAgendaForPointCost(state, cardId),
+      consumeValuPakProgramInstallAction: (legalAction) =>
+        consumeValuPakProgramInstallAction(state, legalAction),
+      startRunnerHostingChoice: (cardId, legalAction) =>
+        startRunnerHostingChoice(state, cardId, legalAction),
+      hiddenRunnerResourceSlotId,
+    },
+    corp: {
+      expireCorporateRetreatInstallCreditAbilities: () =>
+        expireCorporateRetreatInstallCreditAbilities(state),
+      consumeEdgerunnerTempsInstallAction: (legalAction) =>
+        consumeEdgerunnerTempsInstallAction(state, legalAction),
+      isRegionUpgrade,
+      isParisTracePoolSource: (cardId) =>
+        isParisTracePoolSource(fortRunSideFamiliesHostForState(state), cardId),
+      parisTracePoolCapacityForCard: (cardId) =>
+        parisTracePoolCapacityForCard(
+          fortRunSideFamiliesHostForState(state),
+          cardId,
+        ),
+    },
+    hosting: {
+      canHostProgramOnDaemon: (hostCardId, definition) =>
+        canHostProgramOnDaemon(state, hostCardId, definition),
+      canOverlayProgramOnZetatechSoftwareInstaller: (hostCardId, definition) =>
+        canOverlayProgramOnZetatechSoftwareInstaller(
+          state,
+          hostCardId,
+          definition,
+        ),
+      hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
+    },
+    payment: {
+      assertCorpIceInstallCostValid: (cardId, definition, legalAction) =>
+        assertCorpIceInstallCostValid(state, cardId, definition, legalAction),
+      spendClick: (side) => spendClick(state, side),
+      spendRunnerInstallCredits: (amount, cardType) =>
+        spendRunnerInstallCredits(state, amount, cardType),
+      spendCredits: (side, amount) => spendCredits(state, side, amount),
+      rezCostForCard: (cardId) => rezCostForCard(state, cardId),
+    },
+    counters: {
+      setCardCounter: (cardId, counterType, amount) =>
+        setCardCounter(state, cardId, counterType as CounterType, amount),
+      addCardCounter: (cardId, counterType, amount) =>
+        addCardCounter(state, cardId, counterType as CounterType, amount),
+      rollDeterministicDie: (purpose) => rollDeterministicDie(state, purpose),
+    },
+    lifecycle: {
+      executeOnInstall: (legalAction, definition, cardId) =>
+        executeCardImplementationLifecycleEffects(
+          cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+          definition,
+          cardId,
+          "on_install",
+        ),
+    },
+    constants: {
+      PROTEUS_ARMAGEDDON_ID,
+    },
+  };
+}
+
 function performAction(
   state: GameState,
   legalAction: LegalAction,
@@ -5079,7 +5200,7 @@ function performAction(
       }
       return;
     case "install_card":
-      installCard(state, legalAction);
+      executeInstallCard(installCardHost(state), legalAction);
       return;
     case "advance_card":
       spendClick(state, "corp");
@@ -6374,7 +6495,7 @@ function resolveRunnerProgramTrashBeforeInstallChoice(
       ? { trashedCardDefinitionIds: trashedDefinitionIds.join(",") }
       : {}),
   };
-  installCard(state, legalAction);
+  executeInstallCard(installCardHost(state), legalAction);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
@@ -6382,451 +6503,6 @@ function resolveRunnerProgramTrashBeforeInstallChoice(
     installed: true,
     memoryUsedAfter: state.runner.memoryUsed,
     memoryLimitAfter: runnerMemoryLimit(state),
-  };
-}
-
-function installCard(state: GameState, legalAction: LegalAction): void {
-  const cardId = String(legalAction.payload?.cardId);
-  const definition = definitionFor(state, cardId);
-  if (
-    isUniqueCard(definition) &&
-    hasInstalledUniqueCardDefinition(state, legalAction.side, definition.id)
-  ) {
-    throw new Error(
-      "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
-    );
-  }
-  const corpIceInstallQuote = assertCorpIceInstallCostValid(
-    state,
-    cardId,
-    definition,
-    legalAction,
-  );
-  if (
-    legalAction.side === "runner" &&
-    definition.type === "program" &&
-    legalAction.payload?.runnerProgramTrashBeforeInstall === true &&
-    legalAction.payload?.runnerProgramTrashBeforeInstallResolved !== true
-  ) {
-    startRunnerProgramTrashBeforeInstallChoice(state, cardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      runnerProgramTrashChoiceOpened: true,
-    };
-    return;
-  }
-  if (
-    legalAction.side === "corp" &&
-    legalAction.payload?.serverId === "new_remote"
-  ) {
-    assertCorpCanCreateNewDataFort(state);
-  }
-  spendClick(state, legalAction.side);
-  if (legalAction.side === "corp") expireCorporateRetreatInstallCreditAbilities(state);
-  if (legalAction.side === "runner") {
-    const hostOnCardId =
-      typeof legalAction.payload?.hostOnCardId === "string"
-        ? String(legalAction.payload.hostOnCardId)
-        : undefined;
-    const zetatechOverlayInstall =
-      legalAction.payload?.v1922ZetatechOverlayInstall === true;
-    const selectedServerId =
-      typeof legalAction.payload?.selectedServerId === "string"
-        ? String(legalAction.payload.selectedServerId)
-        : undefined;
-    if (definition.type !== "program" && hostOnCardId) {
-      throw new Error("Nur Programme koennen gehostet installiert werden.");
-    }
-    if (
-      definition.type === "program" &&
-      hostOnCardId &&
-      !state.runner.rig.programs.includes(hostOnCardId)
-    ) {
-      throw new Error("Der angegebene Host ist nicht installiert.");
-    }
-    if (
-      definition.type === "program" &&
-      hostOnCardId &&
-      !(
-        zetatechOverlayInstall
-          ? canOverlayProgramOnZetatechSoftwareInstaller(
-              state,
-              hostOnCardId,
-              definition,
-            )
-          : canHostProgramOnDaemon(state, hostOnCardId, definition)
-      )
-    ) {
-      throw new Error("Der angegebene Program-Host ist ungueltig.");
-    }
-    if (requiresDataFortInstallTarget(definition) && (!selectedServerId || selectedServerId === "new_remote")) {
-      throw new Error(
-        "Restrictive Net Zoning benötigt einen gültigen Zielserver.",
-      );
-    }
-    if (
-      definition.id === CODE_VIRAL_CACHE_ID &&
-      ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true
-    ) {
-      throw new Error(
-        "Code Viral Cache darf nur nach erfolgreichem HQ-Run in diesem Zug installiert werden.",
-      );
-    }
-    const restrictiveTargetServerId =
-      selectedServerId && selectedServerId !== "new_remote"
-        ? (selectedServerId as Exclude<ServerId, "new_remote">)
-        : undefined;
-    if (requiresDataFortInstallTarget(definition) && restrictiveTargetServerId) {
-      mustServer(state, restrictiveTargetServerId);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        selectedServerLabel: serverChoiceDisplayLabel(
-          state,
-          restrictiveTargetServerId,
-        ),
-      };
-    }
-    const zetatechRecurringBefore =
-      zetatechOverlayInstall && hostOnCardId
-        ? hostedPaymentCredits(state, hostOnCardId)
-        : 0;
-    const concealedHiddenRunnerResource =
-      definition.type === "resource" && cardHasSubtype(definition, "hidden");
-    const cardImplementationAgendaPointCost =
-      cardImplementationAgendaPointInstallCost(definition);
-    if (cardImplementationAgendaPointCost > 0) {
-      const agendaCost = Number(
-        legalAction.payload?.installAgendaPointCost ?? 0,
-      );
-      if (
-        !Number.isInteger(agendaCost) ||
-        agendaCost !== cardImplementationAgendaPointCost
-      )
-        throw new Error(
-          "Die CardImplementation-Installation benötigt exakt die deklarierten Agenda-Punkt-Zusatzkosten.",
-        );
-      const forfeitAgendaCardId = String(
-        legalAction.payload?.forfeitAgendaCardId ?? "",
-      );
-      forfeitRunnerAgendaForPointCost(state, forfeitAgendaCardId);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        agendaPointCostPaid: agendaCost,
-        forfeitedAgendaCardId: forfeitAgendaCardId,
-        specialZone: "removed_from_game",
-        specialZoneVisibility: "public",
-        specialZoneReason: "agenda_point_cost_card_implementation_install",
-      };
-    }
-    spendRunnerInstallCredits(
-      state,
-      definition.installCost ?? 0,
-      definition.type,
-    );
-    removeFromAllZones(state, cardId);
-    if (definition.type === "hardware") {
-      const trashedDeckDefinitionIds: string[] = [];
-      if (isRunnerHardwareDeckDefinition(definition)) {
-        for (const oldDeckId of state.runner.rig.hardware.slice().sort()) {
-          if (!isRunnerHardwareDeckDefinition(definitionFor(state, oldDeckId)))
-            continue;
-          trashedDeckDefinitionIds.push(definitionFor(state, oldDeckId).id);
-          trashRunnerInstalledCardToHeap(state, oldDeckId);
-        }
-      }
-      state.runner.rig.hardware.push(cardId);
-      if (!hasCardImplementationMemoryUnitModifier(definition)) {
-        if (definition.mechanics.includes("modify_memory_limit"))
-          state.runner.memoryLimit += definition.memoryLimitBonus ?? 1;
-        else if ((definition.memoryLimitBonus ?? 0) > 0)
-          state.runner.memoryLimit += definition.memoryLimitBonus ?? 0;
-      }
-      if (shouldLoadLegacyRecurringCredits(definition))
-        setCardCounter(
-          state,
-          cardId,
-          "recurring_credit",
-          definition.recurringCredits ?? 0,
-        );
-      if (
-        definition.id === ABLATIVE_COUNTER_HARDWARE_CARD_ID &&
-        damagePreventionSourcesForDefinition(definition).length === 0
-      ) {
-        setCardCounter(
-          state,
-          cardId,
-          "power",
-          ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-        );
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          counterType: "power",
-          addedCounterAmount: ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-          remainingCounters: ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-        };
-      }
-      if (trashedDeckDefinitionIds.length > 0) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          deckUniqueReplacement: true,
-          trashedDeckDefinitionIds: trashedDeckDefinitionIds.join(","),
-        };
-      }
-    } else if (definition.type === "program") {
-      state.runner.rig.programs.push(cardId);
-      if (!hostOnCardId) state.runner.memoryUsed += definition.memoryCost ?? 0;
-      if (shouldLoadLegacyRecurringCredits(definition))
-        setCardCounter(
-          state,
-          cardId,
-          "recurring_credit",
-          definition.recurringCredits ?? 0,
-        );
-      if (
-        definition.mechanics.includes("virus") &&
-        !cardImplementationForDefinitionId(definition.id)?.virusCounter &&
-        definition.id !== BUTCHER_BOY_ID &&
-        definition.id !== SKIVVISS_ID
-      )
-        addCardCounter(state, cardId, "virus", 1);
-    } else if (definition.type === "resource") {
-      state.runner.rig.resources.push(cardId);
-      if (shouldLoadLegacyRecurringCredits(definition) && !concealedHiddenRunnerResource)
-        setCardCounter(
-          state,
-          cardId,
-          "recurring_credit",
-          definition.recurringCredits ?? 0,
-        );
-      if (concealedHiddenRunnerResource) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          hiddenRunnerResourceInstall: true,
-          hiddenResourceSlotId: hiddenRunnerResourceSlotId(cardId),
-          redactedKind: "hidden_runner_resource",
-        };
-      }
-    } else {
-      throw new Error(
-        "Nur Programme, Hardware und Resources koennen vom Runner installiert werden.",
-      );
-    }
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: !concealedHiddenRunnerResource,
-      rezzed: !concealedHiddenRunnerResource,
-      zone: { side: "runner", zone: "rig" },
-      ...(hostOnCardId ? { hostedOn: hostOnCardId } : {}),
-      ...(requiresDataFortInstallTarget(definition) && restrictiveTargetServerId
-        ? { selectedServerId: restrictiveTargetServerId }
-        : {}),
-    };
-    if (zetatechOverlayInstall) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1922RunnerProgramAbility: "zetatech_overlay_install",
-        zetatechOverlayInstall: true,
-        hostDefinitionId: ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
-        zetatechRecurringCreditsSpent:
-          zetatechOverlayInstall && hostOnCardId
-            ? Math.max(
-                0,
-                zetatechRecurringBefore -
-                  hostedPaymentCredits(state, hostOnCardId),
-              )
-            : 0,
-        runnerCreditsAfter: state.runner.credits,
-      };
-    }
-    consumeValuPakProgramInstallAction(state, legalAction);
-    if (shouldLoadLegacyRecurringCredits(definition)) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        recurringCreditsLoaded: definition.recurringCredits ?? 0,
-      };
-    }
-    if (definition.id === "v099_host_resource")
-      startRunnerHostingChoice(state, cardId, legalAction);
-    executeCardImplementationLifecycleEffects(
-      cardImplementationRuntimeDeps,
-      state,
-      legalAction,
-      definition,
-      cardId,
-      "on_install",
-    );
-    return;
-  }
-
-  removeFromAllZones(state, cardId);
-  const placement = legalAction.payload?.placement;
-  if (placement === "ice") {
-    const server =
-      legalAction.payload?.serverId === "new_remote"
-        ? createRemote(state)
-        : mustServer(state, String(legalAction.payload?.serverId));
-    if (corpIceInstallQuote) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        ...costQuotePublicPayload(corpIceInstallQuote),
-      };
-    }
-    spendCredits(
-      state,
-      "corp",
-      corpIceInstallQuote?.finalCredits ?? legalAction.costs[0]?.credits ?? 0,
-    );
-    server.ice.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: false,
-      rezzed: false,
-      zone: { side: "corp", zone: "serverIce", serverId: server.id },
-    };
-    markRovingSubmarineActivityForServer(
-      fortRunSideFamiliesHostForState(state),
-      server.id,
-      legalAction,
-    );
-    consumeEdgerunnerTempsInstallAction(state, legalAction);
-    applyArmageddonDoomCounterInstallRolls(state, cardId, legalAction);
-    return;
-  }
-
-  const server =
-    legalAction.payload?.serverId === "new_remote"
-      ? createRemote(state)
-      : mustServer(state, String(legalAction.payload?.serverId));
-  if (!canInstallCorpRootCardInServer(state, definition, server)) {
-    throw new Error(
-      "In diesem Server darf diese Karte nicht im Root installiert sein.",
-    );
-  }
-  const rootCapacity = corpRootAgendaOrNodeCapacityInServer(state, server);
-  const replacedRootAssetIds =
-    definition.type === "agenda" &&
-    corpRootMainCardIdsInServer(state, server).length >= rootCapacity
-      ? corpRootAssetIdsInServer(state, server)
-      : [];
-  const replacedRootDefinitionIds = replacedRootAssetIds.map(
-    (replacedId) => definitionFor(state, replacedId).id,
-  );
-  for (const replacedId of replacedRootAssetIds) {
-    trashCorpInstalledCardToArchives(state, replacedId, legalAction);
-  }
-  if (replacedRootAssetIds.length > 0) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      rootReplacement: "asset_to_agenda",
-      replacedRootCardIds: replacedRootAssetIds.join(","),
-      replacedRootDefinitionIds: replacedRootDefinitionIds.join(","),
-      replacedRootCardType: "asset",
-    };
-  }
-  server.root.push(cardId);
-  const rootRezOnInstall = rootInstallRezzesOnInstall(definition);
-  if (rootRezOnInstall) {
-    spendCredits(
-      state,
-      "corp",
-      legalAction.costs[0]?.credits ?? rezCostForCard(state, cardId),
-    );
-  }
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    faceup: rootRezOnInstall,
-    rezzed: rootRezOnInstall,
-    zone: { side: "corp", zone: "serverRoot", serverId: server.id },
-  };
-  if (
-    rootRezOnInstall &&
-    isParisTracePoolSource(fortRunSideFamiliesHostForState(state), cardId)
-  ) {
-    const capacity = parisTracePoolCapacityForCard(
-      fortRunSideFamiliesHostForState(state),
-      cardId,
-    );
-    setCardCounter(state, cardId, "bit", capacity);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      sourceDefinitionId: definition.id,
-      counterType: "bit",
-      addedCounterAmount: capacity,
-      remainingCounters: capacity,
-    };
-  }
-  executeCardImplementationLifecycleEffects(
-    cardImplementationRuntimeDeps,
-    state,
-    legalAction,
-    definition,
-    cardId,
-    "on_install",
-  );
-  if (isRegionUpgrade(definition)) {
-    trashOlderRegionUpgradesInServer(state, server, cardId, legalAction);
-  }
-  markRovingSubmarineActivityForServer(
-    fortRunSideFamiliesHostForState(state),
-    server.id,
-    legalAction,
-  );
-  consumeEdgerunnerTempsInstallAction(state, legalAction);
-  applyArmageddonDoomCounterInstallRolls(state, cardId, legalAction);
-}
-
-function applyArmageddonDoomCounterInstallRolls(
-  state: GameState,
-  installedCardId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side && legalAction.side !== "corp") return;
-  const corpCounters = state.purgeableRunnerVirusCounters?.corp;
-  const doomCounters = purgeableRunnerVirusCounterAmount(corpCounters, "doom");
-  if (!corpCounters || doomCounters <= 0) return;
-  let hits = 0;
-  const dieRolls: number[] = [];
-  const randomPurposes: string[] = [];
-  for (let index = 0; index < doomCounters; index += 1) {
-    const randomPurpose = `proteus.armageddon.install.${state.stateVersion}.${installedCardId}.${index}`;
-    const dieRoll = rollDeterministicDie(state, randomPurpose);
-    randomPurposes.push(randomPurpose);
-    dieRolls.push(dieRoll);
-    if (dieRoll === 6) hits += 1;
-  }
-  if (hits > 0) {
-    setPurgeableRunnerVirusCounterAmount(
-      corpCounters,
-      "doom",
-      doomCounters - hits,
-    );
-    if (Object.keys(corpCounters).length === 0 && state.purgeableRunnerVirusCounters)
-      delete state.purgeableRunnerVirusCounters.corp;
-    if (
-      state.purgeableRunnerVirusCounters &&
-      !state.purgeableRunnerVirusCounters.corp &&
-      !state.purgeableRunnerVirusCounters.servers &&
-      !state.purgeableRunnerVirusCounters.effects
-    )
-      delete state.purgeableRunnerVirusCounters;
-    if (state.cardInstances[installedCardId])
-      trashCorpInstalledCardToArchives(state, installedCardId, legalAction);
-  }
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    proteusDoomInstallRolls: dieRolls.join(","),
-    proteusDoomRandomPurposes: randomPurposes.join(","),
-    proteusDoomHits: hits,
-    doomCountersBefore: doomCounters,
-    doomCountersAfter: purgeableRunnerVirusCounterAmount(
-      state.purgeableRunnerVirusCounters?.corp,
-      "doom",
-    ),
-    randomCounterAfter: state.randomCounter,
-    proteusDoomSourceDefinitionId: PROTEUS_ARMAGEDDON_ID,
-    ...(hits > 0
-      ? { trashedInstalledCardDefinitionId: definitionFor(state, installedCardId).id }
-      : {}),
   };
 }
 
