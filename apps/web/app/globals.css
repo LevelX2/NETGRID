@@ -3361,6 +3361,51 @@ select {
   grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
 }
 
+.identityCounterStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 0;
+}
+
+.identityCounterChip {
+  min-width: 0;
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 7px;
+  border: 1px solid color-mix(in srgb, var(--side-status-accent), var(--line) 38%);
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--side-status-accent), var(--text) 18%);
+  background: color-mix(in srgb, var(--side-status-accent), var(--section-bg) 84%);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+.identityCounterChipLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.identityCounterChip strong {
+  min-width: 16px;
+  height: 16px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 4px;
+  border-radius: 999px;
+  color: var(--section-bg);
+  background: color-mix(in srgb, var(--side-status-accent), white 10%);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(62px, 1fr));
@@ -3592,6 +3637,7 @@ select {
   left: 8px;
   z-index: 86;
   min-width: 28px;
+  max-width: 120px;
   height: 28px;
   padding: 0 7px;
   display: inline-flex;
@@ -3605,7 +3651,10 @@ select {
   font-size: 11px;
   font-weight: 900;
   line-height: 1;
+  overflow: hidden;
   pointer-events: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cardChoiceDialog.readableCards {
@@ -4456,7 +4505,7 @@ select {
 }
 
 .server {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   width: fit-content;
   max-width: 100%;
   min-height: 0;
@@ -4906,8 +4955,14 @@ select {
   flex-wrap: nowrap;
   gap: 0;
   align-items: flex-start;
+  overflow: visible;
+}
+
+.iceLane.scrollableIceLane {
+  max-width: min(100%, calc(430px * var(--lane-card-scale, 1)));
   overflow-x: auto;
-  overflow-y: visible;
+  overflow-y: hidden;
+  padding-bottom: calc(10px * var(--lane-card-scale, 1));
 }
 
 .iceLane .iceCardSlot {
@@ -5738,8 +5793,77 @@ select {
   height: 15px;
 }
 
+.cardSetBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 42px;
+  min-width: 22px;
+  min-height: 15px;
+  margin-top: 3px;
+  padding: 1px 4px;
+  border: 1px solid color-mix(in srgb, var(--text), transparent 78%);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--section-bg), black 18%);
+  color: color-mix(in srgb, var(--text), white 8%);
+  box-shadow: 0 2px 5px rgb(0 0 0 / 0.18);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.1;
+  overflow: hidden;
+  pointer-events: none;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cardImageSetBadge {
+  position: absolute;
+  top: clamp(13px, 16cqw, 64px);
+  left: clamp(2px, 2cqw, 8px);
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: clamp(24px, 15cqw, 54px);
+  min-width: clamp(14px, 6.5cqw, 24px);
+  min-height: clamp(8px, 4.4cqw, 16px);
+  padding: clamp(1px, 0.35cqw, 2px) clamp(2px, 1.15cqw, 5px);
+  border: 1px solid rgb(238 222 180 / 0.55);
+  border-radius: clamp(2px, 0.9cqw, 4px);
+  background: rgb(18 23 30 / 0.78);
+  color: #f7efdc;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+  font-size: clamp(5px, 2.35cqw, 10px);
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.05;
+  overflow: hidden;
+  pointer-events: none;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card.compactCard .cardSetBadge {
+  max-width: 36px;
+  min-height: 13px;
+  margin-top: 2px;
+  font-size: 7px;
+}
+
 .card.hiddenBack.inactiveZoneCard::after,
 .card.hiddenBack .cardInactiveZoneBadge {
+  display: none;
+}
+
+.card.hiddenBack .cardSetBadge,
+.card.hidden .cardSetBadge,
+.card.hiddenBack .cardImageSetBadge,
+.card.hidden .cardImageSetBadge {
   display: none;
 }
 
@@ -9569,6 +9693,7 @@ select,
   border-color: var(--card-image-border);
   background: var(--card-image-bg);
   box-shadow: var(--card-shadow);
+  container-type: inline-size;
 }
 
 .card.withImage.preview {
@@ -9673,6 +9798,34 @@ select,
   box-shadow:
     inset 0 1px 0 rgb(255 245 211 / 0.55),
     0 2px 5px rgb(0 0 0 / 0.38);
+}
+
+.hardwareImageOverlaySetBadge {
+  position: absolute;
+  top: clamp(13px, 16cqw, 64px);
+  left: clamp(2px, 2cqw, 8px);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: clamp(24px, 15cqw, 54px);
+  min-width: clamp(14px, 6.5cqw, 24px);
+  min-height: clamp(8px, 4.4cqw, 16px);
+  padding: clamp(1px, 0.35cqw, 2px) clamp(2px, 1.15cqw, 5px);
+  border: 1px solid rgb(238 222 180 / 0.55);
+  border-radius: clamp(2px, 0.9cqw, 4px);
+  background: rgb(18 23 30 / 0.78);
+  color: #f7efdc;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+  font-size: clamp(5px, 2.35cqw, 10px);
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.05;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .hardwareImageOverlayFrame {

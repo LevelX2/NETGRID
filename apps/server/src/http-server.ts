@@ -416,6 +416,10 @@ export class NetgridRealtimeServer {
       await this.sendOpponentBootstrap(context.matchId, opposite(context.side), { side: context.side, connected: false });
       return;
     }
+    if (isTerminalSidePayload(disconnected)) {
+      await this.sendOpponentBootstrap(context.matchId, opposite(context.side), { side: context.side, connected: false });
+      return;
+    }
     this.sendOpponentStatus(context.matchId, opposite(context.side), { side: context.side, connected: false });
   }
 
@@ -838,6 +842,7 @@ async function routeHttp(
         const nextSettings: Parameters<MultiplayerService["createMatch"]>[0]["settings"] = {};
         nextSettings.agendaPointsToWin = 7;
         if (settings.matchFormat === "rules_match" || settings.matchFormat === "two_game_side_swap") nextSettings.matchFormat = settings.matchFormat;
+        if (settings.cardPool === "originalset" || settings.cardPool === "originalset_proteus") nextSettings.cardPool = settings.cardPool;
         if (settings.playerClock && typeof settings.playerClock === "object") {
           const playerClock = settings.playerClock as Record<string, unknown>;
           nextSettings.playerClock = {
@@ -869,7 +874,8 @@ async function routeHttp(
       const deckSelection = deckSelectionFromBody(body);
       if (Object.keys(deckSelection).length > 0) {
         const aiDeckPolicy = aiDeckPolicyFromValue(body.aiDeckPolicy);
-        const deckSetup = resolveDeckSetup(deckSelection, { seed: config.seed ?? "ai-vs-ai-smoke", ...(aiDeckPolicy ? { aiDeckPolicy } : {}) });
+        const cardPool = body.settings && typeof body.settings === "object" && (body.settings as Record<string, unknown>).cardPool === "originalset_proteus" ? "originalset_proteus" : "originalset";
+        const deckSetup = resolveDeckSetup(deckSelection, { seed: config.seed ?? "ai-vs-ai-smoke", ...(aiDeckPolicy ? { aiDeckPolicy } : {}), cardPool });
         config.runnerDeck = deckSetup.runnerDeck;
         config.corpDeck = deckSetup.corpDeck;
         config.runnerDeckMetadata = deckSetup.runnerSnapshot.publicMetadata;
@@ -1161,6 +1167,10 @@ function isLobbyPayload(payload: ServicePayload): payload is LobbyPayload {
   return !("playerView" in payload);
 }
 
+function isTerminalSidePayload(payload: ServicePayload): payload is SidePayload {
+  return "playerView" in payload && (payload.matchStatus === "finished" || payload.matchStatus === "forfeited") && Boolean(payload.winner);
+}
+
 function send(socket: WebSocket | undefined, message: ServerWsMessage): void {
   if (!socket || socket.readyState !== WebSocket.OPEN) return;
   socket.send(JSON.stringify(message));
@@ -1409,6 +1419,7 @@ function deckErrorMessage(error: unknown): string {
   const code = error instanceof Error ? error.message : String(error);
   if (code === "deck_snapshot_wrong_side") return "Das gewählte Deck hat die falsche Seite.";
   if (code === "deck_snapshot_not_validated" || code === "deck_snapshot_invalid") return "Das gewählte Deck ist nicht matchstartfähig. Bitte prüfe die Validierungsfehler.";
+  if (code === "deck_snapshot_card_pool_mismatch") return "Das gewählte Deck passt nicht zum Kartenpool dieses Spiels.";
   if (code === "ai_deck_snapshot_not_supported") return "Das gewählte KI-Deck ist nicht KI-freigegeben. Bitte nutze feste Standard-Decks, deterministisch zufällige KI-Decks oder ein KI-sicheres Snapshot-Deck.";
   if (code === "deck_snapshot_needs_revalidation") return "Das gewählte Deck muss nach der aktuellen Formatversion neu validiert werden.";
   if (code === "deck_snapshot_not_found") return "Das gewählte Deck wurde nicht gefunden.";

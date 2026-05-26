@@ -1,5 +1,5 @@
 import type { PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
-import { formatChronicleEvent, type ChronicleContext, type ChronicleImportance, type ChronicleVisibility } from "./chronicle";
+import { formatChronicleEffectItems, formatChronicleEvent, type ChronicleContext, type ChronicleImportance, type ChronicleVisibility } from "./chronicle";
 import { serverDisplayLabel } from "./action-board-ui";
 
 export type OpponentActionCue = {
@@ -94,8 +94,9 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
     const actor = sideValue(payload.actor);
     const opponent = Boolean(actor && actor !== input.viewerSide);
     const forcedPublicEffectCue = isForcedPublicEffectCue(actionType, payload);
+    const forcedEffectCueItems = formatChronicleEffectItems(event, input.viewerSide).filter(isForcedAccessEffectCueItem);
     const systemCue = !actor && actionType !== "game_created" && (input.includeAutomaticEffectCues || actionType === "game_end");
-    if (!input.includeOwnActions && !opponent && !systemCue && !forcedPublicEffectCue) return [];
+    if (!input.includeOwnActions && !opponent && !systemCue && !forcedPublicEffectCue && forcedEffectCueItems.length === 0) return [];
     if (actionType === "end_turn" && opponent && localAttention && !input.playerView.pendingChoice) return [];
 
     const item = formatChronicleEvent(event, input.viewerSide, input.contextByEventId?.[event.eventId] ?? {});
@@ -128,7 +129,29 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
       requiresLocalAttention: localAttention,
       ...(aiExplanation ? { aiExplanation } : {})
     };
-    return [cue];
+    const effectCues = forcedEffectCueItems.map((effectItem, index): OpponentActionCue => {
+      const relatedCard =
+        effectItem.cardDefinitionId ? visibleCards.get(effectItem.cardDefinitionId) : undefined;
+      return {
+        cueId: `${input.viewerSide}:${event.eventId}:effect:${index}`,
+        eventId: event.eventId,
+        viewerSide: input.viewerSide,
+        ...(effectItem.actor ? { actor: effectItem.actor } : actor ? { actor } : {}),
+        actorLabel: actorLabel(effectItem.actor ?? actor, "system"),
+        ...(actionUsesByEventId[event.eventId] ? { actionUse: actionUsesByEventId[event.eventId] } : {}),
+        opponent: Boolean((effectItem.actor ?? actor) && (effectItem.actor ?? actor) !== input.viewerSide),
+        source: "system",
+        actionType,
+        title: effectItem.title,
+        ...(effectItem.description ? { description: effectItem.description } : {}),
+        visibility: effectItem.visibility,
+        importance: effectItem.importance,
+        ...(relatedCard ? { relatedCard } : {}),
+        sound: "tag_or_damage",
+        requiresLocalAttention: localAttention,
+      };
+    });
+    return [cue, ...effectCues];
   });
 
   return cues;
@@ -300,6 +323,10 @@ export function actionSoundCountForAction(actionType: string, payload: Record<st
 
 function isForcedPublicEffectCue(actionType: string, payload: Record<string, unknown>): boolean {
   return actionType === "continue_run" && payload.v1921UpgradeAbility === "rio_de_janeiro_passed_ice";
+}
+
+function isForcedAccessEffectCueItem(item: { chips: string[]; category: string; visibility: ChronicleVisibility }): boolean {
+  return item.visibility === "public" && item.category === "danger" && item.chips.includes("Access-Effekt");
 }
 
 function turnPhaseSide(phase: PlayerView["phase"]): Side | null {

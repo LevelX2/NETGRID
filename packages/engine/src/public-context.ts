@@ -136,6 +136,7 @@ export function publicContextForAction(
     "baseAccessCount",
     "installedAccessBonus",
     "effectiveAccessCount",
+    "accessIndex",
     "vacuumLinkDieRoll",
     "vacuumLinkRewindApplied",
     "vacuumLinkRewindRezzedIceBack",
@@ -143,6 +144,8 @@ export function publicContextForAction(
     "oliviaSalazarRunEndDerez",
     "derezzedCount",
     "runRootRezPass",
+    "highlighterCounterCount",
+    "highlighterAccessBonus",
   ]) {
     const value = legalAction.payload?.[key];
     if (typeof value === "number" || typeof value === "boolean")
@@ -436,8 +439,16 @@ export function publicContextForAction(
       "secretSpendCorp",
       "secretSpendRunner",
       "tooManyDoorsEndRun",
+      "corpCreditsAfter",
+      "runnerCreditsAfter",
       "passIceTrashProgramPrompt",
       "programTrashCount",
+      "ambushDefinitionId",
+      "accessEffectSourceDefinitionId",
+      "accessedFromZone",
+      "ambushPaymentAmount",
+      "ambushPaidCost",
+      "ambushPaymentDeclined",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -717,6 +728,11 @@ export function publicContextForAction(
     if (typeof legalAction.payload.eligibleConnectionCount === "number")
       context.eligibleConnectionCount =
         legalAction.payload.eligibleConnectionCount;
+    if (typeof legalAction.payload.ambushPaymentChoiceOpened === "boolean")
+      context.ambushPaymentChoiceOpened =
+        legalAction.payload.ambushPaymentChoiceOpened;
+    if (typeof legalAction.payload.ambushPaymentAmount === "number")
+      context.ambushPaymentAmount = legalAction.payload.ambushPaymentAmount;
     if (
       typeof legalAction.payload.installedConnectionTrashCount === "number"
     )

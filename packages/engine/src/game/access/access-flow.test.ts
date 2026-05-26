@@ -383,6 +383,76 @@ describe("access flow execution", () => {
     expect(finishedRuns).toEqual([true]);
   });
 
+  it("adds Highlighter access context to each breached R&D access", () => {
+    const breach = {
+      breachId: "run_1.breach",
+      serverId: "rd" as Exclude<ServerId, "new_remote">,
+      accessMode: "multi" as const,
+      queue: [
+        {
+          entryId: "entry_0",
+          cardInstanceId: "asset" as CardInstanceId,
+          serverId: "rd" as Exclude<ServerId, "new_remote">,
+          zone: "rd" as const,
+          status: "accessed" as const,
+          hiddenInfo: true,
+        },
+        {
+          entryId: "entry_1",
+          cardInstanceId: "asset_2" as CardInstanceId,
+          serverId: "rd" as Exclude<ServerId, "new_remote">,
+          zone: "rd" as const,
+          status: "pending" as const,
+          hiddenInfo: true,
+        },
+        {
+          entryId: "entry_2",
+          cardInstanceId: "asset_3" as CardInstanceId,
+          serverId: "rd" as Exclude<ServerId, "new_remote">,
+          zone: "rd" as const,
+          status: "pending" as const,
+          hiddenInfo: true,
+        },
+      ],
+      currentIndex: 1,
+      completed: false,
+      accessedSummaries: [],
+    };
+    const { host, state } = makeHost({
+      run: {
+        runId: "run_1",
+        attackedServerId: "rd",
+        breach,
+      } as unknown as NonNullable<GameState["run"]>,
+      instances: {
+        asset: instance("asset", "asset_def", { side: "corp", zone: "rd" }),
+        asset_2: instance("asset_2", "asset_def", { side: "corp", zone: "rd" }),
+        asset_3: instance("asset_3", "asset_def", { side: "corp", zone: "rd" }),
+      },
+      corpRd: ["asset", "asset_2", "asset_3"],
+    });
+    state.purgeableRunnerVirusCounters = { corp: { highlighter: 3 } };
+    const legalAction = {
+      side: "runner",
+      type: "access_card",
+      actionId: "runner.access_card",
+      label: "Access",
+      source: "run",
+    } as unknown as LegalAction;
+
+    handleAccessExecution(host, legalAction);
+
+    expect(legalAction.payload).toMatchObject({
+      accessedCardId: "asset_2",
+      accessIndex: 1,
+      baseAccessCount: 1,
+      installedAccessBonus: 2,
+      highlighterCounterCount: 3,
+      highlighterAccessBonus: 2,
+      effectiveAccessCount: 3,
+    });
+  });
+
   it("spends Garbage counters when Proteus free trash is used", () => {
     const breach = {
       breachId: "run_1.breach",

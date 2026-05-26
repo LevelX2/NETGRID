@@ -4148,7 +4148,8 @@ describe("V1.4.0 plan-based Corp AI", () => {
           "onr_v1_210_political-overthrow",
     );
     const basicCredit = input.legalActions.find(
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
     expect(overthrow).toBeDefined();
     expect(basicCredit).toBeDefined();
@@ -4220,7 +4221,10 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(overthrow).toBeDefined();
     if (!score || !overthrow) throw new Error("Missing score override actions");
 
-    const decision = chooseCorpAction({ ...input, legalActions: [overthrow, score] });
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [overthrow, score],
+    });
     expect(decision.actionId).toBe(score.actionId);
   });
 
@@ -4237,14 +4241,18 @@ describe("V1.4.0 plan-based Corp AI", () => {
           "onr_v1_193_corporate-coup",
     );
     const basicCredit = input.legalActions.find(
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
     expect(coup).toBeDefined();
     expect(basicCredit).toBeDefined();
     if (!coup || !basicCredit)
       throw new Error("Missing Corporate Coup counter economy fixture");
 
-    const decision = chooseCorpAction({ ...input, legalActions: [basicCredit, coup] });
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, coup],
+    });
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe(coup.actionId);
@@ -4264,7 +4272,8 @@ describe("V1.4.0 plan-based Corp AI", () => {
           "onr_v1_206_marine-arcology",
     );
     const basicCredit = input.legalActions.find(
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
     expect(marine).toBeDefined();
     expect(basicCredit).toBeDefined();
@@ -4320,13 +4329,18 @@ describe("V1.4.0 plan-based Corp AI", () => {
           "onr_v1_192_corporate-boon",
     );
     const basicCredit = input.legalActions.find(
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
     expect(boon).toBeDefined();
     expect(basicCredit).toBeDefined();
-    if (!boon || !basicCredit) throw new Error("Missing Corporate Boon fixture");
+    if (!boon || !basicCredit)
+      throw new Error("Missing Corporate Boon fixture");
 
-    const decision = chooseCorpAction({ ...input, legalActions: [basicCredit, boon] });
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, boon],
+    });
     const debugText = JSON.stringify(decision.decisionDebug);
 
     expect(decision.actionId).toBe(boon.actionId);
@@ -4346,11 +4360,13 @@ describe("V1.4.0 plan-based Corp AI", () => {
           "onr_v1_208_on-call-solo-team",
     );
     const basicCredit = input.legalActions.find(
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
     expect(damage).toBeDefined();
     expect(basicCredit).toBeDefined();
-    if (!damage || !basicCredit) throw new Error("Missing damage agenda fixture");
+    if (!damage || !basicCredit)
+      throw new Error("Missing damage agenda fixture");
 
     const decision = chooseCorpAction({
       ...input,
@@ -4360,7 +4376,9 @@ describe("V1.4.0 plan-based Corp AI", () => {
 
     expect(decision.actionId).toBe(damage.actionId);
     expect(debugText).toContain("scored_agenda_damage_punish_taken:true");
-    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+    expect(debugText).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
   });
 
   it("keeps scored-agenda economy hidden-state invariant", () => {
@@ -5228,7 +5246,10 @@ describe("V1.4.0 plan-based Corp AI", () => {
     if (!advance || !protectionInstall)
       throw new Error("Missing no-safety-delta fixture actions");
 
-    const scopedInput = { ...input, legalActions: [advance, protectionInstall] };
+    const scopedInput = {
+      ...input,
+      legalActions: [advance, protectionInstall],
+    };
     const protectCandidate = generateCorpPlanCandidates(scopedInput).find(
       (candidate) => candidate.kind === "build_scoring_remote",
     );
@@ -6253,6 +6274,337 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.score.reasons).toContain("remote_ice_rez_reserve_ready");
     expect(JSON.stringify(decision.score.evidence)).not.toMatch(
       /cardInstances|privatePayload|simple_agenda/,
+    );
+  });
+
+  it("strengthens an existing scoring remote instead of opening a planless empty remote", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-portfolio-consolidate-existing-remote",
+      (state) => {
+        state.corp.credits = 7;
+        state.runner.credits = 8;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 1);
+        moveCorpCardToHq(state, "simple_barrier_ice");
+      },
+    );
+    const existingRemoteIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_barrier_ice",
+    );
+    const newRemoteIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "new_remote" &&
+        sourceDefinitionFromInput(input, action) === "simple_barrier_ice",
+    );
+    expect(existingRemoteIce).toBeDefined();
+    expect(newRemoteIce).toBeDefined();
+    if (!existingRemoteIce || !newRemoteIce)
+      throw new Error("Missing remote portfolio fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [newRemoteIce, existingRemoteIce],
+    });
+
+    expect(decision.debug.planKind).toBe("build_scoring_remote");
+    expect(decision.selectedActionId).toBe(existingRemoteIce.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_remote_ice_consolidation_taken:true",
+    );
+  });
+
+  it("allows a new remote when a concrete asset payload plan is visible", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-portfolio-new-remote-with-asset-plan",
+      (state) => {
+        state.corp.credits = 7;
+        moveCorpCardToHq(state, "simple_barrier_ice");
+        moveCorpCardToHq(state, "simple_economy_asset");
+      },
+    );
+    const newRemoteIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "new_remote" &&
+        sourceDefinitionFromInput(input, action) === "simple_barrier_ice",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const assetInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "new_remote" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_asset",
+    );
+    expect(newRemoteIce).toBeDefined();
+    expect(gain).toBeDefined();
+    expect(assetInstall).toBeDefined();
+    if (!newRemoteIce || !gain || !assetInstall)
+      throw new Error("Missing planned new remote fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [newRemoteIce, assetInstall, gain],
+    });
+    const breakdown = JSON.stringify(decision.score.scoreBreakdown);
+
+    expect(decision.selectedActionId).toBe(newRemoteIce.actionId);
+    expect(breakdown).toContain("new_remote_has_payload_plan");
+    expect(JSON.stringify(decision.debug)).not.toMatch(
+      /cardInstances|privatePayload/i,
+    );
+  });
+
+  it("devalues an empty new one-ICE remote without payload plan when economy is needed", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-portfolio-empty-new-remote-no-plan",
+      (state) => {
+        state.corp.credits = 1;
+        moveCorpCardToHq(state, "simple_barrier_ice");
+        moveCorpHqAgendasToRd(state);
+      },
+    );
+    const newRemoteIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "new_remote" &&
+        sourceDefinitionFromInput(input, action) === "simple_barrier_ice",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(newRemoteIce).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!newRemoteIce || !gain)
+      throw new Error("Missing unplanned new remote fixture actions");
+
+    const remoteCandidate = generateCorpPlanCandidates({
+      ...input,
+      legalActions: [newRemoteIce, gain],
+    }).find((candidate) => candidate.kind === "build_scoring_remote");
+    expect(remoteCandidate).toBeDefined();
+    if (!remoteCandidate) throw new Error("Missing remote portfolio candidate");
+
+    const score = evaluateCorpPlan(
+      { ...input, legalActions: [newRemoteIce, gain] },
+      remoteCandidate,
+    );
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [newRemoteIce, gain],
+    });
+
+    expect(JSON.stringify(score.scoreBreakdown)).toContain(
+      "new_remote_without_payload_plan",
+    );
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(gain.actionId);
+  });
+
+  it("uses draw as HQ dilution only when HQ is agenda-heavy and no safe remote line exists", () => {
+    const input = withSyntheticCorpAgendaPressure(
+      withPublicServerEventTail(
+        corpActionPhaseInput("ai-corp-hq-density-draw-dilution", (state) => {
+          state.corp.credits = 6;
+          state.runner.credits = 6;
+          moveCorpCardToHq(state, "simple_agenda");
+          moveCorpCardToHq(state, "simple_agenda");
+          moveCorpHqAgendasToRd(state);
+          moveCorpCardToHq(state, "simple_agenda");
+          moveCorpCardToHq(state, "simple_agenda");
+          moveCorpCardToHq(state, "simple_barrier_ice");
+          moveCorpCardToHq(state, "simple_economy_operation");
+          moveCorpCardToHq(state, "simple_economy_asset");
+        }),
+        ["hq"],
+      ),
+    );
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(draw).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!draw || !gain) throw new Error("Missing HQ dilution fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [draw, gain],
+    });
+
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(draw.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_draw_chosen_to_dilute_agenda_flood:true",
+    );
+  });
+
+  it("prefers safe agenda exit over HQ dilution draw", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-hq-density-safe-remote-before-draw",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        moveCorpCardToHq(state, "simple_agenda");
+        moveCorpCardToHq(state, "simple_agenda");
+      },
+    );
+    const agendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    expect(agendaInstall).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!agendaInstall || !draw)
+      throw new Error("Missing safe remote HQ density fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [draw, agendaInstall],
+    });
+    expect(decision.selectedActionId).toBe(agendaInstall.actionId);
+    expect(decision.score.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ reason: "agenda_removed_from_hq_candidate" }),
+      ]),
+    );
+  });
+
+  it("does not overvalue HQ dilution draw when HQ is not agenda-heavy", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-hq-density-not-heavy",
+      (state) => {
+        state.corp.credits = 6;
+        state.runner.credits = 6;
+        moveCorpCardToHq(state, "simple_agenda");
+        moveCorpCardToHq(state, "simple_economy_operation");
+        moveCorpCardToHq(state, "simple_economy_asset");
+      },
+    );
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(draw).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!draw || !gain) throw new Error("Missing non-flood HQ fixture actions");
+
+    const economyCandidate = generateCorpPlanCandidates({
+      ...input,
+      legalActions: [draw, gain],
+    }).find((candidate) => candidate.kind === "recover_economy");
+    expect(economyCandidate).toBeDefined();
+    if (!economyCandidate) throw new Error("Missing non-flood economy plan");
+
+    const score = evaluateCorpPlan(
+      { ...input, legalActions: [draw, gain] },
+      economyCandidate,
+    );
+    expect(score.evidence).toContain("corp_hq_agenda_flood_risk:false");
+    expect(score.evidence).toContain(
+      "corp_draw_chosen_to_dilute_agenda_flood:false",
+    );
+  });
+
+  it("lets HQ protection override dilution when HQ agenda flood is under pressure", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-hq-density-protect-over-draw",
+      (state) => {
+        state.corp.credits = 7;
+        state.runner.credits = 7;
+        moveCorpCardToHq(state, "simple_agenda");
+        moveCorpCardToHq(state, "simple_agenda");
+        moveCorpCardToHq(state, "simple_barrier_ice");
+      },
+    );
+    const hqIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq",
+    );
+    const draw = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    expect(hqIce).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!hqIce || !draw)
+      throw new Error("Missing HQ protection fixture actions");
+
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [draw, hqIce],
+    });
+
+    expect(decision.debug.planKind).toBe("protect_hq");
+    expect(decision.selectedActionId).toBe(hqIce.actionId);
+    expect(decision.score.evidence).toContain(
+      "corp_hq_protection_chosen_over_dilution:true",
+    );
+  });
+
+  it("keeps remote-portfolio and HQ-density decisions invariant to hidden Runner grip", () => {
+    const buildInput = (seed: string, hiddenRunnerCard: string) =>
+      corpActionPhaseInput(seed, (state) => {
+        state.corp.credits = 7;
+        state.runner.credits = 8;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 1);
+        moveCorpCardToHq(state, "simple_barrier_ice");
+        moveRunnerCardToGrip(state, hiddenRunnerCard);
+      });
+    const scoped = (input: ReturnType<typeof buildInput>) => {
+      const existingRemoteIce = input.legalActions.find(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.placement === "ice" &&
+          action.payload?.serverId === "remote_1",
+      );
+      const newRemoteIce = input.legalActions.find(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.placement === "ice" &&
+          action.payload?.serverId === "new_remote",
+      );
+      expect(existingRemoteIce).toBeDefined();
+      expect(newRemoteIce).toBeDefined();
+      if (!existingRemoteIce || !newRemoteIce)
+        throw new Error("Missing hidden-invariance remote portfolio actions");
+      return { ...input, legalActions: [existingRemoteIce, newRemoteIce] };
+    };
+    const decisionA = chooseCorpPlanDecision(
+      scoped(buildInput("ai-corp-portfolio-hidden-a", "simple_fracter")),
+    );
+    const decisionB = chooseCorpPlanDecision(
+      scoped(buildInput("ai-corp-portfolio-hidden-a", "simple_decoder")),
+    );
+
+    expect(decisionA.selectedActionId).toBe(decisionB.selectedActionId);
+    expect(decisionA.debug.planKind).toBe(decisionB.debug.planKind);
+    expect(JSON.stringify([decisionA, decisionB])).not.toMatch(
+      /cardInstances|privatePayload|simple_fracter|simple_decoder/,
     );
   });
 
@@ -15364,24 +15716,17 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     const metrics = summarizeMatchProgressionMetrics([
       progressionSummary(
         [
-          progressionAction(
-            "corp",
-            1,
-            "activated_card_ability",
-            undefined,
-            1,
-            {
-              evidence: [
-                "scored_agenda_action_opportunity:true",
-                "scored_agenda_action_taken:true",
-                "scored_agenda_economy_opportunity:true",
-                "scored_agenda_economy_taken:true",
-                "political_overthrow_opportunity:true",
-                "political_overthrow_taken:true",
-                "scored_agenda_action_value_over_basic:2",
-              ],
-            },
-          ),
+          progressionAction("corp", 1, "activated_card_ability", undefined, 1, {
+            evidence: [
+              "scored_agenda_action_opportunity:true",
+              "scored_agenda_action_taken:true",
+              "scored_agenda_economy_opportunity:true",
+              "scored_agenda_economy_taken:true",
+              "political_overthrow_opportunity:true",
+              "political_overthrow_taken:true",
+              "scored_agenda_action_value_over_basic:2",
+            ],
+          }),
           progressionAction("corp", 2, "gain_credit", undefined, 1, {
             evidence: [
               "basic_credit_taken_while_better_agenda_economy_available:true",
@@ -15389,29 +15734,22 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
               "political_overthrow_skipped_for_basic_credit:true",
             ],
           }),
-          progressionAction(
-            "corp",
-            3,
-            "activated_card_ability",
-            undefined,
-            1,
-            {
-              evidence: [
-                "scored_agenda_action_opportunity:true",
-                "scored_agenda_action_taken:true",
-                "scored_agenda_draw_opportunity:true",
-                "scored_agenda_draw_taken:true",
-                "scored_agenda_extra_action_opportunity:true",
-                "scored_agenda_extra_action_taken:true",
-                "scored_agenda_trace_tag_opportunity:true",
-                "scored_agenda_trace_tag_taken:true",
-                "scored_agenda_damage_punish_opportunity:true",
-                "scored_agenda_damage_punish_taken:true",
-                "scored_agenda_counter_economy_opportunity:true",
-                "scored_agenda_counter_economy_taken:true",
-              ],
-            },
-          ),
+          progressionAction("corp", 3, "activated_card_ability", undefined, 1, {
+            evidence: [
+              "scored_agenda_action_opportunity:true",
+              "scored_agenda_action_taken:true",
+              "scored_agenda_draw_opportunity:true",
+              "scored_agenda_draw_taken:true",
+              "scored_agenda_extra_action_opportunity:true",
+              "scored_agenda_extra_action_taken:true",
+              "scored_agenda_trace_tag_opportunity:true",
+              "scored_agenda_trace_tag_taken:true",
+              "scored_agenda_damage_punish_opportunity:true",
+              "scored_agenda_damage_punish_taken:true",
+              "scored_agenda_counter_economy_opportunity:true",
+              "scored_agenda_counter_economy_taken:true",
+            ],
+          }),
           progressionAction("corp", 4, "draw_card", undefined, 1, {
             evidence: [
               "basic_draw_taken_while_better_agenda_draw_available:true",
@@ -15439,6 +15777,158 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.scoredAgendaActionValueOverBasic).toBe(2);
     expect(metrics.basicCreditTakenWhileBetterAgendaEconomyAvailable).toBe(1);
     expect(metrics.basicDrawTakenWhileBetterAgendaDrawAvailable).toBe(1);
+  });
+
+  it("summarizes tag/punish terminal-window diagnostics", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "play_operation", undefined, 1, {
+            corpTagSourceOpportunity: true,
+            corpTagSourceTaken: true,
+            corpTraceTagOpportunity: true,
+            corpTraceTagTaken: true,
+            corpTraceTagExpectedSuccess: 1,
+          }),
+          progressionAction("runner", 2, "resolve_choice", undefined, 1, {
+            runnerTagsBeforeAction: 0,
+            runnerTagsAfterAction: 1,
+            runnerTagAddedByAction: true,
+            runnerTaggedAfterTraceDuringRun: true,
+          }),
+          progressionAction("runner", 3, "end_turn", undefined, 1, {
+            runnerTagsBeforeAction: 1,
+            runnerTagsAfterAction: 1,
+            runnerTaggedAtEndOfRunnerTurn: true,
+          }),
+          progressionAction("corp", 4, "mandatory_draw", undefined, 2, {
+            runnerTagsBeforeAction: 1,
+            runnerTagsAfterAction: 1,
+            runnerTaggedAtCorpDecision: true,
+            runnerTaggedAtStartOfCorpTurn: true,
+            corpPunishOpportunity: true,
+            corpPunishTaken: true,
+            corpPunishKind: "scorched_earth_like",
+          }),
+          progressionAction("runner", 5, "resolve_choice", undefined, 2, {
+            runnerTagsBeforeAction: 0,
+            runnerTagsAfterAction: 1,
+            runnerTagAddedByAction: true,
+            runnerTaggedAfterTraceDuringRun: true,
+          }),
+          progressionAction("runner", 6, "remove_tag", undefined, 2, {
+            runnerTagsBeforeAction: 1,
+            runnerTagsAfterAction: 0,
+            runnerTagClearedByAction: true,
+          }),
+          progressionAction("corp", 7, "mandatory_draw", undefined, 3, {
+            runnerTagsBeforeAction: 0,
+            runnerTagsAfterAction: 0,
+          }),
+          progressionAction("corp", 8, "gain_credit", undefined, 4, {
+            runnerTagsBeforeAction: 1,
+            runnerTaggedAtCorpDecision: true,
+            corpPunishOpportunity: true,
+            corpPunishKind: "urban_renewal_like",
+            corpPunishSkippedReason: "economy",
+          }),
+          progressionAction("corp", 9, "install_card", "hq", 4, {
+            runnerTagsBeforeAction: 1,
+            runnerTaggedAtCorpDecision: true,
+            corpPunishOpportunity: true,
+            corpPunishKind: "punitive_counterstrike_like",
+            corpPunishSkippedReason: "protection",
+            corpTraceTagOpportunity: true,
+            corpTraceTagSkippedReason: "protection",
+          }),
+          progressionAction(
+            "corp",
+            10,
+            "activated_card_ability",
+            undefined,
+            4,
+            {
+              runnerTagsBeforeAction: 1,
+              runnerTaggedAtCorpDecision: true,
+              corpPunishOpportunity: true,
+              corpPunishTaken: true,
+              corpPunishKind: "scored_agenda_damage_like",
+            },
+          ),
+        ],
+        "tag-punish-window-metric-fixture",
+      ),
+    ]);
+
+    expect(metrics.runnerTaggedAtCorpDecision).toBe(4);
+    expect(metrics.runnerTaggedAtCorpDecisionTurns).toBe(2);
+    expect(metrics.runnerTaggedAtCorpDecisionActions).toBe(4);
+    expect(metrics.runnerTaggedAtStartOfCorpTurn).toBe(1);
+    expect(metrics.runnerTaggedAtEndOfRunnerTurn).toBe(1);
+    expect(metrics.runnerTaggedAfterTraceDuringRun).toBe(2);
+    expect(metrics.runnerTagClearedSameRunnerTurn).toBe(1);
+    expect(metrics.runnerTagClearedBeforeCorpDecision).toBe(1);
+    expect(metrics.runnerTagWindowExpiredBeforeCorpTurn).toBe(1);
+    expect(metrics.corpPunishOpportunities).toBe(4);
+    expect(metrics.corpPunishTaken).toBe(2);
+    expect(metrics.corpPunishSkipped).toBe(2);
+    expect(metrics.corpPunishTakeRate).toBe(0.5);
+    expect(metrics.corpPunishOpportunityScorchedEarthLike).toBe(1);
+    expect(metrics.corpPunishOpportunityUrbanRenewalLike).toBe(1);
+    expect(metrics.corpPunishOpportunityPunitiveCounterstrikeLike).toBe(1);
+    expect(metrics.corpPunishOpportunityScoredAgendaDamageLike).toBe(1);
+    expect(metrics.corpPunishSkippedForEconomy).toBe(1);
+    expect(metrics.corpPunishSkippedForProtection).toBe(1);
+    expect(metrics.corpPunishWindowExpiredBeforeCorpTurn).toBe(1);
+    expect(metrics.corpTagSourceOpportunities).toBe(1);
+    expect(metrics.corpTagSourceTaken).toBe(1);
+    expect(metrics.corpTraceTagOpportunities).toBe(2);
+    expect(metrics.corpTraceTagTaken).toBe(1);
+    expect(metrics.corpTraceTagSkipped).toBe(1);
+    expect(metrics.corpTraceTagExpectedSuccess).toBe(1);
+    expect(metrics.corpTraceTagSkippedForProtection).toBe(1);
+    expect(metrics.corpTagSourceConvertedToRunnerTagged).toBe(1);
+    expect(metrics.corpTagSourceConvertedToPunishOpportunity).toBe(1);
+    expect(metrics.corpTagSourceConvertedToPunishTaken).toBe(1);
+    expect(metrics.corpTagPunishFunnelTagSourceOpportunity).toBe(1);
+    expect(metrics.corpTagPunishFunnelTagSourceTaken).toBe(1);
+    expect(metrics.corpTagPunishFunnelRunnerTagged).toBe(1);
+    expect(metrics.corpTagPunishFunnelRunnerTaggedAtCorpDecision).toBe(4);
+    expect(metrics.corpTagPunishFunnelPunishOpportunity).toBe(4);
+    expect(metrics.corpTagPunishFunnelPunishTaken).toBe(2);
+    expect(metrics.corpTagPunishFunnelTerminalDamageOrEconomicHit).toBe(2);
+  });
+
+  it("keeps tag/punish diagnostics invariant to hidden runner zones", () => {
+    const visibleActions = [
+      progressionAction("corp", 1, "gain_credit", undefined, 1, {
+        runnerTagsBeforeAction: 1,
+        runnerTaggedAtCorpDecision: true,
+        corpPunishOpportunity: true,
+        corpPunishKind: "closed_accounts_like",
+        corpPunishSkippedReason: "economy",
+      }),
+    ];
+    const first = summarizeMatchProgressionMetrics([
+      progressionSummary(visibleActions, "tag-punish-hidden-a"),
+    ]);
+    const second = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        visibleActions.map((entry) => ({
+          ...entry,
+          evidence: ["hidden_runner_hand_variant_not_used"],
+        })),
+        "tag-punish-hidden-b",
+      ),
+    ]);
+
+    expect(second.corpPunishOpportunities).toBe(first.corpPunishOpportunities);
+    expect(second.corpPunishSkippedForEconomy).toBe(
+      first.corpPunishSkippedForEconomy,
+    );
+    expect(second.runnerTaggedAtCorpDecision).toBe(
+      first.runnerTaggedAtCorpDecision,
+    );
   });
 
   it("does not count generic central endgame runs as true runner closeout", () => {
@@ -17162,7 +17652,9 @@ function corpScoredAgendaAbilityInput(
     credits?: number;
     clicks?: number;
     runnerTagged?: boolean;
-    counters?: Partial<NonNullable<GameState["cardInstances"][string]["counters"]>>;
+    counters?: Partial<
+      NonNullable<GameState["cardInstances"][string]["counters"]>
+    >;
     mutate?: (state: GameState) => void;
   } = {},
 ) {

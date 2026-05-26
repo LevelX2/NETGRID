@@ -181,7 +181,16 @@ describe("catalog API filters", () => {
 
   it("guards the Proteus visible baseline against decklegal, AI or broad promotion", () => {
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
+      "onr_proteus_001_ai-board-member",
       "onr_proteus_002_charity-takeover",
+      "onr_proteus_003_corporate-headhunters",
+      "onr_proteus_004_fetal-ai",
+      "onr_proteus_005_marked-accounts",
+      "onr_proteus_006_please-dont-choke-anyone",
+      "onr_proteus_007_project-venice",
+      "onr_proteus_008_project-zurich",
+      "onr_proteus_009_viral-breeding-ground",
+      "onr_proteus_010_world-domination",
       "onr_proteus_012_bug-zapper",
       "onr_proteus_013_caryatid",
       "onr_proteus_017_credit-blocks",
@@ -202,15 +211,30 @@ describe("catalog API filters", () => {
       "onr_proteus_040_sumo-2008",
       "onr_proteus_041_toughoniumtm-wall",
       "onr_proteus_044_walking-wall",
+      "onr_proteus_054_bel-digmo-antibody",
+      "onr_proteus_057_doppelganger-antibody",
       "onr_proteus_062_lesley-major",
       "onr_proteus_065_networked-center",
+      "onr_proteus_068_pattel-antibody",
       "onr_proteus_070_rasmin-bridger",
       "onr_proteus_072_research-bunker",
+      "onr_proteus_075_stereogram-antibody",
       "onr_proteus_077_weapons-depot",
+      "onr_proteus_084_crumble",
       "onr_proteus_085_disintegrator",
+      "onr_proteus_089_garbage-in",
+      "onr_proteus_090_highlighter",
+      "onr_proteus_097_taxman",
+      "onr_proteus_098_vienna-22",
+      "onr_proteus_099_viral-pipeline",
       "onr_proteus_108_faked-hit",
       "onr_proteus_117_poisoned-water-supply",
+      "onr_proteus_134_cortical-cybermodem",
+      "onr_proteus_135_cortical-stimulators",
+      "onr_proteus_138_deck-the",
+      "onr_proteus_146_precision-bribery",
       "onr_proteus_150_streetware-distributor",
+      "onr_proteus_151_sunburst-cranial-interface",
     ]);
     for (const candidateId of PROTEUS_VISIBLE_BASELINE_CARD_IDS) {
       const candidateResponse = catalogDetailResponse(candidateId);
@@ -262,7 +286,7 @@ describe("catalog API filters", () => {
     }
 
     const outsideResponse = catalogDetailResponse(
-      "onr_proteus_001_ai-board-member",
+      "onr_proteus_011_brain-wash",
     );
     expect(outsideResponse.status).toBe(200);
     const outsideBody = outsideResponse.body as {

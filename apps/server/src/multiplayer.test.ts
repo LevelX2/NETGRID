@@ -1704,6 +1704,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.pendingDeckHandshake).toBe(true);
     expect(created.lobby?.hostReady).toBe(false);
     expect(created.lobby?.joinerReady).toBe(false);
+    expect(created.lobby?.sideAssignmentMode).toBe("random_pending");
+    expect(created.lobby?.participants.player_a.side).toBeUndefined();
+    expect(created.lobby?.participants.player_b.side).toBeUndefined();
     expect(created.lobby?.participants.player_a.runnerDeckReady).toBe(true);
     expect(created.lobby?.participants.player_a.corpDeckReady).toBe(true);
     expect(created.lobby?.participants.player_b.connected).toBe(false);
@@ -1736,6 +1739,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(joined.lobby?.matchFormat).toBe("rules_match");
     expect(joined.lobby?.hostReady).toBe(false);
     expect(joined.lobby?.joinerReady).toBe(false);
+    expect(joined.lobby?.sideAssignmentMode).toBe("random_pending");
+    expect(joined.lobby?.participants.player_a.side).toBeUndefined();
+    expect(joined.lobby?.participants.player_b.side).toBeUndefined();
     expect(joined.lobby?.participants.player_a.runnerDeckReady).toBe(true);
     expect(joined.lobby?.participants.player_b.corpDeckReady).toBe(true);
     expect(JSON.stringify(joined.lobby)).not.toContain("deckName");
@@ -2901,6 +2907,34 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(aiCreated.playerView.deckMetadata?.opponent.formatProfileId).toBe("netgrid_private_local_v1");
     expect(aiCreated.playerView.deckMetadata?.opponent.formatProfileVersion).toBe("1.3.0");
     expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
+  });
+
+  it("enforces the selected match card pool for Proteus playtest snapshots", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "mp-proteus-card-pool" });
+
+    await expect(
+      service.createMatch({
+        hostSide: "corp",
+        seed: "mp-proteus-blocked-originalset",
+        runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+        corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+        settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset" }
+      })
+    ).rejects.toThrow("deck_snapshot_card_pool_mismatch");
+
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "mp-proteus-allowed",
+      runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+      corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_proteus" }
+    });
+
+    expect(created.playerView.deckMetadata?.opponent.formatProfileId).toBe("netgrid_private_local_proteus_playtest_v1");
+    expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe("1.0.0");
+    expect(JSON.stringify(created)).not.toContain("onr_proteus_084_crumble");
+    const record = await service.loadForTest(created.matchId);
+    expect(record?.match.settings.cardPool).toBe("originalset_proteus");
   });
 
   it("handles V1.1.1 Discard and Core-Damage status through side-safe multiplayer payloads", async () => {
@@ -4596,6 +4630,67 @@ describe("MVP 0.2 multiplayer service", () => {
     } finally {
       hostSocket.close();
       runnerSocket?.close();
+      await handle.close();
+    }
+  });
+
+  it("refreshes the opponent with a terminal forfeit payload when the forfeiting tab leaves immediately", async () => {
+    const match = await joinedMatch("ws-forfeit-close-refresh");
+    const handle = createNetgridHttpServer(match.service);
+    const baseUrl = await listen(handle);
+    const wsUrl = baseUrl.replace(/^http:/, "ws:") + "/ws";
+    const corpSocket = new WebSocket(wsUrl);
+    const runnerSocket = new WebSocket(wsUrl);
+
+    try {
+      await Promise.all([waitForOpen(corpSocket), waitForOpen(runnerSocket)]);
+      corpSocket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: match.matchId, sessionToken: match.corp.sessionToken, side: "corp" }
+        })
+      );
+      runnerSocket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: match.matchId, sessionToken: match.runner.sessionToken, side: "runner" }
+        })
+      );
+      await Promise.all([waitForMessage(corpSocket, "state_update"), waitForMessage(runnerSocket, "state_update")]);
+
+      const firstTerminal = waitForMessage(runnerSocket, "match_finished");
+      const response = await fetch(`${baseUrl}/api/matches/${encodeURIComponent(match.matchId)}/forfeit`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ side: "corp", sessionToken: match.corp.sessionToken })
+      });
+      expect(response.status).toBe(200);
+      const firstTerminalPayload = messagePayload(await firstTerminal) as {
+        matchStatus?: string;
+        winner?: Side | "draw";
+        resultSummary?: { reason?: string; winnerSide?: Side; loserSide?: Side };
+      };
+      expect(firstTerminalPayload).toMatchObject({
+        matchStatus: "forfeited",
+        winner: "runner",
+        resultSummary: { reason: "forfeit", winnerSide: "runner", loserSide: "corp" }
+      });
+
+      const refreshedTerminal = waitForMessage(runnerSocket, "match_finished");
+      corpSocket.close();
+      const refreshedPayload = messagePayload(await refreshedTerminal) as {
+        matchStatus?: string;
+        winner?: Side | "draw";
+        resultSummary?: { reason?: string; winnerSide?: Side; loserSide?: Side };
+      };
+      expect(refreshedPayload).toMatchObject({
+        matchStatus: "forfeited",
+        winner: "runner",
+        resultSummary: { reason: "forfeit", winnerSide: "runner", loserSide: "corp" }
+      });
+    } finally {
+      corpSocket.close();
+      runnerSocket.close();
       await handle.close();
     }
   });

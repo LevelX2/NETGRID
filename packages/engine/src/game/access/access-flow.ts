@@ -9,6 +9,10 @@ import type {
   SpecialZoneState,
 } from "@netgrid/shared";
 import {
+  accessCountPayloadForBreach,
+  type BreachStateHost,
+} from "./breach-state";
+import {
   canFreeTrashCurrentAccessCard,
   effectiveAccessTrashCost,
   freeTrashAccessSourceForCurrentAccessCard,
@@ -129,6 +133,22 @@ export function handleAccessExecution(
   }
 }
 
+function accessFlowBreachStateHost(host: AccessFlowHost): BreachStateHost {
+  return {
+    state: host.state,
+    cards: {
+      definitionFor: host.cards.definitionFor,
+      cardInstanceFor: host.cards.cardInstanceFor,
+    },
+    servers: {
+      mustServer: host.servers.mustServer,
+    },
+    rng: {
+      nextRandom: () => 0,
+    },
+  };
+}
+
 export function accessCurrentCard(
   host: AccessFlowHost,
   legalAction: LegalAction,
@@ -148,6 +168,7 @@ export function accessCurrentCard(
       serverId: breach.serverId,
       breachId: breach.breachId,
       accessIndex: breach.currentIndex,
+      ...accessCountPayloadForBreach(accessFlowBreachStateHost(host), breach),
     };
     markV1915InstalledRevealAccess(host, entry, legalAction);
     const updatedQueue = breach.queue.map((candidate, index) =>

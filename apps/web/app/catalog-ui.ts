@@ -15,6 +15,12 @@ export type CatalogCardForSetFilter = {
   setId: string;
 };
 
+export type CatalogCardForSetDisplay = {
+  setId?: string | null;
+  setName?: string | null;
+  collectorNumber?: string | null;
+};
+
 export type CatalogSetIdFilterOption = {
   key: string;
   label: string;
@@ -148,6 +154,30 @@ export function catalogSetLabelForSetId(setId: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+export function catalogSetShortLabelForSetId(setId: string | null | undefined): string | null {
+  const normalizedSetId = setId?.trim().toLowerCase() ?? "";
+  if (!normalizedSetId) return null;
+  if (normalizedSetId.startsWith("originalset-") || normalizedSetId.startsWith("onr-v1")) return "OV1";
+  if (normalizedSetId.startsWith("proteus")) return "PRO";
+  if (normalizedSetId.startsWith("classic")) return "CLS";
+  if (normalizedSetId.startsWith("testset-") || normalizedSetId.startsWith("mvp-")) return "TEST";
+  const compact = normalizedSetId
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0))
+    .join("")
+    .toUpperCase();
+  return compact.slice(0, 4) || normalizedSetId.slice(0, 4).toUpperCase();
+}
+
+export function catalogSetDetailLabel(card: CatalogCardForSetDisplay): string | null {
+  const setId = card.setId?.trim();
+  if (!setId) return null;
+  const setName = card.setName?.trim() || catalogSetLabelForSetId(setId);
+  const collectorNumber = card.collectorNumber?.trim();
+  return collectorNumber ? `${setName} #${collectorNumber}` : setName;
 }
 
 export function catalogSetFilterOptions(cards: CatalogCardForSetFilter[]): CatalogSetIdFilterOption[] {

@@ -377,6 +377,34 @@ type CorpScoreWindowCompressionContext = {
   opportunity: boolean;
 };
 
+type CorpRemotePortfolioContext = {
+  newRemoteActionIds: string[];
+  newRemoteWithPlanActionIds: string[];
+  newRemoteWithoutPlanActionIds: string[];
+  emptyRemoteWithIceActionIds: string[];
+  existingRemoteStrengthenActionIds: string[];
+  cheapOneIceRemoteIds: string[];
+  existingRemoteCouldBeStrengthened: boolean;
+  consolidationOpportunity: boolean;
+  overExpanded: boolean;
+};
+
+type CorpHqAgendaDensityContext = {
+  hqCardCount: number;
+  hqAgendaCount: number;
+  hqAgendaDensity: number;
+  agendaFloodRisk: boolean;
+  hqAccessThreat: boolean;
+  hqKnownAgendaThreat: boolean;
+  hqMultiaccessThreat: boolean;
+  drawWouldLikelyDilute: boolean;
+  drawWouldRiskAgendaFlood: boolean;
+  betterAgendaExitActionIds: string[];
+  hqProtectionActionIds: string[];
+  drawActionIds: string[];
+  noSafeRemote: boolean;
+};
+
 export type CorpEvaluationContext = {
   beliefState: BeliefState;
   remoteRootSecurityByActionId: Map<string, number>;
@@ -764,6 +792,12 @@ export function evaluateCorpPlan(
     candidate,
     context,
   );
+  const remotePortfolio = evaluateCorpRemotePortfolioDiscipline(
+    input,
+    candidate,
+    context,
+  );
+  const hqDensity = evaluateCorpHqAgendaDensity(input, candidate, context);
   const outcomeFollowup = evaluateCorpOutcomeFollowup(
     input,
     candidate,
@@ -794,6 +828,8 @@ export function evaluateCorpPlan(
     scoreConversion.score +
     protectionToScore.score +
     scoreWindowCompression.score +
+    remotePortfolio.score +
+    hqDensity.score +
     outcomeFollowup.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
@@ -837,6 +873,8 @@ export function evaluateCorpPlan(
     ...remoteRootExposureEvidence(input, candidate, context),
     ...remoteRezReserve.evidence,
     ...remoteIntent.evidence,
+    ...remotePortfolio.evidence,
+    ...hqDensity.evidence,
     `belief_version:${beliefState.version}`,
     ...(beliefState.corpOpponentModel
       ? [
@@ -989,6 +1027,20 @@ export function evaluateCorpPlan(
         scoreWindowCompression.score,
         1,
         firstReason(scoreWindowCompression.reasons),
+      ],
+      [
+        "remotePortfolio",
+        "Remote-Portfolio",
+        remotePortfolio.score,
+        1,
+        firstReason(remotePortfolio.reasons),
+      ],
+      [
+        "hqDensity",
+        "HQ-Dichte",
+        hqDensity.score,
+        1,
+        firstReason(hqDensity.reasons),
       ],
       [
         "planContinuation",
@@ -1261,9 +1313,7 @@ function evaluateCorpUnsafeRemoteScoreConversion(
       ...(alternativeChosen
         ? ["corp_unsafe_scoring_remote_alternative_chosen:true"]
         : []),
-      ...(stalled
-        ? ["corp_unsafe_scoring_remote_stalled:true"]
-        : []),
+      ...(stalled ? ["corp_unsafe_scoring_remote_stalled:true"] : []),
       ...(protectsUnsafeRemote
         ? [
             "corp_unsafe_remote_converted_to_protection:true",
@@ -1383,8 +1433,7 @@ function evaluateCorpProtectionToScoreConversion(
       evidence.push("corp_protection_followed_by_agenda_install:true");
     if (choosesAdvance)
       evidence.push("corp_protection_followed_by_advance:true");
-    if (choosesScore)
-      evidence.push("corp_protection_followed_by_score:true");
+    if (choosesScore) evidence.push("corp_protection_followed_by_score:true");
   }
 
   if (choosesProtectionNoDelta) {
@@ -1565,7 +1614,9 @@ function evaluateCorpScoreWindowCompression(
     evidence.push("corp_central_protection_before_score_window:true");
     if (compression.centralProtectionNecessary) {
       score += 20;
-      evidence.push("corp_central_protection_before_score_window_necessary:true");
+      evidence.push(
+        "corp_central_protection_before_score_window_necessary:true",
+      );
     } else {
       score -= 85;
       reasons.push("avoid_central_protection_over_score_window");
@@ -1978,11 +2029,8 @@ function corpUnsafeRemoteScoreConversionContext(
 ): CorpUnsafeRemoteScoreConversionContext {
   const unsafeOpportunities = input.legalActions
     .map((action) => unsafeScoringRemoteOpportunity(input, action, context))
-    .filter(
-      (
-        opportunity,
-      ): opportunity is CorpUnsafeScoringRemoteOpportunity =>
-        Boolean(opportunity),
+    .filter((opportunity): opportunity is CorpUnsafeScoringRemoteOpportunity =>
+      Boolean(opportunity),
     );
   const betterRemoteActions = input.legalActions
     .filter(
@@ -2010,8 +2058,7 @@ function corpUnsafeRemoteScoreConversionContext(
     })
     .sort(
       (left, right) =>
-        right.score - left.score ||
-        compareAction(left.action, right.action),
+        right.score - left.score || compareAction(left.action, right.action),
     );
   const unsafeServers = sortedUnique(
     unsafeOpportunities.map((opportunity) => opportunity.serverId),
@@ -2089,9 +2136,10 @@ function corpProtectionToScoreConversionContext(
   const protectedRemoteIds = sortedUnique(
     input.playerView.servers
       .filter((server) => server.id.startsWith("remote_"))
-      .filter((server) =>
-        assessCorpEffectiveRemoteSafety(input, server.id, context)
-          .effectivelyProtected,
+      .filter(
+        (server) =>
+          assessCorpEffectiveRemoteSafety(input, server.id, context)
+            .effectivelyProtected,
       )
       .map((server) => server.id),
   );
@@ -2113,7 +2161,8 @@ function corpProtectionToScoreConversionContext(
       (action) =>
         action.type === "install_card" &&
         action.payload?.placement === "ice" &&
-        (action.payload?.serverId === "hq" || action.payload?.serverId === "rd"),
+        (action.payload?.serverId === "hq" ||
+          action.payload?.serverId === "rd"),
     )
     .map((action) => action.actionId);
   return {
@@ -2145,9 +2194,10 @@ function corpScoreWindowCompressionContext(
   const protectedRemoteIds = sortedUnique(
     input.playerView.servers
       .filter((server) => server.id.startsWith("remote_"))
-      .filter((server) =>
-        assessCorpEffectiveRemoteSafety(input, server.id, context)
-          .effectivelyProtected,
+      .filter(
+        (server) =>
+          assessCorpEffectiveRemoteSafety(input, server.id, context)
+            .effectivelyProtected,
       )
       .map((server) => server.id),
   );
@@ -2203,7 +2253,8 @@ function corpScoreWindowCompressionContext(
   const compressionServerIds = sortedUnique(
     scorePathActions.flatMap((action) => {
       const horizon = remoteScoreHorizonForAction(input, action, context);
-      const serverId = horizon?.serverId ?? remoteServerIdForAction(input, action);
+      const serverId =
+        horizon?.serverId ?? remoteServerIdForAction(input, action);
       return serverId?.startsWith("remote_") ? [serverId] : [];
     }),
   );
@@ -2221,7 +2272,12 @@ function corpScoreWindowCompressionContext(
     .map((action) => action.actionId);
   const protectionNoSafetyDeltaActionIds = input.legalActions
     .filter((action) =>
-      isProtectionNoSafetyDeltaAction(input, action, context, protectedRemoteIds),
+      isProtectionNoSafetyDeltaAction(
+        input,
+        action,
+        context,
+        protectedRemoteIds,
+      ),
     )
     .map((action) => action.actionId);
   const economyActionIds = input.legalActions
@@ -2242,7 +2298,8 @@ function corpScoreWindowCompressionContext(
       (action) =>
         action.type === "install_card" &&
         action.payload?.placement === "ice" &&
-        (action.payload?.serverId === "hq" || action.payload?.serverId === "rd"),
+        (action.payload?.serverId === "hq" ||
+          action.payload?.serverId === "rd"),
     )
     .map((action) => action.actionId);
   const drawActionIds = input.legalActions
@@ -2268,8 +2325,351 @@ function corpScoreWindowCompressionContext(
     centralProtectionNecessary,
     drawActionIds,
     endTurnActionIds,
-    opportunity: scorePathActions.length > 0 || economyNecessaryActionIds.length > 0,
+    opportunity:
+      scorePathActions.length > 0 || economyNecessaryActionIds.length > 0,
   };
+}
+
+function evaluateCorpRemotePortfolioDiscipline(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+  context: CorpEvaluationContext,
+): CorpPlanEvaluatorResult {
+  const portfolio = corpRemotePortfolioContext(input, context);
+  const actions = actionsForCandidate(input, candidate);
+  const choosesNewRemote = actions.some((action) =>
+    portfolio.newRemoteActionIds.includes(action.actionId),
+  );
+  const choosesPlannedNewRemote = actions.some((action) =>
+    portfolio.newRemoteWithPlanActionIds.includes(action.actionId),
+  );
+  const choosesUnplannedNewRemote = actions.some((action) =>
+    portfolio.newRemoteWithoutPlanActionIds.includes(action.actionId),
+  );
+  const choosesEmptyRemoteWithIce = actions.some((action) =>
+    portfolio.emptyRemoteWithIceActionIds.includes(action.actionId),
+  );
+  const choosesConsolidation = actions.some((action) =>
+    portfolio.existingRemoteStrengthenActionIds.includes(action.actionId),
+  );
+  const features = extractCorpPlanFeatures(input);
+
+  const score =
+    (choosesConsolidation ? 95 : 0) +
+    (choosesPlannedNewRemote ? 12 : 0) -
+    (choosesUnplannedNewRemote ? (features.credits < 3 ? 420 : 115) : 0) -
+    (portfolio.overExpanded && choosesNewRemote ? 70 : 0);
+  return {
+    score,
+    reasons: sortedUnique([
+      ...(choosesConsolidation ? ["remote_ice_consolidation"] : []),
+      ...(choosesPlannedNewRemote ? ["new_remote_has_payload_plan"] : []),
+      ...(choosesUnplannedNewRemote ? ["new_remote_without_payload_plan"] : []),
+      ...(portfolio.overExpanded ? ["remote_portfolio_overexpanded"] : []),
+    ]),
+    evidence: [
+      `corp_new_remote_created:${choosesNewRemote}`,
+      `corp_new_remote_created_with_plan:${choosesPlannedNewRemote}`,
+      `corp_new_remote_created_without_payload_plan:${choosesUnplannedNewRemote}`,
+      `corp_empty_remote_with_ice_created:${choosesEmptyRemoteWithIce}`,
+      `corp_existing_remote_could_be_strengthened:${portfolio.existingRemoteCouldBeStrengthened}`,
+      `corp_remote_ice_consolidation_opportunity:${portfolio.consolidationOpportunity}`,
+      `corp_remote_ice_consolidation_taken:${choosesConsolidation}`,
+      `corp_ice_installed_on_new_remote_instead_of_existing_scoring_remote:${
+        choosesUnplannedNewRemote && portfolio.existingRemoteCouldBeStrengthened
+      }`,
+      `corp_remote_portfolio_overexpanded:${portfolio.overExpanded && choosesNewRemote}`,
+      `corp_one_ice_remote_cheaply_contestable:${portfolio.cheapOneIceRemoteIds.length > 0}`,
+    ],
+  };
+}
+
+function evaluateCorpHqAgendaDensity(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+  context: CorpEvaluationContext,
+): CorpPlanEvaluatorResult {
+  const density = corpHqAgendaDensityContext(input, context);
+  const actions = actionsForCandidate(input, candidate);
+  const choosesDraw = actions.some((action) =>
+    density.drawActionIds.includes(action.actionId),
+  );
+  const choosesAgendaExit = actions.some((action) =>
+    density.betterAgendaExitActionIds.includes(action.actionId),
+  );
+  const choosesHqProtection = actions.some((action) =>
+    density.hqProtectionActionIds.includes(action.actionId),
+  );
+  const dilutionEligible =
+    density.drawWouldLikelyDilute &&
+    density.noSafeRemote &&
+    density.hqProtectionActionIds.length === 0;
+  const drawRisky =
+    density.drawWouldRiskAgendaFlood &&
+    (density.betterAgendaExitActionIds.length > 0 ||
+      density.hqProtectionActionIds.length > 0);
+
+  const score =
+    (choosesAgendaExit && density.agendaFloodRisk ? 100 : 0) +
+    (choosesHqProtection &&
+    density.agendaFloodRisk &&
+    density.hqAccessThreat &&
+    input.playerView.own.credits >= 3
+      ? 70
+      : 0) +
+    (choosesDraw && dilutionEligible ? 60 : 0) -
+    (choosesDraw && drawRisky ? 85 : 0);
+  return {
+    score,
+    reasons: sortedUnique([
+      ...(density.agendaFloodRisk ? ["hq_agenda_flood_risk"] : []),
+      ...(choosesAgendaExit ? ["agenda_removed_from_hq_candidate"] : []),
+      ...(choosesHqProtection ? ["hq_protection_over_dilution"] : []),
+      ...(choosesDraw && dilutionEligible ? ["hq_dilution_draw"] : []),
+      ...(choosesDraw && drawRisky ? ["draw_risks_agenda_flood"] : []),
+    ]),
+    evidence: [
+      `corp_hq_card_count:${density.hqCardCount}`,
+      `corp_hq_known_agenda_count:${density.hqAgendaCount}`,
+      `corp_hq_agenda_density:${round(density.hqAgendaDensity)}`,
+      `corp_hq_agenda_flood_risk:${density.agendaFloodRisk}`,
+      `runner_hq_access_threat:${density.hqAccessThreat}`,
+      `runner_hq_known_agenda_threat:${density.hqKnownAgendaThreat}`,
+      `runner_hq_multiaccess_threat:${density.hqMultiaccessThreat}`,
+      `corp_draw_would_likely_dilute_hq:${density.drawWouldLikelyDilute}`,
+      `corp_draw_would_risk_agenda_flood:${density.drawWouldRiskAgendaFlood}`,
+      `corp_draw_chosen_to_dilute_agenda_flood:${choosesDraw && dilutionEligible}`,
+      `corp_draw_skipped_because_agenda_flood_risk:${
+        !choosesDraw && drawRisky
+      }`,
+      `corp_agenda_removed_from_hq_to_remote_or_score:${choosesAgendaExit}`,
+      `corp_hq_protection_chosen_over_dilution:${choosesHqProtection}`,
+      `corp_hq_dilution_chosen_because_no_safe_remote:${
+        choosesDraw && dilutionEligible
+      }`,
+    ],
+  };
+}
+
+function corpRemotePortfolioContext(
+  input: AiDecisionInput,
+  context: CorpEvaluationContext,
+): CorpRemotePortfolioContext {
+  const remoteServers = input.playerView.servers.filter((server) =>
+    server.id.startsWith("remote_"),
+  );
+  const newRemoteActions = input.legalActions.filter(
+    (action) =>
+      action.type === "install_card" &&
+      action.payload?.serverId === "new_remote",
+  );
+  const existingRemoteStrengthenActions = input.legalActions.filter(
+    (action) =>
+      action.type === "install_card" &&
+      action.payload?.placement === "ice" &&
+      typeof action.payload.serverId === "string" &&
+      action.payload.serverId.startsWith("remote_") &&
+      remoteServerHasPayloadPlan(input, action.payload.serverId, context),
+  );
+  const newRemoteWithPlan = newRemoteActions.filter((action) =>
+    newRemoteActionHasPayloadPlan(input, action),
+  );
+  const newRemoteWithoutPlan = newRemoteActions.filter(
+    (action) => !newRemoteActionHasPayloadPlan(input, action),
+  );
+  const emptyRemoteWithIce = newRemoteActions.filter(
+    (action) => action.payload?.placement === "ice",
+  );
+  const cheapOneIceRemoteIds = remoteServers
+    .filter((server) => server.ice.length === 1)
+    .filter(
+      (server) =>
+        assessCorpEffectiveRemoteSafety(input, server.id, context)
+          .cheaplyContestable,
+    )
+    .map((server) => server.id);
+  const emptyOneIceRemotes = remoteServers.filter(
+    (server) => server.ice.length === 1 && server.root.length === 0,
+  ).length;
+  const existingRemoteCouldBeStrengthened =
+    existingRemoteStrengthenActions.length > 0;
+  const consolidationOpportunity =
+    existingRemoteCouldBeStrengthened && newRemoteActions.length > 0;
+  const overExpanded =
+    newRemoteWithoutPlan.length > 0 &&
+    (existingRemoteCouldBeStrengthened ||
+      emptyOneIceRemotes >= 1 ||
+      cheapOneIceRemoteIds.length > 0);
+  return {
+    newRemoteActionIds: newRemoteActions.map((action) => action.actionId),
+    newRemoteWithPlanActionIds: newRemoteWithPlan.map(
+      (action) => action.actionId,
+    ),
+    newRemoteWithoutPlanActionIds: newRemoteWithoutPlan.map(
+      (action) => action.actionId,
+    ),
+    emptyRemoteWithIceActionIds: emptyRemoteWithIce.map(
+      (action) => action.actionId,
+    ),
+    existingRemoteStrengthenActionIds: existingRemoteStrengthenActions.map(
+      (action) => action.actionId,
+    ),
+    cheapOneIceRemoteIds,
+    existingRemoteCouldBeStrengthened,
+    consolidationOpportunity,
+    overExpanded,
+  };
+}
+
+function corpHqAgendaDensityContext(
+  input: AiDecisionInput,
+  context: CorpEvaluationContext,
+): CorpHqAgendaDensityContext {
+  const features = extractCorpPlanFeatures(input);
+  const memory = evaluateRemoteIntentMemory(input, context.beliefState);
+  const hq = features.serverFeatures.get("hq");
+  const hqCardCount = Math.max(0, features.handCount);
+  const hqAgendaCount = features.ownAgendaCount;
+  const hqAgendaDensity =
+    hqCardCount > 0 ? hqAgendaCount / Math.max(1, hqCardCount) : 0;
+  const hqAccessThreat =
+    memory.centralRunSignals.hq > 0 ||
+    ((hq?.iceCount ?? 0) === 0 && features.runnerCredits >= 4);
+  const hqMultiaccessThreat = (input.playerView.opponent.rig ?? []).some(
+    (card) =>
+      rolesForCardId(card.definitionId).some(
+        (role) =>
+          role.includes("hq_pressure") ||
+          role.includes("multiaccess") ||
+          role.includes("interface"),
+      ),
+  );
+  const agendaFloodRisk =
+    hqAgendaCount >= 2 && (hqAgendaDensity >= 0.35 || hqAccessThreat);
+  const betterAgendaExitActionIds = input.legalActions
+    .filter(
+      (action) =>
+        action.type === "score_agenda" ||
+        action.type === "advance_card" ||
+        (action.type === "install_card" &&
+          action.payload?.placement !== "ice" &&
+          rolesForAction(input, action).some(isAgendaRole) &&
+          isSafeScoringRootAction(input, action, context)) ||
+        isCorpAdvanceBurstScoreAction(input, action, context),
+    )
+    .map((action) => action.actionId);
+  const hqProtectionActionIds = input.legalActions
+    .filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq",
+    )
+    .map((action) => action.actionId);
+  const drawActionIds = input.legalActions
+    .filter((action) => action.type === "draw_card")
+    .map((action) => action.actionId);
+  const noSafeRemote = betterAgendaExitActionIds.length === 0;
+  const drawWouldLikelyDilute =
+    agendaFloodRisk &&
+    hqAccessThreat &&
+    hqCardCount >= 2 &&
+    input.playerView.own.stackOrRdCount > 0 &&
+    noSafeRemote;
+  const drawWouldRiskAgendaFlood =
+    agendaFloodRisk &&
+    input.playerView.own.stackOrRdCount > 0 &&
+    (betterAgendaExitActionIds.length > 0 ||
+      hqProtectionActionIds.length > 0 ||
+      hqAgendaDensity >= 0.6 ||
+      hqMultiaccessThreat);
+  return {
+    hqCardCount,
+    hqAgendaCount,
+    hqAgendaDensity,
+    agendaFloodRisk,
+    hqAccessThreat,
+    hqKnownAgendaThreat: hqAccessThreat && hqAgendaCount > 0,
+    hqMultiaccessThreat,
+    drawWouldLikelyDilute,
+    drawWouldRiskAgendaFlood,
+    betterAgendaExitActionIds,
+    hqProtectionActionIds,
+    drawActionIds,
+    noSafeRemote,
+  };
+}
+
+function newRemoteActionHasPayloadPlan(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (
+    action.type !== "install_card" ||
+    action.payload?.serverId !== "new_remote"
+  )
+    return false;
+  const roles = rolesForAction(input, action);
+  if (action.payload?.placement !== "ice")
+    return roles.some(
+      (role) =>
+        isAgendaRole(role) ||
+        role.includes("asset") ||
+        role.includes("economy") ||
+        role.includes("ambush") ||
+        role.includes("bait") ||
+        role.includes("remote_support") ||
+        role.includes("upgrade"),
+    );
+  if (input.playerView.own.credits < 3) return false;
+  return input.legalActions.some(
+    (candidate) =>
+      candidate.type === "install_card" &&
+      candidate.payload?.serverId === "new_remote" &&
+      candidate.payload?.placement !== "ice" &&
+      rolesForAction(input, candidate).some(
+        (role) =>
+          isAgendaRole(role) ||
+          role.includes("asset") ||
+          role.includes("economy") ||
+          role.includes("ambush") ||
+          role.includes("bait") ||
+          role.includes("remote_support") ||
+          role.includes("upgrade"),
+      ),
+  );
+}
+
+function remoteServerHasPayloadPlan(
+  input: AiDecisionInput,
+  serverId: string,
+  context: CorpEvaluationContext,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) return false;
+  if (server.root.length > 0) return true;
+  return input.legalActions.some(
+    (action) =>
+      action.type === "install_card" &&
+      action.payload?.placement !== "ice" &&
+      action.payload?.serverId === serverId &&
+      (rolesForAction(input, action).some((role) =>
+        isAgendaRole(role)
+          ? isSafeScoringRootAction(input, action, context)
+          : true,
+      ) ||
+        rolesForAction(input, action).some(
+          (role) =>
+            role.includes("asset") ||
+            role.includes("economy") ||
+            role.includes("ambush") ||
+            role.includes("bait") ||
+            role.includes("remote_support") ||
+            role.includes("upgrade"),
+        )),
+  );
 }
 
 function isScoreWindowCompressionAction(
@@ -2290,7 +2690,12 @@ function isScoreWindowCompressionAction(
   const horizon = remoteScoreHorizonForAction(input, action, context);
   const serverId = horizon?.serverId ?? remoteServerIdForAction(input, action);
   if (!serverId?.startsWith("remote_")) return false;
-  const safety = assessCorpEffectiveRemoteSafety(input, serverId, context, action);
+  const safety = assessCorpEffectiveRemoteSafety(
+    input,
+    serverId,
+    context,
+    action,
+  );
   if (safety.cheaplyContestable && !safety.sameTurnScoreAllowed) return false;
   const reserve = remoteRezReserveNeedForServer(input, serverId, context);
   if (
@@ -2323,8 +2728,8 @@ function isScoreWindowCompressionEconomyNecessary(
     const reserve = remoteRezReserveNeedForServer(input, serverId, context);
     return Boolean(
       reserve &&
-        creditsBefore < reserve.reserveTarget &&
-        creditsAfter >= reserve.reserveTarget,
+      creditsBefore < reserve.reserveTarget &&
+      creditsAfter >= reserve.reserveTarget,
     );
   });
 }
@@ -2487,7 +2892,7 @@ function candidateRepeatsProtectionOverScorePath(
     const serverId = remoteServerIdForAction(input, action);
     return Boolean(
       serverId?.startsWith("remote_") &&
-        isRemoteProtectionAction(input, action, serverId, context),
+      isRemoteProtectionAction(input, action, serverId, context),
     );
   });
 }
@@ -2885,8 +3290,8 @@ function evaluateCorpInstalledEconomyActions(
         : best.kind === "scored_agenda_counter_economy"
           ? "scored_agenda_counter_economy"
           : best.kind === "pool_payout"
-        ? "installed_corp_economy_pool_payout"
-        : "installed_corp_economy_direct_payout",
+            ? "installed_corp_economy_pool_payout"
+            : "installed_corp_economy_direct_payout",
     ],
     evidence: [
       "installed_corp_economy:true",
@@ -2915,8 +3320,7 @@ function evaluateCorpScoredAgendaActions(
     .filter((assessment): assessment is CorpScoredAgendaAbilityAssessment =>
       Boolean(assessment),
     );
-  if (assessments.length === 0)
-    return { score: 0, reasons: [], evidence: [] };
+  if (assessments.length === 0) return { score: 0, reasons: [], evidence: [] };
   const best = assessments
     .slice()
     .sort(
@@ -3420,7 +3824,11 @@ export function classifyCorpScoredAgendaAbility(
   )
     return undefined;
   const sourceCard = findVisibleCard(input, action.source);
-  if (!sourceCard?.known || sourceCard.type !== "agenda" || !sourceCard.definitionId)
+  if (
+    !sourceCard?.known ||
+    sourceCard.type !== "agenda" ||
+    !sourceCard.definitionId
+  )
     return undefined;
   if (
     !input.playerView.own.scoreArea.some(
@@ -5938,6 +6346,24 @@ function actionPriority(
       ? 88
       : 60 + Math.max(0, extraActionOperation.netValue) * 4;
   if (kind === "recover_economy" && action.type === "play_operation") return 80;
+  if (kind === "recover_economy" && action.type === "draw_card") {
+    const density = corpHqAgendaDensityContext(input, context);
+    const features = extractCorpPlanFeatures(input);
+    if (
+      density.drawWouldLikelyDilute &&
+      density.noSafeRemote &&
+      density.hqProtectionActionIds.length === 0
+    )
+      return 108;
+    if (
+      features.ownAgendaCount >= 2 &&
+      density.hqAccessThreat &&
+      density.noSafeRemote &&
+      density.hqProtectionActionIds.length === 0
+    )
+      return 96;
+    if (density.drawWouldRiskAgendaFlood) return 28;
+  }
   if (
     kind === "recover_economy" &&
     action.type === "draw_card" &&
@@ -5972,6 +6398,7 @@ function actionPriority(
   )
     return (
       82 +
+      corpRemotePortfolioActionPriorityBonus(input, action, context) +
       (hasRiskyAdvanceWindowForServer(
         input,
         String(action.payload.serverId),
@@ -6042,6 +6469,23 @@ function corpUnsafeScoreConversionActionBonus(
     )
   )
     return -80;
+  return 0;
+}
+
+function corpRemotePortfolioActionPriorityBonus(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+): number {
+  const portfolio = corpRemotePortfolioContext(input, context);
+  if (portfolio.existingRemoteStrengthenActionIds.includes(action.actionId))
+    return 38;
+  if (portfolio.newRemoteWithoutPlanActionIds.includes(action.actionId))
+    return (
+      (portfolio.existingRemoteCouldBeStrengthened ? -55 : -30) +
+      (input.playerView.own.credits < 3 ? -140 : 0)
+    );
+  if (portfolio.newRemoteWithPlanActionIds.includes(action.actionId)) return 12;
   return 0;
 }
 
@@ -6887,7 +7331,7 @@ function scrubPlanEvidence(evidence: string[]): string[] {
         !forbidden.some((needle) => entry.includes(needle)) &&
         !entry.includes("runner_simple_"),
     )
-    .slice(0, 72);
+    .slice(0, 96);
 }
 
 function confidence(score: number, actionCount: number): number {

@@ -812,6 +812,7 @@ function executeCardImplementationAccessEffectStep(
         counterType: step.counterType,
         addedCounterAmount: step.amount,
         remainingCounters,
+        reason: "access_effect",
         sourceDefinitionId: definition.id,
         sourceTitle: definition.title,
       });
@@ -840,6 +841,7 @@ function executeCardImplementationAccessEffectStep(
         counterType: result.counterType,
         addedCounterAmount: result.amount,
         remainingCounters: result.countersAfter,
+        reason: "access_effect",
         sourceDefinitionId: definition.id,
         sourceTitle: definition.title,
       });

@@ -37,6 +37,8 @@ export type AccessCountPayload = {
   baseAccessCount: number;
   installedAccessBonus: number;
   effectiveAccessCount: number;
+  highlighterCounterCount?: number;
+  highlighterAccessBonus?: number;
   installedAccessBonusSourceDefinitionIds?: string;
 };
 
@@ -111,6 +113,14 @@ export function accessCountPayloadForBreach(
   const installedAccessBonus =
     installedAccessBonusForServer(host, breach.serverId) +
     (breach.serverId === "hq" ? runnerHqAccessBonus(host) : 0);
+  const highlighterCounterCount =
+    breach.serverId === "rd"
+      ? Math.max(
+          0,
+          Math.floor(host.state.purgeableRunnerVirusCounters?.corp?.highlighter ?? 0),
+        )
+      : 0;
+  const highlighterAccessBonus = Math.max(0, highlighterCounterCount - 1);
   const installedAccessBonusSourceDefinitionIds = [
     ...installedAccessBonusSourceDefinitionIdsForServer(host, breach.serverId),
     ...(breach.serverId === "hq"
@@ -121,6 +131,8 @@ export function accessCountPayloadForBreach(
     baseAccessCount: Math.max(1, breach.queue.length - installedAccessBonus),
     installedAccessBonus,
     effectiveAccessCount: breach.queue.length,
+    ...(highlighterCounterCount > 0 ? { highlighterCounterCount } : {}),
+    ...(highlighterAccessBonus > 0 ? { highlighterAccessBonus } : {}),
     ...(installedAccessBonusSourceDefinitionIds.length > 0
       ? {
           installedAccessBonusSourceDefinitionIds:

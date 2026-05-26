@@ -128,6 +128,7 @@ export function visibleCorpIdentityCard(state: GameState): VisibleCard {
     ...counterDisplaysField([
       ...(card.counterDisplays ?? []),
       ...(skivvissCorpCounterDisplays(state) ?? []),
+      ...(badPublicityCounterDisplays(state) ?? []),
       ...(purgeableRunnerVirusCounterDisplaysForBucket(
         state.purgeableRunnerVirusCounters?.corp,
         "corp",
@@ -422,6 +423,22 @@ function skivvissCounterTotal(state: GameState): number {
     if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
     return sum + cardCounter(state, cardId, "virus");
   }, 0);
+}
+
+function badPublicityCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
+  const amount = Math.max(0, Math.floor(state.corp.badPublicity));
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "bad_publicity",
+      amount,
+      displayKind: "bad_publicity",
+      label: "Bad Publicity",
+      ariaLabel: `${amount} Bad Publicity`,
+      counterType: "bad_publicity",
+      usageHint: "status_marker",
+    },
+  ];
 }
 
 export function poxCounterDisplaysForServer(
