@@ -47840,6 +47840,175 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     );
   });
 
+  it("plays Proteus PRO005 runner economy/draw events through LegalActions", () => {
+    const cases = [
+      {
+        definitionId: "onr_proteus_103_cruising-for-netwatch",
+        gainedCredits: 1,
+        drawnCount: 2,
+        expectedGripDelta: 1,
+      },
+      {
+        definitionId: "onr_proteus_124_stakeout",
+        gainedCredits: 2,
+        drawnCount: 1,
+        expectedGripDelta: 0,
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `spotcheck-${testCase.definitionId}`,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: {
+            id: `spotcheck_${testCase.definitionId}_runner`,
+            name: `Spotcheck ${testCase.definitionId} Runner`,
+            side: "runner",
+            identity: "runner_identity_001",
+            cards: [
+              { id: testCase.definitionId, quantity: 1 },
+              { id: "simple_economy_event", quantity: 10 },
+            ],
+          },
+          corpDeck: {
+            id: `spotcheck_${testCase.definitionId}_corp`,
+            name: `Spotcheck ${testCase.definitionId} Corp`,
+            side: "corp",
+            identity: "corp_identity_001",
+            cards: [
+              { id: "simple_agenda", quantity: 6 },
+              { id: "simple_economy_operation", quantity: 6 },
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 5;
+      state.runner.clicks = 4;
+
+      const eventId = moveRunnerCardToGrip(state, testCase.definitionId);
+      const legal = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "play_event" &&
+          action.payload?.cardId === eventId,
+      );
+      expect(legal.costs).toEqual([{ clicks: 1, credits: 0 }]);
+
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: legal.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `${testCase.definitionId}-stale`,
+      });
+      expect(stale.ok, testCase.definitionId).toBe(false);
+      if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: legal.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `${testCase.definitionId}-wrong-side`,
+      });
+      expect(wrongSide.ok, testCase.definitionId).toBe(false);
+      if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+      const wrongActionId = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: `${legal.actionId}-missing`,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `${testCase.definitionId}-wrong-action-id`,
+      });
+      expect(wrongActionId.ok, testCase.definitionId).toBe(false);
+
+      const noClicks = structuredClone(state);
+      noClicks.runner.clicks = 0;
+      expect(
+        applyAction(noClicks, {
+          matchId: noClicks.matchId,
+          side: "runner",
+          actionId: legal.actionId,
+          clientKnownStateVersion: noClicks.stateVersion,
+          idempotencyKey: `${testCase.definitionId}-no-clicks`,
+        }).ok,
+        testCase.definitionId,
+      ).toBe(false);
+
+      const removedSource = structuredClone(state);
+      removeEverywhere(removedSource, eventId);
+      const removedHash = hashState(removedSource);
+      expect(
+        applyAction(removedSource, {
+          matchId: removedSource.matchId,
+          side: "runner",
+          actionId: legal.actionId,
+          clientKnownStateVersion: removedSource.stateVersion,
+          idempotencyKey: `${testCase.definitionId}-removed-source`,
+        }).ok,
+        testCase.definitionId,
+      ).toBe(false);
+      expect(hashState(removedSource), testCase.definitionId).toBe(removedHash);
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      const creditsBefore = state.runner.credits;
+      const gripBefore = state.runner.grip.length;
+      const stackBefore = state.runner.stack.length;
+
+      state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+
+      expect(state.runner.credits, testCase.definitionId).toBe(
+        creditsBefore + testCase.gainedCredits,
+      );
+      expect(state.runner.grip.length, testCase.definitionId).toBe(
+        gripBefore + testCase.expectedGripDelta,
+      );
+      expect(state.runner.stack.length, testCase.definitionId).toBe(
+        stackBefore - testCase.drawnCount,
+      );
+      expect(state.runner.heap, testCase.definitionId).toContain(eventId);
+      expect(state.cardInstances[eventId]?.zone).toMatchObject({
+        side: "runner",
+        zone: "heap",
+      });
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "play_event",
+        cardDefinitionId: testCase.definitionId,
+        gainedCredits: testCase.gainedCredits,
+        runnerCreditsAfter: state.runner.credits,
+        drawnCount: testCase.drawnCount,
+        runnerGripAfter: state.runner.grip.length,
+        resolvedEffects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            side: "runner",
+            amount: testCase.gainedCredits,
+            reason: "card_resolver",
+            sourceDefinitionId: testCase.definitionId,
+          }),
+          expect.objectContaining({
+            kind: "draw_cards",
+            side: "runner",
+            amount: testCase.drawnCount,
+            reason: "card_resolver",
+            sourceDefinitionId: testCase.definitionId,
+          }),
+        ],
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, testCase.definitionId).toBe(true);
+      expect(hashState(replay.state), testCase.definitionId).toBe(hashState(state));
+    }
+  });
+
   it("routes Full Body Conversion through a Corp bypass-payment prevention window", () => {
     let state = apply(
       createGameAfterSetup({

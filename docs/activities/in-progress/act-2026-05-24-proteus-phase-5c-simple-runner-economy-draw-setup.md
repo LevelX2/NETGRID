@@ -12,7 +12,6 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 5c
 proReferences:
-  - PRO005
   - PRO014
 blockedBy:
   - runner_trash_subtype_history
@@ -20,6 +19,7 @@ blockedBy:
   - base_link_trace_avoid_reward
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-5c-simple-runner-economy-draw-setup.md
+  - docs/activities/done/act-2026-05-26-proteus-pro005-simple-runner-economy-draw-events.md
   - docs/releases/proteus/README.md
 checks:
   - "rg -n \"onr_proteus_103|onr_proteus_114|onr_proteus_118|onr_proteus_124|onr_proteus_130|onr_proteus_148\" data/cards/proteus-cards.json data/manifests/proteus-card-support.json docs/releases/proteus -S"
@@ -71,10 +71,12 @@ Die einfachen sichtbaren Runner-Economy-, Draw- und Setup-Karten über bestehend
 
 Blockiert am 2026-05-24, ohne Kartenpromotion.
 
-`Cruising for Netwatch` und `Stakeout` sind voraussichtlich über vorhandene `on_play`-Effekte mit `gain_credits` und `draw_cards` umsetzbar. Der vollständige Slice enthält aber vier Karten mit fehlenden generischen Zustands-/Timingbausteinen:
+Update 2026-05-26: PRO005 ist abgeschlossen. `Cruising for Netwatch` und `Stakeout` sind über vorhandene `on_play`-Effekte mit `gain_credits` und `draw_cards` umgesetzt, registriert, im Manifest engine-/human-playable markiert und durch Coverage-/Event-Spotchecks abgesichert.
+
+Die Phase-5c-Sammelactivity bleibt blockiert, weil vier Karten weiterhin fehlende generische Zustands-/Timingbausteine brauchen und nach PRO014 gehören:
 
 - `On the Fast Track` braucht Runner-Turn-History darüber, ob der Runner in diesem Zug eine Advertisement- oder Transactions-Karte getrasht hat. Der aktuelle generische Event-Baustein kennt keine wiederverwendbare, subtype-bezogene Trash-History für Runner-Economy-Events.
 - `Prearranged Drop` braucht einen turngebundenen Delayed-Reward für den nächsten Agenda-Access in diesem Zug. Dafür fehlt ein generischer Runner-Event-Flag, der auf Access einer Agenda triggert, Credits auszahlt, genau einmal verbraucht wird und bei Turn-Ende deterministisch aufräumt.
 - `Back Door to Rivals` und `Runner Sensei` brauchen Base-Link-Trace-Entscheidungen mit Exklusivität pro Trace, variablem Base-Link-/Pump-Creditpfad und anschließendem Credit-Gewinn, wenn genau diese Quelle erfolgreich zum Vermeiden einer Trace verwendet wurde. Das vorhandene `trace_post_bid_link_window`-Muster deckt einfache Link-Boosts ab, aber kein Base-Link-Auswahlfenster mit Source-Reward.
 
-Keine Teilumsetzung wurde vorgenommen, weil der Slice alle sechs Zielkarten gemeinsam fordert und eine isolierte Promotion von `Cruising for Netwatch`/`Stakeout` die Activity-Akzeptanzkriterien für vollständigen Slice-, Registry-/Coverage-/Manifest- und Revalidierungsnachweis nicht erfüllen würde.
+PRO014 bleibt offen; keine dieser vier Karten wurde implementiert, decklegal, formatlegal oder AI-unterstützt gemacht.
