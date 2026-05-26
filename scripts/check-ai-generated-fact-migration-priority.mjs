@@ -65,6 +65,223 @@ const PRIORITY_POLICY = {
     rationale:
       "Universal breaker profile is an exact mechanical fact and should not need long-term manual duplication.",
   },
+  onr_v1_074_worm: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Wall breaker coverage and break/pump costs are stable generated facts; concrete encounter legality remains effectiveRunQuote context.",
+  },
+  "onr_v1_047_pile-driver": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Wall breaker coverage is stable, while stealth_loss must stay a side-effect fact rather than normal credit cost.",
+  },
+  onr_v1_014_codecracker: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Code-gate breaker coverage and costs are stable generated facts.",
+  },
+  onr_v1_016_cyfermaster: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Code-gate breaker coverage and costs are stable generated facts; printed trademark suffix is normalized by cardId.",
+  },
+  onr_v1_052_raffles: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Code-gate breaker coverage and costs are stable generated facts.",
+  },
+  onr_v1_054_raptor: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale: "Sentry breaker coverage and costs are stable generated facts.",
+  },
+  onr_v1_060_shaka: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale: "Sentry breaker coverage and costs are stable generated facts.",
+  },
+  "onr_v1_006_black-dahlia": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale: "Sentry breaker coverage and costs are stable generated facts.",
+  },
+  "onr_v1_040_loony-goon": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale: "Sentry breaker coverage and costs are stable generated facts.",
+  },
+  onr_v1_007_blink: {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Universal random breaker coverage is mechanically derivable, but random_failure and once-per-subroutine must not become deterministic break safety.",
+  },
+  onr_v1_019_dropp: {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Universal breaker coverage is derivable, but ends_run_after_use must remain a side effect and not be lost in normalization.",
+  },
+  onr_v1_056_replicator: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Trace-subroutine breaker coverage is stable and must remain distinct from universal coverage.",
+  },
+  onr_v1_055_reflector: {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "AP-special breaker coverage is derivable, but stun/hellbolt/knockout specificity remains a descriptor limitation.",
+  },
+  "onr_v1_002_ai-boon": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Sentry breaker coverage is derivable, but random run-start strength must remain random-context only.",
+  },
+  "onr_v1_005_bartmoss-memorial-icebreaker": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Universal breaker coverage is derivable, but random self-trash risk must remain a side effect and not deterministic safety.",
+  },
+  onr_v1_070_tinweasel: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Code-gate breaker coverage is stable; no-pump text remains comparison context.",
+  },
+  "onr_v1_073_wizards-book": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Code-gate breaker coverage and costs are stable generated facts.",
+  },
+  "onr_v1_072_wild-card": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale: "Sentry breaker coverage and costs are stable generated facts.",
+  },
   "onr_v1_043_mystery-box": {
     migrationPriority: "P1",
     migrationRisk: "medium",
@@ -310,6 +527,102 @@ const PRIORITY_POLICY = {
     recommendedMigrationBatch: 3,
     rationale:
       "Agenda steal tax and access condition are mechanical, but remote-protection value remains contextual overlay.",
+  },
+  "onr_v1_370_tesseract-fort-construction": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Additional fort ICE subroutine is mechanically derivable, but active/rezzed/server context must remain board-aware.",
+  },
+  "onr_v1_361_namatoki-plaza": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Remote capacity and score-support mechanics are derivable, while actual remote safety remains board and server context.",
+  },
+  "onr_v1_359_jenny-jett": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Successful-run future-encounter support is mechanically recognizable, but hidden HQ choice and runpath context stay runtime-owned.",
+  },
+  "onr_v1_363_olivia-salazar": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "During-run source-bound rez discount is mechanical, but payment and temporary derez legality remain engine context.",
+  },
+  "onr_v1_367_rio-de-janeiro-city-grid": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Pass-rezzed-ICE random stop pressure is mechanically derivable, but concrete random outcome and path impact stay runtime context.",
+  },
+  "onr_v1_317_data-masons": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Wall rez discount and wall strength modifiers are stable generated ICE-modifier facts.",
+  },
+  "onr_v1_350_antiquated-interface-routines": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Same-fort ICE strength modifier is mechanically derivable and low-risk when board/server context remains explicit.",
+  },
+  "onr_v1_312_chicago-branch": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Activated advancement-counter placement is a stable mechanical score-acceleration fact; closeout valuation stays strategic.",
   },
 };
 

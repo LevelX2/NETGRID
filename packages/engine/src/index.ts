@@ -413,6 +413,11 @@ import {
   type HiddenZoneRuntimeDepsHost,
 } from "./game/card-implementation/hidden-zone-runtime-deps";
 import {
+  createInstallRezCardImplementationRuntimeDeps,
+  type InstallRezRuntimeDepsHost,
+} from "./game/card-implementation/install-rez-runtime-deps";
+import { createDamageCardImplementationRuntimeDeps } from "./game/card-implementation/damage-runtime-deps";
+import {
   createTraceCardImplementationRuntimeDeps,
   type TraceRuntimeDepsHost,
 } from "./game/card-implementation/trace-runtime-deps";
@@ -741,11 +746,6 @@ const cardImplementationEffectAdapters = createCardImplementationEffectAdapters(
   drawCorpCards,
   drawRunnerCards,
   runnerDrawSummaryPublicPayload,
-  createDamageImminentEvent,
-  openReplacementWindow,
-  openEventModificationWindow,
-  resolveDamageImminentEvent,
-  resolveUnpreventableDamage: (state, request) => doDamage(state, request),
   addCardCounter,
   cardCounter,
   spendCardCounter,
@@ -816,6 +816,34 @@ function traceRuntimeDepsHost(): TraceRuntimeDepsHost {
 const traceCardImplementationRuntimeDeps =
   createTraceCardImplementationRuntimeDeps(traceRuntimeDepsHost());
 
+const damageCardImplementationRuntimeDeps =
+  createDamageCardImplementationRuntimeDeps();
+
+function installRezRuntimeDepsHost(): InstallRezRuntimeDepsHost {
+  return {
+    cards: { definitionFor },
+    install: { runnerInstallableProgramIdsForValuPak },
+    rez: {
+      affordableRezzedInstalledIceIdsForRunner,
+      unrezzedInstalledIceIds,
+      installedIceIds: (state) =>
+        corpInstalledCardIds(state).filter(
+          (cardId) =>
+            mustInstance(state.cardInstances, cardId).zone.zone === "serverIce",
+        ),
+      rezzedBlackIceIds,
+      startCoreCommandJettisonIceChoice,
+      startSecurityCodeWormChipTrashIceChoice,
+      startForgedActivationOrdersTargetChoice,
+      startAnonymousTipDerezBlackIceChoice,
+    },
+    runner: { ensureTurnFlags: ensureRunnerTurnFlags },
+  };
+}
+
+const installRezCardImplementationRuntimeDeps =
+  createInstallRezCardImplementationRuntimeDeps(installRezRuntimeDepsHost());
+
 const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   definitionFor,
   mustInstance,
@@ -823,7 +851,6 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   rezzedCorpRootCardIds,
   runnerInstalledCardIds,
   runnerRunAttemptsLastTurn,
-  runnerWasDamagedDuringLastThreeActions,
   runnerMadeSuccessfulRunOnServerThisTurn: (state, server) =>
     server === "hq" && hasSuccessfulHqRunThisTurn(state),
   runnerLiberatedAgendaSubtypeThisTurn: (state, subtype) =>
@@ -836,6 +863,7 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   appendResolvedEffectsToPayload,
   ...cardImplementationEffectAdapters,
   ...traceCardImplementationRuntimeDeps,
+  ...damageCardImplementationRuntimeDeps,
   startRun: (state, legalAction, serverId, options) => {
     const sourceCardId =
       typeof legalAction.source === "string" &&
@@ -966,57 +994,8 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     return { publicPayload: legalAction.payload ?? {} };
   },
   ...hiddenZoneCardImplementationRuntimeDeps,
-  rezzedIceTargetCount: (state) =>
-    affordableRezzedInstalledIceIdsForRunner(state).length,
-  unrezzedIceTargetCount: (state) => unrezzedInstalledIceIds(state).length,
-  installedIceTargetCount: (state) =>
-    corpInstalledCardIds(state).filter(
-      (cardId) => mustInstance(state.cardInstances, cardId).zone.zone === "serverIce",
-    ).length,
-  rezzedBlackIceTargetCount: (state) => rezzedBlackIceIds(state).length,
+  ...installRezCardImplementationRuntimeDeps,
   corpHqCardCount: (state) => state.corp.hq.length,
-  runnerValuPakInstallableProgramCount: (state) =>
-    runnerInstallableProgramIdsForValuPak(state).length,
-  startPayRezCostToTrashRezzedIceChoice: (state, legalAction, sourceCardId) => {
-    startCoreCommandJettisonIceChoice(state, sourceCardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      p3_48RunnerRunControl: "pay_rez_cost_to_trash_rezzed_ice",
-      v1922RunnerEventAbility:
-        "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
-      sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    };
-    return { publicPayload: legalAction.payload ?? {} };
-  },
-  startTrashUnrezzedIceChoice: (state, legalAction, sourceCardId) => {
-    startSecurityCodeWormChipTrashIceChoice(state, sourceCardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      p3_48RunnerRunControl: "trash_unrezzed_ice",
-      v1922RunnerEventAbility: "successful_hq_run_trash_unrezzed_ice",
-      sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    };
-    return { publicPayload: legalAction.payload ?? {} };
-  },
-  startCorpChoiceRezOrTrashIceChoice: (state, legalAction, sourceCardId) => {
-    startForgedActivationOrdersTargetChoice(state, sourceCardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      p3_48RunnerRunControl: "corp_choice_rez_or_trash_ice",
-      v1922RunnerEventAbility: "force_rez_or_trash_ice",
-      sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    };
-    return { publicPayload: legalAction.payload ?? {} };
-  },
-  startDerezRezzedBlackIceChoice: (state, legalAction, sourceCardId) => {
-    startAnonymousTipDerezBlackIceChoice(state, sourceCardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      v1922RunnerEventAbility: "derez_black_ice",
-      sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    };
-    return { publicPayload: legalAction.payload ?? {} };
-  },
   startCorpDiscardHqWithRetainPayment: (
     state,
     legalAction,
@@ -1027,34 +1006,6 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
       { sourceCardId, retainCostPerCard },
     ),
-  startRunnerProgramInstallActionBundle: (
-    state,
-    legalAction,
-    actionCount,
-    temporaryCredit,
-  ) => {
-    if (actionCount !== 5 || temporaryCredit !== 1)
-      throw new Error("Valu-Pak Software Bundle profile is invalid.");
-    const installablePrograms = runnerInstallableProgramIdsForValuPak(state);
-    if (installablePrograms.length === 0)
-      throw new Error(
-        "Valu-Pak Software Bundle findet kein installierbares Programm.",
-      );
-    const flags = ensureRunnerTurnFlags(state);
-    flags.valuPakProgramInstallActionsRemaining = actionCount;
-    flags.valuPakTemporaryProgramInstallCredits = temporaryCredit;
-    state.runner.clicks += actionCount;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      v1922RunnerEventAbility: "program_install_action_bundle",
-      gainedActions: actionCount,
-      temporaryProgramInstallCredits: temporaryCredit,
-      valuPakProgramInstallActionsRemaining:
-        flags.valuPakProgramInstallActionsRemaining,
-      runnerClicksAfter: state.runner.clicks,
-    };
-    return { publicPayload: legalAction.payload ?? {} };
-  },
   addCounterToAllInstalledRunnerIcebreakers: (state, counterType, amount) =>
     addCounterToAllInstalledRunnerIcebreakers(state, counterType, amount),
   shuffleSourceIntoCorpRd: (state, sourceCardId, sourceDefinitionId) =>
@@ -8438,14 +8389,6 @@ function runnerRunAttemptsLastTurn(state: GameState): number {
     0,
     Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0),
   );
-}
-
-function runnerWasDamagedDuringLastThreeActions(state: GameState): boolean {
-  const flags = state.runnerTurnFlags;
-  const lastDamageOrdinal = Math.floor(flags?.lastDamageRunnerActionOrdinal ?? 0);
-  if (lastDamageOrdinal <= 0) return false;
-  const actionsTaken = Math.floor(flags?.runnerActionsTakenThisTurn ?? 0);
-  return actionsTaken - lastDamageOrdinal < 3;
 }
 
 function recordRunnerActionSpent(state: GameState, amount: number): void {

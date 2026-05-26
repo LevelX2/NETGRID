@@ -2,23 +2,19 @@
  * Bridges declarative CardImplementation effects to existing engine primitives.
  *
  * The adapter layer may call mutating host functions supplied by index.ts, but
- * it must not introduce card-specific behavior or bypass existing draw, damage,
+ * it must not introduce card-specific behavior or bypass existing draw,
  * hosted-credit, and source-trash rules.
  */
 import type {
   CardDefinition,
-  CardDefinitionId,
   CardInstance,
   CardInstanceId,
   CounterType,
-  DamageType,
   GameState,
-  ImminentEvent,
   LegalAction,
   Side,
 } from "@netgrid/shared";
 import type {
-  CardEffectDamageResult,
   CardEffectDrawCardsResult,
   CardEffectHostedCreditsResult,
   CardEffectCounterResult,
@@ -35,22 +31,6 @@ type RunnerDrawSummaryForCardImplementation = {
   citySurveillanceTagsAdded: number;
 };
 
-type DamageSummaryForCardImplementation = {
-  damageType: DamageType;
-  amount: number;
-  cardsTrashed: number;
-  flatline: boolean;
-  coreDamageAfter?: number;
-  runnerMaxHandSizeAfter?: number;
-};
-
-type DamageRequestForCardImplementation = {
-  damageId: string;
-  damageType: DamageType;
-  amount: number;
-  source: string;
-};
-
 export type CardImplementationEffectAdapterHost = {
   // These dependencies are the mutation boundary: index.ts owns the underlying
   // primitives, while this module shapes them for the CardImplementation runtime.
@@ -63,28 +43,6 @@ export type CardImplementationEffectAdapterHost = {
     state: GameState,
     summary: RunnerDrawSummaryForCardImplementation,
   ) => PublicEffectPayload;
-  createDamageImminentEvent: (
-    state: GameState,
-    request: DamageRequestForCardImplementation,
-  ) => ImminentEvent;
-  openReplacementWindow: (
-    state: GameState,
-    event: ImminentEvent,
-    legalAction: LegalAction,
-  ) => boolean;
-  openEventModificationWindow: (
-    state: GameState,
-    event: ImminentEvent,
-    legalAction: LegalAction,
-  ) => boolean;
-  resolveDamageImminentEvent: (
-    state: GameState,
-    event: ImminentEvent,
-  ) => DamageSummaryForCardImplementation;
-  resolveUnpreventableDamage: (
-    state: GameState,
-    request: DamageRequestForCardImplementation,
-  ) => DamageSummaryForCardImplementation;
   addCardCounter: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -128,8 +86,6 @@ export type CardImplementationEffectAdapterHost = {
 export type CardImplementationEffectAdapters = Pick<
   CardImplementationRuntimeDependencies,
   | "drawCards"
-  | "damageRunner"
-  | "unpreventableDamageRunner"
   | "addHostedCredits"
   | "addCountersToSource"
   | "takeHostedCredits"
@@ -142,7 +98,7 @@ export type CardImplementationEffectAdapters = Pick<
  *
  * The returned functions preserve public payload and ResolvedEffect contracts
  * while delegating actual state mutation to injected host primitives. This keeps
- * the runtime independent from index.ts and avoids a parallel damage/draw engine.
+ * the runtime independent from index.ts and avoids parallel draw/counter engines.
  */
 export function createCardImplementationEffectAdapters(
   host: CardImplementationEffectAdapterHost,
@@ -170,81 +126,6 @@ export function createCardImplementationEffectAdapters(
         ...(summary.drawnCount > 0
           ? { runnerGripAfter: state.runner.grip.length }
           : {}),
-      },
-    };
-  }
-
-  function damageRunnerForCardImplementationEffect(
-    state: GameState,
-    legalAction: LegalAction,
-    sourceDefinitionId: CardDefinitionId,
-    damageType: Extract<DamageType, "meat" | "net" | "core">,
-    amount: number,
-  ): CardEffectDamageResult {
-    // Damage uses the existing imminent-event, prevention, and modification
-    // windows. CardImplementation effects do not resolve damage through a
-    // separate shortcut path.
-    const request = {
-      damageId: `${state.matchId}.${state.stateVersion}.${sourceDefinitionId}`,
-      damageType,
-      amount,
-      source: `operation:${sourceDefinitionId}`,
-    };
-    const event = host.createDamageImminentEvent(state, request);
-    if (
-      host.openReplacementWindow(state, event, legalAction) ||
-      host.openEventModificationWindow(state, event, legalAction)
-    ) {
-      return {
-        resolved: false,
-        damageType,
-        amount: 0,
-        cardsTrashed: 0,
-        flatline: false,
-        publicPayload: legalAction.payload ?? {},
-      };
-    }
-
-    const summary = host.resolveDamageImminentEvent(state, event);
-    const publicPayload = damageSummaryPublicPayload(summary);
-    if (typeof event.payload.baseDamageAmount === "number")
-      publicPayload.baseDamageAmount = event.payload.baseDamageAmount;
-    if (typeof event.payload.bioweaponsEngineeringModifier === "number")
-      publicPayload.bioweaponsEngineeringModifier =
-        event.payload.bioweaponsEngineeringModifier;
-    return {
-      resolved: true,
-      damageType: summary.damageType,
-      amount: summary.amount,
-      cardsTrashed: summary.cardsTrashed,
-      flatline: summary.flatline,
-      publicPayload,
-    };
-  }
-
-  function unpreventableDamageRunnerForCardImplementationEffect(
-    state: GameState,
-    legalAction: LegalAction,
-    sourceDefinitionId: CardDefinitionId,
-    damageType: Extract<DamageType, "meat" | "net" | "core">,
-    amount: number,
-  ): CardEffectDamageResult {
-    const summary = host.resolveUnpreventableDamage(state, {
-      damageId: `${state.matchId}.${state.stateVersion}.${sourceDefinitionId}.unpreventable`,
-      damageType,
-      amount,
-      source: `unpreventable:${sourceDefinitionId}`,
-    });
-    return {
-      resolved: true,
-      damageType: summary.damageType,
-      amount: summary.amount,
-      cardsTrashed: summary.cardsTrashed,
-      flatline: summary.flatline,
-      publicPayload: {
-        ...damageSummaryPublicPayload(summary),
-        preventableDamage: false,
-        unpreventableDamage: true,
       },
     };
   }
@@ -364,31 +245,10 @@ export function createCardImplementationEffectAdapters(
 
   return {
     drawCards: drawCardsForCardImplementationEffect,
-    damageRunner: damageRunnerForCardImplementationEffect,
-    unpreventableDamageRunner:
-      unpreventableDamageRunnerForCardImplementationEffect,
     addHostedCredits: addHostedCreditsForCardImplementationEffect,
     addCountersToSource: addCountersToSourceForCardImplementationEffect,
     takeHostedCredits: takeHostedCreditsForCardImplementationEffect,
     trashSourceWhenEmpty: trashSourceWhenEmptyForCardImplementationEffect,
     trashSource: trashSourceForCardImplementationEffect,
-  };
-}
-
-function damageSummaryPublicPayload(
-  summary: DamageSummaryForCardImplementation,
-): PublicEffectPayload {
-  return {
-    damageResolved: true,
-    damageType: summary.damageType,
-    damageAmount: summary.amount,
-    cardsTrashed: summary.cardsTrashed,
-    flatline: summary.flatline,
-    ...(summary.coreDamageAfter !== undefined
-      ? { coreDamageAfter: summary.coreDamageAfter }
-      : {}),
-    ...(summary.runnerMaxHandSizeAfter !== undefined
-      ? { runnerMaxHandSizeAfter: summary.runnerMaxHandSizeAfter }
-      : {}),
   };
 }

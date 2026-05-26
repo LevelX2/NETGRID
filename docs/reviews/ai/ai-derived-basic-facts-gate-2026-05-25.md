@@ -10,7 +10,7 @@ Der bisherige read-only Prototype ist zu einem stabilen Gate ausgebaut:
 corepack pnpm check:ai-derived-facts
 ```
 
-Das Gate leitet mechanische Basic-AI-Facts aus den 24 versionierten Pilot-CardImplementation-Dateien ab, validiert die generierten Facts gegen bekannte Ontology-Werte, vergleicht sie mit den bestehenden manuellen AI-Hint-Ontology-Feldern und prüft den committed JSON-Report auf Drift. Es bleibt read-only: keine Engine-Regeländerung, keine Strategieänderung, keine Planerwirkung, keine Profilumschaltung, keine Hintmigration und keine Runtime-Nutzung der Derived Facts.
+Das Gate leitet mechanische Basic-AI-Facts aus den 50 versionierten Pilot-CardImplementation-Dateien ab, validiert die generierten Facts gegen bekannte Ontology-Werte, vergleicht sie mit den bestehenden manuellen AI-Hint-Ontology-Feldern und prüft den committed JSON-Report auf Drift. Es bleibt read-only: keine Engine-Regeländerung, keine Strategieänderung, keine Planerwirkung, keine Profilumschaltung, keine Hintmigration und keine Runtime-Nutzung der Derived Facts.
 
 ## Prototype vs Gate
 
@@ -58,41 +58,44 @@ Warnings blockieren nicht. Sie markieren bekannten Descriptor-/Overlay-Bedarf:
 
 Aktueller Stand:
 
-- Warnings: 40
-- `text_pattern_derivation`: 24
-- `descriptor_or_overlay_gap`: 7
-- `manual_ontology_without_generated_match`: 5
-- `confidence_mismatch`: 4
+- Warnings: 70
+- `text_pattern_derivation`: 50
+- `descriptor_or_overlay_gap`: 6
+- `manual_ontology_without_generated_match`: 4
+- `confidence_mismatch`: 10
 - `generated_fact_without_manual_match`: 0
 
 ## Pilotkartenumfang
 
-Keine automatische Ausweitung. Der Scope bleibt exakt die 24 Pilotkarten aus:
+Aufgabe 016 erweitert den read-only Pilot gezielt auf 50 Pilotkarten. Die Erweiterung bleibt auf deterministische Gate-/Report-Artefakte beschränkt:
 
 - `data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json`
 
 Kennzahlen:
 
-- Pilotkarten: 24
-- Implementations gefunden: 24
-- Karten mit Derived Facts: 24
-- Karten mit manueller Ontology-Überschneidung: 24
-- Karten mit Manual-Overlay-/Descriptor-Bedarf: 4
+- Pilotkarten: 50
+- Implementations gefunden: 50
+- Karten mit Derived Facts: 50
+- Karten mit manueller Ontology-Überschneidung: 50
+- Karten mit Manual-Overlay-/Descriptor-Bedarf: 3
 
 Effect-Kinds:
 
 - `access_replacement`: 1
-- `breaker`: 2
+- `breaker`: 20
 - `counter_economy`: 2
 - `damage`: 3
-- `draw`: 1
+- `draw`: 2
 - `economy`: 1
 - `extra_action`: 1
+- `future_encounter_effect`: 3
 - `future_run_effect`: 3
 - `install_discount`: 1
 - `program_trash`: 1
-- `remote_protection`: 1
+- `remote_protection`: 8
+- `rez_discount`: 2
 - `run_tax`: 4
+- `score_acceleration`: 2
 - `scored_agenda_action`: 7
 - `search`: 2
 - `tag_punish_payoff`: 4
@@ -104,15 +107,34 @@ Effect-Kinds:
 Condition-Kinds:
 
 - `requires_accessed_card`: 1
-- `requires_during_run`: 5
+- `requires_during_run`: 7
+- `requires_remote_server`: 1
 - `requires_runner_tagged`: 4
 - `requires_scored_agenda`: 7
-- `requires_successful_run`: 1
+- `requires_successful_run`: 2
 - `requires_trace_success`: 3
+
+Breaker-Coverage:
+
+- `ap`: 1
+- `code_gate`: 5
+- `sentry`: 6
+- `trace`: 1
+- `universal`: 4
+- `wall`: 3
+
+Breaker-SideEffects:
+
+- `ends_run_after_use`: 1
+- `forgo_actions`: 1
+- `once_per_subroutine`: 1
+- `program_trash_risk`: 1
+- `random_failure`: 3
+- `stealth_loss`: 1
 
 ## Bekannte Lücken
 
-Nach Descriptor-/Schema-Slice, Gap-Closeout und Self-Modifying-Code-Review bleiben drei stabile Manual-Overlay-/Descriptor-Kandidaten:
+Nach Descriptor-/Schema-Slice, Gap-Closeout, Self-Modifying-Code-Review und den Batch-3/4/5-Closeouts bleiben drei stabile Manual-Overlay-/Descriptor-Kandidaten:
 
 - `onr_v1_017_deep-thought`
 - `onr_v1_355_crystal-palace-station-grid`

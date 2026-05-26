@@ -19,6 +19,172 @@
       "rationale": "Universal breaker profile and costs are directly represented in CardImplementation icebreaker abilities."
     },
     {
+      "cardId": "onr_v1_074_worm",
+      "title": "Worm",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/worm.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Wall breaker coverage and break/pump costs are directly represented in CardImplementation icebreaker abilities."
+    },
+    {
+      "cardId": "onr_v1_047_pile-driver",
+      "title": "Pile Driver",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/pile-driver.ts",
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:wall",
+        "breakerSideEffect:stealth_loss"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Wall breaker coverage and noisy stealth-loss side effect are directly represented."
+    },
+    {
+      "cardId": "onr_v1_014_codecracker",
+      "title": "Codecracker",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/codecracker.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_016_cyfermaster",
+      "title": "Cyfermaster",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/cyfermaster.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented; catalog title uses the printed trademark suffix."
+    },
+    {
+      "cardId": "onr_v1_052_raffles",
+      "title": "Raffles",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/raffles.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_054_raptor",
+      "title": "Raptor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/raptor.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_060_shaka",
+      "title": "Shaka",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shaka.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_006_black-dahlia",
+      "title": "Black Dahlia",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/black-dahlia.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_040_loony-goon",
+      "title": "Loony Goon",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/loony-goon.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_007_blink",
+      "title": "Blink",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/blink.ts",
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:universal",
+        "breakerSideEffect:random_failure",
+        "breakerSideEffect:once_per_subroutine"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Universal random breaker coverage and once-per-subroutine/random-failure context are directly represented; generated facts do not imply deterministic break safety."
+    },
+    {
+      "cardId": "onr_v1_019_dropp",
+      "title": "Dropp",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/dropp.ts",
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:universal",
+        "breakerSideEffect:ends_run_after_use"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Universal breaker coverage and ends-run side effect are directly represented; catalog title uses the printed trademark suffix."
+    },
+    {
+      "cardId": "onr_v1_056_replicator",
+      "title": "Replicator",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/replicator.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:trace"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-subroutine breaker coverage is directly represented and must not be normalized to universal coverage."
+    },
+    {
+      "cardId": "onr_v1_055_reflector",
+      "title": "Reflector",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/reflector.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:ap"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Stun/hellbolt/knockout breaker coverage is represented as AP-special coverage and must not be normalized to universal coverage."
+    },
+    {
+      "cardId": "onr_v1_002_ai-boon",
+      "title": "AI Boon",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/ai-boon.ts",
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:sentry",
+        "breakerSideEffect:random_failure"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and random run-start strength context are directly represented."
+    },
+    {
+      "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+      "title": "Bartmoss Memorial Icebreaker",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/bartmoss-memorial-icebreaker.ts",
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:universal",
+        "breakerSideEffect:random_failure",
+        "breakerSideEffect:program_trash_risk"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Universal breaker coverage and post-encounter self-trash risk are directly represented."
+    },
+    {
+      "cardId": "onr_v1_070_tinweasel",
+      "title": "Tinweasel",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/tinweasel.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage is directly represented; no pump text is a mechanical restriction kept as comparison context."
+    },
+    {
+      "cardId": "onr_v1_073_wizards-book",
+      "title": "Wizard's Book",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/wizards-book.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented; catalog title uses a typographic apostrophe."
+    },
+    {
+      "cardId": "onr_v1_072_wild-card",
+      "title": "Wild Card",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/wild-card.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
       "cardId": "onr_v1_059_self-modifying-code",
       "title": "Self-Modifying Code",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/self-modifying-code.ts",
@@ -223,6 +389,104 @@
       ],
       "expectedManualOverlayNeeded": true,
       "rationale": "Agenda steal tax and accessed-card condition are derivable; remote_protection remains intentionally manual strategic overlay."
+    },
+    {
+      "cardId": "onr_v1_370_tesseract-fort-construction",
+      "title": "Tesseract Fort Construction",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tesseract-fort-construction.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Additional ETR subroutine on all ICE in the fort is mechanically derivable; active/rezzed/server context remains board-state."
+    },
+    {
+      "cardId": "onr_v1_361_namatoki-plaza",
+      "title": "Namatoki Plaza",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/namatoki-plaza.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "effect:score_acceleration",
+        "condition:requires_remote_server",
+        "remoteRole:remote_capacity"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Additional agenda/node slot and subsidiary-fort install context are mechanical remote-capacity facts; score safety remains board-aware."
+    },
+    {
+      "cardId": "onr_v1_359_jenny-jett",
+      "title": "Jenny Jett",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jenny-jett.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "condition:requires_successful_run",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-run install-and-approach effect is derivable as a future encounter class while HQ card identity and legal target choice remain hidden-info/runtime context."
+    },
+    {
+      "cardId": "onr_v1_363_olivia-salazar",
+      "title": "Olivia Salazar",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/olivia-salazar.ts",
+      "expectedDerivableKinds": [
+        "effect:rez_discount",
+        "effect:remote_protection",
+        "condition:requires_during_run",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Source-bound discounted ICE rez and end-of-run derez window are derivable as during-run remote-support facts; payment legality stays engine-owned."
+    },
+    {
+      "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+      "title": "Rio de Janeiro City Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/rio-de-janeiro-city-grid.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "condition:requires_during_run",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Pass-rezzed-ICE die trigger is derivable as deterministic-random future encounter pressure; actual random result and run end remain runtime state."
+    },
+    {
+      "cardId": "onr_v1_317_data-masons",
+      "title": "Data Masons",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
+      "expectedDerivableKinds": [
+        "effect:rez_discount",
+        "effect:remote_protection",
+        "remoteRole:ice_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Wall rez discount and wall strength modifier are mechanically derivable global ICE modifier facts; reserve/remote value remains strategic context."
+    },
+    {
+      "cardId": "onr_v1_350_antiquated-interface-routines",
+      "title": "Antiquated Interface Routines",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "remoteRole:ice_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Same-fort ICE strength modifier is mechanically derivable; concrete path cost impact remains effectiveRunQuote/board context."
+    },
+    {
+      "cardId": "onr_v1_312_chicago-branch",
+      "title": "Chicago Branch",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/chicago-branch.ts",
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated advancement-counter placement is a mechanical score-acceleration fact; strategic closeout valuation remains manual/consumer context."
     },
     {
       "cardId": "onr_v1_302_scorched-earth",
