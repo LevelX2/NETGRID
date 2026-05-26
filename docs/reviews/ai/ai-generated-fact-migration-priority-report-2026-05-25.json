@@ -1,0 +1,1404 @@
+{
+  "schemaVersion": "ai-generated-fact-migration-priority-v1",
+  "generatedAt": "2026-05-25",
+  "taskId": "Aufgabe 002",
+  "sourceReport": "docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json",
+  "sources": {
+    "compiledIndexReport": "docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json",
+    "derivedFactsReport": "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json",
+    "pilotCards": "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json",
+    "manualOverlays": [
+      "data/ai/hints/overlays/onr-v1/corp/upgrades.json",
+      "data/ai/hints/overlays/onr-v1/runner/programs.json"
+    ],
+    "activeHints": "data/ai/ai-card-hints-active.json"
+  },
+  "mode": "read-only prioritization; no active hint migration, no runtime compile, no planner or consumer binding",
+  "candidateCount": 24,
+  "priorityCounts": {
+    "P0": 13,
+    "P1": 7,
+    "P2": 4,
+    "P3": 0
+  },
+  "fieldCategoryCounts": {
+    "generated_with_board_context": 19,
+    "generated_with_descriptor_limitations": 3,
+    "legacy_keep_for_compat": 24,
+    "overlay_only": 6,
+    "safe_generated_now": 19
+  },
+  "riskCounts": {
+    "low": 13,
+    "medium": 11,
+    "high": 0
+  },
+  "batchPlan": [
+    {
+      "batch": 1,
+      "title": "Scored-agenda and tag/trace/punish generated facts",
+      "cardIds": [
+        "onr_v1_192_corporate-boon",
+        "onr_v1_193_corporate-coup",
+        "onr_v1_199_employee-empowerment",
+        "onr_v1_207_netwatch-operations-office",
+        "onr_v1_208_on-call-solo-team",
+        "onr_v1_210_political-overthrow",
+        "onr_v1_217_strike-force-kali",
+        "onr_v1_283_audit-of-call-records",
+        "onr_v1_284_chance-observation",
+        "onr_v1_285_closed-accounts",
+        "onr_v1_302_scorched-earth"
+      ]
+    },
+    {
+      "batch": 2,
+      "title": "BreakerProfile, targetProfiles and dedicated credits",
+      "cardIds": [
+        "onr_v1_037_japanese-water-torture",
+        "onr_v1_039_krash",
+        "onr_v1_043_mystery-box",
+        "onr_v1_048_poltergeist",
+        "onr_v1_057_scatter-shot",
+        "onr_v1_059_self-modifying-code"
+      ]
+    },
+    {
+      "batch": 3,
+      "title": "RemoteRole run_tax and agenda_steal_tax",
+      "cardIds": [
+        "onr_v1_355_crystal-palace-station-grid",
+        "onr_v1_366_red-herrings"
+      ]
+    },
+    {
+      "batch": 4,
+      "title": "Future-run and future-encounter ICE facts",
+      "cardIds": [
+        "onr_v1_274_tutor",
+        "onr_v1_276_viral-15",
+        "onr_v1_277_virizz"
+      ]
+    },
+    {
+      "batch": 5,
+      "title": "Remaining longtail mechanical facts",
+      "cardIds": [
+        "onr_v1_017_deep-thought",
+        "onr_v1_050_r-and-d-protocol-files"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "cardId": "onr_v1_017_deep-thought",
+      "title": "Deep Thought",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P2",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "legacy_keep_for_compat",
+        "overlay_only",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "effect:topdeck_info"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1,
+        "overlay_strategy_field_not_in_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Topdeck information is mechanically derivable, but the strategic R&D pressure value stays overlay-only.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "lineSupport",
+        "planRoles",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "strategicNotes",
+        "valueHints"
+      ],
+      "derivedRationale": "Topdeck information is derivable; R&D-pressure and interface-pressure conditions remain intentionally manual strategic overlay."
+    },
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P0",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "legacy_keep_for_compat",
+        "overlay_only",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [
+        "lineSupport",
+        "manualNotes",
+        "quality"
+      ],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
+        "overlay_strategy_field_not_in_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 2,
+      "rationale": "Breaker coverage and forgo_actions side effect are exact implementation facts and low-risk generated candidates.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "lineSupport",
+        "manualNotes",
+        "planRoles",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Breaker coverage and the forgo_actions side-effect comparison are derivable; future action debt is represented as a structured breaker side effect for the read-only gate."
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P0",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "breakerProfile",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "breakerProfile"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 2,
+      "rationale": "Universal breaker profile is an exact mechanical fact and should not need long-term manual duplication.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Universal breaker profile and costs are directly represented in CardImplementation icebreaker abilities."
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "overlay_only",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects",
+        "targetProfiles"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "effect:install_discount",
+        "effect:search",
+        "effect:topdeck_info",
+        "targetProfiles"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "conditions",
+        "effects",
+        "targetProfiles"
+      ],
+      "overlayFields": [
+        "lineSupport",
+        "manualNotes",
+        "quality"
+      ],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 3,
+        "overlay_strategy_field_not_in_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 2,
+      "rationale": "Search, top-five target profile, free install and once-per-run are derivable, but install legality still belongs to LegalActions.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "lineSupport",
+        "manualNotes",
+        "planRoles",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Top-of-stack search, show-to-Corp target profile, free program install and once-per-run usage limit are derivable in the read-only target profile."
+    },
+    {
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P2",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "effect:trash_credit"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 2,
+      "rationale": "Dedicated trash-credit facts are mechanical and stable, but currently less critical than active consumer-facing effect classes.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Restricted hosted trash-credit source is directly represented."
+    },
+    {
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "title": "R&D-Protocol Files",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P2",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_successful_run",
+        "effect:access_replacement",
+        "effect:topdeck_info"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Topdeck info and access replacement are mechanical, but the successful-run condition must remain LegalAction-gated.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Successful-run access replacement and private R&D look are directly represented."
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P2",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "effect:trash_credit"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 2,
+      "rationale": "Dedicated trash-credit facts are mechanical and stable, but currently less critical than active consumer-facing effect classes.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Restricted hosted trash-credit source is directly represented."
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "overlay_only",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects",
+        "targetProfiles"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "effect:search",
+        "targetProfiles"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "conditions",
+        "targetProfiles"
+      ],
+      "overlayFields": [
+        "lineSupport",
+        "manualNotes",
+        "quality"
+      ],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "overlay_strategy_field_not_in_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 2,
+      "rationale": "Search and targetProfiles.installCost=normal are now aligned; actual installation still remains LegalAction-gated.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "lineSupport",
+        "manualNotes",
+        "planRoles",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Search timing and target profile are derivable; installation uses normal cost handling, so this card does not carry an install_discount basic fact."
+    },
+    {
+      "cardId": "onr_v1_192_corporate-boon",
+      "title": "Corporate Boon",
+      "side": "corp",
+      "cardType": "agenda",
+      "migrationPriority": "P0",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_scored_agenda",
+        "effect:extra_action",
+        "effect:scored_agenda_action"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 1,
+      "rationale": "Scored-agenda activated extra-action facts are deterministic and high-value for later generated mechanical fields.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Scored agenda extra-action activation is directly represented."
+    },
+    {
+      "cardId": "onr_v1_193_corporate-coup",
+      "title": "Corporate Coup",
+      "side": "corp",
+      "cardType": "agenda",
+      "migrationPriority": "P0",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_scored_agenda",
+        "effect:counter_economy",
+        "effect:scored_agenda_action"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 1,
+      "rationale": "Scored-agenda counter-economy facts are deterministic and high-value for later generated mechanical fields.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Scored agenda hosted-credit economy is directly represented."
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "title": "Employee Empowerment",
+      "side": "corp",
+      "cardType": "agenda",
+      "migrationPriority": "P0",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_scored_agenda",
+        "effect:draw",
+        "effect:scored_agenda_action"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 1,
+      "rationale": "Scored-agenda draw facts are deterministic and high-value for later generated mechanical fields.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Scored agenda draw activation is directly represented."
+    },
+    {
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "title": "Netwatch Operations Office",
+      "side": "corp",
+      "cardType": "agenda",
+      "migrationPriority": "P0",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_scored_agenda",
+        "condition:requires_trace_success",
+        "effect:scored_agenda_action",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 1,
+      "rationale": "Scored-agenda trace/tag facts are derivable, but trace success must stay runtime/LegalAction context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace tag-source mechanics are derivable; legacy tag effect alignment is covered by the generated tag_source fact."
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "title": "On-Call Solo Team",
+      "side": "corp",
+      "cardType": "agenda",
+      "migrationPriority": "P0",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "condition:requires_scored_agenda",
+        "effect:damage",
+        "effect:scored_agenda_action",
+        "effect:tag_punish_payoff"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 1,
+      "rationale": "Scored-agenda tagged-runner damage payoff has clear active consumer value and low semantic ambiguity.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Scored agenda tagged-runner damage payoff is directly represented."
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "title": "Political Overthrow",
+      "side": "corp",
+      "cardType": "agenda",
+      "migrationPriority": "P0",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:scored_agenda_action"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 1,
+      "rationale": "Scored-agenda economy action is deterministic and a good first-batch generated mechanical field.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Scored agenda activated economy is directly represented."
+    },
+    {
+      "cardId": "onr_v1_217_strike-force-kali",
+      "title": "Strike Force Kali",
+      "side": "corp",
+      "cardType": "agenda",
+      "migrationPriority": "P0",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "condition:requires_scored_agenda",
+        "effect:damage",
+        "effect:scored_agenda_action",
+        "effect:tag_punish_payoff"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 1,
+      "rationale": "Scored-agenda tagged-runner damage payoff has clear active consumer value and low semantic ambiguity.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Scored agenda tagged-runner damage payoff is directly represented."
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "effect:future_run_effect",
+        "effect:remote_protection"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 4,
+      "rationale": "Future-run ICE pressure is mechanically recognizable, but the current derived fact remains coarse and encounter-state dependent.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Future-run additional-subroutine semantics are derivable at a coarse level."
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "effect:future_run_effect",
+        "effect:program_trash",
+        "effect:run_tax"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 4,
+      "rationale": "Future-run program trash and jack-out tax are useful, but should wait for stronger future-run descriptor handling.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Future-run, jack-out tax and program-trash semantics are mechanically derivable at coarse gate granularity."
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "effect:future_run_effect",
+        "effect:run_tax"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 4,
+      "rationale": "Future-run tax is mechanically recognizable, but the current derived fact remains coarse and encounter-state dependent.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Future-run break-cost modifier semantics are derivable at a coarse level."
+    },
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P0",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_trace_success",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 1,
+      "rationale": "Trace/tag operation facts are clear generated candidates, with trace success remaining runtime context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-to-tag source is directly represented."
+    },
+    {
+      "cardId": "onr_v1_284_chance-observation",
+      "title": "Chance Observation",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P0",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_trace_success",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 1,
+      "rationale": "Trace/tag operation facts are clear generated candidates, with trace success remaining runtime context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-to-tag source is directly represented."
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P0",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:counter_economy",
+        "effect:tag_punish_payoff"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 1,
+      "rationale": "Tagged-runner counter-economy payoff is exact, consumer-relevant and low ambiguity.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Tagged-runner payoff and counter-economy classification are directly represented."
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P0",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:damage",
+        "effect:tag_punish_payoff"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 1,
+      "rationale": "Tagged-runner damage payoff is exact, consumer-relevant and low ambiguity.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Tagged-runner damage payoff is directly represented."
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "title": "Crystal Palace Station Grid",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "overlay_only"
+      ],
+      "generatedFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "generatedMechanicalFacts": [
+        "effect:run_tax",
+        "remoteRole:run_tax"
+      ],
+      "monolithFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
+        "overlay_strategy_field_not_in_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 3,
+      "rationale": "Run tax is mechanical, but remote-protection value and active/rezzed context must remain board-aware.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "lineSupport",
+        "planRoles",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "strategicNotes",
+        "valueHints"
+      ],
+      "derivedRationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays; remote_protection remains intentionally manual strategic overlay."
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "title": "Red Herrings",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "overlay_only"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_accessed_card",
+        "effect:run_tax",
+        "remoteRole:agenda_steal_tax"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "remoteRole"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "overlayFields": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 3,
+        "generated_fact_absent_from_monolith": 2,
+        "overlay_strategy_field_not_in_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 3,
+      "rationale": "Agenda steal tax and access condition are mechanical, but remote-protection value remains contextual overlay.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "lineSupport",
+        "planRoles",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "strategicNotes",
+        "valueHints"
+      ],
+      "derivedRationale": "Agenda steal tax and accessed-card condition are derivable; remote_protection remains intentionally manual strategic overlay."
+    }
+  ]
+}
