@@ -2012,7 +2012,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     const accessedAsset = card("asset_1", "Doppelganger Antibody", "asset");
     accessedAsset.trashCost = 0;
 
-    expect(accessRevealStatusLabel(accessedAsset, [], "runner", "runner", "R&D")).toBe("Es ist gerade keine Runner-Entscheidung in diesem Zugriffsfenster offen. Danach kannst du den Zugriff fortsetzen.");
+    expect(accessRevealStatusLabel(accessedAsset, [], "runner", "runner", "R&D")).toBe("Angezeigte Karte aus Research and Development.");
   });
 
   it("explains Proteus free access trash for normally untrashable cards", () => {

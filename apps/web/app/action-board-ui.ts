@@ -871,7 +871,10 @@ export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashC
     return `${freeTrashSource}: Du kannst diese Karte kostenlos trashen, auch wenn sie normalerweise keine Trash-Kosten hat.`;
   if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
   if (actions.some((action) => action.type === "access_card")) return "Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.";
-  if (actions.length === 0) return "Es ist gerade keine Runner-Entscheidung in diesem Zugriffsfenster offen. Danach kannst du den Zugriff fortsetzen.";
+  if (actions.length === 0) {
+    if (serverDisplayLabel(serverLabel) === "R&D") return "Angezeigte Karte aus Research and Development.";
+    return "Angezeigte Karte. Du kannst das Fenster schließen.";
+  }
   if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
   if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
   return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
