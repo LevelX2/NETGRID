@@ -72,7 +72,7 @@ describe("derived basic facts gate report", () => {
     expect(report.implementationFoundCount).toBe(24);
     expect(report.cardsWithDerivedFacts).toBe(24);
     expect(report.cardsWithManualOntologyOverlap).toBe(24);
-    expect(report.cardsNeedingManualOverlay).toBe(4);
+    expect(report.cardsNeedingManualOverlay).toBe(3);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
       report.cards.every(
@@ -115,6 +115,8 @@ describe("derived basic facts gate report", () => {
         shuffleAfter: true,
       }),
     );
+    expect(selfModifyingCode.missingManualOverlay).toEqual([]);
+    expect(selfModifyingCode.descriptorGaps).toEqual([]);
 
     const mysteryBox = cardById(report, "onr_v1_043_mystery-box");
     expect(mysteryBox.derivedFacts.targetProfiles).toContainEqual(
@@ -154,6 +156,34 @@ describe("derived basic facts gate report", () => {
     const redHerrings = cardById(report, "onr_v1_366_red-herrings");
     expect(redHerrings.derivedFacts.conditions).toContainEqual(
       expect.objectContaining({ kind: "requires_accessed_card" }),
+    );
+
+    const employeeEmpowerment = cardById(
+      report,
+      "onr_v1_199_employee-empowerment",
+    );
+    expect(employeeEmpowerment.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "draw",
+        timing: "start_of_turn",
+        scope: "corp",
+        resource: "cards",
+        amount: 1,
+        source: "implementation.card_text.start_of_turn.draw",
+      }),
+    );
+    expect(employeeEmpowerment.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "draw",
+        timing: "scored_activated",
+        scope: "corp",
+        resource: "cards",
+        amount: 2,
+        source: "implementation.effect.draw_cards",
+      }),
+    );
+    expect(employeeEmpowerment.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_scored_agenda" }),
     );
   });
 

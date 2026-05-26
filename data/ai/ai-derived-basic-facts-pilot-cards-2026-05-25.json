@@ -26,8 +26,8 @@
         "effect:search",
         "condition:requires_during_run"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Search timing and target profile are derivable; the manual install_discount field is not generated because the implementation uses normal install cost."
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Search timing and target profile are derivable; installation uses normal cost handling, so this card does not carry an install_discount basic fact."
     },
     {
       "cardId": "onr_v1_043_mystery-box",
@@ -124,7 +124,7 @@
         "condition:requires_scored_agenda"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Scored agenda draw activation is directly represented."
+      "rationale": "Scored agenda draw activation is directly represented; the start-of-turn additional draw is derived from the exact implementation card-text comment."
     },
     {
       "cardId": "onr_v1_207_netwatch-operations-office",

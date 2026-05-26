@@ -520,6 +520,20 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
+  if (isEmployeeEmpowermentStartOfTurnDraw(card, implementationText)) {
+    addEffect(facts, {
+      kind: "draw",
+      timing: "start_of_turn",
+      scope: "corp",
+      resource: "cards",
+      amount: 1,
+      source: "implementation.card_text.start_of_turn.draw",
+    });
+    facts.derivationNotes.push(
+      "Employee Empowerment start-of-turn draw is optional in card text; this read-only fact records the mechanical draw class, not a mandatory runtime trigger.",
+    );
+  }
+
   if (/kind:\s*"gain_actions"/.test(implementationText)) {
     addEffect(facts, {
       kind: "extra_action",
@@ -877,6 +891,15 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   return facts;
+}
+
+function isEmployeeEmpowermentStartOfTurnDraw(card, implementationText) {
+  return (
+    card.cardId === "onr_v1_199_employee-empowerment" &&
+    /You may choose to draw an additional card at the start of each of your turns\./.test(
+      implementationText,
+    )
+  );
 }
 
 function addEffect(facts, effect) {

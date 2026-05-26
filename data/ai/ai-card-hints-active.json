@@ -2216,11 +2216,6 @@
           "kind": "search",
           "timing": "during_run",
           "scope": "runner"
-        },
-        {
-          "kind": "install_discount",
-          "timing": "during_run",
-          "scope": "installed_card"
         }
       ],
       "conditions": [

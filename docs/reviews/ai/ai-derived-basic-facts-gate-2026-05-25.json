@@ -10,13 +10,13 @@
   "implementationFoundCount": 24,
   "cardsWithDerivedFacts": 24,
   "cardsWithManualOntologyOverlap": 24,
-  "cardsNeedingManualOverlay": 4,
+  "cardsNeedingManualOverlay": 3,
   "effectKindCounts": {
     "access_replacement": 1,
     "breaker": 2,
     "counter_economy": 2,
     "damage": 3,
-    "draw": 1,
+    "draw": 2,
     "economy": 1,
     "extra_action": 1,
     "future_run_effect": 3,
@@ -43,7 +43,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 40,
+  "warningCount": 38,
   "warnings": [
     {
       "kind": "descriptor_or_overlay_gap",
@@ -99,16 +99,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_057_scatter-shot"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_059_self-modifying-code"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual effect:install_discount has no generated basic fact match.",
-      "cardId": "onr_v1_059_self-modifying-code"
     },
     {
       "kind": "text_pattern_derivation",
@@ -252,7 +242,9 @@
       "title": "Deep Thought",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/deep-thought.ts",
       "implementationFound": true,
-      "expectedDerivableKinds": ["effect:topdeck_info"],
+      "expectedDerivableKinds": [
+        "effect:topdeck_info"
+      ],
       "expectedManualOverlayNeeded": true,
       "rationale": "Topdeck information is derivable; R&D-pressure and interface-pressure conditions remain intentionally manual strategic overlay.",
       "derivedFacts": {
@@ -275,8 +267,15 @@
         "hintPresent": true,
         "side": "runner",
         "cardType": "program",
-        "roles": ["hidden_zone_tool", "program", "rd_run_reward", "virus"],
-        "planRoles": ["build_rig"],
+        "roles": [
+          "hidden_zone_tool",
+          "program",
+          "rd_run_reward",
+          "virus"
+        ],
+        "planRoles": [
+          "build_rig"
+        ],
         "effects": [
           {
             "kind": "topdeck_info",
@@ -294,7 +293,10 @@
             "kind": "requires_successful_run"
           }
         ],
-        "lineSupport": ["early_rnd_pressure", "interface_pressure"],
+        "lineSupport": [
+          "early_rnd_pressure",
+          "interface_pressure"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -304,7 +306,9 @@
         }
       },
       "overlap": {
-        "matches": ["effect:topdeck_info"],
+        "matches": [
+          "effect:topdeck_info"
+        ],
         "generatedOnly": [],
         "manualOnly": [
           "condition:requires_rnd_pressure",
@@ -343,7 +347,10 @@
       "title": "Japanese Water Torture",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
       "implementationFound": true,
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:wall"
+      ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Breaker coverage and the forgo_actions side-effect comparison are derivable; future action debt is represented as a structured breaker side effect for the read-only gate.",
       "derivedFacts": {
@@ -363,20 +370,31 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": ["wall"],
+          "coverage": [
+            "wall"
+          ],
           "pumpCost": 1,
           "breakCost": 0,
           "confidence": "medium",
           "source": "implementation.icebreakerAbilities",
-          "sideEffects": ["forgo_actions"]
+          "sideEffects": [
+            "forgo_actions"
+          ]
         }
       },
       "manualOntologySummary": {
         "hintPresent": true,
         "side": "runner",
         "cardType": "program",
-        "roles": ["per_card_longtail", "program", "runner"],
-        "planRoles": ["runner_install_program", "runner_program_ability"],
+        "roles": [
+          "per_card_longtail",
+          "program",
+          "runner"
+        ],
+        "planRoles": [
+          "runner_install_program",
+          "runner_program_ability"
+        ],
         "effects": [
           {
             "kind": "breaker",
@@ -393,14 +411,20 @@
           "opportunityCost": "high"
         },
         "breakerProfile": {
-          "coverage": ["wall"],
+          "coverage": [
+            "wall"
+          ],
           "baseStrength": 2,
           "pumpCost": 0,
           "breakCost": 0,
-          "sideEffects": ["forgo_actions"],
+          "sideEffects": [
+            "forgo_actions"
+          ],
           "restrictions": []
         },
-        "lineSupport": ["rig_first"],
+        "lineSupport": [
+          "rig_first"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -437,7 +461,10 @@
       "title": "Krash",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/krash.ts",
       "implementationFound": true,
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:universal"],
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:universal"
+      ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Universal breaker profile and costs are directly represented in CardImplementation icebreaker abilities.",
       "derivedFacts": {
@@ -455,7 +482,9 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": ["universal"],
+          "coverage": [
+            "universal"
+          ],
           "pumpCost": 2,
           "breakCost": 2,
           "confidence": "high",
@@ -475,7 +504,10 @@
           "icebreaker_support",
           "program"
         ],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "planRoles": [
+          "build_rig",
+          "safe_probe_run"
+        ],
         "effects": [
           {
             "kind": "breaker",
@@ -492,14 +524,18 @@
           "opportunityCost": "medium"
         },
         "breakerProfile": {
-          "coverage": ["universal"],
+          "coverage": [
+            "universal"
+          ],
           "baseStrength": 0,
           "pumpCost": 2,
           "breakCost": 2,
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": ["rig_first"],
+        "lineSupport": [
+          "rig_first"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -509,7 +545,10 @@
         }
       },
       "overlap": {
-        "matches": ["breakerCoverage:universal", "effect:breaker"],
+        "matches": [
+          "breakerCoverage:universal",
+          "effect:breaker"
+        ],
         "generatedOnly": [],
         "manualOnly": []
       },
@@ -589,8 +628,17 @@
         "hintPresent": true,
         "side": "runner",
         "cardType": "program",
-        "roles": ["hidden_zone", "hidden_zone_tool", "program", "stack_search"],
-        "planRoles": ["build_rig", "information", "recover_rig"],
+        "roles": [
+          "hidden_zone",
+          "hidden_zone_tool",
+          "program",
+          "stack_search"
+        ],
+        "planRoles": [
+          "build_rig",
+          "information",
+          "recover_rig"
+        ],
         "effects": [
           {
             "kind": "install_discount",
@@ -616,7 +664,10 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": ["breaker_search_first", "rig_first"],
+        "lineSupport": [
+          "breaker_search_first",
+          "rig_first"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -650,7 +701,9 @@
       "title": "Poltergeist",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/poltergeist.ts",
       "implementationFound": true,
-      "expectedDerivableKinds": ["effect:trash_credit"],
+      "expectedDerivableKinds": [
+        "effect:trash_credit"
+      ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Restricted hosted trash-credit source is directly represented.",
       "derivedFacts": {
@@ -679,7 +732,10 @@
           "runner",
           "trash_cost_payment"
         ],
-        "planRoles": ["runner_access_trash_economy", "runner_install_program"],
+        "planRoles": [
+          "runner_access_trash_economy",
+          "runner_install_program"
+        ],
         "effects": [
           {
             "kind": "trash_credit",
@@ -696,7 +752,9 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": ["remote_contest"],
+        "lineSupport": [
+          "remote_contest"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -706,7 +764,9 @@
         }
       },
       "overlap": {
-        "matches": ["effect:trash_credit"],
+        "matches": [
+          "effect:trash_credit"
+        ],
         "generatedOnly": [],
         "manualOnly": []
       },
@@ -771,7 +831,10 @@
           "program",
           "rd_run"
         ],
-        "planRoles": ["information", "pressure_rnd"],
+        "planRoles": [
+          "information",
+          "pressure_rnd"
+        ],
         "effects": [
           {
             "kind": "access_replacement",
@@ -791,7 +854,10 @@
             "kind": "requires_successful_run"
           }
         ],
-        "lineSupport": ["early_rnd_pressure", "interface_pressure"],
+        "lineSupport": [
+          "early_rnd_pressure",
+          "interface_pressure"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -824,7 +890,9 @@
       "title": "Scatter Shot",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/scatter-shot.ts",
       "implementationFound": true,
-      "expectedDerivableKinds": ["effect:trash_credit"],
+      "expectedDerivableKinds": [
+        "effect:trash_credit"
+      ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Restricted hosted trash-credit source is directly represented.",
       "derivedFacts": {
@@ -875,7 +943,9 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": ["remote_contest"],
+        "lineSupport": [
+          "remote_contest"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -885,7 +955,9 @@
         }
       },
       "overlap": {
-        "matches": ["effect:trash_credit"],
+        "matches": [
+          "effect:trash_credit"
+        ],
         "generatedOnly": [],
         "manualOnly": []
       },
@@ -908,8 +980,8 @@
         "effect:search",
         "condition:requires_during_run"
       ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Search timing and target profile are derivable; the manual install_discount field is not generated because the implementation uses normal install cost.",
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Search timing and target profile are derivable; installation uses normal cost handling, so this card does not carry an install_discount basic fact.",
       "derivedFacts": {
         "effects": [
           {
@@ -945,14 +1017,16 @@
         "hintPresent": true,
         "side": "runner",
         "cardType": "program",
-        "roles": ["hidden_zone_tool", "program", "stack_search"],
-        "planRoles": ["build_rig", "recover_rig"],
+        "roles": [
+          "hidden_zone_tool",
+          "program",
+          "stack_search"
+        ],
+        "planRoles": [
+          "build_rig",
+          "recover_rig"
+        ],
         "effects": [
-          {
-            "kind": "install_discount",
-            "timing": "during_run",
-            "scope": "installed_card"
-          },
           {
             "kind": "search",
             "timing": "during_run",
@@ -972,7 +1046,10 @@
           "reserveRisk": "medium",
           "opportunityCost": "medium"
         },
-        "lineSupport": ["breaker_search_first", "rig_first"],
+        "lineSupport": [
+          "breaker_search_first",
+          "rig_first"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -988,22 +1065,12 @@
           "effect:search"
         ],
         "generatedOnly": [],
-        "manualOnly": ["effect:install_discount"]
+        "manualOnly": []
       },
-      "missingManualOverlay": ["effect:install_discount"],
-      "descriptorGaps": [
-        "Manual ontology contains fields not currently derivable."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:install_discount has no generated basic fact match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -1056,8 +1123,14 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "agenda",
-        "roles": ["action", "agenda", "corp"],
-        "planRoles": ["corp_score_agenda"],
+        "roles": [
+          "action",
+          "agenda",
+          "corp"
+        ],
+        "planRoles": [
+          "corp_score_agenda"
+        ],
         "effects": [
           {
             "kind": "extra_action",
@@ -1082,7 +1155,10 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": ["fast_advance_or_counter_ops", "score_closeout"],
+        "lineSupport": [
+          "fast_advance_or_counter_ops",
+          "score_closeout"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -1156,8 +1232,17 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "agenda",
-        "roles": ["agenda", "agenda_counters", "economy_agenda", "score_plan"],
-        "planRoles": ["build_scoring_remote", "score_next_turn", "score_now"],
+        "roles": [
+          "agenda",
+          "agenda_counters",
+          "economy_agenda",
+          "score_plan"
+        ],
+        "planRoles": [
+          "build_scoring_remote",
+          "score_next_turn",
+          "score_now"
+        ],
         "effects": [
           {
             "kind": "counter_economy",
@@ -1182,7 +1267,10 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": ["economy_rez_reserve", "score_closeout"],
+        "lineSupport": [
+          "economy_rez_reserve",
+          "score_closeout"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -1221,7 +1309,7 @@
         "condition:requires_scored_agenda"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Scored agenda draw activation is directly represented.",
+      "rationale": "Scored agenda draw activation is directly represented; the start-of-turn additional draw is derived from the exact implementation card-text comment.",
       "derivedFacts": {
         "effects": [
           {
@@ -1232,6 +1320,15 @@
             "resource": "cards",
             "amount": 2,
             "source": "implementation.effect.draw_cards"
+          },
+          {
+            "confidence": "high",
+            "kind": "draw",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1,
+            "source": "implementation.card_text.start_of_turn.draw"
           },
           {
             "confidence": "high",
@@ -1249,15 +1346,23 @@
           }
         ],
         "costProfile": {},
-        "derivationNotes": [],
+        "derivationNotes": [
+          "Employee Empowerment start-of-turn draw is optional in card text; this read-only fact records the mechanical draw class, not a mandatory runtime trigger."
+        ],
         "needsManualOverlayReasons": []
       },
       "manualOntologySummary": {
         "hintPresent": true,
         "side": "corp",
         "cardType": "agenda",
-        "roles": ["agenda", "economy", "recurring"],
-        "planRoles": ["score_agenda"],
+        "roles": [
+          "agenda",
+          "economy",
+          "recurring"
+        ],
+        "planRoles": [
+          "score_agenda"
+        ],
         "effects": [
           {
             "kind": "draw",
@@ -1289,7 +1394,9 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": ["economy_rez_reserve"],
+        "lineSupport": [
+          "economy_rez_reserve"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -1377,8 +1484,17 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "agenda",
-        "roles": ["agenda", "score_plan", "tag_agenda", "trace_agenda"],
-        "planRoles": ["protect_hq", "score_next_turn", "score_now"],
+        "roles": [
+          "agenda",
+          "score_plan",
+          "tag_agenda",
+          "trace_agenda"
+        ],
+        "planRoles": [
+          "protect_hq",
+          "score_next_turn",
+          "score_now"
+        ],
         "effects": [
           {
             "kind": "scored_agenda_action",
@@ -1419,7 +1535,9 @@
           "reserveRisk": "medium",
           "opportunityCost": "medium"
         },
-        "lineSupport": ["tag_trace_punish"],
+        "lineSupport": [
+          "tag_trace_punish"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -1511,8 +1629,16 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "agenda",
-        "roles": ["agenda", "score_plan", "tag_damage_agenda"],
-        "planRoles": ["bait_runner", "score_next_turn", "score_now"],
+        "roles": [
+          "agenda",
+          "score_plan",
+          "tag_damage_agenda"
+        ],
+        "planRoles": [
+          "bait_runner",
+          "score_next_turn",
+          "score_now"
+        ],
         "effects": [
           {
             "kind": "damage",
@@ -1547,7 +1673,9 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": ["tag_trace_punish"],
+        "lineSupport": [
+          "tag_trace_punish"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -1623,8 +1751,15 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "agenda",
-        "roles": ["agenda", "corp", "per_card_longtail"],
-        "planRoles": ["corp_agenda_ability", "corp_score_agenda"],
+        "roles": [
+          "agenda",
+          "corp",
+          "per_card_longtail"
+        ],
+        "planRoles": [
+          "corp_agenda_ability",
+          "corp_score_agenda"
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -1649,7 +1784,10 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": ["economy_rez_reserve", "score_closeout"],
+        "lineSupport": [
+          "economy_rez_reserve",
+          "score_closeout"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -1738,8 +1876,16 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "agenda",
-        "roles": ["agenda", "score_plan", "tag_damage_agenda"],
-        "planRoles": ["bait_runner", "score_next_turn", "score_now"],
+        "roles": [
+          "agenda",
+          "score_plan",
+          "tag_damage_agenda"
+        ],
+        "planRoles": [
+          "bait_runner",
+          "score_next_turn",
+          "score_now"
+        ],
         "effects": [
           {
             "kind": "damage",
@@ -1774,7 +1920,9 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": ["tag_trace_punish"],
+        "lineSupport": [
+          "tag_trace_punish"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -1848,8 +1996,15 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "ice",
-        "roles": ["corp", "ice", "per_card_longtail"],
-        "planRoles": ["corp_install_ice", "corp_rez_ice"],
+        "roles": [
+          "corp",
+          "ice",
+          "per_card_longtail"
+        ],
+        "planRoles": [
+          "corp_install_ice",
+          "corp_rez_ice"
+        ],
         "effects": [
           {
             "kind": "future_run_effect",
@@ -1963,8 +2118,15 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "ice",
-        "roles": ["corp", "ice", "per_card_longtail"],
-        "planRoles": ["corp_install_ice", "corp_rez_ice"],
+        "roles": [
+          "corp",
+          "ice",
+          "per_card_longtail"
+        ],
+        "planRoles": [
+          "corp_install_ice",
+          "corp_rez_ice"
+        ],
         "effects": [
           {
             "kind": "future_run_effect",
@@ -2077,8 +2239,15 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "ice",
-        "roles": ["corp", "ice", "per_card_longtail"],
-        "planRoles": ["corp_install_ice", "corp_rez_ice"],
+        "roles": [
+          "corp",
+          "ice",
+          "per_card_longtail"
+        ],
+        "planRoles": [
+          "corp_install_ice",
+          "corp_rez_ice"
+        ],
         "effects": [
           {
             "kind": "future_run_effect",
@@ -2192,7 +2361,11 @@
           "tag_operation",
           "trace_operation"
         ],
-        "planRoles": ["bait_runner", "protect_hq", "recover_economy"],
+        "planRoles": [
+          "bait_runner",
+          "protect_hq",
+          "recover_economy"
+        ],
         "effects": [
           {
             "kind": "tag_source",
@@ -2218,7 +2391,9 @@
           "reserveRisk": "medium",
           "opportunityCost": "medium"
         },
-        "lineSupport": ["tag_trace_punish"],
+        "lineSupport": [
+          "tag_trace_punish"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -2298,7 +2473,11 @@
           "tag_operation",
           "trace_operation"
         ],
-        "planRoles": ["bait_runner", "protect_hq", "recover_economy"],
+        "planRoles": [
+          "bait_runner",
+          "protect_hq",
+          "recover_economy"
+        ],
         "effects": [
           {
             "kind": "tag_source",
@@ -2324,7 +2503,9 @@
           "reserveRisk": "medium",
           "opportunityCost": "medium"
         },
-        "lineSupport": ["tag_trace_punish"],
+        "lineSupport": [
+          "tag_trace_punish"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -2398,8 +2579,15 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "operation",
-        "roles": ["economy_operation", "operation", "tag_punishment_operation"],
-        "planRoles": ["bait_runner", "recover_economy"],
+        "roles": [
+          "economy_operation",
+          "operation",
+          "tag_punishment_operation"
+        ],
+        "planRoles": [
+          "bait_runner",
+          "recover_economy"
+        ],
         "effects": [
           {
             "kind": "counter_economy",
@@ -2424,7 +2612,9 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": ["tag_trace_punish"],
+        "lineSupport": [
+          "tag_trace_punish"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -2499,8 +2689,14 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "operation",
-        "roles": ["damage_operation", "operation", "tag_punishment_operation"],
-        "planRoles": ["bait_runner"],
+        "roles": [
+          "damage_operation",
+          "operation",
+          "tag_punishment_operation"
+        ],
+        "planRoles": [
+          "bait_runner"
+        ],
         "effects": [
           {
             "kind": "damage",
@@ -2527,7 +2723,9 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": ["tag_trace_punish"],
+        "lineSupport": [
+          "tag_trace_punish"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -2560,7 +2758,10 @@
       "title": "Crystal Palace Station Grid",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
       "implementationFound": true,
-      "expectedDerivableKinds": ["effect:run_tax", "remoteRole:run_tax"],
+      "expectedDerivableKinds": [
+        "effect:run_tax",
+        "remoteRole:run_tax"
+      ],
       "expectedManualOverlayNeeded": true,
       "rationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays; remote_protection remains intentionally manual strategic overlay.",
       "derivedFacts": {
@@ -2593,8 +2794,15 @@
         "hintPresent": true,
         "side": "corp",
         "cardType": "upgrade",
-        "roles": ["city_grid", "region", "run_tax", "upgrade"],
-        "planRoles": ["remote_upgrade_support"],
+        "roles": [
+          "city_grid",
+          "region",
+          "run_tax",
+          "upgrade"
+        ],
+        "planRoles": [
+          "remote_upgrade_support"
+        ],
         "effects": [
           {
             "kind": "remote_protection",
@@ -2615,7 +2823,10 @@
           "threatLevel": "medium",
           "serverScope": "fort"
         },
-        "lineSupport": ["ice_tax_glacier", "remote_scoring_build"],
+        "lineSupport": [
+          "ice_tax_glacier",
+          "remote_scoring_build"
+        ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -2625,11 +2836,18 @@
         }
       },
       "overlap": {
-        "matches": ["effect:run_tax", "remoteRole:run_tax"],
+        "matches": [
+          "effect:run_tax",
+          "remoteRole:run_tax"
+        ],
         "generatedOnly": [],
-        "manualOnly": ["effect:remote_protection"]
+        "manualOnly": [
+          "effect:remote_protection"
+        ]
       },
-      "missingManualOverlay": ["effect:remote_protection"],
+      "missingManualOverlay": [
+        "effect:remote_protection"
+      ],
       "descriptorGaps": [
         "Intentionally manual strategic overlay is not derived: effect:remote_protection."
       ],
@@ -2751,9 +2969,13 @@
           "remoteRole:agenda_steal_tax"
         ],
         "generatedOnly": [],
-        "manualOnly": ["effect:remote_protection"]
+        "manualOnly": [
+          "effect:remote_protection"
+        ]
       },
-      "missingManualOverlay": ["effect:remote_protection"],
+      "missingManualOverlay": [
+        "effect:remote_protection"
+      ],
       "descriptorGaps": [
         "Intentionally manual strategic overlay is not derived: effect:remote_protection."
       ],
