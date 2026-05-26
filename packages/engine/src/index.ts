@@ -4123,7 +4123,7 @@ function assertCurrentSubroutineMatchesLegalAction(
   return subroutine;
 }
 
-function resolvePileDriverBreakSubroutinesAction(
+function resolveMultiBreakSubroutinesAction(
   state: GameState,
   breakerId: CardInstanceId,
   legalAction: LegalAction,
@@ -4131,9 +4131,9 @@ function resolvePileDriverBreakSubroutinesAction(
   const run = mustRun(state);
   const iceId = String(legalAction.payload?.iceId ?? "");
   if (run.phase !== "encounter_ice" || !run.encounteredIceId)
-    throw new Error("Pile Driver kann nur im ICE-Encounter genutzt werden.");
+    throw new Error("Multi-Break kann nur im ICE-Encounter genutzt werden.");
   if (run.encounteredIceId !== iceId)
-    throw new Error("Pile Driver zielt nicht auf das encountered ICE.");
+    throw new Error("Multi-Break zielt nicht auf das encountered ICE.");
   if (run.noBreakSubroutinesActive)
     throw new Error("Subroutinen koennen in diesem Encounter nicht gebrochen werden.");
   if (!state.runner.rig.programs.includes(breakerId))
@@ -4141,7 +4141,7 @@ function resolvePileDriverBreakSubroutinesAction(
   const breakerDefinition = definitionFor(state, breakerId);
   const iceDefinition = definitionFor(state, iceId);
   if (legalAction.payload?.targetIceDefinitionId !== iceDefinition.id)
-    throw new Error("Pile Driver zielt auf die falsche ICE-Definition.");
+    throw new Error("Multi-Break zielt auf die falsche ICE-Definition.");
   const ability = icebreakerAbilitiesForDefinition(breakerDefinition).find(
     (candidate) =>
       candidate.id === legalAction.abilityRef?.abilityId &&
@@ -4202,7 +4202,7 @@ function resolvePileDriverBreakSubroutinesAction(
     subroutineIndexes.length,
   ).totalCost;
   if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
-    throw new Error("Pile Driver-Kosten sind nicht mehr gueltig.");
+    throw new Error("Multi-Break-Kosten sind nicht mehr gueltig.");
   spendRunnerRunCredits(runDurationPaymentHost(state), expectedCost, breakerId);
   executeEffectCommands(
     state,
@@ -4214,6 +4214,8 @@ function resolvePileDriverBreakSubroutinesAction(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     breakSubroutineCount: subroutineIndexes.length,
+    multiBreakSubroutines: true,
+    // Kept for PublicContext and older Pile Driver regression tests.
     pileDriverMultiBreak: true,
     sourceDefinitionId: breakerDefinition.id,
   };
@@ -5337,7 +5339,7 @@ function performAction(
         (breakAbility?.count ?? 1) > 1 &&
         typeof legalAction.payload?.subroutineIndexes === "string"
       ) {
-        resolvePileDriverBreakSubroutinesAction(state, breakerId, legalAction);
+        resolveMultiBreakSubroutinesAction(state, breakerId, legalAction);
         recordBartmossEncounterUsage(state, breakerId);
         recordDupreBreakUsage(runEndCleanupHost(state), breakerId);
         recordSnowballBreakUsage(state, breakerId);

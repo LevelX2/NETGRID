@@ -230,18 +230,19 @@ export function buildRunnerEncounterActions(
       const blinkUsedSubroutines =
         run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
       const subroutines = encounterSubroutines;
-      if (breakAbilities.some((ability) => (ability.count ?? 1) > 1)) {
-        const breakAbility = breakAbilities[0];
-        if (!breakAbility) continue;
+      const multiBreakAbility = breakAbilities.find(
+        (ability) => (ability.count ?? 1) > 1,
+      );
+      if (multiBreakAbility) {
         actions.push(
-          ...pileDriverBreakActions(
+          ...multiBreakSubroutineActions(
             host,
             breakerId,
             breaker.title,
             encounteredIceId,
             iceDefinition,
             subroutines,
-            breakAbility,
+            multiBreakAbility,
           ),
         );
         continue;
@@ -474,7 +475,7 @@ function selfModifyingCodeEncounterActions(
     );
 }
 
-function pileDriverBreakActions(
+function multiBreakSubroutineActions(
   host: RunnerEncounterActionHost,
   breakerId: CardInstanceId,
   breakerTitle: string,
@@ -524,6 +525,8 @@ function pileDriverBreakActions(
             iceId: encounteredIceId,
             subroutineIndexes: subroutineIndexes.join(","),
             breakSubroutineCount: subroutineIndexes.length,
+            multiBreakSubroutines: true,
+            // Kept for PublicContext and older Pile Driver regression tests.
             pileDriverMultiBreak: true,
             targetIceDefinitionId: iceDefinition.id,
             targetIceTitle: iceDefinition.title,

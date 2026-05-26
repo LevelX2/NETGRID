@@ -8,6 +8,7 @@ import {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { buildLegalAction } from "../turn/action-builders";
+import { proteusTestCardDefinition } from "../../test/proteus-card-definitions";
 import {
   buildRunnerEncounterActions,
   buildRunnerMovementActions,
@@ -283,7 +284,72 @@ describe("runner encounter action generation", () => {
     ]);
   });
 
-  it("builds Proteus PRO004 simple icebreaker pump and break LegalActions", () => {
+  it("uses the matching multi-break ability when a breaker also has a single-break ability", () => {
+    const state = makeState({
+      breakerDefinitionId: "test_dual_breaker",
+      runnerCredits: 20,
+    });
+    const breakerDefinition = {
+      id: "test_dual_breaker",
+      title: "Dual Breaker",
+      side: "runner",
+      type: "program",
+      subtypes: ["icebreaker"],
+      strength: 10,
+      abilities: [
+        {
+          id: "test_dual_breaker_single",
+          type: "break_subroutine",
+          cost: { credits: 9 },
+          iceSubtype: "sentry",
+          count: 1,
+          timingPoint: "run.encounter_ice",
+        },
+        {
+          id: "test_dual_breaker_multi",
+          type: "break_subroutine",
+          cost: { credits: 2 },
+          iceSubtype: "sentry",
+          count: 3,
+          timingPoint: "run.encounter_ice",
+        },
+      ],
+    } as CardDefinition;
+    const ice = iceDefinition({
+      subroutines: [
+        { id: "test_sentry_etr_1", type: "end_the_run" },
+        { id: "test_sentry_etr_2", type: "end_the_run" },
+      ],
+    });
+
+    const result = buildRunnerEncounterActions(
+      hostFor(state, {
+        [breakerDefinition.id]: breakerDefinition,
+        [ice.id]: ice,
+      }),
+    );
+
+    const multiBreak = result.legalActions.find(
+      (action) =>
+        action.type === "break_subroutine" &&
+        action.payload?.subroutineIndexes === "0,1",
+    );
+    expect(multiBreak).toMatchObject({
+      costs: [{ credits: 2 }],
+      payload: {
+        breakSubroutineBaseCost: 2,
+        breakSubroutineCount: 2,
+        multiBreakSubroutines: true,
+        pileDriverMultiBreak: true,
+      },
+      abilityRef: {
+        sourceCardInstanceId: "breaker_1",
+        abilityId: "test_dual_breaker_multi",
+      },
+    });
+  });
+
+  it("builds Proteus PRO004 simple icebreaker pump and break LegalActions from real Proteus definitions", () => {
     const cases = [
       {
         definitionId: "onr_proteus_079_big-frackin-gun",
@@ -294,6 +360,7 @@ describe("runner encounter action generation", () => {
         breakCost: 6,
         breakIndexes: "0,1,2,3,4",
         pumpCost: 1,
+        pumpAmount: 1,
       },
       {
         definitionId: "onr_proteus_081_boring-bit",
@@ -303,6 +370,7 @@ describe("runner encounter action generation", () => {
         subroutineCount: 1,
         breakCost: 2,
         pumpCost: 1,
+        pumpAmount: 1,
       },
       {
         definitionId: "onr_proteus_083_corrosion",
@@ -312,6 +380,7 @@ describe("runner encounter action generation", () => {
         subroutineCount: 1,
         breakCost: 0,
         pumpCost: 1,
+        pumpAmount: 1,
       },
       {
         definitionId: "onr_proteus_093_redecorator",
@@ -322,6 +391,7 @@ describe("runner encounter action generation", () => {
         breakCost: 1,
         breakIndexes: "0,1",
         pumpCost: 3,
+        pumpAmount: 1,
       },
       {
         definitionId: "onr_proteus_095_skeleton-passkeys",
@@ -331,6 +401,7 @@ describe("runner encounter action generation", () => {
         subroutineCount: 1,
         breakCost: 0,
         pumpCost: 3,
+        pumpAmount: 4,
       },
       {
         definitionId: "onr_proteus_100_wrecking-ball",
@@ -340,6 +411,7 @@ describe("runner encounter action generation", () => {
         subroutineCount: 1,
         breakCost: 0,
         pumpCost: 2,
+        pumpAmount: 1,
       },
     ] as const;
 
@@ -348,14 +420,7 @@ describe("runner encounter action generation", () => {
         breakerDefinitionId: testCase.definitionId,
         runnerCredits: 20,
       });
-      const breakerDefinition = {
-        id: testCase.definitionId,
-        title: testCase.title,
-        side: "runner",
-        type: "program",
-        subtypes: ["icebreaker"],
-        strength: 10,
-      } as CardDefinition;
+      const breakerDefinition = proteusTestCardDefinition(testCase.definitionId);
       const matchingIce = iceDefinition({
         id: "test_sentry_ice",
         title: `Test ${testCase.iceSubtype}`,
@@ -384,12 +449,20 @@ describe("runner encounter action generation", () => {
         costs: [{ credits: testCase.pumpCost }],
         payload: { breakerId: "breaker_1", iceId: "ice_1" },
       });
+      expect(
+        result.legalActions.find((action) => action.type === "pump_breaker"),
+        testCase.definitionId,
+      ).toMatchObject({
+        label: `${testCase.title}: Stärke +${testCase.pumpAmount}`,
+      });
 
-      const breakAction = testCase.breakIndexes
+      const breakIndexes =
+        "breakIndexes" in testCase ? testCase.breakIndexes : undefined;
+      const breakAction = breakIndexes
         ? result.legalActions.find(
             (action) =>
               action.type === "break_subroutine" &&
-              action.payload?.subroutineIndexes === testCase.breakIndexes,
+              action.payload?.subroutineIndexes === breakIndexes,
           )
         : result.legalActions.find(
             (action) =>
@@ -402,6 +475,9 @@ describe("runner encounter action generation", () => {
           breakerId: "breaker_1",
           iceId: "ice_1",
           breakSubroutineBaseCost: testCase.breakCost,
+          ...(breakIndexes
+            ? { multiBreakSubroutines: true, pileDriverMultiBreak: true }
+            : {}),
         },
       });
       expect(breakAction?.label, testCase.definitionId).toContain(

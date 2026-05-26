@@ -47748,6 +47748,98 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("applies Wrecking Ball as a Proteus wall breaker with public Stealth loss", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-proteus-wrecking-ball-break",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          id: "spotcheck_proteus_wrecking_ball_runner",
+          name: "Spotcheck Proteus Wrecking Ball Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_proteus_100_wrecking-ball", quantity: 1 },
+            { id: "onr_v1_011_cloak", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: {
+          id: "spotcheck_proteus_wrecking_ball_corp",
+          name: "Spotcheck Proteus Wrecking Ball Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_278_wall-of-ice", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    const wreckingBallId = installRunnerProgramForTest(
+      state,
+      "onr_proteus_100_wrecking-ball",
+    );
+    state.cardInstances[wreckingBallId]!.strengthModifier = 20;
+    const cloakId = installRunnerProgramForTest(state, "onr_v1_011_cloak");
+    setCardCounterForTest(state, cloakId, "bit", 1);
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_278_wall-of-ice");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    const breakAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === wreckingBallId &&
+        action.payload?.subroutineIndex === 0,
+    );
+    expect(breakAction.costs).toEqual([{ credits: 0 }]);
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: breakAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "spotcheck-wrecking-ball-stale",
+    });
+    expect(stale.ok).toBe(false);
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: breakAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "spotcheck-wrecking-ball-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+
+    state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
+    expect(state.run?.brokenSubroutineIndexes).toEqual([0]);
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_proteus_100_wrecking-ball",
+      postBreakStealthLoss: 1,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+  });
+
   it("routes Full Body Conversion through a Corp bypass-payment prevention window", () => {
     let state = apply(
       createGameAfterSetup({
