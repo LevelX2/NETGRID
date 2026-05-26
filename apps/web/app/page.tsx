@@ -1291,7 +1291,7 @@ function addNumeric(target: VisibleCard, key: keyof Pick<VisibleCard, "cost" | "
   target[key] = fallback;
 }
 
-function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null): AccessReveal | null {
+function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null, events: PublicGameEvent[] = []): AccessReveal | null {
   if (!event || event.publicPayload.actionType !== "access_card") return null;
   const cardId = payloadString(event.publicPayload, "cardDefinitionId");
   const title = payloadString(event.publicPayload, "title");
@@ -1301,7 +1301,7 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
   const card = detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, cardId, title);
   const serverLabel = serverDisplayLabel(payloadString(event.publicPayload, "serverLabel") ?? "einen Server");
   const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
-  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, event);
+  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, event, undefined, events);
   const highlighterStatus = accessHighlighterStatus(event.publicPayload);
   return {
     eventId: event.eventId,
@@ -1326,11 +1326,11 @@ function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string
   const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
   const card = enrichVisibleCard(accessedCard, detailsById);
   const followupStatus = latestAccessAmbushPaymentStatus(events, accessEvent, card.definitionId);
-  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, accessEvent, view);
+  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, accessEvent, view, events);
   const highlighterStatus = accessEvent ? accessHighlighterStatus(accessEvent.publicPayload) : null;
   const accessFollowupStatus = highlighterStatus ?? followupStatus;
   return {
-    eventId: eventId ?? `current-access:${view.stateVersion}:${accessedCard.instanceId}`,
+    eventId: eventId ?? accessEvent?.eventId ?? `current-access:${view.stateVersion}:${accessedCard.instanceId}`,
     actorSide,
     viewerSide,
     serverLabel,
@@ -1548,17 +1548,34 @@ function latestAccessAmbushPaymentStatus(events: PublicGameEvent[], accessEvent:
   return undefined;
 }
 
-function accessAmbushPendingStatus(viewerSide: Side, accessEvent: PublicGameEvent | null | undefined, view?: PlayerView): string | undefined {
-  const eventAmount = accessEvent?.publicPayload.ambushPaymentChoiceOpened === true ? payloadPositiveInteger(accessEvent.publicPayload, "ambushPaymentAmount") : null;
+function accessAmbushPendingStatus(viewerSide: Side, accessEvent: PublicGameEvent | null | undefined, view?: PlayerView, events: PublicGameEvent[] = []): string | undefined {
+  const eventChoiceResolved = accessEvent ? accessAmbushPaymentChoiceResolved(events, accessEvent) : false;
+  const eventChoiceOpened = !eventChoiceResolved && accessEvent?.publicPayload.ambushPaymentChoiceOpened === true;
+  const eventAmount = eventChoiceOpened ? payloadPositiveInteger(accessEvent.publicPayload, "ambushPaymentAmount") : null;
   const choiceAmount = view?.pendingChoice?.source.startsWith("p3_35.access_payment") ? accessAmbushChoiceAmount(view.pendingChoice) : null;
   const amount = eventAmount ?? choiceAmount;
-  const pending = Boolean(amount || accessEvent?.publicPayload.ambushPaymentChoiceOpened === true || view?.pendingChoice?.source.startsWith("p3_35.access_payment"));
+  const pending = Boolean(amount || eventChoiceOpened || view?.pendingChoice?.source.startsWith("p3_35.access_payment"));
   if (!pending) return undefined;
   const amountText = amount ? `${amount} ${amount === 1 ? "Credit" : "Credits"}` : "Credits";
   if (viewerSide === "corp" && view?.pendingChoice?.source.startsWith("p3_35.access_payment")) {
     return `Du entscheidest jetzt, ob du ${amountText} für den Access-Ambush zahlst.`;
   }
   return `Die Korp entscheidet jetzt, ob sie ${amountText} für den Access-Ambush zahlt.`;
+}
+
+function accessAmbushPaymentChoiceResolved(events: PublicGameEvent[], accessEvent: PublicGameEvent): boolean {
+  const accessIndex = events.findIndex((event) => event.eventId === accessEvent.eventId);
+  if (accessIndex < 0) return false;
+  const accessDefinitionId = payloadString(accessEvent.publicPayload, "cardDefinitionId");
+  for (let index = accessIndex + 1; index < events.length; index += 1) {
+    const payload = events[index]?.publicPayload;
+    if (!payload || payload.actionType !== "resolve_choice") continue;
+    const ambushDefinitionId = payloadString(payload, "ambushDefinitionId") ?? payloadString(payload, "accessEffectSourceDefinitionId");
+    if (accessDefinitionId && ambushDefinitionId && ambushDefinitionId !== accessDefinitionId) continue;
+    if (payload.ambushPaymentDeclined === true) return true;
+    if (payloadPositiveInteger(payload, "ambushPaidCost")) return true;
+  }
+  return false;
 }
 
 function accessAmbushChoiceAmount(choice: NonNullable<PlayerView["pendingChoice"]>): number | null {
@@ -3025,7 +3042,7 @@ export default function Page() {
   const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, dismissedAccessEventId) : null;
   const archivesRevealCount = payload ? latestArchivesRevealCount(payload.eventTail, latestAccessRevealEvent) : null;
   const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount, payload.eventTail, latestAccessRevealEvent) : null;
-  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount) : null;
+  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount, payload.eventTail) : null;
   const accessReveal = currentAccessReveal ?? retainedEventAccessReveal;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;
