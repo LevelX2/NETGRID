@@ -85,9 +85,15 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
 
       await joinHumanVsHumanLobby(joiner.page, secondJoinUrl);
       await joiner.page.getByTestId("leave-lobby").click();
-      await expect(joiner.page.getByRole("heading", { name: "Lobby verlassen" })).toBeVisible();
-      await expect(page.getByText(/Match nicht mehr aktiv|Die Gegenseite hat die Lobby verlassen/)).toBeVisible();
-      await saveFlowScreenshot(page, testInfo, "desktop-lifecycle-terminal");
+      await expect(joiner.page.getByText("Du hast die noch nicht aktive Lobby verlassen.")).toBeVisible();
+      await expect(joiner.page.getByTestId("setup-screen")).toBeVisible();
+      await expect(page.getByTestId("start-lobby")).toBeVisible();
+      await expect(page.getByText("Gegenüber: Wartet auf Gegenüber")).toBeVisible();
+      await saveFlowScreenshot(page, testInfo, "desktop-lifecycle-host-waiting-after-leave");
+      await page.getByTestId("cancel-match").click();
+      await expect(page.getByRole("heading", { name: "Match abgebrochen" })).toBeVisible();
+      await page.getByTestId("discard-local-session").click();
+      await expect(page.getByTestId("setup-screen")).toBeVisible();
     } finally {
       await joiner.context.close();
     }

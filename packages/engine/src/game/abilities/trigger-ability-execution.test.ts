@@ -201,6 +201,10 @@ type TestHostOptions = {
     handled: boolean;
     actionType?: LegalAction["type"];
   };
+  handleHiddenZoneTriggerExecution?: (legalAction: LegalAction) => {
+    handled: boolean;
+    actionType?: LegalAction["type"];
+  };
 };
 
 function testHost(
@@ -270,7 +274,9 @@ function testHost(
         (() => ({ handled: false })),
     },
     hiddenZone: {
-      handleMysteryBoxTopFiveProgramInstallActivation: () => undefined,
+      handleHiddenZoneTriggerExecution:
+        options.handleHiddenZoneTriggerExecution ??
+        (() => ({ handled: false })),
     },
     constants: {
       CODE_VIRAL_CACHE_ID: options.codeViralCacheId ?? "code_viral_cache",

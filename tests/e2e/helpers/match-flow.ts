@@ -1,7 +1,10 @@
-import { expect, type Browser, type BrowserContext, type Page, type TestInfo } from "@playwright/test";
+import { expect, type Browser, type BrowserContext, type Locator, type Page, type TestInfo } from "@playwright/test";
 import { VIEWPORTS, type ViewportName } from "./viewports";
 
 export const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3100";
+const E2E_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
+const E2E_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
+const MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
 
 export async function newContextPage(browser: Browser, viewport: ViewportName): Promise<{ context: BrowserContext; page: Page }> {
   const context = await browser.newContext({ viewport: VIEWPORTS[viewport] });
@@ -10,6 +13,7 @@ export async function newContextPage(browser: Browser, viewport: ViewportName): 
 }
 
 export async function openApp(page: Page): Promise<void> {
+  await installE2eMatchStartSettings(page);
   await page.goto(BASE_URL);
   await expect(page.getByTestId("setup-screen")).toBeVisible();
 }
@@ -31,6 +35,7 @@ export async function createHumanVsHumanLobby(page: Page, seed: string, side: "r
   await openApp(page);
   await page.getByTestId("play-mode-human-vs-human").click();
   await page.getByTestId("match-format-rules-match").click();
+  await selectE2eDecks(page, "Teilnehmer A · Runner-Deck", "Teilnehmer A · Korp-Deck");
   await page.getByTestId("advanced-match-options").locator("summary").click();
   await page.getByLabel("Seitenzuteilung").selectOption(side);
   await page.getByLabel("Countdown").selectOption("3");
@@ -46,9 +51,11 @@ export async function createHumanVsHumanLobby(page: Page, seed: string, side: "r
 }
 
 export async function joinHumanVsHumanLobby(page: Page, joinUrl: string): Promise<void> {
+  await installE2eMatchStartSettings(page);
   await page.goto(joinUrl);
   await expect(page.getByTestId("setup-screen")).toBeVisible();
   await page.getByLabel("Name").fill("Joiner V107");
+  await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
   await expect(page.getByTestId("join-link-input")).toHaveValue(/joinToken=/);
   await page.getByTestId("join-match").click();
   await expect(page.getByTestId("start-lobby")).toBeVisible({ timeout: 20_000 });
@@ -72,13 +79,14 @@ export async function clickFirstAction(page: Page, actionType: string): Promise<
 
 export async function installFirstCorpCard(page: Page): Promise<string> {
   await clickActionIfVisible(page, "mandatory_draw");
-  const cardSlots = page.locator(".cardSlot").filter({ has: page.getByTestId("known-card") });
+  const cardSlots = page.locator(".corpHqHandPanel:not(.corpOpponentHqHandPanel) .cardSlot").filter({ has: page.getByTestId("known-card") });
   const count = await cardSlots.count();
   for (let index = 0; index < count; index += 1) {
     const slot = cardSlots.nth(index);
     const card = slot.getByTestId("known-card");
     const marker = slot.getByTestId("card-action-marker");
-    const title = (await card.innerText()).split("\n")[0]?.trim() ?? "";
+    const title = await knownCardTitle(card);
+    if (!title) continue;
     await card.click();
     const panelInstall = page.locator('[data-testid="action-button"][data-action-type="install_card"]').first();
     if (await panelInstall.isVisible().catch(() => false)) {
@@ -185,6 +193,78 @@ async function clickActionIfVisible(page: Page, actionType: string): Promise<voi
   if (await action.isVisible().catch(() => false)) {
     await action.click();
   }
+}
+
+async function knownCardTitle(card: Locator): Promise<string | null> {
+  const ariaTitle = titleFromKnownCardAriaLabel(await card.getAttribute("aria-label"));
+  if (isMeaningfulHiddenTitle(ariaTitle)) return ariaTitle;
+
+  const textTitle = (await card.innerText())
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find((line) => isMeaningfulHiddenTitle(line));
+  return textTitle ?? null;
+}
+
+function titleFromKnownCardAriaLabel(label: string | null): string | null {
+  if (!label?.startsWith("Karte ")) return null;
+  const withoutPrefix = label.slice("Karte ".length);
+  const setIndex = withoutPrefix.indexOf(", Set ");
+  return (setIndex >= 0 ? withoutPrefix.slice(0, setIndex) : withoutPrefix.split(", ")[0])?.trim() ?? null;
+}
+
+function isMeaningfulHiddenTitle(title: string | null | undefined): title is string {
+  return Boolean(title && title.length >= 3 && /[A-Za-z0-9]/.test(title) && !/^Verdeckte Karte$/i.test(title));
+}
+
+async function selectE2eDecks(page: Page, runnerLabel: string, corpLabel: string): Promise<void> {
+  await page.getByLabel(runnerLabel).selectOption(E2E_RUNNER_SNAPSHOT_ID);
+  await page.getByLabel(corpLabel).selectOption(E2E_CORP_SNAPSHOT_ID);
+}
+
+async function installE2eMatchStartSettings(page: Page): Promise<void> {
+  await page.addInitScript(
+    ({ storageKey, runnerSnapshotId, corpSnapshotId }) => {
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          v: 1,
+          mode: "host",
+          playMode: "human_vs_human",
+          humanSideSelection: "runner",
+          humanAiSideSelection: "runner",
+          matchFormat: "rules_match",
+          matchCardPool: "originalset",
+          runnerDifficulty: "normal",
+          corpDifficulty: "normal",
+          aiDeckPolicy: "fixed",
+          testSetupMode: false,
+          countdownSeconds: 3,
+          playerClockMode: "none",
+          playerClockMinutes: 10,
+          playerClockGraceSeconds: 10,
+          seed: "e2e",
+          runnerDeckSource: "snapshot",
+          corpDeckSource: "snapshot",
+          participantBRunnerDeckSource: "snapshot",
+          participantBCorpDeckSource: "snapshot",
+          selectedRunnerSnapshotId: runnerSnapshotId,
+          selectedCorpSnapshotId: corpSnapshotId,
+          selectedParticipantBRunnerSnapshotId: runnerSnapshotId,
+          selectedParticipantBCorpSnapshotId: corpSnapshotId,
+          selectedRunnerLocalDeckId: "",
+          selectedCorpLocalDeckId: "",
+          selectedParticipantBRunnerLocalDeckId: "",
+          selectedParticipantBCorpLocalDeckId: "",
+        }),
+      );
+    },
+    {
+      storageKey: MATCH_START_SETTINGS_STORAGE_KEY,
+      runnerSnapshotId: E2E_RUNNER_SNAPSHOT_ID,
+      corpSnapshotId: E2E_CORP_SNAPSHOT_ID,
+    },
+  );
 }
 
 async function moveOpponentCueAwayFromPreview(page: Page): Promise<void> {
