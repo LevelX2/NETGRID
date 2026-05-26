@@ -189,6 +189,10 @@ type TestHostOptions = {
   codeViralCacheId?: string;
   remainingReplacementKind?: string;
   trashRunnerInstalledCardToHeap?: (cardId: CardInstanceId) => void;
+  handleCounterUtilityTriggerExecution?: (legalAction: LegalAction) => {
+    handled: boolean;
+    actionType?: LegalAction["type"];
+  };
   handleRunnerSpecialTriggerExecution?: (legalAction: LegalAction) => {
     handled: boolean;
     actionType?: LegalAction["type"];
@@ -260,12 +264,13 @@ function testHost(
       handleRunFortTriggerExecution:
         options.handleRunFortTriggerExecution ?? (() => ({ handled: false })),
     },
-    delegates: {
-      resolveCorpTrashNewDataFortCreationLockSource: () => undefined,
+    counterUtility: {
+      handleCounterUtilityTriggerExecution:
+        options.handleCounterUtilityTriggerExecution ??
+        (() => ({ handled: false })),
+    },
+    hiddenZone: {
       handleMysteryBoxTopFiveProgramInstallActivation: () => undefined,
-      resolvePreyingMantisGainAction: () => undefined,
-      resolveCorpRemoveSpyCounter: () => undefined,
-      resolveRemoveRunnerTraceCounter: () => undefined,
     },
     constants: {
       CODE_VIRAL_CACHE_ID: options.codeViralCacheId ?? "code_viral_cache",

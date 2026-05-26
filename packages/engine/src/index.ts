@@ -143,6 +143,10 @@ import {
   type TriggerAbilityExecutionHost,
 } from "./game/abilities/trigger-ability-execution";
 import {
+  handleCounterUtilityTriggerExecution,
+  type CounterUtilityTriggerExecutionHost,
+} from "./game/abilities/counter-utility-trigger-execution";
+import {
   handleRunFortTriggerExecution,
   microtechHostedProgramIds,
   topHostedProgramOnMicrotech,
@@ -4708,6 +4712,42 @@ function runFortTriggerExecutionHost(
   };
 }
 
+function counterUtilityTriggerExecutionHost(
+  state: GameState,
+): CounterUtilityTriggerExecutionHost {
+  return {
+    state,
+    actions: {
+      spendClick,
+      spendClicks,
+    },
+    cards: {
+      definitionFor,
+      runnerUtilityLongtailKindForCard,
+    },
+    credits: {
+      spend: spendCredits,
+    },
+    counters: {
+      cardCounter,
+      spendCardCounter,
+      spyCountersForServer,
+      traceCounterEffectDefinitionFor,
+    },
+    runner: {
+      ensureTurnFlags: ensureRunnerTurnFlags,
+      trashInstalledCardToHeap: trashRunnerInstalledCardToHeap,
+    },
+    servers: {
+      mustServer,
+      publicServerLabel,
+    },
+    dataFort: {
+      newDataFortCreationLockForSource,
+    },
+  };
+}
+
 function triggerAbilityExecutionHost(
   state: GameState,
 ): TriggerAbilityExecutionHost {
@@ -4745,18 +4785,18 @@ function triggerAbilityExecutionHost(
           legalAction,
         ),
     },
-    delegates: {
-      resolveCorpTrashNewDataFortCreationLockSource: (legalAction) =>
-        resolveCorpTrashNewDataFortCreationLockSource(state, legalAction),
+    counterUtility: {
+      handleCounterUtilityTriggerExecution: (legalAction) =>
+        handleCounterUtilityTriggerExecution(
+          counterUtilityTriggerExecutionHost(state),
+          legalAction,
+        ),
+    },
+    hiddenZone: {
       handleMysteryBoxTopFiveProgramInstallActivation: (legalAction) =>
         handleMysteryBoxTopFiveProgramInstallActivation(
           hiddenZoneSearchActivationHandlerHost(state, legalAction),
         ),
-      resolvePreyingMantisGainAction: (legalAction) => resolvePreyingMantisGainAction(state, legalAction),
-      resolveCorpRemoveSpyCounter: (legalAction) =>
-        resolveCorpRemoveSpyCounter(state, legalAction),
-      resolveRemoveRunnerTraceCounter: (legalAction) =>
-        resolveRemoveRunnerTraceCounter(state, legalAction),
     },
     constants: {
       CODE_VIRAL_CACHE_ID,
@@ -5412,105 +5452,6 @@ function performAction(
       handleTriggerAbilityExecution(triggerAbilityExecutionHost(state), legalAction);
       return;
   }
-}
-
-function resolvePreyingMantisGainAction(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Preying Mantis nutzen.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  if (!state.runner.rig.resources.includes(sourceCardId))
-    throw new Error("Preying Mantis ist nicht installiert.");
-  if (
-    runnerUtilityLongtailKindForCard(state, sourceCardId) !==
-    "preying_mantis_optional_action_unpreventable_core_damage"
-  )
-    throw new Error("Die Preying-Mantis-Faehigkeit passt nicht zur Karte.");
-  const flags = ensureRunnerTurnFlags(state);
-  const used = flags.preyingMantisUsedSourceIdsThisTurn ?? [];
-  if (used.includes(sourceCardId))
-    throw new Error("Preying Mantis wurde in diesem Zug bereits genutzt.");
-  state.runner.clicks += 1;
-  flags.preyingMantisUsedSourceIdsThisTurn = [...used, sourceCardId].sort();
-  flags.preyingMantisDamageDueSourceIdsThisTurn = [
-    ...(flags.preyingMantisDamageDueSourceIdsThisTurn ?? []),
-    sourceCardId,
-  ].sort();
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    gainedActions: 1,
-    runnerClicksAfter: state.runner.clicks,
-    unpreventableDamageDueAtEndOfTurn: true,
-  };
-}
-
-function resolveCorpRemoveSpyCounter(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf Spy-Counter entfernen.");
-  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
-    ServerId,
-    "new_remote"
-  >;
-  const server = mustServer(state, serverId);
-  if (spyCountersForServer(state, server.id) <= 0)
-    throw new Error("In diesem Fort liegt kein Spy-Counter.");
-  if (clickCostForAction(legalAction) !== 1 || creditCostForAction(legalAction) !== 4)
-    throw new Error("Spy-Counter entfernen kostet genau 1 Aktion und 4 Credits.");
-  spendClick(state, "corp");
-  spendCredits(state, "corp", 4);
-  state.spyCountersByServer = {
-    ...(state.spyCountersByServer ?? {}),
-    [server.id]: Math.max(0, spyCountersForServer(state, server.id) - 1),
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    serverId: server.id,
-    serverLabel: publicServerLabel(state, server.id) ?? server.id,
-    counterType: "spy",
-    removedCounterAmount: 1,
-    remainingCounters: spyCountersForServer(state, server.id),
-    removedSpyCounter: true,
-    corpCreditsAfter: state.corp.credits,
-  };
-}
-
-function resolveCorpTrashNewDataFortCreationLockSource(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf diese Lock-Quelle trashen.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  if (!state.runner.rig.resources.includes(sourceCardId))
-    throw new Error("Die Lock-Quelle ist nicht als Runner-Resource installiert.");
-  const lock = newDataFortCreationLockForSource(state, sourceCardId);
-  if (!lock)
-    throw new Error("Diese Resource erzeugt aktuell keinen Data-Fort-Creation-Lock.");
-  const cost = lock.modifier.corpTrashSourceCost;
-  if (
-    clickCostForAction(legalAction) !== cost.clicks ||
-    creditCostForAction(legalAction) !== cost.credits
-  )
-    throw new Error("Die Lock-Quelle hat nicht die erwarteten Trash-Kosten.");
-  if (state.corp.clicks < cost.clicks || state.corp.credits < cost.credits)
-    throw new Error("Die Korp kann die Trash-Kosten nicht bezahlen.");
-  spendClicks(state, "corp", cost.clicks);
-  spendCredits(state, "corp", cost.credits);
-  trashRunnerInstalledCardToHeap(state, sourceCardId, legalAction);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: lock.sourceDefinitionId,
-    trashedCardDefinitionId: lock.sourceDefinitionId,
-    trashCostPaid: cost.credits,
-    newDataFortCreationLockRemoved: true,
-    corpCreditsAfter: state.corp.credits,
-  };
 }
 
 function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
@@ -6203,43 +6144,6 @@ function isHackerTrackerCentralCard(
     remainingReplacementLongtailKindForCard(state, cardId) ===
     "hacker_tracker_trace_bits"
   );
-}
-
-function resolveRemoveRunnerTraceCounter(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Runner-Trace-Counter entfernen.");
-  if (legalAction.payload?.cardId !== state.runner.identity)
-    throw new Error("Trace-Counter liegen auf der Runner-Identitaet.");
-  const counterType = legalAction.payload?.counterType;
-  const counterEffect = traceCounterEffectDefinitionFor(counterType);
-  if (!counterEffect)
-    throw new Error("Dieser Runner-Trace-Counter ist nicht entfernbar.");
-  const removeAmount = Number(legalAction.payload?.removeCounterAmount ?? 0);
-  if (!Number.isInteger(removeAmount) || removeAmount !== 1)
-    throw new Error("Es kann genau ein Runner-Trace-Counter entfernt werden.");
-  const cost = Number(legalAction.payload?.counterRemoveCreditCost ?? 0);
-  if (!Number.isInteger(cost) || cost !== counterEffect.removeCost)
-    throw new Error("Der Counter verlangt den aktuellen Entfernen-Betrag.");
-  if (cardCounter(state, state.runner.identity, counterEffect.counterType) < 1)
-    throw new Error("Es ist kein passender Counter vorhanden.");
-  spendClick(state, "runner");
-  spendCredits(state, "runner", counterEffect.removeCost);
-  spendCardCounter(state, state.runner.identity, counterEffect.counterType, 1);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: counterEffect.sourceDefinitionId,
-    counterType: counterEffect.counterType,
-    removedCounterAmount: 1,
-    remainingCounters: cardCounter(
-      state,
-      state.runner.identity,
-      counterEffect.counterType,
-    ),
-    runnerCreditsAfter: state.runner.credits,
-  };
 }
 
 function applyRunnerTraceCounterRunStartEffects(

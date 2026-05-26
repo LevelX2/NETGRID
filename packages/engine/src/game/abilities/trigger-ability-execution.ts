@@ -11,6 +11,9 @@ import type {
 import type {
   RunnerSpecialTriggerExecutionResult,
 } from "./runner-special-trigger-execution";
+import type {
+  CounterUtilityTriggerExecutionResult,
+} from "./counter-utility-trigger-execution";
 
 export type TriggerAbilityExecutionHost = {
   state: GameState;
@@ -51,16 +54,15 @@ export type TriggerAbilityExecutionHost = {
       legalAction: LegalAction,
     ) => RunFortTriggerExecutionResult;
   };
-  delegates: {
-    resolveCorpTrashNewDataFortCreationLockSource: (
+  counterUtility: {
+    handleCounterUtilityTriggerExecution: (
       legalAction: LegalAction,
-    ) => void;
+    ) => CounterUtilityTriggerExecutionResult;
+  };
+  hiddenZone: {
     handleMysteryBoxTopFiveProgramInstallActivation: (
       legalAction: LegalAction,
     ) => void;
-    resolvePreyingMantisGainAction: (legalAction: LegalAction) => void;
-    resolveCorpRemoveSpyCounter: (legalAction: LegalAction) => void;
-    resolveRemoveRunnerTraceCounter: (legalAction: LegalAction) => void;
   };
   constants: {
     CODE_VIRAL_CACHE_ID: string;
@@ -104,28 +106,15 @@ export function handleTriggerAbilityExecution(
     };
     return handled(legalAction);
   }
-  if (
-    legalAction.payload?.corpAbility ===
-    "trash_new_data_fort_creation_lock_source"
-  ) {
-    host.delegates.resolveCorpTrashNewDataFortCreationLockSource(legalAction);
+  if (host.counterUtility.handleCounterUtilityTriggerExecution(legalAction).handled)
     return handled(legalAction);
-  }
   if (host.runFort.handleRunFortTriggerExecution(legalAction).handled)
     return handled(legalAction);
   if (
     legalAction.payload?.v1915RunnerProgramAbility ===
     "mystery_box_top5_program_install"
   ) {
-    host.delegates.handleMysteryBoxTopFiveProgramInstallActivation(legalAction);
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.runnerUtilityAbility === "preying_mantis_gain_action") {
-    host.delegates.resolvePreyingMantisGainAction(legalAction);
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.corpAbility === "remove_spy_counter") {
-    host.delegates.resolveCorpRemoveSpyCounter(legalAction);
+    host.hiddenZone.handleMysteryBoxTopFiveProgramInstallActivation(legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.runnerAbility === "wilson_gain_run_action") {
@@ -157,10 +146,6 @@ export function handleTriggerAbilityExecution(
       wilsonRunOnlyActionsRemaining: flags.wilsonRunOnlyActionsRemaining,
       runnerClicksAfter: state.runner.clicks,
     };
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.runnerAbility === "remove_runner_trace_counter") {
-    host.delegates.resolveRemoveRunnerTraceCounter(legalAction);
     return handled(legalAction);
   }
   if (
