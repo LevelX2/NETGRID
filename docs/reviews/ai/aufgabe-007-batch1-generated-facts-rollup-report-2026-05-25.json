@@ -1,0 +1,473 @@
+{
+  "schemaVersion": "ai-generated-fact-batch1-rollup-v1",
+  "generatedAt": "2026-05-25",
+  "taskId": "Aufgabe 007",
+  "sourceReports": [
+    "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json",
+    "docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json",
+    "docs/reviews/ai/ai-generated-fact-migration-priority-report-2026-05-25.json",
+    "docs/reviews/ai/aufgabe-003-generated-fact-batch1-dry-run-report-2026-05-25.json",
+    "docs/reviews/ai/aufgabe-004-batch1-compiler-diff-review-report-2026-05-25.json",
+    "docs/reviews/ai/aufgabe-005-batch1-normalization-dry-run-report-2026-05-25.json",
+    "docs/reviews/ai/aufgabe-006-employee-empowerment-start-turn-draw-deriver-2026-05-25.md"
+  ],
+  "batch": "batch_1_scored_agenda_tag_punish",
+  "mode": "read-only rollup; no active hint migration, no runtime compile, no planner or consumer binding",
+  "batchCardCount": 11,
+  "confirmedGeneratedFactCount": 40,
+  "previewAddedFactCount": 0,
+  "hardErrorCount": 0,
+  "conflictCount": 0,
+  "realSemanticConflictCount": 0,
+  "shapeDifferenceCount": 7,
+  "normalizedShapeDifferenceCount": 7,
+  "remainingShapeDifferenceCount": 0,
+  "monolithOnlyMechanicalFactCount": 0,
+  "deriverFollowupCandidateCount": 0,
+  "descriptorGapRemainingCount": 0,
+  "humanReviewCandidateCount": 0,
+  "boardContextRequiredCount": 31,
+  "consumerActiveForFactTypeCount": 40,
+  "legacyKeepForCompatCount": 11,
+  "futureMigrationReadyCardCount": 11,
+  "readinessCounts": {
+    "ready_but_board_context_required": 11
+  },
+  "batchOneStatus": "future_migration_ready_read_only",
+  "boardContextRules": [
+    {
+      "kind": "scored_agenda",
+      "rule": "Generated facts describe card function; actual use remains gated by scored status and Engine LegalActions.",
+      "appliesTo": [
+        "effect:scored_agenda_action",
+        "condition:requires_scored_agenda"
+      ]
+    },
+    {
+      "kind": "trace_tag",
+      "rule": "Trace and tag-source facts describe the action path; tags only happen after runtime trace success.",
+      "appliesTo": [
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_trace_success"
+      ]
+    },
+    {
+      "kind": "tag_punish",
+      "rule": "Tag-punish facts require visible Runner tag state and must not be scored without LegalAction context.",
+      "appliesTo": [
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ]
+    },
+    {
+      "kind": "start_of_turn_draw",
+      "rule": "Start-of-turn draw describes passive/triggered card function only; it is not an action legality signal.",
+      "appliesTo": [
+        "effect:draw"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "cardId": "onr_v1_192_corporate-boon",
+      "title": "Corporate Boon",
+      "factGroups": [
+        "draw_economy_extra_action",
+        "scored_agenda"
+      ],
+      "confirmedGeneratedFacts": [
+        "condition:requires_scored_agenda",
+        "effect:extra_action",
+        "effect:scored_agenda_action"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_scored_agenda",
+        "effect:extra_action",
+        "effect:scored_agenda_action"
+      ],
+      "boardContextRequired": [
+        "condition:requires_scored_agenda",
+        "effect:scored_agenda_action"
+      ],
+      "activeConsumers": [
+        "economy_draw_action_hint_consumer",
+        "scored_agenda_action_consumer"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    },
+    {
+      "cardId": "onr_v1_193_corporate-coup",
+      "title": "Corporate Coup",
+      "factGroups": [
+        "draw_economy_extra_action",
+        "scored_agenda"
+      ],
+      "confirmedGeneratedFacts": [
+        "condition:requires_scored_agenda",
+        "effect:counter_economy",
+        "effect:scored_agenda_action"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_scored_agenda",
+        "effect:counter_economy",
+        "effect:scored_agenda_action"
+      ],
+      "boardContextRequired": [
+        "condition:requires_scored_agenda",
+        "effect:scored_agenda_action"
+      ],
+      "activeConsumers": [
+        "economy_draw_action_hint_consumer",
+        "scored_agenda_action_consumer"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "title": "Employee Empowerment",
+      "factGroups": [
+        "draw_economy_extra_action",
+        "scored_agenda"
+      ],
+      "confirmedGeneratedFacts": [
+        "condition:requires_scored_agenda",
+        "effect:draw",
+        "effect:scored_agenda_action"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_scored_agenda",
+        "effect:draw",
+        "effect:draw",
+        "effect:scored_agenda_action"
+      ],
+      "boardContextRequired": [
+        "condition:requires_scored_agenda",
+        "effect:scored_agenda_action"
+      ],
+      "activeConsumers": [
+        "economy_draw_action_hint_consumer",
+        "scored_agenda_action_consumer"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    },
+    {
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "title": "Netwatch Operations Office",
+      "factGroups": [
+        "scored_agenda",
+        "trace_tag"
+      ],
+      "confirmedGeneratedFacts": [
+        "condition:requires_scored_agenda",
+        "condition:requires_trace_success",
+        "effect:scored_agenda_action",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_scored_agenda",
+        "condition:requires_trace_success",
+        "effect:scored_agenda_action"
+      ],
+      "boardContextRequired": [
+        "condition:requires_scored_agenda",
+        "condition:requires_trace_success",
+        "effect:scored_agenda_action",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "activeConsumers": [
+        "scored_agenda_action_consumer",
+        "tag_punish_consumer"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "title": "On-Call Solo Team",
+      "factGroups": [
+        "scored_agenda",
+        "tag_punish"
+      ],
+      "confirmedGeneratedFacts": [
+        "condition:requires_runner_tagged",
+        "condition:requires_scored_agenda",
+        "effect:damage",
+        "effect:scored_agenda_action",
+        "effect:tag_punish_payoff"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_runner_tagged",
+        "condition:requires_scored_agenda",
+        "effect:damage",
+        "effect:scored_agenda_action"
+      ],
+      "boardContextRequired": [
+        "condition:requires_runner_tagged",
+        "condition:requires_scored_agenda",
+        "effect:scored_agenda_action",
+        "effect:tag_punish_payoff"
+      ],
+      "activeConsumers": [
+        "scored_agenda_action_consumer",
+        "tag_punish_consumer"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "title": "Political Overthrow",
+      "factGroups": [
+        "draw_economy_extra_action",
+        "scored_agenda"
+      ],
+      "confirmedGeneratedFacts": [
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:scored_agenda_action"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:scored_agenda_action"
+      ],
+      "boardContextRequired": [
+        "condition:requires_scored_agenda",
+        "effect:scored_agenda_action"
+      ],
+      "activeConsumers": [
+        "economy_draw_action_hint_consumer",
+        "scored_agenda_action_consumer"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    },
+    {
+      "cardId": "onr_v1_217_strike-force-kali",
+      "title": "Strike Force Kali",
+      "factGroups": [
+        "scored_agenda",
+        "tag_punish"
+      ],
+      "confirmedGeneratedFacts": [
+        "condition:requires_runner_tagged",
+        "condition:requires_scored_agenda",
+        "effect:damage",
+        "effect:scored_agenda_action",
+        "effect:tag_punish_payoff"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_runner_tagged",
+        "condition:requires_scored_agenda",
+        "effect:damage",
+        "effect:scored_agenda_action"
+      ],
+      "boardContextRequired": [
+        "condition:requires_runner_tagged",
+        "condition:requires_scored_agenda",
+        "effect:scored_agenda_action",
+        "effect:tag_punish_payoff"
+      ],
+      "activeConsumers": [
+        "scored_agenda_action_consumer",
+        "tag_punish_consumer"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    },
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "factGroups": [
+        "trace_tag"
+      ],
+      "confirmedGeneratedFacts": [
+        "condition:requires_trace_success",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_trace_success",
+        "effect:tag_source"
+      ],
+      "boardContextRequired": [
+        "condition:requires_trace_success",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "activeConsumers": [
+        "tag_punish_consumer"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    },
+    {
+      "cardId": "onr_v1_284_chance-observation",
+      "title": "Chance Observation",
+      "factGroups": [
+        "trace_tag"
+      ],
+      "confirmedGeneratedFacts": [
+        "condition:requires_trace_success",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_trace_success",
+        "effect:tag_source"
+      ],
+      "boardContextRequired": [
+        "condition:requires_trace_success",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "activeConsumers": [
+        "tag_punish_consumer"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "factGroups": [
+        "draw_economy_extra_action",
+        "tag_punish"
+      ],
+      "confirmedGeneratedFacts": [
+        "condition:requires_runner_tagged",
+        "effect:counter_economy",
+        "effect:tag_punish_payoff"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_runner_tagged",
+        "effect:counter_economy",
+        "effect:tag_punish_payoff"
+      ],
+      "boardContextRequired": [
+        "condition:requires_runner_tagged",
+        "effect:tag_punish_payoff"
+      ],
+      "activeConsumers": [
+        "economy_draw_action_hint_consumer",
+        "tag_punish_consumer"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "factGroups": [
+        "tag_punish"
+      ],
+      "confirmedGeneratedFacts": [
+        "condition:requires_runner_tagged",
+        "effect:damage",
+        "effect:tag_punish_payoff"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_runner_tagged",
+        "effect:damage"
+      ],
+      "boardContextRequired": [
+        "condition:requires_runner_tagged",
+        "effect:tag_punish_payoff"
+      ],
+      "activeConsumers": [
+        "tag_punish_consumer"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    }
+  ],
+  "nextBatchRecommendation": {
+    "recommendedTaskId": "Aufgabe 008",
+    "batchName": "batch_2_breaker_target_trash_credit",
+    "recommendation": "Option A",
+    "rationale": "BreakerProfile, TargetProfiles and dedicated trash-credit facts are more mechanically stable than future-run ICE, already have relevant diagnostic/consumer value, and bridge generated facts toward Runner setup and cost/trash planning without needing runtime migration.",
+    "candidateCards": [
+      "onr_v1_037_japanese-water-torture",
+      "onr_v1_039_krash",
+      "onr_v1_043_mystery-box",
+      "onr_v1_048_poltergeist",
+      "onr_v1_057_scatter-shot",
+      "onr_v1_059_self-modifying-code"
+    ],
+    "deferredCandidateCards": [
+      {
+        "cardId": "onr_v1_050_r-and-d-protocol-files",
+        "reason": "Topdeck/access-replacement pressure is useful but fits the later information/pressure longtail better than the breaker/target/trash-credit batch."
+      }
+    ],
+    "alternatives": [
+      {
+        "option": "Option B",
+        "batchName": "remote_role_future_run_ice",
+        "reasonToDefer": "Future-run and remote-role semantics are more board/runpath-context-sensitive and should follow after the lower-risk breaker/target batch."
+      },
+      {
+        "option": "Option C",
+        "batchName": "runner_information_pressure",
+        "reasonToDefer": "R&D/topdeck pressure is smaller and more strategy-overlay-heavy than the mechanically focused Batch 2A candidate."
+      }
+    ]
+  },
+  "sourceSummary": {
+    "derivedFacts": {
+      "hardErrorCount": 0,
+      "warningCount": 38,
+      "cardsNeedingManualOverlay": 3
+    },
+    "compiledIndex": {
+      "hardErrorCount": 0,
+      "warningCount": 79,
+      "reviewCandidates": 0
+    },
+    "migrationPriority": {
+      "candidateCount": 24,
+      "priorityCounts": {
+        "P0": 13,
+        "P1": 7,
+        "P2": 4,
+        "P3": 0
+      },
+      "riskCounts": {
+        "low": 13,
+        "medium": 11,
+        "high": 0
+      }
+    },
+    "batchOneDryRun": {
+      "warningCount": 111,
+      "warningCountsByKind": {
+        "board_context_required": 31,
+        "consumer_active_for_fact_type": 40,
+        "generated_fact_already_present": 33,
+        "shape_difference": 7
+      },
+      "infoCountsByKind": {
+        "legacy_keep_for_compat": 11,
+        "no_change_needed": 11,
+        "preview_only": 11
+      }
+    }
+  }
+}
