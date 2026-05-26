@@ -413,6 +413,10 @@ import {
   type HiddenZoneRuntimeDepsHost,
 } from "./game/card-implementation/hidden-zone-runtime-deps";
 import {
+  createTraceCardImplementationRuntimeDeps,
+  type TraceRuntimeDepsHost,
+} from "./game/card-implementation/trace-runtime-deps";
+import {
   approachIceExposeCanBeOfferedForCurrentIce,
   beginEncounter,
   continueAfterCorpRootRezIfWindowIsComplete,
@@ -801,6 +805,17 @@ function hiddenZoneRuntimeDepsHost(): HiddenZoneRuntimeDepsHost {
 const hiddenZoneCardImplementationRuntimeDeps =
   createHiddenZoneCardImplementationRuntimeDeps(hiddenZoneRuntimeDepsHost());
 
+function traceRuntimeDepsHost(): TraceRuntimeDepsHost {
+  return {
+    trace: {
+      orchestrationHost: traceOrchestrationHost,
+    },
+  };
+}
+
+const traceCardImplementationRuntimeDeps =
+  createTraceCardImplementationRuntimeDeps(traceRuntimeDepsHost());
+
 const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   definitionFor,
   mustInstance,
@@ -820,26 +835,7 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   createAction: action,
   appendResolvedEffectsToPayload,
   ...cardImplementationEffectAdapters,
-  startTrace: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    baseTraceStrength,
-    successEffect,
-  ) => {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      cardId: sourceCardId,
-    };
-    return startTraceFromOperationInTrace(
-      traceOrchestrationHost(state),
-      sourceDefinitionId,
-      baseTraceStrength,
-      legalAction,
-      successEffect,
-    );
-  },
+  ...traceCardImplementationRuntimeDeps,
   startRun: (state, legalAction, serverId, options) => {
     const sourceCardId =
       typeof legalAction.source === "string" &&
