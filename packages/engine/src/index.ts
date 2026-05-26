@@ -55,7 +55,6 @@ import {
   assertRunnerTraceBidPaymentValid,
   corpServerIdForInstalledCard,
   corpTracePaymentPublicPayload,
-  costQuotePublicPayload,
   payPostBidLinkPaymentQuote,
   payCorpTraceBidQuote,
   payRunnerTraceBidQuote,
@@ -152,6 +151,10 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "./game/install/install-card";
+import {
+  rezCard as executeRezCard,
+  type RezCardHost,
+} from "./game/rez/rez-card";
 import {
   buildRunnerHardwareInstallAction,
   buildRunnerProgramInstallAction,
@@ -4534,6 +4537,75 @@ function installCardHost(state: GameState): InstallCardHost {
   };
 }
 
+function rezCardHost(state: GameState): RezCardHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
+      hasCardImplementationForDefinition: (definitionId) =>
+        Boolean(cardImplementationForDefinitionId(definitionId)),
+      variableRezForDefinition,
+      stableSubtypeList,
+    },
+    run: {
+      mustRun: () => mustRun(state),
+      handleRunRootRezPostRez: (cardId, legalAction) =>
+        handleRunRootRezPostRez(
+          runRezWindowHostForState(state),
+          cardId,
+          legalAction,
+        ),
+      beginEncounter: (cardId, legalAction) =>
+        beginEncounter(encounterEntryHostForState(state), cardId, legalAction),
+    },
+    payment: {
+      rezCostForCard: (cardId) => rezCostForCard(state, cardId),
+      assertCorpRezCostQuoteValid: (cardId, legalAction) =>
+        assertCorpRezCostQuoteValid(state, cardId, legalAction),
+      creditCostForAction,
+      spendCredits: (side, amount) => spendCredits(state, side, amount),
+    },
+    corp: {
+      isAcmeSavingsAndLoanDefinition,
+      spendCorpAgendaPointCost: (requiredPoints) =>
+        spendCorpAgendaPointCost(state, requiredPoints),
+      acmeSavingsAndLoanObligationCount: () =>
+        acmeSavingsAndLoanObligationCount(state),
+    },
+    runner: {
+      ensureTurnFlags: () => ensureRunnerTurnFlags(state),
+    },
+    counters: {
+      setCardCounter: (cardId, counterType, amount) =>
+        setCardCounter(state, cardId, counterType as CounterType, amount),
+    },
+    lifecycle: {
+      executeOnRez: (legalAction, definition, cardId) =>
+        executeCardImplementationLifecycleEffects(
+          cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+          definition,
+          cardId,
+          "on_rez",
+        ),
+    },
+    fort: {
+      isParisTracePoolSource: (cardId) =>
+        isParisTracePoolSource(fortRunSideFamiliesHostForState(state), cardId),
+      parisTracePoolCapacityForCard: (cardId) =>
+        parisTracePoolCapacityForCard(
+          fortRunSideFamiliesHostForState(state),
+          cardId,
+        ),
+    },
+    constants: {
+      KRUMZ_TRACE_ASSET_CARD_ID,
+    },
+  };
+}
+
 function performAction(
   state: GameState,
   legalAction: LegalAction,
@@ -5278,9 +5350,9 @@ function performAction(
       handleRunMovementAction(runMovementHostForState(state), legalAction);
       return;
     case "rez_ice":
-      rezCard(
-        state,
-        String(legalAction.payload?.cardId),
+      executeRezCard(
+        rezCardHost(state),
+        String(legalAction.payload?.cardId) as CardInstanceId,
         legalAction.payload?.rootRez === true ||
           legalAction.payload?.assetRez === true,
         legalAction,
@@ -7048,242 +7120,6 @@ function applyAiBoonRunStart(
       randomCounterAfter: state.randomCounter,
     };
   }
-}
-
-function rezCard(
-  state: GameState,
-  cardId: string,
-  rootRez: boolean,
-  legalAction?: LegalAction,
-): void {
-  const definition = definitionFor(state, cardId);
-  let creditCost = rezCostForCard(state, cardId);
-  const variableIceState = variableIceStateForRezAction(
-    state,
-    cardId,
-    definition,
-    creditCost,
-    legalAction,
-  );
-  if (variableIceState) {
-    creditCost += variableIceState.additionalCostPaid;
-  }
-  const shouldUseCorpRezCostQuote =
-    legalAction?.type === "rez_ice" &&
-    !rootRez &&
-    definition.type === "ice" &&
-    !legalAction.payload?.variableRezKind;
-  if (shouldUseCorpRezCostQuote && legalAction) {
-    const iceId = cardId as CardInstanceId;
-    const quote = assertCorpRezCostQuoteValid(state, iceId, legalAction);
-    creditCost = quote.finalCredits;
-    const quotePayload = costQuotePublicPayload(quote);
-    const sourceId =
-      typeof quotePayload.oliviaSalazarRezSourceCardId === "string"
-        ? (quotePayload.oliviaSalazarRezSourceCardId as CardInstanceId)
-        : undefined;
-    if (sourceId) {
-      const run = mustRun(state);
-      run.oliviaSalazarUsedSourceIdsThisRun = [
-        ...(run.oliviaSalazarUsedSourceIdsThisRun ?? []),
-        sourceId,
-      ].sort();
-      run.oliviaSalazarTemporaryRezzedIceIds = [
-        ...new Set([...(run.oliviaSalazarTemporaryRezzedIceIds ?? []), iceId]),
-      ].sort();
-      quotePayload.serverId = run.attackedServerId;
-    }
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      ...quotePayload,
-    };
-  }
-  if (isAcmeSavingsAndLoanDefinition(definition.id)) {
-    if (!legalAction)
-      throw new Error("ACME Savings and Loan braucht eine LegalAction.");
-    const agendaCost = Number(legalAction?.payload?.agendaPointCost ?? 0);
-    if (!Number.isInteger(agendaCost) || agendaCost !== 1)
-      throw new Error("ACME Savings and Loan kostet genau 1 Agenda-Punkt.");
-    const costResult = spendCorpAgendaPointCost(state, agendaCost);
-    legalAction.payload = {
-      ...(legalAction?.payload ?? {}),
-      agendaPointCost: agendaCost,
-      agendaPointCostPaid: costResult.paidPoints,
-      acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
-      acmeSavingsAndLoanObligationsBefore:
-        acmeSavingsAndLoanObligationCount(state),
-      ...(costResult.bonusPointsSpent > 0
-        ? { corpBonusAgendaPointsSpent: costResult.bonusPointsSpent }
-        : {}),
-      ...(costResult.forfeitedAgendaDefinitionIds.length > 0
-        ? {
-            forfeitedAgendaDefinitionIds:
-              costResult.forfeitedAgendaDefinitionIds.join(","),
-            specialZone: "removed_from_game",
-            specialZoneVisibility: "public",
-            specialZoneReason: "acme_savings_and_loan_rez_cost",
-          }
-        : {}),
-    };
-  }
-  spendCredits(state, "corp", creditCost);
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    rezzed: true,
-    faceup: true,
-    ...(variableIceState ? { variableIceState } : {}),
-  };
-  if (definition.type === "ice") {
-    const flags = ensureRunnerTurnFlags(state);
-    flags.corpRezzedIceThisTurn =
-      Math.max(0, Math.floor(flags.corpRezzedIceThisTurn ?? 0)) + 1;
-  }
-  if (
-    definition.id === KRUMZ_TRACE_ASSET_CARD_ID &&
-    !cardImplementationForDefinitionId(definition.id)
-  ) {
-    setCardCounter(state, cardId as CardInstanceId, "bit", 1);
-  }
-  if (
-    isParisTracePoolSource(
-      fortRunSideFamiliesHostForState(state),
-      cardId as CardInstanceId,
-    )
-  ) {
-    const capacity = parisTracePoolCapacityForCard(
-      fortRunSideFamiliesHostForState(state),
-      cardId as CardInstanceId,
-    );
-    setCardCounter(state, cardId as CardInstanceId, "bit", capacity);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        sourceDefinitionId: definition.id,
-        counterType: "bit",
-        addedCounterAmount: capacity,
-        remainingCounters: capacity,
-      };
-    }
-  }
-  if (legalAction)
-    executeCardImplementationLifecycleEffects(
-      cardImplementationRuntimeDeps,
-      state,
-      legalAction,
-      definition,
-      cardId as CardInstanceId,
-      "on_rez",
-    );
-  if (rootRez) {
-    handleRunRootRezPostRez(
-      runRezWindowHostForState(state),
-      cardId as CardInstanceId,
-      legalAction,
-    );
-    return;
-  }
-  beginEncounter(
-    encounterEntryHostForState(state),
-    cardId as CardInstanceId,
-    legalAction,
-  );
-}
-
-function variableIceStateForRezAction(
-  state: GameState,
-  cardId: string,
-  definition: CardDefinition,
-  baseRezCost: number,
-  legalAction?: LegalAction,
-): CardInstance["variableIceState"] | undefined {
-  const variableRez = variableRezForDefinition(definition);
-  if (!variableRez) return undefined;
-  if (!legalAction)
-    throw new Error("Variable ICE brauchen eine LegalAction.");
-  if (legalAction.payload?.cardId !== cardId)
-    throw new Error("Variable Rez-Zielkarte ist ungueltig.");
-  const additionalCost = Number(legalAction.payload.variableRezAdditionalCost);
-  const value = Number(legalAction.payload.variableRezValue);
-  const rezCostPaid = Number(legalAction.payload.rezCostPaid);
-  const actionCreditCost = creditCostForAction(legalAction);
-  if (
-    !Number.isInteger(additionalCost) ||
-    additionalCost < 0 ||
-    !Number.isInteger(value) ||
-    value < 0 ||
-    rezCostPaid !== baseRezCost + additionalCost ||
-    actionCreditCost !== rezCostPaid ||
-    state.corp.credits < rezCostPaid
-  )
-    throw new Error("Variable Rez-Kosten sind nicht mehr gueltig.");
-  if (variableRez.kind === "x_strength") {
-    if (
-      legalAction.payload.variableRezKind !== variableRez.kind ||
-      additionalCost !== value * variableRez.additionalCostPerValue ||
-      value < variableRez.minValue ||
-      value > variableRez.maxValue ||
-      legalAction.payload.variableRezCap !== variableRez.maxValue ||
-      legalAction.payload.effectiveStrengthAfterRez !== value ||
-      (variableRez.traceBaseFromValue &&
-        legalAction.payload.effectiveTraceBaseAfterRez !== value) ||
-      (variableRez.traceBidLimitFromValue &&
-        legalAction.payload.effectiveTraceBidLimitAfterRez !== value)
-    )
-      throw new Error("Variable X-Staerke ist nicht legal.");
-    return {
-      family: "x_strength",
-      additionalCostPaid: additionalCost,
-      value,
-      cap: variableRez.maxValue,
-      strength: value,
-      ...(variableRez.traceBidLimitFromValue ? { traceBidLimit: value } : {}),
-    };
-  }
-  if (variableRez.kind === "alternate_subtype") {
-    const selectedSubtypesRaw = String(
-      legalAction.payload.selectedSubtypesAfterRez ?? "",
-    );
-    const expectedBaseSubtypes = stableSubtypeList(variableRez.baseSubtypes);
-    const expectedAlternateSubtypes = stableSubtypeList(
-      variableRez.alternateSubtypes,
-    );
-    const selectedSubtypes = stableSubtypeList(
-      selectedSubtypesRaw ? selectedSubtypesRaw.split(",") : [],
-    );
-    const isBaseChoice =
-      value === 0 &&
-      additionalCost === 0 &&
-      selectedSubtypes.join(",") === expectedBaseSubtypes.join(",");
-    const isAlternateChoice =
-      value === 1 &&
-      additionalCost === variableRez.additionalCost &&
-      selectedSubtypes.join(",") === expectedAlternateSubtypes.join(",");
-    if (
-      legalAction.payload.variableRezKind !== variableRez.kind ||
-      (!isBaseChoice && !isAlternateChoice)
-    )
-      throw new Error("Variable Subtyp-Auswahl ist nicht legal.");
-    return {
-      family: "alternate_subtype",
-      additionalCostPaid: additionalCost,
-      value,
-      selectedSubtypes,
-    };
-  }
-  if (
-    legalAction.payload.variableRezKind !== variableRez.kind ||
-    additionalCost % variableRez.additionalCostPerSubroutine !== 0 ||
-    value !== additionalCost / variableRez.additionalCostPerSubroutine ||
-    value < variableRez.minSubroutines ||
-    legalAction.payload.effectiveSubroutineCountAfterRez !== value
-  )
-    throw new Error("Variable ETR-Zusatzkosten sind nicht legal.");
-  return {
-    family: "paid_end_the_run_subroutines",
-    additionalCostPaid: additionalCost,
-    value,
-    subroutineCount: value,
-  };
 }
 
 function continueRun(state: GameState, legalAction?: LegalAction): void {
