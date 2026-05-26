@@ -14,6 +14,9 @@ import type {
 import type {
   CounterUtilityTriggerExecutionResult,
 } from "./counter-utility-trigger-execution";
+import type {
+  HiddenZoneTriggerExecutionResult,
+} from "./hidden-zone-trigger-execution";
 
 export type TriggerAbilityExecutionHost = {
   state: GameState;
@@ -60,9 +63,9 @@ export type TriggerAbilityExecutionHost = {
     ) => CounterUtilityTriggerExecutionResult;
   };
   hiddenZone: {
-    handleMysteryBoxTopFiveProgramInstallActivation: (
+    handleHiddenZoneTriggerExecution: (
       legalAction: LegalAction,
-    ) => void;
+    ) => HiddenZoneTriggerExecutionResult;
   };
   constants: {
     CODE_VIRAL_CACHE_ID: string;
@@ -110,13 +113,8 @@ export function handleTriggerAbilityExecution(
     return handled(legalAction);
   if (host.runFort.handleRunFortTriggerExecution(legalAction).handled)
     return handled(legalAction);
-  if (
-    legalAction.payload?.v1915RunnerProgramAbility ===
-    "mystery_box_top5_program_install"
-  ) {
-    host.hiddenZone.handleMysteryBoxTopFiveProgramInstallActivation(legalAction);
+  if (host.hiddenZone.handleHiddenZoneTriggerExecution(legalAction).handled)
     return handled(legalAction);
-  }
   if (legalAction.payload?.runnerAbility === "wilson_gain_run_action") {
     if (legalAction.side !== "runner")
       throw new Error("Nur der Runner darf Wilson nutzen.");
