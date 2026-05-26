@@ -1,0 +1,4134 @@
+{
+  "schemaVersion": "ai-generated-fact-batch3-diff-review-v1",
+  "generatedAt": "2026-05-25",
+  "taskId": "Aufgabe 013",
+  "sourceDryRunReport": "docs/reviews/ai/aufgabe-012-generated-fact-batch3-dry-run-report-2026-05-25.json",
+  "batch": "batch_3_remote_role_future_run_ice",
+  "mode": "read-only diff review; no active hint migration, no runtime compile, no planner or consumer binding",
+  "hardErrorCount": 0,
+  "shapeDifferenceCount": 6,
+  "remoteRoleShapeDifferenceCount": 4,
+  "futureRunShapeDifferenceCount": 3,
+  "boardContextRequiredCount": 15,
+  "runpathContextRequiredCount": 10,
+  "activeStateContextRequiredCount": 3,
+  "descriptorContextRequiredCount": 9,
+  "realSemanticConflictCount": 0,
+  "classificationCounts": {
+    "active_state_context_required": 1,
+    "agenda_steal_tax_requires_access_context": 3,
+    "board_context_shape_difference": 1,
+    "descriptor_context_info": 6,
+    "future_run_descriptor_followup": 3,
+    "future_run_program_trash_context_required": 1,
+    "future_run_requires_current_run_path": 3,
+    "future_run_requires_effective_run_quote_context": 2,
+    "future_run_requires_ongoing_run_context": 10,
+    "future_run_requires_remaining_ice": 4,
+    "future_run_requires_unbroken_subroutine": 1,
+    "remaining_ice_context_required": 2,
+    "remote_role_equivalent_agenda_steal_tax": 3,
+    "remote_role_equivalent_run_tax": 2,
+    "remote_role_requires_rezzed_active_state": 1,
+    "run_tax_requires_encounter_or_run_context": 1,
+    "runpath_context_shape_difference": 3
+  },
+  "classificationCountsByWarningKind": {
+    "board_context_required": 15,
+    "descriptor_context_required": 9,
+    "future_run_shape_difference": 3,
+    "remote_role_shape_difference": 4,
+    "runpath_context_required": 10,
+    "shape_difference": 6
+  },
+  "boardContextClassifications": {
+    "agenda_steal_tax_requires_access_context": 3,
+    "future_run_requires_ongoing_run_context": 10,
+    "remote_role_requires_rezzed_active_state": 1,
+    "run_tax_requires_encounter_or_run_context": 1
+  },
+  "runpathContextClassifications": {
+    "future_run_requires_current_run_path": 3,
+    "future_run_requires_effective_run_quote_context": 2,
+    "future_run_requires_remaining_ice": 4,
+    "future_run_requires_unbroken_subroutine": 1
+  },
+  "descriptorContextClassifications": {
+    "descriptor_context_info": 6,
+    "future_run_descriptor_followup": 3
+  },
+  "normalizationRuleCandidates": [
+    {
+      "rule": "active_state_context_normalization",
+      "rationale": "Normalize rezzed/activeWhile/same-server/fort context as board context.",
+      "appliesTo": [
+        {
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "condition:requires_during_run",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "effect:future_run_effect",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "effect:remote_protection",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "condition:requires_during_run",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:future_run_effect",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:program_trash",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "condition:requires_during_run",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:future_run_effect",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "shape_difference"
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "remoteRole",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "condition:requires_accessed_card",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "remoteRole",
+          "sourceWarningKind": "board_context_required"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "remoteRole",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "remoteRole",
+          "sourceWarningKind": "shape_difference"
+        }
+      ]
+    },
+    {
+      "rule": "effective_run_quote_priority_annotation",
+      "rationale": "Annotate run_tax/cost-like facts so effectiveRunQuote remains authoritative for concrete path cost.",
+      "appliesTo": [
+        {
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "condition:requires_during_run",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "effect:future_run_effect",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "effect:remote_protection",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "condition:requires_during_run",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:future_run_effect",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "future_run_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "shape_difference"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "condition:requires_during_run",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:future_run_effect",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "future_run_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "shape_difference"
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "remoteRole",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "remoteRole",
+          "sourceWarningKind": "shape_difference"
+        }
+      ]
+    },
+    {
+      "rule": "future_run_program_trash_context_normalization",
+      "rationale": "Mark Viral 15 program-trash as a future-run/runpath consequence, not current trash legality.",
+      "appliesTo": [
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:program_trash",
+          "sourceWarningKind": "future_run_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:program_trash",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:program_trash",
+          "sourceWarningKind": "shape_difference"
+        }
+      ]
+    },
+    {
+      "rule": "future_run_remaining_ice_context_normalization",
+      "rationale": "Mark Tutor/Virizz style future-run effects as remaining-ICE/runpath-dependent, not current self-safety.",
+      "appliesTo": [
+        {
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "condition:requires_during_run",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "effect:future_run_effect",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "effect:remote_protection",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+          "sourceWarningKind": "descriptor_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "condition:requires_during_run",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:future_run_effect",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "future_run_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "shape_difference"
+        },
+        {
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+          "sourceWarningKind": "descriptor_context_required"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "condition:requires_during_run",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:future_run_effect",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "future_run_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "runpath_context_required"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "shape_difference"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+          "sourceWarningKind": "descriptor_context_required"
+        }
+      ]
+    },
+    {
+      "rule": "remote_role_agenda_steal_tax_normalization",
+      "rationale": "Normalize Red Herrings agenda_steal_tax and distinguish access-cost run_tax shape from generic run_tax.",
+      "appliesTo": [
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "remoteRole",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "remoteRole",
+          "sourceWarningKind": "shape_difference"
+        }
+      ]
+    },
+    {
+      "rule": "remote_role_run_tax_normalization",
+      "rationale": "Normalize Crystal Palace run_tax/break-subroutine-cost shape while preserving active/server context.",
+      "appliesTo": [
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:remote_protection",
+          "sourceWarningKind": "descriptor_context_required"
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:remote_protection",
+          "sourceWarningKind": "descriptor_context_required"
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "remote_role_shape_difference"
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:run_tax",
+          "sourceWarningKind": "shape_difference"
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+          "sourceWarningKind": "descriptor_context_required"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:remote_protection",
+          "sourceWarningKind": "descriptor_context_required"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:remote_protection",
+          "sourceWarningKind": "descriptor_context_required"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+          "sourceWarningKind": "descriptor_context_required"
+        }
+      ]
+    }
+  ],
+  "splitRecommendation": {
+    "decision": "remote_upgrades_ready_future_ice_needs_followup",
+    "followupShape": "split_after_diff_review",
+    "remoteUpgrades": [
+      "Crystal Palace Station Grid",
+      "Red Herrings"
+    ],
+    "futureRunIce": [
+      "Tutor",
+      "Virizz",
+      "Viral 15"
+    ],
+    "rationale": "Remote upgrades are comparatively stable after RemoteRole normalization, while future-run ICE needs stricter remaining-ICE/runpath descriptor review before rollup readiness.",
+    "recommendedNextSteps": [
+      "Aufgabe 014A Remote-Upgrades-Normalization-Dry-Run",
+      "Aufgabe 014B Future-run-ICE-Descriptor-Review"
+    ]
+  },
+  "cards": [
+    {
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "recommendedSubBatch": "future_run_ice",
+      "classifications": [
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "condition:requires_during_run",
+          "activeValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "source": "active.conditions"
+          },
+          "generatedValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "confidence": "high",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_274_tutor",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "remote_protection",
+                "timing": "encounter",
+                "scope": "run_path"
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "future_run_requires_ongoing_run_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "effect:future_run_effect",
+          "activeValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_274_tutor",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "remote_protection",
+                "timing": "encounter",
+                "scope": "run_path"
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "future_run_requires_ongoing_run_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "effect:remote_protection",
+          "activeValue": {
+            "type": "effect",
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_additional_subroutine"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_274_tutor",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "remote_protection",
+                "timing": "encounter",
+                "scope": "run_path"
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "future_run_requires_ongoing_run_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "descriptor_context_required",
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+          "activeValue": null,
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_274_tutor",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "remote_protection",
+                "timing": "encounter",
+                "scope": "run_path"
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": false,
+          "boardContextRequired": false,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run/future-encounter descriptor is still coarse and needs a dedicated runpath descriptor follow-up.",
+          "classification": "future_run_descriptor_followup",
+          "rationale": "The derived facts are mechanically recognizable but too coarse for rollup readiness without explicit remaining-ICE/runpath descriptor context.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "runpath_context_required",
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "condition:requires_during_run",
+          "activeValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "source": "active.conditions"
+          },
+          "generatedValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "confidence": "high",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_274_tutor",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "remote_protection",
+                "timing": "encounter",
+                "scope": "run_path"
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run ICE fact remains a static descriptor until runpath, remaining ICE, unbroken subroutines and effectiveRunQuote provide current context.",
+          "classification": "future_run_requires_current_run_path",
+          "rationale": "Runpath-context warnings are expected for Tutor/Virizz/Viral 15 and block rollup readiness until normalized.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "runpath_context_required",
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "effect:future_run_effect",
+          "activeValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_274_tutor",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "remote_protection",
+                "timing": "encounter",
+                "scope": "run_path"
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run ICE fact remains a static descriptor until runpath, remaining ICE, unbroken subroutines and effectiveRunQuote provide current context.",
+          "classification": "future_run_requires_remaining_ice",
+          "rationale": "Runpath-context warnings are expected for Tutor/Virizz/Viral 15 and block rollup readiness until normalized.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "runpath_context_required",
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "fact": "effect:remote_protection",
+          "activeValue": {
+            "type": "effect",
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_additional_subroutine"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_274_tutor",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "remote_protection",
+                "timing": "encounter",
+                "scope": "run_path"
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run ICE fact remains a static descriptor until runpath, remaining ICE, unbroken subroutines and effectiveRunQuote provide current context.",
+          "classification": "future_run_requires_remaining_ice",
+          "rationale": "Runpath-context warnings are expected for Tutor/Virizz/Viral 15 and block rollup readiness until normalized.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        }
+      ],
+      "normalizationCandidates": [
+        {
+          "rule": "active_state_context_normalization",
+          "rationale": "Normalize rezzed/activeWhile/same-server/fort context as board context.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_274_tutor",
+              "title": "Tutor",
+              "fact": "condition:requires_during_run",
+              "sourceWarningKind": "board_context_required"
+            },
+            {
+              "cardId": "onr_v1_274_tutor",
+              "title": "Tutor",
+              "fact": "effect:future_run_effect",
+              "sourceWarningKind": "board_context_required"
+            },
+            {
+              "cardId": "onr_v1_274_tutor",
+              "title": "Tutor",
+              "fact": "effect:remote_protection",
+              "sourceWarningKind": "board_context_required"
+            }
+          ]
+        },
+        {
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Annotate run_tax/cost-like facts so effectiveRunQuote remains authoritative for concrete path cost.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_274_tutor",
+              "title": "Tutor",
+              "fact": "condition:requires_during_run",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_274_tutor",
+              "title": "Tutor",
+              "fact": "effect:future_run_effect",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_274_tutor",
+              "title": "Tutor",
+              "fact": "effect:remote_protection",
+              "sourceWarningKind": "runpath_context_required"
+            }
+          ]
+        },
+        {
+          "rule": "future_run_remaining_ice_context_normalization",
+          "rationale": "Mark Tutor/Virizz style future-run effects as remaining-ICE/runpath-dependent, not current self-safety.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_274_tutor",
+              "title": "Tutor",
+              "fact": "condition:requires_during_run",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_274_tutor",
+              "title": "Tutor",
+              "fact": "effect:future_run_effect",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_274_tutor",
+              "title": "Tutor",
+              "fact": "effect:remote_protection",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_274_tutor",
+              "title": "Tutor",
+              "fact": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+              "sourceWarningKind": "descriptor_context_required"
+            }
+          ]
+        }
+      ],
+      "remainingIssues": [],
+      "realSemanticConflicts": [],
+      "sourceWarningKinds": {
+        "board_context_required": 3,
+        "consumer_active_for_fact_type": 3,
+        "descriptor_context_required": 1,
+        "generated_fact_already_present": 3,
+        "runpath_context_required": 3
+      }
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "recommendedSubBatch": "future_run_ice",
+      "classifications": [
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "condition:requires_during_run",
+          "activeValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "source": "active.conditions"
+          },
+          "generatedValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "confidence": "high",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "future_run_requires_ongoing_run_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:future_run_effect",
+          "activeValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "future_run_requires_ongoing_run_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:program_trash",
+          "activeValue": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_trash_program"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "future_run_requires_ongoing_run_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_jack_out_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "future_run_requires_ongoing_run_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "descriptor_context_required",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+          "activeValue": null,
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": false,
+          "boardContextRequired": false,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run/future-encounter descriptor is still coarse and needs a dedicated runpath descriptor follow-up.",
+          "classification": "future_run_descriptor_followup",
+          "rationale": "The derived facts are mechanically recognizable but too coarse for rollup readiness without explicit remaining-ICE/runpath descriptor context.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "future_run_shape_difference",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:program_trash",
+          "activeValue": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_trash_program"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run program-trash consequence that is not current trash legality.",
+          "classification": "future_run_program_trash_context_required",
+          "rationale": "The generated fact is mechanically useful, but Tutor/Virizz/Viral 15 style ICE must not become immediate self-safety or current LegalAction claims.",
+          "proposedFutureAction": "future_run_program_trash_context_normalization",
+          "normalizationRules": [
+            "future_run_program_trash_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "future_run_shape_difference",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_jack_out_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run run-tax/cost consequence that must stay tied to remaining-run and effectiveRunQuote context.",
+          "classification": "remaining_ice_context_required",
+          "rationale": "The generated fact is mechanically useful, but Tutor/Virizz/Viral 15 style ICE must not become immediate self-safety or current LegalAction claims.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "runpath_context_required",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "condition:requires_during_run",
+          "activeValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "source": "active.conditions"
+          },
+          "generatedValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "confidence": "high",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run ICE fact remains a static descriptor until runpath, remaining ICE, unbroken subroutines and effectiveRunQuote provide current context.",
+          "classification": "future_run_requires_current_run_path",
+          "rationale": "Runpath-context warnings are expected for Tutor/Virizz/Viral 15 and block rollup readiness until normalized.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "runpath_context_required",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:future_run_effect",
+          "activeValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run ICE fact remains a static descriptor until runpath, remaining ICE, unbroken subroutines and effectiveRunQuote provide current context.",
+          "classification": "future_run_requires_remaining_ice",
+          "rationale": "Runpath-context warnings are expected for Tutor/Virizz/Viral 15 and block rollup readiness until normalized.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "runpath_context_required",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:program_trash",
+          "activeValue": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_trash_program"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run ICE fact remains a static descriptor until runpath, remaining ICE, unbroken subroutines and effectiveRunQuote provide current context.",
+          "classification": "future_run_requires_unbroken_subroutine",
+          "rationale": "Runpath-context warnings are expected for Tutor/Virizz/Viral 15 and block rollup readiness until normalized.",
+          "proposedFutureAction": "future_run_program_trash_context_normalization",
+          "normalizationRules": [
+            "future_run_program_trash_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "runpath_context_required",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_jack_out_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run ICE fact remains a static descriptor until runpath, remaining ICE, unbroken subroutines and effectiveRunQuote provide current context.",
+          "classification": "future_run_requires_effective_run_quote_context",
+          "rationale": "Runpath-context warnings are expected for Tutor/Virizz/Viral 15 and block rollup readiness until normalized.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "shape_difference",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:program_trash",
+          "activeValue": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_trash_program"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run program-trash consequence that depends on unbroken subroutine and current runpath context.",
+          "classification": "runpath_context_shape_difference",
+          "rationale": "Generated and active facts agree on the mechanical effect class; active repeatable shape is legacy specificity that must remain runpath-gated.",
+          "proposedFutureAction": "future_run_program_trash_context_normalization",
+          "normalizationRules": [
+            "future_run_program_trash_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "shape_difference",
+          "cardId": "onr_v1_276_viral-15",
+          "title": "Viral 15",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_jack_out_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_276_viral-15",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "program_trash",
+                "timing": "encounter",
+                "scope": "runner",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run jack-out/run-tax consequence that depends on runpath and effectiveRunQuote context.",
+          "classification": "runpath_context_shape_difference",
+          "rationale": "Generated and active facts agree on the mechanical effect class; active repeatable shape is legacy specificity that must remain runpath-gated.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        }
+      ],
+      "normalizationCandidates": [
+        {
+          "rule": "active_state_context_normalization",
+          "rationale": "Normalize rezzed/activeWhile/same-server/fort context as board context.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "condition:requires_during_run",
+              "sourceWarningKind": "board_context_required"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:future_run_effect",
+              "sourceWarningKind": "board_context_required"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:program_trash",
+              "sourceWarningKind": "board_context_required"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "board_context_required"
+            }
+          ]
+        },
+        {
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Annotate run_tax/cost-like facts so effectiveRunQuote remains authoritative for concrete path cost.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "condition:requires_during_run",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:future_run_effect",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "future_run_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "shape_difference"
+            }
+          ]
+        },
+        {
+          "rule": "future_run_program_trash_context_normalization",
+          "rationale": "Mark Viral 15 program-trash as a future-run/runpath consequence, not current trash legality.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:program_trash",
+              "sourceWarningKind": "future_run_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:program_trash",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:program_trash",
+              "sourceWarningKind": "shape_difference"
+            }
+          ]
+        },
+        {
+          "rule": "future_run_remaining_ice_context_normalization",
+          "rationale": "Mark Tutor/Virizz style future-run effects as remaining-ICE/runpath-dependent, not current self-safety.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "condition:requires_during_run",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:future_run_effect",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "future_run_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "shape_difference"
+            },
+            {
+              "cardId": "onr_v1_276_viral-15",
+              "title": "Viral 15",
+              "fact": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+              "sourceWarningKind": "descriptor_context_required"
+            }
+          ]
+        }
+      ],
+      "remainingIssues": [],
+      "realSemanticConflicts": [],
+      "sourceWarningKinds": {
+        "board_context_required": 4,
+        "consumer_active_for_fact_type": 4,
+        "descriptor_context_required": 1,
+        "future_run_shape_difference": 2,
+        "generated_fact_already_present": 2,
+        "runpath_context_required": 4,
+        "shape_difference": 2
+      }
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "recommendedSubBatch": "future_run_ice",
+      "classifications": [
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "condition:requires_during_run",
+          "activeValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "source": "active.conditions"
+          },
+          "generatedValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "confidence": "high",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_277_virizz",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "future_run_requires_ongoing_run_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:future_run_effect",
+          "activeValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_277_virizz",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "future_run_requires_ongoing_run_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_break_subroutine_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_277_virizz",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "future_run_requires_ongoing_run_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "descriptor_context_required",
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+          "activeValue": null,
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_277_virizz",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": false,
+          "boardContextRequired": false,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run/future-encounter descriptor is still coarse and needs a dedicated runpath descriptor follow-up.",
+          "classification": "future_run_descriptor_followup",
+          "rationale": "The derived facts are mechanically recognizable but too coarse for rollup readiness without explicit remaining-ICE/runpath descriptor context.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "future_run_shape_difference",
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_break_subroutine_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_277_virizz",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run run-tax/cost consequence that must stay tied to remaining-run and effectiveRunQuote context.",
+          "classification": "remaining_ice_context_required",
+          "rationale": "The generated fact is mechanically useful, but Tutor/Virizz/Viral 15 style ICE must not become immediate self-safety or current LegalAction claims.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "runpath_context_required",
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "condition:requires_during_run",
+          "activeValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "source": "active.conditions"
+          },
+          "generatedValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "confidence": "high",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_277_virizz",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run ICE fact remains a static descriptor until runpath, remaining ICE, unbroken subroutines and effectiveRunQuote provide current context.",
+          "classification": "future_run_requires_current_run_path",
+          "rationale": "Runpath-context warnings are expected for Tutor/Virizz/Viral 15 and block rollup readiness until normalized.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "runpath_context_required",
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:future_run_effect",
+          "activeValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_277_virizz",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run ICE fact remains a static descriptor until runpath, remaining ICE, unbroken subroutines and effectiveRunQuote provide current context.",
+          "classification": "future_run_requires_remaining_ice",
+          "rationale": "Runpath-context warnings are expected for Tutor/Virizz/Viral 15 and block rollup readiness until normalized.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "runpath_context_required",
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_break_subroutine_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_277_virizz",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run ICE fact remains a static descriptor until runpath, remaining ICE, unbroken subroutines and effectiveRunQuote provide current context.",
+          "classification": "future_run_requires_effective_run_quote_context",
+          "rationale": "Runpath-context warnings are expected for Tutor/Virizz/Viral 15 and block rollup readiness until normalized.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "shape_difference",
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_break_subroutine_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_277_virizz",
+            "side": "corp",
+            "cardType": "ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "timing": "encounter",
+                "scope": "run_path"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "encounter",
+                "scope": "run_path",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          },
+          "manualOverlayPresent": false,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": true,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Future-run break/run cost tax that needs remaining-run and effectiveRunQuote context; active amount/repeatable shape is more specific.",
+          "classification": "runpath_context_shape_difference",
+          "rationale": "Generated and active both describe run_tax during encounter on the run_path; active monolith carries amount/repeatable detail that should be normalized later, not treated as conflict.",
+          "proposedFutureAction": "future_run_remaining_ice_context_normalization",
+          "normalizationRules": [
+            "future_run_remaining_ice_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        }
+      ],
+      "normalizationCandidates": [
+        {
+          "rule": "active_state_context_normalization",
+          "rationale": "Normalize rezzed/activeWhile/same-server/fort context as board context.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "condition:requires_during_run",
+              "sourceWarningKind": "board_context_required"
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "effect:future_run_effect",
+              "sourceWarningKind": "board_context_required"
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "board_context_required"
+            }
+          ]
+        },
+        {
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Annotate run_tax/cost-like facts so effectiveRunQuote remains authoritative for concrete path cost.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "condition:requires_during_run",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "effect:future_run_effect",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "future_run_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "shape_difference"
+            }
+          ]
+        },
+        {
+          "rule": "future_run_remaining_ice_context_normalization",
+          "rationale": "Mark Tutor/Virizz style future-run effects as remaining-ICE/runpath-dependent, not current self-safety.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "condition:requires_during_run",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "effect:future_run_effect",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "future_run_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "runpath_context_required"
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "shape_difference"
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "fact": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+              "sourceWarningKind": "descriptor_context_required"
+            }
+          ]
+        }
+      ],
+      "remainingIssues": [],
+      "realSemanticConflicts": [],
+      "sourceWarningKinds": {
+        "board_context_required": 3,
+        "consumer_active_for_fact_type": 3,
+        "descriptor_context_required": 1,
+        "future_run_shape_difference": 1,
+        "generated_fact_already_present": 2,
+        "runpath_context_required": 3,
+        "shape_difference": 1
+      }
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "title": "Crystal Palace Station Grid",
+      "recommendedSubBatch": "remote_upgrades_only",
+      "classifications": [
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "high",
+            "source": "implementation.modifiers.break_subroutine_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_355_crystal-palace-station-grid",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "persistent",
+                "scope": "fort",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "threatLevel": "medium",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": true,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "run_tax_requires_encounter_or_run_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "remoteRole",
+          "activeValue": {
+            "type": "remoteRole",
+            "kind": "run_tax",
+            "threatLevel": "medium",
+            "serverScope": "fort",
+            "source": "active.remoteRole"
+          },
+          "generatedValue": {
+            "type": "remoteRole",
+            "kind": "run_tax",
+            "threatLevel": "medium",
+            "serverScope": "fort",
+            "confidence": "high",
+            "source": "implementation.modifiers.break_subroutine_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_355_crystal-palace-station-grid",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "persistent",
+                "scope": "fort",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "threatLevel": "medium",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": true,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "remote_role_requires_rezzed_active_state",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "descriptor_context_required",
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:remote_protection",
+          "activeValue": {
+            "type": "effect",
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "fort",
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_355_crystal-palace-station-grid",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "persistent",
+                "scope": "fort",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "threatLevel": "medium",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": false,
+          "boardContextRequired": false,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Remote protection is intentionally strategic/contextual overlay, not generated RemoteRole mechanics.",
+          "classification": "descriptor_context_info",
+          "rationale": "Remote protection should stay manual/strategic until a separate overlay/descriptor slice proves a mechanical field.",
+          "proposedFutureAction": "keep_remote_protection_overlay_only",
+          "normalizationRules": [
+            "remote_role_run_tax_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "descriptor_context_required",
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:remote_protection",
+          "activeValue": {
+            "type": "effect",
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "fort",
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_355_crystal-palace-station-grid",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "persistent",
+                "scope": "fort",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "threatLevel": "medium",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": false,
+          "boardContextRequired": false,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Remote protection is intentionally strategic/contextual overlay, not generated RemoteRole mechanics.",
+          "classification": "descriptor_context_info",
+          "rationale": "Remote protection should stay manual/strategic until a separate overlay/descriptor slice proves a mechanical field.",
+          "proposedFutureAction": "keep_remote_protection_overlay_only",
+          "normalizationRules": [
+            "remote_role_run_tax_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "descriptor_context_required",
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+          "activeValue": null,
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_355_crystal-palace-station-grid",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "persistent",
+                "scope": "fort",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "threatLevel": "medium",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": false,
+          "boardContextRequired": false,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Remote protection is intentionally strategic/contextual overlay, not generated RemoteRole mechanics.",
+          "classification": "descriptor_context_info",
+          "rationale": "Remote protection should stay manual/strategic until a separate overlay/descriptor slice proves a mechanical field.",
+          "proposedFutureAction": "keep_remote_protection_overlay_only",
+          "normalizationRules": [
+            "remote_role_run_tax_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "remote_role_shape_difference",
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "high",
+            "source": "implementation.modifiers.break_subroutine_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_355_crystal-palace-station-grid",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "persistent",
+                "scope": "fort",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "threatLevel": "medium",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": true,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Crystal Palace Station Grid is a fort-scoped run_tax/break-subroutine-cost modifier.",
+          "classification": "remote_role_equivalent_run_tax",
+          "rationale": "The generated class is run_tax and must stay distinct from economy, counters and agenda_steal_tax.",
+          "proposedFutureAction": "remote_role_run_tax_normalization",
+          "normalizationRules": [
+            "remote_role_run_tax_normalization",
+            "active_state_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "shape_difference",
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "high",
+            "source": "implementation.modifiers.break_subroutine_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_355_crystal-palace-station-grid",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort",
+                "repeatable": true
+              },
+              {
+                "kind": "run_tax",
+                "timing": "persistent",
+                "scope": "fort",
+                "resource": "credits",
+                "amount": 1,
+                "repeatable": true
+              }
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "threatLevel": "medium",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": true,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Remote upgrade run_tax/break-subroutine-cost modifier for the protected fort; active repeatable=true is shape detail.",
+          "classification": "remote_role_equivalent_run_tax",
+          "rationale": "Generated and active both describe persistent fort-scoped run_tax; Crystal Palace is not economy, counter or agenda-steal-tax.",
+          "proposedFutureAction": "remote_role_run_tax_normalization",
+          "normalizationRules": [
+            "remote_role_run_tax_normalization",
+            "active_state_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        }
+      ],
+      "normalizationCandidates": [
+        {
+          "rule": "active_state_context_normalization",
+          "rationale": "Normalize rezzed/activeWhile/same-server/fort context as board context.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "title": "Crystal Palace Station Grid",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "board_context_required"
+            },
+            {
+              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "title": "Crystal Palace Station Grid",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "title": "Crystal Palace Station Grid",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "shape_difference"
+            },
+            {
+              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "title": "Crystal Palace Station Grid",
+              "fact": "remoteRole",
+              "sourceWarningKind": "board_context_required"
+            }
+          ]
+        },
+        {
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Annotate run_tax/cost-like facts so effectiveRunQuote remains authoritative for concrete path cost.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "title": "Crystal Palace Station Grid",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "title": "Crystal Palace Station Grid",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "shape_difference"
+            }
+          ]
+        },
+        {
+          "rule": "remote_role_run_tax_normalization",
+          "rationale": "Normalize Crystal Palace run_tax/break-subroutine-cost shape while preserving active/server context.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "title": "Crystal Palace Station Grid",
+              "fact": "effect:remote_protection",
+              "sourceWarningKind": "descriptor_context_required"
+            },
+            {
+              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "title": "Crystal Palace Station Grid",
+              "fact": "effect:remote_protection",
+              "sourceWarningKind": "descriptor_context_required"
+            },
+            {
+              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "title": "Crystal Palace Station Grid",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "title": "Crystal Palace Station Grid",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "shape_difference"
+            },
+            {
+              "cardId": "onr_v1_355_crystal-palace-station-grid",
+              "title": "Crystal Palace Station Grid",
+              "fact": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+              "sourceWarningKind": "descriptor_context_required"
+            }
+          ]
+        }
+      ],
+      "remainingIssues": [],
+      "realSemanticConflicts": [],
+      "sourceWarningKinds": {
+        "active_state_context_required": 2,
+        "board_context_required": 2,
+        "consumer_active_for_fact_type": 2,
+        "descriptor_context_required": 3,
+        "generated_fact_already_present": 1,
+        "monolith_only_mechanical_fact": 1,
+        "remote_role_shape_difference": 1,
+        "shape_difference": 1
+      }
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "title": "Red Herrings",
+      "recommendedSubBatch": "remote_upgrades_only",
+      "classifications": [
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "condition:requires_accessed_card",
+          "activeValue": {
+            "type": "condition",
+            "kind": "requires_accessed_card",
+            "source": "active.conditions"
+          },
+          "generatedValue": {
+            "type": "condition",
+            "kind": "requires_accessed_card",
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost.appliesTo.agenda"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_366_red-herrings",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "on_access",
+                "scope": "accessed_card",
+                "resource": "credits",
+                "amount": 5,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_accessed_card"
+              }
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "agenda_steal_tax_requires_access_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_366_red-herrings",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "on_access",
+                "scope": "accessed_card",
+                "resource": "credits",
+                "amount": 5,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_accessed_card"
+              }
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "agenda_steal_tax_requires_access_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "board_context_required",
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "remoteRole",
+          "activeValue": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "fort",
+            "source": "active.remoteRole"
+          },
+          "generatedValue": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "remote",
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_366_red-herrings",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "on_access",
+                "scope": "accessed_card",
+                "resource": "credits",
+                "amount": 5,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_accessed_card"
+              }
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": true,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Generated fact describes static card function; actual effect depends on board, server/access or current run state.",
+          "classification": "agenda_steal_tax_requires_access_context",
+          "rationale": "Board-context warnings are safety annotations and not semantic conflicts.",
+          "proposedFutureAction": "active_state_context_normalization",
+          "normalizationRules": [
+            "active_state_context_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "descriptor_context_required",
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:remote_protection",
+          "activeValue": {
+            "type": "effect",
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "fort",
+            "source": "active.effects"
+          },
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_366_red-herrings",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "on_access",
+                "scope": "accessed_card",
+                "resource": "credits",
+                "amount": 5,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_accessed_card"
+              }
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": false,
+          "boardContextRequired": false,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Remote protection is intentionally strategic/contextual overlay, not generated RemoteRole mechanics.",
+          "classification": "descriptor_context_info",
+          "rationale": "Remote protection should stay manual/strategic until a separate overlay/descriptor slice proves a mechanical field.",
+          "proposedFutureAction": "keep_remote_protection_overlay_only",
+          "normalizationRules": [
+            "remote_role_run_tax_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "descriptor_context_required",
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:remote_protection",
+          "activeValue": {
+            "type": "effect",
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "fort",
+            "source": "active.effects"
+          },
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_366_red-herrings",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "on_access",
+                "scope": "accessed_card",
+                "resource": "credits",
+                "amount": 5,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_accessed_card"
+              }
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": false,
+          "boardContextRequired": false,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Remote protection is intentionally strategic/contextual overlay, not generated RemoteRole mechanics.",
+          "classification": "descriptor_context_info",
+          "rationale": "Remote protection should stay manual/strategic until a separate overlay/descriptor slice proves a mechanical field.",
+          "proposedFutureAction": "keep_remote_protection_overlay_only",
+          "normalizationRules": [
+            "remote_role_run_tax_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "descriptor_context_required",
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+          "activeValue": null,
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_366_red-herrings",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "on_access",
+                "scope": "accessed_card",
+                "resource": "credits",
+                "amount": 5,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_accessed_card"
+              }
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": false,
+          "boardContextRequired": false,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Remote protection is intentionally strategic/contextual overlay, not generated RemoteRole mechanics.",
+          "classification": "descriptor_context_info",
+          "rationale": "Remote protection should stay manual/strategic until a separate overlay/descriptor slice proves a mechanical field.",
+          "proposedFutureAction": "keep_remote_protection_overlay_only",
+          "normalizationRules": [
+            "remote_role_run_tax_normalization"
+          ]
+        },
+        {
+          "sourceWarningKind": "remote_role_shape_difference",
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_366_red-herrings",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "on_access",
+                "scope": "accessed_card",
+                "resource": "credits",
+                "amount": 5,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_accessed_card"
+              }
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "occurrenceIndex": 0,
+          "normalizedSemanticMeaning": "Red Herrings uses run_tax effect shape to represent an agenda-steal access cost, not generic run taxation.",
+          "classification": "remote_role_equivalent_agenda_steal_tax",
+          "rationale": "Red Herrings keeps agenda_steal_tax semantics and requires access/server context; no generic run_tax migration should be inferred.",
+          "proposedFutureAction": "remote_role_agenda_steal_tax_normalization",
+          "normalizationRules": [
+            "remote_role_agenda_steal_tax_normalization",
+            "active_state_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "remote_role_shape_difference",
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_366_red-herrings",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "on_access",
+                "scope": "accessed_card",
+                "resource": "credits",
+                "amount": 5,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_accessed_card"
+              }
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "occurrenceIndex": 2,
+          "normalizedSemanticMeaning": "Red Herrings uses run_tax effect shape to represent an agenda-steal access cost, not generic run taxation.",
+          "classification": "remote_role_equivalent_agenda_steal_tax",
+          "rationale": "Red Herrings keeps agenda_steal_tax semantics and requires access/server context; no generic run_tax migration should be inferred.",
+          "proposedFutureAction": "remote_role_agenda_steal_tax_normalization",
+          "normalizationRules": [
+            "remote_role_agenda_steal_tax_normalization",
+            "active_state_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "remote_role_shape_difference",
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "remoteRole",
+          "activeValue": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "fort",
+            "source": "active.remoteRole"
+          },
+          "generatedValue": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "remote",
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_366_red-herrings",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "on_access",
+                "scope": "accessed_card",
+                "resource": "credits",
+                "amount": 5,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_accessed_card"
+              }
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": true,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "occurrenceIndex": 1,
+          "normalizedSemanticMeaning": "Red Herrings is agenda_steal_tax; serverScope remote vs fort is an active-state/server-context shape issue.",
+          "classification": "active_state_context_required",
+          "rationale": "Red Herrings keeps agenda_steal_tax semantics and requires access/server context; no generic run_tax migration should be inferred.",
+          "proposedFutureAction": "remote_role_agenda_steal_tax_normalization",
+          "normalizationRules": [
+            "remote_role_agenda_steal_tax_normalization",
+            "active_state_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "shape_difference",
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "effect:run_tax",
+          "activeValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_366_red-herrings",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "on_access",
+                "scope": "accessed_card",
+                "resource": "credits",
+                "amount": 5,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_accessed_card"
+              }
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": false,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Access-time agenda-steal cost represented as run_tax effect, tied to Red Herrings remoteRole agenda_steal_tax semantics.",
+          "classification": "remote_role_equivalent_agenda_steal_tax",
+          "rationale": "Red Herrings remains agenda_steal_tax; the effect-level run_tax shape is the cost form, not a generic remote run tax.",
+          "proposedFutureAction": "remote_role_agenda_steal_tax_normalization",
+          "normalizationRules": [
+            "remote_role_agenda_steal_tax_normalization",
+            "active_state_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        },
+        {
+          "sourceWarningKind": "shape_difference",
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "fact": "remoteRole",
+          "activeValue": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "fort",
+            "source": "active.remoteRole"
+          },
+          "generatedValue": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "remote",
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_366_red-herrings",
+            "side": "corp",
+            "cardType": "upgrade",
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "timing": "persistent",
+                "scope": "fort"
+              },
+              {
+                "kind": "run_tax",
+                "timing": "on_access",
+                "scope": "accessed_card",
+                "resource": "credits",
+                "amount": 5,
+                "repeatable": true
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_accessed_card"
+              }
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            }
+          },
+          "manualOverlayPresent": true,
+          "consumerRelevant": true,
+          "boardContextRequired": true,
+          "runpathContextRequired": false,
+          "activeStateContextRequired": true,
+          "descriptorContextRequired": true,
+          "conflict": false,
+          "normalizedSemanticMeaning": "Agenda-steal-tax remoteRole with serverScope shape mismatch between generated remote and active fort.",
+          "classification": "board_context_shape_difference",
+          "rationale": "Red Herrings remains agenda_steal_tax; the effect-level run_tax shape is the cost form, not a generic remote run tax.",
+          "proposedFutureAction": "remote_role_agenda_steal_tax_normalization",
+          "normalizationRules": [
+            "remote_role_agenda_steal_tax_normalization",
+            "active_state_context_normalization",
+            "effective_run_quote_priority_annotation"
+          ]
+        }
+      ],
+      "normalizationCandidates": [
+        {
+          "rule": "active_state_context_normalization",
+          "rationale": "Normalize rezzed/activeWhile/same-server/fort context as board context.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "condition:requires_accessed_card",
+              "sourceWarningKind": "board_context_required"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "board_context_required"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "remoteRole",
+              "sourceWarningKind": "board_context_required"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "remoteRole",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "remoteRole",
+              "sourceWarningKind": "shape_difference"
+            }
+          ]
+        },
+        {
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Annotate run_tax/cost-like facts so effectiveRunQuote remains authoritative for concrete path cost.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "remoteRole",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "remoteRole",
+              "sourceWarningKind": "shape_difference"
+            }
+          ]
+        },
+        {
+          "rule": "remote_role_agenda_steal_tax_normalization",
+          "rationale": "Normalize Red Herrings agenda_steal_tax and distinguish access-cost run_tax shape from generic run_tax.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:run_tax",
+              "sourceWarningKind": "shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "remoteRole",
+              "sourceWarningKind": "remote_role_shape_difference"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "remoteRole",
+              "sourceWarningKind": "shape_difference"
+            }
+          ]
+        },
+        {
+          "rule": "remote_role_run_tax_normalization",
+          "rationale": "Normalize Crystal Palace run_tax/break-subroutine-cost shape while preserving active/server context.",
+          "appliesTo": [
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:remote_protection",
+              "sourceWarningKind": "descriptor_context_required"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "effect:remote_protection",
+              "sourceWarningKind": "descriptor_context_required"
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "fact": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+              "sourceWarningKind": "descriptor_context_required"
+            }
+          ]
+        }
+      ],
+      "remainingIssues": [],
+      "realSemanticConflicts": [],
+      "sourceWarningKinds": {
+        "active_state_context_required": 1,
+        "board_context_required": 3,
+        "consumer_active_for_fact_type": 3,
+        "descriptor_context_required": 3,
+        "generated_fact_already_present": 1,
+        "monolith_only_mechanical_fact": 1,
+        "remote_role_shape_difference": 3,
+        "shape_difference": 2
+      }
+    }
+  ],
+  "errors": []
+}

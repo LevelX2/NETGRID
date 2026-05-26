@@ -230,17 +230,19 @@ export function buildRunnerEncounterActions(
       const blinkUsedSubroutines =
         run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
       const subroutines = encounterSubroutines;
-      if (breakAbilities.some((ability) => (ability.count ?? 1) > 1)) {
-        const breakAbility = breakAbilities[0];
-        if (!breakAbility) continue;
+      const multiBreakAbility = breakAbilities.find(
+        (ability) => (ability.count ?? 1) > 1,
+      );
+      if (multiBreakAbility) {
         actions.push(
-          ...pileDriverBreakActions(
+          ...multiBreakSubroutineActions(
             host,
             breakerId,
+            breaker.title,
             encounteredIceId,
             iceDefinition,
             subroutines,
-            breakAbility,
+            multiBreakAbility,
           ),
         );
         continue;
@@ -473,9 +475,10 @@ function selfModifyingCodeEncounterActions(
     );
 }
 
-function pileDriverBreakActions(
+function multiBreakSubroutineActions(
   host: RunnerEncounterActionHost,
   breakerId: CardInstanceId,
+  breakerTitle: string,
   encounteredIceId: CardInstanceId,
   iceDefinition: CardDefinition,
   subroutines: NonNullable<CardDefinition["subroutines"]>,
@@ -491,7 +494,7 @@ function pileDriverBreakActions(
         !run.resolvedSubroutineIndexes.includes(index),
     )
     .map(({ index }) => index);
-  const maxCount = Math.min(4, breakAbility.count ?? 4, eligibleIndexes.length);
+  const maxCount = Math.min(breakAbility.count ?? 4, eligibleIndexes.length);
   const actions: LegalAction[] = [];
   const selected: number[] = [];
   const visit = (start: number): void => {
@@ -500,8 +503,8 @@ function pileDriverBreakActions(
       const firstIndex = subroutineIndexes[0] ?? 0;
       const label =
         subroutineIndexes.length === 1
-          ? `Pile Driver: Subroutine ${firstIndex + 1} brechen`
-          : `Pile Driver: ${subroutineIndexes.length} Subroutinen brechen`;
+          ? `${breakerTitle}: Subroutine ${firstIndex + 1} brechen`
+          : `${breakerTitle}: ${subroutineIndexes.length} Subroutinen brechen`;
       const breakCost = host.costs.breakSubroutineCostBreakdown(
         breakAbility.cost.credits,
         subroutineIndexes.length,
@@ -522,6 +525,8 @@ function pileDriverBreakActions(
             iceId: encounteredIceId,
             subroutineIndexes: subroutineIndexes.join(","),
             breakSubroutineCount: subroutineIndexes.length,
+            multiBreakSubroutines: true,
+            // Kept for PublicContext and older Pile Driver regression tests.
             pileDriverMultiBreak: true,
             targetIceDefinitionId: iceDefinition.id,
             targetIceTitle: iceDefinition.title,
