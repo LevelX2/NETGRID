@@ -9,6 +9,7 @@
 - `release-slicing-plan.md`: priorisierte Umsetzungsschnitte für spätere Proteus-Arbeit.
 - `phase-1-slice-handoff-2026-05-24.md`: planning-only Zerlegung des zu großen Phase-1-Baseline-Pakets in sieben kleinere Activities mit benötigten Funktionsbausteinen je Kartenfamilie.
 - `detailed-phase-slice-plan-2026-05-24.md`: konsolidierte Detailplanung für Phase 1 bis 9 mit empfohlenen Unter-Slices, Funktionsbausteinen, Abhängigkeiten und Handoff-Regel für spätere Activities.
+- `proteus-cardimplementation-detailplan-2026-05-26.md`: neuer führender Detailplan zur Abarbeitung der 104 fehlenden CardImplementation-Dateien mit PRO001- bis PRO040-Paketnummern.
 - `bad-publicity-loss-gate-contract.md`: planning-only Vertrag für Bad-Publicity-7+-Game-End.
 - `variable-ice-contract.md`: planning-only Vertrag für variable Proteus-ICE.
 - `hidden-runner-resources-contract-2026-05-17.md`: planning-only Vertrag für verdeckte Runner-Resources.
