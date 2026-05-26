@@ -412,6 +412,7 @@ import {
   createHiddenZoneCardImplementationRuntimeDeps,
   type HiddenZoneRuntimeDepsHost,
 } from "./game/card-implementation/hidden-zone-runtime-deps";
+import { createDamageCardImplementationRuntimeDeps } from "./game/card-implementation/damage-runtime-deps";
 import {
   createTraceCardImplementationRuntimeDeps,
   type TraceRuntimeDepsHost,
@@ -741,11 +742,6 @@ const cardImplementationEffectAdapters = createCardImplementationEffectAdapters(
   drawCorpCards,
   drawRunnerCards,
   runnerDrawSummaryPublicPayload,
-  createDamageImminentEvent,
-  openReplacementWindow,
-  openEventModificationWindow,
-  resolveDamageImminentEvent,
-  resolveUnpreventableDamage: (state, request) => doDamage(state, request),
   addCardCounter,
   cardCounter,
   spendCardCounter,
@@ -816,6 +812,9 @@ function traceRuntimeDepsHost(): TraceRuntimeDepsHost {
 const traceCardImplementationRuntimeDeps =
   createTraceCardImplementationRuntimeDeps(traceRuntimeDepsHost());
 
+const damageCardImplementationRuntimeDeps =
+  createDamageCardImplementationRuntimeDeps();
+
 const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   definitionFor,
   mustInstance,
@@ -823,7 +822,6 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   rezzedCorpRootCardIds,
   runnerInstalledCardIds,
   runnerRunAttemptsLastTurn,
-  runnerWasDamagedDuringLastThreeActions,
   runnerMadeSuccessfulRunOnServerThisTurn: (state, server) =>
     server === "hq" && hasSuccessfulHqRunThisTurn(state),
   runnerLiberatedAgendaSubtypeThisTurn: (state, subtype) =>
@@ -836,6 +834,7 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   appendResolvedEffectsToPayload,
   ...cardImplementationEffectAdapters,
   ...traceCardImplementationRuntimeDeps,
+  ...damageCardImplementationRuntimeDeps,
   startRun: (state, legalAction, serverId, options) => {
     const sourceCardId =
       typeof legalAction.source === "string" &&
@@ -8438,14 +8437,6 @@ function runnerRunAttemptsLastTurn(state: GameState): number {
     0,
     Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0),
   );
-}
-
-function runnerWasDamagedDuringLastThreeActions(state: GameState): boolean {
-  const flags = state.runnerTurnFlags;
-  const lastDamageOrdinal = Math.floor(flags?.lastDamageRunnerActionOrdinal ?? 0);
-  if (lastDamageOrdinal <= 0) return false;
-  const actionsTaken = Math.floor(flags?.runnerActionsTakenThisTurn ?? 0);
-  return actionsTaken - lastDamageOrdinal < 3;
 }
 
 function recordRunnerActionSpent(state: GameState, amount: number): void {
