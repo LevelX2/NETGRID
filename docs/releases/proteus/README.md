@@ -11,6 +11,7 @@
 - `detailed-phase-slice-plan-2026-05-24.md`: konsolidierte Detailplanung für Phase 1 bis 9 mit empfohlenen Unter-Slices, Funktionsbausteinen, Abhängigkeiten und Handoff-Regel für spätere Activities.
 - `proteus-cardimplementation-detailplan-2026-05-26.md`: neuer führender Detailplan zur Abarbeitung der 104 fehlenden CardImplementation-Dateien mit PRO001- bis PRO040-Paketnummern.
 - `proteus-activity-status-2026-05-26.md`: führende Board-/Status-Hygiene ab PRO002; trennt `done + implemented`, `done + superseded`, `in-progress + blocked` und offene PRO-Pakete und legt fest, dass Implementierungsfortschritt aus CardImplementation-Dateien plus Registry gezählt wird, nicht aus Activity-Ordnerpositionen.
+- `proteus-cardimplementation-package-standard.md`: Paketstandard und Verify-Harness ab PRO003; definiert Activity-Template, Done-Gates und den Befehl `corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/coverage.test.ts -t "reconciles Proteus"` für Abdeckung, Restliste und Driftprüfung.
 - `bad-publicity-loss-gate-contract.md`: planning-only Vertrag für Bad-Publicity-7+-Game-End.
 - `variable-ice-contract.md`: planning-only Vertrag für variable Proteus-ICE.
 - `hidden-runner-resources-contract-2026-05-17.md`: planning-only Vertrag für verdeckte Runner-Resources.

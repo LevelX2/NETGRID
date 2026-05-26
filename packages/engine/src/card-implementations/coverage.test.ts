@@ -20,6 +20,7 @@ type ProteusCardSet = {
   cards: Array<{
     cardId: string;
     setId: string;
+    title: string;
   }>;
 };
 
@@ -67,6 +68,214 @@ function toRepoPath(path: string): string {
   return relative(repoRoot, path).split(sep).join("/");
 }
 
+type ProteusImplementationRow = {
+  cardDefinitionId: string;
+  filePath: string;
+};
+
+type ProteusCoverageReport = {
+  cardSet: ProteusCardSet;
+  manifest: ProteusCardSupportManifest;
+  implementationRows: ProteusImplementationRow[];
+  proteusCardIds: string[];
+  manifestCardIds: string[];
+  fileDefinitionIds: string[];
+  uniqueFileDefinitionIds: string[];
+  registryDefinitionIds: string[];
+  missingCards: Array<{ cardDefinitionId: string; title: string }>;
+  filesWithoutDefinitionId: string[];
+  nonProteusFiles: ProteusImplementationRow[];
+  unknownFileDefinitionIds: ProteusImplementationRow[];
+  unregisteredProteusFiles: ProteusImplementationRow[];
+  registeredProteusImplementationsWithoutFile: string[];
+  duplicateFileDefinitionIds: string[];
+  duplicateRegistryDefinitionIds: string[];
+  manifestImplementedIds: string[];
+  manifestImplementedWithoutFile: string[];
+  manifestMissingImplementedForFile: string[];
+  manifestStatusDrift: string[];
+  manifestResolverDrift: string[];
+  manifestLegalFlagDrift: string[];
+};
+
+function buildProteusCoverageReport(): ProteusCoverageReport {
+  const cardSet = readJson<ProteusCardSet>(
+    new URL("../../../../data/cards/proteus-cards.json", import.meta.url),
+  );
+  const manifest = readJson<ProteusCardSupportManifest>(
+    new URL(
+      "../../../../data/manifests/proteus-card-support.json",
+      import.meta.url,
+    ),
+  );
+  const implementationFiles = findTypeScriptFiles(
+    fileURLToPath(new URL("./proteus", import.meta.url)),
+  );
+  const implementationRows = implementationFiles.map((filePath) => {
+    const match = readFileSync(filePath, "utf8").match(
+      /cardDefinitionId:\s*["']([^"']+)["']/,
+    );
+    return {
+      cardDefinitionId: match?.[1] ?? "",
+      filePath: toRepoPath(filePath),
+    };
+  });
+
+  const proteusCardIds = cardSet.cards.map((card) => card.cardId);
+  const proteusCardIdSet = new Set(proteusCardIds);
+  const titleById = new Map(
+    cardSet.cards.map((card) => [card.cardId, card.title]),
+  );
+  const manifestCardIds = manifest.cards.map((card) => card.cardId);
+  const fileDefinitionIds = implementationRows.map(
+    (row) => row.cardDefinitionId,
+  );
+  const uniqueFileDefinitionIds = [
+    ...new Set(fileDefinitionIds.filter(Boolean)),
+  ].sort();
+  const uniqueFileDefinitionIdSet = new Set(uniqueFileDefinitionIds);
+  const registryDefinitionIds = CARD_IMPLEMENTATIONS.filter((implementation) =>
+    implementation.cardDefinitionId.startsWith("onr_proteus_"),
+  ).map((implementation) => implementation.cardDefinitionId);
+  const registryDefinitionIdSet = new Set(registryDefinitionIds);
+  const manifestImplementedIds = manifest.cards
+    .filter((card) => card.statuses.implemented)
+    .map((card) => card.cardId)
+    .sort();
+
+  const filesWithoutDefinitionId = implementationRows
+    .filter((row) => row.cardDefinitionId === "")
+    .map((row) => row.filePath)
+    .sort();
+  const nonProteusFiles = implementationRows
+    .filter(
+      (row) =>
+        row.cardDefinitionId !== "" &&
+        !row.cardDefinitionId.startsWith("onr_proteus_"),
+    )
+    .sort((a, b) => a.filePath.localeCompare(b.filePath));
+  const unknownFileDefinitionIds = implementationRows
+    .filter(
+      (row) =>
+        row.cardDefinitionId !== "" &&
+        !proteusCardIdSet.has(row.cardDefinitionId),
+    )
+    .sort((a, b) => a.cardDefinitionId.localeCompare(b.cardDefinitionId));
+  const unregisteredProteusFiles = implementationRows
+    .filter(
+      (row) =>
+        row.cardDefinitionId.startsWith("onr_proteus_") &&
+        !registryDefinitionIdSet.has(row.cardDefinitionId),
+    )
+    .sort((a, b) => a.cardDefinitionId.localeCompare(b.cardDefinitionId));
+  const registeredProteusImplementationsWithoutFile = registryDefinitionIds
+    .filter((definitionId) => !uniqueFileDefinitionIdSet.has(definitionId))
+    .sort();
+
+  const missingCards = cardSet.cards
+    .filter((card) => !uniqueFileDefinitionIdSet.has(card.cardId))
+    .map((card) => ({
+      cardDefinitionId: card.cardId,
+      title: titleById.get(card.cardId) ?? card.cardId,
+    }))
+    .sort((a, b) => a.cardDefinitionId.localeCompare(b.cardDefinitionId));
+
+  const manifestStatusDrift: string[] = [];
+  const manifestResolverDrift: string[] = [];
+  const manifestLegalFlagDrift: string[] = [];
+
+  for (const card of manifest.cards) {
+    const isImplementedByFile = uniqueFileDefinitionIdSet.has(card.cardId);
+    if (
+      card.statuses.ai_supported ||
+      card.statuses.deck_legal ||
+      card.statuses.format_legal
+    ) {
+      manifestLegalFlagDrift.push(card.cardId);
+    }
+
+    if (isImplementedByFile) {
+      if (
+        !card.statuses.implemented ||
+        !card.statuses.engine_supported ||
+        !card.statuses.playable ||
+        !card.statuses.human_playable ||
+        card.statuses.blocked
+      ) {
+        manifestStatusDrift.push(card.cardId);
+      }
+      if (card.support.resolverRef !== `engine:${card.cardId}`) {
+        manifestResolverDrift.push(card.cardId);
+      }
+    } else {
+      if (
+        card.statuses.implemented ||
+        card.statuses.engine_supported ||
+        card.statuses.playable ||
+        card.statuses.human_playable ||
+        !card.statuses.blocked
+      ) {
+        manifestStatusDrift.push(card.cardId);
+      }
+      if (card.support.resolverRef !== null) {
+        manifestResolverDrift.push(card.cardId);
+      }
+    }
+  }
+
+  return {
+    cardSet,
+    manifest,
+    implementationRows,
+    proteusCardIds,
+    manifestCardIds,
+    fileDefinitionIds,
+    uniqueFileDefinitionIds,
+    registryDefinitionIds,
+    missingCards,
+    filesWithoutDefinitionId,
+    nonProteusFiles,
+    unknownFileDefinitionIds,
+    unregisteredProteusFiles,
+    registeredProteusImplementationsWithoutFile,
+    duplicateFileDefinitionIds: duplicateIds(fileDefinitionIds).sort(),
+    duplicateRegistryDefinitionIds: duplicateIds(registryDefinitionIds).sort(),
+    manifestImplementedIds,
+    manifestImplementedWithoutFile: manifestImplementedIds
+      .filter((definitionId) => !uniqueFileDefinitionIdSet.has(definitionId))
+      .sort(),
+    manifestMissingImplementedForFile: uniqueFileDefinitionIds
+      .filter((definitionId) => !manifestImplementedIds.includes(definitionId))
+      .sort(),
+    manifestStatusDrift: manifestStatusDrift.sort(),
+    manifestResolverDrift: manifestResolverDrift.sort(),
+    manifestLegalFlagDrift: manifestLegalFlagDrift.sort(),
+  };
+}
+
+function formatProteusCoverageReport(report: ProteusCoverageReport): string {
+  const lines = [
+    "Proteus CardImplementation verify:",
+    `- total Proteus cards: ${report.proteusCardIds.length}`,
+    `- unique implemented Proteus cardDefinitionIds from files: ${report.uniqueFileDefinitionIds.length}`,
+    `- missing CardImplementation files: ${report.missingCards.length}`,
+    `- unregistered Proteus files: ${report.unregisteredProteusFiles.length}`,
+    `- registered Proteus implementations without file: ${report.registeredProteusImplementationsWithoutFile.length}`,
+    `- duplicate file cardDefinitionIds: ${report.duplicateFileDefinitionIds.length}`,
+    `- duplicate registry cardDefinitionIds: ${report.duplicateRegistryDefinitionIds.length}`,
+    `- manifest implemented-without-file drift: ${report.manifestImplementedWithoutFile.length}`,
+    `- manifest missing-implemented-for-file drift: ${report.manifestMissingImplementedForFile.length}`,
+    `- manifest status drift: ${report.manifestStatusDrift.length}`,
+    `- manifest resolverRef drift: ${report.manifestResolverDrift.length}`,
+    `- manifest deck_legal/format_legal/ai_supported drift: ${report.manifestLegalFlagDrift.length}`,
+    "Missing Proteus CardImplementation files:",
+    ...report.missingCards.map(
+      (card) => `- ${card.cardDefinitionId} :: ${card.title}`,
+    ),
+  ];
+  return lines.join("\n");
+}
+
 describe("CardImplementation coverage and registry invariants", () => {
   const p344SimpleIcebreakers = [
     "onr_v1_039_krash",
@@ -92,8 +301,13 @@ describe("CardImplementation coverage and registry invariants", () => {
   it("migrates P3.44 simple icebreakers into CardImplementation coverage", () => {
     for (const definitionId of p344SimpleIcebreakers) {
       const implementation = cardImplementationForDefinitionId(definitionId);
-      expect(implementation?.icebreakerAbilities?.length, definitionId).toBeGreaterThan(0);
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        implementation?.icebreakerAbilities?.length,
+        definitionId,
+      ).toBeGreaterThan(0);
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -124,13 +338,20 @@ describe("CardImplementation coverage and registry invariants", () => {
   it("migrates P3.45 special icebreakers into CardImplementation coverage", () => {
     for (const definitionId of p345SpecialIcebreakers) {
       const implementation = cardImplementationForDefinitionId(definitionId);
-      expect(implementation?.icebreakerAbilities?.length, definitionId).toBeGreaterThan(0);
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        implementation?.icebreakerAbilities?.length,
+        definitionId,
+      ).toBeGreaterThan(0);
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
     }
-    expect(cardImplementationForDefinitionId("onr_v1_023_evil-twin")).toMatchObject({
+    expect(
+      cardImplementationForDefinitionId("onr_v1_023_evil-twin"),
+    ).toMatchObject({
       damagePreventionSources: expect.any(Array),
     });
   });
@@ -152,12 +373,16 @@ describe("CardImplementation coverage and registry invariants", () => {
       expect(Boolean(implementation?.hostedProgramModifiers?.length)).toBe(
         reducesStrength,
       );
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
     }
-    expect(cardImplementationForDefinitionId("onr_v1_353_chimera")?.accessEffects).toEqual([
+    expect(
+      cardImplementationForDefinitionId("onr_v1_353_chimera")?.accessEffects,
+    ).toEqual([
       {
         kind: "on_access",
         sourceZones: ["installed"],
@@ -172,7 +397,9 @@ describe("CardImplementation coverage and registry invariants", () => {
         ],
       },
     ]);
-    expect(cardImplementationCoverageForDefinitionId("onr_v1_353_chimera")).toMatchObject({
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_v1_353_chimera"),
+    ).toMatchObject({
       cardDefinitionId: "onr_v1_353_chimera",
       status: "implemented",
     });
@@ -232,7 +459,9 @@ describe("CardImplementation coverage and registry invariants", () => {
       "onr_v1_101_mit-west-tier",
       "onr_v1_103_organ-donor",
     ] as const) {
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -257,8 +486,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of implemented) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -279,7 +513,9 @@ describe("CardImplementation coverage and registry invariants", () => {
         kind: "reverse_ice_on_successful_run_fort",
       }),
     );
-    expect(cardImplementationForDefinitionId("onr_v1_088_fortress-respecification")).toBeDefined();
+    expect(
+      cardImplementationForDefinitionId("onr_v1_088_fortress-respecification"),
+    ).toBeDefined();
   });
 
   it("migrates P3.51 Corp utility operations and nodes into CardImplementation coverage", () => {
@@ -302,8 +538,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of p351Cards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -326,8 +567,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of p352Cards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -377,8 +623,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of p353Cards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -432,15 +683,19 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of p354Cards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_358_dr-dreff")
-        ?.fortRunWindows,
+      cardImplementationForDefinitionId("onr_v1_358_dr-dreff")?.fortRunWindows,
     ).toContainEqual(
       expect.objectContaining({
         kind: "temporary_hq_ice_encounter_after_successful_run",
@@ -484,8 +739,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of p355Cards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -547,8 +807,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of p356Cards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -576,8 +841,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of phase1aCards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -587,8 +857,9 @@ describe("CardImplementation coverage and registry invariants", () => {
         ?.printedSubroutines,
     ).toHaveLength(4);
     expect(
-      cardImplementationForDefinitionId("onr_proteus_150_streetware-distributor")
-        ?.abilities?.[0],
+      cardImplementationForDefinitionId(
+        "onr_proteus_150_streetware-distributor",
+      )?.abilities?.[0],
     ).toMatchObject({
       kind: "activated",
       timing: "runner_main",
@@ -603,8 +874,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of phase1bCards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -639,8 +915,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of phase1dCards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -665,8 +946,13 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus Phase 1g post-pass derez utility into CardImplementation coverage", () => {
     const definitionId = "onr_proteus_085_disintegrator";
-    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+    expect(
+      cardImplementationForDefinitionId(definitionId),
+      definitionId,
+    ).toBeDefined();
+    expect(
+      cardImplementationCoverageForDefinitionId(definitionId),
+    ).toMatchObject({
       cardDefinitionId: definitionId,
       status: "implemented",
     });
@@ -747,8 +1033,13 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus Phase 2b scored-agenda Bad Publicity into CardImplementation coverage", () => {
     const definitionId = "onr_proteus_002_charity-takeover";
-    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+    expect(
+      cardImplementationForDefinitionId(definitionId),
+      definitionId,
+    ).toBeDefined();
+    expect(
+      cardImplementationCoverageForDefinitionId(definitionId),
+    ).toMatchObject({
       cardDefinitionId: definitionId,
       status: "implemented",
     });
@@ -769,12 +1060,19 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus Phase 2c direct runner event BP damage into CardImplementation coverage", () => {
     const definitionId = "onr_proteus_108_faked-hit";
-    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+    expect(
+      cardImplementationForDefinitionId(definitionId),
+      definitionId,
+    ).toBeDefined();
+    expect(
+      cardImplementationCoverageForDefinitionId(definitionId),
+    ).toMatchObject({
       cardDefinitionId: definitionId,
       status: "implemented",
     });
-    expect(cardImplementationForDefinitionId(definitionId)?.abilities?.[0]).toMatchObject({
+    expect(
+      cardImplementationForDefinitionId(definitionId)?.abilities?.[0],
+    ).toMatchObject({
       kind: "on_play",
       costs: "printed",
       effects: [
@@ -791,8 +1089,13 @@ describe("CardImplementation coverage and registry invariants", () => {
 
   it("migrates Proteus Phase 2d installed-connection BP cost into CardImplementation coverage", () => {
     const definitionId = "onr_proteus_117_poisoned-water-supply";
-    expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+    expect(
+      cardImplementationForDefinitionId(definitionId),
+      definitionId,
+    ).toBeDefined();
+    expect(
+      cardImplementationCoverageForDefinitionId(definitionId),
+    ).toMatchObject({
       cardDefinitionId: definitionId,
       status: "implemented",
     });
@@ -828,14 +1131,19 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const { definitionId, variableRez } of cases) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
-      expect(cardImplementationForDefinitionId(definitionId)?.variableRez).toMatchObject(
-        variableRez,
-      );
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.variableRez,
+      ).toMatchObject(variableRez);
     }
   });
 
@@ -885,14 +1193,19 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const { definitionId, variableRez } of cases) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
-      expect(cardImplementationForDefinitionId(definitionId)?.variableRez).toMatchObject(
-        variableRez,
-      );
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.variableRez,
+      ).toMatchObject(variableRez);
     }
   });
 
@@ -905,8 +1218,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of cases) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -925,8 +1243,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of cases) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -954,7 +1277,9 @@ describe("CardImplementation coverage and registry invariants", () => {
         },
       ],
     });
-    expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+    expect(
+      cardImplementationCoverageForDefinitionId(definitionId),
+    ).toMatchObject({
       cardDefinitionId: definitionId,
       status: "implemented",
     });
@@ -973,14 +1298,23 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of p357Cards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
     }
-    expect(cardImplementationForDefinitionId("onr_v1_088_fortress-respecification")).toBeDefined();
-    expect(cardImplementationForDefinitionId("onr_v1_111_social-engineering")).toBeDefined();
+    expect(
+      cardImplementationForDefinitionId("onr_v1_088_fortress-respecification"),
+    ).toBeDefined();
+    expect(
+      cardImplementationForDefinitionId("onr_v1_111_social-engineering"),
+    ).toBeDefined();
   });
 
   it("migrates P3.58 hidden replacement longtail cards into CardImplementation coverage", () => {
@@ -994,13 +1328,20 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of p358Cards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
     }
-    expect(cardImplementationForDefinitionId("onr_v1_131_microtech-backup-drive")).toBeDefined();
+    expect(
+      cardImplementationForDefinitionId("onr_v1_131_microtech-backup-drive"),
+    ).toBeDefined();
   });
 
   it("migrates P3.59 runner utility longtail cards into CardImplementation coverage", () => {
@@ -1017,8 +1358,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of p359Cards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -1037,17 +1383,26 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of p360ImplementedCards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_187_wilson-weeflerunner-apprentice"),
+      cardImplementationForDefinitionId(
+        "onr_v1_187_wilson-weeflerunner-apprentice",
+      ),
     ).toBeDefined();
     expect(
-      cardImplementationForDefinitionId("onr_v1_157_crash-everett-inventive-fixer"),
+      cardImplementationForDefinitionId(
+        "onr_v1_157_crash-everett-inventive-fixer",
+      ),
     ).toBeDefined();
   });
 
@@ -1063,8 +1418,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of p361Cards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -1079,82 +1439,73 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of implementedCards) {
-      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
     }
-    expect(cardImplementationForDefinitionId("onr_v1_220_tycho-extension")).toBeUndefined();
-    expect(cardImplementationCoverageForDefinitionId("onr_v1_220_tycho-extension")).toMatchObject({
+    expect(
+      cardImplementationForDefinitionId("onr_v1_220_tycho-extension"),
+    ).toBeUndefined();
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_v1_220_tycho-extension"),
+    ).toMatchObject({
       cardDefinitionId: "onr_v1_220_tycho-extension",
       status: "no_engine_behavior_required",
     });
   });
 
   it("reconciles Proteus manifest support against concrete files and registry", () => {
-    const cardSet = readJson<ProteusCardSet>(
-      new URL("../../../../data/cards/proteus-cards.json", import.meta.url),
-    );
-    const manifest = readJson<ProteusCardSupportManifest>(
-      new URL(
-        "../../../../data/manifests/proteus-card-support.json",
-        import.meta.url,
-      ),
-    );
-    const implementationFiles = findTypeScriptFiles(
-      fileURLToPath(new URL("./proteus", import.meta.url)),
-    );
-    const implementationRows = implementationFiles.map((filePath) => {
-      const match = readFileSync(filePath, "utf8").match(
-        /cardDefinitionId:\s*["']([^"']+)["']/,
-      );
-      return {
-        cardDefinitionId: match?.[1] ?? "",
-        filePath: toRepoPath(filePath),
-      };
-    });
+    const report = buildProteusCoverageReport();
+    process.stdout.write(`${formatProteusCoverageReport(report)}\n`);
 
-    const proteusCardIds = cardSet.cards.map((card) => card.cardId);
-    const manifestCardIds = manifest.cards.map((card) => card.cardId);
-    const fileDefinitionIds = implementationRows.map(
-      (row) => row.cardDefinitionId,
+    expect(report.cardSet.setId).toBe("proteus");
+    expect(report.proteusCardIds).toHaveLength(154);
+    expect(report.manifest.setId).toBe("proteus");
+    expect(report.manifest.cards).toHaveLength(154);
+    expect([...report.manifestCardIds].sort()).toEqual(
+      [...report.proteusCardIds].sort(),
     );
-    const registryDefinitionIds = CARD_IMPLEMENTATIONS.filter(
-      (implementation) =>
-        implementation.cardDefinitionId.startsWith("onr_proteus_"),
-    ).map((implementation) => implementation.cardDefinitionId);
-    const sortedFileDefinitionIds = [...fileDefinitionIds].sort();
-    const sortedRegistryDefinitionIds = [...registryDefinitionIds].sort();
-    const manifestImplementedIds = manifest.cards
-      .filter((card) => card.statuses.implemented)
-      .map((card) => card.cardId)
-      .sort();
+    expect(duplicateIds(report.proteusCardIds)).toEqual([]);
+    expect(duplicateIds(report.manifestCardIds)).toEqual([]);
 
-    expect(cardSet.setId).toBe("proteus");
-    expect(cardSet.cards).toHaveLength(154);
-    expect(manifest.setId).toBe("proteus");
-    expect(manifest.cards).toHaveLength(154);
-    expect([...manifestCardIds].sort()).toEqual([...proteusCardIds].sort());
-    expect(duplicateIds(proteusCardIds)).toEqual([]);
-    expect(duplicateIds(manifestCardIds)).toEqual([]);
+    expect(report.implementationRows.length).toBeGreaterThan(0);
+    expect(report.filesWithoutDefinitionId).toEqual([]);
+    expect(report.nonProteusFiles).toEqual([]);
+    expect(report.unknownFileDefinitionIds).toEqual([]);
+    expect(report.duplicateFileDefinitionIds).toEqual([]);
+    expect(report.duplicateRegistryDefinitionIds).toEqual([]);
+    expect(report.unregisteredProteusFiles).toEqual([]);
+    expect(report.registeredProteusImplementationsWithoutFile).toEqual([]);
+    expect([...report.registryDefinitionIds].sort()).toEqual(
+      [...report.uniqueFileDefinitionIds].sort(),
+    );
+    expect(report.manifestImplementedIds).toEqual(
+      [...report.uniqueFileDefinitionIds].sort(),
+    );
+    expect(report.manifestImplementedWithoutFile).toEqual([]);
+    expect(report.manifestMissingImplementedForFile).toEqual([]);
+    expect(report.manifestStatusDrift).toEqual([]);
+    expect(report.manifestResolverDrift).toEqual([]);
+    expect(report.manifestLegalFlagDrift).toEqual([]);
 
-    expect(implementationRows.length).toBeGreaterThan(0);
-    expect(
-      implementationRows.filter((row) => row.cardDefinitionId === ""),
-    ).toEqual([]);
-    expect(duplicateIds(fileDefinitionIds)).toEqual([]);
-    expect(duplicateIds(registryDefinitionIds)).toEqual([]);
-    expect(sortedRegistryDefinitionIds).toEqual(sortedFileDefinitionIds);
-    expect(manifestImplementedIds).toEqual(sortedFileDefinitionIds);
-
-    for (const row of implementationRows) {
+    for (const row of report.implementationRows) {
       expect(row.cardDefinitionId, row.filePath).toMatch(/^onr_proteus_/);
-      expect(proteusCardIds, row.filePath).toContain(row.cardDefinitionId);
+      expect(report.proteusCardIds, row.filePath).toContain(
+        row.cardDefinitionId,
+      );
     }
 
-    for (const card of manifest.cards) {
-      const isImplemented = fileDefinitionIds.includes(card.cardId);
+    for (const card of report.manifest.cards) {
+      const isImplemented = report.uniqueFileDefinitionIds.includes(
+        card.cardId,
+      );
       expect(card.setId, card.cardId).toBe("proteus");
       expect(card.statuses.ai_supported, card.cardId).toBe(false);
       expect(card.statuses.deck_legal, card.cardId).toBe(false);
@@ -1202,8 +1553,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     ).toEqual([]);
 
     for (const definitionId of Object.keys(DEMO_CARDS_BY_ID)) {
-      const coverage =
-        cardImplementationCoverageForDefinitionId(definitionId);
+      const coverage = cardImplementationCoverageForDefinitionId(definitionId);
       expect(coverage, definitionId).toBeDefined();
       expect(coverage?.cardDefinitionId).toBe(definitionId);
       expect(coverage?.reason.trim(), definitionId).not.toBe("");
@@ -1223,10 +1573,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         );
         if (!implementation) continue;
       }
-      expect(
-        implementation,
-        entry.cardDefinitionId,
-      ).toBeDefined();
+      expect(implementation, entry.cardDefinitionId).toBeDefined();
     }
 
     for (const implementation of CARD_IMPLEMENTATIONS) {
@@ -1324,5 +1671,4 @@ describe("CardImplementation coverage and registry invariants", () => {
       ).toBe("implemented");
     }
   });
-
 });

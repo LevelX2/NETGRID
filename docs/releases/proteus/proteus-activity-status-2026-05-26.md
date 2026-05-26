@@ -149,7 +149,7 @@ Alle PRO001 bis PRO040 sind hier bewusst erfasst. Bei Paketen ohne eigene konkre
 | --- | --- | --- |
 | PRO001 | Bereits durch PRO001-Guard abgedeckt | `coverage.test.ts`: Manifest-/Registry-/Datei-Reconciliation |
 | PRO002 | Dieses Statusartefakt | `proteus-activity-status-2026-05-26.md` |
-| PRO003 | noch zu schneiden | Kein konkretes Activity-Paket vorhanden |
+| PRO003 | erledigt durch Paketstandard und Verify-Harness | `proteus-cardimplementation-package-standard.md`; `coverage.test.ts`: Proteus-Abdeckung, Restliste und Driftprüfung |
 | PRO004 | referenziert, konkrete Activity noch zu schneiden | Phase 5a, Phase-1-Umbrella |
 | PRO005 | referenziert, konkrete Activity noch zu schneiden | Phase 5c |
 | PRO006 | referenziert, konkrete Activity noch zu schneiden | Phase 6b, Phase-1-Umbrella |
