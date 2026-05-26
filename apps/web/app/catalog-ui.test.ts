@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  catalogSetDetailLabel,
   catalogRarityLabel,
   catalogSetFilterOptions,
   catalogSetKeyForCard,
+  catalogSetShortLabelForSetId,
   filterCatalogCardsBySetId,
   filterCatalogCardsByRarity,
   filterCatalogCardsBySet,
@@ -116,6 +118,18 @@ describe("catalog UI filtering", () => {
     ]);
     expect(filterCatalogCardsBySetId(cards, "proteus").map((card) => card.catalogCardId)).toEqual(["proteus_a", "proteus_b"]);
     expect(filterCatalogCardsBySetId(cards, "all")).toEqual(cards);
+  });
+
+  it("formats compact and detailed set display labels", () => {
+    expect(catalogSetShortLabelForSetId("originalset-v1")).toBe("OV1");
+    expect(catalogSetShortLabelForSetId("onr-v1-limited-private-local")).toBe("OV1");
+    expect(catalogSetShortLabelForSetId("proteus-v1")).toBe("PRO");
+    expect(catalogSetShortLabelForSetId("classic-v1")).toBe("CLS");
+    expect(catalogSetShortLabelForSetId("testset-v1")).toBe("TEST");
+    expect(catalogSetShortLabelForSetId("custom-private-alpha")).toBe("CPA");
+    expect(catalogSetDetailLabel({ setId: "proteus-v1", setName: "Proteus", collectorNumber: "P001" })).toBe("Proteus #P001");
+    expect(catalogSetDetailLabel({ setId: "originalset-v1", collectorNumber: "219" })).toBe("Original Version 1 #219");
+    expect(catalogSetDetailLabel({ setId: "" })).toBeNull();
   });
 
   it("filters and summarizes rarity metadata without breaking cards that have no rarity", () => {

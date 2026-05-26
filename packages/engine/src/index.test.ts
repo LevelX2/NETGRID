@@ -4619,6 +4619,69 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
         (action) => action.payload?.cardId === euromarketId,
       ),
     ).toBe(true);
+    const euromarketAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === euromarketId,
+    );
+    const removedSource = structuredClone(state);
+    removeEverywhere(removedSource, euromarketId);
+    removedSource.corp.archives.push(euromarketId);
+    removedSource.cardInstances[euromarketId] = {
+      ...removedSource.cardInstances[euromarketId]!,
+      zone: { side: "corp", zone: "archives" },
+      faceup: true,
+      rezzed: false,
+    };
+    const staleSourceResult = applyAction(removedSource, {
+      matchId: removedSource.matchId,
+      side: "corp",
+      actionId: euromarketAction.actionId,
+      clientKnownStateVersion: removedSource.stateVersion,
+      idempotencyKey: "spotcheck-euromarket-removed-source",
+    });
+    expect(staleSourceResult.ok).toBe(false);
+
+    const euromarketInitial = structuredClone(state);
+    const euromarketReplayStart = state.eventLog.length;
+    const corpHqBeforeEuromarket = state.corp.hq.length;
+    const corpRdBeforeEuromarket = state.corp.rd.length;
+    const corpCreditsBeforeEuromarket = state.corp.credits;
+    const corpClicksBeforeEuromarket = state.corp.clicks;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === euromarketAction.actionId,
+    );
+    expect(state.corp.hq.length).toBe(corpHqBeforeEuromarket + 2);
+    expect(state.corp.rd.length).toBe(corpRdBeforeEuromarket - 2);
+    expect(state.corp.credits).toBe(corpCreditsBeforeEuromarket - 1);
+    expect(state.corp.clicks).toBe(corpClicksBeforeEuromarket - 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+      cardDefinitionId: "onr_v1_322_euromarket-consortium",
+      drawnCards: 2,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "draw_cards",
+          side: "corp",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_322_euromarket-consortium",
+        }),
+      ],
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const euromarketReplay = replayEvents(
+      euromarketInitial,
+      state.eventLog.slice(euromarketReplayStart),
+    );
+    expect(euromarketReplay.ok).toBe(true);
+    expect(hashState(euromarketReplay.state)).toBe(hashState(state));
+
     removeEverywhere(state, euromarketId);
     state.corp.archives.push(euromarketId);
     state.cardInstances[euromarketId] = {
@@ -20305,13 +20368,19 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       "secretSpendCorp",
     );
 
+    const corpCreditsBeforeReveal = state.corp.credits;
+    const runnerCreditsBeforeReveal = state.runner.credits;
     state = applyChoice(state, "runner", "bid_1");
     expect(state.run).toBeDefined();
+    expect(state.corp.credits).toBe(corpCreditsBeforeReveal - 1);
+    expect(state.runner.credits).toBe(runnerCreditsBeforeReveal - 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       secretSpendRevealed: true,
       secretSpendCorp: 1,
       secretSpendRunner: 1,
       tooManyDoorsEndRun: false,
+      corpCreditsAfter: corpCreditsBeforeReveal - 1,
+      runnerCreditsAfter: runnerCreditsBeforeReveal - 1,
     });
 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -34920,13 +34989,19 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "secretSpendCorp",
     );
+    const corpCreditsBeforeReveal = state.corp.credits;
+    const runnerCreditsBeforeReveal = state.runner.credits;
     state = applyChoice(state, "runner", "bid_0");
+    expect(state.corp.credits).toBe(corpCreditsBeforeReveal - 2);
+    expect(state.runner.credits).toBe(runnerCreditsBeforeReveal);
     expect(state.run).toBeDefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       secretSpendRevealed: true,
       secretSpendCorp: 2,
       secretSpendRunner: 0,
       tooManyDoorsEndRun: false,
+      corpCreditsAfter: corpCreditsBeforeReveal - 2,
+      runnerCreditsAfter: runnerCreditsBeforeReveal,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -34972,12 +35047,20 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       (action) => action.type === "continue_run",
     );
     losingBidState = applyChoice(losingBidState, "corp", "bid_0");
+    const losingCorpCreditsBeforeReveal = losingBidState.corp.credits;
+    const losingRunnerCreditsBeforeReveal = losingBidState.runner.credits;
     losingBidState = applyChoice(losingBidState, "runner", "bid_1");
+    expect(losingBidState.corp.credits).toBe(losingCorpCreditsBeforeReveal);
+    expect(losingBidState.runner.credits).toBe(
+      losingRunnerCreditsBeforeReveal - 1,
+    );
     expect(losingBidState.run).toBeUndefined();
     expect(losingBidState.eventLog.at(-1)?.publicPayload).toMatchObject({
       secretSpendCorp: 0,
       secretSpendRunner: 1,
       tooManyDoorsEndRun: true,
+      corpCreditsAfter: losingCorpCreditsBeforeReveal,
+      runnerCreditsAfter: losingRunnerCreditsBeforeReveal - 1,
     });
   });
 
@@ -38237,6 +38320,19 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
       expect(view.winner).toBe("runner");
       expect(view.gameEndReason).toBe("bad_publicity_7");
       expect(view.legalActions).toHaveLength(0);
+      const corpIdentity =
+        side === "runner" ? view.opponent.identity : view.own.identity;
+      expect(corpIdentity.counterDisplays).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: "bad_publicity",
+            amount: 7,
+            displayKind: "bad_publicity",
+            counterType: "bad_publicity",
+            label: "Bad Publicity",
+          }),
+        ]),
+      );
       const viewJson = JSON.stringify(view);
       expect(viewJson).not.toContain("onr_proteus_");
       expect(viewJson).not.toContain("cardInstances");

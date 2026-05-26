@@ -5,6 +5,7 @@ export type HumanSideSelection = "runner" | "corp" | "random";
 export type HumanAiSideSelection = "runner" | "corp" | "random";
 export type TechnicalMatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
 export type MatchFormatSelection = "rules_match" | "two_game_side_swap";
+export type MatchCardPoolSelection = "originalset" | "originalset_proteus";
 
 export type DerivedMatchStart = {
   requestedPlayMode: PlayMode;
@@ -73,6 +74,11 @@ export function matchFormatCardLabel(format: MatchFormatSelection): { title: str
   return { title: "Regelmatch", description: "7 Agendapunkte, ein Spiel" };
 }
 
+export function matchCardPoolCardLabel(cardPool: MatchCardPoolSelection): { title: string; description: string } {
+  if (cardPool === "originalset_proteus") return { title: "Originalset & Protheus", description: "Alle Protheus-Karten sind im Matchstart legal" };
+  return { title: "Nur Originalset", description: "Protheus-Decks werden nicht zugelassen" };
+}
+
 export function parseJoinLinkInput(input: string): { matchId: string; joinToken: string } | null {
   const trimmed = input.trim();
   if (!trimmed) return null;
@@ -90,6 +96,7 @@ export function parseJoinLinkInput(input: string): { matchId: string; joinToken:
 export function matchStartSummary(input: {
   playMode: PlayMode;
   matchFormat: MatchFormatSelection;
+  matchCardPool?: MatchCardPoolSelection;
   humanSideSelection: HumanSideSelection;
   humanAiSideSelection: HumanAiSideSelection;
   aiDeckPolicy?: "selected" | "fixed" | "seeded_random";
@@ -97,6 +104,7 @@ export function matchStartSummary(input: {
 }): string[] {
   const playMode = playModeCardLabel(input.playMode).title;
   const format = input.matchFormat === "two_game_side_swap" ? "Matchserie mit Seitenwechsel" : "Regelmatch bis 7 Agendapunkte";
+  const cardPool = input.matchCardPool === "originalset_proteus" ? "Kartenpool: Originalset & Protheus" : "Kartenpool: nur Originalset";
   const side =
     input.playMode === "human_vs_human"
       ? input.humanSideSelection === "random"
@@ -121,7 +129,7 @@ export function matchStartSummary(input: {
         : input.aiDeckPolicy === "seeded_random"
           ? "Simulationsdecks: deterministisch zufällig"
           : "Simulationsdecks: ausgewählt";
-  return [playMode, side, format, deckPolicy];
+  return [playMode, side, format, cardPool, deckPolicy];
 }
 
 export function matchStartLobbyBlocksSetup(status: ApiMatchStatus | undefined): boolean {

@@ -17,6 +17,7 @@ import {
   armoredFridgeAblativeCounterBadge,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
+  breachHighlighterAccessHint,
   breachProgressLabel,
   cardChoiceIsReadonlyPrivateLook,
   cardChoiceReadonlyConfirmationOptionId,
@@ -38,10 +39,13 @@ import {
   currentRunTimelineStep,
   groupRunnerRigCards,
   iceModifierBadgesForServer,
+  identityCounterChipsForDisplays,
   inactiveCardZoneAriaSuffix,
   inactiveCardZoneBadgeLabel,
   inactiveCardZoneClassName,
   latestRetainableAccessRevealEvent,
+  newBloodReorderTargetLabel,
+  newBloodReorderTargetSequenceHint,
   orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
@@ -353,6 +357,39 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(breachProgressLabel(secondAccess)).toBe("Zugriff 2 von 2");
   });
 
+  it("explains additional R&D accesses from Highlighter counters", () => {
+    const corpIdentity = {
+      ...card("corp_identity", "Korp Identity", "identity"),
+      counterDisplays: [
+        {
+          id: "runner_virus_corp_highlighter",
+          amount: 3,
+          displayKind: "virus",
+          label: "Highlighter-Counter",
+          ariaLabel: "3 Highlighter-Counter",
+          counterType: "highlighter",
+          usageHint: "status_marker"
+        }
+      ]
+    } satisfies VisibleCard;
+    const secondAccess = view("runner", {
+      opponent: {
+        ...view("runner").opponent,
+        identity: corpIdentity
+      },
+      run: {
+        attackedServerId: "rd",
+        phase: "access",
+        successful: true,
+        breach: { breachId: "breach_1", serverId: "rd", currentIndex: 1, remainingCount: 2, completed: false }
+      }
+    });
+
+    expect(breachHighlighterAccessHint(secondAccess)).toBe(
+      "Zusätzlicher R&D-Zugriff 2 von 3: Die Korp hat 3 Highlighter-Counter."
+    );
+  });
+
   it("groups public Runner rig cards without implying hidden cards", () => {
     const groups = groupRunnerRigCards([card("program_1", "Program", "program"), card("hardware_1", "Hardware", "hardware"), card("resource_1", "Resource", "resource")]);
 
@@ -622,6 +659,47 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(cardChoiceReadonlyConfirmationOptionId(technicianPrivateLookChoice)).toBe("done");
     expect(cardChoiceUsesOrderedSelection(stackTopFiveChoice)).toBe(true);
     expect(cardChoiceUsesOrderedSelection(organDonorChoice)).toBe(false);
+  });
+
+  it("derives explicit target slots for New Blood ordered ICE choices", () => {
+    const newBloodChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      choiceId: "p3_58_new_blood_reorder_7",
+      side: "corp",
+      source: "p3_58.new_blood_reorder:new_blood_1:7",
+      prompt: "Installierte ICE neu anordnen.",
+      kind: "select_cards",
+      options: [
+        {
+          id: "card_hq_ice",
+          label: "Quandary (HQ ICE 1)",
+          publicLabel: "HQ ICE 1",
+          value: "hq_ice"
+        },
+        {
+          id: "card_rd_ice",
+          label: "Data Wall (R&D ICE 1)",
+          publicLabel: "R&D ICE 1",
+          value: "rd_ice"
+        },
+        {
+          id: "card_remote_ice",
+          label: "Iceberg (Remote 1 ICE 1)",
+          value: "remote_ice"
+        }
+      ],
+      minSelections: 3,
+      maxSelections: 3,
+      stateVersion: 7,
+      visibility: "hidden_info_barrier"
+    };
+
+    expect(shouldUseCardChoicePanel(newBloodChoice)).toBe(true);
+    expect(cardChoiceUsesOrderedSelection(newBloodChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(newBloodChoice)).toBe(false);
+    expect(newBloodReorderTargetLabel(newBloodChoice, 0)).toBe("HQ ICE 1");
+    expect(newBloodReorderTargetLabel(newBloodChoice, 1)).toBe("R&D ICE 1");
+    expect(newBloodReorderTargetLabel(newBloodChoice, 2)).toBe("Remote 1 ICE 1");
+    expect(newBloodReorderTargetSequenceHint(newBloodChoice)).toBe("Wähle die ICE in Zielslot-Reihenfolge: HQ ICE 1 -> R&D ICE 1 -> Remote 1 ICE 1.");
   });
 
   it("detects field-card choices for installed board cards only", () => {
@@ -1129,6 +1207,76 @@ describe("V1.0.6 resource and card-display helpers", () => {
       overflowLabel: "10"
     });
     expect(advancementCounterDisplay({ known: false, advancementCounters: 0 })).toBeNull();
+  });
+
+  it("maps public identity CounterDisplays to narrow status chips", () => {
+    expect(
+      identityCounterChipsForDisplays([
+        {
+          id: "runner_virus_corp_highlighter",
+          amount: 2,
+          displayKind: "virus",
+          label: "Highlighter-Counter",
+          ariaLabel: "2 Highlighter-Counter",
+          counterType: "highlighter",
+          usageHint: "status_marker"
+        },
+        {
+          id: "runner_virus_corp_tax",
+          amount: 1,
+          displayKind: "virus",
+          label: "Tax-Counter",
+          ariaLabel: "1 Tax-Counter",
+          counterType: "tax",
+          usageHint: "status_marker"
+        },
+        {
+          id: "bad_publicity",
+          amount: 6,
+          displayKind: "bad_publicity",
+          label: "Bad Publicity",
+          ariaLabel: "6 Bad Publicity",
+          counterType: "bad_publicity",
+          usageHint: "status_marker"
+        },
+        {
+          id: "advancement",
+          amount: 3,
+          displayKind: "advancement",
+          label: "Entwicklung",
+          ariaLabel: "3 öffentliche Advancement-Counter",
+          usageHint: "score_modifier"
+        },
+        {
+          id: "runner_virus_corp_empty",
+          amount: 0,
+          displayKind: "virus",
+          label: "Empty-Counter",
+          ariaLabel: "0 Empty-Counter",
+          counterType: "highlighter",
+          usageHint: "status_marker"
+        }
+      ])
+    ).toEqual([
+      {
+        key: "runner_virus_corp_highlighter",
+        amount: 2,
+        label: "Highlighter",
+        ariaLabel: "2 Highlighter-Counter"
+      },
+      {
+        key: "runner_virus_corp_tax",
+        amount: 1,
+        label: "Tax",
+        ariaLabel: "1 Tax-Counter"
+      },
+      {
+        key: "bad_publicity",
+        amount: 6,
+        label: "Bad Publicity",
+        ariaLabel: "6 Bad Publicity"
+      }
+    ]);
   });
 
   it("renders low credit-counter amounts as separate icons", () => {
@@ -1761,6 +1909,34 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(accessRevealStatusLabel(accessedUpgrade, [decline], "runner", "runner", "Remote 1")).toBe("Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.");
   });
 
+  it("does not describe missing local access actions as insufficient credits", () => {
+    const accessedAsset = card("asset_1", "Doppelganger Antibody", "asset");
+    accessedAsset.trashCost = 0;
+
+    expect(accessRevealStatusLabel(accessedAsset, [], "runner", "runner", "R&D")).toBe("Es ist gerade keine Runner-Entscheidung in diesem Zugriffsfenster offen. Danach kannst du den Zugriff fortsetzen.");
+  });
+
+  it("explains Proteus free access trash for normally untrashable cards", () => {
+    const accessedIce = card("ice_1", "Dog Pile", "ice");
+    const trash = legalAction(
+      "runner",
+      "trash_accessed_card",
+      "ice_1",
+      "Dog Pile kostenlos trashen",
+      {
+        cardId: "ice_1",
+        freeAccessTrash: true,
+        proteusRunnerVirusFreeTrashCounterType: "garbage"
+      },
+      "access.resolve_card"
+    );
+    const decline = legalAction("runner", "decline_trash", "game_rule", "Weiter accessen", { cardId: "ice_1" }, "access.resolve_card");
+
+    expect(accessRevealStatusLabel(accessedIce, [trash, decline], "runner", "runner", "R&D")).toBe(
+      "Garbage In: Du kannst diese Karte kostenlos trashen, auch wenn sie normalerweise keine Trash-Kosten hat."
+    );
+  });
+
   it("retains the latest visible access reveal after later cleanup events until it is dismissed", () => {
     const hqReveal = publicEvent("evt_access", "action", {
       actionType: "access_card",
@@ -1777,6 +1953,24 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], null)?.eventId).toBe("evt_access");
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], "evt_access")).toBeNull();
     expect(latestRetainableAccessRevealEvent([hqReveal, runCleanup])?.eventId).toBe("evt_access");
+  });
+
+  it("retains access reveal after an access ambush payment choice resolves", () => {
+    const rdReveal = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "R&D",
+      cardDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      title: "Doppelganger Antibody"
+    });
+    const ambushPayment = publicEvent("evt_ambush", "action", {
+      actionType: "resolve_choice",
+      actor: "corp",
+      ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      ambushPaidCost: 2
+    });
+
+    expect(latestRetainableAccessRevealEvent([rdReveal, ambushPayment])?.eventId).toBe("evt_access");
   });
 
   it("retains a visible access reveal across turn end until it is dismissed", () => {

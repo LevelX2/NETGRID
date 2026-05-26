@@ -32,7 +32,7 @@ export type CuePositionPreference =
 
 export const DEFAULT_CUE_POSITION: CuePositionPreference = { kind: "preset", preset: "top-right" };
 
-const BASE_ACTION_TYPES = new Set<LegalAction["type"]>(["mandatory_draw", "gain_credit", "draw_card", "start_run", "remove_tag", "purge_virus_counters", "end_turn"]);
+const BASE_ACTION_TYPES = new Set<LegalAction["type"]>(["mandatory_draw", "gain_credit", "draw_card", "start_run", "remove_tag", "purge_virus_counters", "purge_runner_virus_counters", "forgo_action", "end_turn"]);
 const DECISION_ACTION_TYPES = new Set<LegalAction["type"]>([
   "resolve_choice",
   "access_card",
@@ -75,6 +75,8 @@ const ACTION_GROUP_LABELS: Record<LegalAction["type"], string> = {
   decline_trash: "Zugriff",
   remove_tag: "Tags/Ressourcen",
   purge_virus_counters: "Virus-Counter",
+  purge_runner_virus_counters: "Virus-Counter",
+  forgo_action: "Zug",
   move_to_set_aside: "Spezialzonen",
   move_to_removed_from_game: "Spezialzonen",
   return_from_set_aside: "Spezialzonen",
@@ -132,6 +134,13 @@ export type CardCounterBadgeView = {
   ariaLabel: string;
   shortLabel: string;
   testId: string;
+};
+
+export type IdentityCounterChipView = {
+  key: string;
+  amount: number;
+  label: string;
+  ariaLabel: string;
 };
 
 export type RunnerProgramInstallTrashChoiceInfo = {
@@ -225,6 +234,21 @@ export function counterDisplaysForRendering(card: Pick<VisibleCard, "counterDisp
       display.displayKind !== "advancement" &&
       safeCounterDisplayAmount(display.amount) > 0,
   );
+}
+
+export function identityCounterChipsForDisplays(counterDisplays: VisibleCard["counterDisplays"]): IdentityCounterChipView[] {
+  return (counterDisplays ?? [])
+    .filter(
+      (display) =>
+        display.displayKind !== "advancement" &&
+        safeCounterDisplayAmount(display.amount) > 0,
+    )
+    .map((display) => ({
+      key: display.id,
+      amount: safeCounterDisplayAmount(display.amount),
+      label: counterDisplayShortLabel(display.label),
+      ariaLabel: display.ariaLabel,
+    }));
 }
 
 export function safeCounterDisplayAmount(amount: number): number {
@@ -745,11 +769,28 @@ export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashC
   if (fromArchives && (card.type === "asset" || card.type === "upgrade")) {
     return "Du hast diese Karte im Archiv gesehen. Du kannst weiter zugreifen oder den Zugriff abschließen.";
   }
+  const freeTrashSource = accessFreeTrashSourceLabel(actions);
+  if (freeTrashSource)
+    return `${freeTrashSource}: Du kannst diese Karte kostenlos trashen, auch wenn sie normalerweise keine Trash-Kosten hat.`;
   if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
   if (actions.some((action) => action.type === "access_card")) return "Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.";
+  if (actions.length === 0) return "Es ist gerade keine Runner-Entscheidung in diesem Zugriffsfenster offen. Danach kannst du den Zugriff fortsetzen.";
   if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
   if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
   return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
+}
+
+function accessFreeTrashSourceLabel(actions: LegalAction[]): string | null {
+  const freeTrashAction = actions.find(
+    (action) =>
+      action.type === "trash_accessed_card" &&
+      action.payload?.freeAccessTrash === true,
+  );
+  const counterType = freeTrashAction?.payload?.proteusRunnerVirusFreeTrashCounterType;
+  if (counterType === "garbage") return "Garbage In";
+  if (counterType === "crumble") return "Crumble";
+  if (freeTrashAction) return "Gratis-Trash";
+  return null;
 }
 
 function accessRevealStealCostStatus(actions: LegalAction[]): string | null {
@@ -827,6 +868,12 @@ export function approachIceExposeViewingIceId(actions: LegalAction[]): string | 
 function accessRevealCanBeRetainedPast(newerEvent: PublicGameEvent, accessEvent: PublicGameEvent): boolean {
   if (newerEvent.stateVersionAfter === accessEvent.stateVersionAfter) return true;
   const actionType = String(newerEvent.publicPayload.actionType ?? "");
+  if (
+    actionType === "resolve_choice" &&
+    (typeof newerEvent.publicPayload.ambushDefinitionId === "string" ||
+      typeof newerEvent.publicPayload.accessEffectSourceDefinitionId === "string")
+  )
+    return true;
   return ["continue_run", "decline_trash", "steal_agenda", "trash_accessed_card", "end_turn"].includes(actionType);
 }
 
@@ -919,6 +966,33 @@ export function cardChoiceUsesOrderedSelection(choice: NonNullable<PlayerView["p
     maxSelections > 1 &&
     isHiddenZoneOrderedCardChoiceSource(choice.source)
   );
+}
+
+export function newBloodReorderTargetLabel(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  selectionIndex: number,
+): string | null {
+  if (choice.kind !== "select_cards" || !choice.source.startsWith("p3_58.new_blood_reorder")) return null;
+  if (!Number.isInteger(selectionIndex) || selectionIndex < 0) return null;
+  const targetOption = choice.options[selectionIndex];
+  if (!targetOption) return null;
+  const publicLabel = typeof targetOption.publicLabel === "string" ? targetOption.publicLabel.trim() : "";
+  if (publicLabel) return normalizeVisibleTerms(publicLabel);
+  const label = targetOption.label.trim();
+  const parenthetical = /\(([^()]+)\)\s*$/.exec(label)?.[1]?.trim();
+  if (parenthetical) return normalizeVisibleTerms(parenthetical);
+  return `Zielslot ${selectionIndex + 1}`;
+}
+
+export function newBloodReorderTargetSequenceHint(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+): string | null {
+  if (choice.kind !== "select_cards" || !choice.source.startsWith("p3_58.new_blood_reorder")) return null;
+  const labels = choice.options
+    .map((_, index) => newBloodReorderTargetLabel(choice, index))
+    .filter((label): label is string => Boolean(label));
+  if (labels.length === 0) return null;
+  return `Wähle die ICE in Zielslot-Reihenfolge: ${labels.join(" -> ")}.`;
 }
 
 function isHiddenZoneReadableCardChoiceSource(source: string): boolean {
@@ -1103,6 +1177,27 @@ export function breachProgressLabel(view: PlayerView): string | null {
   const current = breach.currentIndex + 1;
   const knownTotal = breach.completed ? current : breach.currentIndex + breach.remainingCount;
   return `Zugriff ${current} von ${Math.max(current, knownTotal)}`;
+}
+
+export function breachHighlighterAccessHint(view: PlayerView): string | null {
+  const run = view.run;
+  const breach = run?.breach;
+  if (!run || !breach || run.attackedServerId !== "rd" || breach.currentIndex <= 0) return null;
+  const highlighterCounters = corpHighlighterCounterAmount(view);
+  if (highlighterCounters <= 1) return null;
+  const current = breach.currentIndex + 1;
+  const knownTotal = Math.max(current, breach.completed ? current : breach.currentIndex + breach.remainingCount);
+  return `Zusätzlicher R&D-Zugriff ${current} von ${knownTotal}: Die Korp hat ${highlighterCounters} Highlighter-Counter.`;
+}
+
+function corpHighlighterCounterAmount(view: PlayerView): number {
+  const corpIdentity = view.side === "corp" ? view.own.identity : view.opponent.identity;
+  const display = corpIdentity.counterDisplays?.find(
+    (counter) =>
+      counter.counterType === "highlighter" ||
+      counter.id === "runner_virus_corp_highlighter",
+  );
+  return Math.max(0, Math.floor(display?.amount ?? 0));
 }
 
 export function activeRunIceInstanceId(view: PlayerView): string | null {

@@ -30,6 +30,16 @@ describe("access reveal UI helpers", () => {
 
     expect(accessDecisionLabel(next)).toBe("Nächste Karte");
   });
+
+  it("labels free access trash actions as free", () => {
+    const trash = legalAction("trash_accessed_card", "Dog Pile kostenlos trashen");
+    trash.payload = {
+      freeAccessTrash: true,
+      proteusRunnerVirusFreeTrashCounterType: "garbage"
+    };
+
+    expect(accessDecisionLabel(trash)).toBe("Kostenlos trashen");
+  });
 });
 
 function legalAction(type: LegalAction["type"], label: string, side: Side = "runner"): LegalAction {

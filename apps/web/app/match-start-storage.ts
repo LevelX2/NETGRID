@@ -1,4 +1,4 @@
-import type { HumanAiSideSelection, HumanSideSelection, MatchFormatSelection, PlayMode } from "./match-start";
+import type { HumanAiSideSelection, HumanSideSelection, MatchCardPoolSelection, MatchFormatSelection, PlayMode } from "./match-start";
 
 export type MatchStartMode = "host" | "join";
 export type MatchStartDeckSource = "snapshot" | "local";
@@ -15,6 +15,7 @@ export type MatchStartStorageSettings = {
   humanSideSelection: HumanSideSelection;
   humanAiSideSelection: HumanAiSideSelection;
   matchFormat: MatchFormatSelection;
+  matchCardPool: MatchCardPoolSelection;
   runnerDifficulty: MatchStartAiDifficulty;
   corpDifficulty: MatchStartAiDifficulty;
   aiDeckPolicy: MatchStartAiDeckPolicy;
@@ -59,6 +60,7 @@ export function parseMatchStartSettingsFromStorage(raw: string | null): Partial<
     if (isHumanSideSelection(parsed.humanSideSelection)) next.humanSideSelection = parsed.humanSideSelection;
     if (isHumanAiSideSelection(parsed.humanAiSideSelection)) next.humanAiSideSelection = parsed.humanAiSideSelection;
     if (isMatchFormatSelection(parsed.matchFormat)) next.matchFormat = parsed.matchFormat;
+    if (isMatchCardPoolSelection(parsed.matchCardPool)) next.matchCardPool = parsed.matchCardPool;
     if (isMatchStartAiDifficulty(parsed.runnerDifficulty)) next.runnerDifficulty = parsed.runnerDifficulty;
     if (isMatchStartAiDifficulty(parsed.corpDifficulty)) next.corpDifficulty = parsed.corpDifficulty;
     if (isMatchStartAiDeckPolicy(parsed.aiDeckPolicy)) next.aiDeckPolicy = parsed.aiDeckPolicy;
@@ -104,6 +106,10 @@ function isHumanAiSideSelection(value: unknown): value is HumanAiSideSelection {
 
 function isMatchFormatSelection(value: unknown): value is MatchFormatSelection {
   return value === "rules_match" || value === "two_game_side_swap";
+}
+
+function isMatchCardPoolSelection(value: unknown): value is MatchCardPoolSelection {
+  return value === "originalset" || value === "originalset_proteus";
 }
 
 function isMatchStartAiDifficulty(value: unknown): value is MatchStartAiDifficulty {

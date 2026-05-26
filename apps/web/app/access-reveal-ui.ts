@@ -16,7 +16,10 @@ export function accessRevealActionGroups(actions: LegalAction[]): AccessRevealAc
 export function accessDecisionLabel(action: LegalAction): string {
   if (action.type === "access_card") return "Nächste Karte";
   if (action.type === "steal_agenda") return "Agenda stehlen";
-  if (action.type === "trash_accessed_card") return "Trashen";
+  if (action.type === "trash_accessed_card") {
+    if (action.payload?.freeAccessTrash === true) return "Kostenlos trashen";
+    return "Trashen";
+  }
   if (action.type === "trash_resource") return "Resource trashen";
   if (action.type === "decline_trash") return "OK";
   return normalizeVisibleTerms(action.label);

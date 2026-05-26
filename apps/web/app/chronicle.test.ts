@@ -599,6 +599,85 @@ describe("formatChronicleEvent", () => {
     expect(memoryResolved.description).toBe("Für MU getrasht: Simple Fracter.");
   });
 
+  it("shows access ambush payment choices in the chronicle", () => {
+    const paid = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+        ambushPaidCost: 2
+      }),
+      "runner"
+    );
+    const declined = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+        ambushPaidCost: 0,
+        ambushPaymentDeclined: true
+      }),
+      "runner"
+    );
+
+    expect(paid.title).toBe("Die Korp hat 2 Credits für den Access-Ambush von Doppelganger Antibody bezahlt.");
+    expect(paid.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Doppelganger Antibody", "2 Credits"]));
+    expect(paid.title).not.toContain("Entscheidung beantwortet");
+    expect(declined.title).toBe("Die Korp hat den Access-Ambush von Doppelganger Antibody nicht bezahlt.");
+    expect(declined.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Nicht bezahlt"]));
+  });
+
+  it("names access ambush choices from resolved effects when payment payload is missing", () => {
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "doppelganger_counter",
+            kind: "counter_change",
+            visibility: "hidden_info_barrier",
+            side: "runner",
+            counterType: "doppelganger_antibody",
+            addedCounterAmount: 1,
+            remainingCounters: 1,
+            sourceDefinitionId: "onr_proteus_057_doppelganger-antibody",
+            sourceTitle: "Doppelganger Antibody"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(resolved.title).toBe("Die Korp hat den Access-Ambush von Doppelganger Antibody ausgelöst.");
+    expect(resolved.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Doppelganger Antibody", "Ausgelöst"]));
+    expect(resolved.title).not.toContain("Entscheidung");
+  });
+
+  it("shows access ambush counter effects in the chronicle", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "corp",
+      ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      ambushPaidCost: 2,
+      resolvedEffects: [
+        {
+          effectId: "doppelganger_counter",
+          kind: "counter_change",
+          visibility: "hidden_info_barrier",
+          side: "runner",
+          counterType: "doppelganger_antibody",
+          addedCounterAmount: 1,
+          remainingCounters: 1,
+          sourceDefinitionId: "onr_proteus_057_doppelganger-antibody",
+          sourceTitle: "Doppelganger Antibody"
+        }
+      ]
+    });
+
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(effects[0]?.title).toBe("Du hast 1 Doppelganger-Counter durch Doppelganger Antibody erhalten.");
+    expect(effects[0]?.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Doppelganger Antibody", "+1 Doppelganger-Counter"]));
+    expect(effects[0]?.title).not.toContain("verdeckter Effekt");
+  });
+
   it("shows Playful AI die results and follow-up choices in the chronicle", () => {
     const played = formatChronicleEvent(
       makeEvent("play_event", {
@@ -1908,6 +1987,31 @@ describe("formatChronicleEvent", () => {
       expect(item.chips).toEqual(expect.arrayContaining(["Ability", `+${amount} Credits`]));
       expect(effects).toEqual([]);
     }
+  });
+
+  it("shows Too Many Doors as paid by both sides after reveal", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "runner",
+      sourceDefinitionId: "onr_v1_272_too-many-doors",
+      secretSpendRevealed: true,
+      secretSpendCorp: 1,
+      secretSpendRunner: 2,
+      tooManyDoorsEndRun: true,
+      corpCreditsAfter: 4,
+      runnerCreditsAfter: 3
+    });
+
+    const item = formatChronicleEvent(event, "runner");
+
+    expect(item.title).toBe(
+      "Too Many Doors aufgedeckt: Korp 1 Credit, Runner 2 Credits; Run endet."
+    );
+    expect(item.description).toBe(
+      "Nach der Zahlung: Korp 4 Credits, Runner 3 Credits."
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Too Many Doors", "Korp -1", "Runner -2", "Run endet"])
+    );
   });
 
   it("merges Silicon Saloon Franchise ordered gain and draw effects without revealing drawn cards", () => {
@@ -3513,6 +3617,208 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.title).toBe("Du hast Hostile Takeover durch Bizarre Encryption Scheme gestohlen.");
     expect(items[0]?.category).toBe("agenda");
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["Agenda", "+2 Agenda", "Automatisch"]));
+  });
+
+  it("names access-effect damage with source and discarded cards", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "bel_digmo.access.damage",
+            kind: "damage",
+            visibility: "hidden_info_barrier",
+            side: "runner",
+            amount: 1,
+            damageType: "net",
+            cardsTrashed: 1,
+            reason: "access_effect",
+            sourceDefinitionId: "onr_proteus_071_bel-digmo-antibody",
+            sourceTitle: "Bel-Digmo Antibody"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items[0]?.title).toBe("Du hast 1 Net Damage durch Bel-Digmo Antibody erlitten.");
+    expect(items[0]?.description).toBe("eine Karte wurde dadurch in den Heap bewegt.");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Access-Effekt", "Bel-Digmo Antibody", "1 Heap"]));
+    expect(items[0]?.groupLabel).toBe("Run");
+  });
+
+  it("explains additional R&D accesses from Highlighter counters", () => {
+    const firstAccess = formatChronicleEvent(
+      makeEvent("access_card", {
+        actor: "runner",
+        title: "Pattel Antibody",
+        cardDefinitionId: "onr_proteus_068_pattel-antibody",
+        serverLabel: "R&D",
+        accessIndex: 0,
+        baseAccessCount: 1,
+        highlighterCounterCount: 3,
+        highlighterAccessBonus: 2,
+        effectiveAccessCount: 3
+      }),
+      "runner"
+    );
+    const secondAccess = formatChronicleEvent(
+      makeEvent("access_card", {
+        actor: "runner",
+        title: "Bel-Digmo Antibody",
+        cardDefinitionId: "onr_proteus_071_bel-digmo-antibody",
+        serverLabel: "R&D",
+        accessIndex: 1,
+        baseAccessCount: 1,
+        highlighterCounterCount: 3,
+        highlighterAccessBonus: 2,
+        effectiveAccessCount: 3
+      }),
+      "runner"
+    );
+
+    expect(firstAccess.title).toBe("Du hast auf Pattel Antibody zugegriffen.");
+    expect(secondAccess.title).toBe("Du hast auf Bel-Digmo Antibody zugegriffen, weil die Korp 3 Highlighter-Counter hat.");
+    expect(secondAccess.description).toBe("Das ist Zugriff 2 von 3; Highlighter erlaubt diesen zusätzlichen R&D-Zugriff.");
+    expect(secondAccess.chips).toEqual(expect.arrayContaining(["3 Highlighter", "Zugriff 2/3"]));
+  });
+
+  it("explains Proteus free trash for normally untrashable access cards", () => {
+    const item = formatChronicleEvent(
+      makeEvent("trash_accessed_card", {
+        actor: "runner",
+        title: "Dog Pile",
+        freeAccessTrash: true,
+        proteusRunnerVirusFreeTrashCounterType: "garbage"
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Dog Pile getrasht.");
+    expect(item.description).toBe("Garbage In erlaubt diesen kostenlosen Trash auch für Karten, die normalerweise nicht getrasht werden können.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Trash", "Garbage In", "Kostenlos"]));
+  });
+
+  it("shows Proteus successful-run counters with their concrete target", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("decline_trash", {
+        actor: "runner",
+        resolvedEffects: [
+          {
+            effectId: "run_rd.highlighter.successful_run.highlighter",
+            kind: "counter_change",
+            visibility: "public",
+            side: "corp",
+            amount: 1,
+            counterType: "highlighter",
+            addedCounterAmount: 1,
+            remainingCounters: 1,
+            reason: "proteus_runner_virus_successful_run",
+            sourceDefinitionId: "onr_proteus_090_highlighter",
+            sourceTitle: "Highlighter"
+          },
+          {
+            effectId: "run_rd.viral_pipeline.successful_run.socket_rd",
+            kind: "counter_change",
+            visibility: "public",
+            side: "corp",
+            amount: 1,
+            counterType: "socket_rd",
+            addedCounterAmount: 1,
+            remainingCounters: 1,
+            reason: "proteus_runner_virus_successful_run",
+            sourceDefinitionId: "onr_proteus_099_viral-pipeline",
+            sourceTitle: "Viral Pipeline",
+            serverLabel: "R&D"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items.map((item) => item.title)).toEqual([
+      "Die Korp hat 1 Highlighter-Counter durch Highlighter erhalten.",
+      "R&D hat 1 Socket-Counter durch Viral Pipeline erhalten."
+    ]);
+  });
+
+  it("describes Pattel access counters by affected icebreakers or absence", () => {
+    const withTargets = formatChronicleEffectItems(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        targetCount: 2,
+        targetCardDefinitionIds: "onr_v1_005_bartmoss-memorial-icebreaker,onr_v1_074_worm",
+        resolvedEffects: [
+          {
+            effectId: "pattel.access.counters",
+            kind: "counter_change",
+            visibility: "public",
+            side: "runner",
+            amount: 2,
+            counterType: "pattel_antibody",
+            addedCounterAmount: 2,
+            remainingCounters: 2,
+            sourceDefinitionId: "onr_proteus_068_pattel-antibody",
+            sourceTitle: "Pattel Antibody"
+          }
+        ]
+      }),
+      "runner"
+    );
+    const withoutTargets = formatChronicleEffectItems(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        targetCount: 0,
+        targetCardDefinitionIds: "",
+        resolvedEffects: [
+          {
+            effectId: "pattel.access.no_counters",
+            kind: "counter_change",
+            visibility: "public",
+            side: "runner",
+            amount: 0,
+            counterType: "pattel_antibody",
+            addedCounterAmount: 0,
+            remainingCounters: 0,
+            reason: "access_effect",
+            sourceDefinitionId: "onr_proteus_068_pattel-antibody",
+            sourceTitle: "Pattel Antibody"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(withTargets[0]?.title).toBe("1 Pattel-Counter auf Bartmoss Memorial Icebreaker und Worm gelegt.");
+    expect(withTargets[0]?.description).toBe("Jeder betroffene Icebrecher hat 1 Pattel-Counter erhalten.");
+    expect(withTargets[0]?.groupLabel).toBe("Run");
+    expect(withoutTargets[0]?.title).toBe("Es wurden keine Pattel-Counter auf Icebrecher gelegt, da keine im Spiel waren.");
+  });
+
+  it("names legacy Pattel payment choices from counter effects", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "pattel.access.counters",
+            kind: "counter_change",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            counterType: "pattel_antibody",
+            addedCounterAmount: 1,
+            remainingCounters: 1,
+            sourceDefinitionId: "onr_proteus_068_pattel-antibody",
+            sourceTitle: "Pattel Antibody"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Die Korp hat 3 Credits für den Access-Ambush von Pattel Antibody bezahlt.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Pattel Antibody", "3 Credits"]));
   });
 });
 
