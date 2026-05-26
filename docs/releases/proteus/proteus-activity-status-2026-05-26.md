@@ -18,15 +18,15 @@ Führend ist die eindeutige CardImplementation-Abdeckung:
 
 PRO001 hat dafür bereits den Guard in `packages/engine/src/card-implementations/coverage.test.ts` ergänzt: `reconciles Proteus manifest support against concrete files and registry`. Dieser Guard prüft 154 Karten in `data/cards/proteus-cards.json`, 154 Manifest-Einträge, eindeutige CardImplementation-Dateien, Registry-Parität, `implemented`-Manifestparität, `resolverRef = engine:<cardId>` für implementierte Karten und `resolverRef = null` für nicht implementierte Karten. PRO002 etabliert keine zweite konkurrierende Zählweise.
 
-Aktueller Stand nach PRO001:
+Aktueller Stand nach PRO004:
 
 | Kennzahl | Wert | Führende Quelle |
 | --- | ---: | --- |
 | Proteus-Gesamtbasis | 154 | `data/cards/proteus-cards.json` |
-| Konkrete Proteus-CardImplementation-Dateien | 50 | `packages/engine/src/card-implementations/proteus/*.ts` |
-| Registry-paritätische Implementierungen | 50 | `coverage.test.ts`-Guard gegen Registry |
-| Fehlende konkrete CardImplementation-Dateien | 104 | Gesamtbasis minus konkrete Dateien |
-| Manifest-`implemented`-Einträge | 50 | Driftprüfung in `data/manifests/proteus-card-support.json` |
+| Konkrete Proteus-CardImplementation-Dateien | 56 | `packages/engine/src/card-implementations/proteus/*.ts` |
+| Registry-paritätische Implementierungen | 56 | `coverage.test.ts`-Guard gegen Registry |
+| Fehlende konkrete CardImplementation-Dateien | 98 | Gesamtbasis minus konkrete Dateien |
+| Manifest-`implemented`-Einträge | 56 | Driftprüfung in `data/manifests/proteus-card-support.json` |
 
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
 
@@ -150,7 +150,7 @@ Alle PRO001 bis PRO040 sind hier bewusst erfasst. Bei Paketen ohne eigene konkre
 | PRO001 | Bereits durch PRO001-Guard abgedeckt | `coverage.test.ts`: Manifest-/Registry-/Datei-Reconciliation |
 | PRO002 | Dieses Statusartefakt | `proteus-activity-status-2026-05-26.md` |
 | PRO003 | erledigt durch Paketstandard und Verify-Harness | `proteus-cardimplementation-package-standard.md`; `coverage.test.ts`: Proteus-Abdeckung, Restliste und Driftprüfung |
-| PRO004 | referenziert, konkrete Activity noch zu schneiden | Phase 5a, Phase-1-Umbrella |
+| PRO004 | umgesetzt | Sechs Simple-Icebreaker-Core-Karten (`Big Frackin' Gun`, `Boring Bit`, `Corrosion`, `Redecorator`, `Skeleton Passkeys`, `Wrecking Ball`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable; Phase 5a bleibt für PRO011/PRO012 blockiert. |
 | PRO005 | referenziert, konkrete Activity noch zu schneiden | Phase 5c |
 | PRO006 | referenziert, konkrete Activity noch zu schneiden | Phase 6b, Phase-1-Umbrella |
 | PRO007 | referenziert, konkrete Activity noch zu schneiden | Phase 6c |

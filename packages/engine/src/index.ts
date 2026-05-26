@@ -4171,15 +4171,15 @@ function resolvePileDriverBreakSubroutinesAction(
       : "";
   if (!rawIndexes) throw new Error("Multi-Break braucht Subroutine-Ziele.");
   const subroutineIndexes = rawIndexes.split(",").map((value) => Number(value));
+  const subroutines = subroutinesForCurrentEncounter(state, iceDefinition);
   if (
     subroutineIndexes.length < 1 ||
-    subroutineIndexes.length > Math.min(4, ability.count ?? 4) ||
+    subroutineIndexes.length > Math.min(ability.count ?? 4, subroutines.length) ||
     new Set(subroutineIndexes).size !== subroutineIndexes.length ||
     subroutineIndexes.some((index) => !Number.isInteger(index) || index < 0)
   ) {
     throw new Error("Multi-Break hat ungueltige Subroutine-Ziele.");
   }
-  const subroutines = subroutinesForCurrentEncounter(state, iceDefinition);
   for (const subroutineIndex of subroutineIndexes) {
     const subroutine = subroutines[subroutineIndex];
     if (!subroutine)

@@ -186,13 +186,13 @@ function hostFor(
       }),
     },
     costs: {
-      breakSubroutineCostBreakdown: (baseCost, subroutineCount = 1) => ({
+      breakSubroutineCostBreakdown: (baseCost) => ({
         baseCost,
         legacyRunAdditionalCost: 0,
         runnerHardwareAdditionalCost: 0,
         cardImplementationAdditionalCost: 0,
         additionalCost: 0,
-        totalCost: baseCost * subroutineCount,
+        totalCost: baseCost,
         publicPayload: { breakSubroutineBaseCost: baseCost },
       }),
     },
@@ -281,6 +281,159 @@ describe("runner encounter action generation", () => {
     expect(result.legalActions.map((action) => action.type)).toEqual([
       "continue_run",
     ]);
+  });
+
+  it("builds Proteus PRO004 simple icebreaker pump and break LegalActions", () => {
+    const cases = [
+      {
+        definitionId: "onr_proteus_079_big-frackin-gun",
+        title: "Big Frackin' Gun",
+        iceSubtype: "sentry",
+        offSubtype: "wall",
+        subroutineCount: 5,
+        breakCost: 6,
+        breakIndexes: "0,1,2,3,4",
+        pumpCost: 1,
+      },
+      {
+        definitionId: "onr_proteus_081_boring-bit",
+        title: "Boring Bit",
+        iceSubtype: "wall",
+        offSubtype: "sentry",
+        subroutineCount: 1,
+        breakCost: 2,
+        pumpCost: 1,
+      },
+      {
+        definitionId: "onr_proteus_083_corrosion",
+        title: "Corrosion",
+        iceSubtype: "wall",
+        offSubtype: "sentry",
+        subroutineCount: 1,
+        breakCost: 0,
+        pumpCost: 1,
+      },
+      {
+        definitionId: "onr_proteus_093_redecorator",
+        title: "Redecorator",
+        iceSubtype: "sentry",
+        offSubtype: "wall",
+        subroutineCount: 2,
+        breakCost: 1,
+        breakIndexes: "0,1",
+        pumpCost: 3,
+      },
+      {
+        definitionId: "onr_proteus_095_skeleton-passkeys",
+        title: "Skeleton Passkeys",
+        iceSubtype: "code_gate",
+        offSubtype: "wall",
+        subroutineCount: 1,
+        breakCost: 0,
+        pumpCost: 3,
+      },
+      {
+        definitionId: "onr_proteus_100_wrecking-ball",
+        title: "Wrecking Ball",
+        iceSubtype: "wall",
+        offSubtype: "sentry",
+        subroutineCount: 1,
+        breakCost: 0,
+        pumpCost: 2,
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      const state = makeState({
+        breakerDefinitionId: testCase.definitionId,
+        runnerCredits: 20,
+      });
+      const breakerDefinition = {
+        id: testCase.definitionId,
+        title: testCase.title,
+        side: "runner",
+        type: "program",
+        subtypes: ["icebreaker"],
+        strength: 10,
+      } as CardDefinition;
+      const matchingIce = iceDefinition({
+        id: "test_sentry_ice",
+        title: `Test ${testCase.iceSubtype}`,
+        subtypes: [testCase.iceSubtype],
+        strength: 0,
+        subroutines: Array.from(
+          { length: testCase.subroutineCount },
+          (_unused, index) => ({
+            id: `test_${testCase.iceSubtype}_${index}`,
+            type: "end_the_run" as const,
+          }),
+        ),
+      });
+
+      const result = buildRunnerEncounterActions(
+        hostFor(state, {
+          [breakerDefinition.id]: breakerDefinition,
+          [matchingIce.id]: matchingIce,
+        }),
+      );
+
+      expect(
+        result.legalActions.find((action) => action.type === "pump_breaker"),
+        testCase.definitionId,
+      ).toMatchObject({
+        costs: [{ credits: testCase.pumpCost }],
+        payload: { breakerId: "breaker_1", iceId: "ice_1" },
+      });
+
+      const breakAction = testCase.breakIndexes
+        ? result.legalActions.find(
+            (action) =>
+              action.type === "break_subroutine" &&
+              action.payload?.subroutineIndexes === testCase.breakIndexes,
+          )
+        : result.legalActions.find(
+            (action) =>
+              action.type === "break_subroutine" &&
+              action.payload?.subroutineIndex === 0,
+          );
+      expect(breakAction, testCase.definitionId).toMatchObject({
+        costs: [{ credits: testCase.breakCost }],
+        payload: {
+          breakerId: "breaker_1",
+          iceId: "ice_1",
+          breakSubroutineBaseCost: testCase.breakCost,
+        },
+      });
+      expect(breakAction?.label, testCase.definitionId).toContain(
+        testCase.title,
+      );
+      expect(breakAction?.label, testCase.definitionId).not.toContain(
+        "Pile Driver",
+      );
+
+      const offTypeState = makeState({
+        breakerDefinitionId: testCase.definitionId,
+        runnerCredits: 20,
+      });
+      const offTypeIce = iceDefinition({
+        id: "test_sentry_ice",
+        title: `Test ${testCase.offSubtype}`,
+        subtypes: [testCase.offSubtype],
+        strength: 0,
+      });
+      const offTypeResult = buildRunnerEncounterActions(
+        hostFor(offTypeState, {
+          [breakerDefinition.id]: breakerDefinition,
+          [offTypeIce.id]: offTypeIce,
+        }),
+      );
+      expect(
+        offTypeResult.legalActions.some(
+          (action) => action.type === "break_subroutine",
+        ),
+        testCase.definitionId,
+      ).toBe(false);
+    }
   });
 
   it("offers paid and unpaid continue actions for pay-or-end-run subroutines", () => {

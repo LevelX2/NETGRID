@@ -237,6 +237,7 @@ export function buildRunnerEncounterActions(
           ...pileDriverBreakActions(
             host,
             breakerId,
+            breaker.title,
             encounteredIceId,
             iceDefinition,
             subroutines,
@@ -476,6 +477,7 @@ function selfModifyingCodeEncounterActions(
 function pileDriverBreakActions(
   host: RunnerEncounterActionHost,
   breakerId: CardInstanceId,
+  breakerTitle: string,
   encounteredIceId: CardInstanceId,
   iceDefinition: CardDefinition,
   subroutines: NonNullable<CardDefinition["subroutines"]>,
@@ -491,7 +493,7 @@ function pileDriverBreakActions(
         !run.resolvedSubroutineIndexes.includes(index),
     )
     .map(({ index }) => index);
-  const maxCount = Math.min(4, breakAbility.count ?? 4, eligibleIndexes.length);
+  const maxCount = Math.min(breakAbility.count ?? 4, eligibleIndexes.length);
   const actions: LegalAction[] = [];
   const selected: number[] = [];
   const visit = (start: number): void => {
@@ -500,8 +502,8 @@ function pileDriverBreakActions(
       const firstIndex = subroutineIndexes[0] ?? 0;
       const label =
         subroutineIndexes.length === 1
-          ? `Pile Driver: Subroutine ${firstIndex + 1} brechen`
-          : `Pile Driver: ${subroutineIndexes.length} Subroutinen brechen`;
+          ? `${breakerTitle}: Subroutine ${firstIndex + 1} brechen`
+          : `${breakerTitle}: ${subroutineIndexes.length} Subroutinen brechen`;
       const breakCost = host.costs.breakSubroutineCostBreakdown(
         breakAbility.cost.credits,
         subroutineIndexes.length,

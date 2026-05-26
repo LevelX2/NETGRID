@@ -77,7 +77,9 @@ Die sichtbaren Proteus-Icebreaker als eigene CardImplementation-Dateien über de
 
 ## Ergebnisnotiz
 
-Blockiert am 2026-05-24, ohne Kartenpromotion.
+Teilweise umgesetzt: PRO004 ist abgeschlossen; der übergreifende Phase-5a-Slice bleibt wegen PRO011/PRO012 blockiert.
+
+PRO004 hat die einfachen Zielkarten `Big Frackin' Gun`, `Boring Bit`, `Corrosion`, `Redecorator`, `Skeleton Passkeys` und `Wrecking Ball` als konkrete CardImplementation-Dateien mit generischen `icebreakerAbilities` umgesetzt. Keine dieser Karten ist decklegal, formatlegal oder AI-unterstützt.
 
 Die einfachen Zielkarten `Big Frackin' Gun`, `Boring Bit`, `Corrosion`, `Redecorator`, `Skeleton Passkeys` und `Wrecking Ball` sind voraussichtlich mit vorhandenen `icebreakerAbilities`-Profilen, `count` und Stealth-Loss-Seiteneffekten umsetzbar. Der vollständige Slice enthält aber mehrere Karten, für die der aktuelle generische Breaker-Baustein nicht ausreicht:
 
@@ -87,4 +89,7 @@ Die einfachen Zielkarten `Big Frackin' Gun`, `Boring Bit`, `Corrosion`, `Redecor
 - `Bulldozer` kann Stealth-Loss bereits teilweise über bestehende Break-Side-Effects abbilden, braucht aber zusätzlich den Folgeeffekt: Wenn alle Subroutinen einer Wall mit Bulldozer gebrochen wurden, wird beim nächsten Sentry in diesem Run eine Subroutine kostenlos gebrochen. Dafür fehlt ein generischer rungebundener Break-Followup-Flag.
 - `Lockjaw` ist laut Kartentext kein Icebreaker-Core-Matcher, sondern ein Encounter-Supportprogramm: `[T]` gibt einem eigenen Icebreaker +2 Stärke für den Rest des Runs. Das passt fachlich eher zu Phase 5e Breaker-Support/Modifier und nicht zu 5a Core Matchers.
 
-Keine Teilumsetzung wurde vorgenommen, weil der Slice alle Zielkarten gemeinsam fordert und eine isolierte Promotion der einfachen Breaker die Akzeptanzkriterien für vollständigen Registry-/Coverage-/Manifest-Nachweis nicht erfüllen würde.
+Die übrigen Karten dieses Phase-5a-Slices bleiben außerhalb von PRO004:
+
+- `Black Widow`, `Fubar` und `Morphing Tool` bleiben PRO011.
+- `Bulldozer` und `Lockjaw` bleiben PRO012.
