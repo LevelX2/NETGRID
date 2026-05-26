@@ -216,23 +216,13 @@ import {
 } from "./game/turn/runner-special-zone-install-actions";
 import {
   lookTopStackShowToCorpThenInstallMatchingTargets,
-  lookTopStackTakeMatchingTargets,
   searchStackInstallTargets,
-  searchStackToGripTargets,
-  searchTrashToGripTargets,
   sneakPreviewInstallableProgramIds,
   sneakPreviewSourceOptions,
-  stackOrTrashProgramInstallTargets,
   startAujourdOuiTop5Activation,
-  startLookTopStackShowToCorpThenInstallMatchingActivation,
-  startLookTopStackTakeMatchingActivation,
   startRunnerStackSearchChoiceActivation,
-  startSearchStackInstallActivation,
-  startSearchStackToGripActivation,
-  startSearchTrashToGripActivation,
   startSelfModifyingCodeStackActivation,
   startSneakPreviewSourceActivation,
-  startStackOrTrashProgramInstallActivation,
 } from "./game/hidden-zone/search-choice-activations";
 import {
   handleHiddenZoneSearchChoice,
@@ -241,9 +231,7 @@ import {
 } from "./game/hidden-zone/search-choice-handlers";
 import {
   handleHiddenZoneArrangeChoice,
-  moveTopTrashToGripForCardImplementation,
   resolveNewBloodConcealAndReorder,
-  startCardImplementationLookTopStackTakeOneArrangeRestChoice,
   startCorpAssetRdTopReorderChoice,
   startCorpRdArrangeChoice,
   startCorpRdTopReorderChoice,
@@ -254,8 +242,6 @@ import {
 } from "./game/hidden-zone/arrange-choice-handlers";
 import {
   handleHiddenZoneNonSearchChoice,
-  startCardImplementationTrashCardsFromGripForCreditsChoice,
-  startCardImplementationTrashOwnInstalledCardsForCreditsChoice,
   startCorpArchivesToHqChoice,
   startCorpDiscardHqWithRetainPaymentChoice,
   startRunnerGripTrashForCreditsChoice,
@@ -271,7 +257,6 @@ import {
   resolveReschedulerHqShuffleDraw,
   startCorporateDownsizingScoreChoice,
   startCorporateNegotiatingCenterChoice,
-  startShowHqAgendasForCreditsChoice,
   type CorpZoneChoiceHandlerHost,
 } from "./game/hidden-zone/corp-zone-choice-handlers";
 import {
@@ -423,6 +408,10 @@ import {
 import {
   handleActivatedCardImplementationAction,
 } from "./game/card-implementation/activated-action-execution";
+import {
+  createHiddenZoneCardImplementationRuntimeDeps,
+  type HiddenZoneRuntimeDepsHost,
+} from "./game/card-implementation/hidden-zone-runtime-deps";
 import {
   approachIceExposeCanBeOfferedForCurrentIce,
   beginEncounter,
@@ -768,6 +757,50 @@ const cardImplementationEffectAdapters = createCardImplementationEffectAdapters(
 // Runtime dependencies define the host contract for declarative
 // CardImplementation abilities and lifecycle hooks. Payment timing, movement,
 // damage windows, and source trashing remain owned by index.ts primitives.
+function hiddenZoneRuntimeDepsHost(): HiddenZoneRuntimeDepsHost {
+  return {
+    cards: {
+      runnerInstalledCardIds,
+      topRunnerHeapCardId,
+    },
+    hiddenZone: {
+      searchActivationTargetHost: hiddenZoneSearchActivationTargetHost,
+      searchActivationHandlerHost: hiddenZoneSearchActivationHandlerHost,
+      arrangeChoiceHandlerHost: hiddenZoneArrangeChoiceHandlerHost,
+      nonSearchChoiceHandlerHost: hiddenZoneNonSearchChoiceHandlerHost,
+      corpZoneChoiceHandlerHost,
+    },
+    callbacks: {
+      startRunnerPrivateLookChoice: (
+        state,
+        legalAction,
+        sourceCardId,
+        sourceDefinitionId,
+        zone,
+        count,
+      ) =>
+        startRunnerPrivateLookChoice(
+          state,
+          sourceCardId,
+          sourceDefinitionId,
+          zone,
+          count,
+          "ability",
+          legalAction,
+        ),
+      exposeInstalledCorpCardTargets,
+      exposeInstalledCorpCard: exposeInstalledCorpCardForImplementation,
+      startExposeInstalledCorpCardsChoice,
+      exposeOutermostIceOfEachDataFort,
+      outermostIceExposures,
+      shuffleGripTrashAndStackThenDrawForCardImplementation,
+    },
+  };
+}
+
+const hiddenZoneCardImplementationRuntimeDeps =
+  createHiddenZoneCardImplementationRuntimeDeps(hiddenZoneRuntimeDepsHost());
+
 const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   definitionFor,
   mustInstance,
@@ -936,306 +969,7 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     };
     return { publicPayload: legalAction.payload ?? {} };
   },
-  startPrivateLook: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    zone,
-    count,
-  ) => {
-    startRunnerPrivateLookChoice(
-      state,
-      sourceCardId,
-      sourceDefinitionId,
-      zone,
-      count,
-      "ability",
-      legalAction,
-    );
-    return { publicPayload: legalAction.payload ?? {} };
-  },
-  exposeInstalledCorpCardTargets: (state, scope) =>
-    exposeInstalledCorpCardTargets(state, scope),
-  exposeInstalledCorpCard: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    targetCardId,
-    scope,
-  ) =>
-    exposeInstalledCorpCardForImplementation(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
-      targetCardId,
-      scope,
-    ),
-  startExposeInstalledCorpCardsChoice: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    min,
-    max,
-  ) =>
-    startExposeInstalledCorpCardsChoice(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
-      min,
-      max,
-    ),
-  exposeOutermostIceEachDataFort: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-  ) =>
-    exposeOutermostIceOfEachDataFort(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
-    ),
-  outermostIceEachDataFortExposeCount: (state) =>
-    outermostIceExposures(state).length,
-  startShowHqAgendasForCreditsChoice: (
-    state,
-    sourceCardId,
-    sourceDefinitionId,
-    creditPerAgenda,
-  ) =>
-    startShowHqAgendasForCreditsChoice(
-      corpZoneChoiceHandlerHost(
-        state,
-        { side: "corp", payload: {} } as LegalAction,
-      ),
-      { sourceCardId, sourceDefinitionId, creditPerAgenda },
-    ),
-  searchTrashToGripTargetCount: (state, filter) =>
-    searchTrashToGripTargets(hiddenZoneSearchActivationTargetHost(state), filter)
-      .length,
-  searchStackToGripTargetCount: (state, filter) =>
-    searchStackToGripTargets(hiddenZoneSearchActivationTargetHost(state), filter)
-      .length,
-  topTrashToGripTargetCount: (state) =>
-    topRunnerHeapCardId(state) ? 1 : 0,
-  topTrashToGripTargetId: (state) => topRunnerHeapCardId(state),
-  searchStackInstallTargetCount: (state, filter, installCost) =>
-    searchStackInstallTargets(
-      hiddenZoneSearchActivationTargetHost(state),
-      filter,
-      installCost,
-    ).length,
-  stackOrTrashProgramInstallTargetCount: (state, installCost) =>
-    stackOrTrashProgramInstallTargets(
-      hiddenZoneSearchActivationTargetHost(state),
-      installCost,
-    ).length,
-  lookTopStackShowToCorpThenInstallMatchingTargetCount: (
-    state,
-    count,
-    allowedTypes,
-    installCost,
-  ) =>
-    lookTopStackShowToCorpThenInstallMatchingTargets(
-      hiddenZoneSearchActivationTargetHost(state),
-      count,
-      allowedTypes,
-      installCost,
-    ).length,
-  lookTopStackTakeMatchingTargetCount: (state, count, allowedTypes) =>
-    lookTopStackTakeMatchingTargets(
-      hiddenZoneSearchActivationTargetHost(state),
-      count,
-      allowedTypes,
-    ).length,
-  startSearchTrashToGripChoice: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    filter,
-  ) =>
-    startSearchTrashToGripActivation(
-      hiddenZoneSearchActivationHandlerHost(state, legalAction),
-      {
-      sourceCardId,
-      sourceDefinitionId,
-      filter,
-      },
-    ),
-  startSearchStackToGripChoice: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    filter,
-    revealToCorp,
-    shuffleAfterwards,
-  ) =>
-    startSearchStackToGripActivation(
-      hiddenZoneSearchActivationHandlerHost(state, legalAction),
-      {
-      sourceCardId,
-      sourceDefinitionId,
-      filter,
-      revealToCorp,
-      shuffleAfterwards,
-      },
-    ),
-  moveTopTrashToGrip: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-  ) =>
-    moveTopTrashToGripForCardImplementation(
-      hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-      { sourceDefinitionId },
-    ),
-  startSearchStackInstallChoice: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    filter,
-    installCost,
-    shuffleAfterwards,
-  ) =>
-    startSearchStackInstallActivation(
-      hiddenZoneSearchActivationHandlerHost(state, legalAction),
-      {
-      sourceCardId,
-      sourceDefinitionId,
-      filter,
-      installCost,
-      shuffleAfterwards,
-      },
-    ),
-  startStackOrTrashProgramInstallChoice: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    installCost,
-    shuffleStackIfSearched,
-    returnInstalledCardToGripAtEndOfTurn,
-  ) =>
-    startStackOrTrashProgramInstallActivation(
-      hiddenZoneSearchActivationHandlerHost(state, legalAction),
-      {
-      sourceCardId,
-      sourceDefinitionId,
-      installCost,
-      shuffleStackIfSearched,
-      returnInstalledCardToGripAtEndOfTurn,
-      },
-    ),
-  startLookTopStackShowToCorpThenInstallMatchingChoice: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    count,
-    allowedTypes,
-    installCost,
-    trashSourceIfInstalled,
-    shuffleAfterwards,
-  ) =>
-    startLookTopStackShowToCorpThenInstallMatchingActivation(
-      hiddenZoneSearchActivationHandlerHost(state, legalAction),
-      {
-      sourceCardId,
-      sourceDefinitionId,
-      count,
-      allowedTypes,
-      installCost,
-      trashSourceIfInstalled,
-      shuffleAfterwards,
-      },
-    ),
-  startLookTopStackTakeMatchingChoice: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    count,
-    allowedTypes,
-    costPerTaken,
-    revealTakenToCorp,
-    shuffleRemainder,
-  ) =>
-    startLookTopStackTakeMatchingActivation(
-      hiddenZoneSearchActivationHandlerHost(state, legalAction),
-      {
-      sourceCardId,
-      sourceDefinitionId,
-      count,
-      allowedTypes,
-      costPerTaken,
-      revealTakenToCorp,
-      shuffleRemainder,
-      },
-    ),
-  startLookTopStackTakeOneArrangeRestChoice: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    count,
-  ) =>
-    startCardImplementationLookTopStackTakeOneArrangeRestChoice(
-      hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-      { sourceCardId, sourceDefinitionId, count },
-    ),
-  trashOwnInstalledCardTargetCount: (state) => runnerInstalledCardIds(state).length,
-  trashGripCardTargetCount: (state) => state.runner.grip.length,
-  startTrashOwnInstalledCardsForCreditsChoice: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    min,
-    max,
-    gainPerTrashed,
-  ) =>
-    startCardImplementationTrashOwnInstalledCardsForCreditsChoice(
-      hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
-      { sourceCardId, sourceDefinitionId, min, max, gainPerTrashed },
-    ),
-  startTrashCardsFromGripForCreditsChoice: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    max,
-    gainPerTrashed,
-  ) =>
-    startCardImplementationTrashCardsFromGripForCreditsChoice(
-      hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
-      { sourceCardId, sourceDefinitionId, max, gainPerTrashed },
-    ),
-  shuffleGripTrashAndStackThenDraw: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    drawCount,
-    removePlayedCardFromGame,
-  ) =>
-    shuffleGripTrashAndStackThenDrawForCardImplementation(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
-      drawCount,
-      removePlayedCardFromGame,
-    ),
+  ...hiddenZoneCardImplementationRuntimeDeps,
   rezzedIceTargetCount: (state) =>
     affordableRezzedInstalledIceIdsForRunner(state).length,
   unrezzedIceTargetCount: (state) => unrezzedInstalledIceIds(state).length,
