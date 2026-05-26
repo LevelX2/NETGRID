@@ -823,6 +823,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/viral-pipeline.ts",
   "onr_proteus_100_wrecking-ball":
     "packages/engine/src/card-implementations/proteus/runner/programs/wrecking-ball.ts",
+  "onr_proteus_103_cruising-for-netwatch":
+    "packages/engine/src/card-implementations/proteus/runner/events/cruising-for-netwatch.ts",
+  "onr_proteus_124_stakeout":
+    "packages/engine/src/card-implementations/proteus/runner/events/stakeout.ts",
   "onr_proteus_134_cortical-cybermodem":
     "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-cybermodem.ts",
   "onr_proteus_135_cortical-stimulators":

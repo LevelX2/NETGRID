@@ -1368,6 +1368,67 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
   });
 
+  it("migrates Proteus PRO005 simple runner economy/draw events into CardImplementation coverage", () => {
+    const cases = [
+      {
+        definitionId: "onr_proteus_103_cruising-for-netwatch",
+        effects: [
+          {
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 1,
+            visibility: "public",
+          },
+          {
+            kind: "draw_cards",
+            recipient: "controller",
+            amount: 2,
+            visibility: "public",
+          },
+        ],
+      },
+      {
+        definitionId: "onr_proteus_124_stakeout",
+        effects: [
+          {
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 2,
+            visibility: "public",
+          },
+          {
+            kind: "draw_cards",
+            recipient: "controller",
+            amount: 1,
+            visibility: "public",
+          },
+        ],
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      expect(
+        cardImplementationForDefinitionId(testCase.definitionId),
+        testCase.definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(testCase.definitionId),
+      ).toMatchObject({
+        cardDefinitionId: testCase.definitionId,
+        status: "implemented",
+      });
+      expect(
+        cardImplementationForDefinitionId(testCase.definitionId)?.abilities,
+      ).toContainEqual(
+        expect.objectContaining({
+          kind: "on_play",
+          costs: "printed",
+          effects: testCase.effects,
+        }),
+      );
+    }
+  });
+
   it("migrates Proteus Phase 9d data-fort creation lock into CardImplementation coverage", () => {
     const definitionId = "onr_proteus_146_precision-bribery";
 
@@ -1711,10 +1772,10 @@ describe("CardImplementation coverage and registry invariants", () => {
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
     expect(outsideScopeDefinitionIds).toHaveLength(206);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(429);
-    expect(coverageByStatus.get("implemented")).toBe(429);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(431);
+    expect(coverageByStatus.get("implemented")).toBe(431);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(150);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(148);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);

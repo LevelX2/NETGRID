@@ -411,11 +411,13 @@ import { proteusRasminBridgerImplementation } from "./proteus/corp/upgrades/rasm
 import { proteusResearchBunkerImplementation } from "./proteus/corp/upgrades/research-bunker";
 import { proteusWeaponsDepotImplementation } from "./proteus/corp/upgrades/weapons-depot";
 import { proteusFakedHitImplementation } from "./proteus/runner/events/faked-hit";
+import { proteusCruisingForNetwatchImplementation } from "./proteus/runner/events/cruising-for-netwatch";
 import { proteusCorticalCybermodemImplementation } from "./proteus/runner/hardware/cortical-cybermodem";
 import { proteusCorticalStimulatorsImplementation } from "./proteus/runner/hardware/cortical-stimulators";
 import { proteusDeckTheImplementation } from "./proteus/runner/hardware/deck-the";
 import { proteusSunburstCranialInterfaceImplementation } from "./proteus/runner/hardware/sunburst-cranial-interface";
 import { proteusPoisonedWaterSupplyImplementation } from "./proteus/runner/events/poisoned-water-supply";
+import { proteusStakeoutImplementation } from "./proteus/runner/events/stakeout";
 import { proteusArmageddonImplementation } from "./proteus/runner/programs/armageddon";
 import { proteusBigFrackinGunImplementation } from "./proteus/runner/programs/big-frackin-gun";
 import { proteusBoringBitImplementation } from "./proteus/runner/programs/boring-bit";
@@ -843,11 +845,13 @@ export const CARD_IMPLEMENTATIONS = [
   pattelAntibodyImplementation,
   stereogramAntibodyImplementation,
   proteusFakedHitImplementation,
+  proteusCruisingForNetwatchImplementation,
   proteusCorticalCybermodemImplementation,
   proteusCorticalStimulatorsImplementation,
   proteusDeckTheImplementation,
   proteusSunburstCranialInterfaceImplementation,
   proteusPoisonedWaterSupplyImplementation,
+  proteusStakeoutImplementation,
   proteusArmageddonImplementation,
   proteusBigFrackinGunImplementation,
   proteusBoringBitImplementation,

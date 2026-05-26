@@ -1,0 +1,1284 @@
+{
+  "schemaVersion": "ai-generated-fact-batch5-breaker-closeout-v1",
+  "generatedAt": "2026-05-25",
+  "taskId": "Aufgabe 016",
+  "batch": "batch_5_breaker_icebreaker_longtail",
+  "sourceReports": [
+    "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json",
+    "docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json",
+    "docs/reviews/ai/ai-generated-fact-migration-priority-report-2026-05-25.json",
+    "docs/reviews/ai/aufgabe-015-corp-remote-upgrades-regions-closeout-report-2026-05-25.json"
+  ],
+  "mode": "read-only closeout; no active hint migration, no runtime compile, no planner or consumer binding",
+  "candidateCardCount": 26,
+  "includedCardCount": 18,
+  "excludedCardCount": 8,
+  "confirmedGeneratedFactCount": 61,
+  "previewAddedFactCount": 0,
+  "conflictCount": 0,
+  "realSemanticConflictCount": 0,
+  "normalizedDifferenceCount": 17,
+  "remainingDifferenceCount": 0,
+  "encounterContextInfoCount": 20,
+  "paymentContextInfoCount": 5,
+  "effectiveRunQuoteContextInfoCount": 18,
+  "descriptorFollowupCount": 0,
+  "readiness": "ready_read_only_split_subbatches",
+  "readinessCounts": {
+    "ready_read_only_with_encounter_context": 18
+  },
+  "subBatchReadiness": {
+    "noisy_breakers": 1,
+    "random_breakers": 3,
+    "side_effect_breakers": 1,
+    "special_subtype_breakers": 2,
+    "standard_breakers": 11
+  },
+  "normalizationRuleCounts": {
+    "breaker_profile_shape_normalization": 0,
+    "breaker_coverage_normalization": 11,
+    "breaker_cost_shape_normalization": 0,
+    "noisy_stealth_loss_normalization": 2,
+    "random_breaker_context_normalization": 5,
+    "run_ends_after_use_normalization": 2,
+    "special_subtype_breaker_normalization": 4,
+    "cost_profile_split_normalization": 0,
+    "board_context_required_classification": 18,
+    "effective_run_quote_priority_annotation": 18
+  },
+  "activeBreakerCoverageByCard": {
+    "onr_v1_002_ai-boon": [
+      "sentry"
+    ],
+    "onr_v1_005_bartmoss-memorial-icebreaker": [
+      "universal"
+    ],
+    "onr_v1_006_black-dahlia": [
+      "sentry"
+    ],
+    "onr_v1_007_blink": [
+      "universal"
+    ],
+    "onr_v1_014_codecracker": [
+      "code_gate"
+    ],
+    "onr_v1_016_cyfermaster": [
+      "code_gate"
+    ],
+    "onr_v1_019_dropp": [
+      "universal"
+    ],
+    "onr_v1_040_loony-goon": [
+      "sentry"
+    ],
+    "onr_v1_047_pile-driver": [
+      "wall"
+    ],
+    "onr_v1_052_raffles": [
+      "code_gate"
+    ],
+    "onr_v1_054_raptor": [
+      "sentry"
+    ],
+    "onr_v1_055_reflector": [
+      "ap"
+    ],
+    "onr_v1_056_replicator": [
+      "trace"
+    ],
+    "onr_v1_060_shaka": [
+      "sentry"
+    ],
+    "onr_v1_070_tinweasel": [
+      "code_gate"
+    ],
+    "onr_v1_072_wild-card": [
+      "sentry"
+    ],
+    "onr_v1_073_wizards-book": [
+      "code_gate"
+    ],
+    "onr_v1_074_worm": [
+      "wall"
+    ]
+  },
+  "includedCards": [
+    {
+      "cardId": "onr_v1_002_ai-boon",
+      "title": "AI Boon",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "random_breakers",
+      "priority": "P1",
+      "risk": "medium",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:sentry",
+        "breakerProfile",
+        "breakerSideEffect:random_failure",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [
+        {
+          "kind": "payment_or_side_effect_context_required_info",
+          "rule": "random_breaker_context_normalization",
+          "rationale": "Side effects remain context facts; the dry-run does not choose payments, random outcomes, self-trash, or run-ending lines."
+        }
+      ],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+      "title": "Bartmoss Memorial Icebreaker",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "random_breakers",
+      "priority": "P1",
+      "risk": "medium",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:universal",
+        "breakerProfile",
+        "breakerSideEffect:program_trash_risk",
+        "breakerSideEffect:random_failure",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "random_breaker_context_normalized",
+          "rule": "random_breaker_context_normalization",
+          "rationale": "Random breaker side effects are preserved as context and do not imply deterministic break safety."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [
+        {
+          "kind": "payment_or_side_effect_context_required_info",
+          "rule": "random_breaker_context_normalization",
+          "rationale": "Side effects remain context facts; the dry-run does not choose payments, random outcomes, self-trash, or run-ending lines."
+        }
+      ],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_006_black-dahlia",
+      "title": "Black Dahlia",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "standard_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:sentry",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "breaker_coverage_cost_shape_normalized",
+          "rule": "breaker_coverage_normalization",
+          "rationale": "Generated breaker coverage and break/pump costs are semantically compatible with legacy monolith breakerProfile shape."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_007_blink",
+      "title": "Blink",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "random_breakers",
+      "priority": "P1",
+      "risk": "medium",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:universal",
+        "breakerProfile",
+        "breakerSideEffect:once_per_subroutine",
+        "breakerSideEffect:random_failure",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "random_breaker_context_normalized",
+          "rule": "random_breaker_context_normalization",
+          "rationale": "Random breaker side effects are preserved as context and do not imply deterministic break safety."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [
+        {
+          "kind": "payment_or_side_effect_context_required_info",
+          "rule": "random_breaker_context_normalization",
+          "rationale": "Side effects remain context facts; the dry-run does not choose payments, random outcomes, self-trash, or run-ending lines."
+        }
+      ],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_014_codecracker",
+      "title": "Codecracker",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "standard_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:code_gate",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "breaker_coverage_cost_shape_normalized",
+          "rule": "breaker_coverage_normalization",
+          "rationale": "Generated breaker coverage and break/pump costs are semantically compatible with legacy monolith breakerProfile shape."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_016_cyfermaster",
+      "title": "Cyfermaster",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "standard_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:code_gate",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "breaker_coverage_cost_shape_normalized",
+          "rule": "breaker_coverage_normalization",
+          "rationale": "Generated breaker coverage and break/pump costs are semantically compatible with legacy monolith breakerProfile shape."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_019_dropp",
+      "title": "Dropp",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "side_effect_breakers",
+      "priority": "P1",
+      "risk": "medium",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:universal",
+        "breakerProfile",
+        "breakerSideEffect:ends_run_after_use",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "ends_run_after_use_normalized",
+          "rule": "run_ends_after_use_normalization",
+          "rationale": "Ends-run side effect remains visible and prevents treating the breaker as a generic safe universal breaker."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [
+        {
+          "kind": "payment_or_side_effect_context_required_info",
+          "rule": "run_ends_after_use_normalization",
+          "rationale": "Side effects remain context facts; the dry-run does not choose payments, random outcomes, self-trash, or run-ending lines."
+        }
+      ],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_040_loony-goon",
+      "title": "Loony Goon",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "standard_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:sentry",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "breaker_coverage_cost_shape_normalized",
+          "rule": "breaker_coverage_normalization",
+          "rationale": "Generated breaker coverage and break/pump costs are semantically compatible with legacy monolith breakerProfile shape."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_047_pile-driver",
+      "title": "Pile Driver",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "noisy_breakers",
+      "priority": "P1",
+      "risk": "medium",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:wall",
+        "breakerProfile",
+        "breakerSideEffect:stealth_loss",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "noisy_stealth_loss_normalized",
+          "rule": "noisy_stealth_loss_normalization",
+          "rationale": "Stealth loss is a breaker side effect, not a normal credit cost or static payment decision."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [
+        {
+          "kind": "payment_or_side_effect_context_required_info",
+          "rule": "noisy_stealth_loss_normalization",
+          "rationale": "Side effects remain context facts; the dry-run does not choose payments, random outcomes, self-trash, or run-ending lines."
+        }
+      ],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_052_raffles",
+      "title": "Raffles",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "standard_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:code_gate",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "breaker_coverage_cost_shape_normalized",
+          "rule": "breaker_coverage_normalization",
+          "rationale": "Generated breaker coverage and break/pump costs are semantically compatible with legacy monolith breakerProfile shape."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_054_raptor",
+      "title": "Raptor",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "standard_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:sentry",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "breaker_coverage_cost_shape_normalized",
+          "rule": "breaker_coverage_normalization",
+          "rationale": "Generated breaker coverage and break/pump costs are semantically compatible with legacy monolith breakerProfile shape."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_055_reflector",
+      "title": "Reflector",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "special_subtype_breakers",
+      "priority": "P1",
+      "risk": "medium",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:ap",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "special_subtype_breaker_normalized",
+          "rule": "special_subtype_breaker_normalization",
+          "rationale": "Special subtype coverage is preserved and is not normalized to universal coverage."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        },
+        {
+          "kind": "special_subtype_context_required_info",
+          "rule": "special_subtype_breaker_normalization",
+          "rationale": "Special coverage applies only to matching subroutine or ICE classes and must not be treated as universal coverage."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_056_replicator",
+      "title": "Replicator",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "special_subtype_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:trace",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "special_subtype_breaker_normalized",
+          "rule": "special_subtype_breaker_normalization",
+          "rationale": "Special subtype coverage is preserved and is not normalized to universal coverage."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        },
+        {
+          "kind": "special_subtype_context_required_info",
+          "rule": "special_subtype_breaker_normalization",
+          "rationale": "Special coverage applies only to matching subroutine or ICE classes and must not be treated as universal coverage."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_060_shaka",
+      "title": "Shaka",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "standard_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:sentry",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "breaker_coverage_cost_shape_normalized",
+          "rule": "breaker_coverage_normalization",
+          "rationale": "Generated breaker coverage and break/pump costs are semantically compatible with legacy monolith breakerProfile shape."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_070_tinweasel",
+      "title": "Tinweasel",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "standard_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:code_gate",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "breaker_coverage_cost_shape_normalized",
+          "rule": "breaker_coverage_normalization",
+          "rationale": "Generated breaker coverage and break/pump costs are semantically compatible with legacy monolith breakerProfile shape."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_072_wild-card",
+      "title": "Wild Card",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "standard_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:sentry",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "breaker_coverage_cost_shape_normalized",
+          "rule": "breaker_coverage_normalization",
+          "rationale": "Generated breaker coverage and break/pump costs are semantically compatible with legacy monolith breakerProfile shape."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_073_wizards-book",
+      "title": "Wizard's Book",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "standard_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:code_gate",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "breaker_coverage_cost_shape_normalized",
+          "rule": "breaker_coverage_normalization",
+          "rationale": "Generated breaker coverage and break/pump costs are semantically compatible with legacy monolith breakerProfile shape."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    },
+    {
+      "cardId": "onr_v1_074_worm",
+      "title": "Worm",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "standard_breakers",
+      "priority": "P1",
+      "risk": "low",
+      "generatedFactsConfirmed": [
+        "breakerCoverage:wall",
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "breakerProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "breaker_coverage_cost_shape_normalized",
+          "rule": "breaker_coverage_normalization",
+          "rationale": "Generated breaker coverage and break/pump costs are semantically compatible with legacy monolith breakerProfile shape."
+        }
+      ],
+      "encounterContextInfos": [
+        {
+          "kind": "encounter_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "BreakerProfile describes static card function; actual subroutine break legality requires an encounter and LegalAction context."
+        }
+      ],
+      "paymentContextInfos": [],
+      "effectiveRunQuoteContextInfos": [
+        {
+          "kind": "effective_run_quote_priority_info",
+          "rule": "effective_run_quote_priority_annotation",
+          "rationale": "Concrete run path cost and breakability remain governed by board state, LegalActions and effectiveRunQuote."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "effective_run_quote"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_encounter_context"
+    }
+  ],
+  "excludedCards": [
+    {
+      "cardId": "onr_v1_018_dogcatcher",
+      "title": "Dogcatcher",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": false,
+      "derivedFactsFound": false,
+      "compiledIndexFound": false,
+      "migrationPriorityFound": false,
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "Optional breaker candidate intentionally deferred to keep Aufgabe 016 scoped to the 18 primary Longtail cards; implementation and AI-support status are still recorded for a later optional-breaker expansion.",
+      "exclusionKind": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_021_dwarf",
+      "title": "Dwarf",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": false,
+      "derivedFactsFound": false,
+      "compiledIndexFound": false,
+      "migrationPriorityFound": false,
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "Optional breaker candidate intentionally deferred to keep Aufgabe 016 scoped to the 18 primary Longtail cards; implementation and AI-support status are still recorded for a later optional-breaker expansion.",
+      "exclusionKind": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_027_flak",
+      "title": "Flak",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": false,
+      "derivedFactsFound": false,
+      "compiledIndexFound": false,
+      "migrationPriorityFound": false,
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "Optional breaker candidate intentionally deferred to keep Aufgabe 016 scoped to the 18 primary Longtail cards; implementation and AI-support status are still recorded for a later optional-breaker expansion.",
+      "exclusionKind": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_030_grubb",
+      "title": "Grubb",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": false,
+      "derivedFactsFound": false,
+      "compiledIndexFound": false,
+      "migrationPriorityFound": false,
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "Optional breaker candidate intentionally deferred to keep Aufgabe 016 scoped to the 18 primary Longtail cards; implementation and AI-support status are still recorded for a later optional-breaker expansion.",
+      "exclusionKind": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_031_hammer",
+      "title": "Hammer",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": false,
+      "derivedFactsFound": false,
+      "compiledIndexFound": false,
+      "migrationPriorityFound": false,
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "Optional breaker candidate intentionally deferred to keep Aufgabe 016 scoped to the 18 primary Longtail cards; implementation and AI-support status are still recorded for a later optional-breaker expansion.",
+      "exclusionKind": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_036_jackhammer",
+      "title": "Jackhammer",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": false,
+      "derivedFactsFound": false,
+      "compiledIndexFound": false,
+      "migrationPriorityFound": false,
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "Optional breaker candidate intentionally deferred to keep Aufgabe 016 scoped to the 18 primary Longtail cards; implementation and AI-support status are still recorded for a later optional-breaker expansion.",
+      "exclusionKind": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_053_ramming-piston",
+      "title": "Ramming Piston",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": false,
+      "derivedFactsFound": false,
+      "compiledIndexFound": false,
+      "migrationPriorityFound": false,
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "Optional breaker candidate intentionally deferred to keep Aufgabe 016 scoped to the 18 primary Longtail cards; implementation and AI-support status are still recorded for a later optional-breaker expansion.",
+      "exclusionKind": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_066_snowball",
+      "title": "Snowball",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": false,
+      "derivedFactsFound": false,
+      "compiledIndexFound": false,
+      "migrationPriorityFound": false,
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "Optional breaker candidate intentionally deferred to keep Aufgabe 016 scoped to the 18 primary Longtail cards; implementation and AI-support status are still recorded for a later optional-breaker expansion.",
+      "exclusionKind": "excluded_from_batch_with_reason"
+    }
+  ],
+  "contextRules": [
+    "BreakerProfile describes static card function only; actual break legality requires an encounter and LegalAction context.",
+    "effectiveRunQuote remains authoritative for concrete path cost, pump choices and subroutine-break feasibility.",
+    "Universal breakers must remain universal and must not be reduced to a specific subtype.",
+    "Special subtype breakers such as trace/AP coverage must not be normalized to universal coverage.",
+    "Random, stealth-loss, self-trash and ends-run side effects remain context facts and do not create deterministic safe runs."
+  ],
+  "nextBatchRecommendation": {
+    "recommendedTaskId": "Aufgabe 017",
+    "batchName": "runner_info_central_pressure_access_replacement",
+    "recommendation": "Option A",
+    "rationale": "After the larger breaker longtail, Runner information and central-pressure/access-replacement facts are the next stable high-impact group: R&D/HQ freshness and access replacement already have prior diagnostics, and the mechanics are narrower than a broad Corp ICE trace/damage batch.",
+    "candidateCards": [
+      "R&D-Protocol Files",
+      "Deep Thought",
+      "Microtech AI Interface",
+      "Executive Wiretaps",
+      "Edited Shipping Manifests",
+      "Custodial Position"
+    ],
+    "riskBoundary": "Generated facts may describe information/access mechanics only; central pressure value and line selection remain strategic overlay or consumer context.",
+    "fallbackBatch": {
+      "batchName": "corp_ice_longtail_future_trace_damage",
+      "rationale": "Corp ICE longtail is higher-impact but should wait until runpath, trace, damage and ETR context rules are bundled in one larger pass."
+    }
+  },
+  "hardErrorCount": 0,
+  "errors": []
+}
