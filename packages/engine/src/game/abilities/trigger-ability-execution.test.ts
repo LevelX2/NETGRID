@@ -193,6 +193,10 @@ type TestHostOptions = {
     handled: boolean;
     actionType?: LegalAction["type"];
   };
+  handleRunFortTriggerExecution?: (legalAction: LegalAction) => {
+    handled: boolean;
+    actionType?: LegalAction["type"];
+  };
 };
 
 function testHost(
@@ -252,21 +256,16 @@ function testHost(
         options.handleRunnerSpecialTriggerExecution ??
         (() => ({ handled: false })),
     },
+    runFort: {
+      handleRunFortTriggerExecution:
+        options.handleRunFortTriggerExecution ?? (() => ({ handled: false })),
+    },
     delegates: {
       resolveCorpTrashNewDataFortCreationLockSource: () => undefined,
-      resolveSuccessfulRunFollowupAbility: () => ({ handled: false }),
-      resolveFullyBrokenPassedIceDerezAndEndRun: () => undefined,
-      resolveStartupImmolatorTrashIce: () => undefined,
       handleMysteryBoxTopFiveProgramInstallActivation: () => undefined,
-      resolveMicrotechBackupDriveReturnTopHosted: () => undefined,
-      resolveFortPassAdvancementWindow: () => undefined,
-      resolveStartRunIceRepositionWindow: () => undefined,
       resolvePreyingMantisGainAction: () => undefined,
       resolveCorpRemoveSpyCounter: () => undefined,
       resolveRemoveRunnerTraceCounter: () => undefined,
-      resolveApproachIceExposeAbility: () => undefined,
-      resolveApproachIceExposeViewingDecision: () => undefined,
-      startSingaporeCityGridSwapChoice: () => undefined,
     },
     constants: {
       CODE_VIRAL_CACHE_ID: options.codeViralCacheId ?? "code_viral_cache",

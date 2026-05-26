@@ -6,6 +6,9 @@ import type {
   Side,
 } from "@netgrid/shared";
 import type {
+  RunFortTriggerExecutionResult,
+} from "./run-fort-trigger-execution";
+import type {
   RunnerSpecialTriggerExecutionResult,
 } from "./runner-special-trigger-execution";
 
@@ -43,33 +46,21 @@ export type TriggerAbilityExecutionHost = {
       legalAction: LegalAction,
     ) => RunnerSpecialTriggerExecutionResult;
   };
+  runFort: {
+    handleRunFortTriggerExecution: (
+      legalAction: LegalAction,
+    ) => RunFortTriggerExecutionResult;
+  };
   delegates: {
     resolveCorpTrashNewDataFortCreationLockSource: (
       legalAction: LegalAction,
     ) => void;
-    resolveSuccessfulRunFollowupAbility: (legalAction: LegalAction) => {
-      handled: boolean;
-    };
-    resolveFullyBrokenPassedIceDerezAndEndRun: (
-      legalAction: LegalAction,
-    ) => void;
-    resolveStartupImmolatorTrashIce: (legalAction: LegalAction) => void;
     handleMysteryBoxTopFiveProgramInstallActivation: (
       legalAction: LegalAction,
     ) => void;
-    resolveMicrotechBackupDriveReturnTopHosted: (
-      legalAction: LegalAction,
-    ) => void;
-    resolveFortPassAdvancementWindow: (legalAction: LegalAction) => void;
-    resolveStartRunIceRepositionWindow: (legalAction: LegalAction) => void;
     resolvePreyingMantisGainAction: (legalAction: LegalAction) => void;
     resolveCorpRemoveSpyCounter: (legalAction: LegalAction) => void;
     resolveRemoveRunnerTraceCounter: (legalAction: LegalAction) => void;
-    resolveApproachIceExposeAbility: (legalAction: LegalAction) => void;
-    resolveApproachIceExposeViewingDecision: (
-      legalAction: LegalAction,
-    ) => void;
-    startSingaporeCityGridSwapChoice: (legalAction: LegalAction) => void;
   };
   constants: {
     CODE_VIRAL_CACHE_ID: string;
@@ -120,48 +111,13 @@ export function handleTriggerAbilityExecution(
     host.delegates.resolveCorpTrashNewDataFortCreationLockSource(legalAction);
     return handled(legalAction);
   }
-  if (host.delegates.resolveSuccessfulRunFollowupAbility(legalAction).handled)
+  if (host.runFort.handleRunFortTriggerExecution(legalAction).handled)
     return handled(legalAction);
-  if (
-    legalAction.payload?.runnerUtilityAbility ===
-    "derez_fully_broken_passed_ice_and_end_run"
-  ) {
-    host.delegates.resolveFullyBrokenPassedIceDerezAndEndRun(legalAction);
-    return handled(legalAction);
-  }
-  if (
-    legalAction.payload?.v1922RunnerProgramAbility ===
-    "startup_immolator_trash_ice"
-  ) {
-    host.delegates.resolveStartupImmolatorTrashIce(legalAction);
-    return handled(legalAction);
-  }
   if (
     legalAction.payload?.v1915RunnerProgramAbility ===
     "mystery_box_top5_program_install"
   ) {
     host.delegates.handleMysteryBoxTopFiveProgramInstallActivation(legalAction);
-    return handled(legalAction);
-  }
-  if (
-    legalAction.payload?.v1922RunnerHardwareAbility ===
-    "microtech_backup_drive_return_top_hosted"
-  ) {
-    host.delegates.resolveMicrotechBackupDriveReturnTopHosted(legalAction);
-    return handled(legalAction);
-  }
-  if (
-    legalAction.payload?.fortRunWindowAbility ===
-    "add_advancement_counters_after_passing_last_ice_on_this_fort"
-  ) {
-    host.delegates.resolveFortPassAdvancementWindow(legalAction);
-    return handled(legalAction);
-  }
-  if (
-    legalAction.payload?.fortRunWindowAbility ===
-    "move_self_to_different_position_on_same_fort"
-  ) {
-    host.delegates.resolveStartRunIceRepositionWindow(legalAction);
     return handled(legalAction);
   }
   if (legalAction.payload?.runnerUtilityAbility === "preying_mantis_gain_action") {
@@ -265,21 +221,6 @@ export function handleTriggerAbilityExecution(
       corpBonusAgendaPointsAfter: state.corpBonusAgendaPoints,
       corpCreditsAfter: state.corp.credits,
     };
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.approachIceExposeDecision) {
-    host.delegates.resolveApproachIceExposeAbility(legalAction);
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.approachIceExposeViewDecision) {
-    host.delegates.resolveApproachIceExposeViewingDecision(legalAction);
-    return handled(legalAction);
-  }
-  if (
-    legalAction.payload?.v1918UpgradeAbility ===
-    "singapore_city_grid_hq_ice_swap"
-  ) {
-    host.delegates.startSingaporeCityGridSwapChoice(legalAction);
     return handled(legalAction);
   }
   throw new Error(

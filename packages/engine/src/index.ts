@@ -143,6 +143,12 @@ import {
   type TriggerAbilityExecutionHost,
 } from "./game/abilities/trigger-ability-execution";
 import {
+  handleRunFortTriggerExecution,
+  microtechHostedProgramIds,
+  topHostedProgramOnMicrotech,
+  type RunFortTriggerExecutionHost,
+} from "./game/abilities/run-fort-trigger-execution";
+import {
   applyShellTradersStartOfTurn,
   handleRunnerSpecialTriggerExecution,
   shellTradersInstallCost,
@@ -3076,8 +3082,10 @@ function runnerMainActionGenerationHost(
     },
     hiddenZone: {
       exposedCorpCardInServer,
-      topHostedProgramOnMicrotech,
-      microtechHostedProgramIds,
+      topHostedProgramOnMicrotech: (stateToRead, cardId) =>
+        topHostedProgramOnMicrotech(runFortTriggerExecutionHost(stateToRead), cardId),
+      microtechHostedProgramIds: (stateToRead, cardId) =>
+        microtechHostedProgramIds(runFortTriggerExecutionHost(stateToRead), cardId),
       topRunnerHeapCardId,
     },
     specialZones: {
@@ -4637,6 +4645,69 @@ function runnerSpecialTriggerExecutionHost(
   };
 }
 
+function runFortTriggerExecutionHost(
+  state: GameState,
+): RunFortTriggerExecutionHost {
+  return {
+    state,
+    actions: {
+      spendClick,
+    },
+    cards: {
+      definitionFor,
+      mustInstance,
+    },
+    zones: {
+      removeFromAllZones,
+    },
+    run: {
+      resolveSuccessfulRunFollowupAbility: (legalAction) =>
+        resolveSuccessfulRunFollowupAbility(
+          successfulRunInterventionHost(state),
+          legalAction,
+        ),
+      resolveFullyBrokenPassedIceDerezAndEndRun: (legalAction) =>
+        resolveFullyBrokenPassedIceDerezAndEndRunInRunModule(
+          encounterSpecialWindowHostForState(state),
+          legalAction,
+        ),
+      resolveStartupImmolatorTrashIce: (legalAction) =>
+        resolveStartupImmolatorTrashIceInRunModule(
+          encounterSpecialWindowHostForState(state),
+          legalAction,
+        ),
+      resolveFortPassAdvancementWindow: (legalAction) =>
+        resolveFortPassAdvancementWindow(
+          fortPassWindowHostForState(state),
+          legalAction,
+        ),
+      resolveStartRunIceRepositionWindow: (legalAction) =>
+        resolveStartRunIceRepositionWindow(
+          fortPassWindowHostForState(state),
+          legalAction,
+        ),
+      resolveApproachIceExposeAbility: (legalAction) =>
+        resolveApproachIceExposeAbility(
+          encounterEntryHostForState(state),
+          legalAction,
+        ),
+      resolveApproachIceExposeViewingDecision: (legalAction) =>
+        resolveApproachIceExposeViewingDecision(
+          encounterEntryHostForState(state),
+          legalAction,
+        ),
+      startSingaporeCityGridSwapChoice: (legalAction) =>
+        startSingaporeCityGridSwapChoice(
+          fortPassWindowHostForState(state),
+          legalAction,
+        ),
+    },
+    constants: {
+      MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
+    },
+  };
+}
+
 function triggerAbilityExecutionHost(
   state: GameState,
 ): TriggerAbilityExecutionHost {
@@ -4667,60 +4738,25 @@ function triggerAbilityExecutionHost(
           legalAction,
         ),
     },
+    runFort: {
+      handleRunFortTriggerExecution: (legalAction) =>
+        handleRunFortTriggerExecution(
+          runFortTriggerExecutionHost(state),
+          legalAction,
+        ),
+    },
     delegates: {
       resolveCorpTrashNewDataFortCreationLockSource: (legalAction) =>
         resolveCorpTrashNewDataFortCreationLockSource(state, legalAction),
-      resolveSuccessfulRunFollowupAbility: (legalAction) =>
-        resolveSuccessfulRunFollowupAbility(
-          successfulRunInterventionHost(state),
-          legalAction,
-        ),
-      resolveFullyBrokenPassedIceDerezAndEndRun: (legalAction) =>
-        resolveFullyBrokenPassedIceDerezAndEndRunInRunModule(
-          encounterSpecialWindowHostForState(state),
-          legalAction,
-        ),
-      resolveStartupImmolatorTrashIce: (legalAction) =>
-        resolveStartupImmolatorTrashIceInRunModule(
-          encounterSpecialWindowHostForState(state),
-          legalAction,
-        ),
       handleMysteryBoxTopFiveProgramInstallActivation: (legalAction) =>
         handleMysteryBoxTopFiveProgramInstallActivation(
           hiddenZoneSearchActivationHandlerHost(state, legalAction),
-        ),
-      resolveMicrotechBackupDriveReturnTopHosted: (legalAction) =>
-        resolveMicrotechBackupDriveReturnTopHosted(state, legalAction),
-      resolveFortPassAdvancementWindow: (legalAction) =>
-        resolveFortPassAdvancementWindow(
-          fortPassWindowHostForState(state),
-          legalAction,
-        ),
-      resolveStartRunIceRepositionWindow: (legalAction) =>
-        resolveStartRunIceRepositionWindow(
-          fortPassWindowHostForState(state),
-          legalAction,
         ),
       resolvePreyingMantisGainAction: (legalAction) => resolvePreyingMantisGainAction(state, legalAction),
       resolveCorpRemoveSpyCounter: (legalAction) =>
         resolveCorpRemoveSpyCounter(state, legalAction),
       resolveRemoveRunnerTraceCounter: (legalAction) =>
         resolveRemoveRunnerTraceCounter(state, legalAction),
-      resolveApproachIceExposeAbility: (legalAction) =>
-        resolveApproachIceExposeAbility(
-          encounterEntryHostForState(state),
-          legalAction,
-        ),
-      resolveApproachIceExposeViewingDecision: (legalAction) =>
-        resolveApproachIceExposeViewingDecision(
-          encounterEntryHostForState(state),
-          legalAction,
-        ),
-      startSingaporeCityGridSwapChoice: (legalAction) =>
-        startSingaporeCityGridSwapChoice(
-          fortPassWindowHostForState(state),
-          legalAction,
-        ),
     },
     constants: {
       CODE_VIRAL_CACHE_ID,
@@ -5376,45 +5412,6 @@ function performAction(
       handleTriggerAbilityExecution(triggerAbilityExecutionHost(state), legalAction);
       return;
   }
-}
-
-function resolveMicrotechBackupDriveReturnTopHosted(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Microtech Backup Drive nutzen.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  if (!state.runner.rig.hardware.includes(sourceCardId))
-    throw new Error("Microtech Backup Drive ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID)
-    throw new Error("Die Microtech-Backup-Drive-Faehigkeit passt nicht zur Karte.");
-  const targetProgramId = String(legalAction.payload?.targetProgramId ?? "");
-  const topHostedId = topHostedProgramOnMicrotech(state, sourceCardId);
-  if (!targetProgramId || targetProgramId !== topHostedId)
-    throw new Error("Nur das oberste Microtech-Programm darf genommen werden.");
-  const targetDefinitionId = definitionFor(state, targetProgramId).id;
-  spendClick(state, "runner");
-  removeFromAllZones(state, targetProgramId);
-  state.runner.grip.push(targetProgramId);
-  const instance = mustInstance(state.cardInstances, targetProgramId);
-  const { hostedOn: _hostedOn, ...withoutHost } = instance;
-  void _hostedOn;
-  state.cardInstances[targetProgramId] = {
-    ...withoutHost,
-    faceup: true,
-    rezzed: true,
-    zone: { side: "runner", zone: "grip" },
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1922RunnerHardwareAbility: "microtech_backup_drive_return_top_hosted",
-    sourceDefinitionId: MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
-    returnedCardDefinitionId: targetDefinitionId,
-    returnedToGrip: true,
-    hostedProgramCountAfter: microtechHostedProgramIds(state, sourceCardId)
-      .length,
-  };
 }
 
 function resolvePreyingMantisGainAction(
@@ -14811,22 +14808,6 @@ function microtechBackupDriveIds(state: GameState): CardInstanceId[] {
         definitionFor(state, cardId).id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
     )
     .sort();
-}
-
-function microtechHostedProgramIds(
-  state: GameState,
-  hostId: CardInstanceId,
-): CardInstanceId[] {
-  return hostedCardsOn(state, hostId)
-    .filter((cardId) => definitionFor(state, cardId).type === "program")
-    .sort();
-}
-
-function topHostedProgramOnMicrotech(
-  state: GameState,
-  hostId: CardInstanceId,
-): CardInstanceId | undefined {
-  return microtechHostedProgramIds(state, hostId).at(-1);
 }
 
 function setHostedOn(
