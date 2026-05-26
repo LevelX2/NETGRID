@@ -339,6 +339,12 @@ export function publicContextForAction(
   }
   if (
     legalAction.type === "break_subroutine" &&
+    legalAction.payload?.multiBreakSubroutines === true
+  ) {
+    context.multiBreakSubroutines = true;
+  }
+  if (
+    legalAction.type === "break_subroutine" &&
     legalAction.payload?.pileDriverMultiBreak === true
   ) {
     context.pileDriverMultiBreak = true;

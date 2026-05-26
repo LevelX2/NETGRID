@@ -793,6 +793,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/upgrades/weapons-depot.ts",
   "onr_proteus_078_armageddon":
     "packages/engine/src/card-implementations/proteus/runner/programs/armageddon.ts",
+  "onr_proteus_079_big-frackin-gun":
+    "packages/engine/src/card-implementations/proteus/runner/programs/big-frackin-gun.ts",
+  "onr_proteus_081_boring-bit":
+    "packages/engine/src/card-implementations/proteus/runner/programs/boring-bit.ts",
+  "onr_proteus_083_corrosion":
+    "packages/engine/src/card-implementations/proteus/runner/programs/corrosion.ts",
   "onr_proteus_084_crumble":
     "packages/engine/src/card-implementations/proteus/runner/programs/crumble.ts",
   "onr_proteus_086_enterprise-inc-shields":
@@ -801,8 +807,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/garbage-in.ts",
   "onr_proteus_090_highlighter":
     "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
+  "onr_proteus_093_redecorator":
+    "packages/engine/src/card-implementations/proteus/runner/programs/redecorator.ts",
   "onr_proteus_094_scaldan":
     "packages/engine/src/card-implementations/proteus/runner/programs/scaldan.ts",
+  "onr_proteus_095_skeleton-passkeys":
+    "packages/engine/src/card-implementations/proteus/runner/programs/skeleton-passkeys.ts",
   "onr_proteus_096_skullcap":
     "packages/engine/src/card-implementations/proteus/runner/programs/skullcap.ts",
   "onr_proteus_097_taxman":
@@ -811,6 +821,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/vienna-22.ts",
   "onr_proteus_099_viral-pipeline":
     "packages/engine/src/card-implementations/proteus/runner/programs/viral-pipeline.ts",
+  "onr_proteus_100_wrecking-ball":
+    "packages/engine/src/card-implementations/proteus/runner/programs/wrecking-ball.ts",
+  "onr_proteus_103_cruising-for-netwatch":
+    "packages/engine/src/card-implementations/proteus/runner/events/cruising-for-netwatch.ts",
+  "onr_proteus_124_stakeout":
+    "packages/engine/src/card-implementations/proteus/runner/events/stakeout.ts",
   "onr_proteus_134_cortical-cybermodem":
     "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-cybermodem.ts",
   "onr_proteus_135_cortical-stimulators":

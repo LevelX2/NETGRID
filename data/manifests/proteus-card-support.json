@@ -2395,24 +2395,29 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_079_big-frackin-gun",
+        "coverage": [
+          "card_implementation",
+          "icebreaker_abilities",
+          "legal_action",
+          "apply_action_revalidation",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [],
+        "notes": "PRO004 Simple Icebreaker Core: sentry multi-break profile via generic icebreakerAbilities; no deck, format, or AI gate."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_080_black-widow",
@@ -2447,24 +2452,29 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_081_boring-bit",
+        "coverage": [
+          "card_implementation",
+          "icebreaker_abilities",
+          "legal_action",
+          "apply_action_revalidation",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [],
+        "notes": "PRO004 Simple Icebreaker Core: wall-breaker profile via generic icebreakerAbilities; no deck, format, or AI gate."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_082_bulldozer",
@@ -2499,24 +2509,29 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_083_corrosion",
+        "coverage": [
+          "card_implementation",
+          "icebreaker_abilities",
+          "legal_action",
+          "apply_action_revalidation",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [],
+        "notes": "PRO004 Simple Icebreaker Core: zero-credit wall-breaker profile via generic icebreakerAbilities; no deck, format, or AI gate."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_084_crumble",
@@ -2788,24 +2803,29 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_093_redecorator",
+        "coverage": [
+          "card_implementation",
+          "icebreaker_abilities",
+          "legal_action",
+          "apply_action_revalidation",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [],
+        "notes": "PRO004 Simple Icebreaker Core: sentry multi-break profile via generic icebreakerAbilities; no deck, format, or AI gate."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_094_scaldan",
@@ -2849,24 +2869,29 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_095_skeleton-passkeys",
+        "coverage": [
+          "card_implementation",
+          "icebreaker_abilities",
+          "legal_action",
+          "apply_action_revalidation",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [],
+        "notes": "PRO004 Simple Icebreaker Core: code-gate breaker profile via generic icebreakerAbilities; no deck, format, or AI gate."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_096_skullcap",
@@ -2995,24 +3020,29 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_100_wrecking-ball",
+        "coverage": [
+          "card_implementation",
+          "icebreaker_abilities",
+          "legal_action",
+          "apply_action_revalidation",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [],
+        "notes": "PRO004 Simple Icebreaker Core: wall-breaker profile with generic post-break stealth-loss side effect; no deck, format, or AI gate."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_101_all-hands",
@@ -3073,24 +3103,22 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
+        "resolverRef": "engine:onr_proteus_103_cruising-for-netwatch",
         "coverage": [],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_104_decoy-signal",
@@ -3644,24 +3672,22 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
+        "resolverRef": "engine:onr_proteus_124_stakeout",
         "coverage": [],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_125_subliminal-corruption",

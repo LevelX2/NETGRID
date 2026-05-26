@@ -1263,6 +1263,172 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
   });
 
+  it("migrates Proteus PRO004 simple icebreakers into CardImplementation coverage", () => {
+    const cases = [
+      {
+        definitionId: "onr_proteus_079_big-frackin-gun",
+        breakCost: 6,
+        matcher: { kind: "ice_subtype", subtype: "sentry" },
+        count: 5,
+        pumpCost: 1,
+        pumpAmount: 1,
+      },
+      {
+        definitionId: "onr_proteus_081_boring-bit",
+        breakCost: 2,
+        matcher: { kind: "ice_subtype", subtype: "wall" },
+        pumpCost: 1,
+        pumpAmount: 1,
+      },
+      {
+        definitionId: "onr_proteus_083_corrosion",
+        breakCost: 0,
+        matcher: { kind: "ice_subtype", subtype: "wall" },
+        pumpCost: 1,
+        pumpAmount: 1,
+      },
+      {
+        definitionId: "onr_proteus_093_redecorator",
+        breakCost: 1,
+        matcher: { kind: "ice_subtype", subtype: "sentry" },
+        count: 2,
+        pumpCost: 3,
+        pumpAmount: 1,
+      },
+      {
+        definitionId: "onr_proteus_095_skeleton-passkeys",
+        breakCost: 0,
+        matcher: { kind: "ice_subtype", subtype: "code_gate" },
+        pumpCost: 3,
+        pumpAmount: 4,
+      },
+      {
+        definitionId: "onr_proteus_100_wrecking-ball",
+        breakCost: 0,
+        matcher: { kind: "ice_subtype", subtype: "wall" },
+        pumpCost: 2,
+        pumpAmount: 1,
+        stealthLoss: 1,
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      const implementation = cardImplementationForDefinitionId(
+        testCase.definitionId,
+      );
+      expect(implementation, testCase.definitionId).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(testCase.definitionId),
+      ).toMatchObject({
+        cardDefinitionId: testCase.definitionId,
+        status: "implemented",
+      });
+
+      const abilities = implementation?.icebreakerAbilities ?? [];
+      expect(abilities.length, testCase.definitionId).toBeGreaterThanOrEqual(2);
+
+      const breakAbility = abilities.find(
+        (ability) => ability.kind === "break_subroutine",
+      );
+      expect(breakAbility, testCase.definitionId).toMatchObject({
+        kind: "break_subroutine",
+        cost: { kind: "credit", amount: testCase.breakCost },
+        matches: testCase.matcher,
+        visibility: "public",
+      });
+      if ("count" in testCase) {
+        expect(breakAbility, testCase.definitionId).toMatchObject({
+          count: testCase.count,
+        });
+      } else {
+        expect(breakAbility, testCase.definitionId).not.toHaveProperty("count");
+      }
+      if ("stealthLoss" in testCase) {
+        expect(breakAbility, testCase.definitionId).toMatchObject({
+          onSuccessfulBreak: [
+            {
+              kind: "lose_bits_from_stealth_sources",
+              amount: testCase.stealthLoss,
+              mode: "up_to_if_available",
+            },
+          ],
+        });
+      }
+
+      expect(
+        abilities.find((ability) => ability.kind === "increase_strength"),
+        testCase.definitionId,
+      ).toMatchObject({
+        kind: "increase_strength",
+        cost: { kind: "credit", amount: testCase.pumpCost },
+        amount: testCase.pumpAmount,
+        duration: "current_encounter",
+        visibility: "public",
+      });
+    }
+  });
+
+  it("migrates Proteus PRO005 simple runner economy/draw events into CardImplementation coverage", () => {
+    const cases = [
+      {
+        definitionId: "onr_proteus_103_cruising-for-netwatch",
+        effects: [
+          {
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 1,
+            visibility: "public",
+          },
+          {
+            kind: "draw_cards",
+            recipient: "controller",
+            amount: 2,
+            visibility: "public",
+          },
+        ],
+      },
+      {
+        definitionId: "onr_proteus_124_stakeout",
+        effects: [
+          {
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 2,
+            visibility: "public",
+          },
+          {
+            kind: "draw_cards",
+            recipient: "controller",
+            amount: 1,
+            visibility: "public",
+          },
+        ],
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      expect(
+        cardImplementationForDefinitionId(testCase.definitionId),
+        testCase.definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(testCase.definitionId),
+      ).toMatchObject({
+        cardDefinitionId: testCase.definitionId,
+        status: "implemented",
+      });
+      expect(
+        cardImplementationForDefinitionId(testCase.definitionId)?.abilities,
+      ).toContainEqual(
+        expect.objectContaining({
+          kind: "on_play",
+          costs: "printed",
+          effects: testCase.effects,
+        }),
+      );
+    }
+  });
+
   it("migrates Proteus Phase 9d data-fort creation lock into CardImplementation coverage", () => {
     const definitionId = "onr_proteus_146_precision-bribery";
 
@@ -1606,10 +1772,10 @@ describe("CardImplementation coverage and registry invariants", () => {
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
     expect(outsideScopeDefinitionIds).toHaveLength(206);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(423);
-    expect(coverageByStatus.get("implemented")).toBe(423);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(431);
+    expect(coverageByStatus.get("implemented")).toBe(431);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(156);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(148);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);

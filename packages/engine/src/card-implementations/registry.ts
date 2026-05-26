@@ -411,22 +411,30 @@ import { proteusRasminBridgerImplementation } from "./proteus/corp/upgrades/rasm
 import { proteusResearchBunkerImplementation } from "./proteus/corp/upgrades/research-bunker";
 import { proteusWeaponsDepotImplementation } from "./proteus/corp/upgrades/weapons-depot";
 import { proteusFakedHitImplementation } from "./proteus/runner/events/faked-hit";
+import { proteusCruisingForNetwatchImplementation } from "./proteus/runner/events/cruising-for-netwatch";
 import { proteusCorticalCybermodemImplementation } from "./proteus/runner/hardware/cortical-cybermodem";
 import { proteusCorticalStimulatorsImplementation } from "./proteus/runner/hardware/cortical-stimulators";
 import { proteusDeckTheImplementation } from "./proteus/runner/hardware/deck-the";
 import { proteusSunburstCranialInterfaceImplementation } from "./proteus/runner/hardware/sunburst-cranial-interface";
 import { proteusPoisonedWaterSupplyImplementation } from "./proteus/runner/events/poisoned-water-supply";
+import { proteusStakeoutImplementation } from "./proteus/runner/events/stakeout";
 import { proteusArmageddonImplementation } from "./proteus/runner/programs/armageddon";
+import { proteusBigFrackinGunImplementation } from "./proteus/runner/programs/big-frackin-gun";
+import { proteusBoringBitImplementation } from "./proteus/runner/programs/boring-bit";
+import { proteusCorrosionImplementation } from "./proteus/runner/programs/corrosion";
 import { proteusCrumbleImplementation } from "./proteus/runner/programs/crumble";
 import { proteusDisintegratorImplementation } from "./proteus/runner/programs/disintegrator";
 import { proteusEnterpriseIncShieldsImplementation } from "./proteus/runner/programs/enterprise-inc-shields";
 import { proteusGarbageInImplementation } from "./proteus/runner/programs/garbage-in";
 import { proteusHighlighterImplementation } from "./proteus/runner/programs/highlighter";
+import { proteusRedecoratorImplementation } from "./proteus/runner/programs/redecorator";
 import { proteusScaldanImplementation } from "./proteus/runner/programs/scaldan";
+import { proteusSkeletonPasskeysImplementation } from "./proteus/runner/programs/skeleton-passkeys";
 import { proteusSkullcapImplementation } from "./proteus/runner/programs/skullcap";
 import { proteusTaxmanImplementation } from "./proteus/runner/programs/taxman";
 import { proteusVienna22Implementation } from "./proteus/runner/programs/vienna-22";
 import { proteusViralPipelineImplementation } from "./proteus/runner/programs/viral-pipeline";
+import { proteusWreckingBallImplementation } from "./proteus/runner/programs/wrecking-ball";
 import { proteusPrecisionBriberyImplementation } from "./proteus/runner/resources/precision-bribery";
 import { proteusStreetwareDistributorImplementation } from "./proteus/runner/resources/streetware-distributor";
 import type { CardImplementationDefinition } from "./types";
@@ -837,22 +845,30 @@ export const CARD_IMPLEMENTATIONS = [
   pattelAntibodyImplementation,
   stereogramAntibodyImplementation,
   proteusFakedHitImplementation,
+  proteusCruisingForNetwatchImplementation,
   proteusCorticalCybermodemImplementation,
   proteusCorticalStimulatorsImplementation,
   proteusDeckTheImplementation,
   proteusSunburstCranialInterfaceImplementation,
   proteusPoisonedWaterSupplyImplementation,
+  proteusStakeoutImplementation,
   proteusArmageddonImplementation,
+  proteusBigFrackinGunImplementation,
+  proteusBoringBitImplementation,
+  proteusCorrosionImplementation,
   proteusCrumbleImplementation,
   proteusDisintegratorImplementation,
   proteusEnterpriseIncShieldsImplementation,
   proteusGarbageInImplementation,
   proteusHighlighterImplementation,
+  proteusRedecoratorImplementation,
   proteusScaldanImplementation,
+  proteusSkeletonPasskeysImplementation,
   proteusSkullcapImplementation,
   proteusTaxmanImplementation,
   proteusVienna22Implementation,
   proteusViralPipelineImplementation,
+  proteusWreckingBallImplementation,
   proteusPrecisionBriberyImplementation,
   proteusStreetwareDistributorImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
