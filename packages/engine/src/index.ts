@@ -146,6 +146,7 @@ import {
   handleCounterUtilityTriggerExecution,
   type CounterUtilityTriggerExecutionHost,
 } from "./game/abilities/counter-utility-trigger-execution";
+import { handleHiddenZoneTriggerExecution } from "./game/abilities/hidden-zone-trigger-execution";
 import {
   handleRunFortTriggerExecution,
   microtechHostedProgramIds,
@@ -214,7 +215,6 @@ import {
   buildRunnerValuPakSequenceEndAction,
 } from "./game/turn/runner-special-zone-install-actions";
 import {
-  handleMysteryBoxTopFiveProgramInstallActivation,
   lookTopStackShowToCorpThenInstallMatchingTargets,
   lookTopStackTakeMatchingTargets,
   searchStackInstallTargets,
@@ -4800,9 +4800,10 @@ function triggerAbilityExecutionHost(
         ),
     },
     hiddenZone: {
-      handleMysteryBoxTopFiveProgramInstallActivation: (legalAction) =>
-        handleMysteryBoxTopFiveProgramInstallActivation(
+      handleHiddenZoneTriggerExecution: (legalAction) =>
+        handleHiddenZoneTriggerExecution(
           hiddenZoneSearchActivationHandlerHost(state, legalAction),
+          legalAction,
         ),
     },
     constants: {
