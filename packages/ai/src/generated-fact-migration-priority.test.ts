@@ -43,19 +43,19 @@ describe("generated fact migration priority report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("prioritizes all 24 compiled generated-fact candidates", () => {
+  it("prioritizes all 32 compiled generated-fact candidates", () => {
     const report = readReport();
     expect(report.taskId).toBe("Aufgabe 002");
-    expect(report.candidateCount).toBe(24);
+    expect(report.candidateCount).toBe(32);
     expect(report.priorityCounts).toEqual({
       P0: 13,
-      P1: 7,
+      P1: 15,
       P2: 4,
       P3: 0,
     });
     expect(report.riskCounts).toEqual({
-      low: 13,
-      medium: 11,
+      low: 15,
+      medium: 17,
       high: 0,
     });
   });
@@ -63,7 +63,7 @@ describe("generated fact migration priority report", () => {
   it("keeps strategic and compatibility fields out of generated migration", () => {
     const report = readReport();
     expect(report.fieldCategoryCounts.overlay_only).toBe(6);
-    expect(report.fieldCategoryCounts.legacy_keep_for_compat).toBe(24);
+    expect(report.fieldCategoryCounts.legacy_keep_for_compat).toBe(32);
     for (const card of report.cards) {
       expect(card.doNotMigrateFields).toContain("aiSupportStatus");
       expect(card.doNotMigrateFields).toContain("roles");
@@ -86,7 +86,7 @@ describe("generated fact migration priority report", () => {
   it("orders the later migration batches without changing runtime sources", () => {
     const report = readReport();
     expect(report.batchPlan.map((batch) => batch.cardIds.length)).toEqual([
-      11, 6, 2, 3, 2,
+      11, 6, 2, 3, 10,
     ]);
     expect(report.cards.every((card) => card.monolithFields.length > 0)).toBe(
       true,

@@ -14,23 +14,23 @@
     "activeHints": "data/ai/ai-card-hints-active.json"
   },
   "mode": "read-only prioritization; no active hint migration, no runtime compile, no planner or consumer binding",
-  "candidateCount": 24,
+  "candidateCount": 32,
   "priorityCounts": {
     "P0": 13,
-    "P1": 7,
+    "P1": 15,
     "P2": 4,
     "P3": 0
   },
   "fieldCategoryCounts": {
-    "generated_with_board_context": 19,
-    "generated_with_descriptor_limitations": 3,
-    "legacy_keep_for_compat": 24,
+    "generated_with_board_context": 27,
+    "generated_with_descriptor_limitations": 5,
+    "legacy_keep_for_compat": 32,
     "overlay_only": 6,
-    "safe_generated_now": 19
+    "safe_generated_now": 25
   },
   "riskCounts": {
-    "low": 13,
-    "medium": 11,
+    "low": 15,
+    "medium": 17,
     "high": 0
   },
   "batchPlan": [
@@ -85,7 +85,15 @@
       "title": "Remaining longtail mechanical facts",
       "cardIds": [
         "onr_v1_017_deep-thought",
-        "onr_v1_050_r-and-d-protocol-files"
+        "onr_v1_050_r-and-d-protocol-files",
+        "onr_v1_312_chicago-branch",
+        "onr_v1_317_data-masons",
+        "onr_v1_350_antiquated-interface-routines",
+        "onr_v1_359_jenny-jett",
+        "onr_v1_361_namatoki-plaza",
+        "onr_v1_363_olivia-salazar",
+        "onr_v1_367_rio-de-janeiro-city-grid",
+        "onr_v1_370_tesseract-fort-construction"
       ]
     }
   ],
@@ -1278,6 +1286,165 @@
       "derivedRationale": "Tagged-runner damage payoff is directly represented."
     },
     {
+      "cardId": "onr_v1_312_chicago-branch",
+      "title": "Chicago Branch",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "costProfile",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedMechanicalFacts": [
+        "costProfile",
+        "effect:score_acceleration",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "remoteRole"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "costProfile",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [
+        "costProfile",
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 3,
+        "generated_fact_absent_from_monolith": 2
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Activated advancement-counter placement is a stable mechanical score-acceleration fact; closeout valuation stays strategic.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Activated advancement-counter placement is a mechanical score-acceleration fact; strategic closeout valuation remains manual/consumer context."
+    },
+    {
+      "cardId": "onr_v1_317_data-masons",
+      "title": "Data Masons",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "generatedMechanicalFacts": [
+        "effect:remote_protection",
+        "effect:rez_discount",
+        "remoteRole:ice_modifier"
+      ],
+      "monolithFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Wall rez discount and wall strength modifiers are stable generated ICE-modifier facts.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Wall rez discount and wall strength modifier are mechanically derivable global ICE modifier facts; reserve/remote value remains strategic context."
+    },
+    {
+      "cardId": "onr_v1_350_antiquated-interface-routines",
+      "title": "Antiquated Interface Routines",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "generatedMechanicalFacts": [
+        "effect:remote_protection",
+        "remoteRole:ice_modifier"
+      ],
+      "monolithFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Same-fort ICE strength modifier is mechanically derivable and low-risk when board/server context remains explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Same-fort ICE strength modifier is mechanically derivable; concrete path cost impact remains effectiveRunQuote/board context."
+    },
+    {
       "cardId": "onr_v1_355_crystal-palace-station-grid",
       "title": "Crystal Palace Station Grid",
       "side": "corp",
@@ -1335,6 +1502,166 @@
         "valueHints"
       ],
       "derivedRationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays; remote_protection remains intentionally manual strategic overlay."
+    },
+    {
+      "cardId": "onr_v1_359_jenny-jett",
+      "title": "Jenny Jett",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_successful_run",
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "remoteRole:scoring_protection"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "remoteRole"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 3
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Successful-run future-encounter support is mechanically recognizable, but hidden HQ choice and runpath context stay runtime-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Successful-run install-and-approach effect is derivable as a future encounter class while HQ card identity and legal target choice remain hidden-info/runtime context."
+    },
+    {
+      "cardId": "onr_v1_361_namatoki-plaza",
+      "title": "Namatoki Plaza",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_remote_server",
+        "effect:remote_protection",
+        "effect:score_acceleration",
+        "remoteRole:remote_capacity"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "remoteRole"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 3
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Remote capacity and score-support mechanics are derivable, while actual remote safety remains board and server context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Additional agenda/node slot and subsidiary-fort install context are mechanical remote-capacity facts; score safety remains board-aware."
+    },
+    {
+      "cardId": "onr_v1_363_olivia-salazar",
+      "title": "Olivia Salazar",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "effect:remote_protection",
+        "effect:rez_discount",
+        "remoteRole:scoring_protection"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "remoteRole"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 3
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "During-run source-bound rez discount is mechanical, but payment and temporary derez legality remain engine context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Source-bound discounted ICE rez and end-of-run derez window are derivable as during-run remote-support facts; payment legality stays engine-owned."
     },
     {
       "cardId": "onr_v1_366_red-herrings",
@@ -1399,6 +1726,111 @@
         "valueHints"
       ],
       "derivedRationale": "Agenda steal tax and accessed-card condition are derivable; remote_protection remains intentionally manual strategic overlay."
+    },
+    {
+      "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+      "title": "Rio de Janeiro City Grid",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "remoteRole:scoring_protection"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "remoteRole"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 3
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Pass-rezzed-ICE random stop pressure is mechanically derivable, but concrete random outcome and path impact stay runtime context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Pass-rezzed-ICE die trigger is derivable as deterministic-random future encounter pressure; actual random result and run end remain runtime state."
+    },
+    {
+      "cardId": "onr_v1_370_tesseract-fort-construction",
+      "title": "Tesseract Fort Construction",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "generatedMechanicalFacts": [
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "remoteRole:scoring_protection"
+      ],
+      "monolithFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 5,
+      "rationale": "Additional fort ICE subroutine is mechanically derivable, but active/rezzed/server context must remain board-aware.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Additional ETR subroutine on all ICE in the fort is mechanically derivable; active/rezzed/server context remains board-state."
     }
   ]
 }

@@ -225,6 +225,104 @@
       "rationale": "Agenda steal tax and accessed-card condition are derivable; remote_protection remains intentionally manual strategic overlay."
     },
     {
+      "cardId": "onr_v1_370_tesseract-fort-construction",
+      "title": "Tesseract Fort Construction",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tesseract-fort-construction.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Additional ETR subroutine on all ICE in the fort is mechanically derivable; active/rezzed/server context remains board-state."
+    },
+    {
+      "cardId": "onr_v1_361_namatoki-plaza",
+      "title": "Namatoki Plaza",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/namatoki-plaza.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "effect:score_acceleration",
+        "condition:requires_remote_server",
+        "remoteRole:remote_capacity"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Additional agenda/node slot and subsidiary-fort install context are mechanical remote-capacity facts; score safety remains board-aware."
+    },
+    {
+      "cardId": "onr_v1_359_jenny-jett",
+      "title": "Jenny Jett",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jenny-jett.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "condition:requires_successful_run",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-run install-and-approach effect is derivable as a future encounter class while HQ card identity and legal target choice remain hidden-info/runtime context."
+    },
+    {
+      "cardId": "onr_v1_363_olivia-salazar",
+      "title": "Olivia Salazar",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/olivia-salazar.ts",
+      "expectedDerivableKinds": [
+        "effect:rez_discount",
+        "effect:remote_protection",
+        "condition:requires_during_run",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Source-bound discounted ICE rez and end-of-run derez window are derivable as during-run remote-support facts; payment legality stays engine-owned."
+    },
+    {
+      "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+      "title": "Rio de Janeiro City Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/rio-de-janeiro-city-grid.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "condition:requires_during_run",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Pass-rezzed-ICE die trigger is derivable as deterministic-random future encounter pressure; actual random result and run end remain runtime state."
+    },
+    {
+      "cardId": "onr_v1_317_data-masons",
+      "title": "Data Masons",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
+      "expectedDerivableKinds": [
+        "effect:rez_discount",
+        "effect:remote_protection",
+        "remoteRole:ice_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Wall rez discount and wall strength modifier are mechanically derivable global ICE modifier facts; reserve/remote value remains strategic context."
+    },
+    {
+      "cardId": "onr_v1_350_antiquated-interface-routines",
+      "title": "Antiquated Interface Routines",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "remoteRole:ice_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Same-fort ICE strength modifier is mechanically derivable; concrete path cost impact remains effectiveRunQuote/board context."
+    },
+    {
+      "cardId": "onr_v1_312_chicago-branch",
+      "title": "Chicago Branch",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/chicago-branch.ts",
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated advancement-counter placement is a mechanical score-acceleration fact; strategic closeout valuation remains manual/consumer context."
+    },
+    {
       "cardId": "onr_v1_302_scorched-earth",
       "title": "Scorched Earth",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/scorched-earth.ts",

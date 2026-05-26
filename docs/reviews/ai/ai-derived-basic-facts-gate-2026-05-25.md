@@ -10,7 +10,7 @@ Der bisherige read-only Prototype ist zu einem stabilen Gate ausgebaut:
 corepack pnpm check:ai-derived-facts
 ```
 
-Das Gate leitet mechanische Basic-AI-Facts aus den 24 versionierten Pilot-CardImplementation-Dateien ab, validiert die generierten Facts gegen bekannte Ontology-Werte, vergleicht sie mit den bestehenden manuellen AI-Hint-Ontology-Feldern und prüft den committed JSON-Report auf Drift. Es bleibt read-only: keine Engine-Regeländerung, keine Strategieänderung, keine Planerwirkung, keine Profilumschaltung, keine Hintmigration und keine Runtime-Nutzung der Derived Facts.
+Das Gate leitet mechanische Basic-AI-Facts aus den 32 versionierten Pilot-CardImplementation-Dateien ab, validiert die generierten Facts gegen bekannte Ontology-Werte, vergleicht sie mit den bestehenden manuellen AI-Hint-Ontology-Feldern und prüft den committed JSON-Report auf Drift. Es bleibt read-only: keine Engine-Regeländerung, keine Strategieänderung, keine Planerwirkung, keine Profilumschaltung, keine Hintmigration und keine Runtime-Nutzung der Derived Facts.
 
 ## Prototype vs Gate
 
@@ -58,26 +58,26 @@ Warnings blockieren nicht. Sie markieren bekannten Descriptor-/Overlay-Bedarf:
 
 Aktueller Stand:
 
-- Warnings: 40
-- `text_pattern_derivation`: 24
-- `descriptor_or_overlay_gap`: 7
-- `manual_ontology_without_generated_match`: 5
-- `confidence_mismatch`: 4
+- Warnings: 49
+- `text_pattern_derivation`: 32
+- `descriptor_or_overlay_gap`: 6
+- `manual_ontology_without_generated_match`: 4
+- `confidence_mismatch`: 7
 - `generated_fact_without_manual_match`: 0
 
 ## Pilotkartenumfang
 
-Keine automatische Ausweitung. Der Scope bleibt exakt die 24 Pilotkarten aus:
+Aufgabe 015 erweitert den read-only Pilot gezielt auf 32 Pilotkarten. Die Erweiterung bleibt auf deterministische Gate-/Report-Artefakte beschränkt:
 
 - `data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json`
 
 Kennzahlen:
 
-- Pilotkarten: 24
-- Implementations gefunden: 24
-- Karten mit Derived Facts: 24
-- Karten mit manueller Ontology-Überschneidung: 24
-- Karten mit Manual-Overlay-/Descriptor-Bedarf: 4
+- Pilotkarten: 32
+- Implementations gefunden: 32
+- Karten mit Derived Facts: 32
+- Karten mit manueller Ontology-Überschneidung: 32
+- Karten mit Manual-Overlay-/Descriptor-Bedarf: 3
 
 Effect-Kinds:
 

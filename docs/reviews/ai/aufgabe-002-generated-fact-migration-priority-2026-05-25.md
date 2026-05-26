@@ -4,26 +4,26 @@ Datum: 2026-05-25
 
 ## Kurzfazit
 
-Aufgabe 002 priorisiert die 24 verbleibenden Generated-Fact-Migrationskandidaten aus dem read-only Compiled-Hint-Index. Es wurde nichts migriert: `data/ai/ai-card-hints-active.json` bleibt unverändert, der Compiler bleibt ohne Runtime-/Planner-/Consumer-Wirkung.
+Aufgabe 002 priorisiert die Generated-Fact-Migrationskandidaten aus dem read-only Compiled-Hint-Index. Nach der Aufgabe-015-Piloterweiterung umfasst der Report 32 Kandidaten. Es wurde nichts migriert: `data/ai/ai-card-hints-active.json` bleibt unverändert, der Compiler bleibt ohne Runtime-/Planner-/Consumer-Wirkung.
 
-Die 79 Compiled-Index-Warnings bleiben Vergleichssignale. Sie sind jetzt als Migrationsreihenfolge interpretierbar, nicht als Fehler.
+Die 105 Compiled-Index-Warnings bleiben Vergleichssignale. Sie sind jetzt als Migrationsreihenfolge interpretierbar, nicht als Fehler.
 
 ## Ausgangslage
 
-- Pilotkarten: 24
+- Pilotkarten: 32
 - Karten mit Manual Overlay: 6
-- Karten ohne Overlay: 18
+- Karten ohne Overlay: 26
 - Hard Errors: 0
-- Compiled-Index Warnings: 79
-- `migrationCandidates`: 24
-- `generatedFactCandidates`: 24
+- Compiled-Index Warnings: 105
+- `migrationCandidates`: 32
+- `generatedFactCandidates`: 32
 - `overlayCandidates`: 0
 - `reviewCandidates`: 0
 
 Warning-Gruppen:
 
-- `monolith_mechanical_duplication_candidate`: 46
-- `generated_fact_absent_from_monolith`: 27
+- `monolith_mechanical_duplication_candidate`: 67
+- `generated_fact_absent_from_monolith`: 32
 - `overlay_strategy_field_not_in_monolith`: 6
 - `manual_review_candidate`: 0
 - `schema_or_descriptor_candidate`: 0
@@ -66,7 +66,7 @@ Der Check liest nur:
 
 Begründung: Diese Karten haben eindeutige mechanische Facts mit hoher späterer Wirkung, etwa scored-agenda actions, tag/punish conditions oder Breakerprofile.
 
-`P1`: 7 Karten
+`P1`: 15 Karten
 
 - `Mystery Box`
 - `Self-Modifying Code`
@@ -75,6 +75,14 @@ Begründung: Diese Karten haben eindeutige mechanische Facts mit hoher späterer
 - `Virizz`
 - `Crystal Palace Station Grid`
 - `Red Herrings`
+- `Antiquated Interface Routines`
+- `Chicago Branch`
+- `Data Masons`
+- `Jenny Jett`
+- `Namatoki Plaza`
+- `Olivia Salazar`
+- `Rio de Janeiro City Grid`
+- `Tesseract Fort Construction`
 
 Begründung: Die Facts sind mechanisch nützlich, brauchen aber saubere Board-/LegalAction-Kontextgrenzen oder stabilere Descriptor-Behandlung.
 
@@ -89,15 +97,15 @@ Begründung: Mechanisch korrekt, aber aktuell eher Diagnose-/Longtail-Wert oder 
 
 `P3`: 0 Karten
 
-Begründung: Es gibt keine Karte im 24er-Pilot, die ausschließlich strategisch/quality-getrieben und nicht Generated-Fact-Kandidat ist.
+Begründung: Es gibt keine Karte im 32er-Pilot, die ausschließlich strategisch/quality-getrieben und nicht Generated-Fact-Kandidat ist.
 
 ## Field-Kategorien
 
-- `safe_generated_now`: 19
-- `generated_with_board_context`: 19
-- `generated_with_descriptor_limitations`: 3
+- `safe_generated_now`: 25
+- `generated_with_board_context`: 27
+- `generated_with_descriptor_limitations`: 5
 - `overlay_only`: 6
-- `legacy_keep_for_compat`: 24
+- `legacy_keep_for_compat`: 32
 
 Interpretation:
 
@@ -107,8 +115,8 @@ Interpretation:
 
 ## Risiko
 
-- `low`: 13
-- `medium`: 11
+- `low`: 15
+- `medium`: 17
 - `high`: 0
 
 Kein Kandidat ist als `high` klassifiziert, weil es keine Hard Errors, keine Review-Kandidaten und keine offenen Schema-/Descriptor-Kandidaten im Compiled-Index gibt. Medium heißt hier: spätere Migration darf den Board-/LegalAction-Kontext nicht statisch interpretieren.
@@ -153,6 +161,14 @@ Batch 5: Restliche Longtail-Facts
 
 - `Deep Thought`
 - `R&D-Protocol Files`
+- `Antiquated Interface Routines`
+- `Chicago Branch`
+- `Data Masons`
+- `Jenny Jett`
+- `Namatoki Plaza`
+- `Olivia Salazar`
+- `Rio de Janeiro City Grid`
+- `Tesseract Fort Construction`
 
 ## Bewusst Nicht Geändert
 

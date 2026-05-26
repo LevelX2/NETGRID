@@ -66,12 +66,12 @@ describe("derived basic facts gate report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("keeps the 24-card pilot complete", () => {
+  it("keeps the 32-card pilot complete", () => {
     const report = readReport();
-    expect(report.pilotCardCount).toBe(24);
-    expect(report.implementationFoundCount).toBe(24);
-    expect(report.cardsWithDerivedFacts).toBe(24);
-    expect(report.cardsWithManualOntologyOverlap).toBe(24);
+    expect(report.pilotCardCount).toBe(32);
+    expect(report.implementationFoundCount).toBe(32);
+    expect(report.cardsWithDerivedFacts).toBe(32);
+    expect(report.cardsWithManualOntologyOverlap).toBe(32);
     expect(report.cardsNeedingManualOverlay).toBe(3);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
@@ -184,6 +184,27 @@ describe("derived basic facts gate report", () => {
     );
     expect(employeeEmpowerment.derivedFacts.conditions).toContainEqual(
       expect.objectContaining({ kind: "requires_scored_agenda" }),
+    );
+
+    const tesseract = cardById(
+      report,
+      "onr_v1_370_tesseract-fort-construction",
+    );
+    expect(tesseract.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({ kind: "future_encounter_effect" }),
+    );
+    expect(tesseract.derivedFacts.remoteRole).toEqual(
+      expect.objectContaining({ kind: "scoring_protection" }),
+    );
+
+    const namatoki = cardById(report, "onr_v1_361_namatoki-plaza");
+    expect(namatoki.derivedFacts.remoteRole).toEqual(
+      expect.objectContaining({ kind: "remote_capacity" }),
+    );
+
+    const chicagoBranch = cardById(report, "onr_v1_312_chicago-branch");
+    expect(chicagoBranch.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({ kind: "score_acceleration" }),
     );
   });
 

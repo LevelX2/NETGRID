@@ -311,6 +311,102 @@ const PRIORITY_POLICY = {
     rationale:
       "Agenda steal tax and access condition are mechanical, but remote-protection value remains contextual overlay.",
   },
+  "onr_v1_370_tesseract-fort-construction": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Additional fort ICE subroutine is mechanically derivable, but active/rezzed/server context must remain board-aware.",
+  },
+  "onr_v1_361_namatoki-plaza": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Remote capacity and score-support mechanics are derivable, while actual remote safety remains board and server context.",
+  },
+  "onr_v1_359_jenny-jett": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Successful-run future-encounter support is mechanically recognizable, but hidden HQ choice and runpath context stay runtime-owned.",
+  },
+  "onr_v1_363_olivia-salazar": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "During-run source-bound rez discount is mechanical, but payment and temporary derez legality remain engine context.",
+  },
+  "onr_v1_367_rio-de-janeiro-city-grid": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Pass-rezzed-ICE random stop pressure is mechanically derivable, but concrete random outcome and path impact stay runtime context.",
+  },
+  "onr_v1_317_data-masons": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Wall rez discount and wall strength modifiers are stable generated ICE-modifier facts.",
+  },
+  "onr_v1_350_antiquated-interface-routines": {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Same-fort ICE strength modifier is mechanically derivable and low-risk when board/server context remains explicit.",
+  },
+  "onr_v1_312_chicago-branch": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 5,
+    rationale:
+      "Activated advancement-counter placement is a stable mechanical score-acceleration fact; closeout valuation stays strategic.",
+  },
 };
 
 function repoPath(relativePath) {

@@ -816,6 +816,211 @@ function deriveFromImplementation(card, implementationText, hint) {
     }
   }
 
+  if (/kind:\s*"additional_subroutine"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "future_encounter_effect",
+      timing: "encounter",
+      scope: "run_path",
+      source: "implementation.modifiers.additional_subroutine",
+    });
+    addEffect(facts, {
+      kind: "remote_protection",
+      timing: "persistent",
+      scope: "fort",
+      resource: "subroutines",
+      source: "implementation.modifiers.additional_subroutine",
+    });
+    facts.remoteRole = {
+      kind: "scoring_protection",
+      threatLevel: "high",
+      serverScope: "fort",
+      confidence: "high",
+      source: "implementation.modifiers.additional_subroutine",
+    };
+  }
+
+  if (/additional_agenda_or_node_slot_inside_fort/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "remote_protection",
+      timing: "persistent",
+      scope: "remote",
+      source: "implementation.fortCapacityModifiers.additional_slot",
+    });
+    addEffect(facts, {
+      kind: "score_acceleration",
+      timing: "persistent",
+      scope: "remote",
+      source: "implementation.fortCapacityModifiers.additional_slot",
+    });
+    addCondition(facts, {
+      kind: "requires_remote_server",
+      source: "implementation.installCapabilities.subsidiary_data_fort",
+    });
+    facts.remoteRole = {
+      kind: "remote_capacity",
+      threatLevel: "medium",
+      serverScope: "remote",
+      confidence: "high",
+      source: "implementation.fortCapacityModifiers.additional_slot",
+    };
+  }
+
+  if (
+    /install_hq_ice_innermost_after_successful_run/.test(implementationText)
+  ) {
+    addEffect(facts, {
+      kind: "future_encounter_effect",
+      timing: "successful_run",
+      scope: "fort",
+      confidence: "medium",
+      source:
+        "implementation.fortRunWindows.install_hq_ice_innermost_after_successful_run",
+    });
+    addEffect(facts, {
+      kind: "remote_protection",
+      timing: "successful_run",
+      scope: "fort",
+      confidence: "medium",
+      source:
+        "implementation.fortRunWindows.install_hq_ice_innermost_after_successful_run",
+    });
+    addCondition(facts, {
+      kind: "requires_successful_run",
+      source:
+        "implementation.fortRunWindows.install_hq_ice_innermost_after_successful_run",
+    });
+    facts.remoteRole = {
+      kind: "scoring_protection",
+      threatLevel: "high",
+      serverScope: "fort",
+      confidence: "medium",
+      source:
+        "implementation.fortRunWindows.install_hq_ice_innermost_after_successful_run",
+    };
+    facts.derivationNotes.push(
+      "Jenny Jett is derived only as a successful-run future-encounter class; HQ card identity and legal target choice remain hidden-info/runtime context.",
+    );
+  }
+
+  if (/discounted_rez_ice_on_this_fort/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "rez_discount",
+      timing: "during_run",
+      scope: "ice",
+      source: "implementation.fortRunWindows.discounted_rez_ice_on_this_fort",
+    });
+    addEffect(facts, {
+      kind: "remote_protection",
+      timing: "during_run",
+      scope: "fort",
+      source: "implementation.fortRunWindows.discounted_rez_ice_on_this_fort",
+    });
+    addCondition(facts, {
+      kind: "requires_during_run",
+      source: "implementation.fortRunWindows.discounted_rez_ice_on_this_fort",
+    });
+    facts.remoteRole = {
+      kind: "scoring_protection",
+      threatLevel: "medium",
+      serverScope: "fort",
+      confidence: "high",
+      source: "implementation.fortRunWindows.discounted_rez_ice_on_this_fort",
+    };
+  }
+
+  if (/roll_die_on_pass_rezzed_ice_on_same_fort/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "future_encounter_effect",
+      timing: "during_run",
+      scope: "fort",
+      confidence: "medium",
+      source:
+        "implementation.fortRunWindows.roll_die_on_pass_rezzed_ice_on_same_fort",
+    });
+    addEffect(facts, {
+      kind: "remote_protection",
+      timing: "persistent",
+      scope: "fort",
+      confidence: "medium",
+      source:
+        "implementation.fortRunWindows.roll_die_on_pass_rezzed_ice_on_same_fort",
+    });
+    addCondition(facts, {
+      kind: "requires_during_run",
+      source:
+        "implementation.fortRunWindows.roll_die_on_pass_rezzed_ice_on_same_fort",
+    });
+    facts.remoteRole = {
+      kind: "scoring_protection",
+      threatLevel: "medium",
+      serverScope: "fort",
+      confidence: "medium",
+      source:
+        "implementation.fortRunWindows.roll_die_on_pass_rezzed_ice_on_same_fort",
+    };
+    facts.derivationNotes.push(
+      "Rio de Janeiro City Grid is represented as a deterministic-random future encounter class; actual die result and run ending remain runtime state.",
+    );
+  }
+
+  if (/kind:\s*"rez_cost"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "rez_discount",
+      timing: "persistent",
+      scope: "ice",
+      resource: "credits",
+      amount: amountNear(implementationText, "rez_cost"),
+      source: "implementation.modifiers.rez_cost",
+    });
+  }
+
+  if (/kind:\s*"ice_strength"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "remote_protection",
+      timing: "persistent",
+      scope: /sameServerAsSource:\s*true/.test(implementationText)
+        ? "fort"
+        : "ice",
+      resource: "strength",
+      amount: amountNear(implementationText, "ice_strength"),
+      source: "implementation.modifiers.ice_strength",
+    });
+    if (!isAgenda) {
+      facts.remoteRole = {
+        kind: "ice_modifier",
+        threatLevel: "medium",
+        serverScope: /sameServerAsSource:\s*true/.test(implementationText)
+          ? "fort"
+          : "server",
+        confidence: "high",
+        source: "implementation.modifiers.ice_strength",
+      };
+    }
+  }
+
+  if (/kind:\s*"distribute_advancement_counters"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "score_acceleration",
+      timing: "action",
+      scope: "installed_card",
+      resource: "advancement_counters",
+      amount: amountNear(implementationText, "distribute_advancement_counters"),
+      source: "implementation.abilities.distribute_advancement_counters",
+    });
+    facts.costProfile = {
+      clicks: amountNear(implementationText, "action"),
+      credits: amountNear(implementationText, "credit"),
+      source: "implementation.abilities.costs",
+    };
+    facts.remoteRole = {
+      kind: "asset_economy",
+      threatLevel: "medium",
+      serverScope: "remote",
+      confidence: "high",
+      source: "implementation.abilities.distribute_advancement_counters",
+    };
+  }
+
   if (/kind:\s*"break_subroutine_cost"/.test(implementationText)) {
     addEffect(facts, {
       kind: "run_tax",
