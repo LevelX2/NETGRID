@@ -15,6 +15,7 @@
     "check:ai-generated-fact-batch1-diff-review": "node scripts/check-ai-generated-fact-batch1-diff-review.mjs --check",
     "check:ai-generated-fact-batch1-normalization-dry-run": "node scripts/check-ai-generated-fact-batch1-normalization-dry-run.mjs --check",
     "check:ai-generated-fact-batch1-rollup": "node scripts/check-ai-generated-fact-batch1-rollup.mjs --check",
+    "check:ai-generated-fact-batch2-dry-run": "node scripts/check-ai-generated-fact-batch2-dry-run.mjs --check",
     "check:ai-generated-fact-migration-dry-run": "node scripts/check-ai-generated-fact-migration-dry-run.mjs --check",
     "check:ai-generated-fact-migration-priority": "node scripts/check-ai-generated-fact-migration-priority.mjs --check",
     "check:ai-hint-compiled-index": "node scripts/check-ai-hint-compiled-index.mjs --check",
