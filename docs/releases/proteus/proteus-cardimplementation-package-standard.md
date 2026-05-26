@@ -34,14 +34,15 @@ Jedes Proteus-CardImplementation-Paket muss diese Projektprinzipien einhalten:
 Neue PRO-Activities sollen klein bleiben und höchstens ein PRO-Paket abdecken. Wenn ein Paket mehr als sechs Karten oder mehr als vier neue generische Engine-Bausteine braucht, wird es vor Umsetzung weiter geschnitten, zum Beispiel `PRO016a`.
 
 ```markdown
-# <kurzer Activity-Titel>
-
+---
 status: inbox
 priority: normal
 primaryAgent: release-implementation-agent
-proRefs:
+proReferences:
+  - PRO0xx
+---
 
-- PRO0xx
+# <kurzer Activity-Titel>
 
 ## Ziel / PRO-Referenz
 
