@@ -1,0 +1,530 @@
+{
+  "schemaVersion": "ai-generated-fact-batch2-rollup-v1",
+  "generatedAt": "2026-05-25",
+  "taskId": "Aufgabe 011",
+  "sourceReports": [
+    "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json",
+    "docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json",
+    "docs/reviews/ai/ai-generated-fact-migration-priority-report-2026-05-25.json",
+    "docs/reviews/ai/aufgabe-007-batch1-generated-facts-rollup-report-2026-05-25.json",
+    "docs/reviews/ai/aufgabe-008-generated-fact-batch2-dry-run-report-2026-05-25.json",
+    "docs/reviews/ai/aufgabe-009-batch2-diff-review-report-2026-05-25.json",
+    "docs/reviews/ai/aufgabe-010-batch2-normalization-dry-run-report-2026-05-25.json"
+  ],
+  "batch": "batch_2_breaker_target_trash_credit",
+  "mode": "read-only rollup; no active hint migration, no runtime compile, no planner or consumer binding",
+  "batchCardCount": 6,
+  "confirmedGeneratedFactCount": 11,
+  "previewAddedFactCount": 3,
+  "previewChangedCardCount": 2,
+  "hardErrorCount": 0,
+  "conflictCount": 0,
+  "realSemanticConflictCount": 0,
+  "shapeDifferenceCount": 5,
+  "normalizedDifferenceCount": 15,
+  "remainingShapeDifferenceCount": 0,
+  "remainingTargetProfileDifferenceCount": 0,
+  "remainingTrashCreditTargetDifferenceCount": 0,
+  "remainingCostProfileDifferenceCount": 0,
+  "boardContextInfoCount": 7,
+  "monolithOnlyMechanicalFactCount": 0,
+  "deriverFollowupCandidateCount": 0,
+  "descriptorGapRemainingCount": 0,
+  "humanReviewCandidateCount": 0,
+  "consumerActiveForFactTypeCount": 14,
+  "legacyKeepForCompatCount": 6,
+  "futureMigrationReadyCardCount": 6,
+  "readinessCounts": {
+    "ready_but_board_context_required": 2,
+    "ready_for_future_generated_migration": 4
+  },
+  "batchTwoStatus": "future_migration_ready_read_only",
+  "normalizationRuleCounts": {
+    "target_profile_install_cost_normalization": 3,
+    "target_profile_stack_search_normalization": 2,
+    "trash_credit_target_normalization": 4,
+    "breaker_profile_shape_normalization": 2,
+    "cost_profile_split_normalization": 6,
+    "board_context_required_classification": 7
+  },
+  "boardContextRules": [
+    {
+      "kind": "breakerProfile",
+      "rule": "Generated BreakerProfile describes static card function only; actual breaking remains Encounter, LegalAction, Engine and effectiveRunQuote state.",
+      "appliesTo": [
+        "breakerProfile",
+        "effect:breaker"
+      ]
+    },
+    {
+      "kind": "targetProfiles",
+      "rule": "Generated TargetProfiles describe search/install target shape; actual search and install legality remain Engine/LegalAction state.",
+      "appliesTo": [
+        "condition:requires_during_run",
+        "effect:search",
+        "effect:install_discount",
+        "targetProfile"
+      ]
+    },
+    {
+      "kind": "trashCredits",
+      "rule": "Generated trash-credit facts describe dedicated credit sources only; actual use and payment remain Cost/LegalAction-gated and card-specific targets must not be swapped.",
+      "appliesTo": [
+        "effect:trash_credit"
+      ]
+    },
+    {
+      "kind": "costProfile",
+      "rule": "Mechanical costs can be generated later, but reserveRisk and opportunityCost remain strategy/overlay fields until an active migration explicitly splits them.",
+      "appliesTo": [
+        "costProfile"
+      ]
+    },
+    {
+      "kind": "legacyCompatibility",
+      "rule": "roles, planRoles, aiSupportStatus, lineSupport and quality remain active monolith/overlay fields and are not changed by this rollup.",
+      "appliesTo": [
+        "roles",
+        "planRoles",
+        "aiSupportStatus",
+        "lineSupport",
+        "quality"
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "factGroups": [
+        "breakerProfile",
+        "costProfile"
+      ],
+      "priority": "P0",
+      "risk": "low",
+      "confirmedGeneratedFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAddedFacts": [],
+      "generatedFactsAlreadyPresent": [
+        "effect:breaker"
+      ],
+      "boardContextRequired": [],
+      "normalizedDifferences": [
+        {
+          "fact": "breakerProfile",
+          "sourceWarningKind": "shape_difference",
+          "rules": [
+            "breaker_profile_shape_normalization"
+          ],
+          "classification": "normalized_equivalent"
+        },
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "classification": "normalized_cost_profile_split"
+        }
+      ],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "cost_profile_diagnostic_consumer"
+      ],
+      "manualOverlayPresent": true,
+      "guardrails": [
+        "forgo_actions_side_effect_retained",
+        "breaker_profile_does_not_create_break_legality"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_for_future_generated_migration"
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "factGroups": [
+        "breakerProfile",
+        "costProfile"
+      ],
+      "priority": "P0",
+      "risk": "low",
+      "confirmedGeneratedFacts": [
+        "breakerProfile",
+        "effect:breaker"
+      ],
+      "previewAddedFacts": [],
+      "generatedFactsAlreadyPresent": [
+        "effect:breaker"
+      ],
+      "boardContextRequired": [],
+      "normalizedDifferences": [
+        {
+          "fact": "breakerProfile",
+          "sourceWarningKind": "shape_difference",
+          "rules": [
+            "breaker_profile_shape_normalization"
+          ],
+          "classification": "normalized_equivalent"
+        },
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "classification": "normalized_cost_profile_split"
+        }
+      ],
+      "activeConsumers": [
+        "breaker_profile_consumer",
+        "cost_profile_diagnostic_consumer"
+      ],
+      "manualOverlayPresent": false,
+      "guardrails": [
+        "universal_breaker_coverage_retained",
+        "universal_coverage_not_reduced_to_single_ice_type"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_for_future_generated_migration"
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "factGroups": [
+        "costProfile",
+        "targetProfile"
+      ],
+      "priority": "P1",
+      "risk": "medium",
+      "confirmedGeneratedFacts": [
+        "condition:requires_during_run",
+        "effect:install_discount",
+        "effect:search"
+      ],
+      "previewAddedFacts": [
+        "effect:topdeck_info",
+        "targetProfile"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_during_run",
+        "effect:search"
+      ],
+      "boardContextRequired": [
+        "condition:requires_during_run",
+        "effect:install_discount",
+        "effect:search",
+        "targetProfile"
+      ],
+      "normalizedDifferences": [
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "classification": "normalized_cost_profile_split"
+        },
+        {
+          "fact": "effect:install_discount",
+          "sourceWarningKind": "shape_difference",
+          "rules": [
+            "target_profile_install_cost_normalization"
+          ],
+          "classification": "normalized_equivalent"
+        },
+        {
+          "fact": "targetProfile",
+          "sourceWarningKind": "target_profile_shape_difference",
+          "rules": [
+            "target_profile_install_cost_normalization",
+            "target_profile_stack_search_normalization"
+          ],
+          "classification": "normalized_equivalent"
+        }
+      ],
+      "activeConsumers": [
+        "cost_profile_diagnostic_consumer",
+        "target_profile_diagnostic_consumer"
+      ],
+      "manualOverlayPresent": true,
+      "guardrails": [
+        "free_install_cost_retained",
+        "install_discount_retained",
+        "top_five_stack_target_profile_not_full_stack"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    },
+    {
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
+      "factGroups": [
+        "costProfile",
+        "trash_credit"
+      ],
+      "priority": "P2",
+      "risk": "low",
+      "confirmedGeneratedFacts": [
+        "effect:trash_credit"
+      ],
+      "previewAddedFacts": [],
+      "generatedFactsAlreadyPresent": [],
+      "boardContextRequired": [],
+      "normalizedDifferences": [
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "classification": "normalized_cost_profile_split"
+        },
+        {
+          "fact": "effect:trash_credit",
+          "sourceWarningKind": "shape_difference",
+          "rules": [
+            "trash_credit_target_normalization"
+          ],
+          "classification": "normalized_equivalent"
+        },
+        {
+          "fact": "effect:trash_credit",
+          "sourceWarningKind": "trash_credit_target_shape_difference",
+          "rules": [
+            "trash_credit_target_normalization"
+          ],
+          "classification": "normalized_equivalent"
+        }
+      ],
+      "activeConsumers": [
+        "cost_profile_diagnostic_consumer",
+        "trash_credit_consumer"
+      ],
+      "manualOverlayPresent": false,
+      "guardrails": [
+        "node_trash_credit_target_retained",
+        "trash_credit_payment_legality_not_inferred"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_for_future_generated_migration"
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "factGroups": [
+        "costProfile",
+        "trash_credit"
+      ],
+      "priority": "P2",
+      "risk": "low",
+      "confirmedGeneratedFacts": [
+        "effect:trash_credit"
+      ],
+      "previewAddedFacts": [],
+      "generatedFactsAlreadyPresent": [],
+      "boardContextRequired": [],
+      "normalizedDifferences": [
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "classification": "normalized_cost_profile_split"
+        },
+        {
+          "fact": "effect:trash_credit",
+          "sourceWarningKind": "shape_difference",
+          "rules": [
+            "trash_credit_target_normalization"
+          ],
+          "classification": "normalized_equivalent"
+        },
+        {
+          "fact": "effect:trash_credit",
+          "sourceWarningKind": "trash_credit_target_shape_difference",
+          "rules": [
+            "trash_credit_target_normalization"
+          ],
+          "classification": "normalized_equivalent"
+        }
+      ],
+      "activeConsumers": [
+        "cost_profile_diagnostic_consumer",
+        "trash_credit_consumer"
+      ],
+      "manualOverlayPresent": false,
+      "guardrails": [
+        "upgrade_trash_credit_target_retained",
+        "trash_credit_payment_legality_not_inferred"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_for_future_generated_migration"
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "factGroups": [
+        "costProfile",
+        "targetProfile"
+      ],
+      "priority": "P1",
+      "risk": "low",
+      "confirmedGeneratedFacts": [
+        "condition:requires_during_run",
+        "effect:search"
+      ],
+      "previewAddedFacts": [
+        "targetProfile"
+      ],
+      "generatedFactsAlreadyPresent": [
+        "condition:requires_during_run",
+        "effect:search"
+      ],
+      "boardContextRequired": [
+        "condition:requires_during_run",
+        "effect:search",
+        "targetProfile"
+      ],
+      "normalizedDifferences": [
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "classification": "normalized_cost_profile_split"
+        },
+        {
+          "fact": "targetProfile",
+          "sourceWarningKind": "target_profile_shape_difference",
+          "rules": [
+            "target_profile_install_cost_normalization",
+            "target_profile_stack_search_normalization"
+          ],
+          "classification": "normalized_equivalent"
+        }
+      ],
+      "activeConsumers": [
+        "cost_profile_diagnostic_consumer",
+        "target_profile_diagnostic_consumer"
+      ],
+      "manualOverlayPresent": true,
+      "guardrails": [
+        "normal_install_cost_retained",
+        "install_discount_not_generated",
+        "full_stack_program_search_not_free_install"
+      ],
+      "remainingIssues": [],
+      "futureMigrationReady": true,
+      "readiness": "ready_but_board_context_required"
+    }
+  ],
+  "nextBatchRecommendation": {
+    "recommendedTaskId": "Aufgabe 012",
+    "batchName": "batch_3_remote_role_future_run_ice",
+    "recommendation": "Option A",
+    "rationale": "RemoteRole and future-run ICE are the next important mechanical category after the conflict-free Batch 1 and Batch 2 paths. RemoteRole facts already have diagnostic/consumer value, while future-run and future-encounter effects need explicit board/runpath context in the same read-only style.",
+    "candidateCards": [
+      "onr_v1_274_tutor",
+      "onr_v1_277_virizz",
+      "onr_v1_276_viral-15",
+      "onr_v1_355_crystal-palace-station-grid",
+      "onr_v1_366_red-herrings"
+    ],
+    "riskMitigation": "Keep RemoteRole/run_tax/agenda_steal_tax separate from future_run/future_encounter facts, and classify board/runpath context before any rollup readiness claim.",
+    "fallbackOption": {
+      "recommendedTaskId": "Aufgabe 012A",
+      "batchName": "batch_3_remote_upgrades_only",
+      "rationale": "If the future-run ICE slice looks too broad, Crystal Palace Station Grid and Red Herrings form a smaller RemoteRole-only batch with clearer run_tax/agenda_steal_tax boundaries.",
+      "candidateCards": [
+        "onr_v1_355_crystal-palace-station-grid",
+        "onr_v1_366_red-herrings"
+      ]
+    },
+    "deferredAlternatives": [
+      {
+        "option": "Option B",
+        "batchName": "runner_information_central_pressure",
+        "reasonToDefer": "R&D-Protocol Files and Deep Thought are useful but smaller and more strategy-overlay-heavy than RemoteRole/future-run mechanics."
+      }
+    ]
+  },
+  "sourceSummary": {
+    "derivedFacts": {
+      "hardErrorCount": 0,
+      "warningCount": 38,
+      "cardsNeedingManualOverlay": 3
+    },
+    "compiledIndex": {
+      "hardErrorCount": 0,
+      "warningCount": 79,
+      "reviewCandidates": 0
+    },
+    "migrationPriority": {
+      "candidateCount": 24,
+      "priorityCounts": {
+        "P0": 13,
+        "P1": 7,
+        "P2": 4,
+        "P3": 0
+      },
+      "riskCounts": {
+        "low": 13,
+        "medium": 11,
+        "high": 0
+      }
+    },
+    "batchOneRollup": {
+      "batchOneStatus": "future_migration_ready_read_only",
+      "confirmedGeneratedFactCount": 40
+    },
+    "batchTwoDryRun": {
+      "warningCount": 47,
+      "warningCountsByKind": {
+        "board_context_required": 7,
+        "consumer_active_for_fact_type": 14,
+        "cost_profile_shape_difference": 6,
+        "descriptor_context_required": 2,
+        "generated_fact_added_in_preview": 3,
+        "generated_fact_already_present": 6,
+        "shape_difference": 5,
+        "target_profile_shape_difference": 2,
+        "trash_credit_target_shape_difference": 2
+      },
+      "infoCountsByKind": {
+        "legacy_keep_for_compat": 6,
+        "manual_overlay_not_runtime": 3,
+        "manual_overlay_present": 3,
+        "no_change_needed": 4,
+        "preview_only": 6
+      }
+    },
+    "batchTwoDiffReview": {
+      "realSemanticConflictCount": 0,
+      "classificationCounts": {
+        "cost_profile_requires_overlay_split": 6,
+        "generated_more_precise_than_monolith": 3,
+        "install_cost_requires_engine_cost_context": 1,
+        "monolith_more_specific_than_generated": 2,
+        "semantic_equivalent_shape_difference": 2,
+        "target_equivalent_node_trash_credit": 1,
+        "target_equivalent_upgrade_trash_credit": 1,
+        "target_profile_requires_search_legalaction_context": 6
+      }
+    },
+    "batchTwoNormalization": {
+      "normalizedDifferenceCount": 15,
+      "boardContextInfoCount": 7,
+      "remainingDifferenceCount": 0
+    }
+  },
+  "errors": []
+}
