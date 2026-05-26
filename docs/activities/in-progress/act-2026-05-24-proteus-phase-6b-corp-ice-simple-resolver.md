@@ -12,7 +12,6 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 6b
 proReferences:
-  - PRO006
   - PRO025
 blockedBy:
   - Chihuahua needs a printed trace success effect that deals preventable Net damage; current trace success effects support tags, counters, end-run, hardware/program trash, run locks and unpreventable meat damage, but not preventable net/core damage.
@@ -72,8 +71,9 @@ Die einfachen öffentlichen Proteus-Corp-ICE-Resolver über generische Printed-S
 
 Blockiert. Mehrere Zielkarten passen in bestehende Familien, aber der Slice ist als Ganzes nicht vollstaendig umsetzbar:
 
-- `Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank` und Teile von `Iceberg` sind voraussichtlich mit vorhandenen `damage`, `trash_program`, `end_the_run_unless_runner_pays`, Lifecycle-`on_rez` und Riddler-artigem `add_current_encounter_additional_subroutine` abbildbar.
+- PRO006 ist abgeschlossen: `Brain Wash`, `Colonel Failure`, `Misleading Access Menus` und `Snowbank` sind als konkrete CardImplementation-Dateien umgesetzt, registriert, im Manifest engine-/human-playable und durch Coverage-/Behavior-Tests abgedeckt.
+- `Iceberg` bleibt bei PRO025, weil seine Conditional-ICE-Details nicht in den Simple-Resolver-Scope von PRO006 gezogen wurden.
 - `Chihuahua` braucht aber eine Trace-Erfolg-Folge fuer preventable Net damage; die aktuelle Trace-Success-Union deckt diesen Effekt nicht ab.
 - `Coyote` braucht eine rungebundene Future-ICE-Strength-Erhoehung mit Runner-Zahlungsfenster beim Passieren genau dieser Quelle. Der vorhandene `run_duration_ice_strength`-Baustein hat keine solche Cancel-/Pass-Window-Revalidierung.
 - `Washed-Up Solo Construct` braucht ein generisches "Runner zahlt sonst trash program"-Printed-Subroutine-Fenster; `trash_program` ist aktuell unmittelbar.
-- Keine CardImplementation wurde fuer 6b angelegt und keine Manifest-/Coverage-Promotion vorgenommen.
+- Phase 6b bleibt deshalb nur noch fuer PRO025 blockiert; keine PRO025-Karte wurde in PRO006 umgesetzt oder freigegeben.

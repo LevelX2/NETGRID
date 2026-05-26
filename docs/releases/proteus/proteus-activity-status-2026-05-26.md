@@ -18,15 +18,15 @@ Führend ist die eindeutige CardImplementation-Abdeckung:
 
 PRO001 hat dafür bereits den Guard in `packages/engine/src/card-implementations/coverage.test.ts` ergänzt: `reconciles Proteus manifest support against concrete files and registry`. Dieser Guard prüft 154 Karten in `data/cards/proteus-cards.json`, 154 Manifest-Einträge, eindeutige CardImplementation-Dateien, Registry-Parität, `implemented`-Manifestparität, `resolverRef = engine:<cardId>` für implementierte Karten und `resolverRef = null` für nicht implementierte Karten. PRO002 etabliert keine zweite konkurrierende Zählweise.
 
-Aktueller Stand nach PRO005:
+Aktueller Stand nach PRO006:
 
 | Kennzahl | Wert | Führende Quelle |
 | --- | ---: | --- |
 | Proteus-Gesamtbasis | 154 | `data/cards/proteus-cards.json` |
-| Konkrete Proteus-CardImplementation-Dateien | 58 | `packages/engine/src/card-implementations/proteus/*.ts` |
-| Registry-paritätische Implementierungen | 58 | `coverage.test.ts`-Guard gegen Registry |
-| Fehlende konkrete CardImplementation-Dateien | 96 | Gesamtbasis minus konkrete Dateien |
-| Manifest-`implemented`-Einträge | 58 | Driftprüfung in `data/manifests/proteus-card-support.json` |
+| Konkrete Proteus-CardImplementation-Dateien | 62 | `packages/engine/src/card-implementations/proteus/*.ts` |
+| Registry-paritätische Implementierungen | 62 | `coverage.test.ts`-Guard gegen Registry |
+| Fehlende konkrete CardImplementation-Dateien | 92 | Gesamtbasis minus konkrete Dateien |
+| Manifest-`implemented`-Einträge | 62 | Driftprüfung in `data/manifests/proteus-card-support.json` |
 
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
 
@@ -64,6 +64,7 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-24-proteus-phase-4a-hidden-resource-activation-foundation.md` | `done` | Phase 4a | Hidden-Runner-Resource-Foundation, keine Zielkartenpromotion. |
 | `done/act-2026-05-26-proteus-pro004-1-multibreak-hardening.md` | `done` | PRO004-1 | Multi-Break-Härtung, Proteus-Testkatalog und Regressionstests; keine neue Kartenpromotion. |
 | `done/act-2026-05-26-proteus-pro005-simple-runner-economy-draw-events.md` | `done` | PRO005 | 2 Karten: `Cruising for Netwatch`, `Stakeout`; Phase 5c bleibt für PRO014 blockiert. |
+| `done/act-2026-05-26-proteus-pro006-simple-corp-ice-resolver.md` | `done` | PRO006 | 4 Karten: `Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`; Phase 6b bleibt für PRO025 blockiert. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
 | `done/act-2026-05-24-proteus-phase-7a-hardware-deck-foundation.md` | `done` | Phase 7a | 1 Karte: `Deck, The`. |
 | `done/act-2026-05-24-proteus-phase-7b-icebreaker-credit-decks.md` | `done` | Phase 7b | 2 Karten: `Cortical Cybermodem`, `Sunburst Cranial Interface`. |
@@ -134,7 +135,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | `in-progress/act-2026-05-24-proteus-phase-5d-visible-runner-run-events.md` | `blocked` | Phase 5d | `All-Hands`, `Rush Hour`, `Decoy Signal`, `Demolition Run`, `Remote Detonator`, `Disgruntled Ice Technician`, `Drone for a Day`, `Reconnaissance`, `Weefle Initiation`; Run-Event-Flags und Followups. | `PRO015`, `PRO016` |
 | `in-progress/act-2026-05-24-proteus-phase-5e-icebreaker-modifier-support-hardware.md` | `blocked` | Phase 5e | `Personal Touch, The`, `Eurocorpse (TM) Spin Chip`; Icebreaker-Modifier-Hardware. | `PRO013` |
 | `in-progress/act-2026-05-24-proteus-phase-6a-agenda-scoring-steal-baseline.md` | `blocked` | Phase 6a | `Corporate Headhunters`, `Fetal AI`, `Marked Accounts`, `Project Zurich`, `World Domination`; Agenda-Score-/Steal-Baseline. | `PRO024` |
-| `in-progress/act-2026-05-24-proteus-phase-6b-corp-ice-simple-resolver.md` | `blocked` | Phase 6b | `Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`, `Chihuahua`, `Coyote`, `Iceberg`, `Washed-Up Solo Construct`; Simple ICE und Trace/Conditional Resolver. | `PRO006`, `PRO025` |
+| `in-progress/act-2026-05-24-proteus-phase-6b-corp-ice-simple-resolver.md` | `blocked` | Phase 6b | PRO006 ist umgesetzt: `Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`. Offen/blockiert bleiben `Chihuahua`, `Coyote`, `Iceberg`, `Washed-Up Solo Construct` für Trace-/Conditional-Resolver. | `PRO025` |
 | `in-progress/act-2026-05-24-proteus-phase-6c-corp-operation-trace-tag-economy.md` | `blocked` | Phase 6c | `Credit Consolidation`, `Data Sifters`, `Manhunt`, `Schlaghund Pointers`, `Underworld Mole`; Operation Economy und Trace/History. | `PRO007`, `PRO026` |
 | `in-progress/act-2026-05-24-proteus-phase-6d-corp-asset-upgrade-utility.md` | `blocked` | Phase 6d | `Department of Misinformation`, `Government Contract`, `LDL Traffic Analyzers`, `Panic Button`, `Cybertech Think Tank`, `Raymond Ellison`, `Siren`, `Syd Meyer Superstores`; Asset/Upgrade Utility A/B. | `PRO027`, `PRO028` |
 | `in-progress/act-2026-05-24-proteus-phase-6e-runner-agenda-overadvance-events.md` | `blocked` | Phase 6e | `Blackmail`, `Pirate Broadcast`, `Promises, Promises`; Runner Agenda/Overadvance Events. | `PRO029` |
@@ -154,7 +155,7 @@ Alle PRO001 bis PRO040 sind hier bewusst erfasst. Bei Paketen ohne eigene konkre
 | PRO003 | erledigt durch Paketstandard und Verify-Harness | `proteus-cardimplementation-package-standard.md`; `coverage.test.ts`: Proteus-Abdeckung, Restliste und Driftprüfung |
 | PRO004 | umgesetzt; PRO004-1 Nacharbeit erledigt | Sechs Simple-Icebreaker-Core-Karten (`Big Frackin' Gun`, `Boring Bit`, `Corrosion`, `Redecorator`, `Skeleton Passkeys`, `Wrecking Ball`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. PRO004-1 ergänzt Multi-Break-Härtung und einen Proteus-Testkatalog; Phase 5a bleibt für PRO011/PRO012 blockiert. |
 | PRO005 | umgesetzt | Zwei Simple-Runner-Economy-/Draw-Events (`Cruising for Netwatch`, `Stakeout`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
-| PRO006 | referenziert, konkrete Activity noch zu schneiden | Phase 6b, Phase-1-Umbrella |
+| PRO006 | umgesetzt | Vier Simple-Corp-ICE-Resolver (`Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. Phase 6b bleibt für PRO025 blockiert. |
 | PRO007 | referenziert, konkrete Activity noch zu schneiden | Phase 6c |
 | PRO008 | referenziert, konkrete Activity noch zu schneiden | Phase 4d |
 | PRO009 | referenziert, konkrete Activity noch zu schneiden | Phase 1e |

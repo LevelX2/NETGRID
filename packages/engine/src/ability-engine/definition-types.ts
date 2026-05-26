@@ -1712,6 +1712,11 @@ export type CardPrintedSubroutineImplementation =
       text: "*End the run.";
     }
   | {
+      kind: "end_the_run_unless_runner_pays";
+      amount: number;
+      text: "*End the run unless Runner pays [1].";
+    }
+  | {
       kind: "trash_program";
       text: "*Trash a program.";
     }

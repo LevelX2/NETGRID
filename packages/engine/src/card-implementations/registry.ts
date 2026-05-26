@@ -385,8 +385,10 @@ import { belDigmoAntibodyImplementation } from "./proteus/corp/assets/bel-digmo-
 import { doppelgangerAntibodyImplementation } from "./proteus/corp/assets/doppelganger-antibody";
 import { pattelAntibodyImplementation } from "./proteus/corp/assets/pattel-antibody";
 import { stereogramAntibodyImplementation } from "./proteus/corp/assets/stereogram-antibody";
+import { proteusBrainWashImplementation } from "./proteus/corp/ice/brain-wash";
 import { proteusBugZapperImplementation } from "./proteus/corp/ice/bug-zapper";
 import { proteusCaryatidImplementation } from "./proteus/corp/ice/caryatid";
+import { proteusColonelFailureImplementation } from "./proteus/corp/ice/colonel-failure";
 import { proteusCreditBlocksImplementation } from "./proteus/corp/ice/credit-blocks";
 import { proteusDigicondaImplementation } from "./proteus/corp/ice/digiconda";
 import { proteusDogPileImplementation } from "./proteus/corp/ice/dog-pile";
@@ -397,8 +399,10 @@ import { proteusHomingMissileImplementation } from "./proteus/corp/ice/homing-mi
 import { proteusHuntingPackImplementation } from "./proteus/corp/ice/hunting-pack";
 import { proteusLesserArcanaImplementation } from "./proteus/corp/ice/lesser-arcana";
 import { proteusMastermindImplementation } from "./proteus/corp/ice/mastermind";
+import { proteusMisleadingAccessMenusImplementation } from "./proteus/corp/ice/misleading-access-menus";
 import { proteusMobileBarricadeImplementation } from "./proteus/corp/ice/mobile-barricade";
 import { proteusSandstormImplementation } from "./proteus/corp/ice/sandstorm";
+import { proteusSnowbankImplementation } from "./proteus/corp/ice/snowbank";
 import { proteusSphinx2006Implementation } from "./proteus/corp/ice/sphinx-2006";
 import { proteusSumo2008Implementation } from "./proteus/corp/ice/sumo-2008";
 import { proteusToughoniumWallImplementation } from "./proteus/corp/ice/toughonium-wall";
@@ -813,9 +817,11 @@ export const CARD_IMPLEMENTATIONS = [
   tokyoChibaInfightingImplementation,
   turbeauDelacroixImplementation,
   washingtonDcCityGridImplementation,
+  proteusBrainWashImplementation,
   proteusToughoniumWallImplementation,
   proteusBugZapperImplementation,
   proteusCaryatidImplementation,
+  proteusColonelFailureImplementation,
   proteusCreditBlocksImplementation,
   proteusDigicondaImplementation,
   proteusDogPileImplementation,
@@ -826,8 +832,10 @@ export const CARD_IMPLEMENTATIONS = [
   proteusHuntingPackImplementation,
   proteusLesserArcanaImplementation,
   proteusMastermindImplementation,
+  proteusMisleadingAccessMenusImplementation,
   proteusMobileBarricadeImplementation,
   proteusSandstormImplementation,
+  proteusSnowbankImplementation,
   proteusSphinx2006Implementation,
   proteusSumo2008Implementation,
   proteusWalkingWallImplementation,

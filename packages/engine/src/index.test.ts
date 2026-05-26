@@ -2489,6 +2489,354 @@ describe("Proteus Dynamic Public ETR ICE", () => {
   });
 });
 
+describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
+  const BRAIN_WASH = "onr_proteus_011_brain-wash";
+  const COLONEL_FAILURE = "onr_proteus_015_colonel-failure";
+  const MISLEADING_ACCESS_MENUS =
+    "onr_proteus_032_misleading-access-menus";
+  const SNOWBANK = "onr_proteus_038_snowbank";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusSimpleCorpIceGame(seed: string): GameState {
+    const corpOverrideIds = new Set([
+      BRAIN_WASH,
+      COLONEL_FAILURE,
+      MISLEADING_ACCESS_MENUS,
+      SNOWBANK,
+    ]);
+    const runnerOverrideIds = new Set([
+      "simple_decoder",
+      "simple_fracter",
+      "simple_killer",
+    ]);
+    return createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        ...ONR_V1_6_2_RUNNER_DECK,
+        id: `${seed}_runner`,
+        cards: [
+          { id: "simple_decoder", quantity: 2 },
+          { id: "simple_fracter", quantity: 2 },
+          { id: "simple_killer", quantity: 2 },
+          ...ONR_V1_6_2_RUNNER_DECK.cards.filter(
+            (card) => !runnerOverrideIds.has(card.id),
+          ),
+        ],
+      },
+      corpDeck: {
+        ...ONR_V1_6_2_CORP_DECK,
+        id: `${seed}_corp`,
+        cards: [
+          { id: BRAIN_WASH, quantity: 1 },
+          { id: COLONEL_FAILURE, quantity: 1 },
+          { id: MISLEADING_ACCESS_MENUS, quantity: 1 },
+          { id: SNOWBANK, quantity: 1 },
+          ...ONR_V1_6_2_CORP_DECK.cards.filter(
+            (card) => !corpOverrideIds.has(card.id),
+          ),
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+  }
+
+  function setRezzed(state: GameState, cardId: CardInstanceId): void {
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+
+  function startEncounterWithRezzedIce(
+    state: GameState,
+    definitionId: string,
+  ): { state: GameState; iceId: CardInstanceId } {
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 30;
+    state.runner.credits = 20;
+    const iceId = putCorpIceOnServer(state, "rd", definitionId);
+    setRezzed(state, iceId);
+    state = enterEncounterFromMovementWindow(
+      apply(
+        toRunnerTurnFromCorpMain(state),
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      ),
+    );
+    return { state, iceId };
+  }
+
+  function startEncounterAndRezIce(
+    state: GameState,
+    definitionId: string,
+  ): { state: GameState; iceId: CardInstanceId; rezCreditsBefore: number } {
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 30;
+    state.runner.credits = 20;
+    const iceId = putCorpIceOnServer(state, "rd", definitionId);
+    state = apply(
+      toRunnerTurnFromCorpMain(state),
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const rezCreditsBefore = state.corp.credits;
+    state = enterEncounterFromMovementWindow(
+      apply(state, "corp", (action) => action.type === "rez_ice" && action.source === iceId),
+    );
+    return { state, iceId, rezCreditsBefore };
+  }
+
+  it("resolves Brain Wash brain damage with stale, side, actionId, and ICE revalidation", () => {
+    const setup = startEncounterWithRezzedIce(
+      proteusSimpleCorpIceGame("proteus-pro006-brain-wash"),
+      BRAIN_WASH,
+    );
+    let { state } = setup;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(continueAction.payload).toMatchObject({
+      unbrokenSubroutineCount: 1,
+      encounterSubroutineIds:
+        `card_implementation.${BRAIN_WASH}.printed_subroutine.1.brain_damage`,
+    });
+
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: continueAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-pro006-brain-wrong-side",
+      }).ok,
+    ).toBe(false);
+    const staleState = structuredClone(state);
+    expect(
+      applyAction(staleState, {
+        matchId: staleState.matchId,
+        side: "runner",
+        actionId: continueAction.actionId,
+        clientKnownStateVersion: staleState.stateVersion - 1,
+        idempotencyKey: "proteus-pro006-brain-stale",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: `${continueAction.actionId}.missing`,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-pro006-brain-action",
+      }).ok,
+    ).toBe(false);
+    const wrongIce = structuredClone(state);
+    delete wrongIce.run!.encounteredIceId;
+    expect(
+      applyAction(wrongIce, {
+        matchId: wrongIce.matchId,
+        side: "runner",
+        actionId: continueAction.actionId,
+        clientKnownStateVersion: wrongIce.stateVersion,
+        idempotencyKey: "proteus-pro006-brain-no-current-ice",
+      }).ok,
+    ).toBe(false);
+
+    state = apply(state, "runner", (action) => action.actionId === continueAction.actionId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      damageType: "core",
+      damageAmount: 1,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "resolve_subroutine",
+          sourceDefinitionId: BRAIN_WASH,
+          subroutineType: "do_damage",
+          amount: 1,
+        }),
+      ],
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("resolves Colonel Failure as three program trash subroutines followed by two ETR subroutines", () => {
+    const setup = startEncounterWithRezzedIce(
+      proteusSimpleCorpIceGame("proteus-pro006-colonel-failure"),
+      COLONEL_FAILURE,
+    );
+    let { state } = setup;
+    installRunnerProgramForTest(state, "simple_decoder");
+    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, "simple_killer");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(continueAction.payload).toMatchObject({
+      unbrokenSubroutineCount: 5,
+      encounterWillEndRun: true,
+    });
+    expect(continueAction.payload?.encounterSubroutineIds).toBe(
+      [
+        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.1.trash_program`,
+        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.2.trash_program`,
+        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.3.trash_program`,
+        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.4.end_the_run`,
+        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.5.end_the_run`,
+      ].join(","),
+    );
+    state = apply(state, "runner", (action) => action.actionId === continueAction.actionId);
+    expect(state.run).toBeUndefined();
+    expect(state.runner.rig.programs).toHaveLength(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      trashedCardType: "program",
+      trashedCount: 1,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
+      expect.objectContaining({
+        subroutineIndex: 0,
+        subroutineType: "trash_installed_program",
+        cardsTrashed: 1,
+      }),
+      expect.objectContaining({
+        subroutineIndex: 1,
+        subroutineType: "trash_installed_program",
+        cardsTrashed: 1,
+      }),
+      expect.objectContaining({
+        subroutineIndex: 2,
+        subroutineType: "trash_installed_program",
+        cardsTrashed: 1,
+      }),
+      expect.objectContaining({
+        subroutineIndex: 3,
+        subroutineType: "end_the_run",
+        endedRun: true,
+      }),
+    ]);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it.each([
+    [MISLEADING_ACCESS_MENUS, "Misleading Access Menus"],
+    [SNOWBANK, "Snowbank"],
+  ] as const)(
+    "gains 3 credits on rez once and resolves paid/unpaid pay-or-end-run for %s",
+    (definitionId, _title) => {
+      const setup = startEncounterAndRezIce(
+        proteusSimpleCorpIceGame(`proteus-pro006-${definitionId}`),
+        definitionId,
+      );
+      let { state } = setup;
+      expect(state.corp.credits).toBe(setup.rezCreditsBefore + 3);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "rez_ice",
+        sourceDefinitionId: definitionId,
+        gainedCredits: 3,
+        corpCreditsAfter: state.corp.credits,
+        resolvedEffects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            side: "corp",
+            amount: 3,
+            sourceDefinitionId: definitionId,
+          }),
+        ],
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        hiddenPayloadMarkers,
+      );
+
+      const reRez = getLegalActions(state, "corp").filter(
+        (action) => action.type === "rez_ice" && action.source === setup.iceId,
+      );
+      expect(reRez).toHaveLength(0);
+      const paidContinue = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "continue_run" &&
+          action.costs[0]?.credits === 1 &&
+          action.payload?.encounterWillEndRun === false,
+      );
+      expect(paidContinue.payload).toMatchObject({
+        payOrEndRunSubroutineIndexes: "0",
+        payOrEndRunSubroutinePayment: 1,
+      });
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.actionId === paidContinue.actionId);
+      const paidPayload = state.eventLog.at(-1)?.publicPayload;
+      state = enterEncounterFromMovementWindow(state);
+      expect(state.run?.phase).toBe("access");
+      expect(state.runner.credits).toBe(initial.runner.credits - 1);
+      expect(paidPayload?.resolvedEffects).toEqual([
+        expect.objectContaining({
+          kind: "resolve_subroutine",
+          sourceDefinitionId: definitionId,
+          subroutineType: "end_the_run_unless_runner_pays",
+          paidCredits: 1,
+        }),
+      ]);
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+
+      const refusing = startEncounterAndRezIce(
+        proteusSimpleCorpIceGame(`proteus-pro006-${definitionId}-refuse`),
+        definitionId,
+      ).state;
+      const refuseContinue = mustAction(
+        refusing,
+        "runner",
+        (action) =>
+          action.type === "continue_run" &&
+          action.costs.length === 0 &&
+          action.payload?.encounterWillEndRun === true,
+      );
+      const refused = apply(
+        refusing,
+        "runner",
+        (action) => action.actionId === refuseContinue.actionId,
+      );
+      expect(refused.run).toBeUndefined();
+      expect(refused.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
+        expect.objectContaining({
+          kind: "resolve_subroutine",
+          sourceDefinitionId: definitionId,
+          subroutineType: "end_the_run_unless_runner_pays",
+          paidCredits: 0,
+          endedRun: true,
+        }),
+      ]);
+      expect(JSON.stringify(refused.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        hiddenPayloadMarkers,
+      );
+    },
+  );
+});
+
 describe("Proteus Public Fort Pass Windows", () => {
   const LESLEY = "onr_proteus_062_lesley-major";
   const RASMIN = "onr_proteus_070_rasmin-bridger";

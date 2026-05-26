@@ -761,12 +761,20 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tesseract-fort-construction.ts",
   "onr_v1_374_washington-d-c-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/washington-d-c-city-grid.ts",
+  "onr_proteus_011_brain-wash":
+    "packages/engine/src/card-implementations/proteus/corp/ice/brain-wash.ts",
+  "onr_proteus_015_colonel-failure":
+    "packages/engine/src/card-implementations/proteus/corp/ice/colonel-failure.ts",
   "onr_proteus_031_minotaur":
     "packages/engine/src/card-implementations/proteus/corp/ice/minotaur.ts",
+  "onr_proteus_032_misleading-access-menus":
+    "packages/engine/src/card-implementations/proteus/corp/ice/misleading-access-menus.ts",
   "onr_proteus_033_mobile-barricade":
     "packages/engine/src/card-implementations/proteus/corp/ice/mobile-barricade.ts",
   "onr_proteus_034_riddler":
     "packages/engine/src/card-implementations/proteus/corp/ice/riddler.ts",
+  "onr_proteus_038_snowbank":
+    "packages/engine/src/card-implementations/proteus/corp/ice/snowbank.ts",
   "onr_proteus_041_toughoniumtm-wall":
     "packages/engine/src/card-implementations/proteus/corp/ice/toughonium-wall.ts",
   "onr_proteus_044_walking-wall":

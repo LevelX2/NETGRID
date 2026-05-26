@@ -28,6 +28,13 @@ function printedSubroutineDefinitionForImplementation(
       type: "end_the_run",
     };
   }
+  if (subroutine.kind === "end_the_run_unless_runner_pays") {
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "end_the_run_unless_runner_pays",
+      amount: subroutine.amount,
+    };
+  }
   if (subroutine.kind === "trash_program") {
     return {
       id: printedSubroutineId(definition, index, subroutine),

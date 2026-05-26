@@ -1772,10 +1772,10 @@ describe("CardImplementation coverage and registry invariants", () => {
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
     expect(outsideScopeDefinitionIds).toHaveLength(206);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(431);
-    expect(coverageByStatus.get("implemented")).toBe(431);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(435);
+    expect(coverageByStatus.get("implemented")).toBe(435);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(148);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(144);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);
@@ -1835,6 +1835,97 @@ describe("CardImplementation coverage and registry invariants", () => {
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
         definitionId,
       ).toBe("implemented");
+    }
+  });
+
+  it("migrates Proteus PRO006 simple Corp ICE resolvers into CardImplementation coverage", () => {
+    const cases = [
+      {
+        definitionId: "onr_proteus_011_brain-wash",
+        printedSubroutines: [
+          {
+            kind: "damage",
+            damageType: "brain",
+            amount: 1,
+            preventable: true,
+            text: "*Do 1 brain damage.",
+          },
+        ],
+      },
+      {
+        definitionId: "onr_proteus_015_colonel-failure",
+        printedSubroutines: [
+          { kind: "trash_program", text: "*Trash a program." },
+          { kind: "trash_program", text: "*Trash a program." },
+          { kind: "trash_program", text: "*Trash a program." },
+          { kind: "end_the_run", text: "*End the run." },
+          { kind: "end_the_run", text: "*End the run." },
+        ],
+      },
+      {
+        definitionId: "onr_proteus_032_misleading-access-menus",
+        printedSubroutines: [
+          {
+            kind: "end_the_run_unless_runner_pays",
+            amount: 1,
+            text: "*End the run unless Runner pays [1].",
+          },
+        ],
+        lifecycle: {
+          on_rez: [
+            {
+              kind: "gain_credits",
+              recipient: "corp",
+              amount: 3,
+              visibility: "public",
+            },
+          ],
+        },
+      },
+      {
+        definitionId: "onr_proteus_038_snowbank",
+        printedSubroutines: [
+          {
+            kind: "end_the_run_unless_runner_pays",
+            amount: 1,
+            text: "*End the run unless Runner pays [1].",
+          },
+        ],
+        lifecycle: {
+          on_rez: [
+            {
+              kind: "gain_credits",
+              recipient: "corp",
+              amount: 3,
+              visibility: "public",
+            },
+          ],
+        },
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      expect(
+        cardImplementationForDefinitionId(testCase.definitionId),
+        testCase.definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(testCase.definitionId),
+      ).toMatchObject({
+        cardDefinitionId: testCase.definitionId,
+        status: "implemented",
+      });
+      expect(
+        cardImplementationForDefinitionId(testCase.definitionId)
+          ?.printedSubroutines,
+        testCase.definitionId,
+      ).toEqual(testCase.printedSubroutines);
+      if ("lifecycle" in testCase) {
+        expect(
+          cardImplementationForDefinitionId(testCase.definitionId)?.lifecycle,
+          testCase.definitionId,
+        ).toEqual(testCase.lifecycle);
+      }
     }
   });
 });
