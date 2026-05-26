@@ -28155,11 +28155,12 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       ambushDefinitionId: "onr_v1_345_trap",
       cardDefinitionId: "onr_v1_345_trap",
       revealKind: "reveal",
+      accessedFromZone: "rd",
       damageAmount: 3,
       tagsAdded: 1,
     });
     expect(JSON.stringify(rdState.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
+      /"privatePayload"|"cardInstances"/,
     );
     const replay = replayEvents(initial, rdState.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

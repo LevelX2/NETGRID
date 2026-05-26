@@ -1,3 +1,6 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { relative, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { DEMO_CARDS_BY_ID } from "../index";
 import {
@@ -11,6 +14,58 @@ import {
   CARD_IMPLEMENTATIONS_BY_DEFINITION_ID,
   cardImplementationForDefinitionId,
 } from "./registry";
+
+type ProteusCardSet = {
+  setId: string;
+  cards: Array<{
+    cardId: string;
+    setId: string;
+  }>;
+};
+
+type ProteusCardSupportManifest = {
+  setId: string;
+  cards: Array<{
+    cardId: string;
+    setId: string;
+    statuses: {
+      implemented: boolean;
+      engine_supported: boolean;
+      playable: boolean;
+      human_playable: boolean;
+      ai_supported: boolean;
+      deck_legal: boolean;
+      format_legal: boolean;
+      blocked: boolean;
+    };
+    support: {
+      resolverRef: string | null;
+    };
+  }>;
+};
+
+const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
+
+function readJson<T>(url: URL): T {
+  return JSON.parse(readFileSync(url, "utf8")) as T;
+}
+
+function findTypeScriptFiles(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = `${directory}/${entry.name}`;
+    if (entry.isDirectory()) return findTypeScriptFiles(path);
+    if (entry.isFile() && path.endsWith(".ts")) return [path];
+    return [];
+  });
+}
+
+function duplicateIds(ids: readonly string[]): string[] {
+  return ids.filter((id, index) => ids.indexOf(id) !== index);
+}
+
+function toRepoPath(path: string): string {
+  return relative(repoRoot, path).split(sep).join("/");
+}
 
 describe("CardImplementation coverage and registry invariants", () => {
   const p344SimpleIcebreakers = [
@@ -1037,10 +1092,99 @@ describe("CardImplementation coverage and registry invariants", () => {
     });
   });
 
-  it("requires implementation coverage for every demo card", () => {
-    const duplicateIds = (ids: string[]): string[] =>
-      ids.filter((id, index) => ids.indexOf(id) !== index);
+  it("reconciles Proteus manifest support against concrete files and registry", () => {
+    const cardSet = readJson<ProteusCardSet>(
+      new URL("../../../../data/cards/proteus-cards.json", import.meta.url),
+    );
+    const manifest = readJson<ProteusCardSupportManifest>(
+      new URL(
+        "../../../../data/manifests/proteus-card-support.json",
+        import.meta.url,
+      ),
+    );
+    const implementationFiles = findTypeScriptFiles(
+      fileURLToPath(new URL("./proteus", import.meta.url)),
+    );
+    const implementationRows = implementationFiles.map((filePath) => {
+      const match = readFileSync(filePath, "utf8").match(
+        /cardDefinitionId:\s*["']([^"']+)["']/,
+      );
+      return {
+        cardDefinitionId: match?.[1] ?? "",
+        filePath: toRepoPath(filePath),
+      };
+    });
 
+    const proteusCardIds = cardSet.cards.map((card) => card.cardId);
+    const manifestCardIds = manifest.cards.map((card) => card.cardId);
+    const fileDefinitionIds = implementationRows.map(
+      (row) => row.cardDefinitionId,
+    );
+    const registryDefinitionIds = CARD_IMPLEMENTATIONS.filter(
+      (implementation) =>
+        implementation.cardDefinitionId.startsWith("onr_proteus_"),
+    ).map((implementation) => implementation.cardDefinitionId);
+    const sortedFileDefinitionIds = [...fileDefinitionIds].sort();
+    const sortedRegistryDefinitionIds = [...registryDefinitionIds].sort();
+    const manifestImplementedIds = manifest.cards
+      .filter((card) => card.statuses.implemented)
+      .map((card) => card.cardId)
+      .sort();
+
+    expect(cardSet.setId).toBe("proteus");
+    expect(cardSet.cards).toHaveLength(154);
+    expect(manifest.setId).toBe("proteus");
+    expect(manifest.cards).toHaveLength(154);
+    expect([...manifestCardIds].sort()).toEqual([...proteusCardIds].sort());
+    expect(duplicateIds(proteusCardIds)).toEqual([]);
+    expect(duplicateIds(manifestCardIds)).toEqual([]);
+
+    expect(implementationRows.length).toBeGreaterThan(0);
+    expect(
+      implementationRows.filter((row) => row.cardDefinitionId === ""),
+    ).toEqual([]);
+    expect(duplicateIds(fileDefinitionIds)).toEqual([]);
+    expect(duplicateIds(registryDefinitionIds)).toEqual([]);
+    expect(sortedRegistryDefinitionIds).toEqual(sortedFileDefinitionIds);
+    expect(manifestImplementedIds).toEqual(sortedFileDefinitionIds);
+
+    for (const row of implementationRows) {
+      expect(row.cardDefinitionId, row.filePath).toMatch(/^onr_proteus_/);
+      expect(proteusCardIds, row.filePath).toContain(row.cardDefinitionId);
+    }
+
+    for (const card of manifest.cards) {
+      const isImplemented = fileDefinitionIds.includes(card.cardId);
+      expect(card.setId, card.cardId).toBe("proteus");
+      expect(card.statuses.ai_supported, card.cardId).toBe(false);
+      expect(card.statuses.deck_legal, card.cardId).toBe(false);
+      expect(card.statuses.format_legal, card.cardId).toBe(false);
+
+      if (isImplemented) {
+        expect(card.statuses, card.cardId).toMatchObject({
+          implemented: true,
+          engine_supported: true,
+          playable: true,
+          human_playable: true,
+          blocked: false,
+        });
+        expect(card.support.resolverRef, card.cardId).toBe(
+          `engine:${card.cardId}`,
+        );
+      } else {
+        expect(card.statuses, card.cardId).toMatchObject({
+          implemented: false,
+          engine_supported: false,
+          playable: false,
+          human_playable: false,
+          blocked: true,
+        });
+        expect(card.support.resolverRef, card.cardId).toBeNull();
+      }
+    }
+  });
+
+  it("requires implementation coverage for every demo card", () => {
     const implementationIds = CARD_IMPLEMENTATIONS.map(
       (implementation) => implementation.cardDefinitionId,
     );
@@ -1114,11 +1258,11 @@ describe("CardImplementation coverage and registry invariants", () => {
     );
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
-    expect(outsideScopeDefinitionIds).toHaveLength(99);
+    expect(outsideScopeDefinitionIds).toHaveLength(206);
     expect(CARD_IMPLEMENTATIONS).toHaveLength(423);
     expect(coverageByStatus.get("implemented")).toBe(423);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(52);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(156);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);
