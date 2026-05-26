@@ -11,6 +11,8 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 4c
+proReferences:
+  - PRO020
 blockedBy:
   - missing-hidden-resource-access-start-intervention-window
   - slice-scope-mismatch-simulacrum-encounter-ap-ice

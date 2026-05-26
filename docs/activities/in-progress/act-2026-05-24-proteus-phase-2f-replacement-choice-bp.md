@@ -11,6 +11,8 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 2f
+proReferences:
+  - PRO031
 blockedBy:
   - act-2026-05-24-proteus-phase-2a-bad-publicity-foundation
   - proteus-grip-event-damage-prevention-contract

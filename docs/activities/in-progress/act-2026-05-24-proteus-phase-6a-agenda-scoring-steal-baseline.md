@@ -11,6 +11,8 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 6a
+proReferences:
+  - PRO024
 blockedBy:
   - Corporate Headhunters needs a scored-agenda activated meat-damage ability gated by runner tags plus a source-bound "if this damage succeeds, reduce Runner hand size" effect; current scoredAgenda/special damage families do not model that source-bound successful-damage follow-up.
   - Fetal AI can partially reuse accessEffects for net damage and R&D reveal, but its printed steal cost is on the accessed agenda itself; current steal_cost modifiers model rezzed root sources, not current-access self steal costs from any access zone.

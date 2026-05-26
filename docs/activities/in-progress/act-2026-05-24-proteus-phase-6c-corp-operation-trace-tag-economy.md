@@ -11,6 +11,9 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 6c
+proReferences:
+  - PRO007
+  - PRO026
 blockedBy:
   - Data Sifters needs a Runner-last-turn history condition for trashed nodes; current CardConditionImplementation does not track or query subtype/card-type trash history from the Runner's previous turn.
   - Manhunt needs a trace success effect that gives tags equal to the margin by which Corp trace strength exceeded Runner link; current trace success effects support fixed tag amounts only.

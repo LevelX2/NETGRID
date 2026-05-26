@@ -11,6 +11,10 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 4b
+proReferences:
+  - PRO018
+  - PRO019
+  - PRO023
 blockedBy:
   - missing-hidden-resource-cost-penalty-support-window
   - slice-scope-mismatch-airport-locker-and-time-to-collect

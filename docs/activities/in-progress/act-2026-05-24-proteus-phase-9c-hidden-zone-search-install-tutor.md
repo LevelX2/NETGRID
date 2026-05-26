@@ -11,6 +11,8 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 9c
+proReferences:
+  - PRO036
 blockedBy:
   - grip_install_temporary_credit_choice_contract
   - search_install_run_followup_return_or_penalty_contract
