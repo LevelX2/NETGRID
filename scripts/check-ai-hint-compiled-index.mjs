@@ -77,6 +77,27 @@ const CRYSTAL_PALACE_FORBIDDEN_VALUES = new Set([
   "remote_upgrade_economy",
 ]);
 
+const WARNING_CLASSIFICATION_BY_KIND = {
+  active_monolith_mechanical_duplication:
+    "monolith_mechanical_duplication_candidate",
+  generated_fact_missing_from_active_monolith:
+    "generated_fact_absent_from_monolith",
+  manual_overlay_strategy_field_missing_from_active:
+    "overlay_strategy_field_not_in_monolith",
+  descriptor_gap_remaining: "schema_or_descriptor_candidate",
+  descriptor_gap_without_manual_note: "schema_or_descriptor_candidate",
+  needs_human_review: "manual_review_candidate",
+  overlay_missing_for_manual_gap: "manual_review_candidate",
+  overlay_outside_compiled_pilot: "manual_review_candidate",
+  strategic_overlay_without_generated_facts: "manual_review_candidate",
+};
+
+const STRATEGIC_MANUAL_MISSING_ITEMS = new Set([
+  "condition:requires_rnd_pressure",
+  "condition:requires_successful_run",
+  "effect:remote_protection",
+]);
+
 function repoPath(relativePath) {
   return path.join(REPO_ROOT, relativePath);
 }
@@ -310,8 +331,9 @@ function compareFields(activeHint, generatedFacts, overlay) {
 }
 
 function addWarning(warnings, cardWarnings, warning) {
-  warnings.push(warning);
-  cardWarnings.push(warning);
+  const classifiedWarning = classifyWarning(warning);
+  warnings.push(classifiedWarning);
+  cardWarnings.push(classifiedWarning);
 }
 
 function warningCountsByKind(warnings) {
@@ -324,22 +346,157 @@ function warningCountsByKind(warnings) {
   );
 }
 
+function classifyWarning(warning) {
+  return {
+    classification:
+      WARNING_CLASSIFICATION_BY_KIND[warning.kind] ?? "manual_review_candidate",
+    blocking: false,
+    ...warning,
+  };
+}
+
+function countsByClassification(warnings) {
+  const counts = {};
+  for (const warning of warnings) {
+    counts[warning.classification] = (counts[warning.classification] ?? 0) + 1;
+  }
+  return Object.fromEntries(
+    Object.entries(counts).sort(([left], [right]) => left.localeCompare(right)),
+  );
+}
+
+function infoCounts(cards) {
+  return {
+    info_no_overlay_needed: cards.filter(
+      (card) =>
+        !card.manualOverlayFound &&
+        !card.expectedManualOverlayNeeded &&
+        !card.needsManualReview,
+    ).length,
+    info_overlay_present: cards.filter((card) => card.manualOverlayFound)
+      .length,
+  };
+}
+
+function warningClassificationByCard(cards) {
+  return cards.map((card) => ({
+    cardId: card.cardId,
+    title: card.title,
+    recommendedNextAction: card.recommendedNextAction,
+    migrationReadiness: card.migrationReadiness,
+    warningClassificationCounts: countsByClassification(card.warnings),
+    info: card.manualOverlayFound
+      ? ["overlay_present"]
+      : card.expectedManualOverlayNeeded || card.needsManualReview
+        ? []
+        : ["info_no_overlay_needed"],
+  }));
+}
+
+function candidateSummary(card, extra = {}) {
+  return {
+    cardId: card.cardId,
+    title: card.title,
+    recommendedNextAction: card.recommendedNextAction,
+    migrationReadiness: card.migrationReadiness,
+    ...extra,
+  };
+}
+
+function migrationCandidates(cards) {
+  return cards
+    .filter((card) =>
+      card.warnings.some((warning) =>
+        new Set([
+          "monolith_mechanical_duplication_candidate",
+          "generated_fact_absent_from_monolith",
+        ]).has(warning.classification),
+      ),
+    )
+    .map((card) =>
+      candidateSummary(card, {
+        generatedFields: card.generatedFields,
+        generatedOnlyFields: card.generatedOnlyFields,
+        duplicatedActiveMechanicalFields: card.duplicatedActiveMechanicalFields,
+      }),
+    );
+}
+
+function overlayCandidates(cards) {
+  return cards
+    .filter(
+      (card) =>
+        !card.manualOverlayFound &&
+        (card.expectedManualOverlayNeeded || card.needsManualReview),
+    )
+    .map((card) =>
+      candidateSummary(card, {
+        missingManualOverlay: card.missingManualOverlay,
+      }),
+    );
+}
+
+function generatedFactCandidates(cards) {
+  return cards
+    .filter((card) => card.mechanicalFactsFromGenerated.length > 0)
+    .map((card) =>
+      candidateSummary(card, {
+        mechanicalFactsFromGenerated: card.mechanicalFactsFromGenerated,
+      }),
+    );
+}
+
+function reviewCandidates(cards) {
+  return cards
+    .filter((card) => card.needsManualReview)
+    .map((card) =>
+      candidateSummary(card, {
+        missingManualOverlay: card.missingManualOverlay,
+      }),
+    );
+}
+
 function recommendedNextAction({
   cardErrors,
   comparison,
   expectedManualOverlayNeeded,
   generatedFields,
+  manualReviewNeeded,
   manualOverlayFound,
   overlay,
 }) {
-  if (cardErrors.length > 0) return "manual_review_needed";
+  if (cardErrors.length > 0 || manualReviewNeeded)
+    return "manual_review_candidate";
   if (expectedManualOverlayNeeded && !manualOverlayFound)
-    return "overlay_needed";
-  if (isMeaningful(overlay.descriptorGaps)) return "schema_gap";
-  if (comparison.generatedOnlyFields.length > 0)
-    return "generated_fact_candidate";
-  if (generatedFields.length > 0) return "monolith_mechanical_duplication";
-  return "overlay_not_needed";
+    return "manual_overlay_candidate";
+  if (isMeaningful(overlay.descriptorGaps))
+    return "schema_descriptor_candidate";
+  if (manualOverlayFound && comparison.overlayOnlyFields.length > 0)
+    return "ready_for_overlay_only_strategy_fields";
+  if (comparison.generatedOnlyFields.length > 0 || generatedFields.length > 0)
+    return "ready_for_generated_mechanical_fields";
+  return "keep_current_no_action";
+}
+
+function migrationReadiness({
+  cardErrors,
+  expectedManualOverlayNeeded,
+  manualOverlayFound,
+  manualReviewNeeded,
+  overlay,
+}) {
+  if (cardErrors.length > 0 || manualReviewNeeded) return "needs_review";
+  if (isMeaningful(overlay.descriptorGaps)) return "needs_schema";
+  if (expectedManualOverlayNeeded && !manualOverlayFound)
+    return "needs_overlay";
+  return "ready";
+}
+
+function manualReviewNeededForDerivedCard(derivedCard) {
+  const missingManualOverlay = derivedCard?.missingManualOverlay ?? [];
+  return missingManualOverlay.some(
+    (item) => !STRATEGIC_MANUAL_MISSING_ITEMS.has(item),
+  );
 }
 
 function validateNoForbiddenOutput(compiledPreview, cardId, errors) {
@@ -487,6 +644,10 @@ export function buildCompiledIndexReport(options = {}) {
     const derivedFacts = derivedCard?.derivedFacts ?? {};
     const generatedFacts = derivedMechanicalFacts(derivedFacts);
     const manualOverlayFound = Boolean(overlayEntry);
+    const missingManualOverlay = [...(derivedCard?.missingManualOverlay ?? [])];
+    const manualReviewNeeded =
+      manualReviewNeededForDerivedCard(derivedCard) &&
+      !isMeaningful(overlay.descriptorGaps);
     const expectedManualOverlayNeeded = Boolean(
       pilotCard.expectedManualOverlayNeeded,
     );
@@ -538,10 +699,11 @@ export function buildCompiledIndexReport(options = {}) {
     const comparison = compareFields(activeHint, generatedFacts, overlay);
     const generatedFields = Object.keys(generatedFacts).sort();
     const overlayFields = overlayStrategicFields(overlay);
-
-    for (const field of generatedFields.filter((field) =>
+    const duplicatedActiveMechanicalFields = generatedFields.filter((field) =>
       isMeaningful(activeHint?.[field]),
-    )) {
+    );
+
+    for (const field of duplicatedActiveMechanicalFields) {
       addWarning(warnings, cardWarnings, {
         kind: "active_monolith_mechanical_duplication",
         message: `Active monolith already carries mechanical field ${field}; long-term source should be generated facts.`,
@@ -619,9 +781,13 @@ export function buildCompiledIndexReport(options = {}) {
       derivedFactsFound: Boolean(derivedCard),
       manualOverlayFound,
       expectedManualOverlayNeeded,
+      needsManualReview: manualReviewNeeded,
+      missingManualOverlay,
       compiledPreview,
       mechanicalFactsFromGenerated: generatedFactLabels(derivedFacts),
+      generatedFields,
       strategyFieldsFromOverlay: overlayFields,
+      duplicatedActiveMechanicalFields,
       activeMonolithOnlyFields: comparison.activeMonolithOnlyFields,
       generatedOnlyFields: comparison.generatedOnlyFields,
       overlayOnlyFields: comparison.overlayOnlyFields,
@@ -636,7 +802,15 @@ export function buildCompiledIndexReport(options = {}) {
         comparison,
         expectedManualOverlayNeeded,
         generatedFields,
+        manualReviewNeeded,
         manualOverlayFound,
+        overlay,
+      }),
+      migrationReadiness: migrationReadiness({
+        cardErrors,
+        expectedManualOverlayNeeded,
+        manualOverlayFound,
+        manualReviewNeeded,
         overlay,
       }),
     });
@@ -670,6 +844,13 @@ export function buildCompiledIndexReport(options = {}) {
     hardErrorCount: sortedErrors.length,
     warningCount: sortedWarnings.length,
     warningCountsByKind: warningCountsByKind(sortedWarnings),
+    warningClassificationCounts: countsByClassification(sortedWarnings),
+    warningClassificationByCard: warningClassificationByCard(cards),
+    migrationCandidates: migrationCandidates(cards),
+    overlayCandidates: overlayCandidates(cards),
+    generatedFactCandidates: generatedFactCandidates(cards),
+    reviewCandidates: reviewCandidates(cards),
+    infoCounts: infoCounts(cards),
     cards,
     errors: sortedErrors,
     warnings: sortedWarnings,

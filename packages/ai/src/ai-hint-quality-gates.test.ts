@@ -44,6 +44,13 @@ describe("AI hint quality gates", () => {
     expect(report.hintCount).toBe(410);
     expect(report.benchmarkCoverage.totalUniqueCards).toBeGreaterThan(0);
     expect(report.benchmarkCoverage.missingHintCards).toEqual([]);
+    expect(report.benchmarkCoverage.skippedDecks.length).toBeGreaterThan(0);
+    expect(
+      report.benchmarkCoverage.skippedDecks.every(
+        (entry: { reason?: string }) =>
+          entry.reason === "proteus_playtest_not_active_ai_hint_scope",
+      ),
+    ).toBe(true);
   });
 
   it("keeps the Crystal Palace semantic denylist protected", () => {

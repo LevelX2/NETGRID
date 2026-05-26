@@ -21,6 +21,17 @@ type CompiledIndexReport = {
   hardErrorCount: number;
   warningCount: number;
   warningCountsByKind: Record<string, number>;
+  warningClassificationCounts: Record<string, number>;
+  infoCounts: Record<string, number>;
+  migrationCandidates: Array<{ cardId: string }>;
+  overlayCandidates: Array<{ cardId: string }>;
+  generatedFactCandidates: Array<{ cardId: string }>;
+  reviewCandidates: Array<{ cardId: string }>;
+  warningClassificationByCard: Array<{
+    cardId: string;
+    warningClassificationCounts: Record<string, number>;
+    info: string[];
+  }>;
   source: {
     activeHintsPath: string;
     pilotCardsPath: string;
@@ -33,11 +44,19 @@ type CompiledIndexReport = {
     derivedFactsFound: boolean;
     manualOverlayFound: boolean;
     expectedManualOverlayNeeded: boolean;
+    needsManualReview: boolean;
     compiledPreview: Record<string, unknown>;
     mechanicalFactsFromGenerated: string[];
     strategyFieldsFromOverlay: string[];
     conflicts: unknown[];
     recommendedNextAction: string;
+    migrationReadiness: string;
+    warnings: Array<{
+      kind: string;
+      classification: string;
+      blocking: boolean;
+      field?: string;
+    }>;
   }>;
 };
 
@@ -123,6 +142,7 @@ describe("compiled hint index pilot report", () => {
     expect(report.warningCountsByKind.overlay_missing_for_manual_gap ?? 0).toBe(
       0,
     );
+    expect(report.infoCounts.info_no_overlay_needed).toBe(18);
     expect(
       report.cards
         .filter((card) => !card.manualOverlayFound)
@@ -131,15 +151,72 @@ describe("compiled hint index pilot report", () => {
     expect(
       report.cards.every((card) =>
         [
-          "generated_fact_candidate",
-          "manual_review_needed",
-          "monolith_mechanical_duplication",
-          "overlay_needed",
-          "overlay_not_needed",
-          "schema_gap",
+          "keep_current_no_action",
+          "manual_overlay_candidate",
+          "manual_review_candidate",
+          "ready_for_generated_mechanical_fields",
+          "ready_for_overlay_only_strategy_fields",
+          "schema_descriptor_candidate",
         ].includes(card.recommendedNextAction),
       ),
     ).toBe(true);
+  });
+
+  it("classifies compiled-index warnings into non-blocking comparison groups", () => {
+    const report = readReport();
+    expect(report.warningCount).toBe(80);
+    expect(report.warningClassificationCounts).toEqual({
+      generated_fact_absent_from_monolith: 28,
+      monolith_mechanical_duplication_candidate: 46,
+      overlay_strategy_field_not_in_monolith: 6,
+    });
+    expect(
+      report.cards.every((card) =>
+        card.warnings.every((warning) => warning.blocking === false),
+      ),
+    ).toBe(true);
+    expect(
+      report.cards.every((card) =>
+        card.warnings.every(
+          (warning) => typeof warning.classification === "string",
+        ),
+      ),
+    ).toBe(true);
+  });
+
+  it("classifies overlay-only strategy fields and generated mechanical candidates", () => {
+    const report = readReport();
+    const crystalPalace = report.cards.find(
+      (card) => card.cardId === "onr_v1_355_crystal-palace-station-grid",
+    );
+    expect(crystalPalace?.warnings).toContainEqual(
+      expect.objectContaining({
+        kind: "manual_overlay_strategy_field_missing_from_active",
+        classification: "overlay_strategy_field_not_in_monolith",
+        field: "strategicNotes",
+      }),
+    );
+    expect(report.migrationCandidates.length).toBe(24);
+    expect(report.generatedFactCandidates.length).toBe(24);
+    expect(report.overlayCandidates).toEqual([]);
+  });
+
+  it("keeps semantic review candidates explicit without turning them into hard errors", () => {
+    const report = readReport();
+    expect(report.reviewCandidates).toEqual([
+      expect.objectContaining({
+        cardId: "onr_v1_059_self-modifying-code",
+      }),
+    ]);
+    const selfModifyingCode = report.cards.find(
+      (card) => card.cardId === "onr_v1_059_self-modifying-code",
+    );
+    expect(selfModifyingCode?.recommendedNextAction).toBe(
+      "manual_review_candidate",
+    );
+    expect(selfModifyingCode?.migrationReadiness).toBe("needs_review");
+    expect(selfModifyingCode?.needsManualReview).toBe(true);
+    expect(report.hardErrorCount).toBe(0);
   });
 
   it("keeps Crystal Palace denylist protected in the compiled pilot", () => {

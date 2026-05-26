@@ -256,6 +256,7 @@ function itemCount(entry) {
 
 function collectBenchmarkCoverage(repoRoot, deckFiles, hintByCard) {
   const benchmarkDeckCards = new Map();
+  const skippedDecks = [];
   for (const file of deckFiles) {
     const absolute = resolvePath(repoRoot, file);
     if (!fs.existsSync(absolute)) continue;
@@ -263,6 +264,15 @@ function collectBenchmarkCoverage(repoRoot, deckFiles, hintByCard) {
     for (const deck of findDeckLikeObjects(json)) {
       const deckId =
         deck.deckSnapshotId ?? deck.snapshotId ?? deck.deckId ?? file;
+      const skipReason = aiHintCoverageSkipReason(deck);
+      if (skipReason) {
+        skippedDecks.push({
+          deckId,
+          file,
+          reason: skipReason,
+        });
+        continue;
+      }
       const deckUse =
         deck.holdoutUse ?? deck.tuningUse ?? deck.classification ?? "benchmark";
       for (const cardId of deckCardIds(deck)) {
@@ -328,11 +338,40 @@ function collectBenchmarkCoverage(repoRoot, deckFiles, hintByCard) {
   return {
     deckFiles,
     totalUniqueCards: benchmarkDeckCards.size,
+    skippedDecks: skippedDecks.sort((a, b) => a.deckId.localeCompare(b.deckId)),
     missingHintCards: missingHintCards.sort((a, b) =>
       a.cardId.localeCompare(b.cardId),
     ),
     riskCards: riskCards.sort((a, b) => a.cardId.localeCompare(b.cardId)),
   };
+}
+
+function aiHintCoverageSkipReason(deck) {
+  const formatProfileId = stringValue(deck.formatProfileId);
+  const publicFormatProfileId = stringValue(
+    deck.publicMetadata?.formatProfileId,
+  );
+  const cardPoolVersion = stringValue(deck.cardPoolVersion);
+  const publicCardPoolVersion = stringValue(
+    deck.publicMetadata?.cardPoolVersion,
+  );
+
+  if (
+    [
+      formatProfileId,
+      publicFormatProfileId,
+      cardPoolVersion,
+      publicCardPoolVersion,
+    ].some((value) => value.includes("proteus_playtest"))
+  ) {
+    return "proteus_playtest_not_active_ai_hint_scope";
+  }
+
+  return undefined;
+}
+
+function stringValue(value) {
+  return typeof value === "string" ? value : "";
 }
 
 function defaultDeckFiles() {

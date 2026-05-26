@@ -277,6 +277,28 @@
       "data/ai/ai-real-scene-benchmark-deck-snapshots-2026-05-24.json"
     ],
     "totalUniqueCards": 190,
+    "skippedDecks": [
+      {
+        "deckId": "proteus_corp_antibody_tax_snapshot_v2026_05_25",
+        "file": "data/decks/deck-snapshots-0.8.json",
+        "reason": "proteus_playtest_not_active_ai_hint_scope"
+      },
+      {
+        "deckId": "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+        "file": "data/decks/deck-snapshots-0.8.json",
+        "reason": "proteus_playtest_not_active_ai_hint_scope"
+      },
+      {
+        "deckId": "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+        "file": "data/decks/deck-snapshots-0.8.json",
+        "reason": "proteus_playtest_not_active_ai_hint_scope"
+      },
+      {
+        "deckId": "proteus_runner_rd_bad_publicity_snapshot_v2026_05_25",
+        "file": "data/decks/deck-snapshots-0.8.json",
+        "reason": "proteus_playtest_not_active_ai_hint_scope"
+      }
+    ],
     "missingHintCards": [],
     "riskCards": []
   }
