@@ -34,6 +34,12 @@ import {
   chooseCorpBaselineAction,
   chooseCorpAction,
   chooseCorpPlanDecision,
+  classifyTagPunishLegalActionFromOntology,
+  classifyScoredAgendaActionFromOntology,
+  estimateBreakerCostProfileFromOntology,
+  estimateStructuredBreakerCostForIce,
+  getStructuredRemoteRoleForCard,
+  structuredRemoteRoleSafetyAssessmentForCard,
   chooseRunnerBaselineAction,
   corpPlanUsesOnlyAiSupportedCards,
   chooseRunnerPlanDecision,
@@ -154,6 +160,31 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(corpInput)).not.toContain("sessionToken");
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+  });
+
+  it("keeps release-default profile policy stable", () => {
+    const state = createGameAfterSetup({ seed: "ai-release-default-policy" });
+    const corpInput = buildAiDecisionInput(state, "corp");
+    const runnerInput = buildAiDecisionInput(state, "runner");
+    const benchmarkProfiles = listV143BenchmarkProfiles().map(
+      (profile) => profile.benchmarkProfileId,
+    );
+    const benchmark = runMatchProgressionBenchmark({
+      includeHoldout: false,
+      maxActions: 1,
+      comparisonProfiles: ["belief_ai_v1_4_2", "current_candidate"],
+    });
+
+    expect(corpInput.profileId).toBe("corp-ai-v0.9-normal");
+    expect(runnerInput.profileId).toBe("runner-ai-v0.9-normal");
+    expect(benchmarkProfiles).toContain("belief_ai_v1_4_2");
+    expect(benchmarkProfiles).toContain("current_candidate");
+    expect(benchmark.baselineProfile).toBe("belief_ai_v1_4_2");
+    expect(benchmark.candidateProfile).toBe("current_candidate");
+    expect(benchmark.profileComparisons.map((entry) => entry.profile)).toEqual([
+      "belief_ai_v1_4_2",
+      "current_candidate",
+    ]);
   });
 
   it("redacts hidden Runner Resources in Corp AIInput before reveal", () => {
@@ -4135,6 +4166,51 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(JSON.stringify(input)).not.toMatch(/cardInstances|privatePayload/i);
   });
 
+  it("classifies scored-agenda activated effects from read-only ontology hints", () => {
+    expect(
+      classifyScoredAgendaActionFromOntology("onr_v1_210_political-overthrow"),
+    ).toEqual(
+      expect.objectContaining({
+        kind: "scored_agenda_economy",
+        immediateGain: 3,
+      }),
+    );
+    expect(
+      classifyScoredAgendaActionFromOntology("onr_v1_193_corporate-coup"),
+    ).toEqual(
+      expect.objectContaining({
+        kind: "scored_agenda_counter_economy",
+        immediateGain: 3,
+      }),
+    );
+    expect(
+      classifyScoredAgendaActionFromOntology("onr_v1_199_employee-empowerment"),
+    ).toEqual(
+      expect.objectContaining({
+        kind: "scored_agenda_draw",
+        drawAmount: 2,
+      }),
+    );
+    expect(
+      classifyScoredAgendaActionFromOntology("onr_v1_192_corporate-boon"),
+    ).toEqual(
+      expect.objectContaining({
+        kind: "scored_agenda_extra_action",
+        gainedActions: 1,
+      }),
+    );
+    expect(
+      classifyScoredAgendaActionFromOntology(
+        "onr_v1_188_ai-chief-financial-officer",
+      ),
+    ).toEqual(
+      expect.objectContaining({
+        kind: "scored_agenda_shuffle_draw",
+        drawAmount: 5,
+      }),
+    );
+  });
+
   it("uses Political Overthrow scored-agenda economy before basic credit", () => {
     const { input } = corpScoredAgendaAbilityInput(
       "ai-political-overthrow-economy",
@@ -4166,6 +4242,11 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(debugText).toContain("scored_agenda_action_taken:true");
     expect(debugText).toContain("political_overthrow_taken:true");
     expect(debugText).toContain("scored_agenda_economy_taken:true");
+    expect(debugText).toContain("scored_agenda_ontology_present:true");
+    expect(debugText).toContain(
+      "scored_agenda_ontology_kind:scored_agenda_economy",
+    );
+    expect(debugText).toContain("scored_agenda_ontology_used:true");
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
   });
 
@@ -4786,7 +4867,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
-  it("allows agenda install when visible remote tax makes the remote effectively protected", () => {
+  it("recognizes run-tax RemoteRole without treating it as agenda-steal protection", () => {
     const input = corpEffectiveRemoteSafetyInput(
       "ai-corp-tax-protected-remote",
       { runnerCredits: 8, includeTaxUpgrade: true },
@@ -4807,12 +4888,163 @@ describe("V1.4.0 plan-based Corp AI", () => {
       throw new Error("Missing tax-protected remote fixture actions");
 
     const scopedInput = { ...input, legalActions: [agendaInstall, gain] };
+    const score = evaluateRemoteScoreHorizon(scopedInput, {
+      planId: "remote-role-run-tax-fixture",
+      kind: "build_scoring_remote",
+      legalActionIds: [agendaInstall.actionId],
+      steps: [],
+      expectedBenefits: [],
+      visibleRisks: [],
+      requiredRoles: [],
+    });
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(decision.selectedActionId).not.toBe(agendaInstall.actionId);
+    expect(score.evidence).toContain("corp_remote_role_kind:run_tax");
+    expect(score.evidence).toContain("corp_remote_role_used_for_safety:true");
+    expect(score.evidence).toContain(
+      "corp_remote_role_did_not_raise_safety_because_cheap_contest:true",
+    );
+    expect(score.evidence).not.toContain("corp_remote_role_kind:asset_economy");
+  });
+
+  it("uses agenda-steal-tax RemoteRole to raise scoring remote safety when the Runner cannot pay", () => {
+    const input = corpEffectiveRemoteSafetyInput(
+      "ai-corp-red-herrings-remote-role",
+      { runnerCredits: 4, includeAgendaStealTaxUpgrade: true },
+    );
+    const agendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(agendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!agendaInstall || !gain)
+      throw new Error("Missing agenda-steal-tax fixture actions");
+
+    const scopedInput = { ...input, legalActions: [agendaInstall, gain] };
     const decision = chooseCorpPlanDecision(scopedInput);
 
     expect(decision.selectedActionId).toBe(agendaInstall.actionId);
     expect(decision.score.evidence).toContain(
-      "corp_score_line_continued_when_remote_effectively_protected:true",
+      "corp_remote_role_kind:agenda_steal_tax",
     );
+    expect(decision.score.evidence).toContain(
+      "corp_remote_role_agenda_steal_tax_blocks_steal:true",
+    );
+    expect(decision.score.evidence).toContain(
+      "corp_remote_role_used_for_scoring_remote:true",
+    );
+  });
+
+  it("classifies structured remote roles without treating capacity, asset or bait as scoring protection", () => {
+    const redHerrings = getStructuredRemoteRoleForCard(
+      "onr_v1_366_red-herrings",
+    );
+    const namatoki = getStructuredRemoteRoleForCard(
+      "onr_v1_361_namatoki-plaza",
+    );
+    const assetEconomy = getStructuredRemoteRoleForCard(
+      "onr_v1_309_bbs-whispering-campaign",
+    );
+
+    expect(redHerrings?.kind).toBe("agenda_steal_tax");
+    expect(namatoki?.kind).toBe("remote_capacity");
+    expect(assetEconomy?.kind).toBe("asset_economy");
+
+    const activeRedHerrings = structuredRemoteRoleSafetyAssessmentForCard(
+      {
+        definitionId: "onr_v1_366_red-herrings",
+        known: true,
+        rezzed: true,
+      },
+      { agendaContext: true, runnerCreditsAfterKnownPath: 2 },
+    );
+    const activeCapacity = structuredRemoteRoleSafetyAssessmentForCard(
+      {
+        definitionId: "onr_v1_361_namatoki-plaza",
+        known: true,
+        rezzed: true,
+      },
+      { agendaContext: true, runnerCreditsAfterKnownPath: 2 },
+    );
+    const inactiveTax = structuredRemoteRoleSafetyAssessmentForCard(
+      {
+        definitionId: "onr_v1_355_crystal-palace-station-grid",
+        known: true,
+        rezzed: false,
+      },
+      { agendaContext: true, runnerCreditsAfterKnownPath: 2 },
+    );
+
+    expect(activeRedHerrings.raisesSafety).toBe(true);
+    expect(activeRedHerrings.blocksAgendaSteal).toBe(true);
+    expect(activeCapacity.raisesSafety).toBe(false);
+    expect(activeCapacity.evidence).toContain(
+      "corp_remote_role_kind:remote_capacity",
+    );
+    expect(inactiveTax.raisesSafety).toBe(false);
+    expect(inactiveTax.evidence).toContain(
+      "corp_remote_role_did_not_raise_safety_because_inactive:true",
+    );
+  });
+
+  it("summarizes RemoteRole ontology evidence as first-class metrics", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "install_card", "remote_1", 1, {
+            evidence: [
+              "corp_remote_role_profile_seen:true",
+              "corp_remote_role_kind:agenda_steal_tax",
+              "corp_remote_role_server_scope:fort",
+              "corp_remote_role_used_for_safety:true",
+              "corp_remote_role_used_for_scoring_remote:true",
+              "corp_remote_role_raised_safety_score:true",
+            ],
+          }),
+          progressionAction("corp", 2, "install_card", "remote_1", 1, {
+            evidence: [
+              "corp_remote_role_profile_seen:true",
+              "corp_remote_role_kind:remote_capacity",
+              "corp_remote_role_server_scope:remote",
+              "corp_remote_role_conflict_with_legacy:true",
+            ],
+          }),
+          progressionAction("runner", 3, "trash_accessed_card", "remote_1", 1, {
+            evidence: [
+              "runner_remote_role_profile_seen:true",
+              "runner_remote_role_kind:run_tax",
+              "runner_remote_role_server_scope:fort",
+              "runner_remote_role_used_for_trash_value:true",
+            ],
+          }),
+        ],
+        "remote-role-metric-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpRemoteRoleProfilesSeen).toBe(2);
+    expect(metrics.corpRemoteRoleUsedForSafety).toBe(1);
+    expect(metrics.corpRemoteRoleUsedForScoringRemote).toBe(1);
+    expect(metrics.corpRemoteRoleRaisedSafetyScore).toBe(1);
+    expect(metrics.corpRemoteRoleConflictWithLegacy).toBe(1);
+    expect(metrics.corpAgendaStealTaxRemoteRoleSeen).toBe(1);
+    expect(metrics.corpRemoteCapacityRoleSeen).toBe(1);
+    expect(metrics.runnerRemoteRoleProfilesSeen).toBe(1);
+    expect(metrics.runnerRemoteRoleUsedForTrashValue).toBe(1);
+    expect(metrics.runnerRunTaxRemoteRoleAccessed).toBe(1);
+    expect(metrics.remoteRoleKindAgendaStealTax).toBe(1);
+    expect(metrics.remoteRoleKindRemoteCapacity).toBe(1);
+    expect(metrics.remoteRoleKindRunTax).toBe(1);
+    expect(metrics.remoteRoleServerScopeFort).toBe(2);
+    expect(metrics.remoteRoleServerScopeRemote).toBe(1);
   });
 
   it("allows same-turn score setup despite cheap contest when Runner has no response window", () => {
@@ -8152,6 +8384,71 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
+  it("classifies tag source and payoff LegalActions from structured ontology only when legal and visible", () => {
+    const operation = (source: string): LegalAction =>
+      ({
+        actionId: `test.${source}`,
+        type: "play_operation",
+        side: "corp",
+        source: "corp_hq_card",
+        label: source,
+        timingPoint: "corp_action",
+        costs: [],
+      }) as unknown as LegalAction;
+
+    const audit = classifyTagPunishLegalActionFromOntology(
+      operation("Audit of Call Records"),
+      "onr_v1_283_audit-of-call-records",
+      { runnerTagged: false, legacyRoles: ["trace_operation"] },
+    );
+    expect(audit?.isTagSource).toBe(true);
+    expect(audit?.isTraceTagSource).toBe(true);
+    expect(audit?.isPunishPayoff).toBe(false);
+    expect(audit?.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_tag_source_legal_action_classified_by_ontology:true",
+        "corp_tag_punish_ontology_kind:tag_source",
+        "corp_tag_punish_condition:requires_trace_success",
+      ]),
+    );
+
+    const taggedDatapool = classifyTagPunishLegalActionFromOntology(
+      operation("Datapool by Zetatech"),
+      "onr_v1_287_datapool-by-zetatech",
+      { runnerTagged: true, legacyRoles: ["operation"] },
+    );
+    expect(taggedDatapool?.isPunishPayoff).toBe(true);
+    expect(taggedDatapool?.blockedByMissingTag).toBe(false);
+    expect(taggedDatapool?.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_punish_legal_action_classified_by_ontology:true",
+        "corp_punish_opportunity_confirmed_by_ontology:true",
+        "corp_tag_punish_condition:requires_runner_tagged",
+      ]),
+    );
+
+    const untaggedDatapool = classifyTagPunishLegalActionFromOntology(
+      operation("Datapool by Zetatech"),
+      "onr_v1_287_datapool-by-zetatech",
+      { runnerTagged: false, legacyRoles: ["operation"] },
+    );
+    expect(untaggedDatapool?.isPunishPayoff).toBe(false);
+    expect(untaggedDatapool?.blockedByMissingTag).toBe(true);
+    expect(untaggedDatapool?.evidence).toContain(
+      "corp_tag_punish_payoff_blocked_by_missing_visible_tag:true",
+    );
+    const noLegalCarrier = classifyTagPunishLegalActionFromOntology(
+      {
+        ...operation("Datapool by Zetatech"),
+        type: "end_turn",
+        source: "game_rule",
+      } as LegalAction,
+      "onr_v1_287_datapool-by-zetatech",
+      { runnerTagged: true, legacyRoles: [] },
+    );
+    expect(noLegalCarrier).toBeUndefined();
+  });
+
   it("uses tag punishment operations when the Runner is visibly tagged", () => {
     if (!createRuntimeCardsById()["onr_v1_287_datapool-by-zetatech"]) return;
     let state = createGameAfterSetup({
@@ -8211,10 +8508,13 @@ describe("V1.4.0 plan-based Corp AI", () => {
       "onr_v1_287_datapool-by-zetatech",
       "onr_v1_293_netwatch-credit-voucher",
     ]).toContain(selectedDefinition);
-    expect([
-      "corp.plan.recover_economy",
-      "corp.tag.punish_visible_tag",
-    ]).toContain(decision.reasonCode);
+    expect(["corp.tag.punish_visible_tag"]).toContain(decision.reasonCode);
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_tag_punish_payoff_ontology_used:true",
+        "corp_punish_opportunity_confirmed_by_ontology:true",
+      ]),
+    );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|simple_run_event|Simple Run Event/,
     );
@@ -10261,6 +10561,96 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(decision.reasonCode).toBe("runner.plan.build_rig");
     expect(buildScore.reasons).toContain(
       "visible_missing_breaker_search_available",
+    );
+  });
+
+  it("uses structured breaker ontology to recognize installable wall coverage", () => {
+    const costProfile = estimateBreakerCostProfileFromOntology(
+      "onr_v1_037_japanese-water-torture",
+    );
+    const wallCost = estimateStructuredBreakerCostForIce(
+      "onr_v1_037_japanese-water-torture",
+      { definitionId: "onr_v1_237_data-wall", strength: 0 },
+    );
+    expect(costProfile).toEqual(
+      expect.objectContaining({
+        installCredits: 7,
+        memory: 1,
+      }),
+    );
+    expect(costProfile?.sideEffectPenalty).toBeGreaterThan(0);
+    expect(wallCost).toEqual(
+      expect.objectContaining({
+        coverage: "wall",
+        cost: 0,
+      }),
+    );
+
+    const input = runnerActionPhaseInput(
+      "ai-runner-structured-breaker-coverage",
+      (state) => {
+        state.runner.credits = 8;
+        moveRunnerCardToGrip(state, "onr_v1_037_japanese-water-torture");
+        const iceId = putCorpIceOnServer(state, "rd", "onr_v1_237_data-wall");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      {
+        runnerDeck: {
+          id: "ai_structured_breaker_runner",
+          name: "AI Structured Breaker Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_037_japanese-water-torture", quantity: 2 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+        corpDeck: {
+          id: "ai_structured_breaker_corp",
+          name: "AI Structured Breaker Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 4 },
+            { id: "onr_v1_237_data-wall", quantity: 2 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const install = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_037_japanese-water-torture",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(install).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!install || !gain)
+      throw new Error("Missing structured breaker coverage actions");
+
+    const scopedInput = { ...input, legalActions: [install, gain] };
+    const buildCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "build_rig",
+    );
+    expect(buildCandidate).toBeDefined();
+    if (!buildCandidate)
+      throw new Error("Missing structured breaker coverage candidate");
+    const buildScore = evaluateRunnerPlan(scopedInput, buildCandidate);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(buildCandidate.legalActionIds).toContain(install.actionId);
+    expect(decision.actionId).toBe(install.actionId);
+    expect(buildScore.score).toBeGreaterThan(0);
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /privatePayload|FullState|runnerHiddenStackOrder/i,
     );
   });
 
@@ -15389,6 +15779,162 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     });
   });
 
+  it("summarizes first-class breaker ontology metrics from action evidence", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary([
+        progressionAction("runner", 1, "install_card", undefined, 1, {
+          runnerPathBlockedByMissingCoverage: true,
+          evidence: [
+            "visible_breaker_pressure:true",
+            "matching_grip_breakers:0",
+            "structured_matching_grip_breakers:1",
+            "structured_heap_matching_breakers:0",
+            "coverage_search_actions:0",
+            "structured_breaker_cost_profile:true",
+            "structured_breaker_install_credits:2",
+            "structured_breaker_memory:1",
+            "structured_breaker_coverage:wall",
+            "structured_breaker_coverage:wall",
+            "structured_breaker_side_effect_penalty:12",
+            "runner_missing_coverage_resolved_by_ontology:true",
+          ],
+        }),
+        progressionAction("runner", 2, "play_event", undefined, 1, {
+          evidence: [
+            "visible_breaker_pressure:true",
+            "matching_grip_breakers:0",
+            "structured_matching_grip_breakers:0",
+            "structured_heap_matching_breakers:1",
+            "coverage_search_actions:1",
+            "runner_search_target_ranked_by_ontology:true",
+          ],
+        }),
+        progressionAction("runner", 3, "draw_card", undefined, 1, {
+          evidence: [
+            "runner_breaker_ontology_profile_seen:true",
+            "runner_breaker_ontology_conflict:true",
+            "runner_breaker_ontology_setup_suppressed_pressure_ready:true",
+          ],
+        }),
+        progressionAction("corp", 4, "install_card", "remote_1", 2, {
+          evidence: [
+            "runner_contest_capacity:high",
+            "visible_runner_breaker_ontology_profiles:1",
+            "structured_breaker_visible_coverage:wall",
+            "structured_breaker_profile_contest_fallback:true",
+            "structured_breaker_coverage:wall",
+            "structured_breaker_cost:0",
+            "structured_breaker_effective_quote_override:true",
+            "corp_agenda_install_blocked_by_ontology_cheap_contest:true",
+          ],
+        }),
+        progressionAction("corp", 5, "advance_card", "remote_1", 2, {
+          evidence: [
+            "runner_contest_capacity:medium",
+            "visible_runner_breaker_ontology_profiles:1",
+            "structured_breaker_profile_contest_fallback:true",
+            "structured_breaker_coverage:sentry",
+            "structured_breaker_side_effect_penalty:5",
+            "corp_remote_safety_ontology_conflict_with_effective_quote:true",
+            "corp_advance_blocked_by_ontology_cheap_contest:true",
+          ],
+        }),
+      ]),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerBreakerOntologyProfilesSeen: 3,
+      runnerBreakerOntologyCoverageUsed: 2,
+      runnerBreakerOntologyFallbackUsed: 1,
+      runnerBreakerOntologyConflict: 1,
+      runnerInstallableBreakerRankedByOntology: 1,
+      runnerSearchTargetRankedByOntology: 1,
+      runnerMissingCoverageResolvedByOntology: 1,
+      runnerBreakerOntologySetupSuppressedBecausePressureReady: 1,
+      corpVisibleRunnerBreakerOntologyProfilesSeen: 2,
+      corpRemoteSafetyUsedRunnerBreakerOntology: 2,
+      corpCheapContestDetectedByBreakerOntology: 1,
+      corpRemoteSafetyOntologyConflictWithEffectiveQuote: 2,
+      corpAgendaInstallBlockedByOntologyCheapContest: 1,
+      corpAdvanceBlockedByOntologyCheapContest: 1,
+      breakerOntologyCoverageByType: 3,
+      breakerOntologyCoverageWall: 2,
+      breakerOntologyCoverageSentry: 1,
+      breakerOntologySideEffectsSeen: 2,
+      breakerOntologyCostProfileSeen: 2,
+      breakerOntologyFallbackEvidenceCount: 2,
+      breakerOntologyEffectiveQuoteOverrideCount: 1,
+    });
+  });
+
+  it("does not report breaker ontology metrics for legacy-only evidence", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary([
+        progressionAction("runner", 1, "install_card", undefined, 1, {
+          evidence: [
+            "visible_breaker_pressure:true",
+            "matching_grip_breakers:1",
+            "structured_matching_grip_breakers:0",
+          ],
+        }),
+        progressionAction("corp", 2, "install_card", "remote_1", 1, {
+          evidence: [
+            "runner_contest_capacity:medium",
+            "visible_runner_breaker_ontology_profiles:0",
+            "structured_breaker_profile_contest_fallback:false",
+          ],
+        }),
+      ]),
+    ]);
+
+    expect(metrics.runnerBreakerOntologyProfilesSeen).toBe(0);
+    expect(metrics.runnerBreakerOntologyCoverageUsed).toBe(0);
+    expect(metrics.corpVisibleRunnerBreakerOntologyProfilesSeen).toBe(0);
+    expect(metrics.corpRemoteSafetyUsedRunnerBreakerOntology).toBe(0);
+    expect(metrics.breakerOntologyFallbackEvidenceCount).toBe(0);
+  });
+
+  it("keeps breaker ontology metric aggregation hidden-state invariant", () => {
+    const visibleActions = [
+      progressionAction("corp", 1, "advance_card", "remote_1", 1, {
+        evidence: [
+          "runner_contest_capacity:high",
+          "visible_runner_breaker_ontology_profiles:1",
+          "structured_breaker_profile_contest_fallback:true",
+          "structured_breaker_coverage:wall",
+        ],
+      }),
+    ];
+
+    const first = summarizeMatchProgressionMetrics([
+      progressionSummary(visibleActions, "breaker-visible-a"),
+    ]);
+    const second = summarizeMatchProgressionMetrics([
+      {
+        ...progressionSummary(visibleActions, "breaker-visible-b"),
+        finalStateHash: "fnv1a:different-hidden-state",
+      },
+    ]);
+
+    expect({
+      corpVisibleRunnerBreakerOntologyProfilesSeen:
+        first.corpVisibleRunnerBreakerOntologyProfilesSeen,
+      corpRemoteSafetyUsedRunnerBreakerOntology:
+        first.corpRemoteSafetyUsedRunnerBreakerOntology,
+      corpCheapContestDetectedByBreakerOntology:
+        first.corpCheapContestDetectedByBreakerOntology,
+      breakerOntologyCoverageWall: first.breakerOntologyCoverageWall,
+    }).toEqual({
+      corpVisibleRunnerBreakerOntologyProfilesSeen:
+        second.corpVisibleRunnerBreakerOntologyProfilesSeen,
+      corpRemoteSafetyUsedRunnerBreakerOntology:
+        second.corpRemoteSafetyUsedRunnerBreakerOntology,
+      corpCheapContestDetectedByBreakerOntology:
+        second.corpCheapContestDetectedByBreakerOntology,
+      breakerOntologyCoverageWall: second.breakerOntologyCoverageWall,
+    });
+  });
+
   it("summarizes short-horizon plan conversion metrics from action traces", () => {
     const metrics = summarizeMatchProgressionMetrics([
       progressionSummary([
@@ -15789,6 +16335,13 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             corpTraceTagOpportunity: true,
             corpTraceTagTaken: true,
             corpTraceTagExpectedSuccess: 1,
+            corpTagPunishOntologyProfilesSeen: true,
+            corpTagSourceOntologyProfilesSeen: true,
+            corpTagSourceOntologyUsed: true,
+            corpTagSourceLegalActionClassifiedByOntology: true,
+            corpTagSourceTakenWithOntologyPayoffAvailable: true,
+            corpTagPunishOntologyKinds: ["tag_source", "trace"],
+            corpTagPunishConditionKinds: ["requires_trace_success"],
           }),
           progressionAction("runner", 2, "resolve_choice", undefined, 1, {
             runnerTagsBeforeAction: 0,
@@ -15809,6 +16362,14 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             corpPunishOpportunity: true,
             corpPunishTaken: true,
             corpPunishKind: "scorched_earth_like",
+            corpTagPunishOntologyProfilesSeen: true,
+            corpTagPunishPayoffOntologyProfilesSeen: true,
+            corpTagPunishPayoffOntologyUsed: true,
+            corpPunishLegalActionClassifiedByOntology: true,
+            corpPunishOpportunityConfirmedByOntology: true,
+            corpOntologyPunishOpportunityConverted: true,
+            corpTagPunishOntologyKinds: ["tag_punish_payoff", "damage"],
+            corpTagPunishConditionKinds: ["requires_runner_tagged"],
           }),
           progressionAction("runner", 5, "resolve_choice", undefined, 2, {
             runnerTagsBeforeAction: 0,
@@ -15831,6 +16392,11 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             corpPunishOpportunity: true,
             corpPunishKind: "urban_renewal_like",
             corpPunishSkippedReason: "economy",
+            corpPunishOpportunityConfirmedByOntology: true,
+            corpPunishSkippedDespiteOntologyOpportunity: true,
+            corpTagPunishOntologyProfilesSeen: true,
+            corpTagPunishPayoffOntologyProfilesSeen: true,
+            corpTagPunishOntologyKinds: ["tag_punish_payoff"],
           }),
           progressionAction("corp", 9, "install_card", "hq", 4, {
             runnerTagsBeforeAction: 1,
@@ -15897,6 +16463,19 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.corpTagPunishFunnelPunishOpportunity).toBe(4);
     expect(metrics.corpTagPunishFunnelPunishTaken).toBe(2);
     expect(metrics.corpTagPunishFunnelTerminalDamageOrEconomicHit).toBe(2);
+    expect(metrics.corpTagPunishOntologyProfilesSeen).toBe(3);
+    expect(metrics.corpTagSourceOntologyUsed).toBe(1);
+    expect(metrics.corpTagPunishPayoffOntologyUsed).toBe(1);
+    expect(metrics.corpPunishOpportunityConfirmedByOntology).toBe(2);
+    expect(metrics.corpPunishSkippedDespiteOntologyOpportunity).toBe(1);
+    expect(metrics.corpTagSourceTakenWithOntologyPayoffAvailable).toBe(1);
+    expect(metrics.corpTagSourceConvertedToOntologyPunishOpportunity).toBe(1);
+    expect(metrics.corpOntologyPunishOpportunityConverted).toBe(1);
+    expect(metrics.corpTagPunishOntologyKindTagSource).toBe(1);
+    expect(metrics.corpTagPunishOntologyKindTagPunishPayoff).toBe(2);
+    expect(metrics.corpTagPunishOntologyKindTrace).toBe(1);
+    expect(metrics.corpTagPunishConditionRequiresRunnerTagged).toBe(1);
+    expect(metrics.corpTagPunishConditionRequiresTraceSuccess).toBe(1);
   });
 
   it("keeps tag/punish diagnostics invariant to hidden runner zones", () => {
@@ -18463,6 +19042,7 @@ function corpEffectiveRemoteSafetyInput(
   options: {
     runnerCredits: number;
     includeTaxUpgrade?: boolean;
+    includeAgendaStealTaxUpgrade?: boolean;
     installedAgendaCounters?: number;
     agendaInHq?: boolean;
     assetInHq?: boolean;
@@ -18497,6 +19077,7 @@ function corpEffectiveRemoteSafetyInput(
         { id: "simple_code_gate_ice", quantity: 2 },
         { id: "simple_barrier_ice", quantity: 2 },
         { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+        { id: "onr_v1_366_red-herrings", quantity: 1 },
       ],
     },
     agendaPointsToWin: 7,
@@ -18519,6 +19100,14 @@ function corpEffectiveRemoteSafetyInput(
       "onr_v1_355_crystal-palace-station-grid",
       0,
     );
+    state.cardInstances[taxId] = {
+      ...state.cardInstances[taxId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+  if (options.includeAgendaStealTaxUpgrade) {
+    const taxId = putCorpRootInRemote(state, "onr_v1_366_red-herrings", 0);
     state.cardInstances[taxId] = {
       ...state.cardInstances[taxId]!,
       faceup: true,
@@ -18572,6 +19161,7 @@ function corpEffectiveRemoteSafetyInput(
       { cardId: "simple_barrier_ice", quantity: 2 },
       { cardId: "simple_economy_operation", quantity: 4 },
       { cardId: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+      { cardId: "onr_v1_366_red-herrings", quantity: 1 },
     ],
   });
   return buildAiDecisionInput(state, "corp", {

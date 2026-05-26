@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "ai-manual-hint-overlay-v1",
+  "scope": {
+    "set": "onr-v1",
+    "side": "corp",
+    "cardType": "upgrade"
+  },
+  "status": "read_only_pilot",
+  "cards": [
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "overlay": {
+        "lineSupport": ["remote_scoring_build", "ice_tax_glacier"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        },
+        "strategicNotes": [
+          "Remote protection is context-dependent strategic overlay; the run tax stays mechanical."
+        ]
+      }
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "overlay": {
+        "lineSupport": [
+          "remote_scoring_build",
+          "ice_tax_glacier",
+          "score_closeout"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        },
+        "strategicNotes": [
+          "Remote protection is context-dependent strategic overlay; agenda steal tax and access condition stay mechanical."
+        ]
+      }
+    }
+  ]
+}

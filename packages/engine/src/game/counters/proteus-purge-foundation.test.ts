@@ -221,6 +221,54 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
     ]);
   });
 
+  it("offers Runner-virus purge in the normal Corp action phase and creates future action debt", () => {
+    let state = createGame({
+      seed: "proteus-8a-main-phase-runner-virus-purge",
+      setupMode: "completed",
+    });
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.purgeableRunnerVirusCounters = {
+      corp: { vienna: 2 },
+    };
+
+    const purge = getLegalActions(state, "corp").find(
+      (action) => action.type === "purge_runner_virus_counters",
+    );
+    expect(purge).toMatchObject({
+      label: "Runner-Virus-Counter purgen (3 Aktionen aussetzen)",
+      costs: [],
+      payload: {
+        purgeModel: "future_action_debt",
+        actionDebtAdded: 3,
+        timingFamily: "corp_main_action",
+      },
+    });
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "purge_runner_virus_counters",
+    );
+
+    expect(state.purgeableRunnerVirusCounters).toBeUndefined();
+    expect(state.corp.clicks).toBe(3);
+    expect(state.corpActionDebt).toMatchObject({
+      forgoActionsPending: 3,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "purge_runner_virus_counters",
+      purgedRunnerVirusCounters: 2,
+      actionDebtAdded: 3,
+      timingFamily: "corp_main_action",
+    });
+    expect(getLegalActions(state, "corp").map((action) => action.type)).toEqual([
+      "forgo_action",
+    ]);
+  });
+
   it("applies Tax and Pipe counters at Corp start of turn", () => {
     let state = createGame({
       seed: "proteus-8d-tax-pipe-start",

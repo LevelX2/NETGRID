@@ -11,6 +11,8 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 3d
+proReferences:
+  - PRO017
 blockedBy:
   - missing-generic-corp-post-pass-ice-window-contract
 resultArtifacts: []

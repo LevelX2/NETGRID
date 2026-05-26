@@ -33,6 +33,12 @@ import {
   iceHasEndTheRun,
   serverIdFromEvent,
 } from "./visible-run-analysis";
+import {
+  estimateBreakerCostProfileFromOntology,
+  estimateStructuredBreakerCostForIce,
+  getStructuredBreakerProfileForCard,
+  structuredBreakerProfileCoversIce,
+} from "./breaker-ontology-consumer";
 
 export type RunnerPlanKind =
   | "pressure_rnd"
@@ -166,12 +172,15 @@ type RunnerServerFeatures =
 type VisibleBreakerPressure = {
   blockedServerIds: Set<string>;
   knownIceBlockedServerIds: Set<string>;
+  missingIceDefinitionIds: Set<string>;
   missingBreakerRoles: Set<string>;
   matchingGripBreakerCount: number;
+  ontologyMatchingGripBreakerCount: number;
   matchingInstallActionIds: Set<string>;
   searchActionIds: Set<string>;
   recoveryActionIds: Set<string>;
   heapMatchingBreakerCount: number;
+  ontologyHeapMatchingBreakerCount: number;
   deckAnswerCount: number;
   missingAnswerCount: number;
   requiredCoverageCredits: number;
@@ -629,14 +638,15 @@ export function generateRunnerPlanCandidates(
       actions.filter(
         (action) =>
           (action.type === "install_card" &&
-            rolesForAction(input, action).some(
+            (rolesForAction(input, action).some(
               (role) =>
                 role.startsWith("breaker_") ||
                 role === "memory" ||
                 role === "setup" ||
                 role === "build_rig" ||
                 isRunnerPressureRole(role),
-            )) ||
+            ) ||
+              isStructuredBreakerInstallAction(input, action))) ||
           (hasCoverageSearchNeed &&
             runnerCoverageSearchAction(input, action)) ||
           Boolean(classifyShellTradersAction(input, action)),
@@ -2968,12 +2978,15 @@ function evaluateVisibleBreakerPlan(
       `visible_breaker_pressure:true`,
       `visible_blocked_servers:${pressure.blockedServerIds.size}`,
       `known_ice_blocked_servers:${pressure.knownIceBlockedServerIds.size}`,
+      `missing_ice_definitions:${pressure.missingIceDefinitionIds.size}`,
       `missing_breaker_roles:${pressure.missingBreakerRoles.size}`,
       `matching_grip_breakers:${pressure.matchingGripBreakerCount}`,
+      `structured_matching_grip_breakers:${pressure.ontologyMatchingGripBreakerCount}`,
       `matching_install_actions:${pressure.matchingInstallActionIds.size}`,
       `coverage_search_actions:${pressure.searchActionIds.size}`,
       `coverage_recovery_actions:${pressure.recoveryActionIds.size}`,
       `heap_matching_breakers:${pressure.heapMatchingBreakerCount}`,
+      `structured_heap_matching_breakers:${pressure.ontologyHeapMatchingBreakerCount}`,
       `deck_breaker_answers:${pressure.deckAnswerCount}`,
       `missing_breaker_answers:${pressure.missingAnswerCount}`,
       `coverage_required_credits:${pressure.requiredCoverageCredits}`,
@@ -6096,9 +6109,30 @@ function isRunnerInstallableRelevantBreaker(
   const roles = rolesForAction(input, action).filter((role) =>
     role.startsWith("breaker_"),
   );
-  if (roles.length === 0) return false;
   const features = extractRunnerFeatures(input);
-  return roles.some((role) => !features.rigRoles.has(role));
+  if (roles.length > 0 && roles.some((role) => !features.rigRoles.has(role)))
+    return true;
+  const definitionId = sourceDefinitionIdForAction(input, action);
+  const profile = getStructuredBreakerProfileForCard(definitionId);
+  if (!profile) return false;
+  const installedCoverage = new Set(
+    (input.playerView.own.rig ?? []).flatMap(
+      (card) =>
+        getStructuredBreakerProfileForCard(card.definitionId)?.coverage ?? [],
+    ),
+  );
+  return profile.coverage.some((coverage) => !installedCoverage.has(coverage));
+}
+
+function isStructuredBreakerInstallAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.type !== "install_card") return false;
+  const definitionId = sourceDefinitionIdForAction(input, action);
+  return Boolean(
+    definitionId && estimateBreakerCostProfileFromOntology(definitionId),
+  );
 }
 
 function isRunnerRunnablePressureAction(
@@ -7447,8 +7481,14 @@ function runnerInstallPriority(
   const remainingCredits = features.credits - actionCreditCost(action);
   let priority = 85;
   priority -= runnerDuplicateInstallPriorityPenalty(input, action);
-  if (breakerPressure.matchingInstallActionIds.has(action.actionId))
+  if (breakerPressure.matchingInstallActionIds.has(action.actionId)) {
     priority += 120;
+    priority += runnerStructuredBreakerInstallPriority(
+      input,
+      action,
+      breakerPressure,
+    );
+  }
   if (
     roles.some(
       (role) => role.startsWith("breaker_") && !features.rigRoles.has(role),
@@ -7484,6 +7524,36 @@ function runnerInstallPriority(
   )
     priority -= 18;
   return priority;
+}
+
+function runnerStructuredBreakerInstallPriority(
+  input: AiDecisionInput,
+  action: LegalAction,
+  pressure: VisibleBreakerPressure,
+): number {
+  const definitionId = sourceDefinitionIdForAction(input, action);
+  if (!definitionId || pressure.missingIceDefinitionIds.size === 0) return 0;
+  const matchingEstimates = [...pressure.missingIceDefinitionIds]
+    .map((iceDefinitionId) =>
+      estimateStructuredBreakerCostForIce(definitionId, {
+        definitionId: iceDefinitionId,
+      }),
+    )
+    .filter(
+      (estimate): estimate is NonNullable<typeof estimate> =>
+        estimate !== undefined,
+    );
+  if (matchingEstimates.length === 0) return 0;
+  const bestCost = Math.min(
+    ...matchingEstimates.map((estimate) => estimate.cost),
+  );
+  const sideEffectPenalty = Math.min(
+    ...matchingEstimates.map((estimate) => estimate.sideEffectPenalty),
+  );
+  const profile = estimateBreakerCostProfileFromOntology(definitionId);
+  const riskPenalty =
+    (profile?.reserveRiskPenalty ?? 0) + (profile?.opportunityCostPenalty ?? 0);
+  return Math.max(0, 42 - bestCost * 6 - sideEffectPenalty - riskPenalty);
 }
 
 function runnerDuplicateInstallPriorityPenalty(
@@ -7576,7 +7646,11 @@ function assessVisibleBreakerPressure(
           !rigCards.some(
             (card) =>
               card.definitionId &&
-              canBreakerDefinitionBreakIce(card.definitionId, definitionId),
+              runnerStaticBreakerCoversIce(
+                card.definitionId,
+                definitionId,
+                true,
+              ),
           ),
       );
     const rezzedMissingDefinitions = assessment.blocked
@@ -7614,14 +7688,28 @@ function assessVisibleBreakerPressure(
   );
   const matchingGripBreakers = gripCards.filter((card) =>
     [...missingIceDefinitionIds].some((iceDefinitionId) =>
-      canBreakerDefinitionBreakIce(card.definitionId!, iceDefinitionId),
+      runnerStaticBreakerCoversIce(card.definitionId!, iceDefinitionId, true),
     ),
   );
   const matchingHeapBreakers = heapCards.filter((card) =>
     [...missingIceDefinitionIds].some((iceDefinitionId) =>
-      canBreakerDefinitionBreakIce(card.definitionId!, iceDefinitionId),
+      runnerStaticBreakerCoversIce(card.definitionId!, iceDefinitionId, true),
     ),
   );
+  const ontologyMatchingGripBreakerCount = matchingGripBreakers.filter((card) =>
+    [...missingIceDefinitionIds].some(
+      (iceDefinitionId) =>
+        card.definitionId &&
+        structuredBreakerProfileCoversIce(card.definitionId, iceDefinitionId),
+    ),
+  ).length;
+  const ontologyHeapMatchingBreakerCount = matchingHeapBreakers.filter((card) =>
+    [...missingIceDefinitionIds].some(
+      (iceDefinitionId) =>
+        card.definitionId &&
+        structuredBreakerProfileCoversIce(card.definitionId, iceDefinitionId),
+    ),
+  ).length;
   const matchingGripIds = new Set(
     matchingGripBreakers.map((card) => card.instanceId),
   );
@@ -7677,12 +7765,15 @@ function assessVisibleBreakerPressure(
   return {
     blockedServerIds,
     knownIceBlockedServerIds,
+    missingIceDefinitionIds,
     missingBreakerRoles,
     matchingGripBreakerCount: matchingGripBreakers.length,
+    ontologyMatchingGripBreakerCount,
     matchingInstallActionIds,
     searchActionIds,
     recoveryActionIds,
     heapMatchingBreakerCount: matchingHeapBreakers.length,
+    ontologyHeapMatchingBreakerCount,
     deckAnswerCount,
     missingAnswerCount:
       matchingGripBreakers.length === 0
@@ -7744,6 +7835,18 @@ function missingBreakerRolesForIce(definitionId: string): string[] {
     roles.add("breaker_killer");
   if (roles.size === 0) roles.add("breaker_generic");
   return [...roles].sort();
+}
+
+function runnerStaticBreakerCoversIce(
+  breakerDefinitionId: string,
+  iceDefinitionId: string,
+  allowStructuredOntology: boolean,
+): boolean {
+  return (
+    canBreakerDefinitionBreakIce(breakerDefinitionId, iceDefinitionId) ||
+    (allowStructuredOntology &&
+      structuredBreakerProfileCoversIce(breakerDefinitionId, iceDefinitionId))
+  );
 }
 
 function subtypeKeyForRunnerCoverage(subtype: string): string {

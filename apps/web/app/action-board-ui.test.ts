@@ -25,6 +25,7 @@ import {
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   counterDisplayBadgeView,
+  counterDisplayTooltipText,
   counterDisplaysForRendering,
   clampCuePosition,
   contextualCardActionLabel,
@@ -61,6 +62,7 @@ import {
   runWindowStatusLabel,
   runnerRigMemorySummary,
   serverBoardRows,
+  serverCounterChipsForDisplays,
   serverDisplayLabel,
   splitLegalActions,
   storedCreditAmount,
@@ -1127,7 +1129,8 @@ describe("V1.0.6 resource and card-display helpers", () => {
       label: "7 Ablative-Counter",
       ariaLabel: "7 Ablative-Counter",
       shortLabel: "7 Ablative",
-      testId: "ablative-counter-badge"
+      testId: "ablative-counter-badge",
+      tooltip: "7 Ablative-Counter"
     });
     expect(
       counterDisplayBadgeView(
@@ -1179,6 +1182,42 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(
       armoredFridgeAblativeCounterBadge(rawUnknownPowerCard)
     ).toBeNull();
+  });
+
+  it("explains Proteus counter effects for badge and identity tooltips", () => {
+    expect(
+      counterDisplayTooltipText({
+        id: "runner_virus_corp_highlighter",
+        amount: 3,
+        displayKind: "virus",
+        label: "Highlighter-Counter",
+        ariaLabel: "3 Highlighter-Counter",
+        counterType: "highlighter",
+        usageHint: "status_marker"
+      })
+    ).toBe("Highlighter: 3 Highlighter geben dem Runner 2 zusätzliche R&D-Karten beim Zugriff auf R&D. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen.");
+    expect(
+      counterDisplayTooltipText({
+        id: "runner_virus_corp_vienna",
+        amount: 2,
+        displayKind: "virus",
+        label: "Vienna-Counter",
+        ariaLabel: "2 Vienna-Counter",
+        counterType: "vienna",
+        usageHint: "status_marker"
+      })
+    ).toBe("Vienna 22: 2 Vienna geben dem Runner 2 zusätzliche HQ-Karten beim Zugriff auf HQ. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen.");
+    expect(
+      counterDisplayTooltipText({
+        id: "pattel_antibody",
+        amount: 1,
+        displayKind: "generic_counter",
+        label: "Pattel-Counter",
+        ariaLabel: "1 Pattel-Counter",
+        counterType: "pattel_antibody",
+        usageHint: "status_marker"
+      })
+    ).toBe("Pattel Antibody: Jeder Pattel-Counter auf einem Icebreaker reduziert dessen Stärke um 1.");
   });
 
   it("keeps advancement counters as separate gems until ten counters", () => {
@@ -1262,19 +1301,79 @@ describe("V1.0.6 resource and card-display helpers", () => {
         key: "runner_virus_corp_highlighter",
         amount: 2,
         label: "Highlighter",
-        ariaLabel: "2 Highlighter-Counter"
+        ariaLabel: "2 Highlighter-Counter",
+        tooltip: "Highlighter: 2 Highlighter geben dem Runner 1 zusätzliche R&D-Karte beim Zugriff auf R&D. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen."
       },
       {
         key: "runner_virus_corp_tax",
         amount: 1,
         label: "Tax",
-        ariaLabel: "1 Tax-Counter"
+        ariaLabel: "1 Tax-Counter",
+        tooltip: "Taxman: Je 2 Tax-Counter verliert die Korp zu Beginn ihres Zugs 1 Credit. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen."
       },
       {
         key: "bad_publicity",
         amount: 6,
         label: "Bad Publicity",
-        ariaLabel: "6 Bad Publicity"
+        ariaLabel: "6 Bad Publicity",
+        tooltip: "Bad Publicity: Jede Bad Publicity gibt dem Runner zu Beginn eines Runs 1 temporären Credit. Bei 7 Bad Publicity verliert die Korp."
+      }
+    ]);
+  });
+
+  it("maps server CounterDisplays to fort-level counter chips", () => {
+    expect(
+      serverCounterChipsForDisplays([
+        {
+          id: "runner_virus_server_rd_socket_rd",
+          amount: 1,
+          displayKind: "virus",
+          label: "Socket-Counter R&D",
+          ariaLabel: "1 Socket-Counter R&D",
+          counterType: "socket_rd",
+          usageHint: "status_marker"
+        },
+        {
+          id: "pox",
+          amount: 2,
+          displayKind: "virus",
+          label: "Pox-Counter",
+          ariaLabel: "2 Pox-Counter auf diesem Server",
+          counterType: "virus",
+          usageHint: "status_marker"
+        },
+        {
+          id: "advancement",
+          amount: 3,
+          displayKind: "advancement",
+          label: "Entwicklung",
+          ariaLabel: "3 öffentliche Advancement-Counter",
+          usageHint: "score_modifier"
+        },
+        {
+          id: "empty_socket",
+          amount: 0,
+          displayKind: "virus",
+          label: "Socket-Counter HQ",
+          ariaLabel: "0 Socket-Counter HQ",
+          counterType: "socket_hq",
+          usageHint: "status_marker"
+        }
+      ])
+    ).toEqual([
+      {
+        key: "runner_virus_server_rd_socket_rd",
+        amount: 1,
+        label: "Socket",
+        ariaLabel: "1 Socket-Counter R&D",
+        tooltip: "Viral Pipeline: Socket-Counter auf R&D. Sobald je 1 Socket auf Archives, HQ und R&D liegt, werden diese drei Socket-Counter in 1 Pipe-Counter umgewandelt. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen."
+      },
+      {
+        key: "pox",
+        amount: 2,
+        label: "Pox",
+        ariaLabel: "2 Pox-Counter auf diesem Server",
+        tooltip: "Pox: Je 2 Pox-Counter in diesem Fort erhöhen die Korp-Installationskosten in oder auf diesem Fort um 1 Credit. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen."
       }
     ]);
   });
@@ -1913,7 +2012,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     const accessedAsset = card("asset_1", "Doppelganger Antibody", "asset");
     accessedAsset.trashCost = 0;
 
-    expect(accessRevealStatusLabel(accessedAsset, [], "runner", "runner", "R&D")).toBe("Es ist gerade keine Runner-Entscheidung in diesem Zugriffsfenster offen. Danach kannst du den Zugriff fortsetzen.");
+    expect(accessRevealStatusLabel(accessedAsset, [], "runner", "runner", "R&D")).toBe("Angezeigte Karte aus Research and Development.");
   });
 
   it("explains Proteus free access trash for normally untrashable cards", () => {

@@ -20,6 +20,7 @@ import {
   RUNTIME_CARDS,
   createAiHintsByCard,
 } from "./ai-hints";
+import type { AiHintStructuredEffect } from "./hint-ontology";
 import {
   beliefDebugSummary,
   reconstructBeliefState,
@@ -31,6 +32,17 @@ import {
   minimumCreditsToBreakEndTheRunSubroutines,
   serverIdFromEvent,
 } from "./visible-run-analysis";
+import {
+  estimateStructuredBreakerCostForIce,
+  getStructuredBreakerProfileForCard,
+} from "./breaker-ontology-consumer";
+import {
+  getStructuredRemoteRoleForCard,
+  remoteRoleIsScoringProtectionKind,
+  structuredRemoteRoleConflictWithLegacy,
+  structuredRemoteRoleSafetyBonusForServer,
+} from "./remote-role-ontology-consumer";
+import { classifyTagPunishLegalActionFromOntology } from "./tag-punish-ontology-consumer";
 
 export type CorpPlanKind =
   | "score_now"
@@ -200,6 +212,15 @@ export type CorpScoredAgendaAbilityAssessment = {
   evidence: string[];
 };
 
+export type CorpScoredAgendaOntologyAssessment = {
+  kind: CorpScoredAgendaAbilityKind;
+  immediateGain: number;
+  drawAmount: number;
+  gainedActions: number;
+  effectKinds: string[];
+  evidence: string[];
+};
+
 type CorpExtraActionOperationAssessment = {
   gainedActions: number;
   actionCost: number;
@@ -303,6 +324,8 @@ type CorpEffectiveRemoteSafetyAssessment = {
   knownPathCost?: number;
   contestCapacity: RunnerContestCapacity["capacity"];
   rootProtectionCount: number;
+  structuredRemoteRoleProtectionCount: number;
+  structuredRemoteRoleSafetyBonus: number;
   effectiveProtectionScore: number;
   runnerCanContestWithCredits: boolean;
   runnerCanContestForActionOnly: boolean;
@@ -1788,13 +1811,15 @@ function selectCorpStrategicLine(
         (role) => role.includes("economy") || role.includes("draw"),
       ),
   ).length;
-  const tagTraceActions = input.legalActions.filter((action) =>
-    rolesForAction(input, action).some(
-      (role) =>
-        role.includes("tag") ||
-        role.includes("trace") ||
-        role.includes("punish"),
-    ),
+  const tagTraceActions = input.legalActions.filter(
+    (action) =>
+      corpTagPunishOntologyAssessmentForAction(input, action) ||
+      rolesForAction(input, action).some(
+        (role) =>
+          role.includes("tag") ||
+          role.includes("trace") ||
+          role.includes("punish"),
+      ),
   ).length;
   const baitActions = input.legalActions.filter((action) =>
     rolesForAction(input, action).some(
@@ -1979,13 +2004,15 @@ function corpCandidateMatchesStrategicLine(
         candidate.kind === "score_next_turn" || candidate.kind === "score_now"
       );
     case "tag_trace_punish":
-      return actionsForCandidate(input, candidate).some((action) =>
-        rolesForAction(input, action).some(
-          (role) =>
-            role.includes("tag") ||
-            role.includes("trace") ||
-            role.includes("punish"),
-        ),
+      return actionsForCandidate(input, candidate).some(
+        (action) =>
+          corpTagPunishOntologyAssessmentForAction(input, action) ||
+          rolesForAction(input, action).some(
+            (role) =>
+              role.includes("tag") ||
+              role.includes("trace") ||
+              role.includes("punish"),
+          ),
       );
     case "bait_and_punish":
       return candidate.kind === "bait_runner";
@@ -2352,6 +2379,16 @@ function evaluateCorpRemotePortfolioDiscipline(
   const choosesConsolidation = actions.some((action) =>
     portfolio.existingRemoteStrengthenActionIds.includes(action.actionId),
   );
+  const structuredRemoteRoleInPortfolio = actions.some((action) => {
+    const serverId =
+      typeof action.payload?.serverId === "string"
+        ? action.payload.serverId
+        : remoteServerIdForAction(input, action);
+    return Boolean(
+      serverId?.startsWith("remote_") &&
+      remoteServerHasStructuredRemoteRole(input, serverId),
+    );
+  });
   const features = extractCorpPlanFeatures(input);
 
   const score =
@@ -2380,8 +2417,29 @@ function evaluateCorpRemotePortfolioDiscipline(
       }`,
       `corp_remote_portfolio_overexpanded:${portfolio.overExpanded && choosesNewRemote}`,
       `corp_one_ice_remote_cheaply_contestable:${portfolio.cheapOneIceRemoteIds.length > 0}`,
+      `corp_remote_role_used_for_portfolio:${structuredRemoteRoleInPortfolio}`,
+      `corp_remote_role_helped_choose_existing_remote:${structuredRemoteRoleInPortfolio && !choosesNewRemote}`,
+      `corp_remote_role_helped_avoid_new_empty_remote:${
+        structuredRemoteRoleInPortfolio &&
+        !choosesNewRemote &&
+        portfolio.newRemoteWithoutPlanActionIds.length > 0
+      }`,
     ],
   };
+}
+
+function remoteServerHasStructuredRemoteRole(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  return Boolean(
+    server?.root.some((card) =>
+      Boolean(getStructuredRemoteRoleForCard(card.definitionId)),
+    ),
+  );
 }
 
 function evaluateCorpHqAgendaDensity(
@@ -3836,6 +3894,9 @@ export function classifyCorpScoredAgendaAbility(
     )
   )
     return undefined;
+  const ontologyAssessment = classifyScoredAgendaActionFromOntology(
+    sourceCard.definitionId,
+  );
   const text = scoredAgendaAbilityText(sourceCard, action);
   const storedCredits = Math.max(
     0,
@@ -3850,41 +3911,57 @@ export function classifyCorpScoredAgendaAbility(
     numberPayload(action, "amount"),
   );
   const textGain = scoredAgendaCreditGainFromText(text);
-  const immediateGain = Math.max(payloadGain, textGain);
-  const drawAmount = Math.max(
+  const observedImmediateGain = Math.max(payloadGain, textGain);
+  const observedDrawAmount = Math.max(
     0,
     numberPayload(action, "drawCardsAmount"),
     scoredAgendaDrawAmountFromText(text),
   );
-  const gainedActions = scoredAgendaGainedActionsFromText(text);
-  const netCredits = Math.max(0, immediateGain - creditCost);
-  const valueOverBasic = Math.max(
-    0,
-    Math.max(netCredits - clickCost, drawAmount - clickCost, gainedActions),
-  );
+  const observedGainedActions = scoredAgendaGainedActionsFromText(text);
   const lowerText = text.toLowerCase();
   const counterEconomy =
-    immediateGain > 0 &&
+    observedImmediateGain > 0 &&
     (storedCredits > 0 ||
       numberPayload(action, "removePowerCounterAmount") > 0 ||
       /counter|coup|take\s+\[?\d+\]?.*from/i.test(text));
-  const kind: CorpScoredAgendaAbilityKind =
+  const heuristicKind: CorpScoredAgendaAbilityKind =
     action.payload?.agendaAbility === "ai_chief_financial_officer" ||
-    (lowerText.includes("shuffle") && drawAmount > 0)
+    (lowerText.includes("shuffle") && observedDrawAmount > 0)
       ? "scored_agenda_shuffle_draw"
       : counterEconomy
         ? "scored_agenda_counter_economy"
-        : immediateGain > 0
+        : observedImmediateGain > 0
           ? "scored_agenda_economy"
-          : drawAmount > 1
+          : observedDrawAmount > 1
             ? "scored_agenda_draw"
-            : gainedActions > 0
+            : observedGainedActions > 0
               ? "scored_agenda_extra_action"
               : lowerText.includes("trace") && lowerText.includes("tag")
                 ? "scored_agenda_trace_tag"
                 : lowerText.includes("damage")
                   ? "scored_agenda_damage_punish"
                   : "scored_agenda_utility";
+  const kind = resolveScoredAgendaOntologyKind(
+    heuristicKind,
+    ontologyAssessment?.kind,
+  );
+  const immediateGain =
+    kind === "scored_agenda_economy" || kind === "scored_agenda_counter_economy"
+      ? Math.max(observedImmediateGain, ontologyAssessment?.immediateGain ?? 0)
+      : observedImmediateGain;
+  const drawAmount =
+    kind === "scored_agenda_draw" || kind === "scored_agenda_shuffle_draw"
+      ? Math.max(observedDrawAmount, ontologyAssessment?.drawAmount ?? 0)
+      : observedDrawAmount;
+  const gainedActions =
+    kind === "scored_agenda_extra_action"
+      ? Math.max(observedGainedActions, ontologyAssessment?.gainedActions ?? 0)
+      : observedGainedActions;
+  const netCredits = Math.max(0, immediateGain - creditCost);
+  const valueOverBasic = Math.max(
+    0,
+    Math.max(netCredits - clickCost, drawAmount - clickCost, gainedActions),
+  );
   const tacticalValue =
     kind === "scored_agenda_damage_punish"
       ? input.playerView.opponent.tags > 0
@@ -3902,6 +3979,11 @@ export function classifyCorpScoredAgendaAbility(
           : kind === "scored_agenda_shuffle_draw"
             ? 120
             : valueOverBasic * 45;
+  const ontologyEvidence = scoredAgendaOntologyEvidence(
+    ontologyAssessment,
+    heuristicKind,
+    kind,
+  );
   return {
     kind,
     sourceDefinitionId: sourceCard.definitionId,
@@ -3915,21 +3997,149 @@ export function classifyCorpScoredAgendaAbility(
     storedCredits,
     valueOverBasic,
     tacticalValue,
-    evidence: scoredAgendaAbilityEvidence({
-      kind,
-      sourceDefinitionId: sourceCard.definitionId,
-      sourceTitle: sourceCard.title ?? sourceCard.definitionId,
-      immediateGain,
-      drawAmount,
-      gainedActions,
-      netCredits,
-      clickCost,
-      creditCost,
-      storedCredits,
-      valueOverBasic,
-      tacticalValue,
-    }),
+    evidence: [
+      ...scoredAgendaAbilityEvidence({
+        kind,
+        sourceDefinitionId: sourceCard.definitionId,
+        sourceTitle: sourceCard.title ?? sourceCard.definitionId,
+        immediateGain,
+        drawAmount,
+        gainedActions,
+        netCredits,
+        clickCost,
+        creditCost,
+        storedCredits,
+        valueOverBasic,
+        tacticalValue,
+      }),
+      ...ontologyEvidence,
+    ],
   };
+}
+
+export function classifyScoredAgendaActionFromOntology(
+  sourceDefinitionId: string | undefined,
+): CorpScoredAgendaOntologyAssessment | undefined {
+  if (!sourceDefinitionId) return undefined;
+  const hint = AI_HINTS.get(sourceDefinitionId);
+  const scoredEffects = (hint?.effects ?? []).filter(
+    isScoredAgendaOntologyEffect,
+  );
+  if (scoredEffects.length === 0) return undefined;
+
+  const effectKinds = sortedUnique(scoredEffects.map((effect) => effect.kind));
+  const immediateGain = maxEffectAmount(scoredEffects, (effect) =>
+    (effect.kind === "economy" || effect.kind === "counter_economy") &&
+    effect.resource === "credits"
+      ? effect.amount
+      : undefined,
+  );
+  const drawAmount = maxEffectAmount(scoredEffects, (effect) =>
+    effect.kind === "draw" && effect.resource === "cards"
+      ? effect.amount
+      : undefined,
+  );
+  const gainedActions = maxEffectAmount(scoredEffects, (effect) =>
+    effect.kind === "extra_action" && effect.resource === "actions"
+      ? effect.amount
+      : undefined,
+  );
+  const kind = scoredAgendaKindFromOntologyEffects(scoredEffects);
+  if (!kind) return undefined;
+  return {
+    kind,
+    immediateGain,
+    drawAmount,
+    gainedActions,
+    effectKinds,
+    evidence: [
+      "scored_agenda_ontology_present:true",
+      `scored_agenda_ontology_kind:${kind}`,
+      ...effectKinds.map(
+        (effectKind) => `scored_agenda_ontology_effect:${effectKind}`,
+      ),
+      ...(immediateGain > 0
+        ? [`scored_agenda_ontology_immediate_gain:${immediateGain}`]
+        : []),
+      ...(drawAmount > 0
+        ? [`scored_agenda_ontology_draw_amount:${drawAmount}`]
+        : []),
+      ...(gainedActions > 0
+        ? [`scored_agenda_ontology_gained_actions:${gainedActions}`]
+        : []),
+    ],
+  };
+}
+
+function isScoredAgendaOntologyEffect(effect: AiHintStructuredEffect): boolean {
+  return effect.timing === "scored_activated";
+}
+
+function maxEffectAmount(
+  effects: AiHintStructuredEffect[],
+  select: (effect: AiHintStructuredEffect) => number | undefined,
+): number {
+  return Math.max(
+    0,
+    ...effects
+      .map(select)
+      .filter((amount): amount is number => typeof amount === "number")
+      .filter((amount) => Number.isFinite(amount) && amount > 0),
+  );
+}
+
+function scoredAgendaKindFromOntologyEffects(
+  effects: AiHintStructuredEffect[],
+): CorpScoredAgendaAbilityKind | undefined {
+  const kinds = new Set(effects.map((effect) => effect.kind));
+  const hasScoredAction = kinds.has("scored_agenda_action");
+  if (kinds.has("zone_shuffle") && kinds.has("draw"))
+    return "scored_agenda_shuffle_draw";
+  if (kinds.has("counter_economy")) return "scored_agenda_counter_economy";
+  if (kinds.has("economy")) return "scored_agenda_economy";
+  if (kinds.has("draw")) return "scored_agenda_draw";
+  if (kinds.has("extra_action")) return "scored_agenda_extra_action";
+  if (kinds.has("trace") || kinds.has("tag") || kinds.has("tag_source"))
+    return "scored_agenda_trace_tag";
+  if (kinds.has("damage") || kinds.has("tag_punish_payoff"))
+    return "scored_agenda_damage_punish";
+  return hasScoredAction ? "scored_agenda_utility" : undefined;
+}
+
+function resolveScoredAgendaOntologyKind(
+  heuristicKind: CorpScoredAgendaAbilityKind,
+  ontologyKind: CorpScoredAgendaAbilityKind | undefined,
+): CorpScoredAgendaAbilityKind {
+  if (!ontologyKind) return heuristicKind;
+  if (
+    heuristicKind === "unknown_scored_agenda_ability" ||
+    heuristicKind === "scored_agenda_utility"
+  )
+    return ontologyKind;
+  return heuristicKind;
+}
+
+function scoredAgendaOntologyEvidence(
+  ontologyAssessment: CorpScoredAgendaOntologyAssessment | undefined,
+  heuristicKind: CorpScoredAgendaAbilityKind,
+  resolvedKind: CorpScoredAgendaAbilityKind,
+): string[] {
+  if (!ontologyAssessment) return [];
+  const ontologyUsed = resolvedKind === ontologyAssessment.kind;
+  const conflict =
+    !ontologyUsed &&
+    heuristicKind !== "scored_agenda_utility" &&
+    heuristicKind !== "unknown_scored_agenda_ability";
+  return [
+    ...ontologyAssessment.evidence,
+    `scored_agenda_ontology_used:${ontologyUsed}`,
+    ...(conflict
+      ? [
+          "scored_agenda_ontology_conflict:true",
+          `scored_agenda_heuristic_kind:${heuristicKind}`,
+        ]
+      : []),
+  ];
 }
 
 function activatedCardAbilityCreditGain(
@@ -4391,15 +4601,44 @@ function computeRunnerContestCapacity(
     rigCards,
     runnerCredits,
   );
+  const visibleBreakerOntologyProfiles = rigCards.filter(
+    (card) =>
+      card.known &&
+      Boolean(getStructuredBreakerProfileForCard(card.definitionId)),
+  );
+  const visibleBreakerCoverage = [
+    ...new Set(
+      visibleBreakerOntologyProfiles.flatMap(
+        (card) =>
+          getStructuredBreakerProfileForCard(card.definitionId)?.coverage ?? [],
+      ),
+    ),
+  ].sort();
   const evidence = [
     `runner_contest_capacity:${knownPath.capacity}`,
     `runner_credits_visible:${runnerCredits}`,
     `runner_breakers_visible:${installedBreakers}`,
+    `visible_runner_breaker_ontology_profiles:${visibleBreakerOntologyProfiles.length}`,
+    ...visibleBreakerCoverage.map(
+      (coverage) => `structured_breaker_visible_coverage:${coverage}`,
+    ),
     `remote_ice:${server.ice.length}`,
     `remote_rezzed_ice:${server.ice.filter((ice) => ice.rezzed === true).length}`,
     `remote_unrezzed_ice:${server.ice.filter((ice) => ice.rezzed !== true).length}`,
     `visible_break_cost:${knownPath.visibleBreakCost ?? "unknown"}`,
     `runner_remote_pressure:${round(remotePressure)}`,
+    `structured_breaker_profile_contest_fallback:${knownPath.reasons.includes("structured_breaker_profile_contest_fallback")}`,
+    ...(knownPath.reasons.includes(
+      "structured_breaker_effective_quote_override",
+    )
+      ? ["structured_breaker_effective_quote_override:true"]
+      : []),
+    ...knownPath.reasons.filter(
+      (reason) =>
+        reason.startsWith("structured_breaker_coverage:") ||
+        reason.startsWith("structured_breaker_cost:") ||
+        reason.startsWith("structured_breaker_side_effect_penalty:"),
+    ),
   ];
   return runnerContestCapacityResult(
     serverId,
@@ -4800,13 +5039,32 @@ function assessCorpEffectiveRemoteSafety(
   const knownPathCost = contest.visibleBreakCost;
   const runnerCreditsAfterKnownPath =
     knownPathCost === undefined ? undefined : runnerCredits - knownPathCost;
-  const rootProtectionCount =
-    server?.root.filter((card) => isVisibleRemoteProtectionCard(card)).length ??
-    0;
   const sameTurnScoreAllowed =
     action !== undefined &&
     action.type !== "install_card" &&
     actionOpensSameTurnScoreWindow(input, action);
+  const agendaContext =
+    action !== undefined &&
+    (isRemoteAgendaSetupAction(input, action) ||
+      action.type === "score_agenda");
+  const structuredRemoteRoleSafety = structuredRemoteRoleSafetyBonusForServer(
+    server?.root ?? [],
+    { agendaContext, runnerCreditsAfterKnownPath },
+  );
+  const rootProtectionCount =
+    server?.root.filter(
+      (card) =>
+        card.rezzed === true &&
+        !getStructuredRemoteRoleForCard(card.definitionId) &&
+        isVisibleRemoteProtectionCard(card, agendaContext),
+    ).length ?? 0;
+  const remoteRoleLegacyConflict =
+    server?.root.some((card) =>
+      structuredRemoteRoleConflictWithLegacy(
+        getStructuredRemoteRoleForCard(card.definitionId),
+        rolesForCardId(card.definitionId),
+      ),
+    ) ?? false;
   const hasIce = (server?.ice.length ?? 0) > 0;
   const runnerCanContestWithCredits =
     contest.capacity === "high" &&
@@ -4814,7 +5072,9 @@ function assessCorpEffectiveRemoteSafety(
     runnerCreditsAfterKnownPath !== undefined &&
     runnerCreditsAfterKnownPath >= 1;
   const runnerCanContestForActionOnly =
-    runnerCanContestWithCredits && knownPathCost <= 1;
+    runnerCanContestWithCredits &&
+    knownPathCost <= 1 &&
+    !structuredRemoteRoleSafety.blocksAgendaSteal;
   const cheaplyContestable =
     hasIce &&
     runnerCanContestForActionOnly &&
@@ -4823,6 +5083,7 @@ function assessCorpEffectiveRemoteSafety(
   const effectiveProtectionScore =
     (hasIce ? 18 : -80) +
     rootProtectionCount * 45 +
+    structuredRemoteRoleSafety.safetyBonus +
     (contest.capacity === "low"
       ? 85
       : contest.capacity === "medium"
@@ -4834,6 +5095,8 @@ function assessCorpEffectiveRemoteSafety(
     sameTurnScoreAllowed ||
     contest.capacity === "low" ||
     rootProtectionCount > 0 ||
+    (structuredRemoteRoleSafety.activeProtectionCount > 0 &&
+      !runnerCanContestForActionOnly) ||
     (!runnerCanContestWithCredits && contest.capacity !== "high") ||
     effectiveProtectionScore >= 60;
   const protectionOverestimatedByIcePresence =
@@ -4843,6 +5106,9 @@ function assessCorpEffectiveRemoteSafety(
     ...(effectivelyProtected ? ["remote_effectively_protected"] : []),
     ...(sameTurnScoreAllowed ? ["same_turn_score_allowed"] : []),
     ...(rootProtectionCount > 0 ? ["visible_remote_root_protection"] : []),
+    ...(structuredRemoteRoleSafety.activeProtectionCount > 0
+      ? ["structured_remote_role_safety"]
+      : []),
   ];
   return {
     serverId,
@@ -4854,6 +5120,9 @@ function assessCorpEffectiveRemoteSafety(
     ...(knownPathCost !== undefined ? { knownPathCost } : {}),
     contestCapacity: contest.capacity,
     rootProtectionCount,
+    structuredRemoteRoleProtectionCount:
+      structuredRemoteRoleSafety.activeProtectionCount,
+    structuredRemoteRoleSafetyBonus: structuredRemoteRoleSafety.safetyBonus,
     effectiveProtectionScore,
     runnerCanContestWithCredits,
     runnerCanContestForActionOnly,
@@ -4871,8 +5140,23 @@ function assessCorpEffectiveRemoteSafety(
       `runner_can_contest_scoring_remote_for_action_only:${runnerCanContestForActionOnly}`,
       `runner_can_contest_scoring_remote_with_credits:${runnerCanContestWithCredits}`,
       `corp_remote_effective_protection_score:${effectiveProtectionScore}`,
+      `corp_remote_role_safety_bonus:${structuredRemoteRoleSafety.safetyBonus}`,
       `corp_remote_protection_overestimated_by_ice_presence:${protectionOverestimatedByIcePresence}`,
       `corp_same_turn_score_allowed_despite_cheap_contest:${sameTurnScoreAllowed && runnerCanContestForActionOnly}`,
+      ...(remoteRoleLegacyConflict
+        ? ["corp_remote_role_conflict_with_legacy:true"]
+        : []),
+      ...(structuredRemoteRoleSafety.safetyBonus > 0
+        ? ["corp_remote_role_raised_safety_score:true"]
+        : []),
+      ...(structuredRemoteRoleSafety.safetyBonus > 0 && agendaContext
+        ? ["corp_remote_role_used_for_scoring_remote:true"]
+        : []),
+      ...(structuredRemoteRoleSafety.safetyBonus > 0 &&
+      runnerCanContestForActionOnly
+        ? ["corp_remote_role_did_not_raise_safety_because_cheap_contest:true"]
+        : []),
+      ...structuredRemoteRoleSafety.evidence,
     ],
   };
 }
@@ -4928,14 +5212,18 @@ function remoteProtectionScoreForServer(
     !reserve ||
     reserve.reserveTarget <= 0 ||
     creditsAfterAction >= reserve.reserveTarget;
-  const rootProtection = server.root.filter((card) =>
-    isVisibleRemoteProtectionCard(card),
+  const rootProtection = server.root.filter(
+    (card) =>
+      card.rezzed === true &&
+      !getStructuredRemoteRoleForCard(card.definitionId) &&
+      isVisibleRemoteProtectionCard(card),
   ).length;
   return (
     Math.min(server.ice.length, 3) * 22 +
     rezzedIce * 32 +
     (unrezzedIce > 0 && reserveOk ? 28 : 0) +
     rootProtection * 35 +
+    effectiveSafety.structuredRemoteRoleSafetyBonus +
     (contest.capacity === "low"
       ? 35
       : contest.capacity === "medium"
@@ -4982,8 +5270,18 @@ function isRemoteProtectionAction(
   return false;
 }
 
-function isVisibleRemoteProtectionCard(card: VisibleCard): boolean {
+function isVisibleRemoteProtectionCard(
+  card: VisibleCard,
+  agendaContext = true,
+): boolean {
   if (!card.definitionId) return false;
+  const structuredRole = getStructuredRemoteRoleForCard(card.definitionId);
+  if (structuredRole) {
+    return (
+      remoteRoleIsScoringProtectionKind(structuredRole.kind) &&
+      (structuredRole.kind !== "agenda_steal_tax" || agendaContext)
+    );
+  }
   const id = card.definitionId.toLocaleLowerCase("en-US");
   const title = (card.title ?? "").toLocaleLowerCase("en-US");
   const roles = rolesForCardId(card.definitionId);
@@ -5610,6 +5908,8 @@ function assessKnownIcePathForRunnerContest(
 
   let visibleBreakCost = 0;
   let relevantKnownIce = 0;
+  let structuredBreakerFallback = false;
+  const structuredBreakerEvidence = new Set<string>();
   const breakerStrengths = new Map(
     rigCards.map((card) => [
       card.instanceId,
@@ -5645,7 +5945,17 @@ function assessKnownIcePathForRunnerContest(
       breakerStrengths,
       additionalBreakCostPerSubroutine,
     );
-    if (endTheRunCount > 0 && !breakAssessment)
+    const structuredBreakAssessment =
+      endTheRunCount > 0 && !breakAssessment
+        ? minimumStructuredBreakerCostForIce(
+            effectiveIce,
+            rigCards,
+            endTheRunCount,
+            breakerStrengths,
+            additionalBreakCostPerSubroutine,
+          )
+        : undefined;
+    if (endTheRunCount > 0 && !breakAssessment && !structuredBreakAssessment)
       return {
         capacity: "low",
         ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
@@ -5653,6 +5963,15 @@ function assessKnownIcePathForRunnerContest(
       };
     if (breakAssessment) {
       visibleBreakCost += breakAssessment.cost;
+    } else if (structuredBreakAssessment) {
+      structuredBreakerFallback = true;
+      visibleBreakCost += structuredBreakAssessment.cost;
+      for (const evidence of structuredBreakAssessment.evidence)
+        structuredBreakerEvidence.add(evidence);
+      if (quote)
+        structuredBreakerEvidence.add(
+          "structured_breaker_effective_quote_override",
+        );
     }
     if (breakAssessment?.carriesStrengthAcrossIce) {
       breakerStrengths.set(
@@ -5691,7 +6010,15 @@ function assessKnownIcePathForRunnerContest(
     return {
       capacity: "low",
       visibleBreakCost,
-      reasons: ["runner_remote_contest_low_break_cost"],
+      reasons: [
+        "runner_remote_contest_low_break_cost",
+        ...(structuredBreakerFallback
+          ? [
+              "structured_breaker_profile_contest_fallback",
+              ...structuredBreakerEvidence,
+            ]
+          : []),
+      ],
     };
   if (
     relevantKnownIce > 0 &&
@@ -5701,7 +6028,15 @@ function assessKnownIcePathForRunnerContest(
     return {
       capacity: "high",
       visibleBreakCost,
-      reasons: ["runner_remote_contest_high_visible_breaker"],
+      reasons: [
+        "runner_remote_contest_high_visible_breaker",
+        ...(structuredBreakerFallback
+          ? [
+              "structured_breaker_profile_contest_fallback",
+              ...structuredBreakerEvidence,
+            ]
+          : []),
+      ],
     };
   if (installedBreakers === 0 || runnerCredits <= 3)
     return {
@@ -5712,8 +6047,62 @@ function assessKnownIcePathForRunnerContest(
   return {
     capacity: "medium",
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
-    reasons: ["runner_remote_contest_medium_uncertain"],
+    reasons: [
+      "runner_remote_contest_medium_uncertain",
+      ...(structuredBreakerFallback
+        ? [
+            "structured_breaker_profile_contest_fallback",
+            ...structuredBreakerEvidence,
+          ]
+        : []),
+    ],
   };
+}
+
+function minimumStructuredBreakerCostForIce(
+  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  rigCards: VisibleCard[],
+  endTheRunCount: number,
+  breakerStrengths: Map<string, number>,
+  additionalBreakCostPerSubroutine = 0,
+):
+  | {
+      cost: number;
+      breakerInstanceId: string;
+      sideEffectPenalty: number;
+      evidence: string[];
+    }
+  | undefined {
+  const estimates = rigCards
+    .filter((card) => card.known && card.definitionId)
+    .map((card) => {
+      const estimate = estimateStructuredBreakerCostForIce(
+        card.definitionId,
+        ice,
+        endTheRunCount,
+        breakerStrengths.get(card.instanceId),
+        additionalBreakCostPerSubroutine,
+      );
+      return estimate
+        ? {
+            cost: estimate.cost,
+            breakerInstanceId: card.instanceId,
+            sideEffectPenalty: estimate.sideEffectPenalty,
+            evidence: estimate.evidence,
+          }
+        : undefined;
+    })
+    .filter((estimate): estimate is NonNullable<typeof estimate> =>
+      Boolean(estimate),
+    )
+    .sort(
+      (left, right) =>
+        left.cost +
+          left.sideEffectPenalty / 10 -
+          (right.cost + right.sideEffectPenalty / 10) ||
+        left.breakerInstanceId.localeCompare(right.breakerInstanceId),
+    );
+  return estimates[0];
 }
 
 function remoteServerIdForAction(
@@ -6573,6 +6962,32 @@ function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
     return [];
   const visible = findVisibleCard(input, action.source);
   return rolesForCardId(visible?.definitionId);
+}
+
+function corpTagPunishOntologyAssessmentForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+) {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  const sourceCard =
+    action.source === "basic_action" || action.source === "game_rule"
+      ? undefined
+      : findVisibleCard(input, action.source);
+  const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+  return classifyTagPunishLegalActionFromOntology(
+    action,
+    sourceCard?.definitionId,
+    {
+      runnerTagged: input.playerView.opponent.tags > 0,
+      legacyRoles: rolesForAction(input, action),
+      scoredAgendaKind:
+        scoredAgenda?.kind === "scored_agenda_trace_tag"
+          ? "trace_tag"
+          : scoredAgenda?.kind === "scored_agenda_damage_punish"
+            ? "damage_punish"
+            : undefined,
+    },
+  );
 }
 
 function findVisibleCard(

@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "ai-manual-hint-overlay-v1",
+  "scope": {
+    "set": "onr-v1",
+    "side": "runner",
+    "cardType": "program"
+  },
+  "status": "read_only_pilot",
+  "cards": [
+    {
+      "cardId": "onr_v1_017_deep-thought",
+      "overlay": {
+        "lineSupport": ["early_rnd_pressure", "interface_pressure"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        },
+        "strategicNotes": [
+          "Repeated R&D topdeck knowledge is strategic pressure, not a mechanical basic fact."
+        ]
+      }
+    },
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "overlay": {
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        },
+        "manualNotes": [
+          "Future action debt is represented mechanically as breakerProfile.sideEffects forgo_actions; breaker coverage remains generated."
+        ]
+      }
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "overlay": {
+        "lineSupport": ["rig_first", "breaker_search_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        },
+        "manualNotes": [
+          "The once-per-run limit is represented mechanically as targetProfiles.oncePerRun; search and install target profile stay generated."
+        ]
+      }
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "overlay": {
+        "lineSupport": ["rig_first", "breaker_search_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        },
+        "manualNotes": [
+          "The install target profile is mechanical; any install-discount mismatch belongs in hint cleanup, not in this overlay."
+        ]
+      }
+    }
+  ]
+}

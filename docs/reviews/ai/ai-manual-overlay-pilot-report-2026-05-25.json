@@ -1,0 +1,160 @@
+{
+  "schemaVersion": "ai-manual-overlay-pilot-report-v1",
+  "generatedAt": "2026-05-25",
+  "overlayFileCount": 2,
+  "overlayCardCount": 6,
+  "segmentScopes": [
+    {
+      "overlayPath": "data/ai/hints/overlays/onr-v1/corp/upgrades.json",
+      "set": "onr-v1",
+      "side": "corp",
+      "cardType": "upgrade",
+      "cardCount": 2
+    },
+    {
+      "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+      "set": "onr-v1",
+      "side": "runner",
+      "cardType": "program",
+      "cardCount": 4
+    }
+  ],
+  "cards": [
+    {
+      "cardId": "onr_v1_017_deep-thought",
+      "title": "Deep Thought",
+      "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+      "activeHintFound": true,
+      "sideMatches": true,
+      "cardTypeMatches": true,
+      "overlayFields": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "generatedFactsOverlap": [],
+      "mechanicalDuplicationWarnings": [],
+      "strategicOverlayFields": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "hiddenInfoErrors": [],
+      "conflicts": []
+    },
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+      "activeHintFound": true,
+      "sideMatches": true,
+      "cardTypeMatches": true,
+      "overlayFields": [
+        "lineSupport",
+        "manualNotes",
+        "quality"
+      ],
+      "generatedFactsOverlap": [],
+      "mechanicalDuplicationWarnings": [],
+      "strategicOverlayFields": [
+        "lineSupport",
+        "manualNotes",
+        "quality"
+      ],
+      "hiddenInfoErrors": [],
+      "conflicts": []
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+      "activeHintFound": true,
+      "sideMatches": true,
+      "cardTypeMatches": true,
+      "overlayFields": [
+        "lineSupport",
+        "manualNotes",
+        "quality"
+      ],
+      "generatedFactsOverlap": [],
+      "mechanicalDuplicationWarnings": [],
+      "strategicOverlayFields": [
+        "lineSupport",
+        "manualNotes",
+        "quality"
+      ],
+      "hiddenInfoErrors": [],
+      "conflicts": []
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+      "activeHintFound": true,
+      "sideMatches": true,
+      "cardTypeMatches": true,
+      "overlayFields": [
+        "lineSupport",
+        "manualNotes",
+        "quality"
+      ],
+      "generatedFactsOverlap": [],
+      "mechanicalDuplicationWarnings": [],
+      "strategicOverlayFields": [
+        "lineSupport",
+        "manualNotes",
+        "quality"
+      ],
+      "hiddenInfoErrors": [],
+      "conflicts": []
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "title": "Crystal Palace Station Grid",
+      "overlayPath": "data/ai/hints/overlays/onr-v1/corp/upgrades.json",
+      "activeHintFound": true,
+      "sideMatches": true,
+      "cardTypeMatches": true,
+      "overlayFields": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "generatedFactsOverlap": [],
+      "mechanicalDuplicationWarnings": [],
+      "strategicOverlayFields": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "hiddenInfoErrors": [],
+      "conflicts": []
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "title": "Red Herrings",
+      "overlayPath": "data/ai/hints/overlays/onr-v1/corp/upgrades.json",
+      "activeHintFound": true,
+      "sideMatches": true,
+      "cardTypeMatches": true,
+      "overlayFields": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "generatedFactsOverlap": [],
+      "mechanicalDuplicationWarnings": [],
+      "strategicOverlayFields": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ],
+      "hiddenInfoErrors": [],
+      "conflicts": []
+    }
+  ],
+  "hardErrorCount": 0,
+  "warningCount": 0,
+  "errors": [],
+  "warnings": []
+}

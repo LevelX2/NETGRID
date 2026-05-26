@@ -140,6 +140,7 @@ import {
   cardChoiceReadonlyConfirmationOptionId,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
+  counterDisplayTooltipText,
   counterDisplaysForRendering,
   clampCuePosition,
   contextualCardActionLabel,
@@ -181,6 +182,7 @@ import {
   shouldUseCardChoicePanel,
   safeCounterDisplayAmount,
   serverBoardRows,
+  serverCounterChipsForDisplays,
   serverDisplayLabel,
   splitArchiveCardsForDisplay,
   splitLegalActions,
@@ -1291,7 +1293,7 @@ function addNumeric(target: VisibleCard, key: keyof Pick<VisibleCard, "cost" | "
   target[key] = fallback;
 }
 
-function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null): AccessReveal | null {
+function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null, events: PublicGameEvent[] = []): AccessReveal | null {
   if (!event || event.publicPayload.actionType !== "access_card") return null;
   const cardId = payloadString(event.publicPayload, "cardDefinitionId");
   const title = payloadString(event.publicPayload, "title");
@@ -1301,7 +1303,7 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
   const card = detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, cardId, title);
   const serverLabel = serverDisplayLabel(payloadString(event.publicPayload, "serverLabel") ?? "einen Server");
   const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
-  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, event);
+  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, event, undefined, events);
   const highlighterStatus = accessHighlighterStatus(event.publicPayload);
   return {
     eventId: event.eventId,
@@ -1326,11 +1328,11 @@ function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string
   const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
   const card = enrichVisibleCard(accessedCard, detailsById);
   const followupStatus = latestAccessAmbushPaymentStatus(events, accessEvent, card.definitionId);
-  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, accessEvent, view);
+  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, accessEvent, view, events);
   const highlighterStatus = accessEvent ? accessHighlighterStatus(accessEvent.publicPayload) : null;
   const accessFollowupStatus = highlighterStatus ?? followupStatus;
   return {
-    eventId: eventId ?? `current-access:${view.stateVersion}:${accessedCard.instanceId}`,
+    eventId: eventId ?? accessEvent?.eventId ?? `current-access:${view.stateVersion}:${accessedCard.instanceId}`,
     actorSide,
     viewerSide,
     serverLabel,
@@ -1548,17 +1550,34 @@ function latestAccessAmbushPaymentStatus(events: PublicGameEvent[], accessEvent:
   return undefined;
 }
 
-function accessAmbushPendingStatus(viewerSide: Side, accessEvent: PublicGameEvent | null | undefined, view?: PlayerView): string | undefined {
-  const eventAmount = accessEvent?.publicPayload.ambushPaymentChoiceOpened === true ? payloadPositiveInteger(accessEvent.publicPayload, "ambushPaymentAmount") : null;
+function accessAmbushPendingStatus(viewerSide: Side, accessEvent: PublicGameEvent | null | undefined, view?: PlayerView, events: PublicGameEvent[] = []): string | undefined {
+  const eventChoiceResolved = accessEvent ? accessAmbushPaymentChoiceResolved(events, accessEvent) : false;
+  const eventChoiceOpened = !eventChoiceResolved && accessEvent?.publicPayload.ambushPaymentChoiceOpened === true;
+  const eventAmount = eventChoiceOpened ? payloadPositiveInteger(accessEvent.publicPayload, "ambushPaymentAmount") : null;
   const choiceAmount = view?.pendingChoice?.source.startsWith("p3_35.access_payment") ? accessAmbushChoiceAmount(view.pendingChoice) : null;
   const amount = eventAmount ?? choiceAmount;
-  const pending = Boolean(amount || accessEvent?.publicPayload.ambushPaymentChoiceOpened === true || view?.pendingChoice?.source.startsWith("p3_35.access_payment"));
+  const pending = Boolean(amount || eventChoiceOpened || view?.pendingChoice?.source.startsWith("p3_35.access_payment"));
   if (!pending) return undefined;
   const amountText = amount ? `${amount} ${amount === 1 ? "Credit" : "Credits"}` : "Credits";
   if (viewerSide === "corp" && view?.pendingChoice?.source.startsWith("p3_35.access_payment")) {
     return `Du entscheidest jetzt, ob du ${amountText} für den Access-Ambush zahlst.`;
   }
   return `Die Korp entscheidet jetzt, ob sie ${amountText} für den Access-Ambush zahlt.`;
+}
+
+function accessAmbushPaymentChoiceResolved(events: PublicGameEvent[], accessEvent: PublicGameEvent): boolean {
+  const accessIndex = events.findIndex((event) => event.eventId === accessEvent.eventId);
+  if (accessIndex < 0) return false;
+  const accessDefinitionId = payloadString(accessEvent.publicPayload, "cardDefinitionId");
+  for (let index = accessIndex + 1; index < events.length; index += 1) {
+    const payload = events[index]?.publicPayload;
+    if (!payload || payload.actionType !== "resolve_choice") continue;
+    const ambushDefinitionId = payloadString(payload, "ambushDefinitionId") ?? payloadString(payload, "accessEffectSourceDefinitionId");
+    if (accessDefinitionId && ambushDefinitionId && ambushDefinitionId !== accessDefinitionId) continue;
+    if (payload.ambushPaymentDeclined === true) return true;
+    if (payloadPositiveInteger(payload, "ambushPaidCost")) return true;
+  }
+  return false;
 }
 
 function accessAmbushChoiceAmount(choice: NonNullable<PlayerView["pendingChoice"]>): number | null {
@@ -3025,7 +3044,7 @@ export default function Page() {
   const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, dismissedAccessEventId) : null;
   const archivesRevealCount = payload ? latestArchivesRevealCount(payload.eventTail, latestAccessRevealEvent) : null;
   const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount, payload.eventTail, latestAccessRevealEvent) : null;
-  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount) : null;
+  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount, payload.eventTail) : null;
   const accessReveal = currentAccessReveal ?? retainedEventAccessReveal;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;
@@ -5803,6 +5822,7 @@ export default function Page() {
                             </div>
                           </div>
                           {!serverCollapsed ? <div className="serverBody">
+                            <ServerCounterStrip displays={server.counterDisplays} serverLabel={serverDisplayLabel(server.id)} />
                             <div className={isCorpHqComposite ? "corpHqComposite" : "pairedServerLanes"}>
                               {isOwnCorpHq ? (
                                 <>
@@ -12565,10 +12585,25 @@ function IdentityCounterStrip({ displays, side }: { displays: VisibleCard["count
   return (
     <div className="identityCounterStrip" role="list" aria-label={`${sideLabel(side)}-Counter`}>
       {chips.map((chip) => (
-        <span className="identityCounterChip" role="listitem" key={chip.key} title={chip.ariaLabel} aria-label={chip.ariaLabel}>
+        <CounterHelpTooltipTrigger className="identityCounterChip" role="listitem" key={chip.key} ariaLabel={chip.ariaLabel} tooltip={chip.tooltip}>
           <span className="identityCounterChipLabel">{chip.label}</span>
           <strong>{chip.amount}</strong>
-        </span>
+        </CounterHelpTooltipTrigger>
+      ))}
+    </div>
+  );
+}
+
+function ServerCounterStrip({ displays, serverLabel }: { displays: VisibleCard["counterDisplays"]; serverLabel: string }) {
+  const chips = serverCounterChipsForDisplays(displays);
+  if (chips.length === 0) return null;
+  return (
+    <div className="serverCounterStrip" role="list" aria-label={`${serverLabel}-Counter`}>
+      {chips.map((chip) => (
+        <CounterHelpTooltipTrigger className="serverCounterChip" role="listitem" key={chip.key} ariaLabel={chip.ariaLabel} tooltip={chip.tooltip}>
+          <span className="serverCounterChipLabel">{chip.label}</span>
+          <strong>{chip.amount}</strong>
+        </CounterHelpTooltipTrigger>
       ))}
     </div>
   );
@@ -14016,9 +14051,9 @@ function CounterDisplayBadge({ display, scoreState }: { display: NonNullable<Vis
           ? "ablative-counter-badge"
           : "counter-display-badge";
   return (
-    <span className={className} aria-label={display.ariaLabel} data-testid={testId} title={display.ariaLabel}>
+    <CounterHelpTooltipTrigger className={className} ariaLabel={display.ariaLabel} data-testid={testId} tooltip={counterDisplayTooltipText(display)}>
       {counterDisplayBadgeText(display, amount)}
-    </span>
+    </CounterHelpTooltipTrigger>
   );
 }
 
@@ -14026,6 +14061,80 @@ function counterDisplayBadgeText(display: NonNullable<VisibleCard["counterDispla
   if (display.displayKind === "shell") return `${amount} Shell`;
   if (display.id === "data_raven") return `${amount} Raven`;
   return `${amount} ${display.label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "")}`;
+}
+
+function CounterHelpTooltipTrigger({
+  children,
+  className,
+  tooltip,
+  ariaLabel,
+  role,
+  "data-testid": testId
+}: {
+  children: ReactNode;
+  className: string;
+  tooltip: string;
+  ariaLabel: string;
+  role?: string;
+  "data-testid"?: string;
+}) {
+  const tooltipId = useId();
+  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
+  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("above");
+  const [visible, setVisible] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const showTooltip = (element: HTMLElement, pin = false) => {
+    const rect = element.getBoundingClientRect();
+    const width = Math.min(280, Math.max(220, window.innerWidth - 16));
+    const left = Math.min(Math.max(8, rect.left + rect.width / 2 - width / 2), Math.max(8, window.innerWidth - width - 8));
+    const above = rect.top > 132;
+    const top = above ? rect.top - 10 : rect.bottom + 10;
+    setTooltipPlacement(above ? "above" : "below");
+    setTooltipStyle({ left, top, width });
+    setPinned(pin);
+    setVisible(true);
+  };
+  const hideTooltip = () => {
+    setPinned(false);
+    setVisible(false);
+  };
+  return (
+    <span
+      className={`${className} counterHelpTooltipTrigger`}
+      role={role}
+      aria-label={ariaLabel}
+      aria-describedby={visible ? tooltipId : undefined}
+      data-testid={testId}
+      tabIndex={0}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (visible && pinned) {
+          hideTooltip();
+          return;
+        }
+        showTooltip(event.currentTarget, true);
+      }}
+      onPointerEnter={(event) => {
+        if (event.pointerType !== "touch") showTooltip(event.currentTarget);
+      }}
+      onPointerLeave={() => {
+        if (!pinned) setVisible(false);
+      }}
+      onFocus={(event) => showTooltip(event.currentTarget)}
+      onBlur={hideTooltip}
+    >
+      {children}
+      {visible
+        ? createPortal(
+            <span id={tooltipId} className={`cardTooltip counterHelpTooltip ${tooltipPlacement} visible`} role="tooltip" style={tooltipStyle}>
+              <span className="cardTooltipText">{tooltip}</span>
+            </span>,
+            document.body
+          )
+        : null}
+    </span>
+  );
 }
 
 function CardCreditCounter({ amount, ariaLabel, className, testId }: { amount: number; ariaLabel: string; className: string; testId: string }) {

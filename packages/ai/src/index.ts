@@ -58,6 +58,16 @@ import {
   endTheRunSubroutineCount,
   iceHasEndTheRun,
 } from "./visible-run-analysis";
+import {
+  getStructuredRemoteRoleForCard,
+  remoteRoleIsNonScoringProtectionKind,
+  remoteRoleIsScoringProtectionKind,
+} from "./remote-role-ontology-consumer";
+import {
+  classifyTagPunishLegalActionFromOntology,
+  classifyTagPunishPayoffFromOntology,
+  type StructuredTagPunishPayoffKind,
+} from "./tag-punish-ontology-consumer";
 import { buildAiDecisionInputDto } from "./input-dto";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
@@ -106,6 +116,7 @@ export {
   chooseCorpPlanAction,
   chooseCorpPlanDecision,
   classifyCorpScoredAgendaAbility,
+  classifyScoredAgendaActionFromOntology,
   corpPlanUsesOnlyAiSupportedCards,
   evaluateAgendaRisk,
   evaluateCorpPlan,
@@ -166,6 +177,39 @@ export type {
   OpeningHandEvaluation,
   RunnerOpeningHandEvaluation,
 } from "./deck-doctrine";
+export {
+  classifyBreakerCoverageFromOntology,
+  compareBreakerProfilesForCoverage,
+  estimateBreakerCostProfileFromOntology,
+  estimateStructuredBreakerCostForIce,
+  getStructuredBreakerProfileForCard,
+  structuredBreakerProfileCoversIce,
+} from "./breaker-ontology-consumer";
+export {
+  classifyRemoteRoleFromOntology,
+  getStructuredRemoteRoleForCard,
+  remoteRoleIsScoringProtectionKind,
+  structuredRemoteRoleSafetyAssessmentForCard,
+} from "./remote-role-ontology-consumer";
+export {
+  classifyTagPunishLegalActionFromOntology,
+  classifyTagPunishPayoffFromOntology,
+  classifyTagSourceFromOntology,
+} from "./tag-punish-ontology-consumer";
+export { buildAiDeckOntologySummary } from "./hint-ontology-doctrine";
+export type {
+  AiDeckOntologyBreakerCoverageSummary,
+  AiDeckOntologyConditionCounts,
+  AiDeckOntologyDeckSnapshot,
+  AiDeckOntologyEffectCounts,
+  AiDeckOntologyLineSupportCounts,
+  AiDeckOntologyQualitySummary,
+  AiDeckOntologyRemoteRoleSummary,
+  AiDeckOntologyScoredAgendaActionSummary,
+  AiDeckOntologySummary,
+  AiDeckOntologyTagPunishSummary,
+  AiDeckOntologyValidationSummary,
+} from "./hint-ontology-doctrine";
 
 type RankedChoice = {
   action: LegalAction | undefined;
@@ -369,6 +413,79 @@ export type AiMatchProgressionMetrics = {
   pumpActionsThatCouldNotLeadToBreak: number;
   pumpActionsThatDestroyedAccessReserve: number;
   breakSkippedToPreserveTrashReserve: number;
+  runnerBreakerOntologyProfilesSeen: number;
+  runnerBreakerOntologyCoverageUsed: number;
+  runnerBreakerOntologyFallbackUsed: number;
+  runnerBreakerOntologyConflict: number;
+  runnerInstallableBreakerRankedByOntology: number;
+  runnerSearchTargetRankedByOntology: number;
+  runnerMissingCoverageResolvedByOntology: number;
+  runnerBreakerOntologySetupSuppressedBecausePressureReady: number;
+  corpVisibleRunnerBreakerOntologyProfilesSeen: number;
+  corpRemoteSafetyUsedRunnerBreakerOntology: number;
+  corpCheapContestDetectedByBreakerOntology: number;
+  corpRemoteSafetyOntologyConflictWithEffectiveQuote: number;
+  corpAgendaInstallBlockedByOntologyCheapContest: number;
+  corpAdvanceBlockedByOntologyCheapContest: number;
+  breakerOntologyCoverageByType: number;
+  breakerOntologyCoverageWall: number;
+  breakerOntologyCoverageSentry: number;
+  breakerOntologyCoverageCodeGate: number;
+  breakerOntologyCoverageAp: number;
+  breakerOntologyCoverageTrace: number;
+  breakerOntologyCoverageWatchdog: number;
+  breakerOntologyCoverageBlackIce: number;
+  breakerOntologyCoverageUniversal: number;
+  breakerOntologyCoverageUnknownSpecial: number;
+  breakerOntologySideEffectsSeen: number;
+  breakerOntologyCostProfileSeen: number;
+  breakerOntologyFallbackEvidenceCount: number;
+  breakerOntologyEffectiveQuoteOverrideCount: number;
+  corpRemoteRoleProfilesSeen: number;
+  corpRemoteRoleUsedForSafety: number;
+  corpRemoteRoleUsedForScoringRemote: number;
+  corpRemoteRoleUsedForPortfolio: number;
+  corpRemoteRoleConflictWithLegacy: number;
+  corpRemoteRoleConflictWithBoardState: number;
+  corpScoringProtectionRemoteRoleSeen: number;
+  corpAgendaStealTaxRemoteRoleSeen: number;
+  corpRunTaxRemoteRoleSeen: number;
+  corpRemoteCapacityRoleSeen: number;
+  corpAssetEconomyRemoteRoleSeen: number;
+  corpBaitRemoteRoleSeen: number;
+  corpAmbushRemoteRoleSeen: number;
+  corpIceModifierRemoteRoleSeen: number;
+  corpRemoteRoleRaisedSafetyScore: number;
+  corpRemoteRoleDidNotRaiseSafetyBecauseInactive: number;
+  corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest: number;
+  corpRemoteRolePreventedBaitAsScoringProtection: number;
+  corpRemoteRolePreventedAssetAsScoringProtection: number;
+  corpRemoteRoleHelpedChooseExistingRemote: number;
+  corpRemoteRoleHelpedAvoidNewEmptyRemote: number;
+  runnerRemoteRoleProfilesSeen: number;
+  runnerRemoteRoleUsedForTrashValue: number;
+  runnerRemoteRoleUsedForContestValue: number;
+  runnerRemoteRoleTrashBudgetPreserved: number;
+  runnerRemoteRoleConflictWithHiddenStateGuard: number;
+  runnerRunTaxRemoteRoleAccessed: number;
+  runnerAgendaStealTaxRemoteRoleAccessed: number;
+  runnerAssetEconomyRemoteRoleAccessed: number;
+  remoteRoleByKind: number;
+  remoteRoleKindScoringProtection: number;
+  remoteRoleKindAgendaStealTax: number;
+  remoteRoleKindRunTax: number;
+  remoteRoleKindRemoteCapacity: number;
+  remoteRoleKindAssetEconomy: number;
+  remoteRoleKindBait: number;
+  remoteRoleKindAmbush: number;
+  remoteRoleKindIceModifier: number;
+  remoteRoleKindTaxFort: number;
+  remoteRoleByServerScope: number;
+  remoteRoleServerScopeFort: number;
+  remoteRoleServerScopeRemote: number;
+  remoteRoleServerScopeCentral: number;
+  remoteRoleServerScopeServer: number;
+  remoteRoleSafetyDedupeCount: number;
   unbrokenRunEffectIgnoredBecauseNoRemainingIce: number;
   unbrokenRunEffectAppliedToRemainingPath: number;
   badOutcomeRepeatedWithoutNewInfo: number;
@@ -556,6 +673,35 @@ export type AiMatchProgressionMetrics = {
   corpTagPunishFunnelPunishTaken: number;
   corpTagPunishFunnelTerminalDamageOrEconomicHit: number;
   corpTagPunishFunnelFlatlineOrLock: number;
+  corpTagPunishOntologyProfilesSeen: number;
+  corpTagSourceOntologyProfilesSeen: number;
+  corpTagPunishPayoffOntologyProfilesSeen: number;
+  corpTagSourceOntologyUsed: number;
+  corpTagPunishPayoffOntologyUsed: number;
+  corpTagPunishOntologyFallbackUsed: number;
+  corpTagPunishOntologyConflict: number;
+  corpTagSourceLegalActionClassifiedByOntology: number;
+  corpPunishLegalActionClassifiedByOntology: number;
+  corpPunishOpportunityConfirmedByOntology: number;
+  corpPunishSkippedDespiteOntologyOpportunity: number;
+  corpTagSourceTakenWithOntologyPayoffAvailable: number;
+  corpTagSourceTakenWithoutOntologyPayoff: number;
+  corpTagSourceConvertedToOntologyPunishOpportunity: number;
+  corpOntologyPunishOpportunityConverted: number;
+  corpOntologyPunishOpportunityExpired: number;
+  corpTagPunishOntologyByKind: number;
+  corpTagPunishOntologyKindTagSource: number;
+  corpTagPunishOntologyKindTagPunishPayoff: number;
+  corpTagPunishOntologyKindTrace: number;
+  corpTagPunishOntologyKindTag: number;
+  corpTagPunishOntologyKindDamage: number;
+  corpTagPunishOntologyKindResourceTrash: number;
+  corpTagPunishOntologyKindHardwareTrash: number;
+  corpTagPunishOntologyKindScoredAgendaDamageLike: number;
+  corpTagPunishOntologyKindScoredAgendaTraceTagLike: number;
+  corpTagPunishConditionByKind: number;
+  corpTagPunishConditionRequiresRunnerTagged: number;
+  corpTagPunishConditionRequiresTraceSuccess: number;
   scoredAgendaActionValueOverBasic: number;
   basicCreditTakenWhileBetterAgendaEconomyAvailable: number;
   basicDrawTakenWhileBetterAgendaDrawAvailable: number;
@@ -1819,6 +1965,24 @@ export type AiSimulationSummary = {
     corpTraceTagTaken?: boolean;
     corpTraceTagExpectedSuccess?: number;
     corpTraceTagSkippedReason?: CorpTagPunishSkipReason;
+    corpTagPunishOntologyProfilesSeen?: boolean;
+    corpTagSourceOntologyProfilesSeen?: boolean;
+    corpTagPunishPayoffOntologyProfilesSeen?: boolean;
+    corpTagSourceOntologyUsed?: boolean;
+    corpTagPunishPayoffOntologyUsed?: boolean;
+    corpTagPunishOntologyFallbackUsed?: boolean;
+    corpTagPunishOntologyConflict?: boolean;
+    corpTagSourceLegalActionClassifiedByOntology?: boolean;
+    corpPunishLegalActionClassifiedByOntology?: boolean;
+    corpPunishOpportunityConfirmedByOntology?: boolean;
+    corpPunishSkippedDespiteOntologyOpportunity?: boolean;
+    corpTagSourceTakenWithOntologyPayoffAvailable?: boolean;
+    corpTagSourceTakenWithoutOntologyPayoff?: boolean;
+    corpTagSourceConvertedToOntologyPunishOpportunity?: boolean;
+    corpOntologyPunishOpportunityConverted?: boolean;
+    corpOntologyPunishOpportunityExpired?: boolean;
+    corpTagPunishOntologyKinds?: string[];
+    corpTagPunishConditionKinds?: string[];
     qualityTags: string[];
     stateHashAfter: string;
     installPlacement?: string;
@@ -2012,6 +2176,7 @@ function isCorpReactiveBaselineDecision(decision: AiDecision): boolean {
     decision.reasonCode === "corp.rez.defensive_card" ||
     decision.reasonCode === "corp.rez.decline" ||
     decision.reasonCode === "corp.tag.punish_visible_tag" ||
+    decision.reasonCode === "corp.tag.source_visible_payoff" ||
     decision.reasonCode === "corp.tag.trash_visible_resource" ||
     decision.reasonCode === "corp.purge.visible_virus_counters"
   );
@@ -4899,6 +5064,70 @@ export function formatMatchProgressionBenchmarkSuiteReport(
   const nonRunnableRows = suite.slots.filter(
     (slot) => slot.status !== "runnable",
   );
+  const breakerOntologyRows = suite.slots
+    .filter((slot) => slot.status === "runnable" && slot.benchmark)
+    .flatMap((slot) =>
+      slot.benchmark!.profileComparisons.map(({ profile, metrics }) => [
+        slot.slotId,
+        slot.tuningUse,
+        profile,
+        metrics.runnerBreakerOntologyProfilesSeen,
+        metrics.runnerBreakerOntologyCoverageUsed,
+        metrics.runnerBreakerOntologyFallbackUsed,
+        metrics.runnerInstallableBreakerRankedByOntology,
+        metrics.runnerSearchTargetRankedByOntology,
+        metrics.corpVisibleRunnerBreakerOntologyProfilesSeen,
+        metrics.corpRemoteSafetyUsedRunnerBreakerOntology,
+        metrics.corpCheapContestDetectedByBreakerOntology,
+        metrics.corpRemoteSafetyOntologyConflictWithEffectiveQuote,
+        metrics.breakerOntologyCoverageByType,
+        metrics.breakerOntologyFallbackEvidenceCount,
+        metrics.breakerOntologyEffectiveQuoteOverrideCount,
+      ]),
+    );
+  const remoteRoleRows = suite.slots
+    .filter((slot) => slot.status === "runnable" && slot.benchmark)
+    .flatMap((slot) =>
+      slot.benchmark!.profileComparisons.map(({ profile, metrics }) => [
+        slot.slotId,
+        slot.tuningUse,
+        profile,
+        metrics.corpRemoteRoleProfilesSeen,
+        metrics.corpRemoteRoleUsedForSafety,
+        metrics.corpRemoteRoleUsedForScoringRemote,
+        metrics.corpRemoteRoleRaisedSafetyScore,
+        metrics.corpRemoteRoleDidNotRaiseSafetyBecauseInactive,
+        metrics.corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest,
+        metrics.corpRemoteRoleConflictWithLegacy,
+        metrics.corpRemoteRolePreventedBaitAsScoringProtection,
+        metrics.corpRemoteRolePreventedAssetAsScoringProtection,
+        metrics.runnerRemoteRoleProfilesSeen,
+        metrics.runnerRemoteRoleUsedForTrashValue,
+        metrics.remoteRoleByKind,
+        metrics.remoteRoleByServerScope,
+      ]),
+    );
+  const tagPunishOntologyRows = suite.slots
+    .filter((slot) => slot.status === "runnable" && slot.benchmark)
+    .flatMap((slot) =>
+      slot.benchmark!.profileComparisons.map(({ profile, metrics }) => [
+        slot.slotId,
+        slot.tuningUse,
+        profile,
+        metrics.corpTagPunishOntologyProfilesSeen,
+        metrics.corpTagSourceOntologyUsed,
+        metrics.corpTagPunishPayoffOntologyUsed,
+        metrics.corpPunishOpportunityConfirmedByOntology,
+        metrics.corpPunishSkippedDespiteOntologyOpportunity,
+        metrics.corpOntologyPunishOpportunityConverted,
+        metrics.corpOntologyPunishOpportunityExpired,
+        metrics.corpTagSourceTakenWithOntologyPayoffAvailable,
+        metrics.corpTagSourceTakenWithoutOntologyPayoff,
+        metrics.corpTagPunishOntologyConflict,
+        metrics.corpTagPunishOntologyByKind,
+        metrics.corpTagPunishConditionByKind,
+      ]),
+    );
   const sectionRows = (slotTypes: AiBenchmarkDeckSlotType[]) =>
     runnableRows
       .filter((row) => slotTypes.includes(row[1]))
@@ -4955,6 +5184,82 @@ export function formatMatchProgressionBenchmarkSuiteReport(
         (slot) =>
           `| ${slot.slotId} | ${slot.status} | ${slot.runnerDeckRef} | ${slot.corpDeckRef} | ${slot.reason ?? "pending"} |`,
       ),
+    "",
+    "## Breaker Ontology Metrics",
+    "",
+    "| Slot | Use | Profile | Runner Profiles Seen | Runner Coverage Used | Runner Fallback | Runner Install Ranked | Runner Search Ranked | Corp Visible Profiles | Corp Remote Safety Used | Corp Cheap Contest | Quote Conflict/Override | Coverage Signals | Fallback Evidence | Effective Quote Override |",
+    "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ...breakerOntologyRows.map(
+      ([
+        slotId,
+        tuningUse,
+        profile,
+        runnerProfilesSeen,
+        runnerCoverageUsed,
+        runnerFallback,
+        runnerInstallRanked,
+        runnerSearchRanked,
+        corpVisibleProfiles,
+        corpRemoteSafetyUsed,
+        corpCheapContest,
+        quoteConflict,
+        coverageSignals,
+        fallbackEvidence,
+        effectiveQuoteOverride,
+      ]) =>
+        `| ${slotId} | ${tuningUse} | ${profile} | ${runnerProfilesSeen} | ${runnerCoverageUsed} | ${runnerFallback} | ${runnerInstallRanked} | ${runnerSearchRanked} | ${corpVisibleProfiles} | ${corpRemoteSafetyUsed} | ${corpCheapContest} | ${quoteConflict} | ${coverageSignals} | ${fallbackEvidence} | ${effectiveQuoteOverride} |`,
+    ),
+    "",
+    "## RemoteRole Ontology Metrics",
+    "",
+    "| Slot | Use | Profile | Corp Profiles Seen | Corp Safety Used | Corp Scoring Used | Raised Safety | Inactive | Cheap Contest Blocked | Legacy Conflict | Bait Not Protection | Asset Not Protection | Runner Profiles Seen | Runner Trash Value | Kinds | Scopes |",
+    "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ...remoteRoleRows.map(
+      ([
+        slotId,
+        tuningUse,
+        profile,
+        corpProfilesSeen,
+        corpSafetyUsed,
+        corpScoringUsed,
+        raisedSafety,
+        inactive,
+        cheapContestBlocked,
+        legacyConflict,
+        baitNotProtection,
+        assetNotProtection,
+        runnerProfilesSeen,
+        runnerTrashValue,
+        kinds,
+        scopes,
+      ]) =>
+        `| ${slotId} | ${tuningUse} | ${profile} | ${corpProfilesSeen} | ${corpSafetyUsed} | ${corpScoringUsed} | ${raisedSafety} | ${inactive} | ${cheapContestBlocked} | ${legacyConflict} | ${baitNotProtection} | ${assetNotProtection} | ${runnerProfilesSeen} | ${runnerTrashValue} | ${kinds} | ${scopes} |`,
+    ),
+    "",
+    "## Tag/Punish Ontology Metrics",
+    "",
+    "| Slot | Use | Profile | Profiles Seen | Tag Source Used | Payoff Used | Confirmed Punish Opp | Skipped Confirmed Opp | Converted | Expired | Tag Source With Payoff | Tag Source Without Payoff | Conflict | Kinds | Conditions |",
+    "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ...tagPunishOntologyRows.map(
+      ([
+        slotId,
+        tuningUse,
+        profile,
+        profilesSeen,
+        tagSourceUsed,
+        payoffUsed,
+        confirmedOpp,
+        skippedConfirmed,
+        converted,
+        expired,
+        sourceWithPayoff,
+        sourceWithoutPayoff,
+        conflict,
+        kinds,
+        conditions,
+      ]) =>
+        `| ${slotId} | ${tuningUse} | ${profile} | ${profilesSeen} | ${tagSourceUsed} | ${payoffUsed} | ${confirmedOpp} | ${skippedConfirmed} | ${converted} | ${expired} | ${sourceWithPayoff} | ${sourceWithoutPayoff} | ${conflict} | ${kinds} | ${conditions} |`,
+    ),
     "",
     "## Metric Notes",
     "",
@@ -7286,12 +7591,50 @@ function scoreCorpAction(
       }
       break;
     case "play_operation":
-      score = scoreCorpOperation(roles, features, profile);
-      reasonCode = roles.includes("tag_punishment")
-        ? "corp.tag.punish_visible_tag"
-        : roles.includes("draw_operation")
-          ? "corp.economy.draw_operation"
-          : "corp.economy.operation";
+      {
+        const tagPunish = corpTagPunishOntologyAssessmentForAction(
+          input,
+          action,
+        );
+        const ontologyPayoffAvailable =
+          tagPunish !== undefined &&
+          tagPunish.isPunishPayoff &&
+          features.opponentTags > 0;
+        const ontologyTagSourceWithPayoff =
+          Boolean(tagPunish?.isTagSource) &&
+          corpOntologyPayoffAvailableForTagSource(input, action);
+        score = scoreCorpOperation(roles, features, profile);
+        if (ontologyPayoffAvailable && tagPunish) {
+          score = Math.max(
+            score,
+            820 + tagPunishPayoffPriorityBonus(tagPunish),
+          );
+        } else if (ontologyTagSourceWithPayoff) {
+          score = Math.max(
+            score,
+            720 + Math.round(traceTagExpectedSuccessEstimate(input) * 60),
+          );
+        } else if (tagPunish?.isTagSource) {
+          score = Math.max(score, 500);
+        }
+        reasonCode = ontologyPayoffAvailable
+          ? "corp.tag.punish_visible_tag"
+          : ontologyTagSourceWithPayoff
+            ? "corp.tag.source_visible_payoff"
+            : roles.includes("tag_punishment")
+              ? "corp.tag.punish_visible_tag"
+              : roles.includes("draw_operation")
+                ? "corp.economy.draw_operation"
+                : "corp.economy.operation";
+        evidence.push(...(tagPunish?.evidence ?? []));
+        if (tagPunish?.isTagSource) {
+          evidence.push(
+            ontologyTagSourceWithPayoff
+              ? "corp_tag_source_taken_with_ontology_payoff_available:true"
+              : "corp_tag_source_taken_without_ontology_payoff:true",
+          );
+        }
+      }
       explanation =
         "Eine legale Operation verbessert anhand eigener sichtbarer Rollen die Corp-Position.";
       evidence.push(
@@ -7684,31 +8027,59 @@ function tagPunishWindowDiagnosticsForSimulationAction(
     runnerTagsAfterAction: runnerTagsAfter,
   };
   if (input.side === "corp") {
+    const selectedOntology = corpTagPunishOntologyAssessmentForAction(
+      input,
+      action,
+    );
+    applyTagPunishOntologyDiagnostics(diagnostics, selectedOntology);
     if (runnerTagsBefore > 0) diagnostics.runnerTaggedAtCorpDecision = true;
     if (isCorpTurnStartDecision(action, stateBeforeAction))
       diagnostics.runnerTaggedAtStartOfCorpTurn = runnerTagsBefore > 0;
     const punishOpportunity = strongestCorpPunishOpportunity(input);
     if (punishOpportunity) {
+      const punishOntology = corpTagPunishOntologyAssessmentForAction(
+        input,
+        punishOpportunity.action,
+      );
+      applyTagPunishOntologyDiagnostics(diagnostics, punishOntology);
       diagnostics.corpPunishOpportunity = true;
       diagnostics.corpPunishKind = punishOpportunity.kind;
-      if (action.actionId === punishOpportunity.action.actionId)
+      if (punishOntology?.isPunishPayoff)
+        diagnostics.corpPunishOpportunityConfirmedByOntology = true;
+      if (action.actionId === punishOpportunity.action.actionId) {
         diagnostics.corpPunishTaken = true;
-      else
+        if (punishOntology?.isPunishPayoff)
+          diagnostics.corpOntologyPunishOpportunityConverted = true;
+      } else {
         diagnostics.corpPunishSkippedReason = corpTagPunishSkipReason(
           action,
           decision,
         );
+        if (punishOntology?.isPunishPayoff)
+          diagnostics.corpPunishSkippedDespiteOntologyOpportunity = true;
+      }
     }
     const tagSourceOpportunity = strongestCorpTagSourceOpportunity(input);
     if (tagSourceOpportunity) {
+      const tagSourceOntology = corpTagPunishOntologyAssessmentForAction(
+        input,
+        tagSourceOpportunity.action,
+      );
+      applyTagPunishOntologyDiagnostics(diagnostics, tagSourceOntology);
       diagnostics.corpTagSourceOpportunity = true;
-      if (action.actionId === tagSourceOpportunity.action.actionId)
+      if (action.actionId === tagSourceOpportunity.action.actionId) {
         diagnostics.corpTagSourceTaken = true;
-      else
+        if (tagSourceOntology?.isTagSource) {
+          if (corpOntologyPayoffAvailableForTagSource(input, action))
+            diagnostics.corpTagSourceTakenWithOntologyPayoffAvailable = true;
+          else diagnostics.corpTagSourceTakenWithoutOntologyPayoff = true;
+        }
+      } else {
         diagnostics.corpTraceTagSkippedReason = corpTagPunishSkipReason(
           action,
           decision,
         );
+      }
       if (tagSourceOpportunity.traceTag) {
         diagnostics.corpTraceTagOpportunity = true;
         diagnostics.corpTraceTagExpectedSuccess =
@@ -7739,6 +8110,41 @@ function tagPunishWindowDiagnosticsForSimulationAction(
   if (runnerTagsAfter < runnerTagsBefore)
     diagnostics.runnerTagClearedByAction = true;
   return diagnostics;
+}
+
+function applyTagPunishOntologyDiagnostics(
+  diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
+  assessment: ReturnType<typeof corpTagPunishOntologyAssessmentForAction>,
+): void {
+  if (!assessment) return;
+  diagnostics.corpTagPunishOntologyProfilesSeen = true;
+  if (assessment.profile.tagSource)
+    diagnostics.corpTagSourceOntologyProfilesSeen = true;
+  if (assessment.profile.payoff)
+    diagnostics.corpTagPunishPayoffOntologyProfilesSeen = true;
+  if (assessment.isTagSource) diagnostics.corpTagSourceOntologyUsed = true;
+  if (assessment.isPunishPayoff)
+    diagnostics.corpTagPunishPayoffOntologyUsed = true;
+  if (assessment.conflictWithLegacy)
+    diagnostics.corpTagPunishOntologyConflict = true;
+  if (assessment.isTagSource)
+    diagnostics.corpTagSourceLegalActionClassifiedByOntology = true;
+  if (assessment.isPunishPayoff)
+    diagnostics.corpPunishLegalActionClassifiedByOntology = true;
+  diagnostics.corpTagPunishOntologyKinds = sortedUnique([
+    ...(diagnostics.corpTagPunishOntologyKinds ?? []),
+    ...assessment.profile.effectKinds,
+    ...(assessment.payoffKind === "scored_agenda_damage_like"
+      ? ["scored_agenda_damage_like"]
+      : []),
+    ...(assessment.payoffKind === "scored_agenda_trace_tag_like"
+      ? ["scored_agenda_trace_tag_like"]
+      : []),
+  ]);
+  diagnostics.corpTagPunishConditionKinds = sortedUnique([
+    ...(diagnostics.corpTagPunishConditionKinds ?? []),
+    ...assessment.profile.conditionKinds,
+  ]);
 }
 
 function isCorpTurnStartDecision(
@@ -7789,6 +8195,9 @@ function corpPunishKindForAction(
   action: LegalAction,
 ): CorpPunishKind | undefined {
   if (input.side !== "corp") return undefined;
+  const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
+  if (ontology?.isPunishPayoff)
+    return corpPunishKindFromOntologyPayoff(ontology.payoffKind);
   if (action.type === "trash_resource") return "resource_trash_like";
   const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
   if (scoredAgenda?.kind === "scored_agenda_damage_punish")
@@ -7816,6 +8225,8 @@ function isCorpTagSourceAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
+  const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
+  if (ontology?.isTagSource) return true;
   const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
   if (scoredAgenda?.kind === "scored_agenda_trace_tag") return true;
   const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
@@ -7833,11 +8244,104 @@ function isCorpTraceTagSourceAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
+  const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
+  if (ontology?.isTraceTagSource) return true;
   const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
   if (scoredAgenda?.kind === "scored_agenda_trace_tag") return true;
   const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
   if (CORP_TRACE_TAG_SOURCE_IDS.has(sourceDefinitionId)) return true;
   return rolesForAction(input, action).some((role) => role.includes("trace"));
+}
+
+function corpTagPunishOntologyAssessmentForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+) {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+  return classifyTagPunishLegalActionFromOntology(
+    action,
+    sourceDefinitionIdForAction(input, action),
+    {
+      runnerTagged: input.playerView.opponent.tags > 0,
+      legacyRoles: rolesForAction(input, action),
+      scoredAgendaKind:
+        scoredAgenda?.kind === "scored_agenda_trace_tag"
+          ? "trace_tag"
+          : scoredAgenda?.kind === "scored_agenda_damage_punish"
+            ? "damage_punish"
+            : undefined,
+    },
+  );
+}
+
+function corpPunishKindFromOntologyPayoff(
+  payoffKind: StructuredTagPunishPayoffKind,
+): CorpPunishKind {
+  switch (payoffKind) {
+    case "damage":
+      return "scorched_earth_like";
+    case "economic":
+      return "closed_accounts_like";
+    case "resource_trash":
+      return "resource_trash_like";
+    case "hardware_trash":
+      return "power_grid_overload_like";
+    case "scored_agenda_damage_like":
+      return "scored_agenda_damage_like";
+    case "scored_agenda_trace_tag_like":
+      return "scored_agenda_trace_tag_like";
+    default:
+      return "unknown";
+  }
+}
+
+function corpOntologyPayoffAvailableForTagSource(
+  input: AiDecisionInput,
+  sourceAction: LegalAction,
+): boolean {
+  if (input.side !== "corp") return false;
+  if (
+    input.legalActions.some((action) => {
+      if (action.actionId === sourceAction.actionId) return false;
+      return corpTagPunishOntologyAssessmentForAction(input, action)
+        ?.isPunishPayoff;
+    })
+  )
+    return true;
+  return [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.own.scoreArea,
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
+  ].some((card) =>
+    Boolean(
+      card.known &&
+      card.definitionId &&
+      classifyTagPunishPayoffFromOntology(card.definitionId),
+    ),
+  );
+}
+
+function tagPunishPayoffPriorityBonus(
+  assessment: NonNullable<
+    ReturnType<typeof corpTagPunishOntologyAssessmentForAction>
+  >,
+): number {
+  switch (assessment.payoffKind) {
+    case "damage":
+    case "scored_agenda_damage_like":
+      return 55;
+    case "economic":
+      return 35;
+    case "resource_trash":
+    case "hardware_trash":
+      return 25;
+    default:
+      return 10;
+  }
 }
 
 function sourceDefinitionIdForAction(
@@ -9161,6 +9665,79 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "pumpActionsThatCouldNotLeadToBreak",
   "pumpActionsThatDestroyedAccessReserve",
   "breakSkippedToPreserveTrashReserve",
+  "runnerBreakerOntologyProfilesSeen",
+  "runnerBreakerOntologyCoverageUsed",
+  "runnerBreakerOntologyFallbackUsed",
+  "runnerBreakerOntologyConflict",
+  "runnerInstallableBreakerRankedByOntology",
+  "runnerSearchTargetRankedByOntology",
+  "runnerMissingCoverageResolvedByOntology",
+  "runnerBreakerOntologySetupSuppressedBecausePressureReady",
+  "corpVisibleRunnerBreakerOntologyProfilesSeen",
+  "corpRemoteSafetyUsedRunnerBreakerOntology",
+  "corpCheapContestDetectedByBreakerOntology",
+  "corpRemoteSafetyOntologyConflictWithEffectiveQuote",
+  "corpAgendaInstallBlockedByOntologyCheapContest",
+  "corpAdvanceBlockedByOntologyCheapContest",
+  "breakerOntologyCoverageByType",
+  "breakerOntologyCoverageWall",
+  "breakerOntologyCoverageSentry",
+  "breakerOntologyCoverageCodeGate",
+  "breakerOntologyCoverageAp",
+  "breakerOntologyCoverageTrace",
+  "breakerOntologyCoverageWatchdog",
+  "breakerOntologyCoverageBlackIce",
+  "breakerOntologyCoverageUniversal",
+  "breakerOntologyCoverageUnknownSpecial",
+  "breakerOntologySideEffectsSeen",
+  "breakerOntologyCostProfileSeen",
+  "breakerOntologyFallbackEvidenceCount",
+  "breakerOntologyEffectiveQuoteOverrideCount",
+  "corpRemoteRoleProfilesSeen",
+  "corpRemoteRoleUsedForSafety",
+  "corpRemoteRoleUsedForScoringRemote",
+  "corpRemoteRoleUsedForPortfolio",
+  "corpRemoteRoleConflictWithLegacy",
+  "corpRemoteRoleConflictWithBoardState",
+  "corpScoringProtectionRemoteRoleSeen",
+  "corpAgendaStealTaxRemoteRoleSeen",
+  "corpRunTaxRemoteRoleSeen",
+  "corpRemoteCapacityRoleSeen",
+  "corpAssetEconomyRemoteRoleSeen",
+  "corpBaitRemoteRoleSeen",
+  "corpAmbushRemoteRoleSeen",
+  "corpIceModifierRemoteRoleSeen",
+  "corpRemoteRoleRaisedSafetyScore",
+  "corpRemoteRoleDidNotRaiseSafetyBecauseInactive",
+  "corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest",
+  "corpRemoteRolePreventedBaitAsScoringProtection",
+  "corpRemoteRolePreventedAssetAsScoringProtection",
+  "corpRemoteRoleHelpedChooseExistingRemote",
+  "corpRemoteRoleHelpedAvoidNewEmptyRemote",
+  "runnerRemoteRoleProfilesSeen",
+  "runnerRemoteRoleUsedForTrashValue",
+  "runnerRemoteRoleUsedForContestValue",
+  "runnerRemoteRoleTrashBudgetPreserved",
+  "runnerRemoteRoleConflictWithHiddenStateGuard",
+  "runnerRunTaxRemoteRoleAccessed",
+  "runnerAgendaStealTaxRemoteRoleAccessed",
+  "runnerAssetEconomyRemoteRoleAccessed",
+  "remoteRoleByKind",
+  "remoteRoleKindScoringProtection",
+  "remoteRoleKindAgendaStealTax",
+  "remoteRoleKindRunTax",
+  "remoteRoleKindRemoteCapacity",
+  "remoteRoleKindAssetEconomy",
+  "remoteRoleKindBait",
+  "remoteRoleKindAmbush",
+  "remoteRoleKindIceModifier",
+  "remoteRoleKindTaxFort",
+  "remoteRoleByServerScope",
+  "remoteRoleServerScopeFort",
+  "remoteRoleServerScopeRemote",
+  "remoteRoleServerScopeCentral",
+  "remoteRoleServerScopeServer",
+  "remoteRoleSafetyDedupeCount",
   "unbrokenRunEffectIgnoredBecauseNoRemainingIce",
   "unbrokenRunEffectAppliedToRemainingPath",
   "badOutcomeRepeatedWithoutNewInfo",
@@ -9348,6 +9925,35 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpTagPunishFunnelPunishTaken",
   "corpTagPunishFunnelTerminalDamageOrEconomicHit",
   "corpTagPunishFunnelFlatlineOrLock",
+  "corpTagPunishOntologyProfilesSeen",
+  "corpTagSourceOntologyProfilesSeen",
+  "corpTagPunishPayoffOntologyProfilesSeen",
+  "corpTagSourceOntologyUsed",
+  "corpTagPunishPayoffOntologyUsed",
+  "corpTagPunishOntologyFallbackUsed",
+  "corpTagPunishOntologyConflict",
+  "corpTagSourceLegalActionClassifiedByOntology",
+  "corpPunishLegalActionClassifiedByOntology",
+  "corpPunishOpportunityConfirmedByOntology",
+  "corpPunishSkippedDespiteOntologyOpportunity",
+  "corpTagSourceTakenWithOntologyPayoffAvailable",
+  "corpTagSourceTakenWithoutOntologyPayoff",
+  "corpTagSourceConvertedToOntologyPunishOpportunity",
+  "corpOntologyPunishOpportunityConverted",
+  "corpOntologyPunishOpportunityExpired",
+  "corpTagPunishOntologyByKind",
+  "corpTagPunishOntologyKindTagSource",
+  "corpTagPunishOntologyKindTagPunishPayoff",
+  "corpTagPunishOntologyKindTrace",
+  "corpTagPunishOntologyKindTag",
+  "corpTagPunishOntologyKindDamage",
+  "corpTagPunishOntologyKindResourceTrash",
+  "corpTagPunishOntologyKindHardwareTrash",
+  "corpTagPunishOntologyKindScoredAgendaDamageLike",
+  "corpTagPunishOntologyKindScoredAgendaTraceTagLike",
+  "corpTagPunishConditionByKind",
+  "corpTagPunishConditionRequiresRunnerTagged",
+  "corpTagPunishConditionRequiresTraceSuccess",
   "scoredAgendaActionValueOverBasic",
   "basicCreditTakenWhileBetterAgendaEconomyAvailable",
   "basicDrawTakenWhileBetterAgendaDrawAvailable",
@@ -9974,6 +10580,9 @@ export function summarizeMatchProgressionMetrics(
   const actionLimitEndgameMetrics =
     summarizeActionLimitEndgameMetrics(summaries);
   const tagPunishWindowMetrics = summarizeTagPunishWindowMetrics(summaries);
+  const breakerOntologyMetrics = summarizeBreakerOntologyMetrics(summaries);
+  const remoteRoleOntologyMetrics =
+    summarizeRemoteRoleOntologyMetrics(summaries);
   const runnerHandUseOpportunityWindows = actionSequence.filter(
     (entry) => entry.runnerHandUseOpportunity === true,
   ).length;
@@ -10042,6 +10651,8 @@ export function summarizeMatchProgressionMetrics(
     ...corpScoreConversionMetrics,
     ...actionLimitEndgameMetrics,
     ...tagPunishWindowMetrics,
+    ...breakerOntologyMetrics,
+    ...remoteRoleOntologyMetrics,
     advancedAgendaSteals,
     advancedAgendaStealsFromRemote,
     advancedAgendaStealsFromCentral,
@@ -12703,6 +13314,605 @@ function evidenceValue(
     ?.slice(prefix.length);
 }
 
+function evidenceNumber(
+  entry: PlanConversionActionEntry,
+  prefix: string,
+): number {
+  const parsed = Number(evidenceValue(entry, prefix));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function hasEvidencePrefix(
+  entry: PlanConversionActionEntry,
+  prefix: string,
+): boolean {
+  return entry.evidence.some((item) => item.startsWith(prefix));
+}
+
+type BreakerOntologyCoverageMetricKey =
+  | "breakerOntologyCoverageWall"
+  | "breakerOntologyCoverageSentry"
+  | "breakerOntologyCoverageCodeGate"
+  | "breakerOntologyCoverageAp"
+  | "breakerOntologyCoverageTrace"
+  | "breakerOntologyCoverageWatchdog"
+  | "breakerOntologyCoverageBlackIce"
+  | "breakerOntologyCoverageUniversal"
+  | "breakerOntologyCoverageUnknownSpecial";
+
+const BREAKER_ONTOLOGY_COVERAGE_METRIC_KEYS: Record<
+  string,
+  BreakerOntologyCoverageMetricKey
+> = {
+  wall: "breakerOntologyCoverageWall",
+  sentry: "breakerOntologyCoverageSentry",
+  code_gate: "breakerOntologyCoverageCodeGate",
+  ap: "breakerOntologyCoverageAp",
+  trace: "breakerOntologyCoverageTrace",
+  watchdog: "breakerOntologyCoverageWatchdog",
+  black_ice: "breakerOntologyCoverageBlackIce",
+  universal: "breakerOntologyCoverageUniversal",
+  unknown_special: "breakerOntologyCoverageUnknownSpecial",
+};
+
+type RemoteRoleKindMetricKey =
+  | "remoteRoleKindScoringProtection"
+  | "remoteRoleKindAgendaStealTax"
+  | "remoteRoleKindRunTax"
+  | "remoteRoleKindRemoteCapacity"
+  | "remoteRoleKindAssetEconomy"
+  | "remoteRoleKindBait"
+  | "remoteRoleKindAmbush"
+  | "remoteRoleKindIceModifier"
+  | "remoteRoleKindTaxFort";
+
+const REMOTE_ROLE_KIND_METRIC_KEYS: Record<string, RemoteRoleKindMetricKey> = {
+  scoring_protection: "remoteRoleKindScoringProtection",
+  agenda_steal_tax: "remoteRoleKindAgendaStealTax",
+  run_tax: "remoteRoleKindRunTax",
+  remote_capacity: "remoteRoleKindRemoteCapacity",
+  asset_economy: "remoteRoleKindAssetEconomy",
+  bait: "remoteRoleKindBait",
+  ambush: "remoteRoleKindAmbush",
+  ice_modifier: "remoteRoleKindIceModifier",
+  tax_fort: "remoteRoleKindTaxFort",
+};
+
+type RemoteRoleServerScopeMetricKey =
+  | "remoteRoleServerScopeFort"
+  | "remoteRoleServerScopeRemote"
+  | "remoteRoleServerScopeCentral"
+  | "remoteRoleServerScopeServer";
+
+const REMOTE_ROLE_SERVER_SCOPE_METRIC_KEYS: Record<
+  string,
+  RemoteRoleServerScopeMetricKey
+> = {
+  fort: "remoteRoleServerScopeFort",
+  remote: "remoteRoleServerScopeRemote",
+  central: "remoteRoleServerScopeCentral",
+  server: "remoteRoleServerScopeServer",
+};
+
+function summarizeBreakerOntologyMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "runnerBreakerOntologyProfilesSeen"
+  | "runnerBreakerOntologyCoverageUsed"
+  | "runnerBreakerOntologyFallbackUsed"
+  | "runnerBreakerOntologyConflict"
+  | "runnerInstallableBreakerRankedByOntology"
+  | "runnerSearchTargetRankedByOntology"
+  | "runnerMissingCoverageResolvedByOntology"
+  | "runnerBreakerOntologySetupSuppressedBecausePressureReady"
+  | "corpVisibleRunnerBreakerOntologyProfilesSeen"
+  | "corpRemoteSafetyUsedRunnerBreakerOntology"
+  | "corpCheapContestDetectedByBreakerOntology"
+  | "corpRemoteSafetyOntologyConflictWithEffectiveQuote"
+  | "corpAgendaInstallBlockedByOntologyCheapContest"
+  | "corpAdvanceBlockedByOntologyCheapContest"
+  | "breakerOntologyCoverageByType"
+  | "breakerOntologyCoverageWall"
+  | "breakerOntologyCoverageSentry"
+  | "breakerOntologyCoverageCodeGate"
+  | "breakerOntologyCoverageAp"
+  | "breakerOntologyCoverageTrace"
+  | "breakerOntologyCoverageWatchdog"
+  | "breakerOntologyCoverageBlackIce"
+  | "breakerOntologyCoverageUniversal"
+  | "breakerOntologyCoverageUnknownSpecial"
+  | "breakerOntologySideEffectsSeen"
+  | "breakerOntologyCostProfileSeen"
+  | "breakerOntologyFallbackEvidenceCount"
+  | "breakerOntologyEffectiveQuoteOverrideCount"
+> {
+  const metrics = {
+    runnerBreakerOntologyProfilesSeen: 0,
+    runnerBreakerOntologyCoverageUsed: 0,
+    runnerBreakerOntologyFallbackUsed: 0,
+    runnerBreakerOntologyConflict: 0,
+    runnerInstallableBreakerRankedByOntology: 0,
+    runnerSearchTargetRankedByOntology: 0,
+    runnerMissingCoverageResolvedByOntology: 0,
+    runnerBreakerOntologySetupSuppressedBecausePressureReady: 0,
+    corpVisibleRunnerBreakerOntologyProfilesSeen: 0,
+    corpRemoteSafetyUsedRunnerBreakerOntology: 0,
+    corpCheapContestDetectedByBreakerOntology: 0,
+    corpRemoteSafetyOntologyConflictWithEffectiveQuote: 0,
+    corpAgendaInstallBlockedByOntologyCheapContest: 0,
+    corpAdvanceBlockedByOntologyCheapContest: 0,
+    breakerOntologyCoverageByType: 0,
+    breakerOntologyCoverageWall: 0,
+    breakerOntologyCoverageSentry: 0,
+    breakerOntologyCoverageCodeGate: 0,
+    breakerOntologyCoverageAp: 0,
+    breakerOntologyCoverageTrace: 0,
+    breakerOntologyCoverageWatchdog: 0,
+    breakerOntologyCoverageBlackIce: 0,
+    breakerOntologyCoverageUniversal: 0,
+    breakerOntologyCoverageUnknownSpecial: 0,
+    breakerOntologySideEffectsSeen: 0,
+    breakerOntologyCostProfileSeen: 0,
+    breakerOntologyFallbackEvidenceCount: 0,
+    breakerOntologyEffectiveQuoteOverrideCount: 0,
+  };
+
+  for (const summary of summaries) {
+    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
+    for (const entry of sequence) {
+      const structuredGripBreakers = evidenceNumber(
+        entry,
+        "structured_matching_grip_breakers:",
+      );
+      const structuredHeapBreakers = evidenceNumber(
+        entry,
+        "structured_heap_matching_breakers:",
+      );
+      const matchingGripBreakers = evidenceNumber(
+        entry,
+        "matching_grip_breakers:",
+      );
+      const coverageSearchActions = evidenceNumber(
+        entry,
+        "coverage_search_actions:",
+      );
+      const coverageRecoveryActions = evidenceNumber(
+        entry,
+        "coverage_recovery_actions:",
+      );
+      const visibleRunnerProfiles = evidenceNumber(
+        entry,
+        "visible_runner_breaker_ontology_profiles:",
+      );
+      const structuredContestFallback =
+        hasEvidenceFlag(
+          entry,
+          "structured_breaker_profile_contest_fallback:true",
+        ) || hasEvidenceFlag(entry, "structured_breaker_ice_cost:true");
+      const effectiveQuoteOverride =
+        hasEvidenceFlag(
+          entry,
+          "structured_breaker_effective_quote_override:true",
+        ) ||
+        hasEvidenceFlag(
+          entry,
+          "structured_breaker_ontology_effective_quote_override:true",
+        );
+      const ontologyConflict =
+        hasEvidenceFlag(entry, "runner_breaker_ontology_conflict:true") ||
+        hasEvidenceFlag(entry, "structured_breaker_coverage_conflict:true") ||
+        hasEvidenceFlag(
+          entry,
+          "corp_remote_safety_ontology_conflict_with_effective_quote:true",
+        );
+
+      if (entry.side === "runner") {
+        const runnerProfileSeen =
+          structuredGripBreakers > 0 ||
+          structuredHeapBreakers > 0 ||
+          hasEvidenceFlag(entry, "structured_breaker_cost_profile:true") ||
+          hasEvidencePrefix(entry, "structured_breaker_coverage:") ||
+          hasEvidenceFlag(entry, "runner_breaker_ontology_profile_seen:true");
+        if (runnerProfileSeen) metrics.runnerBreakerOntologyProfilesSeen += 1;
+        if (
+          structuredGripBreakers > 0 ||
+          structuredHeapBreakers > 0 ||
+          hasEvidencePrefix(entry, "structured_breaker_coverage:") ||
+          hasEvidenceFlag(entry, "runner_breaker_ontology_coverage_used:true")
+        )
+          metrics.runnerBreakerOntologyCoverageUsed += 1;
+        if (
+          (structuredGripBreakers > 0 && matchingGripBreakers <= 0) ||
+          hasEvidenceFlag(entry, "runner_breaker_ontology_fallback_used:true")
+        )
+          metrics.runnerBreakerOntologyFallbackUsed += 1;
+        if (ontologyConflict) metrics.runnerBreakerOntologyConflict += 1;
+        if (
+          entry.actionType === "install_card" &&
+          (hasEvidenceFlag(entry, "structured_breaker_cost_profile:true") ||
+            structuredGripBreakers > 0 ||
+            hasEvidenceFlag(
+              entry,
+              "runner_installable_breaker_ranked_by_ontology:true",
+            ))
+        )
+          metrics.runnerInstallableBreakerRankedByOntology += 1;
+        if (
+          (coverageSearchActions > 0 || coverageRecoveryActions > 0) &&
+          (structuredGripBreakers > 0 ||
+            structuredHeapBreakers > 0 ||
+            hasEvidenceFlag(
+              entry,
+              "runner_search_target_ranked_by_ontology:true",
+            ))
+        )
+          metrics.runnerSearchTargetRankedByOntology += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "runner_missing_coverage_resolved_by_ontology:true",
+          ) ||
+          (entry.runnerPathBlockedByMissingCoverage === true &&
+            (structuredGripBreakers > 0 || structuredHeapBreakers > 0))
+        )
+          metrics.runnerMissingCoverageResolvedByOntology += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "runner_breaker_ontology_setup_suppressed_pressure_ready:true",
+          )
+        )
+          metrics.runnerBreakerOntologySetupSuppressedBecausePressureReady += 1;
+      }
+
+      if (entry.side === "corp") {
+        if (visibleRunnerProfiles > 0 || structuredContestFallback)
+          metrics.corpVisibleRunnerBreakerOntologyProfilesSeen += 1;
+        if (structuredContestFallback)
+          metrics.corpRemoteSafetyUsedRunnerBreakerOntology += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_cheap_contest_detected_by_breaker_ontology:true",
+          ) ||
+          (structuredContestFallback &&
+            evidenceValue(entry, "runner_contest_capacity:") === "high")
+        )
+          metrics.corpCheapContestDetectedByBreakerOntology += 1;
+        if (
+          effectiveQuoteOverride ||
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_safety_ontology_conflict_with_effective_quote:true",
+          )
+        )
+          metrics.corpRemoteSafetyOntologyConflictWithEffectiveQuote += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_agenda_install_blocked_by_ontology_cheap_contest:true",
+          ) ||
+          (structuredContestFallback &&
+            hasEvidenceFlag(
+              entry,
+              "corp_agenda_install_deferred_due_to_cheap_contest:true",
+            ))
+        )
+          metrics.corpAgendaInstallBlockedByOntologyCheapContest += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_advance_blocked_by_ontology_cheap_contest:true",
+          ) ||
+          (structuredContestFallback &&
+            hasEvidenceFlag(
+              entry,
+              "corp_advance_deferred_due_to_cheap_contest:true",
+            ))
+        )
+          metrics.corpAdvanceBlockedByOntologyCheapContest += 1;
+      }
+
+      const coverageTypes = new Set<string>();
+      for (const evidence of entry.evidence) {
+        if (evidence.startsWith("structured_breaker_coverage:")) {
+          coverageTypes.add(
+            evidence.slice("structured_breaker_coverage:".length),
+          );
+        }
+        if (evidence.startsWith("structured_breaker_visible_coverage:")) {
+          coverageTypes.add(
+            evidence.slice("structured_breaker_visible_coverage:".length),
+          );
+        }
+      }
+      for (const coverage of coverageTypes) {
+        const metricKey = BREAKER_ONTOLOGY_COVERAGE_METRIC_KEYS[coverage];
+        if (!metricKey) continue;
+        metrics.breakerOntologyCoverageByType += 1;
+        metrics[metricKey] += 1;
+      }
+      const sideEffectPenalty = evidenceNumber(
+        entry,
+        "structured_breaker_side_effect_penalty:",
+      );
+      if (sideEffectPenalty > 0) metrics.breakerOntologySideEffectsSeen += 1;
+      if (
+        hasEvidenceFlag(entry, "structured_breaker_cost_profile:true") ||
+        hasEvidencePrefix(entry, "structured_breaker_install_credits:") ||
+        hasEvidencePrefix(entry, "structured_breaker_memory:") ||
+        hasEvidencePrefix(entry, "structured_breaker_cost:")
+      )
+        metrics.breakerOntologyCostProfileSeen += 1;
+      if (structuredContestFallback)
+        metrics.breakerOntologyFallbackEvidenceCount += 1;
+      if (effectiveQuoteOverride)
+        metrics.breakerOntologyEffectiveQuoteOverrideCount += 1;
+    }
+  }
+
+  return metrics;
+}
+
+function summarizeRemoteRoleOntologyMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "corpRemoteRoleProfilesSeen"
+  | "corpRemoteRoleUsedForSafety"
+  | "corpRemoteRoleUsedForScoringRemote"
+  | "corpRemoteRoleUsedForPortfolio"
+  | "corpRemoteRoleConflictWithLegacy"
+  | "corpRemoteRoleConflictWithBoardState"
+  | "corpScoringProtectionRemoteRoleSeen"
+  | "corpAgendaStealTaxRemoteRoleSeen"
+  | "corpRunTaxRemoteRoleSeen"
+  | "corpRemoteCapacityRoleSeen"
+  | "corpAssetEconomyRemoteRoleSeen"
+  | "corpBaitRemoteRoleSeen"
+  | "corpAmbushRemoteRoleSeen"
+  | "corpIceModifierRemoteRoleSeen"
+  | "corpRemoteRoleRaisedSafetyScore"
+  | "corpRemoteRoleDidNotRaiseSafetyBecauseInactive"
+  | "corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest"
+  | "corpRemoteRolePreventedBaitAsScoringProtection"
+  | "corpRemoteRolePreventedAssetAsScoringProtection"
+  | "corpRemoteRoleHelpedChooseExistingRemote"
+  | "corpRemoteRoleHelpedAvoidNewEmptyRemote"
+  | "runnerRemoteRoleProfilesSeen"
+  | "runnerRemoteRoleUsedForTrashValue"
+  | "runnerRemoteRoleUsedForContestValue"
+  | "runnerRemoteRoleTrashBudgetPreserved"
+  | "runnerRemoteRoleConflictWithHiddenStateGuard"
+  | "runnerRunTaxRemoteRoleAccessed"
+  | "runnerAgendaStealTaxRemoteRoleAccessed"
+  | "runnerAssetEconomyRemoteRoleAccessed"
+  | "remoteRoleByKind"
+  | "remoteRoleKindScoringProtection"
+  | "remoteRoleKindAgendaStealTax"
+  | "remoteRoleKindRunTax"
+  | "remoteRoleKindRemoteCapacity"
+  | "remoteRoleKindAssetEconomy"
+  | "remoteRoleKindBait"
+  | "remoteRoleKindAmbush"
+  | "remoteRoleKindIceModifier"
+  | "remoteRoleKindTaxFort"
+  | "remoteRoleByServerScope"
+  | "remoteRoleServerScopeFort"
+  | "remoteRoleServerScopeRemote"
+  | "remoteRoleServerScopeCentral"
+  | "remoteRoleServerScopeServer"
+  | "remoteRoleSafetyDedupeCount"
+> {
+  const metrics = {
+    corpRemoteRoleProfilesSeen: 0,
+    corpRemoteRoleUsedForSafety: 0,
+    corpRemoteRoleUsedForScoringRemote: 0,
+    corpRemoteRoleUsedForPortfolio: 0,
+    corpRemoteRoleConflictWithLegacy: 0,
+    corpRemoteRoleConflictWithBoardState: 0,
+    corpScoringProtectionRemoteRoleSeen: 0,
+    corpAgendaStealTaxRemoteRoleSeen: 0,
+    corpRunTaxRemoteRoleSeen: 0,
+    corpRemoteCapacityRoleSeen: 0,
+    corpAssetEconomyRemoteRoleSeen: 0,
+    corpBaitRemoteRoleSeen: 0,
+    corpAmbushRemoteRoleSeen: 0,
+    corpIceModifierRemoteRoleSeen: 0,
+    corpRemoteRoleRaisedSafetyScore: 0,
+    corpRemoteRoleDidNotRaiseSafetyBecauseInactive: 0,
+    corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest: 0,
+    corpRemoteRolePreventedBaitAsScoringProtection: 0,
+    corpRemoteRolePreventedAssetAsScoringProtection: 0,
+    corpRemoteRoleHelpedChooseExistingRemote: 0,
+    corpRemoteRoleHelpedAvoidNewEmptyRemote: 0,
+    runnerRemoteRoleProfilesSeen: 0,
+    runnerRemoteRoleUsedForTrashValue: 0,
+    runnerRemoteRoleUsedForContestValue: 0,
+    runnerRemoteRoleTrashBudgetPreserved: 0,
+    runnerRemoteRoleConflictWithHiddenStateGuard: 0,
+    runnerRunTaxRemoteRoleAccessed: 0,
+    runnerAgendaStealTaxRemoteRoleAccessed: 0,
+    runnerAssetEconomyRemoteRoleAccessed: 0,
+    remoteRoleByKind: 0,
+    remoteRoleKindScoringProtection: 0,
+    remoteRoleKindAgendaStealTax: 0,
+    remoteRoleKindRunTax: 0,
+    remoteRoleKindRemoteCapacity: 0,
+    remoteRoleKindAssetEconomy: 0,
+    remoteRoleKindBait: 0,
+    remoteRoleKindAmbush: 0,
+    remoteRoleKindIceModifier: 0,
+    remoteRoleKindTaxFort: 0,
+    remoteRoleByServerScope: 0,
+    remoteRoleServerScopeFort: 0,
+    remoteRoleServerScopeRemote: 0,
+    remoteRoleServerScopeCentral: 0,
+    remoteRoleServerScopeServer: 0,
+    remoteRoleSafetyDedupeCount: 0,
+  };
+
+  for (const summary of summaries) {
+    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
+    for (const entry of sequence) {
+      const roleKinds = new Set<string>();
+      const serverScopes = new Set<string>();
+      for (const evidence of entry.evidence) {
+        if (evidence.startsWith("corp_remote_role_kind:"))
+          roleKinds.add(evidence.slice("corp_remote_role_kind:".length));
+        if (evidence.startsWith("runner_remote_role_kind:"))
+          roleKinds.add(evidence.slice("runner_remote_role_kind:".length));
+        if (evidence.startsWith("corp_remote_role_server_scope:"))
+          serverScopes.add(
+            evidence.slice("corp_remote_role_server_scope:".length),
+          );
+        if (evidence.startsWith("runner_remote_role_server_scope:"))
+          serverScopes.add(
+            evidence.slice("runner_remote_role_server_scope:".length),
+          );
+      }
+
+      for (const roleKind of roleKinds) {
+        const key = REMOTE_ROLE_KIND_METRIC_KEYS[roleKind];
+        if (!key) continue;
+        metrics.remoteRoleByKind += 1;
+        metrics[key] += 1;
+      }
+      for (const serverScope of serverScopes) {
+        const key = REMOTE_ROLE_SERVER_SCOPE_METRIC_KEYS[serverScope];
+        if (!key) continue;
+        metrics.remoteRoleByServerScope += 1;
+        metrics[key] += 1;
+      }
+
+      if (entry.side === "corp") {
+        if (hasEvidenceFlag(entry, "corp_remote_role_profile_seen:true"))
+          metrics.corpRemoteRoleProfilesSeen += 1;
+        if (hasEvidenceFlag(entry, "corp_remote_role_used_for_safety:true")) {
+          metrics.corpRemoteRoleUsedForSafety += 1;
+          metrics.remoteRoleSafetyDedupeCount += 1;
+        }
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_used_for_scoring_remote:true",
+          )
+        )
+          metrics.corpRemoteRoleUsedForScoringRemote += 1;
+        if (hasEvidenceFlag(entry, "corp_remote_role_used_for_portfolio:true"))
+          metrics.corpRemoteRoleUsedForPortfolio += 1;
+        if (
+          hasEvidenceFlag(entry, "corp_remote_role_conflict_with_legacy:true")
+        )
+          metrics.corpRemoteRoleConflictWithLegacy += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_conflict_with_board_state:true",
+          )
+        )
+          metrics.corpRemoteRoleConflictWithBoardState += 1;
+        if (roleKinds.has("scoring_protection"))
+          metrics.corpScoringProtectionRemoteRoleSeen += 1;
+        if (roleKinds.has("agenda_steal_tax"))
+          metrics.corpAgendaStealTaxRemoteRoleSeen += 1;
+        if (roleKinds.has("run_tax")) metrics.corpRunTaxRemoteRoleSeen += 1;
+        if (roleKinds.has("remote_capacity"))
+          metrics.corpRemoteCapacityRoleSeen += 1;
+        if (roleKinds.has("asset_economy"))
+          metrics.corpAssetEconomyRemoteRoleSeen += 1;
+        if (roleKinds.has("bait")) metrics.corpBaitRemoteRoleSeen += 1;
+        if (roleKinds.has("ambush")) metrics.corpAmbushRemoteRoleSeen += 1;
+        if (roleKinds.has("ice_modifier"))
+          metrics.corpIceModifierRemoteRoleSeen += 1;
+        if (hasEvidenceFlag(entry, "corp_remote_role_raised_safety_score:true"))
+          metrics.corpRemoteRoleRaisedSafetyScore += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_did_not_raise_safety_because_inactive:true",
+          )
+        )
+          metrics.corpRemoteRoleDidNotRaiseSafetyBecauseInactive += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_did_not_raise_safety_because_cheap_contest:true",
+          )
+        )
+          metrics.corpRemoteRoleDidNotRaiseSafetyBecauseCheapContest += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_prevented_bait_as_scoring_protection:true",
+          )
+        )
+          metrics.corpRemoteRolePreventedBaitAsScoringProtection += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_prevented_asset_as_scoring_protection:true",
+          )
+        )
+          metrics.corpRemoteRolePreventedAssetAsScoringProtection += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_helped_choose_existing_remote:true",
+          )
+        )
+          metrics.corpRemoteRoleHelpedChooseExistingRemote += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "corp_remote_role_helped_avoid_new_empty_remote:true",
+          )
+        )
+          metrics.corpRemoteRoleHelpedAvoidNewEmptyRemote += 1;
+      }
+
+      if (entry.side === "runner") {
+        if (hasEvidenceFlag(entry, "runner_remote_role_profile_seen:true"))
+          metrics.runnerRemoteRoleProfilesSeen += 1;
+        if (
+          hasEvidenceFlag(entry, "runner_remote_role_used_for_trash_value:true")
+        )
+          metrics.runnerRemoteRoleUsedForTrashValue += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "runner_remote_role_used_for_contest_value:true",
+          )
+        )
+          metrics.runnerRemoteRoleUsedForContestValue += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "runner_remote_role_trash_budget_preserved:true",
+          )
+        )
+          metrics.runnerRemoteRoleTrashBudgetPreserved += 1;
+        if (
+          hasEvidenceFlag(
+            entry,
+            "runner_remote_role_conflict_with_hidden_state_guard:true",
+          )
+        )
+          metrics.runnerRemoteRoleConflictWithHiddenStateGuard += 1;
+        if (roleKinds.has("run_tax"))
+          metrics.runnerRunTaxRemoteRoleAccessed += 1;
+        if (roleKinds.has("agenda_steal_tax"))
+          metrics.runnerAgendaStealTaxRemoteRoleAccessed += 1;
+        if (roleKinds.has("asset_economy"))
+          metrics.runnerAssetEconomyRemoteRoleAccessed += 1;
+      }
+    }
+  }
+
+  return metrics;
+}
+
 function summarizeStrategicLineMetrics(
   summaries: AiSimulationSummary[],
 ): Pick<
@@ -13136,6 +14346,35 @@ function summarizeTagPunishWindowMetrics(
   | "corpTagPunishFunnelPunishTaken"
   | "corpTagPunishFunnelTerminalDamageOrEconomicHit"
   | "corpTagPunishFunnelFlatlineOrLock"
+  | "corpTagPunishOntologyProfilesSeen"
+  | "corpTagSourceOntologyProfilesSeen"
+  | "corpTagPunishPayoffOntologyProfilesSeen"
+  | "corpTagSourceOntologyUsed"
+  | "corpTagPunishPayoffOntologyUsed"
+  | "corpTagPunishOntologyFallbackUsed"
+  | "corpTagPunishOntologyConflict"
+  | "corpTagSourceLegalActionClassifiedByOntology"
+  | "corpPunishLegalActionClassifiedByOntology"
+  | "corpPunishOpportunityConfirmedByOntology"
+  | "corpPunishSkippedDespiteOntologyOpportunity"
+  | "corpTagSourceTakenWithOntologyPayoffAvailable"
+  | "corpTagSourceTakenWithoutOntologyPayoff"
+  | "corpTagSourceConvertedToOntologyPunishOpportunity"
+  | "corpOntologyPunishOpportunityConverted"
+  | "corpOntologyPunishOpportunityExpired"
+  | "corpTagPunishOntologyByKind"
+  | "corpTagPunishOntologyKindTagSource"
+  | "corpTagPunishOntologyKindTagPunishPayoff"
+  | "corpTagPunishOntologyKindTrace"
+  | "corpTagPunishOntologyKindTag"
+  | "corpTagPunishOntologyKindDamage"
+  | "corpTagPunishOntologyKindResourceTrash"
+  | "corpTagPunishOntologyKindHardwareTrash"
+  | "corpTagPunishOntologyKindScoredAgendaDamageLike"
+  | "corpTagPunishOntologyKindScoredAgendaTraceTagLike"
+  | "corpTagPunishConditionByKind"
+  | "corpTagPunishConditionRequiresRunnerTagged"
+  | "corpTagPunishConditionRequiresTraceSuccess"
 > {
   let runnerTaggedAtCorpDecisionActions = 0;
   const runnerTaggedAtCorpDecisionTurns = new Set<string>();
@@ -13192,6 +14431,37 @@ function summarizeTagPunishWindowMetrics(
   let corpTagSourceConvertedToPunishTaken = 0;
   let corpTagPunishFunnelTerminalDamageOrEconomicHit = 0;
   let corpTagPunishFunnelFlatlineOrLock = 0;
+  let corpTagPunishOntologyProfilesSeen = 0;
+  let corpTagSourceOntologyProfilesSeen = 0;
+  let corpTagPunishPayoffOntologyProfilesSeen = 0;
+  let corpTagSourceOntologyUsed = 0;
+  let corpTagPunishPayoffOntologyUsed = 0;
+  let corpTagPunishOntologyFallbackUsed = 0;
+  let corpTagPunishOntologyConflict = 0;
+  let corpTagSourceLegalActionClassifiedByOntology = 0;
+  let corpPunishLegalActionClassifiedByOntology = 0;
+  let corpPunishOpportunityConfirmedByOntology = 0;
+  let corpPunishSkippedDespiteOntologyOpportunity = 0;
+  let corpTagSourceTakenWithOntologyPayoffAvailable = 0;
+  let corpTagSourceTakenWithoutOntologyPayoff = 0;
+  let corpTagSourceConvertedToOntologyPunishOpportunity = 0;
+  let corpOntologyPunishOpportunityConverted = 0;
+  let corpOntologyPunishOpportunityExpired = 0;
+  const ontologyByKind: Record<string, number> = {
+    tag_source: 0,
+    tag_punish_payoff: 0,
+    trace: 0,
+    tag: 0,
+    damage: 0,
+    resource_trash: 0,
+    hardware_trash: 0,
+    scored_agenda_damage_like: 0,
+    scored_agenda_trace_tag_like: 0,
+  };
+  const ontologyConditionByKind: Record<string, number> = {
+    requires_runner_tagged: 0,
+    requires_trace_success: 0,
+  };
 
   for (const summary of summaries) {
     const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
@@ -13218,6 +14488,16 @@ function summarizeTagPunishWindowMetrics(
           runnerTagClearedBeforeCorpDecision += 1;
           runnerTagWindowExpiredBeforeCorpTurn += 1;
           expiredBeforeCorpTurnIndexes.add(nextCorpIndex);
+          if (
+            sequence
+              .slice(Math.max(0, index - 12), index)
+              .some(
+                (previous) =>
+                  previous.corpTagSourceTakenWithOntologyPayoffAvailable ===
+                  true,
+              )
+          )
+            corpOntologyPunishOpportunityExpired += 1;
         }
       }
       if (entry.corpPunishOpportunity === true) {
@@ -13247,6 +14527,11 @@ function summarizeTagPunishWindowMetrics(
             corpTagSourceConvertedToPunishOpportunity += 1;
           if (tagSourceConvertsToPunishTaken(sequence, index))
             corpTagSourceConvertedToPunishTaken += 1;
+          if (
+            entry.corpTagSourceTakenWithOntologyPayoffAvailable === true &&
+            tagSourceConvertsToPunishOpportunity(sequence, index)
+          )
+            corpTagSourceConvertedToOntologyPunishOpportunity += 1;
         } else corpTagSourceSkipped += 1;
       }
       if (entry.corpTraceTagOpportunity === true) {
@@ -13258,6 +14543,47 @@ function summarizeTagPunishWindowMetrics(
           traceSkippedByReason[entry.corpTraceTagSkippedReason ?? "unknown"] +=
             1;
         }
+      }
+      if (entry.corpTagPunishOntologyProfilesSeen === true)
+        corpTagPunishOntologyProfilesSeen += 1;
+      if (entry.corpTagSourceOntologyProfilesSeen === true)
+        corpTagSourceOntologyProfilesSeen += 1;
+      if (entry.corpTagPunishPayoffOntologyProfilesSeen === true)
+        corpTagPunishPayoffOntologyProfilesSeen += 1;
+      if (entry.corpTagSourceOntologyUsed === true)
+        corpTagSourceOntologyUsed += 1;
+      if (entry.corpTagPunishPayoffOntologyUsed === true)
+        corpTagPunishPayoffOntologyUsed += 1;
+      if (
+        entry.corpTagPunishOntologyProfilesSeen === true &&
+        (entry.corpTagSourceOntologyUsed === true ||
+          entry.corpTagPunishPayoffOntologyUsed === true)
+      )
+        corpTagPunishOntologyFallbackUsed += 1;
+      if (entry.corpTagPunishOntologyConflict === true)
+        corpTagPunishOntologyConflict += 1;
+      if (entry.corpTagSourceLegalActionClassifiedByOntology === true)
+        corpTagSourceLegalActionClassifiedByOntology += 1;
+      if (entry.corpPunishLegalActionClassifiedByOntology === true)
+        corpPunishLegalActionClassifiedByOntology += 1;
+      if (entry.corpPunishOpportunityConfirmedByOntology === true)
+        corpPunishOpportunityConfirmedByOntology += 1;
+      if (entry.corpPunishSkippedDespiteOntologyOpportunity === true)
+        corpPunishSkippedDespiteOntologyOpportunity += 1;
+      if (entry.corpTagSourceTakenWithOntologyPayoffAvailable === true)
+        corpTagSourceTakenWithOntologyPayoffAvailable += 1;
+      if (entry.corpTagSourceTakenWithoutOntologyPayoff === true)
+        corpTagSourceTakenWithoutOntologyPayoff += 1;
+      if (entry.corpOntologyPunishOpportunityConverted === true)
+        corpOntologyPunishOpportunityConverted += 1;
+      for (const kind of entry.corpTagPunishOntologyKinds ?? []) {
+        if (kind in ontologyByKind)
+          ontologyByKind[kind] = (ontologyByKind[kind] ?? 0) + 1;
+      }
+      for (const kind of entry.corpTagPunishConditionKinds ?? []) {
+        if (kind in ontologyConditionByKind)
+          ontologyConditionByKind[kind] =
+            (ontologyConditionByKind[kind] ?? 0) + 1;
       }
     }
     if (
@@ -13334,6 +14660,46 @@ function summarizeTagPunishWindowMetrics(
     corpTagPunishFunnelPunishTaken: corpPunishTaken,
     corpTagPunishFunnelTerminalDamageOrEconomicHit,
     corpTagPunishFunnelFlatlineOrLock,
+    corpTagPunishOntologyProfilesSeen,
+    corpTagSourceOntologyProfilesSeen,
+    corpTagPunishPayoffOntologyProfilesSeen,
+    corpTagSourceOntologyUsed,
+    corpTagPunishPayoffOntologyUsed,
+    corpTagPunishOntologyFallbackUsed,
+    corpTagPunishOntologyConflict,
+    corpTagSourceLegalActionClassifiedByOntology,
+    corpPunishLegalActionClassifiedByOntology,
+    corpPunishOpportunityConfirmedByOntology,
+    corpPunishSkippedDespiteOntologyOpportunity,
+    corpTagSourceTakenWithOntologyPayoffAvailable,
+    corpTagSourceTakenWithoutOntologyPayoff,
+    corpTagSourceConvertedToOntologyPunishOpportunity,
+    corpOntologyPunishOpportunityConverted,
+    corpOntologyPunishOpportunityExpired,
+    corpTagPunishOntologyByKind: Object.values(ontologyByKind).reduce(
+      (sum, value) => sum + value,
+      0,
+    ),
+    corpTagPunishOntologyKindTagSource: ontologyByKind.tag_source ?? 0,
+    corpTagPunishOntologyKindTagPunishPayoff:
+      ontologyByKind.tag_punish_payoff ?? 0,
+    corpTagPunishOntologyKindTrace: ontologyByKind.trace ?? 0,
+    corpTagPunishOntologyKindTag: ontologyByKind.tag ?? 0,
+    corpTagPunishOntologyKindDamage: ontologyByKind.damage ?? 0,
+    corpTagPunishOntologyKindResourceTrash: ontologyByKind.resource_trash ?? 0,
+    corpTagPunishOntologyKindHardwareTrash: ontologyByKind.hardware_trash ?? 0,
+    corpTagPunishOntologyKindScoredAgendaDamageLike:
+      ontologyByKind.scored_agenda_damage_like ?? 0,
+    corpTagPunishOntologyKindScoredAgendaTraceTagLike:
+      ontologyByKind.scored_agenda_trace_tag_like ?? 0,
+    corpTagPunishConditionByKind: Object.values(ontologyConditionByKind).reduce(
+      (sum, value) => sum + value,
+      0,
+    ),
+    corpTagPunishConditionRequiresRunnerTagged:
+      ontologyConditionByKind.requires_runner_tagged ?? 0,
+    corpTagPunishConditionRequiresTraceSuccess:
+      ontologyConditionByKind.requires_trace_success ?? 0,
   };
 }
 
@@ -17931,6 +19297,9 @@ function runnerRemoteTrashAccessContext(
     };
   }
   const targetType = remoteTrashTargetTypeForVisibleCard(accessed);
+  const structuredRemoteRole = getStructuredRemoteRoleForCard(
+    accessed.definitionId,
+  );
   const role = remoteTrashRoleForAccessedVisibleCard(input, accessed);
   const trashAction = input.legalActions.find(
     (candidate) => candidate.type === "trash_accessed_card",
@@ -17994,6 +19363,23 @@ function runnerRemoteTrashAccessContext(
     deferredByBudget,
     evidence: [
       `remote_trash_role:${role}`,
+      ...(structuredRemoteRole
+        ? [
+            "runner_remote_role_profile_seen:true",
+            `runner_remote_role_kind:${structuredRemoteRole.kind}`,
+            ...(structuredRemoteRole.serverScope
+              ? [
+                  `runner_remote_role_server_scope:${structuredRemoteRole.serverScope}`,
+                ]
+              : []),
+            ...(relevant
+              ? ["runner_remote_role_used_for_trash_value:true"]
+              : []),
+            ...(deferredByBudget
+              ? ["runner_remote_role_trash_budget_preserved:true"]
+              : []),
+          ]
+        : []),
       `remote_trash_cost:${trashCost}`,
       `remote_trash_general_credit_cost:${generalCreditCost}`,
       `remote_trash_dedicated_credits:${dedicatedTrashCredits}`,
@@ -18186,6 +19572,24 @@ function remoteTrashRoleForAccessedVisibleCard(
 
 function remoteTrashRoleForVisibleCard(card: VisibleCard): RemoteTrashRole {
   if (card.definitionId === "simple_upgrade") return "low_value";
+  const structuredRole = getStructuredRemoteRoleForCard(card.definitionId);
+  if (structuredRole) {
+    if (structuredRole.kind === "remote_capacity") return "remote_capacity";
+    if (structuredRole.kind === "asset_economy") return "economy";
+    if (structuredRole.kind === "bait" || structuredRole.kind === "ambush")
+      return "ambush";
+    if (
+      structuredRole.kind === "run_tax" ||
+      structuredRole.kind === "tax_fort" ||
+      structuredRole.kind === "ice_modifier"
+    )
+      return "run_tax";
+    if (
+      remoteRoleIsScoringProtectionKind(structuredRole.kind) &&
+      !remoteRoleIsNonScoringProtectionKind(structuredRole.kind)
+    )
+      return "scoring_protection";
+  }
   const roles = rolesForCardId(card.definitionId);
   const runtimeDefinition = card.definitionId
     ? RUNTIME_CARDS[card.definitionId]

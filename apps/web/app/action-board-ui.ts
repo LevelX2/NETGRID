@@ -134,6 +134,7 @@ export type CardCounterBadgeView = {
   ariaLabel: string;
   shortLabel: string;
   testId: string;
+  tooltip: string;
 };
 
 export type IdentityCounterChipView = {
@@ -141,6 +142,15 @@ export type IdentityCounterChipView = {
   amount: number;
   label: string;
   ariaLabel: string;
+  tooltip: string;
+};
+
+export type ServerCounterChipView = {
+  key: string;
+  amount: number;
+  label: string;
+  ariaLabel: string;
+  tooltip: string;
 };
 
 export type RunnerProgramInstallTrashChoiceInfo = {
@@ -179,6 +189,7 @@ export type AdvancementCounterDisplay = {
 };
 
 const TESSERACT_FORT_CONSTRUCTION_ID = "onr_v1_370_tesseract-fort-construction";
+const PURGEABLE_RUNNER_VIRUS_HELP = "Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen.";
 
 export function iceModifierBadgesForServer(server: PlayerView["servers"][number]): IceModifierBadgeView[] {
   if (!serverHasRezzedTesseractFortConstruction(server)) return [];
@@ -224,8 +235,64 @@ export function counterDisplayBadgeView(display: NonNullable<VisibleCard["counte
     label: `${amount} ${label}`,
     ariaLabel: display.ariaLabel,
     shortLabel: `${amount} ${counterDisplayShortLabel(label)}`,
-    testId
+    testId,
+    tooltip: counterDisplayTooltipText(display)
   };
+}
+
+export function counterDisplayTooltipText(display: NonNullable<VisibleCard["counterDisplays"]>[number]): string {
+  const amount = safeCounterDisplayAmount(display.amount);
+  const countLabel = `${amount} ${counterDisplayShortLabel(display.label)}`;
+  switch (display.counterType) {
+    case "doom":
+      return `Armageddon: Bei jeder Korp-Installation wird pro Doom-Counter ein Würfel geworfen. Jede 6 trasht die installierte Karte und entfernt 1 Doom-Counter. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    case "crumble":
+      return amount >= 2
+        ? `Crumble: ${countLabel} erlauben dem Runner, Karten beim HQ-Zugriff kostenlos zu trashen, auch wenn sie normalerweise nicht trashbar sind. ${PURGEABLE_RUNNER_VIRUS_HELP}`
+        : `Crumble: Ab 2 Crumble-Countern darf der Runner Karten beim HQ-Zugriff kostenlos trashen. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    case "garbage":
+      return amount >= 2
+        ? `Garbage In: ${countLabel} erlauben dem Runner, Karten beim R&D-Zugriff kostenlos zu trashen, auch wenn sie normalerweise nicht trashbar sind. Wenn das genutzt wird, verliert die Korp 2 Garbage-Counter. ${PURGEABLE_RUNNER_VIRUS_HELP}`
+        : `Garbage In: Ab 2 Garbage-Countern darf der Runner Karten beim R&D-Zugriff kostenlos trashen. Wenn das genutzt wird, verliert die Korp 2 Garbage-Counter. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    case "highlighter": {
+      const bonus = Math.max(0, amount - 1);
+      return bonus > 0
+        ? `Highlighter: ${countLabel} geben dem Runner ${bonus} zusätzliche ${bonus === 1 ? "R&D-Karte" : "R&D-Karten"} beim Zugriff auf R&D. ${PURGEABLE_RUNNER_VIRUS_HELP}`
+        : `Highlighter: Jeder Highlighter-Counter nach dem ersten gibt dem Runner 1 zusätzlichen R&D-Zugriff. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    }
+    case "scaldan":
+      return `Scaldan: Zu Beginn jedes Korp-Zugs wird pro Scaldan-Counter gewürfelt. Bei 5 oder 6 erhält die Korp 1 Bad Publicity. Bei 7 Bad Publicity verliert die Korp. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    case "tax": {
+      const loss = Math.floor(amount / 2);
+      return loss > 0
+        ? `Taxman: ${countLabel} lassen die Korp zu Beginn ihres Zugs ${loss} ${loss === 1 ? "Credit" : "Credits"} verlieren. ${PURGEABLE_RUNNER_VIRUS_HELP}`
+        : `Taxman: Je 2 Tax-Counter verliert die Korp zu Beginn ihres Zugs 1 Credit. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    }
+    case "vienna":
+      return `Vienna 22: ${countLabel} geben dem Runner ${amount} zusätzliche ${amount === 1 ? "HQ-Karte" : "HQ-Karten"} beim Zugriff auf HQ. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    case "socket_archives":
+      return `Viral Pipeline: Socket-Counter auf Archives. Sobald je 1 Socket auf Archives, HQ und R&D liegt, werden diese drei Socket-Counter in 1 Pipe-Counter umgewandelt. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    case "socket_hq":
+      return `Viral Pipeline: Socket-Counter auf HQ. Sobald je 1 Socket auf Archives, HQ und R&D liegt, werden diese drei Socket-Counter in 1 Pipe-Counter umgewandelt. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    case "socket_rd":
+      return `Viral Pipeline: Socket-Counter auf R&D. Sobald je 1 Socket auf Archives, HQ und R&D liegt, werden diese drei Socket-Counter in 1 Pipe-Counter umgewandelt. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    case "pipe":
+      return `Viral Pipeline: Zu Beginn jedes Korp-Zugs muss die Korp pro Pipe-Counter 1 Aktion aussetzen. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    case "doppelganger_antibody":
+      return `Doppelganger Antibody: Zu Beginn jedes Runner-Zugs verliert der Runner pro Doppelganger-Counter 1 Credit. Der Runner kann 1 Aktion nehmen und 4 Credits zahlen, um 1 Doppelganger-Counter zu entfernen.`;
+    case "pattel_antibody":
+      return `Pattel Antibody: Jeder Pattel-Counter auf einem Icebreaker reduziert dessen Stärke um 1.`;
+    case "bad_publicity":
+      return `Bad Publicity: Jede Bad Publicity gibt dem Runner zu Beginn eines Runs 1 temporären Credit. Bei 7 Bad Publicity verliert die Korp.`;
+    default:
+      if (display.id === "pox")
+        return `Pox: Je 2 Pox-Counter in diesem Fort erhöhen die Korp-Installationskosten in oder auf diesem Fort um 1 Credit. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+      if (display.id === "skivviss")
+        return `Skivviss: Jeder Skivviss-Counter lässt die Korp zu Beginn ihres Zugs 1 zusätzliche Karte ziehen. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+      if (display.counterType === "virus")
+        return `Virus-Counter: Kartenabhängiger Virus-Counter. Die konkrete Wirkung steht auf der Karte oder im aktuellen Run-Kontext. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+      return display.ariaLabel;
+  }
 }
 
 export function counterDisplaysForRendering(card: Pick<VisibleCard, "counterDisplays">): NonNullable<VisibleCard["counterDisplays"]> {
@@ -248,6 +315,23 @@ export function identityCounterChipsForDisplays(counterDisplays: VisibleCard["co
       amount: safeCounterDisplayAmount(display.amount),
       label: counterDisplayShortLabel(display.label),
       ariaLabel: display.ariaLabel,
+      tooltip: counterDisplayTooltipText(display),
+    }));
+}
+
+export function serverCounterChipsForDisplays(counterDisplays: VisibleCard["counterDisplays"]): ServerCounterChipView[] {
+  return (counterDisplays ?? [])
+    .filter(
+      (display) =>
+        display.displayKind !== "advancement" &&
+        safeCounterDisplayAmount(display.amount) > 0,
+    )
+    .map((display) => ({
+      key: display.id,
+      amount: safeCounterDisplayAmount(display.amount),
+      label: serverCounterChipLabel(display),
+      ariaLabel: display.ariaLabel,
+      tooltip: counterDisplayTooltipText(display),
     }));
 }
 
@@ -257,6 +341,19 @@ export function safeCounterDisplayAmount(amount: number): number {
 
 function counterDisplayShortLabel(label: string): string {
   return label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "");
+}
+
+function serverCounterChipLabel(display: NonNullable<VisibleCard["counterDisplays"]>[number]): string {
+  if (
+    display.counterType === "socket_archives" ||
+    display.counterType === "socket_hq" ||
+    display.counterType === "socket_rd"
+  ) {
+    return "Socket";
+  }
+  return counterDisplayShortLabel(display.label)
+    .replace(/\s+(Archives|HQ|R&D)$/u, "")
+    .trim();
 }
 
 export function advancementCounterDisplay(card: Pick<VisibleCard, "known" | "advancementCounters">): AdvancementCounterDisplay | null {
@@ -774,7 +871,10 @@ export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashC
     return `${freeTrashSource}: Du kannst diese Karte kostenlos trashen, auch wenn sie normalerweise keine Trash-Kosten hat.`;
   if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
   if (actions.some((action) => action.type === "access_card")) return "Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.";
-  if (actions.length === 0) return "Es ist gerade keine Runner-Entscheidung in diesem Zugriffsfenster offen. Danach kannst du den Zugriff fortsetzen.";
+  if (actions.length === 0) {
+    if (serverDisplayLabel(serverLabel) === "R&D") return "Angezeigte Karte aus Research and Development.";
+    return "Angezeigte Karte. Du kannst das Fenster schließen.";
+  }
   if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
   if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
   return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";

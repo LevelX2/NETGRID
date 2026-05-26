@@ -11,6 +11,9 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 5c
+proReferences:
+  - PRO005
+  - PRO014
 blockedBy:
   - runner_trash_subtype_history
   - runner_next_agenda_access_reward

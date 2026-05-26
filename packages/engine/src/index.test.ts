@@ -28155,6 +28155,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       ambushDefinitionId: "onr_v1_345_trap",
       cardDefinitionId: "onr_v1_345_trap",
       revealKind: "reveal",
+      accessedFromZone: "rd",
       damageAmount: 3,
       tagsAdded: 1,
     });

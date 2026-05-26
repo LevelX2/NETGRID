@@ -11,6 +11,9 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 6d
+proReferences:
+  - PRO027
+  - PRO028
 blockedBy:
   - Cybertech Think Tank needs an advancement-counter payment window that increases another source's successful meat damage; current damage pipelines do not expose a generic source-bound "boost other source damage" reaction.
   - Department of Misinformation needs rez-during-expose-attempt plus paid expose prevention; no generic expose-attempt prevention/replacement window exists.

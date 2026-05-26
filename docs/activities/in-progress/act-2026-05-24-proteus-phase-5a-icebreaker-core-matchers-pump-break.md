@@ -11,6 +11,10 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 5a
+proReferences:
+  - PRO004
+  - PRO011
+  - PRO012
 blockedBy:
   - icebreaker_install_choice_state
   - stateful_breaker_subtype_choice

@@ -140,7 +140,11 @@ export function handleTurnBasicExecution(
       if (legalAction.side !== "corp")
         throw new Error("Nur die Korp darf Runner-Virus-Counter purgen.");
       const window = state.runnerVirusPurgeWindow;
-      if (!window)
+      const mainActionPurge =
+        state.phase === "corp_action_phase" &&
+        state.timingPoint === "corp_action.main" &&
+        state.activeSide === "corp";
+      if (!window && !mainActionPurge)
         throw new Error("Runner-Virus-Purge ist im aktuellen Fenster nicht legal.");
       const summary = purgePurgeableRunnerVirusCounters(state);
       const pendingDebt = addCorpActionDebt(state, {
@@ -156,8 +160,14 @@ export function handleTurnBasicExecution(
         purgedCounterSummary: summary.publicSummary,
         actionDebtAdded: 3,
         corpActionDebtTotalAfter: pendingDebt,
-        timingWindowId: window.windowId,
-        timingFamily: window.timingFamily,
+        ...(window
+          ? {
+              timingWindowId: window.windowId,
+              timingFamily: window.timingFamily,
+            }
+          : {
+              timingFamily: "corp_main_action",
+            }),
       };
       return handled(legalAction);
     }

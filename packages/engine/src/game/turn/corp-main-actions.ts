@@ -9,6 +9,7 @@ export type CorpMainActionGenerationHost = {
     makeActionId: HostFn<string>;
     buildEndTurnAction: HostFn<LegalAction>;
     buildForgoActionDebtAction: HostFn<LegalAction>;
+    buildPurgeableRunnerVirusPurgeAction: HostFn<LegalAction>;
     buildPurgeVirusAction: HostFn<LegalAction>;
     buildGainCreditAction: HostFn<LegalAction>;
     buildDrawAction: HostFn<LegalAction>;
@@ -41,6 +42,7 @@ export type CorpMainActionGenerationHost = {
   };
   counters: {
     totalCounters: HostFn<number>;
+    purgeableRunnerVirusCounterTotal: HostFn<number>;
     spyCountersForServer: HostFn<number>;
   };
   corp: {
@@ -114,6 +116,8 @@ export function buildCorpMainActions(
   const makeActionId = host.actions.makeActionId;
   const buildCorpEndTurnAction = host.actions.buildEndTurnAction;
   const buildCorpForgoActionDebtAction = host.actions.buildForgoActionDebtAction;
+  const buildPurgeableRunnerVirusPurgeAction =
+    host.actions.buildPurgeableRunnerVirusPurgeAction;
   const buildCorpPurgeVirusAction = host.actions.buildPurgeVirusAction;
   const buildCorpGainCreditAction = host.actions.buildGainCreditAction;
   const buildCorpDrawAction = host.actions.buildDrawAction;
@@ -147,6 +151,8 @@ export function buildCorpMainActions(
   const buildScoredAgendaAbilityActionsForCard =
     host.agenda.buildScoredAgendaAbilityActionsForCard;
   const totalCounters = host.counters.totalCounters;
+  const purgeableRunnerVirusCounterTotal =
+    host.counters.purgeableRunnerVirusCounterTotal;
   const spyCountersForServer = host.counters.spyCountersForServer;
   const corpActionDebtPending = host.corp.corpActionDebtPending;
   const acmeSavingsAndLoanObligationCount =
@@ -269,6 +275,9 @@ export function buildCorpMainActions(
   }
   if (corpActionDebtPending(state) > 0) {
     return [buildCorpForgoActionDebtAction(state)];
+  }
+  if (purgeableRunnerVirusCounterTotal(state) > 0) {
+    actions.push(buildPurgeableRunnerVirusPurgeAction(state));
   }
   if (state.corp.clicks >= 3 && totalCounters(state, "virus") > 0) {
     actions.push(buildCorpPurgeVirusAction(state));

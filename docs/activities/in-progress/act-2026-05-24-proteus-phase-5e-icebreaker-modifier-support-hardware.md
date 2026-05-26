@@ -11,6 +11,8 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 5e
+proReferences:
+  - PRO013
 blockedBy:
   - act-2026-05-24-proteus-phase-5a-icebreaker-core-matchers-pump-break
   - Personal Touch needs a generic targeted permanent +1 strength counter for one installed icebreaker; the current Militech effect only adds Militech counters to all installed runner icebreakers.

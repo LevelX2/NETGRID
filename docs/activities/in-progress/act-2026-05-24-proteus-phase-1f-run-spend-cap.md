@@ -11,6 +11,8 @@ startedAt: 2026-05-24
 completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1f
+proReferences:
+  - PRO038
 blockedBy:
   - payment-source-contract-obfuscated-fortress-run-spend-cap
 resultArtifacts:

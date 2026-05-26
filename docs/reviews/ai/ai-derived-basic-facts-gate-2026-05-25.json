@@ -1,0 +1,2777 @@
+{
+  "schemaVersion": "ai-derived-basic-facts-gate-v1",
+  "generatedAt": "2026-05-25",
+  "source": {
+    "hintsPath": "data/ai/ai-card-hints-active.json",
+    "pilotCardsPath": "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json",
+    "derivationMode": "read-only CardImplementation text/descriptor scan; no runtime, planner, or strategy consumption"
+  },
+  "pilotCardCount": 24,
+  "implementationFoundCount": 24,
+  "cardsWithDerivedFacts": 24,
+  "cardsWithManualOntologyOverlap": 24,
+  "cardsNeedingManualOverlay": 4,
+  "effectKindCounts": {
+    "access_replacement": 1,
+    "breaker": 2,
+    "counter_economy": 2,
+    "damage": 3,
+    "draw": 1,
+    "economy": 1,
+    "extra_action": 1,
+    "future_run_effect": 3,
+    "install_discount": 1,
+    "program_trash": 1,
+    "remote_protection": 1,
+    "run_tax": 4,
+    "scored_agenda_action": 7,
+    "search": 2,
+    "tag_punish_payoff": 4,
+    "tag_source": 3,
+    "topdeck_info": 3,
+    "trace": 3,
+    "trash_credit": 2
+  },
+  "conditionKindCounts": {
+    "requires_accessed_card": 1,
+    "requires_during_run": 5,
+    "requires_runner_tagged": 4,
+    "requires_scored_agenda": 7,
+    "requires_successful_run": 1,
+    "requires_trace_success": 3
+  },
+  "hardErrorCount": 0,
+  "hardErrors": [],
+  "hardConflicts": [],
+  "warningCount": 40,
+  "warnings": [
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Intentionally manual strategic overlay is not derived: condition:requires_rnd_pressure, condition:requires_successful_run.",
+      "cardId": "onr_v1_017_deep-thought"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual condition:requires_rnd_pressure has no generated basic fact match.",
+      "cardId": "onr_v1_017_deep-thought"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual condition:requires_successful_run has no generated basic fact match.",
+      "cardId": "onr_v1_017_deep-thought"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_017_deep-thought"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence medium differs from manual confidence high.",
+      "cardId": "onr_v1_037_japanese-water-torture"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_037_japanese-water-torture"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_039_krash"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_043_mystery-box"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_048_poltergeist"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_050_r-and-d-protocol-files"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_057_scatter-shot"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
+      "cardId": "onr_v1_059_self-modifying-code"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:install_discount has no generated basic fact match.",
+      "cardId": "onr_v1_059_self-modifying-code"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_059_self-modifying-code"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_192_corporate-boon"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_193_corporate-coup"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_199_employee-empowerment"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_207_netwatch-operations-office"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_208_on-call-solo-team"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_210_political-overthrow"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_217_strike-force-kali"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence medium differs from manual confidence high.",
+      "cardId": "onr_v1_274_tutor"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+      "cardId": "onr_v1_274_tutor"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_274_tutor"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence medium differs from manual confidence high.",
+      "cardId": "onr_v1_276_viral-15"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+      "cardId": "onr_v1_276_viral-15"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_276_viral-15"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence medium differs from manual confidence high.",
+      "cardId": "onr_v1_277_virizz"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+      "cardId": "onr_v1_277_virizz"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_277_virizz"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_283_audit-of-call-records"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_284_chance-observation"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_285_closed-accounts"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_302_scorched-earth"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+      "cardId": "onr_v1_355_crystal-palace-station-grid"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:remote_protection has no generated basic fact match.",
+      "cardId": "onr_v1_355_crystal-palace-station-grid"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_355_crystal-palace-station-grid"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+      "cardId": "onr_v1_366_red-herrings"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:remote_protection has no generated basic fact match.",
+      "cardId": "onr_v1_366_red-herrings"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_366_red-herrings"
+    }
+  ],
+  "cards": [
+    {
+      "cardId": "onr_v1_017_deep-thought",
+      "title": "Deep Thought",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/deep-thought.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:topdeck_info"],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Topdeck information is derivable; R&D-pressure and interface-pressure conditions remain intentionally manual strategic overlay.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "timing": "start_of_turn",
+            "scope": "rnd",
+            "resource": "cards",
+            "source": "implementation.effect.private_look_top_rd"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["hidden_zone_tool", "program", "rd_run_reward", "virus"],
+        "planRoles": ["build_rig"],
+        "effects": [
+          {
+            "kind": "topdeck_info",
+            "timing": "start_of_turn",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_rnd_pressure"
+          },
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "lineSupport": ["early_rnd_pressure", "interface_pressure"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:topdeck_info"],
+        "generatedOnly": [],
+        "manualOnly": [
+          "condition:requires_rnd_pressure",
+          "condition:requires_successful_run"
+        ]
+      },
+      "missingManualOverlay": [
+        "condition:requires_rnd_pressure",
+        "condition:requires_successful_run"
+      ],
+      "descriptorGaps": [
+        "Intentionally manual strategic overlay is not derived: condition:requires_rnd_pressure, condition:requires_successful_run."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Intentionally manual strategic overlay is not derived: condition:requires_rnd_pressure, condition:requires_successful_run."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_rnd_pressure has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_successful_run has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Breaker coverage and the forgo_actions side-effect comparison are derivable; future action debt is represented as a structured breaker side effect for the read-only gate.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [
+          "Future action debt is represented as the structured breaker side effect forgo_actions; no planner/runtime consumption is implied."
+        ],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["wall"],
+          "pumpCost": 1,
+          "breakCost": 0,
+          "confidence": "medium",
+          "source": "implementation.icebreakerAbilities",
+          "sideEffects": ["forgo_actions"]
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["per_card_longtail", "program", "runner"],
+        "planRoles": ["runner_install_program", "runner_program_ability"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 7,
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "high"
+        },
+        "breakerProfile": {
+          "coverage": ["wall"],
+          "baseStrength": 2,
+          "pumpCost": 0,
+          "breakCost": 0,
+          "sideEffects": ["forgo_actions"],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "breakerCoverage:wall",
+          "breakerSideEffect:forgo_actions",
+          "effect:breaker"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "medium",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence medium differs from manual confidence high."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/krash.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:universal"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Universal breaker profile and costs are directly represented in CardImplementation icebreaker abilities.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["universal"],
+          "pumpCost": 2,
+          "breakCost": 2,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "breaker_decoder",
+          "breaker_fracter",
+          "breaker_killer",
+          "flex_breaker",
+          "icebreaker",
+          "icebreaker_support",
+          "program"
+        ],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "credits": 0,
+          "memory": 1,
+          "reserveRisk": "high",
+          "opportunityCost": "medium"
+        },
+        "breakerProfile": {
+          "coverage": ["universal"],
+          "baseStrength": 0,
+          "pumpCost": 2,
+          "breakCost": 2,
+          "sideEffects": [],
+          "restrictions": []
+        },
+        "lineSupport": ["rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["breakerCoverage:universal", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/mystery-box.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:search",
+        "effect:topdeck_info",
+        "effect:install_discount",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Top-of-stack search, show-to-Corp target profile, free program install and once-per-run usage limit are derivable in the read-only target profile.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "install_discount",
+            "timing": "during_run",
+            "scope": "runner",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching.installCost"
+          },
+          {
+            "confidence": "high",
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
+          },
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "timing": "during_run",
+            "scope": "runner",
+            "resource": "cards",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.ability.timing.during_run"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "targetProfiles": [
+          {
+            "zone": "stack_top",
+            "lookCount": 5,
+            "targetCardType": "program",
+            "installsTarget": true,
+            "installCost": "free",
+            "shuffleAfter": true,
+            "showToOpponent": true,
+            "oncePerRun": true,
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
+          }
+        ]
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["hidden_zone", "hidden_zone_tool", "program", "stack_search"],
+        "planRoles": ["build_rig", "information", "recover_rig"],
+        "effects": [
+          {
+            "kind": "install_discount",
+            "timing": "during_run",
+            "scope": "installed_card"
+          },
+          {
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          },
+          {
+            "kind": "requires_installed_program"
+          }
+        ],
+        "costProfile": {
+          "clicks": 0,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["breaker_search_first", "rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_during_run",
+          "condition:requires_installed_program",
+          "effect:install_discount",
+          "effect:search"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/poltergeist.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:trash_credit"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Restricted hosted trash-credit source is directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "source": "implementation.restrictedHostedCreditSource"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "program",
+          "recurring_credit",
+          "runner",
+          "trash_cost_payment"
+        ],
+        "planRoles": ["runner_access_trash_economy", "runner_install_program"],
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "amount": 2
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "credits": 0,
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["remote_contest"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:trash_credit"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "title": "R&D-Protocol Files",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/r-d-protocol-files.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:topdeck_info",
+        "effect:access_replacement",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-run access replacement and private R&D look are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "access_replacement",
+            "timing": "successful_run",
+            "scope": "rnd",
+            "source": "implementation.successfulRunAccessReplacement"
+          },
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "timing": "successful_run",
+            "scope": "rnd",
+            "resource": "cards",
+            "source": "implementation.effect.private_look_top_rd"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_successful_run",
+            "source": "implementation.successfulRunAccessReplacement"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "access_replacement",
+          "hidden_zone_tool",
+          "program",
+          "rd_run"
+        ],
+        "planRoles": ["information", "pressure_rnd"],
+        "effects": [
+          {
+            "kind": "access_replacement",
+            "timing": "successful_run",
+            "scope": "rnd"
+          },
+          {
+            "kind": "topdeck_info",
+            "timing": "successful_run",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 5
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "lineSupport": ["early_rnd_pressure", "interface_pressure"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_successful_run",
+          "effect:access_replacement",
+          "effect:topdeck_info"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/scatter-shot.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:trash_credit"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Restricted hosted trash-credit source is directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "source": "implementation.restrictedHostedCreditSource"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "per_card_longtail",
+          "program",
+          "recurring_credit",
+          "runner",
+          "trash_cost_payment"
+        ],
+        "planRoles": [
+          "runner_access_trash_economy",
+          "runner_install_program",
+          "runner_program_ability"
+        ],
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "amount": 2
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "credits": 0,
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["remote_contest"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:trash_credit"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/self-modifying-code.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:search",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Search timing and target profile are derivable; the manual install_discount field is not generated because the implementation uses normal install cost.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner",
+            "source": "implementation.effect.search_stack_install"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.ability.timing.during_run"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "targetProfiles": [
+          {
+            "zone": "stack",
+            "targetCardType": "program",
+            "installsTarget": true,
+            "installCost": "normal",
+            "shuffleAfter": true,
+            "source": "implementation.effect.search_stack_install"
+          }
+        ]
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["hidden_zone_tool", "program", "stack_search"],
+        "planRoles": ["build_rig", "recover_rig"],
+        "effects": [
+          {
+            "kind": "install_discount",
+            "timing": "during_run",
+            "scope": "installed_card"
+          },
+          {
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          },
+          {
+            "kind": "requires_installed_program"
+          }
+        ],
+        "costProfile": {
+          "clicks": 0,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["breaker_search_first", "rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_during_run",
+          "condition:requires_installed_program",
+          "effect:search"
+        ],
+        "generatedOnly": [],
+        "manualOnly": ["effect:install_discount"]
+      },
+      "missingManualOverlay": ["effect:install_discount"],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:install_discount has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_192_corporate-boon",
+      "title": "Corporate Boon",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-boon.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:extra_action",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda extra-action activation is directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "extra_action",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "actions",
+            "amount": 1,
+            "source": "implementation.effect.gain_actions"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["action", "agenda", "corp"],
+        "planRoles": ["corp_score_agenda"],
+        "effects": [
+          {
+            "kind": "extra_action",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "actions",
+            "amount": 1
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "counters": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["fast_advance_or_counter_ops", "score_closeout"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_scored_agenda",
+          "effect:extra_action",
+          "effect:scored_agenda_action"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_193_corporate-coup",
+      "title": "Corporate Coup",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-coup.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:counter_economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda hosted-credit economy is directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "source": "implementation.effect.take_hosted_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "agenda_counters", "economy_agenda", "score_plan"],
+        "planRoles": ["build_scoring_remote", "score_next_turn", "score_now"],
+        "effects": [
+          {
+            "kind": "counter_economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["economy_rez_reserve", "score_closeout"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_scored_agenda",
+          "effect:counter_economy",
+          "effect:scored_agenda_action"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "title": "Employee Empowerment",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/employee-empowerment.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:draw",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda draw activation is directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "draw",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 2,
+            "source": "implementation.effect.draw_cards"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "economy", "recurring"],
+        "planRoles": ["score_agenda"],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 2
+          },
+          {
+            "kind": "draw",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["economy_rez_reserve"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_scored_agenda",
+          "effect:draw",
+          "effect:scored_agenda_action"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "title": "Netwatch Operations Office",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/netwatch-operations-office.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_scored_agenda",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace tag-source mechanics are derivable; legacy tag effect alignment is covered by the generated tag_source fact.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_source",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "source": "implementation.effect.trace.onSuccess.add_tags"
+          },
+          {
+            "confidence": "high",
+            "kind": "trace",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "source": "implementation.effect.trace"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_trace_success",
+            "source": "implementation.effect.trace.onSuccess"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "score_plan", "tag_agenda", "trace_agenda"],
+        "planRoles": ["protect_hq", "score_next_turn", "score_now"],
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "tag",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          },
+          {
+            "kind": "trace",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_scored_agenda",
+          "condition:requires_trace_success",
+          "effect:scored_agenda_action",
+          "effect:tag",
+          "effect:tag_source",
+          "effect:trace"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "title": "On-Call Solo Team",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/on-call-solo-team.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_scored_agenda",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda tagged-runner damage payoff is directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "damage",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 1,
+            "source": "implementation.effect.damage"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "source": "implementation.condition.runner_is_tagged.effect.damage"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "score_plan", "tag_damage_agenda"],
+        "planRoles": ["bait_runner", "score_next_turn", "score_now"],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 1
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          },
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_runner_tagged",
+          "condition:requires_scored_agenda",
+          "effect:damage",
+          "effect:scored_agenda_action",
+          "effect:tag_punish_payoff"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "title": "Political Overthrow",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda activated economy is directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "source": "implementation.effect.gain_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "corp", "per_card_longtail"],
+        "planRoles": ["corp_agenda_ability", "corp_score_agenda"],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["economy_rez_reserve", "score_closeout"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_scored_agenda",
+          "effect:economy",
+          "effect:scored_agenda_action"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_217_strike-force-kali",
+      "title": "Strike Force Kali",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/strike-force-kali.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_scored_agenda",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda tagged-runner damage payoff is directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "damage",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2,
+            "source": "implementation.effect.damage"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "source": "implementation.condition.runner_is_tagged.effect.damage"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "score_plan", "tag_damage_agenda"],
+        "planRoles": ["bait_runner", "score_next_turn", "score_now"],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          },
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_runner_tagged",
+          "condition:requires_scored_agenda",
+          "effect:damage",
+          "effect:scored_agenda_action",
+          "effect:tag_punish_payoff"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/tutor.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:future_run_effect",
+        "effect:remote_protection",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Future-run additional-subroutine semantics are derivable at a coarse level.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "medium",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          {
+            "confidence": "medium",
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration_additional_subroutine"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.printedSubroutines.run_duration"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "ice",
+        "roles": ["corp", "ice", "per_card_longtail"],
+        "planRoles": ["corp_install_ice", "corp_rez_ice"],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "lineSupport": [
+          "central_stabilize",
+          "ice_tax_glacier",
+          "remote_scoring_build"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_during_run",
+          "effect:future_run_effect",
+          "effect:remote_protection"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [
+        "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+      ],
+      "confidence": "medium",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence medium differs from manual confidence high."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/viral-15.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:future_run_effect",
+        "effect:run_tax",
+        "effect:program_trash",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Future-run, jack-out tax and program-trash semantics are mechanically derivable at coarse gate granularity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "medium",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          {
+            "confidence": "medium",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "source": "implementation.printedSubroutines.run_duration_trash_program"
+          },
+          {
+            "confidence": "medium",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "source": "implementation.printedSubroutines.run_duration_jack_out_cost"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.printedSubroutines.run_duration"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "ice",
+        "roles": ["corp", "ice", "per_card_longtail"],
+        "planRoles": ["corp_install_ice", "corp_rez_ice"],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "lineSupport": [
+          "central_stabilize",
+          "ice_tax_glacier",
+          "remote_scoring_build"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_during_run",
+          "effect:future_run_effect",
+          "effect:program_trash",
+          "effect:run_tax"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [
+        "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+      ],
+      "confidence": "medium",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence medium differs from manual confidence high."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/virizz.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:future_run_effect",
+        "effect:run_tax",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Future-run break-cost modifier semantics are derivable at a coarse level.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "medium",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          {
+            "confidence": "medium",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "source": "implementation.printedSubroutines.run_duration_break_subroutine_cost"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.printedSubroutines.run_duration"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "ice",
+        "roles": ["corp", "ice", "per_card_longtail"],
+        "planRoles": ["corp_install_ice", "corp_rez_ice"],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "lineSupport": [
+          "central_stabilize",
+          "ice_tax_glacier",
+          "remote_scoring_build"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_during_run",
+          "effect:future_run_effect",
+          "effect:run_tax"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [
+        "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+      ],
+      "confidence": "medium",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence medium differs from manual confidence high."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/audit-of-call-records.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag source is directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "source": "implementation.effect.trace.onSuccess.add_tags"
+          },
+          {
+            "confidence": "high",
+            "kind": "trace",
+            "timing": "action",
+            "scope": "corp",
+            "source": "implementation.effect.trace"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_trace_success",
+            "source": "implementation.effect.trace.onSuccess"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": [
+          "operation",
+          "runner_activity_punish",
+          "tag_operation",
+          "trace_operation"
+        ],
+        "planRoles": ["bait_runner", "protect_hq", "recover_economy"],
+        "effects": [
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          },
+          {
+            "kind": "trace",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 5
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_trace_success",
+          "effect:tag_source",
+          "effect:trace"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_284_chance-observation",
+      "title": "Chance Observation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/chance-observation.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag source is directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "source": "implementation.effect.trace.onSuccess.add_tags"
+          },
+          {
+            "confidence": "high",
+            "kind": "trace",
+            "timing": "action",
+            "scope": "corp",
+            "source": "implementation.effect.trace"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_trace_success",
+            "source": "implementation.effect.trace.onSuccess"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": [
+          "operation",
+          "runner_activity_punish",
+          "tag_operation",
+          "trace_operation"
+        ],
+        "planRoles": ["bait_runner", "protect_hq", "recover_economy"],
+        "effects": [
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          },
+          {
+            "kind": "trace",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 5
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_trace_success",
+          "effect:tag_source",
+          "effect:trace"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/closed-accounts.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:counter_economy",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner payoff and counter-economy classification are directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "source": "implementation.effect.lose_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "source": "implementation.condition.runner_is_tagged.effect.lose_credits"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": ["economy_operation", "operation", "tag_punishment_operation"],
+        "planRoles": ["bait_runner", "recover_economy"],
+        "effects": [
+          {
+            "kind": "counter_economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits"
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_runner_tagged",
+          "effect:counter_economy",
+          "effect:tag_punish_payoff"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/scorched-earth.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner damage payoff is directly represented.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 4,
+            "source": "implementation.effect.damage"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "source": "implementation.condition.runner_is_tagged.effect.damage"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": ["damage_operation", "operation", "tag_punishment_operation"],
+        "planRoles": ["bait_runner"],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 4
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 4
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_runner_tagged",
+          "effect:damage",
+          "effect:tag_punish_payoff"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "title": "Crystal Palace Station Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:run_tax", "remoteRole:run_tax"],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays; remote_protection remains intentionally manual strategic overlay.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "source": "implementation.modifiers.break_subroutine_cost"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [
+          "Active board-state still belongs to engine/runtime; derived facts only describe the mechanical class."
+        ],
+        "needsManualOverlayReasons": [],
+        "remoteRole": {
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort",
+          "confidence": "high",
+          "source": "implementation.modifiers.break_subroutine_cost"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "upgrade",
+        "roles": ["city_grid", "region", "run_tax", "upgrade"],
+        "planRoles": ["remote_upgrade_support"],
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "fort"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1
+          }
+        ],
+        "conditions": [],
+        "remoteRole": {
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort"
+        },
+        "lineSupport": ["ice_tax_glacier", "remote_scoring_build"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:run_tax", "remoteRole:run_tax"],
+        "generatedOnly": [],
+        "manualOnly": ["effect:remote_protection"]
+      },
+      "missingManualOverlay": ["effect:remote_protection"],
+      "descriptorGaps": [
+        "Intentionally manual strategic overlay is not derived: effect:remote_protection."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:remote_protection has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "title": "Red Herrings",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/red-herrings.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:run_tax",
+        "remoteRole:agenda_steal_tax"
+      ],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Agenda steal tax and accessed-card condition are derivable; remote_protection remains intentionally manual strategic overlay.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "source": "implementation.modifiers.steal_cost"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_accessed_card",
+            "source": "implementation.modifiers.steal_cost.appliesTo.agenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Active board-state still belongs to engine/runtime; derived facts only describe the mechanical class."
+        ],
+        "needsManualOverlayReasons": [],
+        "remoteRole": {
+          "kind": "agenda_steal_tax",
+          "threatLevel": "high",
+          "serverScope": "remote",
+          "confidence": "high",
+          "source": "implementation.modifiers.steal_cost"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "upgrade",
+        "roles": [
+          "access_tax",
+          "agenda_steal_tax",
+          "remote_agenda_protection",
+          "upgrade"
+        ],
+        "planRoles": [
+          "build_scoring_remote",
+          "protect_remote",
+          "remote_upgrade_tax"
+        ],
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "fort"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          }
+        ],
+        "remoteRole": {
+          "kind": "agenda_steal_tax",
+          "threatLevel": "high",
+          "serverScope": "fort"
+        },
+        "lineSupport": [
+          "ice_tax_glacier",
+          "remote_scoring_build",
+          "score_closeout"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_accessed_card",
+          "effect:run_tax",
+          "remoteRole:agenda_steal_tax"
+        ],
+        "generatedOnly": [],
+        "manualOnly": ["effect:remote_protection"]
+      },
+      "missingManualOverlay": ["effect:remote_protection"],
+      "descriptorGaps": [
+        "Intentionally manual strategic overlay is not derived: effect:remote_protection."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:remote_protection has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    }
+  ]
+}
