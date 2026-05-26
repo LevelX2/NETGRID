@@ -140,6 +140,7 @@ import {
   cardChoiceReadonlyConfirmationOptionId,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
+  counterDisplayTooltipText,
   counterDisplaysForRendering,
   clampCuePosition,
   contextualCardActionLabel,
@@ -181,6 +182,7 @@ import {
   shouldUseCardChoicePanel,
   safeCounterDisplayAmount,
   serverBoardRows,
+  serverCounterChipsForDisplays,
   serverDisplayLabel,
   splitArchiveCardsForDisplay,
   splitLegalActions,
@@ -5820,6 +5822,7 @@ export default function Page() {
                             </div>
                           </div>
                           {!serverCollapsed ? <div className="serverBody">
+                            <ServerCounterStrip displays={server.counterDisplays} serverLabel={serverDisplayLabel(server.id)} />
                             <div className={isCorpHqComposite ? "corpHqComposite" : "pairedServerLanes"}>
                               {isOwnCorpHq ? (
                                 <>
@@ -12582,10 +12585,25 @@ function IdentityCounterStrip({ displays, side }: { displays: VisibleCard["count
   return (
     <div className="identityCounterStrip" role="list" aria-label={`${sideLabel(side)}-Counter`}>
       {chips.map((chip) => (
-        <span className="identityCounterChip" role="listitem" key={chip.key} title={chip.ariaLabel} aria-label={chip.ariaLabel}>
+        <CounterHelpTooltipTrigger className="identityCounterChip" role="listitem" key={chip.key} ariaLabel={chip.ariaLabel} tooltip={chip.tooltip}>
           <span className="identityCounterChipLabel">{chip.label}</span>
           <strong>{chip.amount}</strong>
-        </span>
+        </CounterHelpTooltipTrigger>
+      ))}
+    </div>
+  );
+}
+
+function ServerCounterStrip({ displays, serverLabel }: { displays: VisibleCard["counterDisplays"]; serverLabel: string }) {
+  const chips = serverCounterChipsForDisplays(displays);
+  if (chips.length === 0) return null;
+  return (
+    <div className="serverCounterStrip" role="list" aria-label={`${serverLabel}-Counter`}>
+      {chips.map((chip) => (
+        <CounterHelpTooltipTrigger className="serverCounterChip" role="listitem" key={chip.key} ariaLabel={chip.ariaLabel} tooltip={chip.tooltip}>
+          <span className="serverCounterChipLabel">{chip.label}</span>
+          <strong>{chip.amount}</strong>
+        </CounterHelpTooltipTrigger>
       ))}
     </div>
   );
@@ -14033,9 +14051,9 @@ function CounterDisplayBadge({ display, scoreState }: { display: NonNullable<Vis
           ? "ablative-counter-badge"
           : "counter-display-badge";
   return (
-    <span className={className} aria-label={display.ariaLabel} data-testid={testId} title={display.ariaLabel}>
+    <CounterHelpTooltipTrigger className={className} ariaLabel={display.ariaLabel} data-testid={testId} tooltip={counterDisplayTooltipText(display)}>
       {counterDisplayBadgeText(display, amount)}
-    </span>
+    </CounterHelpTooltipTrigger>
   );
 }
 
@@ -14043,6 +14061,80 @@ function counterDisplayBadgeText(display: NonNullable<VisibleCard["counterDispla
   if (display.displayKind === "shell") return `${amount} Shell`;
   if (display.id === "data_raven") return `${amount} Raven`;
   return `${amount} ${display.label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "")}`;
+}
+
+function CounterHelpTooltipTrigger({
+  children,
+  className,
+  tooltip,
+  ariaLabel,
+  role,
+  "data-testid": testId
+}: {
+  children: ReactNode;
+  className: string;
+  tooltip: string;
+  ariaLabel: string;
+  role?: string;
+  "data-testid"?: string;
+}) {
+  const tooltipId = useId();
+  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
+  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("above");
+  const [visible, setVisible] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const showTooltip = (element: HTMLElement, pin = false) => {
+    const rect = element.getBoundingClientRect();
+    const width = Math.min(280, Math.max(220, window.innerWidth - 16));
+    const left = Math.min(Math.max(8, rect.left + rect.width / 2 - width / 2), Math.max(8, window.innerWidth - width - 8));
+    const above = rect.top > 132;
+    const top = above ? rect.top - 10 : rect.bottom + 10;
+    setTooltipPlacement(above ? "above" : "below");
+    setTooltipStyle({ left, top, width });
+    setPinned(pin);
+    setVisible(true);
+  };
+  const hideTooltip = () => {
+    setPinned(false);
+    setVisible(false);
+  };
+  return (
+    <span
+      className={`${className} counterHelpTooltipTrigger`}
+      role={role}
+      aria-label={ariaLabel}
+      aria-describedby={visible ? tooltipId : undefined}
+      data-testid={testId}
+      tabIndex={0}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (visible && pinned) {
+          hideTooltip();
+          return;
+        }
+        showTooltip(event.currentTarget, true);
+      }}
+      onPointerEnter={(event) => {
+        if (event.pointerType !== "touch") showTooltip(event.currentTarget);
+      }}
+      onPointerLeave={() => {
+        if (!pinned) setVisible(false);
+      }}
+      onFocus={(event) => showTooltip(event.currentTarget)}
+      onBlur={hideTooltip}
+    >
+      {children}
+      {visible
+        ? createPortal(
+            <span id={tooltipId} className={`cardTooltip counterHelpTooltip ${tooltipPlacement} visible`} role="tooltip" style={tooltipStyle}>
+              <span className="cardTooltipText">{tooltip}</span>
+            </span>,
+            document.body
+          )
+        : null}
+    </span>
+  );
 }
 
 function CardCreditCounter({ amount, ariaLabel, className, testId }: { amount: number; ariaLabel: string; className: string; testId: string }) {

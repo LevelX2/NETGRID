@@ -2640,6 +2640,8 @@ function corpMainActionGenerationHost(
       makeActionId,
       buildEndTurnAction: buildCorpEndTurnAction,
       buildForgoActionDebtAction: buildCorpForgoActionDebtAction,
+      buildPurgeableRunnerVirusPurgeAction: () =>
+        buildPurgeableRunnerVirusPurgeAction(state),
       buildPurgeVirusAction: buildCorpPurgeVirusAction,
       buildGainCreditAction: buildCorpGainCreditAction,
       buildDrawAction: buildCorpDrawAction,
@@ -2670,6 +2672,7 @@ function corpMainActionGenerationHost(
     },
     counters: {
       totalCounters,
+      purgeableRunnerVirusCounterTotal,
       spyCountersForServer,
     },
     corp: {
@@ -2736,20 +2739,24 @@ function corpMainActionGenerationHost(
 
 function buildPurgeableRunnerVirusPurgeAction(state: GameState): LegalAction {
   const window = state.runnerVirusPurgeWindow;
-  if (!window)
-    throw new Error("Runner-Virus-Purge braucht ein offenes Timingfenster.");
   return action(
     state,
     "corp",
     "purge_runner_virus_counters",
-    "Runner-Virus-Counter purgen",
+    "Runner-Virus-Counter purgen (3 Aktionen aussetzen)",
     "game_rule",
     [],
     {
       purgeModel: "future_action_debt",
       actionDebtAdded: 3,
-      timingWindowId: window.windowId,
-      timingFamily: window.timingFamily,
+      ...(window
+        ? {
+            timingWindowId: window.windowId,
+            timingFamily: window.timingFamily,
+          }
+        : {
+            timingFamily: "corp_main_action",
+          }),
     },
     { targetRequirements: [] },
   );

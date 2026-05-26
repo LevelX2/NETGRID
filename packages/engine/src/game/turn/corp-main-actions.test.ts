@@ -63,6 +63,32 @@ describe("corp main action generation", () => {
       corpActionDebtTotalBefore: 2,
     });
   });
+
+  it("offers Runner-virus purge during normal Corp main actions", () => {
+    const state = minimalCorpMainState("arch-53-corp-runner-virus-purge");
+    state.corp.clicks = 3;
+
+    const actions = buildCorpMainActions(
+      testCorpMainHost(state, {
+        purgeableRunnerVirusCounterTotal: () => 2,
+      }),
+    );
+
+    expect(actions.map((candidate) => candidate.type)).toContain(
+      "purge_runner_virus_counters",
+    );
+    expect(
+      actions.find((candidate) => candidate.type === "purge_runner_virus_counters"),
+    ).toMatchObject({
+      label: "Runner-Virus-Counter purgen (3 Aktionen aussetzen)",
+      costs: [],
+      payload: {
+        purgeModel: "future_action_debt",
+        actionDebtAdded: 3,
+        timingFamily: "corp_main_action",
+      },
+    });
+  });
 });
 
 function minimalCorpMainState(seed: string): GameState {
@@ -85,6 +111,7 @@ function testCorpMainHost(
   state: GameState,
   overrides: Partial<{
     corpActionDebtPending: () => number;
+    purgeableRunnerVirusCounterTotal: () => number;
   }> = {},
 ): CorpMainActionGenerationHost {
   const unexpected = (name: string) => () => {
@@ -105,6 +132,21 @@ function testCorpMainHost(
       },
       { targetRequirements: [] },
     );
+  const runnerVirusPurgeAction = () =>
+    buildLegalAction(
+      state,
+      "corp",
+      "purge_runner_virus_counters",
+      "Runner-Virus-Counter purgen (3 Aktionen aussetzen)",
+      "game_rule",
+      [],
+      {
+        purgeModel: "future_action_debt",
+        actionDebtAdded: 3,
+        timingFamily: "corp_main_action",
+      },
+      { targetRequirements: [] },
+    );
 
   return {
     state,
@@ -113,6 +155,7 @@ function testCorpMainHost(
       makeActionId,
       buildEndTurnAction: buildCorpEndTurnAction,
       buildForgoActionDebtAction: forgoAction,
+      buildPurgeableRunnerVirusPurgeAction: runnerVirusPurgeAction,
       buildPurgeVirusAction: buildCorpPurgeVirusAction,
       buildGainCreditAction: buildCorpGainCreditAction,
       buildDrawAction: buildCorpDrawAction,
@@ -147,6 +190,8 @@ function testCorpMainHost(
     },
     counters: {
       totalCounters: () => 0,
+      purgeableRunnerVirusCounterTotal:
+        overrides.purgeableRunnerVirusCounterTotal ?? (() => 0),
       spyCountersForServer: () => 0,
     },
     corp: {
