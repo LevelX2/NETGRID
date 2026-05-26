@@ -138,11 +138,7 @@ function pendingChoiceHost(
       resolveEventModificationChoice: unexpected("resolveEventModificationChoice"),
     },
     trace: {
-      traceIsInPhase: () => false,
-      resolveTraceCorpBid: unexpected("resolveTraceCorpBid"),
-      resolveTraceBaseLinkChoice: unexpected("resolveTraceBaseLinkChoice"),
-      resolveTracePostBidLinkChoice: unexpected("resolveTracePostBidLinkChoice"),
-      resolveTraceRunnerBid: unexpected("resolveTraceRunnerBid"),
+      resolveTraceChoice: unexpected("resolveTraceChoice"),
     },
     hiddenZone: {
       handleHiddenZoneArrangeChoice: unhandled,

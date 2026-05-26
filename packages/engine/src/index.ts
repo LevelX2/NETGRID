@@ -50,28 +50,13 @@ import {
 } from "@netgrid/shared";
 import {
   assertCorpRezCostQuoteValid,
-  assertCorpTraceBidPaymentValid,
-  assertPostBidLinkPaymentValid,
-  assertRunnerTraceBidPaymentValid,
   corpServerIdForInstalledCard,
-  corpTracePaymentPublicPayload,
-  payPostBidLinkPaymentQuote,
-  payCorpTraceBidQuote,
-  payRunnerTraceBidQuote,
-  postBidLinkPaymentPublicPayload,
   quoteCorpIceInstallCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
-  runnerTracePaymentPublicPayload,
   type CorpTracePaymentDependencies,
   type RunnerTracePaymentDependencies,
 } from "./game/payment";
-import {
-  assertTraceBaseLinkChoiceValid,
-  installedTraceBaseLinkCardImplementation,
-  quoteTraceBaseLinkChoices,
-  traceBaseLinkChoicePublicPayload,
-} from "./game/trace/base-link";
 import {
   resolvePendingChoice,
   type PendingChoiceResolutionHost,
@@ -94,11 +79,13 @@ export {
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "./game/win-conditions";
 export { checkWinConditions } from "./game/win-conditions";
 import {
-  requireTracePhase,
-  traceIsInPhase,
-  tracePostBidLinkSourceUsed,
-} from "./game/trace/trace-state";
-import { describeTraceResultFromTrace } from "./game/trace/trace-result";
+  calculateRunnerLink as calculateRunnerLinkInTrace,
+  handleTraceOrchestrationAction,
+  resolveTraceChoice,
+  traceBidChoice,
+  startTraceFromOperation as startTraceFromOperationInTrace,
+  type TraceOrchestrationHost,
+} from "./game/trace/trace-orchestration";
 import {
   buildLegalAction as action,
   makeActionId,
@@ -687,7 +674,6 @@ import type {
   CardUniqueDirectLongtailImplementation,
   CardVariableRezImplementation,
   CardVirusCounterImplementation,
-  IncreaseTraceLinkEffectImplementation,
   MakeRunEffectImplementation,
 } from "./ability-engine/definition-types";
 
@@ -765,8 +751,8 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       ...(legalAction.payload ?? {}),
       cardId: sourceCardId,
     };
-    return startTraceFromOperation(
-      state,
+    return startTraceFromOperationInTrace(
+      traceOrchestrationHost(state),
       sourceDefinitionId,
       baseTraceStrength,
       legalAction,
@@ -4606,6 +4592,84 @@ function rezCardHost(state: GameState): RezCardHost {
   };
 }
 
+function traceOrchestrationHost(state: GameState): TraceOrchestrationHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      runnerInstalledCardIds: () => runnerInstalledCardIds(state),
+      hasCardImplementationForDefinition: (definitionId) =>
+        Boolean(cardImplementationForDefinitionId(definitionId)),
+      activatedTraceAbilities: (definition, timing) =>
+        cardImplementationForDefinitionId(definition.id)?.abilities
+          ?.map((ability, index) => ({ ability, index }))
+          .filter(
+            (
+              entry,
+            ): entry is {
+              ability: ActivatedCardAbilityImplementation;
+              index: number;
+            } =>
+              entry.ability.kind === "activated" &&
+              entry.ability.timing === timing,
+          ) ?? [],
+      isSubmarineUplinkSource: (cardId) =>
+        isSubmarineUplinkSource(state, cardId),
+    },
+    payment: {
+      corpTracePaymentDeps,
+      runnerTracePaymentDeps,
+      runnerTraceLinkCreditSourceIds: () =>
+        runnerTracePaymentDeps.runnerTraceLinkCreditSourceIds(state),
+      hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
+      spendRunnerCredits: (amount) => spendCredits(state, "runner", amount),
+    },
+    runner: {
+      identityModifierAmount: (side, kind, duration) =>
+        identityModifierAmount(state, side, kind, duration),
+    },
+    corp: {
+      rezzedCorpRootCardIds: () => rezzedCorpRootCardIds(state),
+    },
+    counters: {
+      cardCounter: (cardId, counterType) =>
+        cardCounter(state, cardId, counterType as CounterType),
+      hackerTrackerCounterTotal: () => hackerTrackerCounterTotal(state),
+      krumzTraceBitTotal: () => krumzTraceBitTotal(state),
+    },
+    fort: {
+      parisCityGridTracePoolSource: () =>
+        parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state)),
+    },
+    run: {
+      markSubmarineUplinkJackOutAfterEncounter: (cardId, legalAction) =>
+        markSubmarineUplinkJackOutAfterEncounter(
+          encounterSpecialWindowHostForState(state),
+          cardId,
+          legalAction,
+        ),
+      applyPrintedTraceSuccessFollowups: (options) =>
+        applyPrintedTraceSuccessFollowups(
+          encounterPrintedEffectHostForState(state, options.legalAction),
+          options,
+        ),
+    },
+    trace: {
+      supportsTraceSuccessEffect: (effect) =>
+        isSupportedEncounterTraceSuccessEffect(
+          effect,
+          traceCounterEffectDefinitionFor,
+        ),
+    },
+    callbacks: {
+      sanitizeId,
+    },
+    constants: {
+      PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
+    },
+  };
+}
+
 function performAction(
   state: GameState,
   legalAction: LegalAction,
@@ -4891,33 +4955,12 @@ function performAction(
         };
         return;
       }
-      if (legalAction.payload?.v1918UpgradeAbility === "trace_2_tag") {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf V1.9.18-City-Grid-Traces nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-          throw new Error(
-            "Die V1.9.18-City-Grid-Trace-Faehigkeit ist nicht rezzed installiert.",
-          );
-        const definition = definitionFor(state, sourceCardId);
-        if (
-          definition.id !== PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID ||
-          cardImplementationForDefinitionId(definition.id)
-        )
-          throw new Error(
-            "Die V1.9.18-City-Grid-Trace-Faehigkeit passt nicht zur Karte.",
-          );
-        const traceStrength = Number(legalAction.payload?.traceStrength ?? 0);
-        if (!Number.isInteger(traceStrength) || traceStrength !== 2)
-          throw new Error(
-            "Paris City Grid startet in diesem WIP genau Trace 2.",
-          );
-        startTraceFromOperation(
-          state,
-          definition.id,
-          traceStrength,
+      if (
+        handleTraceOrchestrationAction(
+          traceOrchestrationHost(state),
           legalAction,
-        );
+        ).handled
+      ) {
         return;
       }
       if (legalAction.payload?.v1918UpgradeAbility === "tag_condition_credit") {
@@ -7466,120 +7509,6 @@ function rabbitTraceLimitReductionForIceTrace(state: GameState): number {
     return 0;
   });
   return Math.max(0, ...reductions);
-}
-
-function startTraceFromOperation(
-  state: GameState,
-  sourceDefinitionId: string,
-  baseTraceStrength: number,
-  legalAction: LegalAction,
-  successEffect: TraceSuccessEffect = { type: "add_tag", amount: 1 },
-): Record<string, string | number | boolean> {
-  if (state.trace || state.pendingChoice)
-    throw new Error("Es ist bereits ein Trace oder eine Choice offen.");
-  if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0)
-    throw new Error("Trace strength ist ungueltig.");
-  if (
-    !isSupportedEncounterTraceSuccessEffect(
-      successEffect,
-      traceCounterEffectDefinitionFor,
-    )
-  )
-    throw new Error("Dieser Trace-Erfolgseffekt wird nicht unterstuetzt.");
-  const sourceCardInstanceId = String(legalAction.payload?.cardId ?? "");
-  if (!sourceCardInstanceId || !state.cardInstances[sourceCardInstanceId])
-    throw new Error("Trace-Operation hat keine gueltige Quellenkarte.");
-  const traceId = `op_trace.${state.stateVersion + 1}.${sanitizeId(sourceDefinitionId)}.${sourceCardInstanceId}`;
-  const parisPoolSource = parisCityGridTracePoolSource(
-    fortRunSideFamiliesHostForState(state),
-  );
-  state.trace = {
-    traceId,
-    sourceCardInstanceId,
-    sourceDefinitionId: sourceDefinitionId as CardDefinitionId,
-    baseTraceStrength,
-    corpBidMax:
-      state.corp.credits +
-      hackerTrackerCounterTotal(state) +
-      krumzTraceBitTotal(state) +
-      (parisPoolSource ? cardCounter(state, parisPoolSource.cardId, "bit") : 0),
-    status: "corp_bid",
-    successEffect,
-    ...(parisPoolSource
-      ? {
-          parisCityGridPoolSourceCardInstanceId: parisPoolSource.cardId,
-          parisCityGridPoolServerId: parisPoolSource.serverId,
-        }
-      : {}),
-    returnPhase: state.phase,
-    returnTimingPoint: state.timingPoint,
-    returnActiveSide: state.activeSide,
-  };
-  state.pendingChoice = traceBidChoice(
-    state,
-    "corp",
-    traceId,
-    `Korp Trace-Bid wählen (Base Trace ${baseTraceStrength})`,
-    state.corp.credits +
-      hackerTrackerCounterTotal(state) +
-      krumzTraceBitTotal(state) +
-      (parisPoolSource ? cardCounter(state, parisPoolSource.cardId, "bit") : 0),
-  );
-  state.activeSide = "corp";
-  const publicPayload = {
-    traceStarted: true,
-    traceId,
-    sourceCardId: sourceCardInstanceId,
-    sourceDefinitionId,
-    baseTraceStrength,
-    ...(parisPoolSource
-      ? {
-          corpBidMax:
-            state.corp.credits +
-            hackerTrackerCounterTotal(state) +
-            krumzTraceBitTotal(state) +
-            cardCounter(state, parisPoolSource.cardId, "bit"),
-          parisCityGridPoolAvailable: cardCounter(
-            state,
-            parisPoolSource.cardId,
-            "bit",
-          ),
-          parisCityGridPoolServerId: parisPoolSource.serverId,
-        }
-      : {}),
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ...publicPayload,
-  };
-  return publicPayload;
-}
-
-function traceBidChoice(
-  state: GameState,
-  side: Side,
-  traceId: string,
-  prompt: string,
-  maxBid: number,
-): ChoiceRequest {
-  const boundedMax = Math.max(0, Math.floor(maxBid));
-  return {
-    choiceId: `${traceId}.${side}.bid.${state.stateVersion + 1}`,
-    side,
-    source: `trace:${traceId}`,
-    prompt,
-    kind: "bid_amount",
-    options: Array.from({ length: boundedMax + 1 }, (_, amount) => ({
-      id: `bid_${amount}`,
-      label: `${amount} Credits`,
-      publicLabel: `${amount} Credits`,
-      value: amount,
-    })),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
 }
 
 function archivesAccessRequiresDecisionOrEffect(
@@ -14086,7 +14015,7 @@ function encounterPrintedEffectHostForState(
     addCardCounter: (cardId, counterType, amount) =>
       addCardCounter(state, cardId, counterType, amount),
     addHackerTrackerTraceCounters: () => addHackerTrackerTraceCounters(state),
-    calculateRunnerLink: () => calculateRunnerLink(state),
+    calculateRunnerLink: () => calculateRunnerLinkInTrace(traceOrchestrationHost(state)),
     cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
     createDamageImminentEvent: (request) =>
       createDamageImminentEvent(state, request),
@@ -14504,8 +14433,8 @@ function accessEffectHandlerHost(
     trace: {
       startTraceFromOperation: (sourceDefinitionId, baseTraceStrength, successEffect) => {
         if (!legalAction) throw new Error("Trace-Aktion fehlt.");
-        startTraceFromOperation(
-          state,
+        startTraceFromOperationInTrace(
+          traceOrchestrationHost(state),
           sourceDefinitionId,
           baseTraceStrength,
           legalAction,
@@ -14588,11 +14517,12 @@ function pendingChoiceResolutionHost(
       resolveEventModificationChoice,
     },
     trace: {
-      traceIsInPhase,
-      resolveTraceCorpBid,
-      resolveTraceBaseLinkChoice,
-      resolveTracePostBidLinkChoice,
-      resolveTraceRunnerBid,
+      resolveTraceChoice: (_state, actionToResolve, playerActionToResolve) =>
+        resolveTraceChoice(
+          traceOrchestrationHost(state),
+          actionToResolve,
+          playerActionToResolve,
+        ),
     },
     hiddenZone: {
       handleHiddenZoneArrangeChoice,
@@ -17165,7 +17095,16 @@ const corpTracePaymentDeps: CorpTracePaymentDependencies = {
 };
 
 const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
-  runnerTraceLinkCreditSourceIds,
+  runnerTraceLinkCreditSourceIds: (state) =>
+    [
+      ...restrictedHostedCreditSourceIds(state, "increase_link"),
+      ...[...state.runner.rig.hardware, ...state.runner.rig.resources].filter(
+        (cardId) =>
+          !isRestrictedHostedCreditSource(definitionFor(state, cardId)) &&
+          definitionFor(state, cardId).id === HELLS_RUN_ID &&
+          cardCounter(state, cardId, "recurring_credit") > 0,
+      ),
+    ].sort(),
   hostedPaymentCredits,
   spendHostedPaymentCredits,
   runnerCreditsAvailable: (state) => state.runner.credits,
@@ -17175,586 +17114,6 @@ const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
   definitionIdForCard: (state, cardId) => definitionFor(state, cardId).id,
   hellsRunDefinitionId: HELLS_RUN_ID,
 };
-
-function resolveTraceCorpBid(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const trace = requireTracePhase(state, "corp_bid");
-  const bid = selectedBidAmount(state.pendingChoice, playerAction);
-  const tracePaymentQuote = assertCorpTraceBidPaymentValid(
-    corpTracePaymentDeps,
-    state,
-    trace,
-    bid,
-  );
-  const tracePaymentReceipt = payCorpTraceBidQuote(
-    corpTracePaymentDeps,
-    state,
-    trace,
-    tracePaymentQuote,
-  );
-  const tracePaymentPayload = corpTracePaymentPublicPayload(
-    trace,
-    tracePaymentQuote,
-    tracePaymentReceipt,
-  );
-  const traceStrength = trace.baseTraceStrength + bid;
-  const runnerLink = calculateRunnerLink(state);
-  const cryingCounterCount = cardCounter(state, state.runner.identity, "crying");
-  const baseLinkTrace = {
-    ...trace,
-    status: "base_link" as const,
-    corpBid: bid,
-    traceStrength,
-    runnerLink,
-  };
-  if (startTraceBaseLinkChoice(state, baseLinkTrace)) {
-    state.trace = baseLinkTrace;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      traceId: trace.traceId,
-      traceStep: "corp_bid",
-      baseTraceStrength: trace.baseTraceStrength,
-      sourceDefinitionId: trace.sourceDefinitionId,
-      ...(typeof trace.corpBidMax === "number"
-        ? { corpBidMax: trace.corpBidMax }
-        : {}),
-      ...(typeof trace.rabbitTraceLimitReduction === "number"
-        ? { rabbitTraceLimitReduction: trace.rabbitTraceLimitReduction }
-        : {}),
-      ...tracePaymentPayload,
-      traceStrength,
-      runnerLink,
-      traceBaseLinkChoiceOpened: true,
-      ...(cryingCounterCount > 0 ? { cryingCounterCount, cryingLinkReduction: cryingCounterCount * 2 } : {}),
-    };
-    return;
-  }
-  state.trace = {
-    ...baseLinkTrace,
-    status: "runner_bid",
-  };
-  state.pendingChoice = traceBidChoice(
-    state,
-    "runner",
-    trace.traceId,
-    `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
-    state.runner.credits + runnerTraceLinkCredits(state),
-  );
-  state.activeSide = "runner";
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    traceId: trace.traceId,
-    traceStep: "corp_bid",
-    baseTraceStrength: trace.baseTraceStrength,
-    sourceDefinitionId: trace.sourceDefinitionId,
-    ...(typeof trace.corpBidMax === "number"
-      ? { corpBidMax: trace.corpBidMax }
-      : {}),
-    ...(typeof trace.rabbitTraceLimitReduction === "number"
-      ? { rabbitTraceLimitReduction: trace.rabbitTraceLimitReduction }
-      : {}),
-    ...tracePaymentPayload,
-    traceStrength,
-    runnerLink,
-    ...(cryingCounterCount > 0 ? { cryingCounterCount, cryingLinkReduction: cryingCounterCount * 2 } : {}),
-    traceBaseLinkChoiceOpened: false,
-  };
-}
-
-type TracePostBidLinkCandidate = {
-  cardId: CardInstanceId;
-  definitionId: CardDefinitionId;
-  label: string;
-  linkDelta: number;
-  creditCost: number;
-  limitOncePerTrace: boolean;
-};
-
-function creditCostForTraceAbility(
-  ability: ActivatedCardAbilityImplementation,
-): number {
-  const creditCosts = ability.costs.filter((cost) => cost.kind === "credit");
-  if (
-    ability.costs.length !== 1 ||
-    creditCosts.length !== 1 ||
-    !Number.isInteger(creditCosts[0]?.amount) ||
-    (creditCosts[0]?.amount ?? 0) < 0
-  ) {
-    throw new Error(
-      "Trace CardImplementation ability supports exactly one nonnegative credit cost.",
-    );
-  }
-  return creditCosts[0]!.amount;
-}
-
-function activatedCardImplementationTraceAbilities(
-  definition: CardDefinition,
-  timing: Extract<
-    ActivatedCardAbilityImplementation["timing"],
-    "trace_base_link_window" | "trace_post_bid_link_window"
-  >,
-): Array<{ ability: ActivatedCardAbilityImplementation; index: number }> {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.abilities
-      ?.map((ability, index) => ({ ability, index }))
-      .filter(
-        (
-          entry,
-        ): entry is {
-          ability: ActivatedCardAbilityImplementation;
-          index: number;
-        } => entry.ability.kind === "activated" && entry.ability.timing === timing,
-      ) ?? []
-  );
-}
-
-function increaseTraceLinkEffect(
-  ability: ActivatedCardAbilityImplementation,
-): IncreaseTraceLinkEffectImplementation | undefined {
-  const effects = ability.effects.filter(
-    (effect): effect is IncreaseTraceLinkEffectImplementation =>
-      effect.kind === "increase_trace_link",
-  );
-  if (effects.length > 1)
-    throw new Error(
-      "Trace link ability has multiple increase_trace_link effects.",
-    );
-  return effects[0];
-}
-
-function startTraceBaseLinkChoice(
-  state: GameState,
-  trace: NonNullable<GameState["trace"]>,
-): boolean {
-  const candidates = quoteTraceBaseLinkChoices(state, trace);
-  if (candidates.length === 0) return false;
-  state.pendingChoice = {
-    choiceId: `${trace.traceId}.base_link.${state.stateVersion + 1}`,
-    side: "runner",
-    source: `trace_base_link:${trace.traceId}`,
-    prompt: "Base-Link-Karte fuer Trace nutzen",
-    kind: "select_option",
-    options: [
-      { id: "pass", label: "Keine Base-Link-Karte nutzen" },
-      ...candidates.map((candidate) => ({
-        id: `trace_base_link_${candidate.sourceCardInstanceId}`,
-        label: `${candidate.label}: Base Link ${candidate.baseLinkValue}`,
-        publicLabel: "Base Link",
-        value: candidate.sourceCardInstanceId,
-      })),
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
-  state.activeSide = "runner";
-  return true;
-}
-
-function openTraceRunnerBidChoice(
-  state: GameState,
-  trace: NonNullable<GameState["trace"]>,
-): void {
-  state.trace = {
-    ...trace,
-    status: "runner_bid",
-  };
-  state.pendingChoice = traceBidChoice(
-    state,
-    "runner",
-    trace.traceId,
-    `Runner Link-Bid wählen (Trace ${trace.traceStrength ?? trace.baseTraceStrength}, Link ${trace.runnerLink ?? calculateRunnerLink(state)})`,
-    state.runner.credits + runnerTraceLinkCredits(state),
-  );
-  state.activeSide = "runner";
-}
-
-function resolveTraceBaseLinkChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const trace = requireTracePhase(state, "base_link");
-  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const baseRunnerLink = trace.runnerLink ?? calculateRunnerLink(state);
-  if (selected === "pass") {
-    delete state.pendingChoice;
-    const nextTrace = {
-      ...trace,
-      runnerLink: baseRunnerLink,
-    };
-    openTraceRunnerBidChoice(state, nextTrace);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      traceId: trace.traceId,
-      traceStep: "base_link",
-      baseTraceStrength: trace.baseTraceStrength,
-      sourceDefinitionId: trace.sourceDefinitionId,
-      corpBid: trace.corpBid ?? 0,
-      traceStrength: trace.traceStrength ?? trace.baseTraceStrength,
-      baseLinkUsed: false,
-      runnerLink: baseRunnerLink,
-    };
-    return;
-  }
-  const option = state.pendingChoice?.options.find(
-    (candidate) => candidate.id === selected,
-  );
-  const cardId =
-    typeof option?.value === "string"
-      ? (option.value as CardInstanceId)
-      : undefined;
-  if (!cardId) throw new Error("Diese Base-Link-Quelle ist nicht legal.");
-  const candidate = assertTraceBaseLinkChoiceValid(state, cardId);
-  spendCredits(state, "runner", candidate.creditCost);
-  markSubmarineUplinkJackOutAfterEncounter(
-    encounterSpecialWindowHostForState(state),
-    candidate.sourceCardInstanceId,
-    legalAction,
-  );
-  const runnerLink = calculateRunnerLinkCore(state) + candidate.baseLinkValue;
-  const nextTrace = {
-    ...trace,
-    baseLinkSourceId: candidate.sourceCardInstanceId,
-    baseLinkValue: candidate.baseLinkValue,
-    baseLinkCostPaid: candidate.creditCost,
-    runnerLink,
-  };
-  delete state.pendingChoice;
-  openTraceRunnerBidChoice(state, nextTrace);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    traceId: trace.traceId,
-    traceStep: "base_link",
-    baseTraceStrength: trace.baseTraceStrength,
-    sourceDefinitionId: trace.sourceDefinitionId,
-    corpBid: trace.corpBid ?? 0,
-    traceStrength: trace.traceStrength ?? trace.baseTraceStrength,
-    ...traceBaseLinkChoicePublicPayload(candidate),
-    runnerLink,
-    runnerCreditsAfter: state.runner.credits,
-  };
-}
-
-function resolveTraceRunnerBid(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const trace = requireTracePhase(state, "runner_bid");
-  const bid = selectedBidAmount(state.pendingChoice, playerAction);
-  const tracePaymentQuote = assertRunnerTraceBidPaymentValid(
-    runnerTracePaymentDeps,
-    state,
-    bid,
-  );
-  const tracePaymentReceipt = payRunnerTraceBidQuote(
-    runnerTracePaymentDeps,
-    state,
-    tracePaymentQuote,
-  );
-  const tracePaymentPayload =
-    runnerTracePaymentPublicPayload(tracePaymentReceipt);
-  const runnerLink = trace.runnerLink ?? calculateRunnerLink(state);
-  const postBidTraceBase = {
-    ...trace,
-    status: "post_bid_link" as const,
-    runnerLink,
-    runnerBid: bid,
-    postBidLinkBonus: 0,
-    postBidLinkSourceIds: [],
-  };
-  const result = describeTraceResultFromTrace(postBidTraceBase, {
-    runnerLinkFallback: runnerLink,
-  });
-  const traceStrength = result.corpTraceStrength;
-  const runnerStrength = result.runnerTraceStrength;
-  const successful = result.successful;
-  const postBidTrace = {
-    ...postBidTraceBase,
-    traceStrength,
-    runnerStrength,
-  };
-  if (startTracePostBidLinkChoice(state, postBidTrace)) {
-    state.trace = postBidTrace;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      traceId: trace.traceId,
-      traceStep: "runner_bid",
-      baseTraceStrength: trace.baseTraceStrength,
-      sourceDefinitionId: trace.sourceDefinitionId,
-      corpBid: trace.corpBid ?? 0,
-      traceStrength,
-      runnerLink,
-      runnerBid: bid,
-      ...tracePaymentPayload,
-      runnerStrength,
-      postBidTraceLinkChoiceOpened: true,
-    };
-    return;
-  }
-  applyPrintedTraceSuccessFollowups(
-    encounterPrintedEffectHostForState(state, legalAction),
-    {
-      trace: postBidTrace,
-      traceStep: "runner_bid",
-      legalAction,
-      runnerLinkFallback: runnerLink,
-      extraPayload: tracePaymentPayload,
-      deletePendingChoice: true,
-    },
-  );
-}
-
-function postBidTraceLinkCandidates(
-  state: GameState,
-  trace: NonNullable<GameState["trace"]>,
-): TracePostBidLinkCandidate[] {
-  const candidates: TracePostBidLinkCandidate[] = [];
-  for (const cardId of runnerInstalledCardIds(state).sort()) {
-    const instance = state.cardInstances[cardId];
-    if (!instance || instance.controller !== "runner") continue;
-    const definition = definitionFor(state, cardId);
-    for (const { ability } of activatedCardImplementationTraceAbilities(
-      definition,
-      "trace_post_bid_link_window",
-    )) {
-      const effect = increaseTraceLinkEffect(ability);
-      if (!effect) continue;
-      if (isSubmarineUplinkSource(state, cardId) && !state.run) continue;
-      const creditCost = creditCostForTraceAbility(ability);
-      if (state.runner.credits + runnerTraceLinkCredits(state) < creditCost)
-        continue;
-      const limitOncePerTrace =
-        ability.limit?.kind === "once_per_trace_per_source" &&
-        ability.limit.scope === "source";
-      if (limitOncePerTrace && tracePostBidLinkSourceUsed(trace, cardId))
-        continue;
-      if (
-        !Number.isInteger(effect.amount) ||
-        effect.amount <= 0 ||
-        effect.visibility !== "public"
-      )
-        throw new Error("Trace link effect is invalid.");
-      candidates.push({
-        cardId,
-        definitionId: definition.id,
-        label: definition.title,
-        linkDelta: effect.amount,
-        creditCost,
-        limitOncePerTrace,
-      });
-    }
-  }
-  return candidates;
-}
-
-function startTracePostBidLinkChoice(
-  state: GameState,
-  trace: NonNullable<GameState["trace"]>,
-): boolean {
-  const candidates = postBidTraceLinkCandidates(state, trace);
-  if (candidates.length === 0) return false;
-  state.pendingChoice = {
-    choiceId: `${trace.traceId}.post_bid_link.${state.stateVersion + 1}`,
-    side: "runner",
-    source: `trace_post_bid_link:${trace.traceId}`,
-    prompt: "Post-bid Link-Faehigkeit nutzen",
-    kind: "select_option",
-    options: [
-      { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
-      ...candidates.map((candidate) => ({
-        id: `trace_link_${candidate.cardId}`,
-        label: `${candidate.label}: +${candidate.linkDelta} Link`,
-        publicLabel: "Trace Link",
-        value: candidate.cardId,
-      })),
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  state.activeSide = "runner";
-  return true;
-}
-
-function resolveTracePostBidLinkChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const trace = requireTracePhase(state, "post_bid_link");
-  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  if (selected !== "pass") {
-    const option = state.pendingChoice?.options.find(
-      (candidate) => candidate.id === selected,
-    );
-    const cardId =
-      typeof option?.value === "string"
-        ? (option.value as CardInstanceId)
-        : undefined;
-    const candidate = postBidTraceLinkCandidates(state, trace).find(
-      (item) => item.cardId === cardId,
-    );
-    if (!candidate)
-      throw new Error("Diese Post-Bid-Link-Quelle ist nicht legal.");
-    const paymentQuote = assertPostBidLinkPaymentValid(
-      runnerTracePaymentDeps,
-      state,
-      candidate.creditCost,
-    );
-    const paymentReceipt = payPostBidLinkPaymentQuote(
-      runnerTracePaymentDeps,
-      state,
-      paymentQuote,
-    );
-    const paymentPayload = postBidLinkPaymentPublicPayload(paymentReceipt);
-    markSubmarineUplinkJackOutAfterEncounter(
-      encounterSpecialWindowHostForState(state),
-      candidate.cardId,
-      legalAction,
-    );
-    const nextTrace = {
-      ...trace,
-      runnerLink: (trace.runnerLink ?? 0) + candidate.linkDelta,
-      runnerStrength: (trace.runnerStrength ?? 0) + candidate.linkDelta,
-      postBidLinkBonus:
-        (trace.postBidLinkBonus ?? 0) + candidate.linkDelta,
-      postBidLinkSourceIds: [
-        ...(trace.postBidLinkSourceIds ?? []),
-        candidate.cardId,
-      ],
-    };
-    delete state.pendingChoice;
-    state.trace = nextTrace;
-    const opensNext = startTracePostBidLinkChoice(state, nextTrace);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      traceId: trace.traceId,
-      traceStep: "post_bid_link",
-      eventModificationDecision: "apply",
-      sourceDefinitionId: candidate.definitionId,
-      postBidTraceLinkSourceDefinitionId: candidate.definitionId,
-      postBidTraceLinkCostPaid: candidate.creditCost,
-      ...paymentPayload,
-      postBidTraceLinkDelta: candidate.linkDelta,
-      postBidTraceLinkBonus: nextTrace.postBidLinkBonus ?? 0,
-      runnerLink: nextTrace.runnerLink ?? 0,
-      runnerStrength: nextTrace.runnerStrength ?? 0,
-      postBidTraceLinkChoiceOpened: opensNext,
-    };
-    if (opensNext) return;
-    completeTraceAfterPostBidLink(state, nextTrace, legalAction);
-    return;
-  }
-  delete state.pendingChoice;
-  completeTraceAfterPostBidLink(state, trace, legalAction);
-}
-
-function completeTraceAfterPostBidLink(
-  state: GameState,
-  trace: NonNullable<GameState["trace"]>,
-  legalAction: LegalAction,
-): void {
-  applyPrintedTraceSuccessFollowups(
-    encounterPrintedEffectHostForState(state, legalAction),
-    {
-      trace,
-      traceStep: "post_bid_link",
-      legalAction,
-      runnerLinkFallback: calculateRunnerLink(state),
-    },
-  );
-}
-
-function runnerTraceLinkCreditSourceIds(state: GameState): CardInstanceId[] {
-  return [
-    ...restrictedHostedCreditSourceIds(state, "increase_link"),
-    ...[...state.runner.rig.hardware, ...state.runner.rig.resources].filter(
-      (cardId) =>
-        !isRestrictedHostedCreditSource(definitionFor(state, cardId)) &&
-        definitionFor(state, cardId).id === HELLS_RUN_ID &&
-        cardCounter(state, cardId, "recurring_credit") > 0,
-    ),
-  ].sort();
-}
-
-function runnerTraceLinkCredits(state: GameState): number {
-  return runnerTraceLinkCreditSourceIds(state).reduce(
-    (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
-    0,
-  );
-}
-
-function selectedBidAmount(
-  choice: ChoiceRequest | undefined,
-  playerAction: PlayerAction,
-): number {
-  if (!choice) throw new Error("Es ist keine Bid-Choice offen.");
-  const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
-  const selected = choice.options.find(
-    (option) => option.id === selectedOptionId,
-  );
-  const amount =
-    typeof selected?.value === "number" ? selected.value : Number.NaN;
-  if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Der Trace-Bid ist ungueltig.");
-  return amount;
-}
-
-function calculateRunnerLinkCore(state: GameState): number {
-  const identity = definitionFor(state, state.runner.identity);
-  const baseLink = identity.baseLink ?? 0;
-  if (!Number.isInteger(baseLink) || baseLink < 0)
-    throw new Error("Runner-Link ist ungueltig.");
-  const modifier = identityModifierAmount(
-    state,
-    "runner",
-    "base_link",
-    "static",
-  );
-  const cryingReduction = cardCounter(state, state.runner.identity, "crying") * 2;
-  const link = Math.max(0, baseLink + modifier - cryingReduction);
-  if (!Number.isInteger(link) || link < 0)
-    throw new Error("Runner-Link ist ungueltig.");
-  return link;
-}
-
-function calculateRunnerLink(state: GameState): number {
-  const coreLink = calculateRunnerLinkCore(state);
-  const traceBaseLink = state.trace?.baseLinkValue ?? 0;
-  if (!Number.isInteger(traceBaseLink) || traceBaseLink < 0)
-    throw new Error("Runner-Link ist ungueltig.");
-  const installedLink =
-    traceBaseLink > 0
-      ? 0
-      : [
-          ...state.runner.rig.programs,
-          ...state.runner.rig.hardware,
-          ...state.runner.rig.resources,
-        ].reduce((best, cardId) => {
-          const definition = definitionFor(state, cardId);
-          if (installedTraceBaseLinkCardImplementation(definition)) return best;
-          const cardLink = definition.baseLink ?? 0;
-          if (!Number.isInteger(cardLink) || cardLink < 0)
-            throw new Error("Runner-Link ist ungueltig.");
-          return Math.max(best, cardLink);
-        }, 0);
-  const link = Math.max(0, coreLink + installedLink + traceBaseLink);
-  const runTraceLinkBonus = Math.max(
-    0,
-    Math.floor(state.run?.runTraceLinkBonus ?? 0),
-  );
-  const effectiveLink = link + runTraceLinkBonus;
-  if (!Number.isInteger(effectiveLink) || effectiveLink < 0)
-    throw new Error("Runner-Link ist ungueltig.");
-  return effectiveLink;
-}
 
 function identityModifierAmount(
   state: GameState,

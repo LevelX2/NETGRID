@@ -13,11 +13,7 @@ export type PendingChoiceResolutionHost = {
     resolveEventModificationChoice: HostFn<void>;
   };
   trace: {
-    traceIsInPhase: HostFn<boolean>;
-    resolveTraceCorpBid: HostFn<void>;
-    resolveTraceBaseLinkChoice: HostFn<void>;
-    resolveTracePostBidLinkChoice: HostFn<void>;
-    resolveTraceRunnerBid: HostFn<void>;
+    resolveTraceChoice: HostFn<void>;
   };
   hiddenZone: {
     handleHiddenZoneArrangeChoice: HostFn<{ handled: boolean }>;
@@ -104,12 +100,7 @@ export function resolvePendingChoice(
   const resolveReplacementChoice = host.replacement.resolveReplacementChoice;
   const resolveEventModificationChoice =
     host.replacement.resolveEventModificationChoice;
-  const traceIsInPhase = host.trace.traceIsInPhase;
-  const resolveTraceCorpBid = host.trace.resolveTraceCorpBid;
-  const resolveTraceBaseLinkChoice = host.trace.resolveTraceBaseLinkChoice;
-  const resolveTracePostBidLinkChoice =
-    host.trace.resolveTracePostBidLinkChoice;
-  const resolveTraceRunnerBid = host.trace.resolveTraceRunnerBid;
+  const resolveTraceChoice = host.trace.resolveTraceChoice;
   const handleHiddenZoneArrangeChoice =
     host.hiddenZone.handleHiddenZoneArrangeChoice;
   const hiddenZoneArrangeChoiceHandlerHost =
@@ -237,19 +228,7 @@ export function resolvePendingChoice(
     return;
   }
   if (state.trace) {
-    if (traceIsInPhase(state, "corp_bid")) {
-      resolveTraceCorpBid(state, legalAction, playerAction);
-      return;
-    }
-    if (traceIsInPhase(state, "base_link")) {
-      resolveTraceBaseLinkChoice(state, legalAction, playerAction);
-      return;
-    }
-    if (traceIsInPhase(state, "post_bid_link")) {
-      resolveTracePostBidLinkChoice(state, legalAction, playerAction);
-      return;
-    }
-    resolveTraceRunnerBid(state, legalAction, playerAction);
+    resolveTraceChoice(state, legalAction, playerAction);
     return;
   }
   const hiddenZoneArrangeChoice = handleHiddenZoneArrangeChoice(
