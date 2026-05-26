@@ -1,0 +1,1565 @@
+{
+  "schemaVersion": "ai-generated-fact-batch2-normalization-dry-run-v1",
+  "generatedAt": "2026-05-25",
+  "taskId": "Aufgabe 010",
+  "sourceDiffReviewReport": "docs/reviews/ai/aufgabe-009-batch2-diff-review-report-2026-05-25.json",
+  "sourceDryRunReport": "docs/reviews/ai/aufgabe-008-generated-fact-batch2-dry-run-report-2026-05-25.json",
+  "batch": "batch_2_breaker_target_trash_credit",
+  "mode": "read-only normalization dry-run; no active hint migration, no runtime compile, no planner or consumer binding",
+  "hardErrorCount": 0,
+  "normalizationRulesApplied": [
+    {
+      "kind": "target_profile_install_cost_normalization",
+      "appliesTo": [
+        "targetProfile",
+        "effect:install_discount"
+      ],
+      "rationale": "SMC normal-cost target installs and Mystery Box free installs stay distinct while comparing targetProfile/install_discount shape.",
+      "safetyBoundary": "Comparator-only; does not create install legality, cost payment or an install_discount for SMC.",
+      "scope": "read-only comparator normalization; no runtime, planner, consumer or active hint effect"
+    },
+    {
+      "kind": "target_profile_stack_search_normalization",
+      "appliesTo": [
+        "targetProfile"
+      ],
+      "rationale": "Full-stack search and top-five stack look/install are normalized as distinct target-profile classes.",
+      "safetyBoundary": "Comparator-only; does not equate stack search with top-five stack reveal/install.",
+      "scope": "read-only comparator normalization; no runtime, planner, consumer or active hint effect"
+    },
+    {
+      "kind": "trash_credit_target_normalization",
+      "appliesTo": [
+        "effect:trash_credit"
+      ],
+      "rationale": "Poltergeist node trash credits and Scatter Shot upgrade trash credits are normalized as target-specific trash-credit sources.",
+      "safetyBoundary": "Comparator-only; does not infer payment legality or swap node/upgrade targets.",
+      "scope": "read-only comparator normalization; no runtime, planner, consumer or active hint effect"
+    },
+    {
+      "kind": "breaker_profile_shape_normalization",
+      "appliesTo": [
+        "breakerProfile"
+      ],
+      "rationale": "Breaker coverage, baseStrength defaults, pumpCost, breakCost and sideEffects are compared through one read-only normal form.",
+      "safetyBoundary": "Comparator-only; does not create break legality or replace Engine/effectiveRunQuote cost handling.",
+      "scope": "read-only comparator normalization; no runtime, planner, consumer or active hint effect"
+    },
+    {
+      "kind": "cost_profile_split_normalization",
+      "appliesTo": [
+        "costProfile"
+      ],
+      "rationale": "Mechanical cost fields are split from strategic reserveRisk/opportunityCost overlay fields.",
+      "safetyBoundary": "Comparator-only; does not migrate strategic cost/risk hints into generated basic facts.",
+      "scope": "read-only comparator normalization; no runtime, planner, consumer or active hint effect"
+    },
+    {
+      "kind": "board_context_required_classification",
+      "appliesTo": [
+        "condition:requires_during_run",
+        "effect:install_discount",
+        "effect:search",
+        "targetProfile"
+      ],
+      "rationale": "Board-/LegalAction-context notes are downgraded to explicit safety context, not unresolved migration warnings.",
+      "safetyBoundary": "Comparator-only; does not assert current playability or action availability.",
+      "scope": "read-only comparator normalization; no runtime, planner, consumer or active hint effect"
+    }
+  ],
+  "normalizationRuleCounts": {
+    "target_profile_install_cost_normalization": 3,
+    "target_profile_stack_search_normalization": 2,
+    "trash_credit_target_normalization": 4,
+    "breaker_profile_shape_normalization": 2,
+    "cost_profile_split_normalization": 6,
+    "board_context_required_classification": 7
+  },
+  "normalizedDifferenceCount": 15,
+  "remainingShapeDifferenceCount": 0,
+  "remainingTargetProfileDifferenceCount": 0,
+  "remainingTrashCreditTargetDifferenceCount": 0,
+  "remainingCostProfileDifferenceCount": 0,
+  "boardContextInfoCount": 7,
+  "realSemanticConflictCount": 0,
+  "normalizedEquivalencesByCard": [
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "normalizedCount": 2,
+      "boardContextInfoCount": 0,
+      "remainingCount": 0
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "normalizedCount": 2,
+      "boardContextInfoCount": 0,
+      "remainingCount": 0
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "normalizedCount": 3,
+      "boardContextInfoCount": 4,
+      "remainingCount": 0
+    },
+    {
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
+      "normalizedCount": 3,
+      "boardContextInfoCount": 0,
+      "remainingCount": 0
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "normalizedCount": 3,
+      "boardContextInfoCount": 0,
+      "remainingCount": 0
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "normalizedCount": 2,
+      "boardContextInfoCount": 3,
+      "remainingCount": 0
+    }
+  ],
+  "remainingDifferences": [],
+  "realSemanticConflicts": [],
+  "cards": [
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "normalizedEquivalences": [
+        {
+          "fact": "breakerProfile",
+          "sourceWarningKind": "shape_difference",
+          "oldClassification": "generated_more_precise_than_monolith",
+          "newClassification": "normalized_equivalent",
+          "rules": [
+            "breaker_profile_shape_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "breaker_profile_shape_normalization",
+              "form": {
+                "kind": "breakerProfile",
+                "coverage": [
+                  "wall"
+                ],
+                "baseStrength": 2,
+                "pumpCost": 1,
+                "breakCost": 0,
+                "sideEffects": [
+                  "forgo_actions"
+                ],
+                "sourcePreference": "generated_mechanical_fields_with_active_defaults",
+                "legalityBoundary": "encounter_legalaction_required"
+              },
+              "rationale": "Breaker coverage, baseStrength defaults, pumpCost, breakCost and sideEffects are compared through one read-only normal form.",
+              "safetyBoundary": "Comparator-only; does not create break legality or replace Engine/effectiveRunQuote cost handling."
+            }
+          ],
+          "activeValue": {
+            "type": "breakerProfile",
+            "coverage": [
+              "wall"
+            ],
+            "baseStrength": 2,
+            "pumpCost": 0,
+            "breakCost": 0,
+            "sideEffects": [
+              "forgo_actions"
+            ],
+            "source": "active.breakerProfile"
+          },
+          "generatedValue": {
+            "type": "breakerProfile",
+            "coverage": [
+              "wall"
+            ],
+            "pumpCost": 1,
+            "breakCost": 0,
+            "sideEffects": [
+              "forgo_actions"
+            ],
+            "confidence": "medium",
+            "source": "implementation.icebreakerAbilities"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_037_japanese-water-torture",
+            "side": "runner",
+            "cardType": "program",
+            "effects": [
+              {
+                "kind": "breaker",
+                "timing": "persistent",
+                "scope": "runner"
+              }
+            ],
+            "breakerProfile": {
+              "coverage": [
+                "wall"
+              ],
+              "baseStrength": 2,
+              "pumpCost": 0,
+              "breakCost": 0,
+              "sideEffects": [
+                "forgo_actions"
+              ]
+            },
+            "costProfile": {
+              "clicks": 0,
+              "credits": 7,
+              "memory": 1,
+              "reserveRisk": "low",
+              "opportunityCost": "high"
+            }
+          },
+          "manualOverlay": {
+            "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+            "fields": [
+              "lineSupport",
+              "manualNotes",
+              "quality"
+            ],
+            "value": {
+              "lineSupport": [
+                "rig_first"
+              ],
+              "quality": {
+                "hintReviewed": true,
+                "strategyCovered": false,
+                "benchmarkCovered": false,
+                "confidence": "high",
+                "needsHumanReview": false
+              },
+              "manualNotes": [
+                "Future action debt is represented mechanically as breakerProfile.sideEffects forgo_actions; breaker coverage remains generated."
+              ]
+            }
+          },
+          "rationale": "Generated facts preserve forgo_actions and expose pumpCost=1; the active monolith has the same coverage/side effect but carries legacy baseStrength/pumpCost shape.",
+          "conflict": false
+        },
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "oldClassification": "cost_profile_requires_overlay_split",
+          "newClassification": "normalized_cost_profile_split",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "cost_profile_split_normalization",
+              "form": {
+                "kind": "costProfileSplit",
+                "mechanicalCostFields": {
+                  "clicks": 0,
+                  "credits": 7,
+                  "memory": 1
+                },
+                "strategicOverlayFields": {
+                  "reserveRisk": "low",
+                  "opportunityCost": "high"
+                },
+                "generatedMigrationBoundary": "mechanical_costs_only; reserveRisk/opportunityCost remain strategy overlay"
+              },
+              "rationale": "Mechanical cost fields are split from strategic reserveRisk/opportunityCost overlay fields.",
+              "safetyBoundary": "Comparator-only; does not migrate strategic cost/risk hints into generated basic facts."
+            }
+          ],
+          "activeValue": {
+            "type": "costProfile",
+            "clicks": 0,
+            "credits": 7,
+            "memory": 1,
+            "reserveRisk": "low",
+            "opportunityCost": "high",
+            "source": "active.costProfile"
+          },
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "clicks": 0,
+            "credits": 7,
+            "memory": 1,
+            "reserveRisk": "low",
+            "opportunityCost": "high"
+          },
+          "manualOverlay": {
+            "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+            "fields": [
+              "lineSupport",
+              "manualNotes",
+              "quality"
+            ],
+            "value": {
+              "lineSupport": [
+                "rig_first"
+              ],
+              "quality": {
+                "hintReviewed": true,
+                "strategyCovered": false,
+                "benchmarkCovered": false,
+                "confidence": "high",
+                "needsHumanReview": false
+              },
+              "manualNotes": [
+                "Future action debt is represented mechanically as breakerProfile.sideEffects forgo_actions; breaker coverage remains generated."
+              ]
+            }
+          },
+          "rationale": "Mechanical clicks/credits/memory can be generated later where descriptors expose them; reserveRisk/opportunityCost are strategic/diagnostic overlay fields and should not be treated as generated basic facts.",
+          "conflict": false
+        }
+      ],
+      "boardContextInfos": [],
+      "remainingDifferences": [],
+      "realSemanticConflicts": []
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "normalizedEquivalences": [
+        {
+          "fact": "breakerProfile",
+          "sourceWarningKind": "shape_difference",
+          "oldClassification": "semantic_equivalent_shape_difference",
+          "newClassification": "normalized_equivalent",
+          "rules": [
+            "breaker_profile_shape_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "breaker_profile_shape_normalization",
+              "form": {
+                "kind": "breakerProfile",
+                "coverage": [
+                  "universal"
+                ],
+                "baseStrength": 0,
+                "pumpCost": 2,
+                "breakCost": 2,
+                "sideEffects": [],
+                "sourcePreference": "generated_mechanical_fields_with_active_defaults",
+                "legalityBoundary": "encounter_legalaction_required"
+              },
+              "rationale": "Breaker coverage, baseStrength defaults, pumpCost, breakCost and sideEffects are compared through one read-only normal form.",
+              "safetyBoundary": "Comparator-only; does not create break legality or replace Engine/effectiveRunQuote cost handling."
+            }
+          ],
+          "activeValue": {
+            "type": "breakerProfile",
+            "coverage": [
+              "universal"
+            ],
+            "baseStrength": 0,
+            "pumpCost": 2,
+            "breakCost": 2,
+            "source": "active.breakerProfile"
+          },
+          "generatedValue": {
+            "type": "breakerProfile",
+            "coverage": [
+              "universal"
+            ],
+            "pumpCost": 2,
+            "breakCost": 2,
+            "confidence": "high",
+            "source": "implementation.icebreakerAbilities"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_039_krash",
+            "side": "runner",
+            "cardType": "program",
+            "effects": [
+              {
+                "kind": "breaker",
+                "timing": "persistent",
+                "scope": "runner"
+              }
+            ],
+            "breakerProfile": {
+              "coverage": [
+                "universal"
+              ],
+              "baseStrength": 0,
+              "pumpCost": 2,
+              "breakCost": 2
+            },
+            "costProfile": {
+              "clicks": 0,
+              "credits": 0,
+              "memory": 1,
+              "reserveRisk": "high",
+              "opportunityCost": "medium"
+            }
+          },
+          "manualOverlay": {
+            "fields": [],
+            "value": null
+          },
+          "rationale": "Krash generated and active breaker profiles agree on universal coverage and costs; active baseStrength=0 is a harmless explicit default.",
+          "conflict": false
+        },
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "oldClassification": "cost_profile_requires_overlay_split",
+          "newClassification": "normalized_cost_profile_split",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "cost_profile_split_normalization",
+              "form": {
+                "kind": "costProfileSplit",
+                "mechanicalCostFields": {
+                  "clicks": 0,
+                  "credits": 0,
+                  "memory": 1
+                },
+                "strategicOverlayFields": {
+                  "reserveRisk": "high",
+                  "opportunityCost": "medium"
+                },
+                "generatedMigrationBoundary": "mechanical_costs_only; reserveRisk/opportunityCost remain strategy overlay"
+              },
+              "rationale": "Mechanical cost fields are split from strategic reserveRisk/opportunityCost overlay fields.",
+              "safetyBoundary": "Comparator-only; does not migrate strategic cost/risk hints into generated basic facts."
+            }
+          ],
+          "activeValue": {
+            "type": "costProfile",
+            "clicks": 0,
+            "credits": 0,
+            "memory": 1,
+            "reserveRisk": "high",
+            "opportunityCost": "medium",
+            "source": "active.costProfile"
+          },
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "clicks": 0,
+            "credits": 0,
+            "memory": 1,
+            "reserveRisk": "high",
+            "opportunityCost": "medium"
+          },
+          "manualOverlay": {
+            "fields": [],
+            "value": null
+          },
+          "rationale": "Mechanical clicks/credits/memory can be generated later where descriptors expose them; reserveRisk/opportunityCost are strategic/diagnostic overlay fields and should not be treated as generated basic facts.",
+          "conflict": false
+        }
+      ],
+      "boardContextInfos": [],
+      "remainingDifferences": [],
+      "realSemanticConflicts": []
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "normalizedEquivalences": [
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "oldClassification": "cost_profile_requires_overlay_split",
+          "newClassification": "normalized_cost_profile_split",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "cost_profile_split_normalization",
+              "form": {
+                "kind": "costProfileSplit",
+                "mechanicalCostFields": {
+                  "clicks": 0
+                },
+                "strategicOverlayFields": {
+                  "reserveRisk": "low",
+                  "opportunityCost": "medium"
+                },
+                "generatedMigrationBoundary": "mechanical_costs_only; reserveRisk/opportunityCost remain strategy overlay"
+              },
+              "rationale": "Mechanical cost fields are split from strategic reserveRisk/opportunityCost overlay fields.",
+              "safetyBoundary": "Comparator-only; does not migrate strategic cost/risk hints into generated basic facts."
+            }
+          ],
+          "activeValue": {
+            "type": "costProfile",
+            "clicks": 0,
+            "reserveRisk": "low",
+            "opportunityCost": "medium",
+            "source": "active.costProfile"
+          },
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "clicks": 0,
+            "reserveRisk": "low",
+            "opportunityCost": "medium"
+          },
+          "manualOverlay": {
+            "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+            "fields": [
+              "lineSupport",
+              "manualNotes",
+              "quality"
+            ],
+            "value": {
+              "lineSupport": [
+                "rig_first",
+                "breaker_search_first"
+              ],
+              "quality": {
+                "hintReviewed": true,
+                "strategyCovered": false,
+                "benchmarkCovered": false,
+                "confidence": "high",
+                "needsHumanReview": false
+              },
+              "manualNotes": [
+                "The once-per-run limit is represented mechanically as targetProfiles.oncePerRun; search and install target profile stay generated."
+              ]
+            }
+          },
+          "rationale": "Mechanical clicks/credits/memory can be generated later where descriptors expose them; reserveRisk/opportunityCost are strategic/diagnostic overlay fields and should not be treated as generated basic facts.",
+          "conflict": false
+        },
+        {
+          "fact": "effect:install_discount",
+          "sourceWarningKind": "shape_difference",
+          "oldClassification": "semantic_equivalent_shape_difference",
+          "newClassification": "normalized_equivalent",
+          "rules": [
+            "target_profile_install_cost_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "target_profile_install_cost_normalization",
+              "form": {
+                "kind": "install_discount",
+                "profileClass": "free_install_effect",
+                "cardId": "onr_v1_043_mystery-box",
+                "installCost": "free",
+                "targetProfileRequired": true,
+                "legalityBoundary": "engine_cost_context_required"
+              },
+              "rationale": "SMC normal-cost target installs and Mystery Box free installs stay distinct while comparing targetProfile/install_discount shape.",
+              "safetyBoundary": "Comparator-only; does not create install legality, cost payment or an install_discount for SMC."
+            }
+          ],
+          "activeValue": {
+            "type": "effect",
+            "kind": "install_discount",
+            "timing": "during_run",
+            "scope": "installed_card",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "install_discount",
+            "timing": "during_run",
+            "scope": "runner",
+            "confidence": "high",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching.installCost"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_043_mystery-box",
+            "side": "runner",
+            "cardType": "program",
+            "effects": [
+              {
+                "kind": "install_discount",
+                "timing": "during_run",
+                "scope": "installed_card"
+              },
+              {
+                "kind": "search",
+                "timing": "during_run",
+                "scope": "runner"
+              },
+              {
+                "kind": "topdeck_info",
+                "timing": "during_run",
+                "scope": "runner",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              },
+              {
+                "kind": "requires_installed_program"
+              }
+            ],
+            "targetProfiles": [
+              {
+                "zone": "stack_top",
+                "lookCount": 5,
+                "targetCardType": "program",
+                "installsTarget": true,
+                "installCost": "free",
+                "oncePerRun": true,
+                "shuffleAfter": true,
+                "showToOpponent": true
+              }
+            ],
+            "costProfile": {
+              "clicks": 0,
+              "reserveRisk": "low",
+              "opportunityCost": "medium"
+            }
+          },
+          "manualOverlay": {
+            "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+            "fields": [
+              "lineSupport",
+              "manualNotes",
+              "quality"
+            ],
+            "value": {
+              "lineSupport": [
+                "rig_first",
+                "breaker_search_first"
+              ],
+              "quality": {
+                "hintReviewed": true,
+                "strategyCovered": false,
+                "benchmarkCovered": false,
+                "confidence": "high",
+                "needsHumanReview": false
+              },
+              "manualNotes": [
+                "The once-per-run limit is represented mechanically as targetProfiles.oncePerRun; search and install target profile stay generated."
+              ]
+            }
+          },
+          "rationale": "The targetProfile confirms installCost=free, so the install_discount scope mismatch is a shape issue, not an SMC-style discount error.",
+          "conflict": false
+        },
+        {
+          "fact": "targetProfile",
+          "sourceWarningKind": "target_profile_shape_difference",
+          "oldClassification": "generated_more_precise_than_monolith",
+          "newClassification": "normalized_equivalent",
+          "rules": [
+            "target_profile_install_cost_normalization",
+            "target_profile_stack_search_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "target_profile_install_cost_normalization",
+              "form": {
+                "kind": "targetProfile",
+                "profileClass": "top_five_stack_program_look_install",
+                "zone": "stack_top",
+                "lookCount": 5,
+                "targetCardType": "program",
+                "installsTarget": true,
+                "installCost": "free",
+                "showToOpponent": true,
+                "oncePerRun": true,
+                "shuffleAfter": true,
+                "discountEffect": true,
+                "legalityBoundary": "search_and_install_legalaction_required"
+              },
+              "rationale": "SMC normal-cost target installs and Mystery Box free installs stay distinct while comparing targetProfile/install_discount shape.",
+              "safetyBoundary": "Comparator-only; does not create install legality, cost payment or an install_discount for SMC."
+            },
+            {
+              "rule": "target_profile_stack_search_normalization",
+              "form": {
+                "kind": "targetProfile",
+                "profileClass": "top_five_stack_program_look_install",
+                "zone": "stack_top",
+                "lookCount": 5,
+                "targetCardType": "program",
+                "installsTarget": true,
+                "installCost": "free",
+                "showToOpponent": true,
+                "oncePerRun": true,
+                "shuffleAfter": true,
+                "discountEffect": true,
+                "legalityBoundary": "search_and_install_legalaction_required"
+              },
+              "rationale": "Full-stack search and top-five stack look/install are normalized as distinct target-profile classes.",
+              "safetyBoundary": "Comparator-only; does not equate stack search with top-five stack reveal/install."
+            }
+          ],
+          "activeValue": null,
+          "generatedValue": {
+            "type": "targetProfile",
+            "zone": "stack_top",
+            "lookCount": 5,
+            "targetCardType": "program",
+            "installsTarget": true,
+            "installCost": "free",
+            "oncePerRun": true,
+            "shuffleAfter": true,
+            "showToOpponent": true,
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_043_mystery-box",
+            "side": "runner",
+            "cardType": "program",
+            "effects": [
+              {
+                "kind": "install_discount",
+                "timing": "during_run",
+                "scope": "installed_card"
+              },
+              {
+                "kind": "search",
+                "timing": "during_run",
+                "scope": "runner"
+              },
+              {
+                "kind": "topdeck_info",
+                "timing": "during_run",
+                "scope": "runner",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              },
+              {
+                "kind": "requires_installed_program"
+              }
+            ],
+            "targetProfiles": [
+              {
+                "zone": "stack_top",
+                "lookCount": 5,
+                "targetCardType": "program",
+                "installsTarget": true,
+                "installCost": "free",
+                "oncePerRun": true,
+                "shuffleAfter": true,
+                "showToOpponent": true
+              }
+            ],
+            "costProfile": {
+              "clicks": 0,
+              "reserveRisk": "low",
+              "opportunityCost": "medium"
+            }
+          },
+          "manualOverlay": {
+            "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+            "fields": [
+              "lineSupport",
+              "manualNotes",
+              "quality"
+            ],
+            "value": {
+              "lineSupport": [
+                "rig_first",
+                "breaker_search_first"
+              ],
+              "quality": {
+                "hintReviewed": true,
+                "strategyCovered": false,
+                "benchmarkCovered": false,
+                "confidence": "high",
+                "needsHumanReview": false
+              },
+              "manualNotes": [
+                "The once-per-run limit is represented mechanically as targetProfiles.oncePerRun; search and install target profile stay generated."
+              ]
+            }
+          },
+          "rationale": "Mystery Box generated targetProfile carries zone=stack_top, lookCount=5, targetCardType=program, installsTarget=true, installCost=free, showToOpponent and oncePerRun; the active monolith has only older search/discount shapes.",
+          "conflict": false
+        }
+      ],
+      "boardContextInfos": [
+        {
+          "fact": "condition:requires_during_run",
+          "classification": "target_profile_requires_search_legalaction_context",
+          "rule": "board_context_required_classification",
+          "normalizedForm": {
+            "kind": "condition:requires_during_run",
+            "contextClass": "target_profile_requires_search_legalaction_context",
+            "boardContextRequired": true,
+            "legalityBoundary": "search_or_target_legalaction_required"
+          },
+          "activeValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "source": "active.conditions"
+          },
+          "generatedValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "confidence": "high",
+            "source": "implementation.ability.timing.during_run"
+          },
+          "rationale": "Board-/LegalAction-context notes are downgraded to explicit safety context, not unresolved migration warnings.",
+          "safetyBoundary": "Comparator-only; does not assert current playability or action availability.",
+          "conflict": false
+        },
+        {
+          "fact": "effect:install_discount",
+          "classification": "install_cost_requires_engine_cost_context",
+          "rule": "board_context_required_classification",
+          "normalizedForm": {
+            "kind": "effect:install_discount",
+            "contextClass": "install_cost_requires_engine_cost_context",
+            "boardContextRequired": true,
+            "legalityBoundary": "engine_cost_context_required"
+          },
+          "activeValue": {
+            "type": "effect",
+            "kind": "install_discount",
+            "timing": "during_run",
+            "scope": "installed_card",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "install_discount",
+            "timing": "during_run",
+            "scope": "runner",
+            "confidence": "high",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching.installCost"
+          },
+          "rationale": "Board-/LegalAction-context notes are downgraded to explicit safety context, not unresolved migration warnings.",
+          "safetyBoundary": "Comparator-only; does not assert current playability or action availability.",
+          "conflict": false
+        },
+        {
+          "fact": "effect:search",
+          "classification": "target_profile_requires_search_legalaction_context",
+          "rule": "board_context_required_classification",
+          "normalizedForm": {
+            "kind": "effect:search",
+            "contextClass": "target_profile_requires_search_legalaction_context",
+            "boardContextRequired": true,
+            "legalityBoundary": "search_or_target_legalaction_required"
+          },
+          "activeValue": {
+            "type": "effect",
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner",
+            "confidence": "high",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
+          },
+          "rationale": "Board-/LegalAction-context notes are downgraded to explicit safety context, not unresolved migration warnings.",
+          "safetyBoundary": "Comparator-only; does not assert current playability or action availability.",
+          "conflict": false
+        },
+        {
+          "fact": "targetProfile",
+          "classification": "target_profile_requires_search_legalaction_context",
+          "rule": "board_context_required_classification",
+          "normalizedForm": {
+            "kind": "targetProfile",
+            "contextClass": "target_profile_requires_search_legalaction_context",
+            "boardContextRequired": true,
+            "legalityBoundary": "search_or_target_legalaction_required"
+          },
+          "generatedValue": {
+            "type": "targetProfile",
+            "zone": "stack_top",
+            "lookCount": 5,
+            "targetCardType": "program",
+            "installsTarget": true,
+            "installCost": "free",
+            "oncePerRun": true,
+            "shuffleAfter": true,
+            "showToOpponent": true,
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
+          },
+          "rationale": "Board-/LegalAction-context notes are downgraded to explicit safety context, not unresolved migration warnings.",
+          "safetyBoundary": "Comparator-only; does not assert current playability or action availability.",
+          "conflict": false
+        }
+      ],
+      "remainingDifferences": [],
+      "realSemanticConflicts": []
+    },
+    {
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
+      "normalizedEquivalences": [
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "oldClassification": "cost_profile_requires_overlay_split",
+          "newClassification": "normalized_cost_profile_split",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "cost_profile_split_normalization",
+              "form": {
+                "kind": "costProfileSplit",
+                "mechanicalCostFields": {
+                  "credits": 0,
+                  "memory": 1
+                },
+                "strategicOverlayFields": {
+                  "reserveRisk": "low",
+                  "opportunityCost": "low"
+                },
+                "generatedMigrationBoundary": "mechanical_costs_only; reserveRisk/opportunityCost remain strategy overlay"
+              },
+              "rationale": "Mechanical cost fields are split from strategic reserveRisk/opportunityCost overlay fields.",
+              "safetyBoundary": "Comparator-only; does not migrate strategic cost/risk hints into generated basic facts."
+            }
+          ],
+          "activeValue": {
+            "type": "costProfile",
+            "credits": 0,
+            "memory": 1,
+            "reserveRisk": "low",
+            "opportunityCost": "low",
+            "source": "active.costProfile"
+          },
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "credits": 0,
+            "memory": 1,
+            "reserveRisk": "low",
+            "opportunityCost": "low"
+          },
+          "manualOverlay": {
+            "fields": [],
+            "value": null
+          },
+          "rationale": "Mechanical clicks/credits/memory can be generated later where descriptors expose them; reserveRisk/opportunityCost are strategic/diagnostic overlay fields and should not be treated as generated basic facts.",
+          "conflict": false
+        },
+        {
+          "fact": "effect:trash_credit",
+          "sourceWarningKind": "shape_difference",
+          "oldClassification": "monolith_more_specific_than_generated",
+          "newClassification": "normalized_equivalent",
+          "rules": [
+            "trash_credit_target_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "trash_credit_target_normalization",
+              "form": {
+                "kind": "trash_credit",
+                "resource": "trash_credits",
+                "target": "node",
+                "amount": 2,
+                "repeatable": true,
+                "legalityBoundary": "payment_legalaction_required"
+              },
+              "rationale": "Poltergeist node trash credits and Scatter Shot upgrade trash credits are normalized as target-specific trash-credit sources.",
+              "safetyBoundary": "Comparator-only; does not infer payment legality or swap node/upgrade targets."
+            }
+          ],
+          "activeValue": {
+            "type": "effect",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "amount": 2,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "confidence": "high",
+            "source": "implementation.restrictedHostedCreditSource"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_048_poltergeist",
+            "side": "runner",
+            "cardType": "program",
+            "effects": [
+              {
+                "kind": "trash_credit",
+                "timing": "persistent",
+                "scope": "runner",
+                "resource": "trash_credits",
+                "amount": 2,
+                "repeatable": true
+              }
+            ],
+            "costProfile": {
+              "credits": 0,
+              "memory": 1,
+              "reserveRisk": "low",
+              "opportunityCost": "low"
+            }
+          },
+          "manualOverlay": {
+            "fields": [],
+            "value": null
+          },
+          "rationale": "The generated fact confirms trash_credit but does not yet encode amount/repeatable or the card-specific node/upgrade target.",
+          "conflict": false
+        },
+        {
+          "fact": "effect:trash_credit",
+          "sourceWarningKind": "trash_credit_target_shape_difference",
+          "oldClassification": "target_equivalent_node_trash_credit",
+          "newClassification": "normalized_equivalent",
+          "rules": [
+            "trash_credit_target_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "trash_credit_target_normalization",
+              "form": {
+                "kind": "trash_credit",
+                "resource": "trash_credits",
+                "target": "node",
+                "amount": 2,
+                "repeatable": true,
+                "legalityBoundary": "payment_legalaction_required"
+              },
+              "rationale": "Poltergeist node trash credits and Scatter Shot upgrade trash credits are normalized as target-specific trash-credit sources.",
+              "safetyBoundary": "Comparator-only; does not infer payment legality or swap node/upgrade targets."
+            }
+          ],
+          "activeValue": {
+            "type": "effect",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "amount": 2,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "confidence": "high",
+            "source": "implementation.restrictedHostedCreditSource"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_048_poltergeist",
+            "side": "runner",
+            "cardType": "program",
+            "effects": [
+              {
+                "kind": "trash_credit",
+                "timing": "persistent",
+                "scope": "runner",
+                "resource": "trash_credits",
+                "amount": 2,
+                "repeatable": true
+              }
+            ],
+            "costProfile": {
+              "credits": 0,
+              "memory": 1,
+              "reserveRisk": "low",
+              "opportunityCost": "low"
+            }
+          },
+          "manualOverlay": {
+            "fields": [],
+            "value": null
+          },
+          "rationale": "The dry-run keeps node/upgrade targets separate via card-specific context; generated currently confirms the credit source but not the full target/amount shape.",
+          "conflict": false
+        }
+      ],
+      "boardContextInfos": [],
+      "remainingDifferences": [],
+      "realSemanticConflicts": []
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "normalizedEquivalences": [
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "oldClassification": "cost_profile_requires_overlay_split",
+          "newClassification": "normalized_cost_profile_split",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "cost_profile_split_normalization",
+              "form": {
+                "kind": "costProfileSplit",
+                "mechanicalCostFields": {
+                  "credits": 0,
+                  "memory": 1
+                },
+                "strategicOverlayFields": {
+                  "reserveRisk": "low",
+                  "opportunityCost": "low"
+                },
+                "generatedMigrationBoundary": "mechanical_costs_only; reserveRisk/opportunityCost remain strategy overlay"
+              },
+              "rationale": "Mechanical cost fields are split from strategic reserveRisk/opportunityCost overlay fields.",
+              "safetyBoundary": "Comparator-only; does not migrate strategic cost/risk hints into generated basic facts."
+            }
+          ],
+          "activeValue": {
+            "type": "costProfile",
+            "credits": 0,
+            "memory": 1,
+            "reserveRisk": "low",
+            "opportunityCost": "low",
+            "source": "active.costProfile"
+          },
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "credits": 0,
+            "memory": 1,
+            "reserveRisk": "low",
+            "opportunityCost": "low"
+          },
+          "manualOverlay": {
+            "fields": [],
+            "value": null
+          },
+          "rationale": "Mechanical clicks/credits/memory can be generated later where descriptors expose them; reserveRisk/opportunityCost are strategic/diagnostic overlay fields and should not be treated as generated basic facts.",
+          "conflict": false
+        },
+        {
+          "fact": "effect:trash_credit",
+          "sourceWarningKind": "shape_difference",
+          "oldClassification": "monolith_more_specific_than_generated",
+          "newClassification": "normalized_equivalent",
+          "rules": [
+            "trash_credit_target_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "trash_credit_target_normalization",
+              "form": {
+                "kind": "trash_credit",
+                "resource": "trash_credits",
+                "target": "upgrade",
+                "amount": 2,
+                "repeatable": true,
+                "legalityBoundary": "payment_legalaction_required"
+              },
+              "rationale": "Poltergeist node trash credits and Scatter Shot upgrade trash credits are normalized as target-specific trash-credit sources.",
+              "safetyBoundary": "Comparator-only; does not infer payment legality or swap node/upgrade targets."
+            }
+          ],
+          "activeValue": {
+            "type": "effect",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "amount": 2,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "confidence": "high",
+            "source": "implementation.restrictedHostedCreditSource"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_057_scatter-shot",
+            "side": "runner",
+            "cardType": "program",
+            "effects": [
+              {
+                "kind": "trash_credit",
+                "timing": "persistent",
+                "scope": "runner",
+                "resource": "trash_credits",
+                "amount": 2,
+                "repeatable": true
+              }
+            ],
+            "costProfile": {
+              "credits": 0,
+              "memory": 1,
+              "reserveRisk": "low",
+              "opportunityCost": "low"
+            }
+          },
+          "manualOverlay": {
+            "fields": [],
+            "value": null
+          },
+          "rationale": "The generated fact confirms trash_credit but does not yet encode amount/repeatable or the card-specific node/upgrade target.",
+          "conflict": false
+        },
+        {
+          "fact": "effect:trash_credit",
+          "sourceWarningKind": "trash_credit_target_shape_difference",
+          "oldClassification": "target_equivalent_upgrade_trash_credit",
+          "newClassification": "normalized_equivalent",
+          "rules": [
+            "trash_credit_target_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "trash_credit_target_normalization",
+              "form": {
+                "kind": "trash_credit",
+                "resource": "trash_credits",
+                "target": "upgrade",
+                "amount": 2,
+                "repeatable": true,
+                "legalityBoundary": "payment_legalaction_required"
+              },
+              "rationale": "Poltergeist node trash credits and Scatter Shot upgrade trash credits are normalized as target-specific trash-credit sources.",
+              "safetyBoundary": "Comparator-only; does not infer payment legality or swap node/upgrade targets."
+            }
+          ],
+          "activeValue": {
+            "type": "effect",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "amount": 2,
+            "repeatable": true,
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "trash_credit",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "trash_credits",
+            "confidence": "high",
+            "source": "implementation.restrictedHostedCreditSource"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_057_scatter-shot",
+            "side": "runner",
+            "cardType": "program",
+            "effects": [
+              {
+                "kind": "trash_credit",
+                "timing": "persistent",
+                "scope": "runner",
+                "resource": "trash_credits",
+                "amount": 2,
+                "repeatable": true
+              }
+            ],
+            "costProfile": {
+              "credits": 0,
+              "memory": 1,
+              "reserveRisk": "low",
+              "opportunityCost": "low"
+            }
+          },
+          "manualOverlay": {
+            "fields": [],
+            "value": null
+          },
+          "rationale": "The dry-run keeps node/upgrade targets separate via card-specific context; generated currently confirms the credit source but not the full target/amount shape.",
+          "conflict": false
+        }
+      ],
+      "boardContextInfos": [],
+      "remainingDifferences": [],
+      "realSemanticConflicts": []
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "normalizedEquivalences": [
+        {
+          "fact": "costProfile",
+          "sourceWarningKind": "cost_profile_shape_difference",
+          "oldClassification": "cost_profile_requires_overlay_split",
+          "newClassification": "normalized_cost_profile_split",
+          "rules": [
+            "cost_profile_split_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "cost_profile_split_normalization",
+              "form": {
+                "kind": "costProfileSplit",
+                "mechanicalCostFields": {
+                  "clicks": 0
+                },
+                "strategicOverlayFields": {
+                  "reserveRisk": "medium",
+                  "opportunityCost": "medium"
+                },
+                "generatedMigrationBoundary": "mechanical_costs_only; reserveRisk/opportunityCost remain strategy overlay"
+              },
+              "rationale": "Mechanical cost fields are split from strategic reserveRisk/opportunityCost overlay fields.",
+              "safetyBoundary": "Comparator-only; does not migrate strategic cost/risk hints into generated basic facts."
+            }
+          ],
+          "activeValue": {
+            "type": "costProfile",
+            "clicks": 0,
+            "reserveRisk": "medium",
+            "opportunityCost": "medium",
+            "source": "active.costProfile"
+          },
+          "generatedValue": null,
+          "compiledPreviewValue": {
+            "clicks": 0,
+            "reserveRisk": "medium",
+            "opportunityCost": "medium"
+          },
+          "manualOverlay": {
+            "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+            "fields": [
+              "lineSupport",
+              "manualNotes",
+              "quality"
+            ],
+            "value": {
+              "lineSupport": [
+                "rig_first",
+                "breaker_search_first"
+              ],
+              "quality": {
+                "hintReviewed": true,
+                "strategyCovered": false,
+                "benchmarkCovered": true,
+                "confidence": "high",
+                "needsHumanReview": false
+              },
+              "manualNotes": [
+                "The install target profile is mechanical; any install-discount mismatch belongs in hint cleanup, not in this overlay."
+              ]
+            }
+          },
+          "rationale": "Mechanical clicks/credits/memory can be generated later where descriptors expose them; reserveRisk/opportunityCost are strategic/diagnostic overlay fields and should not be treated as generated basic facts.",
+          "conflict": false
+        },
+        {
+          "fact": "targetProfile",
+          "sourceWarningKind": "target_profile_shape_difference",
+          "oldClassification": "generated_more_precise_than_monolith",
+          "newClassification": "normalized_equivalent",
+          "rules": [
+            "target_profile_install_cost_normalization",
+            "target_profile_stack_search_normalization"
+          ],
+          "normalizedForms": [
+            {
+              "rule": "target_profile_install_cost_normalization",
+              "form": {
+                "kind": "targetProfile",
+                "profileClass": "full_stack_program_search_install",
+                "zone": "stack",
+                "targetCardType": "program",
+                "installsTarget": true,
+                "installCost": "normal",
+                "shuffleAfter": true,
+                "discountEffect": false,
+                "legalityBoundary": "search_and_install_legalaction_required"
+              },
+              "rationale": "SMC normal-cost target installs and Mystery Box free installs stay distinct while comparing targetProfile/install_discount shape.",
+              "safetyBoundary": "Comparator-only; does not create install legality, cost payment or an install_discount for SMC."
+            },
+            {
+              "rule": "target_profile_stack_search_normalization",
+              "form": {
+                "kind": "targetProfile",
+                "profileClass": "full_stack_program_search_install",
+                "zone": "stack",
+                "targetCardType": "program",
+                "installsTarget": true,
+                "installCost": "normal",
+                "shuffleAfter": true,
+                "discountEffect": false,
+                "legalityBoundary": "search_and_install_legalaction_required"
+              },
+              "rationale": "Full-stack search and top-five stack look/install are normalized as distinct target-profile classes.",
+              "safetyBoundary": "Comparator-only; does not equate stack search with top-five stack reveal/install."
+            }
+          ],
+          "activeValue": null,
+          "generatedValue": {
+            "type": "targetProfile",
+            "zone": "stack",
+            "targetCardType": "program",
+            "installsTarget": true,
+            "installCost": "normal",
+            "shuffleAfter": true,
+            "source": "implementation.effect.search_stack_install"
+          },
+          "compiledPreviewValue": {
+            "cardId": "onr_v1_059_self-modifying-code",
+            "side": "runner",
+            "cardType": "program",
+            "effects": [
+              {
+                "kind": "search",
+                "timing": "during_run",
+                "scope": "runner"
+              }
+            ],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              },
+              {
+                "kind": "requires_installed_program"
+              }
+            ],
+            "targetProfiles": [
+              {
+                "zone": "stack",
+                "targetCardType": "program",
+                "installsTarget": true,
+                "installCost": "normal",
+                "shuffleAfter": true
+              }
+            ],
+            "costProfile": {
+              "clicks": 0,
+              "reserveRisk": "medium",
+              "opportunityCost": "medium"
+            }
+          },
+          "manualOverlay": {
+            "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
+            "fields": [
+              "lineSupport",
+              "manualNotes",
+              "quality"
+            ],
+            "value": {
+              "lineSupport": [
+                "rig_first",
+                "breaker_search_first"
+              ],
+              "quality": {
+                "hintReviewed": true,
+                "strategyCovered": false,
+                "benchmarkCovered": true,
+                "confidence": "high",
+                "needsHumanReview": false
+              },
+              "manualNotes": [
+                "The install target profile is mechanical; any install-discount mismatch belongs in hint cleanup, not in this overlay."
+              ]
+            }
+          },
+          "rationale": "SMC generated targetProfile carries zone=stack, targetCardType=program, installsTarget=true and installCost=normal; the active monolith has search/condition but no structured targetProfile.",
+          "conflict": false
+        }
+      ],
+      "boardContextInfos": [
+        {
+          "fact": "condition:requires_during_run",
+          "classification": "target_profile_requires_search_legalaction_context",
+          "rule": "board_context_required_classification",
+          "normalizedForm": {
+            "kind": "condition:requires_during_run",
+            "contextClass": "target_profile_requires_search_legalaction_context",
+            "boardContextRequired": true,
+            "legalityBoundary": "search_or_target_legalaction_required"
+          },
+          "activeValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "source": "active.conditions"
+          },
+          "generatedValue": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "confidence": "high",
+            "source": "implementation.ability.timing.during_run"
+          },
+          "rationale": "Board-/LegalAction-context notes are downgraded to explicit safety context, not unresolved migration warnings.",
+          "safetyBoundary": "Comparator-only; does not assert current playability or action availability.",
+          "conflict": false
+        },
+        {
+          "fact": "effect:search",
+          "classification": "target_profile_requires_search_legalaction_context",
+          "rule": "board_context_required_classification",
+          "normalizedForm": {
+            "kind": "effect:search",
+            "contextClass": "target_profile_requires_search_legalaction_context",
+            "boardContextRequired": true,
+            "legalityBoundary": "search_or_target_legalaction_required"
+          },
+          "activeValue": {
+            "type": "effect",
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner",
+            "source": "active.effects"
+          },
+          "generatedValue": {
+            "type": "effect",
+            "kind": "search",
+            "timing": "during_run",
+            "scope": "runner",
+            "confidence": "high",
+            "source": "implementation.effect.search_stack_install"
+          },
+          "rationale": "Board-/LegalAction-context notes are downgraded to explicit safety context, not unresolved migration warnings.",
+          "safetyBoundary": "Comparator-only; does not assert current playability or action availability.",
+          "conflict": false
+        },
+        {
+          "fact": "targetProfile",
+          "classification": "target_profile_requires_search_legalaction_context",
+          "rule": "board_context_required_classification",
+          "normalizedForm": {
+            "kind": "targetProfile",
+            "contextClass": "target_profile_requires_search_legalaction_context",
+            "boardContextRequired": true,
+            "legalityBoundary": "search_or_target_legalaction_required"
+          },
+          "generatedValue": {
+            "type": "targetProfile",
+            "zone": "stack",
+            "targetCardType": "program",
+            "installsTarget": true,
+            "installCost": "normal",
+            "shuffleAfter": true,
+            "source": "implementation.effect.search_stack_install"
+          },
+          "rationale": "Board-/LegalAction-context notes are downgraded to explicit safety context, not unresolved migration warnings.",
+          "safetyBoundary": "Comparator-only; does not assert current playability or action availability.",
+          "conflict": false
+        }
+      ],
+      "remainingDifferences": [],
+      "realSemanticConflicts": []
+    }
+  ],
+  "errors": []
+}
