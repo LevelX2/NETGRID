@@ -17,7 +17,7 @@ function printedSubroutineId(
   return `card_implementation.${definition.id}.printed_subroutine.${index + 1}.${subroutine.kind === "damage" ? `${subroutine.damageType}_damage` : subroutine.kind}`;
 }
 
-function printedSubroutineDefinitionForImplementation(
+export function printedSubroutineDefinitionForImplementation(
   definition: CardDefinition,
   subroutine: CardPrintedSubroutineImplementation,
   index: number,

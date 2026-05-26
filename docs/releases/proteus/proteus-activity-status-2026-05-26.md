@@ -18,7 +18,7 @@ Führend ist die eindeutige CardImplementation-Abdeckung:
 
 PRO001 hat dafür bereits den Guard in `packages/engine/src/card-implementations/coverage.test.ts` ergänzt: `reconciles Proteus manifest support against concrete files and registry`. Dieser Guard prüft 154 Karten in `data/cards/proteus-cards.json`, 154 Manifest-Einträge, eindeutige CardImplementation-Dateien, Registry-Parität, `implemented`-Manifestparität, `resolverRef = engine:<cardId>` für implementierte Karten und `resolverRef = null` für nicht implementierte Karten. PRO002 etabliert keine zweite konkurrierende Zählweise.
 
-Aktueller Stand nach PRO006:
+Aktueller Stand nach PRO006-1:
 
 | Kennzahl | Wert | Führende Quelle |
 | --- | ---: | --- |
@@ -28,6 +28,8 @@ Aktueller Stand nach PRO006:
 | Fehlende konkrete CardImplementation-Dateien | 92 | Gesamtbasis minus konkrete Dateien |
 | Manifest-`implemented`-Einträge | 62 | Driftprüfung in `data/manifests/proteus-card-support.json` |
 
+PRO006-1 ist ausschließlich Test- und Typ-Härtung für den bereits umgesetzten PRO006-Scope. Es setzt keine neue Proteus-Karte um, ändert keine Manifest-Freigaben und zieht keine PRO025-Mechaniken vor. `trash_program` bleibt für PRO006 ein automatischer Printed-Subroutine-Effekt; Payment- und Zielwahlvarianten gehören zu PRO025.
+
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
 
 ## Geprüfte Activity-Menge
@@ -36,7 +38,7 @@ Geprüft wurden alle Activity-Unterordner unter `docs/activities/`: `inbox/`, `i
 
 | Kategorie | Anzahl | Bedeutung |
 | --- | ---: | --- |
-| `done + implemented/foundation` | 27 | Erledigte Runtime-, Foundation- oder gezielte Härtungsslices; Implementierungsfortschritt wird trotzdem nur über Dateien plus Registry gezählt. |
+| `done + implemented/foundation` | 28 | Erledigte Runtime-, Foundation- oder gezielte Härtungsslices; Implementierungsfortschritt wird trotzdem nur über Dateien plus Registry gezählt. |
 | `done + planning/contract/historical` | 13 | Erledigte Import-, Analyse-, Vertrags-, Harness- oder Planungsactivities ohne direkte CardImplementation-Zählung. |
 | `done + superseded` | 8 | Grobe Phase-Activities, die ersetzt oder aufgeteilt wurden; sie zählen nie als Kartenimplementierung. |
 | `in-progress + blocked` | 24 | Offene Detail-Activities mit fehlender PRO-, Regel- oder generischer Vertragsarbeit. |
@@ -65,6 +67,7 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-26-proteus-pro004-1-multibreak-hardening.md` | `done` | PRO004-1 | Multi-Break-Härtung, Proteus-Testkatalog und Regressionstests; keine neue Kartenpromotion. |
 | `done/act-2026-05-26-proteus-pro005-simple-runner-economy-draw-events.md` | `done` | PRO005 | 2 Karten: `Cruising for Netwatch`, `Stakeout`; Phase 5c bleibt für PRO014 blockiert. |
 | `done/act-2026-05-26-proteus-pro006-simple-corp-ice-resolver.md` | `done` | PRO006 | 4 Karten: `Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`; Phase 6b bleibt für PRO025 blockiert. |
+| `done/act-2026-05-26-proteus-pro006-1-simple-ice-hardening.md` | `done` | PRO006-1 | Test-/Typ-Härtung für PRO006; keine neue Kartenpromotion, Implementierungszählung bleibt 62/154, PRO025 bleibt blockiert. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
 | `done/act-2026-05-24-proteus-phase-7a-hardware-deck-foundation.md` | `done` | Phase 7a | 1 Karte: `Deck, The`. |
 | `done/act-2026-05-24-proteus-phase-7b-icebreaker-credit-decks.md` | `done` | Phase 7b | 2 Karten: `Cortical Cybermodem`, `Sunburst Cranial Interface`. |
@@ -155,7 +158,7 @@ Alle PRO001 bis PRO040 sind hier bewusst erfasst. Bei Paketen ohne eigene konkre
 | PRO003 | erledigt durch Paketstandard und Verify-Harness | `proteus-cardimplementation-package-standard.md`; `coverage.test.ts`: Proteus-Abdeckung, Restliste und Driftprüfung |
 | PRO004 | umgesetzt; PRO004-1 Nacharbeit erledigt | Sechs Simple-Icebreaker-Core-Karten (`Big Frackin' Gun`, `Boring Bit`, `Corrosion`, `Redecorator`, `Skeleton Passkeys`, `Wrecking Ball`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. PRO004-1 ergänzt Multi-Break-Härtung und einen Proteus-Testkatalog; Phase 5a bleibt für PRO011/PRO012 blockiert. |
 | PRO005 | umgesetzt | Zwei Simple-Runner-Economy-/Draw-Events (`Cruising for Netwatch`, `Stakeout`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
-| PRO006 | umgesetzt | Vier Simple-Corp-ICE-Resolver (`Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. Phase 6b bleibt für PRO025 blockiert. |
+| PRO006 | umgesetzt; PRO006-1 Nacharbeit erledigt | Vier Simple-Corp-ICE-Resolver (`Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. PRO006-1 ergänzt Typ-/Mapping-Härtung für variable `end_the_run_unless_runner_pays`-Beträge und Colonel-Failure-Regressionen für 0/1 installierte Programme. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. Phase 6b bleibt für PRO025 blockiert; `trash_program` bleibt im PRO006-Scope automatischer Subroutine-Effekt. |
 | PRO007 | referenziert, konkrete Activity noch zu schneiden | Phase 6c |
 | PRO008 | referenziert, konkrete Activity noch zu schneiden | Phase 4d |
 | PRO009 | referenziert, konkrete Activity noch zu schneiden | Phase 1e |

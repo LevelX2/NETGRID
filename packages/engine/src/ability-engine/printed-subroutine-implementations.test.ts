@@ -1,8 +1,32 @@
 import { describe, expect, it } from "vitest";
+import type { CardDefinition } from "@netgrid/shared";
 import { cardImplementationCoverageForDefinitionId } from "../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import { printedSubroutineDefinitionForImplementation } from "./printed-subroutine-implementations";
 
 describe("printed subroutine implementations", () => {
+  it("maps pay-or-end-run printed subroutines with variable amounts", () => {
+    const definition = {
+      id: "test_variable_pay_or_end_ice",
+    } as CardDefinition;
+
+    expect(
+      printedSubroutineDefinitionForImplementation(
+        definition,
+        {
+          kind: "end_the_run_unless_runner_pays",
+          amount: 2,
+          text: "*End the run unless Runner pays [2].",
+        },
+        0,
+      ),
+    ).toEqual({
+      id: "card_implementation.test_variable_pay_or_end_ice.printed_subroutine.1.end_the_run_unless_runner_pays",
+      type: "end_the_run_unless_runner_pays",
+      amount: 2,
+    });
+  });
+
   it("registers P3.25 simple ICE printed subroutines as implemented", () => {
     const p325IceCases = [
       ["onr_v1_232_crystal-wall", 1],

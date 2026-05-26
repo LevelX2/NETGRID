@@ -1531,7 +1531,7 @@ export type CardSubroutineImplementation =
   | {
       kind: "end_the_run_unless_runner_pays";
       amount: number;
-      text: "*End the run unless Runner pays [1].";
+      text: `*End the run unless Runner pays [${number}].`;
   visibility: EventVisibilityClass;
 };
 
@@ -1714,7 +1714,7 @@ export type CardPrintedSubroutineImplementation =
   | {
       kind: "end_the_run_unless_runner_pays";
       amount: number;
-      text: "*End the run unless Runner pays [1].";
+      text: `*End the run unless Runner pays [${number}].`;
     }
   | {
       kind: "trash_program";

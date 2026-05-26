@@ -2739,6 +2739,78 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
   });
 
   it.each([
+    { seed: "proteus-pro006-colonel-failure-one-program", programCount: 1 },
+    { seed: "proteus-pro006-colonel-failure-zero-programs", programCount: 0 },
+  ] as const)(
+    "resolves Colonel Failure without duplicate trash targets with $programCount installed Runner programs",
+    ({ seed, programCount }) => {
+      const setup = startEncounterWithRezzedIce(
+        proteusSimpleCorpIceGame(seed),
+        COLONEL_FAILURE,
+      );
+      let { state } = setup;
+      const installedProgramIds = [
+        "simple_decoder",
+        "simple_fracter",
+        "simple_killer",
+      ]
+        .slice(0, programCount)
+        .map((definitionId) =>
+          installRunnerProgramForTest(state, definitionId),
+        );
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      const continueAction = mustAction(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
+
+      state = apply(
+        state,
+        "runner",
+        (action) => action.actionId === continueAction.actionId,
+      );
+
+      expect(state.run).toBeUndefined();
+      const trashedInstalledPrograms = state.runner.heap.filter((cardId) =>
+        installedProgramIds.includes(cardId),
+      );
+      expect(trashedInstalledPrograms).toHaveLength(programCount);
+      expect(new Set(trashedInstalledPrograms).size).toBe(programCount);
+      expect(state.runner.rig.programs).toHaveLength(0);
+      expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
+        expect.objectContaining({
+          subroutineIndex: 0,
+          subroutineType: "trash_installed_program",
+          cardsTrashed: programCount > 0 ? 1 : 0,
+        }),
+        expect.objectContaining({
+          subroutineIndex: 1,
+          subroutineType: "trash_installed_program",
+          cardsTrashed: 0,
+        }),
+        expect.objectContaining({
+          subroutineIndex: 2,
+          subroutineType: "trash_installed_program",
+          cardsTrashed: 0,
+        }),
+        expect.objectContaining({
+          subroutineIndex: 3,
+          subroutineType: "end_the_run",
+          endedRun: true,
+        }),
+      ]);
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        hiddenPayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    },
+  );
+
+  it.each([
     [MISLEADING_ACCESS_MENUS, "Misleading Access Menus"],
     [SNOWBANK, "Snowbank"],
   ] as const)(
