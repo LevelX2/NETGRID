@@ -141,6 +141,15 @@ function buildShapeReview(card, shapeDifference) {
 
 function activeMonolithOnlyFact(card) {
   if (card.cardId !== "onr_v1_199_employee-empowerment") return undefined;
+  if (
+    !(card.warnings ?? []).some(
+      (warning) =>
+        warning.kind === "monolith_only_mechanical_fact" &&
+        warning.fact === "effect:draw",
+    )
+  ) {
+    return undefined;
+  }
   return card.activeMechanicalFieldsInScope.find(
     (fact) =>
       fact.type === "effect" &&
@@ -223,13 +232,13 @@ export function buildBatchOneDiffReviewReport() {
     },
   ]);
   const deriverFollowupCandidates = sortByKey([
-    {
+    ...monolithOnly.map((fact) => ({
       cardId: "onr_v1_199_employee-empowerment",
       title: "Employee Empowerment",
-      fact: "effect:draw",
+      fact: fact.fact,
       rationale:
         "Add a descriptor/deriver source for the mechanical start-of-turn draw that currently lives in scored-agenda flow.",
-    },
+    })),
     {
       cardId: "batch_1_trace_cards",
       title: "Trace cards",

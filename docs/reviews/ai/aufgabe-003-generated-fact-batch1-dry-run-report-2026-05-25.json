@@ -10,13 +10,12 @@
   },
   "mode": "read-only dry-run; does not write ai-card-hints-active.json and has no runtime, planner or consumer binding",
   "hardErrorCount": 0,
-  "warningCount": 110,
+  "warningCount": 111,
   "infoCount": 33,
   "warningCountsByKind": {
     "board_context_required": 31,
-    "consumer_active_for_fact_type": 39,
-    "generated_fact_already_present": 32,
-    "monolith_only_mechanical_fact": 1,
+    "consumer_active_for_fact_type": 40,
+    "generated_fact_already_present": 33,
     "shape_difference": 7
   },
   "infoCountsByKind": {
@@ -26,7 +25,7 @@
   },
   "batchCardCount": 11,
   "previewChangedCardCount": 0,
-  "confirmedFactCount": 39,
+  "confirmedFactCount": 40,
   "previewAddedFactCount": 0,
   "conflictCount": 0,
   "batchCardIds": [
@@ -503,6 +502,15 @@
         },
         {
           "type": "effect",
+          "kind": "draw",
+          "timing": "start_of_turn",
+          "scope": "corp",
+          "resource": "cards",
+          "amount": 1,
+          "source": "implementation.card_text.start_of_turn.draw"
+        },
+        {
+          "type": "effect",
           "kind": "scored_agenda_action",
           "timing": "scored_activated",
           "scope": "score_area",
@@ -610,6 +618,28 @@
         },
         {
           "relation": "exact",
+          "fact": "effect:draw",
+          "generated": {
+            "type": "effect",
+            "kind": "draw",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1,
+            "source": "implementation.card_text.start_of_turn.draw"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "draw",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1,
+            "repeatable": true
+          }
+        },
+        {
+          "relation": "exact",
           "fact": "effect:scored_agenda_action",
           "generated": {
             "type": "effect",
@@ -682,6 +712,11 @@
         },
         {
           "kind": "consumer_active_for_fact_type",
+          "message": "Generated effect:draw belongs to the Batch-1 consumer-relevant fact set.",
+          "fact": "effect:draw"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
           "message": "Generated effect:scored_agenda_action belongs to the Batch-1 consumer-relevant fact set.",
           "fact": "effect:scored_agenda_action"
         },
@@ -697,13 +732,13 @@
         },
         {
           "kind": "generated_fact_already_present",
-          "message": "Generated effect:scored_agenda_action is already present in active monolith.",
-          "fact": "effect:scored_agenda_action"
+          "message": "Generated effect:draw is already present in active monolith.",
+          "fact": "effect:draw"
         },
         {
-          "kind": "monolith_only_mechanical_fact",
-          "message": "Active monolith effect:draw is in Batch-1 scope but not generated.",
-          "fact": "effect:draw"
+          "kind": "generated_fact_already_present",
+          "message": "Generated effect:scored_agenda_action is already present in active monolith.",
+          "fact": "effect:scored_agenda_action"
         }
       ],
       "infos": [
@@ -3077,6 +3112,12 @@
     {
       "cardId": "onr_v1_199_employee-empowerment",
       "kind": "consumer_active_for_fact_type",
+      "message": "Generated effect:draw belongs to the Batch-1 consumer-relevant fact set.",
+      "fact": "effect:draw"
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "kind": "consumer_active_for_fact_type",
       "message": "Generated effect:scored_agenda_action belongs to the Batch-1 consumer-relevant fact set.",
       "fact": "effect:scored_agenda_action"
     },
@@ -3095,14 +3136,14 @@
     {
       "cardId": "onr_v1_199_employee-empowerment",
       "kind": "generated_fact_already_present",
-      "message": "Generated effect:scored_agenda_action is already present in active monolith.",
-      "fact": "effect:scored_agenda_action"
+      "message": "Generated effect:draw is already present in active monolith.",
+      "fact": "effect:draw"
     },
     {
       "cardId": "onr_v1_199_employee-empowerment",
-      "kind": "monolith_only_mechanical_fact",
-      "message": "Active monolith effect:draw is in Batch-1 scope but not generated.",
-      "fact": "effect:draw"
+      "kind": "generated_fact_already_present",
+      "message": "Generated effect:scored_agenda_action is already present in active monolith.",
+      "fact": "effect:scored_agenda_action"
     },
     {
       "cardId": "onr_v1_207_netwatch-operations-office",

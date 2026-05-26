@@ -157,6 +157,34 @@ describe("derived basic facts gate report", () => {
     expect(redHerrings.derivedFacts.conditions).toContainEqual(
       expect.objectContaining({ kind: "requires_accessed_card" }),
     );
+
+    const employeeEmpowerment = cardById(
+      report,
+      "onr_v1_199_employee-empowerment",
+    );
+    expect(employeeEmpowerment.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "draw",
+        timing: "start_of_turn",
+        scope: "corp",
+        resource: "cards",
+        amount: 1,
+        source: "implementation.card_text.start_of_turn.draw",
+      }),
+    );
+    expect(employeeEmpowerment.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "draw",
+        timing: "scored_activated",
+        scope: "corp",
+        resource: "cards",
+        amount: 2,
+        source: "implementation.effect.draw_cards",
+      }),
+    );
+    expect(employeeEmpowerment.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_scored_agenda" }),
+    );
   });
 
   it("does not emit hidden-info fields in generated facts", () => {

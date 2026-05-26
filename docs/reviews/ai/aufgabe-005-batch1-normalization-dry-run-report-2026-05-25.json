@@ -33,12 +33,6 @@
   "realSemanticConflictCount": 0,
   "normalizedEquivalencesByCard": [
     {
-      "cardId": "onr_v1_199_employee-empowerment",
-      "title": "Employee Empowerment",
-      "normalizedCount": 0,
-      "remainingCount": 0
-    },
-    {
       "cardId": "onr_v1_207_netwatch-operations-office",
       "title": "Netwatch Operations Office",
       "normalizedCount": 2,
@@ -76,57 +70,8 @@
     }
   ],
   "remainingUnnormalizedDifferences": [],
-  "deriverFollowupCandidates": [
-    {
-      "cardId": "onr_v1_199_employee-empowerment",
-      "title": "Employee Empowerment",
-      "fact": "effect:draw",
-      "activeValue": {
-        "type": "effect",
-        "kind": "draw",
-        "timing": "start_of_turn",
-        "scope": "corp",
-        "resource": "cards",
-        "amount": 1,
-        "repeatable": true
-      },
-      "classification": "generated_deriver_gap",
-      "rationale": "Employee Empowerment has a mechanical start-of-turn draw in legacy scored-agenda flow, but the CardImplementation descriptor only exposes the activated draw-two ability.",
-      "futureAction": "descriptor_or_deriver_followup",
-      "mechanical": true,
-      "strategic": false,
-      "cleanupCandidate": false,
-      "overlayCandidate": false
-    }
-  ],
+  "deriverFollowupCandidates": [],
   "cards": [
-    {
-      "cardId": "onr_v1_199_employee-empowerment",
-      "title": "Employee Empowerment",
-      "normalizedEquivalences": [],
-      "remainingDifferences": [],
-      "deriverFollowups": [
-        {
-          "fact": "effect:draw",
-          "activeValue": {
-            "type": "effect",
-            "kind": "draw",
-            "timing": "start_of_turn",
-            "scope": "corp",
-            "resource": "cards",
-            "amount": 1,
-            "repeatable": true
-          },
-          "classification": "generated_deriver_gap",
-          "rationale": "Employee Empowerment has a mechanical start-of-turn draw in legacy scored-agenda flow, but the CardImplementation descriptor only exposes the activated draw-two ability.",
-          "futureAction": "descriptor_or_deriver_followup",
-          "mechanical": true,
-          "strategic": false,
-          "cleanupCandidate": false,
-          "overlayCandidate": false
-        }
-      ]
-    },
     {
       "cardId": "onr_v1_207_netwatch-operations-office",
       "title": "Netwatch Operations Office",

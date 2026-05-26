@@ -83,7 +83,7 @@ describe("generated fact Batch-1 migration dry-run", () => {
 
   it("confirms Batch-1 generated facts without changing the active monolith", () => {
     const report = readReport();
-    expect(report.confirmedFactCount).toBe(39);
+    expect(report.confirmedFactCount).toBe(40);
     expect(report.previewAddedFactCount).toBe(0);
     expect(report.previewChangedCardCount).toBe(0);
     expect(
@@ -96,12 +96,11 @@ describe("generated fact Batch-1 migration dry-run", () => {
 
   it("classifies shape and board-context warnings as dry-run signals", () => {
     const report = readReport();
-    expect(report.warningCount).toBe(110);
+    expect(report.warningCount).toBe(111);
     expect(report.warningCountsByKind).toEqual({
       board_context_required: 31,
-      consumer_active_for_fact_type: 39,
-      generated_fact_already_present: 32,
-      monolith_only_mechanical_fact: 1,
+      consumer_active_for_fact_type: 40,
+      generated_fact_already_present: 33,
       shape_difference: 7,
     });
   });

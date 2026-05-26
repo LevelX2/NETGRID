@@ -4,7 +4,7 @@
   "taskId": "Aufgabe 004",
   "sourceDryRunReport": "docs/reviews/ai/aufgabe-003-generated-fact-batch1-dry-run-report-2026-05-25.json",
   "shapeDifferenceCount": 7,
-  "monolithOnlyMechanicalFactCount": 1,
+  "monolithOnlyMechanicalFactCount": 0,
   "realSemanticConflictCount": 0,
   "shapeDifferenceClassifications": {
     "semantic_equivalent_shape_difference": 0,
@@ -17,7 +17,7 @@
   "monolithOnlyClassifications": {
     "legacy_keep_for_compat": 0,
     "manual_strategy_not_generated": 0,
-    "generated_deriver_gap": 1,
+    "generated_deriver_gap": 0,
     "monolith_mechanical_duplication_candidate": 0,
     "potential_hint_cleanup_candidate": 0
   },
@@ -56,41 +56,9 @@
       "title": "Trace cards",
       "fact": "effect:trace",
       "rationale": "Derive trace target/base amount where available instead of only deriving trace class."
-    },
-    {
-      "cardId": "onr_v1_199_employee-empowerment",
-      "title": "Employee Empowerment",
-      "fact": "effect:draw",
-      "rationale": "Add a descriptor/deriver source for the mechanical start-of-turn draw that currently lives in scored-agenda flow."
     }
   ],
   "cards": [
-    {
-      "cardId": "onr_v1_199_employee-empowerment",
-      "title": "Employee Empowerment",
-      "shapeDifferences": [],
-      "monolithOnlyMechanicalFacts": [
-        {
-          "fact": "effect:draw",
-          "activeValue": {
-            "type": "effect",
-            "kind": "draw",
-            "timing": "start_of_turn",
-            "scope": "corp",
-            "resource": "cards",
-            "amount": 1,
-            "repeatable": true
-          },
-          "classification": "generated_deriver_gap",
-          "rationale": "Employee Empowerment has a mechanical start-of-turn draw in legacy scored-agenda flow, but the CardImplementation descriptor only exposes the activated draw-two ability.",
-          "futureAction": "descriptor_or_deriver_followup",
-          "mechanical": true,
-          "strategic": false,
-          "cleanupCandidate": false,
-          "overlayCandidate": false
-        }
-      ]
-    },
     {
       "cardId": "onr_v1_207_netwatch-operations-office",
       "title": "Netwatch Operations Office",

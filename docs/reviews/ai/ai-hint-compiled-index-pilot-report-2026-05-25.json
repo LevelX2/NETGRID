@@ -2207,6 +2207,15 @@
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
+            "amount": 1,
+            "confidence": "high",
+            "kind": "draw",
+            "resource": "cards",
+            "scope": "corp",
+            "source": "implementation.card_text.start_of_turn.draw",
+            "timing": "start_of_turn"
+          },
+          {
             "amount": 2,
             "confidence": "high",
             "kind": "draw",

@@ -65,31 +65,34 @@ describe("generated fact Batch-1 compiler diff review", () => {
     ).toBe(true);
   });
 
-  it("classifies the Employee Empowerment monolith-only fact as a deriver follow-up", () => {
+  it("keeps the Employee Empowerment deriver follow-up closed", () => {
     const report = readReport();
-    expect(report.monolithOnlyMechanicalFactCount).toBe(1);
+    expect(report.monolithOnlyMechanicalFactCount).toBe(0);
     expect(report.monolithOnlyClassifications).toEqual({
       legacy_keep_for_compat: 0,
       manual_strategy_not_generated: 0,
-      generated_deriver_gap: 1,
+      generated_deriver_gap: 0,
       monolith_mechanical_duplication_candidate: 0,
       potential_hint_cleanup_candidate: 0,
     });
-    const employee = report.cards.find(
-      (card) => card.cardId === "onr_v1_199_employee-empowerment",
-    );
-    expect(employee?.monolithOnlyMechanicalFacts).toContainEqual(
-      expect.objectContaining({
-        classification: "generated_deriver_gap",
-        futureAction: "descriptor_or_deriver_followup",
-      }),
-    );
+    expect(
+      report.cards.find(
+        (card) => card.cardId === "onr_v1_199_employee-empowerment",
+      ),
+    ).toBeUndefined();
+    expect(
+      report.deriverFollowupCandidates.find(
+        (candidate) =>
+          (candidate as { cardId?: string }).cardId ===
+          "onr_v1_199_employee-empowerment",
+      ),
+    ).toBeUndefined();
   });
 
-  it("keeps follow-up lists focused on normalization and derivation only", () => {
+  it("keeps follow-up lists focused on remaining normalization and derivation only", () => {
     const report = readReport();
     expect(report.normalizationRuleCandidates.length).toBe(3);
-    expect(report.deriverFollowupCandidates.length).toBe(3);
+    expect(report.deriverFollowupCandidates.length).toBe(2);
     expect(
       report.cards
         .flatMap((card) => card.shapeDifferences)

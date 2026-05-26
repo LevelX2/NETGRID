@@ -691,7 +691,7 @@
         "scenarioRefs",
         "valueHints"
       ],
-      "derivedRationale": "Scored agenda draw activation is directly represented."
+      "derivedRationale": "Scored agenda draw activation is directly represented; the start-of-turn additional draw is derived from the exact implementation card-text comment."
     },
     {
       "cardId": "onr_v1_207_netwatch-operations-office",

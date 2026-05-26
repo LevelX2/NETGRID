@@ -126,24 +126,18 @@ describe("generated fact Batch-1 normalization dry run", () => {
     }
   });
 
-  it("keeps the Employee Empowerment deriver gap visible", () => {
+  it("keeps the Employee Empowerment deriver gap closed", () => {
     const report = readReport();
-    expect(report.deriverFollowupCandidates).toContainEqual(
+    expect(report.deriverFollowupCandidates).not.toContainEqual(
       expect.objectContaining({
         cardId: "onr_v1_199_employee-empowerment",
-        fact: "effect:draw",
-        classification: "generated_deriver_gap",
       }),
     );
-    const employee = findCard(report, "onr_v1_199_employee-empowerment");
-    expect(employee.normalizedEquivalences).toEqual([]);
-    expect(employee.remainingDifferences).toEqual([]);
-    expect(employee.deriverFollowups).toContainEqual(
-      expect.objectContaining({
-        fact: "effect:draw",
-        classification: "generated_deriver_gap",
-      }),
-    );
+    expect(
+      report.cards.find(
+        (card) => card.cardId === "onr_v1_199_employee-empowerment",
+      ),
+    ).toBeUndefined();
   });
 
   it("does not emit hidden-info or runtime state fields", () => {
