@@ -1,0 +1,2334 @@
+{
+  "schemaVersion": "ai-generated-fact-batch3-dry-run-v1",
+  "generatedAt": "2026-05-25",
+  "taskId": "Aufgabe 012",
+  "batch": "batch_3_remote_role_future_run_ice",
+  "sources": {
+    "activeHintsPath": "data/ai/ai-card-hints-active.json",
+    "derivedFactsReportPath": "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json",
+    "migrationPriorityReportPath": "docs/reviews/ai/ai-generated-fact-migration-priority-report-2026-05-25.json",
+    "compiledIndexReportPath": "docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json",
+    "overlayPaths": [
+      "data/ai/hints/overlays/onr-v1/corp/upgrades.json",
+      "data/ai/hints/overlays/onr-v1/runner/programs.json"
+    ]
+  },
+  "mode": "read-only dry-run; does not write ai-card-hints-active.json and has no runtime, planner or consumer binding",
+  "hardErrorCount": 0,
+  "warningCount": 76,
+  "infoCount": 19,
+  "warningCountsByKind": {
+    "active_state_context_required": 3,
+    "board_context_required": 15,
+    "consumer_active_for_fact_type": 15,
+    "descriptor_context_required": 9,
+    "future_run_shape_difference": 3,
+    "generated_fact_already_present": 9,
+    "monolith_only_mechanical_fact": 2,
+    "remote_role_shape_difference": 4,
+    "runpath_context_required": 10,
+    "shape_difference": 6
+  },
+  "infoCountsByKind": {
+    "legacy_keep_for_compat": 5,
+    "manual_overlay_not_runtime": 2,
+    "manual_overlay_present": 2,
+    "no_change_needed": 5,
+    "preview_only": 5
+  },
+  "batchCardCount": 5,
+  "previewChangedCardCount": 0,
+  "confirmedFactCount": 15,
+  "previewAddedFactCount": 0,
+  "conflictCount": 0,
+  "shapeDifferenceCount": 6,
+  "remoteRoleDifferenceCount": 3,
+  "futureRunDifferenceCount": 3,
+  "boardContextRequiredCount": 15,
+  "runpathContextRequiredCount": 10,
+  "activeStateContextRequiredCount": 3,
+  "manualOverlayPresentCount": 2,
+  "readinessCounts": {
+    "needs_diff_review": 2,
+    "needs_future_run_descriptor_review": 3
+  },
+  "boardRunpathContextRules": [
+    {
+      "kind": "remoteRole",
+      "rule": "RemoteRole describes static card function; active impact still depends on rezzed, activeWhile, same-server and fort/server context."
+    },
+    {
+      "kind": "crystal_palace_station_grid",
+      "rule": "Crystal Palace Station Grid is run_tax/break-subroutine-cost context, not economy, counter or agenda_steal_tax."
+    },
+    {
+      "kind": "red_herrings",
+      "rule": "Red Herrings is agenda_steal_tax in an access/agenda-steal context, not generic run_tax remote safety."
+    },
+    {
+      "kind": "future_run_ice",
+      "rule": "Future-run ICE facts describe static subroutine/run consequences only; current relevance depends on runpath, remaining ICE, encounter state, unbroken subroutines and LegalActions."
+    },
+    {
+      "kind": "legacyCompatibility",
+      "rule": "roles, planRoles, aiSupportStatus, lineSupport and quality remain active monolith/overlay fields and are not changed by this dry-run."
+    }
+  ],
+  "batchCardIds": [
+    "onr_v1_274_tutor",
+    "onr_v1_277_virizz",
+    "onr_v1_276_viral-15",
+    "onr_v1_355_crystal-palace-station-grid",
+    "onr_v1_366_red-herrings"
+  ],
+  "batchThreeStatus": "needs_diff_review",
+  "scopeAssessment": "Future-run ICE is tractable as a read-only comparison batch, but the three ICE cards need Aufgabe 013 diff/normalization review because runpath descriptor context is intentionally still coarse.",
+  "cards": [
+    {
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "priority": "P1",
+      "risk": "medium",
+      "batchIncluded": true,
+      "expectedGroups": [
+        "future_run_ice"
+      ],
+      "expectedContext": "future_run_ice",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "migrationPriorityFound": true,
+      "compiledIndexFound": true,
+      "manualOverlayFound": false,
+      "generatedFactsInScope": [
+        {
+          "type": "condition",
+          "kind": "requires_during_run",
+          "confidence": "high",
+          "source": "implementation.printedSubroutines.run_duration"
+        },
+        {
+          "type": "effect",
+          "kind": "future_run_effect",
+          "timing": "encounter",
+          "scope": "run_path",
+          "confidence": "medium",
+          "source": "implementation.printedSubroutines.run_duration"
+        },
+        {
+          "type": "effect",
+          "kind": "remote_protection",
+          "timing": "encounter",
+          "scope": "run_path",
+          "confidence": "medium",
+          "source": "implementation.printedSubroutines.run_duration_additional_subroutine"
+        }
+      ],
+      "activeMechanicalFieldsInScope": [
+        {
+          "type": "condition",
+          "kind": "requires_during_run",
+          "source": "active.conditions"
+        },
+        {
+          "type": "effect",
+          "kind": "future_run_effect",
+          "timing": "encounter",
+          "scope": "run_path",
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "remote_protection",
+          "timing": "encounter",
+          "scope": "run_path",
+          "source": "active.effects"
+        }
+      ],
+      "compiledAfterMigrationPreview": {
+        "cardId": "onr_v1_274_tutor",
+        "side": "corp",
+        "cardType": "ice",
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ]
+      },
+      "confirmedByGeneratedFacts": [
+        {
+          "relation": "exact",
+          "fact": "condition:requires_during_run",
+          "generated": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "confidence": "high",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "active": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "source": "active.conditions"
+          }
+        },
+        {
+          "relation": "exact",
+          "fact": "effect:future_run_effect",
+          "generated": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          }
+        },
+        {
+          "relation": "exact",
+          "fact": "effect:remote_protection",
+          "generated": {
+            "type": "effect",
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_additional_subroutine"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          }
+        }
+      ],
+      "wouldAddToPreview": [],
+      "wouldRemoveFromManualFuture": [
+        {
+          "type": "condition",
+          "kind": "requires_during_run",
+          "source": "active.conditions"
+        },
+        {
+          "type": "effect",
+          "kind": "future_run_effect",
+          "timing": "encounter",
+          "scope": "run_path",
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "remote_protection",
+          "timing": "encounter",
+          "scope": "run_path",
+          "source": "active.effects"
+        }
+      ],
+      "shapeDifferences": [],
+      "remoteRoleDifferences": [],
+      "futureRunDifferences": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "board_context_required",
+          "message": "Generated condition:requires_during_run must not be interpreted without current run, encounter and LegalAction state.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated effect:future_run_effect must not be interpreted without current run, encounter and LegalAction state.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated effect:remote_protection must not be interpreted without current run, encounter and LegalAction state.",
+          "fact": "effect:remote_protection"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated condition:requires_during_run belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated effect:future_run_effect belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated effect:remote_protection belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "effect:remote_protection"
+        },
+        {
+          "kind": "descriptor_context_required",
+          "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+          "descriptorGap": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+        },
+        {
+          "kind": "generated_fact_already_present",
+          "message": "Generated condition:requires_during_run is already present in active monolith.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "generated_fact_already_present",
+          "message": "Generated effect:future_run_effect is already present in active monolith.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "generated_fact_already_present",
+          "message": "Generated effect:remote_protection is already present in active monolith.",
+          "fact": "effect:remote_protection"
+        },
+        {
+          "kind": "runpath_context_required",
+          "message": "Generated condition:requires_during_run depends on remaining run path, later ICE or future encounter context.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "runpath_context_required",
+          "message": "Generated effect:future_run_effect depends on remaining run path, later ICE or future encounter context.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "runpath_context_required",
+          "message": "Generated effect:remote_protection depends on remaining run path, later ICE or future encounter context.",
+          "fact": "effect:remote_protection"
+        }
+      ],
+      "infos": [
+        {
+          "kind": "legacy_keep_for_compat",
+          "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
+        },
+        {
+          "kind": "no_change_needed",
+          "message": "Dry-run preview adds no new Batch-3 fact."
+        },
+        {
+          "kind": "preview_only",
+          "message": "Dry-run does not write ai-card-hints-active.json."
+        }
+      ],
+      "readiness": "needs_future_run_descriptor_review"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "priority": "P1",
+      "risk": "medium",
+      "batchIncluded": true,
+      "expectedGroups": [
+        "future_run_ice",
+        "run_tax"
+      ],
+      "expectedContext": "future_run_ice",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "migrationPriorityFound": true,
+      "compiledIndexFound": true,
+      "manualOverlayFound": false,
+      "generatedFactsInScope": [
+        {
+          "type": "condition",
+          "kind": "requires_during_run",
+          "confidence": "high",
+          "source": "implementation.printedSubroutines.run_duration"
+        },
+        {
+          "type": "effect",
+          "kind": "future_run_effect",
+          "timing": "encounter",
+          "scope": "run_path",
+          "confidence": "medium",
+          "source": "implementation.printedSubroutines.run_duration"
+        },
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "encounter",
+          "scope": "run_path",
+          "resource": "credits",
+          "confidence": "medium",
+          "source": "implementation.printedSubroutines.run_duration_break_subroutine_cost"
+        }
+      ],
+      "activeMechanicalFieldsInScope": [
+        {
+          "type": "condition",
+          "kind": "requires_during_run",
+          "source": "active.conditions"
+        },
+        {
+          "type": "effect",
+          "kind": "future_run_effect",
+          "timing": "encounter",
+          "scope": "run_path",
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "encounter",
+          "scope": "run_path",
+          "resource": "credits",
+          "amount": 1,
+          "repeatable": true,
+          "source": "active.effects"
+        }
+      ],
+      "compiledAfterMigrationPreview": {
+        "cardId": "onr_v1_277_virizz",
+        "side": "corp",
+        "cardType": "ice",
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ]
+      },
+      "confirmedByGeneratedFacts": [
+        {
+          "relation": "equivalent_shape_difference",
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_break_subroutine_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        },
+        {
+          "relation": "exact",
+          "fact": "condition:requires_during_run",
+          "generated": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "confidence": "high",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "active": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "source": "active.conditions"
+          }
+        },
+        {
+          "relation": "exact",
+          "fact": "effect:future_run_effect",
+          "generated": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          }
+        }
+      ],
+      "wouldAddToPreview": [],
+      "wouldRemoveFromManualFuture": [
+        {
+          "type": "condition",
+          "kind": "requires_during_run",
+          "source": "active.conditions"
+        },
+        {
+          "type": "effect",
+          "kind": "future_run_effect",
+          "timing": "encounter",
+          "scope": "run_path",
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "encounter",
+          "scope": "run_path",
+          "resource": "credits",
+          "amount": 1,
+          "repeatable": true,
+          "source": "active.effects"
+        }
+      ],
+      "shapeDifferences": [
+        {
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_break_subroutine_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        }
+      ],
+      "remoteRoleDifferences": [],
+      "futureRunDifferences": [
+        {
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_break_subroutine_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        }
+      ],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "board_context_required",
+          "message": "Generated condition:requires_during_run must not be interpreted without current run, encounter and LegalAction state.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated effect:future_run_effect must not be interpreted without current run, encounter and LegalAction state.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated effect:run_tax must not be interpreted without current run, encounter and LegalAction state.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated condition:requires_during_run belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated effect:future_run_effect belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated effect:run_tax belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "descriptor_context_required",
+          "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+          "descriptorGap": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+        },
+        {
+          "kind": "future_run_shape_difference",
+          "message": "Generated effect:run_tax needs future-run/runpath shape review before any migration.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "generated_fact_already_present",
+          "message": "Generated condition:requires_during_run is already present in active monolith.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "generated_fact_already_present",
+          "message": "Generated effect:future_run_effect is already present in active monolith.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "runpath_context_required",
+          "message": "Generated condition:requires_during_run depends on remaining run path, later ICE or future encounter context.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "runpath_context_required",
+          "message": "Generated effect:future_run_effect depends on remaining run path, later ICE or future encounter context.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "runpath_context_required",
+          "message": "Generated effect:run_tax depends on remaining run path, later ICE or future encounter context.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "shape_difference",
+          "message": "Generated effect:run_tax matches active monolith semantically but has a different shape.",
+          "fact": "effect:run_tax"
+        }
+      ],
+      "infos": [
+        {
+          "kind": "legacy_keep_for_compat",
+          "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
+        },
+        {
+          "kind": "no_change_needed",
+          "message": "Dry-run preview adds no new Batch-3 fact."
+        },
+        {
+          "kind": "preview_only",
+          "message": "Dry-run does not write ai-card-hints-active.json."
+        }
+      ],
+      "readiness": "needs_future_run_descriptor_review"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "priority": "P1",
+      "risk": "medium",
+      "batchIncluded": true,
+      "expectedGroups": [
+        "future_run_ice",
+        "run_tax",
+        "program_trash"
+      ],
+      "expectedContext": "future_run_ice",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "migrationPriorityFound": true,
+      "compiledIndexFound": true,
+      "manualOverlayFound": false,
+      "generatedFactsInScope": [
+        {
+          "type": "condition",
+          "kind": "requires_during_run",
+          "confidence": "high",
+          "source": "implementation.printedSubroutines.run_duration"
+        },
+        {
+          "type": "effect",
+          "kind": "future_run_effect",
+          "timing": "encounter",
+          "scope": "run_path",
+          "confidence": "medium",
+          "source": "implementation.printedSubroutines.run_duration"
+        },
+        {
+          "type": "effect",
+          "kind": "program_trash",
+          "timing": "encounter",
+          "scope": "runner",
+          "confidence": "medium",
+          "source": "implementation.printedSubroutines.run_duration_trash_program"
+        },
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "encounter",
+          "scope": "run_path",
+          "resource": "credits",
+          "amount": 1,
+          "confidence": "medium",
+          "source": "implementation.printedSubroutines.run_duration_jack_out_cost"
+        }
+      ],
+      "activeMechanicalFieldsInScope": [
+        {
+          "type": "condition",
+          "kind": "requires_during_run",
+          "source": "active.conditions"
+        },
+        {
+          "type": "effect",
+          "kind": "future_run_effect",
+          "timing": "encounter",
+          "scope": "run_path",
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "program_trash",
+          "timing": "encounter",
+          "scope": "runner",
+          "repeatable": true,
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "encounter",
+          "scope": "run_path",
+          "resource": "credits",
+          "amount": 1,
+          "repeatable": true,
+          "source": "active.effects"
+        }
+      ],
+      "compiledAfterMigrationPreview": {
+        "cardId": "onr_v1_276_viral-15",
+        "side": "corp",
+        "cardType": "ice",
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "repeatable": true
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ]
+      },
+      "confirmedByGeneratedFacts": [
+        {
+          "relation": "equivalent_shape_difference",
+          "fact": "effect:program_trash",
+          "generated": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_trash_program"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        },
+        {
+          "relation": "equivalent_shape_difference",
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_jack_out_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        },
+        {
+          "relation": "exact",
+          "fact": "condition:requires_during_run",
+          "generated": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "confidence": "high",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "active": {
+            "type": "condition",
+            "kind": "requires_during_run",
+            "source": "active.conditions"
+          }
+        },
+        {
+          "relation": "exact",
+          "fact": "effect:future_run_effect",
+          "generated": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path",
+            "source": "active.effects"
+          }
+        }
+      ],
+      "wouldAddToPreview": [],
+      "wouldRemoveFromManualFuture": [
+        {
+          "type": "condition",
+          "kind": "requires_during_run",
+          "source": "active.conditions"
+        },
+        {
+          "type": "effect",
+          "kind": "future_run_effect",
+          "timing": "encounter",
+          "scope": "run_path",
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "program_trash",
+          "timing": "encounter",
+          "scope": "runner",
+          "repeatable": true,
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "encounter",
+          "scope": "run_path",
+          "resource": "credits",
+          "amount": 1,
+          "repeatable": true,
+          "source": "active.effects"
+        }
+      ],
+      "shapeDifferences": [
+        {
+          "fact": "effect:program_trash",
+          "generated": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_trash_program"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        },
+        {
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_jack_out_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        }
+      ],
+      "remoteRoleDifferences": [],
+      "futureRunDifferences": [
+        {
+          "fact": "effect:program_trash",
+          "generated": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_trash_program"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        },
+        {
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "medium",
+            "source": "implementation.printedSubroutines.run_duration_jack_out_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        }
+      ],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "board_context_required",
+          "message": "Generated condition:requires_during_run must not be interpreted without current run, encounter and LegalAction state.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated effect:future_run_effect must not be interpreted without current run, encounter and LegalAction state.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated effect:program_trash must not be interpreted without current run, encounter and LegalAction state.",
+          "fact": "effect:program_trash"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated effect:run_tax must not be interpreted without current run, encounter and LegalAction state.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated condition:requires_during_run belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated effect:future_run_effect belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated effect:program_trash belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "effect:program_trash"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated effect:run_tax belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "descriptor_context_required",
+          "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+          "descriptorGap": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+        },
+        {
+          "kind": "future_run_shape_difference",
+          "message": "Generated effect:program_trash needs future-run/runpath shape review before any migration.",
+          "fact": "effect:program_trash"
+        },
+        {
+          "kind": "future_run_shape_difference",
+          "message": "Generated effect:run_tax needs future-run/runpath shape review before any migration.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "generated_fact_already_present",
+          "message": "Generated condition:requires_during_run is already present in active monolith.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "generated_fact_already_present",
+          "message": "Generated effect:future_run_effect is already present in active monolith.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "runpath_context_required",
+          "message": "Generated condition:requires_during_run depends on remaining run path, later ICE or future encounter context.",
+          "fact": "condition:requires_during_run"
+        },
+        {
+          "kind": "runpath_context_required",
+          "message": "Generated effect:future_run_effect depends on remaining run path, later ICE or future encounter context.",
+          "fact": "effect:future_run_effect"
+        },
+        {
+          "kind": "runpath_context_required",
+          "message": "Generated effect:program_trash depends on remaining run path, later ICE or future encounter context.",
+          "fact": "effect:program_trash"
+        },
+        {
+          "kind": "runpath_context_required",
+          "message": "Generated effect:run_tax depends on remaining run path, later ICE or future encounter context.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "shape_difference",
+          "message": "Generated effect:program_trash matches active monolith semantically but has a different shape.",
+          "fact": "effect:program_trash"
+        },
+        {
+          "kind": "shape_difference",
+          "message": "Generated effect:run_tax matches active monolith semantically but has a different shape.",
+          "fact": "effect:run_tax"
+        }
+      ],
+      "infos": [
+        {
+          "kind": "legacy_keep_for_compat",
+          "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
+        },
+        {
+          "kind": "no_change_needed",
+          "message": "Dry-run preview adds no new Batch-3 fact."
+        },
+        {
+          "kind": "preview_only",
+          "message": "Dry-run does not write ai-card-hints-active.json."
+        }
+      ],
+      "readiness": "needs_future_run_descriptor_review"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "title": "Crystal Palace Station Grid",
+      "priority": "P1",
+      "risk": "medium",
+      "batchIncluded": true,
+      "expectedGroups": [
+        "remote_role",
+        "run_tax"
+      ],
+      "expectedContext": "remote_upgrade",
+      "expectedRemoteRoleKind": "run_tax",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "migrationPriorityFound": true,
+      "compiledIndexFound": true,
+      "manualOverlayFound": true,
+      "generatedFactsInScope": [
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "persistent",
+          "scope": "fort",
+          "resource": "credits",
+          "amount": 1,
+          "confidence": "high",
+          "source": "implementation.modifiers.break_subroutine_cost"
+        },
+        {
+          "type": "remoteRole",
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort",
+          "confidence": "high",
+          "source": "implementation.modifiers.break_subroutine_cost"
+        }
+      ],
+      "activeMechanicalFieldsInScope": [
+        {
+          "type": "effect",
+          "kind": "remote_protection",
+          "timing": "persistent",
+          "scope": "fort",
+          "repeatable": true,
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "persistent",
+          "scope": "fort",
+          "resource": "credits",
+          "amount": 1,
+          "repeatable": true,
+          "source": "active.effects"
+        },
+        {
+          "type": "remoteRole",
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort",
+          "source": "active.remoteRole"
+        }
+      ],
+      "compiledAfterMigrationPreview": {
+        "cardId": "onr_v1_355_crystal-palace-station-grid",
+        "side": "corp",
+        "cardType": "upgrade",
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "fort",
+            "repeatable": true
+          },
+          {
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "remoteRole": {
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort"
+        }
+      },
+      "confirmedByGeneratedFacts": [
+        {
+          "relation": "equivalent_shape_difference",
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "high",
+            "source": "implementation.modifiers.break_subroutine_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        },
+        {
+          "relation": "exact",
+          "fact": "remoteRole",
+          "generated": {
+            "type": "remoteRole",
+            "kind": "run_tax",
+            "threatLevel": "medium",
+            "serverScope": "fort",
+            "confidence": "high",
+            "source": "implementation.modifiers.break_subroutine_cost"
+          },
+          "active": {
+            "type": "remoteRole",
+            "kind": "run_tax",
+            "threatLevel": "medium",
+            "serverScope": "fort",
+            "source": "active.remoteRole"
+          }
+        }
+      ],
+      "wouldAddToPreview": [],
+      "wouldRemoveFromManualFuture": [
+        {
+          "type": "effect",
+          "kind": "remote_protection",
+          "timing": "persistent",
+          "scope": "fort",
+          "repeatable": true,
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "persistent",
+          "scope": "fort",
+          "resource": "credits",
+          "amount": 1,
+          "repeatable": true,
+          "source": "active.effects"
+        },
+        {
+          "type": "remoteRole",
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort",
+          "source": "active.remoteRole"
+        }
+      ],
+      "shapeDifferences": [
+        {
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "high",
+            "source": "implementation.modifiers.break_subroutine_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        }
+      ],
+      "remoteRoleDifferences": [
+        {
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "confidence": "high",
+            "source": "implementation.modifiers.break_subroutine_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        }
+      ],
+      "futureRunDifferences": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_state_context_required",
+          "message": "Generated effect:run_tax depends on rezzed/active/same-server context and is not a static playability signal.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "active_state_context_required",
+          "message": "Generated remoteRole depends on rezzed/active/same-server context and is not a static playability signal.",
+          "fact": "remoteRole"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated effect:run_tax must remain gated by current fort/server board state.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated remoteRole must remain gated by current fort/server board state.",
+          "fact": "remoteRole"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated effect:run_tax belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated remoteRole belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "remoteRole"
+        },
+        {
+          "kind": "descriptor_context_required",
+          "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+          "descriptorGap": "Intentionally manual strategic overlay is not derived: effect:remote_protection."
+        },
+        {
+          "kind": "descriptor_context_required",
+          "message": "Manual/strategic overlay remains intentionally separate: effect:remote_protection.",
+          "missingOverlay": "effect:remote_protection"
+        },
+        {
+          "kind": "descriptor_context_required",
+          "message": "Remote protection is present in active hints but remains strategic/contextual and is not generated in Batch 3.",
+          "fact": "effect:remote_protection"
+        },
+        {
+          "kind": "generated_fact_already_present",
+          "message": "Generated remoteRole is already present in active monolith.",
+          "fact": "remoteRole"
+        },
+        {
+          "kind": "monolith_only_mechanical_fact",
+          "message": "Active monolith effect:remote_protection is in Batch-3 scope but not generated.",
+          "fact": "effect:remote_protection"
+        },
+        {
+          "kind": "remote_role_shape_difference",
+          "message": "Generated effect:run_tax needs RemoteRole shape review before any migration.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "shape_difference",
+          "message": "Generated effect:run_tax matches active monolith semantically but has a different shape.",
+          "fact": "effect:run_tax"
+        }
+      ],
+      "infos": [
+        {
+          "kind": "legacy_keep_for_compat",
+          "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
+        },
+        {
+          "kind": "manual_overlay_not_runtime",
+          "message": "Manual overlay is not used by runtime or planner."
+        },
+        {
+          "kind": "manual_overlay_present",
+          "message": "Manual overlay exists for strategic/quality notes only."
+        },
+        {
+          "kind": "no_change_needed",
+          "message": "Dry-run preview adds no new Batch-3 fact."
+        },
+        {
+          "kind": "preview_only",
+          "message": "Dry-run does not write ai-card-hints-active.json."
+        }
+      ],
+      "readiness": "needs_diff_review"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "title": "Red Herrings",
+      "priority": "P1",
+      "risk": "medium",
+      "batchIncluded": true,
+      "expectedGroups": [
+        "remote_role",
+        "agenda_steal_tax"
+      ],
+      "expectedContext": "remote_upgrade",
+      "expectedRemoteRoleKind": "agenda_steal_tax",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "migrationPriorityFound": true,
+      "compiledIndexFound": true,
+      "manualOverlayFound": true,
+      "generatedFactsInScope": [
+        {
+          "type": "condition",
+          "kind": "requires_accessed_card",
+          "confidence": "high",
+          "source": "implementation.modifiers.steal_cost.appliesTo.agenda"
+        },
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "resource": "credits",
+          "amount": 5,
+          "confidence": "high",
+          "source": "implementation.modifiers.steal_cost"
+        },
+        {
+          "type": "remoteRole",
+          "kind": "agenda_steal_tax",
+          "threatLevel": "high",
+          "serverScope": "remote",
+          "confidence": "high",
+          "source": "implementation.modifiers.steal_cost"
+        }
+      ],
+      "activeMechanicalFieldsInScope": [
+        {
+          "type": "condition",
+          "kind": "requires_accessed_card",
+          "source": "active.conditions"
+        },
+        {
+          "type": "effect",
+          "kind": "remote_protection",
+          "timing": "persistent",
+          "scope": "fort",
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "resource": "credits",
+          "amount": 5,
+          "repeatable": true,
+          "source": "active.effects"
+        },
+        {
+          "type": "remoteRole",
+          "kind": "agenda_steal_tax",
+          "threatLevel": "high",
+          "serverScope": "fort",
+          "source": "active.remoteRole"
+        }
+      ],
+      "compiledAfterMigrationPreview": {
+        "cardId": "onr_v1_366_red-herrings",
+        "side": "corp",
+        "cardType": "upgrade",
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "fort"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          }
+        ],
+        "remoteRole": {
+          "kind": "agenda_steal_tax",
+          "threatLevel": "high",
+          "serverScope": "fort"
+        }
+      },
+      "confirmedByGeneratedFacts": [
+        {
+          "relation": "equivalent_shape_difference",
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        },
+        {
+          "relation": "equivalent_shape_difference",
+          "fact": "remoteRole",
+          "generated": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "remote",
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "active": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "fort",
+            "source": "active.remoteRole"
+          }
+        },
+        {
+          "relation": "exact",
+          "fact": "condition:requires_accessed_card",
+          "generated": {
+            "type": "condition",
+            "kind": "requires_accessed_card",
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost.appliesTo.agenda"
+          },
+          "active": {
+            "type": "condition",
+            "kind": "requires_accessed_card",
+            "source": "active.conditions"
+          }
+        }
+      ],
+      "wouldAddToPreview": [],
+      "wouldRemoveFromManualFuture": [
+        {
+          "type": "condition",
+          "kind": "requires_accessed_card",
+          "source": "active.conditions"
+        },
+        {
+          "type": "effect",
+          "kind": "remote_protection",
+          "timing": "persistent",
+          "scope": "fort",
+          "source": "active.effects"
+        },
+        {
+          "type": "effect",
+          "kind": "run_tax",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "resource": "credits",
+          "amount": 5,
+          "repeatable": true,
+          "source": "active.effects"
+        },
+        {
+          "type": "remoteRole",
+          "kind": "agenda_steal_tax",
+          "threatLevel": "high",
+          "serverScope": "fort",
+          "source": "active.remoteRole"
+        }
+      ],
+      "shapeDifferences": [
+        {
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        },
+        {
+          "fact": "remoteRole",
+          "generated": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "remote",
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "active": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "fort",
+            "source": "active.remoteRole"
+          }
+        }
+      ],
+      "remoteRoleDifferences": [
+        {
+          "fact": "effect:run_tax",
+          "generated": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "active": {
+            "type": "effect",
+            "kind": "run_tax",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "credits",
+            "amount": 5,
+            "repeatable": true,
+            "source": "active.effects"
+          }
+        },
+        {
+          "fact": "remoteRole",
+          "generated": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "remote",
+            "confidence": "high",
+            "source": "implementation.modifiers.steal_cost"
+          },
+          "active": {
+            "type": "remoteRole",
+            "kind": "agenda_steal_tax",
+            "threatLevel": "high",
+            "serverScope": "fort",
+            "source": "active.remoteRole"
+          }
+        }
+      ],
+      "futureRunDifferences": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "kind": "active_state_context_required",
+          "message": "Generated remoteRole depends on rezzed/active/same-server context and is not a static playability signal.",
+          "fact": "remoteRole"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated condition:requires_accessed_card must remain gated by current fort/server board state.",
+          "fact": "condition:requires_accessed_card"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated effect:run_tax must remain gated by current fort/server board state.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "board_context_required",
+          "message": "Generated remoteRole must remain gated by current fort/server board state.",
+          "fact": "remoteRole"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated condition:requires_accessed_card belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "condition:requires_accessed_card"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated effect:run_tax belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "consumer_active_for_fact_type",
+          "message": "Generated remoteRole belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+          "fact": "remoteRole"
+        },
+        {
+          "kind": "descriptor_context_required",
+          "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+          "descriptorGap": "Intentionally manual strategic overlay is not derived: effect:remote_protection."
+        },
+        {
+          "kind": "descriptor_context_required",
+          "message": "Manual/strategic overlay remains intentionally separate: effect:remote_protection.",
+          "missingOverlay": "effect:remote_protection"
+        },
+        {
+          "kind": "descriptor_context_required",
+          "message": "Remote protection is present in active hints but remains strategic/contextual and is not generated in Batch 3.",
+          "fact": "effect:remote_protection"
+        },
+        {
+          "kind": "generated_fact_already_present",
+          "message": "Generated condition:requires_accessed_card is already present in active monolith.",
+          "fact": "condition:requires_accessed_card"
+        },
+        {
+          "kind": "monolith_only_mechanical_fact",
+          "message": "Active monolith effect:remote_protection is in Batch-3 scope but not generated.",
+          "fact": "effect:remote_protection"
+        },
+        {
+          "kind": "remote_role_shape_difference",
+          "message": "Generated effect:run_tax needs RemoteRole shape review before any migration.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "remote_role_shape_difference",
+          "message": "Generated remoteRole needs RemoteRole shape review before any migration.",
+          "fact": "remoteRole"
+        },
+        {
+          "kind": "remote_role_shape_difference",
+          "message": "Red Herrings generated effect uses run_tax shape, but remoteRole keeps agenda_steal_tax semantics.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "shape_difference",
+          "message": "Generated effect:run_tax matches active monolith semantically but has a different shape.",
+          "fact": "effect:run_tax"
+        },
+        {
+          "kind": "shape_difference",
+          "message": "Generated remoteRole matches active monolith semantically but has a different shape.",
+          "fact": "remoteRole"
+        }
+      ],
+      "infos": [
+        {
+          "kind": "legacy_keep_for_compat",
+          "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
+        },
+        {
+          "kind": "manual_overlay_not_runtime",
+          "message": "Manual overlay is not used by runtime or planner."
+        },
+        {
+          "kind": "manual_overlay_present",
+          "message": "Manual overlay exists for strategic/quality notes only."
+        },
+        {
+          "kind": "no_change_needed",
+          "message": "Dry-run preview adds no new Batch-3 fact."
+        },
+        {
+          "kind": "preview_only",
+          "message": "Dry-run does not write ai-card-hints-active.json."
+        }
+      ],
+      "readiness": "needs_diff_review"
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "board_context_required",
+      "message": "Generated condition:requires_during_run must not be interpreted without current run, encounter and LegalAction state.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "board_context_required",
+      "message": "Generated effect:future_run_effect must not be interpreted without current run, encounter and LegalAction state.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "board_context_required",
+      "message": "Generated effect:remote_protection must not be interpreted without current run, encounter and LegalAction state.",
+      "fact": "effect:remote_protection"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated condition:requires_during_run belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated effect:future_run_effect belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated effect:remote_protection belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "effect:remote_protection"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "descriptor_context_required",
+      "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+      "descriptorGap": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "generated_fact_already_present",
+      "message": "Generated condition:requires_during_run is already present in active monolith.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "generated_fact_already_present",
+      "message": "Generated effect:future_run_effect is already present in active monolith.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "generated_fact_already_present",
+      "message": "Generated effect:remote_protection is already present in active monolith.",
+      "fact": "effect:remote_protection"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "runpath_context_required",
+      "message": "Generated condition:requires_during_run depends on remaining run path, later ICE or future encounter context.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "runpath_context_required",
+      "message": "Generated effect:future_run_effect depends on remaining run path, later ICE or future encounter context.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "runpath_context_required",
+      "message": "Generated effect:remote_protection depends on remaining run path, later ICE or future encounter context.",
+      "fact": "effect:remote_protection"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "board_context_required",
+      "message": "Generated condition:requires_during_run must not be interpreted without current run, encounter and LegalAction state.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "board_context_required",
+      "message": "Generated effect:future_run_effect must not be interpreted without current run, encounter and LegalAction state.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "board_context_required",
+      "message": "Generated effect:program_trash must not be interpreted without current run, encounter and LegalAction state.",
+      "fact": "effect:program_trash"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "board_context_required",
+      "message": "Generated effect:run_tax must not be interpreted without current run, encounter and LegalAction state.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated condition:requires_during_run belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated effect:future_run_effect belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated effect:program_trash belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "effect:program_trash"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated effect:run_tax belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "descriptor_context_required",
+      "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+      "descriptorGap": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "future_run_shape_difference",
+      "message": "Generated effect:program_trash needs future-run/runpath shape review before any migration.",
+      "fact": "effect:program_trash"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "future_run_shape_difference",
+      "message": "Generated effect:run_tax needs future-run/runpath shape review before any migration.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "generated_fact_already_present",
+      "message": "Generated condition:requires_during_run is already present in active monolith.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "generated_fact_already_present",
+      "message": "Generated effect:future_run_effect is already present in active monolith.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "runpath_context_required",
+      "message": "Generated condition:requires_during_run depends on remaining run path, later ICE or future encounter context.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "runpath_context_required",
+      "message": "Generated effect:future_run_effect depends on remaining run path, later ICE or future encounter context.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "runpath_context_required",
+      "message": "Generated effect:program_trash depends on remaining run path, later ICE or future encounter context.",
+      "fact": "effect:program_trash"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "runpath_context_required",
+      "message": "Generated effect:run_tax depends on remaining run path, later ICE or future encounter context.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "shape_difference",
+      "message": "Generated effect:program_trash matches active monolith semantically but has a different shape.",
+      "fact": "effect:program_trash"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "shape_difference",
+      "message": "Generated effect:run_tax matches active monolith semantically but has a different shape.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "board_context_required",
+      "message": "Generated condition:requires_during_run must not be interpreted without current run, encounter and LegalAction state.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "board_context_required",
+      "message": "Generated effect:future_run_effect must not be interpreted without current run, encounter and LegalAction state.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "board_context_required",
+      "message": "Generated effect:run_tax must not be interpreted without current run, encounter and LegalAction state.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated condition:requires_during_run belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated effect:future_run_effect belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated effect:run_tax belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "descriptor_context_required",
+      "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
+      "descriptorGap": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "future_run_shape_difference",
+      "message": "Generated effect:run_tax needs future-run/runpath shape review before any migration.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "generated_fact_already_present",
+      "message": "Generated condition:requires_during_run is already present in active monolith.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "generated_fact_already_present",
+      "message": "Generated effect:future_run_effect is already present in active monolith.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "runpath_context_required",
+      "message": "Generated condition:requires_during_run depends on remaining run path, later ICE or future encounter context.",
+      "fact": "condition:requires_during_run"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "runpath_context_required",
+      "message": "Generated effect:future_run_effect depends on remaining run path, later ICE or future encounter context.",
+      "fact": "effect:future_run_effect"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "runpath_context_required",
+      "message": "Generated effect:run_tax depends on remaining run path, later ICE or future encounter context.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "shape_difference",
+      "message": "Generated effect:run_tax matches active monolith semantically but has a different shape.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "active_state_context_required",
+      "message": "Generated effect:run_tax depends on rezzed/active/same-server context and is not a static playability signal.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "active_state_context_required",
+      "message": "Generated remoteRole depends on rezzed/active/same-server context and is not a static playability signal.",
+      "fact": "remoteRole"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "board_context_required",
+      "message": "Generated effect:run_tax must remain gated by current fort/server board state.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "board_context_required",
+      "message": "Generated remoteRole must remain gated by current fort/server board state.",
+      "fact": "remoteRole"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated effect:run_tax belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated remoteRole belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "remoteRole"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "descriptor_context_required",
+      "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+      "descriptorGap": "Intentionally manual strategic overlay is not derived: effect:remote_protection."
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "descriptor_context_required",
+      "message": "Manual/strategic overlay remains intentionally separate: effect:remote_protection.",
+      "missingOverlay": "effect:remote_protection"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "descriptor_context_required",
+      "message": "Remote protection is present in active hints but remains strategic/contextual and is not generated in Batch 3.",
+      "fact": "effect:remote_protection"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "generated_fact_already_present",
+      "message": "Generated remoteRole is already present in active monolith.",
+      "fact": "remoteRole"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "monolith_only_mechanical_fact",
+      "message": "Active monolith effect:remote_protection is in Batch-3 scope but not generated.",
+      "fact": "effect:remote_protection"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "remote_role_shape_difference",
+      "message": "Generated effect:run_tax needs RemoteRole shape review before any migration.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "shape_difference",
+      "message": "Generated effect:run_tax matches active monolith semantically but has a different shape.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "active_state_context_required",
+      "message": "Generated remoteRole depends on rezzed/active/same-server context and is not a static playability signal.",
+      "fact": "remoteRole"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "board_context_required",
+      "message": "Generated condition:requires_accessed_card must remain gated by current fort/server board state.",
+      "fact": "condition:requires_accessed_card"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "board_context_required",
+      "message": "Generated effect:run_tax must remain gated by current fort/server board state.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "board_context_required",
+      "message": "Generated remoteRole must remain gated by current fort/server board state.",
+      "fact": "remoteRole"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated condition:requires_accessed_card belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "condition:requires_accessed_card"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated effect:run_tax belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "consumer_active_for_fact_type",
+      "message": "Generated remoteRole belongs to the Batch-3 diagnostic/consumer-relevant fact set.",
+      "fact": "remoteRole"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "descriptor_context_required",
+      "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+      "descriptorGap": "Intentionally manual strategic overlay is not derived: effect:remote_protection."
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "descriptor_context_required",
+      "message": "Manual/strategic overlay remains intentionally separate: effect:remote_protection.",
+      "missingOverlay": "effect:remote_protection"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "descriptor_context_required",
+      "message": "Remote protection is present in active hints but remains strategic/contextual and is not generated in Batch 3.",
+      "fact": "effect:remote_protection"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "generated_fact_already_present",
+      "message": "Generated condition:requires_accessed_card is already present in active monolith.",
+      "fact": "condition:requires_accessed_card"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "monolith_only_mechanical_fact",
+      "message": "Active monolith effect:remote_protection is in Batch-3 scope but not generated.",
+      "fact": "effect:remote_protection"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "remote_role_shape_difference",
+      "message": "Generated effect:run_tax needs RemoteRole shape review before any migration.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "remote_role_shape_difference",
+      "message": "Generated remoteRole needs RemoteRole shape review before any migration.",
+      "fact": "remoteRole"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "remote_role_shape_difference",
+      "message": "Red Herrings generated effect uses run_tax shape, but remoteRole keeps agenda_steal_tax semantics.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "shape_difference",
+      "message": "Generated effect:run_tax matches active monolith semantically but has a different shape.",
+      "fact": "effect:run_tax"
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "shape_difference",
+      "message": "Generated remoteRole matches active monolith semantically but has a different shape.",
+      "fact": "remoteRole"
+    }
+  ],
+  "infos": [
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "legacy_keep_for_compat",
+      "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "no_change_needed",
+      "message": "Dry-run preview adds no new Batch-3 fact."
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "kind": "preview_only",
+      "message": "Dry-run does not write ai-card-hints-active.json."
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "legacy_keep_for_compat",
+      "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "no_change_needed",
+      "message": "Dry-run preview adds no new Batch-3 fact."
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "kind": "preview_only",
+      "message": "Dry-run does not write ai-card-hints-active.json."
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "legacy_keep_for_compat",
+      "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "no_change_needed",
+      "message": "Dry-run preview adds no new Batch-3 fact."
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "kind": "preview_only",
+      "message": "Dry-run does not write ai-card-hints-active.json."
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "legacy_keep_for_compat",
+      "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "manual_overlay_not_runtime",
+      "message": "Manual overlay is not used by runtime or planner."
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "manual_overlay_present",
+      "message": "Manual overlay exists for strategic/quality notes only."
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "no_change_needed",
+      "message": "Dry-run preview adds no new Batch-3 fact."
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "kind": "preview_only",
+      "message": "Dry-run does not write ai-card-hints-active.json."
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "legacy_keep_for_compat",
+      "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "manual_overlay_not_runtime",
+      "message": "Manual overlay is not used by runtime or planner."
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "manual_overlay_present",
+      "message": "Manual overlay exists for strategic/quality notes only."
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "no_change_needed",
+      "message": "Dry-run preview adds no new Batch-3 fact."
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "kind": "preview_only",
+      "message": "Dry-run does not write ai-card-hints-active.json."
+    }
+  ],
+  "conflicts": []
+}
