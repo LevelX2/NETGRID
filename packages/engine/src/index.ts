@@ -2753,14 +2753,30 @@ function canHostProgramOnDaemon(
   if (hostInstance.hostedOn) return false;
   const hostDefinition = definitionFor(state, hostId);
   if (
-    hostDefinition.type !== "program" ||
-    !cardHasSubtype(hostDefinition, "daemon")
+    hostDefinition.type !== "program" &&
+    hostDefinition.type !== "hardware"
   )
     return false;
   const implementation = cardImplementationForDefinitionId(hostDefinition.id);
   if (
     implementation?.hostedProgramCapacity?.hostedProgramsAreInstalled !== true ||
     !implementation.hostedProgramCapacity.allowedCardTypes.includes("program")
+  )
+    return false;
+  const allowedProgramSubtypes =
+    implementation.hostedProgramCapacity.allowedProgramSubtypes;
+  if (
+    allowedProgramSubtypes?.length &&
+    !allowedProgramSubtypes.some((subtype) =>
+      cardHasSubtype(programDefinition, subtype),
+    )
+  )
+    return false;
+  const maxHostedPrograms =
+    implementation.hostedProgramCapacity.maxHostedPrograms;
+  if (
+    typeof maxHostedPrograms === "number" &&
+    hostedCardsOn(state, hostId).length >= maxHostedPrograms
   )
     return false;
   const capacity = daemonHostingCapacity(hostDefinition);
@@ -2794,6 +2810,20 @@ function hostedProgramStrengthModifier(
     const amount = Math.max(0, Math.floor(modifier.amount));
     return sum + (modifier.operation === "reduce" ? -amount : amount);
   }, 0);
+}
+
+function icebreakerEncounterStrengthBonus(
+  state: GameState,
+  breakerId: CardInstanceId,
+  encounteredIceId: CardInstanceId,
+): number {
+  const instance = state.cardInstances[breakerId];
+  if (!instance || instance.selectedCardId !== encounteredIceId) return 0;
+  const bonus =
+    cardImplementationForDefinitionId(definitionFor(state, breakerId).id)
+      ?.icebreakerEncounterStrengthBonus;
+  if (bonus?.kind !== "against_selected_installed_ice") return 0;
+  return Math.max(0, Math.floor(bonus.amount));
 }
 
 function canOverlayProgramOnZetatechSoftwareInstaller(
@@ -3455,6 +3485,15 @@ function dupreStrengthCounterBonus(
   return cardCounter(state, breakerId, "power");
 }
 
+function permanentIcebreakerStrengthCounterBonus(
+  state: GameState,
+  breakerId: CardInstanceId,
+): number {
+  if (icebreakerHasSpecial(state, breakerId, "dupre_strength_counter_and_last_fort"))
+    return 0;
+  return cardCounter(state, breakerId, "power");
+}
+
 function pumpAmountForLegalAction(
   state: GameState,
   legalAction: LegalAction,
@@ -3585,11 +3624,22 @@ function resolveMultiBreakSubroutinesAction(
     )
   )
     throw new Error("Der Icebreaker hat keine gueltige Multi-Break-Faehigkeit.");
+  if (
+    ability.selectedIceSubtypeFromBreaker &&
+    !effectiveSubtypesForCard(state, iceId as CardInstanceId, iceDefinition).includes(
+      normalizeSubtypeLabel(
+        mustInstance(state.cardInstances, breakerId).selectedSubtype ?? "",
+      ),
+    )
+  )
+    throw new Error("Der gewählte Icebreaker-Typ passt nicht zum ICE.");
   const breakerStrength =
     (breakerDefinition.strength ?? 0) +
     mustInstance(state.cardInstances, breakerId).strengthModifier +
     hostedProgramStrengthModifier(state, breakerId) +
+    icebreakerEncounterStrengthBonus(state, breakerId, iceId) +
     cardCounter(state, breakerId, "militech") +
+    permanentIcebreakerStrengthCounterBonus(state, breakerId) +
     cardCounter(state, breakerId, "pattel_antibody") * -1 +
     dupreStrengthCounterBonus(state, breakerId) +
     runRemainderStrengthBonusForBreaker(run, breakerId);
@@ -3683,8 +3733,29 @@ function assertBreakSubroutineCostQuoteValid(
     )
   )
     throw new Error("Breaker hat keine gueltige Break-Faehigkeit.");
+  if (
+    ability.selectedIceSubtypeFromBreaker &&
+    !effectiveSubtypesForCard(state, run.encounteredIceId, iceDefinition).includes(
+      normalizeSubtypeLabel(
+        mustInstance(state.cardInstances, breakerId).selectedSubtype ?? "",
+      ),
+    )
+  )
+    throw new Error("Der gewählte Icebreaker-Typ passt nicht zum ICE.");
   if (!breakAbilityMatchesSubroutine(ability, subroutine))
     throw new Error("Breaker kann diese Subroutine nicht brechen.");
+  const breakerStrength =
+    (breakerDefinition.strength ?? 0) +
+    mustInstance(state.cardInstances, breakerId).strengthModifier +
+    hostedProgramStrengthModifier(state, breakerId) +
+    icebreakerEncounterStrengthBonus(state, breakerId, run.encounteredIceId) +
+    cardCounter(state, breakerId, "militech") +
+    permanentIcebreakerStrengthCounterBonus(state, breakerId) +
+    cardCounter(state, breakerId, "pattel_antibody") * -1 +
+    dupreStrengthCounterBonus(state, breakerId) +
+    runRemainderStrengthBonusForBreaker(run, breakerId);
+  if (breakerStrength < iceStrengthFor(state, run.encounteredIceId))
+    throw new Error("Der Icebreaker ist nicht stark genug fuer dieses ICE.");
   const expectedCost = breakSubroutineCostBreakdown(
     state,
     ability.cost.credits,
@@ -3824,6 +3895,17 @@ function runCardImplementationActionHost(state: GameState) {
       cardInstanceFor: (cardId: CardInstanceId) => state.cardInstances[cardId],
       definitionFor: (cardId: CardInstanceId) => definitionFor(state, cardId),
       runnerInstalledCardIds: () => runnerInstalledCardIds(state),
+      cardImplementationForDefinitionId: (definitionId: string) =>
+        cardImplementationForDefinitionId(definitionId as CardDefinitionId),
+    },
+    actions: {
+      buildLegalAction: (
+        type: LegalAction["type"],
+        label: string,
+        source: LegalAction["source"],
+        costs?: LegalAction["costs"],
+        payload?: LegalAction["payload"],
+      ) => action(state, "runner", type, label, source, costs, payload),
     },
     runtime: {
       pushActivatedActionsForTiming: (
@@ -4198,6 +4280,8 @@ function triggerAbilityExecutionHost(
     cards: {
       definitionFor,
       remainingReplacementLongtailKindForCard,
+      cardImplementationForDefinitionId: (definitionId) =>
+        cardImplementationForDefinitionId(definitionId as CardDefinitionId),
     },
     credits: {
       spend: spendCredits,
@@ -4803,6 +4887,16 @@ function performAction(
         Number(legalAction.payload?.subroutineIndex),
         legalAction,
       );
+      if (legalAction.payload?.nextSentryFreeBreak === true) {
+        resolveNextSentryFreeBreakAction(
+          state,
+          breakerId,
+          Number(legalAction.payload?.subroutineIndex),
+          currentSubroutine,
+          legalAction,
+        );
+        return;
+      }
       assertBreakSubroutineCostQuoteValid(
         state,
         breakerId,
@@ -4856,6 +4950,7 @@ function performAction(
         recordBartmossEncounterUsage(state, breakerId);
         recordDupreBreakUsage(runEndCleanupHost(state), breakerId);
         recordSnowballBreakUsage(state, breakerId);
+        recordNextSentryFreeBreakIfEarned(state, breakerId, breakAbility);
         if (breakAbility?.onUseEndRun) finishRun(state, false, legalAction);
       }
       return;
@@ -4909,6 +5004,78 @@ function performAction(
   }
 }
 
+function resolveNextSentryFreeBreakAction(
+  state: GameState,
+  breakerId: CardInstanceId | undefined,
+  subroutineIndex: number,
+  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
+  legalAction: LegalAction,
+): void {
+  const run = mustRun(state);
+  if (!breakerId) throw new Error("Free-Break-Quelle fehlt.");
+  if (run.phase !== "encounter_ice" || !run.encounteredIceId)
+    throw new Error("Free-Break kann nur im ICE-Encounter genutzt werden.");
+  if (!state.runner.rig.programs.includes(breakerId))
+    throw new Error("Der Icebreaker ist nicht installiert.");
+  if (!run.nextSentryFreeBreakByBreaker?.[breakerId])
+    throw new Error("Es gibt keinen offenen Free-Break-Effekt.");
+  const iceDefinition = definitionFor(state, run.encounteredIceId);
+  if (
+    !effectiveSubtypesForCard(state, run.encounteredIceId, iceDefinition).includes(
+      "sentry",
+    )
+  )
+    throw new Error("Der Free-Break-Effekt gilt nur für das nächste Sentry.");
+  if (
+    run.brokenSubroutineIndexes.includes(subroutineIndex) ||
+    run.resolvedSubroutineIndexes.includes(subroutineIndex)
+  )
+    throw new Error("Diese Subroutine ist bereits erledigt.");
+  if ((legalAction.costs[0]?.credits ?? 0) !== 0)
+    throw new Error("Free-Break-Kosten sind nicht mehr gueltig.");
+  executeEffectCommands(state, [{ type: "break_subroutine", subroutineIndex }]);
+  const pending = { ...(run.nextSentryFreeBreakByBreaker ?? {}) };
+  delete pending[breakerId];
+  if (Object.keys(pending).length > 0) run.nextSentryFreeBreakByBreaker = pending;
+  else delete run.nextSentryFreeBreakByBreaker;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    nextSentryFreeBreakConsumed: true,
+    sourceDefinitionId: definitionFor(state, breakerId).id,
+    subroutineId: subroutine.id,
+  };
+}
+
+function recordNextSentryFreeBreakIfEarned(
+  state: GameState,
+  breakerId: CardInstanceId,
+  breakAbility: RuntimeIcebreakerAbility | undefined,
+): void {
+  if (
+    breakAbility?.special !==
+    "set_next_sentry_free_break_after_fully_breaking_wall"
+  )
+    return;
+  const run = state.run;
+  if (!run?.encounteredIceId) return;
+  const iceDefinition = definitionFor(state, run.encounteredIceId);
+  if (
+    !effectiveSubtypesForCard(state, run.encounteredIceId, iceDefinition).includes(
+      "wall",
+    )
+  )
+    return;
+  const subroutineCount = subroutinesForCurrentEncounter(state, iceDefinition).length;
+  if (subroutineCount === 0) return;
+  for (let index = 0; index < subroutineCount; index += 1) {
+    if (!run.brokenSubroutineIndexes.includes(index)) return;
+  }
+  run.nextSentryFreeBreakByBreaker = {
+    ...(run.nextSentryFreeBreakByBreaker ?? {}),
+    [breakerId]: run.encounteredIceId,
+  };
+}
+
 function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
   spendClick(state, "runner");
   spendCredits(state, "runner", legalAction.costs[0]?.credits ?? 0);
@@ -4924,6 +5091,8 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
   const resolver =
     cardImplementationRunnerEventResolver(definition) ??
     RUNNER_EVENT_RESOLVERS[definition.id];
+  if (resolveRunnerTargetedEventImplementation(state, definition, legalAction))
+    return;
   if (canPlayPrintedCostOnPlayImplementation(
     cardImplementationRuntimeDeps,
     state,
@@ -4944,6 +5113,32 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
     return;
   }
   throw new Error(`Kein Runner-Event-Resolver fuer ${definition.id}.`);
+}
+
+function resolveRunnerTargetedEventImplementation(
+  state: GameState,
+  definition: CardDefinition,
+  legalAction: LegalAction,
+): boolean {
+  const effect =
+    cardImplementationForDefinitionId(definition.id)?.runnerEventTargetedEffect;
+  if (effect?.kind !== "add_strength_counter_to_installed_icebreaker")
+    return false;
+  const targetCardId = String(legalAction.payload?.targetCardId ?? "") as CardInstanceId;
+  if (!state.runner.rig.programs.includes(targetCardId))
+    throw new Error("Das Ziel-Icebreaker-Programm ist nicht installiert.");
+  const targetDefinition = definitionFor(state, targetCardId);
+  if (!cardHasSubtype(targetDefinition, "icebreaker"))
+    throw new Error("Das Ziel ist kein Icebreaker.");
+  addCardCounter(state, targetCardId, effect.counterType, effect.amount);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    targetDefinitionId: targetDefinition.id,
+    counterType: effect.counterType,
+    counterAmountAdded: effect.amount,
+    remainingCounters: cardCounter(state, targetCardId, effect.counterType),
+  };
+  return true;
 }
 
 function resolvePostOnPlayGenericFollowups(
@@ -10007,6 +10202,10 @@ function runnerEncounterActionHostForState(
         effectiveSubtypesForCard(state, cardId, definition),
       hostedProgramStrengthModifier: (cardId) =>
         hostedProgramStrengthModifier(state, cardId),
+      icebreakerEncounterStrengthBonus: (breakerId, encounteredIceId) =>
+        icebreakerEncounterStrengthBonus(state, breakerId, encounteredIceId),
+      permanentIcebreakerStrengthCounterBonus: (breakerId) =>
+        permanentIcebreakerStrengthCounterBonus(state, breakerId),
       publicServerLabel: (serverId) => publicServerLabel(state, serverId),
     },
     run: {

@@ -527,6 +527,11 @@ function restrictedHostedCreditSourceMatchesUse(
       return false;
     const breakerDefinition = definitionFor(state, breakerId);
     if (!cardHasSubtype(breakerDefinition, "icebreaker")) return false;
+    if (
+      source.requireHostedBreakerForIcebreakerUse &&
+      state.cardInstances[breakerId]?.hostedOn !== cardId
+    )
+      return false;
     if (use === "using_icebreaker_during_run") return true;
     if (use === "using_icebreaker_during_run_non_noisy")
       return !cardHasSubtype(breakerDefinition, "noisy");

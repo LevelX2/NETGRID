@@ -2408,24 +2408,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_080_black-widow",
+        "coverage": [
+          "card_implementation"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_081_boring-bit",
@@ -2465,24 +2465,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_082_bulldozer",
+        "coverage": [
+          "card_implementation"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_083_corrosion",
@@ -2649,24 +2649,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_088_fubar",
+        "coverage": [
+          "card_implementation"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_089_garbage-in",
@@ -2733,24 +2733,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_091_lockjaw",
+        "coverage": [
+          "card_implementation"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_092_morphing-tool",
@@ -2759,24 +2759,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_092_morphing-tool",
+        "coverage": [
+          "card_implementation"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_093_redecorator",
@@ -3407,24 +3407,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_115_personal-touch-the",
+        "coverage": [
+          "card_implementation"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_116_pirate-broadcast",
@@ -4073,24 +4073,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_139_eurocorpse-tm-spin-chip",
+        "coverage": [
+          "card_implementation"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_140_expendable-family-member",

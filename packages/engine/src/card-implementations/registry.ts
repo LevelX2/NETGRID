@@ -427,6 +427,7 @@ import { proteusDemolitionRunImplementation } from "./proteus/runner/events/demo
 import { proteusDisgruntledIceTechnicianImplementation } from "./proteus/runner/events/disgruntled-ice-technician";
 import { proteusDroneForADayImplementation } from "./proteus/runner/events/drone-for-a-day";
 import { proteusOnTheFastTrackImplementation } from "./proteus/runner/events/on-the-fast-track";
+import { proteusPersonalTouchTheImplementation } from "./proteus/runner/events/personal-touch-the";
 import { proteusPrearrangedDropImplementation } from "./proteus/runner/events/prearranged-drop";
 import { proteusReconnaissanceImplementation } from "./proteus/runner/events/reconnaissance";
 import { proteusRemoteDetonatorImplementation } from "./proteus/runner/events/remote-detonator";
@@ -435,18 +436,24 @@ import { proteusWeefleInitiationImplementation } from "./proteus/runner/events/w
 import { proteusCorticalCybermodemImplementation } from "./proteus/runner/hardware/cortical-cybermodem";
 import { proteusCorticalStimulatorsImplementation } from "./proteus/runner/hardware/cortical-stimulators";
 import { proteusDeckTheImplementation } from "./proteus/runner/hardware/deck-the";
+import { proteusEurocorpseTmSpinChipImplementation } from "./proteus/runner/hardware/eurocorpse-tm-spin-chip";
 import { proteusSunburstCranialInterfaceImplementation } from "./proteus/runner/hardware/sunburst-cranial-interface";
 import { proteusPoisonedWaterSupplyImplementation } from "./proteus/runner/events/poisoned-water-supply";
 import { proteusStakeoutImplementation } from "./proteus/runner/events/stakeout";
 import { proteusArmageddonImplementation } from "./proteus/runner/programs/armageddon";
+import { proteusBlackWidowImplementation } from "./proteus/runner/programs/black-widow";
 import { proteusBigFrackinGunImplementation } from "./proteus/runner/programs/big-frackin-gun";
 import { proteusBoringBitImplementation } from "./proteus/runner/programs/boring-bit";
+import { proteusBulldozerImplementation } from "./proteus/runner/programs/bulldozer";
 import { proteusCorrosionImplementation } from "./proteus/runner/programs/corrosion";
 import { proteusCrumbleImplementation } from "./proteus/runner/programs/crumble";
 import { proteusDisintegratorImplementation } from "./proteus/runner/programs/disintegrator";
 import { proteusEnterpriseIncShieldsImplementation } from "./proteus/runner/programs/enterprise-inc-shields";
+import { proteusFubarImplementation } from "./proteus/runner/programs/fubar";
 import { proteusGarbageInImplementation } from "./proteus/runner/programs/garbage-in";
 import { proteusHighlighterImplementation } from "./proteus/runner/programs/highlighter";
+import { proteusLockjawImplementation } from "./proteus/runner/programs/lockjaw";
+import { proteusMorphingToolImplementation } from "./proteus/runner/programs/morphing-tool";
 import { proteusRedecoratorImplementation } from "./proteus/runner/programs/redecorator";
 import { proteusScaldanImplementation } from "./proteus/runner/programs/scaldan";
 import { proteusSkeletonPasskeysImplementation } from "./proteus/runner/programs/skeleton-passkeys";
@@ -883,6 +890,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusDisgruntledIceTechnicianImplementation,
   proteusDroneForADayImplementation,
   proteusOnTheFastTrackImplementation,
+  proteusPersonalTouchTheImplementation,
   proteusPrearrangedDropImplementation,
   proteusReconnaissanceImplementation,
   proteusRemoteDetonatorImplementation,
@@ -891,18 +899,24 @@ export const CARD_IMPLEMENTATIONS = [
   proteusCorticalCybermodemImplementation,
   proteusCorticalStimulatorsImplementation,
   proteusDeckTheImplementation,
+  proteusEurocorpseTmSpinChipImplementation,
   proteusSunburstCranialInterfaceImplementation,
   proteusPoisonedWaterSupplyImplementation,
   proteusStakeoutImplementation,
   proteusArmageddonImplementation,
+  proteusBlackWidowImplementation,
   proteusBigFrackinGunImplementation,
   proteusBoringBitImplementation,
+  proteusBulldozerImplementation,
   proteusCorrosionImplementation,
   proteusCrumbleImplementation,
   proteusDisintegratorImplementation,
   proteusEnterpriseIncShieldsImplementation,
+  proteusFubarImplementation,
   proteusGarbageInImplementation,
   proteusHighlighterImplementation,
+  proteusLockjawImplementation,
+  proteusMorphingToolImplementation,
   proteusRedecoratorImplementation,
   proteusScaldanImplementation,
   proteusSkeletonPasskeysImplementation,

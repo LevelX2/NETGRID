@@ -974,6 +974,365 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
   });
 });
 
+describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
+  function runnerMain(seed: string): GameState {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: ONR_V1_RUNNER_DECK,
+        corpDeck: ONR_V1_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 30;
+    state.runner.clicks = 4;
+    state.corp.credits = 30;
+    return state;
+  }
+
+  function installFromGrip(
+    state: GameState,
+    definitionId: CardDefinitionId,
+    predicate: (action: LegalAction) => boolean = () => true,
+  ): { state: GameState; cardId: CardInstanceId; action: LegalAction } {
+    const cardId = addRunnerCardToGripForTest(
+      state,
+      definitionId,
+      definitionId.replace(/[^a-z0-9]/gi, "_"),
+    );
+    const action = mustAction(
+      state,
+      "runner",
+      (candidate) =>
+        candidate.type === "install_card" &&
+        candidate.payload?.cardId === cardId &&
+        predicate(candidate),
+    );
+    return {
+      state: apply(state, "runner", (candidate) => candidate.actionId === action.actionId),
+      cardId,
+      action,
+    };
+  }
+
+  function setEncounter(
+    state: GameState,
+    iceId: CardInstanceId,
+    serverId: ServerId = "rd",
+  ): GameState {
+    state.run = {
+      runId: `pro009_run_${state.stateVersion}`,
+      attackedServerId: serverId as Exclude<ServerId, "new_remote">,
+      phase: "encounter_ice",
+      position: {
+        kind: "ice",
+        serverId: serverId as Exclude<ServerId, "new_remote">,
+        iceIndex: 0,
+      },
+      encounteredIceId: iceId,
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: false,
+    };
+    state.timingPoint = "run.encounter_ice";
+    state.activeSide = "runner";
+    return state;
+  }
+
+  it("requires install choices for Black Widow, Fubar, and Morphing Tool", () => {
+    let state = runnerMain("proteus-pro009-install-choices");
+    const targetIceId = putCorpIceOnServer(state, "rd", "onr_v1_245_fire-wall");
+
+    const blackWidow = installFromGrip(
+      state,
+      "onr_proteus_080_black-widow",
+      (action) => action.payload?.selectedCardId === targetIceId,
+    );
+    state = blackWidow.state;
+    expect(state.cardInstances[blackWidow.cardId]?.selectedCardId).toBe(targetIceId);
+
+    const fubar = installFromGrip(
+      state,
+      "onr_proteus_088_fubar",
+      (action) => action.payload?.selectedSubtype === "sentry",
+    );
+    state = fubar.state;
+    expect(state.cardInstances[fubar.cardId]?.selectedSubtype).toBe("sentry");
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.cardId === fubar.cardId &&
+          action.payload?.runnerAbility === "change_icebreaker_subtype",
+      ),
+    ).toBe(false);
+
+    const morphing = installFromGrip(
+      state,
+      "onr_proteus_092_morphing-tool",
+      (action) => action.payload?.selectedSubtype === "code_gate",
+    );
+    state = morphing.state;
+    expect(state.cardInstances[morphing.cardId]?.selectedSubtype).toBe("code_gate");
+    const change = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.cardId === morphing.cardId &&
+        action.payload?.selectedSubtype === "wall",
+    );
+    state = apply(state, "runner", (action) => action.actionId === change.actionId);
+    expect(state.cardInstances[morphing.cardId]?.selectedSubtype).toBe("wall");
+  });
+
+  it("revalidates chosen breaker types and Black Widow selected ICE strength", () => {
+    let state = runnerMain("proteus-pro009-type-break");
+    const wallId = addRezzedCorpIceForTest(
+      state,
+      "onr_v1_245_fire-wall",
+      "rd",
+      "fire_wall",
+    );
+    const sentryId = addRezzedCorpIceForTest(
+      state,
+      "onr_v1_223_banpei",
+      "rd",
+      "banpei",
+    );
+    const fubar = installFromGrip(
+      state,
+      "onr_proteus_088_fubar",
+      (action) => action.payload?.selectedSubtype === "sentry",
+    );
+    state = fubar.state;
+    state.cardInstances[fubar.cardId]!.strengthModifier = 10;
+    state = setEncounter(state, wallId);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "break_subroutine" && action.payload?.breakerId === fubar.cardId,
+      ),
+    ).toBe(false);
+    state = setEncounter(state, sentryId);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "break_subroutine" && action.payload?.breakerId === fubar.cardId,
+      ),
+    ).toBe(true);
+
+    state = runnerMain("proteus-pro009-black-widow");
+    const chosenIceId = addRezzedCorpIceForTest(
+      state,
+      "onr_v1_224_bolter-cluster",
+      "rd",
+      "chosen_bolter",
+    );
+    const otherIceId = addRezzedCorpIceForTest(
+      state,
+      "onr_v1_224_bolter-cluster",
+      "rd",
+      "other_bolter",
+    );
+    const blackWidow = installFromGrip(
+      state,
+      "onr_proteus_080_black-widow",
+      (action) => action.payload?.selectedCardId === chosenIceId,
+    );
+    state = blackWidow.state;
+    state = setEncounter(state, chosenIceId);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.breakerId === blackWidow.cardId,
+      ),
+    ).toBe(true);
+    state = setEncounter(state, otherIceId);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.breakerId === blackWidow.cardId,
+      ),
+    ).toBe(false);
+  });
+
+  it("sets and consumes Bulldozer's next-sentry free break once", () => {
+    let state = runnerMain("proteus-pro009-bulldozer");
+    const wallId = addRezzedCorpIceForTest(
+      state,
+      "onr_v1_232_crystal-wall",
+      "rd",
+      "wall",
+    );
+    const sentryId = addRezzedCorpIceForTest(
+      state,
+      "onr_v1_223_banpei",
+      "rd",
+      "sentry",
+    );
+    const bulldozerId = addInstalledRunnerProgramForTest(
+      state,
+      "onr_proteus_082_bulldozer",
+      "bulldozer",
+    );
+    state.cardInstances[bulldozerId]!.strengthModifier = 10;
+    const stealthId = addInstalledRunnerProgramForTest(
+      state,
+      "onr_v1_011_cloak",
+      "cloak",
+    );
+    state.cardInstances[stealthId]!.counters = { recurring_credit: 2 };
+    state = setEncounter(state, wallId);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        action.payload?.breakerId === bulldozerId,
+    );
+    expect(state.run?.nextSentryFreeBreakByBreaker?.[bulldozerId]).toBe(wallId);
+    state = setEncounter(state, sentryId);
+    state.run!.nextSentryFreeBreakByBreaker = { [bulldozerId]: wallId };
+    const freeBreak = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        action.payload?.breakerId === bulldozerId &&
+        action.payload?.nextSentryFreeBreak === true,
+    );
+    state = apply(state, "runner", (action) => action.actionId === freeBreak.actionId);
+    expect(state.run?.brokenSubroutineIndexes).toContain(0);
+    expect(state.run?.nextSentryFreeBreakByBreaker?.[bulldozerId]).toBeUndefined();
+  });
+
+  it("applies Lockjaw and Personal Touch only to selected icebreakers", () => {
+    let state = runnerMain("proteus-pro009-modifiers");
+    const lockjawId = addInstalledRunnerProgramForTest(
+      state,
+      "onr_proteus_091_lockjaw",
+      "lockjaw",
+    );
+    const targetId = addInstalledRunnerProgramForTest(
+      state,
+      "onr_v1_036_jackhammer",
+      "jackhammer",
+    );
+    const otherId = addInstalledRunnerProgramForTest(
+      state,
+      "onr_v1_014_codecracker",
+      "codecracker",
+    );
+    state = setEncounter(
+      state,
+      addRezzedCorpIceForTest(state, "onr_v1_245_fire-wall", "rd", "wall"),
+    );
+    const lockjaw = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.cardId === lockjawId &&
+        action.payload?.targetCardId === targetId,
+    );
+    state = apply(state, "runner", (action) => action.actionId === lockjaw.actionId);
+    expect(state.run?.remainderStrengthBonusByBreaker?.[targetId]).toBe(2);
+    expect(state.run?.remainderStrengthBonusByBreaker?.[otherId]).toBeUndefined();
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run).toBeUndefined();
+
+    state = runnerMain("proteus-pro009-personal-touch");
+    const breakerId = addInstalledRunnerProgramForTest(
+      state,
+      "onr_v1_036_jackhammer",
+      "personal_jackhammer",
+    );
+    const untouchedId = addInstalledRunnerProgramForTest(
+      state,
+      "onr_v1_014_codecracker",
+      "personal_codecracker",
+    );
+    addRunnerCardToGripForTest(
+      state,
+      "onr_proteus_115_personal-touch-the",
+      "personal_touch",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.targetCardId === breakerId,
+    );
+    expect(cardCounterAmount(state, breakerId, "power")).toBe(1);
+    expect(cardCounterAmount(state, untouchedId, "power")).toBe(0);
+  });
+
+  it("restricts Eurocorpse bits to the hosted icebreaker and keeps replay stable", () => {
+    let state = runnerMain("proteus-pro009-eurocorpse");
+    const chipInstall = installFromGrip(
+      state,
+      "onr_proteus_139_eurocorpse-tm-spin-chip",
+    );
+    state = chipInstall.state;
+    const chipId = chipInstall.cardId;
+    state.cardInstances[chipId]!.counters = { bit: 2 };
+    const hostedId = addInstalledRunnerProgramForTest(
+      state,
+      "onr_v1_036_jackhammer",
+      "euro_jackhammer",
+    );
+    state.cardInstances[hostedId] = {
+      ...state.cardInstances[hostedId]!,
+      hostedOn: chipId,
+    };
+    const otherId = addInstalledRunnerProgramForTest(
+      state,
+      "onr_v1_014_codecracker",
+      "euro_codecracker",
+    );
+    state.runner.credits = 0;
+    const wallId = addRezzedCorpIceForTest(
+      state,
+      "onr_v1_245_fire-wall",
+      "rd",
+      "euro_wall",
+    );
+    state.cardInstances[hostedId]!.strengthModifier = 10;
+    state.cardInstances[otherId]!.strengthModifier = 10;
+    state = setEncounter(state, wallId);
+    const legal = getLegalActions(state, "runner");
+    expect(
+      legal.some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.breakerId === hostedId,
+      ),
+    ).toBe(true);
+    expect(
+      legal.some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.breakerId === otherId,
+      ),
+    ).toBe(false);
+    const replayStart = state.eventLog.length;
+    const replayInitial = structuredClone(state);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        action.payload?.breakerId === hostedId,
+    );
+    const replay = replayEvents(replayInitial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("MVP 0.1 engine foundation", () => {
   it("normalizes legacy ability payloads into side-safe public ability schema", () => {
     const context = buildPublicAbilitySchemaContext(

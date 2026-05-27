@@ -793,6 +793,8 @@ export type CardInstance = {
   counters?: Partial<Record<CounterType, number>>;
   hostedOn?: CardInstanceId;
   selectedServerId?: Exclude<ServerId, "new_remote">;
+  selectedCardId?: CardInstanceId;
+  selectedSubtype?: string;
   variableIceState?: {
     family:
       | "x_strength"
@@ -974,6 +976,7 @@ export type RunState = {
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
+  nextSentryFreeBreakByBreaker?: Partial<Record<CardInstanceId, CardInstanceId>>;
   fullyBrokenPassedIcePendingId?: CardInstanceId;
   startupImmolatorPendingPassedIceId?: CardInstanceId;
   forceJackOutAfterEncounterSourceId?: CardInstanceId;
@@ -985,6 +988,7 @@ export type RunState = {
     Record<CardInstanceId, number[]>
   >;
   remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
+  runStrengthBoostUsedSourceIds?: CardInstanceId[];
   bizarreEncryptionSchemeActive?: boolean;
   traceSuccessBySubroutineIndex?: Partial<Record<number, boolean>>;
   accessStealCostModifierSnapshotsByServer?: Partial<

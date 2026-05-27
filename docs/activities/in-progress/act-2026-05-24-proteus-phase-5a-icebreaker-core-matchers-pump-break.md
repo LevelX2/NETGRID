@@ -15,9 +15,7 @@ proReferences:
   - PRO004
   - PRO009
 blockedBy:
-  - icebreaker_install_choice_state
-  - stateful_breaker_subtype_choice
-  - bulldozer_next_sentry_followup
+  - legacy_umbrella_activity_status_reference_only
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-5a-icebreaker-core-matchers-pump-break.md
   - docs/releases/proteus/README.md
@@ -76,19 +74,8 @@ Die sichtbaren Proteus-Icebreaker als eigene CardImplementation-Dateien über de
 
 ## Ergebnisnotiz
 
-Teilweise umgesetzt: PRO004 ist abgeschlossen; der übergreifende Phase-5a-Slice bleibt wegen PRO011/PRO012 blockiert.
+Teilweise umgesetzt: PRO004 und PRO009 sind abgeschlossen; der übergreifende Phase-5a-Slice bleibt nur als alte Umbrella-Statusreferenz ohne zusätzliche Komplettzählung offen.
 
 PRO004 hat die einfachen Zielkarten `Big Frackin' Gun`, `Boring Bit`, `Corrosion`, `Redecorator`, `Skeleton Passkeys` und `Wrecking Ball` als konkrete CardImplementation-Dateien mit generischen `icebreakerAbilities` umgesetzt. Keine dieser Karten ist decklegal, formatlegal oder AI-unterstützt.
 
-Die einfachen Zielkarten `Big Frackin' Gun`, `Boring Bit`, `Corrosion`, `Redecorator`, `Skeleton Passkeys` und `Wrecking Ball` sind voraussichtlich mit vorhandenen `icebreakerAbilities`-Profilen, `count` und Stealth-Loss-Seiteneffekten umsetzbar. Der vollständige Slice enthält aber mehrere Karten, für die der aktuelle generische Breaker-Baustein nicht ausreicht:
-
-- `Black Widow` braucht beim Installieren eine Runner-Choice für ein installiertes ICE und einen source-bound +5-Stärke-Modifikator nur während Encounters mit genau diesem ICE. Ein generischer Install-Choice-/Target-State für Runner-Programme existiert dafür noch nicht.
-- `Fubar` braucht eine einmalige, zustandsbehaftete Wahl, ob das Programm Code Gates, Sentries oder Walls bricht. Diese Wahl muss in Break-Actions und `applyAction` revalidiert werden; der aktuelle Breaker-Matcher ist statisch.
-- `Morphing Tool` braucht dieselbe Breaker-Typ-State-Maschine zusätzlich mit Install-Initialwahl und späterer `[1], A`-Neuwahl.
-- `Bulldozer` kann Stealth-Loss bereits teilweise über bestehende Break-Side-Effects abbilden, braucht aber zusätzlich den Folgeeffekt: Wenn alle Subroutinen einer Wall mit Bulldozer gebrochen wurden, wird beim nächsten Sentry in diesem Run eine Subroutine kostenlos gebrochen. Dafür fehlt ein generischer rungebundener Break-Followup-Flag.
-- `Lockjaw` ist laut Kartentext kein Icebreaker-Core-Matcher, sondern ein Encounter-Supportprogramm: `[T]` gibt einem eigenen Icebreaker +2 Stärke für den Rest des Runs. Das passt fachlich eher zu Phase 5e Breaker-Support/Modifier und nicht zu 5a Core Matchers.
-
-Die übrigen Karten dieses Phase-5a-Slices bleiben außerhalb von PRO004:
-
-- `Black Widow`, `Fubar` und `Morphing Tool` bleiben PRO011.
-- `Bulldozer` und `Lockjaw` bleiben PRO012.
+PRO009 hat die früher blockierenden Zielkarten `Black Widow`, `Fubar`, `Morphing Tool`, `Bulldozer` und `Lockjaw` umgesetzt. Ergänzt wurden generische Install-Choices für ICE-Ziele und Icebreaker-Subtypes, selected-subtype Breaker-Matcher, source-bound Encounter-Strength, rungebundene Bulldozer-Followup-Breaks und Lockjaw-Run-Boosts. Keine dieser Karten wurde `deck_legal`, `format_legal` oder `ai_supported`.

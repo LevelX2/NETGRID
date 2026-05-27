@@ -46,8 +46,12 @@ export type CardLifecycleImplementation = {
 };
 
 export type CardInstallTargetBindingImplementation = {
-  kind: "choose_data_fort_on_install";
-  stores: "selectedServerId";
+  kind:
+    | "choose_data_fort_on_install"
+    | "choose_installed_ice_on_install"
+    | "choose_icebreaker_subtype_on_install";
+  stores: "selectedServerId" | "selectedCardId" | "selectedSubtype";
+  choices?: readonly "code_gate"[] | readonly ("code_gate" | "sentry" | "wall")[];
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -675,6 +679,8 @@ export type CardScoredAgendaImplementation =
 export type HostedProgramCapacityImplementation = {
   capacityMu: number;
   allowedCardTypes: readonly ["program"];
+  allowedProgramSubtypes?: readonly string[];
+  maxHostedPrograms?: number;
   hostedProgramsAreInstalled: true;
   hostLeavesPlayTrashesHosted: true;
 };
@@ -1623,6 +1629,7 @@ export type CardIcebreakerAbilityImplementation =
 export type CardIcebreakerBreakMatcherImplementation =
   | { kind: "any" }
   | { kind: "ice_subtype"; subtype: string }
+  | { kind: "selected_ice_subtype" }
   | { kind: "ice_subtype_any_of"; subtypes: readonly string[] }
   | { kind: "subroutine_tag"; tag: string }
   | { kind: "subroutine_traces" };
@@ -1642,7 +1649,8 @@ export type CardIcebreakerBreakSpecialImplementation =
   | { kind: "blink_random_break_or_net_damage" }
   | { kind: "bartmoss_post_encounter_self_trash_check" }
   | { kind: "snowball_run_strength_per_successful_break" }
-  | { kind: "dupre_strength_counter_and_last_fort" };
+  | { kind: "dupre_strength_counter_and_last_fort" }
+  | { kind: "set_next_sentry_free_break_after_fully_breaking_wall" };
 
 export type RestrictedHostedCreditUse =
   | "using_icebreaker_during_run"
@@ -1663,6 +1671,7 @@ export type RestrictedHostedCreditSourceImplementation = {
     mode: "refill_to_capacity_if_used";
   };
   allowUseWhileOverwritingSource?: true;
+  requireHostedBreakerForIcebreakerUse?: true;
 };
 
 export type CardInstallAdditionalCostImplementation = {

@@ -813,18 +813,28 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/armageddon.ts",
   "onr_proteus_079_big-frackin-gun":
     "packages/engine/src/card-implementations/proteus/runner/programs/big-frackin-gun.ts",
+  "onr_proteus_080_black-widow":
+    "packages/engine/src/card-implementations/proteus/runner/programs/black-widow.ts",
   "onr_proteus_081_boring-bit":
     "packages/engine/src/card-implementations/proteus/runner/programs/boring-bit.ts",
+  "onr_proteus_082_bulldozer":
+    "packages/engine/src/card-implementations/proteus/runner/programs/bulldozer.ts",
   "onr_proteus_083_corrosion":
     "packages/engine/src/card-implementations/proteus/runner/programs/corrosion.ts",
   "onr_proteus_084_crumble":
     "packages/engine/src/card-implementations/proteus/runner/programs/crumble.ts",
   "onr_proteus_086_enterprise-inc-shields":
     "packages/engine/src/card-implementations/proteus/runner/programs/enterprise-inc-shields.ts",
+  "onr_proteus_088_fubar":
+    "packages/engine/src/card-implementations/proteus/runner/programs/fubar.ts",
   "onr_proteus_089_garbage-in":
     "packages/engine/src/card-implementations/proteus/runner/programs/garbage-in.ts",
   "onr_proteus_090_highlighter":
     "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
+  "onr_proteus_091_lockjaw":
+    "packages/engine/src/card-implementations/proteus/runner/programs/lockjaw.ts",
+  "onr_proteus_092_morphing-tool":
+    "packages/engine/src/card-implementations/proteus/runner/programs/morphing-tool.ts",
   "onr_proteus_093_redecorator":
     "packages/engine/src/card-implementations/proteus/runner/programs/redecorator.ts",
   "onr_proteus_094_scaldan":
@@ -843,6 +853,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/wrecking-ball.ts",
   "onr_proteus_103_cruising-for-netwatch":
     "packages/engine/src/card-implementations/proteus/runner/events/cruising-for-netwatch.ts",
+  "onr_proteus_115_personal-touch-the":
+    "packages/engine/src/card-implementations/proteus/runner/events/personal-touch-the.ts",
   "onr_proteus_124_stakeout":
     "packages/engine/src/card-implementations/proteus/runner/events/stakeout.ts",
   "onr_proteus_134_cortical-cybermodem":
@@ -851,6 +863,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-stimulators.ts",
   "onr_proteus_138_deck-the":
     "packages/engine/src/card-implementations/proteus/runner/hardware/deck-the.ts",
+  "onr_proteus_139_eurocorpse-tm-spin-chip":
+    "packages/engine/src/card-implementations/proteus/runner/hardware/eurocorpse-tm-spin-chip.ts",
   "onr_proteus_151_sunburst-cranial-interface":
     "packages/engine/src/card-implementations/proteus/runner/hardware/sunburst-cranial-interface.ts",
   "onr_proteus_146_precision-bribery":

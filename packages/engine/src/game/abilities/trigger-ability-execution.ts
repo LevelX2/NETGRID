@@ -29,6 +29,7 @@ export type TriggerAbilityExecutionHost = {
       state: GameState,
       cardId: CardInstanceId,
     ) => string | undefined;
+    cardImplementationForDefinitionId?: (definitionId: string) => any;
   };
   credits: {
     spend: (state: GameState, side: Side, amount: number) => void;
@@ -115,6 +116,76 @@ export function handleTriggerAbilityExecution(
     return handled(legalAction);
   if (host.hiddenZone.handleHiddenZoneTriggerExecution(legalAction).handled)
     return handled(legalAction);
+  if (legalAction.payload?.runnerAbility === "change_icebreaker_subtype") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf den Icebreaker-Typ ändern.");
+    if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
+      throw new Error("Der Icebreaker-Typ kann nur im Runner-Zug geändert werden.");
+    const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+    if (!state.runner.rig.programs.includes(sourceCardId))
+      throw new Error("Der Icebreaker ist nicht installiert.");
+    const definition = host.cards.definitionFor(state, sourceCardId);
+    const change =
+      host.cards.cardImplementationForDefinitionId?.(definition.id)
+        ?.icebreakerSubtypeChange;
+    const selectedSubtype = String(legalAction.payload?.selectedSubtype ?? "");
+    if (!change || !change.choices.includes(selectedSubtype))
+      throw new Error("Der gewählte Icebreaker-Typ ist nicht gültig.");
+    host.actions.spendClick(state, "runner");
+    host.credits.spend(state, "runner", change.cost.credits);
+    state.cardInstances[sourceCardId] = {
+      ...state.cardInstances[sourceCardId]!,
+      selectedSubtype,
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      selectedSubtype,
+      runnerCreditsAfter: state.runner.credits,
+    };
+    return handled(legalAction);
+  }
+  if (legalAction.payload?.runnerAbility === "boost_icebreaker_for_run") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf den Icebreaker verstärken.");
+    if (!state.run)
+      throw new Error("Die Stärkeverstärkung gilt nur während eines Runs.");
+    const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+    const targetCardId = String(
+      legalAction.payload?.targetCardId ?? "",
+    ) as CardInstanceId;
+    if (!state.runner.rig.programs.includes(sourceCardId))
+      throw new Error("Die Support-Quelle ist nicht installiert.");
+    if (!state.runner.rig.programs.includes(targetCardId))
+      throw new Error("Das Ziel-Icebreaker-Programm ist nicht installiert.");
+    const targetDefinition = host.cards.definitionFor(state, targetCardId);
+    if (!targetDefinition.subtypes.includes("icebreaker"))
+      throw new Error("Das Ziel ist kein Icebreaker.");
+    const boost =
+      host.cards.cardImplementationForDefinitionId?.(
+        host.cards.definitionFor(state, sourceCardId).id,
+      )?.runnerRunStrengthBoost;
+    if (!boost) throw new Error("Die Support-Quelle hat keine Run-Verstärkung.");
+    const used = state.run.runStrengthBoostUsedSourceIds ?? [];
+    if (used.includes(sourceCardId))
+      throw new Error("Diese Support-Quelle wurde in diesem Run bereits genutzt.");
+    state.run.runStrengthBoostUsedSourceIds = [...used, sourceCardId].sort();
+    state.run.remainderStrengthBonusByBreaker = {
+      ...(state.run.remainderStrengthBonusByBreaker ?? {}),
+      [targetCardId]:
+        Math.max(
+          0,
+          Math.floor(
+            state.run.remainderStrengthBonusByBreaker?.[targetCardId] ?? 0,
+          ),
+        ) + boost.amount,
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      strengthBonusApplied: boost.amount,
+      targetDefinitionId: targetDefinition.id,
+    };
+    return handled(legalAction);
+  }
   if (legalAction.payload?.runnerAbility === "wilson_gain_run_action") {
     if (legalAction.side !== "runner")
       throw new Error("Nur der Runner darf Wilson nutzen.");
