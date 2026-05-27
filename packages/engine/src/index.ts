@@ -409,20 +409,19 @@ import {
   handleActivatedCardImplementationAction,
 } from "./game/card-implementation/activated-action-execution";
 import {
-  createHiddenZoneCardImplementationRuntimeDeps,
+  createGameCardImplementationRuntimeDeps,
+  type GameCardImplementationRuntimeDepsHost,
+} from "./game/card-implementation/card-implementation-runtime-deps";
+import {
   type HiddenZoneRuntimeDepsHost,
 } from "./game/card-implementation/hidden-zone-runtime-deps";
 import {
-  createInstallRezCardImplementationRuntimeDeps,
   type InstallRezRuntimeDepsHost,
 } from "./game/card-implementation/install-rez-runtime-deps";
-import { createDamageCardImplementationRuntimeDeps } from "./game/card-implementation/damage-runtime-deps";
 import {
-  createCounterLifecycleCardImplementationRuntimeDeps,
   type CounterLifecycleRuntimeDepsHost,
 } from "./game/card-implementation/counter-lifecycle-runtime-deps";
 import {
-  createTraceCardImplementationRuntimeDeps,
   type TraceRuntimeDepsHost,
 } from "./game/card-implementation/trace-runtime-deps";
 import {
@@ -704,7 +703,6 @@ import {
   pushCardImplementationEndOfRunnerTurnActions,
   resolveActivatedCardImplementationAbility,
   resolveCardImplementationEndOfRunnerTurnAction,
-  type CardImplementationRuntimeDependencies,
 } from "./ability-engine/card-implementation-runtime";
 import type {
   ActivatedCardAbilityImplementation,
@@ -805,9 +803,6 @@ function hiddenZoneRuntimeDepsHost(): HiddenZoneRuntimeDepsHost {
   };
 }
 
-const hiddenZoneCardImplementationRuntimeDeps =
-  createHiddenZoneCardImplementationRuntimeDeps(hiddenZoneRuntimeDepsHost());
-
 function traceRuntimeDepsHost(): TraceRuntimeDepsHost {
   return {
     trace: {
@@ -815,12 +810,6 @@ function traceRuntimeDepsHost(): TraceRuntimeDepsHost {
     },
   };
 }
-
-const traceCardImplementationRuntimeDeps =
-  createTraceCardImplementationRuntimeDeps(traceRuntimeDepsHost());
-
-const damageCardImplementationRuntimeDeps =
-  createDamageCardImplementationRuntimeDeps();
 
 function installRezRuntimeDepsHost(): InstallRezRuntimeDepsHost {
   return {
@@ -844,9 +833,6 @@ function installRezRuntimeDepsHost(): InstallRezRuntimeDepsHost {
   };
 }
 
-const installRezCardImplementationRuntimeDeps =
-  createInstallRezCardImplementationRuntimeDeps(installRezRuntimeDepsHost());
-
 function counterLifecycleRuntimeDepsHost(): CounterLifecycleRuntimeDepsHost {
   return {
     counters: {
@@ -861,319 +847,75 @@ function counterLifecycleRuntimeDepsHost(): CounterLifecycleRuntimeDepsHost {
   };
 }
 
-const counterLifecycleCardImplementationRuntimeDeps =
-  createCounterLifecycleCardImplementationRuntimeDeps(
-    counterLifecycleRuntimeDepsHost(),
-  );
-
-const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
-  definitionFor,
-  mustInstance,
-  rezzedCorpRootCardIds,
-  runnerInstalledCardIds,
-  spendClick,
-  spendCredits,
-  createAction: action,
-  appendResolvedEffectsToPayload,
-  ...cardImplementationEffectAdapters,
-  ...traceCardImplementationRuntimeDeps,
-  ...damageCardImplementationRuntimeDeps,
-  ...counterLifecycleCardImplementationRuntimeDeps,
-  startRun: (state, legalAction, serverId, options) => {
-    const sourceCardId =
-      typeof legalAction.source === "string" &&
-      state.cardInstances[legalAction.source]
-        ? legalAction.source
-        : typeof legalAction.payload?.cardId === "string" &&
-            state.cardInstances[legalAction.payload.cardId]
-          ? legalAction.payload.cardId
-          : undefined;
-    const sourceDefinitionId = sourceCardId
-      ? definitionFor(state, sourceCardId).id
-      : undefined;
-    startRun(
-      state,
-      serverId,
-      undefined,
-      options.accessCount ?? 1,
-      {
-        ...(options.freeTrashAccessZones
-          ? { freeTrashAccessZones: options.freeTrashAccessZones.slice() }
-          : {}),
-        ...(options.accessServerOverride
-          ? { accessServerOverride: options.accessServerOverride }
-          : {}),
-        ...(options.successfulRunAccessReplacement
-          ? {
-              successfulRunAccessReplacement:
-                options.successfulRunAccessReplacement,
-            }
-          : {}),
-        ...(options.successfulRunCreditLoss !== undefined
-          ? { successfulRunCreditLoss: options.successfulRunCreditLoss }
-          : {}),
-        ...(options.successfulRunRunnerTagGain !== undefined
-          ? { successfulRunRunnerTagGain: options.successfulRunRunnerTagGain }
-          : {}),
-        ...(options.successfulRunRunnerCreditGain !== undefined
-          ? {
-              successfulRunRunnerCreditGain:
-                options.successfulRunRunnerCreditGain,
-            }
-          : {}),
-        ...(options.successfulRunRequiresCorpCredits !== undefined
-          ? {
-              successfulRunRequiresCorpCredits:
-                options.successfulRunRequiresCorpCredits,
-            }
-          : {}),
-        ...(options.successfulRunPrivateLookCount !== undefined
-          ? { successfulRunPrivateLookCount: options.successfulRunPrivateLookCount }
-          : {}),
-        ...(options.successfulRunArchivesMoveCount !== undefined
-          ? { successfulRunArchivesMoveCount: options.successfulRunArchivesMoveCount }
-          : {}),
-        ...(options.followupRunOnEnd === "optional"
-          ? { grantAllNighterBonusRunOnFinish: true }
-          : {}),
-        ...(options.bypassFirstIce ? { bypassFirstIceRemaining: true } : {}),
-        ...(options.runTraceLinkBonus !== undefined
-          ? { runTraceLinkBonus: options.runTraceLinkBonus }
-          : {}),
-        ...(options.runTemporaryCredits !== undefined
-          ? {
-              runnerRunTemporaryCredits: {
-                sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
-                remaining: options.runTemporaryCredits.amount,
-                returnUnusedAtRunEnd: true,
-              },
-            }
-          : {}),
-        ...(options.afterRunCompletedUnpreventableCoreDamage !== undefined
-          ? {
-              unpreventableCoreDamageAtRunEnd: {
-                sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
-                amount: options.afterRunCompletedUnpreventableCoreDamage,
-              },
-            }
-          : {}),
-        ...(options.runTraceLinkBonus !== undefined &&
-        sourceDefinitionId
-          ? {
-              runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,
-            }
-          : {}),
-        ...(sourceCardId && sourceDefinitionId
-          ? {
-              successfulRunSourceCardId: sourceCardId,
-              successfulRunSourceDefinitionId: sourceDefinitionId,
-              successfulRunSourceTitle: definitionFor(state, sourceCardId).title,
-            }
-          : {}),
-      },
-      legalAction,
-    );
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      ...(options.followupRunOnEnd === "optional"
-        ? { allNighterBonusRunOnFinish: true }
-        : {}),
-      ...(options.bypassFirstIce ? { bypassFirstIce: true } : {}),
-      ...(options.runTraceLinkBonus !== undefined
-        ? {
-            runTraceLinkBonus: options.runTraceLinkBonus,
-            ...(typeof legalAction.source === "string" &&
-            sourceCardId &&
-            sourceDefinitionId
-              ? {
-                  runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,
-                }
-              : {}),
-          }
-        : {}),
-      ...(options.runTemporaryCredits !== undefined
-        ? {
-            v1922RunnerEventAbility: "lucidrine_booster_drug_run_temporary_credits",
-            temporaryRunCredits: options.runTemporaryCredits.amount,
-            temporaryRunCreditsRemaining:
-              state.run?.runnerRunTemporaryCredits?.remaining ?? 0,
-          }
-        : {}),
-      ...(options.afterRunCompletedUnpreventableCoreDamage !== undefined
-        ? {
-            afterRunUnpreventableCoreDamage:
-              options.afterRunCompletedUnpreventableCoreDamage,
-          }
-        : {}),
-    };
-    return { publicPayload: legalAction.payload ?? {} };
-  },
-  ...hiddenZoneCardImplementationRuntimeDeps,
-  ...installRezCardImplementationRuntimeDeps,
-  corpHqCardCount: (state) => state.corp.hq.length,
-  startCorpDiscardHqWithRetainPayment: (
-    state,
-    legalAction,
-    sourceCardId,
-    retainCostPerCard,
-  ) =>
-    startCorpDiscardHqWithRetainPaymentChoice(
-      hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
-      { sourceCardId, retainCostPerCard },
-    ),
-  shuffleSourceIntoCorpRd: (state, sourceCardId, sourceDefinitionId) =>
-    shuffleCorpCardIntoRd(state, sourceCardId, sourceDefinitionId, "lifecycle"),
-  trashCorpInstalledCardsInSourceServer: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-  ) =>
-    trashCorpInstalledCardsInScoredSourceServer(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
-    ),
-  gainRunnerEventAgendaPoint: (
-    state,
-    legalAction,
-    sourceDefinitionId,
-    amount,
-  ) => {
-    if (amount !== 1)
-      throw new Error("Runner event agenda point amount must be 1.");
-    awardRunnerEventAgendaPoint(state, legalAction, sourceDefinitionId);
-    return { publicPayload: legalAction.payload ?? {} };
-  },
-  corpRandomDiscardFromHq: (state, sourceDefinitionId, count) => {
-    const discardedCardIds = discardRandomCorpHqCards(
-      state,
-      count,
-      sourceDefinitionId === TERRORIST_REPRISAL_ID
-        ? `v190.random.${TERRORIST_REPRISAL_ID}.hq_discard`
-        : `card_implementation.random.${sourceDefinitionId}.hq_discard`,
-    );
-    return {
-      publicPayload: {
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "hq_random_discard",
-        discardedCardsCount: discardedCardIds.length,
-      },
-    };
-  },
-  startDistributeAdvancementCounters: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    amount,
-    distribution,
-  ) =>
-    startCardImplementationAdvancementDistributionChoice(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
-      amount,
-      distribution,
-    ),
-  startMoveAdvancementCounters: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    source,
-    maxAmount,
-  ) =>
-    startCardImplementationMoveAdvancementChoice(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
-      source,
-      maxAmount,
-    ),
-  addCurrentEncounterAdditionalSubroutine: (
-    state,
-    legalAction,
-    sourceCardId,
-    sourceDefinitionId,
-    sourceTitle,
-    input,
-  ) =>
-    addCurrentEncounterAdditionalSubroutineForCardImplementation(
-      state,
-      legalAction,
-      sourceCardId,
-      sourceDefinitionId,
-      sourceTitle,
-      input,
-    ),
-  returnSourceToGripIfPaid: (state, legalAction, sourceCardId, amount) =>
-    startReturnSourceToGripIfPaidChoice(
-      state,
-      legalAction,
-      sourceCardId,
-      amount,
-    ),
-};
-
-function addCurrentEncounterAdditionalSubroutineForCardImplementation(
-  state: GameState,
-  legalAction: LegalAction,
-  sourceCardId: CardInstanceId,
-  sourceDefinitionId: CardDefinitionId,
-  sourceTitle: string,
-  input: {
-    subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
-    amount?: number;
-  },
-): { publicPayload: Record<string, string | number | boolean> } {
-  void legalAction;
-  const run = state.run;
-  if (
-    state.timingPoint !== "run.encounter_ice" ||
-    run?.phase !== "encounter_ice" ||
-    run.encounteredIceId !== sourceCardId
-  )
-    throw new Error("Encounter-Subroutine kann nur auf das encountered ICE gelegt werden.");
-  const instance = state.cardInstances[sourceCardId];
-  if (!instance?.rezzed)
-    throw new Error("Encounter-Subroutine braucht gerezzte ICE.");
-  const subroutineKind = input.subroutineKind;
-  if (
-    subroutineKind !== "end_the_run" &&
-    subroutineKind !== "end_the_run_unless_runner_pays"
-  )
-    throw new Error("Encounter-Subroutine-Typ ist nicht unterstuetzt.");
-  let amount: number | undefined;
-  if (subroutineKind === "end_the_run_unless_runner_pays") {
-    amount = Math.max(0, Math.floor(input.amount ?? 0));
-    if (amount <= 0)
-      throw new Error("Pay-or-End-Subroutine braucht einen positiven Betrag.");
-  }
-  run.encounterAdditionalSubroutines = [
-    ...(run.encounterAdditionalSubroutines ?? []),
-    {
-      sourceCardInstanceId: sourceCardId,
-      sourceDefinitionId,
-      sourceTitle,
-      subroutineKind,
-      ...(amount !== undefined ? { amount } : {}),
-    },
-  ];
-  const count = run.encounterAdditionalSubroutines.filter(
-    (record) => record.sourceCardInstanceId === sourceCardId,
-  ).length;
+function gameCardImplementationRuntimeDepsHost(): GameCardImplementationRuntimeDepsHost {
   return {
-    publicPayload: {
-      currentEncounterAdditionalSubroutines: count,
-      currentEncounterAdditionalSubroutineKind: subroutineKind,
-      currentEncounterAdditionalSubroutineSourceDefinitionId: sourceDefinitionId,
+    cards: {
+      definitionFor,
+      mustInstance,
+      rezzedCorpRootCardIds,
+      runnerInstalledCardIds,
+    },
+    credits: {
+      spendClick,
+      spendCredits,
+    },
+    actions: {
+      createAction: action,
+      appendResolvedEffectsToPayload,
+    },
+    run: {
+      startRun: (state, serverId, accessCount, options, legalAction) =>
+        startRun(state, serverId, undefined, accessCount, options, legalAction),
+    },
+    hiddenZone: {
+      runtimeDepsHost: hiddenZoneRuntimeDepsHost(),
+      startCorpDiscardHqWithRetainPayment: (
+        state,
+        legalAction,
+        sourceCardId,
+        retainCostPerCard,
+      ) =>
+        startCorpDiscardHqWithRetainPaymentChoice(
+          hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+          { sourceCardId, retainCostPerCard },
+        ),
+    },
+    install: {
+      runtimeDepsHost: installRezRuntimeDepsHost(),
+    },
+    trace: traceRuntimeDepsHost(),
+    counters: counterLifecycleRuntimeDepsHost(),
+    callbacks: {
+      effectAdapters: cardImplementationEffectAdapters,
+      shuffleSourceIntoCorpRd: (state, sourceCardId, sourceDefinitionId) =>
+        shuffleCorpCardIntoRd(
+          state,
+          sourceCardId,
+          sourceDefinitionId,
+          "lifecycle",
+        ),
+      trashCorpInstalledCardsInSourceServer:
+        trashCorpInstalledCardsInScoredSourceServer,
+      awardRunnerEventAgendaPoint,
+      discardRandomCorpHqCards: (state, sourceDefinitionId, count) =>
+        discardRandomCorpHqCards(
+          state,
+          count,
+          sourceDefinitionId === TERRORIST_REPRISAL_ID
+            ? `v190.random.${TERRORIST_REPRISAL_ID}.hq_discard`
+            : `card_implementation.random.${sourceDefinitionId}.hq_discard`,
+        ),
+      startDistributeAdvancementCounters:
+        startCardImplementationAdvancementDistributionChoice,
+      startMoveAdvancementCounters: startCardImplementationMoveAdvancementChoice,
+      startOpenEndedMileageProgramReturnChoice,
     },
   };
 }
+
+const cardImplementationRuntimeDeps = createGameCardImplementationRuntimeDeps(
+  gameCardImplementationRuntimeDepsHost(),
+);
 
 // Public context generation is read-only and injected here to avoid an import
 // cycle. It may format already-public payload data, but it must not decide
@@ -8301,41 +8043,6 @@ function sanitizeId(value: string): string {
 
 function requireRunnerTagged(state: GameState): void {
   if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
-}
-
-function startReturnSourceToGripIfPaidChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  sourceCardId: CardInstanceId,
-  amount: number,
-): {
-  choiceOpened: boolean;
-  publicPayload: Record<string, string | number | boolean>;
-} {
-  if (state.runner.credits < amount) {
-    return {
-      choiceOpened: false,
-      publicPayload: {
-        returnToGripCost: amount,
-        returnToGripChoiceOpened: false,
-      },
-    };
-  }
-  startOpenEndedMileageProgramReturnChoice(state, sourceCardId);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1922RunnerEventAbility: "remove_tag_optional_return",
-    returnToGripCost: amount,
-    returnToGripChoiceOpened: true,
-  };
-  return {
-    choiceOpened: true,
-    publicPayload: {
-      v1922RunnerEventAbility: "remove_tag_optional_return",
-      returnToGripCost: amount,
-      returnToGripChoiceOpened: true,
-    },
-  };
 }
 
 function runnerStoleAgendaLastTurn(state: GameState): boolean {
