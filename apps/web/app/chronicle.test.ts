@@ -2521,6 +2521,57 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(["Runner", "Stack", "Vorgezeigt", "den Grip", "Shuffle"]);
   });
 
+  it("describes card-implementation stack-to-hand searches with the revealed selected card", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "p3_37_search_stack_to_grip",
+        sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+        selectedCount: 1,
+        movedCardCount: 1,
+        searchDestination: "runner_grip",
+        publicRevealKind: "reveal",
+        publicRevealDefinitionId: "onr_v1_039_krash",
+        cardDefinitionId: "onr_v1_039_krash",
+        shuffled: true,
+        aiReasonCode: "runner_stack_search_program"
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Die Runner-KI hat Krash aus dem Stack vorgezeigt und auf die Hand genommen.");
+    expect(item.category).toBe("card");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("onr_v1_039_krash");
+    expect(item.chips).toEqual(["Runner", "KI", "Stack", "Vorgezeigt", "Hand", "Shuffle"]);
+    expect(item.title).not.toContain("Entscheidung beantwortet");
+  });
+
+  it("redacts private card-implementation stack-to-hand searches", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "p3_37_search_stack_to_grip",
+        sourceDefinitionId: "onr_v1_105_mantis-fixer-at-large",
+        selectedCount: 1,
+        movedCardCount: 1,
+        searchDestination: "runner_grip",
+        shuffled: true,
+        aiReasonCode: "runner_stack_search_card"
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Die Runner-KI hat eine Karte verdeckt aus dem Stack auf die Hand genommen.");
+    expect(item.category).toBe("hidden");
+    expect(item.visibility).toBe("redacted");
+    expect(item.cardDefinitionId).toBeUndefined();
+    expect(JSON.stringify(item)).not.toContain("Mantis");
+    expect(item.chips).toEqual(["Runner", "KI", "Stack", "Verdeckt", "Hand", "Shuffle"]);
+  });
+
   it("describes Aujourd'Oui top-five program choices with revealed selected programs only", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
