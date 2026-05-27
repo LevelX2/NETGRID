@@ -61,12 +61,14 @@ import {
   type PendingChoiceResolutionHost,
 } from "./game/choices/pending-choice-resolution";
 import { selectedChoiceIds } from "./game/choices/choice-validation";
-import {
-  configureLegalActionGenerationHost,
-  getLegalActions as getLegalActionsFromGame,
-  legalActionsFor as legalActionsForFromGame,
-  type LegalActionGenerationHost,
+export {
+  getLegalActions,
+  legalActionsFor,
 } from "./game/legal-actions";
+import {
+  configureLegalActionHostComposition,
+  type LegalActionHostCompositionHost,
+} from "./game/legal-action-hosts";
 export {
   eventVisibilityForAction,
   isHiddenInfoBarrierEvent,
@@ -1947,45 +1949,25 @@ function runnerDrawSummaryPublicPayload(
   };
 }
 
-export function getLegalActions(state: GameState, side: Side): LegalAction[] {
-  return getLegalActionsFromGame(state, side);
-}
-
-export function legalActionsFor(state: GameState, side: Side): LegalAction[] {
-  return legalActionsForFromGame(state, side);
-}
-
-function legalActionGenerationHost(state: GameState): LegalActionGenerationHost {
-  return {
-    state,
-    actions: {
-      buildMandatoryDrawAction: () =>
-        action(state, "corp", "mandatory_draw", "Korp Pflichtkarte ziehen", "game_rule"),
-      buildChoiceAction: (choice) => choiceAction(state, choice),
-      buildPurgeableRunnerVirusPurgeAction: () =>
-        buildPurgeableRunnerVirusPurgeAction(state),
-      corpRunnerActionPaidWindowActions: () =>
-        corpRunnerActionPaidWindowActions(state),
-    },
-    counters: {
-      purgeableRunnerVirusCounterTotal: () =>
-        purgeableRunnerVirusCounterTotal(state),
-    },
-    hosts: {
-      corpMainActionGenerationHost: () => corpMainActionGenerationHost(state),
-      runnerMainActionGenerationHost: () =>
-        runnerMainActionGenerationHost(state),
-      runnerEncounterActionHost: () => runnerEncounterActionHostForState(state),
-      encounterEntryHost: () => encounterEntryHostForState(state),
-      runRezWindowHost: () => runRezWindowHostForState(state),
-      runCardImplementationActionHost: () =>
-        runCardImplementationActionHost(state),
-      runnerAccessActionHost: () => runnerAccessActionHost(state),
-    },
-  };
-}
-
-configureLegalActionGenerationHost(legalActionGenerationHost);
+const legalActionHostComposition = configureLegalActionHostComposition({
+  actions: {
+    buildChoiceAction: choiceAction,
+    corpRunnerActionPaidWindowActions,
+  },
+  counters: {
+    corpActionDebtPending,
+    purgeableRunnerVirusCounterTotal,
+  },
+  hosts: {
+    corpMainActionGenerationHost,
+    runnerMainActionGenerationHost,
+    runnerEncounterActionHost: runnerEncounterActionHostForState,
+    encounterEntryHost: encounterEntryHostForState,
+    runRezWindowHost: runRezWindowHostForState,
+    runCardImplementationActionHost,
+    runnerAccessActionHost,
+  },
+} satisfies LegalActionHostCompositionHost);
 
 const applyActionHostComposition: ApplyActionHostCompositionHost = {
   actions: {
@@ -2156,9 +2138,10 @@ function corpMainActionGenerationHost(
       buildLegalAction: action,
       makeActionId,
       buildEndTurnAction: buildCorpEndTurnAction,
-      buildForgoActionDebtAction: buildCorpForgoActionDebtAction,
+      buildForgoActionDebtAction:
+        legalActionHostComposition.buildCorpForgoActionDebtAction,
       buildPurgeableRunnerVirusPurgeAction: () =>
-        buildPurgeableRunnerVirusPurgeAction(state),
+        legalActionHostComposition.buildPurgeableRunnerVirusPurgeAction(state),
       buildPurgeVirusAction: buildCorpPurgeVirusAction,
       buildGainCreditAction: buildCorpGainCreditAction,
       buildDrawAction: buildCorpDrawAction,
@@ -2264,47 +2247,6 @@ function corpMainActionGenerationHost(
   };
 }
 
-
-function buildPurgeableRunnerVirusPurgeAction(state: GameState): LegalAction {
-  const window = state.runnerVirusPurgeWindow;
-  return action(
-    state,
-    "corp",
-    "purge_runner_virus_counters",
-    "Runner-Virus-Counter purgen (3 Aktionen aussetzen)",
-    "game_rule",
-    [],
-    {
-      purgeModel: "future_action_debt",
-      actionDebtAdded: 3,
-      ...(window
-        ? {
-            timingWindowId: window.windowId,
-            timingFamily: window.timingFamily,
-          }
-        : {
-            timingFamily: "corp_main_action",
-          }),
-    },
-    { targetRequirements: [] },
-  );
-}
-
-function buildCorpForgoActionDebtAction(state: GameState): LegalAction {
-  return action(
-    state,
-    "corp",
-    "forgo_action",
-    "Aktionsschuld abtragen",
-    "game_rule",
-    [{ clicks: 1 }],
-    {
-      actionDebtPaid: 1,
-      corpActionDebtTotalBefore: corpActionDebtPending(state),
-    },
-    { targetRequirements: [] },
-  );
-}
 
 function expireCorporateRetreatInstallCreditAbilities(state: GameState): void {
   for (const agendaId of state.corp.scoreArea) {
