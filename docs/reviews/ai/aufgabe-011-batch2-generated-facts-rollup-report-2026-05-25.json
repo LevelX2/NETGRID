@@ -51,10 +51,7 @@
     {
       "kind": "breakerProfile",
       "rule": "Generated BreakerProfile describes static card function only; actual breaking remains Encounter, LegalAction, Engine and effectiveRunQuote state.",
-      "appliesTo": [
-        "breakerProfile",
-        "effect:breaker"
-      ]
+      "appliesTo": ["breakerProfile", "effect:breaker"]
     },
     {
       "kind": "targetProfiles",
@@ -69,16 +66,12 @@
     {
       "kind": "trashCredits",
       "rule": "Generated trash-credit facts describe dedicated credit sources only; actual use and payment remain Cost/LegalAction-gated and card-specific targets must not be swapped.",
-      "appliesTo": [
-        "effect:trash_credit"
-      ]
+      "appliesTo": ["effect:trash_credit"]
     },
     {
       "kind": "costProfile",
       "rule": "Mechanical costs can be generated later, but reserveRisk and opportunityCost remain strategy/overlay fields until an active migration explicitly splits them.",
-      "appliesTo": [
-        "costProfile"
-      ]
+      "appliesTo": ["costProfile"]
     },
     {
       "kind": "legacyCompatibility",
@@ -96,36 +89,24 @@
     {
       "cardId": "onr_v1_037_japanese-water-torture",
       "title": "Japanese Water Torture",
-      "factGroups": [
-        "breakerProfile",
-        "costProfile"
-      ],
+      "factGroups": ["breakerProfile", "costProfile"],
       "priority": "P0",
       "risk": "low",
-      "confirmedGeneratedFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
+      "confirmedGeneratedFacts": ["breakerProfile", "effect:breaker"],
       "previewAddedFacts": [],
-      "generatedFactsAlreadyPresent": [
-        "effect:breaker"
-      ],
+      "generatedFactsAlreadyPresent": ["effect:breaker"],
       "boardContextRequired": [],
       "normalizedDifferences": [
         {
           "fact": "breakerProfile",
           "sourceWarningKind": "shape_difference",
-          "rules": [
-            "breaker_profile_shape_normalization"
-          ],
+          "rules": ["breaker_profile_shape_normalization"],
           "classification": "normalized_equivalent"
         },
         {
           "fact": "costProfile",
           "sourceWarningKind": "cost_profile_shape_difference",
-          "rules": [
-            "cost_profile_split_normalization"
-          ],
+          "rules": ["cost_profile_split_normalization"],
           "classification": "normalized_cost_profile_split"
         }
       ],
@@ -145,36 +126,24 @@
     {
       "cardId": "onr_v1_039_krash",
       "title": "Krash",
-      "factGroups": [
-        "breakerProfile",
-        "costProfile"
-      ],
+      "factGroups": ["breakerProfile", "costProfile"],
       "priority": "P0",
       "risk": "low",
-      "confirmedGeneratedFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
+      "confirmedGeneratedFacts": ["breakerProfile", "effect:breaker"],
       "previewAddedFacts": [],
-      "generatedFactsAlreadyPresent": [
-        "effect:breaker"
-      ],
+      "generatedFactsAlreadyPresent": ["effect:breaker"],
       "boardContextRequired": [],
       "normalizedDifferences": [
         {
           "fact": "breakerProfile",
           "sourceWarningKind": "shape_difference",
-          "rules": [
-            "breaker_profile_shape_normalization"
-          ],
+          "rules": ["breaker_profile_shape_normalization"],
           "classification": "normalized_equivalent"
         },
         {
           "fact": "costProfile",
           "sourceWarningKind": "cost_profile_shape_difference",
-          "rules": [
-            "cost_profile_split_normalization"
-          ],
+          "rules": ["cost_profile_split_normalization"],
           "classification": "normalized_cost_profile_split"
         }
       ],
@@ -194,10 +163,7 @@
     {
       "cardId": "onr_v1_043_mystery-box",
       "title": "Mystery Box",
-      "factGroups": [
-        "costProfile",
-        "targetProfile"
-      ],
+      "factGroups": ["costProfile", "targetProfile"],
       "priority": "P1",
       "risk": "medium",
       "confirmedGeneratedFacts": [
@@ -205,10 +171,7 @@
         "effect:install_discount",
         "effect:search"
       ],
-      "previewAddedFacts": [
-        "effect:topdeck_info",
-        "targetProfile"
-      ],
+      "previewAddedFacts": ["effect:topdeck_info", "targetProfile"],
       "generatedFactsAlreadyPresent": [
         "condition:requires_during_run",
         "effect:search"
@@ -223,17 +186,13 @@
         {
           "fact": "costProfile",
           "sourceWarningKind": "cost_profile_shape_difference",
-          "rules": [
-            "cost_profile_split_normalization"
-          ],
+          "rules": ["cost_profile_split_normalization"],
           "classification": "normalized_cost_profile_split"
         },
         {
           "fact": "effect:install_discount",
           "sourceWarningKind": "shape_difference",
-          "rules": [
-            "target_profile_install_cost_normalization"
-          ],
+          "rules": ["target_profile_install_cost_normalization"],
           "classification": "normalized_equivalent"
         },
         {
@@ -263,15 +222,10 @@
     {
       "cardId": "onr_v1_048_poltergeist",
       "title": "Poltergeist",
-      "factGroups": [
-        "costProfile",
-        "trash_credit"
-      ],
+      "factGroups": ["costProfile", "trash_credit"],
       "priority": "P2",
       "risk": "low",
-      "confirmedGeneratedFacts": [
-        "effect:trash_credit"
-      ],
+      "confirmedGeneratedFacts": ["effect:trash_credit"],
       "previewAddedFacts": [],
       "generatedFactsAlreadyPresent": [],
       "boardContextRequired": [],
@@ -279,25 +233,19 @@
         {
           "fact": "costProfile",
           "sourceWarningKind": "cost_profile_shape_difference",
-          "rules": [
-            "cost_profile_split_normalization"
-          ],
+          "rules": ["cost_profile_split_normalization"],
           "classification": "normalized_cost_profile_split"
         },
         {
           "fact": "effect:trash_credit",
           "sourceWarningKind": "shape_difference",
-          "rules": [
-            "trash_credit_target_normalization"
-          ],
+          "rules": ["trash_credit_target_normalization"],
           "classification": "normalized_equivalent"
         },
         {
           "fact": "effect:trash_credit",
           "sourceWarningKind": "trash_credit_target_shape_difference",
-          "rules": [
-            "trash_credit_target_normalization"
-          ],
+          "rules": ["trash_credit_target_normalization"],
           "classification": "normalized_equivalent"
         }
       ],
@@ -317,15 +265,10 @@
     {
       "cardId": "onr_v1_057_scatter-shot",
       "title": "Scatter Shot",
-      "factGroups": [
-        "costProfile",
-        "trash_credit"
-      ],
+      "factGroups": ["costProfile", "trash_credit"],
       "priority": "P2",
       "risk": "low",
-      "confirmedGeneratedFacts": [
-        "effect:trash_credit"
-      ],
+      "confirmedGeneratedFacts": ["effect:trash_credit"],
       "previewAddedFacts": [],
       "generatedFactsAlreadyPresent": [],
       "boardContextRequired": [],
@@ -333,25 +276,19 @@
         {
           "fact": "costProfile",
           "sourceWarningKind": "cost_profile_shape_difference",
-          "rules": [
-            "cost_profile_split_normalization"
-          ],
+          "rules": ["cost_profile_split_normalization"],
           "classification": "normalized_cost_profile_split"
         },
         {
           "fact": "effect:trash_credit",
           "sourceWarningKind": "shape_difference",
-          "rules": [
-            "trash_credit_target_normalization"
-          ],
+          "rules": ["trash_credit_target_normalization"],
           "classification": "normalized_equivalent"
         },
         {
           "fact": "effect:trash_credit",
           "sourceWarningKind": "trash_credit_target_shape_difference",
-          "rules": [
-            "trash_credit_target_normalization"
-          ],
+          "rules": ["trash_credit_target_normalization"],
           "classification": "normalized_equivalent"
         }
       ],
@@ -371,19 +308,14 @@
     {
       "cardId": "onr_v1_059_self-modifying-code",
       "title": "Self-Modifying Code",
-      "factGroups": [
-        "costProfile",
-        "targetProfile"
-      ],
+      "factGroups": ["costProfile", "targetProfile"],
       "priority": "P1",
       "risk": "low",
       "confirmedGeneratedFacts": [
         "condition:requires_during_run",
         "effect:search"
       ],
-      "previewAddedFacts": [
-        "targetProfile"
-      ],
+      "previewAddedFacts": ["targetProfile"],
       "generatedFactsAlreadyPresent": [
         "condition:requires_during_run",
         "effect:search"
@@ -397,9 +329,7 @@
         {
           "fact": "costProfile",
           "sourceWarningKind": "cost_profile_shape_difference",
-          "rules": [
-            "cost_profile_split_normalization"
-          ],
+          "rules": ["cost_profile_split_normalization"],
           "classification": "normalized_cost_profile_split"
         },
         {
@@ -460,25 +390,25 @@
   "sourceSummary": {
     "derivedFacts": {
       "hardErrorCount": 0,
-      "warningCount": 114,
-      "cardsNeedingManualOverlay": 11
+      "warningCount": 325,
+      "cardsNeedingManualOverlay": 35
     },
     "compiledIndex": {
       "hardErrorCount": 0,
-      "warningCount": 190,
-      "reviewCandidates": 8
+      "warningCount": 284,
+      "reviewCandidates": 32
     },
     "migrationPriority": {
-      "candidateCount": 61,
+      "candidateCount": 85,
       "priorityCounts": {
         "P0": 13,
-        "P1": 44,
+        "P1": 68,
         "P2": 4,
         "P3": 0
       },
       "riskCounts": {
         "low": 29,
-        "medium": 32,
+        "medium": 56,
         "high": 0
       }
     },

@@ -68,11 +68,11 @@ describe("compiled hint index pilot report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("compiles the full 61-card derived facts pilot without hard errors", () => {
+  it("compiles the full 85-card derived facts pilot without hard errors", () => {
     const report = readReport();
-    expect(report.compiledCardCount).toBe(61);
+    expect(report.compiledCardCount).toBe(85);
     expect(report.overlayCardCount).toBe(6);
-    expect(report.cardsWithoutOverlay).toBe(55);
+    expect(report.cardsWithoutOverlay).toBe(79);
     expect(report.hardErrorCount).toBe(0);
     expect(report.source.activeHintsPath).toBe(
       "data/ai/ai-card-hints-active.json",
@@ -93,7 +93,7 @@ describe("compiled hint index pilot report", () => {
       6,
     );
     expect(report.cards.filter((card) => !card.manualOverlayFound).length).toBe(
-      55,
+      79,
     );
   });
 
@@ -140,7 +140,7 @@ describe("compiled hint index pilot report", () => {
   it("keeps missing overlays non-fatal when the pilot card does not need one", () => {
     const report = readReport();
     expect(report.warningCountsByKind.overlay_missing_for_manual_gap ?? 0).toBe(
-      8,
+      32,
     );
     expect(report.infoCounts.info_no_overlay_needed).toBe(47);
     expect(
@@ -164,11 +164,11 @@ describe("compiled hint index pilot report", () => {
 
   it("classifies compiled-index warnings into non-blocking comparison groups", () => {
     const report = readReport();
-    expect(report.warningCount).toBe(190);
+    expect(report.warningCount).toBe(284);
     expect(report.warningClassificationCounts).toEqual({
-      generated_fact_absent_from_monolith: 65,
-      manual_review_candidate: 8,
-      monolith_mechanical_duplication_candidate: 111,
+      generated_fact_absent_from_monolith: 111,
+      manual_review_candidate: 32,
+      monolith_mechanical_duplication_candidate: 135,
       overlay_strategy_field_not_in_monolith: 6,
     });
     expect(
@@ -197,8 +197,8 @@ describe("compiled hint index pilot report", () => {
         field: "strategicNotes",
       }),
     );
-    expect(report.migrationCandidates.length).toBe(61);
-    expect(report.generatedFactCandidates.length).toBe(61);
+    expect(report.migrationCandidates.length).toBe(85);
+    expect(report.generatedFactCandidates.length).toBe(85);
     expect(
       report.overlayCandidates.map((candidate) => candidate.cardId),
     ).toEqual([
@@ -210,6 +210,30 @@ describe("compiled hint index pilot report", () => {
       "onr_v1_058_seeya",
       "onr_v1_062_shredder-uplink-protocol",
       "onr_v1_065_smarteye",
+      "onr_v1_221_asp",
+      "onr_v1_222_ball-and-chain",
+      "onr_v1_223_banpei",
+      "onr_v1_224_bolter-cluster",
+      "onr_v1_225_canis-major",
+      "onr_v1_226_canis-minor",
+      "onr_v1_227_cerberus",
+      "onr_v1_228_cinderella",
+      "onr_v1_231_cortical-scrub",
+      "onr_v1_234_data-darts",
+      "onr_v1_235_data-naga",
+      "onr_v1_236_data-raven",
+      "onr_v1_240_fang",
+      "onr_v1_241_fang-2-0",
+      "onr_v1_242_fatal-attractor",
+      "onr_v1_243_fetch-4-0-1",
+      "onr_v1_246_fragmentation-storm",
+      "onr_v1_248_homewrecker",
+      "onr_v1_249_hunter",
+      "onr_v1_251_jack-attack",
+      "onr_v1_255_mastiff",
+      "onr_v1_258_neural-blade",
+      "onr_v1_260_pocket-virtual-reality",
+      "onr_v1_268_shock-r",
     ]);
   });
 

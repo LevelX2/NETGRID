@@ -14,23 +14,23 @@
     "activeHints": "data/ai/ai-card-hints-active.json"
   },
   "mode": "read-only prioritization; no active hint migration, no runtime compile, no planner or consumer binding",
-  "candidateCount": 61,
+  "candidateCount": 85,
   "priorityCounts": {
     "P0": 13,
-    "P1": 44,
+    "P1": 68,
     "P2": 4,
     "P3": 0
   },
   "fieldCategoryCounts": {
-    "generated_with_board_context": 56,
-    "generated_with_descriptor_limitations": 18,
-    "legacy_keep_for_compat": 61,
+    "generated_with_board_context": 80,
+    "generated_with_descriptor_limitations": 42,
+    "legacy_keep_for_compat": 85,
     "overlay_only": 6,
-    "safe_generated_now": 54
+    "safe_generated_now": 78
   },
   "riskCounts": {
     "low": 29,
-    "medium": 32,
+    "medium": 56,
     "high": 0
   },
   "batchPlan": [
@@ -130,6 +130,36 @@
         "onr_v1_084_edited-shipping-manifests",
         "onr_v1_085_executive-wiretaps"
       ]
+    },
+    {
+      "batch": 7,
+      "title": "Corp ICE longtail, future, trace, damage and ETR",
+      "cardIds": [
+        "onr_v1_221_asp",
+        "onr_v1_222_ball-and-chain",
+        "onr_v1_223_banpei",
+        "onr_v1_224_bolter-cluster",
+        "onr_v1_225_canis-major",
+        "onr_v1_226_canis-minor",
+        "onr_v1_227_cerberus",
+        "onr_v1_228_cinderella",
+        "onr_v1_231_cortical-scrub",
+        "onr_v1_234_data-darts",
+        "onr_v1_235_data-naga",
+        "onr_v1_236_data-raven",
+        "onr_v1_240_fang",
+        "onr_v1_241_fang-2-0",
+        "onr_v1_242_fatal-attractor",
+        "onr_v1_243_fetch-4-0-1",
+        "onr_v1_246_fragmentation-storm",
+        "onr_v1_248_homewrecker",
+        "onr_v1_249_hunter",
+        "onr_v1_251_jack-attack",
+        "onr_v1_255_mastiff",
+        "onr_v1_258_neural-blade",
+        "onr_v1_260_pocket-virtual-reality",
+        "onr_v1_268_shock-r"
+      ]
     }
   ],
   "cards": [
@@ -146,23 +176,10 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "generatedOnlyFields": [],
       "overlayFields": [],
       "warningGroups": {
@@ -196,26 +213,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -248,26 +250,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -301,26 +288,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -354,20 +326,14 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_successful_run",
         "effect:hq_info"
       ],
       "monolithFields": [],
       "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "generated_fact_absent_from_monolith": 2,
@@ -400,26 +366,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -452,26 +403,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -504,27 +440,12 @@
         "overlay_only",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "effect:topdeck_info"
-      ],
-      "monolithFields": [
-        "effects",
-        "conditions"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
-      "overlayFields": [
-        "lineSupport",
-        "quality",
-        "strategicNotes"
-      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:topdeck_info"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": ["lineSupport", "quality", "strategicNotes"],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 1,
@@ -561,26 +482,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -614,20 +520,14 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_accessed_card",
         "effect:hq_info"
       ],
       "monolithFields": [],
       "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "generated_fact_absent_from_monolith": 2,
@@ -661,20 +561,14 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_successful_run",
         "effect:expose_info"
       ],
       "monolithFields": [],
       "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "generated_fact_absent_from_monolith": 2,
@@ -707,31 +601,12 @@
         "overlay_only",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
-      "overlayFields": [
-        "lineSupport",
-        "manualNotes",
-        "quality"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
+      "overlayFields": ["lineSupport", "manualNotes", "quality"],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 1,
@@ -762,30 +637,12 @@
       "cardType": "program",
       "migrationPriority": "P0",
       "migrationRisk": "low",
-      "fieldCategories": [
-        "legacy_keep_for_compat",
-        "safe_generated_now"
-      ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "fieldCategories": ["legacy_keep_for_compat", "safe_generated_now"],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -818,26 +675,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -871,26 +713,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_accessed_card",
         "effect:topdeck_info",
         "effect:zone_shuffle"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -924,17 +755,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "effect:expose_info"
-      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:expose_info"],
       "monolithFields": [],
       "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "generated_fact_absent_from_monolith": 1,
@@ -968,11 +793,7 @@
         "overlay_only",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects",
-        "targetProfiles"
-      ],
+      "generatedFields": ["conditions", "effects", "targetProfiles"],
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "effect:install_discount",
@@ -980,25 +801,10 @@
         "effect:topdeck_info",
         "targetProfiles"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "conditions",
-        "effects",
-        "targetProfiles"
-      ],
-      "overlayFields": [
-        "lineSupport",
-        "manualNotes",
-        "quality"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects", "targetProfiles"],
+      "overlayFields": ["lineSupport", "manualNotes", "quality"],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 3,
@@ -1035,26 +841,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1082,26 +873,12 @@
       "cardType": "program",
       "migrationPriority": "P2",
       "migrationRisk": "low",
-      "fieldCategories": [
-        "legacy_keep_for_compat",
-        "safe_generated_now"
-      ],
-      "generatedFields": [
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "effect:trash_credit"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "fieldCategories": ["legacy_keep_for_compat", "safe_generated_now"],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:trash_credit"],
+      "monolithFields": ["effects", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 1,
@@ -1134,26 +911,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_successful_run",
         "effect:access_replacement",
         "effect:topdeck_info"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1186,26 +952,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1238,26 +989,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1291,26 +1027,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1343,26 +1064,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1390,26 +1096,12 @@
       "cardType": "program",
       "migrationPriority": "P2",
       "migrationRisk": "low",
-      "fieldCategories": [
-        "legacy_keep_for_compat",
-        "safe_generated_now"
-      ],
-      "generatedFields": [
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "effect:trash_credit"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "fieldCategories": ["legacy_keep_for_compat", "safe_generated_now"],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:trash_credit"],
+      "monolithFields": ["effects", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 1,
@@ -1442,17 +1134,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "effect:expose_info"
-      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:expose_info"],
       "monolithFields": [],
       "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "generated_fact_absent_from_monolith": 1,
@@ -1486,34 +1172,16 @@
         "overlay_only",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects",
-        "targetProfiles"
-      ],
+      "generatedFields": ["conditions", "effects", "targetProfiles"],
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "effect:search",
         "targetProfiles"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "conditions",
-        "targetProfiles"
-      ],
-      "overlayFields": [
-        "lineSupport",
-        "manualNotes",
-        "quality"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "targetProfiles"],
+      "overlayFields": ["lineSupport", "manualNotes", "quality"],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 2,
@@ -1549,26 +1217,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1602,20 +1255,14 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_successful_run",
         "effect:access_replacement"
       ],
       "monolithFields": [],
       "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "generated_fact_absent_from_monolith": 2,
@@ -1649,20 +1296,14 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "effect:expose_info"
       ],
       "monolithFields": [],
       "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "generated_fact_absent_from_monolith": 2,
@@ -1695,26 +1336,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1747,26 +1373,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1799,26 +1410,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1851,26 +1447,11 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedMechanicalFacts": [
-        "breakerProfile",
-        "effect:breaker"
-      ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "breakerProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "breakerProfile",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "breakerProfile"
-      ],
+      "generatedFields": ["breakerProfile", "effects"],
+      "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
+      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
+      "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1903,25 +1484,14 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_successful_run",
         "effect:multiaccess"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -1955,27 +1525,16 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_successful_run",
         "effect:access_replacement",
         "effect:economy",
         "effect:tag"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2008,25 +1567,14 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_successful_run",
         "effect:multiaccess"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2059,27 +1607,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_scored_agenda",
         "effect:extra_action",
         "effect:scored_agenda_action"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2112,27 +1648,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_scored_agenda",
         "effect:counter_economy",
         "effect:scored_agenda_action"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2165,27 +1689,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_scored_agenda",
         "effect:draw",
         "effect:scored_agenda_action"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2218,10 +1730,7 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_scored_agenda",
         "condition:requires_trace_success",
@@ -2229,18 +1738,9 @@
         "effect:tag_source",
         "effect:trace"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2273,10 +1773,7 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_runner_tagged",
         "condition:requires_scored_agenda",
@@ -2284,18 +1781,9 @@
         "effect:scored_agenda_action",
         "effect:tag_punish_payoff"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2328,27 +1816,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_scored_agenda",
         "effect:economy",
         "effect:scored_agenda_action"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2381,10 +1857,7 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_runner_tagged",
         "condition:requires_scored_agenda",
@@ -2392,18 +1865,9 @@
         "effect:scored_agenda_action",
         "effect:tag_punish_payoff"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2425,6 +1889,1109 @@
       "derivedRationale": "Scored agenda tagged-runner damage payoff is directly represented."
     },
     {
+      "cardId": "onr_v1_221_asp",
+      "title": "Asp",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:remote_protection",
+        "effect:run_lock",
+        "effect:trace"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Trace-success run-lock plus ETR are derivable, while no action legality is generated.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
+    },
+    {
+      "cardId": "onr_v1_222_ball-and-chain",
+      "title": "Ball and Chain",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_run_effect",
+        "effect:run_tax"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Run-duration encounter tax is derivable, but actual path cost remains effectiveRunQuote/LegalAction context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Run-duration encounter tax is mechanically derivable as future-run/runpath pressure; actual path cost remains effectiveRunQuote context."
+    },
+    {
+      "cardId": "onr_v1_223_banpei",
+      "title": "Banpei",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:program_trash",
+        "effect:remote_protection"
+      ],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Program-trash plus ETR subroutines are derivable, while target selection remains encounter context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Program trash plus ETR subroutines are mechanically derivable; target selection and break legality remain encounter context."
+    },
+    {
+      "cardId": "onr_v1_224_bolter-cluster",
+      "title": "Bolter Cluster",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:future_encounter_effect"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Damage plus next-ICE break prohibition is derivable, with later-encounter/runpath context required.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
+    },
+    {
+      "cardId": "onr_v1_225_canis-major",
+      "title": "Canis Major",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_run_effect",
+        "effect:run_tax"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Run-duration ICE-strength modifier is derivable, but concrete break cost remains board and encounter context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Run-duration ICE-strength modifier is mechanically derivable; concrete break cost remains board, encounter and effectiveRunQuote context."
+    },
+    {
+      "cardId": "onr_v1_226_canis-minor",
+      "title": "Canis Minor",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_run_effect",
+        "effect:run_tax"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Run-duration ICE-strength modifier is derivable, but concrete break cost remains board and encounter context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Run-duration ICE-strength modifier is mechanically derivable; concrete break cost remains board, encounter and effectiveRunQuote context."
+    },
+    {
+      "cardId": "onr_v1_227_cerberus",
+      "title": "Cerberus",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:etr",
+        "effect:persistent_counter_effect",
+        "effect:remote_protection",
+        "effect:trace"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Damage, trace/counter context and ETR are derivable, but no current counter state is generated.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Damage, trace-success counter context and ETR are mechanically derivable; generated facts do not assert current counter state."
+    },
+    {
+      "cardId": "onr_v1_228_cinderella",
+      "title": "Cinderella",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:etr",
+        "effect:hardware_trash",
+        "effect:remote_protection",
+        "effect:trace"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Trace-success hardware trash, unpreventable meat damage and ETR are derivable with trace/prevention context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-success hardware trash, unpreventable meat damage and ETR are mechanically derivable; target/prevention outcomes remain engine context."
+    },
+    {
+      "cardId": "onr_v1_231_cortical-scrub",
+      "title": "Cortical Scrub",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:etr",
+        "effect:remote_protection"
+      ],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Damage plus ETR are derivable, while the legacy active hint shape requires read-only normalization.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Damage plus ETR subroutines are mechanically derivable; legacy active hint shape is normalized in the read-only closeout."
+    },
+    {
+      "cardId": "onr_v1_234_data-darts",
+      "title": "Data Darts",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:future_encounter_effect"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Damage plus next-ICE break prohibition is derivable, with later-encounter/runpath context required.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
+    },
+    {
+      "cardId": "onr_v1_235_data-naga",
+      "title": "Data Naga",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:program_trash",
+        "effect:remote_protection"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Program-trash plus ETR subroutines are derivable, while target selection remains encounter context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Program trash plus ETR subroutines are mechanically derivable; target selection and break legality remain encounter context."
+    },
+    {
+      "cardId": "onr_v1_236_data-raven",
+      "title": "Data Raven",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:persistent_counter_effect",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Trace-to-tag plus hosted counter punishment is derivable, but generated facts cannot assert current counter state.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-to-tag and hosted counter punishment are mechanically derivable; generated facts do not assert current counter state."
+    },
+    {
+      "cardId": "onr_v1_240_fang",
+      "title": "Fang",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:remote_protection",
+        "effect:run_lock",
+        "effect:trace"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Trace-success run-lock plus ETR are derivable, while no action legality is generated.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
+    },
+    {
+      "cardId": "onr_v1_241_fang-2-0",
+      "title": "Fang 2.0",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:remote_protection",
+        "effect:run_lock",
+        "effect:trace"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Trace-success run-lock plus ETR are derivable, while no action legality is generated.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
+    },
+    {
+      "cardId": "onr_v1_242_fatal-attractor",
+      "title": "Fatal Attractor",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:future_encounter_effect"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Next-encounter damage-unless-fully-break effect is derivable and runpath-context dependent.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Next-encounter damage-unless-fully-break effect is mechanically derivable and must stay later-encounter/runpath-context gated."
+    },
+    {
+      "cardId": "onr_v1_243_fetch-4-0-1",
+      "title": "Fetch 4.0.1",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Trace-to-tag ICE subroutine is derivable, with trace success remaining runtime context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-to-tag ICE subroutine is mechanically derivable; tag application remains trace-success gated."
+    },
+    {
+      "cardId": "onr_v1_246_fragmentation-storm",
+      "title": "Fragmentation Storm",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:program_trash",
+        "effect:remote_protection",
+        "effect:run_lock",
+        "effect:trace"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Trace-success program trash/run-lock plus ETR are derivable, while target and action-payment context stays runtime-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-success program trash/run-lock and ETR are mechanically derivable; target selection and future action payment remain runtime context."
+    },
+    {
+      "cardId": "onr_v1_248_homewrecker",
+      "title": "Homewrecker™",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:etr",
+        "effect:hardware_trash",
+        "effect:remote_protection",
+        "effect:trace"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Trace-success hardware trash, unpreventable meat damage and ETR are derivable with trace/prevention context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-success hardware trash, unpreventable meat damage and ETR are mechanically derivable; title normalization is cardId-based."
+    },
+    {
+      "cardId": "onr_v1_249_hunter",
+      "title": "Hunter",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Trace-to-tag ICE subroutine is derivable, with trace success remaining runtime context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-to-tag ICE subroutine is mechanically derivable; tag application remains trace-success gated."
+    },
+    {
+      "cardId": "onr_v1_251_jack-attack",
+      "title": "Jack Attack",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_run_effect",
+        "effect:no_jack_out",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "No-jack-out plus trace-to-tag mechanics are derivable, while actual run choices stay runtime-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "No-jack-out run-duration effect and trace-to-tag subroutine are mechanically derivable; actual choices remain current-run context."
+    },
+    {
+      "cardId": "onr_v1_255_mastiff",
+      "title": "Mastiff",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:etr",
+        "effect:future_run_effect",
+        "effect:persistent_counter_effect",
+        "effect:remote_protection",
+        "effect:run_tax",
+        "effect:trace"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Damage, strength modifier, trace/counter context and ETR are derivable with encounter and effectiveRunQuote context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Damage, strength modifier, trace/counter context and ETR are mechanically derivable; concrete path cost remains effectiveRunQuote context."
+    },
+    {
+      "cardId": "onr_v1_258_neural-blade",
+      "title": "Neural Blade",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:future_encounter_effect"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Damage plus next-ICE break prohibition is derivable, with later-encounter/runpath context required.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
+    },
+    {
+      "cardId": "onr_v1_260_pocket-virtual-reality",
+      "title": "Pocket Virtual Reality",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:tag_source",
+        "effect:trace",
+        "effect:trace_credit"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Trace-to-tag and trace-only credits are derivable, while trace bidding remains LegalAction/engine context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-to-tag and trace-only encounter credits are mechanically derivable; trace bidding remains LegalAction/engine context."
+    },
+    {
+      "cardId": "onr_v1_268_shock-r",
+      "title": "Shock.r",
+      "side": "corp",
+      "cardType": "ice",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_encounter",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
+        "effect:no_jack_out"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 7,
+      "rationale": "Next-ICE break/jack-out restriction is derivable, but must not become current ICE self-safety.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Next-ICE break/jack-out restriction is mechanically derivable; generated facts do not create current ICE self-safety."
+    },
+    {
       "cardId": "onr_v1_274_tutor",
       "title": "Tutor",
       "side": "corp",
@@ -2436,23 +3003,14 @@
         "generated_with_descriptor_limitations",
         "legacy_keep_for_compat"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "effect:future_run_effect",
         "effect:remote_protection"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "generatedOnlyFields": [],
       "overlayFields": [],
       "warningGroups": {
@@ -2485,27 +3043,16 @@
         "generated_with_descriptor_limitations",
         "legacy_keep_for_compat"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "effect:future_run_effect",
         "effect:program_trash",
         "effect:run_tax"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2538,26 +3085,15 @@
         "generated_with_descriptor_limitations",
         "legacy_keep_for_compat"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "effect:future_run_effect",
         "effect:run_tax"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2590,27 +3126,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_trace_success",
         "effect:tag_source",
         "effect:trace"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2643,27 +3167,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_trace_success",
         "effect:tag_source",
         "effect:trace"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2696,27 +3208,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_runner_tagged",
         "effect:counter_economy",
         "effect:tag_punish_payoff"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2749,27 +3249,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects"
-      ],
+      "generatedFields": ["conditions", "effects"],
       "generatedMechanicalFacts": [
         "condition:requires_runner_tagged",
         "effect:damage",
         "effect:tag_punish_payoff"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2802,30 +3290,19 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "costProfile",
-        "effects",
-        "remoteRole"
-      ],
+      "generatedFields": ["costProfile", "effects", "remoteRole"],
       "generatedMechanicalFacts": [
         "costProfile",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [
-        "effects",
-        "costProfile",
-        "remoteRole"
-      ],
+      "monolithFields": ["effects", "costProfile", "remoteRole"],
       "duplicatedActiveMechanicalFields": [
         "costProfile",
         "effects",
         "remoteRole"
       ],
-      "generatedOnlyFields": [
-        "costProfile",
-        "effects"
-      ],
+      "generatedOnlyFields": ["costProfile", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 3,
@@ -2858,26 +3335,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "effects",
-        "remoteRole"
-      ],
+      "generatedFields": ["effects", "remoteRole"],
       "generatedMechanicalFacts": [
         "effect:remote_protection",
         "effect:rez_discount",
         "remoteRole:ice_modifier"
       ],
-      "monolithFields": [
-        "effects",
-        "remoteRole"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "effects",
-        "remoteRole"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2910,25 +3376,14 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "effects",
-        "remoteRole"
-      ],
+      "generatedFields": ["effects", "remoteRole"],
       "generatedMechanicalFacts": [
         "effect:remote_protection",
         "remoteRole:ice_modifier"
       ],
-      "monolithFields": [
-        "effects",
-        "remoteRole"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "effects",
-        "remoteRole"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
@@ -2961,30 +3416,12 @@
         "legacy_keep_for_compat",
         "overlay_only"
       ],
-      "generatedFields": [
-        "effects",
-        "remoteRole"
-      ],
-      "generatedMechanicalFacts": [
-        "effect:run_tax",
-        "remoteRole:run_tax"
-      ],
-      "monolithFields": [
-        "effects",
-        "remoteRole"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "effects",
-        "remoteRole"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
-      "overlayFields": [
-        "lineSupport",
-        "quality",
-        "strategicNotes"
-      ],
+      "generatedFields": ["effects", "remoteRole"],
+      "generatedMechanicalFacts": ["effect:run_tax", "remoteRole:run_tax"],
+      "monolithFields": ["effects", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": ["lineSupport", "quality", "strategicNotes"],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 1,
@@ -3020,23 +3457,14 @@
         "generated_with_descriptor_limitations",
         "legacy_keep_for_compat"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects",
-        "remoteRole"
-      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
       "generatedMechanicalFacts": [
         "condition:requires_successful_run",
         "effect:future_encounter_effect",
         "effect:remote_protection",
         "remoteRole:scoring_protection"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "costProfile",
-        "remoteRole"
-      ],
+      "monolithFields": ["effects", "conditions", "costProfile", "remoteRole"],
       "duplicatedActiveMechanicalFields": [
         "conditions",
         "effects",
@@ -3074,22 +3502,14 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects",
-        "remoteRole"
-      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
       "generatedMechanicalFacts": [
         "condition:requires_remote_server",
         "effect:remote_protection",
         "effect:score_acceleration",
         "remoteRole:remote_capacity"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "remoteRole"
-      ],
+      "monolithFields": ["effects", "conditions", "remoteRole"],
       "duplicatedActiveMechanicalFields": [
         "conditions",
         "effects",
@@ -3127,22 +3547,14 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects",
-        "remoteRole"
-      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "effect:remote_protection",
         "effect:rez_discount",
         "remoteRole:scoring_protection"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "remoteRole"
-      ],
+      "monolithFields": ["effects", "conditions", "remoteRole"],
       "duplicatedActiveMechanicalFields": [
         "conditions",
         "effects",
@@ -3180,35 +3592,20 @@
         "legacy_keep_for_compat",
         "overlay_only"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects",
-        "remoteRole"
-      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
       "generatedMechanicalFacts": [
         "condition:requires_accessed_card",
         "effect:run_tax",
         "remoteRole:agenda_steal_tax"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "remoteRole"
-      ],
+      "monolithFields": ["effects", "conditions", "remoteRole"],
       "duplicatedActiveMechanicalFields": [
         "conditions",
         "effects",
         "remoteRole"
       ],
-      "generatedOnlyFields": [
-        "effects",
-        "remoteRole"
-      ],
-      "overlayFields": [
-        "lineSupport",
-        "quality",
-        "strategicNotes"
-      ],
+      "generatedOnlyFields": ["effects", "remoteRole"],
+      "overlayFields": ["lineSupport", "quality", "strategicNotes"],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 3,
         "generated_fact_absent_from_monolith": 2,
@@ -3244,22 +3641,14 @@
         "generated_with_descriptor_limitations",
         "legacy_keep_for_compat"
       ],
-      "generatedFields": [
-        "conditions",
-        "effects",
-        "remoteRole"
-      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "effect:future_encounter_effect",
         "effect:remote_protection",
         "remoteRole:scoring_protection"
       ],
-      "monolithFields": [
-        "effects",
-        "conditions",
-        "remoteRole"
-      ],
+      "monolithFields": ["effects", "conditions", "remoteRole"],
       "duplicatedActiveMechanicalFields": [
         "conditions",
         "effects",
@@ -3297,26 +3686,15 @@
         "legacy_keep_for_compat",
         "safe_generated_now"
       ],
-      "generatedFields": [
-        "effects",
-        "remoteRole"
-      ],
+      "generatedFields": ["effects", "remoteRole"],
       "generatedMechanicalFacts": [
         "effect:future_encounter_effect",
         "effect:remote_protection",
         "remoteRole:scoring_protection"
       ],
-      "monolithFields": [
-        "effects",
-        "remoteRole"
-      ],
-      "duplicatedActiveMechanicalFields": [
-        "effects",
-        "remoteRole"
-      ],
-      "generatedOnlyFields": [
-        "effects"
-      ],
+      "monolithFields": ["effects", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,

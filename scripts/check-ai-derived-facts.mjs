@@ -31,6 +31,7 @@ const KNOWN_EFFECT_KINDS = new Set([
   "hq_info",
   "expose_info",
   "zone_shuffle",
+  "etr",
   "extra_action",
   "counter_economy",
   "scored_agenda_action",
@@ -42,6 +43,10 @@ const KNOWN_EFFECT_KINDS = new Set([
   "program_trash",
   "ice_trash",
   "hardware_trash",
+  "run_lock",
+  "no_jack_out",
+  "persistent_counter_effect",
+  "trace_credit",
   "resource_trash",
   "tag_punish_payoff",
   "tag_source",
@@ -107,6 +112,10 @@ const KNOWN_CONDITIONS = new Set([
   "requires_rnd_pressure",
   "requires_installed_program",
   "requires_missing_breaker_coverage",
+  "requires_encounter",
+  "requires_unbroken_subroutine",
+  "requires_later_encounter",
+  "requires_remaining_ice",
 ]);
 
 const KNOWN_BREAKER_COVERAGES = new Set([
@@ -476,6 +485,12 @@ function deriveFromImplementation(card, implementationText, hint) {
   };
 
   const isAgenda = hint?.cardType === "agenda";
+  const isCorpIce = hint?.side === "corp" && hint?.cardType === "ice";
+  const isPriorFutureRunIce = new Set([
+    "onr_v1_274_tutor",
+    "onr_v1_276_viral-15",
+    "onr_v1_277_virizz",
+  ]).has(card.cardId);
 
   if (isAgenda && /kind:\s*"activated"/.test(implementationText)) {
     addEffect(facts, {
@@ -551,10 +566,24 @@ function deriveFromImplementation(card, implementationText, hint) {
   if (/kind:\s*"trace"/.test(implementationText)) {
     addEffect(facts, {
       kind: "trace",
-      timing: isAgenda ? "scored_activated" : "action",
+      timing: isAgenda
+        ? "scored_activated"
+        : isCorpIce
+          ? "encounter"
+          : "action",
       scope: "corp",
-      source: "implementation.effect.trace",
+      source: isCorpIce
+        ? "implementation.printedSubroutines.trace"
+        : "implementation.effect.trace",
     });
+    if (isCorpIce || /onSuccess:\s*\[/.test(implementationText)) {
+      addCondition(facts, {
+        kind: "requires_trace_success",
+        source: isCorpIce
+          ? "implementation.printedSubroutines.trace.onSuccess"
+          : "implementation.effect.trace.onSuccess",
+      });
+    }
     if (/kind:\s*"add_tags"/.test(implementationText)) {
       addEffect(facts, {
         kind: "tag_source",
@@ -581,11 +610,17 @@ function deriveFromImplementation(card, implementationText, hint) {
   if (/kind:\s*"damage"/.test(implementationText)) {
     addEffect(facts, {
       kind: "damage",
-      timing: isAgenda ? "scored_activated" : "action",
+      timing: isAgenda
+        ? "scored_activated"
+        : isCorpIce
+          ? "encounter"
+          : "action",
       scope: "runner",
       resource: "damage",
       amount: amountNear(implementationText, "damage"),
-      source: "implementation.effect.damage",
+      source: isCorpIce
+        ? "implementation.printedSubroutines.damage"
+        : "implementation.effect.damage",
     });
     if (/runner_is_tagged/.test(implementationText)) {
       addEffect(facts, {
@@ -1024,6 +1059,214 @@ function deriveFromImplementation(card, implementationText, hint) {
         source:
           "implementation.printedSubroutines.run_duration_additional_subroutine",
       });
+    }
+  }
+
+  if (
+    isCorpIce &&
+    !isPriorFutureRunIce &&
+    /printedSubroutines:\s*\[/.test(implementationText)
+  ) {
+    addCondition(facts, {
+      kind: "requires_encounter",
+      source: "implementation.printedSubroutines",
+    });
+    addCondition(facts, {
+      kind: "requires_unbroken_subroutine",
+      source: "implementation.printedSubroutines",
+    });
+
+    if (/kind:\s*"end_the_run"|kind:\s*"end_run"/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "etr",
+        timing: "encounter",
+        scope: "run_path",
+        source: "implementation.printedSubroutines.end_run",
+      });
+      addEffect(facts, {
+        kind: "remote_protection",
+        timing: "encounter",
+        scope: "run_path",
+        source: "implementation.printedSubroutines.end_run",
+      });
+    }
+
+    if (/kind:\s*"trash_program"/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "program_trash",
+        timing: /kind:\s*"trace"[\s\S]{0,360}?kind:\s*"trash_program"/.test(
+          implementationText,
+        )
+          ? "trace_success"
+          : "encounter",
+        scope: "runner",
+        source: "implementation.printedSubroutines.trash_program",
+      });
+    }
+
+    if (/kind:\s*"trash_hardware"/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "hardware_trash",
+        timing: "trace_success",
+        scope: "runner",
+        source:
+          "implementation.printedSubroutines.trace.onSuccess.trash_hardware",
+      });
+    }
+
+    if (/kind:\s*"unpreventable_meat_damage"/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "damage",
+        timing: "trace_success",
+        scope: "runner",
+        resource: "damage",
+        amount: amountNear(implementationText, "unpreventable_meat_damage"),
+        source:
+          "implementation.printedSubroutines.trace.onSuccess.unpreventable_meat_damage",
+      });
+      facts.derivationNotes.push(
+        "Unpreventable damage is still a mechanical damage class; damage prevention and flatline resolution remain engine context.",
+      );
+    }
+
+    if (/runner_run_lock_until_action_paid/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "run_lock",
+        timing: "trace_success",
+        scope: "runner",
+        resource: "actions",
+        source:
+          "implementation.printedSubroutines.trace.onSuccess.runner_run_lock_until_action_paid",
+      });
+    }
+
+    if (/run_duration_cannot_jack_out/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "no_jack_out",
+        timing: "during_run",
+        scope: "runner",
+        source:
+          "implementation.printedSubroutines.run_duration_cannot_jack_out",
+      });
+    }
+
+    if (
+      /prohibit_break_next_ice|prohibit_break_and_jack_out_next_ice/.test(
+        implementationText,
+      )
+    ) {
+      addEffect(facts, {
+        kind: "future_encounter_effect",
+        timing: "encounter",
+        scope: "run_path",
+        source: "implementation.printedSubroutines.prohibit_break_next_ice",
+      });
+      if (/prohibit_break_and_jack_out_next_ice/.test(implementationText)) {
+        addEffect(facts, {
+          kind: "no_jack_out",
+          timing: "encounter",
+          scope: "runner",
+          source:
+            "implementation.printedSubroutines.prohibit_break_and_jack_out_next_ice",
+        });
+      }
+      addCondition(facts, {
+        kind: "requires_later_encounter",
+        source: "implementation.printedSubroutines.prohibit_break_next_ice",
+      });
+      addCondition(facts, {
+        kind: "requires_remaining_ice",
+        source: "implementation.printedSubroutines.prohibit_break_next_ice",
+      });
+    }
+
+    if (/next_encounter_unless_fully_break_damage/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "future_encounter_effect",
+        timing: "encounter",
+        scope: "run_path",
+        source:
+          "implementation.printedSubroutines.next_encounter_unless_fully_break_damage",
+      });
+      addEffect(facts, {
+        kind: "damage",
+        timing: "encounter",
+        scope: "runner",
+        resource: "damage",
+        amount: amountNear(
+          implementationText,
+          "next_encounter_unless_fully_break_damage",
+        ),
+        source:
+          "implementation.printedSubroutines.next_encounter_unless_fully_break_damage",
+      });
+      addCondition(facts, {
+        kind: "requires_later_encounter",
+        source:
+          "implementation.printedSubroutines.next_encounter_unless_fully_break_damage",
+      });
+      addCondition(facts, {
+        kind: "requires_remaining_ice",
+        source:
+          "implementation.printedSubroutines.next_encounter_unless_fully_break_damage",
+      });
+    }
+
+    if (/run_duration_ice_strength/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "run_tax",
+        timing: "encounter",
+        scope: "run_path",
+        resource: "strength",
+        amount: amountNear(implementationText, "run_duration_ice_strength"),
+        source: "implementation.printedSubroutines.run_duration_ice_strength",
+      });
+    }
+
+    if (/run_duration_encounter_cost_or_end_run/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "run_tax",
+        timing: "encounter",
+        scope: "run_path",
+        resource: "credits",
+        amount: amountNear(
+          implementationText,
+          "run_duration_encounter_cost_or_end_run",
+        ),
+        source:
+          "implementation.printedSubroutines.run_duration_encounter_cost_or_end_run",
+      });
+    }
+
+    if (
+      /iceEncounter:\s*\{[\s\S]{0,160}?add_encounter_temporary_credits/.test(
+        implementationText,
+      )
+    ) {
+      addEffect(facts, {
+        kind: "trace_credit",
+        timing: "encounter",
+        scope: "corp",
+        resource: "credits",
+        amount: amountNear(
+          implementationText,
+          "add_encounter_temporary_credits",
+        ),
+        source: "implementation.iceEncounter.add_encounter_temporary_credits",
+      });
+    }
+
+    if (/runnerCounterEffects:\s*\[/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "persistent_counter_effect",
+        timing: "persistent",
+        scope: "runner",
+        resource: "counters",
+        source: "implementation.runnerCounterEffects",
+      });
+      facts.derivationNotes.push(
+        "Runner counter effects describe persistent card mechanics only; generated facts do not assert current counter state.",
+      );
     }
   }
 

@@ -66,13 +66,13 @@ describe("derived basic facts gate report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("keeps the 61-card pilot complete", () => {
+  it("keeps the 85-card pilot complete", () => {
     const report = readReport();
-    expect(report.pilotCardCount).toBe(61);
-    expect(report.implementationFoundCount).toBe(61);
-    expect(report.cardsWithDerivedFacts).toBe(61);
-    expect(report.cardsWithManualOntologyOverlap).toBe(54);
-    expect(report.cardsNeedingManualOverlay).toBe(11);
+    expect(report.pilotCardCount).toBe(85);
+    expect(report.implementationFoundCount).toBe(85);
+    expect(report.cardsWithDerivedFacts).toBe(85);
+    expect(report.cardsWithManualOntologyOverlap).toBe(67);
+    expect(report.cardsNeedingManualOverlay).toBe(35);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
       report.cards.every(
@@ -295,6 +295,48 @@ describe("derived basic facts gate report", () => {
     const smarteye = cardById(report, "onr_v1_065_smarteye");
     expect(smarteye.derivedFacts.effects).toContainEqual(
       expect.objectContaining({ kind: "expose_info", scope: "ice" }),
+    );
+
+    const fetch = cardById(report, "onr_v1_243_fetch-4-0-1");
+    expect(fetch.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "trace", timing: "encounter" }),
+        expect.objectContaining({
+          kind: "tag_source",
+          timing: "trace_success",
+        }),
+      ]),
+    );
+    expect(fetch.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_trace_success" }),
+    );
+
+    const cinderella = cardById(report, "onr_v1_228_cinderella");
+    expect(cinderella.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "hardware_trash" }),
+        expect.objectContaining({ kind: "damage", timing: "trace_success" }),
+        expect.objectContaining({ kind: "etr" }),
+      ]),
+    );
+
+    const shockR = cardById(report, "onr_v1_268_shock-r");
+    expect(shockR.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "future_encounter_effect" }),
+        expect.objectContaining({ kind: "no_jack_out" }),
+      ]),
+    );
+    expect(shockR.derivedFacts.conditions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "requires_later_encounter" }),
+        expect.objectContaining({ kind: "requires_remaining_ice" }),
+      ]),
+    );
+
+    const dataRaven = cardById(report, "onr_v1_236_data-raven");
+    expect(dataRaven.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({ kind: "persistent_counter_effect" }),
     );
   });
 

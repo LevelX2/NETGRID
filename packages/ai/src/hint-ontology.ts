@@ -15,6 +15,7 @@ export const KNOWN_HINT_EFFECT_KINDS = [
   "hq_info",
   "expose_info",
   "zone_shuffle",
+  "etr",
   "extra_action",
   "counter_economy",
   "scored_agenda_action",
@@ -26,6 +27,10 @@ export const KNOWN_HINT_EFFECT_KINDS = [
   "program_trash",
   "ice_trash",
   "hardware_trash",
+  "run_lock",
+  "no_jack_out",
+  "persistent_counter_effect",
+  "trace_credit",
   "resource_trash",
   "tag_punish_payoff",
   "tag_source",
@@ -91,6 +96,10 @@ export const KNOWN_HINT_CONDITION_KINDS = [
   "requires_rnd_pressure",
   "requires_installed_program",
   "requires_missing_breaker_coverage",
+  "requires_encounter",
+  "requires_unbroken_subroutine",
+  "requires_later_encounter",
+  "requires_remaining_ice",
 ] as const;
 
 export const KNOWN_HINT_COST_RISKS = ["low", "medium", "high"] as const;
