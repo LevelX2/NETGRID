@@ -934,6 +934,8 @@ function collectRuntimeTrashPreventionCandidates(
       if (
         source.kind !== "prevent_installed_card_trash" ||
         source.visibility !== "public" ||
+        (source.activeOnlyDuring === "corp_turn" &&
+          !(state.activeSide === "corp" || state.phase === "corp_action_phase")) ||
         !cardImplementationTrashPreventionSourceCanPay(state, cardId, source)
       )
         return;
@@ -989,6 +991,8 @@ function cardImplementationTrashPreventionSourceCanPay(
 ): boolean {
   if (!runnerInstalledCardIds(state).includes(cardId)) return false;
   if (source.cost.kind === "trash_source") return true;
+  if (source.cost.kind === "tap_source")
+    return state.cardInstances[cardId]?.tapped !== true;
   return state.runner.credits >= source.cost.amount;
 }
 
@@ -1003,7 +1007,7 @@ function cardImplementationTrashPreventionProtectsTarget(
   if (!runnerInstalledCardIds(state).includes(targetCardId)) return false;
   const targetDefinition = definitionFor(state, targetCardId);
   return source.protectsCardTypes.includes(
-    targetDefinition.type as Extract<CardType, "program" | "hardware">,
+    targetDefinition.type as Extract<CardType, "program" | "hardware" | "resource">,
   );
 }
 
@@ -2124,6 +2128,22 @@ function applyRuntimeTrashPreventionCost(
       ...hiddenRevealPayload,
       sourceTrashed: true,
       trashedCardDefinitionId: definition.id,
+    };
+  }
+  if (source.cost.kind === "tap_source") {
+    const hiddenRevealPayload = hiddenRunnerResourceRevealPayload(
+      state,
+      sourceCardId,
+    );
+    const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
+    if (sourceInstance.tapped)
+      throw new Error("Die Trash-Prevention-Quelle ist bereits getappt.");
+    sourceInstance.faceup = true;
+    sourceInstance.rezzed = true;
+    sourceInstance.tapped = true;
+    return {
+      ...hiddenRevealPayload,
+      sourceTapped: true,
     };
   }
   spendCredits(state, "runner", source.cost.amount);

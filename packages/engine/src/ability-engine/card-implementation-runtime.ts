@@ -415,6 +415,20 @@ export type CardImplementationRuntimeDependencies = {
     sourceCardId: CardInstanceId,
     legalAction?: LegalAction,
   ) => CardEffectTrashSourceResult;
+  revealHiddenRunnerResource: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+  ) => Record<string, string | number | boolean>;
+  addCurrentRunAccessCount: (
+    state: GameState,
+    server: Extract<ServerId, "hq" | "rd">,
+    amount: number,
+  ) => CardEffectHiddenInfoResult;
+  passCurrentEncounteredIce: (
+    state: GameState,
+    legalAction: LegalAction,
+    subtypeRequired?: "ap",
+  ) => CardEffectHiddenInfoResult;
   startDistributeAdvancementCounters: (
     state: GameState,
     legalAction: LegalAction,
@@ -517,6 +531,25 @@ function cardImplementationConditionMet(
         state,
         condition.server,
       );
+    case "current_encounter_ice":
+      return (
+        state.timingPoint === "run.encounter_ice" &&
+        state.run?.phase === "encounter_ice" &&
+        Boolean(state.run.encounteredIceId)
+      );
+    case "current_encounter_ice_subtype": {
+      if (
+        state.timingPoint !== "run.encounter_ice" ||
+        state.run?.phase !== "encounter_ice" ||
+        !state.run.encounteredIceId
+      )
+        return false;
+      return deps
+        .definitionFor(state, state.run.encounteredIceId)
+        .subtypes.includes(condition.subtype);
+    }
+    case "current_run_server":
+      return state.run?.attackedServerId === condition.server;
     default: {
       const unknownCondition = condition as { kind?: string };
       throw new Error(
@@ -1249,6 +1282,11 @@ function activatedAbilityLegalActionCosts(
         throw new Error(
           "Activated CardImplementation trash_source cost amount must be 1.",
         );
+    } else if (cost.kind === "tap_source") {
+      if (cost.amount !== 1)
+        throw new Error(
+          "Activated CardImplementation tap_source cost amount must be 1.",
+        );
     } else {
       const unknownCost = cost as { kind?: string };
       throw new Error(
@@ -1286,6 +1324,12 @@ function hasTrashSourceCostForActivatedAbility(
   ability: ActivatedCardAbilityImplementation,
 ): boolean {
   return ability.costs.some((cost) => cost.kind === "trash_source");
+}
+
+function hasTapSourceCostForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): boolean {
+  return ability.costs.some((cost) => cost.kind === "tap_source");
 }
 
 function validateActivatedAbilityCosts(
@@ -1337,6 +1381,16 @@ function canPayActivatedCardImplementationCosts(
     )
       return false;
   }
+  if (hasTapSourceCostForActivatedAbility(ability)) {
+    const source = state.cardInstances[cardId];
+    if (
+      !source ||
+      source.controller !== side ||
+      source.zone.side !== side ||
+      source.tapped === true
+    )
+      return false;
+  }
   return true;
 }
 
@@ -1378,6 +1432,16 @@ function payActivatedCardImplementationCosts(
       throw new Error("Die Quelle konnte nicht getrasht werden.");
     Object.assign(publicPayload, trashResult.publicPayload);
   }
+  if (hasTapSourceCostForActivatedAbility(ability)) {
+    const source = state.cardInstances[cardId];
+    if (!source || source.tapped === true)
+      throw new Error("Die Quelle ist bereits getappt.");
+    Object.assign(publicPayload, deps.revealHiddenRunnerResource(state, cardId));
+    source.faceup = true;
+    source.rezzed = true;
+    source.tapped = true;
+    publicPayload.cardImplementationTapSourceCost = true;
+  }
   return publicPayload;
 }
 
@@ -1407,6 +1471,9 @@ function activatedAbilityPayload(
     }, {}),
     ...(hasTrashSourceCostForActivatedAbility(ability)
       ? { cardImplementationTrashSourceCost: true }
+      : {}),
+    ...(hasTapSourceCostForActivatedAbility(ability)
+      ? { cardImplementationTapSourceCost: true }
       : {}),
   };
 }
@@ -1944,6 +2011,10 @@ export function resolveActivatedCardImplementationAbility(
           match.definition.title,
           input,
         ),
+      addCurrentRunAccessCount: (server, amount) =>
+        deps.addCurrentRunAccessCount(state, server, amount),
+      passCurrentEncounteredIce: (subtypeRequired) =>
+        deps.passCurrentEncounteredIce(state, legalAction, subtypeRequired),
     },
     match.ability.effects,
   );

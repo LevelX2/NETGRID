@@ -887,10 +887,26 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/hardware/eurocorpse-tm-spin-chip.ts",
   "onr_proteus_151_sunburst-cranial-interface":
     "packages/engine/src/card-implementations/proteus/runner/hardware/sunburst-cranial-interface.ts",
+  "onr_proteus_128_airport-locker":
+    "packages/engine/src/card-implementations/proteus/runner/resources/airport-locker.ts",
+  "onr_proteus_133_chiba-bank-account":
+    "packages/engine/src/card-implementations/proteus/runner/resources/chiba-bank-account.ts",
+  "onr_proteus_142_hq-mole":
+    "packages/engine/src/card-implementations/proteus/runner/resources/hq-mole.ts",
+  "onr_proteus_143_liberated-savings-account":
+    "packages/engine/src/card-implementations/proteus/runner/resources/liberated-savings-account.ts",
   "onr_proteus_146_precision-bribery":
     "packages/engine/src/card-implementations/proteus/runner/resources/precision-bribery.ts",
+  "onr_proteus_147_r-and-d-mole":
+    "packages/engine/src/card-implementations/proteus/runner/resources/r-and-d-mole.ts",
+  "onr_proteus_149_simulacrum":
+    "packages/engine/src/card-implementations/proteus/runner/resources/simulacrum.ts",
   "onr_proteus_150_streetware-distributor":
     "packages/engine/src/card-implementations/proteus/runner/resources/streetware-distributor.ts",
+  "onr_proteus_152_swiss-bank-account":
+    "packages/engine/src/card-implementations/proteus/runner/resources/swiss-bank-account.ts",
+  "onr_proteus_153_time-to-collect":
+    "packages/engine/src/card-implementations/proteus/runner/resources/time-to-collect.ts",
 };
 
 const CURRENT_RELEASE_CARD_DEFINITION_ID_PATTERN = /^onr_v1_\d{3}_/;

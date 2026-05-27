@@ -185,6 +185,13 @@ export type CardEffectExecutionContext = {
     subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
     amount?: number;
   }) => CardEffectHiddenInfoResult;
+  addCurrentRunAccessCount?: (
+    server: Extract<ServerId, "hq" | "rd">,
+    amount: number,
+  ) => CardEffectHiddenInfoResult;
+  passCurrentEncounteredIce?: (
+    subtypeRequired?: "ap",
+  ) => CardEffectHiddenInfoResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -1385,6 +1392,44 @@ export function executeCardImplementationEffects(
           effect.shuffleAfterwards,
         );
         mergePublicPayload(publicPayload, searchResult.publicPayload);
+        return;
+      }
+      case "add_current_run_access_count": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "add_current_run_access_count visibility must be hidden_info_barrier.",
+          );
+        if (effect.server !== "hq" && effect.server !== "rd")
+          throw new Error("add_current_run_access_count server is invalid.");
+        if (!Number.isInteger(effect.amount) || effect.amount <= 0)
+          throw new Error("add_current_run_access_count amount is invalid.");
+        if (!context.addCurrentRunAccessCount)
+          throw new Error(
+            "add_current_run_access_count requires a run access execution context.",
+          );
+        const accessResult = context.addCurrentRunAccessCount(
+          effect.server,
+          effect.amount,
+        );
+        mergePublicPayload(publicPayload, accessResult.publicPayload);
+        return;
+      }
+      case "pass_current_encountered_ice": {
+        if (effect.visibility !== "public")
+          throw new Error("pass_current_encountered_ice visibility must be public.");
+        if (
+          effect.subtypeRequired !== undefined &&
+          effect.subtypeRequired !== "ap"
+        )
+          throw new Error("pass_current_encountered_ice subtype is invalid.");
+        if (!context.passCurrentEncounteredIce)
+          throw new Error(
+            "pass_current_encountered_ice requires an encounter execution context.",
+          );
+        const passResult = context.passCurrentEncounteredIce(
+          effect.subtypeRequired,
+        );
+        mergePublicPayload(publicPayload, passResult.publicPayload);
         return;
       }
       case "choose_stack_or_trash_program_install": {

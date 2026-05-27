@@ -734,6 +734,15 @@ export type CardConditionImplementation =
   | {
       kind: "runner_made_successful_run_on_server_this_turn";
       server: Extract<ServerId, "hq"> | "any_data_fort";
+    }
+  | { kind: "current_encounter_ice" }
+  | {
+      kind: "current_encounter_ice_subtype";
+      subtype: "ap";
+    }
+  | {
+      kind: "current_run_server";
+      server: Extract<ServerId, "hq" | "rd">;
     };
 
 export type ActivatedCardAbilityImplementation = {
@@ -792,6 +801,10 @@ export type CardAbilityCostImplementation =
     }
   | {
       kind: "trash_source";
+      amount: 1;
+    }
+  | {
+      kind: "tap_source";
       amount: 1;
     };
 
@@ -937,6 +950,8 @@ export type CardEffectImplementation =
   | CorpDiscardHqWithRetainPaymentEffectImplementation
   | DerezRezzedBlackIceEffectImplementation
   | AddCurrentEncounterAdditionalSubroutineEffectImplementation
+  | AddCurrentRunAccessCountEffectImplementation
+  | PassCurrentEncounteredIceEffectImplementation
   | StartRunnerProgramInstallActionBundleEffectImplementation
   | DistributeAdvancementCountersEffectImplementation
   | MoveAdvancementCountersEffectImplementation;
@@ -1024,6 +1039,19 @@ export type AddCurrentEncounterAdditionalSubroutineEffectImplementation = {
   target: "encountered_ice_self";
   append: "after_existing";
   subroutine: CardSubroutineImplementation;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type AddCurrentRunAccessCountEffectImplementation = {
+  kind: "add_current_run_access_count";
+  server: Extract<ServerId, "hq" | "rd">;
+  amount: number;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type PassCurrentEncounteredIceEffectImplementation = {
+  kind: "pass_current_encountered_ice";
+  subtypeRequired?: "ap";
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -1761,12 +1789,16 @@ export type CardTagPreventionSourceImplementation = {
 
 export type CardTrashPreventionSourceImplementation = {
   kind: "prevent_installed_card_trash";
-  protectsCardTypes: readonly Extract<CardType, "program" | "hardware">[];
+  protectsCardTypes: readonly Extract<CardType, "program" | "hardware" | "resource">[];
   excludesSelf?: true;
+  activeOnlyDuring?: "corp_turn";
   mode: "one_card" | "one_or_more_simultaneous";
   cost:
     | {
         kind: "trash_source";
+      }
+    | {
+        kind: "tap_source";
       }
     | {
         kind: "credit_return_source_to_grip";

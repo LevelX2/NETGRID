@@ -472,10 +472,18 @@ import { proteusTaxmanImplementation } from "./proteus/runner/programs/taxman";
 import { proteusVienna22Implementation } from "./proteus/runner/programs/vienna-22";
 import { proteusViralPipelineImplementation } from "./proteus/runner/programs/viral-pipeline";
 import { proteusWreckingBallImplementation } from "./proteus/runner/programs/wrecking-ball";
+import { proteusAirportLockerImplementation } from "./proteus/runner/resources/airport-locker";
 import { proteusPrecisionBriberyImplementation } from "./proteus/runner/resources/precision-bribery";
 import { proteusBackDoorToRivalsImplementation } from "./proteus/runner/resources/back-door-to-rivals";
+import { proteusChibaBankAccountImplementation } from "./proteus/runner/resources/chiba-bank-account";
+import { proteusHqMoleImplementation } from "./proteus/runner/resources/hq-mole";
+import { proteusLiberatedSavingsAccountImplementation } from "./proteus/runner/resources/liberated-savings-account";
+import { proteusRAndDMoleImplementation } from "./proteus/runner/resources/r-and-d-mole";
 import { proteusRunnerSenseiImplementation } from "./proteus/runner/resources/runner-sensei";
+import { proteusSimulacrumImplementation } from "./proteus/runner/resources/simulacrum";
 import { proteusStreetwareDistributorImplementation } from "./proteus/runner/resources/streetware-distributor";
+import { proteusSwissBankAccountImplementation } from "./proteus/runner/resources/swiss-bank-account";
+import { proteusTimeToCollectImplementation } from "./proteus/runner/resources/time-to-collect";
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
@@ -945,10 +953,18 @@ export const CARD_IMPLEMENTATIONS = [
   proteusVienna22Implementation,
   proteusViralPipelineImplementation,
   proteusWreckingBallImplementation,
+  proteusAirportLockerImplementation,
   proteusBackDoorToRivalsImplementation,
+  proteusChibaBankAccountImplementation,
+  proteusHqMoleImplementation,
+  proteusLiberatedSavingsAccountImplementation,
   proteusPrecisionBriberyImplementation,
+  proteusRAndDMoleImplementation,
   proteusRunnerSenseiImplementation,
+  proteusSimulacrumImplementation,
   proteusStreetwareDistributorImplementation,
+  proteusSwissBankAccountImplementation,
+  proteusTimeToCollectImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 
 export const CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: Partial<

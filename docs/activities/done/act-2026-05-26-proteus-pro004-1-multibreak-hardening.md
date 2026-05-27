@@ -42,4 +42,4 @@ Der Encounter-Action-Pfad wählt bei Multi-Break jetzt die tatsächliche Break-A
 
 `packages/engine/src/test/proteus-card-definitions.ts` stellt echte CardDefinitions aus `data/cards/proteus-cards.json` für Engine-Tests bereit. Der gezielte Encounter-Action-Test nutzt diesen Katalog für die sechs PRO004-Karten und prüft Multi-Break, Subtype-Matcher, Pump-Kosten und Skeleton-Passkeys-`+4`.
 
-Die Phase-5a-Sammelactivity bleibt weiterhin `blocked`, weil PRO011 und PRO012 nicht umgesetzt sind. Dieses Paket implementiert keine neuen Proteus-Karten und aktiviert keine Decklegalität, Formatlegalität oder AI-Unterstützung.
+Die Phase-5a-Sammelactivity bleibt weiterhin `blocked`, weil PRO012 nicht umgesetzt ist. Dieses Paket implementiert keine neuen Proteus-Karten und aktiviert keine Decklegalität, Formatlegalität oder AI-Unterstützung.

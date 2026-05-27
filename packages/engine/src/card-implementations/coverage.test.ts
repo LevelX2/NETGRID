@@ -1772,10 +1772,10 @@ describe("CardImplementation coverage and registry invariants", () => {
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
     expect(outsideScopeDefinitionIds).toHaveLength(206);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(470);
-    expect(coverageByStatus.get("implemented")).toBe(470);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(478);
+    expect(coverageByStatus.get("implemented")).toBe(478);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(109);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(101);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);
@@ -2102,6 +2102,42 @@ describe("CardImplementation coverage and registry invariants", () => {
             rewardCreditsOnAvoidTrace: 1,
           }),
         ],
+      }),
+    );
+  });
+
+  it("migrates Proteus PRO011 hidden resource economy/access suite into CardImplementation coverage", () => {
+    const cases = [
+      "onr_proteus_128_airport-locker",
+      "onr_proteus_133_chiba-bank-account",
+      "onr_proteus_142_hq-mole",
+      "onr_proteus_143_liberated-savings-account",
+      "onr_proteus_147_r-and-d-mole",
+      "onr_proteus_149_simulacrum",
+      "onr_proteus_152_swiss-bank-account",
+      "onr_proteus_153_time-to-collect",
+    ] as const;
+
+    for (const definitionId of cases) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_152_swiss-bank-account")
+        ?.abilities,
+    ).toHaveLength(2);
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_153_time-to-collect")
+        ?.trashPreventionSources,
+    ).toContainEqual(
+      expect.objectContaining({
+        protectsCardTypes: ["resource"],
+        excludesSelf: true,
+        cost: { kind: "tap_source" },
       }),
     );
   });

@@ -906,6 +906,10 @@ function gameCardImplementationRuntimeDepsHost(): GameCardImplementationRuntimeD
       startDistributeAdvancementCounters:
         startCardImplementationAdvancementDistributionChoice,
       startMoveAdvancementCounters: startCardImplementationMoveAdvancementChoice,
+      revealHiddenRunnerResource: (state, sourceCardId) =>
+        hiddenRunnerResourceRevealPayload(state, sourceCardId),
+      addCurrentRunAccessCount,
+      passCurrentEncounteredIce,
       startOpenEndedMileageProgramReturnChoice,
     },
   };
@@ -5811,6 +5815,64 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     runContinuationExecutionHost(state),
     legalAction,
   );
+}
+
+function addCurrentRunAccessCount(
+  state: GameState,
+  server: Extract<ServerId, "hq" | "rd">,
+  amount: number,
+): { publicPayload: Record<string, string | number | boolean> } {
+  const run = state.run;
+  if (!run || run.phase === "access")
+    throw new Error("Zusaetzlicher Access ist nur vor dem Access-Fenster moeglich.");
+  if (run.attackedServerId !== server)
+    throw new Error("Diese Access-Faehigkeit passt nicht zum aktuellen Server.");
+  if (!Number.isInteger(amount) || amount <= 0)
+    throw new Error("Die Access-Anzahl ist ungueltig.");
+  run.accessCount = Math.max(0, Math.floor(run.accessCount ?? 1)) + amount;
+  return {
+    publicPayload: {
+      hiddenZoneBarrier: true,
+      hiddenResourceAccessBonus: true,
+      accessedServerId: server,
+      additionalAccessCount: amount,
+      runAccessCountAfter: run.accessCount,
+    },
+  };
+}
+
+function passCurrentEncounteredIce(
+  state: GameState,
+  legalAction: LegalAction,
+  subtypeRequired?: "ap",
+): { publicPayload: Record<string, string | number | boolean> } {
+  const run = state.run;
+  if (
+    state.timingPoint !== "run.encounter_ice" ||
+    run?.phase !== "encounter_ice" ||
+    !run.encounteredIceId
+  )
+    throw new Error("Es gibt keine aktuelle ICE-Encounter zum Passieren.");
+  const iceDefinition = definitionFor(state, run.encounteredIceId);
+  if (subtypeRequired && !cardHasSubtype(iceDefinition, subtypeRequired))
+    throw new Error("Diese ICE hat nicht den benoetigten Subtyp.");
+  const subroutines = subroutinesForCurrentEncounter(state, iceDefinition);
+  for (let index = 0; index < subroutines.length; index += 1) {
+    if (
+      !run.brokenSubroutineIndexes.includes(index) &&
+      !run.resolvedSubroutineIndexes.includes(index)
+    ) {
+      run.resolvedSubroutineIndexes.push(index);
+    }
+  }
+  continueRun(state, legalAction);
+  return {
+    publicPayload: {
+      passedEncounteredIce: true,
+      passedIceDefinitionId: iceDefinition.id,
+      skippedSubroutineCount: subroutines.length,
+    },
+  };
 }
 
 function runContinuationExecutionHost(

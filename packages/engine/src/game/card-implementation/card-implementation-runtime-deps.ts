@@ -128,6 +128,9 @@ export type GameCardImplementationRuntimeDepsHost = {
     ) => CardInstanceId[];
     startDistributeAdvancementCounters: CardImplementationRuntimeDependencies["startDistributeAdvancementCounters"];
     startMoveAdvancementCounters: CardImplementationRuntimeDependencies["startMoveAdvancementCounters"];
+    revealHiddenRunnerResource?: CardImplementationRuntimeDependencies["revealHiddenRunnerResource"];
+    addCurrentRunAccessCount?: CardImplementationRuntimeDependencies["addCurrentRunAccessCount"];
+    passCurrentEncounteredIce?: CardImplementationRuntimeDependencies["passCurrentEncounteredIce"];
     startOpenEndedMileageProgramReturnChoice: (
       state: RuntimeState,
       sourceCardId: CardInstanceId,
@@ -199,6 +202,22 @@ export function createGameCardImplementationRuntimeDeps(
     startDistributeAdvancementCounters:
       host.callbacks.startDistributeAdvancementCounters,
     startMoveAdvancementCounters: host.callbacks.startMoveAdvancementCounters,
+    revealHiddenRunnerResource: (state, sourceCardId) =>
+      host.callbacks.revealHiddenRunnerResource?.(state, sourceCardId) ?? {},
+    addCurrentRunAccessCount: (state, server, amount) => {
+      if (!host.callbacks.addCurrentRunAccessCount)
+        throw new Error("Current-run access count callback is not configured.");
+      return host.callbacks.addCurrentRunAccessCount(state, server, amount);
+    },
+    passCurrentEncounteredIce: (state, legalAction, subtypeRequired) => {
+      if (!host.callbacks.passCurrentEncounteredIce)
+        throw new Error("Encounter pass callback is not configured.");
+      return host.callbacks.passCurrentEncounteredIce(
+        state,
+        legalAction,
+        subtypeRequired,
+      );
+    },
     addCurrentEncounterAdditionalSubroutine: (
       state,
       legalAction,
