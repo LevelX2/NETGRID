@@ -471,6 +471,10 @@ import {
   handlePlayCardExecution,
   type PlayCardExecutionHost,
 } from "./game/play/play-card-execution";
+import {
+  handleBoardStateActionExecution,
+  type BoardStateActionExecutionHost,
+} from "./game/board/board-state-action-execution";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -4775,19 +4779,10 @@ function performAction(
       executeInstallCard(installCardHost(state), legalAction);
       return;
     case "advance_card":
-      spendClick(state, "corp");
-      spendCredits(state, "corp", 1);
-      {
-        const advancedCardId = String(legalAction.payload?.cardId);
-        mustInstance(state.cardInstances, advancedCardId).advancementCounters += 1;
-        const zone = mustInstance(state.cardInstances, advancedCardId).zone;
-        if (zone.side === "corp" && zone.zone === "serverRoot")
-          markRovingSubmarineActivityForServer(
-            fortRunSideFamiliesHostForState(state),
-            zone.serverId,
-            legalAction,
-          );
-      }
+      handleBoardStateActionExecution(
+        boardStateActionExecutionHost(state),
+        legalAction,
+      );
       return;
     case "score_agenda":
       scoreAgenda(
@@ -4890,11 +4885,8 @@ function performAction(
         return;
       throw new Error("Die Access-Aktion ist nicht gueltig.");
     case "trash_resource":
-      trashResource(
-        state,
-        String(
-          legalAction.payload?.resourceId ?? legalAction.payload?.cardId ?? "",
-        ),
+      handleBoardStateActionExecution(
+        boardStateActionExecutionHost(state),
         legalAction,
       );
       return;
@@ -4903,16 +4895,13 @@ function performAction(
         return;
       throw new Error("Die Access-Aktion ist nicht gueltig.");
     case "move_to_set_aside":
-      moveToSpecialZone(state, legalAction, "set_aside");
-      return;
     case "move_to_removed_from_game":
-      moveToSpecialZone(state, legalAction, "removed_from_game");
-      return;
     case "return_from_set_aside":
-      returnFromSetAside(state, legalAction);
-      return;
     case "change_card_control":
-      changeCardControl(state, legalAction);
+      handleBoardStateActionExecution(
+        boardStateActionExecutionHost(state),
+        legalAction,
+      );
       return;
     case "resolve_choice":
       resolvePendingChoice(
@@ -5932,43 +5921,6 @@ function discardRandomCorpHqCards(
     discarded.push(cardId);
   }
   return discarded;
-}
-
-function trashResource(
-  state: GameState,
-  cardId: string,
-  legalAction?: LegalAction,
-): void {
-  if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
-  const resolvedCardId =
-    state.runner.rig.resources.includes(cardId)
-      ? cardId
-      : resolveHiddenRunnerResourceSlot(state, cardId);
-  if (!resolvedCardId || !state.runner.rig.resources.includes(resolvedCardId))
-    throw new Error("Diese Resource ist nicht installiert.");
-  const definition = definitionFor(state, resolvedCardId);
-  if (definition.type !== "resource")
-    throw new Error("Nur installierte Resources koennen getrasht werden.");
-  const wasConcealedHiddenResource = isConcealedRunnerResource(
-    state,
-    resolvedCardId,
-  );
-  const hiddenResourceSlotId = hiddenRunnerResourceSlotId(resolvedCardId);
-  spendClick(state, "corp");
-  spendCredits(state, "corp", 2);
-  trashRunnerInstalledCardToHeap(state, resolvedCardId, legalAction);
-  if (legalAction && wasConcealedHiddenResource) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      cardId: hiddenResourceSlotId,
-      resourceSlotId: hiddenResourceSlotId,
-      hiddenResourceSlotId,
-      hiddenRunnerResource: true,
-      hiddenRunnerResourceRevealed: true,
-      publicRevealDefinitionId: definition.id,
-      redactedKind: "hidden_runner_resource",
-    };
-  }
 }
 
 function trashRunnerInstalledProgram(
@@ -10031,6 +9983,43 @@ function playCardExecutionHost(state: GameState): PlayCardExecutionHost {
       additionalOperationCost: onPlayCardImplementationAdditionalOperationCost,
       needsLastTurnResourceTarget:
         onPlayCardImplementationNeedsLastTurnResourceTarget,
+    },
+  };
+}
+
+function boardStateActionExecutionHost(
+  state: GameState,
+): BoardStateActionExecutionHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+    },
+    zones: {
+      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+      serverById: (serverId) => mustServer(state, serverId),
+    },
+    payment: {
+      spendClick: (side) => spendClick(state, side),
+      spendCredits: (side, amount) => spendCredits(state, side, amount),
+    },
+    runner: {
+      resolveHiddenRunnerResourceSlot: (slotId) =>
+        resolveHiddenRunnerResourceSlot(state, slotId),
+      isConcealedRunnerResource: (cardId) =>
+        isConcealedRunnerResource(state, cardId),
+      hiddenRunnerResourceSlotId,
+      trashInstalledCardToHeap: (cardId, legalAction) =>
+        trashRunnerInstalledCardToHeap(state, cardId, legalAction),
+    },
+    fort: {
+      markRovingSubmarineActivityForServer: (serverId, legalAction) =>
+        markRovingSubmarineActivityForServer(
+          fortRunSideFamiliesHostForState(state),
+          serverId,
+          legalAction,
+        ),
     },
   };
 }
@@ -14182,212 +14171,6 @@ function ensureCorpTurnFlags(
   flags.disinfectantUsedSourceIdsThisTurn ??= [];
   flags.employeeEmpowermentStartTurnResolvedSourceIds ??= [];
   return flags;
-}
-
-function moveToSpecialZone(
-  state: GameState,
-  legalAction: LegalAction,
-  zone: SpecialZoneKind,
-): void {
-  const cardId = stringLegalPayload(legalAction, "cardId");
-  const instance = mustInstance(state.cardInstances, cardId);
-  const harness = state.specialZoneHarness;
-  const harnessConfig =
-    zone === "set_aside" ? harness?.setAside : harness?.removedFromGame;
-  if (
-    !harness ||
-    harness.actor !== legalAction.side ||
-    harness.cardInstanceId !== cardId ||
-    !harnessConfig
-  ) {
-    throw new Error(
-      "Special-Zone-Harness ist fuer diese Aktion nicht freigegeben.",
-    );
-  }
-  if (instance.zone.side === "special")
-    throw new Error("Karte liegt bereits in einer Spezialzone.");
-  const previousZone = instance.zone as Exclude<
-    CardInstance["zone"],
-    { side: "special" }
-  >;
-  const movedInstance = runnerInstalledCardIds(state).includes(cardId)
-    ? cardInstanceWithoutCounters(instance)
-    : instance;
-  const visibility = specialZoneVisibilityPayload(
-    legalAction,
-    harnessConfig.visibility,
-  );
-  const visibilitySide = specialZoneVisibilitySidePayload(
-    legalAction,
-    harnessConfig.visibilitySide,
-  );
-  removeFromAllZones(state, cardId);
-  const specialZones = ensureSpecialZones(state);
-  const target =
-    zone === "set_aside" ? specialZones.setAside : specialZones.removedFromGame;
-  target.push(cardId);
-  target.sort();
-  state.cardInstances[cardId] = {
-    ...movedInstance,
-    zone: {
-      side: "special",
-      zone,
-      visibility,
-      ...(visibilitySide ? { visibilitySide } : {}),
-      ...(zone === "set_aside"
-        ? { returnZone: harness.setAside?.returnZone ?? previousZone }
-        : {}),
-    },
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    cardId,
-    specialZone: zone,
-    specialZoneVisibility: visibility,
-    ...(visibilitySide ? { specialZoneVisibilitySide: visibilitySide } : {}),
-    specialZoneReason: String(
-      legalAction.payload?.specialZoneReason ??
-        harnessConfig.reason ??
-        "v1.2.2_test_harness",
-    ),
-    redactedKind: "special_zone",
-  };
-}
-
-function returnFromSetAside(state: GameState, legalAction: LegalAction): void {
-  const cardId = stringLegalPayload(legalAction, "cardId");
-  const instance = mustInstance(state.cardInstances, cardId);
-  const harness = state.specialZoneHarness;
-  if (
-    !harness?.setAside?.allowReturn ||
-    harness.actor !== legalAction.side ||
-    harness.cardInstanceId !== cardId
-  ) {
-    throw new Error("Rueckkehr aus Set Aside ist nur test-only freigegeben.");
-  }
-  if (instance.zone.side !== "special" || instance.zone.zone !== "set_aside")
-    throw new Error("Karte liegt nicht in Set Aside.");
-  const returnZone = harness.setAside.returnZone ?? instance.zone.returnZone;
-  if (!returnZone)
-    throw new Error("Keine Rueckkehrzone fuer Set Aside definiert.");
-  removeFromAllZones(state, cardId);
-  placeCardInZone(state, cardId, returnZone);
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    zone: returnZone,
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    cardId,
-    specialZone: "set_aside",
-    specialZoneReason: String(
-      legalAction.payload?.specialZoneReason ??
-        harness.setAside.reason ??
-        "v1.2.2_test_harness_return",
-    ),
-    redactedKind: "special_zone",
-  };
-}
-
-function changeCardControl(state: GameState, legalAction: LegalAction): void {
-  const cardId = stringLegalPayload(legalAction, "cardId");
-  const instance = mustInstance(state.cardInstances, cardId);
-  const newController = sideLegalPayload(legalAction, "newController");
-  const harness = state.specialZoneHarness;
-  if (
-    !harness?.controlChange ||
-    harness.actor !== legalAction.side ||
-    harness.cardInstanceId !== cardId ||
-    harness.controlChange.newController !== newController
-  ) {
-    throw new Error("Control-Wechsel ist fuer diese Aktion nicht freigegeben.");
-  }
-  if (instance.controller === newController)
-    throw new Error("Die Karte hat diesen Controller bereits.");
-  state.cardInstances[cardId] = { ...instance, controller: newController };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    cardId,
-    oldController: instance.controller,
-    newController,
-    controlChangeVisibility: harness.controlChange.visibility ?? "public",
-    controlChangeReason: harness.controlChange.reason ?? "v1.2.2_test_harness",
-    ownershipChanged: false,
-    redactedKind: "control_change",
-  };
-}
-
-function placeCardInZone(
-  state: GameState,
-  cardId: CardInstanceId,
-  zone: Exclude<CardInstance["zone"], { side: "special" }>,
-): void {
-  if (zone.side === "corp" && zone.zone === "hq") state.corp.hq.push(cardId);
-  else if (zone.side === "corp" && zone.zone === "rd")
-    state.corp.rd.push(cardId);
-  else if (zone.side === "corp" && zone.zone === "archives")
-    state.corp.archives.push(cardId);
-  else if (zone.side === "corp" && zone.zone === "scoreArea")
-    state.corp.scoreArea.push(cardId);
-  else if (zone.side === "corp" && zone.zone === "serverIce")
-    mustServer(state, zone.serverId).ice.push(cardId);
-  else if (zone.side === "corp" && zone.zone === "serverRoot")
-    mustServer(state, zone.serverId).root.push(cardId);
-  else if (zone.side === "runner" && zone.zone === "grip")
-    state.runner.grip.push(cardId);
-  else if (zone.side === "runner" && zone.zone === "stack")
-    state.runner.stack.push(cardId);
-  else if (zone.side === "runner" && zone.zone === "heap")
-    state.runner.heap.push(cardId);
-  else if (zone.side === "runner" && zone.zone === "scoreArea")
-    state.runner.scoreArea.push(cardId);
-  else if (zone.side === "runner" && zone.zone === "rig") {
-    const definition = definitionFor(state, cardId);
-    if (definition.type === "program") state.runner.rig.programs.push(cardId);
-    else if (definition.type === "hardware")
-      state.runner.rig.hardware.push(cardId);
-    else if (definition.type === "resource")
-      state.runner.rig.resources.push(cardId);
-    else
-      throw new Error(
-        "Nur Runner-Programme, Hardware und Resources koennen in die Rig zurueckkehren.",
-      );
-  }
-}
-
-function specialZoneVisibilityPayload(
-  legalAction: LegalAction,
-  fallback: SpecialZoneVisibility,
-): SpecialZoneVisibility {
-  const value = legalAction.payload?.specialZoneVisibility;
-  return value === "public" ||
-    value === "side_private" ||
-    value === "hidden" ||
-    value === "replay_only"
-    ? value
-    : fallback;
-}
-
-function specialZoneVisibilitySidePayload(
-  legalAction: LegalAction,
-  fallback: Side | undefined,
-): Side | undefined {
-  const value = legalAction.payload?.specialZoneVisibilitySide;
-  return value === "corp" || value === "runner" ? value : fallback;
-}
-
-function stringLegalPayload(legalAction: LegalAction, key: string): string {
-  const value = legalAction.payload?.[key];
-  if (typeof value !== "string" || value.length === 0)
-    throw new Error(`Payload ${key} fehlt.`);
-  return value;
-}
-
-function sideLegalPayload(legalAction: LegalAction, key: string): Side {
-  const value = legalAction.payload?.[key];
-  if (value !== "corp" && value !== "runner")
-    throw new Error(`Payload ${key} ist keine Seite.`);
-  return value;
 }
 
 function createRemote(state: GameState): CorpServer {
