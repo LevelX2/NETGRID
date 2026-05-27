@@ -463,6 +463,10 @@ import {
   createRunFlowAdapters,
   type RunFlowHost,
 } from "./game/run/run-flow-hosts";
+import {
+  handleRunnerBreakerActionExecution,
+  type RunnerBreakerActionExecutionHost,
+} from "./game/run/runner-breaker-action-execution";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -4911,180 +4915,17 @@ function performAction(
       passApproachedIce(runMovementHostForState(state));
       return;
     case "pump_breaker":
-      {
-        const breakerId =
-          typeof legalAction.payload?.breakerId === "string"
-            ? (String(legalAction.payload.breakerId) as CardInstanceId)
-            : undefined;
-        const pumpAbility = pumpAbilityForLegalAction(state, legalAction);
-        const pumpAmount = pumpAmountForLegalAction(state, legalAction);
-        const isVariablePump =
-          pumpAbility?.variableStrength !== undefined ||
-          legalAction.payload?.pumpAmount !== undefined;
-        if (isVariablePump) {
-          const expectedCost = pumpAmount;
-          if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
-            throw new Error("Variable Icebreaker-Pump-Kosten sind nicht mehr gueltig.");
-        }
-        spendRunnerRunCredits(
-          runDurationPaymentHost(state),
-          legalAction.costs[0]?.credits ?? 1,
-          breakerId,
-        );
-        if (
-          breakerId &&
-          shouldOpenAardvarkInterception(
-            fortRunSideFamiliesHostForState(state),
-            breakerId,
-          )
-        ) {
-          startAardvarkInterceptionChoice(
-            fortRunSideFamiliesHostForState(state),
-            breakerId,
-            "pump_breaker",
-            legalAction,
-          );
-          return;
-        }
-        if (
-          breakerId &&
-          pumpDurationForLegalAction(state, legalAction) === "current_run" &&
-          state.run
-        ) {
-          const run = mustRun(state);
-          const previous = runRemainderStrengthBonusForBreaker(run, breakerId);
-          run.remainderStrengthBonusByBreaker = {
-            ...(run.remainderStrengthBonusByBreaker ?? {}),
-            [breakerId]: previous + pumpAmount,
-          };
-          legalAction.payload = {
-            ...(legalAction.payload ?? {}),
-            runRemainderStrengthBonusApplied: true,
-            runRemainderStrengthBonusAfter: previous + pumpAmount,
-          };
-          if (pumpAbility?.onUseEndRun) finishRun(state, false, legalAction);
-          return;
-        }
-        if (breakerId && isVariablePump) {
-          executeEffectCommands(state, [
-            { type: "change_breaker_strength", breakerId, amount: pumpAmount },
-          ]);
-          addRunnerFutureActionDebt(state, pumpAmount);
-          const pendingDebt = Math.max(
-            0,
-            Math.floor(
-              ensureRunnerTurnFlags(state).forgoNextActionsPending ?? 0,
-            ),
-          );
-          legalAction.payload = {
-            ...(legalAction.payload ?? {}),
-            v1922RunnerProgramAbility:
-              "japanese_water_torture_future_action_debt",
-            futureActionDebtAdded: pumpAmount,
-            futureActionDebtPending: pendingDebt,
-            breakerStrengthAfter:
-              (definitionFor(state, breakerId).strength ?? 0) +
-              mustInstance(state.cardInstances, breakerId).strengthModifier,
-          };
-          if (pumpAbility?.onUseEndRun) finishRun(state, false, legalAction);
-          return;
-        }
-        executeEffectCommands(state, [
-          {
-            type: "change_breaker_strength",
-            breakerId: String(legalAction.payload?.breakerId),
-            amount: pumpAmount,
-          },
-        ]);
-        if (breakerId && pumpAbility?.onUseEndRun) finishRun(state, false, legalAction);
-      }
-      return;
-    case "break_subroutine": {
-      const breakerId =
-        typeof legalAction.payload?.breakerId === "string"
-          ? (String(legalAction.payload.breakerId) as CardInstanceId)
-          : undefined;
-      const breakAbility = breakAbilityForLegalAction(state, legalAction);
-      if (
-        breakerId &&
-        (breakAbility?.count ?? 1) > 1 &&
-        typeof legalAction.payload?.subroutineIndexes === "string"
-      ) {
-        resolveMultiBreakSubroutinesAction(state, breakerId, legalAction);
-        recordBartmossEncounterUsage(state, breakerId);
-        recordDupreBreakUsage(runEndCleanupHost(state), breakerId);
-        recordSnowballBreakUsage(state, breakerId);
-        if (breakAbility?.onUseEndRun) finishRun(state, false, legalAction);
-        return;
-      }
-      if (!state.run?.encounteredIceId)
-        throw new Error("Subroutine kann nur im ICE-Encounter gebrochen werden.");
-      if (state.run.noBreakSubroutinesActive)
-        throw new Error("Subroutinen koennen in diesem Encounter nicht gebrochen werden.");
-      const iceDefinition = definitionFor(state, state.run.encounteredIceId);
-      const currentSubroutine = assertCurrentSubroutineMatchesLegalAction(
-        state,
-        iceDefinition,
-        Number(legalAction.payload?.subroutineIndex),
+      handleRunnerBreakerActionExecution(
+        runnerBreakerActionExecutionHost(state),
         legalAction,
       );
-      assertBreakSubroutineCostQuoteValid(
-        state,
-        breakerId,
-        legalAction,
-        currentSubroutine,
-      );
-      spendRunnerRunCredits(
-        runDurationPaymentHost(state),
-        legalAction.costs[0]?.credits ?? 1,
-        breakerId,
-      );
-      if (
-        breakerId &&
-        shouldOpenAardvarkInterception(
-          fortRunSideFamiliesHostForState(state),
-          breakerId,
-        )
-      ) {
-        startAardvarkInterceptionChoice(
-          fortRunSideFamiliesHostForState(state),
-          breakerId,
-          "break_subroutine",
-          legalAction,
-        );
-        return;
-      }
-      if (breakerId) {
-        if (breakAbility?.special === "blink_random_break_or_net_damage") {
-          resolveBlinkBreakSubroutineAction(
-            state,
-            breakerId,
-            Number(legalAction.payload?.subroutineIndex),
-            legalAction,
-          );
-          if (breakAbility.onUseEndRun) finishRun(state, false, legalAction);
-          return;
-        }
-      }
-      executeEffectCommands(state, [
-        {
-          type: "break_subroutine",
-          subroutineIndex: Number(legalAction.payload?.subroutineIndex),
-        },
-      ]);
-      if (breakerId) {
-        applyPostBreakStealthLoss(
-          fortRunSideFamiliesHostForState(state),
-          breakerId,
-          legalAction,
-        );
-        recordBartmossEncounterUsage(state, breakerId);
-        recordDupreBreakUsage(runEndCleanupHost(state), breakerId);
-        recordSnowballBreakUsage(state, breakerId);
-        if (breakAbility?.onUseEndRun) finishRun(state, false, legalAction);
-      }
       return;
-    }
+    case "break_subroutine":
+      handleRunnerBreakerActionExecution(
+        runnerBreakerActionExecutionHost(state),
+        legalAction,
+      );
+      return;
     case "continue_run":
       if (handleRunMovementAction(runMovementHostForState(state), legalAction).handled)
         return;
@@ -10124,6 +9965,108 @@ function encounterPrintedNonTraceHostForState(
 
 function runEndCleanupHost(state: GameState): RunEndCleanupHost {
   return runFlow.runEndCleanupHost(state);
+}
+
+function runnerBreakerActionExecutionHost(
+  state: GameState,
+): RunnerBreakerActionExecutionHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+    },
+    run: {
+      currentRun: () => mustRun(state),
+      runRemainderStrengthBonusForBreaker,
+      finishRun: (successful, legalAction) => finishRun(state, successful, legalAction),
+    },
+    breaker: {
+      pumpAbilityForLegalAction: (legalAction) =>
+        pumpAbilityForLegalAction(state, legalAction),
+      pumpAmountForLegalAction: (legalAction) =>
+        pumpAmountForLegalAction(state, legalAction),
+      pumpDurationForLegalAction: (legalAction) =>
+        pumpDurationForLegalAction(state, legalAction),
+      breakAbilityForLegalAction: (legalAction) =>
+        breakAbilityForLegalAction(state, legalAction),
+      assertCurrentSubroutineMatchesLegalAction: (
+        iceDefinition,
+        subroutineIndex,
+        legalAction,
+      ) =>
+        assertCurrentSubroutineMatchesLegalAction(
+          state,
+          iceDefinition,
+          subroutineIndex,
+          legalAction,
+        ),
+      assertBreakSubroutineCostQuoteValid: (
+        breakerId,
+        legalAction,
+        subroutine,
+      ) =>
+        assertBreakSubroutineCostQuoteValid(
+          state,
+          breakerId,
+          legalAction,
+          subroutine,
+        ),
+      resolveMultiBreakSubroutinesAction: (breakerId, legalAction) =>
+        resolveMultiBreakSubroutinesAction(state, breakerId, legalAction),
+      resolveBlinkBreakSubroutineAction: (
+        breakerId,
+        subroutineIndex,
+        legalAction,
+      ) =>
+        resolveBlinkBreakSubroutineAction(
+          state,
+          breakerId,
+          subroutineIndex,
+          legalAction,
+        ),
+    },
+    payment: {
+      spendRunnerRunCredits: (amount, breakerId) =>
+        spendRunnerRunCredits(runDurationPaymentHost(state), amount, breakerId),
+    },
+    fort: {
+      shouldOpenAardvarkInterception: (breakerId) =>
+        shouldOpenAardvarkInterception(
+          fortRunSideFamiliesHostForState(state),
+          breakerId,
+        ),
+      startAardvarkInterceptionChoice: (breakerId, actionType, legalAction) =>
+        startAardvarkInterceptionChoice(
+          fortRunSideFamiliesHostForState(state),
+          breakerId,
+          actionType,
+          legalAction,
+        ),
+      applyPostBreakStealthLoss: (breakerId, legalAction) =>
+        applyPostBreakStealthLoss(
+          fortRunSideFamiliesHostForState(state),
+          breakerId,
+          legalAction,
+        ),
+    },
+    effects: {
+      executeEffectCommands: (commands) => executeEffectCommands(state, commands),
+      addRunnerFutureActionDebt: (amount) =>
+        addRunnerFutureActionDebt(state, amount),
+    },
+    turn: {
+      ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
+    },
+    tracking: {
+      recordBartmossEncounterUsage: (breakerId) =>
+        recordBartmossEncounterUsage(state, breakerId),
+      recordDupreBreakUsage: (breakerId) =>
+        recordDupreBreakUsage(runEndCleanupHost(state), breakerId),
+      recordSnowballBreakUsage: (breakerId) =>
+        recordSnowballBreakUsage(state, breakerId),
+    },
+  };
 }
 
 function breachStateHost(state: GameState): BreachStateHost {
