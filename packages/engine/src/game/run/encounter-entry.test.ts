@@ -146,6 +146,7 @@ function makeState(
 function definitionsFor(state: GameState): Record<string, CardDefinition> {
   const definitions: Record<string, CardDefinition> = {
     simple_ice: definition("simple_ice"),
+    simple_sentry: definition("simple_sentry", { subtypes: ["sentry"] }),
     simple_upgrade: definition("simple_upgrade", {
       title: "Simple Upgrade",
       type: "upgrade",
@@ -197,6 +198,8 @@ function hostFor(
           ...state.runner.rig.hardware,
           ...state.runner.rig.resources,
         ],
+        effectiveSubtypesForCard: (_cardId, definition) =>
+          definition.subtypes ?? [],
       },
       servers: {
         mustServer: (serverId) => {
@@ -270,6 +273,37 @@ describe("encounter entry", () => {
     });
     expect(state.timingPoint).toBe("run.encounter_ice");
     expect(state.activeSide).toBe("runner");
+  });
+
+  it("binds pending next-sentry free breaks only to the next encountered ICE", () => {
+    const sentryState = makeState({ iceDefinitionId: "simple_sentry" });
+    sentryState.run!.nextSentryFreeBreakByBreaker = {
+      bulldozer: "previous_wall",
+    };
+    beginEncounter(hostFor(sentryState).host, "ice_1" as CardInstanceId);
+    expect(
+      sentryState.run?.nextSentryFreeBreakTargetIceByBreaker?.bulldozer,
+    ).toBe("ice_1");
+
+    const nonSentryState = makeState({ iceDefinitionId: "simple_ice" });
+    nonSentryState.run!.nextSentryFreeBreakByBreaker = {
+      bulldozer: "previous_wall",
+    };
+    beginEncounter(hostFor(nonSentryState).host, "ice_1" as CardInstanceId);
+    expect(nonSentryState.run?.nextSentryFreeBreakByBreaker).toBeUndefined();
+    expect(
+      nonSentryState.run?.nextSentryFreeBreakTargetIceByBreaker,
+    ).toBeUndefined();
+
+    const laterSentryState = makeState({ iceDefinitionId: "simple_sentry" });
+    laterSentryState.run!.nextSentryFreeBreakByBreaker = {
+      bulldozer: "previous_wall",
+    };
+    laterSentryState.run!.nextSentryFreeBreakTargetIceByBreaker = {
+      bulldozer: "old_sentry",
+    };
+    beginEncounter(hostFor(laterSentryState).host, "ice_1" as CardInstanceId);
+    expect(laterSentryState.run?.nextSentryFreeBreakByBreaker).toBeUndefined();
   });
 
   it("sets Pocket Virtual Reality encounter trace credits without running cleanup", () => {

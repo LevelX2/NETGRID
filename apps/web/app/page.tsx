@@ -13333,11 +13333,13 @@ function CardView({
   const advancementCount = advancementDisplay?.amount ?? 0;
   const advancementLabel = advancementDisplay?.ariaLabel ?? null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
+  const tapped = card.known && card.tapped === true && !preview && !forceCardBack;
   const scoreStateBadges = explicitScoreStateBadges.length > 0 ? explicitScoreStateBadges : showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const renderedCounterDisplays = preview ? [] : counterDisplaysForRendering(card);
   const counterAriaSuffix = renderedCounterDisplays.map((display) => display.ariaLabel).filter(Boolean).join(", ");
   const scoreStateAriaSuffix = scoreStateBadges.map((badge) => `${badge.value}: ${badge.label}`).join(", ");
-  const cardStateAriaText = [counterAriaSuffix, scoreStateAriaSuffix].filter(Boolean).join(", ");
+  const tappedAriaSuffix = tapped ? "getappt" : "";
+  const cardStateAriaText = [tappedAriaSuffix, counterAriaSuffix, scoreStateAriaSuffix].filter(Boolean).join(", ");
   const cardStateAria = cardStateAriaText ? `, ${cardStateAriaText}` : "";
   const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
@@ -13662,7 +13664,7 @@ function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${tapped ? " tappedCard" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -13745,6 +13747,11 @@ function CardView({
           <span className="cardInactiveZoneBadge" aria-hidden="true">
             {inactiveZone === "heap" ? <Trash2 size={10} strokeWidth={2.4} /> : <Clipboard size={10} strokeWidth={2.4} />}
             <span>{inactiveZoneBadge}</span>
+          </span>
+        ) : null}
+        {tapped ? (
+          <span className="cardTappedBadge" aria-hidden="true">
+            Getappt
           </span>
         ) : null}
         {modifierBadges.length > 0 ? <IceModifierBadges badges={modifierBadges} /> : null}

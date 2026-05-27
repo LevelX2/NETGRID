@@ -119,8 +119,6 @@ export function handleTriggerAbilityExecution(
   if (legalAction.payload?.runnerAbility === "change_icebreaker_subtype") {
     if (legalAction.side !== "runner")
       throw new Error("Nur der Runner darf den Icebreaker-Typ ändern.");
-    if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
-      throw new Error("Der Icebreaker-Typ kann nur im Runner-Zug geändert werden.");
     const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
     if (!state.runner.rig.programs.includes(sourceCardId))
       throw new Error("Der Icebreaker ist nicht installiert.");
@@ -131,8 +129,24 @@ export function handleTriggerAbilityExecution(
     const selectedSubtype = String(legalAction.payload?.selectedSubtype ?? "");
     if (!change || !change.choices.includes(selectedSubtype))
       throw new Error("Der gewählte Icebreaker-Typ ist nicht gültig.");
-    host.actions.spendClick(state, "runner");
-    host.credits.spend(state, "runner", change.cost.credits);
+    if (
+      change.timing === "runner_main" &&
+      (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
+    )
+      throw new Error("Der Icebreaker-Typ kann nur im Runner-Zug geändert werden.");
+    if (
+      change.timing === "during_run" &&
+      (!state.run || state.run.phase !== "encounter_ice" || state.activeSide !== "runner")
+    )
+      throw new Error("Der Icebreaker-Typ kann nur im Encounter geändert werden.");
+    if (
+      change.limit === "once_until_selected" &&
+      state.cardInstances[sourceCardId]?.selectedSubtype
+    )
+      throw new Error("Der Icebreaker-Typ wurde bereits gewählt.");
+    if (change.cost.clicks > 0) host.actions.spendClick(state, "runner");
+    if (change.cost.credits > 0)
+      host.credits.spend(state, "runner", change.cost.credits);
     state.cardInstances[sourceCardId] = {
       ...state.cardInstances[sourceCardId]!,
       selectedSubtype,
@@ -165,9 +179,17 @@ export function handleTriggerAbilityExecution(
         host.cards.definitionFor(state, sourceCardId).id,
       )?.runnerRunStrengthBoost;
     if (!boost) throw new Error("Die Support-Quelle hat keine Run-Verstärkung.");
+    if (state.cardInstances[sourceCardId]?.tapped)
+      throw new Error("Die Support-Quelle ist bereits getappt.");
     const used = state.run.runStrengthBoostUsedSourceIds ?? [];
     if (used.includes(sourceCardId))
       throw new Error("Diese Support-Quelle wurde in diesem Run bereits genutzt.");
+    if (boost.cost?.tap) {
+      state.cardInstances[sourceCardId] = {
+        ...state.cardInstances[sourceCardId]!,
+        tapped: true,
+      };
+    }
     state.run.runStrengthBoostUsedSourceIds = [...used, sourceCardId].sort();
     state.run.remainderStrengthBonusByBreaker = {
       ...(state.run.remainderStrengthBonusByBreaker ?? {}),

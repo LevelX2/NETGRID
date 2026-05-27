@@ -4,10 +4,11 @@ import type { CardImplementationDefinition } from "../../../types";
 // text: [0]: Choose Code Gates, Sentries, or Walls. Fubar breaks only the chosen type. [1]: Break a subroutine of that type. [2]: +1 strength. Whenever you break a subroutine with Fubar, lose [1] from a stealth card.
 export const proteusFubarImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_proteus_088_fubar",
-  installTargetBinding: {
-    kind: "choose_icebreaker_subtype_on_install",
-    stores: "selectedSubtype",
+  icebreakerSubtypeChange: {
+    timing: "during_run",
+    cost: { clicks: 0, credits: 0 },
     choices: ["code_gate", "sentry", "wall"],
+    limit: "once_until_selected",
     visibility: "public",
   },
   icebreakerAbilities: [

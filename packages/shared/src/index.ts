@@ -791,6 +791,7 @@ export type CardInstance = {
   advancementCounters: number;
   strengthModifier: number;
   counters?: Partial<Record<CounterType, number>>;
+  tapped?: boolean;
   hostedOn?: CardInstanceId;
   selectedServerId?: Exclude<ServerId, "new_remote">;
   selectedCardId?: CardInstanceId;
@@ -977,6 +978,9 @@ export type RunState = {
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
   nextSentryFreeBreakByBreaker?: Partial<Record<CardInstanceId, CardInstanceId>>;
+  nextSentryFreeBreakTargetIceByBreaker?: Partial<
+    Record<CardInstanceId, CardInstanceId>
+  >;
   fullyBrokenPassedIcePendingId?: CardInstanceId;
   startupImmolatorPendingPassedIceId?: CardInstanceId;
   forceJackOutAfterEncounterSourceId?: CardInstanceId;
@@ -1409,6 +1413,7 @@ export type VisibleCard = {
   trashCost?: number;
   counters?: Partial<Record<CounterType, number>>;
   counterDisplays?: CounterDisplay[];
+  tapped?: boolean;
   hostedOn?: CardInstanceId;
   selectedServerId?: Exclude<ServerId, "new_remote">;
   selectedServerLabel?: string;

@@ -49,11 +49,11 @@ PRO009 ist vollständig umgesetzt. Es wurde je eine CardImplementation-Datei fü
 
 ## Ergänzte generische Bausteine
 
-- Source-bound Install-Choice-State für ein installiertes ICE-Ziel und für initiale Icebreaker-Subtype-Wahlen.
+- Source-bound Install-Choice-State für ein installiertes ICE-Ziel und für initiale Icebreaker-Subtype-Wahlen; `Fubar` nutzt nach PRO009-1 stattdessen eine einmalige Encounter-Subtype-Wahl.
 - Selected-subtype Breaker-Matcher mit Revalidierung in LegalActions und `applyAction`.
 - Source-bound Encounter-Strength-Modifikator für genau das gewählte Black-Widow-ICE.
-- Rungebundener Bulldozer-Followup-Flag für den nächsten Sentry-Break, inklusive Nutzung und Run-Ende-Cleanup.
-- Rungebundener Lockjaw-Strength-Boost für genau einen eigenen installierten Icebreaker.
+- Rungebundener Bulldozer-Followup-Flag für den nächsten Sentry-Break, nach PRO009-1 exakt an die nächste ICE-Begegnung gebunden.
+- Rungebundener Lockjaw-Strength-Boost für genau einen eigenen installierten Icebreaker, nach PRO009-1 mit generischem Tap-/Runner-Zugbeginn-Untap-State.
 - Gezielter permanenter Icebreaker-Strength-Counter für `Personal Touch, The`.
 - Gehostete Programmbeschränkung für ein Icebreaker-Programm und hostgebundene Restricted-Hosted-Credit-Zahlung für `Eurocorpse (TM) Spin Chip`.
 

@@ -136,6 +136,35 @@ export function buildRunnerEncounterActions(
     if (run.prohibitNoisyIcebreakers && breaker.subtypes.includes("noisy"))
       continue;
     if (!host.run.canUseBreakerOnCurrentFort(breakerId)) continue;
+    const subtypeChange =
+      cardImplementationForDefinitionId(breaker.id)?.icebreakerSubtypeChange;
+    if (
+      subtypeChange?.timing === "during_run" &&
+      !(
+        subtypeChange.limit === "once_until_selected" &&
+        host.cards.cardInstanceFor(breakerId).selectedSubtype
+      )
+    ) {
+      for (const subtype of subtypeChange.choices) {
+        if (host.payment.availableRunnerRunCredits(breakerId) < subtypeChange.cost.credits)
+          continue;
+        actions.push(
+          host.actions.buildLegalAction(
+            "trigger_ability",
+            `${breaker.title}: ${icebreakerSubtypeLabel(subtype)} wählen`,
+            breakerId,
+            subtypeChange.cost.credits > 0
+              ? [{ credits: subtypeChange.cost.credits }]
+              : [],
+            {
+              cardId: breakerId,
+              runnerAbility: "change_icebreaker_subtype",
+              selectedSubtype: subtype,
+            },
+          ),
+        );
+      }
+    }
     const breakerBaseStrength =
       typeof run.aiBoonRunStrengthByBreaker?.[breakerId] === "number"
         ? run.aiBoonRunStrengthByBreaker[breakerId]
@@ -415,6 +444,19 @@ export function buildRunnerEncounterActions(
   };
 }
 
+function icebreakerSubtypeLabel(subtype: string): string {
+  switch (subtype) {
+    case "code_gate":
+      return "Code Gate";
+    case "sentry":
+      return "Sentry";
+    case "wall":
+      return "Wall";
+    default:
+      return subtype;
+  }
+}
+
 function nextSentryFreeBreakActions(
   host: RunnerEncounterActionHost,
   breakerId: CardInstanceId,
@@ -426,6 +468,8 @@ function nextSentryFreeBreakActions(
 ): LegalAction[] {
   const run = host.run.currentRun();
   if (run.nextSentryFreeBreakByBreaker?.[breakerId] === undefined) return [];
+  if (run.nextSentryFreeBreakTargetIceByBreaker?.[breakerId] !== encounteredIceId)
+    return [];
   if (!encounteredIceSubtypes.includes("sentry")) return [];
   return subroutines.flatMap((subroutine, index) => {
     if (

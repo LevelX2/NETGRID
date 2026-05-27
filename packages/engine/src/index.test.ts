@@ -1040,7 +1040,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     return state;
   }
 
-  it("requires install choices for Black Widow, Fubar, and Morphing Tool", () => {
+  it("requires install choices for Black Widow and Morphing Tool, while Fubar chooses once after install", () => {
     let state = runnerMain("proteus-pro009-install-choices");
     const targetIceId = putCorpIceOnServer(state, "rd", "onr_v1_245_fire-wall");
 
@@ -1052,12 +1052,29 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     state = blackWidow.state;
     expect(state.cardInstances[blackWidow.cardId]?.selectedCardId).toBe(targetIceId);
 
-    const fubar = installFromGrip(
-      state,
-      "onr_proteus_088_fubar",
-      (action) => action.payload?.selectedSubtype === "sentry",
-    );
+    const fubar = installFromGrip(state, "onr_proteus_088_fubar");
     state = fubar.state;
+    expect(state.cardInstances[fubar.cardId]?.selectedSubtype).toBeUndefined();
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.cardId === fubar.cardId &&
+          action.payload?.runnerAbility === "change_icebreaker_subtype",
+      ),
+    ).toBe(false);
+    state = setEncounter(state, targetIceId);
+    const fubarChoice = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.cardId === fubar.cardId &&
+        action.payload?.runnerAbility === "change_icebreaker_subtype" &&
+        action.payload?.selectedSubtype === "sentry",
+    );
+    expect(fubarChoice.costs).toEqual([]);
+    state = apply(state, "runner", (action) => action.actionId === fubarChoice.actionId);
     expect(state.cardInstances[fubar.cardId]?.selectedSubtype).toBe("sentry");
     expect(
       getLegalActions(state, "runner").some(
@@ -1067,6 +1084,10 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
           action.payload?.runnerAbility === "change_icebreaker_subtype",
       ),
     ).toBe(false);
+    delete state.run;
+    state.timingPoint = "runner_action.main";
+    state.phase = "runner_action_phase";
+    state.activeSide = "runner";
 
     const morphing = installFromGrip(
       state,
@@ -1104,9 +1125,17 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     const fubar = installFromGrip(
       state,
       "onr_proteus_088_fubar",
-      (action) => action.payload?.selectedSubtype === "sentry",
     );
     state = fubar.state;
+    state = setEncounter(state, sentryId);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.cardId === fubar.cardId &&
+        action.payload?.selectedSubtype === "sentry",
+    );
     state.cardInstances[fubar.cardId]!.strengthModifier = 10;
     state = setEncounter(state, wallId);
     expect(
@@ -1195,6 +1224,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     expect(state.run?.nextSentryFreeBreakByBreaker?.[bulldozerId]).toBe(wallId);
     state = setEncounter(state, sentryId);
     state.run!.nextSentryFreeBreakByBreaker = { [bulldozerId]: wallId };
+    state.run!.nextSentryFreeBreakTargetIceByBreaker = { [bulldozerId]: sentryId };
     const freeBreak = mustAction(
       state,
       "runner",
@@ -1206,6 +1236,10 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     state = apply(state, "runner", (action) => action.actionId === freeBreak.actionId);
     expect(state.run?.brokenSubroutineIndexes).toContain(0);
     expect(state.run?.nextSentryFreeBreakByBreaker?.[bulldozerId]).toBeUndefined();
+    expect(
+      state.run?.nextSentryFreeBreakTargetIceByBreaker?.[bulldozerId],
+    ).toBeUndefined();
+
   });
 
   it("applies Lockjaw and Personal Touch only to selected icebreakers", () => {
@@ -1238,10 +1272,40 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         action.payload?.targetCardId === targetId,
     );
     state = apply(state, "runner", (action) => action.actionId === lockjaw.actionId);
+    expect(state.cardInstances[lockjawId]?.tapped).toBe(true);
     expect(state.run?.remainderStrengthBonusByBreaker?.[targetId]).toBe(2);
     expect(state.run?.remainderStrengthBonusByBreaker?.[otherId]).toBeUndefined();
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.run).toBeUndefined();
+    state = setEncounter(
+      state,
+      addRezzedCorpIceForTest(state, "onr_v1_245_fire-wall", "rd", "second_wall"),
+    );
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.cardId === lockjawId,
+      ),
+    ).toBe(false);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.maxHandSize = 100;
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.cardInstances[lockjawId]?.tapped).toBe(false);
+    state = setEncounter(
+      state,
+      addRezzedCorpIceForTest(state, "onr_v1_245_fire-wall", "rd", "third_wall"),
+    );
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.cardId === lockjawId &&
+          action.payload?.targetCardId === targetId,
+      ),
+    ).toBe(true);
 
     state = runnerMain("proteus-pro009-personal-touch");
     const breakerId = addInstalledRunnerProgramForTest(

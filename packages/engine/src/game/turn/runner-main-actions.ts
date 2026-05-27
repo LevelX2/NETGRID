@@ -364,11 +364,24 @@ export function buildRunnerMainActions(
     const sourceDefinition = definitionFor(state, sourceCardId);
     const subtypeChange =
       cardImplementationForDefinitionId(sourceDefinition.id)?.icebreakerSubtypeChange;
-    if (!subtypeChange || !hasClicks) continue;
+    if (!subtypeChange || subtypeChange.timing !== "runner_main") continue;
+    const clickCost = subtypeChange.cost.clicks;
+    if (clickCost > 0 && !hasClicks) continue;
     const currentSubtype = state.cardInstances[sourceCardId]?.selectedSubtype;
+    if (subtypeChange.limit === "once_until_selected" && currentSubtype)
+      continue;
     for (const subtype of subtypeChange.choices) {
       if (subtype === currentSubtype) continue;
       if (state.runner.credits < subtypeChange.cost.credits) continue;
+      const costs =
+        clickCost > 0 || subtypeChange.cost.credits > 0
+          ? [
+              {
+                clicks: clickCost,
+                credits: subtypeChange.cost.credits,
+              },
+            ]
+          : [];
       actions.push(
         action(
           state,
@@ -376,12 +389,7 @@ export function buildRunnerMainActions(
           "trigger_ability",
           `${sourceDefinition.title}: ${icebreakerSubtypeLabel(subtype)} wählen`,
           sourceCardId,
-          [
-            {
-              clicks: subtypeChange.cost.clicks,
-              credits: subtypeChange.cost.credits,
-            },
-          ],
+          costs,
           {
             cardId: sourceCardId,
             runnerAbility: "change_icebreaker_subtype",

@@ -5019,6 +5019,8 @@ function resolveNextSentryFreeBreakAction(
     throw new Error("Der Icebreaker ist nicht installiert.");
   if (!run.nextSentryFreeBreakByBreaker?.[breakerId])
     throw new Error("Es gibt keinen offenen Free-Break-Effekt.");
+  if (run.nextSentryFreeBreakTargetIceByBreaker?.[breakerId] !== run.encounteredIceId)
+    throw new Error("Der Free-Break-Effekt gilt nur für das nächste ICE.");
   const iceDefinition = definitionFor(state, run.encounteredIceId);
   if (
     !effectiveSubtypesForCard(state, run.encounteredIceId, iceDefinition).includes(
@@ -5035,9 +5037,16 @@ function resolveNextSentryFreeBreakAction(
     throw new Error("Free-Break-Kosten sind nicht mehr gueltig.");
   executeEffectCommands(state, [{ type: "break_subroutine", subroutineIndex }]);
   const pending = { ...(run.nextSentryFreeBreakByBreaker ?? {}) };
+  const targetPending = { ...(run.nextSentryFreeBreakTargetIceByBreaker ?? {}) };
   delete pending[breakerId];
-  if (Object.keys(pending).length > 0) run.nextSentryFreeBreakByBreaker = pending;
-  else delete run.nextSentryFreeBreakByBreaker;
+  delete targetPending[breakerId];
+  if (Object.keys(pending).length > 0) {
+    run.nextSentryFreeBreakByBreaker = pending;
+    run.nextSentryFreeBreakTargetIceByBreaker = targetPending;
+  } else {
+    delete run.nextSentryFreeBreakByBreaker;
+    delete run.nextSentryFreeBreakTargetIceByBreaker;
+  }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     nextSentryFreeBreakConsumed: true,
@@ -7220,7 +7229,16 @@ function startRunnerTurn(
   consumeRunnerFutureActionDebt(state);
   resolveBizarreEncryptionDelayedAgendas(state, effects);
   refreshRecurringCredits(state, "runner", effects);
+  untapRunnerCardsAtTurnStart(state);
   applyRunnerStartOfTurnEffects(state, effects);
+}
+
+function untapRunnerCardsAtTurnStart(state: GameState): void {
+  for (const cardId of runnerInstalledCardIds(state)) {
+    const instance = state.cardInstances[cardId];
+    if (!instance?.tapped) continue;
+    state.cardInstances[cardId] = { ...instance, tapped: false };
+  }
 }
 
 function resolveBizarreEncryptionDelayedAgendas(
@@ -10393,6 +10411,8 @@ function encounterEntryHostForState(state: GameState): EncounterEntryHost {
       definitionFor: (cardId) => definitionFor(state, cardId),
       cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
       runnerInstalledCardIds: () => runnerInstalledCardIds(state),
+      effectiveSubtypesForCard: (cardId, definition) =>
+        effectiveSubtypesForCard(state, cardId, definition),
     },
     servers: {
       mustServer: (serverId) => mustServer(state, serverId),

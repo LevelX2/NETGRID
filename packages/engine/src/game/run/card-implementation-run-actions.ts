@@ -58,7 +58,11 @@ export function buildRunnerDuringRunCardImplementationActions(
     const boost =
       host.cards.cardImplementationForDefinitionId?.(definition.id)
         ?.runnerRunStrengthBoost;
-    if (!boost || host.state.run.runStrengthBoostUsedSourceIds?.includes(cardId))
+    if (
+      !boost ||
+      host.state.cardInstances[cardId]?.tapped ||
+      host.state.run.runStrengthBoostUsedSourceIds?.includes(cardId)
+    )
       continue;
     for (const targetCardId of host.state.runner.rig.programs.slice().sort()) {
       const targetDefinition = host.cards.definitionFor(targetCardId);
