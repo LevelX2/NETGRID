@@ -61,6 +61,20 @@ import {
   type PendingChoiceResolutionHost,
 } from "./game/choices/pending-choice-resolution";
 import { selectedChoiceIds } from "./game/choices/choice-validation";
+import {
+  corpInstalledCardIds,
+  corpRootAssetIdsInServer,
+  corpRootMainCardIdsInServer,
+  definitionFor,
+  mustInstance,
+  mustRun,
+  mustServer,
+  publicInstalledCorpCardIdentityKnown,
+  rezzedRootCardIdOnServer,
+  runnerInstalledCardIds,
+  scoredCorpAgendaIds,
+  unrezzedRootCardIdOnServer,
+} from "./game/state/card-server-lookup";
 export {
   getLegalActions,
   legalActionsFor,
@@ -2525,21 +2539,6 @@ function isUniqueCard(definition: CardDefinition): boolean {
   );
 }
 
-function runnerInstalledCardIds(state: GameState): CardInstanceId[] {
-  return [
-    ...state.runner.rig.programs,
-    ...state.runner.rig.hardware,
-    ...state.runner.rig.resources,
-  ];
-}
-
-function corpInstalledCardIds(state: GameState): CardInstanceId[] {
-  const installed: CardInstanceId[] = [];
-  for (const server of state.corp.servers)
-    installed.push(...server.root, ...server.ice);
-  return installed;
-}
-
 function rezzedBlackIceIds(state: GameState): CardInstanceId[] {
   return corpInstalledCardIds(state).filter((cardId) => {
     const instance = mustInstance(state.cardInstances, cardId);
@@ -2730,10 +2729,6 @@ function visibleVirusCounterTargetIds(state: GameState): CardInstanceId[] {
     if (cardCounter(state, cardId, "virus") > 0) targets.add(cardId);
   }
   return [...targets];
-}
-
-function scoredCorpAgendaIds(state: GameState): CardInstanceId[] {
-  return state.corp.scoreArea.slice();
 }
 
 function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
@@ -3154,40 +3149,6 @@ function assertCorpIceInstallCostValid(
   if ((legalAction.costs[0]?.credits ?? 0) !== quote.finalCredits)
     throw new Error("Corp-ICE-Installkosten sind nicht mehr gueltig.");
   return quote;
-}
-
-function rezzedRootCardIdOnServer(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-  definitionId: CardDefinitionId,
-): CardInstanceId | undefined {
-  const server = mustServer(state, serverId);
-  return server.root
-    .slice()
-    .sort()
-    .find((cardId) => {
-      const instance = mustInstance(state.cardInstances, cardId);
-      return (
-        instance.rezzed && definitionFor(state, cardId).id === definitionId
-      );
-    });
-}
-
-function unrezzedRootCardIdOnServer(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-  definitionId: CardDefinitionId,
-): CardInstanceId | undefined {
-  const server = mustServer(state, serverId);
-  return server.root
-    .slice()
-    .sort()
-    .find((cardId) => {
-      const instance = mustInstance(state.cardInstances, cardId);
-      return (
-        !instance.rezzed && definitionFor(state, cardId).id === definitionId
-      );
-    });
 }
 
 function specialZoneHarnessActions(
@@ -4837,27 +4798,6 @@ function corpRootAgendaOrNodeCapacityInServer(
       );
     }, 0)
   );
-}
-
-function corpRootAssetIdsInServer(
-  state: GameState,
-  server: CorpServer,
-): CardInstanceId[] {
-  return server.root
-    .filter((id) => definitionFor(state, id).type === "asset")
-    .sort();
-}
-
-function corpRootMainCardIdsInServer(
-  state: GameState,
-  server: CorpServer,
-): CardInstanceId[] {
-  return server.root
-    .filter((id) => {
-      const installedType = definitionFor(state, id).type;
-      return installedType === "agenda" || installedType === "asset";
-    })
-    .sort();
 }
 
 function corpRegionUpgradeIdsInServer(
@@ -13458,14 +13398,6 @@ function removeFromAllZones(state: GameState, cardId: string): void {
   if (wasRunnerRigCard) clearCardCounters(state, cardId);
 }
 
-function publicInstalledCorpCardIdentityKnown(
-  state: GameState,
-  cardId: CardInstanceId,
-): boolean {
-  const instance = state.cardInstances[cardId];
-  return instance?.faceup === true || instance?.rezzed === true;
-}
-
 function uninstallCorpInstalledCardToHq(
   state: GameState,
   cardId: CardInstanceId,
@@ -13614,34 +13546,6 @@ function cleanupEmptyRemotes(state: GameState): void {
       server.root.length > 0 ||
       state.run?.attackedServerId === server.id,
   );
-}
-
-function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
-  const instance = mustInstance(state.cardInstances, id);
-  const definition = DEMO_CARDS_BY_ID[instance.definitionId];
-  if (!definition)
-    throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
-  return definition;
-}
-
-function mustInstance(
-  source: Record<CardInstanceId, CardInstance>,
-  id: CardInstanceId,
-): CardInstance {
-  const instance = source[id];
-  if (!instance) throw new Error(`CardInstance fehlt: ${id}`);
-  return instance;
-}
-
-function mustRun(state: GameState): NonNullable<GameState["run"]> {
-  if (!state.run) throw new Error("Es läuft kein Run.");
-  return state.run;
-}
-
-function mustServer(state: GameState, id: string): CorpServer {
-  const server = state.corp.servers.find((candidate) => candidate.id === id);
-  if (!server) throw new Error(`Server fehlt: ${id}`);
-  return server;
 }
 
 function mustArrayValue<T>(values: T[], index: number, message: string): T {
