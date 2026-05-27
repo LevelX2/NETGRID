@@ -91,13 +91,9 @@ import {
   makeActionId,
 } from "./game/turn/action-builders";
 import {
-  buildCorpMainActions,
-  type CorpMainActionGenerationHost,
-} from "./game/turn/corp-main-actions";
-import {
-  buildRunnerMainActions,
-  type RunnerMainActionGenerationHost,
-} from "./game/turn/runner-main-actions";
+  createMainActionHostComposition,
+  type MainActionHostCompositionHost,
+} from "./game/turn/main-action-hosts";
 import {
   buildCorpDrawAction,
   buildCorpEndTurnAction,
@@ -1949,6 +1945,203 @@ function runnerDrawSummaryPublicPayload(
   };
 }
 
+const mainActionHostComposition = createMainActionHostComposition({
+  actions: {
+    buildLegalAction: action,
+    makeActionId,
+    buildEndTurnAction: buildCorpEndTurnAction,
+    buildForgoActionDebtAction: (state) =>
+      legalActionHostComposition.buildCorpForgoActionDebtAction(state),
+    buildPurgeableRunnerVirusPurgeAction: (state) =>
+      legalActionHostComposition.buildPurgeableRunnerVirusPurgeAction(state),
+    buildPurgeVirusAction: buildCorpPurgeVirusAction,
+    buildGainCreditAction: buildCorpGainCreditAction,
+    buildDrawAction: buildCorpDrawAction,
+    buildTrashNewDataFortCreationLockActions:
+      buildCorpTrashNewDataFortCreationLockActions,
+    buildNewRemoteIceInstallAction: buildCorpNewRemoteIceInstallAction,
+    buildServerIceInstallAction: buildCorpServerIceInstallAction,
+    buildNewRemoteRootInstallAction: buildCorpNewRemoteRootInstallAction,
+    buildServerRootInstallAction: buildCorpServerRootInstallAction,
+    buildRunnerEndTurnAction,
+    buildRunnerGainCreditAction,
+    buildRunnerRemoveTagAction,
+    buildRunnerDrawCardActions,
+    buildRunnerProgramInstallAction,
+    buildRunnerProgramTrashBeforeInstallAction,
+    buildRunnerZetatechOverlayInstallAction,
+    buildRunnerHostedProgramInstallAction,
+    buildRunnerAgendaPointInstallAction,
+    buildRunnerHardwareInstallAction,
+    buildRunnerSelectedServerInstallAction,
+    buildRunnerResourceInstallAction,
+    buildRunnerStackSearchProgramToGripAction,
+    buildRunnerValuPakInstallAction,
+    buildRunnerValuPakSequenceEndAction,
+    buildRunnerShellTradersSetAsideAction,
+    buildRunnerShellTradersRemoveCounterAction,
+  },
+  cards: {
+    definitionFor,
+    mustInstance,
+    isUniqueCard,
+    hasInstalledUniqueCardDefinition,
+    cardImplementationForDefinitionId,
+    rezzedCorpRootCardIds,
+    corpInstalledCardIds,
+    visibleVirusCounterTargetIds,
+  },
+  scored: {
+    effectiveAgendaDifficulty,
+    effectiveAgendaDifficultyDeps,
+    scoredAgendaKindForDefinition,
+    serverChoiceDisplayLabel,
+    scoredAgendaAbilityHost,
+    buildScoredAgendaAbilityActionsForCard,
+  },
+  counters: {
+    totalCounters,
+    purgeableRunnerVirusCounterTotal,
+    spyCountersForServer,
+    cardCounter,
+    runnerTraceCounterEffectDefinitions,
+    runnerCounterDisplayName,
+  },
+  corp: {
+    corpActionDebtPending,
+    acmeSavingsAndLoanObligationCount,
+    canPlayCorpOperation: (stateToRead, definition) =>
+      canPlayCorpOperation(corpOperationResolutionHost(stateToRead), definition),
+    cardImplementationOperationLegalActions: (stateToRead, cardId, definition) =>
+      cardImplementationOperationLegalActions(
+        corpOperationResolutionHost(stateToRead),
+        cardId,
+        definition,
+      ),
+    corpUtilityImplementationForDefinition,
+    powerGridOverloadLegalActions,
+    systematicLayoffsLegalActions,
+    corpAgendaPointTotal,
+    hasCorpUtilityKind,
+    uniqueDirectLongtailKindForDefinition,
+    corpInstalledEconomyActionProfileForDefinition,
+    corpInstalledEconomyActionPayload,
+  },
+  runner: {
+    isConcealedRunnerResource,
+    hiddenRunnerResourceSlotId,
+    ensureRunnerTurnFlags,
+    availableRunnerTagRemovalCredits,
+    availableRunnerProgramInstallCredits,
+    availableRunnerRunStartCredits,
+    runnerDrawActionContext,
+    runnerUtilityLongtailKindForCard,
+    uniqueDirectLongtailImplementationForCard,
+  },
+  run: {
+    activeWilsonSourceIds,
+    runDurationPaymentHost,
+    isRovingSubmarineRunBlocked,
+    fortRunSideFamiliesHostForState,
+    runStartTaxForServerUpgrades,
+    newsgroupTauntingRunStartTax,
+  },
+  install: {
+    corpNewDataFortCreationLocked,
+    corpIceInstallTotalCost,
+    canInstallCorpRootCardInServer,
+    isRegionUpgrade,
+    corpRegionUpgradeIdsInServer,
+    corpRootAgendaOrNodeCapacityInServer,
+    corpRootAssetIdsInServer,
+    corpRootMainCardIdsInServer,
+    isInstalledCorpCardAdvanceable,
+    shouldOfferRunnerProgramTrashBeforeInstall,
+    canOverlayProgramOnZetatechSoftwareInstaller,
+    canHostProgramOnDaemon,
+    cardImplementationAgendaPointInstallCost,
+    pickRunnerAgendaForAgendaPointCost,
+    requiresDataFortInstallTarget,
+  },
+  rez: {
+    rootInstallRezzesOnInstall,
+    rezCostForCard,
+    rezCostReductionSourceDefinitionIdsFor,
+    isAcmeSavingsAndLoanDefinition,
+  },
+  cardImplementation: {
+    corpTraceDamageAbilityHost,
+    corpSpecialDamageAbilityHost,
+    pushCorpTraceDamageOrCardImplementationActions,
+    buildCorpSpecialDamageAbilityActionsForCard,
+    runtimeDeps: cardImplementationRuntimeDeps,
+    cardImplementationForDefinitionId,
+    pushEndOfRunnerTurnActions: pushCardImplementationEndOfRunnerTurnActions,
+    canPlayPrintedCostOnPlayImplementation,
+    runnerEventResolver: cardImplementationRunnerEventResolver,
+    printedCostMakeRunEffect: printedCostCardImplementationMakeRunEffect,
+    pushActivatedActions: pushActivatedCardImplementationActions,
+  },
+  specialZones: {
+    specialZoneHarnessActions,
+    edgerunnerTempsInstallActionsRemaining,
+    valuPakProgramInstallActionsRemaining,
+    runnerInstallableProgramIdsForValuPak,
+    shellTradersPrepareTargetIds: (stateToRead) =>
+      shellTradersPrepareTargetIds(
+        runnerSpecialTriggerExecutionHost(stateToRead),
+      ),
+    shellTradersInstallCost,
+    shellTradersPreparedTargetIds: (stateToRead) =>
+      shellTradersPreparedTargetIds(
+        runnerSpecialTriggerExecutionHost(stateToRead),
+      ),
+  },
+  callbacks: {
+    mustServer,
+    serverChoiceDisplayLabel,
+    runnerMemoryLimit,
+    exposedCorpCardInServer,
+    topHostedProgramOnMicrotech: (stateToRead, cardId) =>
+      topHostedProgramOnMicrotech(runFortTriggerExecutionHost(stateToRead), cardId),
+    microtechHostedProgramIds: (stateToRead, cardId) =>
+      microtechHostedProgramIds(runFortTriggerExecutionHost(stateToRead), cardId),
+    topRunnerHeapCardId,
+    constants: {
+      CODE_VIRAL_CACHE_ID,
+      HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS,
+      HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
+      CORP_HQ_SHUFFLE_DRAW_CARD_ID,
+      COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
+      DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
+      COUNTER_UPGRADE_CARD_IDS,
+      TAG_CONDITION_UPGRADE_CARD_IDS,
+      COUNTER_ASSET_CARD_IDS,
+      INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID,
+      ACTION_ASSET_CARD_IDS,
+      SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
+      RUNNER_EVENT_RESOLVERS,
+      STACK_SEARCH_PROGRAM_CARD_IDS,
+      SELF_MODIFYING_CODE_ID,
+      SHORT_CIRCUIT_RESOURCE_CARD_ID,
+      AUJOURD_OUI_RESOURCE_CARD_ID,
+      SERVER_EXPOSE_PROGRAM_CARD_IDS,
+      STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
+      COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID,
+      FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
+      BOARDWALK_RANDOM_PROGRAM_CARD_ID,
+      MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
+      QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
+      STACK_TOP_REORDER_RESOURCE_CARD_ID,
+      JUNKYARD_BBS_ID,
+      SHELL_TRADERS_ID,
+      DANSHIS_SECOND_ID,
+      BODYWEIGHT_DATA_CRECHE_ID,
+      ALL_NIGHTER_ID,
+    },
+  },
+} satisfies MainActionHostCompositionHost);
+
 const legalActionHostComposition = configureLegalActionHostComposition({
   actions: {
     buildChoiceAction: choiceAction,
@@ -1959,8 +2152,10 @@ const legalActionHostComposition = configureLegalActionHostComposition({
     purgeableRunnerVirusCounterTotal,
   },
   hosts: {
-    corpMainActionGenerationHost,
-    runnerMainActionGenerationHost,
+    corpMainActionGenerationHost:
+      mainActionHostComposition.corpMainActionGenerationHost,
+    runnerMainActionGenerationHost:
+      mainActionHostComposition.runnerMainActionGenerationHost,
     runnerEncounterActionHost: runnerEncounterActionHostForState,
     encounterEntryHost: encounterEntryHostForState,
     runRezWindowHost: runRezWindowHostForState,
@@ -2128,125 +2323,6 @@ function corpRunnerActionPaidWindowActions(state: GameState): LegalAction[] {
   }
   return actions;
 }
-
-function corpMainActionGenerationHost(
-  state: GameState,
-): CorpMainActionGenerationHost {
-  return {
-    state,
-    actions: {
-      buildLegalAction: action,
-      makeActionId,
-      buildEndTurnAction: buildCorpEndTurnAction,
-      buildForgoActionDebtAction:
-        legalActionHostComposition.buildCorpForgoActionDebtAction,
-      buildPurgeableRunnerVirusPurgeAction: () =>
-        legalActionHostComposition.buildPurgeableRunnerVirusPurgeAction(state),
-      buildPurgeVirusAction: buildCorpPurgeVirusAction,
-      buildGainCreditAction: buildCorpGainCreditAction,
-      buildDrawAction: buildCorpDrawAction,
-      buildTrashNewDataFortCreationLockActions:
-        buildCorpTrashNewDataFortCreationLockActions,
-      buildNewRemoteIceInstallAction: buildCorpNewRemoteIceInstallAction,
-      buildServerIceInstallAction: buildCorpServerIceInstallAction,
-      buildNewRemoteRootInstallAction: buildCorpNewRemoteRootInstallAction,
-      buildServerRootInstallAction: buildCorpServerRootInstallAction,
-    },
-    cards: {
-      definitionFor,
-      mustInstance,
-      isUniqueCard,
-      hasInstalledUniqueCardDefinition,
-      cardImplementationForDefinitionId,
-      rezzedCorpRootCardIds,
-      corpInstalledCardIds,
-      visibleVirusCounterTargetIds,
-    },
-    agenda: {
-      effectiveAgendaDifficulty,
-      effectiveAgendaDifficultyDeps,
-      scoredAgendaKindForDefinition,
-      serverChoiceDisplayLabel,
-      scoredAgendaAbilityHost,
-      buildScoredAgendaAbilityActionsForCard,
-    },
-    counters: {
-      totalCounters,
-      purgeableRunnerVirusCounterTotal,
-      spyCountersForServer,
-    },
-    corp: {
-      corpActionDebtPending,
-      acmeSavingsAndLoanObligationCount,
-      canPlayCorpOperation: (stateToRead, definition) =>
-        canPlayCorpOperation(corpOperationResolutionHost(stateToRead), definition),
-      cardImplementationOperationLegalActions: (
-        stateToRead,
-        cardId,
-        definition,
-      ) =>
-        cardImplementationOperationLegalActions(
-          corpOperationResolutionHost(stateToRead),
-          cardId,
-          definition,
-        ),
-      corpUtilityImplementationForDefinition,
-      powerGridOverloadLegalActions,
-      systematicLayoffsLegalActions,
-      corpAgendaPointTotal,
-      hasCorpUtilityKind,
-      uniqueDirectLongtailKindForDefinition,
-      corpInstalledEconomyActionProfileForDefinition,
-      corpInstalledEconomyActionPayload,
-    },
-    runner: {
-      isConcealedRunnerResource,
-      hiddenRunnerResourceSlotId,
-    },
-    install: {
-      corpNewDataFortCreationLocked,
-      corpIceInstallTotalCost,
-      canInstallCorpRootCardInServer,
-      isRegionUpgrade,
-      corpRegionUpgradeIdsInServer,
-      corpRootAgendaOrNodeCapacityInServer,
-      corpRootAssetIdsInServer,
-      corpRootMainCardIdsInServer,
-      isInstalledCorpCardAdvanceable,
-    },
-    rez: {
-      rootInstallRezzesOnInstall,
-      rezCostForCard,
-      rezCostReductionSourceDefinitionIdsFor,
-      isAcmeSavingsAndLoanDefinition,
-    },
-    abilities: {
-      corpTraceDamageAbilityHost,
-      corpSpecialDamageAbilityHost,
-      pushCorpTraceDamageOrCardImplementationActions,
-      buildCorpSpecialDamageAbilityActionsForCard,
-    },
-    specialZones: {
-      specialZoneHarnessActions,
-      edgerunnerTempsInstallActionsRemaining,
-    },
-    constants: {
-      CODE_VIRAL_CACHE_ID,
-      HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS,
-      HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
-      CORP_HQ_SHUFFLE_DRAW_CARD_ID,
-      COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
-      DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-      COUNTER_UPGRADE_CARD_IDS,
-      TAG_CONDITION_UPGRADE_CARD_IDS,
-      COUNTER_ASSET_CARD_IDS,
-      INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID,
-      ACTION_ASSET_CARD_IDS,
-      SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
-    },
-  };
-}
-
 
 function expireCorporateRetreatInstallCreditAbilities(state: GameState): void {
   for (const agendaId of state.corp.scoreArea) {
@@ -2422,129 +2498,6 @@ function consumeValuPakProgramInstallAction(
       valuPakTemporaryProgramInstallCredits(state),
   };
 }
-
-function runnerMainActionGenerationHost(
-  state: GameState,
-): RunnerMainActionGenerationHost {
-  return {
-    state,
-    actions: {
-      buildLegalAction: action,
-      buildRunnerEndTurnAction,
-      buildRunnerGainCreditAction,
-      buildRunnerRemoveTagAction,
-      buildRunnerDrawCardActions,
-      buildRunnerProgramInstallAction,
-      buildRunnerProgramTrashBeforeInstallAction,
-      buildRunnerZetatechOverlayInstallAction,
-      buildRunnerHostedProgramInstallAction,
-      buildRunnerAgendaPointInstallAction,
-      buildRunnerHardwareInstallAction,
-      buildRunnerSelectedServerInstallAction,
-      buildRunnerResourceInstallAction,
-      buildRunnerStackSearchProgramToGripAction,
-      buildRunnerValuPakInstallAction,
-      buildRunnerValuPakSequenceEndAction,
-      buildRunnerShellTradersSetAsideAction,
-      buildRunnerShellTradersRemoveCounterAction,
-    },
-    cards: {
-      definitionFor,
-      isUniqueCard,
-      hasInstalledUniqueCardDefinition,
-    },
-    runner: {
-      ensureRunnerTurnFlags,
-      availableRunnerTagRemovalCredits,
-      availableRunnerProgramInstallCredits,
-      availableRunnerRunStartCredits,
-      runnerDrawActionContext,
-      runnerUtilityLongtailKindForCard,
-      uniqueDirectLongtailImplementationForCard,
-    },
-    servers: {
-      mustServer,
-      serverChoiceDisplayLabel,
-    },
-    run: {
-      activeWilsonSourceIds,
-      runDurationPaymentHost,
-      isRovingSubmarineRunBlocked,
-      fortRunSideFamiliesHostForState,
-      runStartTaxForServerUpgrades,
-      newsgroupTauntingRunStartTax,
-    },
-    install: {
-      shouldOfferRunnerProgramTrashBeforeInstall,
-      canOverlayProgramOnZetatechSoftwareInstaller,
-      canHostProgramOnDaemon,
-      cardImplementationAgendaPointInstallCost,
-      pickRunnerAgendaForAgendaPointCost,
-      requiresDataFortInstallTarget,
-    },
-    memory: {
-      runnerMemoryLimit,
-    },
-    counters: {
-      cardCounter,
-      runnerTraceCounterEffectDefinitions,
-      runnerCounterDisplayName,
-    },
-    hiddenZone: {
-      exposedCorpCardInServer,
-      topHostedProgramOnMicrotech: (stateToRead, cardId) =>
-        topHostedProgramOnMicrotech(runFortTriggerExecutionHost(stateToRead), cardId),
-      microtechHostedProgramIds: (stateToRead, cardId) =>
-        microtechHostedProgramIds(runFortTriggerExecutionHost(stateToRead), cardId),
-      topRunnerHeapCardId,
-    },
-    specialZones: {
-      valuPakProgramInstallActionsRemaining,
-      runnerInstallableProgramIdsForValuPak,
-      specialZoneHarnessActions,
-      shellTradersPrepareTargetIds: (stateToRead) =>
-        shellTradersPrepareTargetIds(
-          runnerSpecialTriggerExecutionHost(stateToRead),
-        ),
-      shellTradersInstallCost,
-      shellTradersPreparedTargetIds: (stateToRead) =>
-        shellTradersPreparedTargetIds(
-          runnerSpecialTriggerExecutionHost(stateToRead),
-        ),
-    },
-    cardImplementation: {
-      runtimeDeps: cardImplementationRuntimeDeps,
-      cardImplementationForDefinitionId,
-      pushEndOfRunnerTurnActions: pushCardImplementationEndOfRunnerTurnActions,
-      canPlayPrintedCostOnPlayImplementation,
-      runnerEventResolver: cardImplementationRunnerEventResolver,
-      printedCostMakeRunEffect: printedCostCardImplementationMakeRunEffect,
-      pushActivatedActions: pushActivatedCardImplementationActions,
-    },
-    constants: {
-      RUNNER_EVENT_RESOLVERS,
-      CODE_VIRAL_CACHE_ID,
-      STACK_SEARCH_PROGRAM_CARD_IDS,
-      SELF_MODIFYING_CODE_ID,
-      SHORT_CIRCUIT_RESOURCE_CARD_ID,
-      AUJOURD_OUI_RESOURCE_CARD_ID,
-      SERVER_EXPOSE_PROGRAM_CARD_IDS,
-      STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
-      COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID,
-      FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
-      BOARDWALK_RANDOM_PROGRAM_CARD_ID,
-      MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
-      QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
-      STACK_TOP_REORDER_RESOURCE_CARD_ID,
-      JUNKYARD_BBS_ID,
-      SHELL_TRADERS_ID,
-      DANSHIS_SECOND_ID,
-      BODYWEIGHT_DATA_CRECHE_ID,
-      ALL_NIGHTER_ID,
-    },
-  };
-}
-
 
 function runnerDrawActionContext(state: GameState): RunnerDrawActionContext {
   return {
