@@ -26,6 +26,7 @@ export type {
   ApiPlayerClockConfig,
   ApiPlayerClockMode,
   ApiPlayerClockSnapshot,
+  ApiRecentGameResult,
   ApiSeriesPlayerSlot,
   ApiSeriesResultSummary,
   ApiSeriesStatus,
@@ -1443,6 +1444,7 @@ export type VisibleCard = {
   advancementCounters?: number;
   advancementRequirement?: number;
   strength?: number;
+  strengthModifier?: number;
   agendaPoints?: number;
   trashCost?: number;
   counters?: Partial<Record<CounterType, number>>;

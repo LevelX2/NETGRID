@@ -628,6 +628,56 @@ export type AiMatchProgressionMetrics = {
   runnerTaggedAfterTraceDuringRun: number;
   runnerTaggedAtEndOfRunnerTurn: number;
   runnerTaggedAtStartOfCorpTurn: number;
+  corpTagCreatedDuringRunnerTurn: number;
+  corpTagCreatedDuringCorpTurn: number;
+  corpTagCreatedDuringEncounter: number;
+  corpTagCreatedByTraceSuccess: number;
+  corpTagCreatedByAccessOrSteal: number;
+  corpTagCreatedByPersistentEffect: number;
+  corpTagCreatedByScoredAgendaAction: number;
+  corpTagCreatedByOperation: number;
+  corpTagCreatedByAssetOrNode: number;
+  corpTagCreatedByIce: number;
+  runnerTaggedAtCorpDecisionWithFunnelPayoffKnown: number;
+  runnerTaggedAtCorpDecisionWithoutPayoffKnown: number;
+  runnerTagFromPreviousRunnerTurnStillVisibleAtCorpDecision: number;
+  runnerTagFromEncounterStillVisibleAtCorpDecision: number;
+  runnerTagClearedBeforeCorpDecisionAfterFunnelSource: number;
+  runnerTagClearedSameRunnerTurnAfterSource: number;
+  runnerTagWindowExpiredBeforeCorpDecision: number;
+  corpVisibleTagPunishLegalActions: number;
+  corpVisibleTagDamagePunishLegalActions: number;
+  corpVisibleTagEconomicPunishLegalActions: number;
+  corpVisibleTagTrashPunishLegalActions: number;
+  corpVisibleTagRunLockPunishLegalActions: number;
+  corpVisibleTagAmbushPunishLegalActions: number;
+  corpVisibleTagPayoffLegalActionsByKind: number;
+  corpVisibleTagPayoffLegalActionsByCard: number;
+  corpVisibleTagPunishTaken: number;
+  corpVisibleTagPunishSkipped: number;
+  corpVisibleTagPunishSkippedForScore: number;
+  corpVisibleTagPunishSkippedForAdvance: number;
+  corpVisibleTagPunishSkippedForEconomy: number;
+  corpVisibleTagPunishSkippedForRemoteProtection: number;
+  corpVisibleTagPunishSkippedForCentralProtection: number;
+  corpVisibleTagPunishSkippedForDraw: number;
+  corpVisibleTagPunishSkippedForInstall: number;
+  corpVisibleTagPunishSkippedForEndTurn: number;
+  corpVisibleTagPunishSkippedForUnknownHigherPriority: number;
+  corpFunnelSourcePayoffPairSeenInDeck: number;
+  corpFunnelSourceActionTakenWithPayoffInDeck: number;
+  corpFunnelSourceActionTakenWithVisiblePayoff: number;
+  corpFunnelSourceActionTakenWithoutVisiblePayoff: number;
+  corpFunnelPairConvertedToTaggedDecisionWindow: number;
+  corpFunnelPairConvertedToLegalPayoffWindow: number;
+  corpFunnelPairConvertedToPayoffTaken: number;
+  corpFunnelPairExpiredBeforePayoffWindow: number;
+  runnerSurvivalCounterContextAvailable: number;
+  runnerTraceDefenseVisibleAtTagSource: number;
+  runnerDamagePreventionVisibleAtPayoffWindow: number;
+  runnerFlatlinePreventionVisibleAtPayoffWindow: number;
+  runnerLinkDefenseVisibleAtTrace: number;
+  runnerSurvivalCounterContextSuppressedPunishValue: number;
   corpPunishOpportunities: number;
   corpPunishTaken: number;
   corpPunishSkipped: number;
@@ -1955,6 +2005,39 @@ export type AiSimulationSummary = {
     runnerTagAddedByAction?: boolean;
     runnerTagClearedByAction?: boolean;
     runnerTaggedAfterTraceDuringRun?: boolean;
+    corpTagCreatedDuringRunnerTurn?: boolean;
+    corpTagCreatedDuringCorpTurn?: boolean;
+    corpTagCreatedDuringEncounter?: boolean;
+    corpTagCreatedByTraceSuccess?: boolean;
+    corpTagCreatedByAccessOrSteal?: boolean;
+    corpTagCreatedByPersistentEffect?: boolean;
+    corpTagCreatedByScoredAgendaAction?: boolean;
+    corpTagCreatedByOperation?: boolean;
+    corpTagCreatedByAssetOrNode?: boolean;
+    corpTagCreatedByIce?: boolean;
+    runnerTaggedAtCorpDecisionWithFunnelPayoffKnown?: boolean;
+    runnerTaggedAtCorpDecisionWithoutPayoffKnown?: boolean;
+    corpVisibleTagPunishLegalActions?: number;
+    corpVisibleTagPayoffLegalActionKinds?: string[];
+    corpVisibleTagPayoffLegalActionCards?: string[];
+    corpVisibleTagDamagePunishLegalActions?: boolean;
+    corpVisibleTagEconomicPunishLegalActions?: boolean;
+    corpVisibleTagTrashPunishLegalActions?: boolean;
+    corpVisibleTagRunLockPunishLegalActions?: boolean;
+    corpVisibleTagAmbushPunishLegalActions?: boolean;
+    corpVisibleTagPunishTaken?: boolean;
+    corpVisibleTagPunishSkipped?: boolean;
+    corpVisibleTagPunishSkippedReason?: CorpTagPunishSkipReason;
+    corpFunnelSourcePayoffPairSeenInDeck?: boolean;
+    corpFunnelSourceActionTakenWithPayoffInDeck?: boolean;
+    corpFunnelSourceActionTakenWithVisiblePayoff?: boolean;
+    corpFunnelSourceActionTakenWithoutVisiblePayoff?: boolean;
+    runnerSurvivalCounterContextAvailable?: boolean;
+    runnerTraceDefenseVisibleAtTagSource?: boolean;
+    runnerDamagePreventionVisibleAtPayoffWindow?: boolean;
+    runnerFlatlinePreventionVisibleAtPayoffWindow?: boolean;
+    runnerLinkDefenseVisibleAtTrace?: boolean;
+    runnerSurvivalCounterContextSuppressedPunishValue?: boolean;
     corpPunishOpportunity?: boolean;
     corpPunishTaken?: boolean;
     corpPunishKind?: CorpPunishKind;
@@ -2026,9 +2109,14 @@ type CorpTagPunishSkipReason =
   | "economy"
   | "protection"
   | "score"
+  | "advance"
   | "remote_safety"
+  | "remote_protection"
+  | "central_protection"
   | "draw"
+  | "install"
   | "end_turn"
+  | "unknown_higher_priority"
   | "unknown";
 
 export type AiDecisionSideSelection =
@@ -8011,7 +8099,33 @@ const CORP_TRACE_TAG_SOURCE_IDS = new Set([
   "onr_v1_249_hunter",
   "onr_v1_283_audit-of-call-records",
   "onr_v1_284_chance-observation",
+  "onr_v1_213_private-cybernet-police",
+  "onr_v1_310_blood-cat",
+  "onr_v1_260_pocket-virtual-reality",
 ]);
+
+const RUNNER_TRACE_DEFENSE_CONTEXT_IDS = new Set([
+  "onr_v1_003_baedekers-net-map",
+  "onr_v1_004_bakdoor",
+  "onr_v1_051_rabbit",
+  "onr_v1_063_signpost",
+]);
+const RUNNER_DAMAGE_PREVENTION_CONTEXT_IDS = new Set([
+  "onr_v1_023_evil-twin",
+  "onr_v1_028_force-shield",
+  "onr_v1_061_shield",
+]);
+const RUNNER_FLATLINE_PREVENTION_CONTEXT_IDS = new Set([
+  "onr_v1_022_emergency-self-construct",
+]);
+
+type CorpVisibleTagPayoffCategory =
+  | "damage"
+  | "economic"
+  | "trash"
+  | "run_lock"
+  | "ambush"
+  | "unknown";
 
 function tagPunishWindowDiagnosticsForSimulationAction(
   input: AiDecisionInput,
@@ -8027,15 +8141,54 @@ function tagPunishWindowDiagnosticsForSimulationAction(
     runnerTagsAfterAction: runnerTagsAfter,
   };
   if (input.side === "corp") {
+    const visiblePunishOpportunities = corpVisibleTagPunishOpportunities(input);
+    const visiblePayoffCategories = sortedUnique(
+      visiblePunishOpportunities.map((opportunity) => opportunity.category),
+    );
+    const visiblePayoffCards = sortedUnique(
+      visiblePunishOpportunities
+        .map((opportunity) => opportunity.cardId)
+        .filter((cardId): cardId is string => Boolean(cardId)),
+    );
+    const survivalContext = runnerSurvivalCounterContextForInput(input);
     const selectedOntology = corpTagPunishOntologyAssessmentForAction(
       input,
       action,
     );
     applyTagPunishOntologyDiagnostics(diagnostics, selectedOntology);
-    if (runnerTagsBefore > 0) diagnostics.runnerTaggedAtCorpDecision = true;
+    if (runnerTagsBefore > 0) {
+      diagnostics.runnerTaggedAtCorpDecision = true;
+      if (visiblePunishOpportunities.length > 0)
+        diagnostics.runnerTaggedAtCorpDecisionWithFunnelPayoffKnown = true;
+      else diagnostics.runnerTaggedAtCorpDecisionWithoutPayoffKnown = true;
+    }
     if (isCorpTurnStartDecision(action, stateBeforeAction))
       diagnostics.runnerTaggedAtStartOfCorpTurn = runnerTagsBefore > 0;
-    const punishOpportunity = strongestCorpPunishOpportunity(input);
+    if (visiblePunishOpportunities.length > 0) {
+      diagnostics.corpVisibleTagPunishLegalActions =
+        visiblePunishOpportunities.length;
+      diagnostics.corpVisibleTagPayoffLegalActionKinds =
+        visiblePayoffCategories;
+      diagnostics.corpVisibleTagPayoffLegalActionCards = visiblePayoffCards;
+      if (visiblePayoffCategories.includes("damage"))
+        diagnostics.corpVisibleTagDamagePunishLegalActions = true;
+      if (visiblePayoffCategories.includes("economic"))
+        diagnostics.corpVisibleTagEconomicPunishLegalActions = true;
+      if (visiblePayoffCategories.includes("trash"))
+        diagnostics.corpVisibleTagTrashPunishLegalActions = true;
+      if (visiblePayoffCategories.includes("run_lock"))
+        diagnostics.corpVisibleTagRunLockPunishLegalActions = true;
+      if (visiblePayoffCategories.includes("ambush"))
+        diagnostics.corpVisibleTagAmbushPunishLegalActions = true;
+      if (survivalContext.any) {
+        diagnostics.runnerSurvivalCounterContextAvailable = true;
+        if (survivalContext.damage)
+          diagnostics.runnerDamagePreventionVisibleAtPayoffWindow = true;
+        if (survivalContext.flatline)
+          diagnostics.runnerFlatlinePreventionVisibleAtPayoffWindow = true;
+      }
+    }
+    const punishOpportunity = visiblePunishOpportunities[0];
     if (punishOpportunity) {
       const punishOntology = corpTagPunishOntologyAssessmentForAction(
         input,
@@ -8048,13 +8201,16 @@ function tagPunishWindowDiagnosticsForSimulationAction(
         diagnostics.corpPunishOpportunityConfirmedByOntology = true;
       if (action.actionId === punishOpportunity.action.actionId) {
         diagnostics.corpPunishTaken = true;
+        diagnostics.corpVisibleTagPunishTaken = true;
         if (punishOntology?.isPunishPayoff)
           diagnostics.corpOntologyPunishOpportunityConverted = true;
       } else {
-        diagnostics.corpPunishSkippedReason = corpTagPunishSkipReason(
-          action,
-          decision,
-        );
+        const skippedReason = corpTagPunishSkipReason(action, decision);
+        diagnostics.corpPunishSkippedReason = skippedReason;
+        diagnostics.corpVisibleTagPunishSkipped = true;
+        diagnostics.corpVisibleTagPunishSkippedReason = skippedReason;
+        if (survivalContext.any)
+          diagnostics.runnerSurvivalCounterContextSuppressedPunishValue = true;
         if (punishOntology?.isPunishPayoff)
           diagnostics.corpPunishSkippedDespiteOntologyOpportunity = true;
       }
@@ -8067,12 +8223,36 @@ function tagPunishWindowDiagnosticsForSimulationAction(
       );
       applyTagPunishOntologyDiagnostics(diagnostics, tagSourceOntology);
       diagnostics.corpTagSourceOpportunity = true;
+      if (
+        corpOntologyPayoffAvailableForTagSource(
+          input,
+          tagSourceOpportunity.action,
+        )
+      )
+        diagnostics.corpFunnelSourcePayoffPairSeenInDeck = true;
+      if (survivalContext.any)
+        diagnostics.runnerSurvivalCounterContextAvailable = true;
+      if (survivalContext.trace)
+        diagnostics.runnerTraceDefenseVisibleAtTagSource = true;
+      if (tagSourceOpportunity.traceTag && survivalContext.link)
+        diagnostics.runnerLinkDefenseVisibleAtTrace = true;
       if (action.actionId === tagSourceOpportunity.action.actionId) {
         diagnostics.corpTagSourceTaken = true;
+        applyCorpTagSourceWindowDiagnostics(
+          diagnostics,
+          input,
+          tagSourceOpportunity.action,
+        );
+        if (diagnostics.corpFunnelSourcePayoffPairSeenInDeck === true)
+          diagnostics.corpFunnelSourceActionTakenWithPayoffInDeck = true;
         if (tagSourceOntology?.isTagSource) {
-          if (corpOntologyPayoffAvailableForTagSource(input, action))
+          if (corpOntologyPayoffAvailableForTagSource(input, action)) {
             diagnostics.corpTagSourceTakenWithOntologyPayoffAvailable = true;
-          else diagnostics.corpTagSourceTakenWithoutOntologyPayoff = true;
+            diagnostics.corpFunnelSourceActionTakenWithVisiblePayoff = true;
+          } else {
+            diagnostics.corpTagSourceTakenWithoutOntologyPayoff = true;
+            diagnostics.corpFunnelSourceActionTakenWithoutVisiblePayoff = true;
+          }
         }
       } else {
         diagnostics.corpTraceTagSkippedReason = corpTagPunishSkipReason(
@@ -8100,6 +8280,13 @@ function tagPunishWindowDiagnosticsForSimulationAction(
     diagnostics.runnerTaggedAtEndOfRunnerTurn = runnerTagsAfter > 0;
   if (runnerTagsAfter > runnerTagsBefore) {
     diagnostics.runnerTagAddedByAction = true;
+    applyActualTagCreationDiagnostics(
+      diagnostics,
+      input,
+      action,
+      decision,
+      stateBeforeAction,
+    );
     if (
       stateBeforeAction.run ||
       decision.reasonCode.includes("trace") ||
@@ -8158,22 +8345,234 @@ function isCorpTurnStartDecision(
   );
 }
 
-function strongestCorpPunishOpportunity(
-  input: AiDecisionInput,
-): { action: LegalAction; kind: CorpPunishKind } | undefined {
-  if (input.side !== "corp") return undefined;
-  const opportunities = input.legalActions
+function corpVisibleTagPunishOpportunities(input: AiDecisionInput): Array<{
+  action: LegalAction;
+  kind: CorpPunishKind;
+  category: CorpVisibleTagPayoffCategory;
+  cardId: string | undefined;
+}> {
+  if (input.side !== "corp") return [];
+  return input.legalActions
     .map((action) => {
       const kind = corpPunishKindForAction(input, action);
-      return kind ? { action, kind } : undefined;
+      if (!kind) return undefined;
+      return {
+        action,
+        kind,
+        category: corpVisibleTagPayoffCategoryForAction(input, action, kind),
+        cardId: sourceDefinitionIdForAction(input, action) || undefined,
+      };
     })
     .filter(
       (
         opportunity,
-      ): opportunity is { action: LegalAction; kind: CorpPunishKind } =>
-        opportunity !== undefined,
+      ): opportunity is {
+        action: LegalAction;
+        kind: CorpPunishKind;
+        category: CorpVisibleTagPayoffCategory;
+        cardId: string | undefined;
+      } => opportunity !== undefined,
     );
-  return opportunities[0];
+}
+
+function corpVisibleTagPayoffCategoryForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  kind: CorpPunishKind,
+): CorpVisibleTagPayoffCategory {
+  const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
+  if (ontology?.payoffKind)
+    return corpVisibleTagPayoffCategoryFromOntology(ontology.payoffKind);
+  if (
+    kind === "scorched_earth_like" ||
+    kind === "urban_renewal_like" ||
+    kind === "punitive_counterstrike_like" ||
+    kind === "scored_agenda_damage_like"
+  )
+    return "damage";
+  if (kind === "closed_accounts_like" || kind === "datapool_like")
+    return "economic";
+  if (kind === "resource_trash_like" || kind === "power_grid_overload_like")
+    return "trash";
+  const roles = rolesForAction(input, action);
+  if (roles.some((role) => role.includes("run_lock"))) return "run_lock";
+  if (roles.some((role) => role.includes("ambush"))) return "ambush";
+  return "unknown";
+}
+
+function corpVisibleTagPayoffCategoryFromOntology(
+  payoffKind: StructuredTagPunishPayoffKind,
+): CorpVisibleTagPayoffCategory {
+  switch (payoffKind) {
+    case "damage":
+    case "scored_agenda_damage_like":
+      return "damage";
+    case "economic":
+      return "economic";
+    case "resource_trash":
+    case "hardware_trash":
+      return "trash";
+    default:
+      return "unknown";
+  }
+}
+
+function applyCorpTagSourceWindowDiagnostics(
+  diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
+  input: AiDecisionInput,
+  action: LegalAction,
+): void {
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  const sourceType =
+    RUNTIME_CARDS[sourceDefinitionId]?.type ??
+    DEMO_CARDS_BY_ID[sourceDefinitionId]?.type;
+  const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
+  if (scoredAgenda?.kind === "scored_agenda_trace_tag")
+    diagnostics.corpTagCreatedByScoredAgendaAction = true;
+  else if (action.type === "play_operation")
+    diagnostics.corpTagCreatedByOperation = true;
+  else if (sourceType === "asset")
+    diagnostics.corpTagCreatedByAssetOrNode = true;
+  else if (sourceType === "ice" || action.type === "rez_ice")
+    diagnostics.corpTagCreatedByIce = true;
+  if (action.type === "trigger_ability")
+    diagnostics.corpTagCreatedByPersistentEffect = true;
+}
+
+function applyActualTagCreationDiagnostics(
+  diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
+  input: AiDecisionInput,
+  action: LegalAction,
+  decision: AiDecision,
+  stateBeforeAction: GameState,
+): void {
+  if (input.side === "runner") {
+    diagnostics.corpTagCreatedDuringRunnerTurn = true;
+    if (
+      stateBeforeAction.run ||
+      action.type === "resolve_choice" ||
+      decision.reasonCode.includes("trace")
+    ) {
+      diagnostics.corpTagCreatedDuringEncounter = true;
+      diagnostics.corpTagCreatedByTraceSuccess = true;
+    }
+    if (
+      action.type === "access_card" ||
+      action.type === "steal_agenda" ||
+      action.type === "trash_accessed_card" ||
+      action.type === "decline_trash"
+    )
+      diagnostics.corpTagCreatedByAccessOrSteal = true;
+    return;
+  }
+  if (input.side !== "corp") return;
+  diagnostics.corpTagCreatedDuringCorpTurn = true;
+  applyCorpTagSourceWindowDiagnostics(diagnostics, input, action);
+}
+
+function runnerSurvivalCounterContextForInput(input: AiDecisionInput): {
+  any: boolean;
+  trace: boolean;
+  damage: boolean;
+  flatline: boolean;
+  link: boolean;
+} {
+  const visibleRunnerCards = input.playerView.opponent.rig ?? [];
+  const definitionIds = new Set(
+    visibleRunnerCards
+      .filter((card) => card.known)
+      .map((card) => card.definitionId)
+      .filter((definitionId): definitionId is string => Boolean(definitionId)),
+  );
+  const trace = [...definitionIds].some((definitionId) =>
+    RUNNER_TRACE_DEFENSE_CONTEXT_IDS.has(definitionId),
+  );
+  const damage = [...definitionIds].some((definitionId) =>
+    RUNNER_DAMAGE_PREVENTION_CONTEXT_IDS.has(definitionId),
+  );
+  const flatline = [...definitionIds].some((definitionId) =>
+    RUNNER_FLATLINE_PREVENTION_CONTEXT_IDS.has(definitionId),
+  );
+  return {
+    any: trace || damage || flatline,
+    trace,
+    damage,
+    flatline,
+    link: trace,
+  };
+}
+
+function tagSourceConvertsToTaggedCorpDecision(
+  sequence: AiSimulationSummary["actionSequence"],
+  index: number,
+): boolean {
+  return sequence
+    .slice(index + 1, index + 12)
+    .some(
+      (entry) =>
+        entry.side === "corp" && entry.runnerTaggedAtCorpDecision === true,
+    );
+}
+
+function tagSourceConvertsToVisibleLegalPayoffWindow(
+  sequence: AiSimulationSummary["actionSequence"],
+  index: number,
+): boolean {
+  return sequence
+    .slice(index + 1, index + 12)
+    .some(
+      (entry) =>
+        entry.side === "corp" &&
+        ((entry.corpVisibleTagPunishLegalActions ?? 0) > 0 ||
+          entry.corpPunishOpportunity === true),
+    );
+}
+
+function previousFunnelSourceBefore(
+  sequence: AiSimulationSummary["actionSequence"],
+  index: number,
+): boolean {
+  return sequence
+    .slice(Math.max(0, index - 12), index)
+    .some(
+      (entry) =>
+        entry.corpTagSourceTaken === true ||
+        entry.corpFunnelSourceActionTakenWithPayoffInDeck === true ||
+        entry.corpFunnelSourceActionTakenWithVisiblePayoff === true,
+    );
+}
+
+function previousRunnerTurnTagBefore(
+  sequence: AiSimulationSummary["actionSequence"],
+  index: number,
+): boolean {
+  return sequence
+    .slice(Math.max(0, index - 12), index)
+    .some((entry) => entry.corpTagCreatedDuringRunnerTurn === true);
+}
+
+function previousEncounterTagBefore(
+  sequence: AiSimulationSummary["actionSequence"],
+  index: number,
+): boolean {
+  return sequence
+    .slice(Math.max(0, index - 12), index)
+    .some((entry) => entry.corpTagCreatedDuringEncounter === true);
+}
+
+function incrementSkipReason(
+  counters: Record<CorpTagPunishSkipReason, number>,
+  reason: CorpTagPunishSkipReason | undefined,
+): void {
+  counters[reason ?? "unknown"] += 1;
+}
+
+function addKindsToCounter(kinds: string[], counter: Record<string, number>) {
+  for (const kind of kinds) counter[kind] = (counter[kind] ?? 0) + 1;
+}
+
+function addCardsToCounter(cardIds: string[], counter: Record<string, number>) {
+  for (const cardId of cardIds) counter[cardId] = (counter[cardId] ?? 0) + 1;
 }
 
 function strongestCorpTagSourceOpportunity(
@@ -8377,19 +8776,29 @@ function corpTagPunishSkipReason(
     action.type === "rez_ice" ||
     (action.type === "install_card" && action.payload?.placement === "ice") ||
     reason.includes("protect")
-  )
+  ) {
+    if (reason.includes("remote") || reason.includes("scoring"))
+      return "remote_protection";
+    if (
+      reason.includes("central") ||
+      reason.includes("hq") ||
+      reason.includes("rd") ||
+      reason.includes("archives")
+    )
+      return "central_protection";
     return "protection";
-  if (
-    action.type === "score_agenda" ||
-    action.type === "advance_card" ||
-    reason.includes("score")
-  )
+  }
+  if (action.type === "score_agenda" || reason.includes("score"))
     return "score";
+  if (action.type === "advance_card" || reason.includes("advance"))
+    return "advance";
   if (reason.includes("remote_safety") || reason.includes("unsafe_remote"))
-    return "remote_safety";
+    return "remote_protection";
   if (action.type === "draw_card" || reason.includes("draw")) return "draw";
+  if (action.type === "install_card" || reason.includes("install"))
+    return "install";
   if (action.type === "end_turn") return "end_turn";
-  return "unknown";
+  return "unknown_higher_priority";
 }
 
 export function buildObservedFacts(input: AiDecisionInput): AiObservedFacts {
@@ -9880,6 +10289,56 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "runnerTaggedAfterTraceDuringRun",
   "runnerTaggedAtEndOfRunnerTurn",
   "runnerTaggedAtStartOfCorpTurn",
+  "corpTagCreatedDuringRunnerTurn",
+  "corpTagCreatedDuringCorpTurn",
+  "corpTagCreatedDuringEncounter",
+  "corpTagCreatedByTraceSuccess",
+  "corpTagCreatedByAccessOrSteal",
+  "corpTagCreatedByPersistentEffect",
+  "corpTagCreatedByScoredAgendaAction",
+  "corpTagCreatedByOperation",
+  "corpTagCreatedByAssetOrNode",
+  "corpTagCreatedByIce",
+  "runnerTaggedAtCorpDecisionWithFunnelPayoffKnown",
+  "runnerTaggedAtCorpDecisionWithoutPayoffKnown",
+  "runnerTagFromPreviousRunnerTurnStillVisibleAtCorpDecision",
+  "runnerTagFromEncounterStillVisibleAtCorpDecision",
+  "runnerTagClearedBeforeCorpDecisionAfterFunnelSource",
+  "runnerTagClearedSameRunnerTurnAfterSource",
+  "runnerTagWindowExpiredBeforeCorpDecision",
+  "corpVisibleTagPunishLegalActions",
+  "corpVisibleTagDamagePunishLegalActions",
+  "corpVisibleTagEconomicPunishLegalActions",
+  "corpVisibleTagTrashPunishLegalActions",
+  "corpVisibleTagRunLockPunishLegalActions",
+  "corpVisibleTagAmbushPunishLegalActions",
+  "corpVisibleTagPayoffLegalActionsByKind",
+  "corpVisibleTagPayoffLegalActionsByCard",
+  "corpVisibleTagPunishTaken",
+  "corpVisibleTagPunishSkipped",
+  "corpVisibleTagPunishSkippedForScore",
+  "corpVisibleTagPunishSkippedForAdvance",
+  "corpVisibleTagPunishSkippedForEconomy",
+  "corpVisibleTagPunishSkippedForRemoteProtection",
+  "corpVisibleTagPunishSkippedForCentralProtection",
+  "corpVisibleTagPunishSkippedForDraw",
+  "corpVisibleTagPunishSkippedForInstall",
+  "corpVisibleTagPunishSkippedForEndTurn",
+  "corpVisibleTagPunishSkippedForUnknownHigherPriority",
+  "corpFunnelSourcePayoffPairSeenInDeck",
+  "corpFunnelSourceActionTakenWithPayoffInDeck",
+  "corpFunnelSourceActionTakenWithVisiblePayoff",
+  "corpFunnelSourceActionTakenWithoutVisiblePayoff",
+  "corpFunnelPairConvertedToTaggedDecisionWindow",
+  "corpFunnelPairConvertedToLegalPayoffWindow",
+  "corpFunnelPairConvertedToPayoffTaken",
+  "corpFunnelPairExpiredBeforePayoffWindow",
+  "runnerSurvivalCounterContextAvailable",
+  "runnerTraceDefenseVisibleAtTagSource",
+  "runnerDamagePreventionVisibleAtPayoffWindow",
+  "runnerFlatlinePreventionVisibleAtPayoffWindow",
+  "runnerLinkDefenseVisibleAtTrace",
+  "runnerSurvivalCounterContextSuppressedPunishValue",
   "corpPunishOpportunities",
   "corpPunishTaken",
   "corpPunishSkipped",
@@ -14301,6 +14760,56 @@ function summarizeTagPunishWindowMetrics(
   | "runnerTaggedAfterTraceDuringRun"
   | "runnerTaggedAtEndOfRunnerTurn"
   | "runnerTaggedAtStartOfCorpTurn"
+  | "corpTagCreatedDuringRunnerTurn"
+  | "corpTagCreatedDuringCorpTurn"
+  | "corpTagCreatedDuringEncounter"
+  | "corpTagCreatedByTraceSuccess"
+  | "corpTagCreatedByAccessOrSteal"
+  | "corpTagCreatedByPersistentEffect"
+  | "corpTagCreatedByScoredAgendaAction"
+  | "corpTagCreatedByOperation"
+  | "corpTagCreatedByAssetOrNode"
+  | "corpTagCreatedByIce"
+  | "runnerTaggedAtCorpDecisionWithFunnelPayoffKnown"
+  | "runnerTaggedAtCorpDecisionWithoutPayoffKnown"
+  | "runnerTagFromPreviousRunnerTurnStillVisibleAtCorpDecision"
+  | "runnerTagFromEncounterStillVisibleAtCorpDecision"
+  | "runnerTagClearedBeforeCorpDecisionAfterFunnelSource"
+  | "runnerTagClearedSameRunnerTurnAfterSource"
+  | "runnerTagWindowExpiredBeforeCorpDecision"
+  | "corpVisibleTagPunishLegalActions"
+  | "corpVisibleTagDamagePunishLegalActions"
+  | "corpVisibleTagEconomicPunishLegalActions"
+  | "corpVisibleTagTrashPunishLegalActions"
+  | "corpVisibleTagRunLockPunishLegalActions"
+  | "corpVisibleTagAmbushPunishLegalActions"
+  | "corpVisibleTagPayoffLegalActionsByKind"
+  | "corpVisibleTagPayoffLegalActionsByCard"
+  | "corpVisibleTagPunishTaken"
+  | "corpVisibleTagPunishSkipped"
+  | "corpVisibleTagPunishSkippedForScore"
+  | "corpVisibleTagPunishSkippedForAdvance"
+  | "corpVisibleTagPunishSkippedForEconomy"
+  | "corpVisibleTagPunishSkippedForRemoteProtection"
+  | "corpVisibleTagPunishSkippedForCentralProtection"
+  | "corpVisibleTagPunishSkippedForDraw"
+  | "corpVisibleTagPunishSkippedForInstall"
+  | "corpVisibleTagPunishSkippedForEndTurn"
+  | "corpVisibleTagPunishSkippedForUnknownHigherPriority"
+  | "corpFunnelSourcePayoffPairSeenInDeck"
+  | "corpFunnelSourceActionTakenWithPayoffInDeck"
+  | "corpFunnelSourceActionTakenWithVisiblePayoff"
+  | "corpFunnelSourceActionTakenWithoutVisiblePayoff"
+  | "corpFunnelPairConvertedToTaggedDecisionWindow"
+  | "corpFunnelPairConvertedToLegalPayoffWindow"
+  | "corpFunnelPairConvertedToPayoffTaken"
+  | "corpFunnelPairExpiredBeforePayoffWindow"
+  | "runnerSurvivalCounterContextAvailable"
+  | "runnerTraceDefenseVisibleAtTagSource"
+  | "runnerDamagePreventionVisibleAtPayoffWindow"
+  | "runnerFlatlinePreventionVisibleAtPayoffWindow"
+  | "runnerLinkDefenseVisibleAtTrace"
+  | "runnerSurvivalCounterContextSuppressedPunishValue"
   | "corpPunishOpportunities"
   | "corpPunishTaken"
   | "corpPunishSkipped"
@@ -14384,6 +14893,64 @@ function summarizeTagPunishWindowMetrics(
   let runnerTaggedAfterTraceDuringRun = 0;
   let runnerTaggedAtEndOfRunnerTurn = 0;
   let runnerTaggedAtStartOfCorpTurn = 0;
+  let corpTagCreatedDuringRunnerTurn = 0;
+  let corpTagCreatedDuringCorpTurn = 0;
+  let corpTagCreatedDuringEncounter = 0;
+  let corpTagCreatedByTraceSuccess = 0;
+  let corpTagCreatedByAccessOrSteal = 0;
+  let corpTagCreatedByPersistentEffect = 0;
+  let corpTagCreatedByScoredAgendaAction = 0;
+  let corpTagCreatedByOperation = 0;
+  let corpTagCreatedByAssetOrNode = 0;
+  let corpTagCreatedByIce = 0;
+  let runnerTaggedAtCorpDecisionWithFunnelPayoffKnown = 0;
+  let runnerTaggedAtCorpDecisionWithoutPayoffKnown = 0;
+  let runnerTagFromPreviousRunnerTurnStillVisibleAtCorpDecision = 0;
+  let runnerTagFromEncounterStillVisibleAtCorpDecision = 0;
+  let runnerTagClearedBeforeCorpDecisionAfterFunnelSource = 0;
+  let runnerTagClearedSameRunnerTurnAfterSource = 0;
+  let runnerTagWindowExpiredBeforeCorpDecision = 0;
+  let corpVisibleTagPunishLegalActions = 0;
+  let corpVisibleTagDamagePunishLegalActions = 0;
+  let corpVisibleTagEconomicPunishLegalActions = 0;
+  let corpVisibleTagTrashPunishLegalActions = 0;
+  let corpVisibleTagRunLockPunishLegalActions = 0;
+  let corpVisibleTagAmbushPunishLegalActions = 0;
+  const corpVisibleTagPayoffLegalActionsByKindCounts: Record<string, number> =
+    {};
+  const corpVisibleTagPayoffLegalActionsByCardCounts: Record<string, number> =
+    {};
+  let corpVisibleTagPunishTaken = 0;
+  let corpVisibleTagPunishSkipped = 0;
+  const visiblePunishSkippedByReason: Record<CorpTagPunishSkipReason, number> =
+    {
+      economy: 0,
+      protection: 0,
+      score: 0,
+      advance: 0,
+      remote_safety: 0,
+      remote_protection: 0,
+      central_protection: 0,
+      draw: 0,
+      install: 0,
+      end_turn: 0,
+      unknown_higher_priority: 0,
+      unknown: 0,
+    };
+  let corpFunnelSourcePayoffPairSeenInDeck = 0;
+  let corpFunnelSourceActionTakenWithPayoffInDeck = 0;
+  let corpFunnelSourceActionTakenWithVisiblePayoff = 0;
+  let corpFunnelSourceActionTakenWithoutVisiblePayoff = 0;
+  let corpFunnelPairConvertedToTaggedDecisionWindow = 0;
+  let corpFunnelPairConvertedToLegalPayoffWindow = 0;
+  let corpFunnelPairConvertedToPayoffTaken = 0;
+  let corpFunnelPairExpiredBeforePayoffWindow = 0;
+  let runnerSurvivalCounterContextAvailable = 0;
+  let runnerTraceDefenseVisibleAtTagSource = 0;
+  let runnerDamagePreventionVisibleAtPayoffWindow = 0;
+  let runnerFlatlinePreventionVisibleAtPayoffWindow = 0;
+  let runnerLinkDefenseVisibleAtTrace = 0;
+  let runnerSurvivalCounterContextSuppressedPunishValue = 0;
   let corpPunishOpportunities = 0;
   let corpPunishTaken = 0;
   let corpPunishSkipped = 0;
@@ -14403,9 +14970,14 @@ function summarizeTagPunishWindowMetrics(
     economy: 0,
     protection: 0,
     score: 0,
+    advance: 0,
     remote_safety: 0,
+    remote_protection: 0,
+    central_protection: 0,
     draw: 0,
+    install: 0,
     end_turn: 0,
+    unknown_higher_priority: 0,
     unknown: 0,
   };
   let corpPunishWindowExpiredBeforeAction = 0;
@@ -14421,9 +14993,14 @@ function summarizeTagPunishWindowMetrics(
     economy: 0,
     protection: 0,
     score: 0,
+    advance: 0,
     remote_safety: 0,
+    remote_protection: 0,
+    central_protection: 0,
     draw: 0,
+    install: 0,
     end_turn: 0,
+    unknown_higher_priority: 0,
     unknown: 0,
   };
   let corpTagSourceConvertedToRunnerTagged = 0;
@@ -14472,6 +15049,14 @@ function summarizeTagPunishWindowMetrics(
         runnerTaggedAtCorpDecisionTurns.add(
           `${summary.seed}:${entry.turnNumber ?? 0}`,
         );
+        if (entry.runnerTaggedAtCorpDecisionWithFunnelPayoffKnown === true)
+          runnerTaggedAtCorpDecisionWithFunnelPayoffKnown += 1;
+        if (entry.runnerTaggedAtCorpDecisionWithoutPayoffKnown === true)
+          runnerTaggedAtCorpDecisionWithoutPayoffKnown += 1;
+        if (previousRunnerTurnTagBefore(sequence, index))
+          runnerTagFromPreviousRunnerTurnStillVisibleAtCorpDecision += 1;
+        if (previousEncounterTagBefore(sequence, index))
+          runnerTagFromEncounterStillVisibleAtCorpDecision += 1;
       }
       if (entry.runnerTaggedAtStartOfCorpTurn === true)
         runnerTaggedAtStartOfCorpTurn += 1;
@@ -14479,14 +15064,39 @@ function summarizeTagPunishWindowMetrics(
         runnerTaggedAtEndOfRunnerTurn += 1;
       if (entry.runnerTaggedAfterTraceDuringRun === true)
         runnerTaggedAfterTraceDuringRun += 1;
+      if (entry.corpTagCreatedDuringRunnerTurn === true)
+        corpTagCreatedDuringRunnerTurn += 1;
+      if (entry.corpTagCreatedDuringCorpTurn === true)
+        corpTagCreatedDuringCorpTurn += 1;
+      if (entry.corpTagCreatedDuringEncounter === true)
+        corpTagCreatedDuringEncounter += 1;
+      if (entry.corpTagCreatedByTraceSuccess === true)
+        corpTagCreatedByTraceSuccess += 1;
+      if (entry.corpTagCreatedByAccessOrSteal === true)
+        corpTagCreatedByAccessOrSteal += 1;
+      if (entry.corpTagCreatedByPersistentEffect === true)
+        corpTagCreatedByPersistentEffect += 1;
+      if (entry.corpTagCreatedByScoredAgendaAction === true)
+        corpTagCreatedByScoredAgendaAction += 1;
+      if (entry.corpTagCreatedByOperation === true)
+        corpTagCreatedByOperation += 1;
+      if (entry.corpTagCreatedByAssetOrNode === true)
+        corpTagCreatedByAssetOrNode += 1;
+      if (entry.corpTagCreatedByIce === true) corpTagCreatedByIce += 1;
       if (entry.runnerTagClearedByAction === true) {
         runnerTagClearedSameRunnerTurn += 1;
+        if (previousFunnelSourceBefore(sequence, index)) {
+          runnerTagClearedSameRunnerTurnAfterSource += 1;
+          runnerTagClearedBeforeCorpDecisionAfterFunnelSource += 1;
+          corpFunnelPairExpiredBeforePayoffWindow += 1;
+        }
         const nextCorpIndex = sequence.findIndex(
           (later, laterIndex) => laterIndex > index && later.side === "corp",
         );
         if (nextCorpIndex > index) {
           runnerTagClearedBeforeCorpDecision += 1;
           runnerTagWindowExpiredBeforeCorpTurn += 1;
+          runnerTagWindowExpiredBeforeCorpDecision += 1;
           expiredBeforeCorpTurnIndexes.add(nextCorpIndex);
           if (
             sequence
@@ -14500,6 +15110,64 @@ function summarizeTagPunishWindowMetrics(
             corpOntologyPunishOpportunityExpired += 1;
         }
       }
+      if ((entry.corpVisibleTagPunishLegalActions ?? 0) > 0) {
+        corpVisibleTagPunishLegalActions +=
+          entry.corpVisibleTagPunishLegalActions ?? 0;
+        addKindsToCounter(
+          entry.corpVisibleTagPayoffLegalActionKinds ?? [],
+          corpVisibleTagPayoffLegalActionsByKindCounts,
+        );
+        addCardsToCounter(
+          entry.corpVisibleTagPayoffLegalActionCards ?? [],
+          corpVisibleTagPayoffLegalActionsByCardCounts,
+        );
+      }
+      if (entry.corpVisibleTagDamagePunishLegalActions === true)
+        corpVisibleTagDamagePunishLegalActions += 1;
+      if (entry.corpVisibleTagEconomicPunishLegalActions === true)
+        corpVisibleTagEconomicPunishLegalActions += 1;
+      if (entry.corpVisibleTagTrashPunishLegalActions === true)
+        corpVisibleTagTrashPunishLegalActions += 1;
+      if (entry.corpVisibleTagRunLockPunishLegalActions === true)
+        corpVisibleTagRunLockPunishLegalActions += 1;
+      if (entry.corpVisibleTagAmbushPunishLegalActions === true)
+        corpVisibleTagAmbushPunishLegalActions += 1;
+      if (entry.corpVisibleTagPunishTaken === true)
+        corpVisibleTagPunishTaken += 1;
+      if (entry.corpVisibleTagPunishSkipped === true) {
+        corpVisibleTagPunishSkipped += 1;
+        incrementSkipReason(
+          visiblePunishSkippedByReason,
+          entry.corpVisibleTagPunishSkippedReason,
+        );
+      }
+      if (entry.corpFunnelSourcePayoffPairSeenInDeck === true)
+        corpFunnelSourcePayoffPairSeenInDeck += 1;
+      if (entry.corpFunnelSourceActionTakenWithPayoffInDeck === true) {
+        corpFunnelSourceActionTakenWithPayoffInDeck += 1;
+        if (tagSourceConvertsToTaggedCorpDecision(sequence, index))
+          corpFunnelPairConvertedToTaggedDecisionWindow += 1;
+        if (tagSourceConvertsToVisibleLegalPayoffWindow(sequence, index))
+          corpFunnelPairConvertedToLegalPayoffWindow += 1;
+        if (tagSourceConvertsToPunishTaken(sequence, index))
+          corpFunnelPairConvertedToPayoffTaken += 1;
+      }
+      if (entry.corpFunnelSourceActionTakenWithVisiblePayoff === true)
+        corpFunnelSourceActionTakenWithVisiblePayoff += 1;
+      if (entry.corpFunnelSourceActionTakenWithoutVisiblePayoff === true)
+        corpFunnelSourceActionTakenWithoutVisiblePayoff += 1;
+      if (entry.runnerSurvivalCounterContextAvailable === true)
+        runnerSurvivalCounterContextAvailable += 1;
+      if (entry.runnerTraceDefenseVisibleAtTagSource === true)
+        runnerTraceDefenseVisibleAtTagSource += 1;
+      if (entry.runnerDamagePreventionVisibleAtPayoffWindow === true)
+        runnerDamagePreventionVisibleAtPayoffWindow += 1;
+      if (entry.runnerFlatlinePreventionVisibleAtPayoffWindow === true)
+        runnerFlatlinePreventionVisibleAtPayoffWindow += 1;
+      if (entry.runnerLinkDefenseVisibleAtTrace === true)
+        runnerLinkDefenseVisibleAtTrace += 1;
+      if (entry.runnerSurvivalCounterContextSuppressedPunishValue === true)
+        runnerSurvivalCounterContextSuppressedPunishValue += 1;
       if (entry.corpPunishOpportunity === true) {
         corpPunishOpportunities += 1;
         punishByKind[entry.corpPunishKind ?? "unknown"] += 1;
@@ -14509,8 +15177,10 @@ function summarizeTagPunishWindowMetrics(
             corpTagPunishFunnelTerminalDamageOrEconomicHit += 1;
         } else {
           corpPunishSkipped += 1;
-          punishSkippedByReason[entry.corpPunishSkippedReason ?? "unknown"] +=
-            1;
+          incrementSkipReason(
+            punishSkippedByReason,
+            entry.corpPunishSkippedReason,
+          );
         }
       }
       if (expiredBeforeCorpTurnIndexes.has(index)) {
@@ -14540,8 +15210,10 @@ function summarizeTagPunishWindowMetrics(
         if (entry.corpTraceTagTaken === true) corpTraceTagTaken += 1;
         else {
           corpTraceTagSkipped += 1;
-          traceSkippedByReason[entry.corpTraceTagSkippedReason ?? "unknown"] +=
-            1;
+          incrementSkipReason(
+            traceSkippedByReason,
+            entry.corpTraceTagSkippedReason,
+          );
         }
       }
       if (entry.corpTagPunishOntologyProfilesSeen === true)
@@ -14607,6 +15279,66 @@ function summarizeTagPunishWindowMetrics(
     runnerTaggedAfterTraceDuringRun,
     runnerTaggedAtEndOfRunnerTurn,
     runnerTaggedAtStartOfCorpTurn,
+    corpTagCreatedDuringRunnerTurn,
+    corpTagCreatedDuringCorpTurn,
+    corpTagCreatedDuringEncounter,
+    corpTagCreatedByTraceSuccess,
+    corpTagCreatedByAccessOrSteal,
+    corpTagCreatedByPersistentEffect,
+    corpTagCreatedByScoredAgendaAction,
+    corpTagCreatedByOperation,
+    corpTagCreatedByAssetOrNode,
+    corpTagCreatedByIce,
+    runnerTaggedAtCorpDecisionWithFunnelPayoffKnown,
+    runnerTaggedAtCorpDecisionWithoutPayoffKnown,
+    runnerTagFromPreviousRunnerTurnStillVisibleAtCorpDecision,
+    runnerTagFromEncounterStillVisibleAtCorpDecision,
+    runnerTagClearedBeforeCorpDecisionAfterFunnelSource,
+    runnerTagClearedSameRunnerTurnAfterSource,
+    runnerTagWindowExpiredBeforeCorpDecision,
+    corpVisibleTagPunishLegalActions,
+    corpVisibleTagDamagePunishLegalActions,
+    corpVisibleTagEconomicPunishLegalActions,
+    corpVisibleTagTrashPunishLegalActions,
+    corpVisibleTagRunLockPunishLegalActions,
+    corpVisibleTagAmbushPunishLegalActions,
+    corpVisibleTagPayoffLegalActionsByKind: Object.values(
+      corpVisibleTagPayoffLegalActionsByKindCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPayoffLegalActionsByCard: Object.values(
+      corpVisibleTagPayoffLegalActionsByCardCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPunishTaken,
+    corpVisibleTagPunishSkipped,
+    corpVisibleTagPunishSkippedForScore: visiblePunishSkippedByReason.score,
+    corpVisibleTagPunishSkippedForAdvance: visiblePunishSkippedByReason.advance,
+    corpVisibleTagPunishSkippedForEconomy: visiblePunishSkippedByReason.economy,
+    corpVisibleTagPunishSkippedForRemoteProtection:
+      visiblePunishSkippedByReason.remote_protection +
+      visiblePunishSkippedByReason.remote_safety,
+    corpVisibleTagPunishSkippedForCentralProtection:
+      visiblePunishSkippedByReason.central_protection,
+    corpVisibleTagPunishSkippedForDraw: visiblePunishSkippedByReason.draw,
+    corpVisibleTagPunishSkippedForInstall: visiblePunishSkippedByReason.install,
+    corpVisibleTagPunishSkippedForEndTurn:
+      visiblePunishSkippedByReason.end_turn,
+    corpVisibleTagPunishSkippedForUnknownHigherPriority:
+      visiblePunishSkippedByReason.unknown_higher_priority +
+      visiblePunishSkippedByReason.unknown,
+    corpFunnelSourcePayoffPairSeenInDeck,
+    corpFunnelSourceActionTakenWithPayoffInDeck,
+    corpFunnelSourceActionTakenWithVisiblePayoff,
+    corpFunnelSourceActionTakenWithoutVisiblePayoff,
+    corpFunnelPairConvertedToTaggedDecisionWindow,
+    corpFunnelPairConvertedToLegalPayoffWindow,
+    corpFunnelPairConvertedToPayoffTaken,
+    corpFunnelPairExpiredBeforePayoffWindow,
+    runnerSurvivalCounterContextAvailable,
+    runnerTraceDefenseVisibleAtTagSource,
+    runnerDamagePreventionVisibleAtPayoffWindow,
+    runnerFlatlinePreventionVisibleAtPayoffWindow,
+    runnerLinkDefenseVisibleAtTrace,
+    runnerSurvivalCounterContextSuppressedPunishValue,
     corpPunishOpportunities,
     corpPunishTaken,
     corpPunishSkipped,
@@ -14629,12 +15361,20 @@ function summarizeTagPunishWindowMetrics(
       punishByKind.scored_agenda_trace_tag_like,
     corpPunishOpportunityUnknown: punishByKind.unknown,
     corpPunishSkippedForEconomy: punishSkippedByReason.economy,
-    corpPunishSkippedForProtection: punishSkippedByReason.protection,
-    corpPunishSkippedForScore: punishSkippedByReason.score,
-    corpPunishSkippedForRemoteSafety: punishSkippedByReason.remote_safety,
+    corpPunishSkippedForProtection:
+      punishSkippedByReason.protection +
+      punishSkippedByReason.remote_protection +
+      punishSkippedByReason.central_protection,
+    corpPunishSkippedForScore:
+      punishSkippedByReason.score + punishSkippedByReason.advance,
+    corpPunishSkippedForRemoteSafety:
+      punishSkippedByReason.remote_safety +
+      punishSkippedByReason.remote_protection,
     corpPunishSkippedForDraw: punishSkippedByReason.draw,
     corpPunishSkippedForEndTurn: punishSkippedByReason.end_turn,
-    corpPunishSkippedForUnknown: punishSkippedByReason.unknown,
+    corpPunishSkippedForUnknown:
+      punishSkippedByReason.unknown +
+      punishSkippedByReason.unknown_higher_priority,
     corpPunishWindowExpiredBeforeAction,
     corpPunishWindowExpiredBeforeCorpTurn,
     corpTagSourceOpportunities,
@@ -14645,9 +15385,15 @@ function summarizeTagPunishWindowMetrics(
     corpTraceTagSkipped,
     corpTraceTagExpectedSuccess: round(corpTraceTagExpectedSuccess),
     corpTraceTagSkippedForEconomy: traceSkippedByReason.economy,
-    corpTraceTagSkippedForProtection: traceSkippedByReason.protection,
-    corpTraceTagSkippedForScore: traceSkippedByReason.score,
-    corpTraceTagSkippedForRemoteSafety: traceSkippedByReason.remote_safety,
+    corpTraceTagSkippedForProtection:
+      traceSkippedByReason.protection +
+      traceSkippedByReason.remote_protection +
+      traceSkippedByReason.central_protection,
+    corpTraceTagSkippedForScore:
+      traceSkippedByReason.score + traceSkippedByReason.advance,
+    corpTraceTagSkippedForRemoteSafety:
+      traceSkippedByReason.remote_safety +
+      traceSkippedByReason.remote_protection,
     corpTagSourceConvertedToRunnerTagged,
     corpTagSourceConvertedToPunishOpportunity,
     corpTagSourceConvertedToPunishTaken,

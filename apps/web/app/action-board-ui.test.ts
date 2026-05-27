@@ -105,6 +105,16 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(actionButtonLabel(actions[1]!)).toBe("Run auf R&D");
   });
 
+  it("keeps All-Nighter bonus run choices visible in the main action panel", () => {
+    const bonusRun = legalAction("runner", "start_run", "basic_action", "Bonus-Run auf HQ", { serverId: "hq", bonusRunNoClick: true });
+
+    const split = splitLegalActions([bonusRun]);
+
+    expect(split.primaryActions).toEqual([bonusRun]);
+    expect(split.contextualActions).toEqual([]);
+    expect(actionButtonLabel(bonusRun)).toBe("Bonus-Run auf HQ");
+  });
+
   it("keeps Olivia Salazar reduced rez source and paid cost visible in the button label", () => {
     const action = legalAction(
       "corp",
@@ -1404,6 +1414,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("keeps contextual card action labels distinct for server-targeted events", () => {
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf R&D", { cardId: "card_1", serverId: "rd" }))).toBe("Run auf R&D");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf Archives", { cardId: "card_1", serverId: "archives" }))).toBe("Run auf Archive");
+    expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "All-Nighter auf HQ", { cardId: "card_1", serverId: "hq", runnerEventRun: true }))).toBe("Run auf HQ");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Draw Event spielen", { cardId: "card_1" }))).toBe("Spielen");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Expose Event auf Remote 2", { cardId: "card_1", serverId: "remote_2" }))).toBe("Spielen auf Remote 2");
     expect(contextualCardActionLabel(legalAction("corp", "score_agenda", "agenda_1", "Security Net Optimization scoren und R&D wählen", { cardId: "agenda_1", selectedServerId: "rd" }))).toBe("Scoren: R&D wählen");

@@ -65,13 +65,18 @@ const EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS = [
   "onr_proteus_077_weapons-depot",
   "onr_proteus_078_armageddon",
   "onr_proteus_079_big-frackin-gun",
+  "onr_proteus_080_black-widow",
   "onr_proteus_081_boring-bit",
+  "onr_proteus_082_bulldozer",
   "onr_proteus_083_corrosion",
   "onr_proteus_084_crumble",
   "onr_proteus_085_disintegrator",
   "onr_proteus_086_enterprise-inc-shields",
+  "onr_proteus_088_fubar",
   "onr_proteus_089_garbage-in",
   "onr_proteus_090_highlighter",
+  "onr_proteus_091_lockjaw",
+  "onr_proteus_092_morphing-tool",
   "onr_proteus_093_redecorator",
   "onr_proteus_094_scaldan",
   "onr_proteus_095_skeleton-passkeys",
@@ -80,14 +85,29 @@ const EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS = [
   "onr_proteus_098_vienna-22",
   "onr_proteus_099_viral-pipeline",
   "onr_proteus_100_wrecking-ball",
+  "onr_proteus_101_all-hands",
   "onr_proteus_103_cruising-for-netwatch",
+  "onr_proteus_104_decoy-signal",
+  "onr_proteus_105_demolition-run",
+  "onr_proteus_106_disgruntled-ice-technician",
+  "onr_proteus_107_drone-for-a-day",
   "onr_proteus_108_faked-hit",
+  "onr_proteus_114_on-the-fast-track",
+  "onr_proteus_115_personal-touch-the",
   "onr_proteus_117_poisoned-water-supply",
+  "onr_proteus_118_prearranged-drop",
+  "onr_proteus_120_reconnaissance",
+  "onr_proteus_121_remote-detonator",
+  "onr_proteus_122_rush-hour",
   "onr_proteus_124_stakeout",
+  "onr_proteus_127_weefle-initiation",
+  "onr_proteus_130_back-door-to-rivals",
   "onr_proteus_134_cortical-cybermodem",
   "onr_proteus_135_cortical-stimulators",
   "onr_proteus_138_deck-the",
+  "onr_proteus_139_eurocorpse-tm-spin-chip",
   "onr_proteus_146_precision-bribery",
+  "onr_proteus_148_runner-sensei",
   "onr_proteus_150_streetware-distributor",
   "onr_proteus_151_sunburst-cranial-interface",
 ] as const;
@@ -266,7 +286,7 @@ describe("card set support catalog source", () => {
         card.catalogCardId.startsWith("onr_proteus_") &&
         !PROTEUS_VISIBLE_BASELINE_CARD_IDS.includes(card.catalogCardId),
     );
-    expect(blockedProteus).toHaveLength(87);
+    expect(blockedProteus).toHaveLength(67);
     expect(blockedProteus.every((card) => card.statuses.blocked)).toBe(true);
   });
 

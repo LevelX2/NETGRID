@@ -266,6 +266,8 @@ describe("game card implementation runtime deps root", () => {
         "runnerRunAttemptsLastTurn",
         "runnerRunAttemptsThisGame",
         "runnerTrashedNodeLastTurn",
+        "runnerTrashedAdvertisementThisTurn",
+        "runnerTrashedTransactionsThisTurn",
         "runnerInstalledResourceLastTurn",
         "runnerWasDamagedDuringLastThreeActions",
         "runnerMadeSuccessfulRunOnServerThisTurn",
@@ -336,6 +338,9 @@ describe("game card implementation runtime deps root", () => {
         "startDistributeAdvancementCounters",
         "startMoveAdvancementCounters",
         "addCurrentEncounterAdditionalSubroutine",
+        "addCurrentRunAccessCount",
+        "passCurrentEncounteredIce",
+        "revealHiddenRunnerResource",
         "abilityLimits",
       ].sort(),
     );

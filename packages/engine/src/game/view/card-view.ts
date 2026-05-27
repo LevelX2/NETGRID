@@ -61,6 +61,20 @@ function visibleKnownCardWithReferenceViewer(
     definition.type === "program"
       ? runRemainderStrengthBonusForBreaker(state.run, id)
       : 0;
+  const visibleStrength =
+    definition.strength !== undefined
+      ? definition.type === "ice"
+        ? iceStrengthFor(state, id)
+        : definition.strength +
+          instance.strengthModifier +
+          hostedProgramStrengthModifier(state, id) +
+          runRemainderStrengthBonus -
+          pattelAntibodyStrengthPenalty(instance)
+      : undefined;
+  const visibleStrengthModifier =
+    visibleStrength !== undefined
+      ? visibleStrengthModifierForKnownCard(state, id, definition, visibleStrength)
+      : undefined;
   return {
     instanceId: id,
     known: true,
@@ -102,17 +116,11 @@ function visibleKnownCardWithReferenceViewer(
               : definition.advancementRequirement,
         }
       : {}),
-    ...(definition.strength !== undefined
-      ? {
-          strength:
-            definition.type === "ice"
-              ? iceStrengthFor(state, id)
-              : definition.strength +
-                instance.strengthModifier +
-                hostedProgramStrengthModifier(state, id) +
-                runRemainderStrengthBonus -
-                pattelAntibodyStrengthPenalty(instance),
-        }
+    ...(visibleStrength !== undefined
+      ? { strength: visibleStrength }
+      : {}),
+    ...(visibleStrengthModifier !== undefined
+      ? { strengthModifier: visibleStrengthModifier }
       : {}),
     ...(definition.agendaPoints !== undefined
       ? { agendaPoints: definition.agendaPoints }
@@ -938,6 +946,24 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
     runEncounterBonus -
     pattelsReduction;
   return Math.max(0, total);
+}
+
+function visibleStrengthModifierForKnownCard(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  visibleStrength: number,
+): number | undefined {
+  if (definition.strength === undefined) return undefined;
+  const instance = mustInstance(state.cardInstances, cardId);
+  const baseStrength =
+    definition.type === "ice" &&
+    instance.variableIceState?.family === "x_strength" &&
+    typeof instance.variableIceState.strength === "number"
+      ? instance.variableIceState.strength
+      : definition.strength;
+  const modifier = Math.floor(visibleStrength - baseStrength);
+  return modifier > 0 ? modifier : undefined;
 }
 
 function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {

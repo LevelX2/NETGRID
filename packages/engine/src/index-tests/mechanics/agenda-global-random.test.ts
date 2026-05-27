@@ -1006,6 +1006,61 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("shows Black Ice Quality Assurance strength bonus on Olivia-rezzed Cinderella", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1919-olivia-black-ice-quality-cinderella-badge",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+          id: "onr_v1_corp_v1919_olivia_black_ice_quality_cinderella",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
+            { id: "onr_v1_191_black-ice-quality-assurance", quantity: 1 },
+            { id: "onr_v1_228_cinderella", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 4;
+    state.corp.maxHandSize = 100;
+    scoreCorpAgendaForTest(state, "onr_v1_191_black-ice-quality-assurance");
+    const oliviaId = putCorpRootInRemote(state, "onr_v1_363_olivia-salazar");
+    state.cardInstances[oliviaId] = {
+      ...state.cardInstances[oliviaId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const iceId = putCorpIceOnServer(state, "remote_1", "onr_v1_228_cinderella");
+
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const oliviaRez = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === iceId &&
+        action.payload?.oliviaSalazarRezSourceCardId === oliviaId,
+    );
+
+    state = apply(state, "corp", (action) => action.actionId === oliviaRez.actionId);
+    const visibleIce = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "remote_1")
+      ?.ice.find((ice) => ice.instanceId === iceId);
+    expect(visibleIce?.strength).toBe(8);
+    expect(visibleIce?.strengthModifier).toBe(2);
+  });
+
   it("keeps Olivia Salazar normal ICE rez actions when regular rez cost is payable", () => {
     let state = apply(
       createGameAfterSetup({

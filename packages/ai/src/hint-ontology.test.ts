@@ -268,4 +268,126 @@ describe("AI hint ontology validation", () => {
     expect(source).not.toContain("./deck-doctrine");
     expect(KNOWN_HINT_EFFECT_KINDS).toContain("scored_agenda_action");
   });
+
+  it("accepts read-only generated Corp economy and score-conversion kinds", () => {
+    const result = validateAiHintOntologyFields({
+      effects: [
+        { kind: "advance_burst", timing: "action", scope: "corp" },
+        { kind: "shuffle_draw", timing: "action", scope: "corp" },
+        { kind: "card_recovery", timing: "action", scope: "corp" },
+        { kind: "agenda_reveal_economy", timing: "when_scored", scope: "hq" },
+        { kind: "advance", timing: "action", scope: "corp" },
+        { kind: "install", timing: "action", scope: "corp" },
+        { kind: "rez", timing: "action", scope: "corp" },
+        { kind: "remote_build", timing: "action", scope: "corp" },
+        { kind: "global_modifier", timing: "persistent", scope: "corp" },
+        {
+          kind: "finite_economy_pool",
+          timing: "when_scored",
+          scope: "score_area",
+        },
+      ],
+      conditions: [
+        { kind: "requires_agenda_in_hq" },
+        { kind: "requires_agenda_reveal" },
+        { kind: "requires_hq_agenda" },
+        { kind: "requires_installed_ice" },
+        { kind: "requires_rezzed_ice" },
+        { kind: "requires_score_window" },
+        { kind: "requires_corp_credits_threshold" },
+        { kind: "requires_start_of_turn" },
+        { kind: "requires_stolen_agenda_last_turn" },
+        { kind: "requires_archives_card" },
+        { kind: "requires_rnd_top" },
+      ],
+    });
+    expect(result.errors).toEqual([]);
+  });
+
+  it("accepts read-only generated Corp node and ambush kinds", () => {
+    const result = validateAiHintOntologyFields({
+      effects: [
+        { kind: "action_economy", timing: "action", scope: "remote" },
+        {
+          kind: "start_of_turn_economy",
+          timing: "start_of_turn",
+          scope: "corp",
+        },
+        { kind: "recurring_economy", timing: "start_of_turn", scope: "corp" },
+        { kind: "advanceable_economy", timing: "action", scope: "remote" },
+        { kind: "ambush", timing: "on_access", scope: "remote" },
+        { kind: "access_punish", timing: "on_access", scope: "accessed_card" },
+        { kind: "remote_tax", timing: "during_run", scope: "runner" },
+        { kind: "link_penalty", timing: "persistent", scope: "runner" },
+        { kind: "economy", timing: "on_rez", scope: "corp" },
+      ],
+      conditions: [
+        { kind: "requires_accessed_card" },
+        { kind: "requires_advancement_counter" },
+        { kind: "requires_rezzed_card" },
+        { kind: "requires_runner_draw" },
+        { kind: "requires_runner_pay_or_take_tag" },
+      ],
+      remoteRole: {
+        kind: "tag_punish_asset",
+        threatLevel: "medium",
+        serverScope: "remote",
+      },
+    });
+    expect(result.errors).toEqual([]);
+  });
+
+  it("accepts read-only generated Runner prevention and survival kinds", () => {
+    const result = validateAiHintOntologyFields({
+      effects: [
+        {
+          kind: "damage_prevention",
+          timing: "prevention_window",
+          scope: "runner",
+          resource: "damage",
+          amount: 2,
+        },
+        {
+          kind: "flatline_prevention",
+          timing: "flatline_replacement",
+          scope: "runner",
+          resource: "damage",
+        },
+        {
+          kind: "program_trash_prevention",
+          timing: "prevention_window",
+          scope: "installed_program",
+        },
+        {
+          kind: "tag_prevention",
+          timing: "prevention_window",
+          scope: "runner",
+          resource: "tags",
+        },
+        { kind: "trace_defense", timing: "trace_window", scope: "trace" },
+        { kind: "base_link", timing: "trace_window", scope: "trace" },
+        {
+          kind: "hand_size_modifier",
+          timing: "persistent",
+          scope: "runner",
+          resource: "hand_size",
+        },
+        {
+          kind: "action_penalty",
+          timing: "persistent",
+          scope: "runner",
+          resource: "actions",
+        },
+      ],
+      conditions: [
+        { kind: "requires_damage" },
+        { kind: "requires_flatline" },
+        { kind: "requires_program_trash" },
+        { kind: "requires_trace_attempt" },
+        { kind: "requires_prevention_window" },
+        { kind: "requires_turn_limit_available" },
+      ],
+    });
+    expect(result.errors).toEqual([]);
+  });
 });

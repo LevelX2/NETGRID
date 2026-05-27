@@ -133,6 +133,78 @@ describe("install card execution", () => {
     expect(calls.regionReplacement).toEqual([regionId]);
   });
 
+  it("records public rez-on-install effects for cards that enter play rezzed", () => {
+    const regionId = "region_1" as CardInstanceId;
+    const forcedRezId = "forced_rez_1" as CardInstanceId;
+    const regionDefinition = definition("region_def", "upgrade", {
+      title: "Test Region",
+      subtypes: ["region"],
+    });
+    const forcedRezDefinition = definition("forced_rez_def", "upgrade", {
+      title: "Forced Rez Upgrade",
+    });
+    const state = minimalState({
+      cardInstances: {
+        [regionId]: instance(regionId, regionDefinition.id, "corp", "hq"),
+        [forcedRezId]: instance(
+          forcedRezId,
+          forcedRezDefinition.id,
+          "corp",
+          "hq",
+        ),
+      },
+      corpHq: [regionId, forcedRezId],
+    });
+    const host = testHost(state, {
+      [regionDefinition.id]: regionDefinition,
+      [forcedRezDefinition.id]: forcedRezDefinition,
+    });
+    host.servers.rootInstallRezzesOnInstall = () => true;
+    const regionAction = installAction("corp", regionId, {
+      placement: "root",
+      serverId: "remote_1",
+    });
+    const forcedRezAction = installAction("corp", forcedRezId, {
+      placement: "root",
+      serverId: "remote_1",
+    });
+
+    installCard(host, regionAction);
+    installCard(host, forcedRezAction);
+
+    expect(state.cardInstances[regionId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+    });
+    expect(state.cardInstances[forcedRezId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+    });
+    expect(regionAction.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "rez_card",
+        visibility: "public",
+        side: "corp",
+        reason: "region_install",
+        sourceDefinitionId: regionDefinition.id,
+        sourceTitle: "Test Region",
+        cardDefinitionId: regionDefinition.id,
+        cardTitle: "Test Region",
+        serverLabel: "Remote 1",
+      }),
+    ]);
+    expect(forcedRezAction.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "rez_card",
+        reason: "install_rez",
+        sourceDefinitionId: forcedRezDefinition.id,
+        sourceTitle: "Forced Rez Upgrade",
+        cardDefinitionId: forcedRezDefinition.id,
+        cardTitle: "Forced Rez Upgrade",
+      }),
+    ]);
+  });
+
   it("preserves Proteus doom install roll payloads and trash behavior", () => {
     const assetId = "asset_1" as CardInstanceId;
     const assetDefinition = definition("asset_def", "asset");

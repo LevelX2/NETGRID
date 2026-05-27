@@ -817,6 +817,13 @@ async function routeHttp(
       return;
     }
 
+    if (request.method === "GET" && url.pathname === "/api/matches/recent-results") {
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "matches-recent-results")) return;
+      const limit = Number(url.searchParams.get("limit") ?? 20);
+      sendJson(response, 200, { results: await service.listRecentGameResults(limit) });
+      return;
+    }
+
     if (request.method === "POST" && url.pathname === "/api/matches") {
       if (!checkRateLimit(response, rateLimiter, "create_match", request, deploymentConfig, "create")) return;
       const body = await readJson(request);

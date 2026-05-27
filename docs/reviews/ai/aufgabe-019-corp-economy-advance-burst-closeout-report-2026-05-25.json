@@ -1,0 +1,3118 @@
+{
+  "schemaVersion": "ai-generated-fact-batch8-corp-economy-closeout-v1",
+  "generatedAt": "2026-05-25",
+  "taskId": "Aufgabe 019",
+  "batch": "batch_8_corp_economy_operation_advance_burst",
+  "sourceReports": [
+    "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json",
+    "docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json",
+    "docs/reviews/ai/ai-generated-fact-migration-priority-report-2026-05-25.json",
+    "docs/reviews/ai/aufgabe-018-corp-ice-longtail-closeout-report-2026-05-25.json"
+  ],
+  "mode": "read-only closeout; no active hint migration, no runtime compile, no planner or consumer binding",
+  "candidateCardCount": 30,
+  "includedCardCount": 30,
+  "excludedCardCount": 0,
+  "confirmedGeneratedFactCount": 101,
+  "previewAddedFactCount": 84,
+  "conflictCount": 0,
+  "realSemanticConflictCount": 0,
+  "normalizedDifferenceCount": 199,
+  "remainingDifferenceCount": 0,
+  "scoreContextInfoCount": 18,
+  "legalActionContextInfoCount": 11,
+  "hiddenZoneContextInfoCount": 6,
+  "variableAmountContextInfoCount": 5,
+  "boardContextInfoCount": 9,
+  "scoreConversionOverlayInfoCount": 23,
+  "descriptorFollowupCount": 0,
+  "readiness": "ready_read_only_split_subbatches",
+  "readinessCounts": {
+    "ready_read_only_with_score_legalaction_context": 30
+  },
+  "subBatchReadiness": {
+    "corp_advance_burst": 3,
+    "corp_operation_draw_or_recovery": 2,
+    "corp_operation_economy": 3,
+    "global_research_modifier": 6,
+    "score_conversion_support": 4,
+    "scored_agenda_economy": 5,
+    "when_scored_economy_or_rez": 7
+  },
+  "normalizationRuleCounts": {
+    "operation_economy_normalization": 11,
+    "finite_economy_pool_normalization": 5,
+    "when_scored_economy_normalization": 0,
+    "scored_activated_economy_draw_normalization": 7,
+    "advance_burst_operation_normalization": 9,
+    "rez_or_install_discount_normalization": 7,
+    "global_research_modifier_normalization": 13,
+    "agenda_reveal_or_hq_context_normalization": 2,
+    "shuffle_draw_or_rnd_reset_normalization": 7,
+    "score_conversion_overlay_split_normalization": 23,
+    "score_context_required_classification": 44,
+    "legalaction_context_required_classification": 14,
+    "hidden_zone_context_classification": 11,
+    "variable_amount_context_classification": 7,
+    "board_context_required_classification": 13
+  },
+  "includedCards": [
+    {
+      "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "title": "AI Chief Financial Officer",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "scored_agenda_economy",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": ["effects", "conditions", "costProfile"],
+      "generatedFactsConfirmed": [
+        "condition:requires_scored_agenda",
+        "effect:draw",
+        "effect:shuffle_draw",
+        "effect:zone_shuffle"
+      ],
+      "previewAdds": ["effect:shuffle_draw"],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:draw",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "scored_activated_context_normalized",
+          "rule": "scored_activated_economy_draw_normalization",
+          "rationale": "Score-area actions remain LegalAction gated and do not create playability on their own."
+        },
+        {
+          "field": "effect:shuffle_draw",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "shuffle_draw_hidden_zone_context_normalized",
+          "rule": "shuffle_draw_or_rnd_reset_normalization",
+          "rationale": "Shuffle/draw/R&D reset facts never expose actual hidden zone order."
+        },
+        {
+          "field": "effect:zone_shuffle",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "shuffle_draw_hidden_zone_context_normalized",
+          "rule": "shuffle_draw_or_rnd_reset_normalization",
+          "rationale": "Shuffle/draw/R&D reset facts never expose actual hidden zone order."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_classification",
+          "rationale": "Hidden-zone facts are side-safe context markers only."
+        }
+      ],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_189_artificial-security-directors",
+      "title": "Artificial Security Directors",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "score_conversion_support",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "effect:global_modifier",
+        "effect:score_acceleration"
+      ],
+      "previewAdds": ["effect:global_modifier", "effect:score_acceleration"],
+      "normalizedDifferences": [
+        {
+          "field": "effect:global_modifier",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effect:score_acceleration",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "advance_burst_context_normalized",
+          "rule": "advance_burst_operation_normalization",
+          "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [
+        {
+          "kind": "legalaction_context_info",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        }
+      ],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [
+        {
+          "kind": "board_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        }
+      ],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "title": "Bioweapons Engineering",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "global_research_modifier",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_scored_agenda",
+        "effect:global_modifier"
+      ],
+      "previewAdds": [
+        "condition:requires_scored_agenda",
+        "effect:global_modifier"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:global_modifier",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [
+        {
+          "kind": "board_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        }
+      ],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "title": "Black Ice Quality Assurance",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "global_research_modifier",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": ["effects"],
+      "generatedFactsConfirmed": [
+        "effect:global_modifier",
+        "effect:remote_protection"
+      ],
+      "previewAdds": ["effect:global_modifier"],
+      "normalizedDifferences": [
+        {
+          "field": "effect:global_modifier",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effect:remote_protection",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [
+        {
+          "kind": "board_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        }
+      ],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_194_corporate-downsizing",
+      "title": "Corporate Downsizing",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "when_scored_economy_or_rez",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_agenda_in_hq",
+        "condition:requires_agenda_reveal",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:agenda_reveal_economy",
+        "effect:economy",
+        "effect:zone_shuffle"
+      ],
+      "previewAdds": [
+        "condition:requires_agenda_in_hq",
+        "condition:requires_agenda_reveal",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:agenda_reveal_economy",
+        "effect:economy",
+        "effect:zone_shuffle"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_agenda_in_hq",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "hidden_zone_context_classified",
+          "rule": "hidden_zone_context_classification",
+          "rationale": "Hidden-zone facts are side-safe context markers only."
+        },
+        {
+          "field": "condition:requires_agenda_reveal",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "agenda_reveal_hq_context_normalized",
+          "rule": "agenda_reveal_or_hq_context_normalization",
+          "rationale": "HQ agenda reveal economy is context only and never includes hidden HQ agenda identities."
+        },
+        {
+          "field": "condition:requires_score_window",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:agenda_reveal_economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "agenda_reveal_hq_context_normalized",
+          "rule": "agenda_reveal_or_hq_context_normalization",
+          "rationale": "HQ agenda reveal economy is context only and never includes hidden HQ agenda identities."
+        },
+        {
+          "field": "effect:economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "operation_economy_context_normalized",
+          "rule": "operation_economy_normalization",
+          "rationale": "Operation economy/draw/action facts stay mechanical; the report never recommends playing economy now."
+        },
+        {
+          "field": "effect:zone_shuffle",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "shuffle_draw_hidden_zone_context_normalized",
+          "rule": "shuffle_draw_or_rnd_reset_normalization",
+          "rationale": "Shuffle/draw/R&D reset facts never expose actual hidden zone order."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_classification",
+          "rationale": "Hidden-zone facts are side-safe context markers only."
+        }
+      ],
+      "variableAmountContextInfos": [
+        {
+          "kind": "variable_amount_context_info",
+          "rule": "variable_amount_context_classification",
+          "rationale": "Variable amounts remain context-dependent and are not fixed guaranteed values."
+        }
+      ],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_195_corporate-retreat",
+      "title": "Corporate Retreat",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "scored_agenda_economy",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:scored_agenda_action"
+      ],
+      "previewAdds": [
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:scored_agenda_action"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "operation_economy_context_normalized",
+          "rule": "operation_economy_normalization",
+          "rationale": "Operation economy/draw/action facts stay mechanical; the report never recommends playing economy now."
+        },
+        {
+          "field": "effect:scored_agenda_action",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "scored_activated_context_normalized",
+          "rule": "scored_activated_economy_draw_normalization",
+          "rationale": "Score-area actions remain LegalAction gated and do not create playability on their own."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_196_corporate-war",
+      "title": "Corporate War",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "when_scored_economy_or_rez",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": ["effects"],
+      "generatedFactsConfirmed": [
+        "condition:requires_corp_credits_threshold",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:counter_economy",
+        "effect:economy"
+      ],
+      "previewAdds": [
+        "condition:requires_corp_credits_threshold",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:counter_economy"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_corp_credits_threshold",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "variable_amount_context_classified",
+          "rule": "variable_amount_context_classification",
+          "rationale": "Variable amounts remain context-dependent and are not fixed guaranteed values."
+        },
+        {
+          "field": "condition:requires_score_window",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:counter_economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "finite_pool_context_normalized",
+          "rule": "finite_economy_pool_normalization",
+          "rationale": "Hosted or finite credit pools are mechanical sources only; remaining pool amount is board state."
+        },
+        {
+          "field": "effect:economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "operation_economy_context_normalized",
+          "rule": "operation_economy_normalization",
+          "rationale": "Operation economy/draw/action facts stay mechanical; the report never recommends playing economy now."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [
+        {
+          "kind": "variable_amount_context_info",
+          "rule": "variable_amount_context_classification",
+          "rationale": "Variable amounts remain context-dependent and are not fixed guaranteed values."
+        }
+      ],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_197_data-fort-reclamation",
+      "title": "Data Fort Reclamation",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "when_scored_economy_or_rez",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_hq_agenda",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:install",
+        "effect:remote_build",
+        "effect:rez"
+      ],
+      "previewAdds": [
+        "condition:requires_hq_agenda",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:install",
+        "effect:remote_build",
+        "effect:rez"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_hq_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "hidden_zone_context_classified",
+          "rule": "hidden_zone_context_classification",
+          "rationale": "Hidden-zone facts are side-safe context markers only."
+        },
+        {
+          "field": "condition:requires_score_window",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "operation_economy_context_normalized",
+          "rule": "operation_economy_normalization",
+          "rationale": "Operation economy/draw/action facts stay mechanical; the report never recommends playing economy now."
+        },
+        {
+          "field": "effect:install",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "rez_install_discount_context_normalized",
+          "rule": "rez_or_install_discount_normalization",
+          "rationale": "Rez/install discount facts do not choose targets and do not reveal hidden cards."
+        },
+        {
+          "field": "effect:remote_build",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "rez_install_discount_context_normalized",
+          "rule": "rez_or_install_discount_normalization",
+          "rationale": "Rez/install discount facts do not choose targets and do not reveal hidden cards."
+        },
+        {
+          "field": "effect:rez",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "rez_install_discount_context_normalized",
+          "rule": "rez_or_install_discount_normalization",
+          "rationale": "Rez/install discount facts do not choose targets and do not reveal hidden cards."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [
+        {
+          "kind": "legalaction_context_info",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        }
+      ],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_classification",
+          "rationale": "Hidden-zone facts are side-safe context markers only."
+        }
+      ],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_198_detroit-police-contract",
+      "title": "Detroit Police Contract",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "scored_agenda_economy",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "previewAdds": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_start_of_turn",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "legalaction_context_classified",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:counter_economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "finite_pool_context_normalized",
+          "rule": "finite_economy_pool_normalization",
+          "rationale": "Hosted or finite credit pools are mechanical sources only; remaining pool amount is board state."
+        },
+        {
+          "field": "effect:finite_economy_pool",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "finite_pool_context_normalized",
+          "rule": "finite_economy_pool_normalization",
+          "rationale": "Hosted or finite credit pools are mechanical sources only; remaining pool amount is board state."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [
+        {
+          "kind": "variable_amount_context_info",
+          "rule": "variable_amount_context_classification",
+          "rationale": "Variable amounts remain context-dependent and are not fixed guaranteed values."
+        }
+      ],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_200_encryption-breakthrough",
+      "title": "Encryption Breakthrough",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "global_research_modifier",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_installed_ice",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:global_modifier",
+        "effect:remote_protection"
+      ],
+      "previewAdds": [
+        "condition:requires_installed_ice",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:global_modifier",
+        "effect:remote_protection"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_installed_ice",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "board_context_classified",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        },
+        {
+          "field": "condition:requires_score_window",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "operation_economy_context_normalized",
+          "rule": "operation_economy_normalization",
+          "rationale": "Operation economy/draw/action facts stay mechanical; the report never recommends playing economy now."
+        },
+        {
+          "field": "effect:global_modifier",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effect:remote_protection",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [
+        {
+          "kind": "board_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        }
+      ],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_201_executive-extraction",
+      "title": "Executive Extraction",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "score_conversion_support",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "effect:global_modifier",
+        "effect:score_acceleration"
+      ],
+      "previewAdds": ["effect:global_modifier", "effect:score_acceleration"],
+      "normalizedDifferences": [
+        {
+          "field": "effect:global_modifier",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effect:score_acceleration",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "advance_burst_context_normalized",
+          "rule": "advance_burst_operation_normalization",
+          "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [
+        {
+          "kind": "legalaction_context_info",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        }
+      ],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [
+        {
+          "kind": "board_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        }
+      ],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_202_genetics-visionary-acquisition",
+      "title": "Genetics-Visionary Acquisition",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "score_conversion_support",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "effect:global_modifier",
+        "effect:score_acceleration"
+      ],
+      "previewAdds": ["effect:global_modifier", "effect:score_acceleration"],
+      "normalizedDifferences": [
+        {
+          "field": "effect:global_modifier",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effect:score_acceleration",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "advance_burst_context_normalized",
+          "rule": "advance_burst_operation_normalization",
+          "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [
+        {
+          "kind": "legalaction_context_info",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        }
+      ],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [
+        {
+          "kind": "board_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        }
+      ],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_203_hostile-takeover",
+      "title": "Hostile Takeover",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "when_scored_economy_or_rez",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": ["effects"],
+      "generatedFactsConfirmed": [
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:economy"
+      ],
+      "previewAdds": [
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_score_window",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "operation_economy_context_normalized",
+          "rule": "operation_economy_normalization",
+          "rationale": "Operation economy/draw/action facts stay mechanical; the report never recommends playing economy now."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_204_ice-transmutation",
+      "title": "Ice Transmutation",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "global_research_modifier",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_rezzed_ice",
+        "condition:requires_scored_agenda",
+        "effect:global_modifier",
+        "effect:remote_protection"
+      ],
+      "previewAdds": [
+        "condition:requires_rezzed_ice",
+        "condition:requires_scored_agenda",
+        "effect:global_modifier",
+        "effect:remote_protection"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_rezzed_ice",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "board_context_classified",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        },
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:global_modifier",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effect:remote_protection",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [
+        {
+          "kind": "board_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        }
+      ],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_206_marine-arcology",
+      "title": "Marine Arcology",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "scored_agenda_economy",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": ["effects", "conditions", "costProfile"],
+      "generatedFactsConfirmed": [
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:scored_agenda_action"
+      ],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "operation_economy_context_normalized",
+          "rule": "operation_economy_normalization",
+          "rationale": "Operation economy/draw/action facts stay mechanical; the report never recommends playing economy now."
+        },
+        {
+          "field": "effect:scored_agenda_action",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "scored_activated_context_normalized",
+          "rule": "scored_activated_economy_draw_normalization",
+          "rationale": "Score-area actions remain LegalAction gated and do not create playability on their own."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_209_political-coup",
+      "title": "Political Coup",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "scored_agenda_economy",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": ["effects", "conditions", "costProfile"],
+      "generatedFactsConfirmed": [
+        "condition:requires_scored_agenda",
+        "effect:counter_economy",
+        "effect:finite_economy_pool",
+        "effect:scored_agenda_action"
+      ],
+      "previewAdds": ["effect:finite_economy_pool"],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:counter_economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "finite_pool_context_normalized",
+          "rule": "finite_economy_pool_normalization",
+          "rationale": "Hosted or finite credit pools are mechanical sources only; remaining pool amount is board state."
+        },
+        {
+          "field": "effect:finite_economy_pool",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "finite_pool_context_normalized",
+          "rule": "finite_economy_pool_normalization",
+          "rationale": "Hosted or finite credit pools are mechanical sources only; remaining pool amount is board state."
+        },
+        {
+          "field": "effect:scored_agenda_action",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "scored_activated_context_normalized",
+          "rule": "scored_activated_economy_draw_normalization",
+          "rationale": "Score-area actions remain LegalAction gated and do not create playability on their own."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [
+        {
+          "kind": "variable_amount_context_info",
+          "rule": "variable_amount_context_classification",
+          "rationale": "Variable amounts remain context-dependent and are not fixed guaranteed values."
+        }
+      ],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_211_polymer-breakthrough",
+      "title": "Polymer Breakthrough",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "when_scored_economy_or_rez",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_start_of_turn",
+        "effect:economy"
+      ],
+      "previewAdds": ["condition:requires_start_of_turn", "effect:economy"],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_start_of_turn",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "legalaction_context_classified",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "operation_economy_context_normalized",
+          "rule": "operation_economy_normalization",
+          "rationale": "Operation economy/draw/action facts stay mechanical; the report never recommends playing economy now."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_212_priority-requisition",
+      "title": "Priority Requisition",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "when_scored_economy_or_rez",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": ["effects"],
+      "generatedFactsConfirmed": [
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:rez",
+        "effect:rez_discount"
+      ],
+      "previewAdds": [
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:rez"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_score_window",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:rez_discount",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "rez_install_discount_context_normalized",
+          "rule": "rez_or_install_discount_normalization",
+          "rationale": "Rez/install discount facts do not choose targets and do not reveal hidden cards."
+        },
+        {
+          "field": "effect:rez",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "rez_install_discount_context_normalized",
+          "rule": "rez_or_install_discount_normalization",
+          "rationale": "Rez/install discount facts do not choose targets and do not reveal hidden cards."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [
+        {
+          "kind": "legalaction_context_info",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        }
+      ],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_215_security-net-optimization",
+      "title": "Security Net Optimization",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "global_research_modifier",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_remote_server",
+        "condition:requires_scored_agenda",
+        "effect:global_modifier"
+      ],
+      "previewAdds": [
+        "condition:requires_remote_server",
+        "condition:requires_scored_agenda",
+        "effect:global_modifier"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_remote_server",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "board_context_classified",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        },
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:global_modifier",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [
+        {
+          "kind": "board_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        }
+      ],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_216_security-purge",
+      "title": "Security Purge",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "when_scored_economy_or_rez",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_rnd_top",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:install",
+        "effect:rez_discount",
+        "effect:topdeck_info"
+      ],
+      "previewAdds": [
+        "condition:requires_rnd_top",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:install",
+        "effect:rez_discount",
+        "effect:topdeck_info"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_rnd_top",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "hidden_zone_context_classified",
+          "rule": "hidden_zone_context_classification",
+          "rationale": "Hidden-zone facts are side-safe context markers only."
+        },
+        {
+          "field": "condition:requires_score_window",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:install",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "rez_install_discount_context_normalized",
+          "rule": "rez_or_install_discount_normalization",
+          "rationale": "Rez/install discount facts do not choose targets and do not reveal hidden cards."
+        },
+        {
+          "field": "effect:rez_discount",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "rez_install_discount_context_normalized",
+          "rule": "rez_or_install_discount_normalization",
+          "rationale": "Rez/install discount facts do not choose targets and do not reveal hidden cards."
+        },
+        {
+          "field": "effect:topdeck_info",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "shuffle_draw_hidden_zone_context_normalized",
+          "rule": "shuffle_draw_or_rnd_reset_normalization",
+          "rationale": "Shuffle/draw/R&D reset facts never expose actual hidden zone order."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [
+        {
+          "kind": "legalaction_context_info",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        }
+      ],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_classification",
+          "rationale": "Hidden-zone facts are side-safe context markers only."
+        }
+      ],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_218_subsidiary-branch",
+      "title": "Subsidiary Branch",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "score_conversion_support",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_start_of_turn",
+        "effect:extra_action"
+      ],
+      "previewAdds": [
+        "condition:requires_start_of_turn",
+        "effect:extra_action"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_start_of_turn",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "legalaction_context_classified",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:extra_action",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "scored_activated_context_normalized",
+          "rule": "scored_activated_economy_draw_normalization",
+          "rationale": "Score-area actions remain LegalAction gated and do not create playability on their own."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [
+        {
+          "kind": "legalaction_context_info",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        }
+      ],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_219_superior-net-barriers",
+      "title": "Superior Net Barriers",
+      "side": "corp",
+      "cardType": "agenda",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "global_research_modifier",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": ["effects"],
+      "generatedFactsConfirmed": [
+        "condition:requires_installed_ice",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:global_modifier",
+        "effect:remote_protection"
+      ],
+      "previewAdds": [
+        "condition:requires_installed_ice",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:global_modifier"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_installed_ice",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "board_context_classified",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        },
+        {
+          "field": "condition:requires_score_window",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "condition:requires_scored_agenda",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "operation_economy_context_normalized",
+          "rule": "operation_economy_normalization",
+          "rationale": "Operation economy/draw/action facts stay mechanical; the report never recommends playing economy now."
+        },
+        {
+          "field": "effect:global_modifier",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effect:remote_protection",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "global_modifier_context_normalized",
+          "rule": "global_research_modifier_normalization",
+          "rationale": "Persistent agenda modifiers are mechanical facts; active board impact remains engine/board context."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [
+        {
+          "kind": "board_context_required_info",
+          "rule": "board_context_required_classification",
+          "rationale": "Board/server/rezzed/install state remains runtime-owned."
+        }
+      ],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_295_night-shift",
+      "title": "Night Shift",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "corp_operation_economy",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": ["effects", "costProfile"],
+      "generatedFactsConfirmed": ["effect:draw", "effect:economy"],
+      "previewAdds": [],
+      "normalizedDifferences": [
+        {
+          "field": "effect:draw",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "scored_activated_context_normalized",
+          "rule": "scored_activated_economy_draw_normalization",
+          "rationale": "Score-area actions remain LegalAction gated and do not create playability on their own."
+        },
+        {
+          "field": "effect:economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "operation_economy_context_normalized",
+          "rule": "operation_economy_normalization",
+          "rationale": "Operation economy/draw/action facts stay mechanical; the report never recommends playing economy now."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_296_off-site-backups",
+      "title": "Off-Site Backups",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "corp_operation_draw_or_recovery",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": ["effects", "costProfile"],
+      "generatedFactsConfirmed": [
+        "condition:requires_archives_card",
+        "effect:card_recovery"
+      ],
+      "previewAdds": [
+        "condition:requires_archives_card",
+        "effect:card_recovery"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_archives_card",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "hidden_zone_context_classified",
+          "rule": "hidden_zone_context_classification",
+          "rationale": "Hidden-zone facts are side-safe context markers only."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:card_recovery",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "shuffle_draw_hidden_zone_context_normalized",
+          "rule": "shuffle_draw_or_rnd_reset_normalization",
+          "rationale": "Shuffle/draw/R&D reset facts never expose actual hidden zone order."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_classification",
+          "rationale": "Hidden-zone facts are side-safe context markers only."
+        }
+      ],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_297_overtime-incentives",
+      "title": "Overtime Incentives",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "corp_operation_economy",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": ["effect:extra_action"],
+      "previewAdds": ["effect:extra_action"],
+      "normalizedDifferences": [
+        {
+          "field": "effect:extra_action",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "scored_activated_context_normalized",
+          "rule": "scored_activated_economy_draw_normalization",
+          "rationale": "Score-area actions remain LegalAction gated and do not create playability on their own."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [
+        {
+          "kind": "legalaction_context_info",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        }
+      ],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_298_planning-consultants",
+      "title": "Planning Consultants",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "corp_operation_draw_or_recovery",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_rnd_top",
+        "effect:topdeck_info",
+        "effect:zone_shuffle"
+      ],
+      "previewAdds": [
+        "condition:requires_rnd_top",
+        "effect:topdeck_info",
+        "effect:zone_shuffle"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_rnd_top",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "hidden_zone_context_classified",
+          "rule": "hidden_zone_context_classification",
+          "rationale": "Hidden-zone facts are side-safe context markers only."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:topdeck_info",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "shuffle_draw_hidden_zone_context_normalized",
+          "rule": "shuffle_draw_or_rnd_reset_normalization",
+          "rationale": "Shuffle/draw/R&D reset facts never expose actual hidden zone order."
+        },
+        {
+          "field": "effect:zone_shuffle",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "shuffle_draw_hidden_zone_context_normalized",
+          "rule": "shuffle_draw_or_rnd_reset_normalization",
+          "rationale": "Shuffle/draw/R&D reset facts never expose actual hidden zone order."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_classification",
+          "rationale": "Hidden-zone facts are side-safe context markers only."
+        }
+      ],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_300_project-consultants",
+      "title": "Project Consultants",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "corp_advance_burst",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_score_window",
+        "effect:advance_burst",
+        "effect:score_acceleration"
+      ],
+      "previewAdds": [
+        "condition:requires_score_window",
+        "effect:advance_burst",
+        "effect:score_acceleration"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_score_window",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "costProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:advance_burst",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "advance_burst_context_normalized",
+          "rule": "advance_burst_operation_normalization",
+          "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effect:score_acceleration",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "advance_burst_context_normalized",
+          "rule": "advance_burst_operation_normalization",
+          "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "remoteRole",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [
+        {
+          "kind": "legalaction_context_info",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        }
+      ],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+      "title": "Silver Lining Recovery Protocol",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "corp_operation_economy",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_stolen_agenda_last_turn",
+        "effect:economy"
+      ],
+      "previewAdds": [
+        "condition:requires_stolen_agenda_last_turn",
+        "effect:economy"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_stolen_agenda_last_turn",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "variable_amount_context_classified",
+          "rule": "variable_amount_context_classification",
+          "rationale": "Variable amounts remain context-dependent and are not fixed guaranteed values."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:economy",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "operation_economy_context_normalized",
+          "rule": "operation_economy_normalization",
+          "rationale": "Operation economy/draw/action facts stay mechanical; the report never recommends playing economy now."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [],
+      "legalActionContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [
+        {
+          "kind": "variable_amount_context_info",
+          "rule": "variable_amount_context_classification",
+          "rationale": "Variable amounts remain context-dependent and are not fixed guaranteed values."
+        }
+      ],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "title": "Systematic Layoffs",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "corp_advance_burst",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_score_window",
+        "effect:advance_burst",
+        "effect:score_acceleration"
+      ],
+      "previewAdds": [
+        "condition:requires_score_window",
+        "effect:advance_burst",
+        "effect:score_acceleration"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_score_window",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "costProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:advance_burst",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "advance_burst_context_normalized",
+          "rule": "advance_burst_operation_normalization",
+          "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effect:score_acceleration",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "advance_burst_context_normalized",
+          "rule": "advance_burst_operation_normalization",
+          "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "remoteRole",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [
+        {
+          "kind": "legalaction_context_info",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        }
+      ],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    },
+    {
+      "cardId": "onr_v1_305_team-restructuring",
+      "title": "Team Restructuring",
+      "side": "corp",
+      "cardType": "operation",
+      "activeHintFound": true,
+      "runtimeCatalogCardFound": true,
+      "cardImplementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "pilotCardFound": true,
+      "derivedFactsFound": true,
+      "compiledIndexFound": true,
+      "migrationPriorityFound": true,
+      "subBatch": "corp_advance_burst",
+      "priority": "P1",
+      "risk": "medium",
+      "activeMechanicalFields": [],
+      "generatedFactsConfirmed": [
+        "condition:requires_score_window",
+        "effect:advance_burst",
+        "effect:score_acceleration"
+      ],
+      "previewAdds": [
+        "condition:requires_score_window",
+        "effect:advance_burst",
+        "effect:score_acceleration"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "condition:requires_score_window",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "score_context_classified",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "costProfile",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:advance_burst",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "advance_burst_context_normalized",
+          "rule": "advance_burst_operation_normalization",
+          "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effect:score_acceleration",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "advance_burst_context_normalized",
+          "rule": "advance_burst_operation_normalization",
+          "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "remoteRole",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        }
+      ],
+      "scoreContextInfos": [
+        {
+          "kind": "score_context_info",
+          "rule": "score_context_required_classification",
+          "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        }
+      ],
+      "legalActionContextInfos": [
+        {
+          "kind": "legalaction_context_info",
+          "rule": "legalaction_context_required_classification",
+          "rationale": "Generated facts describe static card function and do not create PlayerAction legality."
+        }
+      ],
+      "hiddenZoneContextInfos": [],
+      "variableAmountContextInfos": [],
+      "boardContextInfos": [],
+      "scoreConversionOverlayInfos": [
+        {
+          "kind": "score_conversion_overlay_info",
+          "rule": "score_conversion_overlay_split_normalization",
+          "rationale": "Strategic score-conversion value stays overlay/planner logic, not a generated fact."
+        }
+      ],
+      "descriptorFollowups": [],
+      "activeConsumers": [
+        "corp_score_conversion_diagnostics",
+        "corp_economy_context",
+        "scored_agenda_context"
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_score_legalaction_context"
+    }
+  ],
+  "excludedCards": [],
+  "contextRules": [
+    "Operation economy facts describe mechanical credit/draw/action output only and never say to play economy now.",
+    "When-scored and scored-activated facts remain score/LegalAction context and do not create score_now legality.",
+    "Advance-burst facts describe advancement-counter placement only and do not guarantee score windows.",
+    "Rez/install-at-no-cost facts do not select targets and do not reveal hidden cards.",
+    "HQ/R&D/Archives facts remain side-safe hidden-zone context and never contain hidden card identities or order.",
+    "Global modifiers are mechanical scored/persistent facts; active board impact remains engine/board state.",
+    "Score-conversion value remains overlay/planner logic, not generated mechanical facts."
+  ],
+  "nextBatchRecommendation": {
+    "recommendedTaskId": "Aufgabe 020",
+    "batchName": "corp_nodes_assets_ambush_economy_remotes",
+    "recommendation": "Option C",
+    "rationale": "After Corp economy, operations and score-conversion support close cleanly, Corp nodes/assets/ambush/economy remotes are the next large gameplay-relevant mechanical group. They connect directly to remote portfolio, trash-budget and tag/punish evaluation while keeping remote intent and bait valuation as strategy/overlay context.",
+    "candidateCards": [
+      "City Surveillance",
+      "Datapool by Zetatech",
+      "Netwatch Credit Voucher",
+      "BBS Whispering Campaign",
+      "New Blood",
+      "Rent-to-Own Contract",
+      "Melange Mining Corp.",
+      "Chicago Branch"
+    ],
+    "fallbackBatch": {
+      "batchName": "runner_prevention_damage_survival_tools",
+      "rationale": "If asset/ambush remote intent looks too strategic, Runner prevention and survival tools are the safer follow-up after the Corp ICE damage/trace work."
+    }
+  },
+  "hardErrorCount": 0,
+  "errors": []
+}
