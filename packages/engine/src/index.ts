@@ -468,6 +468,14 @@ import {
   type RunnerBreakerActionExecutionHost,
 } from "./game/run/runner-breaker-action-execution";
 import {
+  handleStartRunActionExecution,
+  type StartRunActionExecutionHost,
+} from "./game/run/start-run-action-execution";
+import {
+  handleRezActionExecution,
+  type RezActionExecutionHost,
+} from "./game/rez/rez-action-execution";
+import {
   handlePlayCardExecution,
   type PlayCardExecutionHost,
 } from "./game/play/play-card-execution";
@@ -4791,75 +4799,17 @@ function performAction(
       );
       return;
     case "start_run":
-      validateRovingSubmarineRunGate(
-        fortRunSideFamiliesHostForState(state),
-        String(legalAction.payload?.serverId) as Exclude<
-          ServerId,
-          "new_remote"
-        >,
-      );
-      if (legalAction.payload?.bonusRunNoClick === true) {
-        ensureRunnerTurnFlags(state).allNighterBonusRunPending = false;
-        ensureRunnerTurnFlags(state).bodyweightDataCrecheExtraRunPending = false;
-      } else {
-        spendClick(state, "runner");
-      }
-      if (legalAction.payload?.wilsonRunOnlyAction === true) {
-        const flags = ensureRunnerTurnFlags(state);
-        const remaining = Math.max(
-          0,
-          Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0),
-        );
-        if (remaining <= 0)
-          throw new Error("Es ist keine Wilson-Run-Aktion verfuegbar.");
-        flags.wilsonRunOnlyActionsRemaining = remaining - 1;
-      }
-      startRun(
-        state,
-        String(legalAction.payload?.serverId) as Exclude<
-          ServerId,
-          "new_remote"
-        >,
-        undefined,
-        1,
-        undefined,
+      handleStartRunActionExecution(
+        startRunActionExecutionHost(state),
         legalAction,
       );
-      if (legalAction.payload?.wilsonRunOnlyAction === true && state.run) {
-        const sourceCardId = activeWilsonSourceIds(runDurationPaymentHost(state))[0];
-        state.run.wilsonRunSpendingCap = {
-          sourceCardInstanceId: sourceCardId ?? ("" as CardInstanceId),
-          limit: 3,
-          spent: 0,
-        };
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          runSpendingCap: 3,
-          runSpendingCapSpent: 0,
-          wilsonRunSpendingCapActive: true,
-        };
-      }
-      payRunStartTaxCredits(runDurationPaymentHost(state), legalAction);
       return;
     case "jack_out":
       handleRunMovementAction(runMovementHostForState(state), legalAction);
       return;
     case "rez_ice":
-      executeRezCard(
-        rezCardHost(state),
-        String(legalAction.payload?.cardId) as CardInstanceId,
-        legalAction.payload?.rootRez === true ||
-          legalAction.payload?.assetRez === true,
-        legalAction,
-      );
-      expireCorporateRetreatInstallCreditAbilities(state);
-      return;
     case "decline_rez":
-      if (legalAction.payload?.runRootRezPass === true) {
-        passCorpRunRootRezWindow(runRezWindowHostForState(state), legalAction);
-        return;
-      }
-      passApproachedIce(runMovementHostForState(state));
+      handleRezActionExecution(rezActionExecutionHost(state), legalAction);
       return;
     case "pump_breaker":
       handleRunnerBreakerActionExecution(
@@ -9933,6 +9883,49 @@ function runnerBreakerActionExecutionHost(
         recordDupreBreakUsage(runEndCleanupHost(state), breakerId),
       recordSnowballBreakUsage: (breakerId) =>
         recordSnowballBreakUsage(state, breakerId),
+    },
+  };
+}
+
+function startRunActionExecutionHost(
+  state: GameState,
+): StartRunActionExecutionHost {
+  return {
+    state,
+    payment: {
+      spendRunnerClick: () => spendClick(state, "runner"),
+      payRunStartTaxCredits: (legalAction) =>
+        payRunStartTaxCredits(runDurationPaymentHost(state), legalAction),
+    },
+    turn: {
+      ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
+    },
+    run: {
+      validateRovingSubmarineRunGate: (serverId) =>
+        validateRovingSubmarineRunGate(
+          fortRunSideFamiliesHostForState(state),
+          serverId,
+        ),
+      startRun: (serverId, legalAction) =>
+        startRun(state, serverId, undefined, 1, undefined, legalAction),
+      activeWilsonSourceIds: () =>
+        activeWilsonSourceIds(runDurationPaymentHost(state)),
+    },
+  };
+}
+
+function rezActionExecutionHost(state: GameState): RezActionExecutionHost {
+  return {
+    rez: {
+      executeRezCard: (cardId, rootRez, legalAction) =>
+        executeRezCard(rezCardHost(state), cardId, rootRez, legalAction),
+      expireCorporateRetreatInstallCreditAbilities: () =>
+        expireCorporateRetreatInstallCreditAbilities(state),
+    },
+    run: {
+      passCorpRunRootRezWindow: (legalAction) =>
+        passCorpRunRootRezWindow(runRezWindowHostForState(state), legalAction),
+      passApproachedIce: () => passApproachedIce(runMovementHostForState(state)),
     },
   };
 }
