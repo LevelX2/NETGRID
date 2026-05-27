@@ -39,6 +39,7 @@ import {
   splitArchiveCardsForDisplay,
   currentRunTimelineStep,
   groupRunnerRigCards,
+  hostedOnDetailLabel,
   iceModifierBadgesForServer,
   identityCounterChipsForDisplays,
   inactiveCardZoneAriaSuffix,
@@ -64,12 +65,26 @@ import {
   serverBoardRows,
   serverCounterChipsForDisplays,
   serverDisplayLabel,
+  selectedSubtypeDetailLabel,
+  selectedTargetDetailLabel,
   splitLegalActions,
   storedCreditAmount,
   storedCreditSourceLabel
 } from "./action-board-ui";
 
 describe("V1.0.5 action board UI helpers", () => {
+  it("formats persisted card state as readable card detail labels", () => {
+    expect(selectedSubtypeDetailLabel({ selectedSubtypeLabel: "Sentry" })).toBe(
+      "Gewählter Typ: Sentry",
+    );
+    expect(selectedTargetDetailLabel({ selectedTargetLabel: "ICE auf R&D Position 1" })).toBe(
+      "Ziel-ICE: ICE auf R&D Position 1",
+    );
+    expect(hostedOnDetailLabel({ hostedOnLabel: "Eurocorpse (TM) Spin Chip" })).toBe(
+      "Gehostet auf: Eurocorpse (TM) Spin Chip",
+    );
+  });
+
   it("keeps global and decision actions in the main panel while card actions move to context", () => {
     const iceA = card("corp_ice_a", "Wall A", "ice");
     const iceB = card("corp_ice_b", "Wall B", "ice");

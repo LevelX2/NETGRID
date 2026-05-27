@@ -1051,6 +1051,16 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     );
     state = blackWidow.state;
     expect(state.cardInstances[blackWidow.cardId]?.selectedCardId).toBe(targetIceId);
+    const runnerBlackWidow = getPlayerView(state, "runner").own.rig?.find(
+      (card) => card.instanceId === blackWidow.cardId,
+    );
+    const corpBlackWidow = getPlayerView(state, "corp").opponent.rig?.find(
+      (card) => card.instanceId === blackWidow.cardId,
+    );
+    expect(runnerBlackWidow?.selectedTargetLabel).toBe("ICE auf R&D Position 1");
+    expect(corpBlackWidow?.selectedTargetLabel).toBe("Fire Wall");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Fire Wall");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(targetIceId);
 
     const fubar = installFromGrip(state, "onr_proteus_088_fubar");
     state = fubar.state;
@@ -1077,6 +1087,14 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     state = apply(state, "runner", (action) => action.actionId === fubarChoice.actionId);
     expect(state.cardInstances[fubar.cardId]?.selectedSubtype).toBe("sentry");
     expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === fubar.cardId,
+      ),
+    ).toMatchObject({
+      selectedSubtype: "sentry",
+      selectedSubtypeLabel: "Sentry",
+    });
+    expect(
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "trigger_ability" &&
@@ -1096,6 +1114,14 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     );
     state = morphing.state;
     expect(state.cardInstances[morphing.cardId]?.selectedSubtype).toBe("code_gate");
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === morphing.cardId,
+      ),
+    ).toMatchObject({
+      selectedSubtype: "code_gate",
+      selectedSubtypeLabel: "Code Gate",
+    });
     const change = mustAction(
       state,
       "runner",
@@ -1106,6 +1132,14 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     );
     state = apply(state, "runner", (action) => action.actionId === change.actionId);
     expect(state.cardInstances[morphing.cardId]?.selectedSubtype).toBe("wall");
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === morphing.cardId,
+      ),
+    ).toMatchObject({
+      selectedSubtype: "wall",
+      selectedSubtypeLabel: "Wall",
+    });
   });
 
   it("revalidates chosen breaker types and Black Widow selected ICE strength", () => {
@@ -1332,6 +1366,19 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     );
     expect(cardCounterAmount(state, breakerId, "power")).toBe(1);
     expect(cardCounterAmount(state, untouchedId, "power")).toBe(0);
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === breakerId,
+      )?.counterDisplays,
+    ).toContainEqual({
+      id: "power",
+      amount: 1,
+      displayKind: "generic_counter",
+      label: "Power-Counter",
+      ariaLabel: "1 Power-Counter",
+      counterType: "power",
+      usageHint: "status_marker",
+    });
   });
 
   it("restricts Eurocorpse bits to the hosted icebreaker and keeps replay stable", () => {
@@ -1352,6 +1399,49 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       ...state.cardInstances[hostedId]!,
       hostedOn: chipId,
     };
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === hostedId,
+      ),
+    ).toMatchObject({
+      hostedOn: chipId,
+      hostedOnLabel: "Eurocorpse (TM) Spin Chip",
+    });
+    expect(
+      getPlayerView(state, "corp").opponent.rig?.find(
+        (card) => card.instanceId === hostedId,
+      ),
+    ).toMatchObject({
+      hostedOn: chipId,
+      hostedOnLabel: "Eurocorpse (TM) Spin Chip",
+    });
+    const hiddenHostId = "pro009_hidden_host" as CardInstanceId;
+    state.runner.rig.resources.push(hiddenHostId);
+    state.cardInstances[hiddenHostId] = {
+      instanceId: hiddenHostId,
+      definitionId: "onr_proteus_128_airport-locker",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: false,
+      rezzed: false,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    const hiddenHostedId = addInstalledRunnerProgramForTest(
+      state,
+      "onr_v1_014_codecracker",
+      "hidden_hosted_codecracker",
+    );
+    state.cardInstances[hiddenHostedId] = {
+      ...state.cardInstances[hiddenHostedId]!,
+      hostedOn: hiddenHostId,
+    };
+    const corpHiddenHostedView = getPlayerView(state, "corp").opponent.rig?.find(
+      (card) => card.instanceId === hiddenHostedId,
+    );
+    expect(corpHiddenHostedView?.hostedOnLabel).toBe("installierte Runner-Karte");
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Airport Locker");
     const otherId = addInstalledRunnerProgramForTest(
       state,
       "onr_v1_014_codecracker",

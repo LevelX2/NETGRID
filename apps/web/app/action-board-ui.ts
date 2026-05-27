@@ -303,6 +303,21 @@ export function counterDisplaysForRendering(card: Pick<VisibleCard, "counterDisp
   );
 }
 
+export function selectedSubtypeDetailLabel(card: Pick<VisibleCard, "selectedSubtypeLabel">): string | null {
+  if (!card.selectedSubtypeLabel) return null;
+  return `Gewählter Typ: ${card.selectedSubtypeLabel}`;
+}
+
+export function selectedTargetDetailLabel(card: Pick<VisibleCard, "selectedTargetLabel">): string | null {
+  if (!card.selectedTargetLabel) return null;
+  return `Ziel-ICE: ${card.selectedTargetLabel}`;
+}
+
+export function hostedOnDetailLabel(card: Pick<VisibleCard, "hostedOnLabel">): string | null {
+  if (!card.hostedOnLabel) return null;
+  return `Gehostet auf: ${card.hostedOnLabel}`;
+}
+
 export function identityCounterChipsForDisplays(counterDisplays: VisibleCard["counterDisplays"]): IdentityCounterChipView[] {
   return (counterDisplays ?? [])
     .filter(

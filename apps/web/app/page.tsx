@@ -142,6 +142,9 @@ import {
   cardChoiceUsesReadableCards,
   counterDisplayTooltipText,
   counterDisplaysForRendering,
+  hostedOnDetailLabel,
+  selectedSubtypeDetailLabel,
+  selectedTargetDetailLabel,
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
@@ -14227,6 +14230,9 @@ function cardDetailLines(card: VisibleCard): string[] {
     valueLabel("Agenda", card.agendaPoints),
     valueLabel("Stärke", card.strength),
     selectedServerLabel(card),
+    selectedSubtypeDetailLabel(card),
+    selectedTargetDetailLabel(card),
+    hostedOnDetailLabel(card),
     ...counterDisplayDetailLabels(card)
   ]
     .filter(Boolean)

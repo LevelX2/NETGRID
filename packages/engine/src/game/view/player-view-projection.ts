@@ -17,6 +17,7 @@ import {
   visibleCorpCard,
   visibleCorpIdentityCard,
   visibleOwnCard,
+  visibleOwnCardForViewer,
   visibleRunnerRigCardForViewer,
   visibleSpecialZones,
 } from "./card-view";
@@ -135,7 +136,7 @@ export function buildPlayerViewProjection(
             ...state.runner.rig.programs,
             ...state.runner.rig.hardware,
             ...state.runner.rig.resources,
-          ].map((id) => visibleOwnCard(state, id)),
+          ].map((id) => visibleOwnCardForViewer(state, id, side)),
           memoryUsed: state.runner.memoryUsed,
           memoryLimit: runnerMemoryLimit(state),
           maxHandSize: maxHandSize(state, "runner"),

@@ -1435,8 +1435,12 @@ export type VisibleCard = {
   counterDisplays?: CounterDisplay[];
   tapped?: boolean;
   hostedOn?: CardInstanceId;
+  hostedOnLabel?: string;
   selectedServerId?: Exclude<ServerId, "new_remote">;
   selectedServerLabel?: string;
+  selectedSubtype?: string;
+  selectedSubtypeLabel?: string;
+  selectedTargetLabel?: string;
   owner?: Side;
   controller?: Side;
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
