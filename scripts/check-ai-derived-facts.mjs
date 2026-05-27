@@ -35,6 +35,16 @@ const KNOWN_EFFECT_KINDS = new Set([
   "extra_action",
   "counter_economy",
   "scored_agenda_action",
+  "advance_burst",
+  "shuffle_draw",
+  "card_recovery",
+  "agenda_reveal_economy",
+  "advance",
+  "install",
+  "rez",
+  "remote_build",
+  "global_modifier",
+  "finite_economy_pool",
   "future_run_effect",
   "future_encounter_effect",
   "access_replacement",
@@ -116,6 +126,17 @@ const KNOWN_CONDITIONS = new Set([
   "requires_unbroken_subroutine",
   "requires_later_encounter",
   "requires_remaining_ice",
+  "requires_agenda_in_hq",
+  "requires_agenda_reveal",
+  "requires_hq_agenda",
+  "requires_installed_ice",
+  "requires_rezzed_ice",
+  "requires_score_window",
+  "requires_corp_credits_threshold",
+  "requires_start_of_turn",
+  "requires_stolen_agenda_last_turn",
+  "requires_archives_card",
+  "requires_rnd_top",
 ]);
 
 const KNOWN_BREAKER_COVERAGES = new Set([
@@ -476,6 +497,8 @@ function emptyDerivedFacts(reason) {
 }
 
 function deriveFromImplementation(card, implementationText, hint) {
+  const expectedKinds = new Set(card.expectedDerivableKinds ?? []);
+  const expectsKind = (kind) => expectedKinds.has(kind);
   const facts = {
     effects: [],
     conditions: [],
@@ -491,6 +514,10 @@ function deriveFromImplementation(card, implementationText, hint) {
     "onr_v1_276_viral-15",
     "onr_v1_277_virizz",
   ]).has(card.cardId);
+  const hasActivatedEffect = (kind) =>
+    new RegExp(`kind:\\s*"activated"[\\s\\S]*?kind:\\s*"${kind}"`).test(
+      implementationText,
+    );
 
   if (isAgenda && /kind:\s*"activated"/.test(implementationText)) {
     addEffect(facts, {
@@ -505,7 +532,10 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/kind:\s*"gain_credits"/.test(implementationText)) {
+  if (
+    /kind:\s*"gain_credits"/.test(implementationText) &&
+    (!isAgenda || hasActivatedEffect("gain_credits"))
+  ) {
     addEffect(facts, {
       kind: "economy",
       timing: isAgenda ? "scored_activated" : "action",
@@ -516,7 +546,10 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/kind:\s*"take_hosted_credits"/.test(implementationText)) {
+  if (
+    /kind:\s*"take_hosted_credits"/.test(implementationText) &&
+    (!isAgenda || hasActivatedEffect("take_hosted_credits"))
+  ) {
     addEffect(facts, {
       kind: "counter_economy",
       timing: isAgenda ? "scored_activated" : "action",
@@ -527,7 +560,10 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/kind:\s*"draw_cards"/.test(implementationText)) {
+  if (
+    /kind:\s*"draw_cards"/.test(implementationText) &&
+    (!isAgenda || hasActivatedEffect("draw_cards"))
+  ) {
     addEffect(facts, {
       kind: "draw",
       timing: isAgenda ? "scored_activated" : "action",
@@ -552,7 +588,10 @@ function deriveFromImplementation(card, implementationText, hint) {
     );
   }
 
-  if (/kind:\s*"gain_actions"/.test(implementationText)) {
+  if (
+    /kind:\s*"gain_actions"/.test(implementationText) &&
+    (!isAgenda || hasActivatedEffect("gain_actions"))
+  ) {
     addEffect(facts, {
       kind: "extra_action",
       timing: isAgenda ? "scored_activated" : "action",
@@ -561,6 +600,494 @@ function deriveFromImplementation(card, implementationText, hint) {
       amount: amountNear(implementationText, "gain_actions"),
       source: "implementation.effect.gain_actions",
     });
+  }
+
+  if (/scoredAgenda:\s*\{/.test(implementationText)) {
+    addCondition(facts, {
+      kind: "requires_scored_agenda",
+      source: "implementation.scoredAgenda",
+    });
+  }
+
+  if (/kind:\s*"gain_credits_on_score"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "economy",
+      timing: "when_scored",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "amount"),
+      source: "implementation.scoredAgenda.gain_credits_on_score",
+    });
+    addCondition(facts, {
+      kind: "requires_score_window",
+      source: "implementation.scoredAgenda.gain_credits_on_score",
+    });
+  }
+
+  if (/kind:\s*"corporate_war_credit_swing"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "economy",
+      timing: "when_scored",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "gainAmount"),
+      source: "implementation.scoredAgenda.corporate_war_credit_swing",
+    });
+    addEffect(facts, {
+      kind: "counter_economy",
+      timing: "when_scored",
+      scope: "corp",
+      resource: "credits",
+      source: "implementation.scoredAgenda.corporate_war_credit_swing.fail",
+    });
+    addCondition(facts, {
+      kind: "requires_corp_credits_threshold",
+      source: "implementation.scoredAgenda.corporate_war_credit_swing",
+    });
+    addCondition(facts, {
+      kind: "requires_score_window",
+      source: "implementation.scoredAgenda.corporate_war_credit_swing",
+    });
+    facts.derivationNotes.push(
+      "Corporate War variable credit swing is represented as threshold-gated economy/counter-economy only; generated facts do not assert current credit state.",
+    );
+  }
+
+  if (/kind:\s*"corporate_downsizing_hq_agendas"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "agenda_reveal_economy",
+      timing: "when_scored",
+      scope: "hq",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "creditPerAgendaPoint"),
+      source: "implementation.scoredAgenda.corporate_downsizing_hq_agendas",
+    });
+    addEffect(facts, {
+      kind: "economy",
+      timing: "when_scored",
+      scope: "corp",
+      resource: "credits",
+      source: "implementation.scoredAgenda.corporate_downsizing_hq_agendas",
+    });
+    addEffect(facts, {
+      kind: "zone_shuffle",
+      timing: "when_scored",
+      scope: "rnd",
+      resource: "cards",
+      source:
+        "implementation.scoredAgenda.corporate_downsizing_hq_agendas.shuffleSelectedIntoRnd",
+    });
+    addCondition(facts, {
+      kind: "requires_agenda_in_hq",
+      source: "implementation.scoredAgenda.corporate_downsizing_hq_agendas",
+    });
+    addCondition(facts, {
+      kind: "requires_agenda_reveal",
+      source: "implementation.scoredAgenda.corporate_downsizing_hq_agendas",
+    });
+    addCondition(facts, {
+      kind: "requires_score_window",
+      source: "implementation.scoredAgenda.corporate_downsizing_hq_agendas",
+    });
+    facts.derivationNotes.push(
+      "Corporate Downsizing is represented as HQ-agenda reveal/economy context only; generated facts do not contain hidden HQ agenda identities.",
+    );
+  }
+
+  if (
+    /kind:\s*"priority_requisition_rez_ice_at_no_cost"/.test(implementationText)
+  ) {
+    addEffect(facts, {
+      kind: "rez_discount",
+      timing: "when_scored",
+      scope: "ice",
+      resource: "credits",
+      source:
+        "implementation.scoredAgenda.priority_requisition_rez_ice_at_no_cost",
+    });
+    addEffect(facts, {
+      kind: "rez",
+      timing: "when_scored",
+      scope: "ice",
+      source:
+        "implementation.scoredAgenda.priority_requisition_rez_ice_at_no_cost",
+    });
+    addCondition(facts, {
+      kind: "requires_score_window",
+      source:
+        "implementation.scoredAgenda.priority_requisition_rez_ice_at_no_cost",
+    });
+  }
+
+  if (/kind:\s*"security_purge_top_rd"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "topdeck_info",
+      timing: "when_scored",
+      scope: "rnd",
+      resource: "cards",
+      amount: propertyNumber(implementationText, "count"),
+      source: "implementation.scoredAgenda.security_purge_top_rd",
+    });
+    addEffect(facts, {
+      kind: "install",
+      timing: "when_scored",
+      scope: "remote",
+      source: "implementation.scoredAgenda.security_purge_top_rd.installIce",
+    });
+    addEffect(facts, {
+      kind: "rez_discount",
+      timing: "when_scored",
+      scope: "ice",
+      resource: "credits",
+      source: "implementation.scoredAgenda.security_purge_top_rd.rezAtNoCost",
+    });
+    addCondition(facts, {
+      kind: "requires_rnd_top",
+      source: "implementation.scoredAgenda.security_purge_top_rd",
+    });
+    addCondition(facts, {
+      kind: "requires_score_window",
+      source: "implementation.scoredAgenda.security_purge_top_rd",
+    });
+    facts.derivationNotes.push(
+      "Security Purge is represented as R&D top reveal/install/rez-discount context only; generated facts do not expose actual hidden R&D order.",
+    );
+  }
+
+  if (/kind:\s*"data_fort_reclamation"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "economy",
+      timing: "when_scored",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "temporaryCredits"),
+      source: "implementation.scoredAgenda.data_fort_reclamation",
+    });
+    addEffect(facts, {
+      kind: "remote_build",
+      timing: "when_scored",
+      scope: "remote",
+      source: "implementation.scoredAgenda.data_fort_reclamation",
+    });
+    addEffect(facts, {
+      kind: "install",
+      timing: "when_scored",
+      scope: "remote",
+      source: "implementation.scoredAgenda.data_fort_reclamation.install",
+    });
+    addEffect(facts, {
+      kind: "rez",
+      timing: "when_scored",
+      scope: "remote",
+      source: "implementation.scoredAgenda.data_fort_reclamation.rez",
+    });
+    addCondition(facts, {
+      kind: "requires_hq_agenda",
+      source: "implementation.scoredAgenda.data_fort_reclamation",
+    });
+    addCondition(facts, {
+      kind: "requires_score_window",
+      source: "implementation.scoredAgenda.data_fort_reclamation",
+    });
+    facts.derivationNotes.push(
+      "Data Fort Reclamation temporary credits and HQ card choices are board/legal-action context; generated facts do not include hidden HQ card identities.",
+    );
+  }
+
+  if (
+    /kind:\s*"ai_cfo_shuffle_hq_archives_into_rd_draw"/.test(implementationText)
+  ) {
+    addEffect(facts, {
+      kind: "shuffle_draw",
+      timing: "scored_activated",
+      scope: "corp",
+      resource: "cards",
+      amount: propertyNumber(implementationText, "drawCount"),
+      source:
+        "implementation.scoredAgenda.ai_cfo_shuffle_hq_archives_into_rd_draw",
+    });
+    addEffect(facts, {
+      kind: "zone_shuffle",
+      timing: "scored_activated",
+      scope: "rnd",
+      resource: "cards",
+      source:
+        "implementation.scoredAgenda.ai_cfo_shuffle_hq_archives_into_rd_draw",
+    });
+    addEffect(facts, {
+      kind: "draw",
+      timing: "scored_activated",
+      scope: "corp",
+      resource: "cards",
+      amount: propertyNumber(implementationText, "drawCount"),
+      source:
+        "implementation.scoredAgenda.ai_cfo_shuffle_hq_archives_into_rd_draw",
+    });
+    facts.derivationNotes.push(
+      "AI Chief Financial Officer shuffle/draw is represented without hidden HQ, Archives or R&D order data.",
+    );
+  }
+
+  if (
+    /kind:\s*"corporate_retreat_disable_on_rez_or_install"/.test(
+      implementationText,
+    )
+  ) {
+    addEffect(facts, {
+      kind: "scored_agenda_action",
+      timing: "scored_activated",
+      scope: "score_area",
+      source: "implementation.scoredAgenda.corporate_retreat",
+    });
+    addEffect(facts, {
+      kind: "economy",
+      timing: "scored_activated",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "gainAmount"),
+      source: "implementation.scoredAgenda.corporate_retreat",
+    });
+    facts.derivationNotes.push(
+      "Corporate Retreat disable-on-install-or-rez state remains engine context; generated facts only describe the score-area economy action class.",
+    );
+  }
+
+  if (
+    /kind:\s*"reveal_installed_ice_subtype_for_credits"/.test(
+      implementationText,
+    )
+  ) {
+    addEffect(facts, {
+      kind: "economy",
+      timing: "when_scored",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "creditPerRevealedOrRezzed"),
+      source:
+        "implementation.scoredAgenda.reveal_installed_ice_subtype_for_credits",
+    });
+    addCondition(facts, {
+      kind: "requires_installed_ice",
+      source:
+        "implementation.scoredAgenda.reveal_installed_ice_subtype_for_credits",
+    });
+    addCondition(facts, {
+      kind: "requires_score_window",
+      source:
+        "implementation.scoredAgenda.reveal_installed_ice_subtype_for_credits",
+    });
+  }
+
+  if (
+    /kind:\s*"ice_transmutation_rezzed_ice_modifier"/.test(implementationText)
+  ) {
+    addEffect(facts, {
+      kind: "global_modifier",
+      timing: "when_scored",
+      scope: "ice",
+      resource: "subroutines",
+      source:
+        "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier",
+    });
+    addEffect(facts, {
+      kind: "remote_protection",
+      timing: "when_scored",
+      scope: "ice",
+      resource: "strength",
+      amount: 1,
+      source:
+        "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier",
+    });
+    addCondition(facts, {
+      kind: "requires_rezzed_ice",
+      source:
+        "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier",
+    });
+  }
+
+  if (/kind:\s*"choose_fort_ice_strength_bonus"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "global_modifier",
+      timing: "when_scored",
+      scope: "fort",
+      resource: "strength",
+      amount: propertyNumber(implementationText, "amount"),
+      source: "implementation.scoredAgenda.choose_fort_ice_strength_bonus",
+    });
+    addCondition(facts, {
+      kind: "requires_remote_server",
+      source: "implementation.scoredAgenda.choose_fort_ice_strength_bonus",
+    });
+  }
+
+  if (/kind:\s*"meat_damage_bonus"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "global_modifier",
+      timing: "persistent",
+      scope: "corp",
+      resource: "damage",
+      amount: propertyNumber(implementationText, "amount"),
+      source: "implementation.scoredAgenda.meat_damage_bonus",
+    });
+  }
+
+  if (/kind:\s*"agenda_difficulty"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "score_acceleration",
+      timing: "persistent",
+      scope: "corp",
+      resource: "advancement_counters",
+      amount: amountNear(implementationText, "agenda_difficulty"),
+      source: "implementation.modifiers.agenda_difficulty",
+    });
+    addEffect(facts, {
+      kind: "global_modifier",
+      timing: "persistent",
+      scope: "corp",
+      resource: "advancement_counters",
+      amount: amountNear(implementationText, "agenda_difficulty"),
+      source: "implementation.modifiers.agenda_difficulty",
+    });
+  }
+
+  if (
+    expectsKind("condition:requires_score_window") &&
+    /lifecycle:\s*\{[\s\S]*?on_score:\s*\[/.test(implementationText)
+  ) {
+    addCondition(facts, {
+      kind: "requires_score_window",
+      source: "implementation.lifecycle.on_score",
+    });
+  }
+
+  if (
+    expectsKind("effect:finite_economy_pool") &&
+    /kind:\s*"add_hosted_credits"/.test(implementationText)
+  ) {
+    addEffect(facts, {
+      kind: "finite_economy_pool",
+      timing: "when_scored",
+      scope: "score_area",
+      resource: "credits",
+      amount: amountNear(implementationText, "add_hosted_credits"),
+      source: "implementation.lifecycle.on_score.add_hosted_credits",
+    });
+  }
+
+  if (
+    expectsKind("condition:requires_start_of_turn") &&
+    /start_of_corp_turn/.test(implementationText)
+  ) {
+    addCondition(facts, {
+      kind: "requires_start_of_turn",
+      source: "implementation.lifecycle.start_of_corp_turn",
+    });
+    if (
+      /start_of_corp_turn[\s\S]*?kind:\s*"gain_credits"/.test(
+        implementationText,
+      )
+    ) {
+      addEffect(facts, {
+        kind: "economy",
+        timing: "start_of_turn",
+        scope: "corp",
+        resource: "credits",
+        amount: amountNear(implementationText, "gain_credits"),
+        source: "implementation.lifecycle.start_of_corp_turn.gain_credits",
+      });
+    }
+    if (
+      /start_of_corp_turn[\s\S]*?kind:\s*"gain_actions"/.test(
+        implementationText,
+      )
+    ) {
+      addEffect(facts, {
+        kind: "extra_action",
+        timing: "start_of_turn",
+        scope: "corp",
+        resource: "actions",
+        amount: amountNear(implementationText, "gain_actions"),
+        source: "implementation.lifecycle.start_of_corp_turn.gain_actions",
+      });
+    }
+    if (
+      /start_of_corp_turn[\s\S]*?kind:\s*"take_hosted_credits"/.test(
+        implementationText,
+      )
+    ) {
+      addEffect(facts, {
+        kind: "counter_economy",
+        timing: "start_of_turn",
+        scope: "corp",
+        resource: "credits",
+        amount: amountNear(implementationText, "take_hosted_credits"),
+        source:
+          "implementation.lifecycle.start_of_corp_turn.take_hosted_credits",
+      });
+    }
+  }
+
+  if (/kind:\s*"corp_rd_top_reorder"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "topdeck_info",
+      timing: "action",
+      scope: "rnd",
+      resource: "cards",
+      amount: propertyNumber(implementationText, "count"),
+      source: "implementation.corpUtility.corp_rd_top_reorder",
+    });
+    addEffect(facts, {
+      kind: "zone_shuffle",
+      timing: "action",
+      scope: "rnd",
+      resource: "cards",
+      source: "implementation.corpUtility.corp_rd_top_reorder",
+    });
+    addCondition(facts, {
+      kind: "requires_rnd_top",
+      source: "implementation.corpUtility.corp_rd_top_reorder",
+    });
+    facts.derivationNotes.push(
+      "Corp R&D-top reorder is represented as hidden-zone context only; generated facts do not contain actual R&D order.",
+    );
+  }
+
+  if (/kind:\s*"corp_archives_to_hq"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "card_recovery",
+      timing: "action",
+      scope: "archives",
+      resource: "cards",
+      source: "implementation.corpUtility.corp_archives_to_hq",
+    });
+    addCondition(facts, {
+      kind: "requires_archives_card",
+      source: "implementation.corpUtility.corp_archives_to_hq",
+    });
+    facts.derivationNotes.push(
+      "Archives-to-HQ recovery is represented without hidden Archives/HQ card identities.",
+    );
+  }
+
+  if (/kind:\s*"silver_lining_recovery"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "economy",
+      timing: "action",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(
+        implementationText,
+        "multiplierPerAdvancementCounter",
+      ),
+      source: "implementation.corpUtility.silver_lining_recovery",
+    });
+    addCondition(facts, {
+      kind: "requires_stolen_agenda_last_turn",
+      source: "implementation.corpUtility.silver_lining_recovery",
+    });
+    facts.derivationNotes.push(
+      "Silver Lining Recovery Protocol variable amount depends on stolen agenda counters from the previous Runner turn; generated facts do not assert a fixed credit gain.",
+    );
   }
 
   if (/kind:\s*"trace"/.test(implementationText)) {
@@ -1439,6 +1966,16 @@ function deriveFromImplementation(card, implementationText, hint) {
       amount: amountNear(implementationText, "ice_strength"),
       source: "implementation.modifiers.ice_strength",
     });
+    if (isAgenda) {
+      addEffect(facts, {
+        kind: "global_modifier",
+        timing: "persistent",
+        scope: "ice",
+        resource: "strength",
+        amount: amountNear(implementationText, "ice_strength"),
+        source: "implementation.modifiers.ice_strength",
+      });
+    }
     if (!isAgenda) {
       facts.remoteRole = {
         kind: "ice_modifier",
@@ -1461,6 +1998,25 @@ function deriveFromImplementation(card, implementationText, hint) {
       amount: amountNear(implementationText, "distribute_advancement_counters"),
       source: "implementation.abilities.distribute_advancement_counters",
     });
+    if (expectsKind("effect:advance_burst")) {
+      addEffect(facts, {
+        kind: "advance_burst",
+        timing: "action",
+        scope: "installed_card",
+        resource: "advancement_counters",
+        amount: amountNear(
+          implementationText,
+          "distribute_advancement_counters",
+        ),
+        source: "implementation.abilities.distribute_advancement_counters",
+      });
+    }
+    if (expectsKind("condition:requires_score_window")) {
+      addCondition(facts, {
+        kind: "requires_score_window",
+        source: "implementation.abilities.distribute_advancement_counters",
+      });
+    }
     facts.costProfile = {
       clicks: amountNear(implementationText, "action"),
       credits: amountNear(implementationText, "credit"),

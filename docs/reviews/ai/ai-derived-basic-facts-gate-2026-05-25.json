@@ -6,55 +6,75 @@
     "pilotCardsPath": "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json",
     "derivationMode": "read-only CardImplementation text/descriptor scan; no runtime, planner, or strategy consumption"
   },
-  "pilotCardCount": 85,
-  "implementationFoundCount": 85,
-  "cardsWithDerivedFacts": 85,
-  "cardsWithManualOntologyOverlap": 67,
-  "cardsNeedingManualOverlay": 35,
+  "pilotCardCount": 115,
+  "implementationFoundCount": 115,
+  "cardsWithDerivedFacts": 115,
+  "cardsWithManualOntologyOverlap": 76,
+  "cardsNeedingManualOverlay": 63,
   "effectKindCounts": {
     "access_replacement": 3,
+    "advance_burst": 3,
+    "agenda_reveal_economy": 1,
     "breaker": 20,
-    "counter_economy": 2,
+    "card_recovery": 1,
+    "counter_economy": 5,
     "damage": 12,
-    "draw": 2,
-    "economy": 2,
+    "draw": 4,
+    "economy": 13,
     "etr": 11,
     "expose_info": 4,
-    "extra_action": 1,
+    "extra_action": 3,
+    "finite_economy_pool": 2,
     "future_encounter_effect": 8,
     "future_run_effect": 8,
+    "global_modifier": 9,
     "hardware_trash": 2,
     "hq_info": 2,
+    "install": 2,
     "install_discount": 1,
     "multiaccess": 2,
     "no_jack_out": 2,
     "persistent_counter_effect": 3,
     "program_trash": 4,
-    "remote_protection": 19,
-    "rez_discount": 2,
+    "remote_build": 1,
+    "remote_protection": 23,
+    "rez": 2,
+    "rez_discount": 4,
     "run_lock": 4,
     "run_tax": 8,
-    "score_acceleration": 2,
-    "scored_agenda_action": 7,
+    "score_acceleration": 8,
+    "scored_agenda_action": 10,
     "search": 2,
+    "shuffle_draw": 1,
     "tag": 1,
     "tag_punish_payoff": 4,
     "tag_source": 8,
-    "topdeck_info": 4,
+    "topdeck_info": 6,
     "trace": 16,
     "trace_credit": 1,
     "trash_credit": 2,
-    "zone_shuffle": 1
+    "zone_shuffle": 4
   },
   "conditionKindCounts": {
     "requires_accessed_card": 3,
+    "requires_agenda_in_hq": 1,
+    "requires_agenda_reveal": 1,
+    "requires_archives_card": 1,
+    "requires_corp_credits_threshold": 1,
     "requires_during_run": 13,
     "requires_encounter": 24,
+    "requires_hq_agenda": 1,
+    "requires_installed_ice": 2,
     "requires_later_encounter": 5,
     "requires_remaining_ice": 5,
-    "requires_remote_server": 1,
+    "requires_remote_server": 2,
+    "requires_rezzed_ice": 1,
+    "requires_rnd_top": 2,
     "requires_runner_tagged": 4,
-    "requires_scored_agenda": 7,
+    "requires_score_window": 11,
+    "requires_scored_agenda": 22,
+    "requires_start_of_turn": 3,
+    "requires_stolen_agenda_last_turn": 1,
     "requires_successful_run": 8,
     "requires_trace_success": 16,
     "requires_unbroken_subroutine": 24
@@ -62,7 +82,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 325,
+  "warningCount": 518,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -450,6 +470,116 @@
       "cardId": "onr_v1_085_executive-wiretaps"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_188_ai-chief-financial-officer"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_188_ai-chief-financial-officer"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
+      "cardId": "onr_v1_188_ai-chief-financial-officer"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:shuffle_draw has no manual ontology match.",
+      "cardId": "onr_v1_188_ai-chief-financial-officer"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:scored_agenda_action has no generated basic fact match.",
+      "cardId": "onr_v1_188_ai-chief-financial-officer"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_188_ai-chief-financial-officer"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_189_artificial-security-directors"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:global_modifier has no manual ontology match.",
+      "cardId": "onr_v1_189_artificial-security-directors"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:score_acceleration has no manual ontology match.",
+      "cardId": "onr_v1_189_artificial-security-directors"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_189_artificial-security-directors",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_189_artificial-security-directors"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_190_bioweapons-engineering"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_190_bioweapons-engineering"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:global_modifier has no manual ontology match.",
+      "cardId": "onr_v1_190_bioweapons-engineering"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_190_bioweapons-engineering"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_191_black-ice-quality-assurance"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_191_black-ice-quality-assurance"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:global_modifier has no manual ontology match.",
+      "cardId": "onr_v1_191_black-ice-quality-assurance"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_191_black-ice-quality-assurance"
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_192_corporate-boon"
@@ -460,9 +590,384 @@
       "cardId": "onr_v1_193_corporate-coup"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_194_corporate-downsizing"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_194_corporate-downsizing"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_agenda_in_hq has no manual ontology match.",
+      "cardId": "onr_v1_194_corporate-downsizing"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_agenda_reveal has no manual ontology match.",
+      "cardId": "onr_v1_194_corporate-downsizing"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_194_corporate-downsizing"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_194_corporate-downsizing"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:agenda_reveal_economy has no manual ontology match.",
+      "cardId": "onr_v1_194_corporate-downsizing"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:economy has no manual ontology match.",
+      "cardId": "onr_v1_194_corporate-downsizing"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:zone_shuffle has no manual ontology match.",
+      "cardId": "onr_v1_194_corporate-downsizing"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_194_corporate-downsizing",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_194_corporate-downsizing"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_195_corporate-retreat"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_195_corporate-retreat"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:economy has no manual ontology match.",
+      "cardId": "onr_v1_195_corporate-retreat"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:scored_agenda_action has no manual ontology match.",
+      "cardId": "onr_v1_195_corporate-retreat"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_195_corporate-retreat",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_195_corporate-retreat"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_196_corporate-war"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_196_corporate-war"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_corp_credits_threshold has no manual ontology match.",
+      "cardId": "onr_v1_196_corporate-war"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_196_corporate-war"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_196_corporate-war"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:counter_economy has no manual ontology match.",
+      "cardId": "onr_v1_196_corporate-war"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_196_corporate-war",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_196_corporate-war"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_197_data-fort-reclamation"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_197_data-fort-reclamation"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_hq_agenda has no manual ontology match.",
+      "cardId": "onr_v1_197_data-fort-reclamation"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_197_data-fort-reclamation"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_197_data-fort-reclamation"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:economy has no manual ontology match.",
+      "cardId": "onr_v1_197_data-fort-reclamation"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:install has no manual ontology match.",
+      "cardId": "onr_v1_197_data-fort-reclamation"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:remote_build has no manual ontology match.",
+      "cardId": "onr_v1_197_data-fort-reclamation"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:rez has no manual ontology match.",
+      "cardId": "onr_v1_197_data-fort-reclamation"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_197_data-fort-reclamation",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_197_data-fort-reclamation"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_198_detroit-police-contract"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_start_of_turn has no manual ontology match.",
+      "cardId": "onr_v1_198_detroit-police-contract"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:counter_economy has no manual ontology match.",
+      "cardId": "onr_v1_198_detroit-police-contract"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:finite_economy_pool has no manual ontology match.",
+      "cardId": "onr_v1_198_detroit-police-contract"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_198_detroit-police-contract",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_198_detroit-police-contract"
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_199_employee-empowerment"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_200_encryption-breakthrough"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_installed_ice has no manual ontology match.",
+      "cardId": "onr_v1_200_encryption-breakthrough"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_200_encryption-breakthrough"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_200_encryption-breakthrough"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:economy has no manual ontology match.",
+      "cardId": "onr_v1_200_encryption-breakthrough"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:global_modifier has no manual ontology match.",
+      "cardId": "onr_v1_200_encryption-breakthrough"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:remote_protection has no manual ontology match.",
+      "cardId": "onr_v1_200_encryption-breakthrough"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_200_encryption-breakthrough",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_200_encryption-breakthrough"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_201_executive-extraction"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:global_modifier has no manual ontology match.",
+      "cardId": "onr_v1_201_executive-extraction"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:score_acceleration has no manual ontology match.",
+      "cardId": "onr_v1_201_executive-extraction"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_201_executive-extraction",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_201_executive-extraction"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_202_genetics-visionary-acquisition"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:global_modifier has no manual ontology match.",
+      "cardId": "onr_v1_202_genetics-visionary-acquisition"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:score_acceleration has no manual ontology match.",
+      "cardId": "onr_v1_202_genetics-visionary-acquisition"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_202_genetics-visionary-acquisition",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_202_genetics-visionary-acquisition"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_203_hostile-takeover"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_203_hostile-takeover"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_203_hostile-takeover"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_203_hostile-takeover",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_203_hostile-takeover"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_204_ice-transmutation"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_204_ice-transmutation"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_rezzed_ice has no manual ontology match.",
+      "cardId": "onr_v1_204_ice-transmutation"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_204_ice-transmutation"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:global_modifier has no manual ontology match.",
+      "cardId": "onr_v1_204_ice-transmutation"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:remote_protection has no manual ontology match.",
+      "cardId": "onr_v1_204_ice-transmutation"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_204_ice-transmutation",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_204_ice-transmutation"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_206_marine-arcology"
     },
     {
       "kind": "text_pattern_derivation",
@@ -475,14 +980,254 @@
       "cardId": "onr_v1_208_on-call-solo-team"
     },
     {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_209_political-coup"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:finite_economy_pool has no manual ontology match.",
+      "cardId": "onr_v1_209_political-coup"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_209_political-coup",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_209_political-coup"
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_210_political-overthrow"
     },
     {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_211_polymer-breakthrough"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_start_of_turn has no manual ontology match.",
+      "cardId": "onr_v1_211_polymer-breakthrough"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:economy has no manual ontology match.",
+      "cardId": "onr_v1_211_polymer-breakthrough"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_211_polymer-breakthrough",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_211_polymer-breakthrough"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_212_priority-requisition"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_212_priority-requisition"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection.",
+      "cardId": "onr_v1_212_priority-requisition"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_212_priority-requisition"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_212_priority-requisition"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:rez has no manual ontology match.",
+      "cardId": "onr_v1_212_priority-requisition"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:remote_protection has no generated basic fact match.",
+      "cardId": "onr_v1_212_priority-requisition"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_212_priority-requisition",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_212_priority-requisition"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_215_security-net-optimization"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_215_security-net-optimization"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_remote_server has no manual ontology match.",
+      "cardId": "onr_v1_215_security-net-optimization"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_215_security-net-optimization"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:global_modifier has no manual ontology match.",
+      "cardId": "onr_v1_215_security-net-optimization"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_215_security-net-optimization",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_215_security-net-optimization"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_216_security-purge"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_rnd_top has no manual ontology match.",
+      "cardId": "onr_v1_216_security-purge"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_216_security-purge"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_216_security-purge"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:install has no manual ontology match.",
+      "cardId": "onr_v1_216_security-purge"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:rez_discount has no manual ontology match.",
+      "cardId": "onr_v1_216_security-purge"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:topdeck_info has no manual ontology match.",
+      "cardId": "onr_v1_216_security-purge"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_216_security-purge",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_216_security-purge"
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_217_strike-force-kali"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_218_subsidiary-branch"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_218_subsidiary-branch"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_start_of_turn has no manual ontology match.",
+      "cardId": "onr_v1_218_subsidiary-branch"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:extra_action has no manual ontology match.",
+      "cardId": "onr_v1_218_subsidiary-branch"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_218_subsidiary-branch",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_218_subsidiary-branch"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_219_superior-net-barriers"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_219_superior-net-barriers"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_installed_ice has no manual ontology match.",
+      "cardId": "onr_v1_219_superior-net-barriers"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_219_superior-net-barriers"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_scored_agenda has no manual ontology match.",
+      "cardId": "onr_v1_219_superior-net-barriers"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:global_modifier has no manual ontology match.",
+      "cardId": "onr_v1_219_superior-net-barriers"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_219_superior-net-barriers",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_219_superior-net-barriers"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -1602,7 +2347,247 @@
     {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_295_night-shift"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_296_off-site-backups"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_296_off-site-backups"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
+      "cardId": "onr_v1_296_off-site-backups"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_archives_card has no manual ontology match.",
+      "cardId": "onr_v1_296_off-site-backups"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:card_recovery has no manual ontology match.",
+      "cardId": "onr_v1_296_off-site-backups"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:draw has no generated basic fact match.",
+      "cardId": "onr_v1_296_off-site-backups"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:zone_shuffle has no generated basic fact match.",
+      "cardId": "onr_v1_296_off-site-backups"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_296_off-site-backups",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_296_off-site-backups"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_297_overtime-incentives"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_297_overtime-incentives"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:extra_action has no manual ontology match.",
+      "cardId": "onr_v1_297_overtime-incentives"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_297_overtime-incentives",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_297_overtime-incentives"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_298_planning-consultants"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_rnd_top has no manual ontology match.",
+      "cardId": "onr_v1_298_planning-consultants"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:topdeck_info has no manual ontology match.",
+      "cardId": "onr_v1_298_planning-consultants"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:zone_shuffle has no manual ontology match.",
+      "cardId": "onr_v1_298_planning-consultants"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_298_planning-consultants",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_298_planning-consultants"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_300_project-consultants"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_300_project-consultants"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:advance_burst has no manual ontology match.",
+      "cardId": "onr_v1_300_project-consultants"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:score_acceleration has no manual ontology match.",
+      "cardId": "onr_v1_300_project-consultants"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated remoteRole:asset_economy has no manual ontology match.",
+      "cardId": "onr_v1_300_project-consultants"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_300_project-consultants",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_300_project-consultants"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_302_scorched-earth"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_stolen_agenda_last_turn has no manual ontology match.",
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:economy has no manual ontology match.",
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_304_systematic-layoffs"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_304_systematic-layoffs"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_304_systematic-layoffs"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:advance_burst has no manual ontology match.",
+      "cardId": "onr_v1_304_systematic-layoffs"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:score_acceleration has no manual ontology match.",
+      "cardId": "onr_v1_304_systematic-layoffs"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated remoteRole:asset_economy has no manual ontology match.",
+      "cardId": "onr_v1_304_systematic-layoffs"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_304_systematic-layoffs"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_305_team-restructuring"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_305_team-restructuring"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:advance_burst has no manual ontology match.",
+      "cardId": "onr_v1_305_team-restructuring"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:score_acceleration has no manual ontology match.",
+      "cardId": "onr_v1_305_team-restructuring"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated remoteRole:asset_economy has no manual ontology match.",
+      "cardId": "onr_v1_305_team-restructuring"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_305_team-restructuring",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_305_team-restructuring"
     },
     {
       "kind": "text_pattern_derivation",
@@ -4974,6 +5959,404 @@
       ]
     },
     {
+      "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "title": "AI Chief Financial Officer",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/ai-chief-financial-officer.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:shuffle_draw",
+        "effect:zone_shuffle",
+        "effect:draw",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Shuffle/draw score-area effect is derivable without hidden HQ/Archives/R&D ordering. Batch 8 subbatch: scored_agenda_economy.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "draw",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 5,
+            "source": "implementation.scoredAgenda.ai_cfo_shuffle_hq_archives_into_rd_draw"
+          },
+          {
+            "confidence": "high",
+            "kind": "shuffle_draw",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 5,
+            "source": "implementation.scoredAgenda.ai_cfo_shuffle_hq_archives_into_rd_draw"
+          },
+          {
+            "confidence": "high",
+            "kind": "zone_shuffle",
+            "timing": "scored_activated",
+            "scope": "rnd",
+            "resource": "cards",
+            "source": "implementation.scoredAgenda.ai_cfo_shuffle_hq_archives_into_rd_draw"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "AI Chief Financial Officer shuffle/draw is represented without hidden HQ, Archives or R&D order data."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": [
+          "agenda",
+          "card_flow_agenda",
+          "deck_reset_agenda",
+          "score_plan"
+        ],
+        "planRoles": ["recover_economy", "score_next_turn", "score_now"],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 5
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "scored_activated",
+            "scope": "corp"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["central_stabilize", "economy_rez_reserve"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_scored_agenda",
+          "effect:draw",
+          "effect:zone_shuffle"
+        ],
+        "generatedOnly": ["effect:shuffle_draw"],
+        "manualOnly": ["effect:scored_agenda_action"]
+      },
+      "missingManualOverlay": [
+        "effect:scored_agenda_action",
+        "effect:shuffle_draw"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:shuffle_draw has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:scored_agenda_action has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_189_artificial-security-directors",
+      "title": "Artificial Security Directors",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/artificial-security-directors.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "effect:global_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Black-Ops agenda difficulty reduction is a mechanical score-conversion support fact. Batch 8 subbatch: score_conversion_support.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "corp",
+            "resource": "advancement_counters",
+            "amount": 1,
+            "source": "implementation.modifiers.agenda_difficulty"
+          },
+          {
+            "confidence": "high",
+            "kind": "score_acceleration",
+            "timing": "persistent",
+            "scope": "corp",
+            "resource": "advancement_counters",
+            "amount": 1,
+            "source": "implementation.modifiers.agenda_difficulty"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "hidden_zone", "research"],
+        "planRoles": ["corp_score_agenda"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "effect:global_modifier",
+          "effect:score_acceleration"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "effect:global_modifier",
+        "effect:score_acceleration"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:global_modifier has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:score_acceleration has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "title": "Bioweapons Engineering",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/bioweapons-engineering.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:global_modifier"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Meat-damage modifier is mechanically derivable as persistent/global context. Batch 8 subbatch: global_research_modifier.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "corp",
+            "resource": "damage",
+            "amount": 1,
+            "source": "implementation.scoredAgenda.meat_damage_bonus"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "code_gate", "corp", "hidden_zone", "modifier"],
+        "planRoles": ["corp_score_agenda"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_scored_agenda",
+          "effect:global_modifier"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_scored_agenda",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:global_modifier has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "title": "Black Ice Quality Assurance",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/black-ice-quality-assurance.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "effect:global_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Black-ICE strength modifier is mechanically derivable as persistent scored-agenda context. Batch 8 subbatch: global_research_modifier.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength",
+            "amount": 2,
+            "source": "implementation.modifiers.ice_strength"
+          },
+          {
+            "confidence": "high",
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength",
+            "amount": 2,
+            "source": "implementation.modifiers.ice_strength"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "corp", "ice"],
+        "planRoles": ["corp_score_agenda"],
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength",
+            "amount": 2
+          }
+        ],
+        "conditions": [],
+        "lineSupport": ["ice_tax_glacier", "remote_scoring_build"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:remote_protection"],
+        "generatedOnly": ["effect:global_modifier"],
+        "manualOnly": []
+      },
+      "missingManualOverlay": ["effect:global_modifier"],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:global_modifier has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_192_corporate-boon",
       "title": "Corporate Boon",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-boon.ts",
@@ -5174,6 +6557,639 @@
       ]
     },
     {
+      "cardId": "onr_v1_194_corporate-downsizing",
+      "title": "Corporate Downsizing",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-downsizing.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:agenda_reveal_economy",
+        "effect:economy",
+        "effect:zone_shuffle",
+        "condition:requires_agenda_in_hq",
+        "condition:requires_agenda_reveal"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "HQ-agenda reveal economy and shuffle are derivable, while hidden HQ identities remain out of generated facts. Batch 8 subbatch: when_scored_economy_or_rez.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "agenda_reveal_economy",
+            "timing": "when_scored",
+            "scope": "hq",
+            "resource": "credits",
+            "amount": 2,
+            "source": "implementation.scoredAgenda.corporate_downsizing_hq_agendas"
+          },
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "source": "implementation.scoredAgenda.corporate_downsizing_hq_agendas"
+          },
+          {
+            "confidence": "high",
+            "kind": "zone_shuffle",
+            "timing": "when_scored",
+            "scope": "rnd",
+            "resource": "cards",
+            "source": "implementation.scoredAgenda.corporate_downsizing_hq_agendas.shuffleSelectedIntoRnd"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_agenda_in_hq",
+            "source": "implementation.scoredAgenda.corporate_downsizing_hq_agendas"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_agenda_reveal",
+            "source": "implementation.scoredAgenda.corporate_downsizing_hq_agendas"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_score_window",
+            "source": "implementation.scoredAgenda.corporate_downsizing_hq_agendas"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Corporate Downsizing is represented as HQ-agenda reveal/economy context only; generated facts do not contain hidden HQ agenda identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "hidden_zone_tool", "scored_agenda_ability"],
+        "planRoles": ["protect_rnd", "score_agenda"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_agenda_in_hq",
+          "condition:requires_agenda_reveal",
+          "condition:requires_score_window",
+          "condition:requires_scored_agenda",
+          "effect:agenda_reveal_economy",
+          "effect:economy",
+          "effect:zone_shuffle"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_agenda_in_hq",
+        "condition:requires_agenda_reveal",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:agenda_reveal_economy",
+        "effect:economy",
+        "effect:zone_shuffle"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_agenda_in_hq has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_agenda_reveal has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:agenda_reveal_economy has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:economy has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:zone_shuffle has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_195_corporate-retreat",
+      "title": "Corporate Retreat",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-retreat.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Score-area economy action is derivable; disable-on-install/rez state remains engine context. Batch 8 subbatch: scored_agenda_economy.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 2,
+            "source": "implementation.scoredAgenda.corporate_retreat"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.scoredAgenda.corporate_retreat"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Corporate Retreat disable-on-install-or-rez state remains engine context; generated facts only describe the score-area economy action class."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "corp", "per_card_longtail"],
+        "planRoles": ["corp_agenda_ability", "corp_score_agenda"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_scored_agenda",
+          "effect:economy",
+          "effect:scored_agenda_action"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:scored_agenda_action"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:economy has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:scored_agenda_action has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_196_corporate-war",
+      "title": "Corporate War",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-war.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:counter_economy",
+        "condition:requires_corp_credits_threshold"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Threshold-gated credit swing is mechanically derivable without asserting current credit state. Batch 8 subbatch: when_scored_economy_or_rez.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "source": "implementation.scoredAgenda.corporate_war_credit_swing.fail"
+          },
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 12,
+            "source": "implementation.scoredAgenda.corporate_war_credit_swing"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_corp_credits_threshold",
+            "source": "implementation.scoredAgenda.corporate_war_credit_swing"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_score_window",
+            "source": "implementation.scoredAgenda.corporate_war_credit_swing"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Corporate War variable credit swing is represented as threshold-gated economy/counter-economy only; generated facts do not assert current credit state."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "corp", "per_card_longtail"],
+        "planRoles": ["corp_agenda_ability", "corp_score_agenda"],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 12
+          }
+        ],
+        "conditions": [],
+        "lineSupport": ["economy_rez_reserve", "score_closeout"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": ["effect:economy"],
+        "generatedOnly": [
+          "condition:requires_corp_credits_threshold",
+          "condition:requires_score_window",
+          "condition:requires_scored_agenda",
+          "effect:counter_economy"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_corp_credits_threshold",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:counter_economy"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_corp_credits_threshold has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:counter_economy has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_197_data-fort-reclamation",
+      "title": "Data Fort Reclamation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/data-fort-reclamation.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:remote_build",
+        "effect:install",
+        "effect:rez",
+        "condition:requires_hq_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Temporary credits and HQ-based remote build are derivable, while hidden HQ choice remains LegalAction context. Batch 8 subbatch: when_scored_economy_or_rez.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 10,
+            "source": "implementation.scoredAgenda.data_fort_reclamation"
+          },
+          {
+            "confidence": "high",
+            "kind": "install",
+            "timing": "when_scored",
+            "scope": "remote",
+            "source": "implementation.scoredAgenda.data_fort_reclamation.install"
+          },
+          {
+            "confidence": "high",
+            "kind": "remote_build",
+            "timing": "when_scored",
+            "scope": "remote",
+            "source": "implementation.scoredAgenda.data_fort_reclamation"
+          },
+          {
+            "confidence": "high",
+            "kind": "rez",
+            "timing": "when_scored",
+            "scope": "remote",
+            "source": "implementation.scoredAgenda.data_fort_reclamation.rez"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_hq_agenda",
+            "source": "implementation.scoredAgenda.data_fort_reclamation"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_score_window",
+            "source": "implementation.scoredAgenda.data_fort_reclamation"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Data Fort Reclamation temporary credits and HQ card choices are board/legal-action context; generated facts do not include hidden HQ card identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "corp", "per_card_longtail"],
+        "planRoles": ["corp_agenda_ability", "corp_score_agenda"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_hq_agenda",
+          "condition:requires_score_window",
+          "condition:requires_scored_agenda",
+          "effect:economy",
+          "effect:install",
+          "effect:remote_build",
+          "effect:rez"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_hq_agenda",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:install",
+        "effect:remote_build",
+        "effect:rez"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_hq_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:economy has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:install has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:remote_build has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:rez has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_198_detroit-police-contract",
+      "title": "Detroit Police Contract",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/detroit-police-contract.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "condition:requires_start_of_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Finite hosted credit pool and start-turn payout are mechanically derivable; remaining pool is board state. Batch 8 subbatch: scored_agenda_economy.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 2,
+            "source": "implementation.lifecycle.start_of_corp_turn.take_hosted_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "finite_economy_pool",
+            "timing": "when_scored",
+            "scope": "score_area",
+            "resource": "credits",
+            "amount": 12,
+            "source": "implementation.lifecycle.on_score.add_hosted_credits"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_start_of_turn",
+            "source": "implementation.lifecycle.start_of_corp_turn"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "counter", "economy"],
+        "planRoles": ["score_agenda"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_start_of_turn",
+          "effect:counter_economy",
+          "effect:finite_economy_pool"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_start_of_turn has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:counter_economy has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:finite_economy_pool has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_199_employee-empowerment",
       "title": "Employee Empowerment",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/employee-empowerment.ts",
@@ -5276,6 +7292,618 @@
         "matches": [
           "condition:requires_scored_agenda",
           "effect:draw",
+          "effect:scored_agenda_action"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_200_encryption-breakthrough",
+      "title": "Encryption Breakthrough",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/encryption-breakthrough.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "effect:global_modifier",
+        "effect:economy",
+        "condition:requires_installed_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate strength modifier and reveal-for-credits economy are mechanically derivable with board context. Batch 8 subbatch: global_research_modifier.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 1,
+            "source": "implementation.scoredAgenda.reveal_installed_ice_subtype_for_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength",
+            "amount": 1,
+            "source": "implementation.modifiers.ice_strength"
+          },
+          {
+            "confidence": "high",
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength",
+            "amount": 1,
+            "source": "implementation.modifiers.ice_strength"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_installed_ice",
+            "source": "implementation.scoredAgenda.reveal_installed_ice_subtype_for_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_score_window",
+            "source": "implementation.scoredAgenda.reveal_installed_ice_subtype_for_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "code_gate", "corp", "hidden_zone", "modifier"],
+        "planRoles": ["corp_score_agenda"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_installed_ice",
+          "condition:requires_score_window",
+          "condition:requires_scored_agenda",
+          "effect:economy",
+          "effect:global_modifier",
+          "effect:remote_protection"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_installed_ice",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:economy",
+        "effect:global_modifier",
+        "effect:remote_protection"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_installed_ice has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:economy has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:global_modifier has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:remote_protection has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_201_executive-extraction",
+      "title": "Executive Extraction",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/executive-extraction.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "effect:global_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Gray-Ops agenda difficulty reduction is a mechanical score-conversion support fact. Batch 8 subbatch: score_conversion_support.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "corp",
+            "resource": "advancement_counters",
+            "amount": 1,
+            "source": "implementation.modifiers.agenda_difficulty"
+          },
+          {
+            "confidence": "high",
+            "kind": "score_acceleration",
+            "timing": "persistent",
+            "scope": "corp",
+            "resource": "advancement_counters",
+            "amount": 1,
+            "source": "implementation.modifiers.agenda_difficulty"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "agenda_modifier", "score_plan"],
+        "planRoles": ["build_scoring_remote", "score_next_turn", "score_now"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "effect:global_modifier",
+          "effect:score_acceleration"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "effect:global_modifier",
+        "effect:score_acceleration"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:global_modifier has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:score_acceleration has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_202_genetics-visionary-acquisition",
+      "title": "Genetics-Visionary Acquisition",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/genetics-visionary-acquisition.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "effect:global_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Research agenda difficulty reduction is a mechanical score-conversion support fact. Batch 8 subbatch: score_conversion_support.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "corp",
+            "resource": "advancement_counters",
+            "amount": 1,
+            "source": "implementation.modifiers.agenda_difficulty"
+          },
+          {
+            "confidence": "high",
+            "kind": "score_acceleration",
+            "timing": "persistent",
+            "scope": "corp",
+            "resource": "advancement_counters",
+            "amount": 1,
+            "source": "implementation.modifiers.agenda_difficulty"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "gray_ops", "hidden_zone"],
+        "planRoles": ["corp_score_agenda"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "effect:global_modifier",
+          "effect:score_acceleration"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "effect:global_modifier",
+        "effect:score_acceleration"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:global_modifier has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:score_acceleration has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_203_hostile-takeover",
+      "title": "Hostile Takeover",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/hostile-takeover.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "condition:requires_score_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "When-scored credit gain is a deterministic mechanical fact. Batch 8 subbatch: when_scored_economy_or_rez.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 5,
+            "source": "implementation.scoredAgenda.gain_credits_on_score"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_score_window",
+            "source": "implementation.scoredAgenda.gain_credits_on_score"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "agenda_1pt", "score_plan"],
+        "planRoles": ["build_scoring_remote", "score_next_turn"],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 5
+          }
+        ],
+        "conditions": [],
+        "lineSupport": ["economy_rez_reserve", "score_closeout"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:economy"],
+        "generatedOnly": [
+          "condition:requires_score_window",
+          "condition:requires_scored_agenda"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_204_ice-transmutation",
+      "title": "Ice Transmutation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/ice-transmutation.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:global_modifier",
+        "effect:remote_protection",
+        "condition:requires_rezzed_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Rezzed-ICE strength/subroutine modifier is mechanically derivable with target/board context. Batch 8 subbatch: global_research_modifier.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "global_modifier",
+            "timing": "when_scored",
+            "scope": "ice",
+            "resource": "subroutines",
+            "source": "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier"
+          },
+          {
+            "confidence": "high",
+            "kind": "remote_protection",
+            "timing": "when_scored",
+            "scope": "ice",
+            "resource": "strength",
+            "amount": 1,
+            "source": "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_rezzed_ice",
+            "source": "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "corp", "ice"],
+        "planRoles": ["corp_score_agenda"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_rezzed_ice",
+          "condition:requires_scored_agenda",
+          "effect:global_modifier",
+          "effect:remote_protection"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_rezzed_ice",
+        "condition:requires_scored_agenda",
+        "effect:global_modifier",
+        "effect:remote_protection"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_rezzed_ice has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:global_modifier has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:remote_protection has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_206_marine-arcology",
+      "title": "Marine Arcology",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/marine-arcology.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Score-area economy action is directly represented and remains LegalAction-gated. Batch 8 subbatch: scored_agenda_economy.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "source": "implementation.effect.gain_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "corp", "per_card_longtail"],
+        "planRoles": ["corp_agenda_ability", "corp_score_agenda"],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 2,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["economy_rez_reserve"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_scored_agenda",
+          "effect:economy",
           "effect:scored_agenda_action"
         ],
         "generatedOnly": [],
@@ -5552,6 +8180,125 @@
       ]
     },
     {
+      "cardId": "onr_v1_209_political-coup",
+      "title": "Political Coup",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-coup.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Finite hosted credit pool and score-area payout action are mechanically derivable; remaining pool is board state. Batch 8 subbatch: scored_agenda_economy.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "source": "implementation.effect.take_hosted_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "finite_economy_pool",
+            "timing": "when_scored",
+            "scope": "score_area",
+            "resource": "credits",
+            "amount": 12,
+            "source": "implementation.lifecycle.on_score.add_hosted_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "agenda_counters", "economy_agenda", "score_plan"],
+        "planRoles": ["build_scoring_remote", "score_next_turn", "score_now"],
+        "effects": [
+          {
+            "kind": "counter_economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["economy_rez_reserve", "score_closeout"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_scored_agenda",
+          "effect:counter_economy",
+          "effect:scored_agenda_action"
+        ],
+        "generatedOnly": ["effect:finite_economy_pool"],
+        "manualOnly": []
+      },
+      "missingManualOverlay": ["effect:finite_economy_pool"],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:finite_economy_pool has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_210_political-overthrow",
       "title": "Political Overthrow",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",
@@ -5645,6 +8392,461 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_211_polymer-breakthrough",
+      "title": "Polymer Breakthrough",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/polymer-breakthrough.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "condition:requires_start_of_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Start-of-turn credit economy is mechanically derivable from lifecycle effects. Batch 8 subbatch: when_scored_economy_or_rez.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 1,
+            "source": "implementation.lifecycle.start_of_corp_turn.gain_credits"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_start_of_turn",
+            "source": "implementation.lifecycle.start_of_corp_turn"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "economy_agenda", "scored_trigger_agenda"],
+        "planRoles": ["recover_economy", "score_next_turn", "score_now"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": ["condition:requires_start_of_turn", "effect:economy"],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_start_of_turn",
+        "effect:economy"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_start_of_turn has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:economy has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_212_priority-requisition",
+      "title": "Priority Requisition",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/priority-requisition.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:rez_discount",
+        "effect:rez",
+        "condition:requires_score_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Free ICE rez is derivable as a when-scored rez/discount fact, with target/legal choice staying engine-owned. Batch 8 subbatch: when_scored_economy_or_rez.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "rez",
+            "timing": "when_scored",
+            "scope": "ice",
+            "source": "implementation.scoredAgenda.priority_requisition_rez_ice_at_no_cost"
+          },
+          {
+            "confidence": "high",
+            "kind": "rez_discount",
+            "timing": "when_scored",
+            "scope": "ice",
+            "resource": "credits",
+            "source": "implementation.scoredAgenda.priority_requisition_rez_ice_at_no_cost"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_score_window",
+            "source": "implementation.scoredAgenda.priority_requisition_rez_ice_at_no_cost"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": [
+          "agenda",
+          "agenda_3pt",
+          "expensive_ice_synergy",
+          "free_rez_tempo",
+          "rez_bonus",
+          "score_plan"
+        ],
+        "planRoles": [
+          "build_scoring_remote",
+          "rez_expensive_ice_after_score",
+          "score_next_turn",
+          "score_now"
+        ],
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "when_scored",
+            "scope": "server"
+          },
+          {
+            "kind": "rez_discount",
+            "timing": "when_scored",
+            "scope": "ice",
+            "resource": "credits"
+          }
+        ],
+        "conditions": [],
+        "lineSupport": [
+          "ice_tax_glacier",
+          "remote_scoring_build",
+          "score_closeout"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:rez_discount"],
+        "generatedOnly": [
+          "condition:requires_score_window",
+          "condition:requires_scored_agenda",
+          "effect:rez"
+        ],
+        "manualOnly": ["effect:remote_protection"]
+      },
+      "missingManualOverlay": [
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:remote_protection",
+        "effect:rez"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Intentionally manual strategic overlay is not derived: effect:remote_protection."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Intentionally manual strategic overlay is not derived: effect:remote_protection."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:rez has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:remote_protection has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_215_security-net-optimization",
+      "title": "Security Net Optimization",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/security-net-optimization.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:global_modifier",
+        "condition:requires_remote_server"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Fort ICE strength modifier is mechanically derivable with selected-server context. Batch 8 subbatch: global_research_modifier.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "global_modifier",
+            "timing": "when_scored",
+            "scope": "fort",
+            "resource": "strength",
+            "amount": 1,
+            "source": "implementation.scoredAgenda.choose_fort_ice_strength_bonus"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_remote_server",
+            "source": "implementation.scoredAgenda.choose_fort_ice_strength_bonus"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "ice_modifier", "score_plan"],
+        "planRoles": ["build_scoring_remote", "protect_rnd", "score_next_turn"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_remote_server",
+          "condition:requires_scored_agenda",
+          "effect:global_modifier"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_remote_server",
+        "condition:requires_scored_agenda",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_remote_server has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:global_modifier has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_216_security-purge",
+      "title": "Security Purge",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/security-purge.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:topdeck_info",
+        "effect:install",
+        "effect:rez_discount",
+        "condition:requires_rnd_top"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "R&D top-three reveal/install/rez is derivable as hidden-zone context without actual R&D order. Batch 8 subbatch: when_scored_economy_or_rez.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "install",
+            "timing": "when_scored",
+            "scope": "remote",
+            "source": "implementation.scoredAgenda.security_purge_top_rd.installIce"
+          },
+          {
+            "confidence": "high",
+            "kind": "rez_discount",
+            "timing": "when_scored",
+            "scope": "ice",
+            "resource": "credits",
+            "source": "implementation.scoredAgenda.security_purge_top_rd.rezAtNoCost"
+          },
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "timing": "when_scored",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 3,
+            "source": "implementation.scoredAgenda.security_purge_top_rd"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_rnd_top",
+            "source": "implementation.scoredAgenda.security_purge_top_rd"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_score_window",
+            "source": "implementation.scoredAgenda.security_purge_top_rd"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Security Purge is represented as R&D top reveal/install/rez-discount context only; generated facts do not expose actual hidden R&D order."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "corp", "per_card_longtail"],
+        "planRoles": ["corp_agenda_ability", "corp_score_agenda"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_rnd_top",
+          "condition:requires_score_window",
+          "condition:requires_scored_agenda",
+          "effect:install",
+          "effect:rez_discount",
+          "effect:topdeck_info"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_rnd_top",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:install",
+        "effect:rez_discount",
+        "effect:topdeck_info"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_rnd_top has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:install has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:rez_discount has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:topdeck_info has no manual ontology match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -5772,6 +8974,254 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_218_subsidiary-branch",
+      "title": "Subsidiary Branch",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/subsidiary-branch.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:extra_action",
+        "condition:requires_start_of_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Start-of-turn extra action is mechanically derivable; action use remains LegalAction context. Batch 8 subbatch: score_conversion_support.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "extra_action",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "actions",
+            "amount": 1,
+            "source": "implementation.lifecycle.start_of_corp_turn.gain_actions"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_start_of_turn",
+            "source": "implementation.lifecycle.start_of_corp_turn"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["action", "agenda", "corp"],
+        "planRoles": ["corp_score_agenda"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_start_of_turn",
+          "effect:extra_action"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_start_of_turn",
+        "effect:extra_action"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_start_of_turn has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:extra_action has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_219_superior-net-barriers",
+      "title": "Superior Net Barriers",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/superior-net-barriers.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "effect:global_modifier",
+        "effect:economy",
+        "condition:requires_installed_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Wall strength modifier and reveal-for-credits economy are mechanically derivable with board context. Batch 8 subbatch: global_research_modifier.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 1,
+            "source": "implementation.scoredAgenda.reveal_installed_ice_subtype_for_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength",
+            "amount": 1,
+            "source": "implementation.modifiers.ice_strength"
+          },
+          {
+            "confidence": "high",
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength",
+            "amount": 1,
+            "source": "implementation.modifiers.ice_strength"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_installed_ice",
+            "source": "implementation.scoredAgenda.reveal_installed_ice_subtype_for_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_score_window",
+            "source": "implementation.scoredAgenda.reveal_installed_ice_subtype_for_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.scoredAgenda"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": [
+          "agenda",
+          "agenda_3pt",
+          "global_ice_strength_modifier",
+          "score_plan",
+          "wall_economy",
+          "wall_ice_armor"
+        ],
+        "planRoles": [
+          "build_scoring_remote",
+          "score_next_turn",
+          "score_now",
+          "wall_remote_plan"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits"
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength",
+            "amount": 1
+          }
+        ],
+        "conditions": [],
+        "lineSupport": ["ice_tax_glacier", "remote_scoring_build"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": ["effect:economy", "effect:remote_protection"],
+        "generatedOnly": [
+          "condition:requires_installed_ice",
+          "condition:requires_score_window",
+          "condition:requires_scored_agenda",
+          "effect:global_modifier"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_installed_ice",
+        "condition:requires_score_window",
+        "condition:requires_scored_agenda",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_installed_ice has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:global_modifier has no manual ontology match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -9937,6 +13387,493 @@
       ]
     },
     {
+      "cardId": "onr_v1_295_night-shift",
+      "title": "Night Shift",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/night-shift.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:economy", "effect:draw"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Credit gain and draw are direct on-play operation effects. Batch 8 subbatch: corp_operation_economy.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1,
+            "source": "implementation.effect.draw_cards"
+          },
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 2,
+            "source": "implementation.effect.gain_credits"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": ["draw_operation", "economy_operation", "operation"],
+        "planRoles": ["recover_economy"],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1
+          },
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 2
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["economy_rez_reserve"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:draw", "effect:economy"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_296_off-site-backups",
+      "title": "Off-Site Backups",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/off-site-backups.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:card_recovery",
+        "condition:requires_archives_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Archives-to-HQ recovery is mechanically represented without hidden card identities. Batch 8 subbatch: corp_operation_draw_or_recovery.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "card_recovery",
+            "timing": "action",
+            "scope": "archives",
+            "resource": "cards",
+            "source": "implementation.corpUtility.corp_archives_to_hq"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_archives_card",
+            "source": "implementation.corpUtility.corp_archives_to_hq"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Archives-to-HQ recovery is represented without hidden Archives/HQ card identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": ["corp", "operation", "per_card_longtail"],
+        "planRoles": ["corp_operation_choice", "corp_play_operation"],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "action",
+            "scope": "corp"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["central_stabilize", "economy_rez_reserve"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_archives_card",
+          "effect:card_recovery"
+        ],
+        "manualOnly": ["effect:draw", "effect:zone_shuffle"]
+      },
+      "missingManualOverlay": [
+        "condition:requires_archives_card",
+        "effect:card_recovery",
+        "effect:draw",
+        "effect:zone_shuffle"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_archives_card has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:card_recovery has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:draw has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:zone_shuffle has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_297_overtime-incentives",
+      "title": "Overtime Incentives",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/overtime-incentives.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:extra_action"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Extra Corp actions are a direct on-play operation effect; action use remains LegalAction context. Batch 8 subbatch: corp_operation_economy.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "extra_action",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "actions",
+            "amount": 2,
+            "source": "implementation.effect.gain_actions"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": ["economy_operation", "operation"],
+        "planRoles": ["recover_economy"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": ["effect:extra_action"],
+        "manualOnly": []
+      },
+      "missingManualOverlay": ["effect:extra_action"],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:extra_action has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_298_planning-consultants",
+      "title": "Planning Consultants",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/planning-consultants.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:topdeck_info",
+        "effect:zone_shuffle",
+        "condition:requires_rnd_top"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Corp R&D top-five reorder is mechanically derivable as hidden-zone context without exposing actual R&D order. Batch 8 subbatch: corp_operation_draw_or_recovery.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "timing": "action",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 5,
+            "source": "implementation.corpUtility.corp_rd_top_reorder"
+          },
+          {
+            "confidence": "high",
+            "kind": "zone_shuffle",
+            "timing": "action",
+            "scope": "rnd",
+            "resource": "cards",
+            "source": "implementation.corpUtility.corp_rd_top_reorder"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_rnd_top",
+            "source": "implementation.corpUtility.corp_rd_top_reorder"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Corp R&D-top reorder is represented as hidden-zone context only; generated facts do not contain actual R&D order."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": ["corp", "operation", "per_card_longtail"],
+        "planRoles": ["corp_operation_choice", "corp_play_operation"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_rnd_top",
+          "effect:topdeck_info",
+          "effect:zone_shuffle"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_rnd_top",
+        "effect:topdeck_info",
+        "effect:zone_shuffle"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_rnd_top has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:topdeck_info has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:zone_shuffle has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_300_project-consultants",
+      "title": "Project Consultants",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/project-consultants.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "effect:advance_burst",
+        "condition:requires_score_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advancement-counter burst is directly represented by distribute_advancement_counters; score legality remains LegalAction context. Batch 8 subbatch: corp_advance_burst.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "advance_burst",
+            "timing": "action",
+            "scope": "installed_card",
+            "resource": "advancement_counters",
+            "amount": 4,
+            "source": "implementation.abilities.distribute_advancement_counters"
+          },
+          {
+            "confidence": "high",
+            "kind": "score_acceleration",
+            "timing": "action",
+            "scope": "installed_card",
+            "resource": "advancement_counters",
+            "amount": 4,
+            "source": "implementation.abilities.distribute_advancement_counters"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_score_window",
+            "source": "implementation.abilities.distribute_advancement_counters"
+          }
+        ],
+        "costProfile": {
+          "source": "implementation.abilities.costs"
+        },
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "remoteRole": {
+          "kind": "asset_economy",
+          "threatLevel": "medium",
+          "serverScope": "remote",
+          "confidence": "high",
+          "source": "implementation.abilities.distribute_advancement_counters"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": ["advance", "agenda", "operation"],
+        "planRoles": ["corp_agenda_operation"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_score_window",
+          "effect:advance_burst",
+          "effect:score_acceleration",
+          "remoteRole:asset_economy"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_score_window",
+        "effect:advance_burst",
+        "effect:score_acceleration",
+        "remoteRole:asset_economy"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:advance_burst has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:score_acceleration has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated remoteRole:asset_economy has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_302_scorched-earth",
       "title": "Scorched Earth",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/scorched-earth.ts",
@@ -10033,6 +13970,318 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+      "title": "Silver Lining Recovery Protocol",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/silver-lining-recovery-protocol.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "condition:requires_stolen_agenda_last_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Variable recovery economy is derivable, with amount dependent on stolen agenda counters from the previous Runner turn. Batch 8 subbatch: corp_operation_economy.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "source": "implementation.corpUtility.silver_lining_recovery"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_stolen_agenda_last_turn",
+            "source": "implementation.corpUtility.silver_lining_recovery"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Silver Lining Recovery Protocol variable amount depends on stolen agenda counters from the previous Runner turn; generated facts do not assert a fixed credit gain."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": ["counter", "economy", "operation"],
+        "planRoles": ["corp_agenda_operation"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_stolen_agenda_last_turn",
+          "effect:economy"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_stolen_agenda_last_turn",
+        "effect:economy"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_stolen_agenda_last_turn has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:economy has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "title": "Systematic Layoffs",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/systematic-layoffs.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "effect:advance_burst",
+        "condition:requires_score_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Two advancement counters are directly represented by distribute_advancement_counters; target legality remains engine context. Batch 8 subbatch: corp_advance_burst.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "advance_burst",
+            "timing": "action",
+            "scope": "installed_card",
+            "resource": "advancement_counters",
+            "amount": 2,
+            "source": "implementation.abilities.distribute_advancement_counters"
+          },
+          {
+            "confidence": "high",
+            "kind": "score_acceleration",
+            "timing": "action",
+            "scope": "installed_card",
+            "resource": "advancement_counters",
+            "amount": 2,
+            "source": "implementation.abilities.distribute_advancement_counters"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_score_window",
+            "source": "implementation.abilities.distribute_advancement_counters"
+          }
+        ],
+        "costProfile": {
+          "source": "implementation.abilities.costs"
+        },
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "remoteRole": {
+          "kind": "asset_economy",
+          "threatLevel": "medium",
+          "serverScope": "remote",
+          "confidence": "high",
+          "source": "implementation.abilities.distribute_advancement_counters"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": ["advance", "agenda", "counter", "operation"],
+        "planRoles": ["corp_agenda_operation"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_score_window",
+          "effect:advance_burst",
+          "effect:score_acceleration",
+          "remoteRole:asset_economy"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_score_window",
+        "effect:advance_burst",
+        "effect:score_acceleration",
+        "remoteRole:asset_economy"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:advance_burst has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:score_acceleration has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated remoteRole:asset_economy has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_305_team-restructuring",
+      "title": "Team Restructuring",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/team-restructuring.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "effect:advance_burst",
+        "condition:requires_score_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Up-to-two advancement counter placement is mechanically derivable; score-conversion value remains strategic overlay. Batch 8 subbatch: corp_advance_burst.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "advance_burst",
+            "timing": "action",
+            "scope": "installed_card",
+            "resource": "advancement_counters",
+            "amount": 2,
+            "source": "implementation.abilities.distribute_advancement_counters"
+          },
+          {
+            "confidence": "high",
+            "kind": "score_acceleration",
+            "timing": "action",
+            "scope": "installed_card",
+            "resource": "advancement_counters",
+            "amount": 2,
+            "source": "implementation.abilities.distribute_advancement_counters"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_score_window",
+            "source": "implementation.abilities.distribute_advancement_counters"
+          }
+        ],
+        "costProfile": {
+          "source": "implementation.abilities.costs"
+        },
+        "derivationNotes": [],
+        "needsManualOverlayReasons": [],
+        "remoteRole": {
+          "kind": "asset_economy",
+          "threatLevel": "medium",
+          "serverScope": "remote",
+          "confidence": "high",
+          "source": "implementation.abilities.distribute_advancement_counters"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": ["agenda", "counter", "operation"],
+        "planRoles": ["corp_agenda_operation"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_score_window",
+          "effect:advance_burst",
+          "effect:score_acceleration",
+          "remoteRole:asset_economy"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_score_window",
+        "effect:advance_burst",
+        "effect:score_acceleration",
+        "remoteRole:asset_economy"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:advance_burst has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:score_acceleration has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated remoteRole:asset_economy has no manual ontology match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."

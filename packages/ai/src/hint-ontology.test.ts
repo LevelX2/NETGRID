@@ -268,4 +268,39 @@ describe("AI hint ontology validation", () => {
     expect(source).not.toContain("./deck-doctrine");
     expect(KNOWN_HINT_EFFECT_KINDS).toContain("scored_agenda_action");
   });
+
+  it("accepts read-only generated Corp economy and score-conversion kinds", () => {
+    const result = validateAiHintOntologyFields({
+      effects: [
+        { kind: "advance_burst", timing: "action", scope: "corp" },
+        { kind: "shuffle_draw", timing: "action", scope: "corp" },
+        { kind: "card_recovery", timing: "action", scope: "corp" },
+        { kind: "agenda_reveal_economy", timing: "when_scored", scope: "hq" },
+        { kind: "advance", timing: "action", scope: "corp" },
+        { kind: "install", timing: "action", scope: "corp" },
+        { kind: "rez", timing: "action", scope: "corp" },
+        { kind: "remote_build", timing: "action", scope: "corp" },
+        { kind: "global_modifier", timing: "persistent", scope: "corp" },
+        {
+          kind: "finite_economy_pool",
+          timing: "when_scored",
+          scope: "score_area",
+        },
+      ],
+      conditions: [
+        { kind: "requires_agenda_in_hq" },
+        { kind: "requires_agenda_reveal" },
+        { kind: "requires_hq_agenda" },
+        { kind: "requires_installed_ice" },
+        { kind: "requires_rezzed_ice" },
+        { kind: "requires_score_window" },
+        { kind: "requires_corp_credits_threshold" },
+        { kind: "requires_start_of_turn" },
+        { kind: "requires_stolen_agenda_last_turn" },
+        { kind: "requires_archives_card" },
+        { kind: "requires_rnd_top" },
+      ],
+    });
+    expect(result.errors).toEqual([]);
+  });
 });

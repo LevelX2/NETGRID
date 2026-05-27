@@ -66,13 +66,13 @@ describe("derived basic facts gate report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("keeps the 85-card pilot complete", () => {
+  it("keeps the 115-card pilot complete", () => {
     const report = readReport();
-    expect(report.pilotCardCount).toBe(85);
-    expect(report.implementationFoundCount).toBe(85);
-    expect(report.cardsWithDerivedFacts).toBe(85);
-    expect(report.cardsWithManualOntologyOverlap).toBe(67);
-    expect(report.cardsNeedingManualOverlay).toBe(35);
+    expect(report.pilotCardCount).toBe(115);
+    expect(report.implementationFoundCount).toBe(115);
+    expect(report.cardsWithDerivedFacts).toBe(115);
+    expect(report.cardsWithManualOntologyOverlap).toBe(76);
+    expect(report.cardsNeedingManualOverlay).toBe(63);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
       report.cards.every(
@@ -337,6 +337,76 @@ describe("derived basic facts gate report", () => {
     const dataRaven = cardById(report, "onr_v1_236_data-raven");
     expect(dataRaven.derivedFacts.effects).toContainEqual(
       expect.objectContaining({ kind: "persistent_counter_effect" }),
+    );
+
+    const projectConsultants = cardById(
+      report,
+      "onr_v1_300_project-consultants",
+    );
+    expect(projectConsultants.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "advance_burst", amount: 4 }),
+        expect.objectContaining({ kind: "score_acceleration", amount: 4 }),
+      ]),
+    );
+    expect(projectConsultants.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_score_window" }),
+    );
+
+    const corporateDownsizing = cardById(
+      report,
+      "onr_v1_194_corporate-downsizing",
+    );
+    expect(corporateDownsizing.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "agenda_reveal_economy" }),
+        expect.objectContaining({ kind: "zone_shuffle", scope: "rnd" }),
+      ]),
+    );
+    expect(corporateDownsizing.derivedFacts.conditions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "requires_agenda_in_hq" }),
+        expect.objectContaining({ kind: "requires_agenda_reveal" }),
+      ]),
+    );
+
+    const priorityRequisition = cardById(
+      report,
+      "onr_v1_212_priority-requisition",
+    );
+    expect(priorityRequisition.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "rez_discount" }),
+        expect.objectContaining({ kind: "rez" }),
+      ]),
+    );
+
+    const aiCfo = cardById(report, "onr_v1_188_ai-chief-financial-officer");
+    expect(aiCfo.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "shuffle_draw" }),
+        expect.objectContaining({ kind: "zone_shuffle", scope: "rnd" }),
+      ]),
+    );
+
+    const detroitPolice = cardById(
+      report,
+      "onr_v1_198_detroit-police-contract",
+    );
+    expect(detroitPolice.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "finite_economy_pool", amount: 12 }),
+        expect.objectContaining({
+          kind: "counter_economy",
+          timing: "start_of_turn",
+        }),
+      ]),
+    );
+    expect(detroitPolice.derivedFacts.effects).not.toContainEqual(
+      expect.objectContaining({
+        kind: "counter_economy",
+        timing: "scored_activated",
+      }),
     );
   });
 

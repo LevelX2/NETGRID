@@ -148,8 +148,148 @@ const BATCH7_CORP_ICE_PRIORITY_POLICY = Object.fromEntries(
   ]),
 );
 
+const BATCH8_CORP_ECONOMY_PRIORITY_POLICY = Object.fromEntries(
+  [
+    [
+      "onr_v1_300_project-consultants",
+      "Advance-burst counters are derivable, but target legality and score-conversion timing remain LegalAction and board context.",
+    ],
+    [
+      "onr_v1_298_planning-consultants",
+      "R&D top reorder is derivable as hidden-zone context without generated hidden order.",
+    ],
+    [
+      "onr_v1_304_systematic-layoffs",
+      "Advance-burst counters are derivable, but target legality and score-conversion timing remain LegalAction and board context.",
+    ],
+    [
+      "onr_v1_305_team-restructuring",
+      "Advancement-counter distribution is derivable, but concrete score windows remain engine/board context.",
+    ],
+    [
+      "onr_v1_295_night-shift",
+      "Operation economy and draw are mechanically derivable and low ambiguity.",
+    ],
+    [
+      "onr_v1_297_overtime-incentives",
+      "Operation extra actions are derivable, while action use remains LegalAction context.",
+    ],
+    [
+      "onr_v1_296_off-site-backups",
+      "Archives-to-HQ recovery is derivable, but hidden card identities remain runtime-only.",
+    ],
+    [
+      "onr_v1_303_silver-lining-recovery-protocol",
+      "Variable recovery economy is derivable, with prior stolen-agenda counters remaining history context.",
+    ],
+    [
+      "onr_v1_194_corporate-downsizing",
+      "HQ-agenda reveal economy is derivable, but generated facts cannot contain hidden HQ agenda identity.",
+    ],
+    [
+      "onr_v1_196_corporate-war",
+      "Threshold-gated credit swing is derivable, while current credit state remains board context.",
+    ],
+    [
+      "onr_v1_203_hostile-takeover",
+      "When-scored credit gain is deterministic and low-risk.",
+    ],
+    [
+      "onr_v1_212_priority-requisition",
+      "When-scored free ICE rez is derivable, with target selection and rez legality staying engine-owned.",
+    ],
+    [
+      "onr_v1_216_security-purge",
+      "R&D top reveal/install/rez effect is derivable as hidden-zone context without generated R&D order.",
+    ],
+    [
+      "onr_v1_197_data-fort-reclamation",
+      "Temporary credits plus HQ-based remote build are derivable, while hidden HQ choice remains LegalAction context.",
+    ],
+    [
+      "onr_v1_219_superior-net-barriers",
+      "Wall strength and reveal-for-credits effects are derivable, but board/rezzed state remains context.",
+    ],
+    [
+      "onr_v1_200_encryption-breakthrough",
+      "Code-gate strength and reveal-for-credits effects are derivable, but board/rezzed state remains context.",
+    ],
+    [
+      "onr_v1_211_polymer-breakthrough",
+      "Start-of-turn credit economy is derivable, with score/persistence context explicit.",
+    ],
+    [
+      "onr_v1_218_subsidiary-branch",
+      "Start-of-turn action gain is derivable, with concrete action use staying LegalAction context.",
+    ],
+    [
+      "onr_v1_206_marine-arcology",
+      "Scored-agenda economy action is already mechanical and remains score-area LegalAction gated.",
+    ],
+    [
+      "onr_v1_188_ai-chief-financial-officer",
+      "Shuffle/draw score-area effect is derivable without hidden HQ, Archives or R&D order data.",
+    ],
+    [
+      "onr_v1_204_ice-transmutation",
+      "Rezzed-ICE modifier is derivable, but target selection and board state remain context.",
+    ],
+    [
+      "onr_v1_215_security-net-optimization",
+      "Fort ICE strength modifier is derivable, with selected-server board context explicit.",
+    ],
+    [
+      "onr_v1_190_bioweapons-engineering",
+      "Persistent meat-damage modifier is derivable, while concrete damage resolution remains engine context.",
+    ],
+    [
+      "onr_v1_191_black-ice-quality-assurance",
+      "Black-ICE strength modifier is derivable, while active scored state remains board context.",
+    ],
+    [
+      "onr_v1_189_artificial-security-directors",
+      "Agenda-difficulty modifier is derivable as score-conversion support, not score_now strategy.",
+    ],
+    [
+      "onr_v1_201_executive-extraction",
+      "Agenda-difficulty modifier is derivable as score-conversion support, not score_now strategy.",
+    ],
+    [
+      "onr_v1_202_genetics-visionary-acquisition",
+      "Agenda-difficulty modifier is derivable as score-conversion support, not score_now strategy.",
+    ],
+    [
+      "onr_v1_195_corporate-retreat",
+      "Score-area economy action is derivable, while disable-on-install/rez state remains engine context.",
+    ],
+    [
+      "onr_v1_198_detroit-police-contract",
+      "Finite hosted credit pool and start-turn payout are derivable, with remaining pool state engine-owned.",
+    ],
+    [
+      "onr_v1_209_political-coup",
+      "Finite hosted credit pool and score-area payout are derivable, with remaining pool state engine-owned.",
+    ],
+  ].map(([cardId, rationale]) => [
+    cardId,
+    {
+      migrationPriority: "P1",
+      migrationRisk: "medium",
+      fieldCategories: [
+        "safe_generated_now",
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+      ],
+      recommendedMigrationBatch: 8,
+      rationale,
+    },
+  ]),
+);
+
 const PRIORITY_POLICY = {
   ...BATCH7_CORP_ICE_PRIORITY_POLICY,
+  ...BATCH8_CORP_ECONOMY_PRIORITY_POLICY,
   "onr_v1_017_deep-thought": {
     migrationPriority: "P2",
     migrationRisk: "medium",
@@ -1026,7 +1166,7 @@ export function buildGeneratedFactMigrationPriorityReport() {
     };
   });
 
-  const batchPlan = [1, 2, 3, 4, 5, 6, 7].map((batch) => ({
+  const batchPlan = [1, 2, 3, 4, 5, 6, 7, 8].map((batch) => ({
     batch,
     title: {
       1: "Scored-agenda and tag/trace/punish generated facts",
@@ -1036,6 +1176,7 @@ export function buildGeneratedFactMigrationPriorityReport() {
       5: "Remaining longtail mechanical facts",
       6: "Runner info, central pressure and access replacement",
       7: "Corp ICE longtail, future, trace, damage and ETR",
+      8: "Corp economy, operation and advance-burst score conversion support",
     }[batch],
     cardIds: cards
       .filter((card) => card.recommendedMigrationBatch === batch)
