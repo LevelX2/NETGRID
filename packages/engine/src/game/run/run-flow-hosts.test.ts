@@ -130,6 +130,7 @@ function hostFor(calls: string[]): RunFlowHost {
     access: {
       breachStateHost: (targetState) => ({ state: targetState }) as never,
       accessFlowHost: (targetState) => ({ state: targetState }) as never,
+      hasHiddenResourceAccessStartActions: () => false,
       advanceArchivesBreachPastNonDecisionCards: () =>
         calls.push("advanceArchivesBreach"),
       startRunnerPrivateLookChoice: () => true,

@@ -338,6 +338,9 @@ describe("game card implementation runtime deps root", () => {
         "startDistributeAdvancementCounters",
         "startMoveAdvancementCounters",
         "addCurrentEncounterAdditionalSubroutine",
+        "addCurrentRunAccessCount",
+        "passCurrentEncounteredIce",
+        "revealHiddenRunnerResource",
         "abilityLimits",
       ].sort(),
     );

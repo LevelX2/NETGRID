@@ -112,6 +112,7 @@ export function resolveEncounterPrintedNonTraceEffect(
     subroutineIndex: number;
     legalAction?: LegalAction | undefined;
     paidPayOrEndRunIndexes?: ReadonlySet<number> | undefined;
+    paidPayOrTrashProgramIndexes?: ReadonlySet<number> | undefined;
   },
 ): EncounterPrintedNonTraceResult {
   const { definition, subroutine, subroutineIndex, legalAction } = options;
@@ -134,6 +135,25 @@ export function resolveEncounterPrintedNonTraceEffect(
     return { handled: true, ...source, stateChanged: true };
   }
   if (subroutine.type === "trash_installed_program") {
+    return resolveDirectTrashProgramSubroutine(host, {
+      definition,
+      subroutine,
+      subroutineIndex,
+      legalAction,
+    });
+  }
+  if (subroutine.type === "trash_installed_program_unless_runner_pays") {
+    if (options.paidPayOrTrashProgramIndexes?.has(subroutineIndex)) {
+      appendResolvedSubroutineEffect(
+        legalAction,
+        definition,
+        subroutineIndex,
+        subroutine,
+        undefined,
+        { paidCredits: Math.max(0, Math.floor(subroutine.amount ?? 0)), cardsTrashed: 0 },
+      );
+      return { handled: true, ...source, stateChanged: true };
+    }
     return resolveDirectTrashProgramSubroutine(host, {
       definition,
       subroutine,

@@ -1360,19 +1360,42 @@ describe("Proteus Dynamic Public ETR ICE", () => {
 
 describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
   const BRAIN_WASH = "onr_proteus_011_brain-wash";
+  const CHIHUAHUA = "onr_proteus_014_chihuahua";
   const COLONEL_FAILURE = "onr_proteus_015_colonel-failure";
+  const COYOTE = "onr_proteus_016_coyote";
+  const DATACOMB = "onr_proteus_018_datacomb";
+  const DEATH_YO_YO = "onr_proteus_019_death-yo-yo";
+  const ICEBERG = "onr_proteus_027_iceberg";
+  const MARIONETTE = "onr_proteus_029_marionette";
+  const SCAFFOLDING = "onr_proteus_037_scaffolding";
   const MISLEADING_ACCESS_MENUS =
     "onr_proteus_032_misleading-access-menus";
   const SNOWBANK = "onr_proteus_038_snowbank";
+  const TUMBLERS = "onr_proteus_042_tumblers";
+  const TWISTY_PASSAGES = "onr_proteus_043_twisty-passages";
+  const WASHED_UP_SOLO_CONSTRUCT =
+    "onr_proteus_045_washed-up-solo-construct";
+  const RASMIN_BRIDGER = "onr_proteus_070_rasmin-bridger";
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
   function proteusSimpleCorpIceGame(seed: string): GameState {
     const corpOverrideIds = new Set([
       BRAIN_WASH,
+      CHIHUAHUA,
       COLONEL_FAILURE,
+      COYOTE,
+      DATACOMB,
+      DEATH_YO_YO,
+      ICEBERG,
+      MARIONETTE,
       MISLEADING_ACCESS_MENUS,
+      SCAFFOLDING,
       SNOWBANK,
+      TUMBLERS,
+      TWISTY_PASSAGES,
+      WASHED_UP_SOLO_CONSTRUCT,
+      RASMIN_BRIDGER,
     ]);
     const runnerOverrideIds = new Set([
       "simple_decoder",
@@ -1398,9 +1421,20 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         id: `${seed}_corp`,
         cards: [
           { id: BRAIN_WASH, quantity: 1 },
+          { id: CHIHUAHUA, quantity: 1 },
           { id: COLONEL_FAILURE, quantity: 1 },
+          { id: COYOTE, quantity: 1 },
+          { id: DATACOMB, quantity: 1 },
+          { id: DEATH_YO_YO, quantity: 1 },
+          { id: ICEBERG, quantity: 1 },
+          { id: MARIONETTE, quantity: 1 },
           { id: MISLEADING_ACCESS_MENUS, quantity: 1 },
+          { id: SCAFFOLDING, quantity: 1 },
           { id: SNOWBANK, quantity: 1 },
+          { id: TUMBLERS, quantity: 1 },
+          { id: TWISTY_PASSAGES, quantity: 1 },
+          { id: WASHED_UP_SOLO_CONSTRUCT, quantity: 1 },
+          { id: RASMIN_BRIDGER, quantity: 1 },
           ...ONR_V1_6_2_CORP_DECK.cards.filter(
             (card) => !corpOverrideIds.has(card.id),
           ),
@@ -1457,6 +1491,18 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       apply(state, "corp", (action) => action.type === "rez_ice" && action.source === iceId),
     );
     return { state, iceId, rezCreditsBefore };
+  }
+
+  function resolveOpenTraceWithDefaultChoices(state: GameState): GameState {
+    while (state.trace) {
+      const option =
+        state.pendingChoice?.options.find((candidate) => candidate.id === "bid_0") ??
+        state.pendingChoice?.options.find((candidate) => candidate.id === "pass") ??
+        state.pendingChoice?.options[0];
+      if (!option) throw new Error("Trace choice option missing.");
+      state = applyChoice(state, state.activeSide, option.id);
+    }
+    return state;
   }
 
   it("resolves Brain Wash brain damage with stale, side, actionId, and ICE revalidation", () => {
@@ -1776,4 +1822,266 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       );
     },
   );
+
+  it("PRO010 resolves Chihuahua trace Net damage without leaking hidden grip data", () => {
+    const setup = startEncounterAndRezIce(
+      proteusSimpleCorpIceGame("proteus-pro010-chihuahua-trace"),
+      CHIHUAHUA,
+    );
+    let { state } = setup;
+    expect(state.corp.credits).toBe(setup.rezCreditsBefore + 2);
+    const beforeGrip = state.runner.grip.length;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.trace).toMatchObject({
+      sourceDefinitionId: CHIHUAHUA,
+      baseTraceStrength: 1,
+      successEffect: { type: "net_damage", amount: 1 },
+    });
+    state = resolveOpenTraceWithDefaultChoices(state);
+
+    expect(beforeGrip - state.runner.grip.length).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceSuccessful: true,
+      damageType: "net",
+      damageAmount: 1,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("PRO010 lets Runner pay while passing Coyote to cancel future ICE strength", () => {
+    let state = startEncounterAndRezIce(
+      proteusSimpleCorpIceGame("proteus-pro010-coyote-cancel"),
+      COYOTE,
+    ).state;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    const pay = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.postPassFutureStrengthAbility ===
+          "cancel_future_ice_strength_bonus" &&
+        action.payload?.decision === "pay",
+    );
+    expect(pay.costs).toEqual([{ credits: 2 }]);
+    state = apply(state, "runner", (action) => action.actionId === pay.actionId);
+    expect(state.run?.futureEncounterIceStrengthBonus).toBe(0);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("PRO010 resolves Washed-Up Solo Construct pay-or-trash program branches", () => {
+    let state = startEncounterAndRezIce(
+      proteusSimpleCorpIceGame("proteus-pro010-washed-up-paid"),
+      WASHED_UP_SOLO_CONSTRUCT,
+    ).state;
+    const programId = installRunnerProgramForTest(state, "simple_decoder");
+    const paid = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.payOrTrashProgramSubroutineIndexes === "0",
+    );
+    expect(paid.costs).toEqual([{ credits: 1 }]);
+    state = apply(state, "runner", (action) => action.actionId === paid.actionId);
+    expect(state.runner.rig.programs).toContain(programId);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
+      expect.objectContaining({
+        sourceDefinitionId: WASHED_UP_SOLO_CONSTRUCT,
+        subroutineType: "trash_installed_program_unless_runner_pays",
+        paidCredits: 1,
+        cardsTrashed: 0,
+      }),
+    ]);
+
+    let refusing = startEncounterAndRezIce(
+      proteusSimpleCorpIceGame("proteus-pro010-washed-up-trash"),
+      WASHED_UP_SOLO_CONSTRUCT,
+    ).state;
+    const trashedProgramId = installRunnerProgramForTest(refusing, "simple_decoder");
+    refusing = apply(
+      refusing,
+      "runner",
+      (action) => action.type === "continue_run" && action.costs.length === 0,
+    );
+    expect(refusing.runner.heap).toContain(trashedProgramId);
+    expect(JSON.stringify(refusing.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+  });
+
+  it("PRO010 adds Iceberg paid encounter ETR subroutines through the generic corp encounter window", () => {
+    let state = startEncounterWithRezzedIce(
+      proteusSimpleCorpIceGame("proteus-pro010-iceberg"),
+      ICEBERG,
+    ).state;
+    const addSubroutine = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.source === state.run?.encounteredIceId &&
+        action.costs[0]?.credits === 2,
+    );
+    expect(addSubroutine.costs).toEqual([{ credits: 2 }]);
+    state = apply(state, "corp", (action) => action.actionId === addSubroutine.actionId);
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        String(action.payload?.encounterSubroutineIds ?? "").includes(
+          `card_implementation.${ICEBERG}.current_encounter_additional_subroutine.1.end_the_run`,
+        ),
+    );
+    expect(continueAction.payload?.unbrokenSubroutineCount).toBe(2);
+  });
+
+  it.each([
+    [DATACOMB, "required_pay_or_return"],
+    [MARIONETTE, "required_pay_or_return"],
+    [TWISTY_PASSAGES, "required_pay_or_return"],
+    [DEATH_YO_YO, "optional_return_gain"],
+    [SCAFFOLDING, "optional_return_gain"],
+    [TUMBLERS, "optional_return_gain"],
+  ] as const)(
+    "PRO010 opens deterministic corp post-pass ICE lifecycle window for %s",
+    (definitionId, mode) => {
+      const setup = startEncounterWithRezzedIce(
+        proteusSimpleCorpIceGame(`proteus-pro010-lifecycle-${definitionId}`),
+        definitionId,
+      );
+      let { state, iceId } = setup;
+      const subroutineCount =
+        cardImplementationForDefinitionId(definitionId)?.printedSubroutines
+          ?.length ?? 0;
+      state.run!.brokenSubroutineIndexes = Array.from(
+        { length: subroutineCount },
+        (_, index) => index,
+      );
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      const corpActions = getLegalActions(state, "corp").filter(
+        (action) =>
+          action.type === "continue_run" &&
+          action.payload?.corpPostPassIceAbility === "return_passed_ice_to_hq",
+      );
+      expect(corpActions.map((action) => action.payload?.decision).sort()).toEqual(
+        mode === "required_pay_or_return"
+          ? ["pay", "return_to_hq"]
+          : ["decline", "return_to_hq"],
+      );
+      const returnAction = corpActions.find(
+        (action) => action.payload?.decision === "return_to_hq",
+      );
+      if (!returnAction) throw new Error("Return action missing.");
+      state = apply(state, "corp", (action) => action.actionId === returnAction.actionId);
+      expect(state.corp.hq).toContain(iceId);
+      expect(state.cardInstances[iceId]?.zone).toEqual({
+        side: "corp",
+        zone: "hq",
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        hiddenPayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    },
+  );
+
+  it("PRO010 prioritizes corp lifecycle over Rasmin Bridger post-pass Fort payment", () => {
+    let state = proteusSimpleCorpIceGame("proteus-pro010-rasmin-priority");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 30;
+    state.runner.credits = 20;
+    const rasminId = putCorpRootInRemote(state, RASMIN_BRIDGER);
+    const iceId = putCorpIceOnServer(state, "remote_1", DATACOMB);
+    setRezzed(state, rasminId);
+    setRezzed(state, iceId);
+    state = enterEncounterFromMovementWindow(
+      apply(
+        toRunnerTurnFromCorpMain(state),
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "remote_1",
+      ),
+    );
+    state.run!.brokenSubroutineIndexes = [0];
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run?.corpPostPassIceReturnToHq).toBeDefined();
+    expect(state.run?.postPassPayOrEndRun).toBeDefined();
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.payload?.fortRunWindowAbility ===
+          "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+      ),
+    ).toBe(false);
+    const corpPay = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.corpPostPassIceAbility === "return_passed_ice_to_hq" &&
+        action.payload?.decision === "pay",
+    );
+    expect(corpPay.costs).toEqual([{ credits: 1 }]);
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: corpPay.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-pro010-rasmin-corp-window-wrong-side",
+      }).ok,
+    ).toBe(false);
+    state = apply(state, "corp", (action) => action.actionId === corpPay.actionId);
+    expect(state.run?.corpPostPassIceReturnToHq).toBeUndefined();
+    expect(state.run?.postPassPayOrEndRun).toBeDefined();
+
+    const runnerPay = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.fortRunWindowAbility ===
+          "runner_pay_or_end_run_after_passing_ice_on_this_fort" &&
+        action.payload?.decision === "pay",
+    );
+    expect(runnerPay.costs).toEqual([{ credits: 1 }]);
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: runnerPay.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "proteus-pro010-rasmin-stale-runner-pay",
+    });
+    expect(stale.ok).toBe(false);
+    state = apply(state, "runner", (action) => action.actionId === runnerPay.actionId);
+    expect(state.run?.postPassPayOrEndRun).toBeUndefined();
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
 });

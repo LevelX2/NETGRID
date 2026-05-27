@@ -387,6 +387,20 @@ export function buildRunnerEncounterActions(
     (sum, entry) => sum + Math.max(0, Math.floor(entry.subroutine.amount ?? 0)),
     0,
   );
+  const payOrTrashProgramEntries = nextSubroutineIndexes
+    .map((index) => ({ index, subroutine: encounterSubroutines[index] }))
+    .filter(
+      (
+        entry,
+      ): entry is {
+        index: number;
+        subroutine: NonNullable<CardDefinition["subroutines"]>[number];
+      } => entry.subroutine?.type === "trash_installed_program_unless_runner_pays",
+    );
+  const payOrTrashProgramAmount = payOrTrashProgramEntries.reduce(
+    (sum, entry) => sum + Math.max(0, Math.floor(entry.subroutine.amount ?? 0)),
+    0,
+  );
   const encounterSubroutineIds = nextSubroutines
     .map((subroutine) => subroutine.id)
     .join(",");
@@ -397,16 +411,18 @@ export function buildRunnerEncounterActions(
         ? "Subroutinen auslösen (Run endet)"
         : "Subroutinen auslösen";
   if (
-    payOrEndRunAmount > 0 &&
+    (payOrEndRunAmount > 0 || payOrTrashProgramAmount > 0) &&
     !hardEndRun &&
-    host.payment.availableRunnerRunCredits() >= payOrEndRunAmount
+    host.payment.availableRunnerRunCredits() >=
+      payOrEndRunAmount + payOrTrashProgramAmount
   ) {
+    const totalPayment = payOrEndRunAmount + payOrTrashProgramAmount;
     actions.push(
       host.actions.buildLegalAction(
         "continue_run",
-        `Subroutinen auslösen (Runner zahlt ${payOrEndRunAmount} Credit)`,
+        `Subroutinen auslösen (Runner zahlt ${totalPayment} Credit)`,
         "game_rule",
-        [{ credits: payOrEndRunAmount }],
+        [{ credits: totalPayment }],
         {
           encounterContinue: true,
           sourceDefinitionId: iceDefinition.id,
@@ -417,6 +433,10 @@ export function buildRunnerEncounterActions(
             .map((entry) => entry.index)
             .join(","),
           payOrEndRunSubroutinePayment: payOrEndRunAmount,
+          payOrTrashProgramSubroutineIndexes: payOrTrashProgramEntries
+            .map((entry) => entry.index)
+            .join(","),
+          payOrTrashProgramSubroutinePayment: payOrTrashProgramAmount,
         },
       ),
     );

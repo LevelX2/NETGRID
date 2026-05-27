@@ -415,6 +415,20 @@ export type CardImplementationRuntimeDependencies = {
     sourceCardId: CardInstanceId,
     legalAction?: LegalAction,
   ) => CardEffectTrashSourceResult;
+  revealHiddenRunnerResource: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+  ) => Record<string, string | number | boolean>;
+  addCurrentRunAccessCount: (
+    state: GameState,
+    server: Extract<ServerId, "hq" | "rd">,
+    amount: number,
+  ) => CardEffectHiddenInfoResult;
+  passCurrentEncounteredIce: (
+    state: GameState,
+    legalAction: LegalAction,
+    subtypeRequired?: "ap",
+  ) => CardEffectHiddenInfoResult;
   startDistributeAdvancementCounters: (
     state: GameState,
     legalAction: LegalAction,
@@ -516,6 +530,28 @@ function cardImplementationConditionMet(
       return deps.runnerMadeSuccessfulRunOnServerThisTurn(
         state,
         condition.server,
+      );
+    case "current_encounter_ice":
+      return (
+        state.timingPoint === "run.encounter_ice" &&
+        state.run?.phase === "encounter_ice" &&
+        Boolean(state.run.encounteredIceId)
+      );
+    case "current_encounter_ice_subtype": {
+      if (
+        state.timingPoint !== "run.encounter_ice" ||
+        state.run?.phase !== "encounter_ice" ||
+        !state.run.encounteredIceId
+      )
+        return false;
+      return deps
+        .definitionFor(state, state.run.encounteredIceId)
+        .subtypes.includes(condition.subtype);
+    }
+    case "current_run_server":
+      return (
+        (state.run?.accessServerOverride ?? state.run?.attackedServerId) ===
+        condition.server
       );
     default: {
       const unknownCondition = condition as { kind?: string };
@@ -1249,6 +1285,11 @@ function activatedAbilityLegalActionCosts(
         throw new Error(
           "Activated CardImplementation trash_source cost amount must be 1.",
         );
+    } else if (cost.kind === "tap_source") {
+      if (cost.amount !== 1)
+        throw new Error(
+          "Activated CardImplementation tap_source cost amount must be 1.",
+        );
     } else {
       const unknownCost = cost as { kind?: string };
       throw new Error(
@@ -1286,6 +1327,12 @@ function hasTrashSourceCostForActivatedAbility(
   ability: ActivatedCardAbilityImplementation,
 ): boolean {
   return ability.costs.some((cost) => cost.kind === "trash_source");
+}
+
+function hasTapSourceCostForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): boolean {
+  return ability.costs.some((cost) => cost.kind === "tap_source");
 }
 
 function validateActivatedAbilityCosts(
@@ -1337,6 +1384,16 @@ function canPayActivatedCardImplementationCosts(
     )
       return false;
   }
+  if (hasTapSourceCostForActivatedAbility(ability)) {
+    const source = state.cardInstances[cardId];
+    if (
+      !source ||
+      source.controller !== side ||
+      source.zone.side !== side ||
+      source.tapped === true
+    )
+      return false;
+  }
   return true;
 }
 
@@ -1378,6 +1435,16 @@ function payActivatedCardImplementationCosts(
       throw new Error("Die Quelle konnte nicht getrasht werden.");
     Object.assign(publicPayload, trashResult.publicPayload);
   }
+  if (hasTapSourceCostForActivatedAbility(ability)) {
+    const source = state.cardInstances[cardId];
+    if (!source || source.tapped === true)
+      throw new Error("Die Quelle ist bereits getappt.");
+    Object.assign(publicPayload, deps.revealHiddenRunnerResource(state, cardId));
+    source.faceup = true;
+    source.rezzed = true;
+    source.tapped = true;
+    publicPayload.cardImplementationTapSourceCost = true;
+  }
   return publicPayload;
 }
 
@@ -1385,6 +1452,7 @@ function activatedAbilityPayload(
   cardId: CardInstanceId,
   ability: ActivatedCardAbilityImplementation,
   abilityIndex: number,
+  state?: GameState,
 ): Record<string, string | number | boolean> {
   return {
     cardId,
@@ -1407,6 +1475,21 @@ function activatedAbilityPayload(
     }, {}),
     ...(hasTrashSourceCostForActivatedAbility(ability)
       ? { cardImplementationTrashSourceCost: true }
+      : {}),
+    ...(hasTapSourceCostForActivatedAbility(ability)
+      ? { cardImplementationTapSourceCost: true }
+      : {}),
+    ...(ability.timing === "runner_cost_penalty_support" &&
+    state?.runnerCostPenaltySupportWindow
+      ? {
+          costPenaltySupportWindowId:
+            state.runnerCostPenaltySupportWindow.windowId,
+          costPenaltySupportOriginalActionId:
+            state.runnerCostPenaltySupportWindow.originalActionId,
+          costPenaltySupportAmountDue:
+            state.runnerCostPenaltySupportWindow.amountDue,
+          costPenaltySupportKind: state.runnerCostPenaltySupportWindow.kind,
+        }
       : {}),
   };
 }
@@ -1546,7 +1629,7 @@ export function pushActivatedCardImplementationActionsForTiming(
         ability.label ?? `${definition.title}: Fähigkeit nutzen`,
         sourceCardId,
         activatedAbilityLegalActionCosts(ability),
-        activatedAbilityPayload(sourceCardId, ability, index),
+        activatedAbilityPayload(sourceCardId, ability, index, state),
       ),
     );
   }
@@ -1652,6 +1735,50 @@ function validateActivatedCardImplementationAbility(
       throw new Error("Nur der Runner darf diese aktivierte Kartenfaehigkeit nutzen.");
     if (!state.run)
       throw new Error("Diese aktivierte Kartenfaehigkeit ist nur waehrend eines Runs nutzbar.");
+    if (!deps.runnerInstalledCardIds(state).includes(cardId))
+      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
+  if (ability.timing === "runner_cost_penalty_support") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf Kosten-/Penalty-Support nutzen.");
+    if (!state.runnerCostPenaltySupportWindow)
+      throw new Error("Es ist kein Kosten-/Penalty-Support-Fenster offen.");
+    if (
+      legalAction.payload?.costPenaltySupportWindowId !==
+        state.runnerCostPenaltySupportWindow.windowId ||
+      legalAction.payload?.costPenaltySupportOriginalActionId !==
+        state.runnerCostPenaltySupportWindow.originalActionId ||
+      legalAction.payload?.costPenaltySupportAmountDue !==
+        state.runnerCostPenaltySupportWindow.amountDue ||
+      legalAction.payload?.costPenaltySupportKind !==
+        state.runnerCostPenaltySupportWindow.kind
+    )
+      throw new Error("Das Kosten-/Penalty-Support-Fenster passt nicht mehr.");
+    if (!deps.runnerInstalledCardIds(state).includes(cardId))
+      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
+  if (ability.timing === "access_start") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf Access-Start-Faehigkeiten nutzen.");
+    if (
+      !state.run?.hiddenRunnerResourceAccessStartServerId ||
+      state.run.breach
+    )
+      throw new Error("Es ist kein Access-Start-Fenster offen.");
     if (!deps.runnerInstalledCardIds(state).includes(cardId))
       throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
     assertActivatedCardImplementationAbilityCanResolve(
@@ -1944,6 +2071,10 @@ export function resolveActivatedCardImplementationAbility(
           match.definition.title,
           input,
         ),
+      addCurrentRunAccessCount: (server, amount) =>
+        deps.addCurrentRunAccessCount(state, server, amount),
+      passCurrentEncounteredIce: (subtypeRequired) =>
+        deps.passCurrentEncounteredIce(state, legalAction, subtypeRequired),
     },
     match.ability.effects,
   );

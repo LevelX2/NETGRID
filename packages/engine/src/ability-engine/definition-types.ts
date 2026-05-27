@@ -191,6 +191,18 @@ export type CardRunnerUtilityLongtailImplementation =
   | {
       kind: "microtech_trode_set_ap_subroutine_modifier";
       visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "hidden_resource_current_access_free_trash";
+      cost: { kind: "credit_and_tap_source"; amount: number };
+      target: "current_accessed_cards";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "hidden_resource_post_meat_damage_random_hq_discard";
+      cost: { kind: "tap_source" };
+      amount: number;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
 export type CardAccessHookImplementation =
@@ -290,6 +302,20 @@ export type CardSuccessfulRunFollowupImplementation =
       amount: 1;
       cost: "none";
       visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "hidden_resource_successful_hq_run_corp_lose_credits";
+      timing: "immediately_after_successful_run_before_access";
+      amount: number;
+      cost: { kind: "tap_source" };
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "hidden_resource_successful_remote_run_trash_fort";
+      timing: "immediately_after_successful_run_before_access";
+      include: "root_and_ice";
+      cost: { kind: "tap_source" };
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
 export type CardFortRunWindowImplementation =
@@ -368,6 +394,14 @@ export type CardFortRunWindowImplementation =
       kind: "runner_pay_or_end_run_after_passing_ice_on_this_fort";
       timing: "pass_ice_on_this_fort";
       amount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corp_return_passed_ice_to_hq";
+      timing: "after_runner_passes_this_ice";
+      mode: "required_pay_or_return" | "optional_return_gain";
+      paymentAmount?: number;
+      gainCredits?: number;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -726,6 +760,15 @@ export type CardConditionImplementation =
   | {
       kind: "runner_made_successful_run_on_server_this_turn";
       server: Extract<ServerId, "hq"> | "any_data_fort";
+    }
+  | { kind: "current_encounter_ice" }
+  | {
+      kind: "current_encounter_ice_subtype";
+      subtype: "ap";
+    }
+  | {
+      kind: "current_run_server";
+      server: Extract<ServerId, "hq" | "rd">;
     };
 
 export type ActivatedCardAbilityImplementation = {
@@ -733,10 +776,13 @@ export type ActivatedCardAbilityImplementation = {
   timing:
     | "runner_main"
     | "during_run"
+    | "runner_cost_penalty_support"
+    | "access_start"
     | "corp_main"
     | "corp_encounter"
     | "trace_base_link_window"
-    | "trace_post_bid_link_window";
+    | "trace_post_bid_link_window"
+    | "trace_success_cancel_window";
   costs: readonly CardAbilityCostImplementation[];
   condition?: CardConditionImplementation;
   limit?: CardAbilityLimitImplementation;
@@ -784,6 +830,10 @@ export type CardAbilityCostImplementation =
     }
   | {
       kind: "trash_source";
+      amount: 1;
+    }
+  | {
+      kind: "tap_source";
       amount: 1;
     };
 
@@ -929,6 +979,8 @@ export type CardEffectImplementation =
   | CorpDiscardHqWithRetainPaymentEffectImplementation
   | DerezRezzedBlackIceEffectImplementation
   | AddCurrentEncounterAdditionalSubroutineEffectImplementation
+  | AddCurrentRunAccessCountEffectImplementation
+  | PassCurrentEncounteredIceEffectImplementation
   | StartRunnerProgramInstallActionBundleEffectImplementation
   | DistributeAdvancementCountersEffectImplementation
   | MoveAdvancementCountersEffectImplementation;
@@ -1016,6 +1068,19 @@ export type AddCurrentEncounterAdditionalSubroutineEffectImplementation = {
   target: "encountered_ice_self";
   append: "after_existing";
   subroutine: CardSubroutineImplementation;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type AddCurrentRunAccessCountEffectImplementation = {
+  kind: "add_current_run_access_count";
+  server: Extract<ServerId, "hq" | "rd">;
+  amount: number;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type PassCurrentEncounteredIceEffectImplementation = {
+  kind: "pass_current_encountered_ice";
+  subtypeRequired?: "ap";
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -1252,6 +1317,13 @@ export type CardTraceSuccessEffectImplementation =
   | {
       kind: "unpreventable_meat_damage";
       recipient: "runner";
+      amount: number;
+      visibility: EventVisibilityClass;
+    }
+  | {
+      kind: "preventable_damage";
+      recipient: "runner";
+      damageType: Extract<DamageType, "net" | "core">;
       amount: number;
       visibility: EventVisibilityClass;
     }
@@ -1711,6 +1783,13 @@ export type CardDamagePreventionSourceImplementation = {
     | {
         kind: "credit";
         amount: number;
+      }
+    | {
+        kind: "tap_source";
+      }
+    | {
+        kind: "credit_and_tap_source";
+        amount: number;
       };
   priority: number;
   visibility: Extract<EventVisibilityClass, "public">;
@@ -1739,6 +1818,10 @@ export type CardTagPreventionSourceImplementation = {
     | {
         kind: "credit";
         amount: number;
+      }
+    | {
+        kind: "credit_and_tap_source";
+        amount: number;
       };
   priority: number;
   visibility: Extract<EventVisibilityClass, "public">;
@@ -1746,12 +1829,16 @@ export type CardTagPreventionSourceImplementation = {
 
 export type CardTrashPreventionSourceImplementation = {
   kind: "prevent_installed_card_trash";
-  protectsCardTypes: readonly Extract<CardType, "program" | "hardware">[];
+  protectsCardTypes: readonly Extract<CardType, "program" | "hardware" | "resource">[];
   excludesSelf?: true;
+  activeOnlyDuring?: "corp_turn";
   mode: "one_card" | "one_or_more_simultaneous";
   cost:
     | {
         kind: "trash_source";
+      }
+    | {
+        kind: "tap_source";
       }
     | {
         kind: "credit_return_source_to_grip";
@@ -1776,6 +1863,11 @@ export type CardPrintedSubroutineImplementation =
       text: "*Trash a program.";
     }
   | {
+      kind: "trash_program_unless_runner_pays";
+      amount: number;
+      text: `*Trash a program unless Runner pays [${number}].`;
+    }
+  | {
       kind: "damage";
       damageType: "net" | "brain";
       amount: number;
@@ -1795,6 +1887,7 @@ export type CardPrintedSubroutineImplementation =
   | {
       kind: "run_duration_ice_strength";
       amount: number;
+      runnerMayCancelOnPassingSource?: { amount: number };
       text: string;
       breakTags?: readonly string[];
     }

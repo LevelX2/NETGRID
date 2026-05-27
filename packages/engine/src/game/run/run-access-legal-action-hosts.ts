@@ -34,6 +34,7 @@ export type RunAccessLegalActionHostCompositionHost = {
   };
   access: Pick<
     RunFlowHost["access"],
+    | "hasHiddenResourceAccessStartActions"
     | "advanceArchivesBreachPastNonDecisionCards"
     | "startRunnerPrivateLookChoice"
   >;
@@ -106,6 +107,8 @@ export function createRunAccessLegalActionHostComposition(
     access: {
       breachStateHost: (state) => accessFlow.breachStateHost(state),
       accessFlowHost: (state) => accessFlow.accessFlowHost(state),
+      hasHiddenResourceAccessStartActions:
+        access.hasHiddenResourceAccessStartActions,
       advanceArchivesBreachPastNonDecisionCards:
         access.advanceArchivesBreachPastNonDecisionCards,
       startRunnerPrivateLookChoice: access.startRunnerPrivateLookChoice,

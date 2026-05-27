@@ -162,6 +162,11 @@ export type RunFlowHost = {
   access: {
     breachStateHost: (state: GameState) => BreachStateHost;
     accessFlowHost: (state: GameState) => AccessFlowHost;
+    hasHiddenResourceAccessStartActions: (
+      state: GameState,
+      run: NonNullable<GameState["run"]>,
+      serverId: Exclude<ServerId, "new_remote">,
+    ) => boolean;
     advanceArchivesBreachPastNonDecisionCards: (
       host: AccessFlowHost,
       legalAction?: LegalAction,
@@ -628,6 +633,10 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           approachIceExposeCanBeOfferedForCurrentIce(
             encounterEntryHostForState(state),
           ),
+      },
+      actions: {
+        buildLegalAction: (side, type, label, source, costs, payload) =>
+          action(state, side, type, label, source, costs, payload),
       },
       encounter: {
         encounterResolutionHost: () => encounterResolutionHostForState(state),
@@ -1139,6 +1148,12 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.rng.shuffleStateIds(state, ids, purpose),
       },
       access: {
+        hasHiddenResourceAccessStartActions: (run, serverId) =>
+          host.access.hasHiddenResourceAccessStartActions(
+            state,
+            run,
+            serverId,
+          ),
         advanceArchivesBreachPastNonDecisionCards: (legalAction) =>
           host.access.advanceArchivesBreachPastNonDecisionCards(
             host.access.accessFlowHost(state),

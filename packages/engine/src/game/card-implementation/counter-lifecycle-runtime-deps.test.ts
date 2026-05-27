@@ -98,6 +98,8 @@ describe("counter/lifecycle card implementation runtime deps", () => {
       "runnerRunAttemptsLastTurn",
       "runnerRunAttemptsThisGame",
       "runnerTrashedNodeLastTurn",
+      "runnerTrashedAdvertisementThisTurn",
+      "runnerTrashedTransactionsThisTurn",
       "runnerInstalledResourceLastTurn",
       "runnerMadeSuccessfulRunOnServerThisTurn",
       "runnerLiberatedAgendaSubtypeThisTurn",

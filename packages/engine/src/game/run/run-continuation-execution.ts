@@ -105,6 +105,8 @@ export function continueRun(
     payOrEndRunPayment.payOrEndRunIndexesForThisContinue ?? new Set<number>();
   const paidPayOrEndRunIndexes =
     payOrEndRunPayment.paidPayOrEndRunIndexes ?? new Set<number>();
+  const paidPayOrTrashProgramIndexes =
+    payOrEndRunPayment.paidPayOrTrashProgramIndexes ?? new Set<number>();
   const printedNonTraceHost =
     host.encounter.printedNonTraceHost(legalAction);
   for (let index = 0; index < subroutines.length; index += 1) {
@@ -159,6 +161,7 @@ export function continueRun(
         subroutineIndex: index,
         legalAction,
         paidPayOrEndRunIndexes,
+        paidPayOrTrashProgramIndexes,
       },
     );
     if (nonTraceResult.suspended) return;

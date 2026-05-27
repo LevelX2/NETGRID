@@ -156,6 +156,7 @@ function visibleUnbrokenRunEffectForSubroutine(
     case "set_run_pass_rezzed_ice_program_trash":
     case "do_damage":
     case "trash_installed_program":
+    case "trash_installed_program_unless_runner_pays":
       return { causesDamageOrProgramTrash: true };
     case "set_runner_run_lock_actions":
       return { createsRunLockOrActionTax: Math.max(1, amount) };

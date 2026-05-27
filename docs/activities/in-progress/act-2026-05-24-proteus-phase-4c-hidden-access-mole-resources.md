@@ -63,6 +63,8 @@ Die verdeckten Access-Modifier und Mole-Resources als CardImplementation-Dateien
 
 Blockiert am 2026-05-24.
 
+Statusreferenz 2026-05-27: Die PRO011-Zielkarten dieser alten Phase-4c-Activity sind durch `docs/activities/done/act-2026-05-27-proteus-pro011-hidden-resource-economy-access-suite.md` umgesetzt. Diese Datei bleibt nur als historische Scope-/Blocker-Referenz bestehen und zählt nicht zusätzlich zum Implementierungsfortschritt.
+
 `HQ Mole` und `R&D Mole` können nicht über die vorhandene öffentliche `access_count`-Modifier-Familie umgesetzt werden. Diese Modifier sind passiv, öffentlich und wirken, solange die Quelle installiert ist. Für verdeckte Runner-Resources wäre das falsch: Die zusätzliche Access-Queue darf erst nach einer Runner-privaten Aktivierung im passenden Access-Start-Fenster entstehen, nachdem die Quelle validiert, bezahlt, revealed und getrasht wurde.
 
 Benötigter generischer Vorlauf:

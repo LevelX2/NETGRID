@@ -32,6 +32,9 @@ export type LegalActionHostCompositionHost = {
     runRezWindowHost: StateHostFn<
       ReturnType<LegalActionGenerationHost["hosts"]["runRezWindowHost"]>
     >;
+    runMovementHost: StateHostFn<
+      ReturnType<LegalActionGenerationHost["hosts"]["runMovementHost"]>
+    >;
     runCardImplementationActionHost: StateHostFn<
       ReturnType<LegalActionGenerationHost["hosts"]["runCardImplementationActionHost"]>
     >;
@@ -126,6 +129,7 @@ export function createLegalActionHostComposition(
         runnerEncounterActionHost: () => hosts.runnerEncounterActionHost(state),
         encounterEntryHost: () => hosts.encounterEntryHost(state),
         runRezWindowHost: () => hosts.runRezWindowHost(state),
+        runMovementHost: () => hosts.runMovementHost(state),
         runCardImplementationActionHost: () =>
           hosts.runCardImplementationActionHost(state),
         runnerAccessActionHost: () => hosts.runnerAccessActionHost(state),

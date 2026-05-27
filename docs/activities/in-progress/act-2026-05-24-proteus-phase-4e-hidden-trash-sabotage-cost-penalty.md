@@ -27,6 +27,8 @@ checks:
 
 # Proteus Phase 4e: Hidden Trash, Sabotage and Cost Penalty
 
+Statusreferenz 2026-05-27: Die PRO012-Zielkarten dieses alten Phase-4e-Slices sind umgesetzt. Diese Activity bleibt nur als historische Blocker-/Scope-Referenz offen und erzeugt keine zusätzliche Komplettzählung.
+
 ## Ziel
 
 Die verdeckten Trash-, Forfeit-, Sabotage- und Cost-Penalty-Resources als CardImplementation-Dateien auf der 4a-Aktivierungsgrundlage umsetzen.

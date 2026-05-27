@@ -26,6 +26,7 @@ export type {
   ApiPlayerClockConfig,
   ApiPlayerClockMode,
   ApiPlayerClockSnapshot,
+  ApiRecentGameResult,
   ApiSeriesPlayerSlot,
   ApiSeriesResultSummary,
   ApiSeriesStatus,
@@ -175,6 +176,7 @@ export type CounterType =
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
+  | { type: "net_damage"; amount: number }
   | { type: "add_tags_by_trace_margin_over_runner_link" }
   | { type: "add_counter"; counterType: CounterType; amount: number }
   | {
@@ -201,6 +203,7 @@ export type SubroutineType =
   | "do_damage"
   | "initiate_trace"
   | "trash_installed_program"
+  | "trash_installed_program_unless_runner_pays"
   | "set_run_encounter_tax"
   | "set_run_break_subroutine_cost_modifier"
   | "set_run_future_end_the_run_subroutine"
@@ -227,6 +230,7 @@ export type SubroutineDefinition = {
   baseTraceStrength?: number;
   traceBidLimit?: number;
   traceSuccessEffect?: TraceSuccessEffect;
+  runFutureStrengthCancelPaymentAmount?: number;
   requiresSuccessfulTraceSubroutineIndex?: number;
   breakTags?: string[];
 };
@@ -918,6 +922,8 @@ export type RunState = {
   pendingSuccessBonusCredits?: number;
   accessCount?: number;
   microtechAiInterfacePreAccessResolved?: boolean;
+  hiddenRunnerResourceAccessStartServerId?: Exclude<ServerId, "new_remote">;
+  hiddenRunnerResourceAccessStartWindowClosed?: boolean;
   badPublicityCredits?: number;
   runnerRunTemporaryCredits?: {
     sourceDefinitionId: CardDefinitionId;
@@ -963,6 +969,23 @@ export type RunState = {
     passedIceId: CardInstanceId;
     serverId: Exclude<ServerId, "new_remote">;
     amount: number;
+  };
+  postPassCancellableFutureIceStrength?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    passedIceId: CardInstanceId;
+    serverId: Exclude<ServerId, "new_remote">;
+    amount: number;
+    paymentAmount: number;
+  };
+  corpPostPassIceReturnToHq?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    passedIceId: CardInstanceId;
+    serverId: Exclude<ServerId, "new_remote">;
+    mode: "required_pay_or_return" | "optional_return_gain";
+    paymentAmount?: number;
+    gainCredits?: number;
   };
   aiBoonSourceCardId?: CardInstanceId;
   aiBoonRunStrength?: number;
@@ -1072,7 +1095,12 @@ export type TraceState = {
   parisCityGridPoolServerId?: Exclude<ServerId, "new_remote">;
   encounterTemporaryTraceCreditSourceIceId?: CardInstanceId;
   encounterTemporaryTraceCreditSourceDefinitionId?: CardDefinitionId;
-  status: "corp_bid" | "base_link" | "runner_bid" | "post_bid_link";
+  status:
+    | "corp_bid"
+    | "base_link"
+    | "runner_bid"
+    | "post_bid_link"
+    | "trace_success_cancel";
   successEffect: TraceSuccessEffect;
   returnPhase?: Phase;
   returnTimingPoint?: TimingPointId;
@@ -1144,6 +1172,13 @@ export type GameState = {
   runnerActionsPerTurnOverride?: number;
   runnerPermanentMeatDamagePrevention?: boolean;
   eventModificationHarness?: EventModificationTestHarness;
+  runnerCostPenaltySupportWindow?: {
+    windowId: string;
+    originalActionId: string;
+    amountDue: number;
+    kind: "cost" | "penalty";
+    createdAtStateVersion: number;
+  };
   specialZoneHarness?: SpecialZoneTestHarness;
   deckMetadata?: {
     runner: DeckPublicMetadata;
@@ -1409,14 +1444,19 @@ export type VisibleCard = {
   advancementCounters?: number;
   advancementRequirement?: number;
   strength?: number;
+  strengthModifier?: number;
   agendaPoints?: number;
   trashCost?: number;
   counters?: Partial<Record<CounterType, number>>;
   counterDisplays?: CounterDisplay[];
   tapped?: boolean;
   hostedOn?: CardInstanceId;
+  hostedOnLabel?: string;
   selectedServerId?: Exclude<ServerId, "new_remote">;
   selectedServerLabel?: string;
+  selectedSubtype?: string;
+  selectedSubtypeLabel?: string;
+  selectedTargetLabel?: string;
   owner?: Side;
   controller?: Side;
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;

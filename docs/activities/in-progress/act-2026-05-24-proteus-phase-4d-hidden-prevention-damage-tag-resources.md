@@ -26,6 +26,8 @@ checks:
 
 # Proteus Phase 4d: Hidden Prevention, Damage and Tag Resources
 
+Statusreferenz 2026-05-27: Die PRO012-Zielkarten dieses alten Phase-4d-Slices sind umgesetzt. Diese Activity bleibt nur als historische Blocker-/Scope-Referenz offen und erzeugt keine zusätzliche Komplettzählung.
+
 ## Ziel
 
 Die verdeckten Prevention-, Damage-, Trace-/Tag- und Bad-Publicity-Resources als CardImplementation-Dateien auf der 4a-Aktivierungsgrundlage umsetzen.

@@ -86,6 +86,55 @@ export function buildRunnerDuringRunCardImplementationActions(
   return { handled: true, legalActions };
 }
 
+export function buildRunnerCostPenaltySupportCardImplementationActions(
+  host: RunCardImplementationActionHost,
+): RunCardImplementationActionBuildResult {
+  if (!host.state.runnerCostPenaltySupportWindow)
+    return { handled: true, legalActions: [] };
+  const legalActions: LegalAction[] = [];
+  for (const cardId of host.cards.runnerInstalledCardIds().slice().sort()) {
+    host.runtime.pushActivatedActionsForTiming(
+      legalActions,
+      "runner",
+      cardId,
+      host.cards.definitionFor(cardId),
+      "runner_cost_penalty_support",
+    );
+  }
+  return { handled: true, legalActions };
+}
+
+export function buildRunnerAccessStartCardImplementationActions(
+  host: RunCardImplementationActionHost,
+): RunCardImplementationActionBuildResult {
+  const serverId = host.state.run?.hiddenRunnerResourceAccessStartServerId;
+  if (!serverId) return { handled: true, legalActions: [] };
+  const legalActions: LegalAction[] = [];
+  for (const cardId of host.cards.runnerInstalledCardIds().slice().sort()) {
+    host.runtime.pushActivatedActionsForTiming(
+      legalActions,
+      "runner",
+      cardId,
+      host.cards.definitionFor(cardId),
+      "access_start",
+    );
+  }
+  if (!host.actions) throw new Error("Access-Start-Action-Builder fehlt.");
+  legalActions.push(
+    host.actions.buildLegalAction(
+      "continue_run",
+      "Access beginnen",
+      "game_rule",
+      [],
+      {
+        hiddenRunnerResourceAccessStartContinue: true,
+        serverId,
+      },
+    ),
+  );
+  return { handled: true, legalActions };
+}
+
 export function buildCorpEncounterCardImplementationActions(
   host: RunCardImplementationActionHost,
 ): RunCardImplementationActionBuildResult {

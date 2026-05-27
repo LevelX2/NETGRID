@@ -216,6 +216,8 @@ export function createMainActionHostComposition(
           runner.availableRunnerTagRemovalCredits,
         availableRunnerProgramInstallCredits:
           runner.availableRunnerProgramInstallCredits,
+        runnerCostPenaltySupportCreditCapacity:
+          runner.runnerCostPenaltySupportCreditCapacity,
         availableRunnerRunStartCredits: runner.availableRunnerRunStartCredits,
         runnerDrawActionContext: runner.runnerDrawActionContext,
         runnerUtilityLongtailKindForCard:
