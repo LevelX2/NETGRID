@@ -13,6 +13,7 @@ import type {
   CardUniqueDirectLongtailImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
 import { FAIT_ACCOMPLI_COUNTER_PROGRAM_ID } from "../../mechanics/agenda-operation-effects";
 import {
   FALSE_ECHO_FORCE_REZ_PROGRAM_ID,
@@ -105,6 +106,7 @@ export type SuccessfulRunFollowupExecutionResult = {
   handled: boolean;
   sourceCardId?: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
+  serverId?: Exclude<ServerId, "new_remote">;
   creditsGained?: number;
   counterPlaced?: boolean;
   stateChanged?: boolean;
@@ -140,7 +142,10 @@ export function buildSuccessfulRunFollowupActions(
   if (!run.successful || run.phase !== "access") return [];
   const used = new Set(run.successfulRunAbilityUsedSourceIds ?? []);
   const actions: LegalAction[] = [];
-  for (const sourceCardId of host.state.runner.rig.programs.slice().sort()) {
+  for (const sourceCardId of [
+    ...host.state.runner.rig.programs,
+    ...host.state.runner.rig.resources,
+  ].sort()) {
     if (used.has(sourceCardId)) continue;
     const definition = host.cards.definitionFor(sourceCardId);
     const forceRezFollowup =
@@ -194,6 +199,66 @@ export function buildSuccessfulRunFollowupActions(
           },
         ),
       );
+    }
+    if (
+      successfulRunFollowups.some(
+        (followup) =>
+          followup.kind ===
+          "hidden_resource_successful_hq_run_corp_lose_credits",
+      ) &&
+      run.attackedServerId === "hq" &&
+      host.state.runner.rig.resources.includes(sourceCardId) &&
+      host.cards.cardInstanceFor(sourceCardId).tapped !== true
+    ) {
+      const followup = successfulRunFollowups.find(
+        (candidate) =>
+          candidate.kind ===
+          "hidden_resource_successful_hq_run_corp_lose_credits",
+      );
+      actions.push(
+        host.actions.createRunnerTriggerAction(
+          `${definition.title}: Korp verliert Credits`,
+          sourceCardId,
+          [],
+          {
+            cardId: sourceCardId,
+            serverId: run.attackedServerId,
+            proteusHiddenSuccessfulRunFollowup: "corp_lose_credits",
+            creditLoss: followup?.kind ===
+              "hidden_resource_successful_hq_run_corp_lose_credits"
+              ? followup.amount
+              : 0,
+          },
+        ),
+      );
+    }
+    if (
+      successfulRunFollowups.some(
+        (followup) =>
+          followup.kind ===
+          "hidden_resource_successful_remote_run_trash_fort",
+      ) &&
+      host.servers.mustServer(run.attackedServerId).kind === "remote" &&
+      host.state.runner.rig.resources.includes(sourceCardId) &&
+      host.cards.cardInstanceFor(sourceCardId).tapped !== true
+    ) {
+      const server = host.servers.mustServer(run.attackedServerId);
+      const targetCount = server.root.length + server.ice.length;
+      if (targetCount > 0) {
+        actions.push(
+          host.actions.createRunnerTriggerAction(
+            `${definition.title}: Remote-Fort trashen`,
+            sourceCardId,
+            [],
+            {
+              cardId: sourceCardId,
+              serverId: run.attackedServerId,
+              proteusHiddenSuccessfulRunFollowup: "trash_remote_fort",
+              targetCount,
+            },
+          ),
+        );
+      }
     }
     if (
       successfulRunFollowups.some(
@@ -289,7 +354,146 @@ export function resolveSuccessfulRunFollowupAbility(
     "doom_counter_instead_of_rd_access"
   )
     return resolveArmageddonDoomCounterInsteadOfAccess(host, legalAction);
+  if (
+    legalAction.payload?.proteusHiddenSuccessfulRunFollowup ===
+    "corp_lose_credits"
+  )
+    return resolveHiddenSuccessfulRunCorpLoseCredits(host, legalAction);
+  if (
+    legalAction.payload?.proteusHiddenSuccessfulRunFollowup ===
+    "trash_remote_fort"
+  )
+    return resolveHiddenSuccessfulRunTrashRemoteFort(host, legalAction);
   return { handled: false };
+}
+
+function revealAndTapHiddenResourceSource(
+  host: SuccessfulRunInterventionHost,
+  sourceCardId: CardInstanceId,
+): Record<string, unknown> {
+  const instance = host.cards.cardInstanceFor(sourceCardId);
+  if (
+    !host.state.runner.rig.resources.includes(sourceCardId) ||
+    instance.controller !== "runner"
+  )
+    throw new Error("Die Hidden-Resource-Quelle ist nicht installiert.");
+  if (instance.tapped === true)
+    throw new Error("Die Hidden-Resource-Quelle ist bereits getappt.");
+  const payload = hiddenRunnerResourceRevealPayload(host.state, sourceCardId);
+  host.state.cardInstances[sourceCardId] = {
+    ...instance,
+    faceup: true,
+    rezzed: true,
+    tapped: true,
+  };
+  return { ...payload, sourceTapped: true };
+}
+
+function resolveHiddenSuccessfulRunCorpLoseCredits(
+  host: SuccessfulRunInterventionHost,
+  legalAction: LegalAction,
+): SuccessfulRunFollowupExecutionResult {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf diese Hidden Resource nutzen.");
+  const run = mustRun(host);
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  if (!run.successful || run.phase !== "access" || run.attackedServerId !== "hq")
+    throw new Error("Credit Subversion ist nur vor HQ-Access nach erfolgreichem Run legal.");
+  const sourceDefinition = host.cards.definitionFor(sourceCardId);
+  const followup = cardImplementationForDefinitionId(sourceDefinition.id)
+    ?.successfulRunFollowups?.find(
+      (candidate) =>
+        candidate.kind === "hidden_resource_successful_hq_run_corp_lose_credits",
+    );
+  if (
+    followup?.kind !== "hidden_resource_successful_hq_run_corp_lose_credits"
+  )
+    throw new Error("Die Hidden-Resource-Faehigkeit passt nicht zur Karte.");
+  const used = run.successfulRunAbilityUsedSourceIds ?? [];
+  if (used.includes(sourceCardId))
+    throw new Error("Diese Successful-Run-Faehigkeit wurde bereits genutzt.");
+  const revealPayload = revealAndTapHiddenResourceSource(host, sourceCardId);
+  const creditLoss = Math.min(host.state.corp.credits, followup.amount);
+  host.state.corp.credits -= creditLoss;
+  run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId].sort();
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...revealPayload,
+    sourceDefinitionId: sourceDefinition.id,
+    creditLoss,
+    creditsLost: creditLoss,
+    corpCreditsAfter: host.state.corp.credits,
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "proteus_hidden_successful_hq_run_credit_subversion",
+  };
+  return {
+    handled: true,
+    sourceCardId,
+    sourceDefinitionId: sourceDefinition.id,
+    stateChanged: true,
+    ...resolvedPayloadFor(legalAction),
+  };
+}
+
+function resolveHiddenSuccessfulRunTrashRemoteFort(
+  host: SuccessfulRunInterventionHost,
+  legalAction: LegalAction,
+): SuccessfulRunFollowupExecutionResult {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf diese Hidden Resource nutzen.");
+  const run = mustRun(host);
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
+    ServerId,
+    "new_remote"
+  >;
+  if (
+    !run.successful ||
+    run.phase !== "access" ||
+    serverId !== run.attackedServerId
+  )
+    throw new Error("Death from Above ist nur vor Access nach erfolgreichem Remote-Run legal.");
+  const server = host.servers.mustServer(serverId);
+  if (server.kind !== "remote")
+    throw new Error("Death from Above kann nur subsidiary data forts treffen.");
+  const sourceDefinition = host.cards.definitionFor(sourceCardId);
+  if (
+    !cardImplementationForDefinitionId(sourceDefinition.id)
+      ?.successfulRunFollowups?.some(
+        (candidate) =>
+          candidate.kind === "hidden_resource_successful_remote_run_trash_fort",
+      )
+  )
+    throw new Error("Die Hidden-Resource-Faehigkeit passt nicht zur Karte.");
+  const used = run.successfulRunAbilityUsedSourceIds ?? [];
+  if (used.includes(sourceCardId))
+    throw new Error("Diese Successful-Run-Faehigkeit wurde bereits genutzt.");
+  const revealPayload = revealAndTapHiddenResourceSource(host, sourceCardId);
+  const targets = [...server.root, ...server.ice].sort();
+  const trashedDefinitionIds: CardDefinitionId[] = [];
+  for (const targetId of targets) {
+    trashedDefinitionIds.push(host.cards.definitionFor(targetId).id);
+    host.zones.trashCorpInstalledCardToArchives(targetId, legalAction);
+  }
+  run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId].sort();
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...revealPayload,
+    sourceDefinitionId: sourceDefinition.id,
+    serverId,
+    trashedCount: targets.length,
+    trashedCardDefinitionIds: trashedDefinitionIds.sort().join(","),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "proteus_hidden_successful_remote_run_trash_fort",
+  };
+  return {
+    handled: true,
+    sourceCardId,
+    sourceDefinitionId: sourceDefinition.id,
+    serverId,
+    stateChanged: true,
+    ...resolvedPayloadFor(legalAction),
+  };
 }
 
 function resolveArmageddonDoomCounterInsteadOfAccess(

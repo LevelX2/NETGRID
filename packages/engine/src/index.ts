@@ -993,9 +993,160 @@ const damageCoreHost: DamageCoreHost = {
   rng: {
     nextRandom,
   },
+  reactions: {
+    openPostMeatDamageReactionWindow,
+  },
 };
 
 configureDamageCoreHost(damageCoreHost);
+
+function openPostMeatDamageReactionWindow(
+  state: GameState,
+  summary: DamageSummary,
+): boolean {
+  if (
+    summary.damageType !== "meat" ||
+    summary.cardsTrashed <= 0 ||
+    state.winner ||
+    state.pendingChoice
+  )
+    return false;
+  const candidates = postMeatDamageHiddenResourceCandidates(state);
+  if (candidates.length === 0) return false;
+  state.pendingChoice = {
+    choiceId: `hidden_resource_post_meat_damage_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `hidden_resource.post_meat_damage:${summary.cardsTrashed}`,
+    prompt: "Hidden Resource nach Meat Damage nutzen",
+    kind: "select_option",
+    options: [
+      { id: "pass", label: "Keine Hidden Resource nutzen" },
+      ...candidates.map((candidate) => ({
+        id: `post_meat_damage_${candidate.cardId}`,
+        label: `${candidate.title}: Korp wirft ${candidate.amount} HQ-Karten ab`,
+        publicLabel: "Hidden Resource",
+        value: candidate.cardId,
+      })),
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  state.activeSide = "runner";
+  return true;
+}
+
+function postMeatDamageHiddenResourceCandidates(
+  state: GameState,
+): Array<{
+  cardId: CardInstanceId;
+  definitionId: CardDefinitionId;
+  title: string;
+  amount: number;
+}> {
+  return state.runner.rig.resources
+    .slice()
+    .sort()
+    .flatMap((cardId) => {
+      const instance = state.cardInstances[cardId];
+      if (!instance || instance.tapped === true) return [];
+      const definition = definitionFor(state, cardId);
+      const implementation = runnerUtilityLongtailImplementationForCard(
+        state,
+        cardId,
+      );
+      if (
+        implementation?.kind !==
+        "hidden_resource_post_meat_damage_random_hq_discard"
+      )
+        return [];
+      const amount = Math.max(0, Math.floor(implementation.amount));
+      if (amount <= 0) return [];
+      return [{ cardId, definitionId: definition.id, title: definition.title, amount }];
+    });
+}
+
+function resolvePostMeatDamageHiddenResourceChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("hidden_resource.post_meat_damage"))
+    throw new Error("Es ist kein Hidden-Resource-Meat-Damage-Fenster offen.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  if (selected === "pass") {
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenResourcePostMeatDamageDecision: "pass",
+    };
+    return;
+  }
+  const option = choice.options.find((candidate) => candidate.id === selected);
+  const sourceCardId =
+    typeof option?.value === "string"
+      ? (option.value as CardInstanceId)
+      : undefined;
+  const candidate = postMeatDamageHiddenResourceCandidates(state).find(
+    (item) => item.cardId === sourceCardId,
+  );
+  if (!candidate)
+    throw new Error("Diese Hidden-Resource-Reaktion ist nicht legal.");
+  const sourceInstance = mustInstance(state.cardInstances, candidate.cardId);
+  const revealPayload = hiddenRunnerResourceRevealPayload(state, candidate.cardId);
+  state.cardInstances[candidate.cardId] = {
+    ...sourceInstance,
+    faceup: true,
+    rezzed: true,
+    tapped: true,
+  };
+  const discardedIds = randomCorpHqDiscard(
+    state,
+    candidate.amount,
+    `hidden_resource.post_meat_damage.${candidate.definitionId}.${choice.choiceId}`,
+  );
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenResourcePostMeatDamageDecision: "apply",
+    sourceDefinitionId: candidate.definitionId,
+    ...revealPayload,
+    sourceTapped: true,
+    discardedHqCount: discardedIds.length,
+    corpHqAfter: state.corp.hq.length,
+    randomCounterAfter: state.randomCounter,
+  };
+}
+
+function randomCorpHqDiscard(
+  state: GameState,
+  amount: number,
+  purposePrefix: string,
+): CardInstanceId[] {
+  const discarded: CardInstanceId[] = [];
+  const discardCount = Math.min(Math.max(0, Math.floor(amount)), state.corp.hq.length);
+  for (let index = 0; index < discardCount; index += 1) {
+    const value = nextRandom(state, `${purposePrefix}:selection:${index}`);
+    const selectedIndex = Math.floor(value * state.corp.hq.length);
+    const cardId = mustArrayValue(
+      state.corp.hq,
+      selectedIndex,
+      "HQ-Discard-Auswahl fehlt.",
+    );
+    removeFromAllZones(state, cardId);
+    state.corp.archives.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "archives" },
+    };
+    discarded.push(cardId);
+  }
+  return discarded;
+}
 
 export {
   DEMO_CARDS,
@@ -11227,6 +11378,7 @@ function pendingChoiceResolutionHost(
       resolveAardvarkInterceptionChoice,
       resolveSuccessfulRunInterventionChoiceInRunModule,
       successfulRunInterventionHost,
+      resolvePostMeatDamageHiddenResourceChoice,
     },
     access: {
       resolvePriorityWreckSpendChoice,

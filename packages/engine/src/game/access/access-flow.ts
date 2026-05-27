@@ -18,6 +18,7 @@ import {
   freeTrashAccessSourceForCurrentAccessCard,
   type RunnerAccessActionHost,
 } from "./access-actions";
+import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
@@ -552,6 +553,37 @@ function trashAccessedCard(
     trashCost,
     cardId as CardInstanceId,
   );
+  const hiddenResourceSourceCardId = String(
+    legalAction?.payload?.hiddenResourceSourceCardId ?? "",
+  ) as CardInstanceId;
+  if (legalAction?.payload?.hiddenResourceCurrentAccessTrash === true) {
+    const sourceInstance = host.state.cardInstances[hiddenResourceSourceCardId];
+    if (
+      !sourceInstance ||
+      !host.state.runner.rig.resources.includes(hiddenResourceSourceCardId)
+    )
+      throw new Error("Die Mercenary-Subcontract-Quelle ist nicht installiert.");
+    if (sourceInstance.tapped === true)
+      throw new Error("Die Mercenary-Subcontract-Quelle ist bereits getappt.");
+    const revealPayload = hiddenRunnerResourceRevealPayload(
+      host.state,
+      hiddenResourceSourceCardId,
+    );
+    host.state.cardInstances[hiddenResourceSourceCardId] = {
+      ...sourceInstance,
+      faceup: true,
+      rezzed: true,
+      tapped: true,
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...revealPayload,
+      cardImplementationTapSourceCost: true,
+      sourceTapped: true,
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "proteus_hidden_current_access_free_trash",
+    };
+  }
   if (legalAction && overrideCost === undefined) {
     const scatterShotSpent =
       definition.type === "upgrade" ? trashPayment.recurringSpent : 0;

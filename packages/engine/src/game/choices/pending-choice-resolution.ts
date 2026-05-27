@@ -73,6 +73,7 @@ export type PendingChoiceResolutionHost = {
     resolveAardvarkInterceptionChoice: HostFn<void>;
     resolveSuccessfulRunInterventionChoiceInRunModule: HostFn<void>;
     successfulRunInterventionHost: HostFn<unknown>;
+    resolvePostMeatDamageHiddenResourceChoice: HostFn<void>;
   };
   access: {
     resolvePriorityWreckSpendChoice: HostFn<void>;
@@ -194,6 +195,8 @@ export function resolvePendingChoice(
   const resolveSuccessfulRunInterventionChoiceInRunModule =
     host.run.resolveSuccessfulRunInterventionChoiceInRunModule;
   const successfulRunInterventionHost = host.run.successfulRunInterventionHost;
+  const resolvePostMeatDamageHiddenResourceChoice =
+    host.run.resolvePostMeatDamageHiddenResourceChoice;
   const resolvePriorityWreckSpendChoice =
     host.access.resolvePriorityWreckSpendChoice;
   const runAccessTransitionHost = host.access.runAccessTransitionHost;
@@ -229,6 +232,10 @@ export function resolvePendingChoice(
   }
   if (state.trace) {
     resolveTraceChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("hidden_resource.post_meat_damage")) {
+    resolvePostMeatDamageHiddenResourceChoice(state, legalAction, playerAction);
     return;
   }
   const hiddenZoneArrangeChoice = handleHiddenZoneArrangeChoice(

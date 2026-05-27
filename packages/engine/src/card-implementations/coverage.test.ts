@@ -1772,10 +1772,10 @@ describe("CardImplementation coverage and registry invariants", () => {
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
     expect(outsideScopeDefinitionIds).toHaveLength(206);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(478);
-    expect(coverageByStatus.get("implemented")).toBe(478);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(486);
+    expect(coverageByStatus.get("implemented")).toBe(486);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(101);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(93);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);
@@ -2138,6 +2138,57 @@ describe("CardImplementation coverage and registry invariants", () => {
         protectsCardTypes: ["resource"],
         excludesSelf: true,
         cost: { kind: "tap_source" },
+      }),
+    );
+  });
+
+  it("migrates Proteus PRO012 hidden resource prevention/sabotage suite into CardImplementation coverage", () => {
+    const cases = [
+      "onr_proteus_129_back-door-to-netwatch",
+      "onr_proteus_132_bolt-hole",
+      "onr_proteus_136_credit-subversion",
+      "onr_proteus_137_death-from-above",
+      "onr_proteus_140_expendable-family-member",
+      "onr_proteus_141_get-ready-to-rumble",
+      "onr_proteus_145_mercenary-subcontract",
+      "onr_proteus_154_wired-switchboard",
+    ] as const;
+
+    for (const definitionId of cases) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_132_bolt-hole")
+        ?.damagePreventionSources,
+    ).toContainEqual(
+      expect.objectContaining({
+        damageTypes: ["meat"],
+        amount: 2,
+        cost: { kind: "tap_source" },
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_proteus_140_expendable-family-member",
+      )?.tagPreventionSources,
+    ).toContainEqual(
+      expect.objectContaining({
+        amount: 1,
+        cost: { kind: "credit_and_tap_source", amount: 1 },
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_154_wired-switchboard")
+        ?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        timing: "trace_post_bid_link_window",
+        costs: [{ kind: "tap_source", amount: 1 }],
       }),
     );
   });

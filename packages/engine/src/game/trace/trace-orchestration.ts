@@ -42,6 +42,7 @@ import {
   traceIsInPhase,
   tracePostBidLinkSourceUsed,
 } from "./trace-state";
+import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
 
 type CurrentTrace = NonNullable<GameState["trace"]>;
 
@@ -51,6 +52,7 @@ type TracePostBidLinkCandidate = {
   label: string;
   linkDelta: number;
   creditCost: number;
+  tapSource: boolean;
   limitOncePerTrace: boolean;
   rewardCreditsOnAvoidTrace?: number;
 };
@@ -67,7 +69,9 @@ export type TraceOrchestrationHost = {
       definition: CardDefinition,
       timing: Extract<
         ActivatedCardAbilityImplementation["timing"],
-        "trace_base_link_window" | "trace_post_bid_link_window"
+        | "trace_base_link_window"
+        | "trace_post_bid_link_window"
+        | "trace_success_cancel_window"
       >,
     ) => Array<{ ability: ActivatedCardAbilityImplementation; index: number }>;
     isSubmarineUplinkSource: (cardId: CardInstanceId) => boolean;
@@ -221,6 +225,10 @@ export function resolveTraceChoice(
   }
   if (traceIsInPhase(state, "post_bid_link")) {
     resolveTracePostBidLinkChoice(host, legalAction, playerAction);
+    return;
+  }
+  if (traceIsInPhase(state, "trace_success_cancel")) {
+    resolveTraceSuccessCancelChoice(host, legalAction, playerAction);
     return;
   }
   resolveTraceRunnerBid(host, legalAction, playerAction);
@@ -568,6 +576,24 @@ function resolveTraceRunnerBid(
     };
     return;
   }
+  if (startTraceSuccessCancelChoice(host, postBidTrace)) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      traceId: trace.traceId,
+      traceStep: "runner_bid",
+      baseTraceStrength: trace.baseTraceStrength,
+      sourceDefinitionId: trace.sourceDefinitionId,
+      corpBid: trace.corpBid ?? 0,
+      traceStrength,
+      runnerLink,
+      runnerBid: bid,
+      ...tracePaymentPayload,
+      runnerStrength,
+      postBidTraceLinkChoiceOpened: false,
+      traceSuccessCancelChoiceOpened: true,
+    };
+    return;
+  }
   host.run.applyPrintedTraceSuccessFollowups({
     trace: postBidTrace,
     traceStep: "runner_bid",
@@ -595,9 +621,11 @@ function postBidTraceLinkCandidates(
       const effect = increaseTraceLinkEffect(ability);
       if (!effect) continue;
       if (host.cards.isSubmarineUplinkSource(cardId) && !state.run) continue;
-      const creditCost = creditCostForTraceAbility(ability);
+      const traceCost = costForTraceAbility(ability);
+      const creditCost = traceCost.creditCost;
       if (state.runner.credits + runnerTraceLinkCredits(host) < creditCost)
         continue;
+      if (traceCost.tapSource && instance.tapped === true) continue;
       const limitOncePerTrace =
         ability.limit?.kind === "once_per_trace_per_source" &&
         ability.limit.scope === "source";
@@ -615,6 +643,7 @@ function postBidTraceLinkCandidates(
         label: definition.title,
         linkDelta: effect.amount,
         creditCost,
+        tapSource: traceCost.tapSource,
         limitOncePerTrace,
         ...(effect.rewardCreditsOnAvoidTrace
           ? { rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace }
@@ -688,6 +717,9 @@ function resolveTracePostBidLinkChoice(
       paymentQuote,
     );
     const paymentPayload = postBidLinkPaymentPublicPayload(paymentReceipt);
+    const tapPayload = candidate.tapSource
+      ? tapTraceSource(host, candidate.cardId)
+      : {};
     host.run.markSubmarineUplinkJackOutAfterEncounter(
       candidate.cardId,
       legalAction,
@@ -727,6 +759,7 @@ function resolveTracePostBidLinkChoice(
       postBidTraceLinkSourceDefinitionId: candidate.definitionId,
       postBidTraceLinkCostPaid: candidate.creditCost,
       ...paymentPayload,
+      ...tapPayload,
       postBidTraceLinkDelta: candidate.linkDelta,
       postBidTraceLinkBonus: nextTrace.postBidLinkBonus ?? 0,
       runnerLink: nextTrace.runnerLink ?? 0,
@@ -746,12 +779,159 @@ function completeTraceAfterPostBidLink(
   trace: CurrentTrace,
   legalAction: LegalAction,
 ): void {
+  if (startTraceSuccessCancelChoice(host, trace)) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      traceId: trace.traceId,
+      traceStep: "post_bid_link",
+      sourceDefinitionId: trace.sourceDefinitionId,
+      traceSuccessCancelChoiceOpened: true,
+    };
+    return;
+  }
   host.run.applyPrintedTraceSuccessFollowups({
     trace,
     traceStep: "post_bid_link",
     legalAction,
     runnerLinkFallback: calculateRunnerLink(host),
   });
+}
+
+function traceSuccessCancelCandidates(
+  host: TraceOrchestrationHost,
+  trace: CurrentTrace,
+): TracePostBidLinkCandidate[] {
+  const result = describeTraceResultFromTrace(trace, {
+    runnerLinkFallback: calculateRunnerLink(host),
+  });
+  if (!result.successful) return [];
+  const candidates: TracePostBidLinkCandidate[] = [];
+  for (const cardId of host.cards.runnerInstalledCardIds().sort()) {
+    const instance = host.state.cardInstances[cardId];
+    if (!instance || instance.controller !== "runner" || instance.tapped === true)
+      continue;
+    const definition = host.cards.definitionFor(cardId);
+    for (const { ability } of host.cards.activatedTraceAbilities(
+      definition,
+      "trace_success_cancel_window",
+    )) {
+      const traceCost = costForTraceAbility(ability);
+      if (!traceCost.tapSource) continue;
+      if (host.state.runner.credits < traceCost.creditCost) continue;
+      candidates.push({
+        cardId,
+        definitionId: definition.id,
+        label: definition.title,
+        linkDelta: 0,
+        creditCost: traceCost.creditCost,
+        tapSource: true,
+        limitOncePerTrace: false,
+      });
+    }
+  }
+  return candidates;
+}
+
+function startTraceSuccessCancelChoice(
+  host: TraceOrchestrationHost,
+  trace: CurrentTrace,
+): boolean {
+  const candidates = traceSuccessCancelCandidates(host, trace);
+  if (candidates.length === 0) return false;
+  host.state.trace = { ...trace, status: "trace_success_cancel" };
+  host.state.pendingChoice = {
+    choiceId: `${trace.traceId}.success_cancel.${host.state.stateVersion + 1}`,
+    side: "runner",
+    source: `trace_success_cancel:${trace.traceId}`,
+    prompt: "Trace-Erfolgseffekt canceln",
+    kind: "select_option",
+    options: [
+      { id: "pass", label: "Trace-Effekt nicht canceln" },
+      ...candidates.map((candidate) => ({
+        id: `trace_success_cancel_${candidate.cardId}`,
+        label: `${candidate.label}: Trace-Effekt canceln`,
+        publicLabel: "Trace-Effekt canceln",
+        value: candidate.cardId,
+      })),
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: host.state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  host.state.activeSide = "runner";
+  return true;
+}
+
+function resolveTraceSuccessCancelChoice(
+  host: TraceOrchestrationHost,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const trace = requireTracePhase(host.state, "trace_success_cancel");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  if (selected === "pass") {
+    delete host.state.pendingChoice;
+    host.run.applyPrintedTraceSuccessFollowups({
+      trace: { ...trace, status: "post_bid_link" },
+      traceStep: "post_bid_link",
+      legalAction,
+      runnerLinkFallback: calculateRunnerLink(host),
+    });
+    return;
+  }
+  const option = host.state.pendingChoice?.options.find(
+    (candidate) => candidate.id === selected,
+  );
+  const cardId =
+    typeof option?.value === "string"
+      ? (option.value as CardInstanceId)
+      : undefined;
+  const candidate = traceSuccessCancelCandidates(host, trace).find(
+    (item) => item.cardId === cardId,
+  );
+  if (!candidate)
+    throw new Error("Diese Trace-Cancel-Quelle ist nicht legal.");
+  if (host.state.runner.credits < candidate.creditCost)
+    throw new Error("Der Runner kann die Trace-Cancel-Kosten nicht bezahlen.");
+  host.payment.spendRunnerCredits(candidate.creditCost);
+  const tapPayload = tapTraceSource(host, candidate.cardId);
+  const addsBadPublicity = traceEffectHasNonTagComponent(trace.successEffect);
+  if (addsBadPublicity) host.state.corp.badPublicity += 1;
+  delete host.state.pendingChoice;
+  delete host.state.trace;
+  if (trace.returnTimingPoint && trace.returnActiveSide && trace.returnPhase) {
+    host.state.timingPoint = trace.returnTimingPoint;
+    host.state.activeSide = trace.returnActiveSide;
+    host.state.phase = trace.returnPhase;
+  } else if (host.state.run) {
+    host.state.timingPoint = "run.encounter_ice";
+    host.state.activeSide = "runner";
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceId: trace.traceId,
+    traceStep: "trace_success_cancel",
+    sourceDefinitionId: candidate.definitionId,
+    traceEffectCanceled: true,
+    traceSuccessful: true,
+    traceSuccessCancelCostPaid: candidate.creditCost,
+    ...tapPayload,
+    ...(addsBadPublicity
+      ? {
+          badPublicityAdded: 1,
+          corpBadPublicityAfter: host.state.corp.badPublicity,
+        }
+      : {}),
+    runnerCreditsAfter: host.state.runner.credits,
+  };
+}
+
+function traceEffectHasNonTagComponent(effect: TraceSuccessEffect): boolean {
+  return !(
+    effect.type === "add_tag" ||
+    effect.type === "add_tags_by_trace_margin_over_runner_link"
+  );
 }
 
 function runnerTraceLinkCredits(host: TraceOrchestrationHost): number {
@@ -826,21 +1006,46 @@ export function calculateRunnerLink(host: TraceOrchestrationHost): number {
   return effectiveLink;
 }
 
-function creditCostForTraceAbility(
+function costForTraceAbility(
   ability: ActivatedCardAbilityImplementation,
-): number {
+): { creditCost: number; tapSource: boolean } {
   const creditCosts = ability.costs.filter((cost) => cost.kind === "credit");
+  const tapCosts = ability.costs.filter((cost) => cost.kind === "tap_source");
   if (
-    ability.costs.length !== 1 ||
-    creditCosts.length !== 1 ||
-    !Number.isInteger(creditCosts[0]?.amount) ||
-    (creditCosts[0]?.amount ?? 0) < 0
+    ability.costs.length !== creditCosts.length + tapCosts.length ||
+    creditCosts.length > 1 ||
+    tapCosts.length > 1 ||
+    (creditCosts.length === 0 && tapCosts.length === 0) ||
+    !Number.isInteger(creditCosts[0]?.amount ?? 0) ||
+    (creditCosts[0]?.amount ?? 0) < 0 ||
+    (tapCosts[0] && tapCosts[0].amount !== 1)
   ) {
     throw new Error(
-      "Trace CardImplementation ability supports exactly one nonnegative credit cost.",
+      "Trace CardImplementation ability supports nonnegative credit and optional tap_source costs.",
     );
   }
-  return creditCosts[0]!.amount;
+  return { creditCost: creditCosts[0]?.amount ?? 0, tapSource: tapCosts.length === 1 };
+}
+
+function tapTraceSource(
+  host: TraceOrchestrationHost,
+  cardId: CardInstanceId,
+): Record<string, string | number | boolean> {
+  const instance = host.state.cardInstances[cardId];
+  if (!instance || instance.tapped === true)
+    throw new Error("Die Trace-Link-Quelle ist bereits getappt.");
+  const payload = hiddenRunnerResourceRevealPayload(host.state, cardId);
+  host.state.cardInstances[cardId] = {
+    ...instance,
+    faceup: true,
+    rezzed: true,
+    tapped: true,
+  };
+  return {
+    ...payload,
+    sourceTapped: true,
+    cardImplementationTapSourceCost: true,
+  };
 }
 
 function increaseTraceLinkEffect(

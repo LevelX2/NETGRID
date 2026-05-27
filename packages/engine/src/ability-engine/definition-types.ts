@@ -191,6 +191,18 @@ export type CardRunnerUtilityLongtailImplementation =
   | {
       kind: "microtech_trode_set_ap_subroutine_modifier";
       visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "hidden_resource_current_access_free_trash";
+      cost: { kind: "credit_and_tap_source"; amount: number };
+      target: "current_accessed_cards";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "hidden_resource_post_meat_damage_random_hq_discard";
+      cost: { kind: "tap_source" };
+      amount: number;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
 export type CardAccessHookImplementation =
@@ -290,6 +302,20 @@ export type CardSuccessfulRunFollowupImplementation =
       amount: 1;
       cost: "none";
       visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "hidden_resource_successful_hq_run_corp_lose_credits";
+      timing: "immediately_after_successful_run_before_access";
+      amount: number;
+      cost: { kind: "tap_source" };
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "hidden_resource_successful_remote_run_trash_fort";
+      timing: "immediately_after_successful_run_before_access";
+      include: "root_and_ice";
+      cost: { kind: "tap_source" };
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
 export type CardFortRunWindowImplementation =
@@ -755,7 +781,8 @@ export type ActivatedCardAbilityImplementation = {
     | "corp_main"
     | "corp_encounter"
     | "trace_base_link_window"
-    | "trace_post_bid_link_window";
+    | "trace_post_bid_link_window"
+    | "trace_success_cancel_window";
   costs: readonly CardAbilityCostImplementation[];
   condition?: CardConditionImplementation;
   limit?: CardAbilityLimitImplementation;
@@ -1756,6 +1783,13 @@ export type CardDamagePreventionSourceImplementation = {
     | {
         kind: "credit";
         amount: number;
+      }
+    | {
+        kind: "tap_source";
+      }
+    | {
+        kind: "credit_and_tap_source";
+        amount: number;
       };
   priority: number;
   visibility: Extract<EventVisibilityClass, "public">;
@@ -1783,6 +1817,10 @@ export type CardTagPreventionSourceImplementation = {
       }
     | {
         kind: "credit";
+        amount: number;
+      }
+    | {
+        kind: "credit_and_tap_source";
         amount: number;
       };
   priority: number;

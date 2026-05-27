@@ -103,6 +103,12 @@ export type DamageCoreHost = {
   rng: {
     nextRandom: (state: GameState, purpose: string) => number;
   };
+  reactions?: {
+    openPostMeatDamageReactionWindow: (
+      state: GameState,
+      summary: DamageSummary,
+    ) => boolean;
+  };
 };
 
 let configuredDamageCoreHost: DamageCoreHost | undefined;
@@ -333,7 +339,7 @@ export function doDamage(
   if (request.damageType === "core") state.runner.coreDamage += request.amount;
   recordRunnerDamageDuringCurrentAction(state);
 
-  return {
+  const summary = {
     damageType: request.damageType,
     amount: request.amount,
     cardsTrashed: selected.length,
@@ -345,6 +351,12 @@ export function doDamage(
         }
       : {}),
   };
+  if (request.damageType === "meat" && selected.length > 0 && !state.winner)
+    requireDamageCoreHost().reactions?.openPostMeatDamageReactionWindow(
+      state,
+      summary,
+    );
+  return summary;
 }
 
 export function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSummary {
@@ -876,6 +888,13 @@ function cardImplementationDamagePreventionSourceCanPay(
   if (!runnerInstalledCardIds(state).includes(cardId)) return false;
   if (source.cost.kind === "none") return true;
   if (source.cost.kind === "trash_source") return true;
+  if (source.cost.kind === "tap_source")
+    return state.cardInstances[cardId]?.tapped !== true;
+  if (source.cost.kind === "credit_and_tap_source")
+    return (
+      state.runner.credits >= source.cost.amount &&
+      state.cardInstances[cardId]?.tapped !== true
+    );
   if (source.cost.kind === "credit")
     return state.runner.credits >= source.cost.amount;
   return cardCounter(state, cardId, source.cost.counterType) >= source.cost.amount;
@@ -985,6 +1004,11 @@ function cardImplementationTagPreventionSourceCanPay(
 ): boolean {
   if (!runnerInstalledCardIds(state).includes(cardId)) return false;
   if (source.cost.kind === "trash_source") return true;
+  if (source.cost.kind === "credit_and_tap_source")
+    return (
+      state.runner.credits >= source.cost.amount &&
+      state.cardInstances[cardId]?.tapped !== true
+    );
   return state.runner.credits >= source.cost.amount;
 }
 
@@ -2032,6 +2056,41 @@ function applyRuntimeDamagePreventionCost(
         runnerCreditsAfter: state.runner.credits,
       };
     }
+    if (implementationSource.cost.kind === "tap_source") {
+      const hiddenRevealPayload = hiddenRunnerResourceRevealPayload(
+        state,
+        sourceCardId,
+      );
+      const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
+      if (sourceInstance.tapped)
+        throw new Error("Die Prevention-Quelle ist bereits getappt.");
+      sourceInstance.faceup = true;
+      sourceInstance.rezzed = true;
+      sourceInstance.tapped = true;
+      return {
+        ...hiddenRevealPayload,
+        sourceTapped: true,
+      };
+    }
+    if (implementationSource.cost.kind === "credit_and_tap_source") {
+      const hiddenRevealPayload = hiddenRunnerResourceRevealPayload(
+        state,
+        sourceCardId,
+      );
+      const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
+      if (sourceInstance.tapped)
+        throw new Error("Die Prevention-Quelle ist bereits getappt.");
+      spendCredits(state, "runner", implementationSource.cost.amount);
+      sourceInstance.faceup = true;
+      sourceInstance.rezzed = true;
+      sourceInstance.tapped = true;
+      return {
+        ...hiddenRevealPayload,
+        paidCredits: implementationSource.cost.amount,
+        runnerCreditsAfter: state.runner.credits,
+        sourceTapped: true,
+      };
+    }
     const { counterType, amount, trashSourceWhenEmpty } =
       implementationSource.cost;
     if (cardCounter(state, sourceCardId, counterType) < amount)
@@ -2095,6 +2154,25 @@ function applyRuntimeTagPreventionCost(
       ...hiddenRevealPayload,
       sourceTrashed: true,
       trashedCardDefinitionId: definition.id,
+    };
+  }
+  if (source.cost.kind === "credit_and_tap_source") {
+    const hiddenRevealPayload = hiddenRunnerResourceRevealPayload(
+      state,
+      sourceCardId,
+    );
+    const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
+    if (sourceInstance.tapped)
+      throw new Error("Die Tag-Prevention-Quelle ist bereits getappt.");
+    spendCredits(state, "runner", source.cost.amount);
+    sourceInstance.faceup = true;
+    sourceInstance.rezzed = true;
+    sourceInstance.tapped = true;
+    return {
+      ...hiddenRevealPayload,
+      paidCredits: source.cost.amount,
+      runnerCreditsAfter: state.runner.credits,
+      sourceTapped: true,
     };
   }
   spendCredits(state, "runner", source.cost.amount);

@@ -1094,7 +1094,12 @@ export type TraceState = {
   parisCityGridPoolServerId?: Exclude<ServerId, "new_remote">;
   encounterTemporaryTraceCreditSourceIceId?: CardInstanceId;
   encounterTemporaryTraceCreditSourceDefinitionId?: CardDefinitionId;
-  status: "corp_bid" | "base_link" | "runner_bid" | "post_bid_link";
+  status:
+    | "corp_bid"
+    | "base_link"
+    | "runner_bid"
+    | "post_bid_link"
+    | "trace_success_cancel";
   successEffect: TraceSuccessEffect;
   returnPhase?: Phase;
   returnTimingPoint?: TimingPointId;

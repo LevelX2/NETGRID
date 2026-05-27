@@ -241,6 +241,9 @@ function pendingChoiceHost(
         "resolveSuccessfulRunInterventionChoiceInRunModule",
       ),
       successfulRunInterventionHost: () => ({}),
+      resolvePostMeatDamageHiddenResourceChoice: unexpected(
+        "resolvePostMeatDamageHiddenResourceChoice",
+      ),
     },
     access: {
       resolvePriorityWreckSpendChoice: unexpected("resolvePriorityWreckSpendChoice"),

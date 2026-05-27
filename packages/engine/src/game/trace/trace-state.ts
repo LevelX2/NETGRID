@@ -35,6 +35,7 @@ const TRACE_PHASE_MESSAGES: Record<TracePhase, string> = {
   base_link: "Es ist kein Base-Link-Fenster offen.",
   runner_bid: "Es ist kein Runner-Trace-Bid offen.",
   post_bid_link: "Es ist kein Post-Bid-Link-Fenster offen.",
+  trace_success_cancel: "Es ist kein Trace-Erfolg-Cancel-Fenster offen.",
 };
 
 export function currentTrace(state: GameState): CurrentTrace | undefined {

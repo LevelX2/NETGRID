@@ -12,6 +12,7 @@ import {
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { openRunnerInstalledTrashPreventionWindow } from "../../game/damage/damage-core";
+import { doDamage } from "../../game/damage/damage-core";
 import {
   CURRENT_RULES_BASELINE,
   type CardDefinitionId,
@@ -76,12 +77,54 @@ function addRunnerGripCard(
   return cardId;
 }
 
+function addCorpHqCard(
+  state: GameState,
+  definitionId: CardDefinitionId,
+  id: string,
+): CardInstanceId {
+  const cardId = id as CardInstanceId;
+  state.corp.hq.push(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "hq" },
+    faceup: false,
+    rezzed: false,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
+}
+
 function applyLegal(state: GameState, side: "corp" | "runner", action: LegalAction) {
   return applyAction(state, {
     matchId: state.matchId,
     side,
     actionId: action.actionId,
     clientKnownStateVersion: state.stateVersion,
+  });
+}
+
+function resolveChoice(
+  state: GameState,
+  side: "corp" | "runner",
+  optionId: string,
+) {
+  const action = getLegalActions(state, side).find(
+    (candidate) => candidate.type === "resolve_choice",
+  );
+  expect(action).toBeDefined();
+  return applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: action!.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    selectedChoices: {
+      choiceId: state.pendingChoice!.choiceId,
+      selectedOptionIds: [optionId],
+    },
   });
 }
 
@@ -299,5 +342,207 @@ describe("PRO011 hidden resource timing hardening", () => {
       "Time to Collect",
     );
     expect(timeId).toBeDefined();
+  });
+});
+
+describe("PRO012 hidden resource prevention and sabotage", () => {
+  it("PRO012 Back Door to Netwatch cancels a successful trace and adds Bad Publicity only for non-tag effects", () => {
+    let state = runnerState("pro012-back-door");
+    const backDoorId = installHiddenResource(
+      state,
+      "onr_proteus_129_back-door-to-netwatch",
+      "pro012_back_door",
+    );
+    state.runner.credits = 3;
+    state.corp.badPublicity = 6;
+    state.trace = {
+      traceId: "pro012_trace",
+      sourceCardInstanceId: "corp_trace_source" as CardInstanceId,
+      sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
+      baseTraceStrength: 5,
+      status: "trace_success_cancel",
+      successEffect: { type: "net_damage", amount: 1 },
+      corpBid: 0,
+      runnerBid: 0,
+      traceStrength: 5,
+      runnerLink: 0,
+      runnerStrength: 0,
+    };
+    state.pendingChoice = {
+      choiceId: "pro012_trace_cancel_choice",
+      side: "runner",
+      source: "trace_success_cancel:pro012_trace",
+      prompt: "Trace-Erfolgseffekt canceln",
+      kind: "select_option",
+      options: [
+        { id: "pass", label: "Pass" },
+        {
+          id: `trace_success_cancel_${backDoorId}`,
+          label: "Trace-Effekt canceln",
+          publicLabel: "Trace-Effekt canceln",
+          value: backDoorId,
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion,
+      visibility: "hidden_info_barrier",
+    };
+    const before = structuredClone(state);
+    const result = resolveChoice(
+      state,
+      "runner",
+      `trace_success_cancel_${backDoorId}`,
+    );
+    expect(result.ok).toBe(true);
+    state = result.state;
+    expect(state.trace).toBeUndefined();
+    expect(state.runner.credits).toBe(0);
+    expect(state.cardInstances[backDoorId]?.tapped).toBe(true);
+    expect(state.corp.badPublicity).toBe(7);
+    expect(state.winner).toBe("runner");
+    expect(state.gameEndReason).toBe("bad_publicity_7");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceEffectCanceled: true,
+      hiddenRunnerResourceRevealed: true,
+      publicRevealDefinitionId: "onr_proteus_129_back-door-to-netwatch",
+      badPublicityAdded: 1,
+    });
+    const replay = replayEvents(before, state.eventLog.slice(before.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    const tagsOnly = runnerState("pro012-back-door-tags");
+    const tagsBackDoorId = installHiddenResource(
+      tagsOnly,
+      "onr_proteus_129_back-door-to-netwatch",
+      "pro012_back_door_tags",
+    );
+    tagsOnly.runner.credits = 3;
+    tagsOnly.trace = {
+      traceId: "pro012_tags_trace",
+      sourceCardInstanceId: "corp_trace_source_tags" as CardInstanceId,
+      sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
+      baseTraceStrength: 5,
+      status: "trace_success_cancel",
+      successEffect: { type: "add_tag", amount: 1 },
+      corpBid: 0,
+      runnerBid: 0,
+      traceStrength: 5,
+      runnerLink: 0,
+      runnerStrength: 0,
+    };
+    tagsOnly.pendingChoice = {
+      choiceId: "pro012_trace_cancel_tags_choice",
+      side: "runner",
+      source: "trace_success_cancel:pro012_tags_trace",
+      prompt: "Trace-Erfolgseffekt canceln",
+      kind: "select_option",
+      options: [
+        { id: "pass", label: "Pass" },
+        {
+          id: `trace_success_cancel_${tagsBackDoorId}`,
+          label: "Trace-Effekt canceln",
+          publicLabel: "Trace-Effekt canceln",
+          value: tagsBackDoorId,
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: tagsOnly.stateVersion,
+      visibility: "hidden_info_barrier",
+    };
+    const tagsResult = resolveChoice(
+      tagsOnly,
+      "runner",
+      `trace_success_cancel_${tagsBackDoorId}`,
+    );
+    expect(tagsResult.ok).toBe(true);
+    expect(tagsResult.state.corp.badPublicity).toBe(0);
+  });
+
+  it("PRO012 Get Ready to Rumble opens only after successful Meat Damage and discards HQ deterministically", () => {
+    let state = runnerState("pro012-rumble");
+    const rumbleId = installHiddenResource(
+      state,
+      "onr_proteus_141_get-ready-to-rumble",
+      "pro012_rumble",
+    );
+    addRunnerGripCard(state, "onr_v1_010_cascade", "pro012_grip_1");
+    addRunnerGripCard(state, "onr_v1_011_cloak", "pro012_grip_2");
+    addRunnerGripCard(state, "onr_v1_012_clown", "pro012_grip_3");
+    addCorpHqCard(state, "onr_v1_188_ai-chief-financial-officer", "pro012_hq_1");
+    addCorpHqCard(state, "onr_v1_188_ai-chief-financial-officer", "pro012_hq_2");
+    addCorpHqCard(state, "onr_v1_188_ai-chief-financial-officer", "pro012_hq_3");
+    const hqCountBefore = state.corp.hq.length;
+    const archivesCountBefore = state.corp.archives.length;
+    const randomBefore = state.randomCounter;
+    const summary = doDamage(state, {
+      damageId: "pro012_meat",
+      damageType: "meat",
+      amount: 1,
+      source: "pro012_test",
+    });
+    expect(summary.flatline).toBe(false);
+    expect(state.pendingChoice?.source).toContain("hidden_resource.post_meat_damage");
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "Get Ready to Rumble",
+    );
+    state.pendingChoice = {
+      ...state.pendingChoice!,
+      stateVersion: state.stateVersion,
+    };
+    const beforeChoice = structuredClone(state);
+    const optionId = `post_meat_damage_${rumbleId}`;
+    const result = resolveChoice(state, "runner", optionId);
+    expect(result.ok).toBe(true);
+    state = result.state;
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.cardInstances[rumbleId]?.tapped).toBe(true);
+    expect(state.corp.hq).toHaveLength(hqCountBefore - 2);
+    expect(state.corp.archives).toHaveLength(archivesCountBefore + 2);
+    expect(state.randomCounter).toBe(randomBefore + 3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenResourcePostMeatDamageDecision: "apply",
+      hiddenRunnerResourceRevealed: true,
+      discardedHqCount: 2,
+    });
+    const replay = replayEvents(
+      beforeChoice,
+      state.eventLog.slice(beforeChoice.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    const netState = runnerState("pro012-rumble-net");
+    installHiddenResource(
+      netState,
+      "onr_proteus_141_get-ready-to-rumble",
+      "pro012_rumble_net",
+    );
+    addRunnerGripCard(netState, "onr_v1_010_cascade", "pro012_net_grip");
+    doDamage(netState, {
+      damageId: "pro012_net",
+      damageType: "net",
+      amount: 1,
+      source: "pro012_test",
+    });
+    expect(netState.pendingChoice).toBeUndefined();
+
+    const flatlineState = runnerState("pro012-rumble-flatline");
+    installHiddenResource(
+      flatlineState,
+      "onr_proteus_141_get-ready-to-rumble",
+      "pro012_rumble_flatline",
+    );
+    flatlineState.runner.grip = [];
+    doDamage(flatlineState, {
+      damageId: "pro012_flatline",
+      damageType: "meat",
+      amount: 1,
+      source: "pro012_test",
+    });
+    expect(flatlineState.pendingChoice).toBeUndefined();
+    expect(flatlineState.winner).toBe("corp");
   });
 });
