@@ -245,6 +245,124 @@
       "rationale": "Topdeck information is derivable; R&D-pressure and interface-pressure conditions remain intentionally manual strategic overlay."
     },
     {
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/microtech-ai-interface.ts",
+      "expectedDerivableKinds": [
+        "effect:topdeck_info",
+        "effect:zone_shuffle",
+        "condition:requires_accessed_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "R&D pre-access cut/top manipulation is mechanically derivable as hidden-zone context; generated facts do not reveal actual R&D order or create central-run priority."
+    },
+    {
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "title": "Executive Wiretaps",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/executive-wiretaps.ts",
+      "expectedDerivableKinds": [
+        "effect:multiaccess",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "HQ run event and additional HQ access count are mechanically derivable; strategic HQ pressure remains overlay/consumer context."
+    },
+    {
+      "cardId": "onr_v1_084_edited-shipping-manifests",
+      "title": "Edited Shipping Manifests",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/edited-shipping-manifests.ts",
+      "expectedDerivableKinds": [
+        "effect:access_replacement",
+        "effect:economy",
+        "effect:tag",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "HQ access replacement, runner credit gain and self-tag are mechanically derivable; generated facts do not value the central pressure line."
+    },
+    {
+      "cardId": "onr_v1_081_custodial-position",
+      "title": "Custodial Position",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/custodial-position.ts",
+      "expectedDerivableKinds": [
+        "effect:multiaccess",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "R&D run event and additional R&D access count are mechanically derivable; actual access value remains board/hidden-zone context."
+    },
+    {
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "title": "Expert Schedule Analyzer",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/expert-schedule-analyzer.ts",
+      "expectedDerivableKinds": [
+        "effect:hq_info",
+        "condition:requires_accessed_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Post-access HQ look is mechanically derivable as access-context information; generated facts never contain hidden HQ card identities."
+    },
+    {
+      "cardId": "onr_v1_008_boardwalk",
+      "title": "Boardwalk",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/boardwalk.ts",
+      "expectedDerivableKinds": [
+        "effect:hq_info",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-HQ-run counters and start-turn random HQ reveal are mechanically derivable as gated HQ-info context; generated facts do not expose hidden HQ identities."
+    },
+    {
+      "cardId": "onr_v1_062_shredder-uplink-protocol",
+      "title": "Shredder Uplink Protocol",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shredder-uplink-protocol.ts",
+      "expectedDerivableKinds": [
+        "effect:access_replacement",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Archive run access override to successful HQ-run context is mechanically derivable as central access replacement, not normal Archives access."
+    },
+    {
+      "cardId": "onr_v1_032_i-spy",
+      "title": "I Spy",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/i-spy.ts",
+      "expectedDerivableKinds": [
+        "effect:expose_info",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-run fort counter exposing installed cards is mechanically derivable as remote information; actual targets stay board-context."
+    },
+    {
+      "cardId": "onr_v1_042_mouse",
+      "title": "Mouse",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/mouse.ts",
+      "expectedDerivableKinds": ["effect:expose_info"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated expose of a card inside a data fort is mechanically derivable as installed-card information, not hidden-info leakage."
+    },
+    {
+      "cardId": "onr_v1_058_seeya",
+      "title": "SeeYa",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/seeya.ts",
+      "expectedDerivableKinds": ["effect:expose_info"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated expose of an installed card is mechanically derivable as installed-card information, not a strategic remote-contest decision."
+    },
+    {
+      "cardId": "onr_v1_065_smarteye",
+      "title": "Smarteye",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/smarteye.ts",
+      "expectedDerivableKinds": [
+        "effect:expose_info",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Approach-unrezzed-ICE expose before rez is mechanically derivable as run-context information; generated facts do not reveal ICE identity before the legal effect."
+    },
+    {
       "cardId": "onr_v1_210_political-overthrow",
       "title": "Political Overthrow",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",

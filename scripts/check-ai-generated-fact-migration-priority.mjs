@@ -41,9 +41,148 @@ const PRIORITY_POLICY = {
       "overlay_only",
       "legacy_keep_for_compat",
     ],
-    recommendedMigrationBatch: 5,
+    recommendedMigrationBatch: 6,
     rationale:
       "Topdeck information is mechanically derivable, but the strategic R&D pressure value stays overlay-only.",
+  },
+  "onr_v1_041_microtech-ai-interface": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "R&D top manipulation is mechanically derivable, but generated facts must not become hidden R&D order knowledge.",
+  },
+  "onr_v1_085_executive-wiretaps": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "HQ multiaccess is mechanically derivable, while successful-run/access legality remains engine context.",
+  },
+  "onr_v1_084_edited-shipping-manifests": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "HQ access replacement, economy and self-tag are derivable, but must not be normalized to normal access or automatic value.",
+  },
+  "onr_v1_081_custodial-position": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "R&D multiaccess is mechanically derivable, while access value and hidden-zone state remain runtime/consumer context.",
+  },
+  "onr_v1_024_expert-schedule-analyzer": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Post-access HQ information is derivable, but generated facts must not contain hidden HQ identities.",
+  },
+  onr_v1_008_boardwalk: {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "HQ-info counters are derivable, while random HQ reveal and virus-counter thresholds remain context-gated.",
+  },
+  "onr_v1_062_shredder-uplink-protocol": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Archive-run to HQ-success access replacement is derivable and must stay distinct from normal Archives access.",
+  },
+  "onr_v1_032_i-spy": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Successful-run expose counter is derivable as remote information; target choice and board visibility remain context.",
+  },
+  onr_v1_042_mouse: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Activated installed-card expose is a stable mechanical information fact.",
+  },
+  onr_v1_058_seeya: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Activated installed-card expose is a stable mechanical information fact with payment context.",
+  },
+  onr_v1_065_smarteye: {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Approach-ICE expose is derivable, but actual encounter timing and hidden ICE identity remain LegalAction/runtime context.",
   },
   "onr_v1_037_japanese-water-torture": {
     migrationPriority: "P0",
@@ -311,7 +450,7 @@ const PRIORITY_POLICY = {
       "generated_with_board_context",
       "legacy_keep_for_compat",
     ],
-    recommendedMigrationBatch: 5,
+    recommendedMigrationBatch: 6,
     rationale:
       "Topdeck info and access replacement are mechanical, but the successful-run condition must remain LegalAction-gated.",
   },
@@ -766,7 +905,7 @@ export function buildGeneratedFactMigrationPriorityReport() {
     };
   });
 
-  const batchPlan = [1, 2, 3, 4, 5].map((batch) => ({
+  const batchPlan = [1, 2, 3, 4, 5, 6].map((batch) => ({
     batch,
     title: {
       1: "Scored-agenda and tag/trace/punish generated facts",
@@ -774,6 +913,7 @@ export function buildGeneratedFactMigrationPriorityReport() {
       3: "RemoteRole run_tax and agenda_steal_tax",
       4: "Future-run and future-encounter ICE facts",
       5: "Remaining longtail mechanical facts",
+      6: "Runner info, central pressure and access replacement",
     }[batch],
     cardIds: cards
       .filter((card) => card.recommendedMigrationBatch === batch)

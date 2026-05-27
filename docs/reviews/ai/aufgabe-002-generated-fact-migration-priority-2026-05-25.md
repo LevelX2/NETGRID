@@ -4,28 +4,28 @@ Datum: 2026-05-25
 
 ## Kurzfazit
 
-Aufgabe 002 priorisiert die Generated-Fact-Migrationskandidaten aus dem read-only Compiled-Hint-Index. Nach der Aufgabe-016-Piloterweiterung umfasst der Report 50 Kandidaten. Es wurde nichts migriert: `data/ai/ai-card-hints-active.json` bleibt unverändert, der Compiler bleibt ohne Runtime-/Planner-/Consumer-Wirkung.
+Aufgabe 002 priorisiert die Generated-Fact-Migrationskandidaten aus dem read-only Compiled-Hint-Index. Nach der Aufgabe-017-Piloterweiterung umfasst der Report 61 Kandidaten. Es wurde nichts migriert: `data/ai/ai-card-hints-active.json` bleibt unverändert, der Compiler bleibt ohne Runtime-/Planner-/Consumer-Wirkung.
 
-Die 158 Compiled-Index-Warnings bleiben Vergleichssignale. Sie sind jetzt als Migrationsreihenfolge interpretierbar, nicht als Fehler.
+Die 190 Compiled-Index-Warnings bleiben Vergleichssignale. Sie sind jetzt als Migrationsreihenfolge interpretierbar, nicht als Fehler.
 
 ## Ausgangslage
 
-- Pilotkarten: 50
+- Pilotkarten: 61
 - Karten mit Manual Overlay: 6
-- Karten ohne Overlay: 44
+- Karten ohne Overlay: 55
 - Hard Errors: 0
-- Compiled-Index Warnings: 158
-- `migrationCandidates`: 50
-- `generatedFactCandidates`: 50
+- Compiled-Index Warnings: 190
+- `migrationCandidates`: 61
+- `generatedFactCandidates`: 61
 - `overlayCandidates`: 0
-- `reviewCandidates`: 0
+- `reviewCandidates`: 8
 
 Warning-Gruppen:
 
-- `monolith_mechanical_duplication_candidate`: 103
-- `generated_fact_absent_from_monolith`: 49
+- `monolith_mechanical_duplication_candidate`: 111
+- `generated_fact_absent_from_monolith`: 65
 - `overlay_strategy_field_not_in_monolith`: 6
-- `manual_review_candidate`: 0
+- `manual_review_candidate`: 8
 - `schema_or_descriptor_candidate`: 0
 
 ## Report
@@ -66,7 +66,7 @@ Der Check liest nur:
 
 Begründung: Diese Karten haben eindeutige mechanische Facts mit hoher späterer Wirkung, etwa scored-agenda actions, tag/punish conditions oder Breakerprofile.
 
-`P1`: 33 Karten
+`P1`: 44 Karten
 
 - `Mystery Box`
 - `Self-Modifying Code`
@@ -101,6 +101,17 @@ Begründung: Diese Karten haben eindeutige mechanische Facts mit hoher späterer
 - `Wild Card`
 - `Wizard's Book`
 - `Worm`
+- `Microtech AI Interface`
+- `Executive Wiretaps`
+- `Edited Shipping Manifests`
+- `Custodial Position`
+- `Expert Schedule Analyzer`
+- `Boardwalk`
+- `Shredder Uplink Protocol`
+- `I Spy`
+- `Mouse`
+- `SeeYa`
+- `Smarteye`
 
 Begründung: Die Facts sind mechanisch nützlich, brauchen aber saubere Board-/LegalAction-Kontextgrenzen oder stabilere Descriptor-Behandlung.
 
@@ -115,15 +126,15 @@ Begründung: Mechanisch korrekt, aber aktuell eher Diagnose-/Longtail-Wert oder 
 
 `P3`: 0 Karten
 
-Begründung: Es gibt keine Karte im 50er-Pilot, die ausschließlich strategisch/quality-getrieben und nicht Generated-Fact-Kandidat ist.
+Begründung: Es gibt keine Karte im 61er-Pilot, die ausschließlich strategisch/quality-getrieben und nicht Generated-Fact-Kandidat ist.
 
 ## Field-Kategorien
 
-- `safe_generated_now`: 43
-- `generated_with_board_context`: 45
-- `generated_with_descriptor_limitations`: 11
+- `safe_generated_now`: 54
+- `generated_with_board_context`: 56
+- `generated_with_descriptor_limitations`: 18
 - `overlay_only`: 6
-- `legacy_keep_for_compat`: 50
+- `legacy_keep_for_compat`: 61
 
 Interpretation:
 
@@ -133,8 +144,8 @@ Interpretation:
 
 ## Risiko
 
-- `low`: 27
-- `medium`: 23
+- `low`: 29
+- `medium`: 32
 - `high`: 0
 
 Kein Kandidat ist als `high` klassifiziert, weil es keine Hard Errors, keine Review-Kandidaten und keine offenen Schema-/Descriptor-Kandidaten im Compiled-Index gibt. Medium heißt hier: spätere Migration darf den Board-/LegalAction-Kontext nicht statisch interpretieren.
@@ -177,8 +188,6 @@ Batch 4: Future-run/Future-encounter ICE
 
 Batch 5: Restliche Longtail-Facts
 
-- `Deep Thought`
-- `R&D-Protocol Files`
 - `Antiquated Interface Routines`
 - `Chicago Branch`
 - `Data Masons`
@@ -206,6 +215,22 @@ Batch 5: Restliche Longtail-Facts
 - `Wizard's Book`
 - `Worm`
 
+Batch 6: Runner Info, Central Pressure und Access Replacement
+
+- `Deep Thought`
+- `R&D-Protocol Files`
+- `Boardwalk`
+- `Custodial Position`
+- `Edited Shipping Manifests`
+- `Executive Wiretaps`
+- `Expert Schedule Analyzer`
+- `I Spy`
+- `Microtech AI Interface`
+- `Mouse`
+- `SeeYa`
+- `Shredder Uplink Protocol`
+- `Smarteye`
+
 ## Bewusst Nicht Geändert
 
 - Keine Änderung an `data/ai/ai-card-hints-active.json`.
@@ -218,4 +243,4 @@ Batch 5: Restliche Longtail-Facts
 
 ## Empfehlung
 
-Der nächste praktische Schritt ist kein Runtime-Compiler. Sinnvoll ist ein read-only Compiler-Migrationsdesign für Batch 1: Welche Monolith-Felder werden dort durch Generated Facts ersetzbar, welche Consumer lesen sie heute, und welche Snapshot-/Fallback-Regeln braucht ein späteres Kompilat, bevor irgendeine Runtime-Quelle geändert wird.
+Der nächste praktische Schritt ist kein Runtime-Compiler. Nach den Batch-1-bis-6-Closeouts ist ein größerer read-only Corp-ICE-Longtail-Block sinnvoll, der Trace-, Damage-, ETR- und Future-run-Facts nur als mechanische Generated Facts bewertet.

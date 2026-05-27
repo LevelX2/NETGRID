@@ -6,22 +6,25 @@
     "pilotCardsPath": "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json",
     "derivationMode": "read-only CardImplementation text/descriptor scan; no runtime, planner, or strategy consumption"
   },
-  "pilotCardCount": 50,
-  "implementationFoundCount": 50,
-  "cardsWithDerivedFacts": 50,
-  "cardsWithManualOntologyOverlap": 50,
-  "cardsNeedingManualOverlay": 3,
+  "pilotCardCount": 61,
+  "implementationFoundCount": 61,
+  "cardsWithDerivedFacts": 61,
+  "cardsWithManualOntologyOverlap": 54,
+  "cardsNeedingManualOverlay": 11,
   "effectKindCounts": {
-    "access_replacement": 1,
+    "access_replacement": 3,
     "breaker": 20,
     "counter_economy": 2,
     "damage": 3,
     "draw": 2,
-    "economy": 1,
+    "economy": 2,
+    "expose_info": 4,
     "extra_action": 1,
     "future_encounter_effect": 3,
     "future_run_effect": 3,
+    "hq_info": 2,
     "install_discount": 1,
+    "multiaccess": 2,
     "program_trash": 1,
     "remote_protection": 8,
     "rez_discount": 2,
@@ -29,25 +32,27 @@
     "score_acceleration": 2,
     "scored_agenda_action": 7,
     "search": 2,
+    "tag": 1,
     "tag_punish_payoff": 4,
     "tag_source": 3,
-    "topdeck_info": 3,
+    "topdeck_info": 4,
     "trace": 3,
-    "trash_credit": 2
+    "trash_credit": 2,
+    "zone_shuffle": 1
   },
   "conditionKindCounts": {
-    "requires_accessed_card": 1,
-    "requires_during_run": 7,
+    "requires_accessed_card": 3,
+    "requires_during_run": 8,
     "requires_remote_server": 1,
     "requires_runner_tagged": 4,
     "requires_scored_agenda": 7,
-    "requires_successful_run": 2,
+    "requires_successful_run": 8,
     "requires_trace_success": 3
   },
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 70,
+  "warningCount": 114,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -68,6 +73,31 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_007_blink"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_008_boardwalk"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_successful_run has no manual ontology match.",
+      "cardId": "onr_v1_008_boardwalk"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:hq_info has no manual ontology match.",
+      "cardId": "onr_v1_008_boardwalk"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_008_boardwalk",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_008_boardwalk"
     },
     {
       "kind": "text_pattern_derivation",
@@ -110,6 +140,56 @@
       "cardId": "onr_v1_019_dropp"
     },
     {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_024_expert-schedule-analyzer"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_accessed_card has no manual ontology match.",
+      "cardId": "onr_v1_024_expert-schedule-analyzer"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:hq_info has no manual ontology match.",
+      "cardId": "onr_v1_024_expert-schedule-analyzer"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_024_expert-schedule-analyzer"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_032_i-spy"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_successful_run has no manual ontology match.",
+      "cardId": "onr_v1_032_i-spy"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:expose_info has no manual ontology match.",
+      "cardId": "onr_v1_032_i-spy"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_032_i-spy",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_032_i-spy"
+    },
+    {
       "kind": "confidence_mismatch",
       "message": "Generated confidence medium differs from manual confidence high.",
       "cardId": "onr_v1_037_japanese-water-torture"
@@ -128,6 +208,61 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_040_loony-goon"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_041_microtech-ai-interface"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
+      "cardId": "onr_v1_041_microtech-ai-interface"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:zone_shuffle has no manual ontology match.",
+      "cardId": "onr_v1_041_microtech-ai-interface"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:access_replacement has no generated basic fact match.",
+      "cardId": "onr_v1_041_microtech-ai-interface"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_041_microtech-ai-interface"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_042_mouse"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_042_mouse"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:expose_info has no manual ontology match.",
+      "cardId": "onr_v1_042_mouse"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_042_mouse",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_042_mouse"
     },
     {
       "kind": "text_pattern_derivation",
@@ -180,6 +315,31 @@
       "cardId": "onr_v1_057_scatter-shot"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_058_seeya"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_058_seeya"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:expose_info has no manual ontology match.",
+      "cardId": "onr_v1_058_seeya"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_058_seeya",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_058_seeya"
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_059_self-modifying-code"
@@ -188,6 +348,56 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_060_shaka"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_062_shredder-uplink-protocol"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_successful_run has no manual ontology match.",
+      "cardId": "onr_v1_062_shredder-uplink-protocol"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:access_replacement has no manual ontology match.",
+      "cardId": "onr_v1_062_shredder-uplink-protocol"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_062_shredder-uplink-protocol",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_062_shredder-uplink-protocol"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_065_smarteye"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_during_run has no manual ontology match.",
+      "cardId": "onr_v1_065_smarteye"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:expose_info has no manual ontology match.",
+      "cardId": "onr_v1_065_smarteye"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_065_smarteye",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_065_smarteye"
     },
     {
       "kind": "confidence_mismatch",
@@ -213,6 +423,21 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_074_worm"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_081_custodial-position"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_084_edited-shipping-manifests"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_085_executive-wiretaps"
     },
     {
       "kind": "text_pattern_derivation",
@@ -771,6 +996,90 @@
       ]
     },
     {
+      "cardId": "onr_v1_008_boardwalk",
+      "title": "Boardwalk",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/boardwalk.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:hq_info",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-HQ-run counters and start-turn random HQ reveal are mechanically derivable as gated HQ-info context; generated facts do not expose hidden HQ identities.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "hq_info",
+            "timing": "start_of_turn",
+            "scope": "hq",
+            "resource": "cards",
+            "source": "implementation.virusCounter.startOfRunnerTurn.random_reveal_hq"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_successful_run",
+            "source": "implementation.virusCounter.addOnSuccessfulRun.hq"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Boardwalk HQ reveal is context-gated by public counters; generated facts do not include hidden HQ card identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["program", "random", "runner", "virus"],
+        "planRoles": [
+          "runner_hq_run_counter",
+          "runner_install_program",
+          "runner_start_turn_random_hq_reveal"
+        ],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_successful_run",
+          "effect:hq_info"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_successful_run",
+        "effect:hq_info"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_successful_run has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:hq_info has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_014_codecracker",
       "title": "Codecracker",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/codecracker.ts",
@@ -1136,6 +1445,160 @@
       ]
     },
     {
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "title": "Expert Schedule Analyzer",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/expert-schedule-analyzer.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:hq_info",
+        "condition:requires_accessed_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Post-access HQ look is mechanically derivable as access-context information; generated facts never contain hidden HQ card identities.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "hq_info",
+            "timing": "on_access",
+            "scope": "hq",
+            "resource": "cards",
+            "source": "implementation.accessHooks.post_access_private_look"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_accessed_card",
+            "source": "implementation.accessHooks.post_access_private_look"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Post-access HQ information is represented as a context-gated information effect; generated facts do not include hidden HQ card identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["access", "program"],
+        "planRoles": ["build_rig", "run_pressure"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": ["condition:requires_accessed_card", "effect:hq_info"],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_accessed_card",
+        "effect:hq_info"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_accessed_card has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:hq_info has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_032_i-spy",
+      "title": "I Spy",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/i-spy.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:expose_info",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-run fort counter exposing installed cards is mechanically derivable as remote information; actual targets stay board-context.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "expose_info",
+            "timing": "successful_run",
+            "scope": "fort",
+            "source": "implementation.runnerUtilityLongtail.i_spy_expose"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_successful_run",
+            "source": "implementation.runnerUtilityLongtail.i_spy_expose"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["expose", "program", "spy_counter", "successful_run_reward"],
+        "planRoles": ["information", "pressure_remote"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_successful_run",
+          "effect:expose_info"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_successful_run",
+        "effect:expose_info"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_successful_run has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:expose_info has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_037_japanese-water-torture",
       "title": "Japanese Water Torture",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
@@ -1397,6 +1860,192 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/microtech-ai-interface.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:topdeck_info",
+        "effect:zone_shuffle",
+        "condition:requires_accessed_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "R&D pre-access cut/top manipulation is mechanically derivable as hidden-zone context; generated facts do not reveal actual R&D order or create central-run priority.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "timing": "on_access",
+            "scope": "rnd",
+            "resource": "cards",
+            "source": "implementation.accessHooks.pre_access_rd_cut.context"
+          },
+          {
+            "confidence": "high",
+            "kind": "zone_shuffle",
+            "timing": "on_access",
+            "scope": "rnd",
+            "resource": "cards",
+            "source": "implementation.accessHooks.pre_access_rd_cut"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_accessed_card",
+            "source": "implementation.accessHooks.pre_access_rd_cut"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Microtech AI Interface is represented as R&D top manipulation context only; generated facts do not reveal the actual hidden R&D order."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["access", "program"],
+        "planRoles": ["build_rig", "run_pressure"],
+        "effects": [
+          {
+            "kind": "access_replacement",
+            "timing": "on_access",
+            "scope": "rnd"
+          },
+          {
+            "kind": "topdeck_info",
+            "timing": "on_access",
+            "scope": "rnd"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          }
+        ],
+        "lineSupport": [
+          "closeout_pressure",
+          "early_rnd_pressure",
+          "interface_pressure"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["condition:requires_accessed_card", "effect:topdeck_info"],
+        "generatedOnly": ["effect:zone_shuffle"],
+        "manualOnly": ["effect:access_replacement"]
+      },
+      "missingManualOverlay": [
+        "effect:access_replacement",
+        "effect:zone_shuffle"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:zone_shuffle has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:access_replacement has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_042_mouse",
+      "title": "Mouse",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/mouse.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:expose_info"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated expose of a card inside a data fort is mechanically derivable as installed-card information, not hidden-info leakage.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "expose_info",
+            "timing": "action",
+            "scope": "installed_card",
+            "source": "implementation.effect.expose_installed_card"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["expose_helper", "hidden_zone_tool", "program"],
+        "planRoles": ["build_rig", "contest_remote"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": ["effect:expose_info"],
+        "manualOnly": []
+      },
+      "missingManualOverlay": ["effect:expose_info"],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:expose_info has no manual ontology match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -2227,6 +2876,75 @@
       ]
     },
     {
+      "cardId": "onr_v1_058_seeya",
+      "title": "SeeYa",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/seeya.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:expose_info"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated expose of an installed card is mechanically derivable as installed-card information, not a strategic remote-contest decision.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "expose_info",
+            "timing": "action",
+            "scope": "installed_card",
+            "source": "implementation.effect.expose_installed_card"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["expose_helper", "hidden_zone_tool", "program"],
+        "planRoles": ["build_rig", "contest_remote"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": ["effect:expose_info"],
+        "manualOnly": []
+      },
+      "missingManualOverlay": ["effect:expose_info"],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:expose_info has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_059_self-modifying-code",
       "title": "Self-Modifying Code",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/self-modifying-code.ts",
@@ -2405,6 +3123,162 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_062_shredder-uplink-protocol",
+      "title": "Shredder Uplink Protocol",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shredder-uplink-protocol.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:access_replacement",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Archive run access override to successful HQ-run context is mechanically derivable as central access replacement, not normal Archives access.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "access_replacement",
+            "timing": "successful_run",
+            "scope": "hq",
+            "source": "implementation.effect.make_run.accessServerOverride"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_successful_run",
+            "source": "implementation.effect.make_run.accessServerOverride"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["access", "program"],
+        "planRoles": ["build_rig", "run_pressure"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_successful_run",
+          "effect:access_replacement"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_successful_run",
+        "effect:access_replacement"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_successful_run has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:access_replacement has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_065_smarteye",
+      "title": "Smarteye",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/smarteye.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:expose_info",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Approach-unrezzed-ICE expose before rez is mechanically derivable as run-context information; generated facts do not reveal ICE identity before the legal effect.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "expose_info",
+            "timing": "encounter",
+            "scope": "ice",
+            "source": "implementation.runEncounterInterventions.approach_ice_expose_then_jack_out_before_rez"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_during_run",
+            "source": "implementation.runEncounterInterventions.approach_ice_expose_then_jack_out_before_rez"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Smarteye expose-before-rez information is encounter context only; generated facts do not include hidden ICE identity before the legal effect."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["hidden_zone", "program"],
+        "planRoles": ["build_rig", "information"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_during_run",
+          "effect:expose_info"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_during_run",
+        "effect:expose_info"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_during_run has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:expose_info has no manual ontology match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -2738,6 +3612,289 @@
       },
       "overlap": {
         "matches": ["breakerCoverage:wall", "effect:breaker"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_081_custodial-position",
+      "title": "Custodial Position",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/custodial-position.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:multiaccess",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "R&D run event and additional R&D access count are mechanically derivable; actual access value remains board/hidden-zone context.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "multiaccess",
+            "timing": "successful_run",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 3,
+            "source": "implementation.effect.make_run.accessCount"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_successful_run",
+            "source": "implementation.effect.make_run.accessCount"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "multiaccess", "run_event"],
+        "planRoles": ["pressure_rnd"],
+        "effects": [
+          {
+            "kind": "multiaccess",
+            "timing": "successful_run",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "lineSupport": [
+          "closeout_pressure",
+          "early_rnd_pressure",
+          "interface_pressure"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["condition:requires_successful_run", "effect:multiaccess"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_084_edited-shipping-manifests",
+      "title": "Edited Shipping Manifests",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/edited-shipping-manifests.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:access_replacement",
+        "effect:economy",
+        "effect:tag",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "HQ access replacement, runner credit gain and self-tag are mechanically derivable; generated facts do not value the central pressure line.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "access_replacement",
+            "timing": "successful_run",
+            "scope": "hq",
+            "source": "implementation.successfulRunAccessReplacement"
+          },
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "successful_run",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 10,
+            "source": "implementation.successfulRunRunnerCreditGain"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag",
+            "timing": "successful_run",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "source": "implementation.successfulRunRunnerTagGain"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_successful_run",
+            "source": "implementation.successfulRunAccessReplacement"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": [
+          "access_replacement",
+          "economy",
+          "event",
+          "hq_run",
+          "tag_self"
+        ],
+        "planRoles": ["contest_remote", "pressure_hq"],
+        "effects": [
+          {
+            "kind": "access_replacement",
+            "timing": "successful_run",
+            "scope": "hq"
+          },
+          {
+            "kind": "economy",
+            "timing": "successful_run",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 10
+          },
+          {
+            "kind": "tag",
+            "timing": "successful_run",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "lineSupport": ["closeout_pressure", "early_hq_pressure"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_successful_run",
+          "effect:access_replacement",
+          "effect:economy",
+          "effect:tag"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "title": "Executive Wiretaps",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/executive-wiretaps.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:multiaccess",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "HQ run event and additional HQ access count are mechanically derivable; strategic HQ pressure remains overlay/consumer context.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "multiaccess",
+            "timing": "successful_run",
+            "scope": "hq",
+            "resource": "cards",
+            "amount": 3,
+            "source": "implementation.effect.make_run.accessCount"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_successful_run",
+            "source": "implementation.effect.make_run.accessCount"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "multiaccess", "run_event"],
+        "planRoles": ["pressure_hq", "pressure_rnd"],
+        "effects": [
+          {
+            "kind": "multiaccess",
+            "timing": "successful_run",
+            "scope": "hq",
+            "resource": "cards",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "lineSupport": [
+          "closeout_pressure",
+          "early_hq_pressure",
+          "interface_pressure"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["condition:requires_successful_run", "effect:multiaccess"],
         "generatedOnly": [],
         "manualOnly": []
       },

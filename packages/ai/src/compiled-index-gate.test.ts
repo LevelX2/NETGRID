@@ -68,11 +68,11 @@ describe("compiled hint index pilot report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("compiles the full 50-card derived facts pilot without hard errors", () => {
+  it("compiles the full 61-card derived facts pilot without hard errors", () => {
     const report = readReport();
-    expect(report.compiledCardCount).toBe(50);
+    expect(report.compiledCardCount).toBe(61);
     expect(report.overlayCardCount).toBe(6);
-    expect(report.cardsWithoutOverlay).toBe(44);
+    expect(report.cardsWithoutOverlay).toBe(55);
     expect(report.hardErrorCount).toBe(0);
     expect(report.source.activeHintsPath).toBe(
       "data/ai/ai-card-hints-active.json",
@@ -93,7 +93,7 @@ describe("compiled hint index pilot report", () => {
       6,
     );
     expect(report.cards.filter((card) => !card.manualOverlayFound).length).toBe(
-      44,
+      55,
     );
   });
 
@@ -140,9 +140,9 @@ describe("compiled hint index pilot report", () => {
   it("keeps missing overlays non-fatal when the pilot card does not need one", () => {
     const report = readReport();
     expect(report.warningCountsByKind.overlay_missing_for_manual_gap ?? 0).toBe(
-      0,
+      8,
     );
-    expect(report.infoCounts.info_no_overlay_needed).toBe(44);
+    expect(report.infoCounts.info_no_overlay_needed).toBe(47);
     expect(
       report.cards
         .filter((card) => !card.manualOverlayFound)
@@ -164,10 +164,11 @@ describe("compiled hint index pilot report", () => {
 
   it("classifies compiled-index warnings into non-blocking comparison groups", () => {
     const report = readReport();
-    expect(report.warningCount).toBe(158);
+    expect(report.warningCount).toBe(190);
     expect(report.warningClassificationCounts).toEqual({
-      generated_fact_absent_from_monolith: 49,
-      monolith_mechanical_duplication_candidate: 103,
+      generated_fact_absent_from_monolith: 65,
+      manual_review_candidate: 8,
+      monolith_mechanical_duplication_candidate: 111,
       overlay_strategy_field_not_in_monolith: 6,
     });
     expect(
@@ -196,14 +197,29 @@ describe("compiled hint index pilot report", () => {
         field: "strategicNotes",
       }),
     );
-    expect(report.migrationCandidates.length).toBe(50);
-    expect(report.generatedFactCandidates.length).toBe(50);
-    expect(report.overlayCandidates).toEqual([]);
+    expect(report.migrationCandidates.length).toBe(61);
+    expect(report.generatedFactCandidates.length).toBe(61);
+    expect(
+      report.overlayCandidates.map((candidate) => candidate.cardId),
+    ).toEqual([
+      "onr_v1_008_boardwalk",
+      "onr_v1_024_expert-schedule-analyzer",
+      "onr_v1_032_i-spy",
+      "onr_v1_041_microtech-ai-interface",
+      "onr_v1_042_mouse",
+      "onr_v1_058_seeya",
+      "onr_v1_062_shredder-uplink-protocol",
+      "onr_v1_065_smarteye",
+    ]);
   });
 
   it("keeps Self-Modifying Code out of semantic review after install-discount cleanup", () => {
     const report = readReport();
-    expect(report.reviewCandidates).toEqual([]);
+    expect(
+      report.reviewCandidates.some(
+        (candidate) => candidate.cardId === "onr_v1_059_self-modifying-code",
+      ),
+    ).toBe(false);
     const selfModifyingCode = report.cards.find(
       (card) => card.cardId === "onr_v1_059_self-modifying-code",
     );

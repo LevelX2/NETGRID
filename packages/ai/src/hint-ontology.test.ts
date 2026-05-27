@@ -119,6 +119,34 @@ describe("AI hint ontology validation", () => {
     expect(result.errors).toEqual([]);
   });
 
+  it("accepts read-only central information and expose effect kinds", () => {
+    const result = validateAiHintOntologyFields({
+      effects: [
+        {
+          kind: "hq_info",
+          timing: "on_access",
+          scope: "hq",
+          resource: "cards",
+        },
+        {
+          kind: "expose_info",
+          timing: "action",
+          scope: "installed_card",
+        },
+        {
+          kind: "ice_trash",
+          timing: "during_run",
+          scope: "ice",
+        },
+      ],
+      conditions: [
+        { kind: "requires_accessed_card" },
+        { kind: "requires_during_run" },
+      ],
+    });
+    expect(result.errors).toEqual([]);
+  });
+
   it("rejects an unknown effect kind", () => {
     const result = validateAiHintOntologyFields({
       effects: [

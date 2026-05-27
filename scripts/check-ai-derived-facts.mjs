@@ -28,6 +28,8 @@ const KNOWN_EFFECT_KINDS = new Set([
   "trash_credit",
   "multiaccess",
   "topdeck_info",
+  "hq_info",
+  "expose_info",
   "zone_shuffle",
   "extra_action",
   "counter_economy",
@@ -38,6 +40,7 @@ const KNOWN_EFFECT_KINDS = new Set([
   "install_discount",
   "rez_discount",
   "program_trash",
+  "ice_trash",
   "hardware_trash",
   "resource_trash",
   "tag_punish_payoff",
@@ -800,17 +803,173 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
+  if (/kind:\s*"pre_access_rd_cut"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "zone_shuffle",
+      timing: "on_access",
+      scope: "rnd",
+      resource: "cards",
+      source: "implementation.accessHooks.pre_access_rd_cut",
+    });
+    addEffect(facts, {
+      kind: "topdeck_info",
+      timing: "on_access",
+      scope: "rnd",
+      resource: "cards",
+      source: "implementation.accessHooks.pre_access_rd_cut.context",
+    });
+    addCondition(facts, {
+      kind: "requires_accessed_card",
+      source: "implementation.accessHooks.pre_access_rd_cut",
+    });
+    facts.derivationNotes.push(
+      "Microtech AI Interface is represented as R&D top manipulation context only; generated facts do not reveal the actual hidden R&D order.",
+    );
+  }
+
+  if (/kind:\s*"post_access_private_look"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "hq_info",
+      timing: "on_access",
+      scope: /lookZone:\s*"hq"/.test(implementationText) ? "hq" : "server",
+      resource: "cards",
+      source: "implementation.accessHooks.post_access_private_look",
+    });
+    addCondition(facts, {
+      kind: "requires_accessed_card",
+      source: "implementation.accessHooks.post_access_private_look",
+    });
+    facts.derivationNotes.push(
+      "Post-access HQ information is represented as a context-gated information effect; generated facts do not include hidden HQ card identities.",
+    );
+  }
+
   if (/successfulRunAccessReplacement/.test(implementationText)) {
+    const successfulRunTarget = centralServerTarget(implementationText);
+    const replacementIsPrivateRndLook = /private_look_top_rd/.test(
+      implementationText,
+    );
     addEffect(facts, {
       kind: "access_replacement",
       timing: "successful_run",
-      scope: "rnd",
+      scope: replacementIsPrivateRndLook ? "rnd" : successfulRunTarget,
       source: "implementation.successfulRunAccessReplacement",
     });
     addCondition(facts, {
       kind: "requires_successful_run",
       source: "implementation.successfulRunAccessReplacement",
     });
+    if (/successfulRunRunnerCreditGain/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "economy",
+        timing: "successful_run",
+        scope: "runner",
+        resource: "credits",
+        amount: propertyNumber(
+          implementationText,
+          "successfulRunRunnerCreditGain",
+        ),
+        source: "implementation.successfulRunRunnerCreditGain",
+      });
+    }
+    if (/successfulRunRunnerTagGain/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "tag",
+        timing: "successful_run",
+        scope: "runner",
+        resource: "tags",
+        amount: propertyNumber(
+          implementationText,
+          "successfulRunRunnerTagGain",
+        ),
+        source: "implementation.successfulRunRunnerTagGain",
+      });
+    }
+  }
+
+  if (/accessCount:\s*[2-9]/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "multiaccess",
+      timing: "successful_run",
+      scope: centralServerTarget(implementationText),
+      resource: "cards",
+      amount: propertyNumber(implementationText, "accessCount"),
+      source: "implementation.effect.make_run.accessCount",
+    });
+    addCondition(facts, {
+      kind: "requires_successful_run",
+      source: "implementation.effect.make_run.accessCount",
+    });
+  }
+
+  if (/accessServerOverride:\s*"hq"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "access_replacement",
+      timing: "successful_run",
+      scope: "hq",
+      source: "implementation.effect.make_run.accessServerOverride",
+    });
+    addCondition(facts, {
+      kind: "requires_successful_run",
+      source: "implementation.effect.make_run.accessServerOverride",
+    });
+  }
+
+  if (/random_reveal_hq_cards_per_two_counters/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "hq_info",
+      timing: "start_of_turn",
+      scope: "hq",
+      resource: "cards",
+      source: "implementation.virusCounter.startOfRunnerTurn.random_reveal_hq",
+    });
+    addCondition(facts, {
+      kind: "requires_successful_run",
+      source: "implementation.virusCounter.addOnSuccessfulRun.hq",
+    });
+    facts.derivationNotes.push(
+      "Boardwalk HQ reveal is context-gated by public counters; generated facts do not include hidden HQ card identities.",
+    );
+  }
+
+  if (/kind:\s*"expose_installed_card"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "expose_info",
+      timing: "action",
+      scope: "installed_card",
+      source: "implementation.effect.expose_installed_card",
+    });
+  }
+
+  if (/i_spy_successful_run_fort_counter_expose/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "expose_info",
+      timing: "successful_run",
+      scope: "fort",
+      source: "implementation.runnerUtilityLongtail.i_spy_expose",
+    });
+    addCondition(facts, {
+      kind: "requires_successful_run",
+      source: "implementation.runnerUtilityLongtail.i_spy_expose",
+    });
+  }
+
+  if (/approach_ice_expose_then_jack_out_before_rez/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "expose_info",
+      timing: "encounter",
+      scope: "ice",
+      source:
+        "implementation.runEncounterInterventions.approach_ice_expose_then_jack_out_before_rez",
+    });
+    addCondition(facts, {
+      kind: "requires_during_run",
+      source:
+        "implementation.runEncounterInterventions.approach_ice_expose_then_jack_out_before_rez",
+    });
+    facts.derivationNotes.push(
+      "Smarteye expose-before-rez information is encounter context only; generated facts do not include hidden ICE identity before the legal effect.",
+    );
   }
 
   if (/run_duration_/.test(implementationText)) {
@@ -1157,6 +1316,13 @@ function isEmployeeEmpowermentStartOfTurnDraw(card, implementationText) {
       implementationText,
     )
   );
+}
+
+function centralServerTarget(implementationText) {
+  if (/server:\s*"hq"/.test(implementationText)) return "hq";
+  if (/server:\s*"rd"/.test(implementationText)) return "rnd";
+  if (/server:\s*"archives"/.test(implementationText)) return "archives";
+  return "server";
 }
 
 function addEffect(facts, effect) {
@@ -1690,6 +1856,11 @@ function amountNear(text, kind) {
   const match = text.match(
     new RegExp(`kind:\\s*"${kind}"[\\s\\S]{0,240}?amount:\\s*(\\d+)`),
   );
+  return match ? Number(match[1]) : undefined;
+}
+
+function propertyNumber(text, field) {
+  const match = text.match(new RegExp(`${field}:\\s*(\\d+)`));
   return match ? Number(match[1]) : undefined;
 }
 

@@ -14,23 +14,23 @@
     "activeHints": "data/ai/ai-card-hints-active.json"
   },
   "mode": "read-only prioritization; no active hint migration, no runtime compile, no planner or consumer binding",
-  "candidateCount": 50,
+  "candidateCount": 61,
   "priorityCounts": {
     "P0": 13,
-    "P1": 33,
+    "P1": 44,
     "P2": 4,
     "P3": 0
   },
   "fieldCategoryCounts": {
-    "generated_with_board_context": 45,
-    "generated_with_descriptor_limitations": 11,
-    "legacy_keep_for_compat": 50,
+    "generated_with_board_context": 56,
+    "generated_with_descriptor_limitations": 18,
+    "legacy_keep_for_compat": 61,
     "overlay_only": 6,
-    "safe_generated_now": 43
+    "safe_generated_now": 54
   },
   "riskCounts": {
-    "low": 27,
-    "medium": 23,
+    "low": 29,
+    "medium": 32,
     "high": 0
   },
   "batchPlan": [
@@ -90,11 +90,9 @@
         "onr_v1_007_blink",
         "onr_v1_014_codecracker",
         "onr_v1_016_cyfermaster",
-        "onr_v1_017_deep-thought",
         "onr_v1_019_dropp",
         "onr_v1_040_loony-goon",
         "onr_v1_047_pile-driver",
-        "onr_v1_050_r-and-d-protocol-files",
         "onr_v1_052_raffles",
         "onr_v1_054_raptor",
         "onr_v1_055_reflector",
@@ -112,6 +110,25 @@
         "onr_v1_363_olivia-salazar",
         "onr_v1_367_rio-de-janeiro-city-grid",
         "onr_v1_370_tesseract-fort-construction"
+      ]
+    },
+    {
+      "batch": 6,
+      "title": "Runner info, central pressure and access replacement",
+      "cardIds": [
+        "onr_v1_008_boardwalk",
+        "onr_v1_017_deep-thought",
+        "onr_v1_024_expert-schedule-analyzer",
+        "onr_v1_032_i-spy",
+        "onr_v1_041_microtech-ai-interface",
+        "onr_v1_042_mouse",
+        "onr_v1_050_r-and-d-protocol-files",
+        "onr_v1_058_seeya",
+        "onr_v1_062_shredder-uplink-protocol",
+        "onr_v1_065_smarteye",
+        "onr_v1_081_custodial-position",
+        "onr_v1_084_edited-shipping-manifests",
+        "onr_v1_085_executive-wiretaps"
       ]
     }
   ],
@@ -325,6 +342,53 @@
       "derivedRationale": "Universal random breaker coverage and once-per-subroutine/random-failure context are directly represented; generated facts do not imply deterministic break safety."
     },
     {
+      "cardId": "onr_v1_008_boardwalk",
+      "title": "Boardwalk",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_successful_run",
+        "effect:hq_info"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": [
+        "conditions",
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 6,
+      "rationale": "HQ-info counters are derivable, while random HQ reveal and virus-counter thresholds remain context-gated.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Successful-HQ-run counters and start-turn random HQ reveal are mechanically derivable as gated HQ-info context; generated facts do not expose hidden HQ identities."
+    },
+    {
       "cardId": "onr_v1_014_codecracker",
       "title": "Codecracker",
       "side": "runner",
@@ -468,7 +532,7 @@
       },
       "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
       "migrationReadiness": "ready",
-      "recommendedMigrationBatch": 5,
+      "recommendedMigrationBatch": 6,
       "rationale": "Topdeck information is mechanically derivable, but the strategic R&D pressure value stays overlay-only.",
       "doNotMigrateFields": [
         "aiSupportStatus",
@@ -536,6 +600,100 @@
         "valueHints"
       ],
       "derivedRationale": "Universal breaker coverage and ends-run side effect are directly represented; catalog title uses the printed trademark suffix."
+    },
+    {
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "title": "Expert Schedule Analyzer",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_accessed_card",
+        "effect:hq_info"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": [
+        "conditions",
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 6,
+      "rationale": "Post-access HQ information is derivable, but generated facts must not contain hidden HQ identities.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Post-access HQ look is mechanically derivable as access-context information; generated facts never contain hidden HQ card identities."
+    },
+    {
+      "cardId": "onr_v1_032_i-spy",
+      "title": "I Spy",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_successful_run",
+        "effect:expose_info"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": [
+        "conditions",
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 6,
+      "rationale": "Successful-run expose counter is derivable as remote information; target choice and board visibility remain context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Successful-run fort counter exposing installed cards is mechanically derivable as remote information; actual targets stay board-context."
     },
     {
       "cardId": "onr_v1_037_japanese-water-torture",
@@ -699,6 +857,103 @@
         "valueHints"
       ],
       "derivedRationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_accessed_card",
+        "effect:topdeck_info",
+        "effect:zone_shuffle"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 6,
+      "rationale": "R&D top manipulation is mechanically derivable, but generated facts must not become hidden R&D order knowledge.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "R&D pre-access cut/top manipulation is mechanically derivable as hidden-zone context; generated facts do not reveal actual R&D order or create central-run priority."
+    },
+    {
+      "cardId": "onr_v1_042_mouse",
+      "title": "Mouse",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "effect:expose_info"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 6,
+      "rationale": "Activated installed-card expose is a stable mechanical information fact.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Activated expose of a card inside a data fort is mechanically derivable as installed-card information, not hidden-info leakage."
     },
     {
       "cardId": "onr_v1_043_mystery-box",
@@ -906,7 +1161,7 @@
       },
       "recommendedNextAction": "ready_for_generated_mechanical_fields",
       "migrationReadiness": "ready",
-      "recommendedMigrationBatch": 5,
+      "recommendedMigrationBatch": 6,
       "rationale": "Topdeck info and access replacement are mechanical, but the successful-run condition must remain LegalAction-gated.",
       "doNotMigrateFields": [
         "aiSupportStatus",
@@ -1176,6 +1431,49 @@
       "derivedRationale": "Restricted hosted trash-credit source is directly represented."
     },
     {
+      "cardId": "onr_v1_058_seeya",
+      "title": "SeeYa",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "low",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "effect:expose_info"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 6,
+      "rationale": "Activated installed-card expose is a stable mechanical information fact with payment context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Activated expose of an installed card is mechanically derivable as installed-card information, not a strategic remote-contest decision."
+    },
+    {
       "cardId": "onr_v1_059_self-modifying-code",
       "title": "Self-Modifying Code",
       "side": "runner",
@@ -1290,6 +1588,100 @@
         "valueHints"
       ],
       "derivedRationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_062_shredder-uplink-protocol",
+      "title": "Shredder Uplink Protocol",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_successful_run",
+        "effect:access_replacement"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": [
+        "conditions",
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 6,
+      "rationale": "Archive-run to HQ-success access replacement is derivable and must stay distinct from normal Archives access.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Archive run access override to successful HQ-run context is mechanically derivable as central access replacement, not normal Archives access."
+    },
+    {
+      "cardId": "onr_v1_065_smarteye",
+      "title": "Smarteye",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "effect:expose_info"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": [
+        "conditions",
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 6,
+      "rationale": "Approach-ICE expose is derivable, but actual encounter timing and hidden ICE identity remain LegalAction/runtime context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Approach-unrezzed-ICE expose before rez is mechanically derivable as run-context information; generated facts do not reveal ICE identity before the legal effect."
     },
     {
       "cardId": "onr_v1_070_tinweasel",
@@ -1498,6 +1890,162 @@
         "valueHints"
       ],
       "derivedRationale": "Wall breaker coverage and break/pump costs are directly represented in CardImplementation icebreaker abilities."
+    },
+    {
+      "cardId": "onr_v1_081_custodial-position",
+      "title": "Custodial Position",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_successful_run",
+        "effect:multiaccess"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 6,
+      "rationale": "R&D multiaccess is mechanically derivable, while access value and hidden-zone state remain runtime/consumer context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "R&D run event and additional R&D access count are mechanically derivable; actual access value remains board/hidden-zone context."
+    },
+    {
+      "cardId": "onr_v1_084_edited-shipping-manifests",
+      "title": "Edited Shipping Manifests",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_successful_run",
+        "effect:access_replacement",
+        "effect:economy",
+        "effect:tag"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 6,
+      "rationale": "HQ access replacement, economy and self-tag are derivable, but must not be normalized to normal access or automatic value.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "HQ access replacement, runner credit gain and self-tag are mechanically derivable; generated facts do not value the central pressure line."
+    },
+    {
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "title": "Executive Wiretaps",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedMechanicalFacts": [
+        "condition:requires_successful_run",
+        "effect:multiaccess"
+      ],
+      "monolithFields": [
+        "effects",
+        "conditions"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects"
+      ],
+      "generatedOnlyFields": [
+        "effects"
+      ],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 6,
+      "rationale": "HQ multiaccess is mechanically derivable, while successful-run/access legality remains engine context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "HQ run event and additional HQ access count are mechanically derivable; strategic HQ pressure remains overlay/consumer context."
     },
     {
       "cardId": "onr_v1_192_corporate-boon",
