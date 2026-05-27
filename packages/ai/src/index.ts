@@ -29,8 +29,10 @@ import deckFormatProfiles130Data from "../../../data/decks/deck-format-profiles-
 import deckSnapshots08Data from "../../../data/decks/deck-snapshots-0.8.json";
 import exploitFixtures143Data from "../../../data/scenarios/ai-v143-exploit-regression-fixtures.json";
 import {
+  assessCorpFutureRunIcePlacement,
   chooseCorpPlanAction,
   classifyCorpScoredAgendaAbility,
+  classifyCorpFutureRunIceDefinitionId,
   hasCorpPlanAction,
 } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
@@ -116,7 +118,9 @@ export {
 export {
   chooseCorpPlanAction,
   chooseCorpPlanDecision,
+  assessCorpFutureRunIcePlacement,
   classifyCorpScoredAgendaAbility,
+  classifyCorpFutureRunIceDefinitionId,
   classifyScoredAgendaActionFromOntology,
   corpPlanUsesOnlyAiSupportedCards,
   evaluateAgendaRisk,
@@ -829,6 +833,27 @@ export type AiMatchProgressionMetrics = {
   corpOneIceRemoteCheaplyContestable: number;
   corpRemoteIceConsolidationOpportunity: number;
   corpRemoteIceConsolidationTaken: number;
+  corpFutureRunIceInstallOpportunities: number;
+  corpFutureRunIceInstalled: number;
+  corpFutureRunIceInstalledAsInnermost: number;
+  corpFutureRunIceInstalledAsOutermost: number;
+  corpFutureRunIceInstalledWithLaterIce: number;
+  corpFutureRunIceInstalledWithoutLaterIce: number;
+  corpFutureRunIceInstalledOnEmptyServer: number;
+  corpFutureRunIceInstalledFirstOnEmptyServer: number;
+  corpFutureRunIceInstalledAfterInnerIceExists: number;
+  corpFutureRunIceInstalledAsDeadEffect: number;
+  corpFutureRunIceInstalledAsLiveEffect: number;
+  corpNextIceEffectInstalledLast: number;
+  corpIceOrderFutureEffectDead: number;
+  corpIceOrderFutureEffectLive: number;
+  corpMultiIceInstallOrderFutureEffectDead: number;
+  corpMultiIceInstallOrderOptimized: number;
+  corpBallAndChainInstalledInnermost: number;
+  corpBallAndChainInstalledWithoutLaterIce: number;
+  corpBallAndChainInstalledWithLaterIce: number;
+  corpCanisInstalledWithoutLaterIce: number;
+  corpBolterOrDataDartsInstalledWithoutNextIce: number;
   corpRemoteCreatedThenNoScorePath: number;
   corpRemoteCreatedThenAgendaInstalledWithin3: number;
   corpRemoteCreatedThenAssetInstalledWithin3: number;
@@ -2006,6 +2031,30 @@ export type AiSimulationSummary = {
     fallbackUsed: boolean;
     timeoutUsed: boolean;
     targetServerId?: string;
+    corpFutureRunIceInstallOpportunity?: boolean;
+    corpFutureRunIceInstalled?: boolean;
+    corpFutureRunIceClass?:
+      | "ball_and_chain"
+      | "canis"
+      | "bolter_or_data_darts"
+      | "future_run_ice";
+    corpFutureRunIceInstalledAsInnermost?: boolean;
+    corpFutureRunIceInstalledAsOutermost?: boolean;
+    corpFutureRunIceInstalledWithLaterIce?: boolean;
+    corpFutureRunIceInstalledWithoutLaterIce?: boolean;
+    corpFutureRunIceInstalledOnEmptyServer?: boolean;
+    corpFutureRunIceInstalledFirstOnEmptyServer?: boolean;
+    corpFutureRunIceInstalledAfterInnerIceExists?: boolean;
+    corpFutureRunIceInstalledAsDeadEffect?: boolean;
+    corpFutureRunIceInstalledAsLiveEffect?: boolean;
+    corpNextIceEffectInstalledLast?: boolean;
+    corpIceOrderFutureEffectDead?: boolean;
+    corpIceOrderFutureEffectLive?: boolean;
+    corpBallAndChainInstalledInnermost?: boolean;
+    corpBallAndChainInstalledWithoutLaterIce?: boolean;
+    corpBallAndChainInstalledWithLaterIce?: boolean;
+    corpCanisInstalledWithoutLaterIce?: boolean;
+    corpBolterOrDataDartsInstalledWithoutNextIce?: boolean;
     advancementCountersAdded?: number;
     scoreActionsAvailable?: number;
     targetCardType?: ProgressionCardTargetType;
@@ -2955,6 +3004,10 @@ export function simulateAiGame(
       stateBeforeAction,
       result.state,
     );
+    const corpFutureRunIce = corpFutureRunIceDiagnosticsForSimulationAction(
+      input,
+      action,
+    );
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
@@ -3002,6 +3055,7 @@ export function simulateAiGame(
       ...runnerCoverage,
       ...runnerEconomySetup,
       ...tagPunishDiagnostics,
+      ...corpFutureRunIce,
       ...(typeof action.payload?.placement === "string"
         ? { installPlacement: action.payload.placement }
         : {}),
@@ -4881,6 +4935,42 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.baseline.corpRemoteIceConsolidationTaken,
       benchmark.candidate.corpRemoteIceConsolidationTaken,
       benchmark.delta.corpRemoteIceConsolidationTaken,
+    ],
+    [
+      "corpFutureRunIceInstallOpportunities",
+      benchmark.baseline.corpFutureRunIceInstallOpportunities,
+      benchmark.candidate.corpFutureRunIceInstallOpportunities,
+      benchmark.delta.corpFutureRunIceInstallOpportunities,
+    ],
+    [
+      "corpFutureRunIceInstalled",
+      benchmark.baseline.corpFutureRunIceInstalled,
+      benchmark.candidate.corpFutureRunIceInstalled,
+      benchmark.delta.corpFutureRunIceInstalled,
+    ],
+    [
+      "corpFutureRunIceInstalledAsDeadEffect",
+      benchmark.baseline.corpFutureRunIceInstalledAsDeadEffect,
+      benchmark.candidate.corpFutureRunIceInstalledAsDeadEffect,
+      benchmark.delta.corpFutureRunIceInstalledAsDeadEffect,
+    ],
+    [
+      "corpFutureRunIceInstalledAsLiveEffect",
+      benchmark.baseline.corpFutureRunIceInstalledAsLiveEffect,
+      benchmark.candidate.corpFutureRunIceInstalledAsLiveEffect,
+      benchmark.delta.corpFutureRunIceInstalledAsLiveEffect,
+    ],
+    [
+      "corpMultiIceInstallOrderOptimized",
+      benchmark.baseline.corpMultiIceInstallOrderOptimized,
+      benchmark.candidate.corpMultiIceInstallOrderOptimized,
+      benchmark.delta.corpMultiIceInstallOrderOptimized,
+    ],
+    [
+      "corpBallAndChainInstalledWithoutLaterIce",
+      benchmark.baseline.corpBallAndChainInstalledWithoutLaterIce,
+      benchmark.candidate.corpBallAndChainInstalledWithoutLaterIce,
+      benchmark.delta.corpBallAndChainInstalledWithoutLaterIce,
     ],
     [
       "corpRemotePortfolioOverExpanded",
@@ -11307,6 +11397,27 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpOneIceRemoteCheaplyContestable",
   "corpRemoteIceConsolidationOpportunity",
   "corpRemoteIceConsolidationTaken",
+  "corpFutureRunIceInstallOpportunities",
+  "corpFutureRunIceInstalled",
+  "corpFutureRunIceInstalledAsInnermost",
+  "corpFutureRunIceInstalledAsOutermost",
+  "corpFutureRunIceInstalledWithLaterIce",
+  "corpFutureRunIceInstalledWithoutLaterIce",
+  "corpFutureRunIceInstalledOnEmptyServer",
+  "corpFutureRunIceInstalledFirstOnEmptyServer",
+  "corpFutureRunIceInstalledAfterInnerIceExists",
+  "corpFutureRunIceInstalledAsDeadEffect",
+  "corpFutureRunIceInstalledAsLiveEffect",
+  "corpNextIceEffectInstalledLast",
+  "corpIceOrderFutureEffectDead",
+  "corpIceOrderFutureEffectLive",
+  "corpMultiIceInstallOrderFutureEffectDead",
+  "corpMultiIceInstallOrderOptimized",
+  "corpBallAndChainInstalledInnermost",
+  "corpBallAndChainInstalledWithoutLaterIce",
+  "corpBallAndChainInstalledWithLaterIce",
+  "corpCanisInstalledWithoutLaterIce",
+  "corpBolterOrDataDartsInstalledWithoutNextIce",
   "corpRemoteCreatedThenNoScorePath",
   "corpRemoteCreatedThenAgendaInstalledWithin3",
   "corpRemoteCreatedThenAssetInstalledWithin3",
@@ -12141,6 +12252,9 @@ export function summarizeMatchProgressionMetrics(
   const runnerKnownPathRunEntries = runnerRuns.filter(
     (entry) => typeof entry.runKnownPathCostAtStart === "number",
   );
+  const corpFutureRunIceEntries = actionSequence.filter(
+    (entry) => entry.corpFutureRunIceInstalled === true,
+  );
   const hqMemoryEntries = actionSequence.filter(
     (entry) =>
       entry.side === "runner" && typeof entry.hqKnownCards === "number",
@@ -12187,6 +12301,67 @@ export function summarizeMatchProgressionMetrics(
     ...breakerOntologyMetrics,
     ...remoteRoleOntologyMetrics,
     ...runnerSetupAttributionMetrics,
+    corpFutureRunIceInstallOpportunities: actionSequence.filter(
+      (entry) => entry.corpFutureRunIceInstallOpportunity === true,
+    ).length,
+    corpFutureRunIceInstalled: corpFutureRunIceEntries.length,
+    corpFutureRunIceInstalledAsInnermost: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledAsInnermost === true,
+    ).length,
+    corpFutureRunIceInstalledAsOutermost: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledAsOutermost === true,
+    ).length,
+    corpFutureRunIceInstalledWithLaterIce: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledWithLaterIce === true,
+    ).length,
+    corpFutureRunIceInstalledWithoutLaterIce: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledWithoutLaterIce === true,
+    ).length,
+    corpFutureRunIceInstalledOnEmptyServer: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledOnEmptyServer === true,
+    ).length,
+    corpFutureRunIceInstalledFirstOnEmptyServer: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledFirstOnEmptyServer === true,
+    ).length,
+    corpFutureRunIceInstalledAfterInnerIceExists:
+      corpFutureRunIceEntries.filter(
+        (entry) => entry.corpFutureRunIceInstalledAfterInnerIceExists === true,
+      ).length,
+    corpFutureRunIceInstalledAsDeadEffect: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledAsDeadEffect === true,
+    ).length,
+    corpFutureRunIceInstalledAsLiveEffect: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledAsLiveEffect === true,
+    ).length,
+    corpNextIceEffectInstalledLast: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpNextIceEffectInstalledLast === true,
+    ).length,
+    corpIceOrderFutureEffectDead: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpIceOrderFutureEffectDead === true,
+    ).length,
+    corpIceOrderFutureEffectLive: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpIceOrderFutureEffectLive === true,
+    ).length,
+    corpMultiIceInstallOrderFutureEffectDead:
+      countCorpMultiIceInstallOrderFutureEffectDead(actionSequence),
+    corpMultiIceInstallOrderOptimized:
+      countCorpMultiIceInstallOrderOptimized(actionSequence),
+    corpBallAndChainInstalledInnermost: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpBallAndChainInstalledInnermost === true,
+    ).length,
+    corpBallAndChainInstalledWithoutLaterIce: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpBallAndChainInstalledWithoutLaterIce === true,
+    ).length,
+    corpBallAndChainInstalledWithLaterIce: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpBallAndChainInstalledWithLaterIce === true,
+    ).length,
+    corpCanisInstalledWithoutLaterIce: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpCanisInstalledWithoutLaterIce === true,
+    ).length,
+    corpBolterOrDataDartsInstalledWithoutNextIce:
+      corpFutureRunIceEntries.filter(
+        (entry) => entry.corpBolterOrDataDartsInstalledWithoutNextIce === true,
+      ).length,
     advancedAgendaSteals,
     advancedAgendaStealsFromRemote,
     advancedAgendaStealsFromCentral,
@@ -19858,6 +20033,59 @@ function isRemoteServerTarget(serverId: string | undefined): boolean {
   return serverId === "new_remote" || serverId?.startsWith("remote_") === true;
 }
 
+function countCorpMultiIceInstallOrderFutureEffectDead(
+  sequence: AiSimulationSummary["actionSequence"],
+): number {
+  return sequence.filter((entry, index) => {
+    if (
+      entry.side !== "corp" ||
+      entry.actionType !== "install_card" ||
+      entry.installPlacement !== "ice" ||
+      entry.corpFutureRunIceInstalledAsDeadEffect !== true ||
+      !entry.targetServerId ||
+      !entry.turnNumber
+    )
+      return false;
+    return sequence
+      .slice(index + 1)
+      .some(
+        (later) =>
+          later.side === "corp" &&
+          later.turnNumber === entry.turnNumber &&
+          later.actionType === "install_card" &&
+          later.installPlacement === "ice" &&
+          later.targetServerId === entry.targetServerId,
+      );
+  }).length;
+}
+
+function countCorpMultiIceInstallOrderOptimized(
+  sequence: AiSimulationSummary["actionSequence"],
+): number {
+  return sequence.filter((entry, index) => {
+    if (
+      entry.side !== "corp" ||
+      entry.actionType !== "install_card" ||
+      entry.installPlacement !== "ice" ||
+      entry.corpFutureRunIceInstalledAsLiveEffect !== true ||
+      !entry.targetServerId ||
+      !entry.turnNumber
+    )
+      return false;
+    return sequence
+      .slice(0, index)
+      .some(
+        (previous) =>
+          previous.side === "corp" &&
+          previous.turnNumber === entry.turnNumber &&
+          previous.actionType === "install_card" &&
+          previous.installPlacement === "ice" &&
+          previous.targetServerId === entry.targetServerId &&
+          previous.corpFutureRunIceInstalled !== true,
+      );
+  }).length;
+}
+
 function isCorpRemoteAdvancementProgress(
   entry: AiSimulationSummary["actionSequence"][number],
 ): boolean {
@@ -19973,6 +20201,72 @@ type RunnerPressureReadyForMetrics = {
     | "no_valuable_target"
   >;
 };
+
+function corpFutureRunIceDiagnosticsForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  if (input.side !== "corp" || action.side !== "corp") return {};
+  const opportunity = input.legalActions.some(
+    (candidate) =>
+      candidate.side === "corp" &&
+      candidate.type === "install_card" &&
+      candidate.payload?.placement === "ice" &&
+      Boolean(
+        classifyCorpFutureRunIceDefinitionId(
+          sourceDefinitionIdForSimulationAction(input, candidate),
+        ),
+      ),
+  );
+  const assessment = assessCorpFutureRunIcePlacement(input, action);
+  if (!assessment) {
+    return opportunity ? { corpFutureRunIceInstallOpportunity: true } : {};
+  }
+  return {
+    ...(opportunity ? { corpFutureRunIceInstallOpportunity: true } : {}),
+    corpFutureRunIceInstalled: true,
+    corpFutureRunIceClass: assessment.futureRunIceClass,
+    ...(assessment.installedOnEmptyServer
+      ? {
+          corpFutureRunIceInstalledOnEmptyServer: true,
+          corpFutureRunIceInstalledFirstOnEmptyServer: true,
+          corpFutureRunIceInstalledAsInnermost: true,
+          corpFutureRunIceInstalledWithoutLaterIce: true,
+          corpFutureRunIceInstalledAsDeadEffect: true,
+          corpIceOrderFutureEffectDead: true,
+        }
+      : {
+          corpFutureRunIceInstalledAfterInnerIceExists: true,
+          corpFutureRunIceInstalledWithLaterIce: true,
+          corpFutureRunIceInstalledAsLiveEffect: true,
+          corpIceOrderFutureEffectLive: true,
+        }),
+    corpFutureRunIceInstalledAsOutermost: true,
+    ...(assessment.deadEffect &&
+    (assessment.futureRunIceClass === "bolter_or_data_darts" ||
+      assessment.futureRunIceClass === "future_run_ice")
+      ? { corpNextIceEffectInstalledLast: true }
+      : {}),
+    ...(assessment.futureRunIceClass === "ball_and_chain" &&
+    assessment.deadEffect
+      ? {
+          corpBallAndChainInstalledInnermost: true,
+          corpBallAndChainInstalledWithoutLaterIce: true,
+        }
+      : {}),
+    ...(assessment.futureRunIceClass === "ball_and_chain" &&
+    assessment.liveEffect
+      ? { corpBallAndChainInstalledWithLaterIce: true }
+      : {}),
+    ...(assessment.futureRunIceClass === "canis" && assessment.deadEffect
+      ? { corpCanisInstalledWithoutLaterIce: true }
+      : {}),
+    ...(assessment.futureRunIceClass === "bolter_or_data_darts" &&
+    assessment.deadEffect
+      ? { corpBolterOrDataDartsInstalledWithoutNextIce: true }
+      : {}),
+  };
+}
 
 function runnerBreakerCoverageDiagnosticsForSimulationAction(
   input: AiDecisionInput,

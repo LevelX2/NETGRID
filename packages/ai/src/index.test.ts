@@ -30,6 +30,7 @@ import {
   buildDeckDoctrineProfile,
   buildObservedFacts,
   buildAiDecisionInput,
+  assessCorpFutureRunIcePlacement,
   chooseAiAction,
   chooseCorpBaselineAction,
   chooseCorpAction,
@@ -4143,6 +4144,269 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
     expect(debugText).toContain("installed_corp_economy_stored_credits:16");
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("does not install Ball and Chain first on an empty remote when direct ICE is also installable", () => {
+    const input = corpFutureIceOrderingInput("ai-corp-ball-empty-remote", [
+      "onr_v1_222_ball-and-chain",
+      "simple_barrier_ice",
+      "simple_code_gate_ice",
+    ]);
+    const remoteIceActions = input.legalActions.filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        [
+          "onr_v1_222_ball-and-chain",
+          "simple_barrier_ice",
+          "simple_code_gate_ice",
+        ].includes(sourceDefinitionFromInput(input, action) ?? ""),
+    );
+
+    expect(remoteIceActions.length).toBeGreaterThanOrEqual(2);
+    const ballAction = remoteIceActions.find(
+      (action) =>
+        sourceDefinitionFromInput(input, action) ===
+        "onr_v1_222_ball-and-chain",
+    );
+    expect(ballAction).toBeDefined();
+    const ballPlacement = assessCorpFutureRunIcePlacement(input, ballAction!);
+    expect(ballPlacement).toMatchObject({
+      installedOnEmptyServer: true,
+      deadEffect: true,
+    });
+    expect(ballPlacement?.directImpactAlternativeCount).toBeGreaterThanOrEqual(
+      2,
+    );
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: remoteIceActions,
+    });
+    const selected = remoteIceActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(sourceDefinitionFromInput(input, selected!)).not.toBe(
+      "onr_v1_222_ball-and-chain",
+    );
+    expect(decision.reasonCode).toBe("corp.plan.build_scoring_remote");
+  });
+
+  it("allows Ball and Chain as outer ICE on an already iced remote", () => {
+    const input = corpFutureIceOrderingInput(
+      "ai-corp-ball-outer-remote",
+      ["onr_v1_222_ball-and-chain"],
+      (state) => {
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+      },
+    );
+    const ballAction = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_222_ball-and-chain",
+    );
+
+    expect(ballAction).toBeDefined();
+    expect(assessCorpFutureRunIcePlacement(input, ballAction!)).toMatchObject({
+      existingIceCount: 1,
+      hasLaterIceAfterInstall: true,
+      liveEffect: true,
+    });
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [ballAction!],
+    });
+
+    expect(decision.actionId).toBe(ballAction!.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.build_scoring_remote");
+  });
+
+  it("prefers direct/direct/future order for a three-ICE remote build", () => {
+    const firstInput = corpFutureIceOrderingInput("ai-corp-three-ice-first", [
+      "onr_v1_222_ball-and-chain",
+      "simple_barrier_ice",
+      "simple_code_gate_ice",
+    ]);
+    const firstActions = firstInput.legalActions.filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        [
+          "onr_v1_222_ball-and-chain",
+          "simple_barrier_ice",
+          "simple_code_gate_ice",
+        ].includes(sourceDefinitionFromInput(firstInput, action) ?? ""),
+    );
+    const firstDecision = chooseCorpAction({
+      ...firstInput,
+      legalActions: firstActions,
+    });
+    const firstSelected = firstActions.find(
+      (action) => action.actionId === firstDecision.actionId,
+    );
+
+    expect(sourceDefinitionFromInput(firstInput, firstSelected!)).not.toBe(
+      "onr_v1_222_ball-and-chain",
+    );
+
+    const secondInput = corpFutureIceOrderingInput(
+      "ai-corp-three-ice-second",
+      ["onr_v1_222_ball-and-chain", "simple_code_gate_ice"],
+      (state) => {
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+      },
+    );
+    const secondActions = secondInput.legalActions.filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        ["onr_v1_222_ball-and-chain", "simple_code_gate_ice"].includes(
+          sourceDefinitionFromInput(secondInput, action) ?? "",
+        ),
+    );
+    const secondDecision = chooseCorpAction({
+      ...secondInput,
+      legalActions: secondActions,
+    });
+    const secondSelected = secondActions.find(
+      (action) => action.actionId === secondDecision.actionId,
+    );
+
+    expect(sourceDefinitionFromInput(secondInput, secondSelected!)).toBe(
+      "onr_v1_222_ball-and-chain",
+    );
+  });
+
+  it.each([
+    ["onr_v1_225_canis-major", "corpCanisInstalledWithoutLaterIce"],
+    ["onr_v1_226_canis-minor", "corpCanisInstalledWithoutLaterIce"],
+    [
+      "onr_v1_224_bolter-cluster",
+      "corpBolterOrDataDartsInstalledWithoutNextIce",
+    ],
+    ["onr_v1_234_data-darts", "corpBolterOrDataDartsInstalledWithoutNextIce"],
+  ])("diagnoses %s as dead on an empty remote", (definitionId, metric) => {
+    const input = corpFutureIceOrderingInput(
+      `ai-corp-future-empty-${definitionId}`,
+      [definitionId],
+    );
+    const action = input.legalActions.find(
+      (candidate) =>
+        candidate.type === "install_card" &&
+        candidate.payload?.placement === "ice" &&
+        candidate.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, candidate) === definitionId,
+    );
+
+    expect(action).toBeDefined();
+    expect(assessCorpFutureRunIcePlacement(input, action!)).toMatchObject({
+      installedOnEmptyServer: true,
+      deadEffect: true,
+    });
+
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary([
+        progressionAction("corp", 1, "install_card", "remote_1", 1, {
+          installPlacement: "ice",
+          corpFutureRunIceInstalled: true,
+          corpFutureRunIceInstalledAsDeadEffect: true,
+          corpFutureRunIceInstalledWithoutLaterIce: true,
+          corpIceOrderFutureEffectDead: true,
+          [metric]: true,
+        }),
+      ]),
+    ]);
+
+    expect(metrics.corpFutureRunIceInstalledAsDeadEffect).toBe(1);
+    expect(metrics[metric as keyof typeof metrics]).toBe(1);
+  });
+
+  it("continues to allow direct ETR ICE and emergency future ICE installs on empty remotes", () => {
+    const directInput = corpFutureIceOrderingInput(
+      "ai-corp-direct-empty-allowed",
+      ["simple_barrier_ice"],
+    );
+    const directAction = directInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(directInput, action) === "simple_barrier_ice",
+    );
+    expect(directAction).toBeDefined();
+    expect(
+      chooseCorpAction({ ...directInput, legalActions: [directAction!] })
+        .actionId,
+    ).toBe(directAction!.actionId);
+
+    const emergencyInput = corpFutureIceOrderingInput(
+      "ai-corp-future-emergency-empty",
+      ["onr_v1_222_ball-and-chain"],
+    );
+    const emergencyAction = emergencyInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(emergencyInput, action) ===
+          "onr_v1_222_ball-and-chain",
+    );
+    expect(emergencyAction).toBeDefined();
+    expect(
+      chooseCorpAction({ ...emergencyInput, legalActions: [emergencyAction!] })
+        .actionId,
+    ).toBe(emergencyAction!.actionId);
+  });
+
+  it("keeps Future ICE ordering diagnostics invariant to hidden Runner zones and sanitized", () => {
+    const first = corpFutureIceOrderingInput("ai-corp-future-hidden-a", [
+      "onr_v1_222_ball-and-chain",
+      "simple_barrier_ice",
+    ]);
+    const second = {
+      ...first,
+      seed: "ai-corp-future-hidden-b",
+    };
+    const narrow = (input: AiDecisionInput) => ({
+      ...input,
+      legalActions: input.legalActions.filter(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.placement === "ice" &&
+          action.payload?.serverId === "remote_1",
+      ),
+    });
+
+    const firstDecision = chooseCorpAction(narrow(first));
+    const secondDecision = chooseCorpAction(narrow(second));
+
+    expect(firstDecision.reasonCode).toBe(secondDecision.reasonCode);
+    expect(
+      sourceDefinitionFromInput(
+        first,
+        first.legalActions.find(
+          (action) => action.actionId === firstDecision.actionId,
+        )!,
+      ),
+    ).toBe(
+      sourceDefinitionFromInput(
+        second,
+        second.legalActions.find(
+          (action) => action.actionId === secondDecision.actionId,
+        )!,
+      ),
+    );
+    expect(JSON.stringify(firstDecision.decisionDebug)).not.toMatch(
+      /privatePayload|cardInstances|fullGameState/i,
+    );
   });
 
   it("keeps multiple installed Corp BBS economy actions source-bound above basic credit", () => {
@@ -19219,6 +19483,61 @@ function corpActionPhaseInput(
   let state = createGameAfterSetup({ seed });
   state = apply(state, "corp", (action) => action.type === "mandatory_draw");
   mutate(state);
+  return buildAiDecisionInput(state, "corp", {
+    difficulty: "normal",
+    profileId: "corp-ai-v1.4.0-normal",
+  });
+}
+
+function corpFutureIceOrderingInput(
+  seed: string,
+  hqDefinitionIds: string[],
+  mutate?: (state: GameState) => void,
+): AiDecisionInput {
+  let state = createGameAfterSetup({
+    seed,
+    baseline: CURRENT_RULES_BASELINE,
+    runnerDeck: {
+      id: `ai_corp_future_ice_runner_${seed}`,
+      name: "AI Corp Future ICE Ordering Runner Fixture",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "simple_fracter", quantity: 3 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    },
+    corpDeck: {
+      id: `ai_corp_future_ice_corp_${seed}`,
+      name: "AI Corp Future ICE Ordering Corp Fixture",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "simple_agenda", quantity: 6 },
+        { id: "simple_economy_operation", quantity: 6 },
+        { id: "simple_barrier_ice", quantity: 4 },
+        { id: "simple_code_gate_ice", quantity: 4 },
+        { id: "onr_v1_222_ball-and-chain", quantity: 2 },
+        { id: "onr_v1_224_bolter-cluster", quantity: 1 },
+        { id: "onr_v1_225_canis-major", quantity: 1 },
+        { id: "onr_v1_226_canis-minor", quantity: 1 },
+        { id: "onr_v1_234_data-darts", quantity: 1 },
+        { id: "onr_v1_242_fatal-attractor", quantity: 1 },
+        { id: "onr_v1_274_tutor", quantity: 1 },
+        { id: "onr_v1_276_viral-15", quantity: 1 },
+        { id: "onr_v1_277_virizz", quantity: 1 },
+      ],
+    },
+    agendaPointsToWin: 7,
+  });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  ensureRemoteServer(state, "remote_1");
+  state.corp.credits = 12;
+  state.corp.clicks = 3;
+  for (const definitionId of hqDefinitionIds) {
+    moveCorpCardToHq(state, definitionId);
+  }
+  mutate?.(state);
   return buildAiDecisionInput(state, "corp", {
     difficulty: "normal",
     profileId: "corp-ai-v1.4.0-normal",

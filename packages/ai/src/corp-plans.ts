@@ -126,6 +126,26 @@ export type CorpPlanEvaluatorResult = {
   evidence: string[];
 };
 
+export type CorpFutureRunIceClass =
+  | "ball_and_chain"
+  | "canis"
+  | "bolter_or_data_darts"
+  | "future_run_ice";
+
+export type CorpFutureRunIcePlacementAssessment = {
+  definitionId: string;
+  title: string;
+  futureRunIceClass: CorpFutureRunIceClass;
+  serverId: string;
+  existingIceCount: number;
+  installedOnEmptyServer: boolean;
+  installedAsOutermost: boolean;
+  hasLaterIceAfterInstall: boolean;
+  deadEffect: boolean;
+  liveEffect: boolean;
+  directImpactAlternativeCount: number;
+};
+
 type CorpPlanProfile = {
   profileId: string;
   legacyProfileIds: string[];
@@ -437,6 +457,17 @@ export type CorpEvaluationContext = {
 
 const AI_HINTS = createAiHintsByCard();
 const CORP_PLAN_PROFILES = corpPlanProfilesData.profiles as CorpPlanProfile[];
+const CORP_FUTURE_RUN_ICE_CLASSES: Record<string, CorpFutureRunIceClass> = {
+  "onr_v1_222_ball-and-chain": "ball_and_chain",
+  "onr_v1_224_bolter-cluster": "bolter_or_data_darts",
+  "onr_v1_225_canis-major": "canis",
+  "onr_v1_226_canis-minor": "canis",
+  "onr_v1_234_data-darts": "bolter_or_data_darts",
+  "onr_v1_242_fatal-attractor": "future_run_ice",
+  onr_v1_274_tutor: "future_run_ice",
+  "onr_v1_276_viral-15": "future_run_ice",
+  onr_v1_277_virizz: "future_run_ice",
+};
 const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>([
   "score_agenda",
   "advance_card",
@@ -6132,6 +6163,105 @@ function actionsForCandidate(
     .filter((action): action is LegalAction => Boolean(action));
 }
 
+export function classifyCorpFutureRunIceDefinitionId(
+  definitionId: string | undefined,
+): CorpFutureRunIceClass | undefined {
+  if (!definitionId) return undefined;
+  return CORP_FUTURE_RUN_ICE_CLASSES[definitionId];
+}
+
+export function assessCorpFutureRunIcePlacement(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpFutureRunIcePlacementAssessment | undefined {
+  if (
+    input.side !== "corp" ||
+    action.side !== "corp" ||
+    action.type !== "install_card" ||
+    action.payload?.placement !== "ice"
+  )
+    return undefined;
+  const card = findVisibleCard(input, action.source);
+  const futureRunIceClass = classifyCorpFutureRunIceDefinitionId(
+    card?.definitionId,
+  );
+  const serverId =
+    typeof action.payload.serverId === "string"
+      ? action.payload.serverId
+      : undefined;
+  if (!card?.definitionId || !futureRunIceClass || !serverId) return undefined;
+  const existingIceCount =
+    serverId === "new_remote"
+      ? 0
+      : (input.playerView.servers.find((server) => server.id === serverId)?.ice
+          .length ?? 0);
+  const installedOnEmptyServer = existingIceCount === 0;
+  const directImpactAlternativeCount =
+    installedOnEmptyServer || serverId === "new_remote"
+      ? input.legalActions.filter(
+          (candidate) =>
+            candidate.actionId !== action.actionId &&
+            candidate.side === "corp" &&
+            candidate.type === "install_card" &&
+            candidate.payload?.placement === "ice" &&
+            candidate.payload?.serverId === serverId &&
+            isCorpDirectImpactIceInstall(input, candidate),
+        ).length
+      : 0;
+  return {
+    definitionId: card.definitionId,
+    title: card.title ?? card.definitionId,
+    futureRunIceClass,
+    serverId,
+    existingIceCount,
+    installedOnEmptyServer,
+    installedAsOutermost: true,
+    hasLaterIceAfterInstall: existingIceCount > 0,
+    deadEffect: existingIceCount === 0,
+    liveEffect: existingIceCount > 0,
+    directImpactAlternativeCount,
+  };
+}
+
+function isCorpDirectImpactIceInstall(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (
+    action.side !== "corp" ||
+    action.type !== "install_card" ||
+    action.payload?.placement !== "ice"
+  )
+    return false;
+  const card = findVisibleCard(input, action.source);
+  return (
+    cardDefinitionType(card?.definitionId) === "ice" &&
+    !classifyCorpFutureRunIceDefinitionId(card?.definitionId)
+  );
+}
+
+function corpFutureRunIceOrderingActionBonus(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  const assessment = assessCorpFutureRunIcePlacement(input, action);
+  if (!assessment) return 0;
+  if (assessment.liveEffect) {
+    return 36 + Math.min(assessment.existingIceCount, 3) * 18;
+  }
+  if (assessment.directImpactAlternativeCount > 0) return -180;
+  return -28;
+}
+
+function cardDefinitionType(definitionId: string | undefined): string {
+  if (!definitionId) return "";
+  return (
+    DEMO_CARDS_BY_ID[definitionId]?.type ??
+    RUNTIME_CARDS[definitionId]?.type ??
+    ""
+  );
+}
+
 export function evaluateRemoteIntentMemory(
   input: AiDecisionInput,
   beliefState: BeliefState = reconstructBeliefState(input),
@@ -6723,7 +6853,7 @@ function actionPriority(
     action.type === "install_card" &&
     action.payload?.placement === "ice"
   )
-    return 85;
+    return 85 + corpFutureRunIceOrderingActionBonus(input, action);
   if (
     kind === "recover_economy" &&
     extraActionOperation?.basicCreditFollowupOnly &&
@@ -6787,6 +6917,7 @@ function actionPriority(
   )
     return (
       82 +
+      corpFutureRunIceOrderingActionBonus(input, action) +
       corpRemotePortfolioActionPriorityBonus(input, action, context) +
       (hasRiskyAdvanceWindowForServer(
         input,
