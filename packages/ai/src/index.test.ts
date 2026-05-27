@@ -15779,6 +15779,213 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     });
   });
 
+  it("summarizes Runner economy decision windows, skips, and fix gates", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("runner", 1, "play_event", undefined, 1, {
+            runnerEconomyDecisionWindow: true,
+            runnerLegalEconomyActions: 1,
+            runnerLegalBurstEconomyActions: 1,
+            runnerEconomyTaken: true,
+            runnerEconomyActionTaken: true,
+            runnerLowCreditDecisionWindow: true,
+            runnerCreditStarvedWithLegalEconomy: true,
+            runnerCreditStarvedEconomyTaken: true,
+            runnerEconomyTakenToReachRunReserve: true,
+            runnerEconomyChosenAsReserveSetup: true,
+            runnerEconomyChoicePlausible: true,
+          }),
+          progressionAction("runner", 2, "start_run", "rd", 1, {
+            runnerEconomyDecisionWindow: true,
+            runnerLegalEconomyActions: 1,
+            runnerEconomySkipped: true,
+            runnerEconomySkippedWhileLowCredits: true,
+            runnerEconomySkippedWhileKnownUnaffordablePath: true,
+            runnerEconomySkippedForRun: true,
+            runnerLowCreditDecisionWindow: true,
+            runnerCreditStarvedWithLegalEconomy: true,
+            runnerCreditStarvedEconomySkipped: true,
+            runnerKnownUnaffordablePathWithLegalEconomy: true,
+            runnerEconomySkippedThenUnaffordableRun: true,
+            runnerRunStartedBelowKnownPathCost: true,
+            runnerRunStartedAfterSkippingEconomy: true,
+            runnerEconomyFixGateEligibleStarvedSkip: true,
+          }),
+          progressionAction("runner", 3, "gain_credit", undefined, 1, {
+            runnerEconomyDecisionWindow: true,
+            runnerLegalEconomyActions: 1,
+            runnerLegalActionEconomyActions: 1,
+            runnerEconomyTaken: true,
+            runnerEconomyActionTaken: true,
+            runnerEconomyChosenWhileRich: true,
+            runnerEconomyChosenOverFreshCentralPressure: true,
+            runnerEconomyChosenWhilePressureReady: true,
+            runnerEconomyChoiceSuspicious: true,
+            runnerEconomyFixGateSuspiciousRichEconomy: true,
+            runnerEconomyFixGateSuspiciousEconomyOverPressure: true,
+          }),
+        ],
+        "runner-economy-window-fixture",
+      ),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerEconomyDecisionWindows: 3,
+      runnerLegalEconomyActions: 3,
+      runnerLegalBurstEconomyActions: 1,
+      runnerLegalActionEconomyActions: 1,
+      runnerEconomyTaken: 2,
+      runnerEconomySkipped: 1,
+      runnerEconomySkippedWhileLowCredits: 1,
+      runnerEconomySkippedWhileKnownUnaffordablePath: 1,
+      runnerCreditStarvedWithLegalEconomy: 2,
+      runnerCreditStarvedEconomyTaken: 1,
+      runnerCreditStarvedEconomySkipped: 1,
+      runnerKnownUnaffordablePathWithLegalEconomy: 1,
+      runnerEconomyTakenToReachRunReserve: 1,
+      runnerEconomySkippedThenUnaffordableRun: 1,
+      runnerRunStartedBelowKnownPathCost: 1,
+      runnerRunStartedAfterSkippingEconomy: 1,
+      runnerEconomyChosenOverFreshCentralPressure: 1,
+      runnerEconomyChosenWhileRich: 1,
+      runnerEconomyChoicePlausible: 1,
+      runnerEconomyChoiceSuspicious: 1,
+      runnerEconomyFixGateEligibleStarvedSkip: 1,
+      runnerEconomyFixGateSuspiciousRichEconomy: 1,
+      runnerEconomyFixGateSuspiciousEconomyOverPressure: 1,
+    });
+  });
+
+  it("keeps finite, debt, hand-size, memory, and search recovery diagnostics separated", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction(
+            "runner",
+            1,
+            "activated_card_ability",
+            undefined,
+            1,
+            {
+              runnerEconomyDecisionWindow: true,
+              runnerLegalEconomyActions: 1,
+              runnerLegalFinitePoolEconomyActions: 1,
+              runnerEconomyTaken: true,
+              runnerFinitePoolEconomySeen: true,
+              runnerFinitePoolEconomyTaken: true,
+            },
+          ),
+          progressionAction("runner", 2, "install_card", undefined, 1, {
+            runnerEconomyDecisionWindow: true,
+            runnerLegalEconomyActions: 1,
+            runnerLegalLoanDebtEconomyActions: 1,
+            runnerLegalResourceEconomyActions: 1,
+            runnerEconomyTaken: true,
+            runnerDebtEconomySeen: true,
+            runnerDebtEconomyTaken: true,
+            runnerDebtEconomyTakenWithoutNeed: true,
+            runnerEconomyWithDownsideSeen: true,
+            runnerEconomyWithDownsideTaken: true,
+            runnerDelayedPenaltyEconomyTaken: true,
+            runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed: true,
+          }),
+          progressionAction("runner", 3, "install_card", undefined, 1, {
+            runnerHandSizeBottleneckDecisionWindow: true,
+            runnerLegalHandSizeActions: 1,
+            runnerHandSizeSupportTaken: true,
+            runnerHandSizeFactUsedForDiagnosis: true,
+            runnerEconomySetupEvidence: [
+              "mram_militech_classified_as_hand_size:true",
+            ],
+          }),
+          progressionAction("runner", 4, "end_turn", undefined, 1, {
+            runnerMemoryBottleneckDecisionWindow: true,
+            runnerLegalMemoryHardwareActions: 1,
+            runnerMemorySupportSkippedWhileGripHasPrograms: true,
+            runnerSetupFixGateEligibleMemorySkip: true,
+          }),
+          progressionAction("runner", 5, "play_event", undefined, 2, {
+            runnerLegalSearchActions: 1,
+            runnerSearchSkippedWhileMissingBreakerCoverage: true,
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+          }),
+          progressionAction("runner", 6, "play_event", undefined, 2, {
+            runnerLegalRecoveryActions: 1,
+            runnerRecoveryTaken: true,
+            runnerRecoveryTakenForBreakerCoverage: true,
+          }),
+          progressionAction("runner", 7, "draw_card", undefined, 2),
+          progressionAction("runner", 8, "end_turn", undefined, 2),
+        ],
+        "runner-setup-classification-fixture",
+      ),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerLegalFinitePoolEconomyActions: 1,
+      runnerFinitePoolEconomySeen: 1,
+      runnerFinitePoolEconomyTaken: 1,
+      runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted: 0,
+      runnerLegalLoanDebtEconomyActions: 1,
+      runnerDebtEconomySeen: 1,
+      runnerDebtEconomyTaken: 1,
+      runnerDebtEconomyTakenWithoutNeed: 1,
+      runnerEconomyWithDownsideSeen: 1,
+      runnerDelayedPenaltyEconomyTaken: 1,
+      runnerMemoryBottleneckDecisionWindows: 1,
+      runnerHandSizeBottleneckDecisionWindows: 1,
+      runnerLegalMemoryHardwareActions: 1,
+      runnerLegalHandSizeActions: 1,
+      runnerMemoryHardwareTaken: 0,
+      runnerHandSizeSupportTaken: 1,
+      runnerHandSizeFactUsedForDiagnosis: 1,
+      runnerMemorySupportSkippedWhileGripHasPrograms: 1,
+      runnerLegalSearchActions: 1,
+      runnerLegalRecoveryActions: 1,
+      runnerSearchSkippedWhileMissingBreakerCoverage: 1,
+      runnerRecoveryTaken: 1,
+      runnerRecoveryTakenForBreakerCoverage: 1,
+      runnerSearchOrRecoveryWindowWithNoInstallFollowup: 1,
+      runnerSetupFixGateEligibleMemorySkip: 1,
+      runnerSetupFixGateEligibleSearchRecoverySkip: 1,
+    });
+  });
+
+  it("keeps Runner economy setup diagnostic evidence side-safe and hidden-state invariant", () => {
+    const visibleActions = [
+      progressionAction("runner", 1, "play_event", undefined, 1, {
+        runnerEconomyDecisionWindow: true,
+        runnerLegalEconomyActions: 1,
+        runnerEconomyTaken: true,
+        runnerEconomySetupClassifications: ["runner_economy_taken"],
+        runnerEconomySetupEvidence: [
+          "runner_credits:2",
+          "runner_reserve_target:5",
+          "legal_economy_actions:1",
+          "known_unaffordable_path:false",
+        ],
+      }),
+    ];
+    const first = summarizeMatchProgressionMetrics([
+      progressionSummary(visibleActions, "runner-economy-visible-a"),
+    ]);
+    const second = summarizeMatchProgressionMetrics([
+      {
+        ...progressionSummary(visibleActions, "runner-economy-visible-b"),
+        finalStateHash: "fnv1a:different-hidden-state",
+      },
+    ]);
+
+    expect(first.runnerEconomyDecisionWindows).toBe(
+      second.runnerEconomyDecisionWindows,
+    );
+    expect(first.runnerEconomyTaken).toBe(second.runnerEconomyTaken);
+    expect(JSON.stringify({ visibleActions })).not.toMatch(
+      /cardInstances|privatePayload|fullGameState|corp_hq|corp_rd|runner_stack|runner_grip/i,
+    );
+  });
+
   it("summarizes first-class breaker ontology metrics from action evidence", () => {
     const metrics = summarizeMatchProgressionMetrics([
       progressionSummary([

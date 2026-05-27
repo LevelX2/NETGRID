@@ -1174,6 +1174,88 @@ export type AiMatchProgressionMetrics = {
   runnerLowValueDuplicateInstallActions: number;
   runnerJunkyardBbsDuplicateInstalls: number;
   runnerEconomyActionsTaken: number;
+  runnerEconomyDecisionWindows: number;
+  runnerLegalEconomyActions: number;
+  runnerLegalBurstEconomyActions: number;
+  runnerLegalActionEconomyActions: number;
+  runnerLegalFinitePoolEconomyActions: number;
+  runnerLegalLoanDebtEconomyActions: number;
+  runnerLegalRecurringEconomyActions: number;
+  runnerLegalResourceEconomyActions: number;
+  runnerLegalHardwareEconomyActions: number;
+  runnerEconomyTaken: number;
+  runnerEconomySkipped: number;
+  runnerEconomySkippedWhileLowCredits: number;
+  runnerEconomySkippedWhileKnownUnaffordablePath: number;
+  runnerEconomySkippedForPressure: number;
+  runnerEconomySkippedForRemoteContest: number;
+  runnerEconomySkippedForSetup: number;
+  runnerEconomySkippedForDraw: number;
+  runnerEconomySkippedForRun: number;
+  runnerEconomySkippedForInstallBreaker: number;
+  runnerEconomySkippedForTrash: number;
+  runnerEconomySkippedForEndTurn: number;
+  runnerEconomySkippedForUnknownHigherPriority: number;
+  runnerLowCreditDecisionWindows: number;
+  runnerCreditStarvedWithLegalEconomy: number;
+  runnerCreditStarvedEconomyTaken: number;
+  runnerCreditStarvedEconomySkipped: number;
+  runnerKnownUnaffordablePathWithLegalEconomy: number;
+  runnerEconomyTakenToReachRunReserve: number;
+  runnerEconomyTakenButStillBelowReserve: number;
+  runnerEconomySkippedThenUnaffordableRun: number;
+  runnerRunStartedBelowKnownPathCost: number;
+  runnerRunStartedAfterSkippingEconomy: number;
+  runnerEconomyChosenOverFreshCentralPressure: number;
+  runnerEconomyChosenOverRemoteContest: number;
+  runnerEconomyChosenOverBreakerInstall: number;
+  runnerEconomyChosenOverCriticalSetup: number;
+  runnerEconomyChosenOverRelevantTrash: number;
+  runnerEconomyChosenWhileRich: number;
+  runnerEconomyChosenWhilePressureReady: number;
+  runnerEconomyChosenAsReserveSetup: number;
+  runnerEconomyChoicePlausible: number;
+  runnerEconomyChoiceSuspicious: number;
+  runnerFinitePoolEconomySeen: number;
+  runnerFinitePoolEconomyTaken: number;
+  runnerFinitePoolEconomySkipped: number;
+  runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted: number;
+  runnerDebtEconomySeen: number;
+  runnerDebtEconomyTaken: number;
+  runnerDebtEconomySkipped: number;
+  runnerDebtEconomyTakenWithoutNeed: number;
+  runnerEconomyWithDownsideSeen: number;
+  runnerEconomyWithDownsideTaken: number;
+  runnerDelayedPenaltyEconomyTaken: number;
+  runnerMemoryBottleneckDecisionWindows: number;
+  runnerHandSizeBottleneckDecisionWindows: number;
+  runnerLegalMemoryHardwareActions: number;
+  runnerLegalHandSizeActions: number;
+  runnerMemoryHardwareTaken: number;
+  runnerHandSizeSupportTaken: number;
+  runnerMemorySupportSkippedWhileGripHasPrograms: number;
+  runnerHandSizeSupportSkippedWhileDamageRiskVisible: number;
+  runnerHardwareSetupChosenOverEconomy: number;
+  runnerHardwareSetupChosenOverPressure: number;
+  runnerHandSizeFactUsedForDiagnosis: number;
+  runnerLegalSearchActions: number;
+  runnerLegalRecoveryActions: number;
+  runnerSearchTaken: number;
+  runnerRecoveryTaken: number;
+  runnerSearchSkippedWhileMissingBreakerCoverage: number;
+  runnerRecoverySkippedWhileMissingBreakerCoverage: number;
+  runnerSearchTakenForBreakerCoverage: number;
+  runnerRecoveryTakenForBreakerCoverage: number;
+  runnerSearchOrRecoveryWindowWithNoInstallFollowup: number;
+  runnerSearchRecoveryChosenOverEconomy: number;
+  runnerSearchRecoveryChosenOverPressure: number;
+  runnerEconomyFixGateEligibleStarvedSkip: number;
+  runnerEconomyFixGateSuspiciousRichEconomy: number;
+  runnerEconomyFixGateSuspiciousEconomyOverPressure: number;
+  runnerEconomyFixGateSuspiciousEconomyOverRemoteContest: number;
+  runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed: number;
+  runnerSetupFixGateEligibleMemorySkip: number;
+  runnerSetupFixGateEligibleSearchRecoverySkip: number;
   runnerRigInstallActions: number;
   runnerRemoteTrashOpportunities: number;
   runnerRemoteTrashTaken: number;
@@ -1840,6 +1922,90 @@ export type AiSimulationSummary = {
     runnerLowValueDuplicateInstallAction?: boolean;
     runnerJunkyardBbsDuplicateInstall?: boolean;
     runnerEconomyActionTaken?: boolean;
+    runnerEconomyDecisionWindow?: boolean;
+    runnerLegalEconomyActions?: number;
+    runnerLegalBurstEconomyActions?: number;
+    runnerLegalActionEconomyActions?: number;
+    runnerLegalFinitePoolEconomyActions?: number;
+    runnerLegalLoanDebtEconomyActions?: number;
+    runnerLegalRecurringEconomyActions?: number;
+    runnerLegalResourceEconomyActions?: number;
+    runnerLegalHardwareEconomyActions?: number;
+    runnerEconomyTaken?: boolean;
+    runnerEconomySkipped?: boolean;
+    runnerEconomySkippedWhileLowCredits?: boolean;
+    runnerEconomySkippedWhileKnownUnaffordablePath?: boolean;
+    runnerEconomySkippedForPressure?: boolean;
+    runnerEconomySkippedForRemoteContest?: boolean;
+    runnerEconomySkippedForSetup?: boolean;
+    runnerEconomySkippedForDraw?: boolean;
+    runnerEconomySkippedForRun?: boolean;
+    runnerEconomySkippedForInstallBreaker?: boolean;
+    runnerEconomySkippedForTrash?: boolean;
+    runnerEconomySkippedForEndTurn?: boolean;
+    runnerEconomySkippedForUnknownHigherPriority?: boolean;
+    runnerLowCreditDecisionWindow?: boolean;
+    runnerCreditStarvedWithLegalEconomy?: boolean;
+    runnerCreditStarvedEconomyTaken?: boolean;
+    runnerCreditStarvedEconomySkipped?: boolean;
+    runnerKnownUnaffordablePathWithLegalEconomy?: boolean;
+    runnerEconomyTakenToReachRunReserve?: boolean;
+    runnerEconomyTakenButStillBelowReserve?: boolean;
+    runnerEconomySkippedThenUnaffordableRun?: boolean;
+    runnerRunStartedBelowKnownPathCost?: boolean;
+    runnerRunStartedAfterSkippingEconomy?: boolean;
+    runnerEconomyChosenOverFreshCentralPressure?: boolean;
+    runnerEconomyChosenOverRemoteContest?: boolean;
+    runnerEconomyChosenOverBreakerInstall?: boolean;
+    runnerEconomyChosenOverCriticalSetup?: boolean;
+    runnerEconomyChosenOverRelevantTrash?: boolean;
+    runnerEconomyChosenWhileRich?: boolean;
+    runnerEconomyChosenWhilePressureReady?: boolean;
+    runnerEconomyChosenAsReserveSetup?: boolean;
+    runnerEconomyChoicePlausible?: boolean;
+    runnerEconomyChoiceSuspicious?: boolean;
+    runnerFinitePoolEconomySeen?: boolean;
+    runnerFinitePoolEconomyTaken?: boolean;
+    runnerFinitePoolEconomySkipped?: boolean;
+    runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted?: boolean;
+    runnerDebtEconomySeen?: boolean;
+    runnerDebtEconomyTaken?: boolean;
+    runnerDebtEconomySkipped?: boolean;
+    runnerDebtEconomyTakenWithoutNeed?: boolean;
+    runnerEconomyWithDownsideSeen?: boolean;
+    runnerEconomyWithDownsideTaken?: boolean;
+    runnerDelayedPenaltyEconomyTaken?: boolean;
+    runnerMemoryBottleneckDecisionWindow?: boolean;
+    runnerHandSizeBottleneckDecisionWindow?: boolean;
+    runnerLegalMemoryHardwareActions?: number;
+    runnerLegalHandSizeActions?: number;
+    runnerMemoryHardwareTaken?: boolean;
+    runnerHandSizeSupportTaken?: boolean;
+    runnerMemorySupportSkippedWhileGripHasPrograms?: boolean;
+    runnerHandSizeSupportSkippedWhileDamageRiskVisible?: boolean;
+    runnerHardwareSetupChosenOverEconomy?: boolean;
+    runnerHardwareSetupChosenOverPressure?: boolean;
+    runnerHandSizeFactUsedForDiagnosis?: boolean;
+    runnerLegalSearchActions?: number;
+    runnerLegalRecoveryActions?: number;
+    runnerSearchTaken?: boolean;
+    runnerRecoveryTaken?: boolean;
+    runnerSearchSkippedWhileMissingBreakerCoverage?: boolean;
+    runnerRecoverySkippedWhileMissingBreakerCoverage?: boolean;
+    runnerSearchTakenForBreakerCoverage?: boolean;
+    runnerRecoveryTakenForBreakerCoverage?: boolean;
+    runnerSearchOrRecoveryWindowWithNoInstallFollowup?: boolean;
+    runnerSearchRecoveryChosenOverEconomy?: boolean;
+    runnerSearchRecoveryChosenOverPressure?: boolean;
+    runnerEconomyFixGateEligibleStarvedSkip?: boolean;
+    runnerEconomyFixGateSuspiciousRichEconomy?: boolean;
+    runnerEconomyFixGateSuspiciousEconomyOverPressure?: boolean;
+    runnerEconomyFixGateSuspiciousEconomyOverRemoteContest?: boolean;
+    runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed?: boolean;
+    runnerSetupFixGateEligibleMemorySkip?: boolean;
+    runnerSetupFixGateEligibleSearchRecoverySkip?: boolean;
+    runnerEconomySetupClassifications?: string[];
+    runnerEconomySetupEvidence?: string[];
     runnerRigInstallAction?: boolean;
     runnerPressureActionTaken?: boolean;
     runnerRemoteTrashOpportunity?: boolean;
@@ -2647,6 +2813,12 @@ export function simulateAiGame(
       action,
       targetServerId,
     );
+    const runnerEconomySetup = runnerEconomySetupDiagnosticsForSimulationAction(
+      input,
+      action,
+      targetServerId,
+      result.state,
+    );
     const tagPunishDiagnostics = tagPunishWindowDiagnosticsForSimulationAction(
       input,
       action,
@@ -2699,6 +2871,7 @@ export function simulateAiGame(
       ...runnerReserve,
       ...runnerCentralPressure,
       ...runnerCoverage,
+      ...runnerEconomySetup,
       ...tagPunishDiagnostics,
       ...(typeof action.payload?.placement === "string"
         ? { installPlacement: action.payload.placement }
@@ -11351,6 +11524,88 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "runnerLowValueDuplicateInstallActions",
   "runnerJunkyardBbsDuplicateInstalls",
   "runnerEconomyActionsTaken",
+  "runnerEconomyDecisionWindows",
+  "runnerLegalEconomyActions",
+  "runnerLegalBurstEconomyActions",
+  "runnerLegalActionEconomyActions",
+  "runnerLegalFinitePoolEconomyActions",
+  "runnerLegalLoanDebtEconomyActions",
+  "runnerLegalRecurringEconomyActions",
+  "runnerLegalResourceEconomyActions",
+  "runnerLegalHardwareEconomyActions",
+  "runnerEconomyTaken",
+  "runnerEconomySkipped",
+  "runnerEconomySkippedWhileLowCredits",
+  "runnerEconomySkippedWhileKnownUnaffordablePath",
+  "runnerEconomySkippedForPressure",
+  "runnerEconomySkippedForRemoteContest",
+  "runnerEconomySkippedForSetup",
+  "runnerEconomySkippedForDraw",
+  "runnerEconomySkippedForRun",
+  "runnerEconomySkippedForInstallBreaker",
+  "runnerEconomySkippedForTrash",
+  "runnerEconomySkippedForEndTurn",
+  "runnerEconomySkippedForUnknownHigherPriority",
+  "runnerLowCreditDecisionWindows",
+  "runnerCreditStarvedWithLegalEconomy",
+  "runnerCreditStarvedEconomyTaken",
+  "runnerCreditStarvedEconomySkipped",
+  "runnerKnownUnaffordablePathWithLegalEconomy",
+  "runnerEconomyTakenToReachRunReserve",
+  "runnerEconomyTakenButStillBelowReserve",
+  "runnerEconomySkippedThenUnaffordableRun",
+  "runnerRunStartedBelowKnownPathCost",
+  "runnerRunStartedAfterSkippingEconomy",
+  "runnerEconomyChosenOverFreshCentralPressure",
+  "runnerEconomyChosenOverRemoteContest",
+  "runnerEconomyChosenOverBreakerInstall",
+  "runnerEconomyChosenOverCriticalSetup",
+  "runnerEconomyChosenOverRelevantTrash",
+  "runnerEconomyChosenWhileRich",
+  "runnerEconomyChosenWhilePressureReady",
+  "runnerEconomyChosenAsReserveSetup",
+  "runnerEconomyChoicePlausible",
+  "runnerEconomyChoiceSuspicious",
+  "runnerFinitePoolEconomySeen",
+  "runnerFinitePoolEconomyTaken",
+  "runnerFinitePoolEconomySkipped",
+  "runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted",
+  "runnerDebtEconomySeen",
+  "runnerDebtEconomyTaken",
+  "runnerDebtEconomySkipped",
+  "runnerDebtEconomyTakenWithoutNeed",
+  "runnerEconomyWithDownsideSeen",
+  "runnerEconomyWithDownsideTaken",
+  "runnerDelayedPenaltyEconomyTaken",
+  "runnerMemoryBottleneckDecisionWindows",
+  "runnerHandSizeBottleneckDecisionWindows",
+  "runnerLegalMemoryHardwareActions",
+  "runnerLegalHandSizeActions",
+  "runnerMemoryHardwareTaken",
+  "runnerHandSizeSupportTaken",
+  "runnerMemorySupportSkippedWhileGripHasPrograms",
+  "runnerHandSizeSupportSkippedWhileDamageRiskVisible",
+  "runnerHardwareSetupChosenOverEconomy",
+  "runnerHardwareSetupChosenOverPressure",
+  "runnerHandSizeFactUsedForDiagnosis",
+  "runnerLegalSearchActions",
+  "runnerLegalRecoveryActions",
+  "runnerSearchTaken",
+  "runnerRecoveryTaken",
+  "runnerSearchSkippedWhileMissingBreakerCoverage",
+  "runnerRecoverySkippedWhileMissingBreakerCoverage",
+  "runnerSearchTakenForBreakerCoverage",
+  "runnerRecoveryTakenForBreakerCoverage",
+  "runnerSearchOrRecoveryWindowWithNoInstallFollowup",
+  "runnerSearchRecoveryChosenOverEconomy",
+  "runnerSearchRecoveryChosenOverPressure",
+  "runnerEconomyFixGateEligibleStarvedSkip",
+  "runnerEconomyFixGateSuspiciousRichEconomy",
+  "runnerEconomyFixGateSuspiciousEconomyOverPressure",
+  "runnerEconomyFixGateSuspiciousEconomyOverRemoteContest",
+  "runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed",
+  "runnerSetupFixGateEligibleMemorySkip",
+  "runnerSetupFixGateEligibleSearchRecoverySkip",
   "runnerRigInstallActions",
   "runnerRemoteTrashOpportunities",
   "runnerRemoteTrashTaken",
@@ -12375,6 +12630,340 @@ export function summarizeMatchProgressionMetrics(
     runnerEconomyActionsTaken: actionSequence.filter(
       (entry) => entry.runnerEconomyActionTaken === true,
     ).length,
+    runnerEconomyDecisionWindows: actionSequence.filter(
+      (entry) => entry.runnerEconomyDecisionWindow === true,
+    ).length,
+    runnerLegalEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalBurstEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalBurstEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalActionEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalActionEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalFinitePoolEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalFinitePoolEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalLoanDebtEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalLoanDebtEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalRecurringEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalRecurringEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalResourceEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalResourceEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalHardwareEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalHardwareEconomyActions ?? 0),
+      0,
+    ),
+    runnerEconomyTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyTaken",
+    ),
+    runnerEconomySkipped: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkipped",
+    ),
+    runnerEconomySkippedWhileLowCredits: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedWhileLowCredits",
+    ),
+    runnerEconomySkippedWhileKnownUnaffordablePath:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerEconomySkippedWhileKnownUnaffordablePath",
+      ),
+    runnerEconomySkippedForPressure: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForPressure",
+    ),
+    runnerEconomySkippedForRemoteContest: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForRemoteContest",
+    ),
+    runnerEconomySkippedForSetup: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForSetup",
+    ),
+    runnerEconomySkippedForDraw: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForDraw",
+    ),
+    runnerEconomySkippedForRun: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForRun",
+    ),
+    runnerEconomySkippedForInstallBreaker: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForInstallBreaker",
+    ),
+    runnerEconomySkippedForTrash: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForTrash",
+    ),
+    runnerEconomySkippedForEndTurn: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForEndTurn",
+    ),
+    runnerEconomySkippedForUnknownHigherPriority: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForUnknownHigherPriority",
+    ),
+    runnerLowCreditDecisionWindows: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerLowCreditDecisionWindow",
+    ),
+    runnerCreditStarvedWithLegalEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerCreditStarvedWithLegalEconomy",
+    ),
+    runnerCreditStarvedEconomyTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerCreditStarvedEconomyTaken",
+    ),
+    runnerCreditStarvedEconomySkipped: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerCreditStarvedEconomySkipped",
+    ),
+    runnerKnownUnaffordablePathWithLegalEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerKnownUnaffordablePathWithLegalEconomy",
+    ),
+    runnerEconomyTakenToReachRunReserve: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyTakenToReachRunReserve",
+    ),
+    runnerEconomyTakenButStillBelowReserve: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyTakenButStillBelowReserve",
+    ),
+    runnerEconomySkippedThenUnaffordableRun: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedThenUnaffordableRun",
+    ),
+    runnerRunStartedBelowKnownPathCost: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerRunStartedBelowKnownPathCost",
+    ),
+    runnerRunStartedAfterSkippingEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerRunStartedAfterSkippingEconomy",
+    ),
+    runnerEconomyChosenOverFreshCentralPressure: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenOverFreshCentralPressure",
+    ),
+    runnerEconomyChosenOverRemoteContest: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenOverRemoteContest",
+    ),
+    runnerEconomyChosenOverBreakerInstall: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenOverBreakerInstall",
+    ),
+    runnerEconomyChosenOverCriticalSetup: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenOverCriticalSetup",
+    ),
+    runnerEconomyChosenOverRelevantTrash: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenOverRelevantTrash",
+    ),
+    runnerEconomyChosenWhileRich: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenWhileRich",
+    ),
+    runnerEconomyChosenWhilePressureReady: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenWhilePressureReady",
+    ),
+    runnerEconomyChosenAsReserveSetup: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenAsReserveSetup",
+    ),
+    runnerEconomyChoicePlausible: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChoicePlausible",
+    ),
+    runnerEconomyChoiceSuspicious: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChoiceSuspicious",
+    ),
+    runnerFinitePoolEconomySeen: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerFinitePoolEconomySeen",
+    ),
+    runnerFinitePoolEconomyTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerFinitePoolEconomyTaken",
+    ),
+    runnerFinitePoolEconomySkipped: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerFinitePoolEconomySkipped",
+    ),
+    runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted",
+      ),
+    runnerDebtEconomySeen: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerDebtEconomySeen",
+    ),
+    runnerDebtEconomyTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerDebtEconomyTaken",
+    ),
+    runnerDebtEconomySkipped: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerDebtEconomySkipped",
+    ),
+    runnerDebtEconomyTakenWithoutNeed: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerDebtEconomyTakenWithoutNeed",
+    ),
+    runnerEconomyWithDownsideSeen: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyWithDownsideSeen",
+    ),
+    runnerEconomyWithDownsideTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyWithDownsideTaken",
+    ),
+    runnerDelayedPenaltyEconomyTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerDelayedPenaltyEconomyTaken",
+    ),
+    runnerMemoryBottleneckDecisionWindows: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerMemoryBottleneckDecisionWindow",
+    ),
+    runnerHandSizeBottleneckDecisionWindows: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerHandSizeBottleneckDecisionWindow",
+    ),
+    runnerLegalMemoryHardwareActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalMemoryHardwareActions ?? 0),
+      0,
+    ),
+    runnerLegalHandSizeActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalHandSizeActions ?? 0),
+      0,
+    ),
+    runnerMemoryHardwareTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerMemoryHardwareTaken",
+    ),
+    runnerHandSizeSupportTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerHandSizeSupportTaken",
+    ),
+    runnerMemorySupportSkippedWhileGripHasPrograms:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerMemorySupportSkippedWhileGripHasPrograms",
+      ),
+    runnerHandSizeSupportSkippedWhileDamageRiskVisible:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerHandSizeSupportSkippedWhileDamageRiskVisible",
+      ),
+    runnerHardwareSetupChosenOverEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerHardwareSetupChosenOverEconomy",
+    ),
+    runnerHardwareSetupChosenOverPressure: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerHardwareSetupChosenOverPressure",
+    ),
+    runnerHandSizeFactUsedForDiagnosis: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerHandSizeFactUsedForDiagnosis",
+    ),
+    runnerLegalSearchActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalSearchActions ?? 0),
+      0,
+    ),
+    runnerLegalRecoveryActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalRecoveryActions ?? 0),
+      0,
+    ),
+    runnerSearchTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSearchTaken",
+    ),
+    runnerRecoveryTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerRecoveryTaken",
+    ),
+    runnerSearchSkippedWhileMissingBreakerCoverage:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerSearchSkippedWhileMissingBreakerCoverage",
+      ),
+    runnerRecoverySkippedWhileMissingBreakerCoverage:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerRecoverySkippedWhileMissingBreakerCoverage",
+      ),
+    runnerSearchTakenForBreakerCoverage: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSearchTakenForBreakerCoverage",
+    ),
+    runnerRecoveryTakenForBreakerCoverage: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerRecoveryTakenForBreakerCoverage",
+    ),
+    runnerSearchOrRecoveryWindowWithNoInstallFollowup:
+      countRunnerSearchRecoveryNoInstallFollowup(actionSequence),
+    runnerSearchRecoveryChosenOverEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSearchRecoveryChosenOverEconomy",
+    ),
+    runnerSearchRecoveryChosenOverPressure: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSearchRecoveryChosenOverPressure",
+    ),
+    runnerEconomyFixGateEligibleStarvedSkip: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyFixGateEligibleStarvedSkip",
+    ),
+    runnerEconomyFixGateSuspiciousRichEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyFixGateSuspiciousRichEconomy",
+    ),
+    runnerEconomyFixGateSuspiciousEconomyOverPressure:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerEconomyFixGateSuspiciousEconomyOverPressure",
+      ),
+    runnerEconomyFixGateSuspiciousEconomyOverRemoteContest:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerEconomyFixGateSuspiciousEconomyOverRemoteContest",
+      ),
+    runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed",
+      ),
+    runnerSetupFixGateEligibleMemorySkip: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSetupFixGateEligibleMemorySkip",
+    ),
+    runnerSetupFixGateEligibleSearchRecoverySkip: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSetupFixGateEligibleSearchRecoverySkip",
+    ),
     runnerRigInstallActions: actionSequence.filter(
       (entry) => entry.runnerRigInstallAction === true,
     ).length,
@@ -14297,6 +14886,39 @@ function countRunnerPressureWithinOwnActions(
       if (ownActions >= ownActionWindow) return false;
     }
     return false;
+  }).length;
+}
+
+function countRunnerEconomySetupMetric(
+  sequence: PlanConversionActionEntry[],
+  metric: keyof PlanConversionActionEntry,
+): number {
+  return sequence.filter((entry) => entry[metric] === true).length;
+}
+
+function countRunnerSearchRecoveryNoInstallFollowup(
+  sequence: PlanConversionActionEntry[],
+): number {
+  return sequence.filter((entry, index) => {
+    if (
+      entry.side !== "runner" ||
+      (entry.runnerSearchTaken !== true && entry.runnerRecoveryTaken !== true)
+    )
+      return false;
+    let ownActions = 0;
+    for (
+      let candidateIndex = index + 1;
+      candidateIndex < sequence.length;
+      candidateIndex += 1
+    ) {
+      const candidate = sequence[candidateIndex]!;
+      if (candidate.side !== "runner") continue;
+      ownActions += 1;
+      if (candidate.actionType === "install_card") return false;
+      if (candidate.actionType === "start_run") return false;
+      if (ownActions >= 3) return true;
+    }
+    return ownActions > 0;
   }).length;
 }
 
@@ -19178,6 +19800,630 @@ function runnerHandUseDiagnosticsForSimulationAction(
     ...(handUseOpportunity ? { runnerHandUseOpportunity: true } : {}),
     ...(handUseActionTaken ? { runnerHandUseActionTaken: true } : {}),
   };
+}
+
+type RunnerEconomySetupActionClass = {
+  economy: boolean;
+  burstEconomy: boolean;
+  actionEconomy: boolean;
+  finitePoolEconomy: boolean;
+  loanDebtEconomy: boolean;
+  recurringEconomy: boolean;
+  resourceEconomy: boolean;
+  hardwareEconomy: boolean;
+  memoryHardware: boolean;
+  handSizeSupport: boolean;
+  search: boolean;
+  recovery: boolean;
+  downsideEconomy: boolean;
+  delayedPenaltyEconomy: boolean;
+};
+
+function runnerEconomySetupDiagnosticsForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  targetServerId: string | undefined,
+  stateAfterAction: GameState,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  if (input.side !== "runner" || action.side !== "runner") return {};
+  const legalRunnerActions = input.legalActions.filter(
+    (candidate) => candidate.side === "runner",
+  );
+  const classified = legalRunnerActions.map((candidate) => ({
+    action: candidate,
+    classification: runnerEconomySetupActionClass(input, candidate),
+  }));
+  const legalEconomy = classified.filter(
+    ({ classification }) => classification.economy,
+  );
+  const legalMemory = classified.filter(
+    ({ classification }) => classification.memoryHardware,
+  );
+  const legalHandSize = classified.filter(
+    ({ classification }) => classification.handSizeSupport,
+  );
+  const legalSearch = classified.filter(
+    ({ classification }) => classification.search,
+  );
+  const legalRecovery = classified.filter(
+    ({ classification }) => classification.recovery,
+  );
+  const chosen = runnerEconomySetupActionClass(input, action);
+  const economyWindow = legalEconomy.length > 0;
+  const economyTaken = economyWindow && chosen.economy;
+  const economySkipped = economyWindow && !economyTaken;
+  const reserveTarget = runnerCreditReserveTargetForInput(input);
+  const creditsBefore = input.playerView.own.credits;
+  const creditsAfter = stateAfterAction.runner.credits;
+  const lowCredits = creditsBefore < reserveTarget;
+  const knownUnaffordablePath = runnerHasKnownUnaffordableLegalRun(input);
+  const advancedRemoteContest = runnerAdvancedRemoteContestContext(
+    input,
+    action,
+    targetServerId,
+  );
+  const freshPressureAvailable = hasRunnerRunnablePressureAction(
+    input,
+    action.actionId,
+  );
+  const installableBreaker = hasRunnerInstallableBreakerAction(
+    input,
+    action.actionId,
+  );
+  const remoteTrashAvailable = hasRunnerRemoteTrashAction(input);
+  const draw = runnerDrawKindForSimulationAction(input, action).draw;
+  const runAction = action.type === "start_run";
+  const setupAction =
+    action.type === "install_card" &&
+    (isRunnerRigInstallAction(input, action) || installableBreaker);
+  const relevantSkippedReason = economySkipped
+    ? runnerEconomySkipReasonForDiagnostics({
+        action,
+        draw,
+        runAction,
+        setupAction,
+        installableBreaker,
+        remoteTrashAvailable,
+        advancedRemoteContestSkipped: advancedRemoteContest.skipped,
+        freshPressureAvailable,
+      })
+    : undefined;
+  const rich = creditsBefore >= Math.max(8, reserveTarget + 3);
+  const economyNeeded = lowCredits || knownUnaffordablePath;
+  const economyReserveSetup =
+    economyTaken &&
+    creditsBefore < reserveTarget &&
+    creditsAfter >= reserveTarget;
+  const economyStillBelowReserve = economyTaken && creditsAfter < reserveTarget;
+  const finiteSeen = legalEconomy.some(
+    ({ classification }) => classification.finitePoolEconomy,
+  );
+  const finiteTaken = economyTaken && chosen.finitePoolEconomy;
+  const debtSeen = legalEconomy.some(
+    ({ classification }) => classification.loanDebtEconomy,
+  );
+  const debtTaken = economyTaken && chosen.loanDebtEconomy;
+  const downsideSeen = legalEconomy.some(
+    ({ classification }) => classification.downsideEconomy,
+  );
+  const downsideTaken = economyTaken && chosen.downsideEconomy;
+  const memoryWindow = legalMemory.length > 0;
+  const handSizeWindow = legalHandSize.length > 0;
+  const missingBreakerCoverage =
+    runnerVisibleMissingBreakerCoverage(input) ||
+    runnerHasKnownBlockedPathByCoverage(input);
+  const legalProgramInstalls = legalRunnerActions.filter((candidate) => {
+    if (candidate.type !== "install_card") return false;
+    const definition = definitionForSimulationAction(input, candidate);
+    return definition?.type === "program";
+  }).length;
+  const handSizeNeedVisible =
+    (input.playerView.own.tags ?? 0) > 0 ||
+    (input.playerView.own.gripOrHq?.length ?? 0) >
+      Math.max(0, input.playerView.own.maxHandSize ?? 5);
+  const memorySkipped = memoryWindow && !chosen.memoryHardware;
+  const handSizeSkipped = handSizeWindow && !chosen.handSizeSupport;
+  const searchTaken = chosen.search;
+  const recoveryTaken = chosen.recovery;
+  const searchSkippedWithCoverage =
+    legalSearch.length > 0 && !searchTaken && missingBreakerCoverage;
+  const recoverySkippedWithCoverage =
+    legalRecovery.length > 0 && !recoveryTaken && missingBreakerCoverage;
+  const economyOverPressure = economyTaken && freshPressureAvailable;
+  const economyOverRemoteContest =
+    economyTaken && advancedRemoteContest.skipped;
+  const economyOverSetup = economyTaken && installableBreaker;
+  const economyOverTrash = economyTaken && remoteTrashAvailable;
+  const economyPlausible =
+    economyTaken &&
+    (economyNeeded || economyReserveSetup || creditsAfter < reserveTarget + 2);
+  const economySuspicious =
+    economyTaken &&
+    !economyPlausible &&
+    ((rich && (freshPressureAvailable || advancedRemoteContest.opportunity)) ||
+      economyOverRemoteContest ||
+      economyOverTrash ||
+      (debtTaken && !economyNeeded));
+  const suspiciousEconomyOverPressure =
+    economyOverPressure && !economyPlausible && (rich || !economyNeeded);
+  const suspiciousEconomyOverRemoteContest =
+    economyOverRemoteContest && !economyPlausible && (rich || !economyNeeded);
+  const classifications = sortedUnique([
+    ...(economyWindow ? ["runner_economy_window"] : []),
+    ...(economyTaken ? ["runner_economy_taken"] : []),
+    ...(economySkipped ? ["runner_economy_skipped"] : []),
+    ...(finiteSeen ? ["finite_pool_economy_seen"] : []),
+    ...(debtSeen ? ["debt_economy_seen"] : []),
+    ...(memoryWindow ? ["memory_hardware_window"] : []),
+    ...(handSizeWindow ? ["hand_size_window"] : []),
+    ...(legalSearch.length > 0 ? ["search_window"] : []),
+    ...(legalRecovery.length > 0 ? ["recovery_window"] : []),
+    ...(economySuspicious ? ["economy_choice_suspicious"] : []),
+    ...(economyPlausible ? ["economy_choice_plausible"] : []),
+  ]);
+  const evidence = sortedUnique([
+    `runner_credits:${creditsBefore}`,
+    `runner_reserve_target:${reserveTarget}`,
+    `legal_economy_actions:${legalEconomy.length}`,
+    `legal_memory_hardware_actions:${legalMemory.length}`,
+    `legal_hand_size_actions:${legalHandSize.length}`,
+    `legal_search_actions:${legalSearch.length}`,
+    `legal_recovery_actions:${legalRecovery.length}`,
+    `known_unaffordable_path:${knownUnaffordablePath}`,
+    `missing_breaker_coverage:${missingBreakerCoverage}`,
+    ...(chosen.handSizeSupport
+      ? ["mram_militech_classified_as_hand_size:true"]
+      : []),
+  ]);
+
+  return {
+    ...(economyWindow ? { runnerEconomyDecisionWindow: true } : {}),
+    ...(legalEconomy.length > 0
+      ? { runnerLegalEconomyActions: legalEconomy.length }
+      : {}),
+    ...runnerEconomySubcounts(
+      legalEconomy.map((entry) => entry.classification),
+    ),
+    ...(economyTaken ? { runnerEconomyTaken: true } : {}),
+    ...(economySkipped ? { runnerEconomySkipped: true } : {}),
+    ...(economySkipped && lowCredits
+      ? { runnerEconomySkippedWhileLowCredits: true }
+      : {}),
+    ...(economySkipped && knownUnaffordablePath
+      ? { runnerEconomySkippedWhileKnownUnaffordablePath: true }
+      : {}),
+    ...(relevantSkippedReason === "pressure"
+      ? { runnerEconomySkippedForPressure: true }
+      : {}),
+    ...(relevantSkippedReason === "remote_contest"
+      ? { runnerEconomySkippedForRemoteContest: true }
+      : {}),
+    ...(relevantSkippedReason === "setup"
+      ? { runnerEconomySkippedForSetup: true }
+      : {}),
+    ...(relevantSkippedReason === "draw"
+      ? { runnerEconomySkippedForDraw: true }
+      : {}),
+    ...(relevantSkippedReason === "run"
+      ? { runnerEconomySkippedForRun: true }
+      : {}),
+    ...(relevantSkippedReason === "install_breaker"
+      ? { runnerEconomySkippedForInstallBreaker: true }
+      : {}),
+    ...(relevantSkippedReason === "trash"
+      ? { runnerEconomySkippedForTrash: true }
+      : {}),
+    ...(relevantSkippedReason === "end_turn"
+      ? { runnerEconomySkippedForEndTurn: true }
+      : {}),
+    ...(relevantSkippedReason === "unknown_higher_priority"
+      ? { runnerEconomySkippedForUnknownHigherPriority: true }
+      : {}),
+    ...(lowCredits ? { runnerLowCreditDecisionWindow: true } : {}),
+    ...(economyWindow && lowCredits
+      ? { runnerCreditStarvedWithLegalEconomy: true }
+      : {}),
+    ...(economyTaken && lowCredits
+      ? { runnerCreditStarvedEconomyTaken: true }
+      : {}),
+    ...(economySkipped && lowCredits
+      ? { runnerCreditStarvedEconomySkipped: true }
+      : {}),
+    ...(economyWindow && knownUnaffordablePath
+      ? { runnerKnownUnaffordablePathWithLegalEconomy: true }
+      : {}),
+    ...(economyReserveSetup
+      ? { runnerEconomyTakenToReachRunReserve: true }
+      : {}),
+    ...(economyStillBelowReserve
+      ? { runnerEconomyTakenButStillBelowReserve: true }
+      : {}),
+    ...(economySkipped && knownUnaffordablePath
+      ? {
+          runnerEconomySkippedThenUnaffordableRun: true,
+          runnerRunStartedAfterSkippingEconomy: runAction,
+        }
+      : {}),
+    ...(runAction &&
+    runnerRunKnownPathCost(input, targetServerId) > creditsBefore
+      ? { runnerRunStartedBelowKnownPathCost: true }
+      : {}),
+    ...(economyOverPressure
+      ? { runnerEconomyChosenOverFreshCentralPressure: true }
+      : {}),
+    ...(economyOverRemoteContest
+      ? { runnerEconomyChosenOverRemoteContest: true }
+      : {}),
+    ...(economyOverSetup
+      ? { runnerEconomyChosenOverBreakerInstall: true }
+      : {}),
+    ...(economyOverSetup ? { runnerEconomyChosenOverCriticalSetup: true } : {}),
+    ...(economyOverTrash ? { runnerEconomyChosenOverRelevantTrash: true } : {}),
+    ...(economyTaken && rich ? { runnerEconomyChosenWhileRich: true } : {}),
+    ...(economyTaken && freshPressureAvailable
+      ? { runnerEconomyChosenWhilePressureReady: true }
+      : {}),
+    ...(economyReserveSetup ? { runnerEconomyChosenAsReserveSetup: true } : {}),
+    ...(economyPlausible ? { runnerEconomyChoicePlausible: true } : {}),
+    ...(economySuspicious ? { runnerEconomyChoiceSuspicious: true } : {}),
+    ...(finiteSeen ? { runnerFinitePoolEconomySeen: true } : {}),
+    ...(finiteTaken ? { runnerFinitePoolEconomyTaken: true } : {}),
+    ...(finiteSeen && economySkipped
+      ? { runnerFinitePoolEconomySkipped: true }
+      : {}),
+    ...(debtSeen ? { runnerDebtEconomySeen: true } : {}),
+    ...(debtTaken ? { runnerDebtEconomyTaken: true } : {}),
+    ...(debtSeen && economySkipped ? { runnerDebtEconomySkipped: true } : {}),
+    ...(debtTaken && !economyNeeded
+      ? { runnerDebtEconomyTakenWithoutNeed: true }
+      : {}),
+    ...(downsideSeen ? { runnerEconomyWithDownsideSeen: true } : {}),
+    ...(downsideTaken ? { runnerEconomyWithDownsideTaken: true } : {}),
+    ...(chosen.delayedPenaltyEconomy
+      ? { runnerDelayedPenaltyEconomyTaken: true }
+      : {}),
+    ...(memoryWindow ? { runnerMemoryBottleneckDecisionWindow: true } : {}),
+    ...(handSizeWindow ? { runnerHandSizeBottleneckDecisionWindow: true } : {}),
+    ...(legalMemory.length > 0
+      ? { runnerLegalMemoryHardwareActions: legalMemory.length }
+      : {}),
+    ...(legalHandSize.length > 0
+      ? { runnerLegalHandSizeActions: legalHandSize.length }
+      : {}),
+    ...(chosen.memoryHardware ? { runnerMemoryHardwareTaken: true } : {}),
+    ...(chosen.handSizeSupport
+      ? {
+          runnerHandSizeSupportTaken: true,
+          runnerHandSizeFactUsedForDiagnosis: true,
+        }
+      : {}),
+    ...(memorySkipped && legalProgramInstalls > 0
+      ? { runnerMemorySupportSkippedWhileGripHasPrograms: true }
+      : {}),
+    ...(handSizeSkipped && handSizeNeedVisible
+      ? { runnerHandSizeSupportSkippedWhileDamageRiskVisible: true }
+      : {}),
+    ...(chosen.memoryHardware || chosen.handSizeSupport
+      ? {
+          ...(economyWindow && !economyTaken
+            ? { runnerHardwareSetupChosenOverEconomy: true }
+            : {}),
+          ...(freshPressureAvailable
+            ? { runnerHardwareSetupChosenOverPressure: true }
+            : {}),
+        }
+      : {}),
+    ...(legalSearch.length > 0
+      ? { runnerLegalSearchActions: legalSearch.length }
+      : {}),
+    ...(legalRecovery.length > 0
+      ? { runnerLegalRecoveryActions: legalRecovery.length }
+      : {}),
+    ...(searchTaken ? { runnerSearchTaken: true } : {}),
+    ...(recoveryTaken ? { runnerRecoveryTaken: true } : {}),
+    ...(searchSkippedWithCoverage
+      ? { runnerSearchSkippedWhileMissingBreakerCoverage: true }
+      : {}),
+    ...(recoverySkippedWithCoverage
+      ? { runnerRecoverySkippedWhileMissingBreakerCoverage: true }
+      : {}),
+    ...(searchTaken && missingBreakerCoverage
+      ? { runnerSearchTakenForBreakerCoverage: true }
+      : {}),
+    ...(recoveryTaken && missingBreakerCoverage
+      ? { runnerRecoveryTakenForBreakerCoverage: true }
+      : {}),
+    ...((searchTaken || recoveryTaken) && economyWindow && !economyTaken
+      ? { runnerSearchRecoveryChosenOverEconomy: true }
+      : {}),
+    ...((searchTaken || recoveryTaken) && freshPressureAvailable
+      ? { runnerSearchRecoveryChosenOverPressure: true }
+      : {}),
+    ...(economySkipped && lowCredits && knownUnaffordablePath
+      ? { runnerEconomyFixGateEligibleStarvedSkip: true }
+      : {}),
+    ...(economyTaken && rich
+      ? { runnerEconomyFixGateSuspiciousRichEconomy: true }
+      : {}),
+    ...(suspiciousEconomyOverPressure
+      ? { runnerEconomyFixGateSuspiciousEconomyOverPressure: true }
+      : {}),
+    ...(suspiciousEconomyOverRemoteContest
+      ? { runnerEconomyFixGateSuspiciousEconomyOverRemoteContest: true }
+      : {}),
+    ...(debtTaken && !economyNeeded
+      ? { runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed: true }
+      : {}),
+    ...(memorySkipped && legalProgramInstalls > 0
+      ? { runnerSetupFixGateEligibleMemorySkip: true }
+      : {}),
+    ...(searchSkippedWithCoverage || recoverySkippedWithCoverage
+      ? { runnerSetupFixGateEligibleSearchRecoverySkip: true }
+      : {}),
+    ...(classifications.length > 0
+      ? { runnerEconomySetupClassifications: classifications }
+      : {}),
+    ...(classifications.length > 0
+      ? { runnerEconomySetupEvidence: evidence }
+      : {}),
+  };
+}
+
+function runnerEconomySubcounts(
+  classifications: RunnerEconomySetupActionClass[],
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  const count = (
+    selector: (classification: RunnerEconomySetupActionClass) => boolean,
+  ) => classifications.filter(selector).length;
+  return {
+    ...(count((classification) => classification.burstEconomy) > 0
+      ? {
+          runnerLegalBurstEconomyActions: count(
+            (classification) => classification.burstEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.actionEconomy) > 0
+      ? {
+          runnerLegalActionEconomyActions: count(
+            (classification) => classification.actionEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.finitePoolEconomy) > 0
+      ? {
+          runnerLegalFinitePoolEconomyActions: count(
+            (classification) => classification.finitePoolEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.loanDebtEconomy) > 0
+      ? {
+          runnerLegalLoanDebtEconomyActions: count(
+            (classification) => classification.loanDebtEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.recurringEconomy) > 0
+      ? {
+          runnerLegalRecurringEconomyActions: count(
+            (classification) => classification.recurringEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.resourceEconomy) > 0
+      ? {
+          runnerLegalResourceEconomyActions: count(
+            (classification) => classification.resourceEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.hardwareEconomy) > 0
+      ? {
+          runnerLegalHardwareEconomyActions: count(
+            (classification) => classification.hardwareEconomy,
+          ),
+        }
+      : {}),
+  };
+}
+
+function runnerEconomySetupActionClass(
+  input: AiDecisionInput,
+  action: LegalAction,
+): RunnerEconomySetupActionClass {
+  const definitionId = sourceDefinitionIdForSimulationAction(input, action);
+  const definition = definitionForSimulationAction(input, action);
+  const roles = rolesForAction(input, action);
+  const mechanics =
+    definition &&
+    "mechanics" in definition &&
+    Array.isArray(definition.mechanics)
+      ? definition.mechanics
+      : [];
+  const isShortTermContract = definitionId === "onr_v1_178_short-term-contract";
+  const isLoanFromChiba = definitionId === "onr_v1_168_loan-from-chiba";
+  const isMramHandSize =
+    definitionId === "onr_v1_133_militech-mram-chip" ||
+    definitionId === "onr_v1_134_mram-chip";
+  const economy = isRunnerEconomyAction(input, action);
+  const search = runnerCoverageSearchActionForMetrics(input, action);
+  const recovery = runnerCoverageRecoveryActionForMetrics(input, action);
+  const handSizeSupport =
+    isMramHandSize ||
+    roles.some(
+      (role) =>
+        role.includes("hand_size") ||
+        role.includes("damage_resilience") ||
+        role.includes("damage_prevention"),
+    ) ||
+    mechanics.some(
+      (mechanic: string) =>
+        mechanic.includes("hand") || mechanic.includes("damage_prevention"),
+    );
+  const memoryHardware =
+    !handSizeSupport &&
+    action.type === "install_card" &&
+    (roles.includes("memory") ||
+      roles.includes("memory_support") ||
+      mechanics.some((mechanic: string) => mechanic.includes("memory")));
+  return {
+    economy,
+    burstEconomy: economy && action.type === "play_event",
+    actionEconomy:
+      economy &&
+      (action.type === "gain_credit" ||
+        action.type === "trigger_ability" ||
+        action.type === "activated_card_ability"),
+    finitePoolEconomy:
+      economy &&
+      (isShortTermContract ||
+        roles.some(
+          (role) => role.includes("finite") || role.includes("pool"),
+        ) ||
+        mechanics.some(
+          (mechanic: string) =>
+            mechanic.includes("counter") ||
+            mechanic.includes("resource_action"),
+        )),
+    loanDebtEconomy:
+      economy &&
+      (isLoanFromChiba ||
+        roles.some((role) => role.includes("loan") || role.includes("debt"))),
+    recurringEconomy:
+      economy &&
+      roles.some((role) => role.includes("recurring") || role.includes("drip")),
+    resourceEconomy: economy && definition?.type === "resource",
+    hardwareEconomy: economy && definition?.type === "hardware",
+    memoryHardware,
+    handSizeSupport,
+    search,
+    recovery,
+    downsideEconomy:
+      economy &&
+      (isLoanFromChiba ||
+        roles.some(
+          (role) =>
+            role.includes("risk") ||
+            role.includes("downside") ||
+            role.includes("penalty") ||
+            role.includes("tag"),
+        )),
+    delayedPenaltyEconomy:
+      economy &&
+      (isLoanFromChiba ||
+        roles.some(
+          (role) => role.includes("delayed") || role.includes("penalty"),
+        )),
+  };
+}
+
+function definitionForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+) {
+  const definitionId = sourceDefinitionIdForSimulationAction(input, action);
+  return definitionId
+    ? (RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId])
+    : undefined;
+}
+
+function runnerEconomySkipReasonForDiagnostics(context: {
+  action: LegalAction;
+  draw: boolean;
+  runAction: boolean;
+  setupAction: boolean;
+  installableBreaker: boolean;
+  remoteTrashAvailable: boolean;
+  advancedRemoteContestSkipped: boolean;
+  freshPressureAvailable: boolean;
+}):
+  | "pressure"
+  | "remote_contest"
+  | "setup"
+  | "draw"
+  | "run"
+  | "install_breaker"
+  | "trash"
+  | "end_turn"
+  | "unknown_higher_priority" {
+  if (context.advancedRemoteContestSkipped) return "remote_contest";
+  if (
+    context.action.type === "trash_accessed_card" ||
+    context.remoteTrashAvailable
+  )
+    return "trash";
+  if (context.installableBreaker && context.action.type === "install_card")
+    return "install_breaker";
+  if (context.setupAction) return "setup";
+  if (context.draw) return "draw";
+  if (context.runAction && context.freshPressureAvailable) return "pressure";
+  if (context.runAction) return "run";
+  if (context.action.type === "end_turn") return "end_turn";
+  return "unknown_higher_priority";
+}
+
+function runnerHasKnownUnaffordableLegalRun(input: AiDecisionInput): boolean {
+  return input.legalActions.some((action) => {
+    if (
+      action.side !== "runner" ||
+      action.type !== "start_run" ||
+      typeof action.payload?.serverId !== "string"
+    )
+      return false;
+    return (
+      runnerRunKnownPathCost(input, action.payload.serverId) >
+      input.playerView.own.credits
+    );
+  });
+}
+
+function runnerRunKnownPathCost(
+  input: AiDecisionInput,
+  targetServerId: string | undefined,
+): number {
+  if (!targetServerId) return 0;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  if (!server) return 0;
+  return (
+    assessKnownRezzedIcePath(
+      server.ice,
+      input.playerView.own.rig ?? [],
+      input.playerView.own.credits,
+      server.root,
+    ).visibleBreakCost ?? 0
+  );
+}
+
+function runnerVisibleMissingBreakerCoverage(input: AiDecisionInput): boolean {
+  const rigRoles = new Set(
+    (input.playerView.own.rig ?? []).flatMap((card) =>
+      rolesForCardId(card.definitionId),
+    ),
+  );
+  return input.playerView.servers.some((server) =>
+    server.ice
+      .filter(
+        (ice): ice is typeof ice & { definitionId: string } =>
+          ice.known && typeof ice.definitionId === "string",
+      )
+      .flatMap((ice) => runnerMissingBreakerRolesForMetrics(ice.definitionId))
+      .some((role) => !rigRoles.has(role)),
+  );
+}
+
+function runnerHasKnownBlockedPathByCoverage(input: AiDecisionInput): boolean {
+  return input.playerView.servers.some(
+    (server) =>
+      assessKnownRezzedIcePath(
+        server.ice,
+        input.playerView.own.rig ?? [],
+        input.playerView.own.credits,
+        server.root,
+      ).blocked,
+  );
 }
 
 function runnerCentralPressureDiagnosticsForSimulationAction(
