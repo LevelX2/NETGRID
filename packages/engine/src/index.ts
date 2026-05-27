@@ -809,6 +809,7 @@ function traceRuntimeDepsHost(): TraceRuntimeDepsHost {
   return {
     trace: {
       orchestrationHost: traceOrchestrationHost,
+      runnerLastTurnInstalledResourceIds,
     },
   };
 }
@@ -851,6 +852,9 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   rezzedCorpRootCardIds,
   runnerInstalledCardIds,
   runnerRunAttemptsLastTurn,
+  runnerRunAttemptsThisGame,
+  runnerTrashedNodeLastTurn,
+  runnerInstalledResourceLastTurn,
   runnerMadeSuccessfulRunOnServerThisTurn: (state, server) =>
     server === "hq" && hasSuccessfulHqRunThisTurn(state),
   runnerLiberatedAgendaSubtypeThisTurn: (state, subtype) =>
@@ -2431,6 +2435,7 @@ function corpMainActionGenerationHost(
       corpActionDebtPending,
       acmeSavingsAndLoanObligationCount,
       canPlayCorpOperation,
+      cardImplementationOperationLegalActions,
       corpUtilityImplementationForDefinition,
       powerGridOverloadLegalActions,
       systematicLayoffsLegalActions,
@@ -4796,6 +4801,22 @@ function performAction(
         const definition = definitionFor(state, cardId);
         if (!canPlayCorpOperation(state, definition))
           throw new Error("Diese Operation ist im aktuellen Zustand nicht spielbar.");
+        if (hasPrintedCostOnPlayCardImplementation(definition)) {
+          const expectedCost =
+            (definition.cost ?? 0) +
+            onPlayCardImplementationAdditionalOperationCost(definition);
+          if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
+            throw new Error("Die Operation-Kosten sind nicht mehr gueltig.");
+          if (
+            onPlayCardImplementationNeedsLastTurnResourceTarget(definition) &&
+            !runnerLastTurnInstalledResourceIds(state).includes(
+              String(
+                legalAction.payload.traceSuccessTargetCardId ?? "",
+              ) as CardInstanceId,
+            )
+          )
+            throw new Error("Das Operation-Ziel ist nicht mehr gueltig.");
+        }
       }
       spendClick(state, "corp");
       spendCredits(state, "corp", legalAction.costs[0]?.credits ?? 0);
@@ -5542,6 +5563,7 @@ function startRun(
   const server = mustServer(state, serverId);
   const flags = ensureRunnerTurnFlags(state);
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
+  flags.runAttemptsThisGame = (flags.runAttemptsThisGame ?? 0) + 1;
   executeCardImplementationRunnerRunStartEffects(
     cardImplementationRuntimeDeps,
     state,
@@ -7044,6 +7066,12 @@ function endTurn(
     flags.stoleBlackOpsAgendaThisTurn = false;
     flags.runAttemptsLastTurn = flags.runAttemptsThisTurn ?? 0;
     flags.runAttemptsThisTurn = 0;
+    flags.trashedNodeLastTurn = flags.trashedNodeThisTurn === true;
+    flags.trashedNodeThisTurn = false;
+    flags.installedResourceIdsLastTurn = (
+      flags.installedResourceIdsThisTurn ?? []
+    ).slice();
+    flags.installedResourceIdsThisTurn = [];
     flags.successfulHqRunThisTurn = false;
     flags.successfulRunThisTurn = false;
     delete flags.lastSuccessfulRunServerId;
@@ -8389,6 +8417,27 @@ function runnerRunAttemptsLastTurn(state: GameState): number {
     0,
     Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0),
   );
+}
+
+function runnerRunAttemptsThisGame(state: GameState): number {
+  return Math.max(
+    0,
+    Math.floor(state.runnerTurnFlags?.runAttemptsThisGame ?? 0),
+  );
+}
+
+function runnerTrashedNodeLastTurn(state: GameState): boolean {
+  return state.runnerTurnFlags?.trashedNodeLastTurn === true;
+}
+
+function runnerLastTurnInstalledResourceIds(state: GameState): CardInstanceId[] {
+  return (state.runnerTurnFlags?.installedResourceIdsLastTurn ?? [])
+    .filter((cardId) => state.runner.rig.resources.includes(cardId))
+    .sort();
+}
+
+function runnerInstalledResourceLastTurn(state: GameState): boolean {
+  return runnerLastTurnInstalledResourceIds(state).length > 0;
 }
 
 function recordRunnerActionSpent(state: GameState, amount: number): void {
@@ -10810,6 +10859,19 @@ function encounterPrintedEffectHostForState(
         sourceDefinitionId as CardDefinitionId,
         sourceCardInstanceId,
         traceId,
+      ),
+    resolveTraceTrashRunnerResourceSuccess: (
+      sourceDefinitionId,
+      sourceCardInstanceId,
+      traceId,
+      targetCardId,
+    ) =>
+      resolveTraceTrashRunnerResourceSuccess(
+        state,
+        sourceDefinitionId as CardDefinitionId,
+        sourceCardInstanceId,
+        traceId,
+        targetCardId,
       ),
     resolveTrashInstalledProgramSubroutine: (action = legalAction) => {
       const trashResult = resolveDirectTrashProgramSubroutine(
@@ -13776,6 +13838,28 @@ function resolveTraceHardwareWreckerSuccess(
   };
 }
 
+function resolveTraceTrashRunnerResourceSuccess(
+  state: GameState,
+  sourceDefinitionId: CardDefinitionId,
+  sourceCardInstanceId: CardInstanceId,
+  traceId: string,
+  targetCardId: CardInstanceId,
+): Record<string, unknown> {
+  if (!runnerLastTurnInstalledResourceIds(state).includes(targetCardId))
+    throw new Error("Die Runner-Resource ist fuer diesen Trace nicht mehr legal.");
+  const targetDefinitionId = definitionFor(state, targetCardId).id;
+  trashRunnerInstalledCardToHeap(state, targetCardId);
+  return {
+    traceSuccessEffect: "trash_runner_resource_and_add_tag",
+    sourceDefinitionId,
+    sourceCardInstanceId,
+    traceId,
+    trashedCardType: "resource",
+    trashedCount: 1,
+    trashedCardDefinitionId: targetDefinitionId,
+  };
+}
+
 function encounterTemporaryTraceCreditsAvailable(
   state: GameState,
   trace: NonNullable<GameState["trace"]>,
@@ -14833,11 +14917,17 @@ function canPlayCorpOperation(
   definition: CardDefinition,
 ): boolean {
   if (hasPrintedCostOnPlayCardImplementation(definition))
-    return canPlayPrintedCostOnPlayImplementation(
-      cardImplementationRuntimeDeps,
-      state,
-      definition,
-    ) && onPlayCardImplementationChoicesAreAvailable(state, definition);
+    return (
+      state.corp.credits >=
+        (definition.cost ?? 0) +
+          onPlayCardImplementationAdditionalOperationCost(definition) &&
+      canPlayPrintedCostOnPlayImplementation(
+        cardImplementationRuntimeDeps,
+        state,
+        definition,
+      ) &&
+      onPlayCardImplementationChoicesAreAvailable(state, definition)
+    );
   const utility = corpUtilityImplementationForDefinition(definition.id);
   if (utility) return canPlayCorpUtilityOperation(state, definition, utility);
   const implementationResolver =
@@ -15061,6 +15151,78 @@ function onPlayCardImplementationEffects(
   );
 }
 
+function onPlayCardImplementationAdditionalOperationCost(
+  definition: CardDefinition,
+): number {
+  return onPlayCardImplementationEffects(definition).reduce((sum, effect) => {
+    if (effect.kind !== "trace") return sum;
+    const perPoint = Math.max(
+      0,
+      Math.floor(effect.additionalPlayCostPerBaseTracePointAboveZero ?? 0),
+    );
+    return sum + perPoint * Math.max(0, effect.baseTraceStrength);
+  }, 0);
+}
+
+function onPlayCardImplementationNeedsLastTurnResourceTarget(
+  definition: CardDefinition,
+): boolean {
+  return onPlayCardImplementationEffects(definition).some(
+    (effect) =>
+      effect.kind === "trace" &&
+      effect.onSuccess.some(
+        (success) => success.kind === "trash_runner_resource_and_add_tag",
+      ),
+  );
+}
+
+function cardImplementationOperationLegalActions(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+): LegalAction[] {
+  if (!hasPrintedCostOnPlayCardImplementation(definition)) return [];
+  const additionalCost =
+    onPlayCardImplementationAdditionalOperationCost(definition);
+  const totalCost = (definition.cost ?? 0) + additionalCost;
+  if (state.corp.credits < totalCost) return [];
+  const needsResourceTarget =
+    onPlayCardImplementationNeedsLastTurnResourceTarget(definition);
+  if (!needsResourceTarget && additionalCost === 0) return [];
+  if (!needsResourceTarget)
+    return [
+      action(
+        state,
+        "corp",
+        "play_operation",
+        `${definition.title} spielen`,
+        cardId,
+        [{ clicks: 1, credits: totalCost }],
+        {
+          cardId,
+          ...(additionalCost > 0 ? { additionalTracePlayCost: additionalCost } : {}),
+        },
+      ),
+    ];
+  return runnerLastTurnInstalledResourceIds(state).map((targetCardId) => {
+    const targetDefinition = definitionFor(state, targetCardId);
+    return action(
+      state,
+      "corp",
+      "play_operation",
+      `${definition.title} spielen`,
+      cardId,
+      [{ clicks: 1, credits: totalCost }],
+      {
+        cardId,
+        traceSuccessTargetCardId: targetCardId,
+        traceSuccessTargetDefinitionId: targetDefinition.id,
+        ...(additionalCost > 0 ? { additionalTracePlayCost: additionalCost } : {}),
+      },
+    );
+  });
+}
+
 function onPlayCardImplementationChoicesAreAvailable(
   state: GameState,
   definition: CardDefinition,
@@ -15164,6 +15326,11 @@ function ensureRunnerTurnFlags(
     stoleBlackOpsAgendaThisTurn: false,
     runAttemptsThisTurn: 0,
     runAttemptsLastTurn: 0,
+    runAttemptsThisGame: 0,
+    trashedNodeThisTurn: false,
+    trashedNodeLastTurn: false,
+    installedResourceIdsThisTurn: [],
+    installedResourceIdsLastTurn: [],
     successfulHqRunThisTurn: false,
     successfulRunThisTurn: false,
     damagePreventionUsage: {},
@@ -15190,6 +15357,11 @@ function ensureRunnerTurnFlags(
   flags.stoleBlackOpsAgendaThisTurn ??= false;
   flags.runAttemptsThisTurn ??= 0;
   flags.runAttemptsLastTurn ??= 0;
+  flags.runAttemptsThisGame ??= 0;
+  flags.trashedNodeThisTurn ??= false;
+  flags.trashedNodeLastTurn ??= false;
+  flags.installedResourceIdsThisTurn ??= [];
+  flags.installedResourceIdsLastTurn ??= [];
   flags.successfulHqRunThisTurn ??= false;
   flags.successfulRunThisTurn ??= false;
   flags.damagePreventionUsage ??= {};

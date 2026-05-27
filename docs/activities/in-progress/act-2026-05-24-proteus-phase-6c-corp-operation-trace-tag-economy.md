@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-6c-corp-operation-trace-tag-economy
-status: blocked
+status: done
 kind: implementation
 area: cards
 priority: normal
@@ -8,19 +8,15 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-27
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 6c
 proReferences:
   - PRO007
-  - PRO026
-blockedBy:
-  - Data Sifters needs a Runner-last-turn history condition for trashed nodes; current CardConditionImplementation does not track or query subtype/card-type trash history from the Runner's previous turn.
-  - Manhunt needs a trace success effect that gives tags equal to the margin by which Corp trace strength exceeded Runner link; current trace success effects support fixed tag amounts only.
-  - Schlaghund Pointers needs a play condition for "Runner attempted a run this game" and an additional trace-cost model based on trace points above 0; current operation conditions cover last-turn run attempts but not this game, and trace cost is not declarative per base trace point.
-  - Underworld Mole needs a Runner-last-turn installed-resource history condition and a trace success target limited to one of those resources, then trash plus tag; current trace success effects cannot target last-turn-installed resources.
+blockedBy: []
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-6c-corp-operation-trace-tag-economy.md
+  - docs/activities/done/act-2026-05-27-proteus-pro007-corp-operation-economy-trace-history.md
   - docs/releases/proteus/README.md
 checks:
   - "rg -n \"onr_proteus_047|onr_proteus_048|onr_proteus_050|onr_proteus_052|onr_proteus_053|Credit Consolidation|Data Sifters|Manhunt|Schlaghund Pointers|Underworld Mole\" data/cards/proteus-cards.json docs/releases/proteus data/manifests/proteus-card-support.json -S"
@@ -61,17 +57,20 @@ Die sichtbaren Proteus-Corp-Operations mit Trace-, Tag-, Credit- und Trash-Effek
 
 ## Akzeptanzkriterien
 
-- [ ] Jede Zielkarte besitzt eine eigene CardImplementation-Datei.
-- [ ] Trace- und Folgeeffekte sind LegalAction-basiert und in `applyAction` erneut validiert.
-- [ ] Hidden-Info- und PublicPayload-Grenzen sind nachgewiesen.
-- [ ] Registry-/Coverage-/Manifest-Nachweis ist erbracht.
+- [x] Jede Zielkarte besitzt eine eigene CardImplementation-Datei.
+- [x] Trace- und Folgeeffekte sind LegalAction-basiert und in `applyAction` erneut validiert.
+- [x] Hidden-Info- und PublicPayload-Grenzen sind nachgewiesen.
+- [x] Registry-/Coverage-/Manifest-Nachweis ist erbracht.
 
 ## Ergebnisnotiz
 
-Blockiert. `Credit Consolidation` ist isoliert als einfache Operation mit `gain_credits` umsetzbar, aber der vollständige 6c-Slice benötigt mehrere fehlende generische History- und Trace-Varianten:
+Erledigt durch PRO007. Alle fünf Zielkarten wurden als konkrete CardImplementation-Dateien unter `packages/engine/src/card-implementations/proteus/corp/operations/` umgesetzt, registriert und im Proteus-Manifest als engine-/human-playable markiert.
 
-- `Data Sifters` braucht eine Runner-last-turn-History für getrashte Nodes.
-- `Manhunt` braucht einen Trace-Erfolg "Tags gleich Trace-Marge über Runner-Link" statt fester Tag-Anzahl.
-- `Schlaghund Pointers` braucht eine "Runner attempted a run this game"-Condition und ein deklaratives Zusatzkostenmodell für Trace-Punkte über 0.
-- `Underworld Mole` braucht eine Runner-last-turn-History für installierte Resources, eine Zielauswahl aus genau diesen Resources und einen Trace-Erfolg "trash target plus tag".
-- Keine CardImplementation wurde fuer 6c angelegt und keine Manifest-/Coverage-Promotion vorgenommen.
+Ergänzte generische Engine-Bausteine:
+
+- Runner-History-Conditions für `runner_trashed_node_last_turn`, `runner_installed_resource_last_turn` und `runner_attempted_run_this_game`.
+- Trace-Erfolg `add_tags_by_trace_margin_over_runner_link`.
+- Trace-Erfolg `trash_runner_resource_and_add_tag` mit LegalAction-Zielauswahl für im letzten Runner-Zug installierte Resources und erneuter `applyAction`-Revalidierung.
+- Zusatzkostenmodell `additionalPlayCostPerBaseTracePointAboveZero` für Operation-Traces wie `Schlaghund Pointers`.
+
+Harness-Zahlen: vorher 154/62/92, nachher 154/67/87, jeweils 0 Drift-/Konsistenzfehler. Keine PRO007-Karte wurde `deck_legal`, `format_legal` oder `ai_supported`.

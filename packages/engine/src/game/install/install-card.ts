@@ -319,6 +319,11 @@ function installRunnerCard(
       definition,
       concealedHiddenRunnerResource,
     );
+    const flags = host.runner.ensureTurnFlags();
+    flags.installedResourceIdsThisTurn = [
+      ...(flags.installedResourceIdsThisTurn ?? []),
+      cardId,
+    ];
   } else {
     throw new Error(
       "Nur Programme, Hardware und Resources koennen vom Runner installiert werden.",

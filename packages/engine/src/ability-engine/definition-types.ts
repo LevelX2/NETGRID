@@ -703,6 +703,9 @@ export type CardConditionImplementation =
   | { kind: "source_has_hosted_credits" }
   | { kind: "source_has_advancement_counters"; minimum: number }
   | { kind: "runner_attempted_run_last_turn"; minimumRuns: number }
+  | { kind: "runner_attempted_run_this_game"; minimumRuns: number }
+  | { kind: "runner_trashed_node_last_turn" }
+  | { kind: "runner_installed_resource_last_turn" }
   | { kind: "runner_damaged_during_last_three_actions" }
   | {
       kind: "runner_liberated_agenda_subtype_this_turn";
@@ -1207,6 +1210,11 @@ export type CardTraceSuccessEffectImplementation =
       visibility: EventVisibilityClass;
     }
   | {
+      kind: "add_tags_by_trace_margin_over_runner_link";
+      recipient: "runner";
+      visibility: EventVisibilityClass;
+    }
+  | {
       kind: "add_counter";
       recipient: "runner";
       counterType: Extract<CounterType, "data_raven" | "cerberus" | "mastiff">;
@@ -1237,11 +1245,17 @@ export type CardTraceSuccessEffectImplementation =
       kind: "trash_program";
       target: "installed_runner_program";
       visibility: EventVisibilityClass;
+    }
+  | {
+      kind: "trash_runner_resource_and_add_tag";
+      target: "runner_resource_installed_last_turn";
+      visibility: EventVisibilityClass;
     };
 
 export type TraceEffectImplementation = {
   kind: "trace";
   baseTraceStrength: number;
+  additionalPlayCostPerBaseTracePointAboveZero?: number;
   onSuccess: readonly CardTraceSuccessEffectImplementation[];
   onFailure?: readonly CardTraceSuccessEffectImplementation[];
   visibility: EventVisibilityClass;

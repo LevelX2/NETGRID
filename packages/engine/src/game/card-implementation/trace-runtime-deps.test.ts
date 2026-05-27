@@ -134,6 +134,7 @@ function host(): TraceRuntimeDepsHost {
           PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID: "paris" as CardDefinitionId,
         },
       }),
+      runnerLastTurnInstalledResourceIds: () => [],
     },
   };
 }

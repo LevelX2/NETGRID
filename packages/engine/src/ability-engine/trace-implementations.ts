@@ -15,6 +15,9 @@ export function traceSuccessEffectForCardImplementation(
   const counterEffects = effects.filter(
     (effect) => effect.kind === "add_counter",
   );
+  const marginTagEffects = effects.filter(
+    (effect) => effect.kind === "add_tags_by_trace_margin_over_runner_link",
+  );
   const endRunEffects = effects.filter((effect) => effect.kind === "end_run");
   const runLockEffects = effects.filter(
     (effect) => effect.kind === "runner_run_lock_until_action_paid",
@@ -28,14 +31,19 @@ export function traceSuccessEffectForCardImplementation(
   const unpreventableMeatEffects = effects.filter(
     (effect) => effect.kind === "unpreventable_meat_damage",
   );
+  const trashResourceTagEffects = effects.filter(
+    (effect) => effect.kind === "trash_runner_resource_and_add_tag",
+  );
   if (
     tagEffects.length === 1 &&
     counterEffects.length === 0 &&
+    marginTagEffects.length === 0 &&
     endRunEffects.length === 0 &&
     runLockEffects.length === 0 &&
     trashProgramEffects.length === 0 &&
     trashHardwareEffects.length === 0 &&
-    unpreventableMeatEffects.length === 0
+    unpreventableMeatEffects.length === 0 &&
+    trashResourceTagEffects.length === 0
   ) {
     const amount = tagEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
@@ -45,11 +53,13 @@ export function traceSuccessEffectForCardImplementation(
   if (
     tagEffects.length === 0 &&
     counterEffects.length === 1 &&
+    marginTagEffects.length === 0 &&
     endRunEffects.length === 0 &&
     runLockEffects.length === 0 &&
     trashProgramEffects.length === 0 &&
     trashHardwareEffects.length === 0 &&
-    unpreventableMeatEffects.length === 0
+    unpreventableMeatEffects.length === 0 &&
+    trashResourceTagEffects.length === 0
   ) {
     const amount = counterEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
@@ -63,11 +73,13 @@ export function traceSuccessEffectForCardImplementation(
   if (
     tagEffects.length === 1 &&
     counterEffects.length === 1 &&
+    marginTagEffects.length === 0 &&
     endRunEffects.length === 0 &&
     runLockEffects.length === 0 &&
     trashProgramEffects.length === 0 &&
     trashHardwareEffects.length === 0 &&
-    unpreventableMeatEffects.length === 0
+    unpreventableMeatEffects.length === 0 &&
+    trashResourceTagEffects.length === 0
   ) {
     const tagAmount = tagEffects[0]?.amount ?? 0;
     const counterAmount = counterEffects[0]?.amount ?? 0;
@@ -85,11 +97,26 @@ export function traceSuccessEffectForCardImplementation(
   if (
     tagEffects.length === 0 &&
     counterEffects.length === 0 &&
+    marginTagEffects.length === 1 &&
+    endRunEffects.length === 0 &&
+    runLockEffects.length === 0 &&
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0 &&
+    trashResourceTagEffects.length === 0
+  ) {
+    return { type: "add_tags_by_trace_margin_over_runner_link" };
+  }
+  if (
+    tagEffects.length === 0 &&
+    counterEffects.length === 0 &&
+    marginTagEffects.length === 0 &&
     endRunEffects.length === 1 &&
     runLockEffects.length === 1 &&
     trashProgramEffects.length === 0 &&
     trashHardwareEffects.length === 0 &&
-    unpreventableMeatEffects.length === 0
+    unpreventableMeatEffects.length === 0 &&
+    trashResourceTagEffects.length === 0
   ) {
     const amount = runLockEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
@@ -99,11 +126,13 @@ export function traceSuccessEffectForCardImplementation(
   if (
     tagEffects.length === 0 &&
     counterEffects.length === 0 &&
+    marginTagEffects.length === 0 &&
     endRunEffects.length === 1 &&
     runLockEffects.length === 1 &&
     trashProgramEffects.length === 1 &&
     trashHardwareEffects.length === 0 &&
-    unpreventableMeatEffects.length === 0
+    unpreventableMeatEffects.length === 0 &&
+    trashResourceTagEffects.length === 0
   ) {
     const amount = runLockEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
@@ -113,11 +142,13 @@ export function traceSuccessEffectForCardImplementation(
   if (
     tagEffects.length === 0 &&
     counterEffects.length === 0 &&
+    marginTagEffects.length === 0 &&
     endRunEffects.length === 1 &&
     runLockEffects.length === 0 &&
     trashProgramEffects.length === 0 &&
     trashHardwareEffects.length === 1 &&
-    unpreventableMeatEffects.length === 1
+    unpreventableMeatEffects.length === 1 &&
+    trashResourceTagEffects.length === 0
   ) {
     const amount = unpreventableMeatEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
@@ -125,6 +156,22 @@ export function traceSuccessEffectForCardImplementation(
     return {
       type: "end_run_trash_hardware_and_unpreventable_meat_damage",
       amount,
+    };
+  }
+  if (
+    tagEffects.length === 0 &&
+    counterEffects.length === 0 &&
+    marginTagEffects.length === 0 &&
+    endRunEffects.length === 0 &&
+    runLockEffects.length === 0 &&
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0 &&
+    trashResourceTagEffects.length === 1
+  ) {
+    return {
+      type: "trash_runner_resource_and_add_tag",
+      targetCardInstanceId: "",
     };
   }
   throw new Error("Unsupported CardImplementation trace success effect sequence.");

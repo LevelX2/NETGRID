@@ -779,6 +779,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/ice/toughonium-wall.ts",
   "onr_proteus_044_walking-wall":
     "packages/engine/src/card-implementations/proteus/corp/ice/walking-wall.ts",
+  "onr_proteus_047_credit-consolidation":
+    "packages/engine/src/card-implementations/proteus/corp/operations/credit-consolidation.ts",
+  "onr_proteus_048_data-sifters":
+    "packages/engine/src/card-implementations/proteus/corp/operations/data-sifters.ts",
+  "onr_proteus_050_manhunt":
+    "packages/engine/src/card-implementations/proteus/corp/operations/manhunt.ts",
+  "onr_proteus_052_schlaghund-pointers":
+    "packages/engine/src/card-implementations/proteus/corp/operations/schlaghund-pointers.ts",
+  "onr_proteus_053_underworld-mole":
+    "packages/engine/src/card-implementations/proteus/corp/operations/underworld-mole.ts",
   "onr_proteus_009_viral-breeding-ground":
     "packages/engine/src/card-implementations/proteus/corp/agendas/viral-breeding-ground.ts",
   "onr_proteus_054_bel-digmo-antibody":
