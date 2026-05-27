@@ -310,30 +310,23 @@ import {
   type BreachStateHost,
 } from "./game/access/breach-state";
 import {
-  enterAccessFromSuccessfulRun,
   resolveMicrotechAiInterfacePreAccessChoice,
   resolvePriorityWreckSpendChoice,
   sourcePayloadForSuccessfulRunReplacement,
   type RunAccessTransitionHost,
 } from "./game/run/run-access-transition";
 import {
-  startRun as startRunFromRunCore,
   type RunCoreExecutionHost,
   type StartRunOptions,
 } from "./game/run/run-core-execution";
 import {
-  continueRun as continueRunFromRunContinuation,
   type RunContinuationExecutionHost,
 } from "./game/run/run-continuation-execution";
 import {
   applyBodyweightDataCrecheSuccessfulRun,
-  applyDirectSuccessfulRunTriggers,
   buildSuccessfulRunFollowupActions,
-  cleanupDelayedSuccessfulRunTemporaryIce,
   resolveSuccessfulRunFollowupAbility,
   resolveSuccessfulRunInterventionChoice as resolveSuccessfulRunInterventionChoiceInRunModule,
-  successfulRunInterventionCost,
-  successfulRunInterventionKindForDefinition,
   type SuccessfulRunInterventionHost,
 } from "./game/run/successful-run-interventions";
 import {
@@ -345,7 +338,6 @@ import {
 } from "./game/run/run-end-cleanup";
 import {
   activeWilsonSourceIds,
-  availableRunnerRunCredits,
   availableRunnerRunStartCredits,
   hostedPaymentCredits,
   isRestrictedHostedCreditSource,
@@ -355,7 +347,6 @@ import {
   restrictedHostedCreditSourceIds,
   restrictedHostedCredits,
   runDurationPaymentHost,
-  runJackOutAdditionalCost,
   shouldLoadLegacyRecurringCredits,
   spendHostedPaymentCredits,
   spendRestrictedHostedCredits,
@@ -363,32 +354,25 @@ import {
   type RunDurationPaymentHost,
 } from "./game/run/run-duration-payment";
 import {
-  encounterResolutionHost,
   resolvePassRezzedIceProgramTrashChoice as resolvePassRezzedIceProgramTrashChoiceInRunModule,
   resolveViral15ProgramTrashChoice as resolveViral15ProgramTrashChoiceInRunModule,
   type EncounterResolutionHost,
 } from "./game/run/encounter-resolution";
 import {
   applyRioDeJaneiroCityGridPassedIceTrigger,
-  encounterSpecialWindowHost,
-  fullyBrokenPassedIcePostPassActions,
   isSubmarineUplinkSource,
   markSubmarineUplinkJackOutAfterEncounter,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
   resolveStartupImmolatorTrashIce as resolveStartupImmolatorTrashIceInRunModule,
   resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
-  startupImmolatorPostPassActions,
   type EncounterSpecialWindowHost,
 } from "./game/run/encounter-special-windows";
 import {
   applyPrintedTraceSuccessFollowups,
-  encounterPrintedEffectHost,
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "./game/run/encounter-printed-effects";
 import {
-  encounterPrintedNonTraceHost,
-  resolveDirectTrashProgramSubroutine,
   type EncounterPrintedNonTraceHost,
 } from "./game/run/encounter-printed-nontrace-effects";
 import {
@@ -423,9 +407,7 @@ import {
   type TraceRuntimeDepsHost,
 } from "./game/card-implementation/trace-runtime-deps";
 import {
-  approachIceExposeCanBeOfferedForCurrentIce,
   beginEncounter,
-  continueAfterCorpRootRezIfWindowIsComplete,
   isApproachIceExposeViewingWindowOpen,
   isApproachIceExposeWindowOpen,
   resolveApproachIceExposeAbility,
@@ -437,7 +419,6 @@ import {
 import {
   buildCorpApproachActions,
   buildCorpRunRootRezWindowActions,
-  corpRunRootRezActionsAvailable,
   corpRunRootRezWindowKey,
   handleRunRootRezPostRez,
   isCorpRunRootRezWindowOpen,
@@ -464,23 +445,22 @@ import {
   parisTracePoolCapacityForCard,
   resolveAardvarkInterceptionChoice,
   resolveHammerStealthLossChoice,
-  runnerCanUseBreakerOnCurrentFort,
   runnerStealthRecurringCredits,
   shouldOpenAardvarkInterception,
   spendParisCityGridTracePool,
   startAardvarkInterceptionChoice,
-  isTokyoUnsuccessfulRunSource,
-  tokyoUnsuccessfulRunAmountForCard,
   validateRovingSubmarineRunGate,
   type FortRunSideFamiliesHost,
 } from "./game/run/fort-run-side-families";
 import {
-  approachOrEncounterIce,
   handleRunMovementAction,
-  movePastCurrentIce,
   passApproachedIce,
   type RunMovementHost,
 } from "./game/run/run-movement";
+import {
+  createRunFlowAdapters,
+  type RunFlowHost,
+} from "./game/run/run-flow-hosts";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -914,6 +894,148 @@ function gameCardImplementationRuntimeDepsHost(): GameCardImplementationRuntimeD
 const cardImplementationRuntimeDeps = createGameCardImplementationRuntimeDeps(
   gameCardImplementationRuntimeDepsHost(),
 );
+
+const runFlow = createRunFlowAdapters({
+  cards: {
+    definitionFor,
+    cardInstanceFor: (state, cardId) => mustInstance(state.cardInstances, cardId),
+    cardHasSubtype,
+    runnerInstalledCardIds,
+    publicInstalledCorpCardIdentityKnown,
+    effectiveSubtypesForCard,
+    hostedProgramStrengthModifier,
+    cardImplementationAccessHookKindsForDefinition: (definitionId) =>
+      cardImplementationForDefinitionId(definitionId)?.accessHooks?.map(
+        (hook) => hook.kind,
+      ) ?? [],
+  },
+  servers: {
+    mustServer,
+    publicServerLabel,
+    randomHqAccess,
+  },
+  rules: {
+    isV097OrLater,
+    isV099OrLater,
+  },
+  turn: {
+    ensureRunnerTurnFlags,
+    consumeRunnerFutureActionDebt,
+  },
+  access: {
+    breachStateHost,
+    accessFlowHost,
+    advanceArchivesBreachPastNonDecisionCards,
+    startRunnerPrivateLookChoice,
+    startExpertScheduleAnalyzerPostAccessChoice,
+  },
+  run: {
+    currentRun: mustRun,
+    currentEncounterSubroutines: subroutinesForCurrentEncounter,
+    runRemainderStrengthBonusForBreaker,
+    runnerDuringRunCardImplementationLegalActions: (state) =>
+      buildRunnerDuringRunCardImplementationActions(
+        runCardImplementationActionHost(state),
+      ).legalActions,
+    executeCardImplementationRunnerRunStartEffects: (
+      callbackState,
+      legalAction,
+    ) =>
+      executeCardImplementationRunnerRunStartEffects(
+        cardImplementationRuntimeDeps,
+        callbackState,
+        legalAction,
+      ),
+    applyRunnerTraceCounterRunStartEffects,
+    applyAiBoonRunStart,
+  },
+  trace: {
+    calculateRunnerLink: (state) =>
+      calculateRunnerLinkInTrace(traceOrchestrationHost(state)),
+    traceBidChoice,
+    addHackerTrackerTraceCounters,
+    hackerTrackerCounterTotal,
+    krumzTraceBitTotal,
+    rabbitTraceLimitReductionForIceTrace,
+    resolveTraceHardwareWreckerSuccess,
+    resolveTraceTrashRunnerResourceSuccess,
+    supportsTraceSuccessEffect: (effect) =>
+      isSupportedEncounterTraceSuccessEffect(
+        effect,
+        traceCounterEffectDefinitionFor,
+      ),
+  },
+  damage: {
+    createDamageImminentEvent,
+    doDamage,
+    openEventModificationWindow,
+    openReplacementWindow,
+    resolveDamageImminentEvent,
+    setDamagePayload,
+  },
+  payment: {
+    spendCredits,
+    credits,
+    rezCostForCard,
+    creditCostForAction,
+  },
+  counters: {
+    cardCounter,
+    addCardCounter,
+    setCardCounter,
+    spendCardCounter,
+    addVirusCounterWithDisinfectantPrevention,
+    preventOneVirusCounterWithDisinfectant,
+    poxCountersForServer,
+  },
+  ice: {
+    strengthForIce: iceStrengthFor,
+    icebreakerHasSpecial: (state, breakerId, special) =>
+      icebreakerHasSpecial(
+        state,
+        breakerId,
+        special as NonNullable<RuntimeIcebreakerAbility["special"]>,
+      ),
+    dupreStrengthCounterBonus,
+    resetBreakerStrength,
+    withoutVariableIceState,
+  },
+  zones: {
+    removeFromAllZones,
+    trashCorpInstalledCardToArchives,
+    trashRunnerInstalledCardToHeap,
+    trashRunnerInstalledProgram,
+    cleanupEmptyRemotes,
+    ensureSpecialZones,
+  },
+  choices: {
+    hiddenZoneArrangeChoiceHandlerHost,
+    openRunnerInstalledTrashPreventionWindow,
+  },
+  effects: {
+    executeEffectCommands,
+    breakAbilityForLegalAction,
+    breakSubroutineCostBreakdown,
+    abilityMetadata,
+    revealCorpRdTop,
+  },
+  rng: {
+    nextRandom,
+    rollDie: rollDeterministicDie,
+    shuffleStateIds,
+  },
+  callbacks: {
+    finishRun,
+    drawCorpCards,
+    acmeSavingsAndLoanObligationCount,
+    addAcmeSavingsAndLoanObligation,
+    applyRunnerForgoNextAction,
+    hasInstalledMicrotechTrodeSet,
+    traceCounterEffectDefinitionFor,
+    installedRunnerVirusSourceIds,
+    virusCounterImplementationForCard,
+  },
+} satisfies RunFlowHost);
 
 // Public context generation is read-only and injected here to avoid an import
 // cycle. It may format already-public payload data, but it must not decide
@@ -5279,8 +5401,8 @@ function startRun(
   options?: StartRunOptions,
   legalAction?: LegalAction,
 ): void {
-  startRunFromRunCore(
-    runCoreExecutionHost(state),
+  runFlow.startRun(
+    state,
     serverId,
     pendingSuccessBonusCredits,
     accessCount,
@@ -5290,38 +5412,7 @@ function startRun(
 }
 
 function runCoreExecutionHost(state: GameState): RunCoreExecutionHost {
-  return {
-    state,
-    servers: {
-      mustServer: (serverId) => mustServer(state, serverId),
-    },
-    turn: {
-      ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
-    },
-    access: {
-      breachStateHost: () => breachStateHost(state),
-      runAccessTransitionHost: () => runAccessTransitionHost(state),
-    },
-    run: {
-      movementHost: () => runMovementHostForState(state),
-    },
-    rules: {
-      isV099OrLater: () => isV099OrLater(state),
-    },
-    callbacks: {
-      executeCardImplementationRunnerRunStartEffects: (
-        callbackState,
-        legalAction,
-      ) =>
-        executeCardImplementationRunnerRunStartEffects(
-          cardImplementationRuntimeDeps,
-          callbackState,
-          legalAction,
-        ),
-      applyRunnerTraceCounterRunStartEffects,
-      applyAiBoonRunStart,
-    },
-  };
+  return runFlow.runCoreExecutionHost(state);
 }
 
 type RunnerTraceCounterEffectRuntime =
@@ -5560,56 +5651,13 @@ function applyAiBoonRunStart(
 }
 
 function continueRun(state: GameState, legalAction?: LegalAction): void {
-  continueRunFromRunContinuation(
-    runContinuationExecutionHost(state),
-    legalAction,
-  );
+  runFlow.continueRun(state, legalAction);
 }
 
 function runContinuationExecutionHost(
   state: GameState,
 ): RunContinuationExecutionHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-    },
-    encounter: {
-      currentSubroutines: (iceDefinition) =>
-        subroutinesForCurrentEncounter(state, iceDefinition),
-      resolutionHost: () => encounterResolutionHostForState(state),
-      printedEffectHost: (legalAction) =>
-        encounterPrintedEffectHostForState(state, legalAction),
-      printedNonTraceHost: (legalAction) =>
-        encounterPrintedNonTraceHostForState(state, legalAction),
-      specialWindowHost: () => encounterSpecialWindowHostForState(state),
-      successfulRunInterventionHost: () => successfulRunInterventionHost(state),
-    },
-    movement: {
-      host: () => runMovementHostForState(state),
-    },
-    damage: {
-      dealDamage: (input) => doDamage(state, input),
-      setDamagePayload: (legalAction, summary) =>
-        setDamagePayload(legalAction, summary),
-    },
-    cleanup: {
-      resetBreakerStrength: () => resetBreakerStrength(state),
-    },
-    callbacks: {
-      finishRun: (successful, legalAction) =>
-        finishRun(state, successful, legalAction),
-      icebreakerHasBartmossPostEncounterSelfTrashCheck: (breakerId) =>
-        icebreakerHasSpecial(
-          state,
-          breakerId,
-          "bartmoss_post_encounter_self_trash_check",
-        ),
-      rollDeterministicDie: (purpose) => rollDeterministicDie(state, purpose),
-      trashRunnerInstalledProgram: (breakerId) =>
-        trashRunnerInstalledProgram(state, breakerId),
-    },
-  };
+  return runFlow.runContinuationExecutionHost(state);
 }
 
 function resolveBlinkBreakSubroutineAction(
@@ -9948,524 +9996,63 @@ function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
 function runnerEncounterActionHostForState(
   state: GameState,
 ): RunnerEncounterActionHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-      cardCounter: (cardId, counterType) =>
-        cardCounter(state, cardId, counterType as CounterType),
-      effectiveSubtypesForCard: (cardId, definition) =>
-        effectiveSubtypesForCard(state, cardId, definition),
-      hostedProgramStrengthModifier: (cardId) =>
-        hostedProgramStrengthModifier(state, cardId),
-      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
-    },
-    run: {
-      currentRun: () => mustRun(state),
-      currentEncounterSubroutines: (iceDefinition) =>
-        subroutinesForCurrentEncounter(state, iceDefinition),
-      runnerDuringRunCardImplementationLegalActions: () => buildRunnerDuringRunCardImplementationActions(runCardImplementationActionHost(state)).legalActions,
-      runRemainderStrengthBonusForBreaker: (breakerId) =>
-        runRemainderStrengthBonusForBreaker(state.run, breakerId),
-      canUseBreakerOnCurrentFort: (breakerId) =>
-        runnerCanUseBreakerOnCurrentFort(
-          fortRunSideFamiliesHostForState(state),
-          breakerId,
-        ),
-    },
-    ice: {
-      strengthForIce: (iceId) => iceStrengthFor(state, iceId),
-    },
-    breaker: {
-      dupreStrengthCounterBonus: (breakerId) =>
-        dupreStrengthCounterBonus(state, breakerId),
-      runnerStealthRecurringCredits: () =>
-        runnerStealthRecurringCredits(fortRunSideFamiliesHostForState(state)),
-    },
-    payment: {
-      availableRunnerRunCredits: (breakerId) =>
-        availableRunnerRunCredits(runDurationPaymentHost(state), breakerId),
-      runJackOutAdditionalCost: (run) => runJackOutAdditionalCost(run),
-    },
-    actions: {
-      buildLegalAction: (type, label, source, costs, payload, metadata) =>
-        action(state, "runner", type, label, source, costs, payload, metadata),
-      abilityMetadata: (sourceCardInstanceId, abilityId, encounteredIceId) =>
-        abilityMetadata(sourceCardInstanceId, abilityId, encounteredIceId),
-    },
-    costs: {
-      breakSubroutineCostBreakdown: (baseCost, subroutineCount) =>
-        breakSubroutineCostBreakdown(state, baseCost, subroutineCount),
-    },
-    callbacks: {
-      postPassSpecialWindowActions: () => [
-        ...fullyBrokenPassedIcePostPassActions(
-          encounterSpecialWindowHostForState(state),
-        ),
-        ...startupImmolatorPostPassActions(
-          encounterSpecialWindowHostForState(state),
-        ),
-      ],
-    },
-  };
+  return runFlow.runnerEncounterActionHostForState(state);
 }
 
 function runMovementHostForState(state: GameState): RunMovementHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-    },
-    servers: {
-      mustServer: (serverId) => mustServer(state, serverId),
-      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
-    },
-    rules: {
-      isV097OrLater: () => isV097OrLater(state),
-      corpRunRootRezActionsAvailable: () =>
-        corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
-      approachIceExposeCanBeOfferedForCurrentIce: () =>
-        approachIceExposeCanBeOfferedForCurrentIce(
-          encounterEntryHostForState(state),
-        ),
-    },
-    encounter: {
-      encounterResolutionHost: () => encounterResolutionHostForState(state),
-      encounterSpecialWindowHost: () => encounterSpecialWindowHostForState(state),
-      beginEncounter: (iceId, legalAction) =>
-        beginEncounter(encounterEntryHostForState(state), iceId, legalAction),
-    },
-    access: {
-      startAccessFromSuccessfulRun: (legalAction) => enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction),
-    },
-    cleanup: {
-      finishRun: (successful, legalAction) => finishRun(state, successful, legalAction),
-    },
-  };
+  return runFlow.runMovementHostForState(state);
 }
 
 function runRezWindowHostForState(state: GameState): RunRezWindowHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-      runnerInstalledProgramIds: () => state.runner.rig.programs,
-    },
-    servers: {
-      mustServer: (serverId) => mustServer(state, serverId),
-      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
-    },
-    fortPass: fortPassWindowHostForState(state),
-    choices: {
-      selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
-    },
-    callbacks: {
-      continueAfterRootRez: (legalAction) =>
-        continueAfterCorpRootRezIfWindowIsComplete(
-          encounterEntryHostForState(state),
-          legalAction,
-        ),
-      finishRun: (successful, legalAction) =>
-        finishRun(state, successful, legalAction),
-      trashCorpInstalledCardToArchives: (cardId, legalAction) =>
-        trashCorpInstalledCardToArchives(state, cardId, legalAction),
-      acmeSavingsAndLoanObligationCount: () =>
-        acmeSavingsAndLoanObligationCount(state),
-      addAcmeSavingsAndLoanObligation: (amount) =>
-        addAcmeSavingsAndLoanObligation(state, amount),
-    },
-  };
+  return runFlow.runRezWindowHostForState(state);
 }
 
 function fortPassWindowHostForState(state: GameState): FortPassWindowHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-      publicInstalledCorpCardIdentityKnown: (cardId) =>
-        publicInstalledCorpCardIdentityKnown(state, cardId),
-    },
-    servers: {
-      mustServer: (serverId) => mustServer(state, serverId),
-    },
-    payment: {
-      spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
-    },
-  };
+  return runFlow.fortPassWindowHostForState(state);
 }
 
 function fortRunSideFamiliesHostForState(
   state: GameState,
 ): FortRunSideFamiliesHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-      cardHasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
-      runnerInstalledCardIds: () => runnerInstalledCardIds(state),
-    },
-    servers: {
-      mustServer: (serverId) => mustServer(state, serverId),
-      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
-    },
-    counters: {
-      cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
-      setCardCounter: (cardId, counterType, amount) =>
-        setCardCounter(state, cardId, counterType, amount),
-      spendCardCounter: (cardId, counterType, amount) =>
-        spendCardCounter(state, cardId, counterType, amount),
-    },
-    payment: {
-      hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
-      spendHostedPaymentCredits: (cardId, amount) =>
-        spendHostedPaymentCredits(state, cardId, amount),
-      rezCostForCard: (cardId) => rezCostForCard(state, cardId),
-      spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
-    },
-    breaker: {
-      breakAbilityForLegalAction: (legalAction) =>
-        breakAbilityForLegalAction(state, legalAction),
-    },
-    effects: {
-      executeEffectCommands: (commands) => executeEffectCommands(state, commands),
-      trashRunnerInstalledProgram: (cardId) =>
-        trashRunnerInstalledProgram(state, cardId),
-    },
-  };
+  return runFlow.fortRunSideFamiliesHostForState(state);
 }
 
 function encounterEntryHostForState(state: GameState): EncounterEntryHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-      runnerInstalledCardIds: () => runnerInstalledCardIds(state),
-    },
-    servers: {
-      mustServer: (serverId) => mustServer(state, serverId),
-      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
-    },
-    run: {
-      corpRootRezActionsAvailable: () =>
-        corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
-    },
-    callbacks: {
-      finishRun: (successful, legalAction) =>
-        finishRun(state, successful, legalAction),
-    },
-  };
+  return runFlow.encounterEntryHostForState(state);
 }
 
 function successfulRunInterventionHost(
   state: GameState,
 ): SuccessfulRunInterventionHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-    },
-    servers: {
-      mustServer: (serverId) => mustServer(state, serverId),
-      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
-    },
-    actions: {
-      createRunnerTriggerAction: (label, sourceCardId, costs, payload) =>
-        action(state, "runner", "trigger_ability", label, sourceCardId, costs, payload),
-    },
-    choices: {
-      selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
-    },
-    costs: {
-      creditCostForAction: (legalAction) => creditCostForAction(legalAction),
-      rezCostForCard: (cardId) => rezCostForCard(state, cardId),
-    },
-    credits: {
-      spend: (side, amount) => spendCredits(state, side, amount),
-      gainRunner: (amount) => credits(state, "runner", amount),
-    },
-    counters: {
-      cardCounter: (cardId, counterType) =>
-        cardCounter(state, cardId, counterType as CounterType),
-      addCardCounter: (cardId, counterType, amount) =>
-        addCardCounter(state, cardId, counterType as CounterType, amount),
-    },
-    runner: {
-      ensureTurnFlags: () => ensureRunnerTurnFlags(state),
-    },
-    zones: {
-      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
-      trashCorpInstalledCardToArchives: (cardId, legalAction) =>
-        trashCorpInstalledCardToArchives(state, cardId, legalAction),
-      trashRunnerInstalledCardToHeap: (cardId, legalAction) =>
-        trashRunnerInstalledCardToHeap(state, cardId, legalAction),
-    },
-    encounter: {
-      beginEncounter: (iceId, legalAction) =>
-        beginEncounter(encounterEntryHostForState(state), iceId, legalAction),
-      approachOrEncounterIce: (iceId, legalAction) =>
-        approachOrEncounterIce(
-          runMovementHostForState(state),
-          iceId,
-          legalAction,
-        ),
-    },
-    access: {
-      startAccessFromSuccessfulRun: (legalAction) =>
-        enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction),
-      finishSuccessfulRun: (legalAction) => finishRun(state, true, legalAction),
-    },
-  };
+  return runFlow.successfulRunInterventionHost(state);
 }
 
 function encounterResolutionHostForState(state: GameState): EncounterResolutionHost {
-  return encounterResolutionHost(state, {
-    applyRunnerForgoNextAction: () => applyRunnerForgoNextAction(state),
-    trashRunnerInstalledProgram: (cardId) =>
-      trashRunnerInstalledProgram(state, cardId),
-  });
+  return runFlow.encounterResolutionHostForState(state);
 }
 
 function encounterSpecialWindowHostForState(
   state: GameState,
 ): EncounterSpecialWindowHost {
-  return encounterSpecialWindowHost(state, {
-    derezCorpInstalledCard: (cardId) => {
-      state.cardInstances[cardId] = {
-        ...withoutVariableIceState(mustInstance(state.cardInstances, cardId)),
-        faceup: false,
-        rezzed: false,
-      };
-    },
-    finishRun: (successful, legalAction) =>
-      finishRun(state, successful, legalAction),
-    quoteIceRezCost: (iceId) => rezCostForCard(state, iceId),
-    resetBreakerStrength: () => resetBreakerStrength(state),
-    rollDie: (purpose) => rollDeterministicDie(state, purpose),
-    spendCredits: (side, amount) => spendCredits(state, side, amount),
-    trashCorpInstalledCard: (cardId) =>
-      trashCorpInstalledCardToArchives(state, cardId),
-  });
+  return runFlow.encounterSpecialWindowHostForState(state);
 }
 
 function encounterPrintedEffectHostForState(
   state: GameState,
   legalAction?: LegalAction,
 ): EncounterPrintedEffectHost {
-  return encounterPrintedEffectHost(state, {
-    addCardCounter: (cardId, counterType, amount) =>
-      addCardCounter(state, cardId, counterType, amount),
-    addHackerTrackerTraceCounters: () => addHackerTrackerTraceCounters(state),
-    calculateRunnerLink: () => calculateRunnerLinkInTrace(traceOrchestrationHost(state)),
-    cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
-    createDamageImminentEvent: (request) =>
-      createDamageImminentEvent(state, request),
-    definitionFor: (cardId) => definitionFor(state, cardId),
-    ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
-    finishRun: (successful) => finishRun(state, successful),
-    hasInstalledMicrotechTrodeSet: () => hasInstalledMicrotechTrodeSet(state),
-    hackerTrackerCounterTotal: () => hackerTrackerCounterTotal(state),
-    krumzTraceBitTotal: () => krumzTraceBitTotal(state),
-    openEventModificationWindow: (event, action) =>
-      openEventModificationWindow(state, event, action),
-    openReplacementWindow: (event, action) =>
-      openReplacementWindow(state, event, action),
-    parisCityGridTracePoolSource: () =>
-      parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state)),
-    rabbitTraceLimitReductionForIceTrace: () =>
-      rabbitTraceLimitReductionForIceTrace(state),
-    resolveDamageImminentEvent: (event) =>
-      resolveDamageImminentEvent(state, event),
-    resolveTraceHardwareWreckerSuccess: (
-      sourceDefinitionId,
-      sourceCardInstanceId,
-      traceId,
-    ) =>
-      resolveTraceHardwareWreckerSuccess(
-        state,
-        sourceDefinitionId as CardDefinitionId,
-        sourceCardInstanceId,
-        traceId,
-      ),
-    resolveTraceTrashRunnerResourceSuccess: (
-      sourceDefinitionId,
-      sourceCardInstanceId,
-      traceId,
-      targetCardId,
-    ) =>
-      resolveTraceTrashRunnerResourceSuccess(
-        state,
-        sourceDefinitionId as CardDefinitionId,
-        sourceCardInstanceId,
-        traceId,
-        targetCardId,
-      ),
-    resolveTrashInstalledProgramSubroutine: (action = legalAction) => {
-      const trashResult = resolveDirectTrashProgramSubroutine(
-        encounterPrintedNonTraceHostForState(state, action),
-        { legalAction: action },
-      );
-      const trashedCardId = trashResult.trashedCardIds[0];
-      if (!trashedCardId) return undefined;
-      const trashedDefinition = definitionFor(state, trashedCardId);
-      return {
-        definitionId: trashedDefinition.id,
-        title: trashedDefinition.title,
-      };
-    },
-    setDamagePayload: (summary) => {
-      if (legalAction) setDamagePayload(legalAction, summary);
-    },
-    supportsTraceSuccessEffect: (effect) =>
-      isSupportedEncounterTraceSuccessEffect(
-        effect,
-        traceCounterEffectDefinitionFor,
-      ),
-    traceBidChoice: (side, traceId, prompt, maxBid) =>
-      traceBidChoice(state, side, traceId, prompt, maxBid),
-  });
+  return runFlow.encounterPrintedEffectHostForState(state, legalAction);
 }
 
 function encounterPrintedNonTraceHostForState(
   state: GameState,
   legalAction?: LegalAction,
 ): EncounterPrintedNonTraceHost {
-  return encounterPrintedNonTraceHost(state, {
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-    },
-    encounter: {
-      resolutionHost: encounterResolutionHostForState(state),
-    },
-    trash: {
-      openRunnerInstalledTrashPreventionWindow: (
-        targetCardIds,
-        source,
-        action,
-      ) =>
-        openRunnerInstalledTrashPreventionWindow(
-          state,
-          action,
-          targetCardIds,
-          source,
-        ),
-      trashRunnerInstalledProgram: (cardId) =>
-        trashRunnerInstalledProgram(state, cardId),
-    },
-    choices: {
-      revealCorpRdTop: (action) => revealCorpRdTop(state, action),
-      startCorpRdArrangeChoice: (input) => {
-        if (!legalAction)
-          throw new Error("Continue-Run LegalAction fehlt fuer R&D-Reorder.");
-        startCorpRdArrangeChoice(
-          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-          input,
-        );
-      },
-    },
-  });
+  return runFlow.encounterPrintedNonTraceHostForState(state, legalAction);
 }
 
 function runEndCleanupHost(state: GameState): RunEndCleanupHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-      withoutVariableIceState,
-    },
-    servers: {
-      mustServer: (serverId) => mustServer(state, serverId),
-      publicServerLabel: (serverId) => publicServerLabel(state, serverId),
-    },
-    runner: {
-      ensureTurnFlags: () => ensureRunnerTurnFlags(state),
-      consumeFutureActionDebt: () => {
-        consumeRunnerFutureActionDebt(state);
-      },
-    },
-    choices: {
-      selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
-    },
-    credits: {
-      gainRunner: (amount) => {
-        state.runner.credits += amount;
-      },
-      gainCorp: (amount) => {
-        state.corp.credits += amount;
-      },
-    },
-    damage: {
-      dealUnpreventableCoreDamage: (run, sourceDefinitionId, amount) =>
-        doDamage(state, {
-          damageId: `${run.runId}.${sourceDefinitionId}.run_end_unpreventable_core`,
-          damageType: "core",
-          amount,
-          source: `run_end:${sourceDefinitionId}`,
-        }),
-    },
-    counters: {
-      cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
-      setCardCounter: (cardId, counterType, amount) =>
-        setCardCounter(state, cardId, counterType, amount),
-      addCardCounter: (cardId, counterType, amount) =>
-        addCardCounter(state, cardId, counterType, amount),
-      addVirusCounterWithDisinfectantPrevention: (cardId, amount, legalAction) =>
-        addVirusCounterWithDisinfectantPrevention(
-          state,
-          cardId,
-          amount,
-          legalAction,
-        ),
-      preventOneVirusCounterWithDisinfectant: () =>
-        preventOneVirusCounterWithDisinfectant(state),
-      poxCountersForServer: (serverId) => poxCountersForServer(state, serverId),
-    },
-    ice: {
-      icebreakerHasSpecial: (breakerId, special) =>
-        icebreakerHasSpecial(state, breakerId, special),
-    },
-    virus: {
-      installedRunnerVirusSourceIds: (predicate) =>
-        installedRunnerVirusSourceIds(state, predicate),
-      virusCounterImplementationForCard: (cardId) =>
-        virusCounterImplementationForCard(state, cardId),
-    },
-    aftermath: {
-      tokyoUnsuccessfulRunAmountForCard: (cardId) =>
-        tokyoUnsuccessfulRunAmountForCard(
-          fortRunSideFamiliesHostForState(state),
-          cardId,
-        ),
-      isTokyoUnsuccessfulRunSource: (cardId) =>
-        isTokyoUnsuccessfulRunSource(
-          fortRunSideFamiliesHostForState(state),
-          cardId,
-        ),
-    },
-    followups: {
-      applyBodyweightDataCrecheSuccessfulRun: (legalAction) =>
-        applyBodyweightDataCrecheSuccessfulRun(
-          successfulRunInterventionHost(state),
-          legalAction,
-        ),
-      cleanupDelayedSuccessfulRunTemporaryIce: (run, legalAction) =>
-        cleanupDelayedSuccessfulRunTemporaryIce(
-          successfulRunInterventionHost(state),
-          run,
-          legalAction,
-        ),
-    },
-    cleanup: {
-      cleanupEmptyRemotes: () => cleanupEmptyRemotes(state),
-    },
-  };
+  return runFlow.runEndCleanupHost(state);
 }
 
 function breachStateHost(state: GameState): BreachStateHost {
@@ -10547,90 +10134,7 @@ function accessFlowHost(state: GameState): AccessFlowHost {
 }
 
 function runAccessTransitionHost(state: GameState): RunAccessTransitionHost {
-  return {
-    state,
-    breach: breachStateHost(state),
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-    },
-    runner: {
-      ensureTurnFlags: () => ensureRunnerTurnFlags(state),
-    },
-    draw: {
-      drawCorpCards: (count) => drawCorpCards(state, count),
-    },
-    rng: {
-      shuffleStateIds: (ids, purpose) => shuffleStateIds(state, ids, purpose),
-    },
-    access: {
-      advanceArchivesBreachPastNonDecisionCards: (legalAction) =>
-        advanceArchivesBreachPastNonDecisionCards(
-          accessFlowHost(state),
-          legalAction,
-        ),
-      findMicrotechAiInterfacePreAccessSource: (run) => {
-        if (run.microtechAiInterfacePreAccessResolved) return undefined;
-        const accessServerId = run.accessServerOverride ?? run.attackedServerId;
-        if (accessServerId !== "rd") return undefined;
-        return runnerInstalledCardIds(state)
-          .slice()
-          .sort()
-          .find((cardId) =>
-            cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-              ?.accessHooks?.some((hook) => hook.kind === "pre_access_rd_cut"),
-          );
-      },
-      isMicrotechAiInterfacePreAccessSource: (cardId) =>
-        runnerInstalledCardIds(state).includes(cardId) &&
-        Boolean(
-          cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-            ?.accessHooks?.some((hook) => hook.kind === "pre_access_rd_cut"),
-        ),
-      startRunnerPrivateLookChoice: (
-        sourceCardId,
-        sourceDefinitionId,
-        zone,
-        count,
-        reason,
-        legalAction,
-      ) =>
-        startRunnerPrivateLookChoice(
-          state,
-          sourceCardId,
-          sourceDefinitionId,
-          zone,
-          count,
-          reason,
-          legalAction,
-        ),
-    },
-    run: {
-      isV097OrLater: () => isV097OrLater(state),
-      finishRun: (successful, legalAction) =>
-        finishRun(state, successful, legalAction),
-      applyUniqueDirectSuccessfulRunTriggers: (legalAction) =>
-        applyDirectSuccessfulRunTriggers(
-          successfulRunInterventionHost(state),
-          legalAction,
-        ),
-      successfulRunInterventionKindForSource: (sourceCardId) => {
-        return successfulRunInterventionKindForDefinition(
-          definitionFor(state, sourceCardId).id,
-        );
-      },
-      successfulRunInterventionCost: (kind, serverId, hqIceId) =>
-        successfulRunInterventionCost(
-          successfulRunInterventionHost(state),
-          kind,
-          serverId,
-          hqIceId,
-        ),
-    },
-    choices: {
-      selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
-    },
-  };
+  return runFlow.runAccessTransitionHost(state);
 }
 
 function accessEffectHandlerHost(
