@@ -418,6 +418,10 @@ import {
 } from "./game/card-implementation/install-rez-runtime-deps";
 import { createDamageCardImplementationRuntimeDeps } from "./game/card-implementation/damage-runtime-deps";
 import {
+  createCounterLifecycleCardImplementationRuntimeDeps,
+  type CounterLifecycleRuntimeDepsHost,
+} from "./game/card-implementation/counter-lifecycle-runtime-deps";
+import {
   createTraceCardImplementationRuntimeDeps,
   type TraceRuntimeDepsHost,
 } from "./game/card-implementation/trace-runtime-deps";
@@ -516,7 +520,6 @@ import {
   currentEncounterAdditionalSubroutinesForIce,
 } from "./ability-engine/additional-subroutine-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "./ability-engine/break-subroutine-cost-modifiers";
-import { runnerCardImplementationAbilityLimitHost } from "./ability-engine/card-implementation-ability-limits";
 import {
   effectiveAgendaDifficulty,
   maxHandSize,
@@ -844,19 +847,30 @@ function installRezRuntimeDepsHost(): InstallRezRuntimeDepsHost {
 const installRezCardImplementationRuntimeDeps =
   createInstallRezCardImplementationRuntimeDeps(installRezRuntimeDepsHost());
 
+function counterLifecycleRuntimeDepsHost(): CounterLifecycleRuntimeDepsHost {
+  return {
+    counters: {
+      cardCounter,
+      addCounterToAllInstalledRunnerIcebreakers,
+    },
+    lifecycle: {
+      hasSuccessfulHqRunThisTurn,
+      runnerLiberatedAgendaSubtypeThisTurn: runnerStoleAgendaSubtypeThisTurn,
+      corpScoredBlackOpsAgendaLastTurn,
+    },
+  };
+}
+
+const counterLifecycleCardImplementationRuntimeDeps =
+  createCounterLifecycleCardImplementationRuntimeDeps(
+    counterLifecycleRuntimeDepsHost(),
+  );
+
 const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   definitionFor,
   mustInstance,
-  cardCounter,
   rezzedCorpRootCardIds,
   runnerInstalledCardIds,
-  runnerRunAttemptsLastTurn,
-  runnerMadeSuccessfulRunOnServerThisTurn: (state, server) =>
-    server === "hq" && hasSuccessfulHqRunThisTurn(state),
-  runnerLiberatedAgendaSubtypeThisTurn: (state, subtype) =>
-    runnerStoleAgendaSubtypeThisTurn(state, subtype),
-  corpScoredAgendaSubtypeLastTurn: (state, subtype) =>
-    subtype === "black_ops" && corpScoredBlackOpsAgendaLastTurn(state),
   spendClick,
   spendCredits,
   createAction: action,
@@ -864,6 +878,7 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   ...cardImplementationEffectAdapters,
   ...traceCardImplementationRuntimeDeps,
   ...damageCardImplementationRuntimeDeps,
+  ...counterLifecycleCardImplementationRuntimeDeps,
   startRun: (state, legalAction, serverId, options) => {
     const sourceCardId =
       typeof legalAction.source === "string" &&
@@ -1006,8 +1021,6 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
       { sourceCardId, retainCostPerCard },
     ),
-  addCounterToAllInstalledRunnerIcebreakers: (state, counterType, amount) =>
-    addCounterToAllInstalledRunnerIcebreakers(state, counterType, amount),
   shuffleSourceIntoCorpRd: (state, sourceCardId, sourceDefinitionId) =>
     shuffleCorpCardIntoRd(state, sourceCardId, sourceDefinitionId, "lifecycle"),
   trashCorpInstalledCardsInSourceServer: (
@@ -1097,10 +1110,6 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       sourceTitle,
       input,
     ),
-  removeRunnerTags: (state, mode, amount) =>
-    removeRunnerTagsForCardImplementation(state, mode, amount),
-  avoidNextTag: (state, amount) =>
-    addRunnerTagAvoidanceCredit(state, amount),
   returnSourceToGripIfPaid: (state, legalAction, sourceCardId, amount) =>
     startReturnSourceToGripIfPaidChoice(
       state,
@@ -1108,7 +1117,6 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       sourceCardId,
       amount,
     ),
-  abilityLimits: runnerCardImplementationAbilityLimitHost,
 };
 
 function addCurrentEncounterAdditionalSubroutineForCardImplementation(
@@ -8295,47 +8303,6 @@ function requireRunnerTagged(state: GameState): void {
   if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
 }
 
-function removeRunnerTagsForCardImplementation(
-  state: GameState,
-  mode: "amount" | "up_to_amount" | "all",
-  amount?: number,
-): {
-  removedTags: number;
-  runnerTagsAfter: number;
-  publicPayload: Record<string, string | number | boolean>;
-} {
-  const maxAmount =
-    mode === "all" ? state.runner.tags : Math.max(0, Math.floor(amount ?? 0));
-  const removedTags = Math.min(state.runner.tags, maxAmount);
-  state.runner.tags = Math.max(0, state.runner.tags - removedTags);
-  return {
-    removedTags,
-    runnerTagsAfter: state.runner.tags,
-    publicPayload: {
-      removedTags,
-      runnerTagsAfter: state.runner.tags,
-    },
-  };
-}
-
-function addRunnerTagAvoidanceCredit(
-  state: GameState,
-  amount: 1,
-): {
-  amount: number;
-  publicPayload: Record<string, string | number | boolean>;
-} {
-  state.runnerTagAvoidanceCredits =
-    Math.max(0, Math.floor(state.runnerTagAvoidanceCredits ?? 0)) + amount;
-  return {
-    amount,
-    publicPayload: {
-      avoidNextTag: true,
-      tagAvoidanceCreditsAfter: state.runnerTagAvoidanceCredits,
-    },
-  };
-}
-
 function startReturnSourceToGripIfPaidChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -8381,13 +8348,6 @@ function runnerStolenAgendaAdvancementCountersLastTurn(
   return Math.max(
     0,
     Math.floor(state.runnerTurnFlags?.stolenAgendaAdvancementCountersLastTurn ?? 0),
-  );
-}
-
-function runnerRunAttemptsLastTurn(state: GameState): number {
-  return Math.max(
-    0,
-    Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0),
   );
 }
 
