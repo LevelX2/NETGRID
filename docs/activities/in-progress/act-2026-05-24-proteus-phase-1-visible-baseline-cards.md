@@ -14,11 +14,7 @@ releaseTarget: Proteus Phase 1
 proReferences:
   - PRO004
   - PRO006
-  - PRO009
-  - PRO010
-  - PRO037
-  - PRO038
-  - PRO039
+  - PRO019
 blockedBy: []
 blockerReason: "Zielkartenliste ist breiter als die vorhandenen CardImplementation-Familien: nur Toughonium Wall, die drei Region-Agenda-Difficulty-Karten und Streetware Distributor sind ohne neue Mechanikfamilie abbildbar; die übrigen Zielkarten brauchen neue Timing-, Counter-, Hidden-Info-, Run- oder Encounter-Resolver und verletzen die Stop-Kriterien."
 nextAction: "Paket fachlich zurückschneiden in einen implementierbaren Phase-1a-Slice für Toughonium Wall, Networked Center, Research Bunker, Weapons Depot und Streetware Distributor; restliche Zielkarten in separate Folgepakete je Mechanikfamilie triagieren."

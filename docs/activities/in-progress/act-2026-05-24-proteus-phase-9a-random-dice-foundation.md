@@ -12,8 +12,7 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 9a
 proReferences:
-  - PRO032
-  - PRO033
+  - PRO016
 blockedBy:
   - act-2026-05-24-proteus-phase-8f-random-bad-publicity-virus-longtail
   - roadblock_encounter_entry_random_pass_derez_contract

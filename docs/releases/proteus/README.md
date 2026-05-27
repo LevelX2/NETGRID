@@ -9,7 +9,7 @@
 - `release-slicing-plan.md`: priorisierte Umsetzungsschnitte für spätere Proteus-Arbeit.
 - `phase-1-slice-handoff-2026-05-24.md`: planning-only Zerlegung des zu großen Phase-1-Baseline-Pakets in sieben kleinere Activities mit benötigten Funktionsbausteinen je Kartenfamilie.
 - `detailed-phase-slice-plan-2026-05-24.md`: konsolidierte Detailplanung für Phase 1 bis 9 mit empfohlenen Unter-Slices, Funktionsbausteinen, Abhängigkeiten und Handoff-Regel für spätere Activities.
-- `proteus-cardimplementation-detailplan-2026-05-26.md`: neuer führender Detailplan zur Abarbeitung der 104 fehlenden CardImplementation-Dateien mit PRO001- bis PRO040-Paketnummern.
+- `proteus-cardimplementation-detailplan-2026-05-26.md`: führender Detailplan; ab PRO007 in größere Mechanikfamilien-Pakete umgedeutet, aktuell PRO001 bis PRO020.
 - `proteus-activity-status-2026-05-26.md`: führende Board-/Status-Hygiene ab PRO002; trennt `done + implemented`, `done + superseded`, `in-progress + blocked` und offene PRO-Pakete und legt fest, dass Implementierungsfortschritt aus CardImplementation-Dateien plus Registry gezählt wird, nicht aus Activity-Ordnerpositionen.
 - `proteus-cardimplementation-package-standard.md`: Paketstandard und Verify-Harness ab PRO003; definiert Activity-Template, Done-Gates und den Befehl `corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/coverage.test.ts -t "reconciles Proteus"` für Abdeckung, Restliste und Driftprüfung.
 - `bad-publicity-loss-gate-contract.md`: planning-only Vertrag für Bad-Publicity-7+-Game-End.

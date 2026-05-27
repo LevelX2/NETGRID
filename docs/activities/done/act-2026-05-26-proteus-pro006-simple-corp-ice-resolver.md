@@ -39,7 +39,7 @@ checks:
 
 ## Ziel
 
-Die vier einfachen Corp-ICE-Resolver aus PRO006 als konkrete Proteus-CardImplementation-Dateien umsetzen, ohne PRO025-Karten freizugeben.
+Die vier einfachen Corp-ICE-Resolver aus PRO006 als konkrete Proteus-CardImplementation-Dateien umsetzen, ohne die verbleibenden Phase-6b-Karten freizugeben.
 
 ## Ergebnisnotiz
 
@@ -51,4 +51,4 @@ Ergänzt wurde nur der generische Mapping-Zweig, der deklarative Printed-Subrout
 
 Alle vier Karten sind registriert, in der Coverage als `implemented` sichtbar und im Proteus-Manifest `implemented`, `engine_supported`, `playable` und `human_playable`. `deck_legal`, `format_legal` und `ai_supported` bleiben `false`.
 
-Die Phase-6b-Sammelactivity bleibt für PRO025 blockiert. `Chihuahua`, `Coyote`, `Iceberg` und `Washed-Up Solo Construct` wurden nicht umgesetzt oder freigegeben.
+Die Phase-6b-Restkarten gehen in PRO010. `Chihuahua`, `Coyote`, `Iceberg` und `Washed-Up Solo Construct` wurden in PRO006 nicht umgesetzt oder freigegeben.

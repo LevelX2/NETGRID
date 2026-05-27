@@ -12,8 +12,7 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 5d
 proReferences:
-  - PRO015
-  - PRO016
+  - PRO008
 blockedBy:
   - Generic event-initiated run flags do not yet support "cannot use noisy icebreakers during that run"; All-Hands and Rush Hour cannot be promoted with accessCount alone.
   - Run-encounter interventions currently model installed sources such as Smarteye; Decoy Signal needs source-bound event-run exposure on every unrezzed ICE approach with jack-out-before-rez cleanup.
