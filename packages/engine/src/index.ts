@@ -449,6 +449,17 @@ import { type RunnerBreakerActionExecutionHost } from "./game/run/runner-breaker
 import { type StartRunActionExecutionHost } from "./game/run/start-run-action-execution";
 import { type RezActionExecutionHost } from "./game/rez/rez-action-execution";
 import { type PlayCardExecutionHost } from "./game/play/play-card-execution";
+import {
+  canPlayCorpOperation,
+  cardImplementationOperationLegalActions,
+  corpUtilityImplementationForDefinition,
+  hasPrintedCostOnPlayCardImplementation,
+  onPlayCardImplementationEffects,
+  onPlayCardImplementationAdditionalOperationCost,
+  onPlayCardImplementationNeedsLastTurnResourceTarget,
+  resolveCorpOperation,
+  type CorpOperationResolutionHost,
+} from "./game/play/corp-operation-resolution";
 import { type BoardStateActionExecutionHost } from "./game/board/board-state-action-execution";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
@@ -674,7 +685,6 @@ import type {
   ActivatedCardAbilityImplementation,
   CardCorpUtilityImplementation,
   CardDamagePreventionSourceImplementation,
-  CardEffectImplementation,
   CardFlatlineReplacementSourceImplementation,
   CardHiddenReplacementLongtailImplementation,
   CardRemainingReplacementLongtailImplementation,
@@ -1397,12 +1407,6 @@ function printedCostCardImplementationMakeRunEffect(
   );
 }
 
-type CorpOperationResolver = {
-  name: string;
-  canPlay?: (state: GameState) => boolean;
-  resolve: (state: GameState, legalAction: LegalAction) => void;
-};
-
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
 const INITIAL_HAND_SIZE = 5;
@@ -1869,200 +1873,6 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
 };
 
-const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
-  simple_economy_operation: {
-    name: "corp_operation_gain_credits_4",
-    resolve: (state) => {
-      state.corp.credits += 4;
-    },
-  },
-  v111_core_damage_operation: {
-    name: "corp_operation_core_damage_1",
-    resolve: (state, legalAction) => {
-      resolveDamageOperation(
-        state,
-        legalAction,
-        "core",
-        1,
-        "v111_core_damage_operation",
-      );
-    },
-  },
-  simple_draw_operation: {
-    name: "corp_operation_draw_2",
-    resolve: (state) => {
-      drawCorpCard(state);
-      drawCorpCard(state);
-    },
-  },
-  simple_tag_punishment_operation: {
-    name: "corp_operation_tag_punishment_lose_2",
-    canPlay: (state) => state.runner.tags > 0,
-    resolve: (state) => {
-      if (state.runner.tags <= 0)
-        throw new Error("Der Runner ist nicht getaggt.");
-      state.runner.credits = Math.max(0, state.runner.credits - 2);
-    },
-  },
-  v08_credit_surge_operation: {
-    name: "corp_operation_gain_credits_7",
-    resolve: (state) => {
-      state.corp.credits += 7;
-    },
-  },
-  v08_archive_planning_operation: {
-    name: "corp_operation_draw_3",
-    resolve: (state) => {
-      drawCorpCard(state);
-      drawCorpCard(state);
-      drawCorpCard(state);
-    },
-  },
-  v098_hq_rd_swap_operation: {
-    name: "corp_operation_swap_hq_rd",
-    canPlay: (state) => state.corp.hq.length > 1 && state.corp.rd.length > 0,
-    resolve: (state) => {
-      swapCorpHqAndRdTop(state);
-    },
-  },
-  v099_bad_publicity_operation: {
-    name: "corp_operation_bad_publicity_credit",
-    resolve: (state) => {
-      state.corp.credits += 3;
-      state.corp.badPublicity += 1;
-    },
-  },
-  [CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID]: {
-    name: "onr_v1922_corp_operation_private_archives_to_hq",
-    canPlay: (state) => state.corp.archives.length > 0,
-    resolve: (state, legalAction) => {
-      const sourceCardId = String(legalAction.payload?.cardId ?? "");
-      if (
-        !sourceCardId ||
-        definitionFor(state, sourceCardId).id !== CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID
-      )
-        throw new Error("Off-Site Backups fehlt als Quelle.");
-      startCorpArchivesToHqChoice(
-        hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
-        sourceCardId,
-      );
-    },
-  },
-  [CORP_RD_TOP5_REORDER_OPERATION_CARD_ID]: {
-    name: "onr_v1922_corp_operation_private_rd_top5_reorder",
-    canPlay: (state) => state.corp.rd.length >= 2,
-    resolve: (state, legalAction) => {
-      const sourceCardId = String(legalAction.payload?.cardId ?? "");
-      if (
-        !sourceCardId ||
-        definitionFor(state, sourceCardId).id !== CORP_RD_TOP5_REORDER_OPERATION_CARD_ID
-      )
-        throw new Error("Planning Consultants fehlt als Quelle.");
-      startCorpRdTopReorderChoice(
-        hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-        sourceCardId,
-      );
-    },
-  },
-  [EDGERUNNER_TEMPS_INSTALL_OPERATION_ID]: {
-    name: "onr_v1922_corp_operation_install_action_bundle",
-    canPlay: (state) =>
-      state.corp.hq.some((cardId) =>
-        isCorpInstallableCardType(definitionFor(state, cardId)),
-      ),
-    resolve: (state, legalAction) => {
-      if (
-        !state.corp.hq.some((cardId) =>
-          isCorpInstallableCardType(definitionFor(state, cardId)),
-        )
-      ) {
-        throw new Error(
-          "Edgerunner, Inc., Temps findet keine installierbare Korp-Karte.",
-        );
-      }
-      const flags = ensureCorpTurnFlags(state);
-      flags.edgerunnerTempsInstallActionsRemaining = 3;
-      state.corp.clicks += 3;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1922CorpOperationAbility: "install_action_bundle",
-        gainedActions: 3,
-        edgerunnerTempsInstallActionsRemaining:
-          flags.edgerunnerTempsInstallActionsRemaining,
-        corpClicksAfter: state.corp.clicks,
-      };
-    },
-  },
-  [FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID]: {
-    name: "onr_v1919_corp_operation_add_power_counter",
-    canPlay: (state) => corpAgendaCounterOperationTarget(state) !== undefined,
-    resolve: (state, legalAction) =>
-      resolveAgendaCounterOperation(
-        state,
-        legalAction,
-        FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID,
-      ),
-  },
-  [MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID]: {
-    name: "onr_v1919_corp_operation_add_three_advancement_counters",
-    canPlay: (state) => advanceableInstalledCardTargets(state).length > 0,
-    resolve: (state, legalAction) =>
-      resolveManagementShakeUpOperation(state, legalAction),
-  },
-  [PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID]: {
-    name: "onr_v1919_corp_operation_advance_installed_agenda",
-    canPlay: (state) => installedAgendaOperationTarget(state) !== undefined,
-    resolve: (state, legalAction) => {
-      const targetAgendaId = installedAgendaOperationTarget(state);
-      if (!targetAgendaId)
-        throw new Error(
-          "Project Consultants findet keine installierte Agenda.",
-        );
-      mustInstance(state.cardInstances, targetAgendaId).advancementCounters +=
-        1;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1919OperationAbility: "advance_installed_agenda",
-        targetCardId: targetAgendaId,
-        targetCardDefinitionId: definitionFor(state, targetAgendaId).id,
-        addedAdvancementCounters: 1,
-        advancementCountersAfter: mustInstance(
-          state.cardInstances,
-          targetAgendaId,
-        ).advancementCounters,
-      };
-    },
-  },
-  [SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID]: {
-    name: "onr_v1919_corp_operation_gain_credits_3",
-    resolve: (state, legalAction) => {
-      credits(state, "corp", 3);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1919OperationAbility: "gain_credits",
-        gainedCredits: 3,
-        corpCreditsAfter: state.corp.credits,
-      };
-    },
-  },
-  [SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID]: {
-    name: "onr_v1919_corp_operation_add_two_advancement_counters",
-    canPlay: (state) => advanceableInstalledCardTargets(state).length > 0,
-    resolve: (state, legalAction) =>
-      resolveSystematicLayoffsAdvancementOperation(state, legalAction),
-  },
-  [TEAM_RESTRUCTURING_COUNTER_OPERATION_ID]: {
-    name: "onr_v1919_corp_operation_add_power_counter",
-    canPlay: (state) => corpAgendaCounterOperationTarget(state) !== undefined,
-    resolve: (state, legalAction) =>
-      resolveAgendaCounterOperation(
-        state,
-        legalAction,
-        TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
-      ),
-  },
-};
-
 type RunnerDrawSummary = {
   drawnCount: number;
   drawnCardIds?: CardInstanceId[];
@@ -2408,8 +2218,18 @@ function corpMainActionGenerationHost(
     corp: {
       corpActionDebtPending,
       acmeSavingsAndLoanObligationCount,
-      canPlayCorpOperation,
-      cardImplementationOperationLegalActions,
+      canPlayCorpOperation: (stateToRead, definition) =>
+        canPlayCorpOperation(corpOperationResolutionHost(stateToRead), definition),
+      cardImplementationOperationLegalActions: (
+        stateToRead,
+        cardId,
+        definition,
+      ) =>
+        cardImplementationOperationLegalActions(
+          corpOperationResolutionHost(stateToRead),
+          cardId,
+          definition,
+        ),
       corpUtilityImplementationForDefinition,
       powerGridOverloadLegalActions,
       systematicLayoffsLegalActions,
@@ -3281,12 +3101,6 @@ function virusCounterImplementationForCard(
   cardId: CardInstanceId,
 ): CardVirusCounterImplementation | undefined {
   return virusCounterImplementationForDefinition(definitionFor(state, cardId).id);
-}
-
-function corpUtilityImplementationForDefinition(
-  definitionId: CardDefinitionId,
-): CardCorpUtilityImplementation | undefined {
-  return cardImplementationForDefinitionId(definitionId)?.corpUtility;
 }
 
 function corpUtilityImplementationForCard(
@@ -9985,6 +9799,7 @@ function rezActionExecutionHost(state: GameState): RezActionExecutionHost {
 }
 
 function playCardExecutionHost(state: GameState): PlayCardExecutionHost {
+  const operationHost = corpOperationResolutionHost(state);
   return {
     state,
     cards: {
@@ -10005,9 +9820,9 @@ function playCardExecutionHost(state: GameState): PlayCardExecutionHost {
     },
     operations: {
       canPlayCorpOperation: (definition) =>
-        canPlayCorpOperation(state, definition),
+        canPlayCorpOperation(operationHost, definition),
       resolveCorpOperation: (definition, legalAction) =>
-        resolveCorpOperation(state, definition, legalAction),
+        resolveCorpOperation(operationHost, definition, legalAction),
       resolveRunnerLastTurnInstalledResourceTargetId: (targetCardId) =>
         resolveRunnerLastTurnInstalledResourceTargetId(state, targetCardId),
     },
@@ -10034,6 +9849,109 @@ function playCardExecutionHost(state: GameState): PlayCardExecutionHost {
       additionalOperationCost: onPlayCardImplementationAdditionalOperationCost,
       needsLastTurnResourceTarget:
         onPlayCardImplementationNeedsLastTurnResourceTarget,
+    },
+  };
+}
+
+function corpOperationResolutionHost(
+  state: GameState,
+): CorpOperationResolutionHost {
+  return {
+    state,
+    actions: {
+      buildLegalAction: action,
+    },
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
+      isCorpInstallableCardType,
+    },
+    corp: {
+      drawCorpCard: () => drawCorpCard(state),
+      ensureTurnFlags: () => ensureCorpTurnFlags(state),
+      runnerStoleAgendaLastTurn: () => runnerStoleAgendaLastTurn(state),
+      runnerStolenAgendaAdvancementCountersLastTurn: () =>
+        runnerStolenAgendaAdvancementCountersLastTurn(state),
+      swapCorpHqAndRdTop: () => swapCorpHqAndRdTop(state),
+    },
+    runner: {
+      requireRunnerTagged: () => requireRunnerTagged(state),
+      runnerLastTurnInstalledResourceIds: () =>
+        runnerLastTurnInstalledResourceIds(state),
+      isConcealedRunnerResource: (cardId) =>
+        isConcealedRunnerResource(state, cardId),
+      hiddenRunnerResourceSlotId,
+    },
+    economy: {
+      gainCorpCredits: (amount) => credits(state, "corp", amount),
+    },
+    zones: {
+      trashRunnerInstalledCardToHeap: (cardId) =>
+        trashRunnerInstalledCardToHeap(state, cardId),
+    },
+    damage: {
+      resolveDamageOperation: (legalAction, damageType, amount, sourceDefinitionId) =>
+        resolveDamageOperation(
+          state,
+          legalAction,
+          damageType,
+          amount,
+          sourceDefinitionId,
+        ),
+      addRunnerTagsWithPrevention: (legalAction, amount, source) =>
+        addRunnerTagsWithPrevention(state, legalAction, amount, source),
+    },
+    hiddenZone: {
+      startCorpArchivesToHqChoice: (legalAction, sourceCardId) =>
+        startCorpArchivesToHqChoice(
+          hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+          sourceCardId,
+        ),
+      startCorpRdTopReorderChoice: (legalAction, sourceCardId) =>
+        startCorpRdTopReorderChoice(
+          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+          sourceCardId,
+        ),
+      resolveNewBloodConcealAndReorder: (legalAction) =>
+        resolveNewBloodConcealAndReorder(
+          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+        ),
+    },
+    board: {
+      installedAgendaOperationTarget: () => installedAgendaOperationTarget(state),
+      advanceableInstalledCardTargets: () => advanceableInstalledCardTargets(state),
+      advancementDistributionOptions: (amount, distribution) =>
+        advancementDistributionOptions(state, amount, distribution as never),
+      moveAdvancementOptions: (sourceCardId, source, maxAmount) =>
+        moveAdvancementOptions(state, sourceCardId, source as never, maxAmount),
+      resolveAgendaCounterOperation: (legalAction, sourceDefinitionId) =>
+        resolveAgendaCounterOperation(state, legalAction, sourceDefinitionId),
+      resolveManagementShakeUpOperation: (legalAction) =>
+        resolveManagementShakeUpOperation(state, legalAction),
+      resolveSystematicLayoffsAdvancementOperation: (legalAction) =>
+        resolveSystematicLayoffsAdvancementOperation(state, legalAction),
+    },
+    operations: {
+      powerGridOverloadEligibleHardwareIds: () =>
+        powerGridOverloadEligibleHardwareIds(state),
+      resolvePowerGridOverloadOperation: (legalAction) =>
+        resolvePowerGridOverloadOperation(state, legalAction),
+    },
+    cardImplementation: {
+      canPlayPrintedCostOnPlay: (definition) =>
+        canPlayPrintedCostOnPlayImplementation(
+          cardImplementationRuntimeDeps,
+          state,
+          definition,
+        ),
+      executeOnPlayAbility: (legalAction, definition, cardId) =>
+        executeOnPlayCardImplementationAbility(
+          cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+          definition,
+          cardId,
+        ),
     },
   };
 }
@@ -13691,380 +13609,6 @@ function isVersionAtLeast(state: GameState, minorGate: number): boolean {
   if (major !== 0) return major > 0;
   if (minor !== minorGate) return minor > minorGate;
   return patch >= 0;
-}
-
-function cardImplementationCorpOperationResolver(
-  definition: CardDefinition,
-): CorpOperationResolver | undefined {
-  const hiddenLongtail = hiddenReplacementLongtailForDefinition(definition);
-  if (hiddenLongtail?.kind === "new_blood_conceal_reorder_installed_ice") {
-    return {
-      name: "card_implementation_corp_operation_new_blood_conceal_reorder_installed_ice",
-      resolve: (state, legalAction) => {
-        resolveNewBloodConcealAndReorder(
-          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-        );
-      },
-    };
-  }
-  return undefined;
-}
-
-function canPlayCorpOperation(
-  state: GameState,
-  definition: CardDefinition,
-): boolean {
-  if (hasPrintedCostOnPlayCardImplementation(definition))
-    return (
-      state.corp.credits >=
-        (definition.cost ?? 0) +
-          onPlayCardImplementationAdditionalOperationCost(definition) &&
-      canPlayPrintedCostOnPlayImplementation(
-        cardImplementationRuntimeDeps,
-        state,
-        definition,
-      ) &&
-      onPlayCardImplementationChoicesAreAvailable(state, definition)
-    );
-  const utility = corpUtilityImplementationForDefinition(definition.id);
-  if (utility) return canPlayCorpUtilityOperation(state, definition, utility);
-  const implementationResolver =
-    cardImplementationCorpOperationResolver(definition);
-  if (implementationResolver)
-    return implementationResolver.canPlay?.(state) ?? true;
-  const resolver = CORP_OPERATION_RESOLVERS[definition.id];
-  if (resolver) return resolver.canPlay?.(state) ?? true;
-  return canPlayPrintedCostOnPlayImplementation(
-    cardImplementationRuntimeDeps,
-    state,
-    definition,
-  );
-}
-
-function resolveCorpOperation(
-  state: GameState,
-  definition: CardDefinition,
-  legalAction: LegalAction,
-): void {
-  if (hasPrintedCostOnPlayCardImplementation(definition)) {
-    const cardId =
-      typeof legalAction.payload?.cardId === "string"
-        ? (legalAction.payload.cardId as CardInstanceId)
-        : "";
-    executeOnPlayCardImplementationAbility(
-      cardImplementationRuntimeDeps,
-      state,
-      legalAction,
-      definition,
-      cardId,
-    );
-    return;
-  }
-  const utility = corpUtilityImplementationForDefinition(definition.id);
-  if (utility) {
-    resolveCorpUtilityOperation(state, definition, legalAction, utility);
-    return;
-  }
-  const implementationResolver =
-    cardImplementationCorpOperationResolver(definition);
-  if (implementationResolver) {
-    implementationResolver.resolve(state, legalAction);
-    return;
-  }
-  const resolver = CORP_OPERATION_RESOLVERS[definition.id];
-  if (resolver) {
-    resolver.resolve(state, legalAction);
-    return;
-  }
-  const cardId =
-    typeof legalAction.payload?.cardId === "string"
-      ? (legalAction.payload.cardId as CardInstanceId)
-      : "";
-  executeOnPlayCardImplementationAbility(
-    cardImplementationRuntimeDeps,
-    state,
-    legalAction,
-    definition,
-    cardId,
-  );
-}
-
-function canPlayCorpUtilityOperation(
-  state: GameState,
-  definition: CardDefinition,
-  utility: CardCorpUtilityImplementation,
-): boolean {
-  switch (utility.kind) {
-    case "gain_restricted_install_actions":
-      return state.corp.hq.some((cardId) =>
-        isCorpInstallableCardType(definitionFor(state, cardId)),
-      );
-    case "corp_archives_to_hq":
-      return state.corp.archives.some((cardId) => {
-        const sourceCardId = state.corp.hq.find(
-          (candidate) => definitionFor(state, candidate).id === definition.id,
-        );
-        return cardId !== sourceCardId;
-      });
-    case "corp_rd_top_reorder":
-      return state.corp.rd.length >= 2;
-    case "trojan_horse_tag":
-      return runnerStoleAgendaLastTurn(state);
-    case "silver_lining_recovery":
-      return runnerStoleAgendaLastTurn(state);
-    case "trash_runner_resources_if_tagged":
-      return state.runner.tags > 0;
-    case "power_grid_overload":
-      return (
-        state.runner.tags > 0 &&
-        state.corp.credits > 0 &&
-        powerGridOverloadEligibleHardwareIds(state).length > 0
-      );
-    default:
-      return false;
-  }
-}
-
-function resolveCorpUtilityOperation(
-  state: GameState,
-  definition: CardDefinition,
-  legalAction: LegalAction,
-  utility: CardCorpUtilityImplementation,
-): void {
-  switch (utility.kind) {
-    case "gain_restricted_install_actions": {
-      if (!canPlayCorpUtilityOperation(state, definition, utility)) {
-        throw new Error(
-          "Edgerunner, Inc., Temps findet keine installierbare Korp-Karte.",
-        );
-      }
-      const flags = ensureCorpTurnFlags(state);
-      flags.edgerunnerTempsInstallActionsRemaining = utility.amount;
-      state.corp.clicks += utility.amount;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1951CorpUtilityAbility: "install_action_bundle",
-        v1922CorpOperationAbility: "install_action_bundle",
-        gainedActions: utility.amount,
-        restrictedActionSequence: "corp_install",
-        edgerunnerTempsInstallActionsRemaining:
-          flags.edgerunnerTempsInstallActionsRemaining,
-        corpClicksAfter: state.corp.clicks,
-      };
-      return;
-    }
-    case "corp_archives_to_hq": {
-      const sourceCardId = String(legalAction.payload?.cardId ?? "");
-      if (!sourceCardId || definitionFor(state, sourceCardId).id !== definition.id)
-        throw new Error("Off-Site Backups fehlt als Quelle.");
-      startCorpArchivesToHqChoice(
-        hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
-        sourceCardId,
-      );
-      return;
-    }
-    case "corp_rd_top_reorder": {
-      const sourceCardId = String(legalAction.payload?.cardId ?? "");
-      if (!sourceCardId || definitionFor(state, sourceCardId).id !== definition.id)
-        throw new Error("Planning Consultants fehlt als Quelle.");
-      startCorpRdTopReorderChoice(
-        hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-        sourceCardId,
-      );
-      return;
-    }
-    case "trojan_horse_tag": {
-      if (!runnerStoleAgendaLastTurn(state))
-        throw new Error("Runner hat im letzten Zug keine Agenda gestohlen.");
-      addRunnerTagsWithPrevention(state, legalAction, 1, "trojan_horse");
-      return;
-    }
-    case "silver_lining_recovery": {
-      if (!runnerStoleAgendaLastTurn(state))
-        throw new Error("Runner hat im letzten Zug keine Agenda gestohlen.");
-      const advancementCounters = runnerStolenAgendaAdvancementCountersLastTurn(state);
-      const gainedCredits = advancementCounters * utility.multiplierPerAdvancementCounter;
-      credits(state, "corp", gainedCredits);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1951CorpUtilityAbility: "silver_lining_recovery",
-        stolenAgendaAdvancementCountersLastTurn: advancementCounters,
-        gainedCredits,
-        corpCreditsAfter: state.corp.credits,
-      };
-      return;
-    }
-    case "trash_runner_resources_if_tagged": {
-      requireRunnerTagged(state);
-      const targetIds = state.runner.rig.resources
-        .slice()
-        .sort()
-        .slice(0, utility.max);
-      const targetDefinitionIds = targetIds.map(
-        (cardId) => definitionFor(state, cardId).id,
-      );
-      for (const cardId of targetIds) {
-        if (!state.runner.rig.resources.includes(cardId)) continue;
-        trashRunnerInstalledCardToHeap(state, cardId);
-      }
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1951CorpUtilityAbility: "trash_runner_resources_if_tagged",
-        trashedResourceCount: targetIds.length,
-        trashedResourceDefinitionIds: targetDefinitionIds.join(","),
-      };
-      return;
-    }
-    case "power_grid_overload": {
-      requireRunnerTagged(state);
-      resolvePowerGridOverloadOperation(state, legalAction);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1951CorpUtilityAbility: "power_grid_overload",
-      };
-      return;
-    }
-    default:
-      throw new Error("Diese Korp-Utility-Operation ist nicht spielbar.");
-  }
-}
-
-function hasPrintedCostOnPlayCardImplementation(
-  definition: CardDefinition,
-): boolean {
-  return Boolean(
-    cardImplementationForDefinitionId(definition.id)?.abilities?.some(
-      (ability) => ability.kind === "on_play" && ability.costs === "printed",
-    ),
-  );
-}
-
-function onPlayCardImplementationEffects(
-  definition: CardDefinition,
-): readonly CardEffectImplementation[] {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.abilities?.find(
-      (ability) => ability.kind === "on_play" && ability.costs === "printed",
-    )?.effects ?? []
-  );
-}
-
-function onPlayCardImplementationAdditionalOperationCost(
-  definition: CardDefinition,
-): number {
-  return onPlayCardImplementationEffects(definition).reduce((sum, effect) => {
-    if (effect.kind !== "trace") return sum;
-    const perPoint = Math.max(
-      0,
-      Math.floor(effect.additionalPlayCostPerBaseTracePointAboveZero ?? 0),
-    );
-    return sum + perPoint * Math.max(0, effect.baseTraceStrength);
-  }, 0);
-}
-
-function onPlayCardImplementationNeedsLastTurnResourceTarget(
-  definition: CardDefinition,
-): boolean {
-  return onPlayCardImplementationEffects(definition).some(
-    (effect) =>
-      effect.kind === "trace" &&
-      effect.onSuccess.some(
-        (success) => success.kind === "trash_runner_resource_and_add_tag",
-      ),
-  );
-}
-
-function runnerLastTurnResourceTargetPayload(
-  state: GameState,
-  targetCardId: CardInstanceId,
-): Record<string, string | number | boolean> {
-  if (isConcealedRunnerResource(state, targetCardId)) {
-    const hiddenResourceSlotId = hiddenRunnerResourceSlotId(targetCardId);
-    return {
-      traceSuccessTargetCardId: hiddenResourceSlotId,
-      traceSuccessTargetResourceSlotId: hiddenResourceSlotId,
-      hiddenResourceSlotId,
-      hiddenRunnerResource: true,
-      redactedKind: "hidden_runner_resource",
-    };
-  }
-  return {
-    traceSuccessTargetCardId: targetCardId,
-    traceSuccessTargetDefinitionId: definitionFor(state, targetCardId).id,
-  };
-}
-
-function cardImplementationOperationLegalActions(
-  state: GameState,
-  cardId: CardInstanceId,
-  definition: CardDefinition,
-): LegalAction[] {
-  if (!hasPrintedCostOnPlayCardImplementation(definition)) return [];
-  const additionalCost =
-    onPlayCardImplementationAdditionalOperationCost(definition);
-  const totalCost = (definition.cost ?? 0) + additionalCost;
-  if (state.corp.credits < totalCost) return [];
-  const needsResourceTarget =
-    onPlayCardImplementationNeedsLastTurnResourceTarget(definition);
-  if (!needsResourceTarget && additionalCost === 0) return [];
-  if (!needsResourceTarget)
-    return [
-      action(
-        state,
-        "corp",
-        "play_operation",
-        `${definition.title} spielen`,
-        cardId,
-        [{ clicks: 1, credits: totalCost }],
-        {
-          cardId,
-          ...(additionalCost > 0 ? { additionalTracePlayCost: additionalCost } : {}),
-        },
-      ),
-    ];
-  return runnerLastTurnInstalledResourceIds(state).map((targetCardId) => {
-    return action(
-      state,
-      "corp",
-      "play_operation",
-      `${definition.title} spielen`,
-      cardId,
-      [{ clicks: 1, credits: totalCost }],
-      {
-        cardId,
-        ...runnerLastTurnResourceTargetPayload(state, targetCardId),
-        ...(additionalCost > 0 ? { additionalTracePlayCost: additionalCost } : {}),
-      },
-    );
-  });
-}
-
-function onPlayCardImplementationChoicesAreAvailable(
-  state: GameState,
-  definition: CardDefinition,
-): boolean {
-  for (const effect of onPlayCardImplementationEffects(definition)) {
-    if (
-      effect.kind === "distribute_advancement_counters" &&
-      advancementDistributionOptions(
-        state,
-        effect.amount,
-        effect.distribution,
-      ).length === 0
-    )
-      return false;
-    if (
-      effect.kind === "move_advancement_counters" &&
-      moveAdvancementOptions(
-        state,
-        "" as CardInstanceId,
-        effect.source,
-        effect.maxAmount,
-      ).length === 0
-    )
-      return false;
-  }
-  return true;
 }
 
 function removeFromAllZones(state: GameState, cardId: string): void {
