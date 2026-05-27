@@ -1772,10 +1772,10 @@ describe("CardImplementation coverage and registry invariants", () => {
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
     expect(outsideScopeDefinitionIds).toHaveLength(206);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(440);
-    expect(coverageByStatus.get("implemented")).toBe(440);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(453);
+    expect(coverageByStatus.get("implemented")).toBe(453);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(139);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(126);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);
@@ -2047,5 +2047,62 @@ describe("CardImplementation coverage and registry invariants", () => {
         cardImplementationForDefinitionId(testCase.definitionId)?.abilities,
       ).toContainEqual(testCase.ability);
     }
+  });
+
+  it("migrates Proteus PRO008 Runner Event Run/Economy/Followup Suite into CardImplementation coverage", () => {
+    const cases = [
+      "onr_proteus_101_all-hands",
+      "onr_proteus_104_decoy-signal",
+      "onr_proteus_105_demolition-run",
+      "onr_proteus_106_disgruntled-ice-technician",
+      "onr_proteus_107_drone-for-a-day",
+      "onr_proteus_114_on-the-fast-track",
+      "onr_proteus_118_prearranged-drop",
+      "onr_proteus_120_reconnaissance",
+      "onr_proteus_121_remote-detonator",
+      "onr_proteus_122_rush-hour",
+      "onr_proteus_127_weefle-initiation",
+      "onr_proteus_130_back-door-to-rivals",
+      "onr_proteus_148_runner-sensei",
+    ] as const;
+
+    for (const definitionId of cases) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_101_all-hands")?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        effects: [
+          expect.objectContaining({
+            kind: "make_run",
+            target: { kind: "central_server", server: "hq" },
+            accessCount: 4,
+            prohibitNoisyIcebreakers: true,
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_130_back-door-to-rivals")
+        ?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        timing: "trace_base_link_window",
+        effects: [
+          expect.objectContaining({
+            kind: "use_base_link",
+            baseLink: 2,
+            rewardCreditsOnAvoidTrace: 1,
+          }),
+        ],
+      }),
+    );
   });
 });

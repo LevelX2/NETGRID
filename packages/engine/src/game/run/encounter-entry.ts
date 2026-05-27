@@ -173,7 +173,11 @@ export function approachIceExposeCanBeOfferedForCurrentIce(
   if (run.approachIceExposeViewingIceId) return false;
   if (run.approachIceExposeSkippedIceIdsThisRun?.includes(approachedIceId))
     return false;
-  if (installedApproachIceExposeSources(host).length === 0) return false;
+  if (
+    installedApproachIceExposeSources(host).length === 0 &&
+    !run.eventApproachIceExposeBeforeRez
+  )
+    return false;
   const ice = host.state.cardInstances[approachedIceId];
   return Boolean(ice && !ice.rezzed);
 }
@@ -185,6 +189,41 @@ export function runnerApproachIceExposeActions(
   const approachedIceId = run.approachedIceId;
   if (!approachedIceId) return [];
   const sources = installedApproachIceExposeSources(host);
+  if (sources.length === 0 && run.eventApproachIceExposeBeforeRez) {
+    const sourceCardId = run.successfulRunSourceCardId;
+    if (!sourceCardId) return [];
+    const definition = host.cards.definitionFor(sourceCardId);
+    return [
+      buildLegalAction(
+        host.state,
+        "runner",
+        "trigger_ability",
+        `${definition.title}: ICE ansehen`,
+        sourceCardId,
+        [],
+        {
+          cardId: sourceCardId,
+          iceId: approachedIceId,
+          approachIceExposeDecision: "expose",
+          eventApproachIceExpose: true,
+        },
+      ),
+      buildLegalAction(
+        host.state,
+        "runner",
+        "trigger_ability",
+        `${definition.title}: Ansehen überspringen`,
+        sourceCardId,
+        [],
+        {
+          cardId: sourceCardId,
+          iceId: approachedIceId,
+          approachIceExposeDecision: "decline",
+          eventApproachIceExpose: true,
+        },
+      ),
+    ];
+  }
   if (sources.length === 0) return [];
   const primarySource = sources[0]!;
   const exposeActions = sources.map((sourceCardId) => {
@@ -292,10 +331,14 @@ export function resolveApproachIceExposeAbility(
   const availableSources = installedApproachIceExposeSources(host);
   const decision = String(legalAction.payload?.approachIceExposeDecision ?? "");
   if (decision === "expose") {
-    if (!availableSources.includes(sourceCardId))
+    if (
+      !availableSources.includes(sourceCardId) &&
+      !(run.eventApproachIceExposeBeforeRez && run.successfulRunSourceCardId === sourceCardId)
+    )
       throw new Error("Die Approach-Expose-Quelle ist nicht installiert.");
     const definition = host.cards.definitionFor(approachedIceId);
-    markApproachIceExposeUsedForSource(run, sourceCardId);
+    if (!run.eventApproachIceExposeBeforeRez)
+      markApproachIceExposeUsedForSource(run, sourceCardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,

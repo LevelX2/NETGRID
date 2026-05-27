@@ -172,6 +172,21 @@ export function rezCard(
     flags.corpRezzedIceThisTurn =
       Math.max(0, Math.floor(flags.corpRezzedIceThisTurn ?? 0)) + 1;
   }
+  const runRezReward = Math.max(
+    0,
+    Math.floor(state.run?.runnerCreditGainOnCorpRez ?? 0),
+  );
+  if (runRezReward > 0) {
+    state.runner.credits += runRezReward;
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        runnerCreditGainOnCorpRez: runRezReward,
+        gainedCredits: runRezReward,
+        runnerCreditsAfter: state.runner.credits,
+      };
+    }
+  }
   if (
     definition.id === host.constants.KRUMZ_TRACE_ASSET_CARD_ID &&
     !host.cards.hasCardImplementationForDefinition(definition.id)

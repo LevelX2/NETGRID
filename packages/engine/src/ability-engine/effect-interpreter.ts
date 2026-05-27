@@ -255,7 +255,8 @@ export type CardEffectMakeRunOptions = {
     | "corp_lose_credits"
     | "runner_spend_corp_lose_credits"
     | "private_look_top_rd"
-    | "archives_faceup_to_rd";
+    | "archives_faceup_to_rd"
+    | "trash_rezzed_ice_on_fort_and_tag_runner";
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunRunnerCreditGain?: number;
@@ -272,6 +273,10 @@ export type CardEffectMakeRunOptions = {
     returnUnusedAtRunEnd: true;
   };
   afterRunCompletedUnpreventableCoreDamage?: number;
+  prohibitNoisyIcebreakers?: boolean;
+  eventApproachIceExposeBeforeRez?: boolean;
+  runnerCreditGainOnCorpRez?: number;
+  damagePreventionPool?: number;
 };
 
 export type CardEffectMakeRunResult = {
@@ -440,6 +445,36 @@ export function executeCardImplementationEffects(
           visibility: effect.visibility,
           side,
           amount: effect.amount,
+          reason: effectReason(context),
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "gain_credits_for_runner_trash_history": {
+        assertPublicVisibility("gain_credits_for_runner_trash_history", effect.visibility);
+        const amount =
+          state.runnerTurnFlags?.trashedAdvertisementThisTurn === true
+            ? effect.advertisementAmount
+            : state.runnerTurnFlags?.trashedTransactionsThisTurn === true
+              ? effect.transactionsAmount
+              : 0;
+        assertPositiveIntegerAmount(
+          "gain_credits_for_runner_trash_history",
+          amount,
+        );
+        gainCredits(state, context.controller, amount);
+        publicPayload.gainedCredits =
+          Number(publicPayload.gainedCredits ?? 0) + amount;
+        publicPayload.runnerCreditsAfter = state.runner.credits;
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "gain_credits"),
+          kind: "gain_credits",
+          visibility: effect.visibility,
+          side: context.controller,
+          amount,
           reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
@@ -1110,8 +1145,47 @@ export function executeCardImplementationEffects(
                   effect.afterRunCompletedUnpreventableCoreDamage,
               }
             : {}),
+          ...(effect.prohibitNoisyIcebreakers !== undefined
+            ? { prohibitNoisyIcebreakers: effect.prohibitNoisyIcebreakers }
+            : {}),
+          ...(effect.eventApproachIceExposeBeforeRez !== undefined
+            ? {
+                eventApproachIceExposeBeforeRez:
+                  effect.eventApproachIceExposeBeforeRez,
+              }
+            : {}),
+          ...(effect.runnerCreditGainOnCorpRez !== undefined
+            ? { runnerCreditGainOnCorpRez: effect.runnerCreditGainOnCorpRez }
+            : {}),
+          ...(effect.damagePreventionPool !== undefined
+            ? { damagePreventionPool: effect.damagePreventionPool }
+            : {}),
         });
         mergePublicPayload(publicPayload, runResult.publicPayload);
+        return;
+      }
+      case "mark_next_agenda_access_credit_gain": {
+        assertPublicVisibility("mark_next_agenda_access_credit_gain", effect.visibility);
+        state.runnerTurnFlags ??= {
+          stoleAgendaThisTurn: false,
+          stoleAgendaLastTurn: false,
+        };
+        state.runnerTurnFlags.prearrangedDropPending = true;
+        mergePublicPayload(publicPayload, {
+          prearrangedDropPending: true,
+          prearrangedDropCreditGain: effect.amount,
+        });
+        return;
+      }
+      case "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags": {
+        assertPublicVisibility(
+          "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags",
+          effect.visibility,
+        );
+        mergePublicPayload(publicPayload, {
+          remoteDetonatorRequested: true,
+          tagsAdded: effect.tagAmount,
+        });
         return;
       }
       case "pay_rez_cost_to_trash_rezzed_ice": {

@@ -412,7 +412,11 @@ export function fullyBrokenPassedIcePostPassActions(
   if (!rezzedInstalledIceIds(state).includes(targetIceId)) return [];
   if (!run.fullyBrokenIceIds?.includes(targetIceId)) return [];
   const targetDefinition = definitionFor(state, targetIceId);
-  return state.runner.rig.programs
+  const sourceIds = [
+    ...state.runner.rig.programs,
+    ...(run.successfulRunSourceCardId ? [run.successfulRunSourceCardId] : []),
+  ];
+  return [...new Set(sourceIds)]
     .filter((cardId) => fullyBrokenPassedIceDerezImplementationForCard(state, cardId))
     .filter((cardId) => {
       const implementation = fullyBrokenPassedIceDerezImplementationForCard(
@@ -460,8 +464,10 @@ export function resolveFullyBrokenPassedIceDerezAndEndRun(
     throw new Error("Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.");
   const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
   const targetIceId = String(legalAction.payload?.targetIceId ?? "") as CardInstanceId;
-  if (!state.runner.rig.programs.includes(sourceCardId))
-    throw new Error("Die Post-Pass-Quelle ist nicht installiert.");
+  const sourceIsInstalledProgram = state.runner.rig.programs.includes(sourceCardId);
+  const sourceIsRunEvent = run.successfulRunSourceCardId === sourceCardId;
+  if (!sourceIsInstalledProgram && !sourceIsRunEvent)
+    throw new Error("Die Post-Pass-Quelle ist nicht legal.");
   const implementation = fullyBrokenPassedIceDerezImplementationForCard(
     state,
     sourceCardId,

@@ -4936,6 +4936,7 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
       definition,
       cardId,
     );
+    resolvePostOnPlayGenericFollowups(state, definition, legalAction);
     return;
   }
   if (resolver) {
@@ -4943,6 +4944,45 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
     return;
   }
   throw new Error(`Kein Runner-Event-Resolver fuer ${definition.id}.`);
+}
+
+function resolvePostOnPlayGenericFollowups(
+  state: GameState,
+  definition: CardDefinition,
+  legalAction: LegalAction,
+): void {
+  const effects = onPlayCardImplementationEffects(definition);
+  if (
+    effects.some(
+      (effect) =>
+        effect.kind ===
+        "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags",
+    )
+  ) {
+    const serverId = state.runnerTurnFlags?.lastSuccessfulRunServerId;
+    if (!serverId)
+      throw new Error("Es gibt keinen erfolgreichen Run-Fort in diesem Zug.");
+    const server = mustServer(state, serverId);
+    const trashedDefinitionIds: CardDefinitionId[] = [];
+    for (const iceId of server.ice.slice()) {
+      if (mustInstance(state.cardInstances, iceId).rezzed !== true) continue;
+      trashedDefinitionIds.push(definitionFor(state, iceId).id);
+      trashCorpInstalledCardToArchives(state, iceId, legalAction);
+    }
+    state.runner.tags += 3;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      remoteDetonatorResolved: true,
+      serverId,
+      trashedRezzedIceCount: trashedDefinitionIds.length,
+      trashedCount: trashedDefinitionIds.length,
+      ...(trashedDefinitionIds.length > 0
+        ? { trashedCardDefinitionIds: trashedDefinitionIds.sort().join(",") }
+        : {}),
+      tagsAdded: 3,
+      runnerTagsAfter: state.runner.tags,
+    };
+  }
 }
 
 function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
@@ -6564,6 +6604,9 @@ function endTurn(
     flags.runAttemptsThisTurn = 0;
     flags.trashedNodeLastTurn = flags.trashedNodeThisTurn === true;
     flags.trashedNodeThisTurn = false;
+    flags.trashedAdvertisementThisTurn = false;
+    flags.trashedTransactionsThisTurn = false;
+    flags.prearrangedDropPending = false;
     flags.installedResourceIdsLastTurn = (
       flags.installedResourceIdsThisTurn ?? []
     ).slice();
@@ -6959,6 +7002,9 @@ function startRunnerTurn(
   flags.successfulHqRunThisTurn = false;
   flags.successfulRunThisTurn = false;
   delete flags.lastSuccessfulRunServerId;
+  flags.trashedAdvertisementThisTurn = false;
+  flags.trashedTransactionsThisTurn = false;
+  flags.prearrangedDropPending = false;
   flags.damagePreventionUsage = {};
   flags.brokerActionCardIdsThisTurn = [];
   flags.startOfTurnFloatingCreditsApplied = false;
@@ -10559,6 +10605,10 @@ function runAccessTransitionHost(state: GameState): RunAccessTransitionHost {
     },
     draw: {
       drawCorpCards: (count) => drawCorpCards(state, count),
+    },
+    trash: {
+      trashCorpInstalledCardToArchives: (cardId, legalAction) =>
+        trashCorpInstalledCardToArchives(state, cardId, legalAction),
     },
     rng: {
       shuffleStateIds: (ids, purpose) => shuffleStateIds(state, ids, purpose),
@@ -14790,6 +14840,9 @@ function ensureRunnerTurnFlags(
     runAttemptsThisGame: 0,
     trashedNodeThisTurn: false,
     trashedNodeLastTurn: false,
+    trashedAdvertisementThisTurn: false,
+    trashedTransactionsThisTurn: false,
+    prearrangedDropPending: false,
     installedResourceIdsThisTurn: [],
     installedResourceIdsLastTurn: [],
     successfulHqRunThisTurn: false,
@@ -14821,6 +14874,9 @@ function ensureRunnerTurnFlags(
   flags.runAttemptsThisGame ??= 0;
   flags.trashedNodeThisTurn ??= false;
   flags.trashedNodeLastTurn ??= false;
+  flags.trashedAdvertisementThisTurn ??= false;
+  flags.trashedTransactionsThisTurn ??= false;
+  flags.prearrangedDropPending ??= false;
   flags.installedResourceIdsThisTurn ??= [];
   flags.installedResourceIdsLastTurn ??= [];
   flags.successfulHqRunThisTurn ??= false;

@@ -52,6 +52,7 @@ type TracePostBidLinkCandidate = {
   linkDelta: number;
   creditCost: number;
   limitOncePerTrace: boolean;
+  rewardCreditsOnAvoidTrace?: number;
 };
 
 export type TraceOrchestrationHost = {
@@ -602,6 +603,9 @@ function postBidTraceLinkCandidates(
         linkDelta: effect.amount,
         creditCost,
         limitOncePerTrace,
+        ...(effect.rewardCreditsOnAvoidTrace
+          ? { rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace }
+          : {}),
       });
     }
   }

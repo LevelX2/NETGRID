@@ -12,6 +12,7 @@ import {
   type ServerId,
 } from "@netgrid/shared";
 import { MICROTECH_TRODE_SET_ID } from "../../compatibility/runtime-compatibility";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { describeTraceResultFromTrace } from "../trace/trace-result";
 import {
   appendResolvedSubroutineEffect,
@@ -376,6 +377,9 @@ export function applyPrintedTraceSuccessFollowups(
   const tagsAdded = traceSuccessTagAmount(trace.successEffect, successful, result);
   const hackerTrackerCountersAdded =
     host.callbacks.addHackerTrackerTraceCounters();
+  const traceAvoidReward = successful
+    ? { amount: 0, sourceDefinitionIds: [] as string[] }
+    : applyTraceAvoidRewards(host, trace);
   let runnerRunLockCreditCost = 0;
   let runnerRunEnded = false;
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
@@ -464,6 +468,15 @@ export function applyPrintedTraceSuccessFollowups(
           traceHostedCreditsAdded: hackerTrackerCountersAdded,
         }
       : {}),
+    ...(traceAvoidReward.amount > 0
+      ? {
+          traceAvoidRewardCredits: traceAvoidReward.amount,
+          gainedCredits: traceAvoidReward.amount,
+          runnerCreditsAfter: state.runner.credits,
+          traceAvoidRewardSourceDefinitionIds:
+            traceAvoidReward.sourceDefinitionIds.sort().join(","),
+        }
+      : {}),
     ...(runnerRunEnded
       ? {
           fangRunEnded: true,
@@ -489,6 +502,37 @@ export function applyPrintedTraceSuccessFollowups(
     payload,
     stateChanged: true,
   };
+}
+
+function applyTraceAvoidRewards(
+  host: EncounterPrintedEffectHost,
+  trace: CurrentTrace,
+): { amount: number; sourceDefinitionIds: string[] } {
+  const sourceIds = [
+    ...(trace.baseLinkSourceId ? [trace.baseLinkSourceId] : []),
+    ...(trace.postBidLinkSourceIds ?? []),
+  ];
+  let amount = 0;
+  const sourceDefinitionIds: string[] = [];
+  for (const sourceId of sourceIds) {
+    const definition = host.callbacks.definitionFor(sourceId);
+    const implementation = cardImplementationForDefinitionId(definition.id);
+    for (const ability of implementation?.abilities ?? []) {
+      if (ability.kind !== "activated") continue;
+      for (const effect of ability.effects) {
+        if (
+          (effect.kind === "use_base_link" ||
+            effect.kind === "increase_trace_link") &&
+          effect.rewardCreditsOnAvoidTrace
+        ) {
+          amount += effect.rewardCreditsOnAvoidTrace;
+          sourceDefinitionIds.push(definition.id);
+        }
+      }
+    }
+  }
+  if (amount > 0) host.state.runner.credits += amount;
+  return { amount, sourceDefinitionIds };
 }
 
 function traceSuccessTagAmount(

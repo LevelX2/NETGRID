@@ -169,6 +169,9 @@ function quoteForAbility(
       traceBaseLinkSourceDefinitionId: definition.id,
       traceBaseLinkCostPaid: creditCost,
       baseLinkValue: effect.baseLink,
+      ...(effect.rewardCreditsOnAvoidTrace
+        ? { traceAvoidRewardCredits: effect.rewardCreditsOnAvoidTrace }
+        : {}),
     },
   };
 }

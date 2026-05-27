@@ -875,7 +875,8 @@ export type RunState = {
     | "corp_lose_credits"
     | "runner_spend_corp_lose_credits"
     | "private_look_top_rd"
-    | "archives_faceup_to_rd";
+    | "archives_faceup_to_rd"
+    | "trash_rezzed_ice_on_fort_and_tag_runner";
   successfulRunSourceCardId?: CardInstanceId;
   successfulRunSourceDefinitionId?: CardDefinitionId;
   successfulRunSourceTitle?: string;
@@ -900,6 +901,13 @@ export type RunState = {
   approachIceExposeSkippedIceIdsThisRun?: CardInstanceId[];
   approachIceExposeViewingIceId?: CardInstanceId;
   approachIceExposeViewingSourceCardId?: CardInstanceId;
+  eventApproachIceExposeBeforeRez?: boolean;
+  prohibitNoisyIcebreakers?: boolean;
+  runnerCreditGainOnCorpRez?: number;
+  damagePreventionPool?: {
+    sourceDefinitionId: CardDefinitionId;
+    remaining: number;
+  };
   brokenSubroutineIndexes: number[];
   resolvedSubroutineIndexes: number[];
   successful: boolean;
@@ -1166,6 +1174,9 @@ export type GameState = {
     runAttemptsThisGame?: number;
     trashedNodeThisTurn?: boolean;
     trashedNodeLastTurn?: boolean;
+    trashedAdvertisementThisTurn?: boolean;
+    trashedTransactionsThisTurn?: boolean;
+    prearrangedDropPending?: boolean;
     installedResourceIdsThisTurn?: CardInstanceId[];
     installedResourceIdsLastTurn?: CardInstanceId[];
     successfulHqRunThisTurn?: boolean;

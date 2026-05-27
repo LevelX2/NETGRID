@@ -128,6 +128,8 @@ export function buildRunnerEncounterActions(
   actions.push(...selfModifyingCodeEncounterActions(host));
   for (const breakerId of host.state.runner.rig.programs) {
     const breaker = host.cards.definitionFor(breakerId);
+    if (run.prohibitNoisyIcebreakers && breaker.subtypes.includes("noisy"))
+      continue;
     if (!host.run.canUseBreakerOnCurrentFort(breakerId)) continue;
     const breakerBaseStrength =
       typeof run.aiBoonRunStrengthByBreaker?.[breakerId] === "number"

@@ -39,6 +39,10 @@ export type StartRunOptions = Pick<
   | "runnerRunTemporaryCredits"
   | "unpreventableCoreDamageAtRunEnd"
   | "socialEngineeringAutoPassIceId"
+  | "prohibitNoisyIcebreakers"
+  | "eventApproachIceExposeBeforeRez"
+  | "runnerCreditGainOnCorpRez"
+  | "damagePreventionPool"
 >;
 
 export type RunCoreExecutionHost = {
@@ -203,6 +207,19 @@ export function startRun(
       : {}),
     ...(options?.socialEngineeringAutoPassIceId
       ? { socialEngineeringAutoPassIceId: options.socialEngineeringAutoPassIceId }
+      : {}),
+    ...(options?.prohibitNoisyIcebreakers
+      ? { prohibitNoisyIcebreakers: true }
+      : {}),
+    ...(options?.eventApproachIceExposeBeforeRez
+      ? { eventApproachIceExposeBeforeRez: true }
+      : {}),
+    ...(options?.runnerCreditGainOnCorpRez &&
+    options.runnerCreditGainOnCorpRez > 0
+      ? { runnerCreditGainOnCorpRez: options.runnerCreditGainOnCorpRez }
+      : {}),
+    ...(options?.damagePreventionPool
+      ? { damagePreventionPool: { ...options.damagePreventionPool } }
       : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };

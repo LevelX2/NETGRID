@@ -64,6 +64,10 @@ type CardImplementationStartRunOptions = Pick<
   | "runnerRunTemporaryCredits"
   | "unpreventableCoreDamageAtRunEnd"
   | "socialEngineeringAutoPassIceId"
+  | "prohibitNoisyIcebreakers"
+  | "eventApproachIceExposeBeforeRez"
+  | "runnerCreditGainOnCorpRez"
+  | "damagePreventionPool"
 >;
 
 export type GameCardImplementationRuntimeDepsHost = {
@@ -309,6 +313,23 @@ function startRunForCardImplementation(
             },
           }
         : {}),
+      ...(options.prohibitNoisyIcebreakers
+        ? { prohibitNoisyIcebreakers: true }
+        : {}),
+      ...(options.eventApproachIceExposeBeforeRez
+        ? { eventApproachIceExposeBeforeRez: true }
+        : {}),
+      ...(options.runnerCreditGainOnCorpRez !== undefined
+        ? { runnerCreditGainOnCorpRez: options.runnerCreditGainOnCorpRez }
+        : {}),
+      ...(options.damagePreventionPool !== undefined
+        ? {
+            damagePreventionPool: {
+              sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
+              remaining: options.damagePreventionPool,
+            },
+          }
+        : {}),
       ...(options.runTraceLinkBonus !== undefined && sourceDefinitionId
         ? {
             runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,
@@ -358,6 +379,18 @@ function startRunForCardImplementation(
           afterRunUnpreventableCoreDamage:
             options.afterRunCompletedUnpreventableCoreDamage,
         }
+      : {}),
+    ...(options.prohibitNoisyIcebreakers
+      ? { prohibitNoisyIcebreakers: true }
+      : {}),
+    ...(options.eventApproachIceExposeBeforeRez
+      ? { eventApproachIceExposeBeforeRez: true }
+      : {}),
+    ...(options.runnerCreditGainOnCorpRez !== undefined
+      ? { runnerCreditGainOnCorpRez: options.runnerCreditGainOnCorpRez }
+      : {}),
+    ...(options.damagePreventionPool !== undefined
+      ? { damagePreventionPool: options.damagePreventionPool }
       : {}),
   };
   return { publicPayload: legalAction.payload ?? {} };
