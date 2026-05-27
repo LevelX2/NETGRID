@@ -26,6 +26,7 @@ export type {
   ApiPlayerClockConfig,
   ApiPlayerClockMode,
   ApiPlayerClockSnapshot,
+  ApiRecentGameResult,
   ApiSeriesPlayerSlot,
   ApiSeriesResultSummary,
   ApiSeriesStatus,
