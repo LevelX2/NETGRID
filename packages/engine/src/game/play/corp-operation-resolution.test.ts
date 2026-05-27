@@ -17,6 +17,8 @@ import {
 const OPERATION_ID = "operation_1" as CardInstanceId;
 const RESOURCE_ID = "resource_1" as CardInstanceId;
 const HIDDEN_RESOURCE_ID = "hidden_resource_1" as CardInstanceId;
+const RUNNER_RESOURCE_DEFINITION_ID = "onr_v1_151_aujourdoui";
+const CORP_ASSET_DEFINITION_ID = "onr_v1_308_acme-savings-and-loan";
 
 function state(): GameState {
   return {
@@ -53,7 +55,7 @@ function state(): GameState {
         controller: "corp",
         zone: { side: "corp", zone: "hq" },
       }),
-      [RESOURCE_ID]: instance(RESOURCE_ID, "runner_resource", {
+      [RESOURCE_ID]: instance(RESOURCE_ID, RUNNER_RESOURCE_DEFINITION_ID, {
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
@@ -148,9 +150,6 @@ function hostFor(
         }) as LegalAction,
     },
     cards: {
-      definitionFor: (cardId) =>
-        definition(targetState.cardInstances[cardId]?.definitionId ?? String(cardId)),
-      mustInstance: (cardId) => targetState.cardInstances[cardId] as CardInstance,
       isCorpInstallableCardType: (cardDefinition) =>
         cardDefinition.side === "corp" && cardDefinition.type === "asset",
     },
@@ -279,12 +278,12 @@ describe("corp-operation-resolution", () => {
   it("delegates hidden-zone operation effects without changing choice contracts", () => {
     const calls: string[] = [];
     const offSiteState = state();
-    const offSiteHost = hostFor(offSiteState, calls, {
-      cards: {
-        ...hostFor(offSiteState).cards,
-        definitionFor: () => definition("onr_v1_296_off-site-backups"),
-      },
-    });
+    offSiteState.cardInstances[OPERATION_ID] = instance(
+      OPERATION_ID,
+      "onr_v1_296_off-site-backups",
+      { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
+    );
+    const offSiteHost = hostFor(offSiteState, calls);
 
     resolveCorpOperation(
       offSiteHost,
@@ -293,12 +292,12 @@ describe("corp-operation-resolution", () => {
     );
 
     const planningState = state();
-    const planningHost = hostFor(planningState, calls, {
-      cards: {
-        ...hostFor(planningState).cards,
-        definitionFor: () => definition("onr_v1_298_planning-consultants"),
-      },
-    });
+    planningState.cardInstances[OPERATION_ID] = instance(
+      OPERATION_ID,
+      "onr_v1_298_planning-consultants",
+      { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
+    );
+    const planningHost = hostFor(planningState, calls);
 
     resolveCorpOperation(
       planningHost,
@@ -316,20 +315,17 @@ describe("corp-operation-resolution", () => {
     const targetState = state();
     targetState.cardInstances["asset_1" as CardInstanceId] = instance(
       "asset_1" as CardInstanceId,
-      "corp_asset",
+      CORP_ASSET_DEFINITION_ID,
+      { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
+    );
+    targetState.cardInstances[OPERATION_ID] = instance(
+      OPERATION_ID,
+      "onr_v1_289_edgerunner-inc-temps",
       { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
     );
     targetState.corp.hq.push("asset_1" as CardInstanceId);
     const calls: string[] = [];
-    const host = hostFor(targetState, calls, {
-      cards: {
-        ...hostFor(targetState).cards,
-        definitionFor: (cardId) =>
-          cardId === "asset_1"
-            ? definition("corp_asset", { type: "asset" })
-            : definition("onr_v1_289_edgerunner-inc-temps"),
-      },
-    });
+    const host = hostFor(targetState, calls);
     const utilityAction = action();
 
     expect(canPlayCorpOperation(host, definition("onr_v1_289_edgerunner-inc-temps"))).toBe(
@@ -369,7 +365,7 @@ describe("corp-operation-resolution", () => {
     expect(actions[0]?.payload).toMatchObject({
       cardId: OPERATION_ID,
       traceSuccessTargetCardId: RESOURCE_ID,
-      traceSuccessTargetDefinitionId: "runner_resource",
+      traceSuccessTargetDefinitionId: RUNNER_RESOURCE_DEFINITION_ID,
     });
   });
 });

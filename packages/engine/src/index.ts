@@ -1100,9 +1100,7 @@ configureEventContextHostComposition({
   cards: {
     agendaPointsForScoredCard,
     cardCounter,
-    definitionFor,
     hostedProgramStrengthModifier,
-    mustInstance,
   },
   publicContext: {
     creditCostForAction,
@@ -9787,10 +9785,6 @@ function playCardExecutionHost(state: GameState): PlayCardExecutionHost {
   const operationHost = corpOperationResolutionHost(state);
   return {
     state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-    },
     zones: {
       removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
     },
@@ -9847,8 +9841,6 @@ function corpOperationResolutionHost(
       buildLegalAction: action,
     },
     cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
       isCorpInstallableCardType,
     },
     corp: {
@@ -9946,10 +9938,6 @@ function boardStateActionExecutionHost(
 ): BoardStateActionExecutionHost {
   return {
     state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-    },
     zones: {
       removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
       serverById: (serverId) => mustServer(state, serverId),

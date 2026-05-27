@@ -1,9 +1,4 @@
-import type {
-  CardDefinition,
-  CardInstanceId,
-  GameState,
-  LegalAction,
-} from "@netgrid/shared";
+import type { CardInstanceId, GameState, LegalAction } from "@netgrid/shared";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { publicContextForAction } from "../../public-context";
@@ -46,7 +41,7 @@ function state(): GameState {
     cardInstances: {
       [BREAKER_ID]: {
         id: BREAKER_ID,
-        definitionId: "breaker_definition",
+        definitionId: "onr_v1_015_codeslinger",
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig", section: "programs" },
@@ -82,20 +77,7 @@ function hostFor(): EventContextHostCompositionHost {
     cards: {
       agendaPointsForScoredCard: () => 2,
       cardCounter: () => 0,
-      definitionFor: () =>
-        ({
-          id: "breaker_definition",
-          title: "Breaker",
-          side: "runner",
-          type: "program",
-          strength: 2,
-        }) as CardDefinition,
       hostedProgramStrengthModifier: () => 4,
-      mustInstance: (instances, cardId) => {
-        const instance = instances[cardId];
-        if (!instance) throw new Error("missing instance");
-        return instance;
-      },
     },
     publicContext: {
       creditCostForAction: () => 3,
@@ -148,7 +130,7 @@ describe("event-context-hosts", () => {
     expect(context).toMatchObject({
       pumpBreakerCreditCost: 3,
       pumpStrengthAmount: 1,
-      breakerStrengthAfter: 6,
+      breakerStrengthAfter: 7,
     });
   });
 

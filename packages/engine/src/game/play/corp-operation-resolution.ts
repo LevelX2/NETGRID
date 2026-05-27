@@ -1,7 +1,6 @@
 import type {
   CardDefinition,
   CardDefinitionId,
-  CardInstance,
   CardInstanceId,
   DamageType,
   GameState,
@@ -25,6 +24,7 @@ import {
   CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
 } from "../../mechanics/hidden-zone";
 import { EDGERUNNER_TEMPS_INSTALL_OPERATION_ID } from "../../mechanics/longtail-card-effects";
+import { definitionFor, mustInstance } from "../state/card-server-lookup";
 
 type CorpOperationResolver = {
   name: string;
@@ -46,8 +46,6 @@ export type CorpOperationResolutionHost = {
     ) => LegalAction;
   };
   cards: {
-    definitionFor: (cardId: CardInstanceId) => CardDefinition;
-    mustInstance: (cardId: CardInstanceId) => CardInstance;
     isCorpInstallableCardType: (definition: CardDefinition) => boolean;
   };
   corp: {
@@ -197,7 +195,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
       if (
         !sourceCardId ||
-        host.cards.definitionFor(sourceCardId).id !==
+        definitionFor(host.state, sourceCardId).id !==
           CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID
       )
         throw new Error("Off-Site Backups fehlt als Quelle.");
@@ -211,7 +209,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
       if (
         !sourceCardId ||
-        host.cards.definitionFor(sourceCardId).id !==
+        definitionFor(host.state, sourceCardId).id !==
           CORP_RD_TOP5_REORDER_OPERATION_CARD_ID
       )
         throw new Error("Planning Consultants fehlt als Quelle.");
@@ -222,12 +220,12 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     name: "onr_v1922_corp_operation_install_action_bundle",
     canPlay: (host) =>
       host.state.corp.hq.some((cardId) =>
-        host.cards.isCorpInstallableCardType(host.cards.definitionFor(cardId)),
+        host.cards.isCorpInstallableCardType(definitionFor(host.state, cardId)),
       ),
     resolve: (host, legalAction) => {
       if (
         !host.state.corp.hq.some((cardId) =>
-          host.cards.isCorpInstallableCardType(host.cards.definitionFor(cardId)),
+          host.cards.isCorpInstallableCardType(definitionFor(host.state, cardId)),
         )
       ) {
         throw new Error(
@@ -271,15 +269,15 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
         throw new Error(
           "Project Consultants findet keine installierte Agenda.",
         );
-      host.cards.mustInstance(targetAgendaId).advancementCounters += 1;
+      mustInstance(host.state.cardInstances, targetAgendaId).advancementCounters += 1;
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         v1919OperationAbility: "advance_installed_agenda",
         targetCardId: targetAgendaId,
-        targetCardDefinitionId: host.cards.definitionFor(targetAgendaId).id,
+        targetCardDefinitionId: definitionFor(host.state, targetAgendaId).id,
         addedAdvancementCounters: 1,
         advancementCountersAfter:
-          host.cards.mustInstance(targetAgendaId).advancementCounters,
+          mustInstance(host.state.cardInstances, targetAgendaId).advancementCounters,
       };
     },
   },
@@ -385,12 +383,12 @@ export function canPlayCorpUtilityOperation(
   switch (utility.kind) {
     case "gain_restricted_install_actions":
       return host.state.corp.hq.some((cardId) =>
-        host.cards.isCorpInstallableCardType(host.cards.definitionFor(cardId)),
+        host.cards.isCorpInstallableCardType(definitionFor(host.state, cardId)),
       );
     case "corp_archives_to_hq":
       return host.state.corp.archives.some((cardId) => {
         const sourceCardId = host.state.corp.hq.find(
-          (candidate) => host.cards.definitionFor(candidate).id === _definition.id,
+          (candidate) => definitionFor(host.state, candidate).id === _definition.id,
         );
         return cardId !== sourceCardId;
       });
@@ -443,14 +441,14 @@ export function resolveCorpUtilityOperation(
     }
     case "corp_archives_to_hq": {
       const sourceCardId = sourceCardIdFromAction(legalAction);
-      if (!sourceCardId || host.cards.definitionFor(sourceCardId).id !== definition.id)
+      if (!sourceCardId || definitionFor(host.state, sourceCardId).id !== definition.id)
         throw new Error("Off-Site Backups fehlt als Quelle.");
       host.hiddenZone.startCorpArchivesToHqChoice(legalAction, sourceCardId);
       return;
     }
     case "corp_rd_top_reorder": {
       const sourceCardId = sourceCardIdFromAction(legalAction);
-      if (!sourceCardId || host.cards.definitionFor(sourceCardId).id !== definition.id)
+      if (!sourceCardId || definitionFor(host.state, sourceCardId).id !== definition.id)
         throw new Error("Planning Consultants fehlt als Quelle.");
       host.hiddenZone.startCorpRdTopReorderChoice(legalAction, sourceCardId);
       return;
@@ -485,7 +483,7 @@ export function resolveCorpUtilityOperation(
         .sort()
         .slice(0, utility.max);
       const targetDefinitionIds = targetIds.map(
-        (cardId) => host.cards.definitionFor(cardId).id,
+        (cardId) => definitionFor(host.state, cardId).id,
       );
       for (const cardId of targetIds) {
         if (!host.state.runner.rig.resources.includes(cardId)) continue;
@@ -662,7 +660,7 @@ function runnerLastTurnResourceTargetPayload(
   }
   return {
     traceSuccessTargetCardId: targetCardId,
-    traceSuccessTargetDefinitionId: host.cards.definitionFor(targetCardId).id,
+    traceSuccessTargetDefinitionId: definitionFor(host.state, targetCardId).id,
   };
 }
 

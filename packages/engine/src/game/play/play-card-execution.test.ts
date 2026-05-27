@@ -1,5 +1,4 @@
 import type {
-  CardDefinition,
   CardInstance,
   CardInstanceId,
   GameState,
@@ -14,6 +13,8 @@ import {
 
 const EVENT_ID = "event_1" as CardInstanceId;
 const OPERATION_ID = "operation_1" as CardInstanceId;
+const RUNNER_EVENT_DEFINITION_ID = "onr_v1_097_livewires-contacts";
+const CORP_OPERATION_DEFINITION_ID = "simple_economy_operation";
 
 function state(): GameState {
   return {
@@ -45,12 +46,12 @@ function state(): GameState {
       servers: [],
     },
     cardInstances: {
-      [EVENT_ID]: instance(EVENT_ID, "runner_event", {
+      [EVENT_ID]: instance(EVENT_ID, RUNNER_EVENT_DEFINITION_ID, {
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "grip" },
       }),
-      [OPERATION_ID]: instance(OPERATION_ID, "corp_operation", {
+      [OPERATION_ID]: instance(OPERATION_ID, CORP_OPERATION_DEFINITION_ID, {
         owner: "corp",
         controller: "corp",
         zone: { side: "corp", zone: "hq" },
@@ -81,20 +82,6 @@ function instance(
   } as unknown as CardInstance;
 }
 
-function definition(
-  id: string,
-  type: CardDefinition["type"],
-  cost = 1,
-): CardDefinition {
-  return {
-    id,
-    title: id,
-    side: type === "operation" ? "corp" : "runner",
-    type,
-    cost,
-  } as CardDefinition;
-}
-
 function legalAction(
   type: LegalAction["type"],
   cardId: CardInstanceId,
@@ -118,7 +105,6 @@ function legalAction(
 }
 
 type HostOverrides = {
-  cards?: Partial<PlayCardExecutionHost["cards"]>;
   zones?: Partial<PlayCardExecutionHost["zones"]>;
   payment?: Partial<PlayCardExecutionHost["payment"]>;
   events?: Partial<PlayCardExecutionHost["events"]>;
@@ -133,16 +119,6 @@ function hostFor(
 ): PlayCardExecutionHost {
   const host: PlayCardExecutionHost = {
     state: targetState,
-    cards: {
-      definitionFor: (cardId) => {
-        const instance = targetState.cardInstances[cardId];
-        return definition(
-          instance?.definitionId ?? String(cardId),
-          cardId === OPERATION_ID ? "operation" : "event",
-        );
-      },
-      cardInstanceFor: (cardId) => targetState.cardInstances[cardId] as CardInstance,
-    },
     zones: {
       removeFromAllZones: (cardId) => {
         calls.push(`remove:${cardId}`);
@@ -182,7 +158,6 @@ function hostFor(
 
   return {
     state: targetState,
-    cards: { ...host.cards, ...overrides.cards },
     zones: { ...host.zones, ...overrides.zones },
     payment: { ...host.payment, ...overrides.payment },
     events: { ...host.events, ...overrides.events },
@@ -255,7 +230,7 @@ describe("play-card-execution", () => {
       "click:runner",
       "credits:runner:1",
       `remove:${EVENT_ID}`,
-      `onPlay:runner_event:${EVENT_ID}`,
+      `onPlay:${RUNNER_EVENT_DEFINITION_ID}:${EVENT_ID}`,
     ]);
   });
 
@@ -278,7 +253,7 @@ describe("play-card-execution", () => {
       "click:corp",
       "credits:corp:3",
       `remove:${OPERATION_ID}`,
-      "operationResolver:corp_operation:play_operation",
+      `operationResolver:${CORP_OPERATION_DEFINITION_ID}:play_operation`,
     ]);
   });
 
@@ -290,7 +265,7 @@ describe("play-card-execution", () => {
       "v098_hq_rd_swap_operation",
       { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
     );
-    const hiddenAction = legalAction("play_operation", OPERATION_ID, 4);
+    const hiddenAction = legalAction("play_operation", OPERATION_ID, 2);
     hiddenAction.payload = {
       ...(hiddenAction.payload ?? {}),
       traceSuccessTargetCardId: "resource_1",
@@ -298,10 +273,6 @@ describe("play-card-execution", () => {
 
     handlePlayCardExecution(
       hostFor(hiddenState, hiddenCalls, {
-        cards: {
-          definitionFor: () =>
-            definition("v098_hq_rd_swap_operation", "operation", 2),
-        },
         cardImplementation: {
           hasPrintedCostOnPlay: () => true,
           additionalOperationCost: () => 2,
@@ -326,12 +297,7 @@ describe("play-card-execution", () => {
     const badPublicityAction = legalAction("play_operation", OPERATION_ID);
 
     handlePlayCardExecution(
-      hostFor(badPublicityState, badPublicityCalls, {
-        cards: {
-          definitionFor: () =>
-            definition("v099_bad_publicity_operation", "operation"),
-        },
-      }),
+      hostFor(badPublicityState, badPublicityCalls),
       badPublicityAction,
     );
 
