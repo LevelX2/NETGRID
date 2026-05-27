@@ -266,6 +266,8 @@ describe("game card implementation runtime deps root", () => {
         "runnerRunAttemptsLastTurn",
         "runnerRunAttemptsThisGame",
         "runnerTrashedNodeLastTurn",
+        "runnerTrashedAdvertisementThisTurn",
+        "runnerTrashedTransactionsThisTurn",
         "runnerInstalledResourceLastTurn",
         "runnerWasDamagedDuringLastThreeActions",
         "runnerMadeSuccessfulRunOnServerThisTurn",
