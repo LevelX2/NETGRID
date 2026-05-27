@@ -176,6 +176,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
     trace: {
       trace: {
         orchestrationHost: () => ({} as never),
+        resolveRunnerLastTurnInstalledResourceTargetId: () => undefined,
       },
     },
     counters: {
@@ -263,6 +264,9 @@ describe("game card implementation runtime deps root", () => {
         "rezzedCorpRootCardIds",
         "runnerInstalledCardIds",
         "runnerRunAttemptsLastTurn",
+        "runnerRunAttemptsThisGame",
+        "runnerTrashedNodeLastTurn",
+        "runnerInstalledResourceLastTurn",
         "runnerWasDamagedDuringLastThreeActions",
         "runnerMadeSuccessfulRunOnServerThisTurn",
         "runnerLiberatedAgendaSubtypeThisTurn",

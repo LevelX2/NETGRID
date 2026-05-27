@@ -90,9 +90,7 @@
       "priority": "P1",
       "risk": "medium",
       "batchIncluded": true,
-      "expectedGroups": [
-        "future_run_ice"
-      ],
+      "expectedGroups": ["future_run_ice"],
       "expectedContext": "future_run_ice",
       "activeHintFound": true,
       "derivedFactsFound": true,
@@ -336,10 +334,7 @@
       "priority": "P1",
       "risk": "medium",
       "batchIncluded": true,
-      "expectedGroups": [
-        "future_run_ice",
-        "run_tax"
-      ],
+      "expectedGroups": ["future_run_ice", "run_tax"],
       "expectedContext": "future_run_ice",
       "activeHintFound": true,
       "derivedFactsFound": true,
@@ -648,11 +643,7 @@
       "priority": "P1",
       "risk": "medium",
       "batchIncluded": true,
-      "expectedGroups": [
-        "future_run_ice",
-        "run_tax",
-        "program_trash"
-      ],
+      "expectedGroups": ["future_run_ice", "run_tax", "program_trash"],
       "expectedContext": "future_run_ice",
       "activeHintFound": true,
       "derivedFactsFound": true,
@@ -1078,10 +1069,7 @@
       "priority": "P1",
       "risk": "medium",
       "batchIncluded": true,
-      "expectedGroups": [
-        "remote_role",
-        "run_tax"
-      ],
+      "expectedGroups": ["remote_role", "run_tax"],
       "expectedContext": "remote_upgrade",
       "expectedRemoteRoleKind": "run_tax",
       "activeHintFound": true,
@@ -1384,10 +1372,7 @@
       "priority": "P1",
       "risk": "medium",
       "batchIncluded": true,
-      "expectedGroups": [
-        "remote_role",
-        "agenda_steal_tax"
-      ],
+      "expectedGroups": ["remote_role", "agenda_steal_tax"],
       "expectedContext": "remote_upgrade",
       "expectedRemoteRoleKind": "agenda_steal_tax",
       "activeHintFound": true,

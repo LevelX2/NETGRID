@@ -154,7 +154,56 @@
     }
   ],
   "hardErrorCount": 0,
-  "warningCount": 0,
+  "warningCount": 8,
   "errors": [],
-  "warnings": []
+  "warnings": [
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_008_boardwalk",
+      "title": "Boardwalk"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "title": "Expert Schedule Analyzer"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_032_i-spy",
+      "title": "I Spy"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_042_mouse",
+      "title": "Mouse"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_058_seeya",
+      "title": "SeeYa"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_062_shredder-uplink-protocol",
+      "title": "Shredder Uplink Protocol"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_065_smarteye",
+      "title": "Smarteye"
+    }
+  ]
 }

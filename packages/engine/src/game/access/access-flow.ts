@@ -582,6 +582,9 @@ function trashAccessedCard(
     );
   }
   host.trash.trashCorpInstalledCardToArchives(cardId as CardInstanceId, legalAction);
+  if (definition.type === "asset" && host.cards.cardHasSubtype(definition, "node")) {
+    host.runner.ensureTurnFlags().trashedNodeThisTurn = true;
+  }
   consumeProteusAccessTrashCounters(host, definition, legalAction);
   if (host.state.run?.breach) {
     return {

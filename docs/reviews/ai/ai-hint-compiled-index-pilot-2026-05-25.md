@@ -4,7 +4,7 @@ Datum: 2026-05-25
 
 ## Kurzfazit
 
-Der read-only Compiler-Prototyp umfasst jetzt alle 50 Derived-Basic-Facts-Pilotkarten statt nur die sechs Karten mit Manual Overlay. Er baut pro Karte eine `compiledPreview` aus:
+Der read-only Compiler-Prototyp umfasst jetzt alle 61 Derived-Basic-Facts-Pilotkarten statt nur die sechs Karten mit Manual Overlay. Er baut pro Karte eine `compiledPreview` aus:
 
 1. aktivem Hint-Monolithen,
 2. Generated Basic Facts aus dem Derived-Facts-Gate,
@@ -12,13 +12,13 @@ Der read-only Compiler-Prototyp umfasst jetzt alle 50 Derived-Basic-Facts-Pilotk
 
 Der Report bleibt ein Vergleichsartefakt: `data/ai/ai-card-hints-active.json` wird nicht ersetzt, nicht überschrieben und weiterhin als einzige Runtime-Quelle genutzt.
 
-Aktueller Gate-Befund nach Descriptor-Gap-Closeout:
+Aktueller Gate-Befund nach Aufgabe 017:
 
-- Compiled Pilot Cards: 50
+- Compiled Pilot Cards: 61
 - Karten mit Overlay: 6
-- Karten ohne Overlay: 44
+- Karten ohne Overlay: 55
 - Harte Errors: 0
-- Warnings: 158
+- Warnings: 190
 
 ## Was der Compiler-Prototyp macht
 
@@ -34,7 +34,7 @@ Root-Script:
 corepack pnpm check:ai-hint-compiled-index
 ```
 
-Der Check liest die 50er-Pilotliste aus `data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json`, ergänzt vorhandene Overlay-Einträge und erzeugt den deterministischen Report `docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json`.
+Der Check liest die 61er-Pilotliste aus `data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json`, ergänzt vorhandene Overlay-Einträge und erzeugt den deterministischen Report `docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json`.
 
 ## Was er ausdrücklich nicht macht
 
@@ -48,7 +48,7 @@ Der Check liest die 50er-Pilotliste aus `data/ai/ai-derived-basic-facts-pilot-ca
 ## Inputquellen
 
 - Active Monolith: `data/ai/ai-card-hints-active.json`
-- 50er Pilotliste: `data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json`
+- 61er Pilotliste: `data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json`
 - Derived Basic Facts: `docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json`
 - Manual Overlays:
   - `data/ai/hints/overlays/onr-v1/runner/programs.json`
@@ -103,24 +103,25 @@ Abgesicherte Error-Klassen:
 - Derived-Facts-Quellreport hat harte Errors.
 - `--check` weicht vom committed Report ab.
 
-Warnings aktuell: 158.
+Warnings aktuell: 190.
 
 Warning-Verteilung:
 
-- `active_monolith_mechanical_duplication`: 103
-- `generated_fact_missing_from_active_monolith`: 49
+- `active_monolith_mechanical_duplication`: 111
+- `generated_fact_missing_from_active_monolith`: 65
 - `manual_overlay_strategy_field_missing_from_active`: 6
+- `overlay_missing_for_manual_gap`: 8
 - `descriptor_gap_remaining`: 0
 
 Klassifikation:
 
-- `monolith_mechanical_duplication_candidate`: 103
-- `generated_fact_absent_from_monolith`: 49
+- `monolith_mechanical_duplication_candidate`: 111
+- `generated_fact_absent_from_monolith`: 65
 - `overlay_strategy_field_not_in_monolith`: 6
-- `manual_review_candidate`: 0
+- `manual_review_candidate`: 8
 - `schema_or_descriptor_candidate`: 0
 
-Fehlende Overlays sind nur dann Warnings, wenn eine Karte in der Pilotliste oder im Derived-Facts-Report einen Manual-Overlay-Bedarf hat. Aktuell gibt es keine `overlay_missing_for_manual_gap`-Warnings, weil die sechs erwarteten Overlaykarten abgedeckt sind.
+Fehlende Overlays sind nur dann Warnings, wenn eine Karte in der Pilotliste oder im Derived-Facts-Report einen Manual-Overlay-/Descriptor-Kontext hat. Aufgabe 017 klassifiziert die neuen Runner-Info-Kontexte read-only im Batch-6-Closeout; sie sind keine aktive Hintmigration.
 
 ## Karten mit Overlay
 
@@ -135,7 +136,7 @@ Diese Karten behalten strategische/manual Informationen im Overlay. Nach dem Clo
 
 ## Karten ohne Overlay
 
-Die übrigen 44 Pilotkarten werden aus Active Monolith + Generated Basic Facts kompiliert:
+Die übrigen 55 Pilotkarten werden aus Active Monolith + Generated Basic Facts kompiliert:
 
 - `Krash`
 - `Poltergeist`
@@ -181,6 +182,17 @@ Die übrigen 44 Pilotkarten werden aus Active Monolith + Generated Basic Facts k
 - `Wild Card`
 - `Wizard's Book`
 - `Worm`
+- `Boardwalk`
+- `Custodial Position`
+- `Edited Shipping Manifests`
+- `Executive Wiretaps`
+- `Expert Schedule Analyzer`
+- `I Spy`
+- `Microtech AI Interface`
+- `Mouse`
+- `SeeYa`
+- `Shredder Uplink Protocol`
+- `Smarteye`
 
 Für diese Karten ist im aktuellen Pilot kein Manual Overlay erforderlich. Die Warnings dort sind vor allem mechanische Vergleichssignale zwischen Generated Facts und Monolith.
 
@@ -198,6 +210,7 @@ Für die 44 Karten ohne Overlay reichen im aktuellen Pilot Generated Basic Facts
 - Future-run ICE coarse facts: `Tutor`, `Viral 15`, `Virizz`
 - Corp Remote/Upgrades/Regions Longtail: `Tesseract Fort Construction`, `Namatoki Plaza`, `Jenny Jett`, `Olivia Salazar`, `Rio de Janeiro City Grid`, `Data Masons`, `Antiquated Interface Routines`, `Chicago Branch`
 - Breaker-/Icebreaker-Longtail: 18 primäre Longtail-Breaker aus Aufgabe 016
+- Runner Info / Central Pressure / Access-Replacement: 13 Karten aus Aufgabe 017
 
 ## Monolith-Felder, die langfristig generated werden sollten
 
@@ -210,7 +223,7 @@ Langfristig generated:
 - `remoteRole`
 - `targetProfiles`
 
-Die 103 `active_monolith_mechanical_duplication`-Warnings zeigen, dass diese Felder im Monolithen bereits strukturiert gepflegt werden, aber im Zielbild besser aus Implementations/Derived Facts kommen.
+Die 111 `active_monolith_mechanical_duplication`-Warnings zeigen, dass diese Felder im Monolithen bereits strukturiert gepflegt werden, aber im Zielbild besser aus Implementations/Derived Facts kommen.
 
 ## Strategische Felder, die Overlay bleiben sollten
 
@@ -228,7 +241,7 @@ Die 6 `manual_overlay_strategy_field_missing_from_active`-Warnings sind erwartba
 
 ## Empfehlung
 
-Der Ansatz ist tragfähig: Der Compiler kann die 50 Derived-Facts-Pilotkarten deterministisch aus Active Monolith, Generated Facts und optionalem Overlay zusammenführen. Der nächste praktische Schritt bleibt kein Runtime-Compile, sondern read-only Batch-Closeout und Normalisierung weiterer mechanischer Longtail-Gruppen:
+Der Ansatz ist tragfähig: Der Compiler kann die 61 Derived-Facts-Pilotkarten deterministisch aus Active Monolith, Generated Facts und optionalem Overlay zusammenführen. Der nächste praktische Schritt bleibt kein Runtime-Compile, sondern read-only Batch-Closeout und Normalisierung weiterer mechanischer Longtail-Gruppen:
 
 1. mechanische Monolith-Felder priorisieren, die langfristig generated werden könnten.
 2. ein weiteres kleines Overlaysegment nur dann anlegen, wenn eine echte strategische Lücke entsteht.

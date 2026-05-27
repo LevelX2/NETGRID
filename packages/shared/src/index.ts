@@ -175,6 +175,7 @@ export type CounterType =
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
+  | { type: "add_tags_by_trace_margin_over_runner_link" }
   | { type: "add_counter"; counterType: CounterType; amount: number }
   | {
       type: "add_tag_and_counter";
@@ -185,6 +186,10 @@ export type TraceSuccessEffect =
   | { type: "end_run_and_run_lock"; amount: number }
   | { type: "end_run_trash_program_and_run_lock"; amount: number }
   | { type: "end_run_trash_hardware_and_unpreventable_meat_damage"; amount: number }
+  | {
+      type: "trash_runner_resource_and_add_tag";
+      targetCardInstanceId: CardInstanceId;
+    }
   | { type: "none" };
 
 export type SubroutineType =
@@ -1158,6 +1163,11 @@ export type GameState = {
     stoleBlackOpsAgendaThisTurn?: boolean;
     runAttemptsThisTurn?: number;
     runAttemptsLastTurn?: number;
+    runAttemptsThisGame?: number;
+    trashedNodeThisTurn?: boolean;
+    trashedNodeLastTurn?: boolean;
+    installedResourceIdsThisTurn?: CardInstanceId[];
+    installedResourceIdsLastTurn?: CardInstanceId[];
     successfulHqRunThisTurn?: boolean;
     successfulRunThisTurn?: boolean;
     lastSuccessfulRunServerId?: Exclude<ServerId, "new_remote">;

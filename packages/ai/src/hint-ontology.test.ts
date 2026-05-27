@@ -119,6 +119,77 @@ describe("AI hint ontology validation", () => {
     expect(result.errors).toEqual([]);
   });
 
+  it("accepts read-only central information and expose effect kinds", () => {
+    const result = validateAiHintOntologyFields({
+      effects: [
+        {
+          kind: "hq_info",
+          timing: "on_access",
+          scope: "hq",
+          resource: "cards",
+        },
+        {
+          kind: "expose_info",
+          timing: "action",
+          scope: "installed_card",
+        },
+        {
+          kind: "ice_trash",
+          timing: "during_run",
+          scope: "ice",
+        },
+      ],
+      conditions: [
+        { kind: "requires_accessed_card" },
+        { kind: "requires_during_run" },
+      ],
+    });
+    expect(result.errors).toEqual([]);
+  });
+
+  it("accepts read-only corp ICE longtail effect and context kinds", () => {
+    const result = validateAiHintOntologyFields({
+      effects: [
+        {
+          kind: "etr",
+          timing: "encounter",
+          scope: "run_path",
+        },
+        {
+          kind: "run_lock",
+          timing: "trace_success",
+          scope: "runner",
+          resource: "actions",
+        },
+        {
+          kind: "no_jack_out",
+          timing: "during_run",
+          scope: "runner",
+        },
+        {
+          kind: "persistent_counter_effect",
+          timing: "persistent",
+          scope: "runner",
+          resource: "counters",
+        },
+        {
+          kind: "trace_credit",
+          timing: "encounter",
+          scope: "corp",
+          resource: "credits",
+          amount: 4,
+        },
+      ],
+      conditions: [
+        { kind: "requires_encounter" },
+        { kind: "requires_unbroken_subroutine" },
+        { kind: "requires_later_encounter" },
+        { kind: "requires_remaining_ice" },
+      ],
+    });
+    expect(result.errors).toEqual([]);
+  });
+
   it("rejects an unknown effect kind", () => {
     const result = validateAiHintOntologyFields({
       effects: [

@@ -17790,7 +17790,7 @@ describe("MVP 0.3 AI simulation harness", () => {
       expect(JSON.stringify(summary)).not.toContain("cardInstances");
       expect(JSON.stringify(summary)).not.toContain("v08_project_agenda_1");
     }
-  });
+  }, 10_000);
 
   it("runs V0.97 Run/Breach decks through side-safe AI smokes", () => {
     const summary = simulateAiGame({

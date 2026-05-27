@@ -12,7 +12,7 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 9e
 proReferences:
-  - PRO037
+  - PRO019
 blockedBy:
   - ice_and_data_special_report_cost_3_0_rule_clarification
 resultArtifacts:

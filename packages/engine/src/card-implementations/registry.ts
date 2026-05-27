@@ -386,6 +386,11 @@ import { doppelgangerAntibodyImplementation } from "./proteus/corp/assets/doppel
 import { pattelAntibodyImplementation } from "./proteus/corp/assets/pattel-antibody";
 import { stereogramAntibodyImplementation } from "./proteus/corp/assets/stereogram-antibody";
 import { proteusBrainWashImplementation } from "./proteus/corp/ice/brain-wash";
+import { proteusCreditConsolidationImplementation } from "./proteus/corp/operations/credit-consolidation";
+import { proteusDataSiftersImplementation } from "./proteus/corp/operations/data-sifters";
+import { proteusManhuntImplementation } from "./proteus/corp/operations/manhunt";
+import { proteusSchlaghundPointersImplementation } from "./proteus/corp/operations/schlaghund-pointers";
+import { proteusUnderworldMoleImplementation } from "./proteus/corp/operations/underworld-mole";
 import { proteusBugZapperImplementation } from "./proteus/corp/ice/bug-zapper";
 import { proteusCaryatidImplementation } from "./proteus/corp/ice/caryatid";
 import { proteusColonelFailureImplementation } from "./proteus/corp/ice/colonel-failure";
@@ -818,6 +823,11 @@ export const CARD_IMPLEMENTATIONS = [
   turbeauDelacroixImplementation,
   washingtonDcCityGridImplementation,
   proteusBrainWashImplementation,
+  proteusCreditConsolidationImplementation,
+  proteusDataSiftersImplementation,
+  proteusManhuntImplementation,
+  proteusSchlaghundPointersImplementation,
+  proteusUnderworldMoleImplementation,
   proteusToughoniumWallImplementation,
   proteusBugZapperImplementation,
   proteusCaryatidImplementation,

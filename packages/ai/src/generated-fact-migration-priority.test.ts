@@ -43,19 +43,19 @@ describe("generated fact migration priority report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("prioritizes all 50 compiled generated-fact candidates", () => {
+  it("prioritizes all 85 compiled generated-fact candidates", () => {
     const report = readReport();
     expect(report.taskId).toBe("Aufgabe 002");
-    expect(report.candidateCount).toBe(50);
+    expect(report.candidateCount).toBe(85);
     expect(report.priorityCounts).toEqual({
       P0: 13,
-      P1: 33,
+      P1: 68,
       P2: 4,
       P3: 0,
     });
     expect(report.riskCounts).toEqual({
-      low: 27,
-      medium: 23,
+      low: 29,
+      medium: 56,
       high: 0,
     });
   });
@@ -63,7 +63,7 @@ describe("generated fact migration priority report", () => {
   it("keeps strategic and compatibility fields out of generated migration", () => {
     const report = readReport();
     expect(report.fieldCategoryCounts.overlay_only).toBe(6);
-    expect(report.fieldCategoryCounts.legacy_keep_for_compat).toBe(50);
+    expect(report.fieldCategoryCounts.legacy_keep_for_compat).toBe(85);
     for (const card of report.cards) {
       expect(card.doNotMigrateFields).toContain("aiSupportStatus");
       expect(card.doNotMigrateFields).toContain("roles");
@@ -86,11 +86,23 @@ describe("generated fact migration priority report", () => {
   it("orders the later migration batches without changing runtime sources", () => {
     const report = readReport();
     expect(report.batchPlan.map((batch) => batch.cardIds.length)).toEqual([
-      11, 6, 2, 3, 28,
+      11, 6, 2, 3, 26, 13, 24,
     ]);
-    expect(report.cards.every((card) => card.monolithFields.length > 0)).toBe(
-      true,
-    );
+    expect(
+      report.cards
+        .filter((card) => card.recommendedMigrationBatch <= 5)
+        .every((card) => card.monolithFields.length > 0),
+    ).toBe(true);
+    expect(
+      report.cards
+        .filter((card) => card.recommendedMigrationBatch === 6)
+        .some((card) => card.monolithFields.length === 0),
+    ).toBe(true);
+    expect(
+      report.cards
+        .filter((card) => card.recommendedMigrationBatch === 7)
+        .every((card) => card.rationale.includes("derivable")),
+    ).toBe(true);
     expect(report.cards.every((card) => card.generatedFields.length > 0)).toBe(
       true,
     );

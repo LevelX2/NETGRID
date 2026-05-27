@@ -245,6 +245,124 @@
       "rationale": "Topdeck information is derivable; R&D-pressure and interface-pressure conditions remain intentionally manual strategic overlay."
     },
     {
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/microtech-ai-interface.ts",
+      "expectedDerivableKinds": [
+        "effect:topdeck_info",
+        "effect:zone_shuffle",
+        "condition:requires_accessed_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "R&D pre-access cut/top manipulation is mechanically derivable as hidden-zone context; generated facts do not reveal actual R&D order or create central-run priority."
+    },
+    {
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "title": "Executive Wiretaps",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/executive-wiretaps.ts",
+      "expectedDerivableKinds": [
+        "effect:multiaccess",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "HQ run event and additional HQ access count are mechanically derivable; strategic HQ pressure remains overlay/consumer context."
+    },
+    {
+      "cardId": "onr_v1_084_edited-shipping-manifests",
+      "title": "Edited Shipping Manifests",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/edited-shipping-manifests.ts",
+      "expectedDerivableKinds": [
+        "effect:access_replacement",
+        "effect:economy",
+        "effect:tag",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "HQ access replacement, runner credit gain and self-tag are mechanically derivable; generated facts do not value the central pressure line."
+    },
+    {
+      "cardId": "onr_v1_081_custodial-position",
+      "title": "Custodial Position",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/custodial-position.ts",
+      "expectedDerivableKinds": [
+        "effect:multiaccess",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "R&D run event and additional R&D access count are mechanically derivable; actual access value remains board/hidden-zone context."
+    },
+    {
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "title": "Expert Schedule Analyzer",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/expert-schedule-analyzer.ts",
+      "expectedDerivableKinds": [
+        "effect:hq_info",
+        "condition:requires_accessed_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Post-access HQ look is mechanically derivable as access-context information; generated facts never contain hidden HQ card identities."
+    },
+    {
+      "cardId": "onr_v1_008_boardwalk",
+      "title": "Boardwalk",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/boardwalk.ts",
+      "expectedDerivableKinds": [
+        "effect:hq_info",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-HQ-run counters and start-turn random HQ reveal are mechanically derivable as gated HQ-info context; generated facts do not expose hidden HQ identities."
+    },
+    {
+      "cardId": "onr_v1_062_shredder-uplink-protocol",
+      "title": "Shredder Uplink Protocol",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shredder-uplink-protocol.ts",
+      "expectedDerivableKinds": [
+        "effect:access_replacement",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Archive run access override to successful HQ-run context is mechanically derivable as central access replacement, not normal Archives access."
+    },
+    {
+      "cardId": "onr_v1_032_i-spy",
+      "title": "I Spy",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/i-spy.ts",
+      "expectedDerivableKinds": [
+        "effect:expose_info",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-run fort counter exposing installed cards is mechanically derivable as remote information; actual targets stay board-context."
+    },
+    {
+      "cardId": "onr_v1_042_mouse",
+      "title": "Mouse",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/mouse.ts",
+      "expectedDerivableKinds": ["effect:expose_info"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated expose of a card inside a data fort is mechanically derivable as installed-card information, not hidden-info leakage."
+    },
+    {
+      "cardId": "onr_v1_058_seeya",
+      "title": "SeeYa",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/seeya.ts",
+      "expectedDerivableKinds": ["effect:expose_info"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated expose of an installed card is mechanically derivable as installed-card information, not a strategic remote-contest decision."
+    },
+    {
+      "cardId": "onr_v1_065_smarteye",
+      "title": "Smarteye",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/smarteye.ts",
+      "expectedDerivableKinds": [
+        "effect:expose_info",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Approach-unrezzed-ICE expose before rez is mechanically derivable as run-context information; generated facts do not reveal ICE identity before the legal effect."
+    },
+    {
       "cardId": "onr_v1_210_political-overthrow",
       "title": "Political Overthrow",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",
@@ -370,6 +488,319 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Future-run, jack-out tax and program-trash semantics are mechanically derivable at coarse gate granularity."
+    },
+    {
+      "cardId": "onr_v1_222_ball-and-chain",
+      "title": "Ball and Chain",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/ball-and-chain.ts",
+      "expectedDerivableKinds": [
+        "effect:future_run_effect",
+        "effect:run_tax",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Run-duration encounter tax is mechanically derivable as future-run/runpath pressure; actual path cost remains effectiveRunQuote context."
+    },
+    {
+      "cardId": "onr_v1_225_canis-major",
+      "title": "Canis Major",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/canis-major.ts",
+      "expectedDerivableKinds": [
+        "effect:run_tax",
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Run-duration ICE-strength modifier is mechanically derivable; concrete break cost remains board, encounter and effectiveRunQuote context."
+    },
+    {
+      "cardId": "onr_v1_226_canis-minor",
+      "title": "Canis Minor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/canis-minor.ts",
+      "expectedDerivableKinds": [
+        "effect:run_tax",
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Run-duration ICE-strength modifier is mechanically derivable; concrete break cost remains board, encounter and effectiveRunQuote context."
+    },
+    {
+      "cardId": "onr_v1_224_bolter-cluster",
+      "title": "Bolter Cluster",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/bolter-cluster.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:future_encounter_effect",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
+    },
+    {
+      "cardId": "onr_v1_258_neural-blade",
+      "title": "Neural Blade",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/neural-blade.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:future_encounter_effect",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
+    },
+    {
+      "cardId": "onr_v1_268_shock-r",
+      "title": "Shock.r",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/shock-r.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:no_jack_out",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Next-ICE break/jack-out restriction is mechanically derivable; generated facts do not create current ICE self-safety."
+    },
+    {
+      "cardId": "onr_v1_243_fetch-4-0-1",
+      "title": "Fetch 4.0.1",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fetch-4-0-1.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag ICE subroutine is mechanically derivable; tag application remains trace-success gated."
+    },
+    {
+      "cardId": "onr_v1_249_hunter",
+      "title": "Hunter",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/hunter.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag ICE subroutine is mechanically derivable; tag application remains trace-success gated."
+    },
+    {
+      "cardId": "onr_v1_236_data-raven",
+      "title": "Data Raven",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/data-raven.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "effect:persistent_counter_effect",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag and hosted counter punishment are mechanically derivable; generated facts do not assert current counter state."
+    },
+    {
+      "cardId": "onr_v1_223_banpei",
+      "title": "Banpei",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/banpei.ts",
+      "expectedDerivableKinds": [
+        "effect:program_trash",
+        "effect:etr",
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Program trash plus ETR subroutines are mechanically derivable; target selection and break legality remain encounter context."
+    },
+    {
+      "cardId": "onr_v1_228_cinderella",
+      "title": "Cinderella",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/cinderella.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:hardware_trash",
+        "effect:damage",
+        "effect:etr",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-success hardware trash, unpreventable meat damage and ETR are mechanically derivable; target/prevention outcomes remain engine context."
+    },
+    {
+      "cardId": "onr_v1_231_cortical-scrub",
+      "title": "Cortical Scrub",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/cortical-scrub.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:etr",
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Damage plus ETR subroutines are mechanically derivable; legacy active hint shape is normalized in the read-only closeout."
+    },
+    {
+      "cardId": "onr_v1_227_cerberus",
+      "title": "Cerberus",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/cerberus.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:trace",
+        "effect:persistent_counter_effect",
+        "effect:etr",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Damage, trace-success counter context and ETR are mechanically derivable; generated facts do not assert current counter state."
+    },
+    {
+      "cardId": "onr_v1_235_data-naga",
+      "title": "Data Naga",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/data-naga.ts",
+      "expectedDerivableKinds": [
+        "effect:program_trash",
+        "effect:etr",
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Program trash plus ETR subroutines are mechanically derivable; target selection and break legality remain encounter context."
+    },
+    {
+      "cardId": "onr_v1_242_fatal-attractor",
+      "title": "Fatal Attractor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fatal-attractor.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:damage",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Next-encounter damage-unless-fully-break effect is mechanically derivable and must stay later-encounter/runpath-context gated."
+    },
+    {
+      "cardId": "onr_v1_251_jack-attack",
+      "title": "Jack Attack",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/jack-attack.ts",
+      "expectedDerivableKinds": [
+        "effect:no_jack_out",
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "No-jack-out run-duration effect and trace-to-tag subroutine are mechanically derivable; actual choices remain current-run context."
+    },
+    {
+      "cardId": "onr_v1_255_mastiff",
+      "title": "Mastiff",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/mastiff.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:run_tax",
+        "effect:trace",
+        "effect:persistent_counter_effect",
+        "effect:etr",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Damage, strength modifier, trace/counter context and ETR are mechanically derivable; concrete path cost remains effectiveRunQuote context."
+    },
+    {
+      "cardId": "onr_v1_234_data-darts",
+      "title": "Data Darts",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/data-darts.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:future_encounter_effect",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
+    },
+    {
+      "cardId": "onr_v1_260_pocket-virtual-reality",
+      "title": "Pocket Virtual Reality",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/pocket-virtual-reality.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "effect:trace_credit",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag and trace-only encounter credits are mechanically derivable; trace bidding remains LegalAction/engine context."
+    },
+    {
+      "cardId": "onr_v1_246_fragmentation-storm",
+      "title": "Fragmentation Storm",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fragmentation-storm.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:program_trash",
+        "effect:run_lock",
+        "effect:etr",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-success program trash/run-lock and ETR are mechanically derivable; target selection and future action payment remain runtime context."
+    },
+    {
+      "cardId": "onr_v1_248_homewrecker",
+      "title": "Homewrecker™",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/homewrecker.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:hardware_trash",
+        "effect:damage",
+        "effect:etr",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-success hardware trash, unpreventable meat damage and ETR are mechanically derivable; title normalization is cardId-based."
+    },
+    {
+      "cardId": "onr_v1_221_asp",
+      "title": "Asp",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/asp.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:run_lock",
+        "effect:etr",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
+    },
+    {
+      "cardId": "onr_v1_240_fang",
+      "title": "Fang",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fang.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:run_lock",
+        "effect:etr",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
+    },
+    {
+      "cardId": "onr_v1_241_fang-2-0",
+      "title": "Fang 2.0",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fang-2-0.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:run_lock",
+        "effect:etr",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
     },
     {
       "cardId": "onr_v1_355_crystal-palace-station-grid",

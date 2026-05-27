@@ -96,6 +96,9 @@ describe("counter/lifecycle card implementation runtime deps", () => {
     expect(Object.keys(deps)).toEqual([
       "cardCounter",
       "runnerRunAttemptsLastTurn",
+      "runnerRunAttemptsThisGame",
+      "runnerTrashedNodeLastTurn",
+      "runnerInstalledResourceLastTurn",
       "runnerMadeSuccessfulRunOnServerThisTurn",
       "runnerLiberatedAgendaSubtypeThisTurn",
       "corpScoredAgendaSubtypeLastTurn",

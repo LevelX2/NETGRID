@@ -66,13 +66,13 @@ describe("derived basic facts gate report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("keeps the 50-card pilot complete", () => {
+  it("keeps the 85-card pilot complete", () => {
     const report = readReport();
-    expect(report.pilotCardCount).toBe(50);
-    expect(report.implementationFoundCount).toBe(50);
-    expect(report.cardsWithDerivedFacts).toBe(50);
-    expect(report.cardsWithManualOntologyOverlap).toBe(50);
-    expect(report.cardsNeedingManualOverlay).toBe(3);
+    expect(report.pilotCardCount).toBe(85);
+    expect(report.implementationFoundCount).toBe(85);
+    expect(report.cardsWithDerivedFacts).toBe(85);
+    expect(report.cardsWithManualOntologyOverlap).toBe(67);
+    expect(report.cardsNeedingManualOverlay).toBe(35);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
       report.cards.every(
@@ -83,9 +83,9 @@ describe("derived basic facts gate report", () => {
           card.derivedFacts.remoteRole !== undefined,
       ),
     ).toBe(true);
-    expect(report.cards.every((card) => card.overlap.matches.length > 0)).toBe(
-      true,
-    );
+    expect(
+      report.cards.filter((card) => card.overlap.matches.length > 0).length,
+    ).toBe(report.cardsWithManualOntologyOverlap);
   });
 
   it("validates generated facts against known ontology values", () => {
@@ -250,6 +250,93 @@ describe("derived basic facts gate report", () => {
     const reflector = cardById(report, "onr_v1_055_reflector");
     expect(reflector.derivedFacts.breakerProfile).toEqual(
       expect.objectContaining({ coverage: ["ap"] }),
+    );
+
+    const microtech = cardById(report, "onr_v1_041_microtech-ai-interface");
+    expect(microtech.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "topdeck_info", scope: "rnd" }),
+        expect.objectContaining({ kind: "zone_shuffle", scope: "rnd" }),
+      ]),
+    );
+    expect(microtech.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_accessed_card" }),
+    );
+
+    const executiveWiretaps = cardById(report, "onr_v1_085_executive-wiretaps");
+    expect(executiveWiretaps.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "multiaccess",
+        scope: "hq",
+        amount: 3,
+      }),
+    );
+
+    const editedShipping = cardById(
+      report,
+      "onr_v1_084_edited-shipping-manifests",
+    );
+    expect(editedShipping.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "access_replacement", scope: "hq" }),
+        expect.objectContaining({ kind: "economy", amount: 10 }),
+        expect.objectContaining({ kind: "tag", amount: 1 }),
+      ]),
+    );
+
+    const expertSchedule = cardById(
+      report,
+      "onr_v1_024_expert-schedule-analyzer",
+    );
+    expect(expertSchedule.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({ kind: "hq_info", scope: "hq" }),
+    );
+
+    const smarteye = cardById(report, "onr_v1_065_smarteye");
+    expect(smarteye.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({ kind: "expose_info", scope: "ice" }),
+    );
+
+    const fetch = cardById(report, "onr_v1_243_fetch-4-0-1");
+    expect(fetch.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "trace", timing: "encounter" }),
+        expect.objectContaining({
+          kind: "tag_source",
+          timing: "trace_success",
+        }),
+      ]),
+    );
+    expect(fetch.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_trace_success" }),
+    );
+
+    const cinderella = cardById(report, "onr_v1_228_cinderella");
+    expect(cinderella.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "hardware_trash" }),
+        expect.objectContaining({ kind: "damage", timing: "trace_success" }),
+        expect.objectContaining({ kind: "etr" }),
+      ]),
+    );
+
+    const shockR = cardById(report, "onr_v1_268_shock-r");
+    expect(shockR.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "future_encounter_effect" }),
+        expect.objectContaining({ kind: "no_jack_out" }),
+      ]),
+    );
+    expect(shockR.derivedFacts.conditions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "requires_later_encounter" }),
+        expect.objectContaining({ kind: "requires_remaining_ice" }),
+      ]),
+    );
+
+    const dataRaven = cardById(report, "onr_v1_236_data-raven");
+    expect(dataRaven.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({ kind: "persistent_counter_effect" }),
     );
   });
 

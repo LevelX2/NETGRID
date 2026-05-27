@@ -88,6 +88,7 @@ export function startRun(
   const server = host.servers.mustServer(serverId);
   const flags = host.turn.ensureRunnerTurnFlags();
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
+  flags.runAttemptsThisGame = (flags.runAttemptsThisGame ?? 0) + 1;
   host.callbacks.executeCardImplementationRunnerRunStartEffects(
     state,
     legalAction,

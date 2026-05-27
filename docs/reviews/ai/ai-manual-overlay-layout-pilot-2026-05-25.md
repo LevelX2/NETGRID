@@ -20,7 +20,7 @@ Gate-Befund:
 - Overlay-Dateien: 2
 - Overlay-Karten: 6
 - Harte Errors: 0
-- Warnings: 0
+- Warnings: 8
 
 ## Warum ein Overlay-Layout nötig ist
 
@@ -114,7 +114,9 @@ Der Check:
 Aktueller Gate-Report:
 
 - Harte Errors: 0
-- Warnings: 0
+- Warnings: 8
+
+Die acht Warnings stammen aus Aufgabe 017: mehrere Runner-Info-/Access-Kontext-Karten haben Generated Facts ohne eigenes Manual Overlay. Der Batch-6-Closeout klassifiziert diese Kontexte read-only und lässt keine offenen Descriptor-Follow-ups zurück. Die bestehenden Overlay-Dateien bleiben frei von Runtime-, Hidden-Info- und mechanischen Duplikationsfeldern.
 
 Harte Error-Klassen:
 

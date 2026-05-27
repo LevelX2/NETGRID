@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import prettier from "prettier";
 
 const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -76,13 +77,17 @@ function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(repoPath(relativePath), "utf8"));
 }
 
-function stableStringify(value) {
-  return `${JSON.stringify(value, null, 2)}\n`;
+async function stableStringify(value) {
+  return prettier.format(JSON.stringify(value, null, 2), { parser: "json" });
 }
 
-function writeJson(relativePath, value) {
+async function writeJson(relativePath, value) {
   fs.mkdirSync(path.dirname(repoPath(relativePath)), { recursive: true });
-  fs.writeFileSync(repoPath(relativePath), stableStringify(value), "utf8");
+  fs.writeFileSync(
+    repoPath(relativePath),
+    await stableStringify(value),
+    "utf8",
+  );
 }
 
 function sortByKey(items) {
@@ -495,12 +500,12 @@ function parseArgs(argv) {
   return options;
 }
 
-export function runCli(argv = process.argv.slice(2)) {
+export async function runCli(argv = process.argv.slice(2)) {
   const options = parseArgs(argv);
   const report = buildBatchTwoRollupReport();
-  const serializedReport = stableStringify(report);
+  const serializedReport = await stableStringify(report);
 
-  if (options.write) writeJson(options.reportPath, report);
+  if (options.write) await writeJson(options.reportPath, report);
 
   if (options.check) {
     const reportPath = repoPath(options.reportPath);
@@ -536,7 +541,7 @@ export function runCli(argv = process.argv.slice(2)) {
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
-    runCli();
+    await runCli();
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     process.exitCode = 1;

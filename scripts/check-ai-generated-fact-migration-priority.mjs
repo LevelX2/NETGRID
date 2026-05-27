@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import prettier from "prettier";
 
 const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -32,7 +33,123 @@ const MECHANICAL_FIELDS = [
   "targetProfiles",
 ];
 
+const BATCH7_CORP_ICE_PRIORITY_POLICY = Object.fromEntries(
+  [
+    [
+      "onr_v1_222_ball-and-chain",
+      "Run-duration encounter tax is derivable, but actual path cost remains effectiveRunQuote/LegalAction context.",
+    ],
+    [
+      "onr_v1_225_canis-major",
+      "Run-duration ICE-strength modifier is derivable, but concrete break cost remains board and encounter context.",
+    ],
+    [
+      "onr_v1_226_canis-minor",
+      "Run-duration ICE-strength modifier is derivable, but concrete break cost remains board and encounter context.",
+    ],
+    [
+      "onr_v1_224_bolter-cluster",
+      "Damage plus next-ICE break prohibition is derivable, with later-encounter/runpath context required.",
+    ],
+    [
+      "onr_v1_258_neural-blade",
+      "Damage plus next-ICE break prohibition is derivable, with later-encounter/runpath context required.",
+    ],
+    [
+      "onr_v1_268_shock-r",
+      "Next-ICE break/jack-out restriction is derivable, but must not become current ICE self-safety.",
+    ],
+    [
+      "onr_v1_243_fetch-4-0-1",
+      "Trace-to-tag ICE subroutine is derivable, with trace success remaining runtime context.",
+    ],
+    [
+      "onr_v1_249_hunter",
+      "Trace-to-tag ICE subroutine is derivable, with trace success remaining runtime context.",
+    ],
+    [
+      "onr_v1_236_data-raven",
+      "Trace-to-tag plus hosted counter punishment is derivable, but generated facts cannot assert current counter state.",
+    ],
+    [
+      "onr_v1_223_banpei",
+      "Program-trash plus ETR subroutines are derivable, while target selection remains encounter context.",
+    ],
+    [
+      "onr_v1_228_cinderella",
+      "Trace-success hardware trash, unpreventable meat damage and ETR are derivable with trace/prevention context.",
+    ],
+    [
+      "onr_v1_231_cortical-scrub",
+      "Damage plus ETR are derivable, while the legacy active hint shape requires read-only normalization.",
+    ],
+    [
+      "onr_v1_227_cerberus",
+      "Damage, trace/counter context and ETR are derivable, but no current counter state is generated.",
+    ],
+    [
+      "onr_v1_235_data-naga",
+      "Program-trash plus ETR subroutines are derivable, while target selection remains encounter context.",
+    ],
+    [
+      "onr_v1_242_fatal-attractor",
+      "Next-encounter damage-unless-fully-break effect is derivable and runpath-context dependent.",
+    ],
+    [
+      "onr_v1_251_jack-attack",
+      "No-jack-out plus trace-to-tag mechanics are derivable, while actual run choices stay runtime-owned.",
+    ],
+    [
+      "onr_v1_255_mastiff",
+      "Damage, strength modifier, trace/counter context and ETR are derivable with encounter and effectiveRunQuote context.",
+    ],
+    [
+      "onr_v1_234_data-darts",
+      "Damage plus next-ICE break prohibition is derivable, with later-encounter/runpath context required.",
+    ],
+    [
+      "onr_v1_260_pocket-virtual-reality",
+      "Trace-to-tag and trace-only credits are derivable, while trace bidding remains LegalAction/engine context.",
+    ],
+    [
+      "onr_v1_246_fragmentation-storm",
+      "Trace-success program trash/run-lock plus ETR are derivable, while target and action-payment context stays runtime-owned.",
+    ],
+    [
+      "onr_v1_248_homewrecker",
+      "Trace-success hardware trash, unpreventable meat damage and ETR are derivable with trace/prevention context.",
+    ],
+    [
+      "onr_v1_221_asp",
+      "Trace-success run-lock plus ETR are derivable, while no action legality is generated.",
+    ],
+    [
+      "onr_v1_240_fang",
+      "Trace-success run-lock plus ETR are derivable, while no action legality is generated.",
+    ],
+    [
+      "onr_v1_241_fang-2-0",
+      "Trace-success run-lock plus ETR are derivable, while no action legality is generated.",
+    ],
+  ].map(([cardId, rationale]) => [
+    cardId,
+    {
+      migrationPriority: "P1",
+      migrationRisk: "medium",
+      fieldCategories: [
+        "safe_generated_now",
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+      ],
+      recommendedMigrationBatch: 7,
+      rationale,
+    },
+  ]),
+);
+
 const PRIORITY_POLICY = {
+  ...BATCH7_CORP_ICE_PRIORITY_POLICY,
   "onr_v1_017_deep-thought": {
     migrationPriority: "P2",
     migrationRisk: "medium",
@@ -41,9 +158,148 @@ const PRIORITY_POLICY = {
       "overlay_only",
       "legacy_keep_for_compat",
     ],
-    recommendedMigrationBatch: 5,
+    recommendedMigrationBatch: 6,
     rationale:
       "Topdeck information is mechanically derivable, but the strategic R&D pressure value stays overlay-only.",
+  },
+  "onr_v1_041_microtech-ai-interface": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "R&D top manipulation is mechanically derivable, but generated facts must not become hidden R&D order knowledge.",
+  },
+  "onr_v1_085_executive-wiretaps": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "HQ multiaccess is mechanically derivable, while successful-run/access legality remains engine context.",
+  },
+  "onr_v1_084_edited-shipping-manifests": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "HQ access replacement, economy and self-tag are derivable, but must not be normalized to normal access or automatic value.",
+  },
+  "onr_v1_081_custodial-position": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "R&D multiaccess is mechanically derivable, while access value and hidden-zone state remain runtime/consumer context.",
+  },
+  "onr_v1_024_expert-schedule-analyzer": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Post-access HQ information is derivable, but generated facts must not contain hidden HQ identities.",
+  },
+  onr_v1_008_boardwalk: {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "HQ-info counters are derivable, while random HQ reveal and virus-counter thresholds remain context-gated.",
+  },
+  "onr_v1_062_shredder-uplink-protocol": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Archive-run to HQ-success access replacement is derivable and must stay distinct from normal Archives access.",
+  },
+  "onr_v1_032_i-spy": {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Successful-run expose counter is derivable as remote information; target choice and board visibility remain context.",
+  },
+  onr_v1_042_mouse: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Activated installed-card expose is a stable mechanical information fact.",
+  },
+  onr_v1_058_seeya: {
+    migrationPriority: "P1",
+    migrationRisk: "low",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Activated installed-card expose is a stable mechanical information fact with payment context.",
+  },
+  onr_v1_065_smarteye: {
+    migrationPriority: "P1",
+    migrationRisk: "medium",
+    fieldCategories: [
+      "safe_generated_now",
+      "generated_with_board_context",
+      "generated_with_descriptor_limitations",
+      "legacy_keep_for_compat",
+    ],
+    recommendedMigrationBatch: 6,
+    rationale:
+      "Approach-ICE expose is derivable, but actual encounter timing and hidden ICE identity remain LegalAction/runtime context.",
   },
   "onr_v1_037_japanese-water-torture": {
     migrationPriority: "P0",
@@ -311,7 +567,7 @@ const PRIORITY_POLICY = {
       "generated_with_board_context",
       "legacy_keep_for_compat",
     ],
-    recommendedMigrationBatch: 5,
+    recommendedMigrationBatch: 6,
     rationale:
       "Topdeck info and access replacement are mechanical, but the successful-run condition must remain LegalAction-gated.",
   },
@@ -630,17 +886,21 @@ function repoPath(relativePath) {
   return path.join(REPO_ROOT, relativePath);
 }
 
-function stableStringify(value) {
-  return `${JSON.stringify(value, null, 2)}\n`;
+async function stableStringify(value) {
+  return prettier.format(JSON.stringify(value, null, 2), { parser: "json" });
 }
 
 function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(repoPath(relativePath), "utf8"));
 }
 
-function writeJson(relativePath, value) {
+async function writeJson(relativePath, value) {
   fs.mkdirSync(path.dirname(repoPath(relativePath)), { recursive: true });
-  fs.writeFileSync(repoPath(relativePath), stableStringify(value), "utf8");
+  fs.writeFileSync(
+    repoPath(relativePath),
+    await stableStringify(value),
+    "utf8",
+  );
 }
 
 function sortStrings(values) {
@@ -766,7 +1026,7 @@ export function buildGeneratedFactMigrationPriorityReport() {
     };
   });
 
-  const batchPlan = [1, 2, 3, 4, 5].map((batch) => ({
+  const batchPlan = [1, 2, 3, 4, 5, 6, 7].map((batch) => ({
     batch,
     title: {
       1: "Scored-agenda and tag/trace/punish generated facts",
@@ -774,6 +1034,8 @@ export function buildGeneratedFactMigrationPriorityReport() {
       3: "RemoteRole run_tax and agenda_steal_tax",
       4: "Future-run and future-encounter ICE facts",
       5: "Remaining longtail mechanical facts",
+      6: "Runner info, central pressure and access replacement",
+      7: "Corp ICE longtail, future, trace, damage and ETR",
     }[batch],
     cardIds: cards
       .filter((card) => card.recommendedMigrationBatch === batch)
@@ -832,12 +1094,12 @@ function parseArgs(argv) {
   return options;
 }
 
-export function runCli(argv = process.argv.slice(2)) {
+export async function runCli(argv = process.argv.slice(2)) {
   const options = parseArgs(argv);
   const report = buildGeneratedFactMigrationPriorityReport();
-  const serializedReport = stableStringify(report);
+  const serializedReport = await stableStringify(report);
 
-  if (options.write) writeJson(options.reportPath, report);
+  if (options.write) await writeJson(options.reportPath, report);
 
   if (options.check) {
     const reportPath = repoPath(options.reportPath);
@@ -866,7 +1128,7 @@ export function runCli(argv = process.argv.slice(2)) {
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
-    runCli();
+    await runCli();
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     process.exitCode = 1;

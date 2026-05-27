@@ -12,7 +12,7 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 6e
 proReferences:
-  - PRO029
+  - PRO013
 blockedBy:
   - act-2026-05-24-proteus-phase-6a-agenda-scoring-steal-baseline
   - successful-run-access-replacement-runner-agenda-point

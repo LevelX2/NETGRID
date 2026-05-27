@@ -18,19 +18,42 @@ Führend ist die eindeutige CardImplementation-Abdeckung:
 
 PRO001 hat dafür bereits den Guard in `packages/engine/src/card-implementations/coverage.test.ts` ergänzt: `reconciles Proteus manifest support against concrete files and registry`. Dieser Guard prüft 154 Karten in `data/cards/proteus-cards.json`, 154 Manifest-Einträge, eindeutige CardImplementation-Dateien, Registry-Parität, `implemented`-Manifestparität, `resolverRef = engine:<cardId>` für implementierte Karten und `resolverRef = null` für nicht implementierte Karten. PRO002 etabliert keine zweite konkurrierende Zählweise.
 
-Aktueller Stand nach PRO006-1:
+Aktueller Stand nach PRO007:
 
 | Kennzahl | Wert | Führende Quelle |
 | --- | ---: | --- |
 | Proteus-Gesamtbasis | 154 | `data/cards/proteus-cards.json` |
-| Konkrete Proteus-CardImplementation-Dateien | 62 | `packages/engine/src/card-implementations/proteus/*.ts` |
-| Registry-paritätische Implementierungen | 62 | `coverage.test.ts`-Guard gegen Registry |
-| Fehlende konkrete CardImplementation-Dateien | 92 | Gesamtbasis minus konkrete Dateien |
-| Manifest-`implemented`-Einträge | 62 | Driftprüfung in `data/manifests/proteus-card-support.json` |
+| Konkrete Proteus-CardImplementation-Dateien | 67 | `packages/engine/src/card-implementations/proteus/*.ts` |
+| Registry-paritätische Implementierungen | 67 | `coverage.test.ts`-Guard gegen Registry |
+| Fehlende konkrete CardImplementation-Dateien | 87 | Gesamtbasis minus konkrete Dateien |
+| Manifest-`implemented`-Einträge | 67 | Driftprüfung in `data/manifests/proteus-card-support.json` |
 
-PRO006-1 ist ausschließlich Test- und Typ-Härtung für den bereits umgesetzten PRO006-Scope. Es setzt keine neue Proteus-Karte um, ändert keine Manifest-Freigaben und zieht keine PRO025-Mechaniken vor. `trash_program` bleibt für PRO006 ein automatischer Printed-Subroutine-Effekt; Payment- und Zielwahlvarianten gehören zu PRO025.
+PRO006-1 ist ausschließlich Test- und Typ-Härtung für den bereits umgesetzten PRO006-Scope. Es setzt keine neue Proteus-Karte um, ändert keine Manifest-Freigaben und zieht keine PRO010-Mechaniken vor. `trash_program` bleibt für PRO006 ein automatischer Printed-Subroutine-Effekt; Payment- und Zielwahlvarianten gehören zu PRO010.
+
+PRO007 ist umgesetzt: `Credit Consolidation`, `Data Sifters`, `Manhunt`, `Schlaghund Pointers` und `Underworld Mole` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Runner-History-Conditions für getrashte Nodes, installierte Resources und Run-Versuche im Spiel, Trace-Margin-Tags, Trace-Zielauswahl für last-turn Resources und ein deklaratives Trace-Zusatzkostenmodell. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
+
+## PRO-Restzuschnitt
+
+Der führende Detailplan `proteus-cardimplementation-detailplan-2026-05-26.md` wurde ab `PRO007` in größere Mechanikfamilien-Pakete umgedeutet. Neue Umsetzungsaufträge arbeiten mit `PRO001` bis `PRO020`.
+
+| PRO | Status | Umfang |
+| --- | --- | --- |
+| PRO007 | umgesetzt | 5 Corp-Operations: Economy, History, Trace, Tags, Resource-Targeting. |
+| PRO008 | neu zu schneiden | 13 Runner-Events: Economy, Run-Flags, Trace-Rewards, Followups. |
+| PRO009 | neu zu schneiden | 7 Icebreaker-/Modifier-/Supportkarten. |
+| PRO010 | neu zu schneiden | 10 Corp-ICE: Trace, Conditional, Post-Pass und Lifecycle. |
+| PRO011 | neu zu schneiden | 8 Hidden-Resource-Economy-/Access-Karten. |
+| PRO012 | neu zu schneiden | 8 Hidden-Resource-Prevention-/Sabotage-Karten. |
+| PRO013 | neu zu schneiden | 8 Agenda-/Steal-/Overadvance-Karten. |
+| PRO014 | neu zu schneiden | 8 Corp-Asset-/Upgrade-Utility-Karten. |
+| PRO015 | neu zu schneiden | 5 Bad-Publicity-Run-/Replacement-Karten. |
+| PRO016 | neu zu schneiden | 4 Random-/Dice-/Encounter-Karten. |
+| PRO017 | neu zu schneiden | 6 Action-Economy-/Action-Debt-Karten. |
+| PRO018 | neu zu schneiden | 2 Hidden-Zone-Search-/Install-Tutor-Karten. |
+| PRO019 | neu zu schneiden | 8 regelvertragliche Baseline-/Utility-Karten. |
+| PRO020 | noch nicht ausführbar | Finaler Proteus-Abschluss nach leerer Restliste. |
 
 ## Geprüfte Activity-Menge
 
@@ -38,12 +61,12 @@ Geprüft wurden alle Activity-Unterordner unter `docs/activities/`: `inbox/`, `i
 
 | Kategorie | Anzahl | Bedeutung |
 | --- | ---: | --- |
-| `done + implemented/foundation` | 28 | Erledigte Runtime-, Foundation- oder gezielte Härtungsslices; Implementierungsfortschritt wird trotzdem nur über Dateien plus Registry gezählt. |
+| `done + implemented/foundation` | 29 | Erledigte Runtime-, Foundation- oder gezielte Härtungsslices; Implementierungsfortschritt wird trotzdem nur über Dateien plus Registry gezählt. |
 | `done + planning/contract/historical` | 13 | Erledigte Import-, Analyse-, Vertrags-, Harness- oder Planungsactivities ohne direkte CardImplementation-Zählung. |
 | `done + superseded` | 8 | Grobe Phase-Activities, die ersetzt oder aufgeteilt wurden; sie zählen nie als Kartenimplementierung. |
-| `in-progress + blocked` | 24 | Offene Detail-Activities mit fehlender PRO-, Regel- oder generischer Vertragsarbeit. |
+| `in-progress + blocked` | 23 | Offene Detail-Activities mit fehlender PRO-, Regel- oder generischer Vertragsarbeit. |
 | `inbox/open` | 0 | Keine Proteus-Activity liegt aktuell in `docs/activities/inbox/`. |
-| Gesamt | 72 | Proteus-Activity-Dateien im Board. |
+| Gesamt | 73 | Proteus-Activity-Dateien im Board. |
 
 ## Done + implemented/foundation
 
@@ -66,8 +89,9 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-24-proteus-phase-4a-hidden-resource-activation-foundation.md` | `done` | Phase 4a | Hidden-Runner-Resource-Foundation, keine Zielkartenpromotion. |
 | `done/act-2026-05-26-proteus-pro004-1-multibreak-hardening.md` | `done` | PRO004-1 | Multi-Break-Härtung, Proteus-Testkatalog und Regressionstests; keine neue Kartenpromotion. |
 | `done/act-2026-05-26-proteus-pro005-simple-runner-economy-draw-events.md` | `done` | PRO005 | 2 Karten: `Cruising for Netwatch`, `Stakeout`; Phase 5c bleibt für PRO014 blockiert. |
-| `done/act-2026-05-26-proteus-pro006-simple-corp-ice-resolver.md` | `done` | PRO006 | 4 Karten: `Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`; Phase 6b bleibt für PRO025 blockiert. |
-| `done/act-2026-05-26-proteus-pro006-1-simple-ice-hardening.md` | `done` | PRO006-1 | Test-/Typ-Härtung für PRO006; keine neue Kartenpromotion, Implementierungszählung bleibt 62/154, PRO025 bleibt blockiert. |
+| `done/act-2026-05-26-proteus-pro006-simple-corp-ice-resolver.md` | `done` | PRO006 | 4 Karten: `Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`; Phase 6b-Rest geht in PRO010. |
+| `done/act-2026-05-26-proteus-pro006-1-simple-ice-hardening.md` | `done` | PRO006-1 | Test-/Typ-Härtung für PRO006; keine neue Kartenpromotion, Implementierungszählung bleibt 62/154, Phase-6b-Rest geht in PRO010. |
+| `done/act-2026-05-27-proteus-pro007-corp-operation-economy-trace-history.md` | `done` | PRO007 | 5 Karten: `Credit Consolidation`, `Data Sifters`, `Manhunt`, `Schlaghund Pointers`, `Underworld Mole`; neue Implementierungszählung 67/154, Phase 6c abgeschlossen. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
 | `done/act-2026-05-24-proteus-phase-7a-hardware-deck-foundation.md` | `done` | Phase 7a | 1 Karte: `Deck, The`. |
 | `done/act-2026-05-24-proteus-phase-7b-icebreaker-credit-decks.md` | `done` | Phase 7b | 2 Karten: `Cortical Cybermodem`, `Sunburst Cranial Interface`. |
@@ -122,34 +146,32 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 
 | Activity | Status | Phase/Slice | Kartenliste / Blockerart | PRO-Referenzen |
 | --- | --- | --- | --- | --- |
-| `in-progress/act-2026-05-24-proteus-phase-1-visible-baseline-cards.md` | `blocked` | Phase 1 | Umbrella-Activity mit bereits erledigten und offenen Phase-1-Karten; durch 1a bis 1g aufgeteilt. | `PRO004`, `PRO006`, `PRO009`, `PRO010`, `PRO037`, `PRO038`, `PRO039` |
-| `in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md` | `blocked` | Phase 1c | `Emergency Rig`, `Rent-to-Own Contract`; X-Counter-/Rent-Isolation. | `PRO010`, `PRO037` |
-| `in-progress/act-2026-05-24-proteus-phase-1e-hidden-fort-manipulation-access.md` | `blocked` | Phase 1e | `Herman Revista`, `Marcel DeSoleil`, `Pavit Bharat`, `Simon Francisco`; Fort-Utility und Hidden-Fort-/Access-Verträge. | `PRO009`, `PRO039` |
-| `in-progress/act-2026-05-24-proteus-phase-1f-run-spend-cap.md` | `blocked` | Phase 1f | `Obfuscated Fortress`; Run-Payment-Source-/Spend-Cap-Vertrag. | `PRO038` |
-| `in-progress/act-2026-05-24-proteus-phase-2e-run-access-history-bp.md` | `blocked` | Phase 2e | `Frame-Up`, `Live News Feed`, `Subliminal Corruption`; Bad-Publicity-Run-/History-Folgen. | `PRO030` |
-| `in-progress/act-2026-05-24-proteus-phase-2f-replacement-choice-bp.md` | `blocked` | Phase 2f | `Identity Donor`, `Senatorial Field Trip`; Bad-Publicity-Replacement/Choice. | `PRO031` |
-| `in-progress/act-2026-05-24-proteus-phase-3d-pass-trigger-uninstall-trash-ice.md` | `blocked` | Phase 3d | `Datacomb`, `Death Yo-Yo`, `Marionette`, `Scaffolding`, `Tumblers`, `Twisty Passages`; Post-Pass-/ICE-Lifecycle. | `PRO017` |
-| `in-progress/act-2026-05-24-proteus-phase-4b-hidden-economy-bank-resources.md` | `blocked` | Phase 4b | `Chiba Bank Account`, `Liberated Savings Account`, `Swiss Bank Account`, `Airport Locker`, `Time to Collect`; Hidden-Bank-/Economy-Fenster. | `PRO018`, `PRO019`, `PRO023` |
-| `in-progress/act-2026-05-24-proteus-phase-4c-hidden-access-mole-resources.md` | `blocked` | Phase 4c | `HQ Mole`, `R&D Mole`, `Simulacrum`; Hidden-Access-/Mole-Fenster. | `PRO020` |
-| `in-progress/act-2026-05-24-proteus-phase-4d-hidden-prevention-damage-tag-resources.md` | `blocked` | Phase 4d | `Bolt-Hole`, `Expendable Family Member`, `Back Door to Netwatch`, `Get Ready to Rumble`, `Wired Switchboard`; Hidden-Prevention-Quick-Slice und Advanced Prevention. | `PRO008`, `PRO023` |
-| `in-progress/act-2026-05-24-proteus-phase-4e-hidden-trash-sabotage-cost-penalty.md` | `blocked` | Phase 4e | `Credit Subversion`, `Death from Above`, `Mercenary Subcontract`; Hidden-Successful-Run-/Access-Sabotage. | `PRO021`, `PRO022` |
-| `in-progress/act-2026-05-24-proteus-phase-5a-icebreaker-core-matchers-pump-break.md` | `blocked` | Phase 5a | 11 Icebreaker-/Supportkarten; Simple Icebreaker, Install-Choice, Breaker-Folgeeffekt. | `PRO004`, `PRO011`, `PRO012` |
-| `in-progress/act-2026-05-24-proteus-phase-5c-simple-runner-economy-draw-setup.md` | `blocked` | Phase 5c | PRO005 ist umgesetzt: `Cruising for Netwatch`, `Stakeout`. Offen/blockiert bleiben `On the Fast Track`, `Prearranged Drop`, `Back Door to Rivals`, `Runner Sensei` für History/Trace-Rewards. | `PRO014` |
-| `in-progress/act-2026-05-24-proteus-phase-5d-visible-runner-run-events.md` | `blocked` | Phase 5d | `All-Hands`, `Rush Hour`, `Decoy Signal`, `Demolition Run`, `Remote Detonator`, `Disgruntled Ice Technician`, `Drone for a Day`, `Reconnaissance`, `Weefle Initiation`; Run-Event-Flags und Followups. | `PRO015`, `PRO016` |
-| `in-progress/act-2026-05-24-proteus-phase-5e-icebreaker-modifier-support-hardware.md` | `blocked` | Phase 5e | `Personal Touch, The`, `Eurocorpse (TM) Spin Chip`; Icebreaker-Modifier-Hardware. | `PRO013` |
-| `in-progress/act-2026-05-24-proteus-phase-6a-agenda-scoring-steal-baseline.md` | `blocked` | Phase 6a | `Corporate Headhunters`, `Fetal AI`, `Marked Accounts`, `Project Zurich`, `World Domination`; Agenda-Score-/Steal-Baseline. | `PRO024` |
-| `in-progress/act-2026-05-24-proteus-phase-6b-corp-ice-simple-resolver.md` | `blocked` | Phase 6b | PRO006 ist umgesetzt: `Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`. Offen/blockiert bleiben `Chihuahua`, `Coyote`, `Iceberg`, `Washed-Up Solo Construct` für Trace-/Conditional-Resolver. | `PRO025` |
-| `in-progress/act-2026-05-24-proteus-phase-6c-corp-operation-trace-tag-economy.md` | `blocked` | Phase 6c | `Credit Consolidation`, `Data Sifters`, `Manhunt`, `Schlaghund Pointers`, `Underworld Mole`; Operation Economy und Trace/History. | `PRO007`, `PRO026` |
-| `in-progress/act-2026-05-24-proteus-phase-6d-corp-asset-upgrade-utility.md` | `blocked` | Phase 6d | `Department of Misinformation`, `Government Contract`, `LDL Traffic Analyzers`, `Panic Button`, `Cybertech Think Tank`, `Raymond Ellison`, `Siren`, `Syd Meyer Superstores`; Asset/Upgrade Utility A/B. | `PRO027`, `PRO028` |
-| `in-progress/act-2026-05-24-proteus-phase-6e-runner-agenda-overadvance-events.md` | `blocked` | Phase 6e | `Blackmail`, `Pirate Broadcast`, `Promises, Promises`; Runner Agenda/Overadvance Events. | `PRO029` |
-| `in-progress/act-2026-05-24-proteus-phase-9a-random-dice-foundation.md` | `blocked` | Phase 9a | `Forward's Legacy`, `Roadblock`, `Executive Boot Camp`, `Lisa Blight`; Random Foundation und Encounter/Cost/Subroutine. | `PRO032`, `PRO033` |
-| `in-progress/act-2026-05-24-proteus-phase-9b-action-economy-debt.md` | `blocked` | Phase 9b | `Lucidrine™ Drip Feed`, `AI Board Member`, `Please Don't Choke Anyone`, `Project Venice`, `Corporate Guard(R) Temps`, `Bargain with Viacox`; Action Economy/Replacement. | `PRO034`, `PRO035` |
-| `in-progress/act-2026-05-24-proteus-phase-9c-hidden-zone-search-install-tutor.md` | `blocked` | Phase 9c | `Hijack`, `Test Spin`; Hidden-Zone Search/Install Tutor. | `PRO036` |
-| `in-progress/act-2026-05-24-proteus-phase-9e-rule-blocked-preflight.md` | `blocked` | Phase 9e | `Ice and Data Special Report`; Rule-Blocked Preflight. | `PRO037` |
+| `in-progress/act-2026-05-24-proteus-phase-1-visible-baseline-cards.md` | `blocked` | Phase 1 | Umbrella-Activity mit bereits erledigten und offenen Phase-1-Karten. | `PRO004`, `PRO006`, `PRO019` |
+| `in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md` | `blocked` | Phase 1c | `Emergency Rig`, `Rent-to-Own Contract`; X-Counter-/Rent-Isolation. | `PRO019` |
+| `in-progress/act-2026-05-24-proteus-phase-1e-hidden-fort-manipulation-access.md` | `blocked` | Phase 1e | `Herman Revista`, `Marcel DeSoleil`, `Pavit Bharat`, `Simon Francisco`; Fort-Utility und Hidden-Fort-/Access-Verträge. | `PRO019` |
+| `in-progress/act-2026-05-24-proteus-phase-1f-run-spend-cap.md` | `blocked` | Phase 1f | `Obfuscated Fortress`; Run-Payment-Source-/Spend-Cap-Vertrag. | `PRO019` |
+| `in-progress/act-2026-05-24-proteus-phase-2e-run-access-history-bp.md` | `blocked` | Phase 2e | `Frame-Up`, `Live News Feed`, `Subliminal Corruption`; Bad-Publicity-Run-/History-Folgen. | `PRO015` |
+| `in-progress/act-2026-05-24-proteus-phase-2f-replacement-choice-bp.md` | `blocked` | Phase 2f | `Identity Donor`, `Senatorial Field Trip`; Bad-Publicity-Replacement/Choice. | `PRO015` |
+| `in-progress/act-2026-05-24-proteus-phase-3d-pass-trigger-uninstall-trash-ice.md` | `blocked` | Phase 3d | `Datacomb`, `Death Yo-Yo`, `Marionette`, `Scaffolding`, `Tumblers`, `Twisty Passages`; Post-Pass-/ICE-Lifecycle. | `PRO010` |
+| `in-progress/act-2026-05-24-proteus-phase-4b-hidden-economy-bank-resources.md` | `blocked` | Phase 4b | `Chiba Bank Account`, `Liberated Savings Account`, `Swiss Bank Account`, `Airport Locker`, `Time to Collect`; Hidden-Bank-/Economy-Fenster. | `PRO011` |
+| `in-progress/act-2026-05-24-proteus-phase-4c-hidden-access-mole-resources.md` | `blocked` | Phase 4c | `HQ Mole`, `R&D Mole`, `Simulacrum`; Hidden-Access-/Mole-Fenster. | `PRO011` |
+| `in-progress/act-2026-05-24-proteus-phase-4d-hidden-prevention-damage-tag-resources.md` | `blocked` | Phase 4d | `Bolt-Hole`, `Expendable Family Member`, `Back Door to Netwatch`, `Get Ready to Rumble`, `Wired Switchboard`; Hidden-Prevention und Advanced Prevention. | `PRO012` |
+| `in-progress/act-2026-05-24-proteus-phase-4e-hidden-trash-sabotage-cost-penalty.md` | `blocked` | Phase 4e | `Credit Subversion`, `Death from Above`, `Mercenary Subcontract`; Hidden-Successful-Run-/Access-Sabotage. | `PRO012` |
+| `in-progress/act-2026-05-24-proteus-phase-5a-icebreaker-core-matchers-pump-break.md` | `blocked` | Phase 5a | 11 Icebreaker-/Supportkarten; Simple Icebreaker, Install-Choice, Breaker-Folgeeffekt. | `PRO004`, `PRO009` |
+| `in-progress/act-2026-05-24-proteus-phase-5c-simple-runner-economy-draw-setup.md` | `blocked` | Phase 5c | PRO005 ist umgesetzt; offene History-/Trace-Rewards gehen in Runner Event Suite. | `PRO005`, `PRO008` |
+| `in-progress/act-2026-05-24-proteus-phase-5d-visible-runner-run-events.md` | `blocked` | Phase 5d | `All-Hands`, `Rush Hour`, `Decoy Signal`, `Demolition Run`, `Remote Detonator`, `Disgruntled Ice Technician`, `Drone for a Day`, `Reconnaissance`, `Weefle Initiation`; Run-Event-Flags und Followups. | `PRO008` |
+| `in-progress/act-2026-05-24-proteus-phase-5e-icebreaker-modifier-support-hardware.md` | `blocked` | Phase 5e | `Personal Touch, The`, `Eurocorpse (TM) Spin Chip`; Icebreaker-Modifier-Hardware. | `PRO009` |
+| `in-progress/act-2026-05-24-proteus-phase-6a-agenda-scoring-steal-baseline.md` | `blocked` | Phase 6a | `Corporate Headhunters`, `Fetal AI`, `Marked Accounts`, `Project Zurich`, `World Domination`; Agenda-Score-/Steal-Baseline. | `PRO013` |
+| `in-progress/act-2026-05-24-proteus-phase-6b-corp-ice-simple-resolver.md` | `blocked` | Phase 6b | PRO006 ist umgesetzt; offene Trace-/Conditional-/Lifecycle-ICE gehen in Corp ICE Suite. | `PRO006`, `PRO010` |
+| `in-progress/act-2026-05-24-proteus-phase-6c-corp-operation-trace-tag-economy.md` | `done` | Phase 6c | PRO007 umgesetzt: `Credit Consolidation`, `Data Sifters`, `Manhunt`, `Schlaghund Pointers`, `Underworld Mole`. | `PRO007` |
+| `in-progress/act-2026-05-24-proteus-phase-6d-corp-asset-upgrade-utility.md` | `blocked` | Phase 6d | `Department of Misinformation`, `Government Contract`, `LDL Traffic Analyzers`, `Panic Button`, `Cybertech Think Tank`, `Raymond Ellison`, `Siren`, `Syd Meyer Superstores`; Asset/Upgrade Utility. | `PRO014` |
+| `in-progress/act-2026-05-24-proteus-phase-6e-runner-agenda-overadvance-events.md` | `blocked` | Phase 6e | `Blackmail`, `Pirate Broadcast`, `Promises, Promises`; Runner Agenda/Overadvance Events. | `PRO013` |
+| `in-progress/act-2026-05-24-proteus-phase-9a-random-dice-foundation.md` | `blocked` | Phase 9a | `Forward's Legacy`, `Roadblock`, `Executive Boot Camp`, `Lisa Blight`; Random Foundation und Encounter/Cost/Subroutine. | `PRO016` |
+| `in-progress/act-2026-05-24-proteus-phase-9b-action-economy-debt.md` | `blocked` | Phase 9b | `Lucidrine™ Drip Feed`, `AI Board Member`, `Please Don't Choke Anyone`, `Project Venice`, `Corporate Guard(R) Temps`, `Bargain with Viacox`; Action Economy/Replacement. | `PRO017` |
+| `in-progress/act-2026-05-24-proteus-phase-9c-hidden-zone-search-install-tutor.md` | `blocked` | Phase 9c | `Hijack`, `Test Spin`; Hidden-Zone Search/Install Tutor. | `PRO018` |
+| `in-progress/act-2026-05-24-proteus-phase-9e-rule-blocked-preflight.md` | `blocked` | Phase 9e | `Ice and Data Special Report`; Rule-Blocked Preflight. | `PRO019` |
 
 ## PRO-Referenzabdeckung
-
-Alle PRO001 bis PRO040 sind hier bewusst erfasst. Bei Paketen ohne eigene konkrete Activity steht `noch zu schneiden`; die bestehenden Phase-Activities dienen dann nur als Referenz- und Blockeranker.
 
 | PRO | Status im Board nach PRO002 | Activity-/Artefaktbezug |
 | --- | --- | --- |
@@ -158,45 +180,25 @@ Alle PRO001 bis PRO040 sind hier bewusst erfasst. Bei Paketen ohne eigene konkre
 | PRO003 | erledigt durch Paketstandard und Verify-Harness | `proteus-cardimplementation-package-standard.md`; `coverage.test.ts`: Proteus-Abdeckung, Restliste und Driftprüfung |
 | PRO004 | umgesetzt; PRO004-1 Nacharbeit erledigt | Sechs Simple-Icebreaker-Core-Karten (`Big Frackin' Gun`, `Boring Bit`, `Corrosion`, `Redecorator`, `Skeleton Passkeys`, `Wrecking Ball`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. PRO004-1 ergänzt Multi-Break-Härtung und einen Proteus-Testkatalog; Phase 5a bleibt für PRO011/PRO012 blockiert. |
 | PRO005 | umgesetzt | Zwei Simple-Runner-Economy-/Draw-Events (`Cruising for Netwatch`, `Stakeout`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
-| PRO006 | umgesetzt; PRO006-1 Nacharbeit erledigt | Vier Simple-Corp-ICE-Resolver (`Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. PRO006-1 ergänzt Typ-/Mapping-Härtung für variable `end_the_run_unless_runner_pays`-Beträge und Colonel-Failure-Regressionen für 0/1 installierte Programme. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. Phase 6b bleibt für PRO025 blockiert; `trash_program` bleibt im PRO006-Scope automatischer Subroutine-Effekt. |
-| PRO007 | referenziert, konkrete Activity noch zu schneiden | Phase 6c |
-| PRO008 | referenziert, konkrete Activity noch zu schneiden | Phase 4d |
-| PRO009 | referenziert, konkrete Activity noch zu schneiden | Phase 1e |
-| PRO010 | referenziert, konkrete Activity noch zu schneiden | Phase 1c |
-| PRO011 | referenziert, konkrete Activity noch zu schneiden | Phase 5a |
-| PRO012 | referenziert, konkrete Activity noch zu schneiden | Phase 5a |
-| PRO013 | referenziert, konkrete Activity noch zu schneiden | Phase 5e |
-| PRO014 | referenziert, konkrete Activity noch zu schneiden | Phase 5c |
-| PRO015 | referenziert, konkrete Activity noch zu schneiden | Phase 5d |
-| PRO016 | referenziert, konkrete Activity noch zu schneiden | Phase 5d |
-| PRO017 | referenziert, konkrete Activity noch zu schneiden | Phase 3d |
-| PRO018 | referenziert, konkrete Activity noch zu schneiden | Phase 4b |
-| PRO019 | referenziert, konkrete Activity noch zu schneiden | Phase 4b |
-| PRO020 | referenziert, konkrete Activity noch zu schneiden | Phase 4c |
-| PRO021 | referenziert, konkrete Activity noch zu schneiden | Phase 4e |
-| PRO022 | referenziert, konkrete Activity noch zu schneiden | Phase 4e |
-| PRO023 | referenziert, konkrete Activity noch zu schneiden | Phase 4b, Phase 4d |
-| PRO024 | referenziert, konkrete Activity noch zu schneiden | Phase 6a |
-| PRO025 | referenziert, konkrete Activity noch zu schneiden | Phase 6b |
-| PRO026 | referenziert, konkrete Activity noch zu schneiden | Phase 6c |
-| PRO027 | referenziert, konkrete Activity noch zu schneiden | Phase 6d |
-| PRO028 | referenziert, konkrete Activity noch zu schneiden | Phase 6d |
-| PRO029 | referenziert, konkrete Activity noch zu schneiden | Phase 6e |
-| PRO030 | referenziert, konkrete Activity noch zu schneiden | Phase 2e |
-| PRO031 | referenziert, konkrete Activity noch zu schneiden | Phase 2f |
-| PRO032 | referenziert, konkrete Activity noch zu schneiden | Phase 9a |
-| PRO033 | referenziert, konkrete Activity noch zu schneiden | Phase 9a |
-| PRO034 | referenziert, konkrete Activity noch zu schneiden | Phase 9b |
-| PRO035 | referenziert, konkrete Activity noch zu schneiden | Phase 9b |
-| PRO036 | referenziert, konkrete Activity noch zu schneiden | Phase 9c |
-| PRO037 | referenziert, konkrete Activity noch zu schneiden | Phase 1c, Phase 9e, Phase-1-Umbrella |
-| PRO038 | referenziert, konkrete Activity noch zu schneiden | Phase 1f |
-| PRO039 | referenziert, konkrete Activity noch zu schneiden | Phase 1e |
-| PRO040 | noch zu schneiden | Finaler Proteus-Abschluss erst nach leerer Restliste |
+| PRO006 | umgesetzt; PRO006-1 Nacharbeit erledigt | Vier Simple-Corp-ICE-Resolver (`Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. PRO006-1 ergänzt Typ-/Mapping-Härtung für variable `end_the_run_unless_runner_pays`-Beträge und Colonel-Failure-Regressionen für 0/1 installierte Programme. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. Phase-6b-Rest geht in PRO010; `trash_program` bleibt im PRO006-Scope automatischer Subroutine-Effekt. |
+| PRO007 | umgesetzt | Corp Operation Economy/Trace/History: `Credit Consolidation`, `Data Sifters`, `Manhunt`, `Schlaghund Pointers`, `Underworld Mole` sind konkrete Dateien, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
+| PRO008 | neu zu schneiden | Runner Event Run/Economy/Followup Suite mit 13 Runner-Events. |
+| PRO009 | neu zu schneiden | Runner Icebreaker Choice/Modifier Suite mit 7 Icebreaker-/Modifier-/Supportkarten. |
+| PRO010 | neu zu schneiden | Corp ICE Trace/Conditional/Lifecycle Suite mit 10 Corp-ICE-Karten. |
+| PRO011 | neu zu schneiden | Hidden Resource Economy/Access Suite mit 8 Karten. |
+| PRO012 | neu zu schneiden | Hidden Resource Prevention/Sabotage Suite mit 8 Karten. |
+| PRO013 | neu zu schneiden | Agenda/Steal/Overadvance Suite mit 8 Karten. |
+| PRO014 | neu zu schneiden | Corp Asset/Upgrade Utility Suite mit 8 Karten. |
+| PRO015 | neu zu schneiden | Bad-Publicity Run/Replacement Suite mit 5 Karten. |
+| PRO016 | neu zu schneiden | Random/Dice/Encounter Suite mit 4 Karten. |
+| PRO017 | neu zu schneiden | Action Economy/Action Debt Suite mit 6 Karten. |
+| PRO018 | neu zu schneiden | Hidden-Zone Search/Install Tutor Suite mit 2 Karten. |
+| PRO019 | neu zu schneiden | Rule-Contract Baseline Utilities mit 8 Karten. |
+| PRO020 | noch nicht ausführbar | Finaler Proteus-Abschluss erst nach leerer Restliste. |
 
 ## Arbeitsregel ab PRO002
 
 - `done/status: superseded` und ersetzte grobe Phase-Activities dürfen nicht als `implemented` gezählt werden.
 - Blockierte Detail-Activities bleiben offen, bis das jeweilige PRO-Paket oder der nötige Vertrag explizit umgesetzt ist.
-- Neue PRO-Activities sollen höchstens ein PRO-Paket schneiden; bei Bedarf darf nach Detailplan mit Suffixen wie `PRO016a` gearbeitet werden, ohne die führende PRO001-bis-PRO040-Nummerierung zu ändern.
+- Neue PRO-Activities sollen höchstens ein PRO-Paket schneiden; bei Bedarf darf nach Detailplan mit Suffixen wie `PRO016a` gearbeitet werden, ohne die führende PRO001-bis-PRO020-Nummerierung zu ändern.
 - Abschluss eines PRO-Implementierungspakets braucht mindestens: konkrete CardImplementation-Datei pro Karte, Registry-Eintrag, grüne PRO001-Reconciliation, passende Manifest-Driftprüfung, LegalAction-/`applyAction`-Revalidierung und Hidden-Info-/Replay-/StateHash-Nachweis.

@@ -198,6 +198,7 @@ function testCorpMainHost(
       corpActionDebtPending: overrides.corpActionDebtPending ?? (() => 0),
       acmeSavingsAndLoanObligationCount: () => 0,
       canPlayCorpOperation: unexpected("canPlayCorpOperation"),
+      cardImplementationOperationLegalActions: () => [],
       corpUtilityImplementationForDefinition: () => undefined,
       powerGridOverloadLegalActions: () => [],
       systematicLayoffsLegalActions: () => [],

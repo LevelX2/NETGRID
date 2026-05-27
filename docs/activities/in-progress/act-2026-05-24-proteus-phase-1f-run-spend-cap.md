@@ -12,7 +12,7 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1f
 proReferences:
-  - PRO038
+  - PRO019
 blockedBy:
   - payment-source-contract-obfuscated-fortress-run-spend-cap
 resultArtifacts:

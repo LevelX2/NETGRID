@@ -18,8 +18,10 @@ import type {
   Side,
   Winner,
 } from "@netgrid/shared";
-import type { CardEffectImplementation } from "./definition-types";
-import { traceSuccessEffectForCardImplementation } from "./trace-implementations";
+import type {
+  CardEffectImplementation,
+  CardTraceSuccessEffectImplementation,
+} from "./definition-types";
 
 export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;
@@ -71,7 +73,7 @@ export type CardEffectExecutionContext = {
   startTrace?: (
     sourceCardId: CardInstanceId,
     baseTraceStrength: number,
-    successEffect: ReturnType<typeof traceSuccessEffectForCardImplementation>,
+    successEffects: readonly CardTraceSuccessEffectImplementation[],
   ) => CardEffectTraceResult;
   startRun?: (
     serverId: Exclude<ServerId, "new_remote">,
@@ -851,7 +853,7 @@ export function executeCardImplementationEffects(
         const traceResult = context.startTrace(
           context.sourceCardId,
           effect.baseTraceStrength,
-          traceSuccessEffectForCardImplementation(effect.onSuccess),
+          effect.onSuccess,
         );
         mergePublicPayload(publicPayload, traceResult.publicPayload);
         return;

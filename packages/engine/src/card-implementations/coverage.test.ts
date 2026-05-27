@@ -1772,10 +1772,10 @@ describe("CardImplementation coverage and registry invariants", () => {
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
     expect(outsideScopeDefinitionIds).toHaveLength(206);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(435);
-    expect(coverageByStatus.get("implemented")).toBe(435);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(440);
+    expect(coverageByStatus.get("implemented")).toBe(440);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(144);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(139);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);
@@ -1926,6 +1926,126 @@ describe("CardImplementation coverage and registry invariants", () => {
           testCase.definitionId,
         ).toEqual(testCase.lifecycle);
       }
+    }
+  });
+
+  it("migrates Proteus PRO007 Corp Operation economy, trace, and history cards into CardImplementation coverage", () => {
+    const cases = [
+      {
+        definitionId: "onr_proteus_047_credit-consolidation",
+        ability: {
+          kind: "on_play",
+          costs: "printed",
+          effects: [
+            {
+              kind: "gain_credits",
+              recipient: "controller",
+              amount: 15,
+              visibility: "public",
+            },
+          ],
+        },
+      },
+      {
+        definitionId: "onr_proteus_048_data-sifters",
+        ability: {
+          kind: "on_play",
+          costs: "printed",
+          condition: { kind: "runner_trashed_node_last_turn" },
+          effects: [
+            {
+              kind: "add_tags",
+              recipient: "runner",
+              amount: 1,
+              visibility: "public",
+            },
+          ],
+        },
+      },
+      {
+        definitionId: "onr_proteus_050_manhunt",
+        ability: {
+          kind: "on_play",
+          costs: "printed",
+          condition: { kind: "runner_attempted_run_last_turn", minimumRuns: 1 },
+          effects: [
+            {
+              kind: "trace",
+              baseTraceStrength: 6,
+              visibility: "public",
+              onSuccess: [
+                {
+                  kind: "add_tags_by_trace_margin_over_runner_link",
+                  recipient: "runner",
+                  visibility: "public",
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        definitionId: "onr_proteus_052_schlaghund-pointers",
+        ability: {
+          kind: "on_play",
+          costs: "printed",
+          condition: { kind: "runner_attempted_run_this_game", minimumRuns: 1 },
+          effects: [
+            {
+              kind: "trace",
+              baseTraceStrength: 3,
+              additionalPlayCostPerBaseTracePointAboveZero: 1,
+              visibility: "public",
+              onSuccess: [
+                {
+                  kind: "add_tags",
+                  recipient: "runner",
+                  amount: 1,
+                  visibility: "public",
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        definitionId: "onr_proteus_053_underworld-mole",
+        ability: {
+          kind: "on_play",
+          costs: "printed",
+          condition: { kind: "runner_installed_resource_last_turn" },
+          effects: [
+            {
+              kind: "trace",
+              baseTraceStrength: 4,
+              visibility: "public",
+              onSuccess: [
+                {
+                  kind: "trash_runner_resource_and_add_tag",
+                  target: "runner_resource_installed_last_turn",
+                  visibility: "public",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      expect(
+        cardImplementationForDefinitionId(testCase.definitionId),
+        testCase.definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(testCase.definitionId),
+      ).toMatchObject({
+        cardDefinitionId: testCase.definitionId,
+        status: "implemented",
+      });
+      expect(
+        cardImplementationForDefinitionId(testCase.definitionId)?.abilities,
+      ).toContainEqual(testCase.ability);
     }
   });
 });

@@ -4,6 +4,9 @@ import { runnerCardImplementationAbilityLimitHost } from "../../ability-engine/c
 export type CounterLifecycleRuntimeDepsKey =
   | "cardCounter"
   | "runnerRunAttemptsLastTurn"
+  | "runnerRunAttemptsThisGame"
+  | "runnerTrashedNodeLastTurn"
+  | "runnerInstalledResourceLastTurn"
   | "runnerMadeSuccessfulRunOnServerThisTurn"
   | "runnerLiberatedAgendaSubtypeThisTurn"
   | "corpScoredAgendaSubtypeLastTurn"
@@ -40,6 +43,9 @@ export function createCounterLifecycleCardImplementationRuntimeDeps(
     cardCounter: (state, cardId, counterType) =>
       host.counters.cardCounter(state, cardId, counterType),
     runnerRunAttemptsLastTurn,
+    runnerRunAttemptsThisGame,
+    runnerTrashedNodeLastTurn,
+    runnerInstalledResourceLastTurn,
     runnerMadeSuccessfulRunOnServerThisTurn: (state, server) =>
       server === "hq" && host.lifecycle.hasSuccessfulHqRunThisTurn(state),
     runnerLiberatedAgendaSubtypeThisTurn: (state, subtype) =>
@@ -63,6 +69,23 @@ function runnerRunAttemptsLastTurn(state: RuntimeState): number {
   return Math.max(
     0,
     Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0),
+  );
+}
+
+function runnerRunAttemptsThisGame(state: RuntimeState): number {
+  return Math.max(
+    0,
+    Math.floor(state.runnerTurnFlags?.runAttemptsThisGame ?? 0),
+  );
+}
+
+function runnerTrashedNodeLastTurn(state: RuntimeState): boolean {
+  return state.runnerTurnFlags?.trashedNodeLastTurn === true;
+}
+
+function runnerInstalledResourceLastTurn(state: RuntimeState): boolean {
+  return (state.runnerTurnFlags?.installedResourceIdsLastTurn ?? []).some(
+    (cardId) => state.runner.rig.resources.includes(cardId),
   );
 }
 
