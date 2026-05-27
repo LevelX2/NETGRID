@@ -700,6 +700,30 @@ export type AiMatchProgressionMetrics = {
   corpVisibleTagPunishFixGateBlockedByAffordability: number;
   corpVisibleTagPunishFixGateBlockedByLowImpact: number;
   corpVisibleTagPunishFixGateSuspiciousSkip: number;
+  corpVisibleTagPunishDecisionWindows: number;
+  corpVisibleTagPunishDecisionWindowsTaken: number;
+  corpVisibleTagPunishDecisionWindowsSkipped: number;
+  corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs: number;
+  corpVisibleTagPunishAlternativePayoffsNotChosen: number;
+  corpVisibleTagPunishChosenPayoffAmongAlternatives: number;
+  corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff: number;
+  corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization: number;
+  corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen: number;
+  corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization: number;
+  corpVisibleTagPunishOperationChoiceAmongPayoffs: number;
+  corpVisibleTagPunishChosenDamageOverEconomic: number;
+  corpVisibleTagPunishChosenEconomicOverDamage: number;
+  corpVisibleTagPunishChosenTrashOverDamage: number;
+  corpVisibleTagPunishChosenLethalOverNonLethal: number;
+  corpVisibleTagPunishChosenNonLethalOverLethal: number;
+  corpVisibleTagPunishChosenLowerImpactOverHigherImpact: number;
+  corpVisibleTagPunishChosenUnknownImpactOrdering: number;
+  corpVisibleTagPunishFixGateEligibleWindowNormalized: number;
+  corpVisibleTagPunishFixGateSuspiciousSkipNormalized: number;
+  corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken: number;
+  corpVisibleTagPunishPotentialPayoffOrderingIssue: number;
+  corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed: number;
+  corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage: number;
   corpFunnelSourcePayoffPairSeenInDeck: number;
   corpFunnelSourceActionTakenWithPayoffInDeck: number;
   corpFunnelSourceActionTakenWithVisiblePayoff: number;
@@ -2078,6 +2102,30 @@ export type AiSimulationSummary = {
       | "affordability"
       | "low_impact";
     corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal?: boolean;
+    corpVisibleTagPunishDecisionWindow?: boolean;
+    corpVisibleTagPunishDecisionWindowTaken?: boolean;
+    corpVisibleTagPunishDecisionWindowSkipped?: boolean;
+    corpVisibleTagPunishDecisionWindowWithMultiplePayoffs?: boolean;
+    corpVisibleTagPunishAlternativePayoffsNotChosen?: number;
+    corpVisibleTagPunishChosenPayoffAmongAlternatives?: boolean;
+    corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff?: boolean;
+    corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization?: boolean;
+    corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen?: boolean;
+    corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization?: boolean;
+    corpVisibleTagPunishOperationChoiceAmongPayoffs?: boolean;
+    corpVisibleTagPunishChosenDamageOverEconomic?: boolean;
+    corpVisibleTagPunishChosenEconomicOverDamage?: boolean;
+    corpVisibleTagPunishChosenTrashOverDamage?: boolean;
+    corpVisibleTagPunishChosenLethalOverNonLethal?: boolean;
+    corpVisibleTagPunishChosenNonLethalOverLethal?: boolean;
+    corpVisibleTagPunishChosenLowerImpactOverHigherImpact?: boolean;
+    corpVisibleTagPunishChosenUnknownImpactOrdering?: boolean;
+    corpVisibleTagPunishFixGateEligibleWindowNormalized?: boolean;
+    corpVisibleTagPunishFixGateSuspiciousSkipNormalized?: boolean;
+    corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken?: boolean;
+    corpVisibleTagPunishPotentialPayoffOrderingIssue?: boolean;
+    corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed?: boolean;
+    corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage?: boolean;
     corpFunnelSourcePayoffPairSeenInDeck?: boolean;
     corpFunnelSourceActionTakenWithPayoffInDeck?: boolean;
     corpFunnelSourceActionTakenWithVisiblePayoff?: boolean;
@@ -8251,9 +8299,12 @@ function tagPunishWindowDiagnosticsForSimulationAction(
     if (visiblePunishOpportunities.length > 0) {
       diagnostics.corpVisibleTagPunishLegalActions =
         visiblePunishOpportunities.length;
+      diagnostics.corpVisibleTagPunishDecisionWindow = true;
       diagnostics.corpVisibleTagPayoffLegalActionKinds =
         visiblePayoffCategories;
       diagnostics.corpVisibleTagPayoffLegalActionCards = visiblePayoffCards;
+      if (visiblePunishOpportunities.length > 1)
+        diagnostics.corpVisibleTagPunishDecisionWindowWithMultiplePayoffs = true;
       if (visiblePayoffCategories.includes("damage"))
         diagnostics.corpVisibleTagDamagePunishLegalActions = true;
       if (visiblePayoffCategories.includes("economic"))
@@ -8272,7 +8323,11 @@ function tagPunishWindowDiagnosticsForSimulationAction(
           diagnostics.runnerFlatlinePreventionVisibleAtPayoffWindow = true;
       }
     }
-    const punishOpportunity = visiblePunishOpportunities[0];
+    const chosenPunishOpportunity = visiblePunishOpportunities.find(
+      (opportunity) => opportunity.action.actionId === action.actionId,
+    );
+    const punishOpportunity =
+      chosenPunishOpportunity ?? visiblePunishOpportunities[0];
     if (punishOpportunity) {
       const punishOntology = corpTagPunishOntologyAssessmentForAction(
         input,
@@ -8283,16 +8338,27 @@ function tagPunishWindowDiagnosticsForSimulationAction(
       diagnostics.corpPunishKind = punishOpportunity.kind;
       if (punishOntology?.isPunishPayoff)
         diagnostics.corpPunishOpportunityConfirmedByOntology = true;
-      if (action.actionId === punishOpportunity.action.actionId) {
+      if (chosenPunishOpportunity) {
         diagnostics.corpPunishTaken = true;
         diagnostics.corpVisibleTagPunishTaken = true;
+        diagnostics.corpVisibleTagPunishDecisionWindowTaken = true;
         if (punishOntology?.isPunishPayoff)
           diagnostics.corpOntologyPunishOpportunityConverted = true;
+        applyCorpVisibleTagPunishTakenWindowDiagnostics(
+          diagnostics,
+          input,
+          action,
+          decision,
+          chosenPunishOpportunity,
+          visiblePunishOpportunities,
+        );
       } else {
         const skippedReason = corpTagPunishSkipReason(action, decision);
         diagnostics.corpPunishSkippedReason = skippedReason;
         diagnostics.corpVisibleTagPunishSkipped = true;
         diagnostics.corpVisibleTagPunishSkippedReason = skippedReason;
+        diagnostics.corpVisibleTagPunishDecisionWindowSkipped = true;
+        diagnostics.corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen = true;
         if (
           skippedReason === "unknown_higher_priority" ||
           skippedReason === "unknown"
@@ -8305,6 +8371,21 @@ function tagPunishWindowDiagnosticsForSimulationAction(
             visiblePunishOpportunities,
             survivalContext,
           );
+        if (
+          diagnostics.corpVisibleTagPunishUnknownSkipFixGateEligible === true
+        ) {
+          diagnostics.corpVisibleTagPunishFixGateEligibleWindowNormalized = true;
+          if (
+            diagnostics.corpVisibleTagPunishUnknownSkipPlausibility ===
+            "suspicious"
+          )
+            diagnostics.corpVisibleTagPunishFixGateSuspiciousSkipNormalized = true;
+        }
+        if (
+          skippedReason === "unknown_higher_priority" ||
+          skippedReason === "unknown"
+        )
+          diagnostics.corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization = true;
         if (survivalContext.any)
           diagnostics.runnerSurvivalCounterContextSuppressedPunishValue = true;
         if (punishOntology?.isPunishPayoff)
@@ -8511,6 +8592,134 @@ function corpVisibleTagPayoffCategoryFromOntology(
     default:
       return "unknown";
   }
+}
+
+function applyCorpVisibleTagPunishTakenWindowDiagnostics(
+  diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
+  input: AiDecisionInput,
+  action: LegalAction,
+  decision: AiDecision,
+  chosenOpportunity: {
+    action: LegalAction;
+    kind: CorpPunishKind;
+    category: CorpVisibleTagPayoffCategory;
+    cardId: string | undefined;
+  },
+  opportunities: Array<{
+    action: LegalAction;
+    kind: CorpPunishKind;
+    category: CorpVisibleTagPayoffCategory;
+    cardId: string | undefined;
+  }>,
+): void {
+  const alternatives = opportunities.filter(
+    (opportunity) => opportunity.action.actionId !== action.actionId,
+  );
+  if (alternatives.length <= 0) return;
+
+  diagnostics.corpVisibleTagPunishAlternativePayoffsNotChosen =
+    alternatives.length;
+  diagnostics.corpVisibleTagPunishChosenPayoffAmongAlternatives = true;
+  if (action.type === "play_operation")
+    diagnostics.corpVisibleTagPunishOperationChoiceAmongPayoffs = true;
+
+  const legacyReference = opportunities[0];
+  if (legacyReference?.action.actionId !== action.actionId) {
+    diagnostics.corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization = true;
+    const legacySkippedReason = corpTagPunishSkipReason(action, decision);
+    if (
+      legacySkippedReason === "unknown_higher_priority" ||
+      legacySkippedReason === "unknown"
+    ) {
+      diagnostics.corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff = true;
+      diagnostics.corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken = true;
+    }
+  }
+
+  const chosenLethal = corpPayoffOpportunityIsLethalOrNearLethal(
+    input,
+    chosenOpportunity,
+  );
+  const alternativeCategories = new Set(
+    alternatives.map((opportunity) => opportunity.category),
+  );
+  const alternativeLethal = alternatives.some((opportunity) =>
+    corpPayoffOpportunityIsLethalOrNearLethal(input, opportunity),
+  );
+  if (
+    chosenOpportunity.category === "damage" &&
+    alternativeCategories.has("economic")
+  )
+    diagnostics.corpVisibleTagPunishChosenDamageOverEconomic = true;
+  if (
+    chosenOpportunity.category === "economic" &&
+    alternativeCategories.has("damage")
+  ) {
+    diagnostics.corpVisibleTagPunishChosenEconomicOverDamage = true;
+    diagnostics.corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage = true;
+  }
+  if (
+    chosenOpportunity.category === "trash" &&
+    alternativeCategories.has("damage")
+  )
+    diagnostics.corpVisibleTagPunishChosenTrashOverDamage = true;
+  if (
+    chosenLethal &&
+    alternatives.some((opportunity) => opportunity.category !== "damage")
+  )
+    diagnostics.corpVisibleTagPunishChosenLethalOverNonLethal = true;
+  if (!chosenLethal && alternativeLethal) {
+    diagnostics.corpVisibleTagPunishChosenNonLethalOverLethal = true;
+    diagnostics.corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed = true;
+  }
+
+  const chosenImpact = corpVisibleTagPayoffImpact(chosenOpportunity);
+  const alternativeImpacts = alternatives.map(corpVisibleTagPayoffImpact);
+  if (
+    chosenImpact === undefined ||
+    alternativeImpacts.some((impact) => impact === undefined)
+  ) {
+    diagnostics.corpVisibleTagPunishChosenUnknownImpactOrdering = true;
+  } else if (Math.max(...(alternativeImpacts as number[])) > chosenImpact) {
+    diagnostics.corpVisibleTagPunishChosenLowerImpactOverHigherImpact = true;
+  }
+  if (
+    diagnostics.corpVisibleTagPunishChosenLowerImpactOverHigherImpact ===
+      true ||
+    diagnostics.corpVisibleTagPunishChosenNonLethalOverLethal === true ||
+    diagnostics.corpVisibleTagPunishChosenEconomicOverDamage === true ||
+    diagnostics.corpVisibleTagPunishChosenTrashOverDamage === true
+  )
+    diagnostics.corpVisibleTagPunishPotentialPayoffOrderingIssue = true;
+}
+
+function corpVisibleTagPayoffImpact(opportunity: {
+  category: CorpVisibleTagPayoffCategory;
+}): number | undefined {
+  switch (opportunity.category) {
+    case "damage":
+      return 50;
+    case "economic":
+      return 35;
+    case "trash":
+      return 30;
+    case "run_lock":
+      return 20;
+    case "ambush":
+      return 15;
+    case "unknown":
+      return undefined;
+  }
+}
+
+function corpPayoffOpportunityIsLethalOrNearLethal(
+  input: AiDecisionInput,
+  opportunity: { category: CorpVisibleTagPayoffCategory },
+): boolean {
+  return (
+    opportunity.category === "damage" &&
+    input.playerView.opponent.handCount <= 3
+  );
 }
 
 function applyCorpVisibleTagPunishUnknownSkipDiagnostics(
@@ -10668,6 +10877,30 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpVisibleTagPunishFixGateBlockedByAffordability",
   "corpVisibleTagPunishFixGateBlockedByLowImpact",
   "corpVisibleTagPunishFixGateSuspiciousSkip",
+  "corpVisibleTagPunishDecisionWindows",
+  "corpVisibleTagPunishDecisionWindowsTaken",
+  "corpVisibleTagPunishDecisionWindowsSkipped",
+  "corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs",
+  "corpVisibleTagPunishAlternativePayoffsNotChosen",
+  "corpVisibleTagPunishChosenPayoffAmongAlternatives",
+  "corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff",
+  "corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization",
+  "corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen",
+  "corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization",
+  "corpVisibleTagPunishOperationChoiceAmongPayoffs",
+  "corpVisibleTagPunishChosenDamageOverEconomic",
+  "corpVisibleTagPunishChosenEconomicOverDamage",
+  "corpVisibleTagPunishChosenTrashOverDamage",
+  "corpVisibleTagPunishChosenLethalOverNonLethal",
+  "corpVisibleTagPunishChosenNonLethalOverLethal",
+  "corpVisibleTagPunishChosenLowerImpactOverHigherImpact",
+  "corpVisibleTagPunishChosenUnknownImpactOrdering",
+  "corpVisibleTagPunishFixGateEligibleWindowNormalized",
+  "corpVisibleTagPunishFixGateSuspiciousSkipNormalized",
+  "corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken",
+  "corpVisibleTagPunishPotentialPayoffOrderingIssue",
+  "corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed",
+  "corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage",
   "corpFunnelSourcePayoffPairSeenInDeck",
   "corpFunnelSourceActionTakenWithPayoffInDeck",
   "corpFunnelSourceActionTakenWithVisiblePayoff",
@@ -15175,6 +15408,30 @@ function summarizeTagPunishWindowMetrics(
   | "corpVisibleTagPunishFixGateBlockedByAffordability"
   | "corpVisibleTagPunishFixGateBlockedByLowImpact"
   | "corpVisibleTagPunishFixGateSuspiciousSkip"
+  | "corpVisibleTagPunishDecisionWindows"
+  | "corpVisibleTagPunishDecisionWindowsTaken"
+  | "corpVisibleTagPunishDecisionWindowsSkipped"
+  | "corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs"
+  | "corpVisibleTagPunishAlternativePayoffsNotChosen"
+  | "corpVisibleTagPunishChosenPayoffAmongAlternatives"
+  | "corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff"
+  | "corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization"
+  | "corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen"
+  | "corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization"
+  | "corpVisibleTagPunishOperationChoiceAmongPayoffs"
+  | "corpVisibleTagPunishChosenDamageOverEconomic"
+  | "corpVisibleTagPunishChosenEconomicOverDamage"
+  | "corpVisibleTagPunishChosenTrashOverDamage"
+  | "corpVisibleTagPunishChosenLethalOverNonLethal"
+  | "corpVisibleTagPunishChosenNonLethalOverLethal"
+  | "corpVisibleTagPunishChosenLowerImpactOverHigherImpact"
+  | "corpVisibleTagPunishChosenUnknownImpactOrdering"
+  | "corpVisibleTagPunishFixGateEligibleWindowNormalized"
+  | "corpVisibleTagPunishFixGateSuspiciousSkipNormalized"
+  | "corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken"
+  | "corpVisibleTagPunishPotentialPayoffOrderingIssue"
+  | "corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed"
+  | "corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage"
   | "corpFunnelSourcePayoffPairSeenInDeck"
   | "corpFunnelSourceActionTakenWithPayoffInDeck"
   | "corpFunnelSourceActionTakenWithVisiblePayoff"
@@ -15346,6 +15603,30 @@ function summarizeTagPunishWindowMetrics(
   let corpVisibleTagPunishFixGateBlockedByAffordability = 0;
   let corpVisibleTagPunishFixGateBlockedByLowImpact = 0;
   let corpVisibleTagPunishFixGateSuspiciousSkip = 0;
+  let corpVisibleTagPunishDecisionWindows = 0;
+  let corpVisibleTagPunishDecisionWindowsTaken = 0;
+  let corpVisibleTagPunishDecisionWindowsSkipped = 0;
+  let corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs = 0;
+  let corpVisibleTagPunishAlternativePayoffsNotChosen = 0;
+  let corpVisibleTagPunishChosenPayoffAmongAlternatives = 0;
+  let corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff = 0;
+  let corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization = 0;
+  let corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen = 0;
+  let corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization = 0;
+  let corpVisibleTagPunishOperationChoiceAmongPayoffs = 0;
+  let corpVisibleTagPunishChosenDamageOverEconomic = 0;
+  let corpVisibleTagPunishChosenEconomicOverDamage = 0;
+  let corpVisibleTagPunishChosenTrashOverDamage = 0;
+  let corpVisibleTagPunishChosenLethalOverNonLethal = 0;
+  let corpVisibleTagPunishChosenNonLethalOverLethal = 0;
+  let corpVisibleTagPunishChosenLowerImpactOverHigherImpact = 0;
+  let corpVisibleTagPunishChosenUnknownImpactOrdering = 0;
+  let corpVisibleTagPunishFixGateEligibleWindowNormalized = 0;
+  let corpVisibleTagPunishFixGateSuspiciousSkipNormalized = 0;
+  let corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken = 0;
+  let corpVisibleTagPunishPotentialPayoffOrderingIssue = 0;
+  let corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed = 0;
+  let corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage = 0;
   const visiblePunishSkippedByReason: Record<CorpTagPunishSkipReason, number> =
     {
       economy: 0,
@@ -15651,6 +15932,72 @@ function summarizeTagPunishWindowMetrics(
           }
         }
       }
+      if (entry.corpVisibleTagPunishDecisionWindow === true)
+        corpVisibleTagPunishDecisionWindows += 1;
+      if (entry.corpVisibleTagPunishDecisionWindowTaken === true)
+        corpVisibleTagPunishDecisionWindowsTaken += 1;
+      if (entry.corpVisibleTagPunishDecisionWindowSkipped === true)
+        corpVisibleTagPunishDecisionWindowsSkipped += 1;
+      if (entry.corpVisibleTagPunishDecisionWindowWithMultiplePayoffs === true)
+        corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs += 1;
+      corpVisibleTagPunishAlternativePayoffsNotChosen +=
+        entry.corpVisibleTagPunishAlternativePayoffsNotChosen ?? 0;
+      if (entry.corpVisibleTagPunishChosenPayoffAmongAlternatives === true)
+        corpVisibleTagPunishChosenPayoffAmongAlternatives += 1;
+      if (
+        entry.corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff ===
+        true
+      )
+        corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff += 1;
+      if (
+        entry.corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization ===
+        true
+      )
+        corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization += 1;
+      if (entry.corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen === true)
+        corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen += 1;
+      if (
+        entry.corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization ===
+        true
+      )
+        corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization += 1;
+      if (entry.corpVisibleTagPunishOperationChoiceAmongPayoffs === true)
+        corpVisibleTagPunishOperationChoiceAmongPayoffs += 1;
+      if (entry.corpVisibleTagPunishChosenDamageOverEconomic === true)
+        corpVisibleTagPunishChosenDamageOverEconomic += 1;
+      if (entry.corpVisibleTagPunishChosenEconomicOverDamage === true)
+        corpVisibleTagPunishChosenEconomicOverDamage += 1;
+      if (entry.corpVisibleTagPunishChosenTrashOverDamage === true)
+        corpVisibleTagPunishChosenTrashOverDamage += 1;
+      if (entry.corpVisibleTagPunishChosenLethalOverNonLethal === true)
+        corpVisibleTagPunishChosenLethalOverNonLethal += 1;
+      if (entry.corpVisibleTagPunishChosenNonLethalOverLethal === true)
+        corpVisibleTagPunishChosenNonLethalOverLethal += 1;
+      if (entry.corpVisibleTagPunishChosenLowerImpactOverHigherImpact === true)
+        corpVisibleTagPunishChosenLowerImpactOverHigherImpact += 1;
+      if (entry.corpVisibleTagPunishChosenUnknownImpactOrdering === true)
+        corpVisibleTagPunishChosenUnknownImpactOrdering += 1;
+      if (entry.corpVisibleTagPunishFixGateEligibleWindowNormalized === true)
+        corpVisibleTagPunishFixGateEligibleWindowNormalized += 1;
+      if (entry.corpVisibleTagPunishFixGateSuspiciousSkipNormalized === true)
+        corpVisibleTagPunishFixGateSuspiciousSkipNormalized += 1;
+      if (
+        entry.corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken ===
+        true
+      )
+        corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken += 1;
+      if (entry.corpVisibleTagPunishPotentialPayoffOrderingIssue === true)
+        corpVisibleTagPunishPotentialPayoffOrderingIssue += 1;
+      if (
+        entry.corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed ===
+        true
+      )
+        corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed += 1;
+      if (
+        entry.corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage ===
+        true
+      )
+        corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage += 1;
       if (entry.corpFunnelSourcePayoffPairSeenInDeck === true)
         corpFunnelSourcePayoffPairSeenInDeck += 1;
       if (entry.corpFunnelSourceActionTakenWithPayoffInDeck === true) {
@@ -15900,6 +16247,30 @@ function summarizeTagPunishWindowMetrics(
     corpVisibleTagPunishFixGateBlockedByAffordability,
     corpVisibleTagPunishFixGateBlockedByLowImpact,
     corpVisibleTagPunishFixGateSuspiciousSkip,
+    corpVisibleTagPunishDecisionWindows,
+    corpVisibleTagPunishDecisionWindowsTaken,
+    corpVisibleTagPunishDecisionWindowsSkipped,
+    corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs,
+    corpVisibleTagPunishAlternativePayoffsNotChosen,
+    corpVisibleTagPunishChosenPayoffAmongAlternatives,
+    corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff,
+    corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization,
+    corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen,
+    corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization,
+    corpVisibleTagPunishOperationChoiceAmongPayoffs,
+    corpVisibleTagPunishChosenDamageOverEconomic,
+    corpVisibleTagPunishChosenEconomicOverDamage,
+    corpVisibleTagPunishChosenTrashOverDamage,
+    corpVisibleTagPunishChosenLethalOverNonLethal,
+    corpVisibleTagPunishChosenNonLethalOverLethal,
+    corpVisibleTagPunishChosenLowerImpactOverHigherImpact,
+    corpVisibleTagPunishChosenUnknownImpactOrdering,
+    corpVisibleTagPunishFixGateEligibleWindowNormalized,
+    corpVisibleTagPunishFixGateSuspiciousSkipNormalized,
+    corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken,
+    corpVisibleTagPunishPotentialPayoffOrderingIssue,
+    corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed,
+    corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage,
     corpFunnelSourcePayoffPairSeenInDeck,
     corpFunnelSourceActionTakenWithPayoffInDeck,
     corpFunnelSourceActionTakenWithVisiblePayoff,

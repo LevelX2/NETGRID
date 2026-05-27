@@ -16836,6 +16836,182 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.corpVisibleTagPunishFixGateBlockedByLowImpact).toBe(1);
   });
 
+  it("normalizes visible tag/punish payoff windows by corp decision", () => {
+    const payoffWindow = (
+      actionType: LegalAction["type"],
+      extra: Partial<AiSimulationSummary["actionSequence"][number]>,
+    ) =>
+      progressionAction("corp", 20, actionType, undefined, 5, {
+        runnerTagsBeforeAction: 1,
+        runnerTaggedAtCorpDecision: true,
+        corpVisibleTagPunishLegalActions: 2,
+        corpVisibleTagPayoffLegalActionKinds: ["damage", "economic"],
+        corpVisibleTagPayoffLegalActionCards: [
+          "onr_v1_285_closed-accounts",
+          "onr_v1_302_scorched-earth",
+        ],
+        corpVisibleTagDamagePunishLegalActions: true,
+        corpVisibleTagEconomicPunishLegalActions: true,
+        corpVisibleTagPunishDecisionWindow: true,
+        corpVisibleTagPunishDecisionWindowWithMultiplePayoffs: true,
+        ...extra,
+      });
+
+    const visibleTaken = payoffWindow("play_operation", {
+      corpVisibleTagPunishTaken: true,
+      corpVisibleTagPunishDecisionWindowTaken: true,
+      corpVisibleTagPunishAlternativePayoffsNotChosen: 1,
+      corpVisibleTagPunishChosenPayoffAmongAlternatives: true,
+      corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff: true,
+      corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken: true,
+      corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization: true,
+      corpVisibleTagPunishOperationChoiceAmongPayoffs: true,
+      corpVisibleTagPunishChosenDamageOverEconomic: true,
+    });
+    const lethalMissed = payoffWindow("play_operation", {
+      corpVisibleTagPunishTaken: true,
+      corpVisibleTagPunishDecisionWindowTaken: true,
+      corpVisibleTagPunishAlternativePayoffsNotChosen: 1,
+      corpVisibleTagPunishChosenPayoffAmongAlternatives: true,
+      corpVisibleTagPunishOperationChoiceAmongPayoffs: true,
+      corpVisibleTagPunishChosenEconomicOverDamage: true,
+      corpVisibleTagPunishChosenNonLethalOverLethal: true,
+      corpVisibleTagPunishChosenLowerImpactOverHigherImpact: true,
+      corpVisibleTagPunishPotentialPayoffOrderingIssue: true,
+      corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed: true,
+      corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage: true,
+    });
+    const basicCreditSkip = payoffWindow("gain_credit", {
+      corpVisibleTagPunishLegalActions: 1,
+      corpVisibleTagPayoffLegalActionKinds: ["damage"],
+      corpVisibleTagPunishDecisionWindowWithMultiplePayoffs: false,
+      corpVisibleTagPunishSkipped: true,
+      corpVisibleTagPunishSkippedReason: "unknown_higher_priority",
+      corpVisibleTagPunishDecisionWindowSkipped: true,
+      corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen: true,
+      corpVisibleTagPunishUnknownSkipAttribution:
+        "unknown_skip_suspicious_basic_credit",
+      corpVisibleTagPunishUnknownSkipPlausibility: "suspicious",
+      corpVisibleTagPunishUnknownSkipChosenFamily: "basic_credit",
+      corpVisibleTagPunishUnknownSkipFixGateEligible: true,
+      corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization: true,
+      corpVisibleTagPunishFixGateEligibleWindowNormalized: true,
+      corpVisibleTagPunishFixGateSuspiciousSkipNormalized: true,
+    });
+    const endTurnSkip = payoffWindow("end_turn", {
+      corpVisibleTagPunishLegalActions: 1,
+      corpVisibleTagPayoffLegalActionKinds: ["damage"],
+      corpVisibleTagPunishDecisionWindowWithMultiplePayoffs: false,
+      corpVisibleTagPunishSkipped: true,
+      corpVisibleTagPunishSkippedReason: "unknown_higher_priority",
+      corpVisibleTagPunishDecisionWindowSkipped: true,
+      corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen: true,
+      corpVisibleTagPunishUnknownSkipAttribution:
+        "unknown_skip_suspicious_end_turn",
+      corpVisibleTagPunishUnknownSkipPlausibility: "suspicious",
+      corpVisibleTagPunishUnknownSkipChosenFamily: "end_turn",
+      corpVisibleTagPunishUnknownSkipFixGateEligible: true,
+      corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization: true,
+      corpVisibleTagPunishFixGateEligibleWindowNormalized: true,
+      corpVisibleTagPunishFixGateSuspiciousSkipNormalized: true,
+    });
+    const scoreSkip = payoffWindow("score_agenda", {
+      corpVisibleTagPunishLegalActions: 1,
+      corpVisibleTagPayoffLegalActionKinds: ["damage"],
+      corpVisibleTagPunishDecisionWindowWithMultiplePayoffs: false,
+      corpVisibleTagPunishSkipped: true,
+      corpVisibleTagPunishSkippedReason: "unknown_higher_priority",
+      corpVisibleTagPunishDecisionWindowSkipped: true,
+      corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen: true,
+      corpVisibleTagPunishUnknownSkipAttribution:
+        "unknown_skip_plausible_score_window",
+      corpVisibleTagPunishUnknownSkipPlausibility: "plausible",
+      corpVisibleTagPunishUnknownSkipChosenFamily: "score",
+      corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "score",
+      corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization: true,
+    });
+    const unaffordableSkip = payoffWindow("play_operation", {
+      corpVisibleTagPunishLegalActions: 1,
+      corpVisibleTagPayoffLegalActionKinds: ["damage"],
+      corpVisibleTagPunishDecisionWindowWithMultiplePayoffs: false,
+      corpVisibleTagPunishSkipped: true,
+      corpVisibleTagPunishSkippedReason: "unknown_higher_priority",
+      corpVisibleTagPunishDecisionWindowSkipped: true,
+      corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen: true,
+      corpVisibleTagPunishUnknownSkipAttribution:
+        "unknown_skip_plausible_payoff_unaffordable",
+      corpVisibleTagPunishUnknownSkipPlausibility: "plausible",
+      corpVisibleTagPunishUnknownSkipChosenFamily: "operation",
+      corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "affordability",
+      corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization: true,
+    });
+
+    const first = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          visibleTaken,
+          lethalMissed,
+          basicCreditSkip,
+          endTurnSkip,
+          scoreSkip,
+          unaffordableSkip,
+        ],
+        "tag-punish-window-normalization-a",
+      ),
+    ]);
+    const second = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [visibleTaken, lethalMissed].map((entry) => ({
+          ...entry,
+          evidence: ["hidden_runner_zone_variant_not_used"],
+        })),
+        "tag-punish-window-normalization-b",
+      ),
+    ]);
+
+    expect(first.corpVisibleTagPunishDecisionWindows).toBe(6);
+    expect(first.corpVisibleTagPunishDecisionWindowsTaken).toBe(2);
+    expect(first.corpVisibleTagPunishDecisionWindowsSkipped).toBe(4);
+    expect(first.corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs).toBe(
+      2,
+    );
+    expect(first.corpVisibleTagPunishAlternativePayoffsNotChosen).toBe(2);
+    expect(first.corpVisibleTagPunishChosenPayoffAmongAlternatives).toBe(2);
+    expect(first.corpVisibleTagPunishSkippedForUnknownHigherPriority).toBe(4);
+    expect(
+      first.corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff,
+    ).toBe(1);
+    expect(
+      first.corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization,
+    ).toBe(4);
+    expect(first.corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen).toBe(4);
+    expect(
+      first.corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization,
+    ).toBe(1);
+    expect(first.corpVisibleTagPunishOperationChoiceAmongPayoffs).toBe(2);
+    expect(first.corpVisibleTagPunishChosenDamageOverEconomic).toBe(1);
+    expect(first.corpVisibleTagPunishChosenEconomicOverDamage).toBe(1);
+    expect(first.corpVisibleTagPunishChosenNonLethalOverLethal).toBe(1);
+    expect(first.corpVisibleTagPunishChosenLowerImpactOverHigherImpact).toBe(1);
+    expect(first.corpVisibleTagPunishFixGateEligibleWindowNormalized).toBe(2);
+    expect(first.corpVisibleTagPunishFixGateSuspiciousSkipNormalized).toBe(2);
+    expect(
+      first.corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken,
+    ).toBe(1);
+    expect(first.corpVisibleTagPunishPotentialPayoffOrderingIssue).toBe(1);
+    expect(
+      first.corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed,
+    ).toBe(1);
+    expect(
+      first.corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage,
+    ).toBe(1);
+    expect(second.corpVisibleTagPunishDecisionWindows).toBe(2);
+    expect(second.corpVisibleTagPunishDecisionWindowsTaken).toBe(2);
+    expect(JSON.stringify(visibleTaken)).not.toMatch(
+      /runnerHand|runnerStack|hidden|grip|heap/i,
+    );
+  });
+
   it("does not count generic central endgame runs as true runner closeout", () => {
     const metrics = summarizeMatchProgressionMetrics([
       {
