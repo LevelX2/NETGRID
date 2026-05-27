@@ -1703,8 +1703,17 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       break;
     case "rez_card":
       category = "card";
-      importance = effect.reason === "region_install" || effect.reason === "on_score" ? "important" : "normal";
-      title = `${cardTitle ?? sourceTitle ?? "Eine Karte"} wurde${effect.reason === "region_install" ? " sofort" : ""} gerezzt`;
+      importance =
+        effect.reason === "region_install" ||
+        effect.reason === "install_rez" ||
+        effect.reason === "on_score"
+          ? "important"
+          : "normal";
+      title = `${cardTitle ?? sourceTitle ?? "Eine Karte"} wurde${
+        effect.reason === "region_install" || effect.reason === "install_rez"
+          ? " sofort"
+          : ""
+      } gerezzt`;
       chips.push("Rez", "Automatisch");
       break;
     case "steal_agenda":

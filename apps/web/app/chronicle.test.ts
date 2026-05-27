@@ -3183,6 +3183,33 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.chips).toContain("Automatisch");
   });
 
+  it("formats generic rez-on-install effects", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("install_card", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "install-rez",
+            kind: "rez_card",
+            visibility: "public",
+            side: "corp",
+            cardDefinitionId: "onr_v1_356_namatoki-plaza",
+            cardTitle: "Namatoki Plaza",
+            sourceDefinitionId: "onr_v1_356_namatoki-plaza",
+            sourceTitle: "Namatoki Plaza",
+            reason: "install_rez"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items[0]?.title).toBe("Namatoki Plaza wurde sofort gerezzt.");
+    expect(items[0]?.importance).toBe("important");
+    expect(items[0]?.visibility).toBe("public");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Rez", "Automatisch"]));
+  });
+
   it("formats region replacement trash effects without leaking hidden old names", () => {
     const visibleItems = formatChronicleEffectItems(
       makeEvent("install_card", {

@@ -6,6 +6,7 @@ import {
   type CorpServer,
   type GameState,
   type LegalAction,
+  type ResolvedGameEffect,
   type ServerId,
   type Side,
 } from "@netgrid/shared";
@@ -599,6 +600,9 @@ function installCorpCard(
     rezzed: rootRezOnInstall,
     zone: { side: "corp", zone: "serverRoot", serverId: server.id },
   };
+  if (rootRezOnInstall) {
+    appendRootRezOnInstallEffect(host, server, cardId, definition, legalAction);
+  }
   if (rootRezOnInstall && host.corp.isParisTracePoolSource(cardId)) {
     const capacity = host.corp.parisTracePoolCapacityForCard(cardId);
     host.counters.setCardCounter(cardId, "bit", capacity);
@@ -617,6 +621,31 @@ function installCorpCard(
   host.servers.markRovingSubmarineActivityForServer(server.id, legalAction);
   host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
   applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);
+}
+
+function appendRootRezOnInstallEffect(
+  host: InstallCardHost,
+  server: CorpServer,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  legalAction: LegalAction,
+): void {
+  const effect: ResolvedGameEffect = {
+    effectId: `corp.root_rez_on_install.${server.id}.${cardId}`,
+    kind: "rez_card",
+    visibility: "public",
+    side: "corp",
+    reason: host.corp.isRegionUpgrade(definition)
+      ? "region_install"
+      : "install_rez",
+    sourceDefinitionId: definition.id,
+    sourceTitle: definition.title,
+    cardDefinitionId: definition.id,
+    cardTitle: definition.title,
+    serverId: server.id,
+    serverLabel: server.label,
+  };
+  legalAction.resolvedEffects = [...(legalAction.resolvedEffects ?? []), effect];
 }
 
 function applyArmageddonDoomCounterInstallRolls(
