@@ -34,7 +34,6 @@ import {
   type ReplacementWindow,
   type ResolvedGameEffect,
   type ReplayResult,
-  type RunState,
   type SpecialZoneKind,
   type SpecialZoneState,
   type SpecialZoneVisibility,
@@ -307,7 +306,6 @@ import {
 } from "./game/access/access-flow";
 import {
   installedAccessBonusForServer,
-  installedAccessBonusSourceDefinitionIdsForServer,
   runnerHqAccessBonus as runnerHqAccessBonusForBreach,
   type BreachStateHost,
 } from "./game/access/breach-state";
@@ -318,6 +316,11 @@ import {
   sourcePayloadForSuccessfulRunReplacement,
   type RunAccessTransitionHost,
 } from "./game/run/run-access-transition";
+import {
+  startRun as startRunFromRunCore,
+  type RunCoreExecutionHost,
+  type StartRunOptions,
+} from "./game/run/run-core-execution";
 import {
   applyBodyweightDataCrecheSuccessfulRun,
   applyDirectSuccessfulRunTriggers,
@@ -5257,30 +5260,6 @@ function corpRegionUpgradeIdsInServer(
     .sort();
 }
 
-type StartRunOptions = Pick<
-  RunState,
-  | "freeTrashAccessZones"
-  | "grantAllNighterBonusRunOnFinish"
-  | "accessServerOverride"
-  | "successfulRunAccessReplacement"
-  | "successfulRunCreditLoss"
-  | "successfulRunRunnerTagGain"
-  | "successfulRunCorpDraw"
-  | "successfulRunRunnerCreditGain"
-  | "successfulRunRequiresCorpCredits"
-  | "successfulRunPrivateLookCount"
-  | "successfulRunArchivesMoveCount"
-  | "successfulRunSourceCardId"
-  | "successfulRunSourceDefinitionId"
-  | "successfulRunSourceTitle"
-  | "bypassFirstIceRemaining"
-  | "runTraceLinkBonus"
-  | "runTraceLinkBonusSourceDefinitionId"
-  | "runnerRunTemporaryCredits"
-  | "unpreventableCoreDamageAtRunEnd"
-  | "socialEngineeringAutoPassIceId"
->;
-
 function startRun(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,
@@ -5289,161 +5268,49 @@ function startRun(
   options?: StartRunOptions,
   legalAction?: LegalAction,
 ): void {
-  const server = mustServer(state, serverId);
-  const flags = ensureRunnerTurnFlags(state);
-  flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
-  executeCardImplementationRunnerRunStartEffects(
-    cardImplementationRuntimeDeps,
-    state,
+  startRunFromRunCore(
+    runCoreExecutionHost(state),
+    serverId,
+    pendingSuccessBonusCredits,
+    accessCount,
+    options,
     legalAction,
   );
-  const breachHost = breachStateHost(state);
-  const installedAccessBonus = installedAccessBonusForServer(
-    breachHost,
-    server.id,
-  );
-  const installedAccessBonusSourceDefinitionIds =
-    installedAccessBonusSourceDefinitionIdsForServer(breachHost, server.id);
-  const baseAccessCount = Math.max(1, Math.floor(accessCount));
-  const effectiveAccessCount = baseAccessCount + installedAccessBonus;
-  state.phase = "run";
-  state.activeSide = "runner";
-  state.run = {
-    runId: `run_${state.stateVersion + 1}`,
-    attackedServerId: server.id,
-    phase: "approach_ice",
-    position:
-      server.ice.length > 0
-        ? {
-            kind: "ice",
-            serverId: server.id,
-            iceIndex: outermostIceIndex(server),
-          }
-        : { kind: "server", serverId: server.id },
-    brokenSubroutineIndexes: [],
-    resolvedSubroutineIndexes: [],
-    bartmossUsedBreakerIdsThisEncounter: [],
-    aardvarkInterceptionIceIds: [],
-    blinkUsedSubroutinesByBreakerThisEncounter: {},
-    successful: false,
-    accessCount: effectiveAccessCount,
-    ...(options?.freeTrashAccessZones?.length
-      ? { freeTrashAccessZones: options.freeTrashAccessZones.slice() }
-      : {}),
-    ...(options?.grantAllNighterBonusRunOnFinish
-      ? { grantAllNighterBonusRunOnFinish: true }
-      : {}),
-    ...(options?.accessServerOverride
-      ? { accessServerOverride: options.accessServerOverride }
-      : {}),
-    ...(options?.successfulRunAccessReplacement
-      ? {
-          successfulRunAccessReplacement:
-            options.successfulRunAccessReplacement,
-        }
-      : {}),
-    ...(options?.successfulRunCreditLoss && options.successfulRunCreditLoss > 0
-      ? { successfulRunCreditLoss: options.successfulRunCreditLoss }
-      : {}),
-    ...(options?.successfulRunRunnerTagGain &&
-    options.successfulRunRunnerTagGain > 0
-      ? { successfulRunRunnerTagGain: options.successfulRunRunnerTagGain }
-      : {}),
-    ...(options?.successfulRunCorpDraw && options.successfulRunCorpDraw > 0
-      ? { successfulRunCorpDraw: options.successfulRunCorpDraw }
-      : {}),
-    ...(options?.successfulRunRunnerCreditGain &&
-    options.successfulRunRunnerCreditGain > 0
-      ? { successfulRunRunnerCreditGain: options.successfulRunRunnerCreditGain }
-      : {}),
-    ...(options?.successfulRunRequiresCorpCredits
-      ? { successfulRunRequiresCorpCredits: true }
-      : {}),
-    ...(options?.successfulRunPrivateLookCount &&
-    options.successfulRunPrivateLookCount > 0
-      ? { successfulRunPrivateLookCount: options.successfulRunPrivateLookCount }
-      : {}),
-    ...(options?.successfulRunArchivesMoveCount &&
-    options.successfulRunArchivesMoveCount > 0
-      ? { successfulRunArchivesMoveCount: options.successfulRunArchivesMoveCount }
-      : {}),
-    ...(options?.successfulRunSourceCardId
-      ? { successfulRunSourceCardId: options.successfulRunSourceCardId }
-      : {}),
-    ...(options?.successfulRunSourceDefinitionId
-      ? { successfulRunSourceDefinitionId: options.successfulRunSourceDefinitionId }
-      : {}),
-    ...(options?.successfulRunSourceTitle
-      ? { successfulRunSourceTitle: options.successfulRunSourceTitle }
-      : {}),
-    ...(options?.bypassFirstIceRemaining
-      ? { bypassFirstIceRemaining: true }
-      : {}),
-    ...(options?.runTraceLinkBonus && options.runTraceLinkBonus > 0
-      ? { runTraceLinkBonus: options.runTraceLinkBonus }
-      : {}),
-    ...(options?.runTraceLinkBonusSourceDefinitionId
-      ? {
-          runTraceLinkBonusSourceDefinitionId:
-            options.runTraceLinkBonusSourceDefinitionId,
-        }
-      : {}),
-    ...(isV099OrLater(state)
-      ? { badPublicityCredits: state.corp.badPublicity }
-      : {}),
-    ...(options?.runnerRunTemporaryCredits
-      ? {
-          runnerRunTemporaryCredits: {
-            ...options.runnerRunTemporaryCredits,
-          },
-        }
-      : {}),
-    ...(options?.unpreventableCoreDamageAtRunEnd
-      ? {
-          unpreventableCoreDamageAtRunEnd: {
-            ...options.unpreventableCoreDamageAtRunEnd,
-          },
-        }
-      : {}),
-    ...(options?.socialEngineeringAutoPassIceId
-      ? { socialEngineeringAutoPassIceId: options.socialEngineeringAutoPassIceId }
-      : {}),
-    ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
+}
+
+function runCoreExecutionHost(state: GameState): RunCoreExecutionHost {
+  return {
+    state,
+    servers: {
+      mustServer: (serverId) => mustServer(state, serverId),
+    },
+    turn: {
+      ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
+    },
+    access: {
+      breachStateHost: () => breachStateHost(state),
+      runAccessTransitionHost: () => runAccessTransitionHost(state),
+    },
+    run: {
+      movementHost: () => runMovementHostForState(state),
+    },
+    rules: {
+      isV099OrLater: () => isV099OrLater(state),
+    },
+    callbacks: {
+      executeCardImplementationRunnerRunStartEffects: (
+        callbackState,
+        legalAction,
+      ) =>
+        executeCardImplementationRunnerRunStartEffects(
+          cardImplementationRuntimeDeps,
+          callbackState,
+          legalAction,
+        ),
+      applyRunnerTraceCounterRunStartEffects,
+      applyAiBoonRunStart,
+    },
   };
-  applyRunnerTraceCounterRunStartEffects(state, legalAction);
-  if (state.winner) return;
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      serverId,
-      baseAccessCount,
-      installedAccessBonus,
-      effectiveAccessCount,
-      ...(installedAccessBonusSourceDefinitionIds.length > 0
-        ? {
-            installedAccessBonusSourceDefinitionIds:
-              installedAccessBonusSourceDefinitionIds.join(","),
-          }
-        : {}),
-    };
-  }
-  applyAiBoonRunStart(state, legalAction);
-  if (server.ice.length > 0) {
-    const iceIndex = outermostIceIndex(server);
-    const approachedIceId = mustArrayValue(
-      server.ice,
-      iceIndex,
-      "Server has no approached ice.",
-    );
-    state.run.approachedIceId = approachedIceId;
-    approachOrEncounterIce(
-      runMovementHostForState(state),
-      approachedIceId,
-      legalAction,
-    );
-  } else {
-    enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction);
-  }
 }
 
 type RunnerTraceCounterEffectRuntime =
