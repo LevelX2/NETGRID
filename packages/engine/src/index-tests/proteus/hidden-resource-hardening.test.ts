@@ -12,7 +12,11 @@ import {
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { openRunnerInstalledTrashPreventionWindow } from "../../game/damage/damage-core";
-import { doDamage } from "../../game/damage/damage-core";
+import {
+  addRunnerTagsWithPrevention,
+  doDamage,
+  openEventModificationWindow,
+} from "../../game/damage/damage-core";
 import {
   CURRENT_RULES_BASELINE,
   type CardDefinitionId,
@@ -90,6 +94,45 @@ function addCorpHqCard(
     owner: "corp",
     controller: "corp",
     zone: { side: "corp", zone: "hq" },
+    faceup: false,
+    rezzed: false,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
+}
+
+function addCorpServerCard(
+  state: GameState,
+  definitionId: CardDefinitionId,
+  id: string,
+  serverId: "remote_1" | "rd" | "hq",
+  slot: "root" | "ice",
+): CardInstanceId {
+  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) {
+    server = {
+      id: serverId,
+      kind: serverId === "remote_1" ? "remote" : serverId,
+      label: serverId,
+      ice: [],
+      root: [],
+    } as (typeof state.corp.servers)[number];
+    state.corp.servers.push(server);
+  }
+  const cardId = id as CardInstanceId;
+  if (slot === "root") server.root.push(cardId);
+  else server.ice.push(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: {
+      side: "corp",
+      zone: slot === "root" ? "serverRoot" : "serverIce",
+      serverId,
+    },
     faceup: false,
     rezzed: false,
     advancementCounters: 0,
@@ -346,6 +389,330 @@ describe("PRO011 hidden resource timing hardening", () => {
 });
 
 describe("PRO012 hidden resource prevention and sabotage", () => {
+  it("PRO012 Bolt-Hole prevents only Meat Damage, caps at two damage, reveals/taps without Corp-view leaks, and replays", () => {
+    let state = runnerState("pro012-bolt-hole");
+    const boltId = installHiddenResource(
+      state,
+      "onr_proteus_132_bolt-hole",
+      "pro012_bolt",
+    );
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Bolt-Hole");
+
+    const action = {
+      side: "corp",
+      type: "trigger_ability",
+      actionId: "pro012.meat",
+      label: "Meat",
+      source: "test",
+      costs: [],
+      payload: {},
+    } as unknown as LegalAction;
+    const netOpened = openEventModificationWindow(
+      state,
+      {
+        eventId: "pro012_bolt_net",
+        eventType: "damage",
+        source: { kind: "game_rule" },
+        controller: "corp",
+        affectedSide: "runner",
+        payload: { damageType: "net", amount: 1, source: "pro012_test" },
+        visibility: "public",
+        createdAtStateVersion: state.stateVersion + 1,
+      } as any,
+      action,
+    );
+    expect(netOpened).toBe(false);
+    expect(state.eventModificationWindow).toBeUndefined();
+
+    const opened = openEventModificationWindow(
+      state,
+      {
+        eventId: "pro012_bolt_meat",
+        eventType: "damage",
+        source: { kind: "game_rule" },
+        controller: "corp",
+        affectedSide: "runner",
+        payload: { damageType: "meat", amount: 3, source: "pro012_test" },
+        visibility: "public",
+        createdAtStateVersion: state.stateVersion + 1,
+      } as any,
+      action,
+    );
+    expect(opened).toBe(true);
+    expect(state.eventModificationWindow?.candidates[0]).toMatchObject({
+      sourceRef: { instanceId: boltId },
+      preventAmount: 2,
+    });
+    state.pendingChoice = { ...state.pendingChoice!, stateVersion: state.stateVersion };
+    const before = structuredClone(state);
+    const optionId = state.pendingChoice!.options.find((option) =>
+      option.id.includes(String(boltId)),
+    )!.id;
+    const result = resolveChoice(state, "runner", optionId);
+    expect(result.ok).toBe(true);
+    state = result.state;
+    expect(state.cardInstances[boltId]?.tapped).toBe(true);
+    expect(state.cardInstances[boltId]?.faceup).toBe(true);
+    expect(state.runner.heap).toHaveLength(before.runner.heap.length + 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationOutcome: "partially_prevented",
+      preventedAmount: 2,
+      damageAmount: 1,
+      hiddenRunnerResourceRevealed: true,
+      publicRevealDefinitionId: "onr_proteus_132_bolt-hole",
+    });
+    const replay = replayEvents(before, state.eventLog.slice(before.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("PRO012 Expendable Family Member pays one credit plus tap for tag prevention and revalidates credits", () => {
+    let state = runnerState("pro012-expendable");
+    state.runner.credits = 1;
+    const expendableId = installHiddenResource(
+      state,
+      "onr_proteus_140_expendable-family-member",
+      "pro012_expendable",
+    );
+    const action = {
+      side: "corp",
+      type: "trigger_ability",
+      actionId: "pro012.tags",
+      label: "Tags",
+      source: "test",
+      costs: [],
+      payload: {},
+    } as unknown as LegalAction;
+    addRunnerTagsWithPrevention(state, action, 1, "pro012_test");
+    expect(state.eventModificationWindow?.candidates[0]).toMatchObject({
+      sourceRef: { instanceId: expendableId },
+      preventedTags: 1,
+    });
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "Expendable Family Member",
+    );
+    state.pendingChoice = { ...state.pendingChoice!, stateVersion: state.stateVersion };
+    const optionId = state.pendingChoice!.options.find((option) =>
+      option.id.includes(String(expendableId)),
+    )!.id;
+
+    const stale = structuredClone(state);
+    stale.runner.credits = 0;
+    expect(resolveChoice(stale, "runner", optionId).ok).toBe(false);
+
+    const result = resolveChoice(state, "runner", optionId);
+    expect(result.ok).toBe(true);
+    state = result.state;
+    expect(state.runner.credits).toBe(0);
+    expect(state.runner.tags).toBe(0);
+    expect(state.cardInstances[expendableId]?.tapped).toBe(true);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationOutcome: "avoided",
+      paidCredits: 1,
+      hiddenRunnerResourceRevealed: true,
+      publicRevealDefinitionId: "onr_proteus_140_expendable-family-member",
+    });
+  });
+
+  it("PRO012 Credit Subversion, Death from Above, and Mercenary enforce timing, targets, reveal, and tap", () => {
+    let creditState = runnerState("pro012-credit-subversion");
+    const creditSourceId = installHiddenResource(
+      creditState,
+      "onr_proteus_136_credit-subversion",
+      "pro012_credit_subversion",
+    );
+    creditState.corp.credits = 2;
+    creditState.run = {
+      runId: "pro012_hq_success",
+      attackedServerId: "hq",
+      phase: "access",
+      position: { kind: "server", serverId: "hq" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+    };
+    creditState.activeSide = "runner";
+    creditState.timingPoint = "access.resolve_card";
+    const creditAction = getLegalActions(creditState, "runner").find(
+      (candidate) =>
+        candidate.payload?.proteusHiddenSuccessfulRunFollowup ===
+        "corp_lose_credits",
+    );
+    expect(creditAction).toBeDefined();
+    expect(JSON.stringify(getPlayerView(creditState, "corp"))).not.toContain(
+      "Credit Subversion",
+    );
+    let result = applyLegal(creditState, "runner", creditAction!);
+    expect(result.ok).toBe(true);
+    creditState = result.state;
+    expect(creditState.corp.credits).toBe(0);
+    expect(creditState.cardInstances[creditSourceId]?.tapped).toBe(true);
+    expect(creditState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      creditLoss: 2,
+      hiddenRunnerResourceRevealed: true,
+      publicRevealDefinitionId: "onr_proteus_136_credit-subversion",
+    });
+
+    const wrongHqTiming = runnerState("pro012-credit-subversion-rd");
+    installHiddenResource(
+      wrongHqTiming,
+      "onr_proteus_136_credit-subversion",
+      "pro012_credit_subversion_wrong",
+    );
+    wrongHqTiming.run = {
+      ...creditState.run!,
+      runId: "pro012_rd_success",
+      attackedServerId: "rd",
+      position: { kind: "server", serverId: "rd" },
+    };
+    expect(
+      getLegalActions(wrongHqTiming, "runner").some(
+        (candidate) =>
+          candidate.payload?.proteusHiddenSuccessfulRunFollowup ===
+          "corp_lose_credits",
+      ),
+    ).toBe(false);
+
+    let deathState = runnerState("pro012-death-from-above");
+    const deathSourceId = installHiddenResource(
+      deathState,
+      "onr_proteus_137_death-from-above",
+      "pro012_death",
+    );
+    const assetId = addCorpServerCard(
+      deathState,
+      "onr_v1_309_bbs-whispering-campaign",
+      "pro012_remote_asset",
+      "remote_1",
+      "root",
+    );
+    const upgradeId = addCorpServerCard(
+      deathState,
+      "onr_v1_350_antiquated-interface-routines",
+      "pro012_remote_upgrade",
+      "remote_1",
+      "root",
+    );
+    const iceId = addCorpServerCard(
+      deathState,
+      "onr_v1_221_asp",
+      "pro012_remote_ice",
+      "remote_1",
+      "ice",
+    );
+    deathState.run = {
+      runId: "pro012_remote_success",
+      attackedServerId: "remote_1",
+      phase: "access",
+      position: { kind: "server", serverId: "remote_1" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+    };
+    deathState.activeSide = "runner";
+    deathState.timingPoint = "access.resolve_card";
+    const deathAction = getLegalActions(deathState, "runner").find(
+      (candidate) =>
+        candidate.payload?.proteusHiddenSuccessfulRunFollowup ===
+        "trash_remote_fort",
+    );
+    expect(deathAction).toBeDefined();
+    result = applyLegal(deathState, "runner", deathAction!);
+    expect(result.ok).toBe(true);
+    deathState = result.state;
+    expect(deathState.cardInstances[deathSourceId]?.tapped).toBe(true);
+    expect(deathState.corp.archives).toEqual(
+      expect.arrayContaining([assetId, upgradeId, iceId]),
+    );
+    expect(deathState.cardInstances[assetId]?.faceup).toBe(true);
+    expect(deathState.cardInstances[upgradeId]?.faceup).toBe(true);
+    expect(deathState.cardInstances[iceId]?.faceup).toBe(true);
+    expect(deathState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      trashedCount: 3,
+      hiddenRunnerResourceRevealed: true,
+      publicRevealDefinitionId: "onr_proteus_137_death-from-above",
+    });
+
+    let mercenaryState = runnerState("pro012-mercenary");
+    mercenaryState.runner.credits = 4;
+    const mercenaryId = installHiddenResource(
+      mercenaryState,
+      "onr_proteus_145_mercenary-subcontract",
+      "pro012_mercenary",
+    );
+    const operationId = addCorpServerCard(
+      mercenaryState,
+      "onr_v1_281_accounts-receivable",
+      "pro012_accessed_operation",
+      "rd",
+      "root",
+    );
+    mercenaryState.corp.rd = [operationId, ...mercenaryState.corp.rd];
+    const rdServer = mercenaryState.corp.servers.find((server) => server.id === "rd");
+    if (rdServer) rdServer.root = rdServer.root.filter((id) => id !== operationId);
+    mercenaryState.cardInstances[operationId]!.zone = { side: "corp", zone: "rd" };
+    mercenaryState.run = {
+      runId: "pro012_current_access",
+      attackedServerId: "rd",
+      phase: "access",
+      position: { kind: "server", serverId: "rd" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+      accessedCardId: operationId,
+    };
+    mercenaryState.activeSide = "runner";
+    mercenaryState.timingPoint = "access.resolve_card";
+    // Access is represented by one current run.accessedCardId. Multiaccess repeats
+    // this window per accessed card, so Mercenary's "one or more" is sequential here.
+    const mercenaryAction = getLegalActions(mercenaryState, "runner").find(
+      (candidate) =>
+        candidate.payload?.hiddenResourceCurrentAccessTrash === true &&
+        candidate.payload.hiddenResourceSourceCardId === mercenaryId,
+    );
+    expect(mercenaryAction).toBeDefined();
+    expect(mercenaryAction?.costs).toEqual([{ credits: 4 }]);
+    result = applyLegal(mercenaryState, "runner", mercenaryAction!);
+    expect(result.ok).toBe(true);
+    mercenaryState = result.state;
+    expect(mercenaryState.runner.credits).toBe(0);
+    expect(mercenaryState.cardInstances[mercenaryId]?.tapped).toBe(true);
+    expect(mercenaryState.corp.archives).toContain(operationId);
+    expect(mercenaryState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenRunnerResourceRevealed: true,
+      publicRevealDefinitionId: "onr_proteus_145_mercenary-subcontract",
+      hiddenZoneAction: "proteus_hidden_current_access_free_trash",
+    });
+
+    const agendaState = runnerState("pro012-mercenary-agenda");
+    installHiddenResource(
+      agendaState,
+      "onr_proteus_145_mercenary-subcontract",
+      "pro012_mercenary_agenda",
+    );
+    const agendaId = addCorpServerCard(
+      agendaState,
+      "onr_v1_188_ai-chief-financial-officer",
+      "pro012_accessed_agenda",
+      "rd",
+      "root",
+    );
+    agendaState.corp.rd = [agendaId, ...agendaState.corp.rd];
+    const agendaRdServer = agendaState.corp.servers.find(
+      (server) => server.id === "rd",
+    );
+    if (agendaRdServer)
+      agendaRdServer.root = agendaRdServer.root.filter((id) => id !== agendaId);
+    agendaState.cardInstances[agendaId]!.zone = { side: "corp", zone: "rd" };
+    agendaState.run = { ...mercenaryState.run!, accessedCardId: agendaId };
+    agendaState.timingPoint = "access.resolve_card";
+    expect(
+      getLegalActions(agendaState, "runner").some(
+        (candidate) => candidate.payload?.hiddenResourceCurrentAccessTrash === true,
+      ),
+    ).toBe(false);
+  });
+
   it("PRO012 Back Door to Netwatch cancels a successful trace and adds Bad Publicity only for non-tag effects", () => {
     let state = runnerState("pro012-back-door");
     const backDoorId = installHiddenResource(

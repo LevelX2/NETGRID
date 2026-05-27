@@ -46,6 +46,8 @@ PRO011 ist umgesetzt und PRO011-1 ist als reine Timing-/Behavior-Härtung erledi
 
 PRO012 ist umgesetzt: `Back Door to Netwatch`, `Bolt-Hole`, `Credit Subversion`, `Death from Above`, `Expendable Family Member`, `Get Ready to Rumble`, `Mercenary Subcontract` und `Wired Switchboard` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Hidden-Resource-Tap-/Reveal-Kosten für Damage-/Tag-Prevention, Post-Bid-Link, Trace-Erfolg-Cancel, Post-Meat-Damage-Reaktionen, Successful-Run-vor-Access-Followups und Current-Access-Trash. Neue Implementierungszählung: 113/154, 41 fehlend, kein Drift. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
+PRO012-1 ist ausschließlich Test- und Resolve-Härtung für den bereits umgesetzten PRO012-Scope. Mercenary Subcontract bleibt im sequenziellen NETGRID-Access-Modell auf genau die aktuelle `run.accessedCardId` bezogen; Multiaccess arbeitet diese Current-Access-Fenster nacheinander ab. Der Resolve-Pfad revalidiert jetzt Quelle, Runner-Resource-Installation, Controller, Tap-Zustand, Ability-Kind, Kostenprofil, Zahlbarkeit, kostenloses Trash-Override, aktuelle Zugriffskarte und Agenda-Ausschluss und zieht die `[4]`-Kosten ein. Ergänzt wurden konkrete Verhaltenstests für Bolt-Hole, Expendable Family Member, Trace-Success-Cancel-Öffnung, Credit Subversion, Death from Above und Mercenary Subcontract. Keine neue Kartenpromotion; Implementierungszählung bleibt 113/154, 41 fehlend, kein Drift.
+
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
 
 ## PRO-Restzuschnitt
@@ -60,6 +62,7 @@ Der führende Detailplan `proteus-cardimplementation-detailplan-2026-05-26.md` w
 | PRO010 | umgesetzt | 10 Corp-ICE: Trace, Conditional, Post-Pass und Lifecycle. |
 | PRO011 | umgesetzt | 8 Hidden-Resource-Economy-/Access-Karten. |
 | PRO012 | umgesetzt | 8 Hidden-Resource-Prevention-/Sabotage-Karten. |
+| PRO012-1 | umgesetzt | Test-/Resolve-Härtung für PRO012; keine neue Kartenpromotion. |
 | PRO013 | neu zu schneiden | 8 Agenda-/Steal-/Overadvance-Karten. |
 | PRO014 | neu zu schneiden | 8 Corp-Asset-/Upgrade-Utility-Karten. |
 | PRO015 | neu zu schneiden | 5 Bad-Publicity-Run-/Replacement-Karten. |
@@ -116,6 +119,7 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-27-proteus-pro011-hidden-resource-economy-access-suite.md` | `done` | PRO011 | 8 Hidden-Resources: `Airport Locker`, `Chiba Bank Account`, `HQ Mole`, `Liberated Savings Account`, `R&D Mole`, `Simulacrum`, `Swiss Bank Account`, `Time to Collect`; neue Implementierungszählung 105/154. |
 | `done/act-2026-05-27-proteus-pro011-1-hidden-resource-timing-hardening.md` | `done` | PRO011-1 | Timing-/Behavior-Härtung für PRO011; keine neue Kartenpromotion, Implementierungszählung bleibt 105/154. |
 | `done/act-2026-05-27-proteus-pro012-hidden-resource-prevention-sabotage-suite.md` | `done` | PRO012 | 8 Hidden-Resources: `Back Door to Netwatch`, `Bolt-Hole`, `Credit Subversion`, `Death from Above`, `Expendable Family Member`, `Get Ready to Rumble`, `Mercenary Subcontract`, `Wired Switchboard`; neue Implementierungszählung 113/154. |
+| `done/act-2026-05-27-proteus-pro012-1-hidden-resource-hardening.md` | `done` | PRO012-1 | Resolve- und Test-Härtung für PRO012-Hidden-Resources; keine neue Kartenpromotion, Implementierungszählung bleibt 113/154. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
 | `done/act-2026-05-24-proteus-phase-7a-hardware-deck-foundation.md` | `done` | Phase 7a | 1 Karte: `Deck, The`. |
 | `done/act-2026-05-24-proteus-phase-7b-icebreaker-credit-decks.md` | `done` | Phase 7b | 2 Karten: `Cortical Cybermodem`, `Sunburst Cranial Interface`. |
@@ -214,6 +218,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | PRO011 | umgesetzt | Hidden Resource Economy/Access Suite mit 8 Karten ist umgesetzt, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
 | PRO011-1 | umgesetzt | Reine Timing-/Behavior-Härtung für PRO011: Bankkarten im Kosten-/Penalty-Support-Fenster, HQ/R&D Mole im Access-Start-Fenster, `Time to Collect` nur in echten Korp-Zugphasen. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
 | PRO012 | umgesetzt | Hidden Resource Prevention/Sabotage Suite mit 8 Karten ist umgesetzt, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
+| PRO012-1 | umgesetzt | Reine Test-/Resolve-Härtung für PRO012: Mercenary-Current-Access-Revalidierung, sequenzielle Access-Interpretation und konkrete Hidden-Resource-Verhaltenstests. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
 | PRO013 | neu zu schneiden | Agenda/Steal/Overadvance Suite mit 8 Karten. |
 | PRO014 | neu zu schneiden | Corp Asset/Upgrade Utility Suite mit 8 Karten. |
 | PRO015 | neu zu schneiden | Bad-Publicity Run/Replacement Suite mit 5 Karten. |
