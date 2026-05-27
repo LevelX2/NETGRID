@@ -291,10 +291,6 @@ import {
   type AccessFlowHost,
 } from "./game/access/access-flow";
 import {
-  createAccessFlowAdapters,
-  type AccessFlowCompositionHost,
-} from "./game/access/access-flow-hosts";
-import {
   installedAccessBonusForServer,
   runnerHqAccessBonus as runnerHqAccessBonusForBreach,
   type BreachStateHost,
@@ -308,7 +304,6 @@ import {
 import { type StartRunOptions } from "./game/run/run-core-execution";
 import {
   applyBodyweightDataCrecheSuccessfulRun,
-  buildSuccessfulRunFollowupActions,
   resolveSuccessfulRunFollowupAbility,
   resolveSuccessfulRunInterventionChoice as resolveSuccessfulRunInterventionChoiceInRunModule,
   type SuccessfulRunInterventionHost,
@@ -362,14 +357,12 @@ import {
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
-  buildMysteryBoxRunActions,
   buildRunnerEncounterActions,
   buildRunnerMovementActions,
   type RunnerEncounterActionHost,
 } from "./game/run/encounter-actions";
 import {
   buildCorpEncounterCardImplementationActions,
-  buildRunnerDuringRunCardImplementationActions,
 } from "./game/run/card-implementation-run-actions";
 import {
   createGameCardImplementationRuntimeDeps,
@@ -439,9 +432,9 @@ import {
   type RunMovementHost,
 } from "./game/run/run-movement";
 import {
-  createRunFlowAdapters,
-  type RunFlowHost,
-} from "./game/run/run-flow-hosts";
+  createRunAccessLegalActionHostComposition,
+  type RunAccessLegalActionHostCompositionHost,
+} from "./game/run/run-access-legal-action-hosts";
 import { type RunnerBreakerActionExecutionHost } from "./game/run/runner-breaker-action-execution";
 import { type StartRunActionExecutionHost } from "./game/run/start-run-action-execution";
 import { type RezActionExecutionHost } from "./game/rez/rez-action-execution";
@@ -887,7 +880,8 @@ const cardImplementationRuntimeDeps = createGameCardImplementationRuntimeDeps(
   gameCardImplementationRuntimeDepsHost(),
 );
 
-const runFlow = createRunFlowAdapters({
+const runAccessLegalActionHostComposition =
+  createRunAccessLegalActionHostComposition({
   cards: {
     definitionFor,
     cardInstanceFor: (state, cardId) => mustInstance(state.cardInstances, cardId),
@@ -898,39 +892,16 @@ const runFlow = createRunFlowAdapters({
     hostedProgramStrengthModifier,
     icebreakerEncounterStrengthBonus,
     permanentIcebreakerStrengthCounterBonus,
-    cardImplementationAccessHookKindsForDefinition: (definitionId) =>
-      cardImplementationForDefinitionId(definitionId)?.accessHooks?.map(
-        (hook) => hook.kind,
-      ) ?? [],
   },
   servers: {
     mustServer,
     publicServerLabel,
     randomHqAccess,
   },
-  rules: {
-    isV097OrLater,
-    isV099OrLater,
-  },
-  turn: {
-    ensureRunnerTurnFlags,
-    consumeRunnerFutureActionDebt,
-  },
-  access: {
-    breachStateHost,
-    accessFlowHost,
-    advanceArchivesBreachPastNonDecisionCards,
-    startRunnerPrivateLookChoice,
-    startExpertScheduleAnalyzerPostAccessChoice,
-  },
   run: {
     currentRun: mustRun,
     currentEncounterSubroutines: subroutinesForCurrentEncounter,
     runRemainderStrengthBonusForBreaker,
-    runnerDuringRunCardImplementationLegalActions: (state) =>
-      buildRunnerDuringRunCardImplementationActions(
-        runCardImplementationActionHost(state),
-      ).legalActions,
     executeCardImplementationRunnerRunStartEffects: (
       callbackState,
       legalAction,
@@ -942,178 +913,36 @@ const runFlow = createRunFlowAdapters({
       ),
     applyRunnerTraceCounterRunStartEffects,
     applyAiBoonRunStart,
+    finishRun,
+    successfulRunInterventionHost,
+    startExpertScheduleAnalyzerPostAccessChoice,
   },
-  trace: {
-    calculateRunnerLink: (state) =>
-      calculateRunnerLinkInTrace(traceOrchestrationHost(state)),
-    traceBidChoice,
-    addHackerTrackerTraceCounters,
-    hackerTrackerCounterTotal,
-    krumzTraceBitTotal,
-    rabbitTraceLimitReductionForIceTrace,
-    resolveTraceHardwareWreckerSuccess,
-    resolveTraceTrashRunnerResourceSuccess,
-    supportsTraceSuccessEffect: (effect) =>
-      isSupportedEncounterTraceSuccessEffect(
-        effect,
-        traceCounterEffectDefinitionFor,
-      ),
-  },
-  damage: {
-    createDamageImminentEvent,
-    doDamage,
-    openEventModificationWindow,
-    openReplacementWindow,
-    resolveDamageImminentEvent,
-    setDamagePayload,
+  access: {
+    advanceArchivesBreachPastNonDecisionCards,
+    startRunnerPrivateLookChoice,
   },
   payment: {
     spendCredits,
     credits,
     rezCostForCard,
     creditCostForAction,
-  },
-  counters: {
-    cardCounter,
-    addCardCounter,
-    setCardCounter,
-    spendCardCounter,
-    addVirusCounterWithDisinfectantPrevention,
-    preventOneVirusCounterWithDisinfectant,
-    poxCountersForServer,
-  },
-  ice: {
-    strengthForIce: iceStrengthFor,
-    icebreakerHasSpecial: (state, breakerId, special) =>
-      icebreakerHasSpecial(
-        state,
-        breakerId,
-        special as NonNullable<RuntimeIcebreakerAbility["special"]>,
-      ),
-    dupreStrengthCounterBonus,
-    resetBreakerStrength,
-    withoutVariableIceState,
-  },
-  zones: {
-    removeFromAllZones,
-    trashCorpInstalledCardToArchives,
-    trashRunnerInstalledCardToHeap,
-    trashRunnerInstalledProgram,
-    cleanupEmptyRemotes,
-    ensureSpecialZones,
-  },
-  choices: {
-    hiddenZoneArrangeChoiceHandlerHost,
-    openRunnerInstalledTrashPreventionWindow,
-  },
-  effects: {
-    executeEffectCommands,
-    breakAbilityForLegalAction,
-    breakSubroutineCostBreakdown,
-    abilityMetadata,
-    revealCorpRdTop,
-  },
-  rng: {
-    nextRandom,
-    rollDie: rollDeterministicDie,
-    shuffleStateIds,
-  },
-  callbacks: {
-    finishRun,
-    drawCorpCards,
-    acmeSavingsAndLoanObligationCount,
-    addAcmeSavingsAndLoanObligation,
-    applyRunnerForgoNextAction,
-    hasInstalledMicrotechTrodeSet,
-    traceCounterEffectDefinitionFor,
-    installedRunnerVirusSourceIds,
-    virusCounterImplementationForCard,
-  },
-} satisfies RunFlowHost);
-
-const accessFlow = createAccessFlowAdapters({
-  cards: {
-    definitionFor,
-    cardInstanceFor: (state, cardId) => mustInstance(state.cardInstances, cardId),
-    cardHasSubtype,
-    accessEffectsForDefinition: (definitionId) =>
-      cardImplementationForDefinitionId(definitionId)?.accessEffects ?? [],
-  },
-  servers: {
-    mustServer,
-    randomHqAccess,
-  },
-  run: {
-    finishRun,
-    successfulRunProgramActions: (state, run) =>
-      buildSuccessfulRunFollowupActions(successfulRunInterventionHost(state), run),
-    runnerDuringRunCardImplementationLegalActions: (state) =>
-      buildRunnerDuringRunCardImplementationActions(
-        runCardImplementationActionHost(state),
-      ).legalActions,
-    mysteryBoxRunActions: (state, run) =>
-      buildMysteryBoxRunActions(runnerEncounterActionHostForState(state), run),
-    startExpertScheduleAnalyzerPostAccessChoice,
-  },
-  damage: {
-    resolveDamageOperation,
-    doDamage,
-    setDamagePayload,
-  },
-  tags: {
-    addRunnerTagsWithPrevention,
-  },
-  trace: {
-    startTraceFromOperation: (
-      state,
-      sourceDefinitionId,
-      baseTraceStrength,
-      legalAction,
-      successEffect,
-    ) =>
-      startTraceFromOperationInTrace(
-        traceOrchestrationHost(state),
-        sourceDefinitionId,
-        baseTraceStrength,
-        legalAction,
-        successEffect,
-      ),
-    traceSuccessEffectForCardImplementation,
-  },
-  payment: {
-    spendCredits,
     hostedPaymentCredits,
     restrictedHostedCreditSourceIds,
     isRestrictedHostedCreditSource,
     spendRunnerAccessTrashCredits,
   },
-  counters: {
-    cardCounter,
-    addCardCounter,
-    addCounterToAllInstalledRunnerIcebreakers,
-  },
-  zones: {
-    removeFromAllZones,
-    ensureSpecialZones,
-    trashCorpInstalledCardToArchives,
-    trashRunnerInstalledCardToHeap,
-    shuffleCorpCardIntoRd,
-    returnRunnerInstalledProgramsToGripForAccess,
-  },
   choices: {
+    hiddenZoneArrangeChoiceHandlerHost,
     openRunnerInstalledTrashPreventionWindow,
   },
-  turn: {
-    ensureRunnerTurnFlags,
-  },
-  random: {
-    nextRandom,
-  },
-  callbacks: {
-    agendaPointsForScoredCard,
-    snapshotPersistentStealCostModifiersForSource,
-    archivesAccessRequiresDecisionOrEffect,
-    installedRevealHelperCount: (state) => v1915InstalledRevealHelperIds(state).length,
+  cardImplementation: {
+    accessEffectsForDefinition: (definitionId) =>
+      cardImplementationForDefinitionId(definitionId)?.accessEffects ?? [],
+    accessHookKindsForDefinition: (definitionId) =>
+      cardImplementationForDefinitionId(definitionId)?.accessHooks?.map(
+        (hook) => hook.kind,
+      ) ?? [],
+    runCardImplementationActionHost,
   },
   constants: {
     setup: SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
@@ -1130,7 +959,122 @@ const accessFlow = createAccessFlowAdapters({
     bizarreEncryptionScheme: BIZARRE_ENCRYPTION_SCHEME_ID,
     chimera: CHIMERA_ID,
   },
-} satisfies AccessFlowCompositionHost);
+  callbacks: {
+    rules: {
+      isV097OrLater,
+      isV099OrLater,
+    },
+    turn: {
+      ensureRunnerTurnFlags,
+      consumeRunnerFutureActionDebt,
+    },
+    trace: {
+      calculateRunnerLink: (state) =>
+        calculateRunnerLinkInTrace(traceOrchestrationHost(state)),
+      traceBidChoice,
+      addHackerTrackerTraceCounters,
+      hackerTrackerCounterTotal,
+      krumzTraceBitTotal,
+      rabbitTraceLimitReductionForIceTrace,
+      resolveTraceHardwareWreckerSuccess,
+      resolveTraceTrashRunnerResourceSuccess,
+      supportsTraceSuccessEffect: (effect) =>
+        isSupportedEncounterTraceSuccessEffect(
+          effect,
+          traceCounterEffectDefinitionFor,
+        ),
+      startTraceFromOperation: (
+        state,
+        sourceDefinitionId,
+        baseTraceStrength,
+        legalAction,
+        successEffect,
+      ) =>
+        startTraceFromOperationInTrace(
+          traceOrchestrationHost(state),
+          sourceDefinitionId,
+          baseTraceStrength,
+          legalAction,
+          successEffect,
+        ),
+      traceSuccessEffectForCardImplementation,
+    },
+    damage: {
+      createDamageImminentEvent,
+      doDamage,
+      openEventModificationWindow,
+      openReplacementWindow,
+      resolveDamageImminentEvent,
+      setDamagePayload,
+      resolveDamageOperation,
+    },
+    tags: {
+      addRunnerTagsWithPrevention,
+    },
+    counters: {
+      cardCounter,
+      addCardCounter,
+      setCardCounter,
+      spendCardCounter,
+      addVirusCounterWithDisinfectantPrevention,
+      preventOneVirusCounterWithDisinfectant,
+      poxCountersForServer,
+      addCounterToAllInstalledRunnerIcebreakers,
+    },
+    ice: {
+      strengthForIce: iceStrengthFor,
+      icebreakerHasSpecial: (state, breakerId, special) =>
+        icebreakerHasSpecial(
+          state,
+          breakerId,
+          special as NonNullable<RuntimeIcebreakerAbility["special"]>,
+        ),
+      dupreStrengthCounterBonus,
+      resetBreakerStrength,
+      withoutVariableIceState,
+    },
+    zones: {
+      removeFromAllZones,
+      trashCorpInstalledCardToArchives,
+      trashRunnerInstalledCardToHeap,
+      trashRunnerInstalledProgram,
+      cleanupEmptyRemotes,
+      ensureSpecialZones,
+      shuffleCorpCardIntoRd,
+      returnRunnerInstalledProgramsToGripForAccess,
+    },
+    effects: {
+      executeEffectCommands,
+      breakAbilityForLegalAction,
+      breakSubroutineCostBreakdown,
+      abilityMetadata,
+      revealCorpRdTop,
+    },
+    rng: {
+      nextRandom,
+      rollDie: rollDeterministicDie,
+      shuffleStateIds,
+    },
+    misc: {
+      drawCorpCards,
+      acmeSavingsAndLoanObligationCount,
+      addAcmeSavingsAndLoanObligation,
+      applyRunnerForgoNextAction,
+      hasInstalledMicrotechTrodeSet,
+      traceCounterEffectDefinitionFor,
+      installedRunnerVirusSourceIds,
+      virusCounterImplementationForCard,
+      agendaPointsForScoredCard,
+      snapshotPersistentStealCostModifiersForSource,
+      archivesAccessRequiresDecisionOrEffect,
+      installedRevealHelperCount: (state) =>
+        v1915InstalledRevealHelperIds(state).length,
+    },
+  },
+} satisfies RunAccessLegalActionHostCompositionHost);
+
+const runFlow = runAccessLegalActionHostComposition.runFlow;
+const accessFlow = runAccessLegalActionHostComposition.accessFlow;
 
 configureEventContextHostComposition({
   cards: {
