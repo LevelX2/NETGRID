@@ -16671,6 +16671,171 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.runnerSurvivalCounterContextSuppressedPunishValue).toBe(1);
   });
 
+  it("summarizes tag/punish unknown-skip attribution and fix-gate buckets", () => {
+    const unknownSkip = (
+      actionType: LegalAction["type"],
+      attribution: NonNullable<
+        AiSimulationSummary["actionSequence"][number]["corpVisibleTagPunishUnknownSkipAttribution"]
+      >,
+      plausibility: NonNullable<
+        AiSimulationSummary["actionSequence"][number]["corpVisibleTagPunishUnknownSkipPlausibility"]
+      >,
+      family: NonNullable<
+        AiSimulationSummary["actionSequence"][number]["corpVisibleTagPunishUnknownSkipChosenFamily"]
+      >,
+      extra: Partial<AiSimulationSummary["actionSequence"][number]> = {},
+    ) =>
+      progressionAction("corp", 10, actionType, undefined, 3, {
+        runnerTagsBeforeAction: 1,
+        runnerTaggedAtCorpDecision: true,
+        runnerTaggedAtCorpDecisionWithFunnelPayoffKnown: true,
+        corpPunishOpportunity: true,
+        corpPunishKind: "scorched_earth_like",
+        corpPunishSkippedReason: "unknown_higher_priority",
+        corpVisibleTagPunishLegalActions: 1,
+        corpVisibleTagPayoffLegalActionKinds: ["damage"],
+        corpVisibleTagPayoffLegalActionCards: ["onr_v1_302_scorched-earth"],
+        corpVisibleTagDamagePunishLegalActions: true,
+        corpVisibleTagPunishSkipped: true,
+        corpVisibleTagPunishSkippedReason: "unknown_higher_priority",
+        corpVisibleTagPunishUnknownSkipAttribution: attribution,
+        corpVisibleTagPunishUnknownSkipPlausibility: plausibility,
+        corpVisibleTagPunishUnknownSkipChosenFamily: family,
+        corpVisibleTagPunishUnknownSkipChosenActionType: actionType,
+        ...extra,
+      });
+
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          unknownSkip(
+            "gain_credit",
+            "unknown_skip_suspicious_basic_credit",
+            "suspicious",
+            "basic_credit",
+            {
+              corpVisibleTagPunishUnknownSkipFixGateEligible: true,
+              corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal: true,
+            },
+          ),
+          unknownSkip(
+            "end_turn",
+            "unknown_skip_suspicious_end_turn",
+            "suspicious",
+            "end_turn",
+            { corpVisibleTagPunishUnknownSkipFixGateEligible: true },
+          ),
+          unknownSkip(
+            "score_agenda",
+            "unknown_skip_plausible_score_window",
+            "plausible",
+            "score",
+            { corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "score" },
+          ),
+          unknownSkip(
+            "advance_card",
+            "unknown_skip_plausible_advance_to_score",
+            "plausible",
+            "advance",
+            {
+              corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "advance_score",
+            },
+          ),
+          unknownSkip(
+            "rez_ice",
+            "unknown_skip_plausible_hq_or_rnd_safety",
+            "plausible",
+            "rez",
+            { corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "safety" },
+          ),
+          unknownSkip(
+            "play_operation",
+            "unknown_skip_plausible_payoff_unaffordable",
+            "plausible",
+            "operation",
+            {
+              corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "affordability",
+            },
+          ),
+          unknownSkip(
+            "activated_card_ability",
+            "unknown_skip_plausible_payoff_low_impact",
+            "plausible",
+            "ability",
+            {
+              corpVisibleTagPayoffLegalActionKinds: ["run_lock"],
+              corpVisibleTagRunLockPunishLegalActions: true,
+              corpVisibleTagDamagePunishLegalActions: false,
+              corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "low_impact",
+            },
+          ),
+          unknownSkip(
+            "install_card",
+            "unknown_skip_suspicious_low_value_install",
+            "suspicious",
+            "install_asset_or_upgrade",
+            { corpVisibleTagPunishUnknownSkipFixGateEligible: true },
+          ),
+          unknownSkip(
+            "draw_card",
+            "unknown_skip_plausible_survival_countercontext",
+            "plausible",
+            "draw",
+            {
+              corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "safety",
+              runnerDamagePreventionVisibleAtPayoffWindow: true,
+            },
+          ),
+          unknownSkip(
+            "trigger_ability",
+            "unknown_skip_unclassified_missing_evidence",
+            "unclassified",
+            "unknown",
+          ),
+        ],
+        "tag-punish-unknown-skip-attribution-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpVisibleTagPunishSkippedForUnknownHigherPriority).toBe(
+      10,
+    );
+    expect(metrics.corpVisibleTagPunishUnknownSkipPlausible).toBe(6);
+    expect(metrics.corpVisibleTagPunishUnknownSkipSuspicious).toBe(3);
+    expect(metrics.corpVisibleTagPunishUnknownSkipUnclassified).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenBasicCredit).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenEndTurn).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenScore).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenAdvance).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenRez).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenOperation).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenAbility).toBe(1);
+    expect(
+      metrics.corpVisibleTagPunishSkippedUnknownChosenInstallAssetOrUpgrade,
+    ).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenDraw).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenUnknown).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownByReasonCode).toBe(10);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownByChosenActionType).toBe(
+      10,
+    );
+    expect(metrics.corpVisibleTagPunishSkippedUnknownByPayoffCard).toBe(10);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownByPayoffKind).toBe(10);
+    expect(metrics.corpVisibleTagPunishUnknownSkipPayoffDamage).toBe(9);
+    expect(metrics.corpVisibleTagPunishUnknownSkipPayoffRunLock).toBe(1);
+    expect(
+      metrics.corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal,
+    ).toBe(1);
+    expect(metrics.corpVisibleTagPunishUnknownSkipPayoffNonLethal).toBe(9);
+    expect(metrics.corpVisibleTagPunishFixGateEligibleWindow).toBe(3);
+    expect(metrics.corpVisibleTagPunishFixGateSuspiciousSkip).toBe(3);
+    expect(metrics.corpVisibleTagPunishFixGateBlockedByScore).toBe(1);
+    expect(metrics.corpVisibleTagPunishFixGateBlockedByAdvanceScore).toBe(1);
+    expect(metrics.corpVisibleTagPunishFixGateBlockedBySafety).toBe(2);
+    expect(metrics.corpVisibleTagPunishFixGateBlockedByAffordability).toBe(1);
+    expect(metrics.corpVisibleTagPunishFixGateBlockedByLowImpact).toBe(1);
+  });
+
   it("does not count generic central endgame runs as true runner closeout", () => {
     const metrics = summarizeMatchProgressionMetrics([
       {

@@ -664,6 +664,42 @@ export type AiMatchProgressionMetrics = {
   corpVisibleTagPunishSkippedForInstall: number;
   corpVisibleTagPunishSkippedForEndTurn: number;
   corpVisibleTagPunishSkippedForUnknownHigherPriority: number;
+  corpVisibleTagPunishSkippedUnknownChosenScore: number;
+  corpVisibleTagPunishSkippedUnknownChosenAdvance: number;
+  corpVisibleTagPunishSkippedUnknownChosenInstallAgenda: number;
+  corpVisibleTagPunishSkippedUnknownChosenInstallIce: number;
+  corpVisibleTagPunishSkippedUnknownChosenInstallAssetOrUpgrade: number;
+  corpVisibleTagPunishSkippedUnknownChosenRez: number;
+  corpVisibleTagPunishSkippedUnknownChosenOperation: number;
+  corpVisibleTagPunishSkippedUnknownChosenAbility: number;
+  corpVisibleTagPunishSkippedUnknownChosenTraceTagSource: number;
+  corpVisibleTagPunishSkippedUnknownChosenDraw: number;
+  corpVisibleTagPunishSkippedUnknownChosenBasicCredit: number;
+  corpVisibleTagPunishSkippedUnknownChosenEndTurn: number;
+  corpVisibleTagPunishSkippedUnknownChosenUnknown: number;
+  corpVisibleTagPunishSkippedUnknownByReasonCode: number;
+  corpVisibleTagPunishSkippedUnknownByChosenActionType: number;
+  corpVisibleTagPunishSkippedUnknownByChosenCard: number;
+  corpVisibleTagPunishSkippedUnknownByPayoffCard: number;
+  corpVisibleTagPunishSkippedUnknownByPayoffKind: number;
+  corpVisibleTagPunishUnknownSkipPlausible: number;
+  corpVisibleTagPunishUnknownSkipSuspicious: number;
+  corpVisibleTagPunishUnknownSkipUnclassified: number;
+  corpVisibleTagPunishUnknownSkipByPlausibility: number;
+  corpVisibleTagPunishUnknownSkipPayoffDamage: number;
+  corpVisibleTagPunishUnknownSkipPayoffEconomic: number;
+  corpVisibleTagPunishUnknownSkipPayoffTrash: number;
+  corpVisibleTagPunishUnknownSkipPayoffRunLock: number;
+  corpVisibleTagPunishUnknownSkipPayoffAmbush: number;
+  corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal: number;
+  corpVisibleTagPunishUnknownSkipPayoffNonLethal: number;
+  corpVisibleTagPunishFixGateEligibleWindow: number;
+  corpVisibleTagPunishFixGateBlockedByScore: number;
+  corpVisibleTagPunishFixGateBlockedByAdvanceScore: number;
+  corpVisibleTagPunishFixGateBlockedBySafety: number;
+  corpVisibleTagPunishFixGateBlockedByAffordability: number;
+  corpVisibleTagPunishFixGateBlockedByLowImpact: number;
+  corpVisibleTagPunishFixGateSuspiciousSkip: number;
   corpFunnelSourcePayoffPairSeenInDeck: number;
   corpFunnelSourceActionTakenWithPayoffInDeck: number;
   corpFunnelSourceActionTakenWithVisiblePayoff: number;
@@ -2028,6 +2064,20 @@ export type AiSimulationSummary = {
     corpVisibleTagPunishTaken?: boolean;
     corpVisibleTagPunishSkipped?: boolean;
     corpVisibleTagPunishSkippedReason?: CorpTagPunishSkipReason;
+    corpVisibleTagPunishUnknownSkipAttribution?: CorpTagPunishUnknownSkipAttribution;
+    corpVisibleTagPunishUnknownSkipPlausibility?: CorpTagPunishUnknownSkipPlausibility;
+    corpVisibleTagPunishUnknownSkipChosenFamily?: CorpTagPunishUnknownChosenFamily;
+    corpVisibleTagPunishUnknownSkipChosenActionType?: string;
+    corpVisibleTagPunishUnknownSkipChosenCardId?: string;
+    corpVisibleTagPunishUnknownSkipChosenCardTitle?: string;
+    corpVisibleTagPunishUnknownSkipFixGateEligible?: boolean;
+    corpVisibleTagPunishUnknownSkipFixGateBlockedBy?:
+      | "score"
+      | "advance_score"
+      | "safety"
+      | "affordability"
+      | "low_impact";
+    corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal?: boolean;
     corpFunnelSourcePayoffPairSeenInDeck?: boolean;
     corpFunnelSourceActionTakenWithPayoffInDeck?: boolean;
     corpFunnelSourceActionTakenWithVisiblePayoff?: boolean;
@@ -8127,6 +8177,40 @@ type CorpVisibleTagPayoffCategory =
   | "ambush"
   | "unknown";
 
+type CorpTagPunishUnknownChosenFamily =
+  | "score"
+  | "advance"
+  | "install_agenda"
+  | "install_ice"
+  | "install_asset_or_upgrade"
+  | "rez"
+  | "operation"
+  | "ability"
+  | "trace_tag_source"
+  | "draw"
+  | "basic_credit"
+  | "end_turn"
+  | "unknown";
+
+type CorpTagPunishUnknownSkipPlausibility =
+  | "plausible"
+  | "suspicious"
+  | "unclassified";
+
+type CorpTagPunishUnknownSkipAttribution =
+  | "unknown_skip_plausible_score_window"
+  | "unknown_skip_plausible_advance_to_score"
+  | "unknown_skip_plausible_remote_safety"
+  | "unknown_skip_plausible_hq_or_rnd_safety"
+  | "unknown_skip_plausible_payoff_unaffordable"
+  | "unknown_skip_plausible_payoff_low_impact"
+  | "unknown_skip_plausible_survival_countercontext"
+  | "unknown_skip_suspicious_economy_or_setup"
+  | "unknown_skip_suspicious_low_value_install"
+  | "unknown_skip_suspicious_basic_credit"
+  | "unknown_skip_suspicious_end_turn"
+  | "unknown_skip_unclassified_missing_evidence";
+
 function tagPunishWindowDiagnosticsForSimulationAction(
   input: AiDecisionInput,
   action: LegalAction,
@@ -8209,6 +8293,18 @@ function tagPunishWindowDiagnosticsForSimulationAction(
         diagnostics.corpPunishSkippedReason = skippedReason;
         diagnostics.corpVisibleTagPunishSkipped = true;
         diagnostics.corpVisibleTagPunishSkippedReason = skippedReason;
+        if (
+          skippedReason === "unknown_higher_priority" ||
+          skippedReason === "unknown"
+        )
+          applyCorpVisibleTagPunishUnknownSkipDiagnostics(
+            diagnostics,
+            input,
+            action,
+            decision,
+            visiblePunishOpportunities,
+            survivalContext,
+          );
         if (survivalContext.any)
           diagnostics.runnerSurvivalCounterContextSuppressedPunishValue = true;
         if (punishOntology?.isPunishPayoff)
@@ -8417,6 +8513,213 @@ function corpVisibleTagPayoffCategoryFromOntology(
   }
 }
 
+function applyCorpVisibleTagPunishUnknownSkipDiagnostics(
+  diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
+  input: AiDecisionInput,
+  action: LegalAction,
+  decision: AiDecision,
+  opportunities: Array<{
+    action: LegalAction;
+    kind: CorpPunishKind;
+    category: CorpVisibleTagPayoffCategory;
+    cardId: string | undefined;
+  }>,
+  survivalContext: ReturnType<typeof runnerSurvivalCounterContextForInput>,
+): void {
+  const chosenFamily = corpUnknownSkipChosenFamily(input, action);
+  const chosenCardId = sourceDefinitionIdForAction(input, action) || undefined;
+  const chosenCardTitle = titleForCardId(chosenCardId);
+  const attribution = corpUnknownSkipAttribution(
+    input,
+    action,
+    decision,
+    opportunities,
+    chosenFamily,
+    survivalContext,
+  );
+  const plausibility = corpUnknownSkipPlausibility(attribution);
+  const fixGate = corpUnknownSkipFixGate(attribution, opportunities);
+  diagnostics.corpVisibleTagPunishUnknownSkipChosenFamily = chosenFamily;
+  diagnostics.corpVisibleTagPunishUnknownSkipChosenActionType = action.type;
+  if (chosenCardId)
+    diagnostics.corpVisibleTagPunishUnknownSkipChosenCardId = chosenCardId;
+  if (chosenCardTitle)
+    diagnostics.corpVisibleTagPunishUnknownSkipChosenCardTitle =
+      chosenCardTitle;
+  diagnostics.corpVisibleTagPunishUnknownSkipAttribution = attribution;
+  diagnostics.corpVisibleTagPunishUnknownSkipPlausibility = plausibility;
+  if (corpUnknownSkipPayoffLethalOrNearLethal(input, opportunities))
+    diagnostics.corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal = true;
+  if (fixGate.eligible)
+    diagnostics.corpVisibleTagPunishUnknownSkipFixGateEligible = true;
+  if (fixGate.blockedBy)
+    diagnostics.corpVisibleTagPunishUnknownSkipFixGateBlockedBy =
+      fixGate.blockedBy;
+}
+
+function corpUnknownSkipChosenFamily(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpTagPunishUnknownChosenFamily {
+  if (isCorpTraceTagSourceAction(input, action)) return "trace_tag_source";
+  if (action.type === "score_agenda") return "score";
+  if (action.type === "advance_card") return "advance";
+  if (action.type === "rez_ice") return "rez";
+  if (action.type === "play_operation") return "operation";
+  if (
+    action.type === "activated_card_ability" ||
+    action.type === "trigger_ability"
+  )
+    return "ability";
+  if (action.type === "draw_card") return "draw";
+  if (action.type === "gain_credit") return "basic_credit";
+  if (action.type === "end_turn") return "end_turn";
+  if (action.type === "install_card") {
+    const definitionId = sourceDefinitionIdForAction(input, action);
+    const type =
+      RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type;
+    if (type === "agenda") return "install_agenda";
+    if (type === "ice" || action.payload?.placement === "ice")
+      return "install_ice";
+    if (type === "asset" || type === "upgrade")
+      return "install_asset_or_upgrade";
+    return "unknown";
+  }
+  return "unknown";
+}
+
+function corpUnknownSkipAttribution(
+  input: AiDecisionInput,
+  action: LegalAction,
+  decision: AiDecision,
+  opportunities: Array<{
+    action: LegalAction;
+    kind: CorpPunishKind;
+    category: CorpVisibleTagPayoffCategory;
+    cardId: string | undefined;
+  }>,
+  chosenFamily: CorpTagPunishUnknownChosenFamily,
+  survivalContext: ReturnType<typeof runnerSurvivalCounterContextForInput>,
+): CorpTagPunishUnknownSkipAttribution {
+  const text = `${decision.reasonCode} ${(decision.evidence ?? []).join(" ")}`;
+  if (chosenFamily === "score" || text.includes("score_now"))
+    return "unknown_skip_plausible_score_window";
+  if (
+    chosenFamily === "advance" ||
+    text.includes("advance_to_score") ||
+    text.includes("score_window")
+  )
+    return "unknown_skip_plausible_advance_to_score";
+  if (
+    text.includes("remote_safety") ||
+    text.includes("unsafe_remote") ||
+    text.includes("scoring_remote")
+  )
+    return "unknown_skip_plausible_remote_safety";
+  if (
+    text.includes("central") ||
+    text.includes("protect_hq") ||
+    text.includes("protect_rd") ||
+    text.includes("hq_protection") ||
+    text.includes("rnd_protection")
+  )
+    return "unknown_skip_plausible_hq_or_rnd_safety";
+  if (
+    text.includes("unaffordable") ||
+    text.includes("cannot_afford") ||
+    text.includes("insufficient_credits")
+  )
+    return "unknown_skip_plausible_payoff_unaffordable";
+  if (survivalContext.damage || survivalContext.flatline)
+    return "unknown_skip_plausible_survival_countercontext";
+  if (
+    text.includes("low_impact") ||
+    opportunities.every((opportunity) =>
+      ["unknown", "run_lock", "ambush"].includes(opportunity.category),
+    )
+  )
+    return "unknown_skip_plausible_payoff_low_impact";
+  if (chosenFamily === "basic_credit")
+    return "unknown_skip_suspicious_basic_credit";
+  if (chosenFamily === "end_turn") return "unknown_skip_suspicious_end_turn";
+  if (
+    chosenFamily === "install_asset_or_upgrade" ||
+    chosenFamily === "install_ice" ||
+    chosenFamily === "install_agenda"
+  )
+    return "unknown_skip_suspicious_low_value_install";
+  if (
+    chosenFamily === "operation" &&
+    (text.includes("economy") || text.includes("setup"))
+  )
+    return "unknown_skip_suspicious_economy_or_setup";
+  return "unknown_skip_unclassified_missing_evidence";
+}
+
+function corpUnknownSkipPlausibility(
+  attribution: CorpTagPunishUnknownSkipAttribution,
+): CorpTagPunishUnknownSkipPlausibility {
+  if (attribution.startsWith("unknown_skip_plausible_")) return "plausible";
+  if (attribution.startsWith("unknown_skip_suspicious_")) return "suspicious";
+  return "unclassified";
+}
+
+function corpUnknownSkipFixGate(
+  attribution: CorpTagPunishUnknownSkipAttribution,
+  opportunities: Array<{
+    category: CorpVisibleTagPayoffCategory;
+  }>,
+): {
+  eligible: boolean;
+  blockedBy?:
+    | "score"
+    | "advance_score"
+    | "safety"
+    | "affordability"
+    | "low_impact";
+} {
+  switch (attribution) {
+    case "unknown_skip_plausible_score_window":
+      return { eligible: false, blockedBy: "score" };
+    case "unknown_skip_plausible_advance_to_score":
+      return { eligible: false, blockedBy: "advance_score" };
+    case "unknown_skip_plausible_remote_safety":
+    case "unknown_skip_plausible_hq_or_rnd_safety":
+    case "unknown_skip_plausible_survival_countercontext":
+      return { eligible: false, blockedBy: "safety" };
+    case "unknown_skip_plausible_payoff_unaffordable":
+      return { eligible: false, blockedBy: "affordability" };
+    case "unknown_skip_plausible_payoff_low_impact":
+      return { eligible: false, blockedBy: "low_impact" };
+    case "unknown_skip_suspicious_basic_credit":
+    case "unknown_skip_suspicious_end_turn":
+    case "unknown_skip_suspicious_low_value_install":
+    case "unknown_skip_suspicious_economy_or_setup":
+      return {
+        eligible: opportunities.some(
+          (opportunity) => opportunity.category !== "unknown",
+        ),
+      };
+    default:
+      return { eligible: false };
+  }
+}
+
+function corpUnknownSkipPayoffLethalOrNearLethal(
+  input: AiDecisionInput,
+  opportunities: Array<{ category: CorpVisibleTagPayoffCategory }>,
+): boolean {
+  return (
+    opportunities.some((opportunity) => opportunity.category === "damage") &&
+    input.playerView.opponent.handCount <= 3
+  );
+}
+
+function titleForCardId(cardId: string | undefined): string | undefined {
+  if (!cardId) return undefined;
+  return RUNTIME_CARDS[cardId]?.title ?? DEMO_CARDS_BY_ID[cardId]?.title;
+}
+
 function applyCorpTagSourceWindowDiagnostics(
   diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
   input: AiDecisionInput,
@@ -8573,6 +8876,10 @@ function addKindsToCounter(kinds: string[], counter: Record<string, number>) {
 
 function addCardsToCounter(cardIds: string[], counter: Record<string, number>) {
   for (const cardId of cardIds) counter[cardId] = (counter[cardId] ?? 0) + 1;
+}
+
+function incrementStringCounter(counter: Record<string, number>, key: string) {
+  counter[key] = (counter[key] ?? 0) + 1;
 }
 
 function strongestCorpTagSourceOpportunity(
@@ -10325,6 +10632,42 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpVisibleTagPunishSkippedForInstall",
   "corpVisibleTagPunishSkippedForEndTurn",
   "corpVisibleTagPunishSkippedForUnknownHigherPriority",
+  "corpVisibleTagPunishSkippedUnknownChosenScore",
+  "corpVisibleTagPunishSkippedUnknownChosenAdvance",
+  "corpVisibleTagPunishSkippedUnknownChosenInstallAgenda",
+  "corpVisibleTagPunishSkippedUnknownChosenInstallIce",
+  "corpVisibleTagPunishSkippedUnknownChosenInstallAssetOrUpgrade",
+  "corpVisibleTagPunishSkippedUnknownChosenRez",
+  "corpVisibleTagPunishSkippedUnknownChosenOperation",
+  "corpVisibleTagPunishSkippedUnknownChosenAbility",
+  "corpVisibleTagPunishSkippedUnknownChosenTraceTagSource",
+  "corpVisibleTagPunishSkippedUnknownChosenDraw",
+  "corpVisibleTagPunishSkippedUnknownChosenBasicCredit",
+  "corpVisibleTagPunishSkippedUnknownChosenEndTurn",
+  "corpVisibleTagPunishSkippedUnknownChosenUnknown",
+  "corpVisibleTagPunishSkippedUnknownByReasonCode",
+  "corpVisibleTagPunishSkippedUnknownByChosenActionType",
+  "corpVisibleTagPunishSkippedUnknownByChosenCard",
+  "corpVisibleTagPunishSkippedUnknownByPayoffCard",
+  "corpVisibleTagPunishSkippedUnknownByPayoffKind",
+  "corpVisibleTagPunishUnknownSkipPlausible",
+  "corpVisibleTagPunishUnknownSkipSuspicious",
+  "corpVisibleTagPunishUnknownSkipUnclassified",
+  "corpVisibleTagPunishUnknownSkipByPlausibility",
+  "corpVisibleTagPunishUnknownSkipPayoffDamage",
+  "corpVisibleTagPunishUnknownSkipPayoffEconomic",
+  "corpVisibleTagPunishUnknownSkipPayoffTrash",
+  "corpVisibleTagPunishUnknownSkipPayoffRunLock",
+  "corpVisibleTagPunishUnknownSkipPayoffAmbush",
+  "corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal",
+  "corpVisibleTagPunishUnknownSkipPayoffNonLethal",
+  "corpVisibleTagPunishFixGateEligibleWindow",
+  "corpVisibleTagPunishFixGateBlockedByScore",
+  "corpVisibleTagPunishFixGateBlockedByAdvanceScore",
+  "corpVisibleTagPunishFixGateBlockedBySafety",
+  "corpVisibleTagPunishFixGateBlockedByAffordability",
+  "corpVisibleTagPunishFixGateBlockedByLowImpact",
+  "corpVisibleTagPunishFixGateSuspiciousSkip",
   "corpFunnelSourcePayoffPairSeenInDeck",
   "corpFunnelSourceActionTakenWithPayoffInDeck",
   "corpFunnelSourceActionTakenWithVisiblePayoff",
@@ -14796,6 +15139,42 @@ function summarizeTagPunishWindowMetrics(
   | "corpVisibleTagPunishSkippedForInstall"
   | "corpVisibleTagPunishSkippedForEndTurn"
   | "corpVisibleTagPunishSkippedForUnknownHigherPriority"
+  | "corpVisibleTagPunishSkippedUnknownChosenScore"
+  | "corpVisibleTagPunishSkippedUnknownChosenAdvance"
+  | "corpVisibleTagPunishSkippedUnknownChosenInstallAgenda"
+  | "corpVisibleTagPunishSkippedUnknownChosenInstallIce"
+  | "corpVisibleTagPunishSkippedUnknownChosenInstallAssetOrUpgrade"
+  | "corpVisibleTagPunishSkippedUnknownChosenRez"
+  | "corpVisibleTagPunishSkippedUnknownChosenOperation"
+  | "corpVisibleTagPunishSkippedUnknownChosenAbility"
+  | "corpVisibleTagPunishSkippedUnknownChosenTraceTagSource"
+  | "corpVisibleTagPunishSkippedUnknownChosenDraw"
+  | "corpVisibleTagPunishSkippedUnknownChosenBasicCredit"
+  | "corpVisibleTagPunishSkippedUnknownChosenEndTurn"
+  | "corpVisibleTagPunishSkippedUnknownChosenUnknown"
+  | "corpVisibleTagPunishSkippedUnknownByReasonCode"
+  | "corpVisibleTagPunishSkippedUnknownByChosenActionType"
+  | "corpVisibleTagPunishSkippedUnknownByChosenCard"
+  | "corpVisibleTagPunishSkippedUnknownByPayoffCard"
+  | "corpVisibleTagPunishSkippedUnknownByPayoffKind"
+  | "corpVisibleTagPunishUnknownSkipPlausible"
+  | "corpVisibleTagPunishUnknownSkipSuspicious"
+  | "corpVisibleTagPunishUnknownSkipUnclassified"
+  | "corpVisibleTagPunishUnknownSkipByPlausibility"
+  | "corpVisibleTagPunishUnknownSkipPayoffDamage"
+  | "corpVisibleTagPunishUnknownSkipPayoffEconomic"
+  | "corpVisibleTagPunishUnknownSkipPayoffTrash"
+  | "corpVisibleTagPunishUnknownSkipPayoffRunLock"
+  | "corpVisibleTagPunishUnknownSkipPayoffAmbush"
+  | "corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal"
+  | "corpVisibleTagPunishUnknownSkipPayoffNonLethal"
+  | "corpVisibleTagPunishFixGateEligibleWindow"
+  | "corpVisibleTagPunishFixGateBlockedByScore"
+  | "corpVisibleTagPunishFixGateBlockedByAdvanceScore"
+  | "corpVisibleTagPunishFixGateBlockedBySafety"
+  | "corpVisibleTagPunishFixGateBlockedByAffordability"
+  | "corpVisibleTagPunishFixGateBlockedByLowImpact"
+  | "corpVisibleTagPunishFixGateSuspiciousSkip"
   | "corpFunnelSourcePayoffPairSeenInDeck"
   | "corpFunnelSourceActionTakenWithPayoffInDeck"
   | "corpFunnelSourceActionTakenWithVisiblePayoff"
@@ -14922,6 +15301,51 @@ function summarizeTagPunishWindowMetrics(
     {};
   let corpVisibleTagPunishTaken = 0;
   let corpVisibleTagPunishSkipped = 0;
+  const unknownSkipChosenFamilyCounts: Record<
+    CorpTagPunishUnknownChosenFamily,
+    number
+  > = {
+    score: 0,
+    advance: 0,
+    install_agenda: 0,
+    install_ice: 0,
+    install_asset_or_upgrade: 0,
+    rez: 0,
+    operation: 0,
+    ability: 0,
+    trace_tag_source: 0,
+    draw: 0,
+    basic_credit: 0,
+    end_turn: 0,
+    unknown: 0,
+  };
+  const unknownSkipReasonCodeCounts: Record<string, number> = {};
+  const unknownSkipChosenActionTypeCounts: Record<string, number> = {};
+  const unknownSkipChosenCardCounts: Record<string, number> = {};
+  const unknownSkipPayoffCardCounts: Record<string, number> = {};
+  const unknownSkipPayoffKindCounts: Record<string, number> = {};
+  const unknownSkipPlausibilityCounts: Record<
+    CorpTagPunishUnknownSkipPlausibility,
+    number
+  > = {
+    plausible: 0,
+    suspicious: 0,
+    unclassified: 0,
+  };
+  let corpVisibleTagPunishUnknownSkipPayoffDamage = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffEconomic = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffTrash = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffRunLock = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffAmbush = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffNonLethal = 0;
+  let corpVisibleTagPunishFixGateEligibleWindow = 0;
+  let corpVisibleTagPunishFixGateBlockedByScore = 0;
+  let corpVisibleTagPunishFixGateBlockedByAdvanceScore = 0;
+  let corpVisibleTagPunishFixGateBlockedBySafety = 0;
+  let corpVisibleTagPunishFixGateBlockedByAffordability = 0;
+  let corpVisibleTagPunishFixGateBlockedByLowImpact = 0;
+  let corpVisibleTagPunishFixGateSuspiciousSkip = 0;
   const visiblePunishSkippedByReason: Record<CorpTagPunishSkipReason, number> =
     {
       economy: 0,
@@ -15140,6 +15564,92 @@ function summarizeTagPunishWindowMetrics(
           visiblePunishSkippedByReason,
           entry.corpVisibleTagPunishSkippedReason,
         );
+        if (
+          entry.corpVisibleTagPunishSkippedReason ===
+            "unknown_higher_priority" ||
+          entry.corpVisibleTagPunishSkippedReason === "unknown"
+        ) {
+          unknownSkipChosenFamilyCounts[
+            entry.corpVisibleTagPunishUnknownSkipChosenFamily ?? "unknown"
+          ] += 1;
+          incrementStringCounter(unknownSkipReasonCodeCounts, entry.reasonCode);
+          incrementStringCounter(
+            unknownSkipChosenActionTypeCounts,
+            entry.corpVisibleTagPunishUnknownSkipChosenActionType ??
+              entry.actionType,
+          );
+          if (entry.corpVisibleTagPunishUnknownSkipChosenCardId)
+            incrementStringCounter(
+              unknownSkipChosenCardCounts,
+              entry.corpVisibleTagPunishUnknownSkipChosenCardId,
+            );
+          addCardsToCounter(
+            entry.corpVisibleTagPayoffLegalActionCards ?? [],
+            unknownSkipPayoffCardCounts,
+          );
+          addKindsToCounter(
+            entry.corpVisibleTagPayoffLegalActionKinds ?? [],
+            unknownSkipPayoffKindCounts,
+          );
+          unknownSkipPlausibilityCounts[
+            entry.corpVisibleTagPunishUnknownSkipPlausibility ?? "unclassified"
+          ] += 1;
+          if (
+            entry.corpVisibleTagPayoffLegalActionKinds?.includes("damage") ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffDamage += 1;
+          if (
+            entry.corpVisibleTagPayoffLegalActionKinds?.includes("economic") ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffEconomic += 1;
+          if (
+            entry.corpVisibleTagPayoffLegalActionKinds?.includes("trash") ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffTrash += 1;
+          if (
+            entry.corpVisibleTagPayoffLegalActionKinds?.includes("run_lock") ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffRunLock += 1;
+          if (
+            entry.corpVisibleTagPayoffLegalActionKinds?.includes("ambush") ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffAmbush += 1;
+          if (
+            entry.corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal += 1;
+          else corpVisibleTagPunishUnknownSkipPayoffNonLethal += 1;
+          if (entry.corpVisibleTagPunishUnknownSkipFixGateEligible === true) {
+            corpVisibleTagPunishFixGateEligibleWindow += 1;
+            if (
+              entry.corpVisibleTagPunishUnknownSkipPlausibility === "suspicious"
+            )
+              corpVisibleTagPunishFixGateSuspiciousSkip += 1;
+          }
+          switch (entry.corpVisibleTagPunishUnknownSkipFixGateBlockedBy) {
+            case "score":
+              corpVisibleTagPunishFixGateBlockedByScore += 1;
+              break;
+            case "advance_score":
+              corpVisibleTagPunishFixGateBlockedByAdvanceScore += 1;
+              break;
+            case "safety":
+              corpVisibleTagPunishFixGateBlockedBySafety += 1;
+              break;
+            case "affordability":
+              corpVisibleTagPunishFixGateBlockedByAffordability += 1;
+              break;
+            case "low_impact":
+              corpVisibleTagPunishFixGateBlockedByLowImpact += 1;
+              break;
+          }
+        }
       }
       if (entry.corpFunnelSourcePayoffPairSeenInDeck === true)
         corpFunnelSourcePayoffPairSeenInDeck += 1;
@@ -15325,6 +15835,71 @@ function summarizeTagPunishWindowMetrics(
     corpVisibleTagPunishSkippedForUnknownHigherPriority:
       visiblePunishSkippedByReason.unknown_higher_priority +
       visiblePunishSkippedByReason.unknown,
+    corpVisibleTagPunishSkippedUnknownChosenScore:
+      unknownSkipChosenFamilyCounts.score,
+    corpVisibleTagPunishSkippedUnknownChosenAdvance:
+      unknownSkipChosenFamilyCounts.advance,
+    corpVisibleTagPunishSkippedUnknownChosenInstallAgenda:
+      unknownSkipChosenFamilyCounts.install_agenda,
+    corpVisibleTagPunishSkippedUnknownChosenInstallIce:
+      unknownSkipChosenFamilyCounts.install_ice,
+    corpVisibleTagPunishSkippedUnknownChosenInstallAssetOrUpgrade:
+      unknownSkipChosenFamilyCounts.install_asset_or_upgrade,
+    corpVisibleTagPunishSkippedUnknownChosenRez:
+      unknownSkipChosenFamilyCounts.rez,
+    corpVisibleTagPunishSkippedUnknownChosenOperation:
+      unknownSkipChosenFamilyCounts.operation,
+    corpVisibleTagPunishSkippedUnknownChosenAbility:
+      unknownSkipChosenFamilyCounts.ability,
+    corpVisibleTagPunishSkippedUnknownChosenTraceTagSource:
+      unknownSkipChosenFamilyCounts.trace_tag_source,
+    corpVisibleTagPunishSkippedUnknownChosenDraw:
+      unknownSkipChosenFamilyCounts.draw,
+    corpVisibleTagPunishSkippedUnknownChosenBasicCredit:
+      unknownSkipChosenFamilyCounts.basic_credit,
+    corpVisibleTagPunishSkippedUnknownChosenEndTurn:
+      unknownSkipChosenFamilyCounts.end_turn,
+    corpVisibleTagPunishSkippedUnknownChosenUnknown:
+      unknownSkipChosenFamilyCounts.unknown,
+    corpVisibleTagPunishSkippedUnknownByReasonCode: Object.values(
+      unknownSkipReasonCodeCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPunishSkippedUnknownByChosenActionType: Object.values(
+      unknownSkipChosenActionTypeCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPunishSkippedUnknownByChosenCard: Object.values(
+      unknownSkipChosenCardCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPunishSkippedUnknownByPayoffCard: Object.values(
+      unknownSkipPayoffCardCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPunishSkippedUnknownByPayoffKind: Object.values(
+      unknownSkipPayoffKindCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPunishUnknownSkipPlausible:
+      unknownSkipPlausibilityCounts.plausible,
+    corpVisibleTagPunishUnknownSkipSuspicious:
+      unknownSkipPlausibilityCounts.suspicious,
+    corpVisibleTagPunishUnknownSkipUnclassified:
+      unknownSkipPlausibilityCounts.unclassified,
+    corpVisibleTagPunishUnknownSkipByPlausibility:
+      unknownSkipPlausibilityCounts.plausible +
+      unknownSkipPlausibilityCounts.suspicious +
+      unknownSkipPlausibilityCounts.unclassified,
+    corpVisibleTagPunishUnknownSkipPayoffDamage,
+    corpVisibleTagPunishUnknownSkipPayoffEconomic,
+    corpVisibleTagPunishUnknownSkipPayoffTrash,
+    corpVisibleTagPunishUnknownSkipPayoffRunLock,
+    corpVisibleTagPunishUnknownSkipPayoffAmbush,
+    corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal,
+    corpVisibleTagPunishUnknownSkipPayoffNonLethal,
+    corpVisibleTagPunishFixGateEligibleWindow,
+    corpVisibleTagPunishFixGateBlockedByScore,
+    corpVisibleTagPunishFixGateBlockedByAdvanceScore,
+    corpVisibleTagPunishFixGateBlockedBySafety,
+    corpVisibleTagPunishFixGateBlockedByAffordability,
+    corpVisibleTagPunishFixGateBlockedByLowImpact,
+    corpVisibleTagPunishFixGateSuspiciousSkip,
     corpFunnelSourcePayoffPairSeenInDeck,
     corpFunnelSourceActionTakenWithPayoffInDeck,
     corpFunnelSourceActionTakenWithVisiblePayoff,
