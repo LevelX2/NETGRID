@@ -45,6 +45,10 @@ export type RunAccessTransitionHost = {
     ) => CardInstanceId[];
   };
   access: {
+    hasHiddenResourceAccessStartActions: (
+      run: ActiveRun,
+      serverId: Exclude<ServerId, "new_remote">,
+    ) => boolean;
     advanceArchivesBreachPastNonDecisionCards: (
       legalAction?: LegalAction,
     ) => void;
@@ -163,6 +167,30 @@ export function enterAccessFromSuccessfulRun(
       microtechSourceId,
       legalAction,
     );
+    return {
+      handled: true,
+      stateChanged: true,
+      ...resolvedPayloadFor(legalAction),
+    };
+  }
+  const accessServerId = run.accessServerOverride ?? run.attackedServerId;
+  if (
+    !run.hiddenRunnerResourceAccessStartWindowClosed &&
+    host.access.hasHiddenResourceAccessStartActions(run, accessServerId)
+  ) {
+    host.state.run = {
+      ...run,
+      hiddenRunnerResourceAccessStartServerId: accessServerId,
+    };
+    host.state.activeSide = "runner";
+    host.state.timingPoint = "game.checkpoint";
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenRunnerResourceAccessStartWindowOpened: true,
+        serverId: accessServerId,
+      };
+    }
     return {
       handled: true,
       stateChanged: true,

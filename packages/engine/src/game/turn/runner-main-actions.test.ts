@@ -148,6 +148,7 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
       ensureRunnerTurnFlags: () => state.runnerTurnFlags ?? {},
       availableRunnerTagRemovalCredits: () => state.runner.credits,
       availableRunnerProgramInstallCredits: () => state.runner.credits,
+      runnerCostPenaltySupportCreditCapacity: () => 0,
       availableRunnerRunStartCredits: () => state.runner.credits,
       runnerDrawActionContext: () => ({
         citySurveillanceSourceCount: 0,

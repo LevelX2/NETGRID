@@ -24,7 +24,9 @@ import {
 } from "./run/run-rez-window";
 import { buildRunnerAccessActions, type RunnerAccessActionHost } from "./access/access-actions";
 import {
+  buildRunnerAccessStartCardImplementationActions,
   buildCorpEncounterCardImplementationActions,
+  buildRunnerCostPenaltySupportCardImplementationActions,
   type RunCardImplementationActionHost,
 } from "./run/card-implementation-run-actions";
 import {
@@ -87,6 +89,26 @@ export function buildLegalActions(
 ): LegalAction[] {
   const { state } = host;
   if (state.winner || state.phase === "game_over") return [];
+  if (state.runnerCostPenaltySupportWindow)
+    return side === "runner"
+      ? [
+          ...buildRunnerCostPenaltySupportCardImplementationActions(
+            host.hosts.runCardImplementationActionHost(),
+          ).legalActions,
+          ...buildRunnerMainActions(host.hosts.runnerMainActionGenerationHost()).filter(
+            (action) =>
+              action.actionId ===
+                state.runnerCostPenaltySupportWindow?.originalActionId &&
+              (action.costs[0]?.credits ?? 0) <= state.runner.credits,
+          ),
+        ]
+      : [];
+  if (state.run?.hiddenRunnerResourceAccessStartServerId)
+    return side === "runner"
+      ? buildRunnerAccessStartCardImplementationActions(
+          host.hosts.runCardImplementationActionHost(),
+        ).legalActions
+      : [];
   if (state.pendingChoice)
     return side === state.pendingChoice.side
       ? [host.actions.buildChoiceAction(state.pendingChoice)]

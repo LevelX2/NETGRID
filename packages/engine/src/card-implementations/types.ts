@@ -62,7 +62,7 @@ export type CardImplementationDefinition = {
     visibility: "public";
   };
   icebreakerSubtypeChange?: {
-    timing: "runner_main" | "during_run";
+    timing: "runner_main" | "during_run" | "runner_cost_penalty_support" | "access_start";
     cost: { clicks: 0 | 1; credits: number };
     choices: readonly ("code_gate" | "sentry" | "wall")[];
     limit?: "once_until_selected";

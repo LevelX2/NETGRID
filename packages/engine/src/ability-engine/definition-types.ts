@@ -750,6 +750,8 @@ export type ActivatedCardAbilityImplementation = {
   timing:
     | "runner_main"
     | "during_run"
+    | "runner_cost_penalty_support"
+    | "access_start"
     | "corp_main"
     | "corp_encounter"
     | "trace_base_link_window"

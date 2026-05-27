@@ -549,7 +549,10 @@ function cardImplementationConditionMet(
         .subtypes.includes(condition.subtype);
     }
     case "current_run_server":
-      return state.run?.attackedServerId === condition.server;
+      return (
+        (state.run?.accessServerOverride ?? state.run?.attackedServerId) ===
+        condition.server
+      );
     default: {
       const unknownCondition = condition as { kind?: string };
       throw new Error(
@@ -1449,6 +1452,7 @@ function activatedAbilityPayload(
   cardId: CardInstanceId,
   ability: ActivatedCardAbilityImplementation,
   abilityIndex: number,
+  state?: GameState,
 ): Record<string, string | number | boolean> {
   return {
     cardId,
@@ -1474,6 +1478,18 @@ function activatedAbilityPayload(
       : {}),
     ...(hasTapSourceCostForActivatedAbility(ability)
       ? { cardImplementationTapSourceCost: true }
+      : {}),
+    ...(ability.timing === "runner_cost_penalty_support" &&
+    state?.runnerCostPenaltySupportWindow
+      ? {
+          costPenaltySupportWindowId:
+            state.runnerCostPenaltySupportWindow.windowId,
+          costPenaltySupportOriginalActionId:
+            state.runnerCostPenaltySupportWindow.originalActionId,
+          costPenaltySupportAmountDue:
+            state.runnerCostPenaltySupportWindow.amountDue,
+          costPenaltySupportKind: state.runnerCostPenaltySupportWindow.kind,
+        }
       : {}),
   };
 }
@@ -1613,7 +1629,7 @@ export function pushActivatedCardImplementationActionsForTiming(
         ability.label ?? `${definition.title}: Fähigkeit nutzen`,
         sourceCardId,
         activatedAbilityLegalActionCosts(ability),
-        activatedAbilityPayload(sourceCardId, ability, index),
+        activatedAbilityPayload(sourceCardId, ability, index, state),
       ),
     );
   }
@@ -1719,6 +1735,50 @@ function validateActivatedCardImplementationAbility(
       throw new Error("Nur der Runner darf diese aktivierte Kartenfaehigkeit nutzen.");
     if (!state.run)
       throw new Error("Diese aktivierte Kartenfaehigkeit ist nur waehrend eines Runs nutzbar.");
+    if (!deps.runnerInstalledCardIds(state).includes(cardId))
+      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
+  if (ability.timing === "runner_cost_penalty_support") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf Kosten-/Penalty-Support nutzen.");
+    if (!state.runnerCostPenaltySupportWindow)
+      throw new Error("Es ist kein Kosten-/Penalty-Support-Fenster offen.");
+    if (
+      legalAction.payload?.costPenaltySupportWindowId !==
+        state.runnerCostPenaltySupportWindow.windowId ||
+      legalAction.payload?.costPenaltySupportOriginalActionId !==
+        state.runnerCostPenaltySupportWindow.originalActionId ||
+      legalAction.payload?.costPenaltySupportAmountDue !==
+        state.runnerCostPenaltySupportWindow.amountDue ||
+      legalAction.payload?.costPenaltySupportKind !==
+        state.runnerCostPenaltySupportWindow.kind
+    )
+      throw new Error("Das Kosten-/Penalty-Support-Fenster passt nicht mehr.");
+    if (!deps.runnerInstalledCardIds(state).includes(cardId))
+      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
+  if (ability.timing === "access_start") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf Access-Start-Faehigkeiten nutzen.");
+    if (
+      !state.run?.hiddenRunnerResourceAccessStartServerId ||
+      state.run.breach
+    )
+      throw new Error("Es ist kein Access-Start-Fenster offen.");
     if (!deps.runnerInstalledCardIds(state).includes(cardId))
       throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
     assertActivatedCardImplementationAbilityCanResolve(

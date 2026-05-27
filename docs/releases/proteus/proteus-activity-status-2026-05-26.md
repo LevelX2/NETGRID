@@ -18,7 +18,7 @@ Führend ist die eindeutige CardImplementation-Abdeckung:
 
 PRO001 hat dafür bereits den Guard in `packages/engine/src/card-implementations/coverage.test.ts` ergänzt: `reconciles Proteus manifest support against concrete files and registry`. Dieser Guard prüft 154 Karten in `data/cards/proteus-cards.json`, 154 Manifest-Einträge, eindeutige CardImplementation-Dateien, Registry-Parität, `implemented`-Manifestparität, `resolverRef = engine:<cardId>` für implementierte Karten und `resolverRef = null` für nicht implementierte Karten. PRO002 etabliert keine zweite konkurrierende Zählweise.
 
-Aktueller Stand nach PRO011:
+Aktueller Stand nach PRO011-1:
 
 | Kennzahl | Wert | Führende Quelle |
 | --- | ---: | --- |
@@ -42,7 +42,7 @@ PRO009-2 ist ausschließlich UI-/PlayerView-Härtung für bereits umgesetzte PRO
 
 PRO010 ist umgesetzt: `Chihuahua`, `Coyote`, `Iceberg`, `Washed-Up Solo Construct`, `Datacomb`, `Death Yo-Yo`, `Marionette`, `Scaffolding`, `Tumblers` und `Twisty Passages` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Bausteine für preventable Net-Damage als Trace-Erfolg, Runner-pay-or-trash-program, Future-ICE-Strength-Cancel beim Passieren der Quelle und Korp-Post-Pass-ICE-zurück-nach-HQ-Fenster. PRO010-1 härtet die Priorität gleichzeitiger Post-Pass-Fenster ohne neue Karten- oder Manifestfreigabe: `corpPostPassIceReturnToHq` wird vor `postPassCancellableFutureIceStrength` und `postPassPayOrEndRun` angeboten und ausgeführt. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
-PRO011 ist umgesetzt: `Airport Locker`, `Chiba Bank Account`, `HQ Mole`, `Liberated Savings Account`, `R&D Mole`, `Simulacrum`, `Swiss Bank Account` und `Time to Collect` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Tap-/Reveal-Kosten für verdeckte Runner-Resources, Run-/Encounter-Bedingungen, Access-Count-Erhöhung vor Queue-Aufbau, AP-ICE-Pass über die Run-Fortsetzung und Resource-Trash-Prevention für andere installierte Resources im Korp-Zug. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
+PRO011 ist umgesetzt und PRO011-1 ist als reine Timing-/Behavior-Härtung erledigt: `Airport Locker`, `Chiba Bank Account`, `HQ Mole`, `Liberated Savings Account`, `R&D Mole`, `Simulacrum`, `Swiss Bank Account` und `Time to Collect` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Tap-/Reveal-Kosten für verdeckte Runner-Resources, ein Kosten-/Penalty-Support-Fenster für Bankkarten, Run-/Encounter-Bedingungen, ein Access-Start-Fenster vor Queue-Aufbau für HQ/R&D Mole, AP-ICE-Pass über die Run-Fortsetzung und Resource-Trash-Prevention für andere installierte Resources im echten Korp-Zug. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
 
@@ -112,6 +112,7 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-27-proteus-pro010-corp-ice-trace-conditional-lifecycle-suite.md` | `done` | PRO010 | 10 Corp-ICE: `Chihuahua`, `Coyote`, `Iceberg`, `Washed-Up Solo Construct`, `Datacomb`, `Death Yo-Yo`, `Marionette`, `Scaffolding`, `Tumblers`, `Twisty Passages`; neue Implementierungszählung 97/154. |
 | `done/act-2026-05-27-proteus-pro010-1-post-pass-window-priority-hardening.md` | `done` | PRO010-1 | Priorität gleichzeitiger Post-Pass-Fenster gehärtet; keine neue Kartenpromotion, Implementierungszählung bleibt 97/154. |
 | `done/act-2026-05-27-proteus-pro011-hidden-resource-economy-access-suite.md` | `done` | PRO011 | 8 Hidden-Resources: `Airport Locker`, `Chiba Bank Account`, `HQ Mole`, `Liberated Savings Account`, `R&D Mole`, `Simulacrum`, `Swiss Bank Account`, `Time to Collect`; neue Implementierungszählung 105/154. |
+| `done/act-2026-05-27-proteus-pro011-1-hidden-resource-timing-hardening.md` | `done` | PRO011-1 | Timing-/Behavior-Härtung für PRO011; keine neue Kartenpromotion, Implementierungszählung bleibt 105/154. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
 | `done/act-2026-05-24-proteus-phase-7a-hardware-deck-foundation.md` | `done` | Phase 7a | 1 Karte: `Deck, The`. |
 | `done/act-2026-05-24-proteus-phase-7b-icebreaker-credit-decks.md` | `done` | Phase 7b | 2 Karten: `Cortical Cybermodem`, `Sunburst Cranial Interface`. |
@@ -208,6 +209,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | PRO010 | umgesetzt | Corp ICE Trace/Conditional/Lifecycle Suite mit 10 Corp-ICE-Karten ist umgesetzt, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
 | PRO010-1 | umgesetzt | Post-Pass-Window-Priorität für PRO010-Lifecycle-ICE plus Rasmin Bridger gehärtet; keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
 | PRO011 | umgesetzt | Hidden Resource Economy/Access Suite mit 8 Karten ist umgesetzt, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
+| PRO011-1 | umgesetzt | Reine Timing-/Behavior-Härtung für PRO011: Bankkarten im Kosten-/Penalty-Support-Fenster, HQ/R&D Mole im Access-Start-Fenster, `Time to Collect` nur in echten Korp-Zugphasen. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
 | PRO012 | neu zu schneiden | Hidden Resource Prevention/Sabotage Suite mit 8 Karten. |
 | PRO013 | neu zu schneiden | Agenda/Steal/Overadvance Suite mit 8 Karten. |
 | PRO014 | neu zu schneiden | Corp Asset/Upgrade Utility Suite mit 8 Karten. |

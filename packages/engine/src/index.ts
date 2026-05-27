@@ -400,6 +400,7 @@ import {
   type RunnerEncounterActionHost,
 } from "./game/run/encounter-actions";
 import {
+  buildRunnerAccessStartCardImplementationActions,
   buildCorpEncounterCardImplementationActions,
   buildRunnerDuringRunCardImplementationActions,
 } from "./game/run/card-implementation-run-actions";
@@ -2493,6 +2494,7 @@ function runnerMainActionGenerationHost(
       ensureRunnerTurnFlags,
       availableRunnerTagRemovalCredits,
       availableRunnerProgramInstallCredits,
+      runnerCostPenaltySupportCreditCapacity,
       availableRunnerRunStartCredits,
       runnerDrawActionContext,
       runnerUtilityLongtailKindForCard,
@@ -4424,6 +4426,16 @@ function installCardHost(state: GameState): InstallCardHost {
       spendClick: (side) => spendClick(state, side),
       spendRunnerInstallCredits: (amount, cardType) =>
         spendRunnerInstallCredits(state, amount, cardType),
+      runnerCanPayInstallCost: (amount, cardType) =>
+        runnerCanPayInstallCost(state, amount, cardType),
+      openRunnerCostPenaltySupportWindow: (legalAction, amount, cardType) =>
+        openRunnerCostPenaltySupportWindow(state, legalAction, amount, cardType),
+      closeRunnerCostPenaltySupportWindowForPayment: (legalAction, amount) =>
+        closeRunnerCostPenaltySupportWindowForPayment(
+          state,
+          legalAction,
+          amount,
+        ),
       spendCredits: (side, amount) => spendCredits(state, side, amount),
       rezCostForCard: (cardId) => rezCostForCard(state, cardId),
     },
@@ -4961,6 +4973,19 @@ function performAction(
       return;
     }
     case "continue_run":
+      if (legalAction.payload?.hiddenRunnerResourceAccessStartContinue === true) {
+        const run = state.run;
+        if (
+          !run?.hiddenRunnerResourceAccessStartServerId ||
+          run.hiddenRunnerResourceAccessStartServerId !== legalAction.payload.serverId ||
+          run.breach
+        )
+          throw new Error("Das Access-Start-Fenster ist nicht mehr gueltig.");
+        delete run.hiddenRunnerResourceAccessStartServerId;
+        run.hiddenRunnerResourceAccessStartWindowClosed = true;
+        enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction);
+        return;
+      }
       if (handleRunMovementAction(runMovementHostForState(state), legalAction).handled)
         return;
       continueRun(state, legalAction);
@@ -10902,6 +10927,8 @@ function runAccessTransitionHost(state: GameState): RunAccessTransitionHost {
       shuffleStateIds: (ids, purpose) => shuffleStateIds(state, ids, purpose),
     },
     access: {
+      hasHiddenResourceAccessStartActions: (run, serverId) =>
+        hasHiddenResourceAccessStartActions(state, run, serverId),
       advanceArchivesBreachPastNonDecisionCards: (legalAction) =>
         advanceArchivesBreachPastNonDecisionCards(
           accessFlowHost(state),
@@ -10969,6 +10996,26 @@ function runAccessTransitionHost(state: GameState): RunAccessTransitionHost {
       selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
     },
   };
+}
+
+function hasHiddenResourceAccessStartActions(
+  state: GameState,
+  run: NonNullable<GameState["run"]>,
+  serverId: Exclude<ServerId, "new_remote">,
+): boolean {
+  if (run.breach || run.hiddenRunnerResourceAccessStartServerId) return false;
+  const previous = run.hiddenRunnerResourceAccessStartServerId;
+  run.hiddenRunnerResourceAccessStartServerId = serverId;
+  try {
+    return (
+      buildRunnerAccessStartCardImplementationActions(
+        runCardImplementationActionHost(state),
+      ).legalActions.length > 1
+    );
+  } finally {
+    if (previous) run.hiddenRunnerResourceAccessStartServerId = previous;
+    else delete run.hiddenRunnerResourceAccessStartServerId;
+  }
 }
 
 function accessEffectHandlerHost(
@@ -14315,6 +14362,103 @@ function availableRunnerProgramInstallCredits(state: GameState): number {
     }) +
     valuPakTemporaryProgramInstallCredits(state)
   );
+}
+
+function runnerCanPayInstallCost(
+  state: GameState,
+  amount: number,
+  cardType: CardDefinition["type"],
+): boolean {
+  if (amount <= 0) return true;
+  if (cardType === "program")
+    return availableRunnerProgramInstallCredits(state) >= amount;
+  return state.runner.credits >= amount;
+}
+
+function runnerCostPenaltySupportCreditCapacity(state: GameState): number {
+  let availableCredits = state.runner.credits;
+  let gainedCredits = 0;
+  for (const cardId of runnerInstalledCardIds(state).slice().sort()) {
+    const instance = state.cardInstances[cardId];
+    if (!instance || instance.tapped === true) continue;
+    const implementation = cardImplementationForDefinitionId(instance.definitionId);
+    const abilities = implementation?.abilities ?? [];
+    let bestNet = 0;
+    for (const ability of abilities) {
+      if (ability.kind !== "activated") continue;
+      if (ability.timing !== "runner_cost_penalty_support") continue;
+      if (ability.costs.some((cost) => cost.kind === "action")) continue;
+      const creditCost = ability.costs
+        .filter((cost) => cost.kind === "credit")
+        .reduce((sum, cost) => sum + cost.amount, 0);
+      if (creditCost > availableCredits) continue;
+      const creditGain = ability.effects.reduce((sum, effect) => {
+        if (
+          effect.kind !== "gain_credits" ||
+          (effect.recipient !== "runner" && effect.recipient !== "controller")
+        )
+          return sum;
+        return sum + effect.amount;
+      }, 0);
+      const net = creditGain - creditCost;
+      if (net > bestNet) bestNet = net;
+    }
+    if (bestNet <= 0) continue;
+    availableCredits += bestNet;
+    gainedCredits += bestNet;
+  }
+  return gainedCredits;
+}
+
+function openRunnerCostPenaltySupportWindow(
+  state: GameState,
+  legalAction: LegalAction,
+  amount: number,
+  cardType: CardDefinition["type"],
+): boolean {
+  const available = cardType === "program"
+    ? availableRunnerProgramInstallCredits(state)
+    : state.runner.credits;
+  if (
+    legalAction.side !== "runner" ||
+    amount <= 0 ||
+    available + runnerCostPenaltySupportCreditCapacity(state) < amount
+  )
+    return false;
+  state.runnerCostPenaltySupportWindow = {
+    windowId: `runner_cost_penalty_support.${state.stateVersion + 1}`,
+    originalActionId: legalAction.actionId,
+    amountDue: amount,
+    kind: "cost",
+    createdAtStateVersion: state.stateVersion,
+  };
+  state.activeSide = "runner";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    runnerCostPenaltySupportWindowOpened: true,
+    runnerCostPenaltySupportWindowId: state.runnerCostPenaltySupportWindow.windowId,
+  };
+  return true;
+}
+
+function closeRunnerCostPenaltySupportWindowForPayment(
+  state: GameState,
+  legalAction: LegalAction,
+  amount: number,
+): void {
+  const window = state.runnerCostPenaltySupportWindow;
+  if (!window) return;
+  if (
+    window.originalActionId !== legalAction.actionId ||
+    window.kind !== "cost" ||
+    window.amountDue !== amount
+  )
+    throw new Error("Das Runner-Kostenfenster passt nicht zur Zahlung.");
+  delete state.runnerCostPenaltySupportWindow;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    runnerCostPenaltySupportWindowClosed: true,
+  };
 }
 
 function runnerRecurringCredits(state: GameState): number {

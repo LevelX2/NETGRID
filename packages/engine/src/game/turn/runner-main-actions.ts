@@ -33,6 +33,7 @@ export type RunnerMainActionGenerationHost = {
     ensureRunnerTurnFlags: HostFn<any>;
     availableRunnerTagRemovalCredits: HostFn<number>;
     availableRunnerProgramInstallCredits: HostFn<number>;
+    runnerCostPenaltySupportCreditCapacity: HostFn<number>;
     availableRunnerRunStartCredits: HostFn<number>;
     runnerDrawActionContext: HostFn<any>;
     runnerUtilityLongtailKindForCard: HostFn<string | undefined>;
@@ -166,6 +167,8 @@ export function buildRunnerMainActions(
     host.runner.availableRunnerTagRemovalCredits;
   const availableRunnerProgramInstallCredits =
     host.runner.availableRunnerProgramInstallCredits;
+  const runnerCostPenaltySupportCreditCapacity =
+    host.runner.runnerCostPenaltySupportCreditCapacity;
   const availableRunnerRunStartCredits =
     host.runner.availableRunnerRunStartCredits;
   const runnerMemoryLimit = host.memory.runnerMemoryLimit;
@@ -408,7 +411,8 @@ export function buildRunnerMainActions(
       hasClicks &&
       definition.type === "program" &&
       !uniqueBlocked &&
-      availableRunnerProgramInstallCredits(state) >=
+      availableRunnerProgramInstallCredits(state) +
+        runnerCostPenaltySupportCreditCapacity(state) >=
         (definition.installCost ?? 0) &&
       state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
         runnerMemoryLimit(state)
@@ -519,7 +523,8 @@ export function buildRunnerMainActions(
       hasClicks &&
       definition.type === "hardware" &&
       !uniqueBlocked &&
-      state.runner.credits >= (definition.installCost ?? 0)
+      state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
+        (definition.installCost ?? 0)
     ) {
       const installAgendaPointCost =
         cardImplementationAgendaPointInstallCost(definition);
@@ -543,7 +548,8 @@ export function buildRunnerMainActions(
       hasClicks &&
       definition.type === "resource" &&
       !uniqueBlocked &&
-      state.runner.credits >= (definition.installCost ?? 0)
+      state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
+        (definition.installCost ?? 0)
     ) {
       if (
         definition.id === CODE_VIRAL_CACHE_ID &&

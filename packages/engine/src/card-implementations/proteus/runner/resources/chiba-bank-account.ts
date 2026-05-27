@@ -5,7 +5,7 @@ export const proteusChibaBankAccountImplementation: CardImplementationDefinition
   abilities: [
     {
       kind: "activated",
-      timing: "during_run",
+      timing: "runner_cost_penalty_support",
       costs: [
         { kind: "credit", amount: 1 },
         { kind: "tap_source", amount: 1 },

@@ -935,7 +935,11 @@ function collectRuntimeTrashPreventionCandidates(
         source.kind !== "prevent_installed_card_trash" ||
         source.visibility !== "public" ||
         (source.activeOnlyDuring === "corp_turn" &&
-          !(state.activeSide === "corp" || state.phase === "corp_action_phase")) ||
+          !(
+            state.phase === "corp_draw_phase" ||
+            state.phase === "corp_action_phase" ||
+            state.phase === "corp_discard_phase"
+          )) ||
         !cardImplementationTrashPreventionSourceCanPay(state, cardId, source)
       )
         return;
@@ -2286,6 +2290,15 @@ function revalidateTrashPreventionCandidateSource(
     definitionFor(state, sourceCardId),
     candidate,
   );
+  if (
+    source?.activeOnlyDuring === "corp_turn" &&
+    !(
+      state.phase === "corp_draw_phase" ||
+      state.phase === "corp_action_phase" ||
+      state.phase === "corp_discard_phase"
+    )
+  )
+    throw new Error("Die Trash-Prevention ist nur im Korp-Zug nutzbar.");
   if (
     !source ||
     !cardImplementationTrashPreventionSourceCanPay(state, sourceCardId, source)

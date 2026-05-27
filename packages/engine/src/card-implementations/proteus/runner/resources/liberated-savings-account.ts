@@ -5,7 +5,7 @@ export const proteusLiberatedSavingsAccountImplementation: CardImplementationDef
   abilities: [
     {
       kind: "activated",
-      timing: "during_run",
+      timing: "runner_cost_penalty_support",
       costs: [
         { kind: "credit", amount: 7 },
         { kind: "tap_source", amount: 1 },

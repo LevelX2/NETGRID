@@ -5,7 +5,7 @@ export const proteusHqMoleImplementation: CardImplementationDefinition = {
   abilities: [
     {
       kind: "activated",
-      timing: "during_run",
+      timing: "access_start",
       costs: [
         { kind: "credit", amount: 4 },
         { kind: "tap_source", amount: 1 },

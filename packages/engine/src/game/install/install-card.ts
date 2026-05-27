@@ -125,6 +125,19 @@ export type InstallCardHost = {
       amount: number,
       cardType: CardDefinition["type"],
     ) => void;
+    runnerCanPayInstallCost: (
+      amount: number,
+      cardType: CardDefinition["type"],
+    ) => boolean;
+    openRunnerCostPenaltySupportWindow: (
+      legalAction: LegalAction,
+      amount: number,
+      cardType: CardDefinition["type"],
+    ) => boolean;
+    closeRunnerCostPenaltySupportWindowForPayment: (
+      legalAction: LegalAction,
+      amount: number,
+    ) => void;
     spendCredits: (side: Side, amount: number) => void;
     rezCostForCard: (cardId: CardInstanceId) => number;
   };
@@ -188,6 +201,24 @@ export function installCard(host: InstallCardHost, legalAction: LegalAction): vo
     legalAction.payload?.serverId === "new_remote"
   ) {
     host.servers.assertCorpCanCreateNewDataFort();
+  }
+  if (legalAction.side === "runner") {
+    const installCost = definition.installCost ?? 0;
+    if (!host.payment.runnerCanPayInstallCost(installCost, definition.type)) {
+      if (
+        host.payment.openRunnerCostPenaltySupportWindow(
+          legalAction,
+          installCost,
+          definition.type,
+        )
+      )
+        return;
+      throw new Error("Der Runner kann die Installationskosten nicht bezahlen.");
+    }
+    host.payment.closeRunnerCostPenaltySupportWindowForPayment(
+      legalAction,
+      installCost,
+    );
   }
   host.payment.spendClick(legalAction.side);
   if (legalAction.side === "corp")

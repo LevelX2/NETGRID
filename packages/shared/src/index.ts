@@ -921,6 +921,8 @@ export type RunState = {
   pendingSuccessBonusCredits?: number;
   accessCount?: number;
   microtechAiInterfacePreAccessResolved?: boolean;
+  hiddenRunnerResourceAccessStartServerId?: Exclude<ServerId, "new_remote">;
+  hiddenRunnerResourceAccessStartWindowClosed?: boolean;
   badPublicityCredits?: number;
   runnerRunTemporaryCredits?: {
     sourceDefinitionId: CardDefinitionId;
@@ -1164,6 +1166,13 @@ export type GameState = {
   runnerActionsPerTurnOverride?: number;
   runnerPermanentMeatDamagePrevention?: boolean;
   eventModificationHarness?: EventModificationTestHarness;
+  runnerCostPenaltySupportWindow?: {
+    windowId: string;
+    originalActionId: string;
+    amountDue: number;
+    kind: "cost" | "penalty";
+    createdAtStateVersion: number;
+  };
   specialZoneHarness?: SpecialZoneTestHarness;
   deckMetadata?: {
     runner: DeckPublicMetadata;
