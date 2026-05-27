@@ -15986,6 +15986,152 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     );
   });
 
+  it("attributes Runner setup fix gates across starved economy, search recovery, and memory", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("runner", 1, "start_run", "rd", 1, {
+            runnerEconomyFixGateEligibleStarvedSkip: true,
+            runnerEconomySkippedForRun: true,
+            runStartedAgainstKnownUnaffordablePath: true,
+            lowValueUnaffordableRun: true,
+          }),
+          progressionAction("runner", 2, "draw_card", undefined, 1, {
+            runnerDrawAction: true,
+          }),
+          progressionAction("runner", 3, "start_run", "remote_1", 2, {
+            runnerEconomyFixGateEligibleStarvedSkip: true,
+            runnerEconomySkippedForRemoteContest: true,
+            runnerRemoteRunAgainstAdvancedRemote: true,
+          }),
+          progressionAction("runner", 4, "draw_card", undefined, 2, {
+            runnerEconomyFixGateEligibleStarvedSkip: true,
+            runnerEconomySkippedForDraw: true,
+            runnerDrawAction: true,
+          }),
+          progressionAction("runner", 5, "gain_credit", undefined, 2, {
+            runnerEconomyTaken: true,
+            runnerCreditsAfter: 5,
+            runnerReserveTarget: 5,
+          }),
+          progressionAction("runner", 6, "draw_card", undefined, 3, {
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+            runnerLegalSearchActions: 1,
+            runnerSearchSkippedWhileMissingBreakerCoverage: true,
+            runnerSetupMissingCoverageTypes: ["wall"],
+            runnerDrawAction: true,
+          }),
+          progressionAction("runner", 7, "end_turn", undefined, 3),
+          progressionAction("runner", 8, "install_card", undefined, 4, {
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+            runnerLegalRecoveryActions: 1,
+            runnerRecoverySkippedWhileMissingBreakerCoverage: true,
+            runnerSetupMissingCoverageTypes: ["code_gate", "sentry"],
+            runnerRigInstallAction: true,
+            runnerCoverageImproved: true,
+          }),
+          progressionAction("runner", 9, "install_card", undefined, 4, {
+            runnerSetupFixGateEligibleMemorySkip: true,
+            runnerLegalMemoryHardwareActions: 1,
+            runnerMemorySupportSkippedWhileGripHasPrograms: true,
+            runnerRigInstallAction: true,
+          }),
+          progressionAction("runner", 10, "start_run", "hq", 5, {
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+          }),
+          progressionAction("runner", 11, "draw_card", undefined, 5, {
+            runnerHandSizeSupportSkippedWhileDamageRiskVisible: true,
+            runnerDiscardChoice: true,
+          }),
+        ],
+        "runner-setup-attribution-fixture",
+      ),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerStarvedEconomySkipWindows: 3,
+      runnerStarvedEconomySkipChosenRun: 2,
+      runnerStarvedEconomySkipChosenDraw: 1,
+      runnerStarvedEconomySkipThenUnaffordableRun: 1,
+      runnerStarvedEconomySkipThenFailedRun: 1,
+      runnerStarvedEconomySkipThenEconomyNextDecision: 1,
+      runnerStarvedEconomySkipThenReserveRecovered: 3,
+      runnerStarvedEconomySkipPlausibleRemoteContest: 1,
+      runnerStarvedEconomySkipSuspiciousLowValueRun: 1,
+      runnerStarvedEconomySkipSuspiciousDraw: 0,
+      runnerEconomyFixGateAttributionEligible: 3,
+      runnerEconomyFixGateAttributionBlocked: 1,
+      runnerEconomyFixGateAttributionSuspicious: 1,
+      runnerSearchRecoveryFixGateWindows: 3,
+      runnerSearchRecoveryFixGateLegalSearch: 1,
+      runnerSearchRecoveryFixGateLegalRecovery: 1,
+      runnerSearchRecoveryFixGateMissingWall: 1,
+      runnerSearchRecoveryFixGateMissingCodeGate: 1,
+      runnerSearchRecoveryFixGateMissingSentry: 1,
+      runnerSearchRecoverySkipChosenDraw: 1,
+      runnerSearchRecoverySkipChosenInstall: 1,
+      runnerSearchRecoverySkipChosenRun: 1,
+      runnerSearchRecoverySkipThenCoverageResolved: 1,
+      runnerSearchRecoverySkipThenCoverageStillMissing: 2,
+      runnerSearchRecoverySkipSuspiciousCoverageStillMissing: 1,
+      runnerSearchRecoveryFixGateAttributionEligible: 3,
+      runnerSearchRecoveryFixGateAttributionSuspicious: 1,
+      runnerMemoryFixGateWindows: 1,
+      runnerMemoryFixGateLegalSupport: 1,
+      runnerMemoryFixGateSkipped: 1,
+      runnerMemorySkipChosenInstallNonMemory: 1,
+      runnerMemorySkipThenProgramInstallBlocked: 1,
+      runnerMemorySkipSuspiciousRigBlocked: 1,
+      runnerMemoryFixGateAttributionEligible: 1,
+      runnerMemoryFixGateAttributionSuspicious: 1,
+      runnerHandSizeFixGateWindows: 1,
+      runnerHandSizeFixGateLegalSupport: 1,
+      runnerHandSizeFixGateSkipped: 1,
+      runnerHandSizeSkipThenDamageRiskWindow: 1,
+      runnerSetupAttributionByKindStarvedEconomy: 3,
+      runnerSetupAttributionByKindSearchRecovery: 3,
+      runnerSetupAttributionByKindMemory: 1,
+      runnerSetupAttributionByKindHandSize: 1,
+      runnerSetupAttributionSuspicious: 3,
+      runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis: 1,
+    });
+  });
+
+  it("keeps Runner setup attribution diagnostics hidden-state invariant and redaction-safe", () => {
+    const visibleActions = [
+      progressionAction("runner", 1, "draw_card", undefined, 1, {
+        runnerSetupFixGateEligibleSearchRecoverySkip: true,
+        runnerLegalSearchActions: 1,
+        runnerSearchSkippedWhileMissingBreakerCoverage: true,
+        runnerSetupMissingCoverageTypes: ["universal", "special"],
+        runnerSetupAttributionEvidence: [
+          "chosen_action_type:draw_card",
+          "chosen_reason_family:draw",
+          "missing_coverage_types:universal,special",
+        ],
+      }),
+    ];
+    const first = summarizeMatchProgressionMetrics([
+      progressionSummary(visibleActions, "runner-setup-visible-a"),
+    ]);
+    const second = summarizeMatchProgressionMetrics([
+      {
+        ...progressionSummary(visibleActions, "runner-setup-visible-b"),
+        finalStateHash: "fnv1a:different-hidden-state",
+      },
+    ]);
+
+    expect(first.runnerSearchRecoveryFixGateMissingUniversal).toBe(
+      second.runnerSearchRecoveryFixGateMissingUniversal,
+    );
+    expect(first.runnerSearchRecoveryFixGateMissingSpecial).toBe(
+      second.runnerSearchRecoveryFixGateMissingSpecial,
+    );
+    expect(JSON.stringify({ visibleActions })).not.toMatch(
+      /cardInstances|privatePayload|fullGameState|corp_hq|corp_rd|runner_stack|runner_grip/i,
+    );
+  });
+
   it("summarizes first-class breaker ontology metrics from action evidence", () => {
     const metrics = summarizeMatchProgressionMetrics([
       progressionSummary([
