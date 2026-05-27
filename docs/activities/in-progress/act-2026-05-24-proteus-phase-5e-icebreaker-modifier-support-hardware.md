@@ -14,9 +14,7 @@ releaseTarget: Proteus Phase 5e
 proReferences:
   - PRO009
 blockedBy:
-  - act-2026-05-24-proteus-phase-5a-icebreaker-core-matchers-pump-break
-  - Personal Touch needs a generic targeted permanent +1 strength counter for one installed icebreaker; the current Militech effect only adds Militech counters to all installed runner icebreakers.
-  - Eurocorpse (TM) Spin Chip needs a hosted-program payment restriction for exactly the icebreaker installed in the chip; current restricted hosted credit sources can pay for any matching icebreaker during a run and do not revalidate the host-to-breaker binding.
+  - legacy_umbrella_activity_status_reference_only
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-5e-icebreaker-modifier-support-hardware.md
   - docs/releases/proteus/README.md
@@ -63,8 +61,6 @@ Die sichtbaren Breaker-Support-Karten über generische installierte Modifier, Zi
 
 ## Ergebnisnotiz
 
-Blockiert. Der Slice haengt nicht nur fachlich an der Phase-5a-Icebreaker-Familie, sondern benoetigt auch zwei generische Modifier-/Zahlungsbausteine:
+PRO009 ist umgesetzt; diese alte Phase-5e-Activity bleibt nur als Statusreferenz ohne zusätzliche Komplettzählung offen.
 
-- `Personal Touch, The` kann nicht mit dem vorhandenen `add_counter_to_all_installed_runner_icebreakers` umgesetzt werden. Der vorhandene Baustein ist explizit auf Militech-Counter fuer alle installierten Icebreaker beschraenkt; benoetigt wird eine LegalAction-gewaehlte einzelne Icebreaker-Zielbindung mit permanentem +1-Strength-Counter und erneuter Zielrevalidierung in `applyAction`.
-- `Eurocorpse (TM) Spin Chip` kann die vorhandene `hostedProgramCapacity` teilweise wiederverwenden, aber die vorhandene `restrictedHostedCreditSource`-Familie erlaubt nur globale Uses wie `using_icebreaker_during_run`. Sie prueft nicht, ob der bezahlte Icebreaker tatsaechlich in genau diesem Hardware-Host installiert ist.
-- Eine Promotion mit der bestehenden Credit-Familie waere zu breit und damit regelwidrig; keine CardImplementation wurde fuer 5e angelegt und keine Manifest-/Coverage-Promotion vorgenommen.
+PRO009 hat `Personal Touch, The` mit einer LegalAction-gewählten einzelnen Icebreaker-Zielbindung und permanentem +1-Strength-Counter umgesetzt. `Eurocorpse (TM) Spin Chip` nutzt die generisch gehärtete Hosting-/Restricted-Hosted-Credit-Familie: Es hostet genau ein Icebreaker-Programm und die Bits dürfen nur für genau dieses gehostete Icebreaker-Programm während Runs zahlen. Keine PRO009-Karte wurde `deck_legal`, `format_legal` oder `ai_supported`.

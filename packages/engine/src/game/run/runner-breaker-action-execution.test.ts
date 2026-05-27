@@ -146,9 +146,11 @@ function hostFor(
       definitionFor: (cardId) =>
         definition(cardId === ICE_ID ? "ice_definition" : "breaker_definition"),
       cardInstanceFor: (cardId) => targetState.cardInstances[cardId] as CardInstance,
+      effectiveSubtypesForCard: () => [],
     },
     run: {
       currentRun: () => targetState.run as NonNullable<GameState["run"]>,
+      currentEncounterSubroutines: () => [],
       runRemainderStrengthBonusForBreaker: () => 2,
       finishRun: (successful) => calls.push(`finish:${successful}`),
     },

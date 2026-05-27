@@ -16340,6 +16340,12 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             corpTagSourceOntologyUsed: true,
             corpTagSourceLegalActionClassifiedByOntology: true,
             corpTagSourceTakenWithOntologyPayoffAvailable: true,
+            corpTagCreatedByOperation: true,
+            corpFunnelSourcePayoffPairSeenInDeck: true,
+            corpFunnelSourceActionTakenWithPayoffInDeck: true,
+            corpFunnelSourceActionTakenWithVisiblePayoff: true,
+            runnerTraceDefenseVisibleAtTagSource: true,
+            runnerLinkDefenseVisibleAtTrace: true,
             corpTagPunishOntologyKinds: ["tag_source", "trace"],
             corpTagPunishConditionKinds: ["requires_trace_success"],
           }),
@@ -16348,6 +16354,9 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             runnerTagsAfterAction: 1,
             runnerTagAddedByAction: true,
             runnerTaggedAfterTraceDuringRun: true,
+            corpTagCreatedDuringRunnerTurn: true,
+            corpTagCreatedDuringEncounter: true,
+            corpTagCreatedByTraceSuccess: true,
           }),
           progressionAction("runner", 3, "end_turn", undefined, 1, {
             runnerTagsBeforeAction: 1,
@@ -16358,10 +16367,17 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             runnerTagsBeforeAction: 1,
             runnerTagsAfterAction: 1,
             runnerTaggedAtCorpDecision: true,
+            runnerTaggedAtCorpDecisionWithFunnelPayoffKnown: true,
             runnerTaggedAtStartOfCorpTurn: true,
             corpPunishOpportunity: true,
             corpPunishTaken: true,
             corpPunishKind: "scorched_earth_like",
+            corpVisibleTagPunishLegalActions: 1,
+            corpVisibleTagPayoffLegalActionKinds: ["damage"],
+            corpVisibleTagPayoffLegalActionCards: ["onr_v1_302_scorched-earth"],
+            corpVisibleTagDamagePunishLegalActions: true,
+            corpVisibleTagPunishTaken: true,
+            runnerDamagePreventionVisibleAtPayoffWindow: true,
             corpTagPunishOntologyProfilesSeen: true,
             corpTagPunishPayoffOntologyProfilesSeen: true,
             corpTagPunishPayoffOntologyUsed: true,
@@ -16376,6 +16392,8 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             runnerTagsAfterAction: 1,
             runnerTagAddedByAction: true,
             runnerTaggedAfterTraceDuringRun: true,
+            corpTagCreatedDuringRunnerTurn: true,
+            corpTagCreatedByAccessOrSteal: true,
           }),
           progressionAction("runner", 6, "remove_tag", undefined, 2, {
             runnerTagsBeforeAction: 1,
@@ -16389,9 +16407,16 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
           progressionAction("corp", 8, "gain_credit", undefined, 4, {
             runnerTagsBeforeAction: 1,
             runnerTaggedAtCorpDecision: true,
+            runnerTaggedAtCorpDecisionWithFunnelPayoffKnown: true,
             corpPunishOpportunity: true,
             corpPunishKind: "urban_renewal_like",
             corpPunishSkippedReason: "economy",
+            corpVisibleTagPunishLegalActions: 1,
+            corpVisibleTagPayoffLegalActionKinds: ["damage"],
+            corpVisibleTagPayoffLegalActionCards: ["onr_v1_307_urban-renewal"],
+            corpVisibleTagDamagePunishLegalActions: true,
+            corpVisibleTagPunishSkipped: true,
+            corpVisibleTagPunishSkippedReason: "economy",
             corpPunishOpportunityConfirmedByOntology: true,
             corpPunishSkippedDespiteOntologyOpportunity: true,
             corpTagPunishOntologyProfilesSeen: true,
@@ -16401,9 +16426,18 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
           progressionAction("corp", 9, "install_card", "hq", 4, {
             runnerTagsBeforeAction: 1,
             runnerTaggedAtCorpDecision: true,
+            runnerTaggedAtCorpDecisionWithFunnelPayoffKnown: true,
             corpPunishOpportunity: true,
             corpPunishKind: "punitive_counterstrike_like",
             corpPunishSkippedReason: "protection",
+            corpVisibleTagPunishLegalActions: 1,
+            corpVisibleTagPayoffLegalActionKinds: ["damage"],
+            corpVisibleTagPayoffLegalActionCards: [
+              "onr_v1_301_punitive-counterstrike",
+            ],
+            corpVisibleTagDamagePunishLegalActions: true,
+            corpVisibleTagPunishSkipped: true,
+            corpVisibleTagPunishSkippedReason: "remote_protection",
             corpTraceTagOpportunity: true,
             corpTraceTagSkippedReason: "protection",
           }),
@@ -16416,9 +16450,11 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             {
               runnerTagsBeforeAction: 1,
               runnerTaggedAtCorpDecision: true,
+              runnerTaggedAtCorpDecisionWithoutPayoffKnown: true,
               corpPunishOpportunity: true,
               corpPunishTaken: true,
               corpPunishKind: "scored_agenda_damage_like",
+              corpVisibleTagPunishTaken: true,
             },
           ),
         ],
@@ -16432,9 +16468,41 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.runnerTaggedAtStartOfCorpTurn).toBe(1);
     expect(metrics.runnerTaggedAtEndOfRunnerTurn).toBe(1);
     expect(metrics.runnerTaggedAfterTraceDuringRun).toBe(2);
+    expect(metrics.corpTagCreatedDuringRunnerTurn).toBe(2);
+    expect(metrics.corpTagCreatedDuringEncounter).toBe(1);
+    expect(metrics.corpTagCreatedByTraceSuccess).toBe(1);
+    expect(metrics.corpTagCreatedByAccessOrSteal).toBe(1);
+    expect(metrics.corpTagCreatedByOperation).toBe(1);
+    expect(metrics.runnerTaggedAtCorpDecisionWithFunnelPayoffKnown).toBe(3);
+    expect(metrics.runnerTaggedAtCorpDecisionWithoutPayoffKnown).toBe(1);
+    expect(
+      metrics.runnerTagFromPreviousRunnerTurnStillVisibleAtCorpDecision,
+    ).toBe(4);
+    expect(metrics.runnerTagFromEncounterStillVisibleAtCorpDecision).toBe(4);
     expect(metrics.runnerTagClearedSameRunnerTurn).toBe(1);
     expect(metrics.runnerTagClearedBeforeCorpDecision).toBe(1);
+    expect(metrics.runnerTagClearedBeforeCorpDecisionAfterFunnelSource).toBe(1);
+    expect(metrics.runnerTagClearedSameRunnerTurnAfterSource).toBe(1);
+    expect(metrics.runnerTagWindowExpiredBeforeCorpDecision).toBe(1);
     expect(metrics.runnerTagWindowExpiredBeforeCorpTurn).toBe(1);
+    expect(metrics.corpVisibleTagPunishLegalActions).toBe(3);
+    expect(metrics.corpVisibleTagDamagePunishLegalActions).toBe(3);
+    expect(metrics.corpVisibleTagPayoffLegalActionsByKind).toBe(3);
+    expect(metrics.corpVisibleTagPayoffLegalActionsByCard).toBe(3);
+    expect(metrics.corpVisibleTagPunishTaken).toBe(2);
+    expect(metrics.corpVisibleTagPunishSkipped).toBe(2);
+    expect(metrics.corpVisibleTagPunishSkippedForEconomy).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedForRemoteProtection).toBe(1);
+    expect(metrics.corpFunnelSourcePayoffPairSeenInDeck).toBe(1);
+    expect(metrics.corpFunnelSourceActionTakenWithPayoffInDeck).toBe(1);
+    expect(metrics.corpFunnelSourceActionTakenWithVisiblePayoff).toBe(1);
+    expect(metrics.corpFunnelPairConvertedToTaggedDecisionWindow).toBe(1);
+    expect(metrics.corpFunnelPairConvertedToLegalPayoffWindow).toBe(1);
+    expect(metrics.corpFunnelPairConvertedToPayoffTaken).toBe(1);
+    expect(metrics.corpFunnelPairExpiredBeforePayoffWindow).toBe(1);
+    expect(metrics.runnerTraceDefenseVisibleAtTagSource).toBe(1);
+    expect(metrics.runnerDamagePreventionVisibleAtPayoffWindow).toBe(1);
+    expect(metrics.runnerLinkDefenseVisibleAtTrace).toBe(1);
     expect(metrics.corpPunishOpportunities).toBe(4);
     expect(metrics.corpPunishTaken).toBe(2);
     expect(metrics.corpPunishSkipped).toBe(2);
@@ -16508,6 +16576,99 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(second.runnerTaggedAtCorpDecision).toBe(
       first.runnerTaggedAtCorpDecision,
     );
+  });
+
+  it("separates visible-tag payoff windows from strategy-neutral skip reasons", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "trigger_ability", undefined, 1, {
+            corpTagSourceOpportunity: true,
+            corpTagSourceTaken: true,
+            corpTagCreatedByPersistentEffect: true,
+            corpFunnelSourcePayoffPairSeenInDeck: true,
+            corpFunnelSourceActionTakenWithPayoffInDeck: true,
+          }),
+          progressionAction("corp", 2, "score_agenda", undefined, 2, {
+            runnerTagsBeforeAction: 1,
+            runnerTaggedAtCorpDecision: true,
+            runnerTaggedAtCorpDecisionWithFunnelPayoffKnown: true,
+            corpPunishOpportunity: true,
+            corpPunishKind: "scorched_earth_like",
+            corpPunishSkippedReason: "score",
+            corpVisibleTagPunishLegalActions: 1,
+            corpVisibleTagPayoffLegalActionKinds: ["damage"],
+            corpVisibleTagPayoffLegalActionCards: ["onr_v1_302_scorched-earth"],
+            corpVisibleTagDamagePunishLegalActions: true,
+            corpVisibleTagPunishSkipped: true,
+            corpVisibleTagPunishSkippedReason: "score",
+          }),
+          progressionAction("corp", 3, "advance_card", undefined, 2, {
+            runnerTagsBeforeAction: 1,
+            runnerTaggedAtCorpDecision: true,
+            runnerTaggedAtCorpDecisionWithFunnelPayoffKnown: true,
+            corpPunishOpportunity: true,
+            corpPunishKind: "closed_accounts_like",
+            corpPunishSkippedReason: "advance",
+            corpVisibleTagPunishLegalActions: 1,
+            corpVisibleTagPayoffLegalActionKinds: ["economic"],
+            corpVisibleTagPayoffLegalActionCards: [
+              "onr_v1_285_closed-accounts",
+            ],
+            corpVisibleTagEconomicPunishLegalActions: true,
+            corpVisibleTagPunishSkipped: true,
+            corpVisibleTagPunishSkippedReason: "advance",
+            runnerSurvivalCounterContextAvailable: true,
+            runnerFlatlinePreventionVisibleAtPayoffWindow: true,
+            runnerSurvivalCounterContextSuppressedPunishValue: true,
+          }),
+          progressionAction("corp", 4, "install_card", "hq", 2, {
+            runnerTagsBeforeAction: 1,
+            runnerTaggedAtCorpDecision: true,
+            runnerTaggedAtCorpDecisionWithFunnelPayoffKnown: true,
+            corpPunishOpportunity: true,
+            corpPunishKind: "power_grid_overload_like",
+            corpPunishSkippedReason: "install",
+            corpVisibleTagPunishLegalActions: 1,
+            corpVisibleTagPayoffLegalActionKinds: ["trash"],
+            corpVisibleTagPayoffLegalActionCards: [
+              "onr_v1_299_power-grid-overload",
+            ],
+            corpVisibleTagTrashPunishLegalActions: true,
+            corpVisibleTagPunishSkipped: true,
+            corpVisibleTagPunishSkippedReason: "install",
+          }),
+          progressionAction("corp", 5, "gain_credit", undefined, 2, {
+            runnerTagsBeforeAction: 1,
+            runnerTaggedAtCorpDecision: true,
+            runnerTaggedAtCorpDecisionWithFunnelPayoffKnown: true,
+            corpPunishOpportunity: true,
+            corpPunishKind: "unknown",
+            corpPunishSkippedReason: "unknown_higher_priority",
+            corpVisibleTagPunishLegalActions: 1,
+            corpVisibleTagPayoffLegalActionKinds: ["run_lock", "ambush"],
+            corpVisibleTagRunLockPunishLegalActions: true,
+            corpVisibleTagAmbushPunishLegalActions: true,
+            corpVisibleTagPunishSkipped: true,
+            corpVisibleTagPunishSkippedReason: "unknown_higher_priority",
+          }),
+        ],
+        "tag-punish-terminal-skip-reason-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpTagCreatedByPersistentEffect).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedForScore).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedForAdvance).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedForInstall).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedForUnknownHigherPriority).toBe(1);
+    expect(metrics.corpVisibleTagEconomicPunishLegalActions).toBe(1);
+    expect(metrics.corpVisibleTagTrashPunishLegalActions).toBe(1);
+    expect(metrics.corpVisibleTagRunLockPunishLegalActions).toBe(1);
+    expect(metrics.corpVisibleTagAmbushPunishLegalActions).toBe(1);
+    expect(metrics.runnerSurvivalCounterContextAvailable).toBe(1);
+    expect(metrics.runnerFlatlinePreventionVisibleAtPayoffWindow).toBe(1);
+    expect(metrics.runnerSurvivalCounterContextSuppressedPunishValue).toBe(1);
   });
 
   it("does not count generic central endgame runs as true runner closeout", () => {

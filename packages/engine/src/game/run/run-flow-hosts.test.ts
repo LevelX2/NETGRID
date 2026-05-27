@@ -100,6 +100,8 @@ function hostFor(calls: string[]): RunFlowHost {
       publicInstalledCorpCardIdentityKnown: () => true,
       effectiveSubtypesForCard: () => [],
       hostedProgramStrengthModifier: () => 0,
+      icebreakerEncounterStrengthBonus: () => 0,
+      permanentIcebreakerStrengthCounterBonus: () => 0,
       cardImplementationAccessHookKindsForDefinition: () => [],
     },
     servers: {

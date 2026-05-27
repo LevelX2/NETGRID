@@ -614,6 +614,23 @@ function collectRuntimeDamagePreventionCandidates(
     ...state.runner.rig.resources,
   ];
   const candidates: EventModificationCandidate[] = [];
+  const runPool = state.run?.damagePreventionPool;
+  if (runPool && runPool.remaining > 0) {
+    const preventAmount = Math.min(amount, Math.max(0, Math.floor(runPool.remaining)));
+    if (preventAmount > 0) {
+      candidates.push({
+        candidateId: `run_damage_prevent_${sanitizeId(runPool.sourceDefinitionId)}_${preventAmount}`,
+        eventId: event.eventId,
+        kind: "prevent",
+        controller: "runner",
+        sourceRef: { kind: "game_rule", label: "Run damage prevention" },
+        priority: 145,
+        visibility: "hidden_info_barrier",
+        optional: true,
+        preventAmount,
+      });
+    }
+  }
   if (
     state.runnerPermanentMeatDamagePrevention === true &&
     damageType === "meat"
@@ -1533,6 +1550,12 @@ export function resolveEventModificationChoice(
   );
   const finalAmount = Math.max(0, originalAmount - preventedAmount);
   registerDamagePreventionUsage(state, candidate, preventedAmount);
+  if (candidate.candidateId.startsWith("run_damage_prevent_") && state.run?.damagePreventionPool) {
+    state.run.damagePreventionPool.remaining = Math.max(
+      0,
+      Math.floor(state.run.damagePreventionPool.remaining) - preventedAmount,
+    );
+  }
   const preventionCostPayload = applyRuntimeDamagePreventionCost(
     state,
     candidate,

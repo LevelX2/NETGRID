@@ -33,6 +33,7 @@ export type TraceBaseLinkChoiceQuote = {
   baseLinkValue: number;
   creditCost: number;
   canUse: boolean;
+  rewardCreditsOnAvoidTrace?: number;
   publicPayload: NonNullable<LegalAction["payload"]>;
 };
 
@@ -164,11 +165,17 @@ function quoteForAbility(
     baseLinkValue: effect.baseLink,
     creditCost,
     canUse: true,
+    ...(effect.rewardCreditsOnAvoidTrace
+      ? { rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace }
+      : {}),
     publicPayload: {
       baseLinkUsed: true,
       traceBaseLinkSourceDefinitionId: definition.id,
       traceBaseLinkCostPaid: creditCost,
       baseLinkValue: effect.baseLink,
+      ...(effect.rewardCreditsOnAvoidTrace
+        ? { traceAvoidRewardCredits: effect.rewardCreditsOnAvoidTrace }
+        : {}),
     },
   };
 }

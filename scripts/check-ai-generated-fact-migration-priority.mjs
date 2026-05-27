@@ -148,8 +148,456 @@ const BATCH7_CORP_ICE_PRIORITY_POLICY = Object.fromEntries(
   ]),
 );
 
+const BATCH8_CORP_ECONOMY_PRIORITY_POLICY = Object.fromEntries(
+  [
+    [
+      "onr_v1_300_project-consultants",
+      "Advance-burst counters are derivable, but target legality and score-conversion timing remain LegalAction and board context.",
+    ],
+    [
+      "onr_v1_298_planning-consultants",
+      "R&D top reorder is derivable as hidden-zone context without generated hidden order.",
+    ],
+    [
+      "onr_v1_304_systematic-layoffs",
+      "Advance-burst counters are derivable, but target legality and score-conversion timing remain LegalAction and board context.",
+    ],
+    [
+      "onr_v1_305_team-restructuring",
+      "Advancement-counter distribution is derivable, but concrete score windows remain engine/board context.",
+    ],
+    [
+      "onr_v1_295_night-shift",
+      "Operation economy and draw are mechanically derivable and low ambiguity.",
+    ],
+    [
+      "onr_v1_297_overtime-incentives",
+      "Operation extra actions are derivable, while action use remains LegalAction context.",
+    ],
+    [
+      "onr_v1_296_off-site-backups",
+      "Archives-to-HQ recovery is derivable, but hidden card identities remain runtime-only.",
+    ],
+    [
+      "onr_v1_303_silver-lining-recovery-protocol",
+      "Variable recovery economy is derivable, with prior stolen-agenda counters remaining history context.",
+    ],
+    [
+      "onr_v1_194_corporate-downsizing",
+      "HQ-agenda reveal economy is derivable, but generated facts cannot contain hidden HQ agenda identity.",
+    ],
+    [
+      "onr_v1_196_corporate-war",
+      "Threshold-gated credit swing is derivable, while current credit state remains board context.",
+    ],
+    [
+      "onr_v1_203_hostile-takeover",
+      "When-scored credit gain is deterministic and low-risk.",
+    ],
+    [
+      "onr_v1_212_priority-requisition",
+      "When-scored free ICE rez is derivable, with target selection and rez legality staying engine-owned.",
+    ],
+    [
+      "onr_v1_216_security-purge",
+      "R&D top reveal/install/rez effect is derivable as hidden-zone context without generated R&D order.",
+    ],
+    [
+      "onr_v1_197_data-fort-reclamation",
+      "Temporary credits plus HQ-based remote build are derivable, while hidden HQ choice remains LegalAction context.",
+    ],
+    [
+      "onr_v1_219_superior-net-barriers",
+      "Wall strength and reveal-for-credits effects are derivable, but board/rezzed state remains context.",
+    ],
+    [
+      "onr_v1_200_encryption-breakthrough",
+      "Code-gate strength and reveal-for-credits effects are derivable, but board/rezzed state remains context.",
+    ],
+    [
+      "onr_v1_211_polymer-breakthrough",
+      "Start-of-turn credit economy is derivable, with score/persistence context explicit.",
+    ],
+    [
+      "onr_v1_218_subsidiary-branch",
+      "Start-of-turn action gain is derivable, with concrete action use staying LegalAction context.",
+    ],
+    [
+      "onr_v1_206_marine-arcology",
+      "Scored-agenda economy action is already mechanical and remains score-area LegalAction gated.",
+    ],
+    [
+      "onr_v1_188_ai-chief-financial-officer",
+      "Shuffle/draw score-area effect is derivable without hidden HQ, Archives or R&D order data.",
+    ],
+    [
+      "onr_v1_204_ice-transmutation",
+      "Rezzed-ICE modifier is derivable, but target selection and board state remain context.",
+    ],
+    [
+      "onr_v1_215_security-net-optimization",
+      "Fort ICE strength modifier is derivable, with selected-server board context explicit.",
+    ],
+    [
+      "onr_v1_190_bioweapons-engineering",
+      "Persistent meat-damage modifier is derivable, while concrete damage resolution remains engine context.",
+    ],
+    [
+      "onr_v1_191_black-ice-quality-assurance",
+      "Black-ICE strength modifier is derivable, while active scored state remains board context.",
+    ],
+    [
+      "onr_v1_189_artificial-security-directors",
+      "Agenda-difficulty modifier is derivable as score-conversion support, not score_now strategy.",
+    ],
+    [
+      "onr_v1_201_executive-extraction",
+      "Agenda-difficulty modifier is derivable as score-conversion support, not score_now strategy.",
+    ],
+    [
+      "onr_v1_202_genetics-visionary-acquisition",
+      "Agenda-difficulty modifier is derivable as score-conversion support, not score_now strategy.",
+    ],
+    [
+      "onr_v1_195_corporate-retreat",
+      "Score-area economy action is derivable, while disable-on-install/rez state remains engine context.",
+    ],
+    [
+      "onr_v1_198_detroit-police-contract",
+      "Finite hosted credit pool and start-turn payout are derivable, with remaining pool state engine-owned.",
+    ],
+    [
+      "onr_v1_209_political-coup",
+      "Finite hosted credit pool and score-area payout are derivable, with remaining pool state engine-owned.",
+    ],
+  ].map(([cardId, rationale]) => [
+    cardId,
+    {
+      migrationPriority: "P1",
+      migrationRisk: "medium",
+      fieldCategories: [
+        "safe_generated_now",
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+      ],
+      recommendedMigrationBatch: 8,
+      rationale,
+    },
+  ]),
+);
+
+const BATCH9_CORP_NODES_PRIORITY_POLICY = Object.fromEntries(
+  [
+    [
+      "onr_v1_308_acme-savings-and-loan",
+      "Remote economy/debt context is derivable, while current credit and debt state remain board-owned.",
+    ],
+    [
+      "onr_v1_309_bbs-whispering-campaign",
+      "Finite hosted economy pool is derivable, while remaining credits stay board-owned.",
+    ],
+    [
+      "onr_v1_311_braindance-campaign",
+      "Finite/start-turn hosted economy is derivable, while remaining credits stay board-owned.",
+    ],
+    [
+      "onr_v1_310_blood-cat",
+      "Trace-to-tag node mechanics are derivable, with trace success staying runtime context.",
+    ],
+    [
+      "onr_v1_313_city-surveillance",
+      "Runner-draw payment-or-tag pressure is derivable, but no guaranteed tag is generated.",
+    ],
+    [
+      "onr_v1_314_corporate-negotiating-center",
+      "Remote support context is derivable only as board/LegalAction-gated utility.",
+    ],
+    [
+      "onr_v1_315_corprunners-shattered-remains",
+      "Advanceable hardware-trash ambush is derivable, with access and counter context explicit.",
+    ],
+    [
+      "onr_v1_354_crybaby",
+      "On-access counter/link penalty ambush is derivable without asserting current counter state.",
+    ],
+    [
+      "onr_v1_321_esa-contract",
+      "Remote draw utility is derivable, while use timing remains LegalAction context.",
+    ],
+    [
+      "onr_v1_322_euromarket-consortium",
+      "Draw and hand-size support are derivable, with rezzed board context explicit.",
+    ],
+    [
+      "onr_v1_323_experimental-ai",
+      "Advanceable program-trash ambush is derivable, with access and counter context explicit.",
+    ],
+    [
+      "onr_v1_324_fortress-architects",
+      "ICE install discount is derivable, with rezzed board context explicit.",
+    ],
+    [
+      "onr_v1_325_hacker-tracker-central",
+      "Trace-credit support is derivable, while trace bidding and current pool state remain runtime context.",
+    ],
+    [
+      "onr_v1_326_holovid-campaign",
+      "Finite/start-turn hosted economy is derivable, while remaining credits stay board-owned.",
+    ],
+    [
+      "onr_v1_327_i-got-a-rock",
+      "Tagged-runner damage payoff is derivable, with runner-tagged and damage-resolution context explicit.",
+    ],
+    [
+      "onr_v1_328_information-laundering",
+      "Advanceable counter-to-credit economy is derivable, with variable amount context explicit.",
+    ],
+    [
+      "onr_v1_329_investment-firm",
+      "Credit-diversion pool and recurring payout are derivable, while current pool state remains board-owned.",
+    ],
+    [
+      "onr_v1_332_newsgroup-taunting",
+      "Run-start payment tax is derivable, but concrete remote safety remains run/board context.",
+    ],
+    [
+      "onr_v1_333_omniscience-foundation",
+      "Tag amplification is derivable, with runner-tagged context explicit.",
+    ],
+    [
+      "onr_v1_334_pacifica-regional-ai",
+      "Advancement-counter action gain is derivable, while action use remains LegalAction context.",
+    ],
+    [
+      "onr_v1_335_remote-facility",
+      "Start-turn action gain/remote capacity is derivable, with board context explicit.",
+    ],
+    [
+      "onr_v1_336_rescheduler",
+      "HQ shuffle/draw utility is derivable as hidden-zone context without hidden identities.",
+    ],
+    [
+      "onr_v1_337_rockerboy-promotion",
+      "Hosted action economy pool is derivable, while remaining credits stay board-owned.",
+    ],
+    [
+      "onr_v1_338_rustbelt-hq-branch",
+      "Corp hand-size support is derivable, with rezzed board context explicit.",
+    ],
+    [
+      "onr_v1_339_schlaghund",
+      "Tagged-runner damage payoff is derivable, with runner-tagged/random outcome context explicit.",
+    ],
+    [
+      "onr_v1_340_setup",
+      "On-access damage ambush is derivable, with access context explicit.",
+    ],
+    [
+      "onr_v1_342_solo-squad",
+      "Tagged-runner damage action is derivable, with runner-tagged and LegalAction context explicit.",
+    ],
+    [
+      "onr_v1_343_south-african-mining-corp",
+      "Action economy is derivable, while action use remains LegalAction context.",
+    ],
+    [
+      "onr_v1_344_spinn-public-relations",
+      "Hosted start-turn/action economy pool is derivable, while remaining credits stay board-owned.",
+    ],
+    [
+      "onr_v1_287_datapool-by-zetatech",
+      "Tagged-runner tag operation is derivable, while playability remains LegalAction context.",
+    ],
+    [
+      "onr_v1_293_netwatch-credit-voucher",
+      "Tagged-runner tag plus economy is derivable, while playability remains LegalAction context.",
+    ],
+    [
+      "onr_v1_286_corporate-detective-agency",
+      "Tagged-runner resource trash is derivable, with target selection staying runtime-owned.",
+    ],
+    [
+      "onr_v1_299_power-grid-overload",
+      "Tagged-runner hardware trash is derivable, with target selection staying runtime-owned.",
+    ],
+    [
+      "onr_v1_307_urban-renewal",
+      "Tagged-runner meat damage is derivable, while damage resolution remains engine-owned.",
+    ],
+    [
+      "onr_v1_306_trojan-horse",
+      "Tagged-runner punish operation is derivable, while playability remains LegalAction context.",
+    ],
+    [
+      "onr_v1_294_new-blood",
+      "Conceal/reorder installed ICE is derivable as hidden-zone context only.",
+    ],
+    [
+      "onr_v1_316_cowboy-sysop",
+      "Installed-card-to-HQ utility is derivable as hidden-zone context only.",
+    ],
+    [
+      "onr_v1_368_roving-submarine",
+      "Remote run-window restriction is derivable, but current run legality stays engine-owned.",
+    ],
+    [
+      "onr_v1_362_new-galveston-city-grid",
+      "Asset/upgrade trash-cost tax is derivable, with access/trash context explicit.",
+    ],
+    [
+      "onr_v1_360_jerusalem-city-grid",
+      "Fort wall rez discount/strength support is derivable, with rezzed board context explicit.",
+    ],
+    [
+      "onr_v1_369_singapore-city-grid",
+      "Fort ICE swap is derivable as run/hidden-zone context only.",
+    ],
+    [
+      "onr_v1_352_chester-mix",
+      "Fort ICE install discount is derivable, with rezzed board context explicit.",
+    ],
+    [
+      "onr_v1_364_omni-kismet-ph-d",
+      "Fort ICE swap is derivable as run/hidden-zone context only.",
+    ],
+    [
+      "onr_v1_358_dr-dreff",
+      "Temporary HQ-ICE encounter is derivable as run/hidden-zone context only.",
+    ],
+    [
+      "onr_v1_346_vacant-soulkiller",
+      "Advanceable damage ambush is derivable, with access and counter context explicit.",
+    ],
+  ].map(([cardId, rationale]) => [
+    cardId,
+    {
+      migrationPriority: "P1",
+      migrationRisk: "medium",
+      fieldCategories: [
+        "safe_generated_now",
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+      ],
+      recommendedMigrationBatch: 9,
+      rationale,
+    },
+  ]),
+);
+
+const BATCH10_RUNNER_SURVIVAL_PRIORITY_POLICY = Object.fromEntries(
+  [
+    [
+      "onr_v1_004_bakdoor",
+      "Base-link and link boost mechanics are derivable, but actual trace outcome remains LegalAction/trace-window context.",
+    ],
+    [
+      "onr_v1_022_emergency-self-construct",
+      "Flatline replacement, brain-damage cleanup and persistent penalties are derivable, but generated facts cannot assert current flatline safety.",
+    ],
+    [
+      "onr_v1_023_evil-twin",
+      "Sentry breaker and net/brain prevention are derivable as separate facts, with break/prevention legality remaining runtime-owned.",
+    ],
+    [
+      "onr_v1_028_force-shield",
+      "Per-turn net/brain damage prevention is derivable, with damage/prevention window and turn-limit context explicit.",
+    ],
+    [
+      "onr_v1_038_joan-of-arc",
+      "Program-trash prevention is derivable, scoped to other installed programs with payment/window context retained.",
+    ],
+    [
+      "onr_v1_051_rabbit",
+      "Trace-limit reduction is derivable as trace defense, but does not guarantee trace success.",
+    ],
+    [
+      "onr_v1_061_shield",
+      "Per-turn net damage prevention is derivable, with damage/prevention window and turn-limit context explicit.",
+    ],
+    [
+      "onr_v1_063_signpost",
+      "Post-bid link boost is derivable as trace defense, while actual trace outcome remains engine-owned.",
+    ],
+    [
+      "onr_v1_079_bodyweight-synthetic-blood",
+      "Burst draw is derivable as hand-refill support without hidden stack identity.",
+    ],
+    [
+      "onr_v1_116_total-genetic-retrofit",
+      "Tag removal and next-tag avoidance are derivable, with tagged-runner and prevention-window context retained.",
+    ],
+    [
+      "onr_v1_133_militech-mram-chip",
+      "Installed hand-size increase is derivable as survival context without hidden hand contents.",
+    ],
+    [
+      "onr_v1_134_mram-chip",
+      "Installed hand-size increase is derivable as survival context without hidden hand contents.",
+    ],
+    [
+      "onr_v1_135_nasuko-cycle",
+      "Paid tag avoidance is derivable, with prevention-window and payment context retained.",
+    ],
+    [
+      "onr_v1_157_crash-everett-inventive-fixer",
+      "Extra draw and choose-trash/top replacement are derivable without hidden stack or grip identity.",
+    ],
+    [
+      "onr_v1_161_fall-guy",
+      "Trash-to-avoid-tag is derivable, with prevention-window and cost context retained.",
+    ],
+  ].map(([cardId, rationale]) => [
+    cardId,
+    {
+      migrationPriority: "P1",
+      migrationRisk: "medium",
+      fieldCategories: [
+        "safe_generated_now",
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+      ],
+      recommendedMigrationBatch: 10,
+      rationale,
+    },
+  ]),
+);
+
+const BATCH11_TAG_PUNISH_PRIORITY_POLICY = Object.fromEntries(
+  [
+    [
+      "onr_v1_213_private-cybernet-police",
+      "Scored agenda Trace 5 into tag source is derivable, but trace success and score-area action legality remain engine/LegalAction context.",
+    ],
+    [
+      "onr_v1_301_punitive-counterstrike",
+      "Tagged-runner meat-damage payoff is derivable, but visible tag state, prevention and playability remain LegalAction/board context.",
+    ],
+  ].map(([cardId, rationale]) => [
+    cardId,
+    {
+      migrationPriority: "P1",
+      migrationRisk: "medium",
+      fieldCategories: [
+        "safe_generated_now",
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+      ],
+      recommendedMigrationBatch: 11,
+      rationale,
+    },
+  ]),
+);
+
 const PRIORITY_POLICY = {
   ...BATCH7_CORP_ICE_PRIORITY_POLICY,
+  ...BATCH8_CORP_ECONOMY_PRIORITY_POLICY,
+  ...BATCH9_CORP_NODES_PRIORITY_POLICY,
+  ...BATCH10_RUNNER_SURVIVAL_PRIORITY_POLICY,
+  ...BATCH11_TAG_PUNISH_PRIORITY_POLICY,
   "onr_v1_017_deep-thought": {
     migrationPriority: "P2",
     migrationRisk: "medium",
@@ -1026,7 +1474,7 @@ export function buildGeneratedFactMigrationPriorityReport() {
     };
   });
 
-  const batchPlan = [1, 2, 3, 4, 5, 6, 7].map((batch) => ({
+  const batchPlan = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((batch) => ({
     batch,
     title: {
       1: "Scored-agenda and tag/trace/punish generated facts",
@@ -1036,6 +1484,10 @@ export function buildGeneratedFactMigrationPriorityReport() {
       5: "Remaining longtail mechanical facts",
       6: "Runner info, central pressure and access replacement",
       7: "Corp ICE longtail, future, trace, damage and ETR",
+      8: "Corp economy, operation and advance-burst score conversion support",
+      9: "Corp nodes, assets, ambush and economy remotes",
+      10: "Runner prevention, damage and survival tools",
+      11: "Corp tag/punish funnel cross-batch closeout",
     }[batch],
     cardIds: cards
       .filter((card) => card.recommendedMigrationBatch === batch)

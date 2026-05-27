@@ -188,6 +188,7 @@ export function accessCurrentCard(
     resolveAmbushOnAccessFoundation(host, cardId, legalAction);
     host.effects.executeAccessEffects(cardId, legalAction);
     const definition = host.cards.definitionFor(cardId);
+    applyPrearrangedDropAgendaAccess(host, definition, legalAction);
     const freeTrashAccess = canFreeTrashCurrentAccessCard(
       host.accessActions,
       run,
@@ -248,6 +249,7 @@ export function accessCurrentCard(
   resolveAmbushOnAccessFoundation(host, cardId, legalAction);
   host.effects.executeAccessEffects(cardId, legalAction);
   const definition = host.cards.definitionFor(cardId);
+  applyPrearrangedDropAgendaAccess(host, definition, legalAction);
   const freeTrashAccess = canFreeTrashCurrentAccessCard(
     host.accessActions,
     run,
@@ -276,6 +278,23 @@ export function accessCurrentCard(
     serverId: server.id,
     resolvedPayload: legalAction.payload,
     stateChanged: true,
+  };
+}
+
+function applyPrearrangedDropAgendaAccess(
+  host: AccessFlowHost,
+  definition: CardDefinition,
+  legalAction: LegalAction,
+): void {
+  const flags = host.state.runnerTurnFlags;
+  if (!flags?.prearrangedDropPending || definition.type !== "agenda") return;
+  flags.prearrangedDropPending = false;
+  host.state.runner.credits += 6;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    prearrangedDropResolved: true,
+    gainedCredits: Number(legalAction.payload?.gainedCredits ?? 0) + 6,
+    runnerCreditsAfter: host.state.runner.credits,
   };
 }
 
@@ -584,6 +603,12 @@ function trashAccessedCard(
   host.trash.trashCorpInstalledCardToArchives(cardId as CardInstanceId, legalAction);
   if (definition.type === "asset" && host.cards.cardHasSubtype(definition, "node")) {
     host.runner.ensureTurnFlags().trashedNodeThisTurn = true;
+  }
+  if (host.cards.cardHasSubtype(definition, "advertisement")) {
+    host.runner.ensureTurnFlags().trashedAdvertisementThisTurn = true;
+  }
+  if (host.cards.cardHasSubtype(definition, "transactions")) {
+    host.runner.ensureTurnFlags().trashedTransactionsThisTurn = true;
   }
   consumeProteusAccessTrashCounters(host, definition, legalAction);
   if (host.state.run?.breach) {

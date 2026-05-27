@@ -125,6 +125,15 @@ export type RunFlowHost = {
       state: GameState,
       cardId: CardInstanceId,
     ) => number;
+    icebreakerEncounterStrengthBonus: (
+      state: GameState,
+      breakerId: CardInstanceId,
+      encounteredIceId: CardInstanceId,
+    ) => number;
+    permanentIcebreakerStrengthCounterBonus: (
+      state: GameState,
+      breakerId: CardInstanceId,
+    ) => number;
     cardImplementationAccessHookKindsForDefinition: (
       definitionId: CardDefinitionId,
     ) => readonly string[];
@@ -534,6 +543,14 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             : [],
         hostedProgramStrengthModifier: (cardId) =>
           host.cards.hostedProgramStrengthModifier(state, cardId),
+        icebreakerEncounterStrengthBonus: (breakerId, encounteredIceId) =>
+          host.cards.icebreakerEncounterStrengthBonus(
+            state,
+            breakerId,
+            encounteredIceId,
+          ),
+        permanentIcebreakerStrengthCounterBonus: (breakerId) =>
+          host.cards.permanentIcebreakerStrengthCounterBonus(state, breakerId),
         publicServerLabel: (serverId) =>
           host.servers.publicServerLabel(state, serverId),
       },
@@ -740,6 +757,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         definitionFor: (cardId) => host.cards.definitionFor(state, cardId),
         cardInstanceFor: (cardId) => host.cards.cardInstanceFor(state, cardId),
         runnerInstalledCardIds: () => host.cards.runnerInstalledCardIds(state),
+        effectiveSubtypesForCard: (cardId, definition) =>
+          host.cards.effectiveSubtypesForCard(state, cardId, definition),
       },
       servers: {
         mustServer: (serverId) => host.servers.mustServer(state, serverId),
@@ -1106,6 +1125,14 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       draw: {
         drawCorpCards: (count) => host.callbacks.drawCorpCards(state, count),
+      },
+      trash: {
+        trashCorpInstalledCardToArchives: (cardId, legalAction) =>
+          host.zones.trashCorpInstalledCardToArchives(
+            state,
+            cardId,
+            legalAction,
+          ),
       },
       rng: {
         shuffleStateIds: (ids, purpose) =>

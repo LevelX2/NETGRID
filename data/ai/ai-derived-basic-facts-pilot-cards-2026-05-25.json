@@ -3,93 +3,47 @@
   "scope": "Read-only 24-card pilot for mechanically derivable AI basic facts from CardImplementation files. No automatic expansion in this slice.",
   "cards": [
     {
-      "cardId": "onr_v1_037_japanese-water-torture",
-      "title": "Japanese Water Torture",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Breaker coverage and the forgo_actions side-effect comparison are derivable; future action debt is represented as a structured breaker side effect for the read-only gate."
-    },
-    {
-      "cardId": "onr_v1_039_krash",
-      "title": "Krash",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/krash.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:universal"],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Universal breaker profile and costs are directly represented in CardImplementation icebreaker abilities."
-    },
-    {
-      "cardId": "onr_v1_074_worm",
-      "title": "Worm",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/worm.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Wall breaker coverage and break/pump costs are directly represented in CardImplementation icebreaker abilities."
-    },
-    {
-      "cardId": "onr_v1_047_pile-driver",
-      "title": "Pile Driver",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/pile-driver.ts",
+      "cardId": "onr_v1_002_ai-boon",
+      "title": "AI Boon",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/ai-boon.ts",
       "expectedDerivableKinds": [
         "effect:breaker",
-        "breakerCoverage:wall",
-        "breakerSideEffect:stealth_loss"
+        "breakerCoverage:sentry",
+        "breakerSideEffect:random_failure"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Wall breaker coverage and noisy stealth-loss side effect are directly represented."
+      "rationale": "Sentry breaker coverage and random run-start strength context are directly represented."
     },
     {
-      "cardId": "onr_v1_014_codecracker",
-      "title": "Codecracker",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/codecracker.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "cardId": "onr_v1_004_bakdoor",
+      "title": "Bakdoor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/bakdoor.ts",
+      "expectedDerivableKinds": [
+        "effect:base_link",
+        "effect:link",
+        "effect:trace_defense",
+        "condition:requires_trace_attempt"
+      ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Code-gate breaker coverage and costs are directly represented."
+      "rationale": "Base-link and trace-window link boost are mechanical trace-defense facts; actual trace outcome remains LegalAction/engine context."
     },
     {
-      "cardId": "onr_v1_016_cyfermaster",
-      "title": "Cyfermaster",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/cyfermaster.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+      "title": "Bartmoss Memorial Icebreaker",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/bartmoss-memorial-icebreaker.ts",
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:universal",
+        "breakerSideEffect:random_failure",
+        "breakerSideEffect:program_trash_risk"
+      ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Code-gate breaker coverage and costs are directly represented; catalog title uses the printed trademark suffix."
-    },
-    {
-      "cardId": "onr_v1_052_raffles",
-      "title": "Raffles",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/raffles.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Code-gate breaker coverage and costs are directly represented."
-    },
-    {
-      "cardId": "onr_v1_054_raptor",
-      "title": "Raptor",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/raptor.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Sentry breaker coverage and costs are directly represented."
-    },
-    {
-      "cardId": "onr_v1_060_shaka",
-      "title": "Shaka",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shaka.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Sentry breaker coverage and costs are directly represented."
+      "rationale": "Universal breaker coverage and post-encounter self-trash risk are directly represented."
     },
     {
       "cardId": "onr_v1_006_black-dahlia",
       "title": "Black Dahlia",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/black-dahlia.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Sentry breaker coverage and costs are directly represented."
-    },
-    {
-      "cardId": "onr_v1_040_loony-goon",
-      "title": "Loony Goon",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/loony-goon.ts",
       "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
       "expectedManualOverlayNeeded": false,
       "rationale": "Sentry breaker coverage and costs are directly represented."
@@ -108,6 +62,41 @@
       "rationale": "Universal random breaker coverage and once-per-subroutine/random-failure context are directly represented; generated facts do not imply deterministic break safety."
     },
     {
+      "cardId": "onr_v1_008_boardwalk",
+      "title": "Boardwalk",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/boardwalk.ts",
+      "expectedDerivableKinds": [
+        "effect:hq_info",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-HQ-run counters and start-turn random HQ reveal are mechanically derivable as gated HQ-info context; generated facts do not expose hidden HQ identities."
+    },
+    {
+      "cardId": "onr_v1_014_codecracker",
+      "title": "Codecracker",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/codecracker.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_016_cyfermaster",
+      "title": "Cyfermaster",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/cyfermaster.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented; catalog title uses the printed trademark suffix."
+    },
+    {
+      "cardId": "onr_v1_017_deep-thought",
+      "title": "Deep Thought",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/deep-thought.ts",
+      "expectedDerivableKinds": ["effect:topdeck_info"],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Topdeck information is derivable; R&D-pressure and interface-pressure conditions remain intentionally manual strategic overlay."
+    },
+    {
       "cardId": "onr_v1_019_dropp",
       "title": "Dropp",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/dropp.ts",
@@ -120,80 +109,133 @@
       "rationale": "Universal breaker coverage and ends-run side effect are directly represented; catalog title uses the printed trademark suffix."
     },
     {
-      "cardId": "onr_v1_056_replicator",
-      "title": "Replicator",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/replicator.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:trace"],
+      "cardId": "onr_v1_022_emergency-self-construct",
+      "title": "Emergency Self-Construct",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/emergency-self-construct.ts",
+      "expectedDerivableKinds": [
+        "effect:flatline_prevention",
+        "effect:prevention_replacement",
+        "effect:remove_brain_damage",
+        "effect:meat_damage_prevention",
+        "effect:action_penalty",
+        "effect:hand_size_modifier",
+        "effect:persistent_survival_modifier",
+        "condition:requires_flatline",
+        "condition:requires_prevention_window"
+      ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Trace-subroutine breaker coverage is directly represented and must not be normalized to universal coverage."
+      "rationale": "Flatline replacement, brain-damage removal, meat-damage prevention and persistent penalties are represented without asserting current flatline safety."
     },
     {
-      "cardId": "onr_v1_055_reflector",
-      "title": "Reflector",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/reflector.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:ap"],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Stun/hellbolt/knockout breaker coverage is represented as AP-special coverage and must not be normalized to universal coverage."
-    },
-    {
-      "cardId": "onr_v1_002_ai-boon",
-      "title": "AI Boon",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/ai-boon.ts",
+      "cardId": "onr_v1_023_evil-twin",
+      "title": "Evil Twin",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/evil-twin.ts",
       "expectedDerivableKinds": [
         "effect:breaker",
         "breakerCoverage:sentry",
-        "breakerSideEffect:random_failure"
+        "effect:damage_prevention",
+        "effect:net_damage_prevention",
+        "effect:brain_damage_prevention",
+        "condition:requires_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Sentry breaker coverage and random run-start strength context are directly represented."
+      "rationale": "Sentry breaker and per-turn net/brain prevention are separate mechanical facts; no current break or prevention legality is generated."
     },
     {
-      "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
-      "title": "Bartmoss Memorial Icebreaker",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/bartmoss-memorial-icebreaker.ts",
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "title": "Expert Schedule Analyzer",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/expert-schedule-analyzer.ts",
       "expectedDerivableKinds": [
-        "effect:breaker",
-        "breakerCoverage:universal",
-        "breakerSideEffect:random_failure",
-        "breakerSideEffect:program_trash_risk"
+        "effect:hq_info",
+        "condition:requires_accessed_card"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Universal breaker coverage and post-encounter self-trash risk are directly represented."
+      "rationale": "Post-access HQ look is mechanically derivable as access-context information; generated facts never contain hidden HQ card identities."
     },
     {
-      "cardId": "onr_v1_070_tinweasel",
-      "title": "Tinweasel",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/tinweasel.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "cardId": "onr_v1_028_force-shield",
+      "title": "Force Shield",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/force-shield.ts",
+      "expectedDerivableKinds": [
+        "effect:damage_prevention",
+        "effect:net_damage_prevention",
+        "effect:brain_damage_prevention",
+        "condition:requires_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available"
+      ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Code-gate breaker coverage is directly represented; no pump text is a mechanical restriction kept as comparison context."
+      "rationale": "Per-turn net/brain damage prevention is represented as window-limited mechanical prevention, not damage immunity."
     },
     {
-      "cardId": "onr_v1_073_wizards-book",
-      "title": "Wizard's Book",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/wizards-book.ts",
-      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "cardId": "onr_v1_032_i-spy",
+      "title": "I Spy",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/i-spy.ts",
+      "expectedDerivableKinds": [
+        "effect:expose_info",
+        "condition:requires_successful_run"
+      ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Code-gate breaker coverage and costs are directly represented; catalog title uses a typographic apostrophe."
+      "rationale": "Successful-run fort counter exposing installed cards is mechanically derivable as remote information; actual targets stay board-context."
     },
     {
-      "cardId": "onr_v1_072_wild-card",
-      "title": "Wild Card",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/wild-card.ts",
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Breaker coverage and the forgo_actions side-effect comparison are derivable; future action debt is represented as a structured breaker side effect for the read-only gate."
+    },
+    {
+      "cardId": "onr_v1_038_joan-of-arc",
+      "title": "Joan of Arc",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/joan-of-arc.ts",
+      "expectedDerivableKinds": [
+        "effect:program_trash_prevention",
+        "condition:requires_program_trash",
+        "condition:requires_installed_program",
+        "condition:requires_prevention_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Program-trash prevention is limited to other installed programs and remains payment/window-contextual."
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/krash.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:universal"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Universal breaker profile and costs are directly represented in CardImplementation icebreaker abilities."
+    },
+    {
+      "cardId": "onr_v1_040_loony-goon",
+      "title": "Loony Goon",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/loony-goon.ts",
       "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
       "expectedManualOverlayNeeded": false,
       "rationale": "Sentry breaker coverage and costs are directly represented."
     },
     {
-      "cardId": "onr_v1_059_self-modifying-code",
-      "title": "Self-Modifying Code",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/self-modifying-code.ts",
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/microtech-ai-interface.ts",
       "expectedDerivableKinds": [
-        "effect:search",
-        "condition:requires_during_run"
+        "effect:topdeck_info",
+        "effect:zone_shuffle",
+        "condition:requires_accessed_card"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Search timing and target profile are derivable; installation uses normal cost handling, so this card does not carry an install_discount basic fact."
+      "rationale": "R&D pre-access cut/top manipulation is mechanically derivable as hidden-zone context; generated facts do not reveal actual R&D order or create central-run priority."
+    },
+    {
+      "cardId": "onr_v1_042_mouse",
+      "title": "Mouse",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/mouse.ts",
+      "expectedDerivableKinds": ["effect:expose_info"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated expose of a card inside a data fort is mechanically derivable as installed-card information, not hidden-info leakage."
     },
     {
       "cardId": "onr_v1_043_mystery-box",
@@ -209,17 +251,21 @@
       "rationale": "Top-of-stack search, show-to-Corp target profile, free program install and once-per-run usage limit are derivable in the read-only target profile."
     },
     {
+      "cardId": "onr_v1_047_pile-driver",
+      "title": "Pile Driver",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/pile-driver.ts",
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:wall",
+        "breakerSideEffect:stealth_loss"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Wall breaker coverage and noisy stealth-loss side effect are directly represented."
+    },
+    {
       "cardId": "onr_v1_048_poltergeist",
       "title": "Poltergeist",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/poltergeist.ts",
-      "expectedDerivableKinds": ["effect:trash_credit"],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Restricted hosted trash-credit source is directly represented."
-    },
-    {
-      "cardId": "onr_v1_057_scatter-shot",
-      "title": "Scatter Shot",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/scatter-shot.ts",
       "expectedDerivableKinds": ["effect:trash_credit"],
       "expectedManualOverlayNeeded": false,
       "rationale": "Restricted hosted trash-credit source is directly represented."
@@ -237,35 +283,182 @@
       "rationale": "Successful-run access replacement and private R&D look are directly represented."
     },
     {
-      "cardId": "onr_v1_017_deep-thought",
-      "title": "Deep Thought",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/deep-thought.ts",
-      "expectedDerivableKinds": ["effect:topdeck_info"],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Topdeck information is derivable; R&D-pressure and interface-pressure conditions remain intentionally manual strategic overlay."
-    },
-    {
-      "cardId": "onr_v1_041_microtech-ai-interface",
-      "title": "Microtech AI Interface",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/microtech-ai-interface.ts",
+      "cardId": "onr_v1_051_rabbit",
+      "title": "Rabbit",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/rabbit.ts",
       "expectedDerivableKinds": [
-        "effect:topdeck_info",
-        "effect:zone_shuffle",
-        "condition:requires_accessed_card"
+        "effect:trace_defense",
+        "condition:requires_trace_attempt"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "R&D pre-access cut/top manipulation is mechanically derivable as hidden-zone context; generated facts do not reveal actual R&D order or create central-run priority."
+      "rationale": "Trace limit reduction is mechanical trace defense; it does not guarantee trace success for the Runner."
     },
     {
-      "cardId": "onr_v1_085_executive-wiretaps",
-      "title": "Executive Wiretaps",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/executive-wiretaps.ts",
+      "cardId": "onr_v1_052_raffles",
+      "title": "Raffles",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/raffles.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_054_raptor",
+      "title": "Raptor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/raptor.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_055_reflector",
+      "title": "Reflector",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/reflector.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:ap"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Stun/hellbolt/knockout breaker coverage is represented as AP-special coverage and must not be normalized to universal coverage."
+    },
+    {
+      "cardId": "onr_v1_056_replicator",
+      "title": "Replicator",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/replicator.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:trace"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-subroutine breaker coverage is directly represented and must not be normalized to universal coverage."
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/scatter-shot.ts",
+      "expectedDerivableKinds": ["effect:trash_credit"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Restricted hosted trash-credit source is directly represented."
+    },
+    {
+      "cardId": "onr_v1_058_seeya",
+      "title": "SeeYa",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/seeya.ts",
+      "expectedDerivableKinds": ["effect:expose_info"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated expose of an installed card is mechanically derivable as installed-card information, not a strategic remote-contest decision."
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/self-modifying-code.ts",
+      "expectedDerivableKinds": [
+        "effect:search",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Search timing and target profile are derivable; installation uses normal cost handling, so this card does not carry an install_discount basic fact."
+    },
+    {
+      "cardId": "onr_v1_060_shaka",
+      "title": "Shaka",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shaka.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_061_shield",
+      "title": "Shield",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shield.ts",
+      "expectedDerivableKinds": [
+        "effect:damage_prevention",
+        "effect:net_damage_prevention",
+        "condition:requires_damage",
+        "condition:requires_net_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Per-turn net damage prevention is represented as window-limited mechanical prevention, not damage immunity."
+    },
+    {
+      "cardId": "onr_v1_062_shredder-uplink-protocol",
+      "title": "Shredder Uplink Protocol",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shredder-uplink-protocol.ts",
+      "expectedDerivableKinds": [
+        "effect:access_replacement",
+        "condition:requires_successful_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Archive run access override to successful HQ-run context is mechanically derivable as central access replacement, not normal Archives access."
+    },
+    {
+      "cardId": "onr_v1_063_signpost",
+      "title": "Signpost",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/signpost.ts",
+      "expectedDerivableKinds": [
+        "effect:link",
+        "effect:trace_defense",
+        "condition:requires_trace_attempt"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Post-bid link boost is mechanical trace defense; actual trace outcome remains LegalAction/engine context."
+    },
+    {
+      "cardId": "onr_v1_065_smarteye",
+      "title": "Smarteye",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/smarteye.ts",
+      "expectedDerivableKinds": [
+        "effect:expose_info",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Approach-unrezzed-ICE expose before rez is mechanically derivable as run-context information; generated facts do not reveal ICE identity before the legal effect."
+    },
+    {
+      "cardId": "onr_v1_070_tinweasel",
+      "title": "Tinweasel",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/tinweasel.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage is directly represented; no pump text is a mechanical restriction kept as comparison context."
+    },
+    {
+      "cardId": "onr_v1_072_wild-card",
+      "title": "Wild Card",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/wild-card.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:sentry"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker coverage and costs are directly represented."
+    },
+    {
+      "cardId": "onr_v1_073_wizards-book",
+      "title": "Wizard's Book",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/wizards-book.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:code_gate"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate breaker coverage and costs are directly represented; catalog title uses a typographic apostrophe."
+    },
+    {
+      "cardId": "onr_v1_074_worm",
+      "title": "Worm",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/worm.ts",
+      "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Wall breaker coverage and break/pump costs are directly represented in CardImplementation icebreaker abilities."
+    },
+    {
+      "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+      "title": "Bodyweight Synthetic Blood",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
+      "expectedDerivableKinds": ["effect:draw"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Burst draw is a mechanical hand-refill/survival-adjacent fact without hidden stack identity."
+    },
+    {
+      "cardId": "onr_v1_081_custodial-position",
+      "title": "Custodial Position",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/custodial-position.ts",
       "expectedDerivableKinds": [
         "effect:multiaccess",
         "condition:requires_successful_run"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "HQ run event and additional HQ access count are mechanically derivable; strategic HQ pressure remains overlay/consumer context."
+      "rationale": "R&D run event and additional R&D access count are mechanically derivable; actual access value remains board/hidden-zone context."
     },
     {
       "cardId": "onr_v1_084_edited-shipping-manifests",
@@ -281,110 +474,123 @@
       "rationale": "HQ access replacement, runner credit gain and self-tag are mechanically derivable; generated facts do not value the central pressure line."
     },
     {
-      "cardId": "onr_v1_081_custodial-position",
-      "title": "Custodial Position",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/custodial-position.ts",
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "title": "Executive Wiretaps",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/executive-wiretaps.ts",
       "expectedDerivableKinds": [
         "effect:multiaccess",
         "condition:requires_successful_run"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "R&D run event and additional R&D access count are mechanically derivable; actual access value remains board/hidden-zone context."
+      "rationale": "HQ run event and additional HQ access count are mechanically derivable; strategic HQ pressure remains overlay/consumer context."
     },
     {
-      "cardId": "onr_v1_024_expert-schedule-analyzer",
-      "title": "Expert Schedule Analyzer",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/expert-schedule-analyzer.ts",
+      "cardId": "onr_v1_116_total-genetic-retrofit",
+      "title": "Total Genetic Retrofit",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/total-genetic-retrofit.ts",
       "expectedDerivableKinds": [
-        "effect:hq_info",
-        "condition:requires_accessed_card"
+        "effect:tag_prevention",
+        "effect:survival_payoff",
+        "condition:requires_runner_tagged",
+        "condition:requires_prevention_window"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Post-access HQ look is mechanically derivable as access-context information; generated facts never contain hidden HQ card identities."
+      "rationale": "Tag removal and next-tag avoidance are represented without asserting the Runner is currently untagged."
     },
     {
-      "cardId": "onr_v1_008_boardwalk",
-      "title": "Boardwalk",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/boardwalk.ts",
+      "cardId": "onr_v1_133_militech-mram-chip",
+      "title": "Militech MRAM Chip",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/militech-mram-chip.ts",
       "expectedDerivableKinds": [
-        "effect:hq_info",
-        "condition:requires_successful_run"
+        "effect:hand_size_modifier",
+        "condition:requires_installed_card"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Successful-HQ-run counters and start-turn random HQ reveal are mechanically derivable as gated HQ-info context; generated facts do not expose hidden HQ identities."
+      "rationale": "Installed hand-size increase is a visible survival modifier; current hand contents remain hidden state."
     },
     {
-      "cardId": "onr_v1_062_shredder-uplink-protocol",
-      "title": "Shredder Uplink Protocol",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shredder-uplink-protocol.ts",
+      "cardId": "onr_v1_134_mram-chip",
+      "title": "MRAM Chip",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/mram-chip.ts",
       "expectedDerivableKinds": [
-        "effect:access_replacement",
-        "condition:requires_successful_run"
+        "effect:hand_size_modifier",
+        "condition:requires_installed_card"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Archive run access override to successful HQ-run context is mechanically derivable as central access replacement, not normal Archives access."
+      "rationale": "Installed hand-size increase is a visible survival modifier; current hand contents remain hidden state."
     },
     {
-      "cardId": "onr_v1_032_i-spy",
-      "title": "I Spy",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/i-spy.ts",
+      "cardId": "onr_v1_135_nasuko-cycle",
+      "title": "Nasuko Cycle",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/nasuko-cycle.ts",
       "expectedDerivableKinds": [
-        "effect:expose_info",
-        "condition:requires_successful_run"
+        "effect:tag_prevention",
+        "condition:requires_prevention_window"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Successful-run fort counter exposing installed cards is mechanically derivable as remote information; actual targets stay board-context."
+      "rationale": "Paid tag avoidance is mechanical prevention-window context, not a current untagged state."
     },
     {
-      "cardId": "onr_v1_042_mouse",
-      "title": "Mouse",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/mouse.ts",
-      "expectedDerivableKinds": ["effect:expose_info"],
+      "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+      "title": "Crash Everett, Inventive Fixer",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/crash-everett-inventive-fixer.ts",
+      "expectedDerivableKinds": ["effect:draw", "effect:survival_payoff"],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Activated expose of a card inside a data fort is mechanically derivable as installed-card information, not hidden-info leakage."
+      "rationale": "Extra draw and choose-trash/top replacement are represented as hand-refill context without hidden stack identity."
     },
     {
-      "cardId": "onr_v1_058_seeya",
-      "title": "SeeYa",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/seeya.ts",
-      "expectedDerivableKinds": ["effect:expose_info"],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Activated expose of an installed card is mechanically derivable as installed-card information, not a strategic remote-contest decision."
-    },
-    {
-      "cardId": "onr_v1_065_smarteye",
-      "title": "Smarteye",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/smarteye.ts",
+      "cardId": "onr_v1_161_fall-guy",
+      "title": "Fall Guy",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/fall-guy.ts",
       "expectedDerivableKinds": [
-        "effect:expose_info",
-        "condition:requires_during_run"
+        "effect:tag_prevention",
+        "condition:requires_prevention_window"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Approach-unrezzed-ICE expose before rez is mechanically derivable as run-context information; generated facts do not reveal ICE identity before the legal effect."
+      "rationale": "Trash-to-avoid-tag is mechanical prevention-window context, not a current untagged state."
     },
     {
-      "cardId": "onr_v1_210_political-overthrow",
-      "title": "Political Overthrow",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",
+      "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "title": "AI Chief Financial Officer",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/ai-chief-financial-officer.ts",
       "expectedDerivableKinds": [
-        "effect:scored_agenda_action",
-        "effect:economy",
+        "effect:shuffle_draw",
+        "effect:zone_shuffle",
+        "effect:draw",
         "condition:requires_scored_agenda"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Scored agenda activated economy is directly represented."
+      "rationale": "Shuffle/draw score-area effect is derivable without hidden HQ/Archives/R&D ordering. Batch 8 subbatch: scored_agenda_economy."
     },
     {
-      "cardId": "onr_v1_193_corporate-coup",
-      "title": "Corporate Coup",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-coup.ts",
+      "cardId": "onr_v1_189_artificial-security-directors",
+      "title": "Artificial Security Directors",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/artificial-security-directors.ts",
       "expectedDerivableKinds": [
-        "effect:scored_agenda_action",
-        "effect:counter_economy",
-        "condition:requires_scored_agenda"
+        "effect:score_acceleration",
+        "effect:global_modifier"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Scored agenda hosted-credit economy is directly represented."
+      "rationale": "Black-Ops agenda difficulty reduction is a mechanical score-conversion support fact. Batch 8 subbatch: score_conversion_support."
+    },
+    {
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "title": "Bioweapons Engineering",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/bioweapons-engineering.ts",
+      "expectedDerivableKinds": ["effect:global_modifier"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Meat-damage modifier is mechanically derivable as persistent/global context. Batch 8 subbatch: global_research_modifier."
+    },
+    {
+      "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "title": "Black Ice Quality Assurance",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/black-ice-quality-assurance.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "effect:global_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Black-ICE strength modifier is mechanically derivable as persistent scored-agenda context. Batch 8 subbatch: global_research_modifier."
     },
     {
       "cardId": "onr_v1_192_corporate-boon",
@@ -399,6 +605,82 @@
       "rationale": "Scored agenda extra-action activation is directly represented."
     },
     {
+      "cardId": "onr_v1_193_corporate-coup",
+      "title": "Corporate Coup",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-coup.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:counter_economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda hosted-credit economy is directly represented."
+    },
+    {
+      "cardId": "onr_v1_194_corporate-downsizing",
+      "title": "Corporate Downsizing",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-downsizing.ts",
+      "expectedDerivableKinds": [
+        "effect:agenda_reveal_economy",
+        "effect:economy",
+        "effect:zone_shuffle",
+        "condition:requires_agenda_in_hq",
+        "condition:requires_agenda_reveal"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "HQ-agenda reveal economy and shuffle are derivable, while hidden HQ identities remain out of generated facts. Batch 8 subbatch: when_scored_economy_or_rez."
+    },
+    {
+      "cardId": "onr_v1_195_corporate-retreat",
+      "title": "Corporate Retreat",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-retreat.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Score-area economy action is derivable; disable-on-install/rez state remains engine context. Batch 8 subbatch: scored_agenda_economy."
+    },
+    {
+      "cardId": "onr_v1_196_corporate-war",
+      "title": "Corporate War",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-war.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:counter_economy",
+        "condition:requires_corp_credits_threshold"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Threshold-gated credit swing is mechanically derivable without asserting current credit state. Batch 8 subbatch: when_scored_economy_or_rez."
+    },
+    {
+      "cardId": "onr_v1_197_data-fort-reclamation",
+      "title": "Data Fort Reclamation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/data-fort-reclamation.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:remote_build",
+        "effect:install",
+        "effect:rez",
+        "condition:requires_hq_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Temporary credits and HQ-based remote build are derivable, while hidden HQ choice remains LegalAction context. Batch 8 subbatch: when_scored_economy_or_rez."
+    },
+    {
+      "cardId": "onr_v1_198_detroit-police-contract",
+      "title": "Detroit Police Contract",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/detroit-police-contract.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "condition:requires_start_of_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Finite hosted credit pool and start-turn payout are mechanically derivable; remaining pool is board state. Batch 8 subbatch: scored_agenda_economy."
+    },
+    {
       "cardId": "onr_v1_199_employee-empowerment",
       "title": "Employee Empowerment",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/employee-empowerment.ts",
@@ -409,6 +691,76 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Scored agenda draw activation is directly represented; the start-of-turn additional draw is derived from the exact implementation card-text comment."
+    },
+    {
+      "cardId": "onr_v1_200_encryption-breakthrough",
+      "title": "Encryption Breakthrough",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/encryption-breakthrough.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "effect:global_modifier",
+        "effect:economy",
+        "condition:requires_installed_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Code-gate strength modifier and reveal-for-credits economy are mechanically derivable with board context. Batch 8 subbatch: global_research_modifier."
+    },
+    {
+      "cardId": "onr_v1_201_executive-extraction",
+      "title": "Executive Extraction",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/executive-extraction.ts",
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "effect:global_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Gray-Ops agenda difficulty reduction is a mechanical score-conversion support fact. Batch 8 subbatch: score_conversion_support."
+    },
+    {
+      "cardId": "onr_v1_202_genetics-visionary-acquisition",
+      "title": "Genetics-Visionary Acquisition",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/genetics-visionary-acquisition.ts",
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "effect:global_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Research agenda difficulty reduction is a mechanical score-conversion support fact. Batch 8 subbatch: score_conversion_support."
+    },
+    {
+      "cardId": "onr_v1_203_hostile-takeover",
+      "title": "Hostile Takeover",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/hostile-takeover.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "condition:requires_score_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "When-scored credit gain is a deterministic mechanical fact. Batch 8 subbatch: when_scored_economy_or_rez."
+    },
+    {
+      "cardId": "onr_v1_204_ice-transmutation",
+      "title": "Ice Transmutation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/ice-transmutation.ts",
+      "expectedDerivableKinds": [
+        "effect:global_modifier",
+        "effect:remote_protection",
+        "condition:requires_rezzed_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Rezzed-ICE strength/subroutine modifier is mechanically derivable with target/board context. Batch 8 subbatch: global_research_modifier."
+    },
+    {
+      "cardId": "onr_v1_206_marine-arcology",
+      "title": "Marine Arcology",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/marine-arcology.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Score-area economy action is directly represented and remains LegalAction-gated. Batch 8 subbatch: scored_agenda_economy."
     },
     {
       "cardId": "onr_v1_207_netwatch-operations-office",
@@ -439,6 +791,91 @@
       "rationale": "Scored agenda tagged-runner damage payoff is directly represented."
     },
     {
+      "cardId": "onr_v1_209_political-coup",
+      "title": "Political Coup",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-coup.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Finite hosted credit pool and score-area payout action are mechanically derivable; remaining pool is board state. Batch 8 subbatch: scored_agenda_economy."
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "title": "Political Overthrow",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:economy",
+        "condition:requires_scored_agenda"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Scored agenda activated economy is directly represented."
+    },
+    {
+      "cardId": "onr_v1_211_polymer-breakthrough",
+      "title": "Polymer Breakthrough",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/polymer-breakthrough.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "condition:requires_start_of_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Start-of-turn credit economy is mechanically derivable from lifecycle effects. Batch 8 subbatch: when_scored_economy_or_rez."
+    },
+    {
+      "cardId": "onr_v1_212_priority-requisition",
+      "title": "Priority Requisition",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/priority-requisition.ts",
+      "expectedDerivableKinds": [
+        "effect:rez_discount",
+        "effect:rez",
+        "condition:requires_score_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Free ICE rez is derivable as a when-scored rez/discount fact, with target/legal choice staying engine-owned. Batch 8 subbatch: when_scored_economy_or_rez."
+    },
+    {
+      "cardId": "onr_v1_213_private-cybernet-police",
+      "title": "Private Cybernet Police",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/private-cybernet-police.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_scored_agenda",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Batch 11 tag/punish funnel: scored agenda action starts Trace 5 and gives the Runner a tag only on trace success; LegalActions and trace bidding remain engine-owned."
+    },
+    {
+      "cardId": "onr_v1_215_security-net-optimization",
+      "title": "Security Net Optimization",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/security-net-optimization.ts",
+      "expectedDerivableKinds": [
+        "effect:global_modifier",
+        "condition:requires_remote_server"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Fort ICE strength modifier is mechanically derivable with selected-server context. Batch 8 subbatch: global_research_modifier."
+    },
+    {
+      "cardId": "onr_v1_216_security-purge",
+      "title": "Security Purge",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/security-purge.ts",
+      "expectedDerivableKinds": [
+        "effect:topdeck_info",
+        "effect:install",
+        "effect:rez_discount",
+        "condition:requires_rnd_top"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "R&D top-three reveal/install/rez is derivable as hidden-zone context without actual R&D order. Batch 8 subbatch: when_scored_economy_or_rez."
+    },
+    {
       "cardId": "onr_v1_217_strike-force-kali",
       "title": "Strike Force Kali",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/strike-force-kali.ts",
@@ -453,41 +890,41 @@
       "rationale": "Scored agenda tagged-runner damage payoff is directly represented."
     },
     {
-      "cardId": "onr_v1_274_tutor",
-      "title": "Tutor",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/tutor.ts",
+      "cardId": "onr_v1_218_subsidiary-branch",
+      "title": "Subsidiary Branch",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/subsidiary-branch.ts",
       "expectedDerivableKinds": [
-        "effect:future_run_effect",
+        "effect:extra_action",
+        "condition:requires_start_of_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Start-of-turn extra action is mechanically derivable; action use remains LegalAction context. Batch 8 subbatch: score_conversion_support."
+    },
+    {
+      "cardId": "onr_v1_219_superior-net-barriers",
+      "title": "Superior Net Barriers",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/superior-net-barriers.ts",
+      "expectedDerivableKinds": [
         "effect:remote_protection",
-        "condition:requires_during_run"
+        "effect:global_modifier",
+        "effect:economy",
+        "condition:requires_installed_ice"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Future-run additional-subroutine semantics are derivable at a coarse level."
+      "rationale": "Wall strength modifier and reveal-for-credits economy are mechanically derivable with board context. Batch 8 subbatch: global_research_modifier."
     },
     {
-      "cardId": "onr_v1_277_virizz",
-      "title": "Virizz",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/virizz.ts",
+      "cardId": "onr_v1_221_asp",
+      "title": "Asp",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/asp.ts",
       "expectedDerivableKinds": [
-        "effect:future_run_effect",
-        "effect:run_tax",
-        "condition:requires_during_run"
+        "effect:trace",
+        "effect:run_lock",
+        "effect:etr",
+        "condition:requires_trace_success"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Future-run break-cost modifier semantics are derivable at a coarse level."
-    },
-    {
-      "cardId": "onr_v1_276_viral-15",
-      "title": "Viral 15",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/viral-15.ts",
-      "expectedDerivableKinds": [
-        "effect:future_run_effect",
-        "effect:run_tax",
-        "effect:program_trash",
-        "condition:requires_during_run"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Future-run, jack-out tax and program-trash semantics are mechanically derivable at coarse gate granularity."
+      "rationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
     },
     {
       "cardId": "onr_v1_222_ball-and-chain",
@@ -500,6 +937,32 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Run-duration encounter tax is mechanically derivable as future-run/runpath pressure; actual path cost remains effectiveRunQuote context."
+    },
+    {
+      "cardId": "onr_v1_223_banpei",
+      "title": "Banpei",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/banpei.ts",
+      "expectedDerivableKinds": [
+        "effect:program_trash",
+        "effect:etr",
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Program trash plus ETR subroutines are mechanically derivable; target selection and break legality remain encounter context."
+    },
+    {
+      "cardId": "onr_v1_224_bolter-cluster",
+      "title": "Bolter Cluster",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/bolter-cluster.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:future_encounter_effect",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
     },
     {
       "cardId": "onr_v1_225_canis-major",
@@ -526,93 +989,18 @@
       "rationale": "Run-duration ICE-strength modifier is mechanically derivable; concrete break cost remains board, encounter and effectiveRunQuote context."
     },
     {
-      "cardId": "onr_v1_224_bolter-cluster",
-      "title": "Bolter Cluster",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/bolter-cluster.ts",
+      "cardId": "onr_v1_227_cerberus",
+      "title": "Cerberus",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/cerberus.ts",
       "expectedDerivableKinds": [
         "effect:damage",
-        "effect:future_encounter_effect",
-        "condition:requires_later_encounter",
-        "condition:requires_remaining_ice"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
-    },
-    {
-      "cardId": "onr_v1_258_neural-blade",
-      "title": "Neural Blade",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/neural-blade.ts",
-      "expectedDerivableKinds": [
-        "effect:damage",
-        "effect:future_encounter_effect",
-        "condition:requires_later_encounter",
-        "condition:requires_remaining_ice"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
-    },
-    {
-      "cardId": "onr_v1_268_shock-r",
-      "title": "Shock.r",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/shock-r.ts",
-      "expectedDerivableKinds": [
-        "effect:future_encounter_effect",
-        "effect:no_jack_out",
-        "condition:requires_later_encounter",
-        "condition:requires_remaining_ice"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Next-ICE break/jack-out restriction is mechanically derivable; generated facts do not create current ICE self-safety."
-    },
-    {
-      "cardId": "onr_v1_243_fetch-4-0-1",
-      "title": "Fetch 4.0.1",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fetch-4-0-1.ts",
-      "expectedDerivableKinds": [
         "effect:trace",
-        "effect:tag_source",
-        "condition:requires_trace_success"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Trace-to-tag ICE subroutine is mechanically derivable; tag application remains trace-success gated."
-    },
-    {
-      "cardId": "onr_v1_249_hunter",
-      "title": "Hunter",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/hunter.ts",
-      "expectedDerivableKinds": [
-        "effect:trace",
-        "effect:tag_source",
-        "condition:requires_trace_success"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Trace-to-tag ICE subroutine is mechanically derivable; tag application remains trace-success gated."
-    },
-    {
-      "cardId": "onr_v1_236_data-raven",
-      "title": "Data Raven",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/data-raven.ts",
-      "expectedDerivableKinds": [
-        "effect:trace",
-        "effect:tag_source",
         "effect:persistent_counter_effect",
+        "effect:etr",
         "condition:requires_trace_success"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Trace-to-tag and hosted counter punishment are mechanically derivable; generated facts do not assert current counter state."
-    },
-    {
-      "cardId": "onr_v1_223_banpei",
-      "title": "Banpei",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/banpei.ts",
-      "expectedDerivableKinds": [
-        "effect:program_trash",
-        "effect:etr",
-        "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Program trash plus ETR subroutines are mechanically derivable; target selection and break legality remain encounter context."
+      "rationale": "Damage, trace-success counter context and ETR are mechanically derivable; generated facts do not assert current counter state."
     },
     {
       "cardId": "onr_v1_228_cinderella",
@@ -642,18 +1030,17 @@
       "rationale": "Damage plus ETR subroutines are mechanically derivable; legacy active hint shape is normalized in the read-only closeout."
     },
     {
-      "cardId": "onr_v1_227_cerberus",
-      "title": "Cerberus",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/cerberus.ts",
+      "cardId": "onr_v1_234_data-darts",
+      "title": "Data Darts",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/data-darts.ts",
       "expectedDerivableKinds": [
         "effect:damage",
-        "effect:trace",
-        "effect:persistent_counter_effect",
-        "effect:etr",
-        "condition:requires_trace_success"
+        "effect:future_encounter_effect",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Damage, trace-success counter context and ETR are mechanically derivable; generated facts do not assert current counter state."
+      "rationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
     },
     {
       "cardId": "onr_v1_235_data-naga",
@@ -669,6 +1056,45 @@
       "rationale": "Program trash plus ETR subroutines are mechanically derivable; target selection and break legality remain encounter context."
     },
     {
+      "cardId": "onr_v1_236_data-raven",
+      "title": "Data Raven",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/data-raven.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "effect:persistent_counter_effect",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag and hosted counter punishment are mechanically derivable; generated facts do not assert current counter state."
+    },
+    {
+      "cardId": "onr_v1_240_fang",
+      "title": "Fang",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fang.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:run_lock",
+        "effect:etr",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
+    },
+    {
+      "cardId": "onr_v1_241_fang-2-0",
+      "title": "Fang 2.0",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fang-2-0.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:run_lock",
+        "effect:etr",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
+    },
+    {
       "cardId": "onr_v1_242_fatal-attractor",
       "title": "Fatal Attractor",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fatal-attractor.ts",
@@ -682,58 +1108,16 @@
       "rationale": "Next-encounter damage-unless-fully-break effect is mechanically derivable and must stay later-encounter/runpath-context gated."
     },
     {
-      "cardId": "onr_v1_251_jack-attack",
-      "title": "Jack Attack",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/jack-attack.ts",
-      "expectedDerivableKinds": [
-        "effect:no_jack_out",
-        "effect:trace",
-        "effect:tag_source",
-        "condition:requires_trace_success"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "No-jack-out run-duration effect and trace-to-tag subroutine are mechanically derivable; actual choices remain current-run context."
-    },
-    {
-      "cardId": "onr_v1_255_mastiff",
-      "title": "Mastiff",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/mastiff.ts",
-      "expectedDerivableKinds": [
-        "effect:damage",
-        "effect:run_tax",
-        "effect:trace",
-        "effect:persistent_counter_effect",
-        "effect:etr",
-        "condition:requires_trace_success"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Damage, strength modifier, trace/counter context and ETR are mechanically derivable; concrete path cost remains effectiveRunQuote context."
-    },
-    {
-      "cardId": "onr_v1_234_data-darts",
-      "title": "Data Darts",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/data-darts.ts",
-      "expectedDerivableKinds": [
-        "effect:damage",
-        "effect:future_encounter_effect",
-        "condition:requires_later_encounter",
-        "condition:requires_remaining_ice"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
-    },
-    {
-      "cardId": "onr_v1_260_pocket-virtual-reality",
-      "title": "Pocket Virtual Reality",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/pocket-virtual-reality.ts",
+      "cardId": "onr_v1_243_fetch-4-0-1",
+      "title": "Fetch 4.0.1",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fetch-4-0-1.ts",
       "expectedDerivableKinds": [
         "effect:trace",
         "effect:tag_source",
-        "effect:trace_credit",
         "condition:requires_trace_success"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Trace-to-tag and trace-only encounter credits are mechanically derivable; trace bidding remains LegalAction/engine context."
+      "rationale": "Trace-to-tag ICE subroutine is mechanically derivable; tag application remains trace-success gated."
     },
     {
       "cardId": "onr_v1_246_fragmentation-storm",
@@ -764,184 +1148,120 @@
       "rationale": "Trace-success hardware trash, unpreventable meat damage and ETR are mechanically derivable; title normalization is cardId-based."
     },
     {
-      "cardId": "onr_v1_221_asp",
-      "title": "Asp",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/asp.ts",
+      "cardId": "onr_v1_249_hunter",
+      "title": "Hunter",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/hunter.ts",
       "expectedDerivableKinds": [
         "effect:trace",
-        "effect:run_lock",
-        "effect:etr",
+        "effect:tag_source",
         "condition:requires_trace_success"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
+      "rationale": "Trace-to-tag ICE subroutine is mechanically derivable; tag application remains trace-success gated."
     },
     {
-      "cardId": "onr_v1_240_fang",
-      "title": "Fang",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fang.ts",
+      "cardId": "onr_v1_251_jack-attack",
+      "title": "Jack Attack",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/jack-attack.ts",
       "expectedDerivableKinds": [
+        "effect:no_jack_out",
         "effect:trace",
-        "effect:run_lock",
-        "effect:etr",
+        "effect:tag_source",
         "condition:requires_trace_success"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
+      "rationale": "No-jack-out run-duration effect and trace-to-tag subroutine are mechanically derivable; actual choices remain current-run context."
     },
     {
-      "cardId": "onr_v1_241_fang-2-0",
-      "title": "Fang 2.0",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fang-2-0.ts",
-      "expectedDerivableKinds": [
-        "effect:trace",
-        "effect:run_lock",
-        "effect:etr",
-        "condition:requires_trace_success"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Trace-success run-lock and ETR are mechanically derivable; no action legality is generated."
-    },
-    {
-      "cardId": "onr_v1_355_crystal-palace-station-grid",
-      "title": "Crystal Palace Station Grid",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
-      "expectedDerivableKinds": ["effect:run_tax", "remoteRole:run_tax"],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays; remote_protection remains intentionally manual strategic overlay."
-    },
-    {
-      "cardId": "onr_v1_366_red-herrings",
-      "title": "Red Herrings",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/red-herrings.ts",
-      "expectedDerivableKinds": [
-        "effect:run_tax",
-        "remoteRole:agenda_steal_tax"
-      ],
-      "expectedManualOverlayNeeded": true,
-      "rationale": "Agenda steal tax and accessed-card condition are derivable; remote_protection remains intentionally manual strategic overlay."
-    },
-    {
-      "cardId": "onr_v1_370_tesseract-fort-construction",
-      "title": "Tesseract Fort Construction",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tesseract-fort-construction.ts",
-      "expectedDerivableKinds": [
-        "effect:future_encounter_effect",
-        "effect:remote_protection",
-        "remoteRole:scoring_protection"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Additional ETR subroutine on all ICE in the fort is mechanically derivable; active/rezzed/server context remains board-state."
-    },
-    {
-      "cardId": "onr_v1_361_namatoki-plaza",
-      "title": "Namatoki Plaza",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/namatoki-plaza.ts",
-      "expectedDerivableKinds": [
-        "effect:remote_protection",
-        "effect:score_acceleration",
-        "condition:requires_remote_server",
-        "remoteRole:remote_capacity"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Additional agenda/node slot and subsidiary-fort install context are mechanical remote-capacity facts; score safety remains board-aware."
-    },
-    {
-      "cardId": "onr_v1_359_jenny-jett",
-      "title": "Jenny Jett",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jenny-jett.ts",
-      "expectedDerivableKinds": [
-        "effect:future_encounter_effect",
-        "effect:remote_protection",
-        "condition:requires_successful_run",
-        "remoteRole:scoring_protection"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Successful-run install-and-approach effect is derivable as a future encounter class while HQ card identity and legal target choice remain hidden-info/runtime context."
-    },
-    {
-      "cardId": "onr_v1_363_olivia-salazar",
-      "title": "Olivia Salazar",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/olivia-salazar.ts",
-      "expectedDerivableKinds": [
-        "effect:rez_discount",
-        "effect:remote_protection",
-        "condition:requires_during_run",
-        "remoteRole:scoring_protection"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Source-bound discounted ICE rez and end-of-run derez window are derivable as during-run remote-support facts; payment legality stays engine-owned."
-    },
-    {
-      "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
-      "title": "Rio de Janeiro City Grid",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/rio-de-janeiro-city-grid.ts",
-      "expectedDerivableKinds": [
-        "effect:future_encounter_effect",
-        "effect:remote_protection",
-        "condition:requires_during_run",
-        "remoteRole:scoring_protection"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Pass-rezzed-ICE die trigger is derivable as deterministic-random future encounter pressure; actual random result and run end remain runtime state."
-    },
-    {
-      "cardId": "onr_v1_317_data-masons",
-      "title": "Data Masons",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
-      "expectedDerivableKinds": [
-        "effect:rez_discount",
-        "effect:remote_protection",
-        "remoteRole:ice_modifier"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Wall rez discount and wall strength modifier are mechanically derivable global ICE modifier facts; reserve/remote value remains strategic context."
-    },
-    {
-      "cardId": "onr_v1_350_antiquated-interface-routines",
-      "title": "Antiquated Interface Routines",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
-      "expectedDerivableKinds": [
-        "effect:remote_protection",
-        "remoteRole:ice_modifier"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Same-fort ICE strength modifier is mechanically derivable; concrete path cost impact remains effectiveRunQuote/board context."
-    },
-    {
-      "cardId": "onr_v1_312_chicago-branch",
-      "title": "Chicago Branch",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/chicago-branch.ts",
-      "expectedDerivableKinds": [
-        "effect:score_acceleration",
-        "remoteRole:asset_economy"
-      ],
-      "expectedManualOverlayNeeded": false,
-      "rationale": "Activated advancement-counter placement is a mechanical score-acceleration fact; strategic closeout valuation remains manual/consumer context."
-    },
-    {
-      "cardId": "onr_v1_302_scorched-earth",
-      "title": "Scorched Earth",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/scorched-earth.ts",
+      "cardId": "onr_v1_255_mastiff",
+      "title": "Mastiff",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/mastiff.ts",
       "expectedDerivableKinds": [
         "effect:damage",
-        "effect:tag_punish_payoff",
-        "condition:requires_runner_tagged"
+        "effect:run_tax",
+        "effect:trace",
+        "effect:persistent_counter_effect",
+        "effect:etr",
+        "condition:requires_trace_success"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Tagged-runner damage payoff is directly represented."
+      "rationale": "Damage, strength modifier, trace/counter context and ETR are mechanically derivable; concrete path cost remains effectiveRunQuote context."
     },
     {
-      "cardId": "onr_v1_285_closed-accounts",
-      "title": "Closed Accounts",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/closed-accounts.ts",
+      "cardId": "onr_v1_258_neural-blade",
+      "title": "Neural Blade",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/neural-blade.ts",
       "expectedDerivableKinds": [
-        "effect:counter_economy",
-        "effect:tag_punish_payoff",
-        "condition:requires_runner_tagged"
+        "effect:damage",
+        "effect:future_encounter_effect",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice"
       ],
       "expectedManualOverlayNeeded": false,
-      "rationale": "Tagged-runner payoff and counter-economy classification are directly represented."
+      "rationale": "Damage plus next-ICE break prohibition is mechanically derivable and must stay later-encounter/runpath-context gated."
+    },
+    {
+      "cardId": "onr_v1_260_pocket-virtual-reality",
+      "title": "Pocket Virtual Reality",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/pocket-virtual-reality.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "effect:trace_credit",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag and trace-only encounter credits are mechanically derivable; trace bidding remains LegalAction/engine context."
+    },
+    {
+      "cardId": "onr_v1_268_shock-r",
+      "title": "Shock.r",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/shock-r.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:no_jack_out",
+        "condition:requires_later_encounter",
+        "condition:requires_remaining_ice"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Next-ICE break/jack-out restriction is mechanically derivable; generated facts do not create current ICE self-safety."
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/tutor.ts",
+      "expectedDerivableKinds": [
+        "effect:future_run_effect",
+        "effect:remote_protection",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Future-run additional-subroutine semantics are derivable at a coarse level."
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/viral-15.ts",
+      "expectedDerivableKinds": [
+        "effect:future_run_effect",
+        "effect:run_tax",
+        "effect:program_trash",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Future-run, jack-out tax and program-trash semantics are mechanically derivable at coarse gate granularity."
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/virizz.ts",
+      "expectedDerivableKinds": [
+        "effect:future_run_effect",
+        "effect:run_tax",
+        "condition:requires_during_run"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Future-run break-cost modifier semantics are derivable at a coarse level."
     },
     {
       "cardId": "onr_v1_283_audit-of-call-records",
@@ -966,6 +1286,806 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Trace-to-tag source is directly represented."
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/closed-accounts.ts",
+      "expectedDerivableKinds": [
+        "effect:counter_economy",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner payoff and counter-economy classification are directly represented."
+    },
+    {
+      "cardId": "onr_v1_286_corporate-detective-agency",
+      "title": "Corporate Detective Agency",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/corporate-detective-agency.ts",
+      "expectedDerivableKinds": [
+        "effect:resource_trash",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner resource trash is mechanically represented; target selection and operation legality remain runtime-owned."
+    },
+    {
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "title": "Datapool by Zetatech",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/datapool-by-zetatech.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_source",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner tag source is mechanically represented; playability remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "title": "Netwatch Credit Voucher",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/netwatch-credit-voucher.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_source",
+        "effect:economy",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner tag plus credit gain is mechanically represented; operation timing remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_294_new-blood",
+      "title": "New Blood",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/new-blood.ts",
+      "expectedDerivableKinds": ["effect:zone_shuffle"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Conceal/reorder installed ICE is represented as hidden-zone context without generated hidden card order."
+    },
+    {
+      "cardId": "onr_v1_295_night-shift",
+      "title": "Night Shift",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/night-shift.ts",
+      "expectedDerivableKinds": ["effect:economy", "effect:draw"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Credit gain and draw are direct on-play operation effects. Batch 8 subbatch: corp_operation_economy."
+    },
+    {
+      "cardId": "onr_v1_296_off-site-backups",
+      "title": "Off-Site Backups",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/off-site-backups.ts",
+      "expectedDerivableKinds": [
+        "effect:card_recovery",
+        "condition:requires_archives_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Archives-to-HQ recovery is mechanically represented without hidden card identities. Batch 8 subbatch: corp_operation_draw_or_recovery."
+    },
+    {
+      "cardId": "onr_v1_297_overtime-incentives",
+      "title": "Overtime Incentives",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/overtime-incentives.ts",
+      "expectedDerivableKinds": ["effect:extra_action"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Extra Corp actions are a direct on-play operation effect; action use remains LegalAction context. Batch 8 subbatch: corp_operation_economy."
+    },
+    {
+      "cardId": "onr_v1_298_planning-consultants",
+      "title": "Planning Consultants",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/planning-consultants.ts",
+      "expectedDerivableKinds": [
+        "effect:topdeck_info",
+        "effect:zone_shuffle",
+        "condition:requires_rnd_top"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Corp R&D top-five reorder is mechanically derivable as hidden-zone context without exposing actual R&D order. Batch 8 subbatch: corp_operation_draw_or_recovery."
+    },
+    {
+      "cardId": "onr_v1_299_power-grid-overload",
+      "title": "Power Grid Overload",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/power-grid-overload.ts",
+      "expectedDerivableKinds": [
+        "effect:hardware_trash",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner hardware trash is mechanically represented; target selection remains runtime-owned."
+    },
+    {
+      "cardId": "onr_v1_300_project-consultants",
+      "title": "Project Consultants",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/project-consultants.ts",
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "effect:advance_burst",
+        "condition:requires_score_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advancement-counter burst is directly represented by distribute_advancement_counters; score legality remains LegalAction context. Batch 8 subbatch: corp_advance_burst."
+    },
+    {
+      "cardId": "onr_v1_301_punitive-counterstrike",
+      "title": "Punitive Counterstrike",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/punitive-counterstrike.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Batch 11 tag/punish funnel: operation deals meat damage only if the Runner is tagged; visible tag state and playability remain LegalActions/engine context."
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/scorched-earth.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner damage payoff is directly represented."
+    },
+    {
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+      "title": "Silver Lining Recovery Protocol",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/silver-lining-recovery-protocol.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "condition:requires_stolen_agenda_last_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Variable recovery economy is derivable, with amount dependent on stolen agenda counters from the previous Runner turn. Batch 8 subbatch: corp_operation_economy."
+    },
+    {
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "title": "Systematic Layoffs",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/systematic-layoffs.ts",
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "effect:advance_burst",
+        "condition:requires_score_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Two advancement counters are directly represented by distribute_advancement_counters; target legality remains engine context. Batch 8 subbatch: corp_advance_burst."
+    },
+    {
+      "cardId": "onr_v1_305_team-restructuring",
+      "title": "Team Restructuring",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/team-restructuring.ts",
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "effect:advance_burst",
+        "condition:requires_score_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Up-to-two advancement counter placement is mechanically derivable; score-conversion value remains strategic overlay. Batch 8 subbatch: corp_advance_burst."
+    },
+    {
+      "cardId": "onr_v1_306_trojan-horse",
+      "title": "Trojan Horse",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/trojan-horse.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_source",
+        "condition:requires_stolen_agenda_last_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Stolen-agenda-last-turn tag operation is represented with history context; playability remains LegalAction-owned."
+    },
+    {
+      "cardId": "onr_v1_307_urban-renewal",
+      "title": "Urban Renewal",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/urban-renewal.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner meat damage is mechanically represented; damage resolution remains engine-owned."
+    },
+    {
+      "cardId": "onr_v1_308_acme-savings-and-loan",
+      "title": "ACME Savings and Loan",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/acme-savings-and-loan.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:counter_economy",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "On-rez credit burst and debt context are mechanically represented; current credit state remains board state."
+    },
+    {
+      "cardId": "onr_v1_309_bbs-whispering-campaign",
+      "title": "BBS Whispering Campaign",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/bbs-whispering-campaign.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:action_economy",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted 16-credit pool and action economy are directly represented; remaining credits remain board state."
+    },
+    {
+      "cardId": "onr_v1_310_blood-cat",
+      "title": "Blood Cat",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/blood-cat.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_trace_success",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag asset mechanic is mechanically represented; trace success remains runtime context."
+    },
+    {
+      "cardId": "onr_v1_311_braindance-campaign",
+      "title": "Braindance Campaign",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/braindance-campaign.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:start_of_turn_economy",
+        "effect:recurring_economy",
+        "condition:requires_start_of_turn",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted pool and start-turn take mechanics are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_312_chicago-branch",
+      "title": "Chicago Branch",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/chicago-branch.ts",
+      "expectedDerivableKinds": [
+        "effect:score_acceleration",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated advancement-counter placement is a mechanical score-acceleration fact; strategic closeout valuation remains manual/consumer context."
+    },
+    {
+      "cardId": "onr_v1_313_city-surveillance",
+      "title": "City Surveillance",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/city-surveillance.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_source",
+        "effect:remote_tax",
+        "condition:requires_runner_draw",
+        "condition:requires_runner_pay_or_take_tag",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Runner-draw payment-or-tag mechanic is represented as contextual tag/payment pressure, not a guaranteed tag."
+    },
+    {
+      "cardId": "onr_v1_314_corporate-negotiating-center",
+      "title": "Corporate Negotiating Center",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/corporate-negotiating-center.ts",
+      "expectedDerivableKinds": [
+        "condition:requires_start_of_turn",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Start-turn remote economy/support context is mechanically represented when visible in implementation."
+    },
+    {
+      "cardId": "onr_v1_315_corprunners-shattered-remains",
+      "title": "Corprunner's Shattered Remains",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/corprunners-shattered-remains.ts",
+      "expectedDerivableKinds": [
+        "effect:ambush",
+        "effect:access_punish",
+        "effect:hardware_trash",
+        "effect:advanceable_economy",
+        "condition:requires_accessed_card",
+        "condition:requires_advancement_counter",
+        "remoteRole:ambush"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advanceable hardware-trash ambush mechanics are represented without access outcome or target selection."
+    },
+    {
+      "cardId": "onr_v1_316_cowboy-sysop",
+      "title": "Cowboy Sysop",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/cowboy-sysop.ts",
+      "expectedDerivableKinds": ["effect:zone_shuffle"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Installed-card-to-HQ utility is represented as hidden-zone context only."
+    },
+    {
+      "cardId": "onr_v1_317_data-masons",
+      "title": "Data Masons",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
+      "expectedDerivableKinds": [
+        "effect:rez_discount",
+        "effect:remote_protection",
+        "remoteRole:ice_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Wall rez discount and wall strength modifier are mechanically derivable global ICE modifier facts; reserve/remote value remains strategic context."
+    },
+    {
+      "cardId": "onr_v1_321_esa-contract",
+      "title": "ESA Contract",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/esa-contract.ts",
+      "expectedDerivableKinds": ["effect:draw", "remoteRole:asset_economy"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Action draw node is mechanically represented without strategy about when to use it."
+    },
+    {
+      "cardId": "onr_v1_322_euromarket-consortium",
+      "title": "Euromarket Consortium",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/euromarket-consortium.ts",
+      "expectedDerivableKinds": [
+        "effect:draw",
+        "effect:remote_protection",
+        "condition:requires_rezzed_card",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Draw plus hand-size support are represented as board-context asset utility, not remote safety."
+    },
+    {
+      "cardId": "onr_v1_323_experimental-ai",
+      "title": "Experimental AI",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/experimental-ai.ts",
+      "expectedDerivableKinds": [
+        "effect:ambush",
+        "effect:access_punish",
+        "effect:program_trash",
+        "effect:advanceable_economy",
+        "condition:requires_accessed_card",
+        "condition:requires_advancement_counter",
+        "remoteRole:ambush"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advanceable program-trash ambush mechanics are represented without guaranteed hit or target selection."
+    },
+    {
+      "cardId": "onr_v1_324_fortress-architects",
+      "title": "Fortress Architects",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/fortress-architects.ts",
+      "expectedDerivableKinds": [
+        "effect:install_discount",
+        "condition:requires_rezzed_card",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "ICE install discount is mechanical support; install legality and board state remain runtime-owned."
+    },
+    {
+      "cardId": "onr_v1_325_hacker-tracker-central",
+      "title": "Hacker Tracker Central",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/hacker-tracker-central.ts",
+      "expectedDerivableKinds": [
+        "effect:trace_credit",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-credit support is represented without trace bidding or current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_326_holovid-campaign",
+      "title": "Holovid Campaign",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/holovid-campaign.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:start_of_turn_economy",
+        "effect:recurring_economy",
+        "condition:requires_start_of_turn",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted pool and start-turn economy are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_327_i-got-a-rock",
+      "title": "I Got a Rock",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/i-got-a-rock.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner meat damage payoff is represented; legality and damage resolution remain engine-owned."
+    },
+    {
+      "cardId": "onr_v1_328_information-laundering",
+      "title": "Information Laundering",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/information-laundering.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:advanceable_economy",
+        "condition:requires_advancement_counter",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advanceable counter-to-credit node is represented with variable counter context."
+    },
+    {
+      "cardId": "onr_v1_329_investment-firm",
+      "title": "Investment Firm",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/investment-firm.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:recurring_economy",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Credit-diversion pool and recurring take mechanic are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_332_newsgroup-taunting",
+      "title": "Newsgroup Taunting",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/newsgroup-taunting.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_tax",
+        "effect:run_tax",
+        "condition:requires_during_run",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Run-start payment-or-end-run mechanic is represented as run context, not static remote safety."
+    },
+    {
+      "cardId": "onr_v1_333_omniscience-foundation",
+      "title": "Omniscience Foundation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/omniscience-foundation.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_source",
+        "condition:requires_runner_tagged",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "End-turn tag amplification is represented as runner-tagged context, not guaranteed tag state."
+    },
+    {
+      "cardId": "onr_v1_334_pacifica-regional-ai",
+      "title": "Pacifica Regional AI",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/pacifica-regional-ai.ts",
+      "expectedDerivableKinds": [
+        "effect:extra_action",
+        "effect:advanceable_economy",
+        "condition:requires_advancement_counter",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advancement-counter action gain is represented; action use remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_335_remote-facility",
+      "title": "Remote Facility",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/remote-facility.ts",
+      "expectedDerivableKinds": [
+        "effect:extra_action",
+        "condition:requires_start_of_turn",
+        "remoteRole:remote_capacity"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Start-turn action gain is represented as remote capacity/support context."
+    },
+    {
+      "cardId": "onr_v1_336_rescheduler",
+      "title": "Rescheduler",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/rescheduler.ts",
+      "expectedDerivableKinds": ["effect:zone_shuffle", "effect:draw"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "HQ shuffle/draw is represented as hidden-zone context without hidden HQ identities."
+    },
+    {
+      "cardId": "onr_v1_337_rockerboy-promotion",
+      "title": "Rockerboy Promotion",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/rockerboy-promotion.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:action_economy",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted pool and action take mechanics are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_338_rustbelt-hq-branch",
+      "title": "Rustbelt HQ Branch",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/rustbelt-hq-branch.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "condition:requires_rezzed_card",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Corp hand-size support is represented as board-context asset utility, not remote safety."
+    },
+    {
+      "cardId": "onr_v1_339_schlaghund",
+      "title": "Schlaghund",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/schlaghund.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner die-based meat damage payoff is represented without guaranteed success."
+    },
+    {
+      "cardId": "onr_v1_340_setup",
+      "title": "Setup!",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/setup.ts",
+      "expectedDerivableKinds": [
+        "effect:ambush",
+        "effect:access_punish",
+        "effect:damage",
+        "condition:requires_accessed_card",
+        "remoteRole:ambush"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "On-access damage ambush is represented without guaranteed hit or access outcome."
+    },
+    {
+      "cardId": "onr_v1_342_solo-squad",
+      "title": "Solo Squad",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/solo-squad.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner damage action is represented; playability remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_343_south-african-mining-corp",
+      "title": "South African Mining Corp",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/south-african-mining-corp.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:action_economy",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Action economy node is represented without strategy about when to spend actions."
+    },
+    {
+      "cardId": "onr_v1_344_spinn-public-relations",
+      "title": "Spinn® Public Relations",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/spinn-public-relations.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:start_of_turn_economy",
+        "effect:action_economy",
+        "effect:recurring_economy",
+        "condition:requires_start_of_turn",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted pool, action loading and start-turn take mechanics are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_346_vacant-soulkiller",
+      "title": "Vacant Soulkiller",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/vacant-soulkiller.ts",
+      "expectedDerivableKinds": [
+        "effect:ambush",
+        "effect:access_punish",
+        "effect:damage",
+        "effect:advanceable_economy",
+        "condition:requires_accessed_card",
+        "condition:requires_advancement_counter",
+        "remoteRole:ambush"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advanceable brain-damage ambush is represented without access outcome or fixed counter amount."
+    },
+    {
+      "cardId": "onr_v1_350_antiquated-interface-routines",
+      "title": "Antiquated Interface Routines",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "remoteRole:ice_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Same-fort ICE strength modifier is mechanically derivable; concrete path cost impact remains effectiveRunQuote/board context."
+    },
+    {
+      "cardId": "onr_v1_352_chester-mix",
+      "title": "Chester Mix",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chester-mix.ts",
+      "expectedDerivableKinds": [
+        "effect:install_discount",
+        "condition:requires_rezzed_card",
+        "remoteRole:remote_capacity"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Fort ICE install discount is represented as board-context remote support."
+    },
+    {
+      "cardId": "onr_v1_354_crybaby",
+      "title": "Crybaby",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crybaby.ts",
+      "expectedDerivableKinds": [
+        "effect:ambush",
+        "effect:access_punish",
+        "effect:persistent_counter_effect",
+        "effect:link_penalty",
+        "condition:requires_accessed_card",
+        "remoteRole:ambush"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "On-access crying counter and link penalty are represented without asserting current counter state."
+    },
+    {
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "title": "Crystal Palace Station Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
+      "expectedDerivableKinds": ["effect:run_tax", "remoteRole:run_tax"],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays; remote_protection remains intentionally manual strategic overlay."
+    },
+    {
+      "cardId": "onr_v1_358_dr-dreff",
+      "title": "Dr. Dreff",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/dr-dreff.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:zone_shuffle",
+        "condition:requires_successful_run",
+        "condition:requires_during_run",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Temporary HQ-ICE encounter after successful run is represented as run/hidden-zone context without hidden HQ identity."
+    },
+    {
+      "cardId": "onr_v1_359_jenny-jett",
+      "title": "Jenny Jett",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jenny-jett.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "condition:requires_successful_run",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Successful-run install-and-approach effect is derivable as a future encounter class while HQ card identity and legal target choice remain hidden-info/runtime context."
+    },
+    {
+      "cardId": "onr_v1_360_jerusalem-city-grid",
+      "title": "Jerusalem City Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
+      "expectedDerivableKinds": [
+        "effect:rez_discount",
+        "condition:requires_rezzed_card",
+        "remoteRole:ice_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Fort wall rez discount and strength support are represented as board-context remote support."
+    },
+    {
+      "cardId": "onr_v1_361_namatoki-plaza",
+      "title": "Namatoki Plaza",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/namatoki-plaza.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "effect:score_acceleration",
+        "condition:requires_remote_server",
+        "remoteRole:remote_capacity"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Additional agenda/node slot and subsidiary-fort install context are mechanical remote-capacity facts; score safety remains board-aware."
+    },
+    {
+      "cardId": "onr_v1_362_new-galveston-city-grid",
+      "title": "New Galveston City Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/new-galveston-city-grid.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_tax",
+        "condition:requires_rezzed_card",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Asset/upgrade trash-cost tax is represented as access/trash context, not static remote safety."
+    },
+    {
+      "cardId": "onr_v1_363_olivia-salazar",
+      "title": "Olivia Salazar",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/olivia-salazar.ts",
+      "expectedDerivableKinds": [
+        "effect:rez_discount",
+        "effect:remote_protection",
+        "condition:requires_during_run",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Source-bound discounted ICE rez and end-of-run derez window are derivable as during-run remote-support facts; payment legality stays engine-owned."
+    },
+    {
+      "cardId": "onr_v1_364_omni-kismet-ph-d",
+      "title": "Omni Kismet, Ph.D.",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/omni-kismet-ph-d.ts",
+      "expectedDerivableKinds": [
+        "effect:zone_shuffle",
+        "condition:requires_during_run",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Unrezzed-fort-ICE swap is represented as run/hidden-zone context without hidden HQ identity."
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "title": "Red Herrings",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/red-herrings.ts",
+      "expectedDerivableKinds": [
+        "effect:run_tax",
+        "remoteRole:agenda_steal_tax"
+      ],
+      "expectedManualOverlayNeeded": true,
+      "rationale": "Agenda steal tax and accessed-card condition are derivable; remote_protection remains intentionally manual strategic overlay."
+    },
+    {
+      "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+      "title": "Rio de Janeiro City Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/rio-de-janeiro-city-grid.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "condition:requires_during_run",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Pass-rezzed-ICE die trigger is derivable as deterministic-random future encounter pressure; actual random result and run end remain runtime state."
+    },
+    {
+      "cardId": "onr_v1_368_roving-submarine",
+      "title": "Roving Submarine",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/roving-submarine.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_tax",
+        "condition:requires_remote_server",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Fort run-window restriction is represented as remote/run context, not current run legality."
+    },
+    {
+      "cardId": "onr_v1_369_singapore-city-grid",
+      "title": "Singapore City Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/singapore-city-grid.ts",
+      "expectedDerivableKinds": [
+        "effect:zone_shuffle",
+        "condition:requires_during_run",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Unrezzed-fort-ICE swap is represented as run/hidden-zone context without hidden HQ identity."
+    },
+    {
+      "cardId": "onr_v1_370_tesseract-fort-construction",
+      "title": "Tesseract Fort Construction",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tesseract-fort-construction.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "remoteRole:scoring_protection"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Additional ETR subroutine on all ICE in the fort is mechanically derivable; active/rezzed/server context remains board-state."
     }
   ]
 }

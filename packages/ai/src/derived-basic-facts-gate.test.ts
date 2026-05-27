@@ -66,13 +66,13 @@ describe("derived basic facts gate report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("keeps the 85-card pilot complete", () => {
+  it("keeps the 177-card pilot complete", () => {
     const report = readReport();
-    expect(report.pilotCardCount).toBe(85);
-    expect(report.implementationFoundCount).toBe(85);
-    expect(report.cardsWithDerivedFacts).toBe(85);
-    expect(report.cardsWithManualOntologyOverlap).toBe(67);
-    expect(report.cardsNeedingManualOverlay).toBe(35);
+    expect(report.pilotCardCount).toBe(177);
+    expect(report.implementationFoundCount).toBe(177);
+    expect(report.cardsWithDerivedFacts).toBe(177);
+    expect(report.cardsWithManualOntologyOverlap).toBe(89);
+    expect(report.cardsNeedingManualOverlay).toBe(118);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
       report.cards.every(
@@ -337,6 +337,153 @@ describe("derived basic facts gate report", () => {
     const dataRaven = cardById(report, "onr_v1_236_data-raven");
     expect(dataRaven.derivedFacts.effects).toContainEqual(
       expect.objectContaining({ kind: "persistent_counter_effect" }),
+    );
+
+    const projectConsultants = cardById(
+      report,
+      "onr_v1_300_project-consultants",
+    );
+    expect(projectConsultants.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "advance_burst", amount: 4 }),
+        expect.objectContaining({ kind: "score_acceleration", amount: 4 }),
+      ]),
+    );
+    expect(projectConsultants.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_score_window" }),
+    );
+
+    const corporateDownsizing = cardById(
+      report,
+      "onr_v1_194_corporate-downsizing",
+    );
+    expect(corporateDownsizing.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "agenda_reveal_economy" }),
+        expect.objectContaining({ kind: "zone_shuffle", scope: "rnd" }),
+      ]),
+    );
+    expect(corporateDownsizing.derivedFacts.conditions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "requires_agenda_in_hq" }),
+        expect.objectContaining({ kind: "requires_agenda_reveal" }),
+      ]),
+    );
+
+    const priorityRequisition = cardById(
+      report,
+      "onr_v1_212_priority-requisition",
+    );
+    expect(priorityRequisition.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "rez_discount" }),
+        expect.objectContaining({ kind: "rez" }),
+      ]),
+    );
+
+    const aiCfo = cardById(report, "onr_v1_188_ai-chief-financial-officer");
+    expect(aiCfo.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "shuffle_draw" }),
+        expect.objectContaining({ kind: "zone_shuffle", scope: "rnd" }),
+      ]),
+    );
+
+    const detroitPolice = cardById(
+      report,
+      "onr_v1_198_detroit-police-contract",
+    );
+    expect(detroitPolice.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "finite_economy_pool", amount: 12 }),
+        expect.objectContaining({
+          kind: "counter_economy",
+          timing: "start_of_turn",
+        }),
+      ]),
+    );
+    expect(detroitPolice.derivedFacts.effects).not.toContainEqual(
+      expect.objectContaining({
+        kind: "counter_economy",
+        timing: "scored_activated",
+      }),
+    );
+
+    const emergencySelfConstruct = cardById(
+      report,
+      "onr_v1_022_emergency-self-construct",
+    );
+    expect(emergencySelfConstruct.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "flatline_prevention" }),
+        expect.objectContaining({ kind: "prevention_replacement" }),
+        expect.objectContaining({ kind: "remove_brain_damage" }),
+        expect.objectContaining({ kind: "meat_damage_prevention" }),
+        expect.objectContaining({ kind: "action_penalty" }),
+        expect.objectContaining({ kind: "hand_size_modifier" }),
+      ]),
+    );
+
+    const joanOfArc = cardById(report, "onr_v1_038_joan-of-arc");
+    expect(joanOfArc.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({ kind: "program_trash_prevention" }),
+    );
+    expect(joanOfArc.derivedFacts.conditions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "requires_program_trash" }),
+        expect.objectContaining({ kind: "requires_installed_program" }),
+      ]),
+    );
+
+    const shield = cardById(report, "onr_v1_061_shield");
+    expect(shield.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "damage_prevention" }),
+        expect.objectContaining({ kind: "net_damage_prevention" }),
+      ]),
+    );
+    expect(shield.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_turn_limit_available" }),
+    );
+
+    const bakdoor = cardById(report, "onr_v1_004_bakdoor");
+    expect(bakdoor.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "base_link" }),
+        expect.objectContaining({ kind: "trace_defense" }),
+      ]),
+    );
+
+    const privateCybernetPolice = cardById(
+      report,
+      "onr_v1_213_private-cybernet-police",
+    );
+    expect(privateCybernetPolice.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "scored_agenda_action" }),
+        expect.objectContaining({ kind: "trace" }),
+        expect.objectContaining({ kind: "tag_source" }),
+      ]),
+    );
+    expect(privateCybernetPolice.derivedFacts.conditions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "requires_scored_agenda" }),
+        expect.objectContaining({ kind: "requires_trace_success" }),
+      ]),
+    );
+
+    const punitiveCounterstrike = cardById(
+      report,
+      "onr_v1_301_punitive-counterstrike",
+    );
+    expect(punitiveCounterstrike.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "damage", amount: 2 }),
+        expect.objectContaining({ kind: "tag_punish_payoff" }),
+      ]),
+    );
+    expect(punitiveCounterstrike.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_runner_tagged" }),
     );
   });
 

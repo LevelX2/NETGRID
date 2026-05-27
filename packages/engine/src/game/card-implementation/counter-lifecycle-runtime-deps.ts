@@ -6,6 +6,8 @@ export type CounterLifecycleRuntimeDepsKey =
   | "runnerRunAttemptsLastTurn"
   | "runnerRunAttemptsThisGame"
   | "runnerTrashedNodeLastTurn"
+  | "runnerTrashedAdvertisementThisTurn"
+  | "runnerTrashedTransactionsThisTurn"
   | "runnerInstalledResourceLastTurn"
   | "runnerMadeSuccessfulRunOnServerThisTurn"
   | "runnerLiberatedAgendaSubtypeThisTurn"
@@ -45,9 +47,16 @@ export function createCounterLifecycleCardImplementationRuntimeDeps(
     runnerRunAttemptsLastTurn,
     runnerRunAttemptsThisGame,
     runnerTrashedNodeLastTurn,
+    runnerTrashedAdvertisementThisTurn: (state) =>
+      state.runnerTurnFlags?.trashedAdvertisementThisTurn === true,
+    runnerTrashedTransactionsThisTurn: (state) =>
+      state.runnerTurnFlags?.trashedTransactionsThisTurn === true,
     runnerInstalledResourceLastTurn,
     runnerMadeSuccessfulRunOnServerThisTurn: (state, server) =>
-      server === "hq" && host.lifecycle.hasSuccessfulHqRunThisTurn(state),
+      server === "any_data_fort"
+        ? state.runnerTurnFlags?.successfulRunThisTurn === true &&
+          state.runnerTurnFlags?.lastSuccessfulRunServerId !== undefined
+        : server === "hq" && host.lifecycle.hasSuccessfulHqRunThisTurn(state),
     runnerLiberatedAgendaSubtypeThisTurn: (state, subtype) =>
       host.lifecycle.runnerLiberatedAgendaSubtypeThisTurn(state, subtype),
     corpScoredAgendaSubtypeLastTurn: (state, subtype) =>

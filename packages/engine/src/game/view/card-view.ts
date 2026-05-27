@@ -106,6 +106,7 @@ export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCar
       : {}),
     ...visibleCountersField(visibleCountersForKnownCard(definition, instance)),
     ...counterDisplaysField(counterDisplaysForKnownCard(definition, instance)),
+    ...(instance.tapped ? { tapped: true } : {}),
     ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {}),
     ...(instance.selectedServerId
       ? {

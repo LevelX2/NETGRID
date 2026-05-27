@@ -23,6 +23,10 @@ export type EncounterEntryHost = {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     cardInstanceFor: (cardId: CardInstanceId) => CardInstance;
     runnerInstalledCardIds: () => CardInstanceId[];
+    effectiveSubtypesForCard: (
+      cardId: CardInstanceId,
+      definition: CardDefinition,
+    ) => readonly string[];
   };
   servers: {
     mustServer: (serverId: Exclude<ServerId, "new_remote"> | string) => CorpServer;
@@ -61,6 +65,7 @@ export function beginEncounter(
   legalAction?: LegalAction,
 ): EncounterEntryResult {
   const run = mustRun(host.state);
+  bindOrExpireNextSentryFreeBreak(run, encounteredIceId, host);
   run.phase = "encounter_ice";
   run.encounteredIceId = encounteredIceId;
   run.brokenSubroutineIndexes = [];
@@ -126,6 +131,43 @@ export function beginEncounter(
   };
 }
 
+function bindOrExpireNextSentryFreeBreak(
+  run: ReturnType<typeof mustRun>,
+  encounteredIceId: CardInstanceId,
+  host: EncounterEntryHost,
+): void {
+  const pending = { ...(run.nextSentryFreeBreakByBreaker ?? {}) };
+  const pendingBreakers = Object.keys(pending) as CardInstanceId[];
+  if (pendingBreakers.length === 0) {
+    delete run.nextSentryFreeBreakTargetIceByBreaker;
+    return;
+  }
+  const targets = { ...(run.nextSentryFreeBreakTargetIceByBreaker ?? {}) };
+  const definition = host.cards.definitionFor(encounteredIceId);
+  const isSentry = host.cards
+    .effectiveSubtypesForCard(encounteredIceId, definition)
+    .includes("sentry");
+  for (const breakerId of pendingBreakers) {
+    const targetIceId = targets[breakerId];
+    if (targetIceId) {
+      if (targetIceId !== encounteredIceId) {
+        delete pending[breakerId];
+        delete targets[breakerId];
+      }
+      continue;
+    }
+    if (isSentry) targets[breakerId] = encounteredIceId;
+    else delete pending[breakerId];
+  }
+  if (Object.keys(pending).length > 0) {
+    run.nextSentryFreeBreakByBreaker = pending;
+    run.nextSentryFreeBreakTargetIceByBreaker = targets;
+  } else {
+    delete run.nextSentryFreeBreakByBreaker;
+    delete run.nextSentryFreeBreakTargetIceByBreaker;
+  }
+}
+
 export function continueAfterCorpRootRezIfWindowIsComplete(
   host: EncounterEntryHost,
   legalAction?: LegalAction,
@@ -173,7 +215,11 @@ export function approachIceExposeCanBeOfferedForCurrentIce(
   if (run.approachIceExposeViewingIceId) return false;
   if (run.approachIceExposeSkippedIceIdsThisRun?.includes(approachedIceId))
     return false;
-  if (installedApproachIceExposeSources(host).length === 0) return false;
+  if (
+    installedApproachIceExposeSources(host).length === 0 &&
+    !run.eventApproachIceExposeBeforeRez
+  )
+    return false;
   const ice = host.state.cardInstances[approachedIceId];
   return Boolean(ice && !ice.rezzed);
 }
@@ -185,6 +231,41 @@ export function runnerApproachIceExposeActions(
   const approachedIceId = run.approachedIceId;
   if (!approachedIceId) return [];
   const sources = installedApproachIceExposeSources(host);
+  if (sources.length === 0 && run.eventApproachIceExposeBeforeRez) {
+    const sourceCardId = run.successfulRunSourceCardId;
+    if (!sourceCardId) return [];
+    const definition = host.cards.definitionFor(sourceCardId);
+    return [
+      buildLegalAction(
+        host.state,
+        "runner",
+        "trigger_ability",
+        `${definition.title}: ICE ansehen`,
+        sourceCardId,
+        [],
+        {
+          cardId: sourceCardId,
+          iceId: approachedIceId,
+          approachIceExposeDecision: "expose",
+          eventApproachIceExpose: true,
+        },
+      ),
+      buildLegalAction(
+        host.state,
+        "runner",
+        "trigger_ability",
+        `${definition.title}: Ansehen überspringen`,
+        sourceCardId,
+        [],
+        {
+          cardId: sourceCardId,
+          iceId: approachedIceId,
+          approachIceExposeDecision: "decline",
+          eventApproachIceExpose: true,
+        },
+      ),
+    ];
+  }
   if (sources.length === 0) return [];
   const primarySource = sources[0]!;
   const exposeActions = sources.map((sourceCardId) => {
@@ -292,10 +373,14 @@ export function resolveApproachIceExposeAbility(
   const availableSources = installedApproachIceExposeSources(host);
   const decision = String(legalAction.payload?.approachIceExposeDecision ?? "");
   if (decision === "expose") {
-    if (!availableSources.includes(sourceCardId))
+    if (
+      !availableSources.includes(sourceCardId) &&
+      !(run.eventApproachIceExposeBeforeRez && run.successfulRunSourceCardId === sourceCardId)
+    )
       throw new Error("Die Approach-Expose-Quelle ist nicht installiert.");
     const definition = host.cards.definitionFor(approachedIceId);
-    markApproachIceExposeUsedForSource(run, sourceCardId);
+    if (!run.eventApproachIceExposeBeforeRez)
+      markApproachIceExposeUsedForSource(run, sourceCardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,

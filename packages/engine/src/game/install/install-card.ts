@@ -216,13 +216,25 @@ function installRunnerCard(
     typeof legalAction.payload?.selectedServerId === "string"
       ? String(legalAction.payload.selectedServerId)
       : undefined;
+  const selectedCardId =
+    typeof legalAction.payload?.selectedCardId === "string"
+      ? (String(legalAction.payload.selectedCardId) as CardInstanceId)
+      : undefined;
+  const selectedSubtype =
+    typeof legalAction.payload?.selectedSubtype === "string"
+      ? String(legalAction.payload.selectedSubtype)
+      : undefined;
+  const installTargetBinding =
+    cardImplementationForDefinitionId(definition.id)?.installTargetBinding;
   if (definition.type !== "program" && hostOnCardId) {
     throw new Error("Nur Programme koennen gehostet installiert werden.");
   }
   if (
     definition.type === "program" &&
     hostOnCardId &&
-    !state.runner.rig.programs.includes(hostOnCardId)
+    ![...state.runner.rig.programs, ...state.runner.rig.hardware].includes(
+      hostOnCardId,
+    )
   ) {
     throw new Error("Der angegebene Host ist nicht installiert.");
   }
@@ -247,6 +259,25 @@ function installRunnerCard(
     throw new Error(
       "Restrictive Net Zoning benötigt einen gültigen Zielserver.",
     );
+  }
+  if (installTargetBinding?.kind === "choose_installed_ice_on_install") {
+    if (!selectedCardId) throw new Error("Die Installation benötigt ein ICE-Ziel.");
+    const targetInstance = state.cardInstances[selectedCardId];
+    if (
+      !targetInstance ||
+      targetInstance.zone.side !== "corp" ||
+      targetInstance.zone.zone !== "serverIce"
+    )
+      throw new Error("Das gewählte ICE-Ziel ist nicht installiert.");
+  }
+  if (installTargetBinding?.kind === "choose_icebreaker_subtype_on_install") {
+    const allowed: readonly string[] = installTargetBinding.choices ?? [
+      "code_gate",
+      "sentry",
+      "wall",
+    ];
+    if (!selectedSubtype || !allowed.includes(selectedSubtype))
+      throw new Error("Die Installation benötigt einen gültigen Icebreaker-Typ.");
   }
   if (
     definition.id === CODE_VIRAL_CACHE_ID &&
@@ -338,6 +369,14 @@ function installRunnerCard(
     ...(host.runner.requiresDataFortInstallTarget(definition) &&
     restrictiveTargetServerId
       ? { selectedServerId: restrictiveTargetServerId }
+      : {}),
+    ...(installTargetBinding?.kind === "choose_installed_ice_on_install" &&
+    selectedCardId
+      ? { selectedCardId }
+      : {}),
+    ...(installTargetBinding?.kind === "choose_icebreaker_subtype_on_install" &&
+    selectedSubtype
+      ? { selectedSubtype }
       : {}),
   };
   if (zetatechOverlayInstall) {

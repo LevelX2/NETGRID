@@ -172,6 +172,8 @@ function hostFor(
       canPlayPrintedCostOnPlay: () => false,
       executeOnPlayAbility: (_action, playDefinition, cardId) =>
         calls.push(`onPlay:${playDefinition.id}:${cardId}`),
+      resolveRunnerTargetedEventImplementation: () => false,
+      resolvePostOnPlayGenericFollowups: () => undefined,
       hasPrintedCostOnPlay: () => false,
       additionalOperationCost: () => 0,
       needsLastTurnResourceTarget: () => false,

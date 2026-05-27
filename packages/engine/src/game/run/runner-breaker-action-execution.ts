@@ -16,9 +16,16 @@ export type RunnerBreakerActionExecutionHost = {
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     cardInstanceFor: (cardId: CardInstanceId) => CardInstance;
+    effectiveSubtypesForCard: (
+      cardId: CardInstanceId,
+      definition: CardDefinition,
+    ) => readonly string[];
   };
   run: {
     currentRun: () => ActiveRun;
+    currentEncounterSubroutines: (
+      iceDefinition: CardDefinition,
+    ) => NonNullable<CardDefinition["subroutines"]>;
     runRemainderStrengthBonusForBreaker: (
       run: GameState["run"],
       breakerId: CardInstanceId,
@@ -222,6 +229,16 @@ function executeBreakSubroutineAction(
       Number(legalAction.payload?.subroutineIndex),
       legalAction,
     );
+  if (legalAction.payload?.nextSentryFreeBreak === true) {
+    resolveNextSentryFreeBreakAction(
+      host,
+      breakerId,
+      Number(legalAction.payload?.subroutineIndex),
+      currentSubroutine,
+      legalAction,
+    );
+    return;
+  }
   host.breaker.assertBreakSubroutineCostQuoteValid(
     breakerId,
     legalAction,
@@ -261,6 +278,88 @@ function executeBreakSubroutineAction(
     host.tracking.recordBartmossEncounterUsage(breakerId);
     host.tracking.recordDupreBreakUsage(breakerId);
     host.tracking.recordSnowballBreakUsage(breakerId);
+    recordNextSentryFreeBreakIfEarned(host, breakerId, breakAbility);
     if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
   }
+}
+
+function resolveNextSentryFreeBreakAction(
+  host: RunnerBreakerActionExecutionHost,
+  breakerId: CardInstanceId | undefined,
+  subroutineIndex: number,
+  subroutine: Subroutine,
+  legalAction: LegalAction,
+): void {
+  const run = host.run.currentRun();
+  if (!breakerId) throw new Error("Free-Break-Quelle fehlt.");
+  if (run.phase !== "encounter_ice" || !run.encounteredIceId)
+    throw new Error("Free-Break kann nur im ICE-Encounter genutzt werden.");
+  if (!host.state.runner.rig.programs.includes(breakerId))
+    throw new Error("Der Icebreaker ist nicht installiert.");
+  if (!run.nextSentryFreeBreakByBreaker?.[breakerId])
+    throw new Error("Es gibt keinen offenen Free-Break-Effekt.");
+  if (run.nextSentryFreeBreakTargetIceByBreaker?.[breakerId] !== run.encounteredIceId)
+    throw new Error("Der Free-Break-Effekt gilt nur für das nächste ICE.");
+  const iceDefinition = host.cards.definitionFor(run.encounteredIceId);
+  if (
+    !host.cards
+      .effectiveSubtypesForCard(run.encounteredIceId, iceDefinition)
+      .includes("sentry")
+  )
+    throw new Error("Der Free-Break-Effekt gilt nur für das nächste Sentry.");
+  if (
+    run.brokenSubroutineIndexes.includes(subroutineIndex) ||
+    run.resolvedSubroutineIndexes.includes(subroutineIndex)
+  )
+    throw new Error("Diese Subroutine ist bereits erledigt.");
+  if ((legalAction.costs[0]?.credits ?? 0) !== 0)
+    throw new Error("Free-Break-Kosten sind nicht mehr gueltig.");
+  host.effects.executeEffectCommands([{ type: "break_subroutine", subroutineIndex }]);
+  const pending = { ...(run.nextSentryFreeBreakByBreaker ?? {}) };
+  const targetPending = { ...(run.nextSentryFreeBreakTargetIceByBreaker ?? {}) };
+  delete pending[breakerId];
+  delete targetPending[breakerId];
+  if (Object.keys(pending).length > 0) {
+    run.nextSentryFreeBreakByBreaker = pending;
+    run.nextSentryFreeBreakTargetIceByBreaker = targetPending;
+  } else {
+    delete run.nextSentryFreeBreakByBreaker;
+    delete run.nextSentryFreeBreakTargetIceByBreaker;
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    nextSentryFreeBreakConsumed: true,
+    sourceDefinitionId: host.cards.definitionFor(breakerId).id,
+    subroutineId: subroutine.id,
+  };
+}
+
+function recordNextSentryFreeBreakIfEarned(
+  host: RunnerBreakerActionExecutionHost,
+  breakerId: CardInstanceId,
+  breakAbility: RuntimeIcebreakerAbility | undefined,
+): void {
+  if (
+    breakAbility?.special !==
+    "set_next_sentry_free_break_after_fully_breaking_wall"
+  )
+    return;
+  const run = host.state.run;
+  if (!run?.encounteredIceId) return;
+  const iceDefinition = host.cards.definitionFor(run.encounteredIceId);
+  if (
+    !host.cards
+      .effectiveSubtypesForCard(run.encounteredIceId, iceDefinition)
+      .includes("wall")
+  )
+    return;
+  const subroutineCount = host.run.currentEncounterSubroutines(iceDefinition).length;
+  if (subroutineCount === 0) return;
+  for (let index = 0; index < subroutineCount; index += 1) {
+    if (!run.brokenSubroutineIndexes.includes(index)) return;
+  }
+  run.nextSentryFreeBreakByBreaker = {
+    ...(run.nextSentryFreeBreakByBreaker ?? {}),
+    [breakerId]: run.encounteredIceId,
+  };
 }

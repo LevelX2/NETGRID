@@ -5754,13 +5754,26 @@ select {
   transition:
     border-color 140ms ease,
     background 140ms ease,
-    box-shadow 140ms ease;
+    box-shadow 140ms ease,
+    filter 140ms ease,
+    transform 140ms ease;
 }
 
 .card:hover,
 .card:focus {
   z-index: 30;
   border-color: color-mix(in srgb, var(--runner), var(--line));
+}
+
+.card.tappedCard {
+  border-color: color-mix(in srgb, var(--runner), var(--line) 36%);
+  filter: saturate(0.76) brightness(0.9);
+  transform: rotate(-1.5deg);
+}
+
+.card.tappedCard:hover,
+.card.tappedCard:focus {
+  filter: saturate(0.88) brightness(0.96);
 }
 
 .card.hidden {
@@ -5906,6 +5919,54 @@ select {
   font-size: 7px;
 }
 
+.cardTappedBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 14px);
+  min-height: 18px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--runner), white 32%);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 28% 18%, rgb(255 255 255 / 0.28), transparent 34%),
+    linear-gradient(135deg, color-mix(in srgb, var(--runner), black 10%), color-mix(in srgb, var(--section-bg), black 10%));
+  color: white;
+  box-shadow:
+    0 2px 7px rgb(0 0 0 / 0.32),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  overflow: hidden;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.48);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card.withImage .cardTappedBadge {
+  top: clamp(4px, 2.4cqw, 10px);
+  right: clamp(4px, 2.4cqw, 10px);
+  min-height: clamp(12px, 5.2cqw, 22px);
+  padding: clamp(1px, 0.65cqw, 3px) clamp(4px, 2.2cqw, 8px);
+  font-size: clamp(6px, 2.45cqw, 10px);
+}
+
+.lane .cardTappedBadge {
+  top: calc(5px * var(--lane-card-scale, 1));
+  right: calc(5px * var(--lane-card-scale, 1));
+  min-height: calc(17px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1)) calc(6px * var(--lane-card-scale, 1));
+  font-size: calc(8px * var(--lane-card-scale, 1));
+}
+
 .card.hiddenBack.inactiveZoneCard::after,
 .card.hiddenBack .cardInactiveZoneBadge {
   display: none;
@@ -5913,6 +5974,8 @@ select {
 
 .card.hiddenBack .cardSetBadge,
 .card.hidden .cardSetBadge,
+.card.hiddenBack .cardTappedBadge,
+.card.hidden .cardTappedBadge,
 .card.hiddenBack .cardImageSetBadge,
 .card.hidden .cardImageSetBadge {
   display: none;

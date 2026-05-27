@@ -56,6 +56,32 @@ export type CardImplementationDefinition = {
   restrictedHostedCreditSource?: RestrictedHostedCreditSourceImplementation;
   installAdditionalCosts?: readonly CardInstallAdditionalCostImplementation[];
   installTargetBinding?: CardInstallTargetBindingImplementation;
+  icebreakerEncounterStrengthBonus?: {
+    kind: "against_selected_installed_ice";
+    amount: number;
+    visibility: "public";
+  };
+  icebreakerSubtypeChange?: {
+    timing: "runner_main" | "during_run";
+    cost: { clicks: 0 | 1; credits: number };
+    choices: readonly ("code_gate" | "sentry" | "wall")[];
+    limit?: "once_until_selected";
+    visibility: "public";
+  };
+  runnerRunStrengthBoost?: {
+    timing: "during_run";
+    cost: { tap: true };
+    target: "installed_runner_icebreaker";
+    amount: number;
+    duration: "current_run";
+    visibility: "public";
+  };
+  runnerEventTargetedEffect?: {
+    kind: "add_strength_counter_to_installed_icebreaker";
+    counterType: "power";
+    amount: number;
+    visibility: "public";
+  };
   damagePreventionSources?: readonly CardDamagePreventionSourceImplementation[];
   flatlineReplacementSources?: readonly CardFlatlineReplacementSourceImplementation[];
   tagPreventionSources?: readonly CardTagPreventionSourceImplementation[];

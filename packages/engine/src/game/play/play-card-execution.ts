@@ -43,6 +43,14 @@ export type PlayCardExecutionHost = {
       definition: CardDefinition,
       cardId: CardInstanceId,
     ) => void;
+    resolveRunnerTargetedEventImplementation: (
+      definition: CardDefinition,
+      legalAction: LegalAction,
+    ) => boolean;
+    resolvePostOnPlayGenericFollowups: (
+      definition: CardDefinition,
+      legalAction: LegalAction,
+    ) => void;
     hasPrintedCostOnPlay: (definition: CardDefinition) => boolean;
     additionalOperationCost: (definition: CardDefinition) => number;
     needsLastTurnResourceTarget: (definition: CardDefinition) => boolean;
@@ -85,8 +93,19 @@ function executePlayEventAction(
     zone: { side: "runner", zone: "heap" },
   };
   const resolver = host.events.runnerEventResolver(definition);
+  if (
+    host.cardImplementation.resolveRunnerTargetedEventImplementation(
+      definition,
+      legalAction,
+    )
+  )
+    return;
   if (host.cardImplementation.canPlayPrintedCostOnPlay(definition)) {
     host.cardImplementation.executeOnPlayAbility(legalAction, definition, cardId);
+    host.cardImplementation.resolvePostOnPlayGenericFollowups(
+      definition,
+      legalAction,
+    );
     return;
   }
   if (resolver) {

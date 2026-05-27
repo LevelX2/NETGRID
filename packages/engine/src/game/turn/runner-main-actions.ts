@@ -1,4 +1,4 @@
-import type { GameState, LegalAction } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, type GameState, type LegalAction } from "@netgrid/shared";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -335,7 +335,7 @@ export function buildRunnerMainActions(
         ),
       );
     }
-    for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
+  for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
       if (counterEffect.counterType === "crying") continue;
       if (cardCounter(state, state.runner.identity, counterEffect.counterType) <= 0)
         continue;
@@ -360,6 +360,45 @@ export function buildRunnerMainActions(
       );
     }
   }
+  for (const sourceCardId of state.runner.rig.programs.slice().sort()) {
+    const sourceDefinition = definitionFor(state, sourceCardId);
+    const subtypeChange =
+      cardImplementationForDefinitionId(sourceDefinition.id)?.icebreakerSubtypeChange;
+    if (!subtypeChange || subtypeChange.timing !== "runner_main") continue;
+    const clickCost = subtypeChange.cost.clicks;
+    if (clickCost > 0 && !hasClicks) continue;
+    const currentSubtype = state.cardInstances[sourceCardId]?.selectedSubtype;
+    if (subtypeChange.limit === "once_until_selected" && currentSubtype)
+      continue;
+    for (const subtype of subtypeChange.choices) {
+      if (subtype === currentSubtype) continue;
+      if (state.runner.credits < subtypeChange.cost.credits) continue;
+      const costs =
+        clickCost > 0 || subtypeChange.cost.credits > 0
+          ? [
+              {
+                clicks: clickCost,
+                credits: subtypeChange.cost.credits,
+              },
+            ]
+          : [];
+      actions.push(
+        action(
+          state,
+          "runner",
+          "trigger_ability",
+          `${sourceDefinition.title}: ${icebreakerSubtypeLabel(subtype)} wählen`,
+          sourceCardId,
+          costs,
+          {
+            cardId: sourceCardId,
+            runnerAbility: "change_icebreaker_subtype",
+            selectedSubtype: subtype,
+          },
+        ),
+      );
+    }
+  }
   for (const id of state.runner.grip) {
     const definition = definitionFor(state, id);
     const uniqueBlocked =
@@ -374,7 +413,54 @@ export function buildRunnerMainActions(
       state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
         runnerMemoryLimit(state)
     ) {
-      actions.push(buildRunnerProgramInstallAction(state, id, definition));
+      const installBinding =
+        cardImplementationForDefinitionId(definition.id)?.installTargetBinding;
+      if (installBinding?.kind === "choose_installed_ice_on_install") {
+        for (const targetIceId of installedCorpIceTargetIds(state)) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "install_card",
+              `${definition.title}: installiertes ICE wählen`,
+              id,
+              [{ clicks: 1, credits: definition.installCost ?? 0 }],
+              { cardId: id, selectedCardId: targetIceId },
+              {
+                targetRequirements: [
+                  {
+                    id: "targetIce",
+                    kind: "card",
+                    side: "corp",
+                    zoneScope: ["corp.servers.ice"],
+                    visibility: "public",
+                  },
+                ],
+              },
+            ),
+          );
+        }
+      } else if (installBinding?.kind === "choose_icebreaker_subtype_on_install") {
+        for (const subtype of installBinding.choices ?? [
+          "code_gate",
+          "sentry",
+          "wall",
+        ]) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "install_card",
+              `${definition.title}: ${icebreakerSubtypeLabel(subtype)} wählen`,
+              id,
+              [{ clicks: 1, credits: definition.installCost ?? 0 }],
+              { cardId: id, selectedSubtype: subtype },
+            ),
+          );
+        }
+      } else {
+        actions.push(buildRunnerProgramInstallAction(state, id, definition));
+      }
     }
     if (
       hasClicks &&
@@ -395,7 +481,10 @@ export function buildRunnerMainActions(
       availableRunnerProgramInstallCredits(state) >=
         (definition.installCost ?? 0)
     ) {
-      for (const hostId of state.runner.rig.programs) {
+      for (const hostId of [
+        ...state.runner.rig.programs,
+        ...state.runner.rig.hardware,
+      ]) {
         if (canOverlayProgramOnZetatechSoftwareInstaller(state, hostId, definition)) {
           const hostDefinition = definitionFor(state, hostId);
           actions.push(
@@ -504,6 +593,25 @@ export function buildRunnerMainActions(
         state,
         definition,
       );
+      const targetedEvent =
+        cardImplementationForDefinitionId(definition.id)?.runnerEventTargetedEffect;
+      if (targetedEvent?.kind === "add_strength_counter_to_installed_icebreaker") {
+        for (const targetCardId of installedRunnerIcebreakerIds(state)) {
+          const targetDefinition = definitionFor(state, targetCardId);
+          actions.push(
+            action(
+              state,
+              "runner",
+              "play_event",
+              `${definition.title}: ${targetDefinition.title} verstärken`,
+              id,
+              [{ clicks: 1, credits: definition.cost ?? 0 }],
+              { cardId: id, targetCardId },
+            ),
+          );
+        }
+        continue;
+      }
       const resolver =
         cardImplementationRunnerEventResolver(definition) ??
         RUNNER_EVENT_RESOLVERS[definition.id];
@@ -1091,4 +1199,27 @@ export function buildRunnerMainActions(
     );
   }
   return actions;
+}
+
+function installedCorpIceTargetIds(state: GameState): string[] {
+  const ids: string[] = [];
+  for (const server of state.corp.servers) ids.push(...server.ice);
+  return ids.filter((cardId) => state.cardInstances[cardId]).sort();
+}
+
+function installedRunnerIcebreakerIds(state: GameState): string[] {
+  return state.runner.rig.programs
+    .filter((cardId) => {
+      const definitionId = state.cardInstances[cardId]?.definitionId;
+      const definition = definitionId ? DEMO_CARDS_BY_ID[definitionId] : undefined;
+      return definition?.subtypes.includes("icebreaker") === true;
+    })
+    .sort();
+}
+
+function icebreakerSubtypeLabel(subtype: string): string {
+  if (subtype === "code_gate") return "Code Gate";
+  if (subtype === "sentry") return "Sentry";
+  if (subtype === "wall") return "Wall";
+  return subtype;
 }

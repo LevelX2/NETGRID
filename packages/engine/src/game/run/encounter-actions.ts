@@ -48,6 +48,11 @@ export type RunnerEncounterActionHost = {
     ) => string[];
     hostedProgramStrengthModifier: (cardId: CardInstanceId) => number;
     publicServerLabel: (serverId: ActiveRun["attackedServerId"]) => string | undefined;
+    icebreakerEncounterStrengthBonus?: (
+      breakerId: CardInstanceId,
+      encounteredIceId: CardInstanceId,
+    ) => number;
+    permanentIcebreakerStrengthCounterBonus?: (breakerId: CardInstanceId) => number;
   };
   run: {
     currentRun: () => ActiveRun;
@@ -128,7 +133,38 @@ export function buildRunnerEncounterActions(
   actions.push(...selfModifyingCodeEncounterActions(host));
   for (const breakerId of host.state.runner.rig.programs) {
     const breaker = host.cards.definitionFor(breakerId);
+    if (run.prohibitNoisyIcebreakers && breaker.subtypes.includes("noisy"))
+      continue;
     if (!host.run.canUseBreakerOnCurrentFort(breakerId)) continue;
+    const subtypeChange =
+      cardImplementationForDefinitionId(breaker.id)?.icebreakerSubtypeChange;
+    if (
+      subtypeChange?.timing === "during_run" &&
+      !(
+        subtypeChange.limit === "once_until_selected" &&
+        host.cards.cardInstanceFor(breakerId).selectedSubtype
+      )
+    ) {
+      for (const subtype of subtypeChange.choices) {
+        if (host.payment.availableRunnerRunCredits(breakerId) < subtypeChange.cost.credits)
+          continue;
+        actions.push(
+          host.actions.buildLegalAction(
+            "trigger_ability",
+            `${breaker.title}: ${icebreakerSubtypeLabel(subtype)} wählen`,
+            breakerId,
+            subtypeChange.cost.credits > 0
+              ? [{ credits: subtypeChange.cost.credits }]
+              : [],
+            {
+              cardId: breakerId,
+              runnerAbility: "change_icebreaker_subtype",
+              selectedSubtype: subtype,
+            },
+          ),
+        );
+      }
+    }
     const breakerBaseStrength =
       typeof run.aiBoonRunStrengthByBreaker?.[breakerId] === "number"
         ? run.aiBoonRunStrengthByBreaker[breakerId]
@@ -140,7 +176,12 @@ export function buildRunnerEncounterActions(
       breakerBaseStrength +
       host.cards.cardInstanceFor(breakerId).strengthModifier +
       host.cards.hostedProgramStrengthModifier(breakerId) +
+      (host.cards.icebreakerEncounterStrengthBonus?.(
+        breakerId,
+        encounteredIceId,
+      ) ?? 0) +
       host.cards.cardCounter(breakerId, "militech") +
+      (host.cards.permanentIcebreakerStrengthCounterBonus?.(breakerId) ?? 0) +
       host.cards.cardCounter(breakerId, "pattel_antibody") * -1 +
       host.breaker.dupreStrengthCounterBonus(breakerId) +
       host.run.runRemainderStrengthBonusForBreaker(breakerId);
@@ -148,7 +189,12 @@ export function buildRunnerEncounterActions(
     const breakAbilities = breakerAbilities.filter(
       (ability) =>
         ability.type === "break_subroutine" &&
-        breakAbilityMatchesIce(ability, encounteredIceSubtypes),
+        breakAbilityMatchesIce(ability, encounteredIceSubtypes) &&
+        selectedSubtypeAbilityMatchesBreaker(
+          host.cards.cardInstanceFor(breakerId),
+          ability,
+          encounteredIceSubtypes,
+        ),
     );
     const hasEligibleBreakTarget = breakAbilities.some((ability) =>
       encounterSubroutines.some(
@@ -160,6 +206,17 @@ export function buildRunnerEncounterActions(
     );
     const pump = breakerAbilities.find(
       (ability) => ability.type === "pump_strength",
+    );
+    actions.push(
+      ...nextSentryFreeBreakActions(
+        host,
+        breakerId,
+        breaker.title,
+        encounteredIceId,
+        iceDefinition,
+        encounterSubroutines,
+        encounteredIceSubtypes,
+      ),
     );
     if (
       pump &&
@@ -387,6 +444,64 @@ export function buildRunnerEncounterActions(
   };
 }
 
+function icebreakerSubtypeLabel(subtype: string): string {
+  switch (subtype) {
+    case "code_gate":
+      return "Code Gate";
+    case "sentry":
+      return "Sentry";
+    case "wall":
+      return "Wall";
+    default:
+      return subtype;
+  }
+}
+
+function nextSentryFreeBreakActions(
+  host: RunnerEncounterActionHost,
+  breakerId: CardInstanceId,
+  breakerTitle: string,
+  encounteredIceId: CardInstanceId,
+  iceDefinition: CardDefinition,
+  subroutines: NonNullable<CardDefinition["subroutines"]>,
+  encounteredIceSubtypes: readonly string[],
+): LegalAction[] {
+  const run = host.run.currentRun();
+  if (run.nextSentryFreeBreakByBreaker?.[breakerId] === undefined) return [];
+  if (run.nextSentryFreeBreakTargetIceByBreaker?.[breakerId] !== encounteredIceId)
+    return [];
+  if (!encounteredIceSubtypes.includes("sentry")) return [];
+  return subroutines.flatMap((subroutine, index) => {
+    if (
+      run.brokenSubroutineIndexes.includes(index) ||
+      run.resolvedSubroutineIndexes.includes(index)
+    )
+      return [];
+    return [
+      host.actions.buildLegalAction(
+        "break_subroutine",
+        `${breakerTitle}: nächste Sentry-Subroutine kostenlos brechen`,
+        breakerId,
+        [{ credits: 0 }],
+        {
+          breakerId,
+          iceId: encounteredIceId,
+          subroutineIndex: index,
+          subroutineId: subroutine.id,
+          targetIceDefinitionId: iceDefinition.id,
+          targetIceTitle: iceDefinition.title,
+          nextSentryFreeBreak: true,
+        },
+        host.actions.abilityMetadata(
+          breakerId,
+          `${breakerId}.next_sentry_free_break`,
+          encounteredIceId,
+        ),
+      ),
+    ];
+  });
+}
+
 export function buildRunnerMovementActions(
   host: RunnerEncounterActionHost,
 ): RunnerMovementActionBuildResult {
@@ -569,6 +684,19 @@ export function breakAbilityMatchesIce(
   )
     return false;
   return true;
+}
+
+function selectedSubtypeAbilityMatchesBreaker(
+  breaker: CardInstance,
+  ability: RuntimeIcebreakerAbility,
+  iceSubtypes: readonly string[],
+): boolean {
+  if (!ability.selectedIceSubtypeFromBreaker) return true;
+  const selectedSubtype =
+    typeof breaker.selectedSubtype === "string"
+      ? normalizeSubtypeLabel(breaker.selectedSubtype)
+      : "";
+  return selectedSubtype.length > 0 && iceSubtypes.includes(selectedSubtype);
 }
 
 export function breakAbilityMatchesSubroutine(
