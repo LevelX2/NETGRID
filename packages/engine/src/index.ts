@@ -467,6 +467,10 @@ import {
   handleRunnerBreakerActionExecution,
   type RunnerBreakerActionExecutionHost,
 } from "./game/run/runner-breaker-action-execution";
+import {
+  handlePlayCardExecution,
+  type PlayCardExecutionHost,
+} from "./game/play/play-card-execution";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -4764,60 +4768,8 @@ function performAction(
       handleCreditEconomyExecution(creditEconomyExecutionHost(state), legalAction);
       return;
     case "play_event":
-      playRunnerEvent(state, legalAction);
-      return;
     case "play_operation":
-      if (!legalAction.payload?.cardId)
-        throw new Error("Die Operation hat keine gueltige Karte.");
-      {
-        const cardId = String(legalAction.payload.cardId);
-        const definition = definitionFor(state, cardId);
-        if (!canPlayCorpOperation(state, definition))
-          throw new Error("Diese Operation ist im aktuellen Zustand nicht spielbar.");
-        if (hasPrintedCostOnPlayCardImplementation(definition)) {
-          const expectedCost =
-            (definition.cost ?? 0) +
-            onPlayCardImplementationAdditionalOperationCost(definition);
-          if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
-            throw new Error("Die Operation-Kosten sind nicht mehr gueltig.");
-          if (
-            onPlayCardImplementationNeedsLastTurnResourceTarget(definition) &&
-            !resolveRunnerLastTurnInstalledResourceTargetId(
-              state,
-              String(legalAction.payload.traceSuccessTargetCardId ?? ""),
-            )
-          )
-            throw new Error("Das Operation-Ziel ist nicht mehr gueltig.");
-        }
-      }
-      spendClick(state, "corp");
-      spendCredits(state, "corp", legalAction.costs[0]?.credits ?? 0);
-      if (legalAction.payload?.cardId) {
-        const cardId = String(legalAction.payload.cardId);
-        const definition = definitionFor(state, cardId);
-        removeFromAllZones(state, cardId);
-        state.corp.archives.push(cardId);
-        state.cardInstances[cardId] = {
-          ...mustInstance(state.cardInstances, cardId),
-          faceup: true,
-          rezzed: true,
-          zone: { side: "corp", zone: "archives" },
-        };
-        resolveCorpOperation(state, definition, legalAction);
-        if (definition.id === "v098_hq_rd_swap_operation") {
-          legalAction.payload = {
-            ...(legalAction.payload ?? {}),
-            hiddenZoneBarrier: true,
-            hiddenZoneAction: "swap_hq_rd",
-          };
-        }
-        if (definition.id === "v099_bad_publicity_operation") {
-          legalAction.payload = {
-            ...(legalAction.payload ?? {}),
-            badPublicityAfter: state.corp.badPublicity,
-          };
-        }
-      }
+      handlePlayCardExecution(playCardExecutionHost(state), legalAction);
       return;
     case "install_card":
       executeInstallCard(installCardHost(state), legalAction);
@@ -4973,42 +4925,6 @@ function performAction(
       handleTriggerAbilityExecution(triggerAbilityExecutionHost(state), legalAction);
       return;
   }
-}
-
-function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
-  spendClick(state, "runner");
-  spendCredits(state, "runner", legalAction.costs[0]?.credits ?? 0);
-  const cardId = String(legalAction.payload?.cardId);
-  const definition = definitionFor(state, cardId);
-  removeFromAllZones(state, cardId);
-  state.runner.heap.push(cardId);
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    faceup: true,
-    zone: { side: "runner", zone: "heap" },
-  };
-  const resolver =
-    cardImplementationRunnerEventResolver(definition) ??
-    RUNNER_EVENT_RESOLVERS[definition.id];
-  if (canPlayPrintedCostOnPlayImplementation(
-    cardImplementationRuntimeDeps,
-    state,
-    definition,
-  )) {
-    executeOnPlayCardImplementationAbility(
-      cardImplementationRuntimeDeps,
-      state,
-      legalAction,
-      definition,
-      cardId,
-    );
-    return;
-  }
-  if (resolver) {
-    resolver.resolve(state, legalAction);
-    return;
-  }
-  throw new Error(`Kein Runner-Event-Resolver fuer ${definition.id}.`);
 }
 
 function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
@@ -10065,6 +9981,56 @@ function runnerBreakerActionExecutionHost(
         recordDupreBreakUsage(runEndCleanupHost(state), breakerId),
       recordSnowballBreakUsage: (breakerId) =>
         recordSnowballBreakUsage(state, breakerId),
+    },
+  };
+}
+
+function playCardExecutionHost(state: GameState): PlayCardExecutionHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
+    },
+    zones: {
+      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+    },
+    payment: {
+      spendClick: (side) => spendClick(state, side),
+      spendCredits: (side, amount) => spendCredits(state, side, amount),
+    },
+    events: {
+      runnerEventResolver: (definition) =>
+        cardImplementationRunnerEventResolver(definition) ??
+        RUNNER_EVENT_RESOLVERS[definition.id],
+    },
+    operations: {
+      canPlayCorpOperation: (definition) =>
+        canPlayCorpOperation(state, definition),
+      resolveCorpOperation: (definition, legalAction) =>
+        resolveCorpOperation(state, definition, legalAction),
+      resolveRunnerLastTurnInstalledResourceTargetId: (targetCardId) =>
+        resolveRunnerLastTurnInstalledResourceTargetId(state, targetCardId),
+    },
+    cardImplementation: {
+      canPlayPrintedCostOnPlay: (definition) =>
+        canPlayPrintedCostOnPlayImplementation(
+          cardImplementationRuntimeDeps,
+          state,
+          definition,
+        ),
+      executeOnPlayAbility: (legalAction, definition, cardId) =>
+        executeOnPlayCardImplementationAbility(
+          cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+          definition,
+          cardId,
+        ),
+      hasPrintedCostOnPlay: hasPrintedCostOnPlayCardImplementation,
+      additionalOperationCost: onPlayCardImplementationAdditionalOperationCost,
+      needsLastTurnResourceTarget:
+        onPlayCardImplementationNeedsLastTurnResourceTarget,
     },
   };
 }
