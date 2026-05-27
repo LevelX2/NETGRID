@@ -673,7 +673,7 @@ describe("MVP 0.3 AI controller contract", () => {
         breakerInstanceId: breaker.instanceId,
         endingStrength: pair.expectedEndingStrength,
       });
-      expect(affordable, pair.role).toEqual({
+      expect(affordable, pair.role).toMatchObject({
         blocked: false,
         visibleBreakCost: pair.expectedCost,
       });
@@ -711,13 +711,57 @@ describe("MVP 0.3 AI controller contract", () => {
     };
     const breaker = runtimeVisibleBreaker(cardsById["onr_v1_021_dwarf"]);
 
-    expect(assessKnownRezzedIcePath([ice], [breaker], 2)).toEqual({
+    expect(assessKnownRezzedIcePath([ice], [breaker], 2)).toMatchObject({
       blocked: true,
       visibleBreakCost: 3,
     });
-    expect(assessKnownRezzedIcePath([ice], [breaker], 3)).toEqual({
+    expect(assessKnownRezzedIcePath([ice], [breaker], 3)).toMatchObject({
       blocked: false,
       visibleBreakCost: 3,
+    });
+  });
+
+  it("projects known rezzed ICE paths sequentially through later ICE", () => {
+    const cardsById = createRuntimeCardsById();
+    const outerSentry = runtimeVisibleIce(cardsById["onr_v1_259_in-the-face"]);
+    const innerCodeGate = runtimeVisibleIce(cardsById["onr_v1_261_quandary"]);
+    const killer = runtimeVisibleBreaker(cardsById["onr_v1_023_evil-twin"]);
+    const decoder = runtimeVisibleBreaker(cardsById["onr_v1_014_codecracker"]);
+
+    expect(assessKnownRezzedIcePath([outerSentry], [killer], 4)).toEqual({
+      blocked: false,
+      visibleBreakCost: 3,
+      canReachAccess: true,
+      creditsAfterPath: 1,
+      canBreakNextIceButNotFullPath: false,
+      creditsSpentBeforeUnpayableIce: 0,
+      assessedKnownIceCount: 1,
+    });
+    expect(assessKnownRezzedIcePath([innerCodeGate], [decoder], 4)).toEqual({
+      blocked: false,
+      visibleBreakCost: 2,
+      canReachAccess: true,
+      creditsAfterPath: 2,
+      canBreakNextIceButNotFullPath: false,
+      creditsSpentBeforeUnpayableIce: 0,
+      assessedKnownIceCount: 1,
+    });
+    expect(
+      assessKnownRezzedIcePath(
+        [innerCodeGate, outerSentry],
+        [killer, decoder],
+        4,
+      ),
+    ).toEqual({
+      blocked: true,
+      visibleBreakCost: 5,
+      canReachAccess: false,
+      creditsAfterPath: -1,
+      canBreakNextIceButNotFullPath: true,
+      unpayableIceIndex: 0,
+      creditsSpentBeforeUnpayableIce: 3,
+      assessedKnownIceCount: 2,
+      unpayableReason: "later_ice_unaffordable_after_prior_ice_cost",
     });
   });
 
@@ -734,7 +778,7 @@ describe("MVP 0.3 AI controller contract", () => {
       },
     ] satisfies VisibleCard[];
 
-    expect(assessKnownRezzedIcePath([ice], [breaker], 1, root)).toEqual({
+    expect(assessKnownRezzedIcePath([ice], [breaker], 1, root)).toMatchObject({
       blocked: false,
       visibleBreakCost: 1,
     });
@@ -891,7 +935,7 @@ describe("MVP 0.3 AI controller contract", () => {
         1,
         rdServer?.root ?? [],
       ),
-    ).toEqual({ blocked: true, visibleBreakCost: 2 });
+    ).toMatchObject({ blocked: true, visibleBreakCost: 2 });
     expect(assertAiInputIsSideSafe(input)).toBe(true);
   });
 
@@ -964,7 +1008,7 @@ describe("MVP 0.3 AI controller contract", () => {
         1,
         rdServer?.root ?? [],
       ),
-    ).toEqual({ blocked: true, visibleBreakCost: 2 });
+    ).toMatchObject({ blocked: true, visibleBreakCost: 2 });
     expect(assertAiInputIsSideSafe(input)).toBe(true);
   });
 
@@ -10442,6 +10486,91 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("penalizes remote runs that can break the next ICE but not the known full path", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-known-full-path-no-access",
+        runnerDeck: {
+          id: "ai_known_full_path_runner",
+          name: "AI Known Full Path Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_023_evil-twin", quantity: 2 },
+            { id: "onr_v1_014_codecracker", quantity: 2 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+        corpDeck: {
+          id: "ai_known_full_path_corp",
+          name: "AI Known Full Path Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_259_in-the-face", quantity: 1 },
+            { id: "onr_v1_261_quandary", quantity: 1 },
+            { id: "simple_agenda", quantity: 4 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    moveRunnerProgramToRig(state, "onr_v1_023_evil-twin");
+    moveRunnerProgramToRig(state, "onr_v1_014_codecracker");
+    ensureRemoteServer(state, "remote_1");
+    putCorpRootInRemote(state, "simple_agenda", 0);
+    const innerCodeGate = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_261_quandary",
+    );
+    const outerSentry = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_259_in-the-face",
+    );
+    for (const iceId of [innerCodeGate, outerSentry]) {
+      state.cardInstances[iceId] = {
+        ...state.cardInstances[iceId]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    state.runner.credits = 4;
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const economy = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!remoteRun || !economy)
+      throw new Error("Missing known-full-path run fixture actions");
+
+    const scopedInput = { ...input, legalActions: [remoteRun, economy] };
+    const runCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(runCandidate).toBeDefined();
+    if (!runCandidate) throw new Error("Missing contest remote candidate");
+    const runCost = estimateRunCost(scopedInput, runCandidate);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(runCost.reasons).toContain("known_full_path_no_access");
+    expect(runCost.reasons).toContain("can_break_next_ice_but_not_full_path");
+    expect(decision.actionId).toBe(economy.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
   it("uses playable Runner economy before generic draw", () => {
     const input = runnerActionPhaseInput(
       "ai-v141-hand-economy-before-draw",
@@ -15505,6 +15634,14 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             runCreditsMissingForKnownPath: 1,
             runStartedAgainstKnownUnaffordablePath: true,
             centralRunStartedAgainstKnownUnaffordablePath: true,
+            runnerRunStartedAgainstKnownUnpayableFullPath: true,
+            runnerRunStartedAgainstKnownUnpayableCentralPath: true,
+            runnerKnownPathCanReachAccessFalse: true,
+            runnerKnownPathCanBreakNextIceButNotFullPath: true,
+            runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce: true,
+            runnerRunCostQuoteUnderestimatedFullPath: true,
+            runnerRepeatRunOnKnownUnpayablePath: true,
+            runnerRunPenalizedAsKnownNoAccess: true,
             lowValueUnaffordableRun: true,
           }),
           progressionAction("runner", 2, "draw_card", undefined, 1, {
@@ -15751,6 +15888,15 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
       runsStartedAgainstKnownUnaffordablePath: 1,
       remoteRunsStartedAgainstKnownUnaffordablePath: 0,
       centralRunsStartedAgainstKnownUnaffordablePath: 1,
+      runnerRunStartedAgainstKnownUnpayableFullPath: 1,
+      runnerRunStartedAgainstKnownUnpayableRemotePath: 0,
+      runnerRunStartedAgainstKnownUnpayableCentralPath: 1,
+      runnerKnownPathCanReachAccessFalse: 1,
+      runnerKnownPathCanBreakNextIceButNotFullPath: 1,
+      runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce: 1,
+      runnerRunCostQuoteUnderestimatedFullPath: 1,
+      runnerRepeatRunOnKnownUnpayablePath: 1,
+      runnerRunPenalizedAsKnownNoAccess: 1,
       runsEndedAfterFirstIceDueToCredits: 0,
       creditsMissingForKnownPath: 1,
       knownPathCostAtRunStart: 4,

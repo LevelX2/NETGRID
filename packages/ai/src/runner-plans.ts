@@ -32,6 +32,7 @@ import {
   canBreakerDefinitionBreakIce,
   iceHasEndTheRun,
   serverIdFromEvent,
+  type KnownRezzedIcePathAssessment,
 } from "./visible-run-analysis";
 import {
   estimateBreakerCostProfileFromOntology,
@@ -164,6 +165,7 @@ type RunnerFeatures = {
   >;
   blockedRunServers: Set<string>;
   visibleRunBreakCosts: Map<string, number>;
+  visibleRunFullPathAssessments: Map<string, KnownRezzedIcePathAssessment>;
 };
 type RunnerServerFeatures =
   RunnerFeatures["serverFeatures"] extends Map<string, infer Server>
@@ -418,6 +420,50 @@ const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>([
   "draw_card",
   "trash_accessed_card",
 ]);
+
+function runnerRunActionIsKnownNoAccess(
+  input: AiDecisionInput,
+  action: LegalAction,
+  features: RunnerFeatures,
+): boolean {
+  if (
+    action.type !== "start_run" ||
+    typeof action.payload?.serverId !== "string"
+  )
+    return false;
+  const assessment = features.visibleRunFullPathAssessments.get(
+    action.payload.serverId,
+  );
+  if (!assessment || assessment.canReachAccess) return false;
+  if (assessment.assessedKnownIceCount <= 0) return false;
+  if (!runnerKnownPathAssessmentIsCostNoAccess(assessment)) return false;
+  return !runnerRunActionHasExplicitProbeValue(input, action);
+}
+
+function runnerKnownPathAssessmentIsCostNoAccess(
+  assessment: KnownRezzedIcePathAssessment,
+): boolean {
+  return (
+    assessment.unpayableReason === "ice_unaffordable" ||
+    assessment.unpayableReason === "later_ice_unaffordable_after_prior_ice_cost"
+  );
+}
+
+function runnerRunActionHasExplicitProbeValue(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  return (
+    action.payload?.bypass === true ||
+    rolesForAction(input, action).some(
+      (role) =>
+        role.includes("bypass") ||
+        role.includes("probe") ||
+        role.includes("expose") ||
+        role.includes("inside_job"),
+    )
+  );
+}
 
 export function hasRunnerPlanAction(input: AiDecisionInput): boolean {
   return (
@@ -2670,6 +2716,10 @@ function runnerKnownPathEstimate(
       visibleBreakCost: number;
       creditsAfterPath: number;
       blocked: boolean;
+      canReachAccess: boolean;
+      canBreakNextIceButNotFullPath: boolean;
+      unpayableReason?: KnownRezzedIcePathAssessment["unpayableReason"];
+      creditsSpentBeforeUnpayableIce: number;
       remoteScoreThreat: boolean;
     }
   | undefined {
@@ -2689,8 +2739,15 @@ function runnerKnownPathEstimate(
     0;
   return {
     visibleBreakCost,
-    creditsAfterPath: input.playerView.own.credits - visibleBreakCost,
+    creditsAfterPath: assessment.creditsAfterPath,
     blocked: assessment.blocked || features.blockedRunServers.has(serverId),
+    canReachAccess:
+      assessment.canReachAccess && !features.blockedRunServers.has(serverId),
+    canBreakNextIceButNotFullPath: assessment.canBreakNextIceButNotFullPath,
+    ...(assessment.unpayableReason
+      ? { unpayableReason: assessment.unpayableReason }
+      : {}),
+    creditsSpentBeforeUnpayableIce: assessment.creditsSpentBeforeUnpayableIce,
     remoteScoreThreat:
       serverId.startsWith("remote_") &&
       remoteServerHasVisibleScoreThreat(input, serverId),
@@ -3463,6 +3520,12 @@ export function estimateRunCost(
   const visibleBreakCost = target
     ? features.visibleRunBreakCosts.get(target)
     : undefined;
+  const fullPathAssessment = target
+    ? features.visibleRunFullPathAssessments.get(target)
+    : undefined;
+  const knownNoAccess =
+    fullPathAssessment?.canReachAccess === false &&
+    fullPathAssessment.assessedKnownIceCount > 0;
   const knownUnrezzedIceAdjustment = knownUnrezzedIceCostAdjustment(
     input,
     target,
@@ -3483,7 +3546,9 @@ export function estimateRunCost(
         ? 120
         : 40
       : blocked
-        ? -520
+        ? knownNoAccess
+          ? -50000
+          : -520
         : Math.max(
             -180,
             90 -
@@ -3498,6 +3563,10 @@ export function estimateRunCost(
       ? [
           "run_blocked_by_visible_rezzed_ice",
           "visible_ice_unaffordable_to_break",
+          ...(knownNoAccess ? ["known_full_path_no_access"] : []),
+          ...(fullPathAssessment?.canBreakNextIceButNotFullPath
+            ? ["can_break_next_ice_but_not_full_path"]
+            : []),
         ]
       : ["run_cost_from_visible_ice"],
     evidence: [
@@ -3506,6 +3575,10 @@ export function estimateRunCost(
       `blocked:${blocked}`,
       `credit_reserve:${features.credits}`,
       `visible_etr_break_cost:${visibleBreakCost ?? "unavailable"}`,
+      `known_path_can_reach_access:${fullPathAssessment?.canReachAccess ?? "unknown"}`,
+      `known_path_credits_after_full_path:${fullPathAssessment?.creditsAfterPath ?? "unknown"}`,
+      `known_path_unpayable_reason:${fullPathAssessment?.unpayableReason ?? "none"}`,
+      `known_path_can_break_next_not_full:${fullPathAssessment?.canBreakNextIceButNotFullPath ?? false}`,
       ...knownUnrezzedIceAdjustment.evidence,
     ],
   };
@@ -5789,6 +5862,8 @@ function actionPriority(
   if (kind === "trash_asset" && action.type === "trash_accessed_card")
     return 100;
   if (kind === "contest_remote" && action.type === "start_run") {
+    const features = extractRunnerFeatures(input);
+    if (runnerRunActionIsKnownNoAccess(input, action, features)) return -9000;
     const serverId =
       typeof action.payload?.serverId === "string"
         ? action.payload.serverId
@@ -5821,6 +5896,7 @@ function actionPriority(
     if (target === "hq" || target === "rd" || target === "archives") {
       const beliefState = reconstructBeliefState(input);
       const features = extractRunnerFeatures(input);
+      if (runnerRunActionIsKnownNoAccess(input, action, features)) return -9000;
       const goodTarget = centralPressureTargetIsGood(
         input,
         target,
@@ -5945,6 +6021,10 @@ function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
   );
   const blockedRunServers = new Set<string>();
   const visibleRunBreakCosts = new Map<string, number>();
+  const visibleRunFullPathAssessments = new Map<
+    string,
+    KnownRezzedIcePathAssessment
+  >();
   for (const server of input.playerView.servers) {
     const assessment = assessKnownRezzedIcePath(
       server.ice,
@@ -5952,6 +6032,7 @@ function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
       input.playerView.own.credits,
       server.root,
     );
+    visibleRunFullPathAssessments.set(server.id, assessment);
     if (assessment.visibleBreakCost !== undefined) {
       visibleRunBreakCosts.set(server.id, assessment.visibleBreakCost);
     }
@@ -5971,6 +6052,7 @@ function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
     serverFeatures,
     blockedRunServers,
     visibleRunBreakCosts,
+    visibleRunFullPathAssessments,
   };
 }
 

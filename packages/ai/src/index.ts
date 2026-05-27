@@ -57,6 +57,7 @@ import {
   creditsToBreakEndTheRunSubroutinesWithBreaker,
   endTheRunSubroutineCount,
   iceHasEndTheRun,
+  type KnownRezzedIcePathAssessment,
 } from "./visible-run-analysis";
 import {
   getStructuredRemoteRoleForCard,
@@ -1384,6 +1385,20 @@ export type AiMatchProgressionMetrics = {
   runsStartedAgainstKnownUnaffordablePath: number;
   remoteRunsStartedAgainstKnownUnaffordablePath: number;
   centralRunsStartedAgainstKnownUnaffordablePath: number;
+  runnerRunStartedAgainstKnownUnpayableFullPath: number;
+  runnerRunStartedAgainstKnownUnpayableRemotePath: number;
+  runnerRunStartedAgainstKnownUnpayableCentralPath: number;
+  runnerKnownPathCanReachAccessFalse: number;
+  runnerKnownPathCanBreakNextIceButNotFullPath: number;
+  runnerRunAbortedAfterKnownUnpayableLaterIce: number;
+  runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce: number;
+  runnerRunCostQuoteUnderestimatedFullPath: number;
+  runnerRepeatRunOnKnownUnpayablePath: number;
+  runnerRepeatRunOnKnownUnpayableRemotePath: number;
+  runnerRunCouldOnlyForceRezButNotAccess: number;
+  runnerRunAllowedAsFirstProbeUnknownIce: number;
+  runnerRunSuppressedAsKnownNoAccess: number;
+  runnerRunPenalizedAsKnownNoAccess: number;
   runsEndedAfterFirstIceDueToCredits: number;
   creditsMissingForKnownPath: number;
   knownPathCostAtRunStart: number;
@@ -2319,6 +2334,20 @@ export type AiSimulationSummary = {
     runStartedAgainstKnownUnaffordablePath?: boolean;
     remoteRunStartedAgainstKnownUnaffordablePath?: boolean;
     centralRunStartedAgainstKnownUnaffordablePath?: boolean;
+    runnerRunStartedAgainstKnownUnpayableFullPath?: boolean;
+    runnerRunStartedAgainstKnownUnpayableRemotePath?: boolean;
+    runnerRunStartedAgainstKnownUnpayableCentralPath?: boolean;
+    runnerKnownPathCanReachAccessFalse?: boolean;
+    runnerKnownPathCanBreakNextIceButNotFullPath?: boolean;
+    runnerRunAbortedAfterKnownUnpayableLaterIce?: boolean;
+    runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce?: boolean;
+    runnerRunCostQuoteUnderestimatedFullPath?: boolean;
+    runnerRepeatRunOnKnownUnpayablePath?: boolean;
+    runnerRepeatRunOnKnownUnpayableRemotePath?: boolean;
+    runnerRunCouldOnlyForceRezButNotAccess?: boolean;
+    runnerRunAllowedAsFirstProbeUnknownIce?: boolean;
+    runnerRunSuppressedAsKnownNoAccess?: boolean;
+    runnerRunPenalizedAsKnownNoAccess?: boolean;
     runEndedAfterFirstIceDueToCredits?: boolean;
     runStartedWithInsufficientStealOrTrashReserve?: boolean;
     probeRunWithPositiveInfoValue?: boolean;
@@ -11834,6 +11863,20 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "runsStartedAgainstKnownUnaffordablePath",
   "remoteRunsStartedAgainstKnownUnaffordablePath",
   "centralRunsStartedAgainstKnownUnaffordablePath",
+  "runnerRunStartedAgainstKnownUnpayableFullPath",
+  "runnerRunStartedAgainstKnownUnpayableRemotePath",
+  "runnerRunStartedAgainstKnownUnpayableCentralPath",
+  "runnerKnownPathCanReachAccessFalse",
+  "runnerKnownPathCanBreakNextIceButNotFullPath",
+  "runnerRunAbortedAfterKnownUnpayableLaterIce",
+  "runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce",
+  "runnerRunCostQuoteUnderestimatedFullPath",
+  "runnerRepeatRunOnKnownUnpayablePath",
+  "runnerRepeatRunOnKnownUnpayableRemotePath",
+  "runnerRunCouldOnlyForceRezButNotAccess",
+  "runnerRunAllowedAsFirstProbeUnknownIce",
+  "runnerRunSuppressedAsKnownNoAccess",
+  "runnerRunPenalizedAsKnownNoAccess",
   "runsEndedAfterFirstIceDueToCredits",
   "creditsMissingForKnownPath",
   "knownPathCostAtRunStart",
@@ -13263,6 +13306,50 @@ export function summarizeMatchProgressionMetrics(
     ).length,
     centralRunsStartedAgainstKnownUnaffordablePath: runnerRuns.filter(
       (entry) => entry.centralRunStartedAgainstKnownUnaffordablePath === true,
+    ).length,
+    runnerRunStartedAgainstKnownUnpayableFullPath: runnerRuns.filter(
+      (entry) => entry.runnerRunStartedAgainstKnownUnpayableFullPath === true,
+    ).length,
+    runnerRunStartedAgainstKnownUnpayableRemotePath: runnerRuns.filter(
+      (entry) => entry.runnerRunStartedAgainstKnownUnpayableRemotePath === true,
+    ).length,
+    runnerRunStartedAgainstKnownUnpayableCentralPath: runnerRuns.filter(
+      (entry) =>
+        entry.runnerRunStartedAgainstKnownUnpayableCentralPath === true,
+    ).length,
+    runnerKnownPathCanReachAccessFalse: actionSequence.filter(
+      (entry) => entry.runnerKnownPathCanReachAccessFalse === true,
+    ).length,
+    runnerKnownPathCanBreakNextIceButNotFullPath: actionSequence.filter(
+      (entry) => entry.runnerKnownPathCanBreakNextIceButNotFullPath === true,
+    ).length,
+    runnerRunAbortedAfterKnownUnpayableLaterIce: actionSequence.filter(
+      (entry) => entry.runnerRunAbortedAfterKnownUnpayableLaterIce === true,
+    ).length,
+    runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce: runnerRuns.filter(
+      (entry) =>
+        entry.runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce === true,
+    ).length,
+    runnerRunCostQuoteUnderestimatedFullPath: runnerRuns.filter(
+      (entry) => entry.runnerRunCostQuoteUnderestimatedFullPath === true,
+    ).length,
+    runnerRepeatRunOnKnownUnpayablePath: runnerRuns.filter(
+      (entry) => entry.runnerRepeatRunOnKnownUnpayablePath === true,
+    ).length,
+    runnerRepeatRunOnKnownUnpayableRemotePath: runnerRuns.filter(
+      (entry) => entry.runnerRepeatRunOnKnownUnpayableRemotePath === true,
+    ).length,
+    runnerRunCouldOnlyForceRezButNotAccess: runnerRuns.filter(
+      (entry) => entry.runnerRunCouldOnlyForceRezButNotAccess === true,
+    ).length,
+    runnerRunAllowedAsFirstProbeUnknownIce: actionSequence.filter(
+      (entry) => entry.runnerRunAllowedAsFirstProbeUnknownIce === true,
+    ).length,
+    runnerRunSuppressedAsKnownNoAccess: actionSequence.filter(
+      (entry) => entry.runnerRunSuppressedAsKnownNoAccess === true,
+    ).length,
+    runnerRunPenalizedAsKnownNoAccess: runnerRuns.filter(
+      (entry) => entry.runnerRunPenalizedAsKnownNoAccess === true,
     ).length,
     runsEndedAfterFirstIceDueToCredits: actionSequence.filter(
       (entry) => entry.runEndedAfterFirstIceDueToCredits === true,
@@ -22871,6 +22958,19 @@ function runnerKnownPathDiagnosticsForAction(
   targetServerId: string | undefined,
   reserveTarget: number,
 ): Partial<AiSimulationSummary["actionSequence"][number]> {
+  const legalKnownNoAccessTargets = runnerKnownNoAccessLegalRunTargets(input);
+  const selectedKnownNoAccess =
+    targetServerId !== undefined &&
+    legalKnownNoAccessTargets.some(
+      (target) => target.serverId === targetServerId,
+    );
+  const suppressedKnownNoAccess =
+    action.type !== "start_run" && legalKnownNoAccessTargets.length > 0;
+  const firstProbeUnknownAllowed =
+    action.type === "start_run" &&
+    targetServerId !== undefined &&
+    runnerRunTargetHasOnlyUnknownOrUnrezzedIce(input, targetServerId) &&
+    legalKnownNoAccessTargets.length === 0;
   if (action.type === "jack_out") {
     const run = input.playerView.run;
     const server = input.playerView.servers.find(
@@ -22890,15 +22990,42 @@ function runnerKnownPathDiagnosticsForAction(
         input.playerView.own.credits,
         server?.root ?? [],
       ).blocked
-    )
-      return { runEndedAfterFirstIceDueToCredits: true };
+    ) {
+      const fullPath =
+        server !== undefined
+          ? assessKnownRezzedIcePath(
+              server.ice,
+              input.playerView.own.rig ?? [],
+              input.playerView.own.credits,
+              server.root,
+            )
+          : undefined;
+      return {
+        runEndedAfterFirstIceDueToCredits: true,
+        ...(fullPath?.canReachAccess === false &&
+        fullPath.unpayableReason ===
+          "later_ice_unaffordable_after_prior_ice_cost"
+          ? { runnerRunAbortedAfterKnownUnpayableLaterIce: true }
+          : {}),
+      };
+    }
     return {};
   }
-  if (action.type !== "start_run" || !targetServerId) return {};
+  if (action.type !== "start_run" || !targetServerId)
+    return {
+      ...(suppressedKnownNoAccess
+        ? { runnerRunSuppressedAsKnownNoAccess: true }
+        : {}),
+    };
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === targetServerId,
   );
-  if (!server) return {};
+  if (!server)
+    return {
+      ...(firstProbeUnknownAllowed
+        ? { runnerRunAllowedAsFirstProbeUnknownIce: true }
+        : {}),
+    };
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
@@ -22928,6 +23055,12 @@ function runnerKnownPathDiagnosticsForAction(
           role.includes("inside_job"),
       ));
   const insufficientPath = assessment.blocked || creditsMissing > 0;
+  const knownNoAccess =
+    assessment.canReachAccess === false &&
+    assessment.assessedKnownIceCount > 0 &&
+    runnerKnownPathAssessmentIsCostNoAccess(assessment);
+  const canBreakNextButNotFull =
+    assessment.canBreakNextIceButNotFullPath === true;
   const insufficientReserve =
     !insufficientPath &&
     creditsAfterPath < reserveTarget &&
@@ -22961,6 +23094,45 @@ function runnerKnownPathDiagnosticsForAction(
     ...(insufficientPath && central
       ? { centralRunStartedAgainstKnownUnaffordablePath: true }
       : {}),
+    ...(knownNoAccess
+      ? {
+          runnerRunStartedAgainstKnownUnpayableFullPath: true,
+          runnerKnownPathCanReachAccessFalse: true,
+        }
+      : {}),
+    ...(knownNoAccess && remote
+      ? { runnerRunStartedAgainstKnownUnpayableRemotePath: true }
+      : {}),
+    ...(knownNoAccess && central
+      ? { runnerRunStartedAgainstKnownUnpayableCentralPath: true }
+      : {}),
+    ...(canBreakNextButNotFull
+      ? { runnerKnownPathCanBreakNextIceButNotFullPath: true }
+      : {}),
+    ...(assessment.creditsSpentBeforeUnpayableIce > 0
+      ? { runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce: true }
+      : {}),
+    ...(knownNoAccess &&
+    (assessment.visibleBreakCost ?? 0) > input.playerView.own.credits
+      ? { runnerRunCostQuoteUnderestimatedFullPath: true }
+      : {}),
+    ...(knownNoAccess && runnerHasRecentRunOnServer(input, targetServerId)
+      ? { runnerRepeatRunOnKnownUnpayablePath: true }
+      : {}),
+    ...(knownNoAccess &&
+    remote &&
+    runnerHasRecentRunOnServer(input, targetServerId)
+      ? { runnerRepeatRunOnKnownUnpayableRemotePath: true }
+      : {}),
+    ...(knownNoAccess && positiveProbe
+      ? { runnerRunCouldOnlyForceRezButNotAccess: true }
+      : {}),
+    ...(firstProbeUnknownAllowed
+      ? { runnerRunAllowedAsFirstProbeUnknownIce: true }
+      : {}),
+    ...(selectedKnownNoAccess
+      ? { runnerRunPenalizedAsKnownNoAccess: true }
+      : {}),
     ...(insufficientReserve
       ? { runStartedWithInsufficientStealOrTrashReserve: true }
       : {}),
@@ -22969,6 +23141,84 @@ function runnerKnownPathDiagnosticsForAction(
       ? { lowValueUnaffordableRun: true }
       : {}),
   };
+}
+
+function runnerKnownNoAccessLegalRunTargets(
+  input: AiDecisionInput,
+): Array<{ serverId: string; assessment: KnownRezzedIcePathAssessment }> {
+  if (input.side !== "runner") return [];
+  return input.legalActions
+    .filter(
+      (action) =>
+        action.side === "runner" &&
+        action.type === "start_run" &&
+        typeof action.payload?.serverId === "string",
+    )
+    .map((action) => {
+      const serverId = String(action.payload?.serverId);
+      const server = input.playerView.servers.find(
+        (candidate) => candidate.id === serverId,
+      );
+      if (!server) return undefined;
+      const assessment = assessKnownRezzedIcePath(
+        server.ice,
+        input.playerView.own.rig ?? [],
+        input.playerView.own.credits,
+        server.root,
+      );
+      if (
+        assessment.canReachAccess ||
+        assessment.assessedKnownIceCount <= 0 ||
+        !runnerKnownPathAssessmentIsCostNoAccess(assessment) ||
+        runnerRunTargetHasOnlyUnknownOrUnrezzedIce(input, serverId)
+      )
+        return undefined;
+      return { serverId, assessment };
+    })
+    .filter(
+      (
+        target,
+      ): target is {
+        serverId: string;
+        assessment: KnownRezzedIcePathAssessment;
+      } => target !== undefined,
+    );
+}
+
+function runnerKnownPathAssessmentIsCostNoAccess(
+  assessment: KnownRezzedIcePathAssessment,
+): boolean {
+  return (
+    assessment.unpayableReason === "ice_unaffordable" ||
+    assessment.unpayableReason === "later_ice_unaffordable_after_prior_ice_cost"
+  );
+}
+
+function runnerRunTargetHasOnlyUnknownOrUnrezzedIce(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  return (
+    server !== undefined &&
+    server.ice.length > 0 &&
+    server.ice.every((ice) => !ice.known || ice.rezzed !== true)
+  );
+}
+
+function runnerHasRecentRunOnServer(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  return input.playerView.publicEvents
+    .slice(-24)
+    .some(
+      (event) =>
+        event.publicPayload.actionType === "start_run" &&
+        aiServerIdFromEvent(event) === serverId,
+    );
 }
 
 function runnerContestBlockedByCredits(
