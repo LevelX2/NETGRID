@@ -12,7 +12,7 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 3d
 proReferences:
-  - PRO017
+  - PRO010
 blockedBy:
   - missing-generic-corp-post-pass-ice-window-contract
 resultArtifacts: []

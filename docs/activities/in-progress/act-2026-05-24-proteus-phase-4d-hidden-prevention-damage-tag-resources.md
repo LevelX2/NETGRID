@@ -12,8 +12,7 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 4d
 proReferences:
-  - PRO008
-  - PRO023
+  - PRO012
 blockedBy:
   - missing-hidden-resource-trace-success-cancel-window
   - missing-hidden-resource-post-damage-reaction-window

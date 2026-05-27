@@ -12,8 +12,7 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1e
 proReferences:
-  - PRO009
-  - PRO039
+  - PRO019
 blockedBy:
   - rule-source-clarification-proteus-phase-1e-hidden-fort-and-central-access
 resultArtifacts:

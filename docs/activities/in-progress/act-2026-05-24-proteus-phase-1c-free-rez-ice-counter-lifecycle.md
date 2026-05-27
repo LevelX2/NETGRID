@@ -12,8 +12,7 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1c
 proReferences:
-  - PRO010
-  - PRO037
+  - PRO019
 blockedBy:
   - rule-source-clarification-emergency-rig-x
 resultArtifacts:

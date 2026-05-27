@@ -49,6 +49,7 @@ export type CorpMainActionGenerationHost = {
     corpActionDebtPending: HostFn<number>;
     acmeSavingsAndLoanObligationCount: HostFn<number>;
     canPlayCorpOperation: HostFn<boolean>;
+    cardImplementationOperationLegalActions: HostFn<LegalAction[]>;
     corpUtilityImplementationForDefinition: HostFn<{ kind?: string } | undefined>;
     powerGridOverloadLegalActions: HostFn<LegalAction[]>;
     systematicLayoffsLegalActions: HostFn<LegalAction[]>;
@@ -417,6 +418,12 @@ export function buildCorpMainActions(
       }
       if (definition.id === SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID) {
         actions.push(...systematicLayoffsLegalActions(state, id, definition));
+        continue;
+      }
+      const implementationActions =
+        host.corp.cardImplementationOperationLegalActions(state, id, definition);
+      if (implementationActions.length > 0) {
+        actions.push(...implementationActions);
         continue;
       }
       actions.push(

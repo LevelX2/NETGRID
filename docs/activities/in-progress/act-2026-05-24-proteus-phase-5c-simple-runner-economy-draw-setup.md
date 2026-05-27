@@ -12,7 +12,8 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 5c
 proReferences:
-  - PRO014
+  - PRO005
+  - PRO008
 blockedBy:
   - runner_trash_subtype_history
   - runner_next_agenda_access_reward

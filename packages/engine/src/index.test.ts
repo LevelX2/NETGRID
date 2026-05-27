@@ -199,6 +199,300 @@ import {
   addInstalledRunnerProgramForTest,
 } from "./test-fixtures/index-test-helpers";
 
+const PRO007_CORP_DECK: DeckDefinition = {
+  ...ONR_V1_CORP_DECK,
+  id: "proteus_pro007_corp_test_harness",
+  cards: [
+    ...ONR_V1_CORP_DECK.cards,
+    { id: "onr_proteus_047_credit-consolidation", quantity: 1 },
+    { id: "onr_proteus_048_data-sifters", quantity: 1 },
+    { id: "onr_proteus_050_manhunt", quantity: 1 },
+    { id: "onr_proteus_052_schlaghund-pointers", quantity: 1 },
+    { id: "onr_proteus_053_underworld-mole", quantity: 1 },
+  ],
+};
+
+const PRO007_RUNNER_DECK: DeckDefinition = {
+  ...ONR_V1_RUNNER_DECK,
+  id: "proteus_pro007_runner_test_harness",
+  cards: [
+    ...ONR_V1_RUNNER_DECK.cards,
+    { id: "onr_proteus_128_airport-locker", quantity: 1 },
+    { id: "onr_proteus_150_streetware-distributor", quantity: 1 },
+  ],
+};
+
+function proteusPro007Game(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: CURRENT_RULES_BASELINE,
+    runnerDeck: PRO007_RUNNER_DECK,
+    corpDeck: PRO007_CORP_DECK,
+    agendaPointsToWin: 7,
+  });
+}
+
+function corpActionStateForProteusPro007(seed: string): GameState {
+  const state = proteusPro007Game(seed);
+  return apply(state, "corp", (action) => action.type === "mandatory_draw");
+}
+
+function playCorpOperationByDefinition(
+  state: GameState,
+  definitionId: CardDefinitionId,
+): GameState {
+  const cardId = addCorpCardToHqForTest(
+    state,
+    definitionId,
+    definitionId.replace(/[^a-z0-9]/gi, "_"),
+  );
+  keepOnlyCorpHqCard(state, cardId);
+  return apply(
+    state,
+    "corp",
+    (action) =>
+      action.type === "play_operation" && action.payload?.cardId === cardId,
+  );
+}
+
+function resolveTraceWithZeroBids(state: GameState): GameState {
+  let resolved = applyChoice(state, "corp", "bid_0");
+  if (resolved.pendingChoice?.source.startsWith("trace_base_link:"))
+    resolved = applyChoice(resolved, "runner", "pass");
+  resolved = applyChoice(resolved, "runner", "bid_0");
+  if (resolved.pendingChoice?.source.startsWith("trace_post_bid_link:"))
+    resolved = applyChoice(resolved, "runner", "pass");
+  return resolved;
+}
+
+describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
+  it("plays Credit Consolidation and gates Data Sifters on Runner node trash last turn", () => {
+    let state = corpActionStateForProteusPro007("proteus-pro007-economy");
+    state.corp.credits = 20;
+
+    const dataSiftersId = addCorpCardToHqForTest(
+      state,
+      "onr_proteus_048_data-sifters",
+      "data_sifters",
+    );
+    keepOnlyCorpHqCard(state, dataSiftersId);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "play_operation" &&
+          action.payload?.cardId === dataSiftersId,
+      ),
+    ).toBe(false);
+
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      trashedNodeLastTurn: true,
+    };
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        action.payload?.cardId === dataSiftersId,
+    );
+    expect(state.runner.tags).toBe(1);
+
+    state = corpActionStateForProteusPro007("proteus-pro007-credit");
+    state.corp.credits = 20;
+    state = playCorpOperationByDefinition(
+      state,
+      "onr_proteus_047_credit-consolidation",
+    );
+    expect(state.corp.credits).toBe(25);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      gainedCredits: 15,
+      corpCreditsAfter: 25,
+    });
+  });
+
+  it("resolves Manhunt margin tags and Schlaghund Pointers trace surcharge", () => {
+    let state = corpActionStateForProteusPro007("proteus-pro007-traces");
+    state.corp.credits = 20;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runAttemptsLastTurn: 1,
+      runAttemptsThisGame: 1,
+    };
+
+    state = playCorpOperationByDefinition(state, "onr_proteus_050_manhunt");
+    expect(state.trace).toMatchObject({
+      baseTraceStrength: 6,
+      successEffect: { type: "add_tags_by_trace_margin_over_runner_link" },
+    });
+    state = resolveTraceWithZeroBids(state);
+    expect(state.runner.tags).toBe(6);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceSuccessful: true,
+      tagsAdded: 6,
+      runnerLink: 0,
+    });
+
+    state = corpActionStateForProteusPro007("proteus-pro007-schlaghund");
+    state.corp.credits = 20;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runAttemptsThisGame: 1,
+    };
+    const schlaghundId = addCorpCardToHqForTest(
+      state,
+      "onr_proteus_052_schlaghund-pointers",
+      "schlaghund_pointers",
+    );
+    keepOnlyCorpHqCard(state, schlaghundId);
+    const action = getLegalActions(state, "corp").find(
+      (candidate) =>
+        candidate.type === "play_operation" &&
+        candidate.payload?.cardId === schlaghundId,
+    );
+    expect(action?.costs).toEqual([{ clicks: 1, credits: 9 }]);
+    state = apply(state, "corp", (candidate) => candidate.actionId === action?.actionId);
+    expect(state.corp.credits).toBe(11);
+    state = resolveTraceWithZeroBids(state);
+    expect(state.runner.tags).toBe(1);
+  });
+
+  it("targets only last-turn installed Runner resources for Underworld Mole", () => {
+    let state = corpActionStateForProteusPro007("proteus-pro007-mole");
+    state.corp.credits = 20;
+    const resourceId = installRunnerResourceForTest(
+      state,
+      "onr_proteus_150_streetware-distributor",
+    );
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      installedResourceIdsLastTurn: [resourceId],
+    };
+    const moleId = addCorpCardToHqForTest(
+      state,
+      "onr_proteus_053_underworld-mole",
+      "underworld_mole",
+    );
+    keepOnlyCorpHqCard(state, moleId);
+    const legal = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "play_operation" && action.payload?.cardId === moleId,
+    );
+    expect(legal).toHaveLength(1);
+    expect(legal[0]?.payload).toMatchObject({
+      traceSuccessTargetCardId: resourceId,
+      traceSuccessTargetDefinitionId: "onr_proteus_150_streetware-distributor",
+    });
+
+    state = apply(state, "corp", (action) => action.actionId === legal[0]?.actionId);
+    expect(state.trace).toMatchObject({
+      baseTraceStrength: 4,
+      successEffect: {
+        type: "trash_runner_resource_and_add_tag",
+        targetCardInstanceId: resourceId,
+      },
+    });
+    state = resolveTraceWithZeroBids(state);
+    expect(state.runner.tags).toBe(1);
+    expect(state.runner.heap).toContain(resourceId);
+    expect(state.runner.rig.resources).not.toContain(resourceId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceSuccessful: true,
+      tagsAdded: 1,
+      trashedCardType: "resource",
+      trashedCount: 1,
+      trashedCardDefinitionId: "onr_proteus_150_streetware-distributor",
+    });
+  });
+
+  it("keeps Underworld Mole targets redacted for hidden Runner resources until success", () => {
+    let state = corpActionStateForProteusPro007("proteus-pro007-hidden-mole");
+    state.corp.credits = 20;
+    const hiddenResourceId = installRunnerResourceForTest(
+      state,
+      "onr_proteus_128_airport-locker",
+    );
+    state.cardInstances[hiddenResourceId] = {
+      ...state.cardInstances[hiddenResourceId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      installedResourceIdsLastTurn: [hiddenResourceId],
+    };
+    const moleId = addCorpCardToHqForTest(
+      state,
+      "onr_proteus_053_underworld-mole",
+      "underworld_hidden_mole",
+    );
+    keepOnlyCorpHqCard(state, moleId);
+
+    const legal = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "play_operation" && action.payload?.cardId === moleId,
+    );
+
+    expect(legal).toHaveLength(1);
+    const hiddenResourceSlotId = String(
+      legal[0]?.payload?.hiddenResourceSlotId ?? "",
+    );
+    expect(hiddenResourceSlotId).toMatch(/^hidden_runner_resource_/);
+    expect(legal[0]?.payload).toMatchObject({
+      traceSuccessTargetCardId: hiddenResourceSlotId,
+      traceSuccessTargetResourceSlotId: hiddenResourceSlotId,
+      hiddenResourceSlotId,
+      hiddenRunnerResource: true,
+      redactedKind: "hidden_runner_resource",
+    });
+    expect(legal[0]?.payload).not.toHaveProperty(
+      "traceSuccessTargetDefinitionId",
+    );
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "onr_proteus_128_airport-locker",
+    );
+
+    state = apply(state, "corp", (action) => action.actionId === legal[0]?.actionId);
+    expect(state.trace).toMatchObject({
+      baseTraceStrength: 4,
+      successEffect: {
+        type: "trash_runner_resource_and_add_tag",
+        targetCardInstanceId: hiddenResourceId,
+      },
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      "onr_proteus_128_airport-locker",
+    );
+
+    state = resolveTraceWithZeroBids(state);
+    expect(state.runner.tags).toBe(1);
+    expect(state.runner.heap).toContain(hiddenResourceId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceSuccessful: true,
+      tagsAdded: 1,
+      trashedCardType: "resource",
+      trashedCount: 1,
+      trashedCardDefinitionId: "onr_proteus_128_airport-locker",
+      hiddenResourceSlotId,
+      hiddenRunnerResourceRevealed: true,
+    });
+  });
+});
+
 describe("MVP 0.1 engine foundation", () => {
   it("normalizes legacy ability payloads into side-safe public ability schema", () => {
     const context = buildPublicAbilitySchemaContext(

@@ -18,7 +18,6 @@ import type {
   ResolvedGameEffect,
   ServerId,
   Side,
-  TraceSuccessEffect,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import {
@@ -48,6 +47,7 @@ import type {
   CardAbilityCostImplementation,
   CardConditionImplementation,
   CardEffectImplementation,
+  CardTraceSuccessEffectImplementation,
   CardLifecycleImplementation,
   CardLifecycleTriggeredAbilityImplementation,
   OnPlayCardAbilityImplementation,
@@ -79,6 +79,9 @@ export type CardImplementationRuntimeDependencies = {
   rezzedCorpRootCardIds: (state: GameState) => CardInstanceId[];
   runnerInstalledCardIds: (state: GameState) => CardInstanceId[];
   runnerRunAttemptsLastTurn: (state: GameState) => number;
+  runnerRunAttemptsThisGame: (state: GameState) => number;
+  runnerTrashedNodeLastTurn: (state: GameState) => boolean;
+  runnerInstalledResourceLastTurn: (state: GameState) => boolean;
   runnerWasDamagedDuringLastThreeActions: (state: GameState) => boolean;
   runnerMadeSuccessfulRunOnServerThisTurn: (
     state: GameState,
@@ -132,7 +135,7 @@ export type CardImplementationRuntimeDependencies = {
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinition["id"],
     baseTraceStrength: number,
-    successEffect: TraceSuccessEffect,
+    successEffects: readonly CardTraceSuccessEffectImplementation[],
   ) => Record<string, string | number | boolean>;
   startRun: (
     state: GameState,
@@ -485,6 +488,15 @@ function cardImplementationConditionMet(
         deps.runnerRunAttemptsLastTurn(state) >=
         Math.max(0, condition.minimumRuns)
       );
+    case "runner_attempted_run_this_game":
+      return (
+        deps.runnerRunAttemptsThisGame(state) >=
+        Math.max(0, condition.minimumRuns)
+      );
+    case "runner_trashed_node_last_turn":
+      return deps.runnerTrashedNodeLastTurn(state);
+    case "runner_installed_resource_last_turn":
+      return deps.runnerInstalledResourceLastTurn(state);
     case "runner_damaged_during_last_three_actions":
       return deps.runnerWasDamagedDuringLastThreeActions(state);
     case "runner_liberated_agenda_subtype_this_turn":
@@ -655,6 +667,12 @@ function assertOnPlayCardImplementationAbilityCanResolve(
     throw new Error("Der Runner muss getaggt sein.");
   if (ability.condition?.kind === "runner_attempted_run_last_turn")
     throw new Error("Der Runner hat im letzten Zug nicht genug Runs versucht.");
+  if (ability.condition?.kind === "runner_attempted_run_this_game")
+    throw new Error("Der Runner hat in diesem Spiel nicht genug Runs versucht.");
+  if (ability.condition?.kind === "runner_trashed_node_last_turn")
+    throw new Error("Der Runner hat im letzten Zug keine Node getrasht.");
+  if (ability.condition?.kind === "runner_installed_resource_last_turn")
+    throw new Error("Der Runner hat im letzten Zug keine Resource installiert.");
   if (ability.condition?.kind === "runner_damaged_during_last_three_actions")
     throw new Error("Der Runner wurde in den letzten drei Aktionen nicht verletzt.");
   if (ability.condition?.kind === "runner_made_successful_run_on_server_this_turn")
@@ -695,6 +713,12 @@ function assertActivatedCardImplementationAbilityCanResolve(
     throw new Error("Auf der Quelle muessen Advancement-Counter liegen.");
   if (ability.condition?.kind === "runner_attempted_run_last_turn")
     throw new Error("Der Runner hat im letzten Zug nicht genug Runs versucht.");
+  if (ability.condition?.kind === "runner_attempted_run_this_game")
+    throw new Error("Der Runner hat in diesem Spiel nicht genug Runs versucht.");
+  if (ability.condition?.kind === "runner_trashed_node_last_turn")
+    throw new Error("Der Runner hat im letzten Zug keine Node getrasht.");
+  if (ability.condition?.kind === "runner_installed_resource_last_turn")
+    throw new Error("Der Runner hat im letzten Zug keine Resource installiert.");
   if (ability.condition?.kind === "runner_damaged_during_last_three_actions")
     throw new Error("Der Runner wurde in den letzten drei Aktionen nicht verletzt.");
   const limitFailureMessage = cardImplementationAbilityLimitFailureMessage(

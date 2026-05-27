@@ -34,7 +34,7 @@ checks:
 
 ## Ziel
 
-Die bereits umgesetzte PRO006-Implementierung gezielt über Typ- und Regressionstests härten, ohne neue Proteus-Karten umzusetzen und ohne PRO025-Mechaniken vorzuziehen.
+Die bereits umgesetzte PRO006-Implementierung gezielt über Typ- und Regressionstests härten, ohne neue Proteus-Karten umzusetzen und ohne PRO010-Mechaniken vorzuziehen.
 
 ## Ergebnisnotiz
 
@@ -44,4 +44,4 @@ Der deklarative Printed-Subroutine-Typ für `end_the_run_unless_runner_pays` erl
 
 `Colonel Failure` behält die PRO006-Semantik: `trash_program` bleibt ein automatischer Printed-Subroutine-Effekt ohne Zielwahlfenster. Ergänzte Regressionen decken Fälle mit einem und null installierten Runner-Programmen ab, prüfen fehlende Doppel-Trash-Ziele, Hidden-Info-sichere PublicPayloads sowie Replay-/StateHash-Determinismus.
 
-Dieses Paket implementiert keine neue Proteus-Karte. Die Implementierungszählung bleibt 62 von 154 Proteus-Karten; 92 CardImplementation-Dateien fehlen weiterhin. PRO025 bleibt offen/blockiert: `Chihuahua`, `Coyote`, `Iceberg` und `Washed-Up Solo Construct` wurden nicht umgesetzt oder freigegeben. Payment- und Zielwahlvarianten gehören zu PRO025.
+Dieses Paket implementiert keine neue Proteus-Karte. Die Implementierungszählung bleibt 62 von 154 Proteus-Karten; 92 CardImplementation-Dateien fehlen weiterhin. PRO010 übernimmt die verbleibenden Phase-6b-Karten: `Chihuahua`, `Coyote`, `Iceberg` und `Washed-Up Solo Construct` wurden nicht umgesetzt oder freigegeben. Payment- und Zielwahlvarianten gehören zu PRO010.

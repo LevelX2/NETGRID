@@ -2,7 +2,7 @@
 
 Stand: 2026-05-26
 
-Dieses Artefakt ist ab `PRO003` der Paketstandard für alle späteren Proteus-CardImplementation-Pakete aus `proteus-cardimplementation-detailplan-2026-05-26.md`. Es ergänzt den Detailplan und den Activity-Status, ersetzt sie aber nicht.
+Dieses Artefakt ist ab `PRO003` der Paketstandard für Proteus-CardImplementation-Pakete. Für neue Umsetzungsaufträge gilt der führende Detailplan `proteus-cardimplementation-detailplan-2026-05-26.md`, der ab `PRO007` in größere Mechanikfamilien-Pakete umgedeutet wurde.
 
 ## Führende Zählregel
 
@@ -31,7 +31,7 @@ Jedes Proteus-CardImplementation-Paket muss diese Projektprinzipien einhalten:
 
 ## Activity-Template
 
-Neue PRO-Activities sollen klein bleiben und höchstens ein PRO-Paket abdecken. Wenn ein Paket mehr als sechs Karten oder mehr als vier neue generische Engine-Bausteine braucht, wird es vor Umsetzung weiter geschnitten, zum Beispiel `PRO016a`.
+Neue PRO-Activities sollen höchstens ein PRO-Paket abdecken. Die Pakete ab `PRO007` dürfen bewusst größer sein; wenn ein Paket nach Vorprüfung mehr als vier klar getrennte neue Engine-Verträge braucht, darf der Umsetzung-Agent einzelne Karten begründet zurückstellen oder ein Suffixpaket vorschlagen, ohne den gesamten Restzuschnitt wieder in Mikro-Pakete aufzulösen.
 
 ```markdown
 ---
@@ -113,7 +113,7 @@ Der Testlauf weist mindestens aus:
 - Manifest-Drift gegenüber Datei- und Registry-Wahrheit.
 - Versehentliche `deck_legal`-, `format_legal`- oder `ai_supported`-Freigaben.
 
-Fehlende CardImplementation-Dateien sind im laufenden PRO004-bis-PRO040-Stand informativ und schlagen den Test nicht fehl. Der Test schlägt bei Konsistenzfehlern fehl, insbesondere bei fehlender oder falscher `cardDefinitionId`, unbekannten Proteus-IDs, Registry-/Datei-Drift, doppelten IDs, Manifest-Status-/`resolverRef`-Drift und verbotenen Freigabe-Flags.
+Fehlende CardImplementation-Dateien sind im laufenden Restplan informativ und schlagen den Test nicht fehl. Der Test schlägt bei Konsistenzfehlern fehl, insbesondere bei fehlender oder falscher `cardDefinitionId`, unbekannten Proteus-IDs, Registry-/Datei-Drift, doppelten IDs, Manifest-Status-/`resolverRef`-Drift und verbotenen Freigabe-Flags.
 
 ## PRO003-Ergebnisstand
 

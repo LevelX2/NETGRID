@@ -62,6 +62,12 @@ export type EncounterPrintedEffectHost = {
       sourceCardInstanceId: CardInstanceId,
       traceId: string,
     ) => Record<string, unknown>;
+    resolveTraceTrashRunnerResourceSuccess: (
+      sourceDefinitionId: string,
+      sourceCardInstanceId: CardInstanceId,
+      traceId: string,
+      targetCardId: CardInstanceId,
+    ) => Record<string, unknown>;
     resolveTrashInstalledProgramSubroutine: (
       legalAction?: LegalAction,
     ) => { definitionId: string; title: string } | undefined;
@@ -139,6 +145,12 @@ export function isSupportedEncounterTraceSuccessEffect(
   }
   if (effect.type === "end_run_trash_hardware_and_unpreventable_meat_damage")
     return Number.isInteger(effect.amount) && effect.amount > 0;
+  if (effect.type === "add_tags_by_trace_margin_over_runner_link") return true;
+  if (effect.type === "trash_runner_resource_and_add_tag")
+    return (
+      typeof effect.targetCardInstanceId === "string" &&
+      effect.targetCardInstanceId.length > 0
+    );
   return (
     effect.type === "add_tag" &&
     Number.isInteger(effect.amount) &&
@@ -361,16 +373,26 @@ export function applyPrintedTraceSuccessFollowups(
   const runnerBid = result.runnerBid;
   const runnerStrength = result.runnerTraceStrength;
   const successful = result.successful;
-  const tagsAdded = traceSuccessTagAmount(trace.successEffect, successful);
+  const tagsAdded = traceSuccessTagAmount(trace.successEffect, successful, result);
   const hackerTrackerCountersAdded =
     host.callbacks.addHackerTrackerTraceCounters();
   let runnerRunLockCreditCost = 0;
   let runnerRunEnded = false;
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
+  let traceResourceTrashPayload: Record<string, unknown> = {};
   if (successful) state.runner.tags += tagsAdded;
   const traceCounterPayload = successful
     ? applyTraceCounterSuccess(host, trace.successEffect)
     : {};
+  if (successful && trace.successEffect.type === "trash_runner_resource_and_add_tag") {
+    traceResourceTrashPayload =
+      host.callbacks.resolveTraceTrashRunnerResourceSuccess(
+        trace.sourceDefinitionId,
+        trace.sourceCardInstanceId,
+        trace.traceId,
+        trace.successEffect.targetCardInstanceId,
+      );
+  }
   if (
     successful &&
     (trace.successEffect.type === "end_run_and_run_lock" ||
@@ -451,6 +473,7 @@ export function applyPrintedTraceSuccessFollowups(
         }
       : {}),
     ...traceHardwareWreckerPayload,
+    ...traceResourceTrashPayload,
   };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -471,11 +494,15 @@ export function applyPrintedTraceSuccessFollowups(
 function traceSuccessTagAmount(
   successEffect: TraceSuccessEffect,
   successful: boolean,
+  result: ReturnType<typeof describeTraceResultFromTrace>,
 ): number {
   if (!successful) return 0;
   if (successEffect.type === "add_tag_and_counter")
     return successEffect.tagAmount;
   if (successEffect.type === "add_tag") return successEffect.amount;
+  if (successEffect.type === "add_tags_by_trace_margin_over_runner_link")
+    return Math.max(0, result.corpTraceStrength - result.runnerLink);
+  if (successEffect.type === "trash_runner_resource_and_add_tag") return 1;
   return 0;
 }
 

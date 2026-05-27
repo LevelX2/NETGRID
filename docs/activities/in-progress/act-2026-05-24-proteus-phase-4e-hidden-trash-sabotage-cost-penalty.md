@@ -12,8 +12,7 @@ completedAt:
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 4e
 proReferences:
-  - PRO021
-  - PRO022
+  - PRO012
 blockedBy:
   - hidden_successful_run_before_access_window
   - hidden_current_access_trash_window

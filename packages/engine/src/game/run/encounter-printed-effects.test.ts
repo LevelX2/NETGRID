@@ -201,6 +201,7 @@ function makeHost(
         flatline: false,
       }) as DamageSummary,
     resolveTraceHardwareWreckerSuccess: () => ({}),
+    resolveTraceTrashRunnerResourceSuccess: () => ({}),
     resolveTrashInstalledProgramSubroutine: () => undefined,
     setDamagePayload: (summary) => {
       if (!legalAction) return;
