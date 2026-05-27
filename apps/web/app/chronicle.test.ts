@@ -2704,23 +2704,24 @@ describe("formatChronicleEvent", () => {
   });
 
   it("keeps Cinderella trace outcome and break costs distinct", () => {
-    const trace = formatChronicleEvent(
-      makeEvent("resolve_choice", {
-        actor: "runner",
-        traceStep: "runner_bid",
-        sourceDefinitionId: "onr_v1_228_cinderella",
-        corpBid: 1,
-        traceStrength: 7,
-        runnerBid: 0,
-        runnerStrength: 0,
-        traceSuccessful: true,
-        traceSuccessEffect: "hardware_trash_meat_damage_end_run",
-        trashedCount: 1,
-        damageAmount: 2,
-        damageCannotBePrevented: true
-      }),
-      "runner"
-    );
+    const traceEvent = makeEvent("resolve_choice", {
+      actor: "runner",
+      traceStep: "runner_bid",
+      sourceDefinitionId: "onr_v1_228_cinderella",
+      corpBid: 1,
+      traceStrength: 7,
+      runnerBid: 0,
+      runnerStrength: 0,
+      traceSuccessful: true,
+      traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+      trashedCount: 1,
+      trashedCardDefinitionId: "onr_v1_028_force-shield",
+      damageAmount: 2,
+      damageType: "meat",
+      damageCannotBePrevented: true
+    });
+    const trace = formatChronicleEvent(traceEvent, "runner");
+    const traceEffects = formatChronicleEffectItems(traceEvent, "runner");
     const breakAction = formatChronicleEvent(
       makeEvent("break_subroutine", {
         actor: "runner",
@@ -2735,6 +2736,10 @@ describe("formatChronicleEvent", () => {
     expect(trace.title).toBe("Trace entschieden: Korp 1 Credit, Du 0 Credits; Trace erfolgreich.");
     expect(trace.description).toBe("Endstand: Trace 7 gegen Runner-Stärke 0; Karteneffekt: 1 Hardware getrasht, 2 Meat-Schaden nicht verhinderbar, Run endet.");
     expect(trace.chips).toEqual(expect.arrayContaining(["Trace", "Erfolg", "Hardware -1", "2 Schaden", "Run endet"]));
+    expect(traceEffects).toHaveLength(1);
+    expect(traceEffects[0]?.title).toBe("Cinderella: Force Shield getrasht und 2 Meat Damage verursacht.");
+    expect(traceEffects[0]?.description).toBe("Der erfolgreiche Trace beendet den Run; der Schaden kann nicht verhindert werden.");
+    expect(traceEffects[0]?.chips).toEqual(expect.arrayContaining(["Trace-Erfolg", "Force Shield", "2 Meat Damage", "Nicht verhinderbar", "Run endet"]));
     expect(breakAction.title).toBe("Du hast mit Replicator Subroutine 1 auf Cinderella gebrochen.");
     expect(breakAction.description).toBe("0 Credits: Subroutine 1 auf Cinderella gebrochen.");
     expect(breakAction.chips).toEqual(expect.arrayContaining(["Subroutine 1", "0 Credits", "Replicator", "Cinderella"]));

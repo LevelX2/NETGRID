@@ -9754,6 +9754,7 @@ function chronicleEventBelongsToActiveRun(
 function chronicleResolveChoiceBelongsToRun(event: PublicGameEvent): boolean {
   const payload = event.publicPayload ?? {};
   if (
+    typeof payload.traceStep === "string" ||
     payload.ambushDefinitionId ||
     payload.accessEffectSourceDefinitionId ||
     payload.ambushPaidCost !== undefined ||
