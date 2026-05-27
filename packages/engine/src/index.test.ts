@@ -217,6 +217,7 @@ const PRO007_RUNNER_DECK: DeckDefinition = {
   id: "proteus_pro007_runner_test_harness",
   cards: [
     ...ONR_V1_RUNNER_DECK.cards,
+    { id: "onr_proteus_128_airport-locker", quantity: 1 },
     { id: "onr_proteus_150_streetware-distributor", quantity: 1 },
   ],
 };
@@ -412,6 +413,82 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       trashedCardType: "resource",
       trashedCount: 1,
       trashedCardDefinitionId: "onr_proteus_150_streetware-distributor",
+    });
+  });
+
+  it("keeps Underworld Mole targets redacted for hidden Runner resources until success", () => {
+    let state = corpActionStateForProteusPro007("proteus-pro007-hidden-mole");
+    state.corp.credits = 20;
+    const hiddenResourceId = installRunnerResourceForTest(
+      state,
+      "onr_proteus_128_airport-locker",
+    );
+    state.cardInstances[hiddenResourceId] = {
+      ...state.cardInstances[hiddenResourceId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      installedResourceIdsLastTurn: [hiddenResourceId],
+    };
+    const moleId = addCorpCardToHqForTest(
+      state,
+      "onr_proteus_053_underworld-mole",
+      "underworld_hidden_mole",
+    );
+    keepOnlyCorpHqCard(state, moleId);
+
+    const legal = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "play_operation" && action.payload?.cardId === moleId,
+    );
+
+    expect(legal).toHaveLength(1);
+    const hiddenResourceSlotId = String(
+      legal[0]?.payload?.hiddenResourceSlotId ?? "",
+    );
+    expect(hiddenResourceSlotId).toMatch(/^hidden_runner_resource_/);
+    expect(legal[0]?.payload).toMatchObject({
+      traceSuccessTargetCardId: hiddenResourceSlotId,
+      traceSuccessTargetResourceSlotId: hiddenResourceSlotId,
+      hiddenResourceSlotId,
+      hiddenRunnerResource: true,
+      redactedKind: "hidden_runner_resource",
+    });
+    expect(legal[0]?.payload).not.toHaveProperty(
+      "traceSuccessTargetDefinitionId",
+    );
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "onr_proteus_128_airport-locker",
+    );
+
+    state = apply(state, "corp", (action) => action.actionId === legal[0]?.actionId);
+    expect(state.trace).toMatchObject({
+      baseTraceStrength: 4,
+      successEffect: {
+        type: "trash_runner_resource_and_add_tag",
+        targetCardInstanceId: hiddenResourceId,
+      },
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      "onr_proteus_128_airport-locker",
+    );
+
+    state = resolveTraceWithZeroBids(state);
+    expect(state.runner.tags).toBe(1);
+    expect(state.runner.heap).toContain(hiddenResourceId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceSuccessful: true,
+      tagsAdded: 1,
+      trashedCardType: "resource",
+      trashedCount: 1,
+      trashedCardDefinitionId: "onr_proteus_128_airport-locker",
+      hiddenResourceSlotId,
+      hiddenRunnerResourceRevealed: true,
     });
   });
 });

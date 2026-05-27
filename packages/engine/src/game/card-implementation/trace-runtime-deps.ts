@@ -1,5 +1,7 @@
 import type { CardInstanceId, TraceSuccessEffect } from "@netgrid/shared";
+import { traceSuccessEffectForCardImplementation } from "../../ability-engine/trace-implementations";
 import type { CardImplementationRuntimeDependencies } from "../../ability-engine/card-implementation-runtime";
+import type { CardTraceSuccessEffectImplementation } from "../../ability-engine/definition-types";
 import {
   startTraceFromOperation,
   type TraceOrchestrationHost,
@@ -17,25 +19,31 @@ type RuntimeState = Parameters<TraceCardImplementationRuntimeDeps["startTrace"]>
 export type TraceRuntimeDepsHost = {
   trace: {
     orchestrationHost: (state: RuntimeState) => TraceOrchestrationHost;
-    runnerLastTurnInstalledResourceIds: (state: RuntimeState) => CardInstanceId[];
+    resolveRunnerLastTurnInstalledResourceTargetId: (
+      state: RuntimeState,
+      targetRef: string,
+    ) => CardInstanceId | undefined;
   };
 };
 
 function successEffectWithSelectedTarget(
   host: TraceRuntimeDepsHost,
   state: RuntimeState,
-  successEffect: TraceSuccessEffect,
+  successEffects: readonly CardTraceSuccessEffectImplementation[],
   targetCardId: string,
 ): TraceSuccessEffect {
-  if (successEffect.type !== "trash_runner_resource_and_add_tag")
-    return successEffect;
-  const eligible = host.trace.runnerLastTurnInstalledResourceIds(state);
-  if (!eligible.includes(targetCardId as CardInstanceId))
+  const needsResourceTarget = successEffects.some(
+    (effect) => effect.kind === "trash_runner_resource_and_add_tag",
+  );
+  if (!needsResourceTarget)
+    return traceSuccessEffectForCardImplementation(successEffects);
+  const resolvedTargetCardId =
+    host.trace.resolveRunnerLastTurnInstalledResourceTargetId(state, targetCardId);
+  if (!resolvedTargetCardId)
     throw new Error("Die gewaehlte Runner-Resource ist fuer diesen Trace nicht legal.");
-  return {
-    ...successEffect,
-    targetCardInstanceId: targetCardId as CardInstanceId,
-  };
+  return traceSuccessEffectForCardImplementation(successEffects, {
+    targetCardInstanceId: resolvedTargetCardId,
+  });
 }
 
 export function createTraceCardImplementationRuntimeDeps(

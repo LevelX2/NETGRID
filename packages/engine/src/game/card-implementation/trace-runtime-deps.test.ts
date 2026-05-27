@@ -15,6 +15,7 @@ import {
 
 const sourceCardId = "source" as CardInstanceId;
 const sourceDefinitionId = "source_def" as CardDefinitionId;
+const targetResourceId = "target_resource" as CardInstanceId;
 
 function state(): GameState {
   return {
@@ -134,7 +135,8 @@ function host(): TraceRuntimeDepsHost {
           PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID: "paris" as CardDefinitionId,
         },
       }),
-      runnerLastTurnInstalledResourceIds: () => [],
+      resolveRunnerLastTurnInstalledResourceTargetId: (_gameState, targetRef) =>
+        targetRef === targetResourceId ? targetResourceId : undefined,
     },
   };
 }
@@ -157,7 +159,7 @@ describe("trace card implementation runtime deps", () => {
       sourceCardId,
       sourceDefinitionId,
       4,
-      { type: "add_tag", amount: 1 },
+      [{ kind: "add_tags", recipient: "runner", amount: 1, visibility: "public" }],
     );
 
     expect(result).toMatchObject({
@@ -195,6 +197,56 @@ describe("trace card implementation runtime deps", () => {
       sourceDefinitionId,
       baseTraceStrength: 4,
     });
+  });
+
+  it("binds target-required trace effects before creating TraceState", () => {
+    const gameState = state();
+    const legalAction = action({ traceSuccessTargetCardId: targetResourceId });
+    const deps = createTraceCardImplementationRuntimeDeps(host());
+
+    deps.startTrace(
+      gameState,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      4,
+      [
+        {
+          kind: "trash_runner_resource_and_add_tag",
+          target: "runner_resource_installed_last_turn",
+          visibility: "public",
+        },
+      ],
+    );
+
+    expect(gameState.trace?.successEffect).toEqual({
+      type: "trash_runner_resource_and_add_tag",
+      targetCardInstanceId: targetResourceId,
+    });
+  });
+
+  it("rejects target-required trace effects before TraceState can contain an empty target", () => {
+    const gameState = state();
+    const legalAction = action();
+    const deps = createTraceCardImplementationRuntimeDeps(host());
+
+    expect(() =>
+      deps.startTrace(
+        gameState,
+        legalAction,
+        sourceCardId,
+        sourceDefinitionId,
+        4,
+        [
+          {
+            kind: "trash_runner_resource_and_add_tag",
+            target: "runner_resource_installed_last_turn",
+            visibility: "public",
+          },
+        ],
+      ),
+    ).toThrow("Die gewaehlte Runner-Resource ist fuer diesen Trace nicht legal.");
+    expect(gameState.trace).toBeUndefined();
   });
 
   it("does not import from the public engine index", () => {

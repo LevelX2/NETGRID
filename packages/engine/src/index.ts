@@ -809,7 +809,7 @@ function traceRuntimeDepsHost(): TraceRuntimeDepsHost {
   return {
     trace: {
       orchestrationHost: traceOrchestrationHost,
-      runnerLastTurnInstalledResourceIds,
+      resolveRunnerLastTurnInstalledResourceTargetId,
     },
   };
 }
@@ -4809,10 +4809,9 @@ function performAction(
             throw new Error("Die Operation-Kosten sind nicht mehr gueltig.");
           if (
             onPlayCardImplementationNeedsLastTurnResourceTarget(definition) &&
-            !runnerLastTurnInstalledResourceIds(state).includes(
-              String(
-                legalAction.payload.traceSuccessTargetCardId ?? "",
-              ) as CardInstanceId,
+            !resolveRunnerLastTurnInstalledResourceTargetId(
+              state,
+              String(legalAction.payload.traceSuccessTargetCardId ?? ""),
             )
           )
             throw new Error("Das Operation-Ziel ist nicht mehr gueltig.");
@@ -8434,6 +8433,19 @@ function runnerLastTurnInstalledResourceIds(state: GameState): CardInstanceId[] 
   return (state.runnerTurnFlags?.installedResourceIdsLastTurn ?? [])
     .filter((cardId) => state.runner.rig.resources.includes(cardId))
     .sort();
+}
+
+function resolveRunnerLastTurnInstalledResourceTargetId(
+  state: GameState,
+  targetRef: string,
+): CardInstanceId | undefined {
+  const eligible = runnerLastTurnInstalledResourceIds(state);
+  if (eligible.includes(targetRef as CardInstanceId))
+    return targetRef as CardInstanceId;
+  const hiddenResourceId = resolveHiddenRunnerResourceSlot(state, targetRef);
+  return hiddenResourceId && eligible.includes(hiddenResourceId)
+    ? hiddenResourceId
+    : undefined;
 }
 
 function runnerInstalledResourceLastTurn(state: GameState): boolean {
@@ -13847,6 +13859,8 @@ function resolveTraceTrashRunnerResourceSuccess(
 ): Record<string, unknown> {
   if (!runnerLastTurnInstalledResourceIds(state).includes(targetCardId))
     throw new Error("Die Runner-Resource ist fuer diesen Trace nicht mehr legal.");
+  const hiddenResource = isConcealedRunnerResource(state, targetCardId);
+  const hiddenResourceSlotId = hiddenRunnerResourceSlotId(targetCardId);
   const targetDefinitionId = definitionFor(state, targetCardId).id;
   trashRunnerInstalledCardToHeap(state, targetCardId);
   return {
@@ -13857,6 +13871,14 @@ function resolveTraceTrashRunnerResourceSuccess(
     trashedCardType: "resource",
     trashedCount: 1,
     trashedCardDefinitionId: targetDefinitionId,
+    ...(hiddenResource
+      ? {
+          hiddenResourceSlotId,
+          hiddenRunnerResource: true,
+          hiddenRunnerResourceRevealed: true,
+          redactedKind: "hidden_runner_resource",
+        }
+      : {}),
   };
 }
 
@@ -15176,6 +15198,26 @@ function onPlayCardImplementationNeedsLastTurnResourceTarget(
   );
 }
 
+function runnerLastTurnResourceTargetPayload(
+  state: GameState,
+  targetCardId: CardInstanceId,
+): Record<string, string | number | boolean> {
+  if (isConcealedRunnerResource(state, targetCardId)) {
+    const hiddenResourceSlotId = hiddenRunnerResourceSlotId(targetCardId);
+    return {
+      traceSuccessTargetCardId: hiddenResourceSlotId,
+      traceSuccessTargetResourceSlotId: hiddenResourceSlotId,
+      hiddenResourceSlotId,
+      hiddenRunnerResource: true,
+      redactedKind: "hidden_runner_resource",
+    };
+  }
+  return {
+    traceSuccessTargetCardId: targetCardId,
+    traceSuccessTargetDefinitionId: definitionFor(state, targetCardId).id,
+  };
+}
+
 function cardImplementationOperationLegalActions(
   state: GameState,
   cardId: CardInstanceId,
@@ -15205,7 +15247,6 @@ function cardImplementationOperationLegalActions(
       ),
     ];
   return runnerLastTurnInstalledResourceIds(state).map((targetCardId) => {
-    const targetDefinition = definitionFor(state, targetCardId);
     return action(
       state,
       "corp",
@@ -15215,8 +15256,7 @@ function cardImplementationOperationLegalActions(
       [{ clicks: 1, credits: totalCost }],
       {
         cardId,
-        traceSuccessTargetCardId: targetCardId,
-        traceSuccessTargetDefinitionId: targetDefinition.id,
+        ...runnerLastTurnResourceTargetPayload(state, targetCardId),
         ...(additionalCost > 0 ? { additionalTracePlayCost: additionalCost } : {}),
       },
     );

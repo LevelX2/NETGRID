@@ -18,7 +18,6 @@ import type {
   ResolvedGameEffect,
   ServerId,
   Side,
-  TraceSuccessEffect,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import {
@@ -48,6 +47,7 @@ import type {
   CardAbilityCostImplementation,
   CardConditionImplementation,
   CardEffectImplementation,
+  CardTraceSuccessEffectImplementation,
   CardLifecycleImplementation,
   CardLifecycleTriggeredAbilityImplementation,
   OnPlayCardAbilityImplementation,
@@ -135,7 +135,7 @@ export type CardImplementationRuntimeDependencies = {
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinition["id"],
     baseTraceStrength: number,
-    successEffect: TraceSuccessEffect,
+    successEffects: readonly CardTraceSuccessEffectImplementation[],
   ) => Record<string, string | number | boolean>;
   startRun: (
     state: GameState,

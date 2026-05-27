@@ -5,11 +5,16 @@
  * This module only describes trace outcomes. The actual bid flow, link math,
  * payments, and hidden-info-safe public payloads remain owned by index.ts.
  */
-import type { TraceSuccessEffect } from "@netgrid/shared";
+import type { CardInstanceId, TraceSuccessEffect } from "@netgrid/shared";
 import type { CardTraceSuccessEffectImplementation } from "./definition-types";
+
+type TraceTargetOptions = {
+  targetCardInstanceId?: CardInstanceId;
+};
 
 export function traceSuccessEffectForCardImplementation(
   effects: readonly CardTraceSuccessEffectImplementation[],
+  options: TraceTargetOptions = {},
 ): TraceSuccessEffect {
   const tagEffects = effects.filter((effect) => effect.kind === "add_tags");
   const counterEffects = effects.filter(
@@ -169,9 +174,13 @@ export function traceSuccessEffectForCardImplementation(
     unpreventableMeatEffects.length === 0 &&
     trashResourceTagEffects.length === 1
   ) {
+    if (!options.targetCardInstanceId)
+      throw new Error(
+        "Trace resource trash success effect requires a bound target card instance id.",
+      );
     return {
       type: "trash_runner_resource_and_add_tag",
-      targetCardInstanceId: "",
+      targetCardInstanceId: options.targetCardInstanceId,
     };
   }
   throw new Error("Unsupported CardImplementation trace success effect sequence.");

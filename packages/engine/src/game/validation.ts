@@ -529,7 +529,10 @@ function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
     return Number.isInteger(effect.amount) && effect.amount > 0;
   if (effect.type === "add_tags_by_trace_margin_over_runner_link") return true;
   if (effect.type === "trash_runner_resource_and_add_tag")
-    return typeof effect.targetCardInstanceId === "string";
+    return (
+      typeof effect.targetCardInstanceId === "string" &&
+      effect.targetCardInstanceId.length > 0
+    );
   return (
     effect.type === "add_tag" &&
     Number.isInteger(effect.amount) &&
