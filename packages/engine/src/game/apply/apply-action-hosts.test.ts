@@ -3,10 +3,6 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import { configureApplyActionCoreHost } from "../apply-action";
 import {
-  configureBuildEventHost,
-  type BuildEventHost,
-} from "../events/build-event";
-import {
   configureApplyActionHostComposition,
   createApplyActionHostComposition,
   type ApplyActionHostCompositionHost,
@@ -106,18 +102,6 @@ function hostFor(calls: string[]): ApplyActionHostCompositionHost {
   };
 }
 
-function eventHost(): BuildEventHost {
-  return {
-    publicContext: {
-      publicContextForAction: vi.fn(() => ({})),
-      deps: {} as never,
-    },
-    constants: {
-      badPublicityLossThreshold: 7,
-    },
-  };
-}
-
 describe("apply-action-hosts", () => {
   it("does not import from index or contain public context field logic", () => {
     const source = readFileSync(
@@ -163,26 +147,20 @@ describe("apply-action-hosts", () => {
     expect(composition.replayHost?.actions.applyAction).toBe(applyAction);
   });
 
-  it("configures apply-action and event hosts without rebuilding public context", () => {
+  it("configures apply-action without rebuilding public context", () => {
     const previousApply = configureApplyActionCoreHost(undefined);
-    const previousEvent = configureBuildEventHost(undefined);
     const calls: string[] = [];
-    const buildEventHost = eventHost();
 
     try {
       const composition = configureApplyActionHostComposition({
         ...hostFor(calls),
-        events: buildEventHost,
       });
 
       const configuredApply = configureApplyActionCoreHost(undefined);
-      const configuredEvent = configureBuildEventHost(undefined);
 
       expect(configuredApply).toBe(composition.applyActionCoreHost);
-      expect(configuredEvent).toBe(buildEventHost);
     } finally {
       configureApplyActionCoreHost(previousApply);
-      configureBuildEventHost(previousEvent);
     }
   });
 });

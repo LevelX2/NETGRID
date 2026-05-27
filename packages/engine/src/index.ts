@@ -71,6 +71,9 @@ export {
   eventVisibilityForAction,
   isHiddenInfoBarrierEvent,
 } from "./game/events/build-event";
+import {
+  configureEventContextHostComposition,
+} from "./game/events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "./game/win-conditions";
 export { checkWinConditions } from "./game/win-conditions";
 import {
@@ -498,11 +501,9 @@ import {
   type EffectiveAgendaDifficultyDependencies,
 } from "./ability-engine/effective-values";
 import {
-  publicContextForAction,
   publicServerLabel,
   publicServerLabelForCard,
   serverChoiceDisplayLabel,
-  type PublicContextForActionDependencies,
 } from "./public-context";
 import { printedSubroutinesForCardImplementation } from "./ability-engine/printed-subroutine-implementations";
 import { traceSuccessEffectForCardImplementation } from "./ability-engine/trace-implementations";
@@ -1133,24 +1134,27 @@ const accessFlow = createAccessFlowAdapters({
   },
 } satisfies AccessFlowCompositionHost);
 
-// Public context generation is read-only and injected here to avoid an import
-// cycle. It may format already-public payload data, but it must not decide
-// action legality or reveal hidden card identities.
-const publicContextDeps: PublicContextForActionDependencies = {
-  agendaPointsForScoredCard,
-  cardCounter,
-  cardStrengthModifier: (state, cardId) =>
-    mustInstance(state.cardInstances, cardId).strengthModifier +
-    hostedProgramStrengthModifier(state, cardId) -
-    cardCounter(state, cardId, "pattel_antibody"),
-  creditCostForAction,
-  definitionFor,
-  pumpAmountForLegalAction,
-  runnerHqAccessBonus: (state) =>
-    runnerHqAccessBonusForBreach(breachStateHost(state)),
-  v1915InstalledAccessBonus: (state, serverId) =>
-    installedAccessBonusForServer(breachStateHost(state), serverId),
-};
+configureEventContextHostComposition({
+  cards: {
+    agendaPointsForScoredCard,
+    cardCounter,
+    definitionFor,
+    hostedProgramStrengthModifier,
+    mustInstance,
+  },
+  publicContext: {
+    creditCostForAction,
+    pumpAmountForLegalAction,
+  },
+  callbacks: {
+    breachStateHost,
+    installedAccessBonusForServer,
+    runnerHqAccessBonusForBreach,
+  },
+  constants: {
+    badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD,
+  },
+});
 type VisibleCounterPayload = {
   counterType: CounterType;
   addedCounterAmount?: number;
@@ -1986,15 +1990,6 @@ configureLegalActionGenerationHost(legalActionGenerationHost);
 const applyActionHostComposition: ApplyActionHostCompositionHost = {
   actions: {
     applyAction: applyActionFromGame,
-  },
-  events: {
-    publicContext: {
-      publicContextForAction,
-      deps: publicContextDeps,
-    },
-    constants: {
-      badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD,
-    },
   },
   perform: {
     turn: { turnBasicExecutionHost },

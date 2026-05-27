@@ -14,10 +14,6 @@ import {
   type ApplyActionCoreHost,
 } from "../apply-action";
 import {
-  configureBuildEventHost,
-  type BuildEventHost,
-} from "../events/build-event";
-import {
   createPerformActionExecutorFromDependencies,
   type PerformActionExecutionDependencies,
 } from "./perform-action";
@@ -35,7 +31,6 @@ export type ApplyActionHostCompositionHost = {
     ) => EngineResult;
   };
   perform: PerformActionExecutionDependencies;
-  events?: BuildEventHost;
 };
 
 export type ApplyActionHostComposition = {
@@ -47,7 +42,6 @@ export type ApplyActionHostComposition = {
   applyActionCoreHost: ApplyActionCoreHost;
   applyGameActionHost?: ApplyGameActionHost;
   replayHost?: ReplayHost;
-  buildEventHost?: BuildEventHost;
 };
 
 export function createApplyActionHostComposition(
@@ -69,7 +63,6 @@ export function createApplyActionHostComposition(
     },
     ...(applyGameActionHost ? { applyGameActionHost } : {}),
     ...(replayHost ? { replayHost } : {}),
-    ...(host.events ? { buildEventHost: host.events } : {}),
   };
 }
 
@@ -81,7 +74,5 @@ export function configureApplyActionHostComposition(
   if (composition.applyGameActionHost)
     configureApplyGameActionHost(composition.applyGameActionHost);
   if (composition.replayHost) configureReplayHost(composition.replayHost);
-  if (composition.buildEventHost)
-    configureBuildEventHost(composition.buildEventHost);
   return composition;
 }
