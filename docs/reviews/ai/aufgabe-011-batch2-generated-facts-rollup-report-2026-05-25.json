@@ -390,25 +390,25 @@
   "sourceSummary": {
     "derivedFacts": {
       "hardErrorCount": 0,
-      "warningCount": 518,
-      "cardsNeedingManualOverlay": 63
+      "warningCount": 811,
+      "cardsNeedingManualOverlay": 104
     },
     "compiledIndex": {
       "hardErrorCount": 0,
-      "warningCount": 382,
-      "reviewCandidates": 60
+      "warningCount": 547,
+      "reviewCandidates": 101
     },
     "migrationPriority": {
-      "candidateCount": 115,
+      "candidateCount": 160,
       "priorityCounts": {
         "P0": 13,
-        "P1": 98,
+        "P1": 143,
         "P2": 4,
         "P3": 0
       },
       "riskCounts": {
         "low": 29,
-        "medium": 86,
+        "medium": 131,
         "high": 0
       }
     },

@@ -1099,6 +1099,49 @@
       "rationale": "Tagged-runner payoff and counter-economy classification are directly represented."
     },
     {
+      "cardId": "onr_v1_286_corporate-detective-agency",
+      "title": "Corporate Detective Agency",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/corporate-detective-agency.ts",
+      "expectedDerivableKinds": [
+        "effect:resource_trash",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner resource trash is mechanically represented; target selection and operation legality remain runtime-owned."
+    },
+    {
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "title": "Datapool by Zetatech",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/datapool-by-zetatech.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_source",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner tag source is mechanically represented; playability remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "title": "Netwatch Credit Voucher",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/netwatch-credit-voucher.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_source",
+        "effect:economy",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner tag plus credit gain is mechanically represented; operation timing remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_294_new-blood",
+      "title": "New Blood",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/new-blood.ts",
+      "expectedDerivableKinds": ["effect:zone_shuffle"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Conceal/reorder installed ICE is represented as hidden-zone context without generated hidden card order."
+    },
+    {
       "cardId": "onr_v1_295_night-shift",
       "title": "Night Shift",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/night-shift.ts",
@@ -1136,6 +1179,18 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Corp R&D top-five reorder is mechanically derivable as hidden-zone context without exposing actual R&D order. Batch 8 subbatch: corp_operation_draw_or_recovery."
+    },
+    {
+      "cardId": "onr_v1_299_power-grid-overload",
+      "title": "Power Grid Overload",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/power-grid-overload.ts",
+      "expectedDerivableKinds": [
+        "effect:hardware_trash",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner hardware trash is mechanically represented; target selection remains runtime-owned."
     },
     {
       "cardId": "onr_v1_300_project-consultants",
@@ -1197,6 +1252,82 @@
       "rationale": "Up-to-two advancement counter placement is mechanically derivable; score-conversion value remains strategic overlay. Batch 8 subbatch: corp_advance_burst."
     },
     {
+      "cardId": "onr_v1_306_trojan-horse",
+      "title": "Trojan Horse",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/trojan-horse.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_source",
+        "condition:requires_stolen_agenda_last_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Stolen-agenda-last-turn tag operation is represented with history context; playability remains LegalAction-owned."
+    },
+    {
+      "cardId": "onr_v1_307_urban-renewal",
+      "title": "Urban Renewal",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/urban-renewal.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner meat damage is mechanically represented; damage resolution remains engine-owned."
+    },
+    {
+      "cardId": "onr_v1_308_acme-savings-and-loan",
+      "title": "ACME Savings and Loan",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/acme-savings-and-loan.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:counter_economy",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "On-rez credit burst and debt context are mechanically represented; current credit state remains board state."
+    },
+    {
+      "cardId": "onr_v1_309_bbs-whispering-campaign",
+      "title": "BBS Whispering Campaign",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/bbs-whispering-campaign.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:action_economy",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted 16-credit pool and action economy are directly represented; remaining credits remain board state."
+    },
+    {
+      "cardId": "onr_v1_310_blood-cat",
+      "title": "Blood Cat",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/blood-cat.ts",
+      "expectedDerivableKinds": [
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_trace_success",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-to-tag asset mechanic is mechanically represented; trace success remains runtime context."
+    },
+    {
+      "cardId": "onr_v1_311_braindance-campaign",
+      "title": "Braindance Campaign",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/braindance-campaign.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:start_of_turn_economy",
+        "effect:recurring_economy",
+        "condition:requires_start_of_turn",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted pool and start-turn take mechanics are represented without current hosted-credit state."
+    },
+    {
       "cardId": "onr_v1_312_chicago-branch",
       "title": "Chicago Branch",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/chicago-branch.ts",
@@ -1206,6 +1337,55 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Activated advancement-counter placement is a mechanical score-acceleration fact; strategic closeout valuation remains manual/consumer context."
+    },
+    {
+      "cardId": "onr_v1_313_city-surveillance",
+      "title": "City Surveillance",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/city-surveillance.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_source",
+        "effect:remote_tax",
+        "condition:requires_runner_draw",
+        "condition:requires_runner_pay_or_take_tag",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Runner-draw payment-or-tag mechanic is represented as contextual tag/payment pressure, not a guaranteed tag."
+    },
+    {
+      "cardId": "onr_v1_314_corporate-negotiating-center",
+      "title": "Corporate Negotiating Center",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/corporate-negotiating-center.ts",
+      "expectedDerivableKinds": [
+        "condition:requires_start_of_turn",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Start-turn remote economy/support context is mechanically represented when visible in implementation."
+    },
+    {
+      "cardId": "onr_v1_315_corprunners-shattered-remains",
+      "title": "Corprunner's Shattered Remains",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/corprunners-shattered-remains.ts",
+      "expectedDerivableKinds": [
+        "effect:ambush",
+        "effect:access_punish",
+        "effect:hardware_trash",
+        "effect:advanceable_economy",
+        "condition:requires_accessed_card",
+        "condition:requires_advancement_counter",
+        "remoteRole:ambush"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advanceable hardware-trash ambush mechanics are represented without access outcome or target selection."
+    },
+    {
+      "cardId": "onr_v1_316_cowboy-sysop",
+      "title": "Cowboy Sysop",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/cowboy-sysop.ts",
+      "expectedDerivableKinds": ["effect:zone_shuffle"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Installed-card-to-HQ utility is represented as hidden-zone context only."
     },
     {
       "cardId": "onr_v1_317_data-masons",
@@ -1220,6 +1400,286 @@
       "rationale": "Wall rez discount and wall strength modifier are mechanically derivable global ICE modifier facts; reserve/remote value remains strategic context."
     },
     {
+      "cardId": "onr_v1_321_esa-contract",
+      "title": "ESA Contract",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/esa-contract.ts",
+      "expectedDerivableKinds": ["effect:draw", "remoteRole:asset_economy"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Action draw node is mechanically represented without strategy about when to use it."
+    },
+    {
+      "cardId": "onr_v1_322_euromarket-consortium",
+      "title": "Euromarket Consortium",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/euromarket-consortium.ts",
+      "expectedDerivableKinds": [
+        "effect:draw",
+        "effect:remote_protection",
+        "condition:requires_rezzed_card",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Draw plus hand-size support are represented as board-context asset utility, not remote safety."
+    },
+    {
+      "cardId": "onr_v1_323_experimental-ai",
+      "title": "Experimental AI",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/experimental-ai.ts",
+      "expectedDerivableKinds": [
+        "effect:ambush",
+        "effect:access_punish",
+        "effect:program_trash",
+        "effect:advanceable_economy",
+        "condition:requires_accessed_card",
+        "condition:requires_advancement_counter",
+        "remoteRole:ambush"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advanceable program-trash ambush mechanics are represented without guaranteed hit or target selection."
+    },
+    {
+      "cardId": "onr_v1_324_fortress-architects",
+      "title": "Fortress Architects",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/fortress-architects.ts",
+      "expectedDerivableKinds": [
+        "effect:install_discount",
+        "condition:requires_rezzed_card",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "ICE install discount is mechanical support; install legality and board state remain runtime-owned."
+    },
+    {
+      "cardId": "onr_v1_325_hacker-tracker-central",
+      "title": "Hacker Tracker Central",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/hacker-tracker-central.ts",
+      "expectedDerivableKinds": [
+        "effect:trace_credit",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace-credit support is represented without trace bidding or current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_326_holovid-campaign",
+      "title": "Holovid Campaign",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/holovid-campaign.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:start_of_turn_economy",
+        "effect:recurring_economy",
+        "condition:requires_start_of_turn",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted pool and start-turn economy are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_327_i-got-a-rock",
+      "title": "I Got a Rock",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/i-got-a-rock.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner meat damage payoff is represented; legality and damage resolution remain engine-owned."
+    },
+    {
+      "cardId": "onr_v1_328_information-laundering",
+      "title": "Information Laundering",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/information-laundering.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:advanceable_economy",
+        "condition:requires_advancement_counter",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advanceable counter-to-credit node is represented with variable counter context."
+    },
+    {
+      "cardId": "onr_v1_329_investment-firm",
+      "title": "Investment Firm",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/investment-firm.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:recurring_economy",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Credit-diversion pool and recurring take mechanic are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_332_newsgroup-taunting",
+      "title": "Newsgroup Taunting",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/newsgroup-taunting.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_tax",
+        "effect:run_tax",
+        "condition:requires_during_run",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Run-start payment-or-end-run mechanic is represented as run context, not static remote safety."
+    },
+    {
+      "cardId": "onr_v1_333_omniscience-foundation",
+      "title": "Omniscience Foundation",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/omniscience-foundation.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_source",
+        "condition:requires_runner_tagged",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "End-turn tag amplification is represented as runner-tagged context, not guaranteed tag state."
+    },
+    {
+      "cardId": "onr_v1_334_pacifica-regional-ai",
+      "title": "Pacifica Regional AI",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/pacifica-regional-ai.ts",
+      "expectedDerivableKinds": [
+        "effect:extra_action",
+        "effect:advanceable_economy",
+        "condition:requires_advancement_counter",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advancement-counter action gain is represented; action use remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_335_remote-facility",
+      "title": "Remote Facility",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/remote-facility.ts",
+      "expectedDerivableKinds": [
+        "effect:extra_action",
+        "condition:requires_start_of_turn",
+        "remoteRole:remote_capacity"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Start-turn action gain is represented as remote capacity/support context."
+    },
+    {
+      "cardId": "onr_v1_336_rescheduler",
+      "title": "Rescheduler",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/rescheduler.ts",
+      "expectedDerivableKinds": ["effect:zone_shuffle", "effect:draw"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "HQ shuffle/draw is represented as hidden-zone context without hidden HQ identities."
+    },
+    {
+      "cardId": "onr_v1_337_rockerboy-promotion",
+      "title": "Rockerboy Promotion",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/rockerboy-promotion.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:action_economy",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted pool and action take mechanics are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_338_rustbelt-hq-branch",
+      "title": "Rustbelt HQ Branch",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/rustbelt-hq-branch.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_protection",
+        "condition:requires_rezzed_card",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Corp hand-size support is represented as board-context asset utility, not remote safety."
+    },
+    {
+      "cardId": "onr_v1_339_schlaghund",
+      "title": "Schlaghund",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/schlaghund.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner die-based meat damage payoff is represented without guaranteed success."
+    },
+    {
+      "cardId": "onr_v1_340_setup",
+      "title": "Setup!",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/setup.ts",
+      "expectedDerivableKinds": [
+        "effect:ambush",
+        "effect:access_punish",
+        "effect:damage",
+        "condition:requires_accessed_card",
+        "remoteRole:ambush"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "On-access damage ambush is represented without guaranteed hit or access outcome."
+    },
+    {
+      "cardId": "onr_v1_342_solo-squad",
+      "title": "Solo Squad",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/solo-squad.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged",
+        "remoteRole:tag_punish_asset"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tagged-runner damage action is represented; playability remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_343_south-african-mining-corp",
+      "title": "South African Mining Corp",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/south-african-mining-corp.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:action_economy",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Action economy node is represented without strategy about when to spend actions."
+    },
+    {
+      "cardId": "onr_v1_344_spinn-public-relations",
+      "title": "Spinn® Public Relations",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/spinn-public-relations.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:start_of_turn_economy",
+        "effect:action_economy",
+        "effect:recurring_economy",
+        "condition:requires_start_of_turn",
+        "remoteRole:asset_economy"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted pool, action loading and start-turn take mechanics are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_346_vacant-soulkiller",
+      "title": "Vacant Soulkiller",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/vacant-soulkiller.ts",
+      "expectedDerivableKinds": [
+        "effect:ambush",
+        "effect:access_punish",
+        "effect:damage",
+        "effect:advanceable_economy",
+        "condition:requires_accessed_card",
+        "condition:requires_advancement_counter",
+        "remoteRole:ambush"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Advanceable brain-damage ambush is represented without access outcome or fixed counter amount."
+    },
+    {
       "cardId": "onr_v1_350_antiquated-interface-routines",
       "title": "Antiquated Interface Routines",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
@@ -1231,12 +1691,53 @@
       "rationale": "Same-fort ICE strength modifier is mechanically derivable; concrete path cost impact remains effectiveRunQuote/board context."
     },
     {
+      "cardId": "onr_v1_352_chester-mix",
+      "title": "Chester Mix",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chester-mix.ts",
+      "expectedDerivableKinds": [
+        "effect:install_discount",
+        "condition:requires_rezzed_card",
+        "remoteRole:remote_capacity"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Fort ICE install discount is represented as board-context remote support."
+    },
+    {
+      "cardId": "onr_v1_354_crybaby",
+      "title": "Crybaby",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crybaby.ts",
+      "expectedDerivableKinds": [
+        "effect:ambush",
+        "effect:access_punish",
+        "effect:persistent_counter_effect",
+        "effect:link_penalty",
+        "condition:requires_accessed_card",
+        "remoteRole:ambush"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "On-access crying counter and link penalty are represented without asserting current counter state."
+    },
+    {
       "cardId": "onr_v1_355_crystal-palace-station-grid",
       "title": "Crystal Palace Station Grid",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
       "expectedDerivableKinds": ["effect:run_tax", "remoteRole:run_tax"],
       "expectedManualOverlayNeeded": true,
       "rationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays; remote_protection remains intentionally manual strategic overlay."
+    },
+    {
+      "cardId": "onr_v1_358_dr-dreff",
+      "title": "Dr. Dreff",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/dr-dreff.ts",
+      "expectedDerivableKinds": [
+        "effect:future_encounter_effect",
+        "effect:zone_shuffle",
+        "condition:requires_successful_run",
+        "condition:requires_during_run",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Temporary HQ-ICE encounter after successful run is represented as run/hidden-zone context without hidden HQ identity."
     },
     {
       "cardId": "onr_v1_359_jenny-jett",
@@ -1252,6 +1753,18 @@
       "rationale": "Successful-run install-and-approach effect is derivable as a future encounter class while HQ card identity and legal target choice remain hidden-info/runtime context."
     },
     {
+      "cardId": "onr_v1_360_jerusalem-city-grid",
+      "title": "Jerusalem City Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
+      "expectedDerivableKinds": [
+        "effect:rez_discount",
+        "condition:requires_rezzed_card",
+        "remoteRole:ice_modifier"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Fort wall rez discount and strength support are represented as board-context remote support."
+    },
+    {
       "cardId": "onr_v1_361_namatoki-plaza",
       "title": "Namatoki Plaza",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/namatoki-plaza.ts",
@@ -1265,6 +1778,18 @@
       "rationale": "Additional agenda/node slot and subsidiary-fort install context are mechanical remote-capacity facts; score safety remains board-aware."
     },
     {
+      "cardId": "onr_v1_362_new-galveston-city-grid",
+      "title": "New Galveston City Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/new-galveston-city-grid.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_tax",
+        "condition:requires_rezzed_card",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Asset/upgrade trash-cost tax is represented as access/trash context, not static remote safety."
+    },
+    {
       "cardId": "onr_v1_363_olivia-salazar",
       "title": "Olivia Salazar",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/olivia-salazar.ts",
@@ -1276,6 +1801,18 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Source-bound discounted ICE rez and end-of-run derez window are derivable as during-run remote-support facts; payment legality stays engine-owned."
+    },
+    {
+      "cardId": "onr_v1_364_omni-kismet-ph-d",
+      "title": "Omni Kismet, Ph.D.",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/omni-kismet-ph-d.ts",
+      "expectedDerivableKinds": [
+        "effect:zone_shuffle",
+        "condition:requires_during_run",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Unrezzed-fort-ICE swap is represented as run/hidden-zone context without hidden HQ identity."
     },
     {
       "cardId": "onr_v1_366_red-herrings",
@@ -1300,6 +1837,30 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Pass-rezzed-ICE die trigger is derivable as deterministic-random future encounter pressure; actual random result and run end remain runtime state."
+    },
+    {
+      "cardId": "onr_v1_368_roving-submarine",
+      "title": "Roving Submarine",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/roving-submarine.ts",
+      "expectedDerivableKinds": [
+        "effect:remote_tax",
+        "condition:requires_remote_server",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Fort run-window restriction is represented as remote/run context, not current run legality."
+    },
+    {
+      "cardId": "onr_v1_369_singapore-city-grid",
+      "title": "Singapore City Grid",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/singapore-city-grid.ts",
+      "expectedDerivableKinds": [
+        "effect:zone_shuffle",
+        "condition:requires_during_run",
+        "remoteRole:run_tax"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Unrezzed-fort-ICE swap is represented as run/hidden-zone context without hidden HQ identity."
     },
     {
       "cardId": "onr_v1_370_tesseract-fort-construction",

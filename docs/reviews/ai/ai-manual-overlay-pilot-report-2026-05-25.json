@@ -154,7 +154,7 @@
     }
   ],
   "hardErrorCount": 0,
-  "warningCount": 8,
+  "warningCount": 16,
   "errors": [],
   "warnings": [
     {
@@ -204,6 +204,54 @@
       "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
       "cardId": "onr_v1_065_smarteye",
       "title": "Smarteye"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_352_chester-mix",
+      "title": "Chester Mix"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_354_crybaby",
+      "title": "Crybaby"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_358_dr-dreff",
+      "title": "Dr. Dreff"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_360_jerusalem-city-grid",
+      "title": "Jerusalem City Grid"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_362_new-galveston-city-grid",
+      "title": "New Galveston City Grid"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_364_omni-kismet-ph-d",
+      "title": "Omni Kismet, Ph.D."
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_368_roving-submarine",
+      "title": "Roving Submarine"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_369_singapore-city-grid",
+      "title": "Singapore City Grid"
     }
   ]
 }

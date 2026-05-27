@@ -303,4 +303,37 @@ describe("AI hint ontology validation", () => {
     });
     expect(result.errors).toEqual([]);
   });
+
+  it("accepts read-only generated Corp node and ambush kinds", () => {
+    const result = validateAiHintOntologyFields({
+      effects: [
+        { kind: "action_economy", timing: "action", scope: "remote" },
+        {
+          kind: "start_of_turn_economy",
+          timing: "start_of_turn",
+          scope: "corp",
+        },
+        { kind: "recurring_economy", timing: "start_of_turn", scope: "corp" },
+        { kind: "advanceable_economy", timing: "action", scope: "remote" },
+        { kind: "ambush", timing: "on_access", scope: "remote" },
+        { kind: "access_punish", timing: "on_access", scope: "accessed_card" },
+        { kind: "remote_tax", timing: "during_run", scope: "runner" },
+        { kind: "link_penalty", timing: "persistent", scope: "runner" },
+        { kind: "economy", timing: "on_rez", scope: "corp" },
+      ],
+      conditions: [
+        { kind: "requires_accessed_card" },
+        { kind: "requires_advancement_counter" },
+        { kind: "requires_rezzed_card" },
+        { kind: "requires_runner_draw" },
+        { kind: "requires_runner_pay_or_take_tag" },
+      ],
+      remoteRole: {
+        kind: "tag_punish_asset",
+        threatLevel: "medium",
+        serverScope: "remote",
+      },
+    });
+    expect(result.errors).toEqual([]);
+  });
 });

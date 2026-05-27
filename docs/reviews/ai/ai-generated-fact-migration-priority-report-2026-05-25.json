@@ -14,23 +14,23 @@
     "activeHints": "data/ai/ai-card-hints-active.json"
   },
   "mode": "read-only prioritization; no active hint migration, no runtime compile, no planner or consumer binding",
-  "candidateCount": 115,
+  "candidateCount": 160,
   "priorityCounts": {
     "P0": 13,
-    "P1": 98,
+    "P1": 143,
     "P2": 4,
     "P3": 0
   },
   "fieldCategoryCounts": {
-    "generated_with_board_context": 110,
-    "generated_with_descriptor_limitations": 72,
-    "legacy_keep_for_compat": 115,
+    "generated_with_board_context": 155,
+    "generated_with_descriptor_limitations": 117,
+    "legacy_keep_for_compat": 160,
     "overlay_only": 6,
-    "safe_generated_now": 108
+    "safe_generated_now": 153
   },
   "riskCounts": {
     "low": 29,
-    "medium": 86,
+    "medium": 131,
     "high": 0
   },
   "batchPlan": [
@@ -195,6 +195,56 @@
         "onr_v1_303_silver-lining-recovery-protocol",
         "onr_v1_304_systematic-layoffs",
         "onr_v1_305_team-restructuring"
+      ]
+    },
+    {
+      "batch": 9,
+      "cardIds": [
+        "onr_v1_286_corporate-detective-agency",
+        "onr_v1_287_datapool-by-zetatech",
+        "onr_v1_293_netwatch-credit-voucher",
+        "onr_v1_294_new-blood",
+        "onr_v1_299_power-grid-overload",
+        "onr_v1_306_trojan-horse",
+        "onr_v1_307_urban-renewal",
+        "onr_v1_308_acme-savings-and-loan",
+        "onr_v1_309_bbs-whispering-campaign",
+        "onr_v1_310_blood-cat",
+        "onr_v1_311_braindance-campaign",
+        "onr_v1_313_city-surveillance",
+        "onr_v1_314_corporate-negotiating-center",
+        "onr_v1_315_corprunners-shattered-remains",
+        "onr_v1_316_cowboy-sysop",
+        "onr_v1_321_esa-contract",
+        "onr_v1_322_euromarket-consortium",
+        "onr_v1_323_experimental-ai",
+        "onr_v1_324_fortress-architects",
+        "onr_v1_325_hacker-tracker-central",
+        "onr_v1_326_holovid-campaign",
+        "onr_v1_327_i-got-a-rock",
+        "onr_v1_328_information-laundering",
+        "onr_v1_329_investment-firm",
+        "onr_v1_332_newsgroup-taunting",
+        "onr_v1_333_omniscience-foundation",
+        "onr_v1_334_pacifica-regional-ai",
+        "onr_v1_335_remote-facility",
+        "onr_v1_336_rescheduler",
+        "onr_v1_337_rockerboy-promotion",
+        "onr_v1_338_rustbelt-hq-branch",
+        "onr_v1_339_schlaghund",
+        "onr_v1_340_setup",
+        "onr_v1_342_solo-squad",
+        "onr_v1_343_south-african-mining-corp",
+        "onr_v1_344_spinn-public-relations",
+        "onr_v1_346_vacant-soulkiller",
+        "onr_v1_352_chester-mix",
+        "onr_v1_354_crybaby",
+        "onr_v1_358_dr-dreff",
+        "onr_v1_360_jerusalem-city-grid",
+        "onr_v1_362_new-galveston-city-grid",
+        "onr_v1_364_omni-kismet-ph-d",
+        "onr_v1_368_roving-submarine",
+        "onr_v1_369_singapore-city-grid"
       ]
     }
   ],
@@ -4221,6 +4271,170 @@
       "derivedRationale": "Tagged-runner payoff and counter-economy classification are directly represented."
     },
     {
+      "cardId": "onr_v1_286_corporate-detective-agency",
+      "title": "Corporate Detective Agency",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:resource_trash",
+        "effect:tag_punish_payoff"
+      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Tagged-runner resource trash is derivable, with target selection staying runtime-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Tagged-runner resource trash is mechanically represented; target selection and operation legality remain runtime-owned."
+    },
+    {
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "title": "Datapool by Zetatech",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:tag_source"
+      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Tagged-runner tag operation is derivable, while playability remains LegalAction context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Tagged-runner tag source is mechanically represented; playability remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "title": "Netwatch Credit Voucher",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:economy",
+        "effect:tag_source"
+      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Tagged-runner tag plus economy is derivable, while playability remains LegalAction context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Tagged-runner tag plus credit gain is mechanically represented; operation timing remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_294_new-blood",
+      "title": "New Blood",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:zone_shuffle"],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Conceal/reorder installed ICE is derivable as hidden-zone context only.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Conceal/reorder installed ICE is represented as hidden-zone context without generated hidden card order."
+    },
+    {
       "cardId": "onr_v1_295_night-shift",
       "title": "Night Shift",
       "side": "corp",
@@ -4379,6 +4593,48 @@
         "valueHints"
       ],
       "derivedRationale": "Corp R&D top-five reorder is mechanically derivable as hidden-zone context without exposing actual R&D order. Batch 8 subbatch: corp_operation_draw_or_recovery."
+    },
+    {
+      "cardId": "onr_v1_299_power-grid-overload",
+      "title": "Power Grid Overload",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:hardware_trash",
+        "effect:tag_punish_payoff"
+      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Tagged-runner hardware trash is derivable, with target selection staying runtime-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Tagged-runner hardware trash is mechanically represented; target selection remains runtime-owned."
     },
     {
       "cardId": "onr_v1_300_project-consultants",
@@ -4610,6 +4866,266 @@
       "derivedRationale": "Up-to-two advancement counter placement is mechanically derivable; score-conversion value remains strategic overlay. Batch 8 subbatch: corp_advance_burst."
     },
     {
+      "cardId": "onr_v1_306_trojan-horse",
+      "title": "Trojan Horse",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_stolen_agenda_last_turn",
+        "effect:tag_source"
+      ],
+      "monolithFields": ["effects", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Tagged-runner punish operation is derivable, while playability remains LegalAction context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Stolen-agenda-last-turn tag operation is represented with history context; playability remains LegalAction-owned."
+    },
+    {
+      "cardId": "onr_v1_307_urban-renewal",
+      "title": "Urban Renewal",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:damage",
+        "effect:tag_punish_payoff"
+      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Tagged-runner meat damage is derivable, while damage resolution remains engine-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Tagged-runner meat damage is mechanically represented; damage resolution remains engine-owned."
+    },
+    {
+      "cardId": "onr_v1_308_acme-savings-and-loan",
+      "title": "ACME Savings and Loan",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "effect:counter_economy",
+        "effect:economy",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": ["effects", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Remote economy/debt context is derivable, while current credit and debt state remain board-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "On-rez credit burst and debt context are mechanically represented; current credit state remains board state."
+    },
+    {
+      "cardId": "onr_v1_309_bbs-whispering-campaign",
+      "title": "BBS Whispering Campaign",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": ["effects", "costProfile", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Finite hosted economy pool is derivable, while remaining credits stay board-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Hosted 16-credit pool and action economy are directly represented; remaining credits remain board state."
+    },
+    {
+      "cardId": "onr_v1_310_blood-cat",
+      "title": "Blood Cat",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_trace_success",
+        "effect:tag_source",
+        "effect:trace",
+        "remoteRole:tag_punish_asset"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Trace-to-tag node mechanics are derivable, with trace success staying runtime context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-to-tag asset mechanic is mechanically represented; trace success remains runtime context."
+    },
+    {
+      "cardId": "onr_v1_311_braindance-campaign",
+      "title": "Braindance Campaign",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:finite_economy_pool",
+        "effect:recurring_economy",
+        "effect:start_of_turn_economy",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": ["effects", "costProfile", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Finite/start-turn hosted economy is derivable, while remaining credits stay board-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Hosted pool and start-turn take mechanics are represented without current hosted-credit state."
+    },
+    {
       "cardId": "onr_v1_312_chicago-branch",
       "title": "Chicago Branch",
       "side": "corp",
@@ -4655,6 +5171,176 @@
       "derivedRationale": "Activated advancement-counter placement is a mechanical score-acceleration fact; strategic closeout valuation remains manual/consumer context."
     },
     {
+      "cardId": "onr_v1_313_city-surveillance",
+      "title": "City Surveillance",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_draw",
+        "condition:requires_runner_pay_or_take_tag",
+        "effect:remote_tax",
+        "effect:tag_source",
+        "remoteRole:tag_punish_asset"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Runner-draw payment-or-tag pressure is derivable, but no guaranteed tag is generated.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Runner-draw payment-or-tag mechanic is represented as contextual tag/payment pressure, not a guaranteed tag."
+    },
+    {
+      "cardId": "onr_v1_314_corporate-negotiating-center",
+      "title": "Corporate Negotiating Center",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_start_of_turn",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": ["effects", "costProfile", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["remoteRole"],
+      "generatedOnlyFields": ["conditions"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Remote support context is derivable only as board/LegalAction-gated utility.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Start-turn remote economy/support context is mechanically represented when visible in implementation."
+    },
+    {
+      "cardId": "onr_v1_315_corprunners-shattered-remains",
+      "title": "Corprunner's Shattered Remains",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_accessed_card",
+        "condition:requires_advancement_counter",
+        "effect:access_punish",
+        "effect:advanceable_economy",
+        "effect:ambush",
+        "effect:hardware_trash",
+        "remoteRole:ambush"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Advanceable hardware-trash ambush is derivable, with access and counter context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Advanceable hardware-trash ambush mechanics are represented without access outcome or target selection."
+    },
+    {
+      "cardId": "onr_v1_316_cowboy-sysop",
+      "title": "Cowboy Sysop",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:zone_shuffle"],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Installed-card-to-HQ utility is derivable as hidden-zone context only.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Installed-card-to-HQ utility is represented as hidden-zone context only."
+    },
+    {
       "cardId": "onr_v1_317_data-masons",
       "title": "Data Masons",
       "side": "corp",
@@ -4694,6 +5380,946 @@
         "valueHints"
       ],
       "derivedRationale": "Wall rez discount and wall strength modifier are mechanically derivable global ICE modifier facts; reserve/remote value remains strategic context."
+    },
+    {
+      "cardId": "onr_v1_321_esa-contract",
+      "title": "ESA Contract",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects", "remoteRole"],
+      "generatedMechanicalFacts": ["effect:draw", "remoteRole:asset_economy"],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Remote draw utility is derivable, while use timing remains LegalAction context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Action draw node is mechanically represented without strategy about when to use it."
+    },
+    {
+      "cardId": "onr_v1_322_euromarket-consortium",
+      "title": "Euromarket Consortium",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_rezzed_card",
+        "effect:draw",
+        "effect:remote_protection",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Draw and hand-size support are derivable, with rezzed board context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Draw plus hand-size support are represented as board-context asset utility, not remote safety."
+    },
+    {
+      "cardId": "onr_v1_323_experimental-ai",
+      "title": "Experimental AI",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_accessed_card",
+        "condition:requires_advancement_counter",
+        "effect:access_punish",
+        "effect:advanceable_economy",
+        "effect:ambush",
+        "effect:program_trash",
+        "remoteRole:ambush"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Advanceable program-trash ambush is derivable, with access and counter context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Advanceable program-trash ambush mechanics are represented without guaranteed hit or target selection."
+    },
+    {
+      "cardId": "onr_v1_324_fortress-architects",
+      "title": "Fortress Architects",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_rezzed_card",
+        "effect:install_discount",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "ICE install discount is derivable, with rezzed board context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "ICE install discount is mechanical support; install legality and board state remain runtime-owned."
+    },
+    {
+      "cardId": "onr_v1_325_hacker-tracker-central",
+      "title": "Hacker Tracker Central",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "effect:trace_credit",
+        "remoteRole:tag_punish_asset"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Trace-credit support is derivable, while trace bidding and current pool state remain runtime context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace-credit support is represented without trace bidding or current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_326_holovid-campaign",
+      "title": "Holovid Campaign",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:finite_economy_pool",
+        "effect:recurring_economy",
+        "effect:start_of_turn_economy",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Finite/start-turn hosted economy is derivable, while remaining credits stay board-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Hosted pool and start-turn economy are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_327_i-got-a-rock",
+      "title": "I Got a Rock",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "remoteRole:tag_punish_asset"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Tagged-runner damage payoff is derivable, with runner-tagged and damage-resolution context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Tagged-runner meat damage payoff is represented; legality and damage resolution remain engine-owned."
+    },
+    {
+      "cardId": "onr_v1_328_information-laundering",
+      "title": "Information Laundering",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_advancement_counter",
+        "effect:advanceable_economy",
+        "effect:economy",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Advanceable counter-to-credit economy is derivable, with variable amount context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Advanceable counter-to-credit node is represented with variable counter context."
+    },
+    {
+      "cardId": "onr_v1_329_investment-firm",
+      "title": "Investment Firm",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "effect:finite_economy_pool",
+        "effect:recurring_economy",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Credit-diversion pool and recurring payout are derivable, while current pool state remains board-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Credit-diversion pool and recurring take mechanic are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_332_newsgroup-taunting",
+      "title": "Newsgroup Taunting",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "effect:remote_tax",
+        "effect:run_tax",
+        "remoteRole:run_tax"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Run-start payment tax is derivable, but concrete remote safety remains run/board context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Run-start payment-or-end-run mechanic is represented as run context, not static remote safety."
+    },
+    {
+      "cardId": "onr_v1_333_omniscience-foundation",
+      "title": "Omniscience Foundation",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:tag_source",
+        "remoteRole:tag_punish_asset"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Tag amplification is derivable, with runner-tagged context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "End-turn tag amplification is represented as runner-tagged context, not guaranteed tag state."
+    },
+    {
+      "cardId": "onr_v1_334_pacifica-regional-ai",
+      "title": "Pacifica Regional AI",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_advancement_counter",
+        "effect:advanceable_economy",
+        "effect:extra_action",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Advancement-counter action gain is derivable, while action use remains LegalAction context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Advancement-counter action gain is represented; action use remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_335_remote-facility",
+      "title": "Remote Facility",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_start_of_turn",
+        "effect:extra_action",
+        "remoteRole:remote_capacity"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Start-turn action gain/remote capacity is derivable, with board context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Start-turn action gain is represented as remote capacity/support context."
+    },
+    {
+      "cardId": "onr_v1_336_rescheduler",
+      "title": "Rescheduler",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:draw", "effect:zone_shuffle"],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "HQ shuffle/draw utility is derivable as hidden-zone context without hidden identities.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "HQ shuffle/draw is represented as hidden-zone context without hidden HQ identities."
+    },
+    {
+      "cardId": "onr_v1_337_rockerboy-promotion",
+      "title": "Rockerboy Promotion",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Hosted action economy pool is derivable, while remaining credits stay board-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Hosted pool and action take mechanics are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_338_rustbelt-hq-branch",
+      "title": "Rustbelt HQ Branch",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_rezzed_card",
+        "effect:remote_protection",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Corp hand-size support is derivable, with rezzed board context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Corp hand-size support is represented as board-context asset utility, not remote safety."
+    },
+    {
+      "cardId": "onr_v1_339_schlaghund",
+      "title": "Schlaghund",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "remoteRole:tag_punish_asset"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Tagged-runner damage payoff is derivable, with runner-tagged/random outcome context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Tagged-runner die-based meat damage payoff is represented without guaranteed success."
+    },
+    {
+      "cardId": "onr_v1_340_setup",
+      "title": "Setup!",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_accessed_card",
+        "effect:access_punish",
+        "effect:ambush",
+        "effect:damage",
+        "remoteRole:ambush"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "On-access damage ambush is derivable, with access context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "On-access damage ambush is represented without guaranteed hit or access outcome."
+    },
+    {
+      "cardId": "onr_v1_342_solo-squad",
+      "title": "Solo Squad",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "remoteRole:tag_punish_asset"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Tagged-runner damage action is derivable, with runner-tagged and LegalAction context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Tagged-runner damage action is represented; playability remains LegalAction context."
+    },
+    {
+      "cardId": "onr_v1_343_south-african-mining-corp",
+      "title": "South African Mining Corp",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "effect:action_economy",
+        "effect:economy",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Action economy is derivable, while action use remains LegalAction context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Action economy node is represented without strategy about when to spend actions."
+    },
+    {
+      "cardId": "onr_v1_344_spinn-public-relations",
+      "title": "Spinn® Public Relations",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_start_of_turn",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool",
+        "effect:recurring_economy",
+        "effect:start_of_turn_economy",
+        "remoteRole:asset_economy"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Hosted start-turn/action economy pool is derivable, while remaining credits stay board-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Hosted pool, action loading and start-turn take mechanics are represented without current hosted-credit state."
+    },
+    {
+      "cardId": "onr_v1_346_vacant-soulkiller",
+      "title": "Vacant Soulkiller",
+      "side": "corp",
+      "cardType": "asset",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_accessed_card",
+        "condition:requires_advancement_counter",
+        "effect:access_punish",
+        "effect:advanceable_economy",
+        "effect:ambush",
+        "effect:damage",
+        "remoteRole:ambush"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Advanceable damage ambush is derivable, with access and counter context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Advanceable brain-damage ambush is represented without access outcome or fixed counter amount."
     },
     {
       "cardId": "onr_v1_350_antiquated-interface-routines",
@@ -4736,6 +6362,93 @@
       "derivedRationale": "Same-fort ICE strength modifier is mechanically derivable; concrete path cost impact remains effectiveRunQuote/board context."
     },
     {
+      "cardId": "onr_v1_352_chester-mix",
+      "title": "Chester Mix",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_rezzed_card",
+        "effect:install_discount",
+        "remoteRole:remote_capacity"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Fort ICE install discount is derivable, with rezzed board context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Fort ICE install discount is represented as board-context remote support."
+    },
+    {
+      "cardId": "onr_v1_354_crybaby",
+      "title": "Crybaby",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_accessed_card",
+        "effect:access_punish",
+        "effect:ambush",
+        "effect:link_penalty",
+        "effect:persistent_counter_effect",
+        "remoteRole:ambush"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "On-access counter/link penalty ambush is derivable without asserting current counter state.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "On-access crying counter and link penalty are represented without asserting current counter state."
+    },
+    {
       "cardId": "onr_v1_355_crystal-palace-station-grid",
       "title": "Crystal Palace Station Grid",
       "side": "corp",
@@ -4775,6 +6488,50 @@
         "valueHints"
       ],
       "derivedRationale": "Fort break-cost modifier is derivable and protected by a hard conflict gate against Economy/Counter overlays; remote_protection remains intentionally manual strategic overlay."
+    },
+    {
+      "cardId": "onr_v1_358_dr-dreff",
+      "title": "Dr. Dreff",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "condition:requires_successful_run",
+        "effect:future_encounter_effect",
+        "effect:zone_shuffle",
+        "remoteRole:run_tax"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Temporary HQ-ICE encounter is derivable as run/hidden-zone context only.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Temporary HQ-ICE encounter after successful run is represented as run/hidden-zone context without hidden HQ identity."
     },
     {
       "cardId": "onr_v1_359_jenny-jett",
@@ -4822,6 +6579,49 @@
       "derivedRationale": "Successful-run install-and-approach effect is derivable as a future encounter class while HQ card identity and legal target choice remain hidden-info/runtime context."
     },
     {
+      "cardId": "onr_v1_360_jerusalem-city-grid",
+      "title": "Jerusalem City Grid",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_rezzed_card",
+        "effect:remote_protection",
+        "effect:rez_discount",
+        "remoteRole:ice_modifier"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Fort wall rez discount/strength support is derivable, with rezzed board context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Fort wall rez discount and strength support are represented as board-context remote support."
+    },
+    {
       "cardId": "onr_v1_361_namatoki-plaza",
       "title": "Namatoki Plaza",
       "side": "corp",
@@ -4867,6 +6667,48 @@
       "derivedRationale": "Additional agenda/node slot and subsidiary-fort install context are mechanical remote-capacity facts; score safety remains board-aware."
     },
     {
+      "cardId": "onr_v1_362_new-galveston-city-grid",
+      "title": "New Galveston City Grid",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_rezzed_card",
+        "effect:remote_tax",
+        "remoteRole:run_tax"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Asset/upgrade trash-cost tax is derivable, with access/trash context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Asset/upgrade trash-cost tax is represented as access/trash context, not static remote safety."
+    },
+    {
       "cardId": "onr_v1_363_olivia-salazar",
       "title": "Olivia Salazar",
       "side": "corp",
@@ -4910,6 +6752,48 @@
         "valueHints"
       ],
       "derivedRationale": "Source-bound discounted ICE rez and end-of-run derez window are derivable as during-run remote-support facts; payment legality stays engine-owned."
+    },
+    {
+      "cardId": "onr_v1_364_omni-kismet-ph-d",
+      "title": "Omni Kismet, Ph.D.",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "effect:zone_shuffle",
+        "remoteRole:run_tax"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Fort ICE swap is derivable as run/hidden-zone context only.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Unrezzed-fort-ICE swap is represented as run/hidden-zone context without hidden HQ identity."
     },
     {
       "cardId": "onr_v1_366_red-herrings",
@@ -5004,6 +6888,90 @@
         "valueHints"
       ],
       "derivedRationale": "Pass-rezzed-ICE die trigger is derivable as deterministic-random future encounter pressure; actual random result and run end remain runtime state."
+    },
+    {
+      "cardId": "onr_v1_368_roving-submarine",
+      "title": "Roving Submarine",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_remote_server",
+        "effect:remote_tax",
+        "remoteRole:run_tax"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Remote run-window restriction is derivable, but current run legality stays engine-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Fort run-window restriction is represented as remote/run context, not current run legality."
+    },
+    {
+      "cardId": "onr_v1_369_singapore-city-grid",
+      "title": "Singapore City Grid",
+      "side": "corp",
+      "cardType": "upgrade",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects", "remoteRole"],
+      "generatedMechanicalFacts": [
+        "condition:requires_during_run",
+        "effect:zone_shuffle",
+        "remoteRole:run_tax"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 9,
+      "rationale": "Fort ICE swap is derivable as run/hidden-zone context only.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Unrezzed-fort-ICE swap is represented as run/hidden-zone context without hidden HQ identity."
     },
     {
       "cardId": "onr_v1_370_tesseract-fort-construction",

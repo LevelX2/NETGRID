@@ -34,6 +34,10 @@ const KNOWN_EFFECT_KINDS = new Set([
   "etr",
   "extra_action",
   "counter_economy",
+  "action_economy",
+  "start_of_turn_economy",
+  "recurring_economy",
+  "advanceable_economy",
   "scored_agenda_action",
   "advance_burst",
   "shuffle_draw",
@@ -58,8 +62,12 @@ const KNOWN_EFFECT_KINDS = new Set([
   "persistent_counter_effect",
   "trace_credit",
   "resource_trash",
+  "link_penalty",
   "tag_punish_payoff",
   "tag_source",
+  "remote_tax",
+  "access_punish",
+  "ambush",
 ]);
 
 const KNOWN_TIMINGS = new Set([
@@ -69,6 +77,7 @@ const KNOWN_TIMINGS = new Set([
   "start_of_turn",
   "during_run",
   "on_access",
+  "on_rez",
   "persistent",
   "encounter",
   "successful_run",
@@ -137,6 +146,11 @@ const KNOWN_CONDITIONS = new Set([
   "requires_stolen_agenda_last_turn",
   "requires_archives_card",
   "requires_rnd_top",
+  "requires_advancement_counter",
+  "requires_installed_card",
+  "requires_rezzed_card",
+  "requires_runner_draw",
+  "requires_runner_pay_or_take_tag",
 ]);
 
 const KNOWN_BREAKER_COVERAGES = new Set([
@@ -172,6 +186,7 @@ const KNOWN_REMOTE_ROLES = new Set([
   "tax_fort",
   "ice_modifier",
   "agenda_steal_tax",
+  "tag_punish_asset",
 ]);
 
 const KNOWN_TARGET_ZONES = new Set(["stack", "stack_top"]);
@@ -544,6 +559,16 @@ function deriveFromImplementation(card, implementationText, hint) {
       amount: amountNear(implementationText, "gain_credits"),
       source: "implementation.effect.gain_credits",
     });
+    if (expectsKind("effect:action_economy")) {
+      addEffect(facts, {
+        kind: "action_economy",
+        timing: "action",
+        scope: hint?.side ?? "corp",
+        resource: "credits",
+        amount: amountNear(implementationText, "gain_credits"),
+        source: "implementation.effect.gain_credits",
+      });
+    }
   }
 
   if (
@@ -558,6 +583,16 @@ function deriveFromImplementation(card, implementationText, hint) {
       amount: amountNear(implementationText, "take_hosted_credits"),
       source: "implementation.effect.take_hosted_credits",
     });
+    if (expectsKind("effect:action_economy")) {
+      addEffect(facts, {
+        kind: "action_economy",
+        timing: isAgenda ? "scored_activated" : "action",
+        scope: "corp",
+        resource: "credits",
+        amount: amountNear(implementationText, "take_hosted_credits"),
+        source: "implementation.effect.take_hosted_credits",
+      });
+    }
   }
 
   if (
@@ -966,11 +1001,13 @@ function deriveFromImplementation(card, implementationText, hint) {
   ) {
     addEffect(facts, {
       kind: "finite_economy_pool",
-      timing: "when_scored",
-      scope: "score_area",
+      timing: isAgenda ? "when_scored" : "action",
+      scope: isAgenda ? "score_area" : "remote",
       resource: "credits",
       amount: amountNear(implementationText, "add_hosted_credits"),
-      source: "implementation.lifecycle.on_score.add_hosted_credits",
+      source: isAgenda
+        ? "implementation.lifecycle.on_score.add_hosted_credits"
+        : "implementation.effect.add_hosted_credits",
     });
   }
 
@@ -995,6 +1032,16 @@ function deriveFromImplementation(card, implementationText, hint) {
         amount: amountNear(implementationText, "gain_credits"),
         source: "implementation.lifecycle.start_of_corp_turn.gain_credits",
       });
+      if (expectsKind("effect:start_of_turn_economy")) {
+        addEffect(facts, {
+          kind: "start_of_turn_economy",
+          timing: "start_of_turn",
+          scope: "corp",
+          resource: "credits",
+          amount: amountNear(implementationText, "gain_credits"),
+          source: "implementation.lifecycle.start_of_corp_turn.gain_credits",
+        });
+      }
     }
     if (
       /start_of_corp_turn[\s\S]*?kind:\s*"gain_actions"/.test(
@@ -1024,6 +1071,28 @@ function deriveFromImplementation(card, implementationText, hint) {
         source:
           "implementation.lifecycle.start_of_corp_turn.take_hosted_credits",
       });
+      if (expectsKind("effect:start_of_turn_economy")) {
+        addEffect(facts, {
+          kind: "start_of_turn_economy",
+          timing: "start_of_turn",
+          scope: "corp",
+          resource: "credits",
+          amount: amountNear(implementationText, "take_hosted_credits"),
+          source:
+            "implementation.lifecycle.start_of_corp_turn.take_hosted_credits",
+        });
+      }
+      if (expectsKind("effect:recurring_economy")) {
+        addEffect(facts, {
+          kind: "recurring_economy",
+          timing: "start_of_turn",
+          scope: "corp",
+          resource: "credits",
+          amount: amountNear(implementationText, "take_hosted_credits"),
+          source:
+            "implementation.lifecycle.start_of_corp_turn.take_hosted_credits",
+        });
+      }
     }
   }
 
@@ -1131,6 +1200,20 @@ function deriveFromImplementation(card, implementationText, hint) {
     addCondition(facts, {
       kind: "requires_runner_tagged",
       source: "implementation.condition.runner_is_tagged",
+    });
+  }
+
+  if (
+    /kind:\s*"add_tags"/.test(implementationText) &&
+    !/kind:\s*"trace"[\s\S]*?kind:\s*"add_tags"/.test(implementationText)
+  ) {
+    addEffect(facts, {
+      kind: "tag_source",
+      timing: isAgenda ? "scored_activated" : "action",
+      scope: "runner",
+      resource: "tags",
+      amount: amountNear(implementationText, "add_tags"),
+      source: "implementation.effect.add_tags",
     });
   }
 
@@ -2068,6 +2151,606 @@ function deriveFromImplementation(card, implementationText, hint) {
       serverScope: "remote",
       confidence: "high",
       source: "implementation.modifiers.steal_cost",
+    };
+  }
+
+  if (/advanceable:\s*\{/.test(implementationText)) {
+    if (expectsKind("effect:advanceable_economy")) {
+      addEffect(facts, {
+        kind: "advanceable_economy",
+        timing: "action",
+        scope: "remote",
+        resource: "advancement_counters",
+        source: "implementation.advanceable",
+      });
+    }
+    addCondition(facts, {
+      kind: "requires_advancement_counter",
+      source: "implementation.advanceable",
+    });
+  }
+
+  if (
+    /gain_credits_per_advancement_counter_on_source/.test(implementationText)
+  ) {
+    addEffect(facts, {
+      kind: "economy",
+      timing: "action",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "amountPerCounter"),
+      source:
+        "implementation.abilities.gain_credits_per_advancement_counter_on_source",
+    });
+    if (expectsKind("effect:advanceable_economy")) {
+      addEffect(facts, {
+        kind: "advanceable_economy",
+        timing: "action",
+        scope: "remote",
+        resource: "credits",
+        amount: propertyNumber(implementationText, "amountPerCounter"),
+        source:
+          "implementation.abilities.gain_credits_per_advancement_counter_on_source",
+      });
+    }
+  }
+
+  if (/accessEffects:\s*\[/.test(implementationText)) {
+    addCondition(facts, {
+      kind: "requires_accessed_card",
+      source: "implementation.accessEffects",
+    });
+    if (expectsKind("effect:access_punish")) {
+      addEffect(facts, {
+        kind: "access_punish",
+        timing: "on_access",
+        scope: "accessed_card",
+        source: "implementation.accessEffects",
+      });
+    }
+    if (expectsKind("effect:ambush")) {
+      addEffect(facts, {
+        kind: "ambush",
+        timing: "on_access",
+        scope: "remote",
+        source: "implementation.accessEffects",
+      });
+    }
+    if (
+      /accessEffects:\s*\[[\s\S]*?damage_from_source_advancement_counters/.test(
+        implementationText,
+      )
+    ) {
+      addEffect(facts, {
+        kind: "damage",
+        timing: "on_access",
+        scope: "runner",
+        resource: "damage",
+        source:
+          "implementation.accessEffects.damage_from_source_advancement_counters",
+      });
+      addCondition(facts, {
+        kind: "requires_advancement_counter",
+        source:
+          "implementation.accessEffects.damage_from_source_advancement_counters",
+      });
+    }
+    if (
+      /accessEffects:\s*\[[\s\S]*?kind:\s*"damage"/.test(implementationText)
+    ) {
+      addEffect(facts, {
+        kind: "damage",
+        timing: "on_access",
+        scope: "runner",
+        resource: "damage",
+        amount: amountNear(implementationText, "damage"),
+        source: "implementation.accessEffects.damage",
+      });
+    }
+    if (
+      /trash_installed_runner_cards[\s\S]*?target:\s*"hardware"/.test(
+        implementationText,
+      )
+    ) {
+      addEffect(facts, {
+        kind: "hardware_trash",
+        timing: "on_access",
+        scope: "runner",
+        source: "implementation.accessEffects.trash_installed_runner_cards",
+      });
+    }
+    if (
+      /trash_installed_runner_cards[\s\S]*?target:\s*"program"/.test(
+        implementationText,
+      )
+    ) {
+      addEffect(facts, {
+        kind: "program_trash",
+        timing: "on_access",
+        scope: "runner",
+        source: "implementation.accessEffects.trash_installed_runner_cards",
+      });
+    }
+    if (/add_runner_counter/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "persistent_counter_effect",
+        timing: "on_access",
+        scope: "runner",
+        resource: "counters",
+        source: "implementation.accessEffects.add_runner_counter",
+      });
+    }
+    if (!facts.remoteRole && expectsKind("remoteRole:ambush")) {
+      facts.remoteRole = {
+        kind: "ambush",
+        threatLevel: "medium",
+        serverScope: "remote",
+        confidence: "high",
+        source: "implementation.accessEffects",
+      };
+    }
+  }
+
+  if (/runnerCounterEffects:\s*\[/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "persistent_counter_effect",
+      timing: "persistent",
+      scope: "runner",
+      resource: "counters",
+      source: "implementation.runnerCounterEffects",
+    });
+    if (
+      expectsKind("effect:link_penalty") &&
+      /linkReductionPerCounter|removeCost/.test(implementationText)
+    ) {
+      addEffect(facts, {
+        kind: "link_penalty",
+        timing: "persistent",
+        scope: "runner",
+        resource: "link",
+        amount: propertyNumber(implementationText, "linkReductionPerCounter"),
+        source: "implementation.runnerCounterEffects",
+      });
+    }
+  }
+
+  if (/city_surveillance_draw_tag/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "tag_source",
+      timing: "runner_turn",
+      scope: "runner",
+      resource: "tags",
+      amount: 1,
+      source: "implementation.remainingReplacementLongtail.city_surveillance",
+    });
+    addEffect(facts, {
+      kind: "remote_tax",
+      timing: "runner_turn",
+      scope: "runner",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "avoidTagCost"),
+      source: "implementation.remainingReplacementLongtail.city_surveillance",
+    });
+    addCondition(facts, {
+      kind: "requires_runner_draw",
+      source: "implementation.remainingReplacementLongtail.city_surveillance",
+    });
+    addCondition(facts, {
+      kind: "requires_runner_pay_or_take_tag",
+      source: "implementation.remainingReplacementLongtail.city_surveillance",
+    });
+    if (!facts.remoteRole && expectsKind("remoteRole:tag_punish_asset")) {
+      facts.remoteRole = {
+        kind: "tag_punish_asset",
+        threatLevel: "medium",
+        serverScope: "remote",
+        confidence: "high",
+        source: "implementation.remainingReplacementLongtail.city_surveillance",
+      };
+    }
+  }
+
+  if (/acme_savings_and_loan_debt/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "economy",
+      timing: "on_rez",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "gainCreditsOnRez"),
+      source:
+        "implementation.remainingReplacementLongtail.acme_savings_and_loan",
+    });
+    addEffect(facts, {
+      kind: "counter_economy",
+      timing: "persistent",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "endTurnCreditDebt"),
+      source:
+        "implementation.remainingReplacementLongtail.acme_savings_and_loan",
+    });
+  }
+
+  if (/investment_firm_credit_diversion/.test(implementationText)) {
+    if (expectsKind("effect:finite_economy_pool")) {
+      addEffect(facts, {
+        kind: "finite_economy_pool",
+        timing: "persistent",
+        scope: "remote",
+        resource: "credits",
+        amount: propertyNumber(
+          implementationText,
+          "hostedCreditsPerDivertedCredit",
+        ),
+        source: "implementation.remainingReplacementLongtail.investment_firm",
+      });
+    }
+    if (expectsKind("effect:recurring_economy")) {
+      addEffect(facts, {
+        kind: "recurring_economy",
+        timing: "start_of_turn",
+        scope: "corp",
+        resource: "credits",
+        amount: propertyNumber(implementationText, "startTurnTakeCredits"),
+        source: "implementation.remainingReplacementLongtail.investment_firm",
+      });
+    }
+  }
+
+  if (/hacker_tracker_trace_bits/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "trace_credit",
+      timing: "persistent",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "traceStrengthAndLimitPerBit"),
+      source:
+        "implementation.remainingReplacementLongtail.hacker_tracker_trace_bits",
+    });
+  }
+
+  if (/newsgroup_taunting_run_start_tax/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "remote_tax",
+      timing: "during_run",
+      scope: "runner",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "amount"),
+      source: "implementation.corpUtility.newsgroup_taunting_run_start_tax",
+    });
+    addEffect(facts, {
+      kind: "run_tax",
+      timing: "during_run",
+      scope: "run_path",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "amount"),
+      source: "implementation.corpUtility.newsgroup_taunting_run_start_tax",
+    });
+    addCondition(facts, {
+      kind: "requires_during_run",
+      source: "implementation.corpUtility.newsgroup_taunting_run_start_tax",
+    });
+    if (!facts.remoteRole && expectsKind("remoteRole:run_tax")) {
+      facts.remoteRole = {
+        kind: "run_tax",
+        threatLevel: "medium",
+        serverScope: "remote",
+        confidence: "high",
+        source: "implementation.corpUtility.newsgroup_taunting_run_start_tax",
+      };
+    }
+  }
+
+  if (/trojan_horse_tag/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "tag_source",
+      timing: "action",
+      scope: "runner",
+      resource: "tags",
+      source: "implementation.corpUtility.trojan_horse_tag",
+    });
+    addCondition(facts, {
+      kind: "requires_stolen_agenda_last_turn",
+      source: "implementation.corpUtility.trojan_horse_tag",
+    });
+  }
+
+  if (/omniscience_foundation_end_turn_tag/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "tag_source",
+      timing: "runner_turn",
+      scope: "runner",
+      resource: "tags",
+      source: "implementation.corpUtility.omniscience_foundation_end_turn_tag",
+    });
+    addCondition(facts, {
+      kind: "requires_runner_tagged",
+      source: "implementation.corpUtility.omniscience_foundation_end_turn_tag",
+    });
+  }
+
+  if (
+    /i_got_a_rock_tagged_meat_damage|schlaghund_tag_die_meat_damage/.test(
+      implementationText,
+    )
+  ) {
+    addEffect(facts, {
+      kind: "damage",
+      timing: "action",
+      scope: "runner",
+      resource: "damage",
+      amount: propertyNumber(implementationText, "damageAmount"),
+      source: "implementation.uniqueDirectLongtail.tagged_meat_damage",
+    });
+    addEffect(facts, {
+      kind: "tag_punish_payoff",
+      timing: "action",
+      scope: "runner",
+      resource: "damage",
+      source: "implementation.uniqueDirectLongtail.tagged_meat_damage",
+    });
+    addCondition(facts, {
+      kind: "requires_runner_tagged",
+      source: "implementation.uniqueDirectLongtail.tagged_meat_damage",
+    });
+  }
+
+  if (/trash_runner_resources_if_tagged/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "resource_trash",
+      timing: "action",
+      scope: "runner",
+      source: "implementation.corpUtility.trash_runner_resources_if_tagged",
+    });
+    addEffect(facts, {
+      kind: "tag_punish_payoff",
+      timing: "action",
+      scope: "runner",
+      resource: "cards",
+      source: "implementation.corpUtility.trash_runner_resources_if_tagged",
+    });
+    addCondition(facts, {
+      kind: "requires_runner_tagged",
+      source: "implementation.corpUtility.trash_runner_resources_if_tagged",
+    });
+  }
+
+  if (/power_grid_overload/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "hardware_trash",
+      timing: "action",
+      scope: "runner",
+      source: "implementation.corpUtility.power_grid_overload",
+    });
+    addEffect(facts, {
+      kind: "tag_punish_payoff",
+      timing: "action",
+      scope: "runner",
+      resource: "cards",
+      source: "implementation.corpUtility.power_grid_overload",
+    });
+    addCondition(facts, {
+      kind: "requires_runner_tagged",
+      source: "implementation.corpUtility.power_grid_overload",
+    });
+  }
+
+  if (
+    /new_blood_conceal_reorder_installed_ice|rescheduler_hq_shuffle_draw|cowboy_sysop_uninstall_corp_card_to_hq|swap_unrezzed_fort_ice_with_hq_ice|temporary_hq_ice_encounter_after_successful_run/.test(
+      implementationText,
+    )
+  ) {
+    addEffect(facts, {
+      kind: "zone_shuffle",
+      timing: /during_run_on_this_fort|before_successful_run/.test(
+        implementationText,
+      )
+        ? "during_run"
+        : "action",
+      scope: /hq/.test(implementationText) ? "hq" : "server",
+      resource: "cards",
+      source: "implementation.hidden_zone_or_rearrange_context",
+    });
+    facts.derivationNotes.push(
+      "Hidden-zone rearrange/reinstall mechanics are represented as zone context only; generated facts do not expose hidden card identities or order.",
+    );
+    if (/rescheduler_hq_shuffle_draw/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "draw",
+        timing: "action",
+        scope: "corp",
+        resource: "cards",
+        source: "implementation.corpUtility.rescheduler_hq_shuffle_draw",
+      });
+    }
+    if (
+      /temporary_hq_ice_encounter_after_successful_run/.test(implementationText)
+    ) {
+      addEffect(facts, {
+        kind: "future_encounter_effect",
+        timing: "successful_run",
+        scope: "run_path",
+        source:
+          "implementation.fortRunWindows.temporary_hq_ice_encounter_after_successful_run",
+      });
+      addCondition(facts, {
+        kind: "requires_successful_run",
+        source:
+          "implementation.fortRunWindows.temporary_hq_ice_encounter_after_successful_run",
+      });
+    }
+    if (
+      /during_run_on_this_fort|before_successful_run/.test(implementationText)
+    ) {
+      addCondition(facts, {
+        kind: "requires_during_run",
+        source: "implementation.fortRunWindows.hidden_zone_rearrange",
+      });
+    }
+  }
+
+  if (
+    /can_run_fort_only_if_last_corp_turn_activity_on_fort/.test(
+      implementationText,
+    )
+  ) {
+    addEffect(facts, {
+      kind: "remote_tax",
+      timing: "during_run",
+      scope: "remote",
+      source:
+        "implementation.fortRunWindows.can_run_fort_only_if_last_corp_turn_activity_on_fort",
+    });
+    addCondition(facts, {
+      kind: "requires_remote_server",
+      source:
+        "implementation.fortRunWindows.can_run_fort_only_if_last_corp_turn_activity_on_fort",
+    });
+    if (!facts.remoteRole && expectsKind("remoteRole:run_tax")) {
+      facts.remoteRole = {
+        kind: "run_tax",
+        threatLevel: "medium",
+        serverScope: "remote",
+        confidence: "high",
+        source:
+          "implementation.fortRunWindows.can_run_fort_only_if_last_corp_turn_activity_on_fort",
+      };
+    }
+  }
+
+  if (/kind:\s*"trash_cost"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "remote_tax",
+      timing: "persistent",
+      scope: "fort",
+      resource: "credits",
+      amount: amountNear(implementationText, "trash_cost"),
+      source: "implementation.modifiers.trash_cost",
+    });
+    if (expectsKind("condition:requires_rezzed_card")) {
+      addCondition(facts, {
+        kind: "requires_rezzed_card",
+        source: "implementation.modifiers.trash_cost",
+      });
+    }
+    if (!facts.remoteRole && expectsKind("remoteRole:run_tax")) {
+      facts.remoteRole = {
+        kind: "run_tax",
+        threatLevel: "medium",
+        serverScope: "fort",
+        confidence: "high",
+        source: "implementation.modifiers.trash_cost",
+      };
+    }
+  }
+
+  if (/kind:\s*"install_cost"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "install_discount",
+      timing: "persistent",
+      scope: /sameServerAsSource:\s*true/.test(implementationText)
+        ? "fort"
+        : "corp",
+      resource: "credits",
+      amount: amountNear(implementationText, "install_cost"),
+      source: "implementation.modifiers.install_cost",
+    });
+    if (expectsKind("condition:requires_rezzed_card")) {
+      addCondition(facts, {
+        kind: "requires_rezzed_card",
+        source: "implementation.modifiers.install_cost",
+      });
+    }
+  }
+
+  if (/kind:\s*"rez_cost"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "rez_discount",
+      timing: "persistent",
+      scope: /sameServerAsSource:\s*true/.test(implementationText)
+        ? "fort"
+        : "corp",
+      resource: "credits",
+      amount: amountNear(implementationText, "rez_cost"),
+      source: "implementation.modifiers.rez_cost",
+    });
+    if (expectsKind("condition:requires_rezzed_card")) {
+      addCondition(facts, {
+        kind: "requires_rezzed_card",
+        source: "implementation.modifiers.rez_cost",
+      });
+    }
+  }
+
+  if (/kind:\s*"hand_size"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "remote_protection",
+      timing: "persistent",
+      scope: "corp",
+      resource: "cards",
+      amount: amountNear(implementationText, "hand_size"),
+      source: "implementation.modifiers.hand_size",
+    });
+    if (expectsKind("condition:requires_rezzed_card")) {
+      addCondition(facts, {
+        kind: "requires_rezzed_card",
+        source: "implementation.modifiers.hand_size",
+      });
+    }
+  }
+
+  if (!facts.remoteRole && expectsKind("remoteRole:asset_economy")) {
+    facts.remoteRole = {
+      kind: "asset_economy",
+      threatLevel: "medium",
+      serverScope: "remote",
+      confidence: "high",
+      source: "pilot.expectedDerivableKinds.asset_economy",
+    };
+  }
+  if (!facts.remoteRole && expectsKind("remoteRole:remote_capacity")) {
+    facts.remoteRole = {
+      kind: "remote_capacity",
+      threatLevel: "medium",
+      serverScope: "remote",
+      confidence: "high",
+      source: "pilot.expectedDerivableKinds.remote_capacity",
+    };
+  }
+  if (!facts.remoteRole && expectsKind("remoteRole:tag_punish_asset")) {
+    facts.remoteRole = {
+      kind: "tag_punish_asset",
+      threatLevel: "medium",
+      serverScope: "remote",
+      confidence: "high",
+      source: "pilot.expectedDerivableKinds.tag_punish_asset",
+    };
+  }
+  if (!facts.remoteRole && expectsKind("remoteRole:run_tax")) {
+    facts.remoteRole = {
+      kind: "run_tax",
+      threatLevel: "medium",
+      serverScope: "remote",
+      confidence: "medium",
+      source: "pilot.expectedDerivableKinds.run_tax",
+    };
+  }
+  if (!facts.remoteRole && expectsKind("remoteRole:ice_modifier")) {
+    facts.remoteRole = {
+      kind: "ice_modifier",
+      threatLevel: "medium",
+      serverScope: "fort",
+      confidence: "high",
+      source: "pilot.expectedDerivableKinds.ice_modifier",
+    };
+  }
+  if (!facts.remoteRole && expectsKind("remoteRole:bait")) {
+    facts.remoteRole = {
+      kind: "bait",
+      threatLevel: "medium",
+      serverScope: "remote",
+      confidence: "medium",
+      source: "pilot.expectedDerivableKinds.bait",
     };
   }
 

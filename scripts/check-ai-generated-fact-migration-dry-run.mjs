@@ -20,7 +20,7 @@ const DEFAULT_REPORT_PATH =
   "docs/reviews/ai/aufgabe-003-generated-fact-batch1-dry-run-report-2026-05-25.json";
 
 const BATCH_NUMBER = 1;
-const KNOWN_BATCHES = new Set([1, 2, 3, 4, 5, 6, 7, 8]);
+const KNOWN_BATCHES = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9]);
 const IN_SCOPE_EFFECT_KINDS = new Set([
   "scored_agenda_action",
   "economy",

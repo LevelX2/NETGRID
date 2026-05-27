@@ -18,6 +18,10 @@ export const KNOWN_HINT_EFFECT_KINDS = [
   "etr",
   "extra_action",
   "counter_economy",
+  "action_economy",
+  "start_of_turn_economy",
+  "recurring_economy",
+  "advanceable_economy",
   "scored_agenda_action",
   "advance_burst",
   "shuffle_draw",
@@ -42,8 +46,12 @@ export const KNOWN_HINT_EFFECT_KINDS = [
   "persistent_counter_effect",
   "trace_credit",
   "resource_trash",
+  "link_penalty",
   "tag_punish_payoff",
   "tag_source",
+  "remote_tax",
+  "access_punish",
+  "ambush",
 ] as const;
 
 export const KNOWN_HINT_EFFECT_TIMINGS = [
@@ -53,6 +61,7 @@ export const KNOWN_HINT_EFFECT_TIMINGS = [
   "start_of_turn",
   "during_run",
   "on_access",
+  "on_rez",
   "persistent",
   "encounter",
   "successful_run",
@@ -121,6 +130,11 @@ export const KNOWN_HINT_CONDITION_KINDS = [
   "requires_stolen_agenda_last_turn",
   "requires_archives_card",
   "requires_rnd_top",
+  "requires_advancement_counter",
+  "requires_installed_card",
+  "requires_rezzed_card",
+  "requires_runner_draw",
+  "requires_runner_pay_or_take_tag",
 ] as const;
 
 export const KNOWN_HINT_COST_RISKS = ["low", "medium", "high"] as const;
@@ -158,6 +172,7 @@ export const KNOWN_HINT_REMOTE_ROLE_KINDS = [
   "tax_fort",
   "ice_modifier",
   "agenda_steal_tax",
+  "tag_punish_asset",
 ] as const;
 
 export const KNOWN_HINT_REMOTE_THREAT_LEVELS = [
