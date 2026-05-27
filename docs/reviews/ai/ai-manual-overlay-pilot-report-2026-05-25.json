@@ -154,14 +154,32 @@
     }
   ],
   "hardErrorCount": 0,
-  "warningCount": 16,
+  "warningCount": 24,
   "errors": [],
   "warnings": [
     {
       "kind": "missing_manual_overlay_pilot_card",
       "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_004_bakdoor",
+      "title": "Bakdoor"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
       "cardId": "onr_v1_008_boardwalk",
       "title": "Boardwalk"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_022_emergency-self-construct",
+      "title": "Emergency Self-Construct"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_023_evil-twin",
+      "title": "Evil Twin"
     },
     {
       "kind": "missing_manual_overlay_pilot_card",
@@ -172,8 +190,20 @@
     {
       "kind": "missing_manual_overlay_pilot_card",
       "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_028_force-shield",
+      "title": "Force Shield"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
       "cardId": "onr_v1_032_i-spy",
       "title": "I Spy"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_038_joan-of-arc",
+      "title": "Joan of Arc"
     },
     {
       "kind": "missing_manual_overlay_pilot_card",
@@ -190,14 +220,32 @@
     {
       "kind": "missing_manual_overlay_pilot_card",
       "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_051_rabbit",
+      "title": "Rabbit"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
       "cardId": "onr_v1_058_seeya",
       "title": "SeeYa"
     },
     {
       "kind": "missing_manual_overlay_pilot_card",
       "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_061_shield",
+      "title": "Shield"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
       "cardId": "onr_v1_062_shredder-uplink-protocol",
       "title": "Shredder Uplink Protocol"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_063_signpost",
+      "title": "Signpost"
     },
     {
       "kind": "missing_manual_overlay_pilot_card",

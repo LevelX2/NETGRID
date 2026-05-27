@@ -15,6 +15,19 @@
       "rationale": "Sentry breaker coverage and random run-start strength context are directly represented."
     },
     {
+      "cardId": "onr_v1_004_bakdoor",
+      "title": "Bakdoor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/bakdoor.ts",
+      "expectedDerivableKinds": [
+        "effect:base_link",
+        "effect:link",
+        "effect:trace_defense",
+        "condition:requires_trace_attempt"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Base-link and trace-window link boost are mechanical trace-defense facts; actual trace outcome remains LegalAction/engine context."
+    },
+    {
       "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
       "title": "Bartmoss Memorial Icebreaker",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/bartmoss-memorial-icebreaker.ts",
@@ -96,6 +109,41 @@
       "rationale": "Universal breaker coverage and ends-run side effect are directly represented; catalog title uses the printed trademark suffix."
     },
     {
+      "cardId": "onr_v1_022_emergency-self-construct",
+      "title": "Emergency Self-Construct",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/emergency-self-construct.ts",
+      "expectedDerivableKinds": [
+        "effect:flatline_prevention",
+        "effect:prevention_replacement",
+        "effect:remove_brain_damage",
+        "effect:meat_damage_prevention",
+        "effect:action_penalty",
+        "effect:hand_size_modifier",
+        "effect:persistent_survival_modifier",
+        "condition:requires_flatline",
+        "condition:requires_prevention_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Flatline replacement, brain-damage removal, meat-damage prevention and persistent penalties are represented without asserting current flatline safety."
+    },
+    {
+      "cardId": "onr_v1_023_evil-twin",
+      "title": "Evil Twin",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/evil-twin.ts",
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:sentry",
+        "effect:damage_prevention",
+        "effect:net_damage_prevention",
+        "effect:brain_damage_prevention",
+        "condition:requires_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker and per-turn net/brain prevention are separate mechanical facts; no current break or prevention legality is generated."
+    },
+    {
       "cardId": "onr_v1_024_expert-schedule-analyzer",
       "title": "Expert Schedule Analyzer",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/expert-schedule-analyzer.ts",
@@ -105,6 +153,21 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Post-access HQ look is mechanically derivable as access-context information; generated facts never contain hidden HQ card identities."
+    },
+    {
+      "cardId": "onr_v1_028_force-shield",
+      "title": "Force Shield",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/force-shield.ts",
+      "expectedDerivableKinds": [
+        "effect:damage_prevention",
+        "effect:net_damage_prevention",
+        "effect:brain_damage_prevention",
+        "condition:requires_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Per-turn net/brain damage prevention is represented as window-limited mechanical prevention, not damage immunity."
     },
     {
       "cardId": "onr_v1_032_i-spy",
@@ -124,6 +187,19 @@
       "expectedDerivableKinds": ["effect:breaker", "breakerCoverage:wall"],
       "expectedManualOverlayNeeded": false,
       "rationale": "Breaker coverage and the forgo_actions side-effect comparison are derivable; future action debt is represented as a structured breaker side effect for the read-only gate."
+    },
+    {
+      "cardId": "onr_v1_038_joan-of-arc",
+      "title": "Joan of Arc",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/joan-of-arc.ts",
+      "expectedDerivableKinds": [
+        "effect:program_trash_prevention",
+        "condition:requires_program_trash",
+        "condition:requires_installed_program",
+        "condition:requires_prevention_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Program-trash prevention is limited to other installed programs and remains payment/window-contextual."
     },
     {
       "cardId": "onr_v1_039_krash",
@@ -207,6 +283,17 @@
       "rationale": "Successful-run access replacement and private R&D look are directly represented."
     },
     {
+      "cardId": "onr_v1_051_rabbit",
+      "title": "Rabbit",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/rabbit.ts",
+      "expectedDerivableKinds": [
+        "effect:trace_defense",
+        "condition:requires_trace_attempt"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace limit reduction is mechanical trace defense; it does not guarantee trace success for the Runner."
+    },
+    {
       "cardId": "onr_v1_052_raffles",
       "title": "Raffles",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/raffles.ts",
@@ -274,6 +361,21 @@
       "rationale": "Sentry breaker coverage and costs are directly represented."
     },
     {
+      "cardId": "onr_v1_061_shield",
+      "title": "Shield",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shield.ts",
+      "expectedDerivableKinds": [
+        "effect:damage_prevention",
+        "effect:net_damage_prevention",
+        "condition:requires_damage",
+        "condition:requires_net_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Per-turn net damage prevention is represented as window-limited mechanical prevention, not damage immunity."
+    },
+    {
       "cardId": "onr_v1_062_shredder-uplink-protocol",
       "title": "Shredder Uplink Protocol",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shredder-uplink-protocol.ts",
@@ -283,6 +385,18 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Archive run access override to successful HQ-run context is mechanically derivable as central access replacement, not normal Archives access."
+    },
+    {
+      "cardId": "onr_v1_063_signpost",
+      "title": "Signpost",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/signpost.ts",
+      "expectedDerivableKinds": [
+        "effect:link",
+        "effect:trace_defense",
+        "condition:requires_trace_attempt"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Post-bid link boost is mechanical trace defense; actual trace outcome remains LegalAction/engine context."
     },
     {
       "cardId": "onr_v1_065_smarteye",
@@ -328,6 +442,14 @@
       "rationale": "Wall breaker coverage and break/pump costs are directly represented in CardImplementation icebreaker abilities."
     },
     {
+      "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+      "title": "Bodyweight Synthetic Blood",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
+      "expectedDerivableKinds": ["effect:draw"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Burst draw is a mechanical hand-refill/survival-adjacent fact without hidden stack identity."
+    },
+    {
       "cardId": "onr_v1_081_custodial-position",
       "title": "Custodial Position",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/custodial-position.ts",
@@ -361,6 +483,71 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "HQ run event and additional HQ access count are mechanically derivable; strategic HQ pressure remains overlay/consumer context."
+    },
+    {
+      "cardId": "onr_v1_116_total-genetic-retrofit",
+      "title": "Total Genetic Retrofit",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/total-genetic-retrofit.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_prevention",
+        "effect:survival_payoff",
+        "condition:requires_runner_tagged",
+        "condition:requires_prevention_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tag removal and next-tag avoidance are represented without asserting the Runner is currently untagged."
+    },
+    {
+      "cardId": "onr_v1_133_militech-mram-chip",
+      "title": "Militech MRAM Chip",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/militech-mram-chip.ts",
+      "expectedDerivableKinds": [
+        "effect:hand_size_modifier",
+        "condition:requires_installed_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Installed hand-size increase is a visible survival modifier; current hand contents remain hidden state."
+    },
+    {
+      "cardId": "onr_v1_134_mram-chip",
+      "title": "MRAM Chip",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/mram-chip.ts",
+      "expectedDerivableKinds": [
+        "effect:hand_size_modifier",
+        "condition:requires_installed_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Installed hand-size increase is a visible survival modifier; current hand contents remain hidden state."
+    },
+    {
+      "cardId": "onr_v1_135_nasuko-cycle",
+      "title": "Nasuko Cycle",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/nasuko-cycle.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_prevention",
+        "condition:requires_prevention_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Paid tag avoidance is mechanical prevention-window context, not a current untagged state."
+    },
+    {
+      "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+      "title": "Crash Everett, Inventive Fixer",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/crash-everett-inventive-fixer.ts",
+      "expectedDerivableKinds": ["effect:draw", "effect:survival_payoff"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Extra draw and choose-trash/top replacement are represented as hand-refill context without hidden stack identity."
+    },
+    {
+      "cardId": "onr_v1_161_fall-guy",
+      "title": "Fall Guy",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/fall-guy.ts",
+      "expectedDerivableKinds": [
+        "effect:tag_prevention",
+        "condition:requires_prevention_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trash-to-avoid-tag is mechanical prevention-window context, not a current untagged state."
     },
     {
       "cardId": "onr_v1_188_ai-chief-financial-officer",

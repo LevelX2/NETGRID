@@ -486,10 +486,90 @@ const BATCH9_CORP_NODES_PRIORITY_POLICY = Object.fromEntries(
   ]),
 );
 
+const BATCH10_RUNNER_SURVIVAL_PRIORITY_POLICY = Object.fromEntries(
+  [
+    [
+      "onr_v1_004_bakdoor",
+      "Base-link and link boost mechanics are derivable, but actual trace outcome remains LegalAction/trace-window context.",
+    ],
+    [
+      "onr_v1_022_emergency-self-construct",
+      "Flatline replacement, brain-damage cleanup and persistent penalties are derivable, but generated facts cannot assert current flatline safety.",
+    ],
+    [
+      "onr_v1_023_evil-twin",
+      "Sentry breaker and net/brain prevention are derivable as separate facts, with break/prevention legality remaining runtime-owned.",
+    ],
+    [
+      "onr_v1_028_force-shield",
+      "Per-turn net/brain damage prevention is derivable, with damage/prevention window and turn-limit context explicit.",
+    ],
+    [
+      "onr_v1_038_joan-of-arc",
+      "Program-trash prevention is derivable, scoped to other installed programs with payment/window context retained.",
+    ],
+    [
+      "onr_v1_051_rabbit",
+      "Trace-limit reduction is derivable as trace defense, but does not guarantee trace success.",
+    ],
+    [
+      "onr_v1_061_shield",
+      "Per-turn net damage prevention is derivable, with damage/prevention window and turn-limit context explicit.",
+    ],
+    [
+      "onr_v1_063_signpost",
+      "Post-bid link boost is derivable as trace defense, while actual trace outcome remains engine-owned.",
+    ],
+    [
+      "onr_v1_079_bodyweight-synthetic-blood",
+      "Burst draw is derivable as hand-refill support without hidden stack identity.",
+    ],
+    [
+      "onr_v1_116_total-genetic-retrofit",
+      "Tag removal and next-tag avoidance are derivable, with tagged-runner and prevention-window context retained.",
+    ],
+    [
+      "onr_v1_133_militech-mram-chip",
+      "Installed hand-size increase is derivable as survival context without hidden hand contents.",
+    ],
+    [
+      "onr_v1_134_mram-chip",
+      "Installed hand-size increase is derivable as survival context without hidden hand contents.",
+    ],
+    [
+      "onr_v1_135_nasuko-cycle",
+      "Paid tag avoidance is derivable, with prevention-window and payment context retained.",
+    ],
+    [
+      "onr_v1_157_crash-everett-inventive-fixer",
+      "Extra draw and choose-trash/top replacement are derivable without hidden stack or grip identity.",
+    ],
+    [
+      "onr_v1_161_fall-guy",
+      "Trash-to-avoid-tag is derivable, with prevention-window and cost context retained.",
+    ],
+  ].map(([cardId, rationale]) => [
+    cardId,
+    {
+      migrationPriority: "P1",
+      migrationRisk: "medium",
+      fieldCategories: [
+        "safe_generated_now",
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+      ],
+      recommendedMigrationBatch: 10,
+      rationale,
+    },
+  ]),
+);
+
 const PRIORITY_POLICY = {
   ...BATCH7_CORP_ICE_PRIORITY_POLICY,
   ...BATCH8_CORP_ECONOMY_PRIORITY_POLICY,
   ...BATCH9_CORP_NODES_PRIORITY_POLICY,
+  ...BATCH10_RUNNER_SURVIVAL_PRIORITY_POLICY,
   "onr_v1_017_deep-thought": {
     migrationPriority: "P2",
     migrationRisk: "medium",
@@ -1366,7 +1446,7 @@ export function buildGeneratedFactMigrationPriorityReport() {
     };
   });
 
-  const batchPlan = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((batch) => ({
+  const batchPlan = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((batch) => ({
     batch,
     title: {
       1: "Scored-agenda and tag/trace/punish generated facts",
@@ -1377,6 +1457,8 @@ export function buildGeneratedFactMigrationPriorityReport() {
       6: "Runner info, central pressure and access replacement",
       7: "Corp ICE longtail, future, trace, damage and ETR",
       8: "Corp economy, operation and advance-burst score conversion support",
+      9: "Corp nodes, assets, ambush and economy remotes",
+      10: "Runner prevention, damage and survival tools",
     }[batch],
     cardIds: cards
       .filter((card) => card.recommendedMigrationBatch === batch)

@@ -68,6 +68,24 @@ const KNOWN_EFFECT_KINDS = new Set([
   "remote_tax",
   "access_punish",
   "ambush",
+  "damage_prevention",
+  "flatline_prevention",
+  "program_trash_prevention",
+  "hardware_trash_prevention",
+  "resource_trash_prevention",
+  "tag_prevention",
+  "trace_defense",
+  "link",
+  "base_link",
+  "remove_brain_damage",
+  "meat_damage_prevention",
+  "net_damage_prevention",
+  "brain_damage_prevention",
+  "hand_size_modifier",
+  "action_penalty",
+  "persistent_survival_modifier",
+  "prevention_replacement",
+  "survival_payoff",
 ]);
 
 const KNOWN_TIMINGS = new Set([
@@ -84,6 +102,10 @@ const KNOWN_TIMINGS = new Set([
   "trace_success",
   "corp_turn",
   "runner_turn",
+  "prevention_window",
+  "damage_window",
+  "flatline_replacement",
+  "trace_window",
 ]);
 
 const KNOWN_SCOPES = new Set([
@@ -100,6 +122,9 @@ const KNOWN_SCOPES = new Set([
   "installed_card",
   "accessed_card",
   "run_path",
+  "installed_program",
+  "trace",
+  "damage",
 ]);
 
 const KNOWN_RESOURCES = new Set([
@@ -115,6 +140,10 @@ const KNOWN_RESOURCES = new Set([
   "counters",
   "strength",
   "subroutines",
+  "net_damage",
+  "meat_damage",
+  "brain_damage",
+  "hand_size",
 ]);
 
 const KNOWN_CONDITIONS = new Set([
@@ -151,6 +180,15 @@ const KNOWN_CONDITIONS = new Set([
   "requires_rezzed_card",
   "requires_runner_draw",
   "requires_runner_pay_or_take_tag",
+  "requires_damage",
+  "requires_net_damage",
+  "requires_meat_damage",
+  "requires_brain_damage",
+  "requires_flatline",
+  "requires_program_trash",
+  "requires_trace_attempt",
+  "requires_prevention_window",
+  "requires_turn_limit_available",
 ]);
 
 const KNOWN_BREAKER_COVERAGES = new Set([
@@ -1360,6 +1398,329 @@ function deriveFromImplementation(card, implementationText, hint) {
       resource: "trash_credits",
       source: "implementation.restrictedHostedCreditSource",
     });
+  }
+
+  if (/damagePreventionSources:\s*\[/.test(implementationText)) {
+    const damageTypes = [
+      ...new Set([
+        ...(/damageTypes:\s*\[[\s\S]*?"net"/.test(implementationText)
+          ? ["net"]
+          : []),
+        ...(/damageTypes:\s*\[[\s\S]*?"core"/.test(implementationText)
+          ? ["brain"]
+          : []),
+        ...(/damageTypes:\s*\[[\s\S]*?"meat"/.test(implementationText)
+          ? ["meat"]
+          : []),
+      ]),
+    ].sort();
+    const preventionAmount = amountNear(
+      implementationText,
+      "damage_prevention",
+    );
+    addEffect(facts, {
+      kind: "damage_prevention",
+      timing: "prevention_window",
+      scope: "runner",
+      resource: "damage",
+      amount: preventionAmount,
+      damageTypes,
+      perTurnLimit: propertyNumber(implementationText, "amount"),
+      source: "implementation.damagePreventionSources",
+    });
+    if (damageTypes.includes("net")) {
+      addEffect(facts, {
+        kind: "net_damage_prevention",
+        timing: "prevention_window",
+        scope: "runner",
+        resource: "net_damage",
+        amount: preventionAmount,
+        perTurnLimit: propertyNumber(implementationText, "amount"),
+        source: "implementation.damagePreventionSources.damageTypes.net",
+      });
+      addCondition(facts, {
+        kind: "requires_net_damage",
+        source: "implementation.damagePreventionSources.damageTypes.net",
+      });
+    }
+    if (damageTypes.includes("brain")) {
+      addEffect(facts, {
+        kind: "brain_damage_prevention",
+        timing: "prevention_window",
+        scope: "runner",
+        resource: "brain_damage",
+        amount: preventionAmount,
+        perTurnLimit: propertyNumber(implementationText, "amount"),
+        source: "implementation.damagePreventionSources.damageTypes.core",
+      });
+      addCondition(facts, {
+        kind: "requires_brain_damage",
+        source: "implementation.damagePreventionSources.damageTypes.core",
+      });
+    }
+    if (damageTypes.includes("meat")) {
+      addEffect(facts, {
+        kind: "meat_damage_prevention",
+        timing: "prevention_window",
+        scope: "runner",
+        resource: "meat_damage",
+        amount: preventionAmount,
+        perTurnLimit: propertyNumber(implementationText, "amount"),
+        source: "implementation.damagePreventionSources.damageTypes.meat",
+      });
+      addCondition(facts, {
+        kind: "requires_meat_damage",
+        source: "implementation.damagePreventionSources.damageTypes.meat",
+      });
+    }
+    addCondition(facts, {
+      kind: "requires_damage",
+      source: "implementation.damagePreventionSources",
+    });
+    addCondition(facts, {
+      kind: "requires_prevention_window",
+      source: "implementation.damagePreventionSources",
+    });
+    addCondition(facts, {
+      kind: "requires_turn_limit_available",
+      source: "implementation.damagePreventionSources.limit.per_turn",
+    });
+    facts.derivationNotes.push(
+      "Damage prevention is represented as event-window and per-turn-limit context only; generated facts do not imply current damage immunity.",
+    );
+  }
+
+  if (/flatlineReplacementSources:\s*\[/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "flatline_prevention",
+      timing: "flatline_replacement",
+      scope: "runner",
+      resource: "damage",
+      source: "implementation.flatlineReplacementSources",
+    });
+    addEffect(facts, {
+      kind: "prevention_replacement",
+      timing: "flatline_replacement",
+      scope: "runner",
+      resource: "damage",
+      source: "implementation.flatlineReplacementSources",
+    });
+    if (/emergency_self_construct/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "remove_brain_damage",
+        timing: "flatline_replacement",
+        scope: "runner",
+        resource: "brain_damage",
+        source:
+          "implementation.flatlineReplacementSources.emergency_self_construct",
+      });
+      addEffect(facts, {
+        kind: "meat_damage_prevention",
+        timing: "persistent",
+        scope: "runner",
+        resource: "meat_damage",
+        source:
+          "implementation.flatlineReplacementSources.emergency_self_construct",
+      });
+      addEffect(facts, {
+        kind: "action_penalty",
+        timing: "persistent",
+        scope: "runner",
+        resource: "actions",
+        amount: 1,
+        source:
+          "implementation.flatlineReplacementSources.emergency_self_construct",
+      });
+      addEffect(facts, {
+        kind: "hand_size_modifier",
+        timing: "persistent",
+        scope: "runner",
+        resource: "hand_size",
+        amount: -1,
+        source:
+          "implementation.flatlineReplacementSources.emergency_self_construct",
+      });
+      addEffect(facts, {
+        kind: "persistent_survival_modifier",
+        timing: "persistent",
+        scope: "runner",
+        source:
+          "implementation.flatlineReplacementSources.emergency_self_construct",
+      });
+    }
+    addCondition(facts, {
+      kind: "requires_flatline",
+      source: "implementation.flatlineReplacementSources",
+    });
+    addCondition(facts, {
+      kind: "requires_prevention_window",
+      source: "implementation.flatlineReplacementSources",
+    });
+    facts.derivationNotes.push(
+      "Flatline replacement is represented as a replacement-window fact only; generated facts do not assert the Runner is currently safe from flatline.",
+    );
+  }
+
+  if (/trashPreventionSources:\s*\[/.test(implementationText)) {
+    if (/protectsCardTypes:\s*\[[\s\S]*?"program"/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "program_trash_prevention",
+        timing: "prevention_window",
+        scope: "installed_program",
+        source:
+          "implementation.trashPreventionSources.protectsCardTypes.program",
+      });
+      addCondition(facts, {
+        kind: "requires_installed_program",
+        source:
+          "implementation.trashPreventionSources.protectsCardTypes.program",
+      });
+    }
+    addCondition(facts, {
+      kind: "requires_program_trash",
+      source: "implementation.trashPreventionSources",
+    });
+    addCondition(facts, {
+      kind: "requires_prevention_window",
+      source: "implementation.trashPreventionSources",
+    });
+    facts.derivationNotes.push(
+      "Program-trash prevention is target- and window-context only; costs and target selection stay LegalAction/engine-owned.",
+    );
+  }
+
+  if (/tagPreventionSources:\s*\[/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "tag_prevention",
+      timing: "prevention_window",
+      scope: "runner",
+      resource: "tags",
+      amount: amountNear(implementationText, "avoid_tag"),
+      source: "implementation.tagPreventionSources",
+    });
+    addCondition(facts, {
+      kind: "requires_prevention_window",
+      source: "implementation.tagPreventionSources",
+    });
+    facts.derivationNotes.push(
+      "Tag prevention is represented as tag-window context only; generated facts do not assert the Runner is untagged.",
+    );
+  }
+
+  if (/kind:\s*"avoid_next_tag"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "tag_prevention",
+      timing: "prevention_window",
+      scope: "runner",
+      resource: "tags",
+      amount: amountNear(implementationText, "avoid_next_tag"),
+      source: "implementation.effect.avoid_next_tag",
+    });
+    addCondition(facts, {
+      kind: "requires_runner_tagged",
+      source: "implementation.condition.runner_is_tagged",
+    });
+    addCondition(facts, {
+      kind: "requires_prevention_window",
+      source: "implementation.effect.avoid_next_tag",
+    });
+  }
+
+  if (/kind:\s*"remove_tags"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "survival_payoff",
+      timing: "action",
+      scope: "runner",
+      resource: "tags",
+      source: "implementation.effect.remove_tags",
+    });
+  }
+
+  if (/kind:\s*"use_base_link"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "base_link",
+      timing: "trace_window",
+      scope: "trace",
+      resource: "link",
+      amount: propertyNumber(implementationText, "baseLink"),
+      source: "implementation.effect.use_base_link",
+    });
+    addEffect(facts, {
+      kind: "trace_defense",
+      timing: "trace_window",
+      scope: "trace",
+      resource: "link",
+      amount: propertyNumber(implementationText, "baseLink"),
+      source: "implementation.effect.use_base_link",
+    });
+    addCondition(facts, {
+      kind: "requires_trace_attempt",
+      source: "implementation.ability.timing.trace_base_link_window",
+    });
+  }
+
+  if (/kind:\s*"increase_trace_link"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "link",
+      timing: "trace_window",
+      scope: "trace",
+      resource: "link",
+      amount: amountNear(implementationText, "increase_trace_link"),
+      source: "implementation.effect.increase_trace_link",
+    });
+    addEffect(facts, {
+      kind: "trace_defense",
+      timing: "trace_window",
+      scope: "trace",
+      resource: "link",
+      amount: amountNear(implementationText, "increase_trace_link"),
+      source: "implementation.effect.increase_trace_link",
+    });
+    addCondition(facts, {
+      kind: "requires_trace_attempt",
+      source: "implementation.ability.timing.trace_post_bid_link_window",
+    });
+  }
+
+  if (/rabbit_ice_trace_limit_reduction/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "trace_defense",
+      timing: "trace_window",
+      scope: "trace",
+      resource: "link",
+      amount: propertyNumber(implementationText, "amount"),
+      source:
+        "implementation.runnerUtilityLongtail.rabbit_ice_trace_limit_reduction",
+    });
+    addCondition(facts, {
+      kind: "requires_trace_attempt",
+      source:
+        "implementation.runnerUtilityLongtail.rabbit_ice_trace_limit_reduction",
+    });
+  }
+
+  if (/crash_everett_draw_extra_choose_trash_or_top/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "draw",
+      timing: "persistent",
+      scope: "runner",
+      resource: "cards",
+      amount: propertyNumber(implementationText, "extraDraw"),
+      source:
+        "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top",
+    });
+    addEffect(facts, {
+      kind: "survival_payoff",
+      timing: "persistent",
+      scope: "runner",
+      resource: "cards",
+      amount: propertyNumber(implementationText, "extraDraw"),
+      source:
+        "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top",
+    });
+    facts.derivationNotes.push(
+      "Crash Everett extra draw and choose-trash/top replacement are represented without hidden hand or stack identities.",
+    );
   }
 
   if (
@@ -2683,19 +3044,34 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (/kind:\s*"hand_size"/.test(implementationText)) {
-    addEffect(facts, {
-      kind: "remote_protection",
-      timing: "persistent",
-      scope: "corp",
-      resource: "cards",
-      amount: amountNear(implementationText, "hand_size"),
-      source: "implementation.modifiers.hand_size",
-    });
-    if (expectsKind("condition:requires_rezzed_card")) {
-      addCondition(facts, {
-        kind: "requires_rezzed_card",
+    if (hint?.side === "runner") {
+      addEffect(facts, {
+        kind: "hand_size_modifier",
+        timing: "persistent",
+        scope: "runner",
+        resource: "hand_size",
+        amount: amountNear(implementationText, "hand_size"),
         source: "implementation.modifiers.hand_size",
       });
+      addCondition(facts, {
+        kind: "requires_installed_card",
+        source: "implementation.modifiers.hand_size",
+      });
+    } else {
+      addEffect(facts, {
+        kind: "remote_protection",
+        timing: "persistent",
+        scope: "corp",
+        resource: "cards",
+        amount: amountNear(implementationText, "hand_size"),
+        source: "implementation.modifiers.hand_size",
+      });
+      if (expectsKind("condition:requires_rezzed_card")) {
+        addCondition(facts, {
+          kind: "requires_rezzed_card",
+          source: "implementation.modifiers.hand_size",
+        });
+      }
     }
   }
 

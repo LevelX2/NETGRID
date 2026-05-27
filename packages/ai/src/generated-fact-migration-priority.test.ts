@@ -43,19 +43,19 @@ describe("generated fact migration priority report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("prioritizes all 160 compiled generated-fact candidates", () => {
+  it("prioritizes all 175 compiled generated-fact candidates", () => {
     const report = readReport();
     expect(report.taskId).toBe("Aufgabe 002");
-    expect(report.candidateCount).toBe(160);
+    expect(report.candidateCount).toBe(175);
     expect(report.priorityCounts).toEqual({
       P0: 13,
-      P1: 143,
+      P1: 158,
       P2: 4,
       P3: 0,
     });
     expect(report.riskCounts).toEqual({
       low: 29,
-      medium: 131,
+      medium: 146,
       high: 0,
     });
   });
@@ -63,7 +63,7 @@ describe("generated fact migration priority report", () => {
   it("keeps strategic and compatibility fields out of generated migration", () => {
     const report = readReport();
     expect(report.fieldCategoryCounts.overlay_only).toBe(6);
-    expect(report.fieldCategoryCounts.legacy_keep_for_compat).toBe(160);
+    expect(report.fieldCategoryCounts.legacy_keep_for_compat).toBe(175);
     for (const card of report.cards) {
       expect(card.doNotMigrateFields).toContain("aiSupportStatus");
       expect(card.doNotMigrateFields).toContain("roles");
@@ -86,7 +86,7 @@ describe("generated fact migration priority report", () => {
   it("orders the later migration batches without changing runtime sources", () => {
     const report = readReport();
     expect(report.batchPlan.map((batch) => batch.cardIds.length)).toEqual([
-      11, 6, 2, 3, 26, 13, 24, 30, 45,
+      11, 6, 2, 3, 26, 13, 24, 30, 45, 15,
     ]);
     expect(
       report.cards
@@ -112,6 +112,24 @@ describe("generated fact migration priority report", () => {
       report.cards
         .filter((card) => card.recommendedMigrationBatch === 9)
         .every((card) => card.rationale.length > 20),
+    ).toBe(true);
+    expect(
+      report.cards
+        .filter((card) => card.recommendedMigrationBatch === 10)
+        .every((card) =>
+          card.generatedMechanicalFacts.some((fact) =>
+            [
+              "effect:damage_prevention",
+              "effect:flatline_prevention",
+              "effect:program_trash_prevention",
+              "effect:trace_defense",
+              "effect:tag_prevention",
+              "effect:hand_size_modifier",
+              "effect:draw",
+              "effect:survival_payoff",
+            ].includes(fact),
+          ),
+        ),
     ).toBe(true);
     expect(report.cards.every((card) => card.generatedFields.length > 0)).toBe(
       true,

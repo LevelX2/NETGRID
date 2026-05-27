@@ -336,4 +336,58 @@ describe("AI hint ontology validation", () => {
     });
     expect(result.errors).toEqual([]);
   });
+
+  it("accepts read-only generated Runner prevention and survival kinds", () => {
+    const result = validateAiHintOntologyFields({
+      effects: [
+        {
+          kind: "damage_prevention",
+          timing: "prevention_window",
+          scope: "runner",
+          resource: "damage",
+          amount: 2,
+        },
+        {
+          kind: "flatline_prevention",
+          timing: "flatline_replacement",
+          scope: "runner",
+          resource: "damage",
+        },
+        {
+          kind: "program_trash_prevention",
+          timing: "prevention_window",
+          scope: "installed_program",
+        },
+        {
+          kind: "tag_prevention",
+          timing: "prevention_window",
+          scope: "runner",
+          resource: "tags",
+        },
+        { kind: "trace_defense", timing: "trace_window", scope: "trace" },
+        { kind: "base_link", timing: "trace_window", scope: "trace" },
+        {
+          kind: "hand_size_modifier",
+          timing: "persistent",
+          scope: "runner",
+          resource: "hand_size",
+        },
+        {
+          kind: "action_penalty",
+          timing: "persistent",
+          scope: "runner",
+          resource: "actions",
+        },
+      ],
+      conditions: [
+        { kind: "requires_damage" },
+        { kind: "requires_flatline" },
+        { kind: "requires_program_trash" },
+        { kind: "requires_trace_attempt" },
+        { kind: "requires_prevention_window" },
+        { kind: "requires_turn_limit_available" },
+      ],
+    });
+    expect(result.errors).toEqual([]);
+  });
 });

@@ -68,11 +68,11 @@ describe("compiled hint index pilot report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("compiles the full 160-card derived facts pilot without hard errors", () => {
+  it("compiles the full 175-card derived facts pilot without hard errors", () => {
     const report = readReport();
-    expect(report.compiledCardCount).toBe(160);
+    expect(report.compiledCardCount).toBe(175);
     expect(report.overlayCardCount).toBe(6);
-    expect(report.cardsWithoutOverlay).toBe(154);
+    expect(report.cardsWithoutOverlay).toBe(169);
     expect(report.hardErrorCount).toBe(0);
     expect(report.source.activeHintsPath).toBe(
       "data/ai/ai-card-hints-active.json",
@@ -93,7 +93,7 @@ describe("compiled hint index pilot report", () => {
       6,
     );
     expect(report.cards.filter((card) => !card.manualOverlayFound).length).toBe(
-      154,
+      169,
     );
   });
 
@@ -140,9 +140,9 @@ describe("compiled hint index pilot report", () => {
   it("keeps missing overlays non-fatal when the pilot card does not need one", () => {
     const report = readReport();
     expect(report.warningCountsByKind.overlay_missing_for_manual_gap ?? 0).toBe(
-      101,
+      115,
     );
-    expect(report.infoCounts.info_no_overlay_needed).toBe(53);
+    expect(report.infoCounts.info_no_overlay_needed).toBe(54);
     expect(
       report.cards
         .filter((card) => !card.manualOverlayFound)
@@ -164,11 +164,11 @@ describe("compiled hint index pilot report", () => {
 
   it("classifies compiled-index warnings into non-blocking comparison groups", () => {
     const report = readReport();
-    expect(report.warningCount).toBe(547);
+    expect(report.warningCount).toBe(591);
     expect(report.warningClassificationCounts).toEqual({
-      generated_fact_absent_from_monolith: 275,
-      manual_review_candidate: 101,
-      monolith_mechanical_duplication_candidate: 165,
+      generated_fact_absent_from_monolith: 304,
+      manual_review_candidate: 115,
+      monolith_mechanical_duplication_candidate: 166,
       overlay_strategy_field_not_in_monolith: 6,
     });
     expect(
@@ -197,9 +197,9 @@ describe("compiled hint index pilot report", () => {
         field: "strategicNotes",
       }),
     );
-    expect(report.migrationCandidates.length).toBe(160);
-    expect(report.generatedFactCandidates.length).toBe(160);
-    expect(report.overlayCandidates.length).toBe(101);
+    expect(report.migrationCandidates.length).toBe(175);
+    expect(report.generatedFactCandidates.length).toBe(175);
+    expect(report.overlayCandidates.length).toBe(115);
     expect(
       report.overlayCandidates.map((candidate) => candidate.cardId),
     ).toEqual(
@@ -266,6 +266,7 @@ function runGateJson(): CompiledIndexReport {
       {
         cwd: repoRoot,
         encoding: "utf8",
+        maxBuffer: 8 * 1024 * 1024,
       },
     ),
   ) as CompiledIndexReport;

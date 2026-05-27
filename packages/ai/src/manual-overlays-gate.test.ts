@@ -91,7 +91,7 @@ describe("manual overlay pilot gate report", () => {
   it("keeps overlays free of runtime, hidden-info, and duplicated mechanical facts", () => {
     const report = readReport();
     expect(report.hardErrorCount).toBe(0);
-    expect(report.warningCount).toBe(16);
+    expect(report.warningCount).toBe(24);
     expect(
       report.cards.every((card) => card.hiddenInfoErrors.length === 0),
     ).toBe(true);

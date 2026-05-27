@@ -52,6 +52,24 @@ export const KNOWN_HINT_EFFECT_KINDS = [
   "remote_tax",
   "access_punish",
   "ambush",
+  "damage_prevention",
+  "flatline_prevention",
+  "program_trash_prevention",
+  "hardware_trash_prevention",
+  "resource_trash_prevention",
+  "tag_prevention",
+  "trace_defense",
+  "link",
+  "base_link",
+  "remove_brain_damage",
+  "meat_damage_prevention",
+  "net_damage_prevention",
+  "brain_damage_prevention",
+  "hand_size_modifier",
+  "action_penalty",
+  "persistent_survival_modifier",
+  "prevention_replacement",
+  "survival_payoff",
 ] as const;
 
 export const KNOWN_HINT_EFFECT_TIMINGS = [
@@ -68,6 +86,10 @@ export const KNOWN_HINT_EFFECT_TIMINGS = [
   "trace_success",
   "corp_turn",
   "runner_turn",
+  "prevention_window",
+  "damage_window",
+  "flatline_replacement",
+  "trace_window",
 ] as const;
 
 export const KNOWN_HINT_EFFECT_SCOPES = [
@@ -84,6 +106,9 @@ export const KNOWN_HINT_EFFECT_SCOPES = [
   "installed_card",
   "accessed_card",
   "run_path",
+  "installed_program",
+  "trace",
+  "damage",
 ] as const;
 
 export const KNOWN_HINT_EFFECT_RESOURCES = [
@@ -99,6 +124,10 @@ export const KNOWN_HINT_EFFECT_RESOURCES = [
   "counters",
   "strength",
   "subroutines",
+  "net_damage",
+  "meat_damage",
+  "brain_damage",
+  "hand_size",
 ] as const;
 
 export const KNOWN_HINT_CONDITION_KINDS = [
@@ -135,6 +164,15 @@ export const KNOWN_HINT_CONDITION_KINDS = [
   "requires_rezzed_card",
   "requires_runner_draw",
   "requires_runner_pay_or_take_tag",
+  "requires_damage",
+  "requires_net_damage",
+  "requires_meat_damage",
+  "requires_brain_damage",
+  "requires_flatline",
+  "requires_program_trash",
+  "requires_trace_attempt",
+  "requires_prevention_window",
+  "requires_turn_limit_available",
 ] as const;
 
 export const KNOWN_HINT_COST_RISKS = ["low", "medium", "high"] as const;

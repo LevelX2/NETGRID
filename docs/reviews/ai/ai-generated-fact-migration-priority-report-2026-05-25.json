@@ -14,23 +14,23 @@
     "activeHints": "data/ai/ai-card-hints-active.json"
   },
   "mode": "read-only prioritization; no active hint migration, no runtime compile, no planner or consumer binding",
-  "candidateCount": 160,
+  "candidateCount": 175,
   "priorityCounts": {
     "P0": 13,
-    "P1": 143,
+    "P1": 158,
     "P2": 4,
     "P3": 0
   },
   "fieldCategoryCounts": {
-    "generated_with_board_context": 155,
-    "generated_with_descriptor_limitations": 117,
-    "legacy_keep_for_compat": 160,
+    "generated_with_board_context": 170,
+    "generated_with_descriptor_limitations": 132,
+    "legacy_keep_for_compat": 175,
     "overlay_only": 6,
-    "safe_generated_now": 153
+    "safe_generated_now": 168
   },
   "riskCounts": {
     "low": 29,
-    "medium": 131,
+    "medium": 146,
     "high": 0
   },
   "batchPlan": [
@@ -199,6 +199,7 @@
     },
     {
       "batch": 9,
+      "title": "Corp nodes, assets, ambush and economy remotes",
       "cardIds": [
         "onr_v1_286_corporate-detective-agency",
         "onr_v1_287_datapool-by-zetatech",
@@ -246,6 +247,27 @@
         "onr_v1_368_roving-submarine",
         "onr_v1_369_singapore-city-grid"
       ]
+    },
+    {
+      "batch": 10,
+      "title": "Runner prevention, damage and survival tools",
+      "cardIds": [
+        "onr_v1_004_bakdoor",
+        "onr_v1_022_emergency-self-construct",
+        "onr_v1_023_evil-twin",
+        "onr_v1_028_force-shield",
+        "onr_v1_038_joan-of-arc",
+        "onr_v1_051_rabbit",
+        "onr_v1_061_shield",
+        "onr_v1_063_signpost",
+        "onr_v1_079_bodyweight-synthetic-blood",
+        "onr_v1_116_total-genetic-retrofit",
+        "onr_v1_133_militech-mram-chip",
+        "onr_v1_134_mram-chip",
+        "onr_v1_135_nasuko-cycle",
+        "onr_v1_157_crash-everett-inventive-fixer",
+        "onr_v1_161_fall-guy"
+      ]
     }
   ],
   "cards": [
@@ -285,6 +307,49 @@
         "valueHints"
       ],
       "derivedRationale": "Sentry breaker coverage and random run-start strength context are directly represented."
+    },
+    {
+      "cardId": "onr_v1_004_bakdoor",
+      "title": "Bakdoor",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_trace_attempt",
+        "effect:base_link",
+        "effect:link",
+        "effect:trace_defense"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Base-link and link boost mechanics are derivable, but actual trace outcome remains LegalAction/trace-window context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Base-link and trace-window link boost are mechanical trace-defense facts; actual trace outcome remains LegalAction/engine context."
     },
     {
       "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
@@ -594,6 +659,103 @@
       "derivedRationale": "Universal breaker coverage and ends-run side effect are directly represented; catalog title uses the printed trademark suffix."
     },
     {
+      "cardId": "onr_v1_022_emergency-self-construct",
+      "title": "Emergency Self-Construct",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_flatline",
+        "condition:requires_prevention_window",
+        "effect:action_penalty",
+        "effect:flatline_prevention",
+        "effect:hand_size_modifier",
+        "effect:meat_damage_prevention",
+        "effect:persistent_survival_modifier",
+        "effect:prevention_replacement",
+        "effect:remove_brain_damage"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Flatline replacement, brain-damage cleanup and persistent penalties are derivable, but generated facts cannot assert current flatline safety.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Flatline replacement, brain-damage removal, meat-damage prevention and persistent penalties are represented without asserting current flatline safety."
+    },
+    {
+      "cardId": "onr_v1_023_evil-twin",
+      "title": "Evil Twin",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["breakerProfile", "conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "breakerProfile",
+        "condition:requires_brain_damage",
+        "condition:requires_damage",
+        "condition:requires_net_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available",
+        "effect:brain_damage_prevention",
+        "effect:breaker",
+        "effect:damage_prevention",
+        "effect:net_damage_prevention"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["breakerProfile", "conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Sentry breaker and net/brain prevention are derivable as separate facts, with break/prevention legality remaining runtime-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Sentry breaker and per-turn net/brain prevention are separate mechanical facts; no current break or prevention legality is generated."
+    },
+    {
       "cardId": "onr_v1_024_expert-schedule-analyzer",
       "title": "Expert Schedule Analyzer",
       "side": "runner",
@@ -633,6 +795,53 @@
         "valueHints"
       ],
       "derivedRationale": "Post-access HQ look is mechanically derivable as access-context information; generated facts never contain hidden HQ card identities."
+    },
+    {
+      "cardId": "onr_v1_028_force-shield",
+      "title": "Force Shield",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_brain_damage",
+        "condition:requires_damage",
+        "condition:requires_net_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available",
+        "effect:brain_damage_prevention",
+        "effect:damage_prevention",
+        "effect:net_damage_prevention"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Per-turn net/brain damage prevention is derivable, with damage/prevention window and turn-limit context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Per-turn net/brain damage prevention is represented as window-limited mechanical prevention, not damage immunity."
     },
     {
       "cardId": "onr_v1_032_i-spy",
@@ -715,6 +924,49 @@
         "valueHints"
       ],
       "derivedRationale": "Breaker coverage and the forgo_actions side-effect comparison are derivable; future action debt is represented as a structured breaker side effect for the read-only gate."
+    },
+    {
+      "cardId": "onr_v1_038_joan-of-arc",
+      "title": "Joan of Arc",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_installed_program",
+        "condition:requires_prevention_window",
+        "condition:requires_program_trash",
+        "effect:program_trash_prevention"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Program-trash prevention is derivable, scoped to other installed programs with payment/window context retained.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Program-trash prevention is limited to other installed programs and remains payment/window-contextual."
     },
     {
       "cardId": "onr_v1_039_krash",
@@ -1027,6 +1279,47 @@
       "derivedRationale": "Successful-run access replacement and private R&D look are directly represented."
     },
     {
+      "cardId": "onr_v1_051_rabbit",
+      "title": "Rabbit",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_trace_attempt",
+        "effect:trace_defense"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Trace-limit reduction is derivable as trace defense, but does not guarantee trace success.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trace limit reduction is mechanical trace defense; it does not guarantee trace success for the Runner."
+    },
+    {
       "cardId": "onr_v1_052_raffles",
       "title": "Raffles",
       "side": "runner",
@@ -1329,6 +1622,51 @@
       "derivedRationale": "Sentry breaker coverage and costs are directly represented."
     },
     {
+      "cardId": "onr_v1_061_shield",
+      "title": "Shield",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_damage",
+        "condition:requires_net_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available",
+        "effect:damage_prevention",
+        "effect:net_damage_prevention"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Per-turn net damage prevention is derivable, with damage/prevention window and turn-limit context explicit.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Per-turn net damage prevention is represented as window-limited mechanical prevention, not damage immunity."
+    },
+    {
       "cardId": "onr_v1_062_shredder-uplink-protocol",
       "title": "Shredder Uplink Protocol",
       "side": "runner",
@@ -1368,6 +1706,48 @@
         "valueHints"
       ],
       "derivedRationale": "Archive run access override to successful HQ-run context is mechanically derivable as central access replacement, not normal Archives access."
+    },
+    {
+      "cardId": "onr_v1_063_signpost",
+      "title": "Signpost",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_trace_attempt",
+        "effect:link",
+        "effect:trace_defense"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Post-bid link boost is derivable as trace defense, while actual trace outcome remains engine-owned.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Post-bid link boost is mechanical trace defense; actual trace outcome remains LegalAction/engine context."
     },
     {
       "cardId": "onr_v1_065_smarteye",
@@ -1559,6 +1939,44 @@
       "derivedRationale": "Wall breaker coverage and break/pump costs are directly represented in CardImplementation icebreaker abilities."
     },
     {
+      "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+      "title": "Bodyweight Synthetic Blood",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:draw"],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Burst draw is derivable as hand-refill support without hidden stack identity.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Burst draw is a mechanical hand-refill/survival-adjacent fact without hidden stack identity."
+    },
+    {
       "cardId": "onr_v1_081_custodial-position",
       "title": "Custodial Position",
       "side": "runner",
@@ -1680,6 +2098,251 @@
         "valueHints"
       ],
       "derivedRationale": "HQ run event and additional HQ access count are mechanically derivable; strategic HQ pressure remains overlay/consumer context."
+    },
+    {
+      "cardId": "onr_v1_116_total-genetic-retrofit",
+      "title": "Total Genetic Retrofit",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_prevention_window",
+        "condition:requires_runner_tagged",
+        "effect:survival_payoff",
+        "effect:tag_prevention"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Tag removal and next-tag avoidance are derivable, with tagged-runner and prevention-window context retained.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Tag removal and next-tag avoidance are represented without asserting the Runner is currently untagged."
+    },
+    {
+      "cardId": "onr_v1_133_militech-mram-chip",
+      "title": "Militech MRAM Chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_installed_card",
+        "effect:hand_size_modifier"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Installed hand-size increase is derivable as survival context without hidden hand contents.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Installed hand-size increase is a visible survival modifier; current hand contents remain hidden state."
+    },
+    {
+      "cardId": "onr_v1_134_mram-chip",
+      "title": "MRAM Chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_installed_card",
+        "effect:hand_size_modifier"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Installed hand-size increase is derivable as survival context without hidden hand contents.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Installed hand-size increase is a visible survival modifier; current hand contents remain hidden state."
+    },
+    {
+      "cardId": "onr_v1_135_nasuko-cycle",
+      "title": "Nasuko Cycle",
+      "side": "runner",
+      "cardType": "hardware",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_prevention_window",
+        "effect:tag_prevention"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Paid tag avoidance is derivable, with prevention-window and payment context retained.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Paid tag avoidance is mechanical prevention-window context, not a current untagged state."
+    },
+    {
+      "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+      "title": "Crash Everett, Inventive Fixer",
+      "side": "runner",
+      "cardType": "resource",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:draw", "effect:survival_payoff"],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Extra draw and choose-trash/top replacement are derivable without hidden stack or grip identity.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Extra draw and choose-trash/top replacement are represented as hand-refill context without hidden stack identity."
+    },
+    {
+      "cardId": "onr_v1_161_fall-guy",
+      "title": "Fall Guy",
+      "side": "runner",
+      "cardType": "resource",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_prevention_window",
+        "effect:tag_prevention"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 10,
+      "rationale": "Trash-to-avoid-tag is derivable, with prevention-window and cost context retained.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trash-to-avoid-tag is mechanical prevention-window context, not a current untagged state."
     },
     {
       "cardId": "onr_v1_188_ai-chief-financial-officer",

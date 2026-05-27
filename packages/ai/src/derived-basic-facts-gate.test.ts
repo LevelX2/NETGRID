@@ -66,13 +66,13 @@ describe("derived basic facts gate report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("keeps the 160-card pilot complete", () => {
+  it("keeps the 175-card pilot complete", () => {
     const report = readReport();
-    expect(report.pilotCardCount).toBe(160);
-    expect(report.implementationFoundCount).toBe(160);
-    expect(report.cardsWithDerivedFacts).toBe(160);
-    expect(report.cardsWithManualOntologyOverlap).toBe(86);
-    expect(report.cardsNeedingManualOverlay).toBe(104);
+    expect(report.pilotCardCount).toBe(175);
+    expect(report.implementationFoundCount).toBe(175);
+    expect(report.cardsWithDerivedFacts).toBe(175);
+    expect(report.cardsWithManualOntologyOverlap).toBe(87);
+    expect(report.cardsNeedingManualOverlay).toBe(118);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
       report.cards.every(
@@ -407,6 +407,51 @@ describe("derived basic facts gate report", () => {
         kind: "counter_economy",
         timing: "scored_activated",
       }),
+    );
+
+    const emergencySelfConstruct = cardById(
+      report,
+      "onr_v1_022_emergency-self-construct",
+    );
+    expect(emergencySelfConstruct.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "flatline_prevention" }),
+        expect.objectContaining({ kind: "prevention_replacement" }),
+        expect.objectContaining({ kind: "remove_brain_damage" }),
+        expect.objectContaining({ kind: "meat_damage_prevention" }),
+        expect.objectContaining({ kind: "action_penalty" }),
+        expect.objectContaining({ kind: "hand_size_modifier" }),
+      ]),
+    );
+
+    const joanOfArc = cardById(report, "onr_v1_038_joan-of-arc");
+    expect(joanOfArc.derivedFacts.effects).toContainEqual(
+      expect.objectContaining({ kind: "program_trash_prevention" }),
+    );
+    expect(joanOfArc.derivedFacts.conditions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "requires_program_trash" }),
+        expect.objectContaining({ kind: "requires_installed_program" }),
+      ]),
+    );
+
+    const shield = cardById(report, "onr_v1_061_shield");
+    expect(shield.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "damage_prevention" }),
+        expect.objectContaining({ kind: "net_damage_prevention" }),
+      ]),
+    );
+    expect(shield.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_turn_limit_available" }),
+    );
+
+    const bakdoor = cardById(report, "onr_v1_004_bakdoor");
+    expect(bakdoor.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "base_link" }),
+        expect.objectContaining({ kind: "trace_defense" }),
+      ]),
     );
   });
 

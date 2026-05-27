@@ -6,45 +6,58 @@
     "pilotCardsPath": "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json",
     "derivationMode": "read-only CardImplementation text/descriptor scan; no runtime, planner, or strategy consumption"
   },
-  "pilotCardCount": 160,
-  "implementationFoundCount": 160,
-  "cardsWithDerivedFacts": 160,
-  "cardsWithManualOntologyOverlap": 86,
-  "cardsNeedingManualOverlay": 104,
+  "pilotCardCount": 175,
+  "implementationFoundCount": 175,
+  "cardsWithDerivedFacts": 175,
+  "cardsWithManualOntologyOverlap": 87,
+  "cardsNeedingManualOverlay": 118,
   "effectKindCounts": {
     "access_punish": 5,
     "access_replacement": 3,
     "action_economy": 4,
+    "action_penalty": 1,
     "advance_burst": 3,
     "advanceable_economy": 6,
     "agenda_reveal_economy": 1,
     "ambush": 5,
-    "breaker": 20,
+    "base_link": 1,
+    "brain_damage_prevention": 2,
+    "breaker": 21,
     "card_recovery": 1,
     "counter_economy": 14,
     "damage": 19,
-    "draw": 7,
+    "damage_prevention": 3,
+    "draw": 9,
     "economy": 17,
     "etr": 11,
     "expose_info": 4,
     "extra_action": 6,
     "finite_economy_pool": 8,
+    "flatline_prevention": 1,
     "future_encounter_effect": 9,
     "future_run_effect": 8,
     "global_modifier": 9,
+    "hand_size_modifier": 3,
     "hardware_trash": 4,
     "hq_info": 2,
     "install": 2,
     "install_discount": 3,
+    "link": 2,
     "link_penalty": 1,
+    "meat_damage_prevention": 1,
     "multiaccess": 2,
+    "net_damage_prevention": 3,
     "no_jack_out": 2,
     "persistent_counter_effect": 5,
+    "persistent_survival_modifier": 1,
+    "prevention_replacement": 1,
     "program_trash": 5,
+    "program_trash_prevention": 1,
     "recurring_economy": 4,
     "remote_build": 1,
     "remote_protection": 26,
     "remote_tax": 4,
+    "remove_brain_damage": 1,
     "resource_trash": 1,
     "rez": 2,
     "rez_discount": 7,
@@ -55,12 +68,15 @@
     "search": 2,
     "shuffle_draw": 1,
     "start_of_turn_economy": 3,
+    "survival_payoff": 2,
     "tag": 1,
+    "tag_prevention": 3,
     "tag_punish_payoff": 10,
     "tag_source": 14,
     "topdeck_info": 6,
     "trace": 17,
     "trace_credit": 2,
+    "trace_defense": 3,
     "trash_credit": 2,
     "zone_shuffle": 10
   },
@@ -70,12 +86,20 @@
     "requires_agenda_in_hq": 1,
     "requires_agenda_reveal": 1,
     "requires_archives_card": 1,
+    "requires_brain_damage": 2,
     "requires_corp_credits_threshold": 1,
+    "requires_damage": 3,
     "requires_during_run": 17,
     "requires_encounter": 24,
+    "requires_flatline": 1,
     "requires_hq_agenda": 1,
+    "requires_installed_card": 2,
     "requires_installed_ice": 2,
+    "requires_installed_program": 1,
     "requires_later_encounter": 5,
+    "requires_net_damage": 3,
+    "requires_prevention_window": 8,
+    "requires_program_trash": 1,
     "requires_remaining_ice": 5,
     "requires_remote_server": 3,
     "requires_rezzed_card": 6,
@@ -83,24 +107,61 @@
     "requires_rnd_top": 2,
     "requires_runner_draw": 1,
     "requires_runner_pay_or_take_tag": 1,
-    "requires_runner_tagged": 13,
+    "requires_runner_tagged": 14,
     "requires_score_window": 11,
     "requires_scored_agenda": 22,
     "requires_start_of_turn": 8,
     "requires_stolen_agenda_last_turn": 2,
     "requires_successful_run": 9,
+    "requires_trace_attempt": 3,
     "requires_trace_success": 17,
+    "requires_turn_limit_available": 3,
     "requires_unbroken_subroutine": 24
   },
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 811,
+  "warningCount": 921,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_002_ai-boon"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_004_bakdoor"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_trace_attempt has no manual ontology match.",
+      "cardId": "onr_v1_004_bakdoor"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:base_link has no manual ontology match.",
+      "cardId": "onr_v1_004_bakdoor"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:link has no manual ontology match.",
+      "cardId": "onr_v1_004_bakdoor"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:trace_defense has no manual ontology match.",
+      "cardId": "onr_v1_004_bakdoor"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_004_bakdoor",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_004_bakdoor"
     },
     {
       "kind": "text_pattern_derivation",
@@ -185,6 +246,131 @@
     {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_flatline has no manual ontology match.",
+      "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_prevention_window has no manual ontology match.",
+      "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:action_penalty has no manual ontology match.",
+      "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:flatline_prevention has no manual ontology match.",
+      "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:hand_size_modifier has no manual ontology match.",
+      "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:meat_damage_prevention has no manual ontology match.",
+      "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:persistent_survival_modifier has no manual ontology match.",
+      "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:prevention_replacement has no manual ontology match.",
+      "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:remove_brain_damage has no manual ontology match.",
+      "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_022_emergency-self-construct",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated breakerCoverage:sentry has no manual ontology match.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_brain_damage has no manual ontology match.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_damage has no manual ontology match.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_net_damage has no manual ontology match.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_prevention_window has no manual ontology match.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_turn_limit_available has no manual ontology match.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:brain_damage_prevention has no manual ontology match.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:breaker has no manual ontology match.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:damage_prevention has no manual ontology match.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:net_damage_prevention has no manual ontology match.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_023_evil-twin",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_023_evil-twin"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_024_expert-schedule-analyzer"
     },
     {
@@ -206,6 +392,66 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_024_expert-schedule-analyzer"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_028_force-shield"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_028_force-shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_brain_damage has no manual ontology match.",
+      "cardId": "onr_v1_028_force-shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_damage has no manual ontology match.",
+      "cardId": "onr_v1_028_force-shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_net_damage has no manual ontology match.",
+      "cardId": "onr_v1_028_force-shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_prevention_window has no manual ontology match.",
+      "cardId": "onr_v1_028_force-shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_turn_limit_available has no manual ontology match.",
+      "cardId": "onr_v1_028_force-shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:brain_damage_prevention has no manual ontology match.",
+      "cardId": "onr_v1_028_force-shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:damage_prevention has no manual ontology match.",
+      "cardId": "onr_v1_028_force-shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:net_damage_prevention has no manual ontology match.",
+      "cardId": "onr_v1_028_force-shield"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_028_force-shield",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_028_force-shield"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -241,6 +487,46 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_037_japanese-water-torture"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_038_joan-of-arc"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_038_joan-of-arc"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_installed_program has no manual ontology match.",
+      "cardId": "onr_v1_038_joan-of-arc"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_prevention_window has no manual ontology match.",
+      "cardId": "onr_v1_038_joan-of-arc"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_program_trash has no manual ontology match.",
+      "cardId": "onr_v1_038_joan-of-arc"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:program_trash_prevention has no manual ontology match.",
+      "cardId": "onr_v1_038_joan-of-arc"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_038_joan-of-arc",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_038_joan-of-arc"
     },
     {
       "kind": "text_pattern_derivation",
@@ -328,6 +614,31 @@
       "cardId": "onr_v1_050_r-and-d-protocol-files"
     },
     {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_051_rabbit"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_trace_attempt has no manual ontology match.",
+      "cardId": "onr_v1_051_rabbit"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:trace_defense has no manual ontology match.",
+      "cardId": "onr_v1_051_rabbit"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_051_rabbit",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_051_rabbit"
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_052_raffles"
@@ -393,6 +704,56 @@
       "cardId": "onr_v1_060_shaka"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_061_shield"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_061_shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_damage has no manual ontology match.",
+      "cardId": "onr_v1_061_shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_net_damage has no manual ontology match.",
+      "cardId": "onr_v1_061_shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_prevention_window has no manual ontology match.",
+      "cardId": "onr_v1_061_shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_turn_limit_available has no manual ontology match.",
+      "cardId": "onr_v1_061_shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:damage_prevention has no manual ontology match.",
+      "cardId": "onr_v1_061_shield"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:net_damage_prevention has no manual ontology match.",
+      "cardId": "onr_v1_061_shield"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_061_shield",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_061_shield"
+    },
+    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_062_shredder-uplink-protocol"
@@ -416,6 +777,36 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_062_shredder-uplink-protocol"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_063_signpost"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_trace_attempt has no manual ontology match.",
+      "cardId": "onr_v1_063_signpost"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:link has no manual ontology match.",
+      "cardId": "onr_v1_063_signpost"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:trace_defense has no manual ontology match.",
+      "cardId": "onr_v1_063_signpost"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_063_signpost",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_063_signpost"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -468,6 +859,16 @@
       "cardId": "onr_v1_074_worm"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_079_bodyweight-synthetic-blood"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_079_bodyweight-synthetic-blood"
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_081_custodial-position"
@@ -481,6 +882,181 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_085_executive-wiretaps"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_116_total-genetic-retrofit"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_prevention_window has no manual ontology match.",
+      "cardId": "onr_v1_116_total-genetic-retrofit"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_runner_tagged has no manual ontology match.",
+      "cardId": "onr_v1_116_total-genetic-retrofit"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:survival_payoff has no manual ontology match.",
+      "cardId": "onr_v1_116_total-genetic-retrofit"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:tag_prevention has no manual ontology match.",
+      "cardId": "onr_v1_116_total-genetic-retrofit"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_116_total-genetic-retrofit",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_116_total-genetic-retrofit"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_133_militech-mram-chip"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_133_militech-mram-chip"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_installed_card has no manual ontology match.",
+      "cardId": "onr_v1_133_militech-mram-chip"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:hand_size_modifier has no manual ontology match.",
+      "cardId": "onr_v1_133_militech-mram-chip"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_133_militech-mram-chip",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_133_militech-mram-chip"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_134_mram-chip"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_134_mram-chip"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_installed_card has no manual ontology match.",
+      "cardId": "onr_v1_134_mram-chip"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:hand_size_modifier has no manual ontology match.",
+      "cardId": "onr_v1_134_mram-chip"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_134_mram-chip",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_134_mram-chip"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_135_nasuko-cycle"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_prevention_window has no manual ontology match.",
+      "cardId": "onr_v1_135_nasuko-cycle"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:tag_prevention has no manual ontology match.",
+      "cardId": "onr_v1_135_nasuko-cycle"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_135_nasuko-cycle",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_135_nasuko-cycle"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_157_crash-everett-inventive-fixer"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:draw has no manual ontology match.",
+      "cardId": "onr_v1_157_crash-everett-inventive-fixer"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:survival_payoff has no manual ontology match.",
+      "cardId": "onr_v1_157_crash-everett-inventive-fixer"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_157_crash-everett-inventive-fixer"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_161_fall-guy"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_161_fall-guy"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_prevention_window has no manual ontology match.",
+      "cardId": "onr_v1_161_fall-guy"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:tag_prevention has no manual ontology match.",
+      "cardId": "onr_v1_161_fall-guy"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_161_fall-guy",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_161_fall-guy"
     },
     {
       "kind": "confidence_mismatch",
@@ -4251,6 +4827,117 @@
       ]
     },
     {
+      "cardId": "onr_v1_004_bakdoor",
+      "title": "Bakdoor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/bakdoor.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:base_link",
+        "effect:link",
+        "effect:trace_defense",
+        "condition:requires_trace_attempt"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Base-link and trace-window link boost are mechanical trace-defense facts; actual trace outcome remains LegalAction/engine context.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "base_link",
+            "timing": "trace_window",
+            "scope": "trace",
+            "resource": "link",
+            "amount": 3,
+            "source": "implementation.effect.use_base_link"
+          },
+          {
+            "confidence": "high",
+            "kind": "link",
+            "timing": "trace_window",
+            "scope": "trace",
+            "resource": "link",
+            "amount": 1,
+            "source": "implementation.effect.increase_trace_link"
+          },
+          {
+            "confidence": "high",
+            "kind": "trace_defense",
+            "timing": "trace_window",
+            "scope": "trace",
+            "resource": "link",
+            "amount": 3,
+            "source": "implementation.effect.use_base_link"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_trace_attempt",
+            "source": "implementation.ability.timing.trace_base_link_window"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["daemon", "hosting", "program"],
+        "planRoles": ["build_rig"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_trace_attempt",
+          "effect:base_link",
+          "effect:link",
+          "effect:trace_defense"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_trace_attempt",
+        "effect:base_link",
+        "effect:link",
+        "effect:trace_defense"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_trace_attempt has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:base_link has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:link has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:trace_defense has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
       "title": "Bartmoss Memorial Icebreaker",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/bartmoss-memorial-icebreaker.ts",
@@ -4973,6 +5660,386 @@
       ]
     },
     {
+      "cardId": "onr_v1_022_emergency-self-construct",
+      "title": "Emergency Self-Construct",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/emergency-self-construct.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:flatline_prevention",
+        "effect:prevention_replacement",
+        "effect:remove_brain_damage",
+        "effect:meat_damage_prevention",
+        "effect:action_penalty",
+        "effect:hand_size_modifier",
+        "effect:persistent_survival_modifier",
+        "condition:requires_flatline",
+        "condition:requires_prevention_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Flatline replacement, brain-damage removal, meat-damage prevention and persistent penalties are represented without asserting current flatline safety.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "action_penalty",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "actions",
+            "amount": 1,
+            "source": "implementation.flatlineReplacementSources.emergency_self_construct"
+          },
+          {
+            "confidence": "high",
+            "kind": "flatline_prevention",
+            "timing": "flatline_replacement",
+            "scope": "runner",
+            "resource": "damage",
+            "source": "implementation.flatlineReplacementSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "hand_size_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "hand_size",
+            "amount": -1,
+            "source": "implementation.flatlineReplacementSources.emergency_self_construct"
+          },
+          {
+            "confidence": "high",
+            "kind": "meat_damage_prevention",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "meat_damage",
+            "source": "implementation.flatlineReplacementSources.emergency_self_construct"
+          },
+          {
+            "confidence": "high",
+            "kind": "persistent_survival_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.flatlineReplacementSources.emergency_self_construct"
+          },
+          {
+            "confidence": "high",
+            "kind": "prevention_replacement",
+            "timing": "flatline_replacement",
+            "scope": "runner",
+            "resource": "damage",
+            "source": "implementation.flatlineReplacementSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "remove_brain_damage",
+            "timing": "flatline_replacement",
+            "scope": "runner",
+            "resource": "brain_damage",
+            "source": "implementation.flatlineReplacementSources.emergency_self_construct"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_flatline",
+            "source": "implementation.flatlineReplacementSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_prevention_window",
+            "source": "implementation.flatlineReplacementSources"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Flatline replacement is represented as a replacement-window fact only; generated facts do not assert the Runner is currently safe from flatline."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["handlimit", "program", "runner"],
+        "planRoles": ["remote_upgrade_modifier"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_flatline",
+          "condition:requires_prevention_window",
+          "effect:action_penalty",
+          "effect:flatline_prevention",
+          "effect:hand_size_modifier",
+          "effect:meat_damage_prevention",
+          "effect:persistent_survival_modifier",
+          "effect:prevention_replacement",
+          "effect:remove_brain_damage"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_flatline",
+        "condition:requires_prevention_window",
+        "effect:action_penalty",
+        "effect:flatline_prevention",
+        "effect:hand_size_modifier",
+        "effect:meat_damage_prevention",
+        "effect:persistent_survival_modifier",
+        "effect:prevention_replacement",
+        "effect:remove_brain_damage"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_flatline has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_prevention_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:action_penalty has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:flatline_prevention has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:hand_size_modifier has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:meat_damage_prevention has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:persistent_survival_modifier has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:prevention_replacement has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:remove_brain_damage has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_023_evil-twin",
+      "title": "Evil Twin",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/evil-twin.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:breaker",
+        "breakerCoverage:sentry",
+        "effect:damage_prevention",
+        "effect:net_damage_prevention",
+        "effect:brain_damage_prevention",
+        "condition:requires_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Sentry breaker and per-turn net/brain prevention are separate mechanical facts; no current break or prevention legality is generated.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "brain_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "brain_damage",
+            "amount": 2,
+            "perTurnLimit": 3,
+            "source": "implementation.damagePreventionSources.damageTypes.core"
+          },
+          {
+            "confidence": "high",
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner",
+            "source": "implementation.icebreakerAbilities"
+          },
+          {
+            "confidence": "high",
+            "kind": "damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2,
+            "damageTypes": ["brain", "net"],
+            "perTurnLimit": 3,
+            "source": "implementation.damagePreventionSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "net_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "net_damage",
+            "amount": 2,
+            "perTurnLimit": 3,
+            "source": "implementation.damagePreventionSources.damageTypes.net"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_brain_damage",
+            "source": "implementation.damagePreventionSources.damageTypes.core"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_damage",
+            "source": "implementation.damagePreventionSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_net_damage",
+            "source": "implementation.damagePreventionSources.damageTypes.net"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_prevention_window",
+            "source": "implementation.damagePreventionSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_turn_limit_available",
+            "source": "implementation.damagePreventionSources.limit.per_turn"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Damage prevention is represented as event-window and per-turn-limit context only; generated facts do not imply current damage immunity."
+        ],
+        "needsManualOverlayReasons": [],
+        "breakerProfile": {
+          "coverage": ["sentry"],
+          "pumpCost": 1,
+          "breakCost": 3,
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities"
+        }
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": [
+          "breaker_killer",
+          "damage_prevention",
+          "icebreaker",
+          "program",
+          "rig_defense"
+        ],
+        "planRoles": ["build_rig", "safe_probe_run"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "breakerCoverage:sentry",
+          "condition:requires_brain_damage",
+          "condition:requires_damage",
+          "condition:requires_net_damage",
+          "condition:requires_prevention_window",
+          "condition:requires_turn_limit_available",
+          "effect:brain_damage_prevention",
+          "effect:breaker",
+          "effect:damage_prevention",
+          "effect:net_damage_prevention"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "breakerCoverage:sentry",
+        "condition:requires_brain_damage",
+        "condition:requires_damage",
+        "condition:requires_net_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available",
+        "effect:brain_damage_prevention",
+        "effect:breaker",
+        "effect:damage_prevention",
+        "effect:net_damage_prevention"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated breakerCoverage:sentry has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_brain_damage has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_damage has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_net_damage has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_prevention_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_turn_limit_available has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:brain_damage_prevention has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:breaker has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:damage_prevention has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:net_damage_prevention has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_024_expert-schedule-analyzer",
       "title": "Expert Schedule Analyzer",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/expert-schedule-analyzer.ts",
@@ -5042,6 +6109,180 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:hq_info has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_028_force-shield",
+      "title": "Force Shield",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/force-shield.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:damage_prevention",
+        "effect:net_damage_prevention",
+        "effect:brain_damage_prevention",
+        "condition:requires_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Per-turn net/brain damage prevention is represented as window-limited mechanical prevention, not damage immunity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "brain_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "brain_damage",
+            "amount": 2,
+            "perTurnLimit": 2,
+            "source": "implementation.damagePreventionSources.damageTypes.core"
+          },
+          {
+            "confidence": "high",
+            "kind": "damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2,
+            "damageTypes": ["brain", "net"],
+            "perTurnLimit": 2,
+            "source": "implementation.damagePreventionSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "net_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "net_damage",
+            "amount": 2,
+            "perTurnLimit": 2,
+            "source": "implementation.damagePreventionSources.damageTypes.net"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_brain_damage",
+            "source": "implementation.damagePreventionSources.damageTypes.core"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_damage",
+            "source": "implementation.damagePreventionSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_net_damage",
+            "source": "implementation.damagePreventionSources.damageTypes.net"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_prevention_window",
+            "source": "implementation.damagePreventionSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_turn_limit_available",
+            "source": "implementation.damagePreventionSources.limit.per_turn"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Damage prevention is represented as event-window and per-turn-limit context only; generated facts do not imply current damage immunity."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["damage_prevention", "program", "rig_defense"],
+        "planRoles": ["build_rig", "recover_economy"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_brain_damage",
+          "condition:requires_damage",
+          "condition:requires_net_damage",
+          "condition:requires_prevention_window",
+          "condition:requires_turn_limit_available",
+          "effect:brain_damage_prevention",
+          "effect:damage_prevention",
+          "effect:net_damage_prevention"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_brain_damage",
+        "condition:requires_damage",
+        "condition:requires_net_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available",
+        "effect:brain_damage_prevention",
+        "effect:damage_prevention",
+        "effect:net_damage_prevention"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_brain_damage has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_damage has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_net_damage has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_prevention_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_turn_limit_available has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:brain_damage_prevention has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:damage_prevention has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:net_damage_prevention has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -5213,6 +6454,120 @@
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence medium differs from manual confidence high."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_038_joan-of-arc",
+      "title": "Joan of Arc",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/joan-of-arc.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:program_trash_prevention",
+        "condition:requires_program_trash",
+        "condition:requires_installed_program",
+        "condition:requires_prevention_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Program-trash prevention is limited to other installed programs and remains payment/window-contextual.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "program_trash_prevention",
+            "timing": "prevention_window",
+            "scope": "installed_program",
+            "source": "implementation.trashPreventionSources.protectsCardTypes.program"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_installed_program",
+            "source": "implementation.trashPreventionSources.protectsCardTypes.program"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_prevention_window",
+            "source": "implementation.trashPreventionSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_program_trash",
+            "source": "implementation.trashPreventionSources"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Program-trash prevention is target- and window-context only; costs and target selection stay LegalAction/engine-owned."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["program", "trash_prevention"],
+        "planRoles": ["build_rig", "protect_rig"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_installed_program",
+          "condition:requires_prevention_window",
+          "condition:requires_program_trash",
+          "effect:program_trash_prevention"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_installed_program",
+        "condition:requires_prevention_window",
+        "condition:requires_program_trash",
+        "effect:program_trash_prevention"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_installed_program has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_prevention_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_program_trash has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:program_trash_prevention has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -5977,6 +7332,85 @@
       ]
     },
     {
+      "cardId": "onr_v1_051_rabbit",
+      "title": "Rabbit",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/rabbit.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:trace_defense",
+        "condition:requires_trace_attempt"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trace limit reduction is mechanical trace defense; it does not guarantee trace success for the Runner.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "trace_defense",
+            "timing": "trace_window",
+            "scope": "trace",
+            "resource": "link",
+            "amount": 1,
+            "source": "implementation.runnerUtilityLongtail.rabbit_ice_trace_limit_reduction"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_trace_attempt",
+            "source": "implementation.runnerUtilityLongtail.rabbit_ice_trace_limit_reduction"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["per_card_longtail", "program", "runner"],
+        "planRoles": ["runner_install_program", "runner_program_ability"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_trace_attempt",
+          "effect:trace_defense"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_trace_attempt",
+        "effect:trace_defense"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_trace_attempt has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:trace_defense has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_052_raffles",
       "title": "Raffles",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/raffles.ts",
@@ -6658,6 +8092,153 @@
       ]
     },
     {
+      "cardId": "onr_v1_061_shield",
+      "title": "Shield",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shield.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:damage_prevention",
+        "effect:net_damage_prevention",
+        "condition:requires_damage",
+        "condition:requires_net_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Per-turn net damage prevention is represented as window-limited mechanical prevention, not damage immunity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2,
+            "damageTypes": ["net"],
+            "perTurnLimit": 2,
+            "source": "implementation.damagePreventionSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "net_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "net_damage",
+            "amount": 2,
+            "perTurnLimit": 2,
+            "source": "implementation.damagePreventionSources.damageTypes.net"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_damage",
+            "source": "implementation.damagePreventionSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_net_damage",
+            "source": "implementation.damagePreventionSources.damageTypes.net"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_prevention_window",
+            "source": "implementation.damagePreventionSources"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_turn_limit_available",
+            "source": "implementation.damagePreventionSources.limit.per_turn"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Damage prevention is represented as event-window and per-turn-limit context only; generated facts do not imply current damage immunity."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["per_card_longtail", "program", "runner"],
+        "planRoles": ["runner_install_program", "runner_program_ability"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_damage",
+          "condition:requires_net_damage",
+          "condition:requires_prevention_window",
+          "condition:requires_turn_limit_available",
+          "effect:damage_prevention",
+          "effect:net_damage_prevention"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_damage",
+        "condition:requires_net_damage",
+        "condition:requires_prevention_window",
+        "condition:requires_turn_limit_available",
+        "effect:damage_prevention",
+        "effect:net_damage_prevention"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_damage has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_net_damage has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_prevention_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_turn_limit_available has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:damage_prevention has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:net_damage_prevention has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_062_shredder-uplink-protocol",
       "title": "Shredder Uplink Protocol",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/shredder-uplink-protocol.ts",
@@ -6727,6 +8308,101 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:access_replacement has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_063_signpost",
+      "title": "Signpost",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/signpost.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:link",
+        "effect:trace_defense",
+        "condition:requires_trace_attempt"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Post-bid link boost is mechanical trace defense; actual trace outcome remains LegalAction/engine context.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "link",
+            "timing": "trace_window",
+            "scope": "trace",
+            "resource": "link",
+            "amount": 2,
+            "source": "implementation.effect.increase_trace_link"
+          },
+          {
+            "confidence": "high",
+            "kind": "trace_defense",
+            "timing": "trace_window",
+            "scope": "trace",
+            "resource": "link",
+            "amount": 2,
+            "source": "implementation.effect.increase_trace_link"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_trace_attempt",
+            "source": "implementation.ability.timing.trace_post_bid_link_window"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["post_bid_link", "program", "trace"],
+        "planRoles": ["build_rig", "post_bid_trace_link", "trace_bid_support"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_trace_attempt",
+          "effect:link",
+          "effect:trace_defense"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_trace_attempt",
+        "effect:link",
+        "effect:trace_defense"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_trace_attempt has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:link has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:trace_defense has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -7154,6 +8830,73 @@
       ]
     },
     {
+      "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+      "title": "Bodyweight Synthetic Blood",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:draw"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Burst draw is a mechanical hand-refill/survival-adjacent fact without hidden stack identity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "draw",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "cards",
+            "amount": 5,
+            "source": "implementation.effect.draw_cards"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["draw", "setup"],
+        "planRoles": ["draw_for_answers"],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "lineSupport": ["breaker_search_first", "rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": ["effect:draw"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_081_custodial-position",
       "title": "Custodial Position",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/custodial-position.ts",
@@ -7430,6 +9173,540 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_116_total-genetic-retrofit",
+      "title": "Total Genetic Retrofit",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/total-genetic-retrofit.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:tag_prevention",
+        "effect:survival_payoff",
+        "condition:requires_runner_tagged",
+        "condition:requires_prevention_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Tag removal and next-tag avoidance are represented without asserting the Runner is currently untagged.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "survival_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "tags",
+            "source": "implementation.effect.remove_tags"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "source": "implementation.effect.avoid_next_tag"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_prevention_window",
+            "source": "implementation.effect.avoid_next_tag"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "tag_remove"],
+        "planRoles": ["clear_tags"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_prevention_window",
+          "condition:requires_runner_tagged",
+          "effect:survival_payoff",
+          "effect:tag_prevention"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_prevention_window",
+        "condition:requires_runner_tagged",
+        "effect:survival_payoff",
+        "effect:tag_prevention"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_prevention_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_runner_tagged has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:survival_payoff has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:tag_prevention has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_133_militech-mram-chip",
+      "title": "Militech MRAM Chip",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/militech-mram-chip.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:hand_size_modifier",
+        "condition:requires_installed_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Installed hand-size increase is a visible survival modifier; current hand contents remain hidden state.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "hand_size_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "hand_size",
+            "amount": 3,
+            "source": "implementation.modifiers.hand_size"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_installed_card",
+            "source": "implementation.modifiers.hand_size"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "hardware",
+        "roles": ["hardware", "memory", "runner"],
+        "planRoles": ["remote_upgrade_modifier"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_installed_card",
+          "effect:hand_size_modifier"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_installed_card",
+        "effect:hand_size_modifier"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_installed_card has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:hand_size_modifier has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_134_mram-chip",
+      "title": "MRAM Chip",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/mram-chip.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:hand_size_modifier",
+        "condition:requires_installed_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Installed hand-size increase is a visible survival modifier; current hand contents remain hidden state.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "hand_size_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "hand_size",
+            "amount": 2,
+            "source": "implementation.modifiers.hand_size"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_installed_card",
+            "source": "implementation.modifiers.hand_size"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "hardware",
+        "roles": ["hardware", "memory", "runner"],
+        "planRoles": ["remote_upgrade_modifier"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_installed_card",
+          "effect:hand_size_modifier"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_installed_card",
+        "effect:hand_size_modifier"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_installed_card has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:hand_size_modifier has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_135_nasuko-cycle",
+      "title": "Nasuko Cycle",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/nasuko-cycle.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:tag_prevention",
+        "condition:requires_prevention_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Paid tag avoidance is mechanical prevention-window context, not a current untagged state.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "tag_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "source": "implementation.tagPreventionSources"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_prevention_window",
+            "source": "implementation.tagPreventionSources"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Tag prevention is represented as tag-window context only; generated facts do not assert the Runner is untagged."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "hardware",
+        "roles": ["hardware", "tag_avoid"],
+        "planRoles": ["avoid_tags", "build_rig"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_prevention_window",
+          "effect:tag_prevention"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_prevention_window",
+        "effect:tag_prevention"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_prevention_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:tag_prevention has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+      "title": "Crash Everett, Inventive Fixer",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/crash-everett-inventive-fixer.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:draw", "effect:survival_payoff"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Extra draw and choose-trash/top replacement are represented as hand-refill context without hidden stack identity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "draw",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "cards",
+            "amount": 1,
+            "source": "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top"
+          },
+          {
+            "confidence": "high",
+            "kind": "survival_payoff",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "cards",
+            "amount": 1,
+            "source": "implementation.remainingReplacementLongtail.crash_everett_draw_extra_choose_trash_or_top"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [
+          "Crash Everett extra draw and choose-trash/top replacement are represented without hidden hand or stack identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "resource",
+        "roles": ["draw", "resource"],
+        "planRoles": ["build_rig", "draw"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": ["effect:draw", "effect:survival_payoff"],
+        "manualOnly": []
+      },
+      "missingManualOverlay": ["effect:draw", "effect:survival_payoff"],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:draw has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:survival_payoff has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_161_fall-guy",
+      "title": "Fall Guy",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/fall-guy.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:tag_prevention",
+        "condition:requires_prevention_window"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trash-to-avoid-tag is mechanical prevention-window context, not a current untagged state.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "tag_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "source": "implementation.tagPreventionSources"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_prevention_window",
+            "source": "implementation.tagPreventionSources"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Tag prevention is represented as tag-window context only; generated facts do not assert the Runner is untagged."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "resource",
+        "roles": ["resource", "tag_avoid"],
+        "planRoles": ["avoid_tags", "build_rig"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_prevention_window",
+          "effect:tag_prevention"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_prevention_window",
+        "effect:tag_prevention"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_prevention_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:tag_prevention has no manual ontology match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
