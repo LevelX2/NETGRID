@@ -288,12 +288,10 @@ import {
 } from "./game/corp/special-damage-abilities";
 import {
   availableRunnerAccessTrashCredits,
-  buildRunnerAccessActions,
   runnerAccessTrashRecurringCreditSourceIds,
   type RunnerAccessActionHost,
 } from "./game/access/access-actions";
 import {
-  handleAccessEffectsForCard,
   resolveAccessInstalledRunnerProgramReturnChoice,
   resolveAccessPaymentChoice,
   resolveChimeraDaemonTrashChoice as resolveAccessChimeraDaemonTrashChoice,
@@ -304,6 +302,10 @@ import {
   handleAccessExecution,
   type AccessFlowHost,
 } from "./game/access/access-flow";
+import {
+  createAccessFlowAdapters,
+  type AccessFlowCompositionHost,
+} from "./game/access/access-flow-hosts";
 import {
   installedAccessBonusForServer,
   runnerHqAccessBonus as runnerHqAccessBonusForBreach,
@@ -1036,6 +1038,107 @@ const runFlow = createRunFlowAdapters({
     virusCounterImplementationForCard,
   },
 } satisfies RunFlowHost);
+
+const accessFlow = createAccessFlowAdapters({
+  cards: {
+    definitionFor,
+    cardInstanceFor: (state, cardId) => mustInstance(state.cardInstances, cardId),
+    cardHasSubtype,
+    accessEffectsForDefinition: (definitionId) =>
+      cardImplementationForDefinitionId(definitionId)?.accessEffects ?? [],
+  },
+  servers: {
+    mustServer,
+    randomHqAccess,
+  },
+  run: {
+    finishRun,
+    successfulRunProgramActions: (state, run) =>
+      buildSuccessfulRunFollowupActions(successfulRunInterventionHost(state), run),
+    runnerDuringRunCardImplementationLegalActions: (state) =>
+      buildRunnerDuringRunCardImplementationActions(
+        runCardImplementationActionHost(state),
+      ).legalActions,
+    mysteryBoxRunActions: (state, run) =>
+      buildMysteryBoxRunActions(runnerEncounterActionHostForState(state), run),
+    startExpertScheduleAnalyzerPostAccessChoice,
+  },
+  damage: {
+    resolveDamageOperation,
+    doDamage,
+    setDamagePayload,
+  },
+  tags: {
+    addRunnerTagsWithPrevention,
+  },
+  trace: {
+    startTraceFromOperation: (
+      state,
+      sourceDefinitionId,
+      baseTraceStrength,
+      legalAction,
+      successEffect,
+    ) =>
+      startTraceFromOperationInTrace(
+        traceOrchestrationHost(state),
+        sourceDefinitionId,
+        baseTraceStrength,
+        legalAction,
+        successEffect,
+      ),
+    traceSuccessEffectForCardImplementation,
+  },
+  payment: {
+    spendCredits,
+    hostedPaymentCredits,
+    restrictedHostedCreditSourceIds,
+    isRestrictedHostedCreditSource,
+    spendRunnerAccessTrashCredits,
+  },
+  counters: {
+    cardCounter,
+    addCardCounter,
+    addCounterToAllInstalledRunnerIcebreakers,
+  },
+  zones: {
+    removeFromAllZones,
+    ensureSpecialZones,
+    trashCorpInstalledCardToArchives,
+    trashRunnerInstalledCardToHeap,
+    shuffleCorpCardIntoRd,
+    returnRunnerInstalledProgramsToGripForAccess,
+  },
+  choices: {
+    openRunnerInstalledTrashPreventionWindow,
+  },
+  turn: {
+    ensureRunnerTurnFlags,
+  },
+  random: {
+    nextRandom,
+  },
+  callbacks: {
+    agendaPointsForScoredCard,
+    snapshotPersistentStealCostModifiersForSource,
+    archivesAccessRequiresDecisionOrEffect,
+    installedRevealHelperCount: (state) => v1915InstalledRevealHelperIds(state).length,
+  },
+  constants: {
+    setup: SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
+    trap: TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
+    crybaby: CRYBABY_ACCESS_COST_UPGRADE_ID,
+    dedicatedResponseTeam: DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
+    dieterEsslin: DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
+    turbeauDelacroix: TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
+    corprunnersShatteredRemains:
+      CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
+    experimentalAi: EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
+    vacantSoulkiller: VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
+    virusTestSite: VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
+    bizarreEncryptionScheme: BIZARRE_ENCRYPTION_SCHEME_ID,
+    chimera: CHIMERA_ID,
+  },
+} satisfies AccessFlowCompositionHost);
 
 // Public context generation is read-only and injected here to avoid an import
 // cycle. It may format already-public payload data, but it must not decide
@@ -9958,39 +10061,7 @@ function corpSpecialDamageAbilityHost(
 }
 
 function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-      cardHasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
-    },
-    servers: {
-      mustServer: (serverId) => mustServer(state, serverId),
-    },
-    actions: {
-      buildLegalAction: (side, type, label, source, costs, payload) =>
-        action(state, side, type, label, source, costs, payload),
-    },
-    payment: {
-      hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
-      restrictedHostedCreditSourceIds: (use, options) =>
-        restrictedHostedCreditSourceIds(state, use, options),
-      isRestrictedHostedCreditSource: (definition) =>
-        isRestrictedHostedCreditSource(definition),
-    },
-    counters: {
-      cardCounter: (cardId, counterType) =>
-        cardCounter(state, cardId, counterType as CounterType),
-    },
-    callbacks: {
-      successfulRunProgramActions: (run) =>
-        buildSuccessfulRunFollowupActions(successfulRunInterventionHost(state), run),
-      runnerDuringRunCardImplementationLegalActions: () => buildRunnerDuringRunCardImplementationActions(runCardImplementationActionHost(state)).legalActions,
-      mysteryBoxRunActions: (run) =>
-        buildMysteryBoxRunActions(runnerEncounterActionHostForState(state), run),
-    },
-  };
+  return accessFlow.runnerAccessActionHost(state);
 }
 
 function runnerEncounterActionHostForState(
@@ -10056,81 +10127,11 @@ function runEndCleanupHost(state: GameState): RunEndCleanupHost {
 }
 
 function breachStateHost(state: GameState): BreachStateHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-    },
-    servers: {
-      mustServer: (serverId) => mustServer(state, serverId),
-    },
-    rng: {
-      nextRandom: (purpose) => nextRandom(state, purpose),
-    },
-  };
+  return accessFlow.breachStateHost(state);
 }
 
 function accessFlowHost(state: GameState): AccessFlowHost {
-  return {
-    state,
-    accessActions: runnerAccessActionHost(state),
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-      cardHasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
-    },
-    servers: {
-      mustServer: (serverId) => mustServer(state, serverId),
-      randomHqAccess: () => randomHqAccess(state),
-    },
-    effects: {
-      executeAccessEffects: (cardId, legalAction) =>
-        handleAccessEffectsForCard(accessEffectHandlerHost(state, legalAction), cardId),
-      archivesAccessRequiresDecisionOrEffect: (cardId) =>
-        archivesAccessRequiresDecisionOrEffect(state, cardId),
-    },
-    runner: {
-      ensureTurnFlags: () => ensureRunnerTurnFlags(state),
-    },
-    zones: {
-      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
-      ensureSpecialZones: () => ensureSpecialZones(state),
-    },
-    payment: {
-      spendRunnerCredits: (amount) => spendCredits(state, "runner", amount),
-      spendRunnerAccessTrashCredits: (amount, accessedCardId) =>
-        spendRunnerAccessTrashCredits(state, amount, accessedCardId),
-    },
-    steal: {
-      agendaPointsForScoredCard: (cardId) =>
-        agendaPointsForScoredCard(state, cardId),
-      snapshotPersistentStealCostModifiersForSource: (
-        cardId,
-        serverId,
-        legalAction,
-      ) =>
-        snapshotPersistentStealCostModifiersForSource(
-          state,
-          cardId,
-          serverId,
-          legalAction,
-        ),
-    },
-    trash: {
-      trashCorpInstalledCardToArchives: (cardId, legalAction) =>
-        trashCorpInstalledCardToArchives(state, cardId, legalAction),
-    },
-    run: {
-      finishRun: (successful, legalAction) =>
-        finishRun(state, successful, legalAction),
-      startExpertScheduleAnalyzerPostAccessChoice: (run, legalAction) =>
-        startExpertScheduleAnalyzerPostAccessChoice(state, run, legalAction),
-    },
-    access: {
-      installedRevealHelperCount: () => v1915InstalledRevealHelperIds(state).length,
-    },
-  };
+  return accessFlow.accessFlowHost(state);
 }
 
 function runAccessTransitionHost(state: GameState): RunAccessTransitionHost {
@@ -10141,106 +10142,7 @@ function accessEffectHandlerHost(
   state: GameState,
   legalAction?: LegalAction,
 ): AccessEffectHandlerHost {
-  return {
-    state,
-    ...(legalAction ? { legalAction } : {}),
-    definitions: {
-      setup: SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
-      trap: TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
-      crybaby: CRYBABY_ACCESS_COST_UPGRADE_ID,
-      dedicatedResponseTeam: DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
-      dieterEsslin: DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
-      turbeauDelacroix: TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
-      corprunnersShatteredRemains: CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
-      experimentalAi: EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
-      vacantSoulkiller: VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
-      virusTestSite: VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
-      bizarreEncryptionScheme: BIZARRE_ENCRYPTION_SCHEME_ID,
-      chimera: CHIMERA_ID,
-    },
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
-      cardHasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
-      accessEffectsForDefinition: (definitionId) =>
-        cardImplementationForDefinitionId(definitionId)?.accessEffects ?? [],
-    },
-    damage: {
-      resolveDamageOperation: (damageType, amount, sourceDefinitionId) => {
-        if (!legalAction) throw new Error("Damage-Aktion fehlt.");
-        resolveDamageOperation(
-          state,
-          legalAction,
-          damageType,
-          amount,
-          sourceDefinitionId,
-        );
-      },
-      doDamage: (damageId, damageType, amount, sourceDefinitionId) =>
-        doDamage(state, {
-          damageId,
-          damageType,
-          amount,
-          source: sourceDefinitionId,
-        }),
-      setDamagePayload: (summary) => {
-        if (!legalAction) throw new Error("Damage-Aktion fehlt.");
-        setDamagePayload(legalAction, summary);
-      },
-    },
-    tags: {
-      addRunnerTagsWithPrevention: (amount, sourceDefinitionId) => {
-        if (!legalAction) throw new Error("Tag-Aktion fehlt.");
-        addRunnerTagsWithPrevention(state, legalAction, amount, sourceDefinitionId);
-      },
-    },
-    trace: {
-      startTraceFromOperation: (sourceDefinitionId, baseTraceStrength, successEffect) => {
-        if (!legalAction) throw new Error("Trace-Aktion fehlt.");
-        startTraceFromOperationInTrace(
-          traceOrchestrationHost(state),
-          sourceDefinitionId,
-          baseTraceStrength,
-          legalAction,
-          successEffect as TraceSuccessEffect | undefined,
-        );
-      },
-      traceSuccessEffectForCardImplementation: (effects) =>
-        traceSuccessEffectForCardImplementation(effects),
-    },
-    counters: {
-      cardCounter: (cardId, counterType) =>
-        cardCounter(state, cardId, counterType as CounterType),
-      addCardCounter: (cardId, counterType, amount) =>
-        addCardCounter(state, cardId, counterType as CounterType, amount),
-      addCounterToAllInstalledRunnerIcebreakers: (counterType, amount) =>
-        addCounterToAllInstalledRunnerIcebreakers(state, counterType, amount),
-    },
-    corpCards: {
-      shuffleCorpCardIntoRd: (cardId, sourceDefinitionId) =>
-        shuffleCorpCardIntoRd(state, cardId, sourceDefinitionId, "access"),
-    },
-    runnerCards: {
-      returnInstalledProgramsToGrip: (cardIds) =>
-        returnRunnerInstalledProgramsToGripForAccess(state, cardIds),
-    },
-    payment: {
-      spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
-    },
-    trash: {
-      trashRunnerInstalledCardToHeap: (cardId) =>
-        trashRunnerInstalledCardToHeap(state, cardId),
-      openRunnerInstalledTrashPreventionWindow: (targetIds, sourceDefinitionId) => {
-        if (!legalAction) throw new Error("Trash-Prevention-Aktion fehlt.");
-        return openRunnerInstalledTrashPreventionWindow(
-          state,
-          legalAction,
-          targetIds,
-          sourceDefinitionId,
-        );
-      },
-    },
-  };
+  return accessFlow.accessEffectHandlerHost(state, legalAction);
 }
 
 function pushCorpTraceDamageOrCardImplementationActions(
