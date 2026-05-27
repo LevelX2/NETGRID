@@ -711,7 +711,8 @@ function playEventContextLabel(action: LegalAction): string {
   if (!serverId) return "Spielen";
   const serverLabel = serverDisplayLabel(serverId);
   const fullLabel = actionButtonLabel(action);
-  if (/\bRun\b/i.test(fullLabel) || /\bDeep Dive\b/i.test(fullLabel)) return `Run auf ${serverLabel}`;
+  if (action.payload?.runnerEventRun === true || /\bRun\b/i.test(fullLabel) || /\bDeep Dive\b/i.test(fullLabel))
+    return `Run auf ${serverLabel}`;
   return `Spielen auf ${serverLabel}`;
 }
 

@@ -649,7 +649,7 @@ export function buildRunnerMainActions(
               `${definition.title} auf ${server.label}`,
               id,
               [{ clicks: 1, credits: definition.cost ?? 0 }],
-              { cardId: id, serverId: server.id },
+              { cardId: id, serverId: server.id, runnerEventRun: true },
             ),
           );
           continue;
@@ -664,7 +664,7 @@ export function buildRunnerMainActions(
                 `${definition.title} auf ${server.label}`,
                 id,
                 [{ clicks: 1, credits: definition.cost ?? 0 }],
-                { cardId: id, serverId: server.id },
+                { cardId: id, serverId: server.id, runnerEventRun: true },
               ),
             );
           }
