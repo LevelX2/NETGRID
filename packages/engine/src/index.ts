@@ -127,20 +127,13 @@ import {
 import {
   addCorpActionDebt,
   corpActionDebtPending,
-  handleTurnBasicExecution,
   purgeableRunnerVirusCounterAmount,
   purgeableRunnerVirusCounterTotal,
   purgeVirusCounters,
   type TurnBasicExecutionHost,
 } from "./game/turn/turn-basic-execution";
-import {
-  handleCreditEconomyExecution,
-  type CreditEconomyExecutionHost,
-} from "./game/economy/credit-economy-execution";
-import {
-  handleTriggerAbilityExecution,
-  type TriggerAbilityExecutionHost,
-} from "./game/abilities/trigger-ability-execution";
+import { type CreditEconomyExecutionHost } from "./game/economy/credit-economy-execution";
+import { type TriggerAbilityExecutionHost } from "./game/abilities/trigger-ability-execution";
 import {
   handleCounterUtilityTriggerExecution,
   type CounterUtilityTriggerExecutionHost,
@@ -267,7 +260,6 @@ import {
 } from "./game/corp/install-rez-sequence-handlers";
 import {
   handleScoredAgendaFlowChoice,
-  scoreAgenda,
   startEmployeeEmpowermentStartDrawChoice,
   type ScoredAgendaFlowHost,
 } from "./game/corp/scored-agenda-flow";
@@ -299,7 +291,6 @@ import {
 } from "./game/access/access-effect-handlers";
 import {
   advanceArchivesBreachPastNonDecisionCards,
-  handleAccessExecution,
   type AccessFlowHost,
 } from "./game/access/access-flow";
 import {
@@ -317,13 +308,7 @@ import {
   sourcePayloadForSuccessfulRunReplacement,
   type RunAccessTransitionHost,
 } from "./game/run/run-access-transition";
-import {
-  type RunCoreExecutionHost,
-  type StartRunOptions,
-} from "./game/run/run-core-execution";
-import {
-  type RunContinuationExecutionHost,
-} from "./game/run/run-continuation-execution";
+import { type StartRunOptions } from "./game/run/run-core-execution";
 import {
   applyBodyweightDataCrecheSuccessfulRun,
   buildSuccessfulRunFollowupActions,
@@ -389,9 +374,6 @@ import {
   buildCorpEncounterCardImplementationActions,
   buildRunnerDuringRunCardImplementationActions,
 } from "./game/run/card-implementation-run-actions";
-import {
-  handleActivatedCardImplementationAction,
-} from "./game/card-implementation/activated-action-execution";
 import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
@@ -463,26 +445,11 @@ import {
   createRunFlowAdapters,
   type RunFlowHost,
 } from "./game/run/run-flow-hosts";
-import {
-  handleRunnerBreakerActionExecution,
-  type RunnerBreakerActionExecutionHost,
-} from "./game/run/runner-breaker-action-execution";
-import {
-  handleStartRunActionExecution,
-  type StartRunActionExecutionHost,
-} from "./game/run/start-run-action-execution";
-import {
-  handleRezActionExecution,
-  type RezActionExecutionHost,
-} from "./game/rez/rez-action-execution";
-import {
-  handlePlayCardExecution,
-  type PlayCardExecutionHost,
-} from "./game/play/play-card-execution";
-import {
-  handleBoardStateActionExecution,
-  type BoardStateActionExecutionHost,
-} from "./game/board/board-state-action-execution";
+import { type RunnerBreakerActionExecutionHost } from "./game/run/runner-breaker-action-execution";
+import { type StartRunActionExecutionHost } from "./game/run/start-run-action-execution";
+import { type RezActionExecutionHost } from "./game/rez/rez-action-execution";
+import { type PlayCardExecutionHost } from "./game/play/play-card-execution";
+import { type BoardStateActionExecutionHost } from "./game/board/board-state-action-execution";
 import { shuffleRunnerStackAndRefreshZones } from "./game/hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -493,9 +460,9 @@ import { hashState } from "./game/hash";
 import {
   applyAction as applyActionFromGame,
   configureApplyActionCoreHost,
-  type ApplyActionCoreHost,
 } from "./game/apply-action";
 export { applyAction } from "./game/apply-action";
+import { createPerformActionExecutorFromDependencies } from "./game/apply/perform-action";
 import { configureApplyGameActionHost } from "./game/apply-game-action";
 export { applyGameAction } from "./game/apply-game-action";
 export { getPlayerView, playerViewFor } from "./game/player-view";
@@ -2222,13 +2189,29 @@ function legalActionGenerationHost(state: GameState): LegalActionGenerationHost 
 
 configureLegalActionGenerationHost(legalActionGenerationHost);
 
-const applyActionCoreHost: ApplyActionCoreHost = {
+configureApplyActionCoreHost({
   actions: {
-    performAction,
+    performAction: createPerformActionExecutorFromDependencies({
+      turn: { turnBasicExecutionHost },
+      economy: { creditEconomyExecutionHost },
+      abilities: { triggerAbilityExecutionHost },
+      cardImplementation: { activatedCardImplementationExecutionHost },
+      play: { playCardExecutionHost },
+      install: { installCardHost },
+      board: { boardStateActionExecutionHost },
+      corp: { scoredAgendaFlowHost },
+      run: {
+        startRunActionExecutionHost,
+        runMovementHostForState,
+        runnerBreakerActionExecutionHost,
+        continueRun: (state, legalAction) => runFlow.continueRun(state, legalAction),
+      },
+      rez: { rezActionExecutionHost },
+      access: { accessFlowHost },
+      choices: { pendingChoiceResolutionHost },
+    }),
   },
-};
-
-configureApplyActionCoreHost(applyActionCoreHost);
+});
 
 configureApplyGameActionHost({
   actions: {
@@ -4754,116 +4737,30 @@ function traceOrchestrationHost(state: GameState): TraceOrchestrationHost {
   };
 }
 
-function performAction(
+function activatedCardImplementationExecutionHost(
   state: GameState,
   legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  if (handleTurnBasicExecution(turnBasicExecutionHost(state), legalAction).handled)
-    return;
-
-  switch (legalAction.type) {
-    case "activated_card_ability":
-      handleActivatedCardImplementationAction(
-        {
+) {
+  return {
+    state,
+    action: { legalAction },
+    callbacks: {
+      handleCorpTraceDamageActivatedAbility: (actionToResolve: LegalAction) =>
+        handleCorpTraceDamageActivatedAbility(
+          corpTraceDamageAbilityHost(state, actionToResolve),
+        ).handled,
+      handleScoredAgendaActivatedAbilityAction: (actionToResolve: LegalAction) =>
+        handleScoredAgendaActivatedAbilityAction(
+          scoredAgendaAbilityHost(state, actionToResolve),
+        ).handled,
+      resolveActivatedCardImplementationAbility: (actionToResolve: LegalAction) =>
+        resolveActivatedCardImplementationAbility(
+          cardImplementationRuntimeDeps,
           state,
-          action: { legalAction },
-          callbacks: {
-            handleCorpTraceDamageActivatedAbility: (actionToResolve) => handleCorpTraceDamageActivatedAbility(corpTraceDamageAbilityHost(state, actionToResolve)).handled,
-            handleScoredAgendaActivatedAbilityAction: (actionToResolve) => handleScoredAgendaActivatedAbilityAction(scoredAgendaAbilityHost(state, actionToResolve)).handled,
-            resolveActivatedCardImplementationAbility: (actionToResolve) => resolveActivatedCardImplementationAbility(cardImplementationRuntimeDeps, state, actionToResolve),
-          },
-        },
-      );
-      return;
-    case "gain_credit":
-      handleCreditEconomyExecution(creditEconomyExecutionHost(state), legalAction);
-      return;
-    case "play_event":
-    case "play_operation":
-      handlePlayCardExecution(playCardExecutionHost(state), legalAction);
-      return;
-    case "install_card":
-      executeInstallCard(installCardHost(state), legalAction);
-      return;
-    case "advance_card":
-      handleBoardStateActionExecution(
-        boardStateActionExecutionHost(state),
-        legalAction,
-      );
-      return;
-    case "score_agenda":
-      scoreAgenda(
-        scoredAgendaFlowHost(state, legalAction),
-        String(legalAction.payload?.cardId) as CardInstanceId,
-      );
-      return;
-    case "start_run":
-      handleStartRunActionExecution(
-        startRunActionExecutionHost(state),
-        legalAction,
-      );
-      return;
-    case "jack_out":
-      handleRunMovementAction(runMovementHostForState(state), legalAction);
-      return;
-    case "rez_ice":
-    case "decline_rez":
-      handleRezActionExecution(rezActionExecutionHost(state), legalAction);
-      return;
-    case "pump_breaker":
-      handleRunnerBreakerActionExecution(
-        runnerBreakerActionExecutionHost(state),
-        legalAction,
-      );
-      return;
-    case "break_subroutine":
-      handleRunnerBreakerActionExecution(
-        runnerBreakerActionExecutionHost(state),
-        legalAction,
-      );
-      return;
-    case "continue_run":
-      if (handleRunMovementAction(runMovementHostForState(state), legalAction).handled)
-        return;
-      continueRun(state, legalAction);
-      return;
-    case "access_card":
-    case "steal_agenda":
-    case "trash_accessed_card":
-      if (handleAccessExecution(accessFlowHost(state), legalAction).handled)
-        return;
-      throw new Error("Die Access-Aktion ist nicht gueltig.");
-    case "trash_resource":
-      handleBoardStateActionExecution(
-        boardStateActionExecutionHost(state),
-        legalAction,
-      );
-      return;
-    case "decline_trash":
-      if (handleAccessExecution(accessFlowHost(state), legalAction).handled)
-        return;
-      throw new Error("Die Access-Aktion ist nicht gueltig.");
-    case "move_to_set_aside":
-    case "move_to_removed_from_game":
-    case "return_from_set_aside":
-    case "change_card_control":
-      handleBoardStateActionExecution(
-        boardStateActionExecutionHost(state),
-        legalAction,
-      );
-      return;
-    case "resolve_choice":
-      resolvePendingChoice(
-        pendingChoiceResolutionHost(state),
-        legalAction,
-        playerAction,
-      );
-      return;
-    case "trigger_ability":
-      handleTriggerAbilityExecution(triggerAbilityExecutionHost(state), legalAction);
-      return;
-  }
+          actionToResolve,
+        ),
+    },
+  };
 }
 
 function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
@@ -5210,10 +5107,6 @@ function startRun(
   );
 }
 
-function runCoreExecutionHost(state: GameState): RunCoreExecutionHost {
-  return runFlow.runCoreExecutionHost(state);
-}
-
 type RunnerTraceCounterEffectRuntime =
   NonNullable<(typeof CARD_IMPLEMENTATIONS)[number]["runnerCounterEffects"]>[number] & {
     sourceDefinitionId: CardDefinitionId;
@@ -5447,16 +5340,6 @@ function applyAiBoonRunStart(
       randomCounterAfter: state.randomCounter,
     };
   }
-}
-
-function continueRun(state: GameState, legalAction?: LegalAction): void {
-  runFlow.continueRun(state, legalAction);
-}
-
-function runContinuationExecutionHost(
-  state: GameState,
-): RunContinuationExecutionHost {
-  return runFlow.runContinuationExecutionHost(state);
 }
 
 function resolveBlinkBreakSubroutineAction(
