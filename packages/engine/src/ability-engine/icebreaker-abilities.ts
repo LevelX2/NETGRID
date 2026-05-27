@@ -12,6 +12,7 @@ import type {
 
 export type RuntimeIcebreakerAbility = AbilityDefinition & {
   iceSubtypes?: readonly string[];
+  selectedIceSubtypeFromBreaker?: true;
   strengthDuration?: "current_encounter" | "current_run";
   variableStrength?: { min: number };
   postBreakStealthLossMode?: "total_if_available" | "up_to_if_available";
@@ -21,15 +22,21 @@ export type RuntimeIcebreakerAbility = AbilityDefinition & {
     | "blink_random_break_or_net_damage"
     | "bartmoss_post_encounter_self_trash_check"
     | "snowball_run_strength_per_successful_break"
-    | "dupre_strength_counter_and_last_fort";
+    | "dupre_strength_counter_and_last_fort"
+    | "set_next_sentry_free_break_after_fully_breaking_wall";
   source: "shared_card_definition" | "card_implementation";
 };
 
 function breakMatcherFields(
   matcher: CardIcebreakerBreakMatcherImplementation,
-): Pick<RuntimeIcebreakerAbility, "iceSubtype" | "iceSubtypes" | "subroutineBreakTags"> {
+): Pick<
+  RuntimeIcebreakerAbility,
+  "iceSubtype" | "iceSubtypes" | "selectedIceSubtypeFromBreaker" | "subroutineBreakTags"
+> {
   if (matcher.kind === "any") return {};
   if (matcher.kind === "ice_subtype") return { iceSubtype: matcher.subtype };
+  if (matcher.kind === "selected_ice_subtype")
+    return { selectedIceSubtypeFromBreaker: true };
   if (matcher.kind === "ice_subtype_any_of")
     return { iceSubtypes: [...matcher.subtypes] };
   if (matcher.kind === "subroutine_tag")

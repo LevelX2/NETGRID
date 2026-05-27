@@ -376,6 +376,9 @@ export function applyPrintedTraceSuccessFollowups(
   const tagsAdded = traceSuccessTagAmount(trace.successEffect, successful, result);
   const hackerTrackerCountersAdded =
     host.callbacks.addHackerTrackerTraceCounters();
+  const traceAvoidReward = successful
+    ? { amount: 0, sourceDefinitionIds: [] as string[] }
+    : applyTraceAvoidRewards(host, trace);
   let runnerRunLockCreditCost = 0;
   let runnerRunEnded = false;
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
@@ -464,6 +467,15 @@ export function applyPrintedTraceSuccessFollowups(
           traceHostedCreditsAdded: hackerTrackerCountersAdded,
         }
       : {}),
+    ...(traceAvoidReward.amount > 0
+      ? {
+          traceAvoidRewardCredits: traceAvoidReward.amount,
+          gainedCredits: traceAvoidReward.amount,
+          runnerCreditsAfter: state.runner.credits,
+          traceAvoidRewardSourceDefinitionIds:
+            traceAvoidReward.sourceDefinitionIds.sort().join(","),
+        }
+      : {}),
     ...(runnerRunEnded
       ? {
           fangRunEnded: true,
@@ -489,6 +501,21 @@ export function applyPrintedTraceSuccessFollowups(
     payload,
     stateChanged: true,
   };
+}
+
+function applyTraceAvoidRewards(
+  host: EncounterPrintedEffectHost,
+  trace: CurrentTrace,
+): { amount: number; sourceDefinitionIds: string[] } {
+  let amount = 0;
+  const sourceDefinitionIds: string[] = [];
+  for (const reward of trace.traceAvoidRewardUsages ?? []) {
+    if (!Number.isInteger(reward.amount) || reward.amount <= 0) continue;
+    amount += reward.amount;
+    sourceDefinitionIds.push(reward.sourceDefinitionId);
+  }
+  if (amount > 0) host.state.runner.credits += amount;
+  return { amount, sourceDefinitionIds };
 }
 
 function traceSuccessTagAmount(

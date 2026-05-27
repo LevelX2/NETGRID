@@ -96,8 +96,11 @@ export function makeActionId(
   ];
   if (payload?.serverId) parts.push(String(payload.serverId));
   if (payload?.selectedServerId) parts.push(String(payload.selectedServerId));
+  if (payload?.selectedCardId) parts.push(String(payload.selectedCardId));
+  if (payload?.selectedSubtype) parts.push(String(payload.selectedSubtype));
   if (payload?.cardId) parts.push(String(payload.cardId));
   if (payload?.hostOnCardId) parts.push(String(payload.hostOnCardId));
+  if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   if (payload?.runnerProgramTrashBeforeInstall)
     parts.push("runner_program_trash_before_install");
   if (payload?.breakerId) parts.push(String(payload.breakerId));

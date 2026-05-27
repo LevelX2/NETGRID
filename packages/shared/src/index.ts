@@ -791,8 +791,11 @@ export type CardInstance = {
   advancementCounters: number;
   strengthModifier: number;
   counters?: Partial<Record<CounterType, number>>;
+  tapped?: boolean;
   hostedOn?: CardInstanceId;
   selectedServerId?: Exclude<ServerId, "new_remote">;
+  selectedCardId?: CardInstanceId;
+  selectedSubtype?: string;
   variableIceState?: {
     family:
       | "x_strength"
@@ -875,7 +878,8 @@ export type RunState = {
     | "corp_lose_credits"
     | "runner_spend_corp_lose_credits"
     | "private_look_top_rd"
-    | "archives_faceup_to_rd";
+    | "archives_faceup_to_rd"
+    | "trash_rezzed_ice_on_fort_and_tag_runner";
   successfulRunSourceCardId?: CardInstanceId;
   successfulRunSourceDefinitionId?: CardDefinitionId;
   successfulRunSourceTitle?: string;
@@ -900,6 +904,13 @@ export type RunState = {
   approachIceExposeSkippedIceIdsThisRun?: CardInstanceId[];
   approachIceExposeViewingIceId?: CardInstanceId;
   approachIceExposeViewingSourceCardId?: CardInstanceId;
+  eventApproachIceExposeBeforeRez?: boolean;
+  prohibitNoisyIcebreakers?: boolean;
+  runnerCreditGainOnCorpRez?: number;
+  damagePreventionPool?: {
+    sourceDefinitionId: CardDefinitionId;
+    remaining: number;
+  };
   brokenSubroutineIndexes: number[];
   resolvedSubroutineIndexes: number[];
   successful: boolean;
@@ -966,6 +977,10 @@ export type RunState = {
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
+  nextSentryFreeBreakByBreaker?: Partial<Record<CardInstanceId, CardInstanceId>>;
+  nextSentryFreeBreakTargetIceByBreaker?: Partial<
+    Record<CardInstanceId, CardInstanceId>
+  >;
   fullyBrokenPassedIcePendingId?: CardInstanceId;
   startupImmolatorPendingPassedIceId?: CardInstanceId;
   forceJackOutAfterEncounterSourceId?: CardInstanceId;
@@ -977,6 +992,7 @@ export type RunState = {
     Record<CardInstanceId, number[]>
   >;
   remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
+  runStrengthBoostUsedSourceIds?: CardInstanceId[];
   bizarreEncryptionSchemeActive?: boolean;
   traceSuccessBySubroutineIndex?: Partial<Record<number, boolean>>;
   accessStealCostModifierSnapshotsByServer?: Partial<
@@ -1067,6 +1083,12 @@ export type TraceState = {
   baseLinkSourceId?: CardInstanceId;
   baseLinkValue?: number;
   baseLinkCostPaid?: number;
+  traceAvoidRewardUsages?: Array<{
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    amount: number;
+    timing: "trace_base_link_window" | "trace_post_bid_link_window";
+  }>;
   runnerBid?: number;
   runnerStrength?: number;
   postBidLinkSourceIds?: CardInstanceId[];
@@ -1166,6 +1188,9 @@ export type GameState = {
     runAttemptsThisGame?: number;
     trashedNodeThisTurn?: boolean;
     trashedNodeLastTurn?: boolean;
+    trashedAdvertisementThisTurn?: boolean;
+    trashedTransactionsThisTurn?: boolean;
+    prearrangedDropPending?: boolean;
     installedResourceIdsThisTurn?: CardInstanceId[];
     installedResourceIdsLastTurn?: CardInstanceId[];
     successfulHqRunThisTurn?: boolean;
@@ -1388,6 +1413,7 @@ export type VisibleCard = {
   trashCost?: number;
   counters?: Partial<Record<CounterType, number>>;
   counterDisplays?: CounterDisplay[];
+  tapped?: boolean;
   hostedOn?: CardInstanceId;
   selectedServerId?: Exclude<ServerId, "new_remote">;
   selectedServerLabel?: string;

@@ -52,6 +52,7 @@ type TracePostBidLinkCandidate = {
   linkDelta: number;
   creditCost: number;
   limitOncePerTrace: boolean;
+  rewardCreditsOnAvoidTrace?: number;
 };
 
 export type TraceOrchestrationHost = {
@@ -479,6 +480,19 @@ function resolveTraceBaseLinkChoice(
     baseLinkSourceId: candidate.sourceCardInstanceId,
     baseLinkValue: candidate.baseLinkValue,
     baseLinkCostPaid: candidate.creditCost,
+    ...(candidate.rewardCreditsOnAvoidTrace
+      ? {
+          traceAvoidRewardUsages: [
+            ...(trace.traceAvoidRewardUsages ?? []),
+            {
+              sourceCardInstanceId: candidate.sourceCardInstanceId,
+              sourceDefinitionId: candidate.sourceDefinitionId,
+              amount: candidate.rewardCreditsOnAvoidTrace,
+              timing: "trace_base_link_window" as const,
+            },
+          ],
+        }
+      : {}),
     runnerLink,
   };
   delete state.pendingChoice;
@@ -602,6 +616,9 @@ function postBidTraceLinkCandidates(
         linkDelta: effect.amount,
         creditCost,
         limitOncePerTrace,
+        ...(effect.rewardCreditsOnAvoidTrace
+          ? { rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace }
+          : {}),
       });
     }
   }
@@ -684,6 +701,19 @@ function resolveTracePostBidLinkChoice(
         ...(trace.postBidLinkSourceIds ?? []),
         candidate.cardId,
       ],
+      ...(candidate.rewardCreditsOnAvoidTrace
+        ? {
+            traceAvoidRewardUsages: [
+              ...(trace.traceAvoidRewardUsages ?? []),
+              {
+                sourceCardInstanceId: candidate.cardId,
+                sourceDefinitionId: candidate.definitionId,
+                amount: candidate.rewardCreditsOnAvoidTrace,
+                timing: "trace_post_bid_link_window" as const,
+              },
+            ],
+          }
+        : {}),
     };
     delete state.pendingChoice;
     state.trace = nextTrace;

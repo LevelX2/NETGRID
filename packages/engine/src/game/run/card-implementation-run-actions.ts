@@ -14,6 +14,16 @@ export type RunCardImplementationActionHost = {
     cardInstanceFor: (cardId: CardInstanceId) => CardInstance | undefined;
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     runnerInstalledCardIds: () => CardInstanceId[];
+    cardImplementationForDefinitionId?: (definitionId: string) => any;
+  };
+  actions?: {
+    buildLegalAction: (
+      type: LegalAction["type"],
+      label: string,
+      source: LegalAction["source"],
+      costs?: LegalAction["costs"],
+      payload?: LegalAction["payload"],
+    ) => LegalAction;
   };
   runtime: {
     pushActivatedActionsForTiming: (
@@ -45,6 +55,33 @@ export function buildRunnerDuringRunCardImplementationActions(
       definition,
       "during_run",
     );
+    const boost =
+      host.cards.cardImplementationForDefinitionId?.(definition.id)
+        ?.runnerRunStrengthBoost;
+    if (
+      !boost ||
+      host.state.cardInstances[cardId]?.tapped ||
+      host.state.run.runStrengthBoostUsedSourceIds?.includes(cardId)
+    )
+      continue;
+    for (const targetCardId of host.state.runner.rig.programs.slice().sort()) {
+      const targetDefinition = host.cards.definitionFor(targetCardId);
+      if (!targetDefinition.subtypes.includes("icebreaker")) continue;
+      if (!host.actions) continue;
+      legalActions.push(
+        host.actions.buildLegalAction(
+          "trigger_ability",
+          `${definition.title}: ${targetDefinition.title} +${boost.amount}`,
+          cardId,
+          [],
+          {
+            cardId,
+            targetCardId,
+            runnerAbility: "boost_icebreaker_for_run",
+          },
+        ),
+      );
+    }
   }
   return { handled: true, legalActions };
 }

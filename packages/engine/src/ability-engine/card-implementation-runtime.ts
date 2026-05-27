@@ -81,11 +81,13 @@ export type CardImplementationRuntimeDependencies = {
   runnerRunAttemptsLastTurn: (state: GameState) => number;
   runnerRunAttemptsThisGame: (state: GameState) => number;
   runnerTrashedNodeLastTurn: (state: GameState) => boolean;
+  runnerTrashedAdvertisementThisTurn: (state: GameState) => boolean;
+  runnerTrashedTransactionsThisTurn: (state: GameState) => boolean;
   runnerInstalledResourceLastTurn: (state: GameState) => boolean;
   runnerWasDamagedDuringLastThreeActions: (state: GameState) => boolean;
   runnerMadeSuccessfulRunOnServerThisTurn: (
     state: GameState,
-    server: Extract<ServerId, "hq">,
+    server: Extract<ServerId, "hq"> | "any_data_fort",
   ) => boolean;
   runnerLiberatedAgendaSubtypeThisTurn: (
     state: GameState,
@@ -495,6 +497,10 @@ function cardImplementationConditionMet(
       );
     case "runner_trashed_node_last_turn":
       return deps.runnerTrashedNodeLastTurn(state);
+    case "runner_trashed_advertisement_this_turn":
+      return deps.runnerTrashedAdvertisementThisTurn(state);
+    case "runner_trashed_transactions_this_turn":
+      return deps.runnerTrashedTransactionsThisTurn(state);
     case "runner_installed_resource_last_turn":
       return deps.runnerInstalledResourceLastTurn(state);
     case "runner_damaged_during_last_three_actions":
@@ -642,6 +648,11 @@ function canResolveActivatedCardImplementationAbility(
       return deps.trashOwnInstalledCardTargetCount(state) >= effect.min;
     if (effect.kind === "trash_cards_from_grip_for_credits")
       return effect.max >= 0;
+    if (effect.kind === "gain_credits_for_runner_trash_history")
+      return (
+        state.runnerTurnFlags?.trashedAdvertisementThisTurn === true ||
+        state.runnerTurnFlags?.trashedTransactionsThisTurn === true
+      );
     return true;
   });
 }
@@ -671,6 +682,10 @@ function assertOnPlayCardImplementationAbilityCanResolve(
     throw new Error("Der Runner hat in diesem Spiel nicht genug Runs versucht.");
   if (ability.condition?.kind === "runner_trashed_node_last_turn")
     throw new Error("Der Runner hat im letzten Zug keine Node getrasht.");
+  if (ability.condition?.kind === "runner_trashed_advertisement_this_turn")
+    throw new Error("Der Runner hat in diesem Zug keine Advertisement-Karte getrasht.");
+  if (ability.condition?.kind === "runner_trashed_transactions_this_turn")
+    throw new Error("Der Runner hat in diesem Zug keine Transactions-Karte getrasht.");
   if (ability.condition?.kind === "runner_installed_resource_last_turn")
     throw new Error("Der Runner hat im letzten Zug keine Resource installiert.");
   if (ability.condition?.kind === "runner_damaged_during_last_three_actions")
@@ -717,6 +732,10 @@ function assertActivatedCardImplementationAbilityCanResolve(
     throw new Error("Der Runner hat in diesem Spiel nicht genug Runs versucht.");
   if (ability.condition?.kind === "runner_trashed_node_last_turn")
     throw new Error("Der Runner hat im letzten Zug keine Node getrasht.");
+  if (ability.condition?.kind === "runner_trashed_advertisement_this_turn")
+    throw new Error("Der Runner hat in diesem Zug keine Advertisement-Karte getrasht.");
+  if (ability.condition?.kind === "runner_trashed_transactions_this_turn")
+    throw new Error("Der Runner hat in diesem Zug keine Transactions-Karte getrasht.");
   if (ability.condition?.kind === "runner_installed_resource_last_turn")
     throw new Error("Der Runner hat im letzten Zug keine Resource installiert.");
   if (ability.condition?.kind === "runner_damaged_during_last_three_actions")

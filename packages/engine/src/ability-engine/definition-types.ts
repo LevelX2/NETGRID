@@ -46,8 +46,12 @@ export type CardLifecycleImplementation = {
 };
 
 export type CardInstallTargetBindingImplementation = {
-  kind: "choose_data_fort_on_install";
-  stores: "selectedServerId";
+  kind:
+    | "choose_data_fort_on_install"
+    | "choose_installed_ice_on_install"
+    | "choose_icebreaker_subtype_on_install";
+  stores: "selectedServerId" | "selectedCardId" | "selectedSubtype";
+  choices?: readonly "code_gate"[] | readonly ("code_gate" | "sentry" | "wall")[];
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -675,6 +679,8 @@ export type CardScoredAgendaImplementation =
 export type HostedProgramCapacityImplementation = {
   capacityMu: number;
   allowedCardTypes: readonly ["program"];
+  allowedProgramSubtypes?: readonly string[];
+  maxHostedPrograms?: number;
   hostedProgramsAreInstalled: true;
   hostLeavesPlayTrashesHosted: true;
 };
@@ -705,6 +711,8 @@ export type CardConditionImplementation =
   | { kind: "runner_attempted_run_last_turn"; minimumRuns: number }
   | { kind: "runner_attempted_run_this_game"; minimumRuns: number }
   | { kind: "runner_trashed_node_last_turn" }
+  | { kind: "runner_trashed_advertisement_this_turn" }
+  | { kind: "runner_trashed_transactions_this_turn" }
   | { kind: "runner_installed_resource_last_turn" }
   | { kind: "runner_damaged_during_last_three_actions" }
   | {
@@ -717,7 +725,7 @@ export type CardConditionImplementation =
     }
   | {
       kind: "runner_made_successful_run_on_server_this_turn";
-      server: Extract<ServerId, "hq">;
+      server: Extract<ServerId, "hq"> | "any_data_fort";
     };
 
 export type ActivatedCardAbilityImplementation = {
@@ -870,6 +878,7 @@ export type CardRemainingReplacementLongtailImplementation =
 
 export type CardEffectImplementation =
   | GainCreditsEffectImplementation
+  | GainCreditsForRunnerTrashHistoryEffectImplementation
   | AddBadPublicityEffectImplementation
   | DrawCardsEffectImplementation
   | LoseCreditsEffectImplementation
@@ -906,6 +915,8 @@ export type CardEffectImplementation =
   | TrashCardsFromGripForCreditsEffectImplementation
   | ShuffleGripTrashAndStackThenDrawEffectImplementation
   | PayRezCostToTrashRezzedIceEffectImplementation
+  | MarkPrearrangedDropEffectImplementation
+  | TrashRezzedIceOnLastSuccessfulRunFortEffectImplementation
   | TrashUnrezzedIceEffectImplementation
   | CorpChoiceRezOrTrashIceEffectImplementation
   | GainCreditsPerAdvancementCounterOnSourceEffectImplementation
@@ -927,6 +938,14 @@ export type GainCreditsEffectImplementation = {
   recipient: "controller" | "runner" | "corp";
   amount: number;
   visibility: EventVisibilityClass;
+};
+
+export type GainCreditsForRunnerTrashHistoryEffectImplementation = {
+  kind: "gain_credits_for_runner_trash_history";
+  recipient: "controller";
+  advertisementAmount: number;
+  transactionsAmount: number;
+  visibility: Extract<EventVisibilityClass, "public">;
 };
 
 export type AddBadPublicityEffectImplementation = {
@@ -1276,7 +1295,8 @@ export type MakeRunEffectImplementation = {
     | "corp_lose_credits"
     | "runner_spend_corp_lose_credits"
     | "private_look_top_rd"
-    | "archives_faceup_to_rd";
+    | "archives_faceup_to_rd"
+    | "trash_rezzed_ice_on_fort_and_tag_runner";
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunRunnerCreditGain?: number;
@@ -1293,12 +1313,28 @@ export type MakeRunEffectImplementation = {
     returnUnusedAtRunEnd: true;
   };
   afterRunCompletedUnpreventableCoreDamage?: number;
+  prohibitNoisyIcebreakers?: boolean;
+  eventApproachIceExposeBeforeRez?: boolean;
+  runnerCreditGainOnCorpRez?: number;
+  damagePreventionPool?: number;
   visibility: EventVisibilityClass;
 };
 
 export type PayRezCostToTrashRezzedIceEffectImplementation = {
   kind: "pay_rez_cost_to_trash_rezzed_ice";
   target: "chosen_rezzed_ice";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type MarkPrearrangedDropEffectImplementation = {
+  kind: "mark_next_agenda_access_credit_gain";
+  amount: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type TrashRezzedIceOnLastSuccessfulRunFortEffectImplementation = {
+  kind: "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags";
+  tagAmount: number;
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -1369,12 +1405,14 @@ export type PayCreditsOrLoseGameEffectImplementation = {
 export type UseBaseLinkEffectImplementation = {
   kind: "use_base_link";
   baseLink: number;
+  rewardCreditsOnAvoidTrace?: number;
   visibility: EventVisibilityClass;
 };
 
 export type IncreaseTraceLinkEffectImplementation = {
   kind: "increase_trace_link";
   amount: number;
+  rewardCreditsOnAvoidTrace?: number;
   visibility: EventVisibilityClass;
 };
 
@@ -1591,6 +1629,7 @@ export type CardIcebreakerAbilityImplementation =
 export type CardIcebreakerBreakMatcherImplementation =
   | { kind: "any" }
   | { kind: "ice_subtype"; subtype: string }
+  | { kind: "selected_ice_subtype" }
   | { kind: "ice_subtype_any_of"; subtypes: readonly string[] }
   | { kind: "subroutine_tag"; tag: string }
   | { kind: "subroutine_traces" };
@@ -1610,7 +1649,8 @@ export type CardIcebreakerBreakSpecialImplementation =
   | { kind: "blink_random_break_or_net_damage" }
   | { kind: "bartmoss_post_encounter_self_trash_check" }
   | { kind: "snowball_run_strength_per_successful_break" }
-  | { kind: "dupre_strength_counter_and_last_fort" };
+  | { kind: "dupre_strength_counter_and_last_fort" }
+  | { kind: "set_next_sentry_free_break_after_fully_breaking_wall" };
 
 export type RestrictedHostedCreditUse =
   | "using_icebreaker_during_run"
@@ -1631,6 +1671,7 @@ export type RestrictedHostedCreditSourceImplementation = {
     mode: "refill_to_capacity_if_used";
   };
   allowUseWhileOverwritingSource?: true;
+  requireHostedBreakerForIcebreakerUse?: true;
 };
 
 export type CardInstallAdditionalCostImplementation = {

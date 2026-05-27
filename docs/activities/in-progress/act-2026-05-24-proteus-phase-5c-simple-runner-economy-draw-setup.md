@@ -15,12 +15,11 @@ proReferences:
   - PRO005
   - PRO008
 blockedBy:
-  - runner_trash_subtype_history
-  - runner_next_agenda_access_reward
-  - base_link_trace_avoid_reward
+  - legacy_umbrella_activity_not_leading_completion_unit
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-5c-simple-runner-economy-draw-setup.md
   - docs/activities/done/act-2026-05-26-proteus-pro005-simple-runner-economy-draw-events.md
+  - docs/activities/done/act-2026-05-27-proteus-pro008-runner-event-run-economy-followup.md
   - docs/releases/proteus/README.md
 checks:
   - "rg -n \"onr_proteus_103|onr_proteus_114|onr_proteus_118|onr_proteus_124|onr_proteus_130|onr_proteus_148\" data/cards/proteus-cards.json data/manifests/proteus-card-support.json docs/releases/proteus -S"
@@ -63,10 +62,10 @@ Die einfachen sichtbaren Runner-Economy-, Draw- und Setup-Karten über bestehend
 
 ## Akzeptanzkriterien
 
-- [ ] Jede Zielkarte besitzt eine eigene CardImplementation-Datei.
-- [ ] Kosten, Ziele, Choices und Timing werden in `applyAction` revalidiert.
-- [ ] Hidden-Zone-/PlayerView-/PublicEvent-Redaction ist bei Stack-/Grip-/HQ-/R&D-Bezug abgesichert.
-- [ ] Replay-/StateHash-Stabilität und Registry-/Coverage-/Manifest-Nachweis sind erbracht.
+- [x] Jede Zielkarte besitzt eine eigene CardImplementation-Datei.
+- [x] Kosten, Ziele, Choices und Timing werden in `applyAction` revalidiert.
+- [x] Hidden-Zone-/PlayerView-/PublicEvent-Redaction ist bei Stack-/Grip-/HQ-/R&D-Bezug abgesichert.
+- [x] Replay-/StateHash-Stabilität und Registry-/Coverage-/Manifest-Nachweis sind erbracht.
 
 ## Ergebnisnotiz
 
@@ -80,4 +79,6 @@ Die Phase-5c-Sammelactivity bleibt blockiert, weil vier Karten weiterhin fehlend
 - `Prearranged Drop` braucht einen turngebundenen Delayed-Reward für den nächsten Agenda-Access in diesem Zug. Dafür fehlt ein generischer Runner-Event-Flag, der auf Access einer Agenda triggert, Credits auszahlt, genau einmal verbraucht wird und bei Turn-Ende deterministisch aufräumt.
 - `Back Door to Rivals` und `Runner Sensei` brauchen Base-Link-Trace-Entscheidungen mit Exklusivität pro Trace, variablem Base-Link-/Pump-Creditpfad und anschließendem Credit-Gewinn, wenn genau diese Quelle erfolgreich zum Vermeiden einer Trace verwendet wurde. Das vorhandene `trace_post_bid_link_window`-Muster deckt einfache Link-Boosts ab, aber kein Base-Link-Auswahlfenster mit Source-Reward.
 
-PRO014 bleibt offen; keine dieser vier Karten wurde implementiert, decklegal, formatlegal oder AI-unterstützt gemacht.
+Update 2026-05-27: PRO008 ist abgeschlossen. `On the Fast Track`, `Prearranged Drop`, `Back Door to Rivals` und `Runner Sensei` sind über generische Runner-Trash-History, Next-Agenda-Access-Reward und Trace-Link-Reward-Bausteine umgesetzt, registriert, im Manifest engine-/human-playable markiert und durch fokussierte PRO008-Tests abgesichert.
+
+Diese alte Phase-5c-Sammelactivity bleibt als Umbrella-Referenz im Board und wird nicht als zusätzliches eigenständiges Komplettpaket gezählt. Die führenden Abschlussnachweise sind PRO005 und PRO008. Keine Karte wurde decklegal, formatlegal oder AI-unterstützt gemacht.

@@ -32,6 +32,12 @@ export type RunAccessTransitionHost = {
   draw: {
     drawCorpCards: (count: number) => void;
   };
+  trash?: {
+    trashCorpInstalledCardToArchives: (
+      cardId: CardInstanceId,
+      legalAction?: LegalAction,
+    ) => void;
+  };
   rng: {
     shuffleStateIds: (
       ids: CardInstanceId[],
@@ -131,6 +137,18 @@ export function enterAccessFromSuccessfulRun(
       handled: true,
       accessSkipped: true,
       replacementApplied: "archives_faceup_to_rd",
+      runFinished: true,
+      stateChanged: true,
+      ...resolvedPayloadFor(legalAction),
+    };
+  }
+  if (run.successfulRunAccessReplacement === "trash_rezzed_ice_on_fort_and_tag_runner") {
+    applySuccessfulRunAccessReplacement(host, run, legalAction);
+    host.run.finishRun(true, legalAction);
+    return {
+      handled: true,
+      accessSkipped: true,
+      replacementApplied: "trash_rezzed_ice_on_fort_and_tag_runner",
       runFinished: true,
       stateChanged: true,
       ...resolvedPayloadFor(legalAction),
@@ -413,6 +431,19 @@ function applySuccessfulRunAccessReplacement(
     Math.floor(run.successfulRunRunnerCreditGain ?? 0),
   );
   if (runnerCreditGain > 0) host.state.runner.credits += runnerCreditGain;
+  let trashedRezzedIceCount = 0;
+  const trashedRezzedIceDefinitionIds: CardDefinitionId[] = [];
+  if (run.successfulRunAccessReplacement === "trash_rezzed_ice_on_fort_and_tag_runner") {
+    const server = host.breach.servers.mustServer(run.attackedServerId);
+    for (const iceId of server.ice.slice()) {
+      if (host.cards.cardInstanceFor(iceId).rezzed !== true) continue;
+      trashedRezzedIceDefinitionIds.push(host.cards.definitionFor(iceId).id);
+      if (!host.trash)
+        throw new Error("Successful-run ICE-trash callback fehlt.");
+      host.trash.trashCorpInstalledCardToArchives(iceId, legalAction);
+      trashedRezzedIceCount += 1;
+    }
+  }
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -424,6 +455,11 @@ function applySuccessfulRunAccessReplacement(
       corpDrawnCount: corpDraw,
       gainedCredits: runnerCreditGain,
       runnerCreditsAfter: host.state.runner.credits,
+      trashedRezzedIceCount,
+      trashedCount: trashedRezzedIceCount,
+      ...(trashedRezzedIceDefinitionIds.length > 0
+        ? { trashedCardDefinitionIds: trashedRezzedIceDefinitionIds.sort().join(",") }
+        : {}),
       hiddenZoneBarrier: true,
     };
   }

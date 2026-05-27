@@ -14,14 +14,10 @@ releaseTarget: Proteus Phase 5d
 proReferences:
   - PRO008
 blockedBy:
-  - Generic event-initiated run flags do not yet support "cannot use noisy icebreakers during that run"; All-Hands and Rush Hour cannot be promoted with accessCount alone.
-  - Run-encounter interventions currently model installed sources such as Smarteye; Decoy Signal needs source-bound event-run exposure on every unrezzed ICE approach with jack-out-before-rez cleanup.
-  - Successful-run access replacements do not yet support "do not access; trash all rezzed ICE on the attacked fort; Corp gives Runner three tags" for Demolition Run.
-  - The fully-broken-passed-ICE derez window currently requires an installed program source; Disgruntled Ice Technician needs the same family as a temporary event-run follow-up.
-  - The engine tracks a boolean successful-run-this-turn flag, but not the exact successful data fort for later event play; Remote Detonator cannot revalidate its target fort yet.
-  - Damage-prevention sources are installed source based; Weefle Initiation needs a temporary, run-bound prevention pool that expires at run end.
+  - legacy_umbrella_activity_not_leading_completion_unit
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-5d-visible-runner-run-events.md
+  - docs/activities/done/act-2026-05-27-proteus-pro008-runner-event-run-economy-followup.md
   - docs/releases/proteus/README.md
 checks:
   - "rg -n \"onr_proteus_101|onr_proteus_104|onr_proteus_105|onr_proteus_106|onr_proteus_107|onr_proteus_120|onr_proteus_121|onr_proteus_122|onr_proteus_127\" data/cards/proteus-cards.json data/manifests/proteus-card-support.json docs/releases/proteus -S"
@@ -66,10 +62,10 @@ Die sichtbaren Proteus-Run-Events über generische `make_run`- und rungebundene 
 
 ## Akzeptanzkriterien
 
-- [ ] Jede Zielkarte besitzt eine eigene CardImplementation-Datei.
-- [ ] Runstart, Runziel, Folgeflags und Cleanup sind deterministisch und revalidiert.
-- [ ] Wrong-Side-, stale-action-, Kosten-, Ziel-, Hidden-Info- und Replay-/StateHash-Tests sind vorhanden.
-- [ ] Registry-/Coverage-/Manifest-Nachweis ist erbracht.
+- [x] Jede Zielkarte besitzt eine eigene CardImplementation-Datei.
+- [x] Runstart, Runziel, Folgeflags und Cleanup sind deterministisch und revalidiert.
+- [x] Wrong-Side-, stale-action-, Kosten-, Ziel-, Hidden-Info- und Replay-/StateHash-Tests sind vorhanden.
+- [x] Registry-/Coverage-/Manifest-Nachweis ist erbracht.
 
 ## Ergebnisnotiz
 
@@ -83,4 +79,6 @@ Blockiert. Die Zielkarten teilen zwar die sichtbare Runner-Run-Event-Familie, be
 - `Weefle Initiation` braucht einen temporären Damage-Prevention-Pool bis Run-Ende.
 - `Drone for a Day` ist isoliert als Gain-plus-Tag-Event machbar, wird aber nicht einzeln promotet, weil der Slice als Ganzes nicht alle Akzeptanzkriterien erfuellen kann.
 
-Keine CardImplementation wurde fuer 5d angelegt und keine Manifest-/Coverage-Promotion vorgenommen.
+Update 2026-05-27: PRO008 ist abgeschlossen. Alle 5d-Zielkarten sind über generische Runner-Event-Run-Flags, Noisy-Icebreaker-Verbot, Decoy-Expose-vor-Rez, Rezzed-ICE-Trash-Replacements, Event-Source-Post-Pass-Derez, erfolgreiche-Data-Fort-History, Corp-Rez-Rewards und rungebundene Damage-Prevention-Pools umgesetzt, registriert, im Manifest engine-/human-playable markiert und durch fokussierte PRO008-Tests abgesichert.
+
+Diese alte Phase-5d-Sammelactivity bleibt als Umbrella-Referenz im Board und wird nicht als zusätzliches eigenständiges Komplettpaket gezählt. Der führende Abschlussnachweis ist PRO008. Keine Karte wurde decklegal, formatlegal oder AI-unterstützt gemacht.
