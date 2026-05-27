@@ -322,11 +322,14 @@ import {
   type StartRunOptions,
 } from "./game/run/run-core-execution";
 import {
+  continueRun as continueRunFromRunContinuation,
+  type RunContinuationExecutionHost,
+} from "./game/run/run-continuation-execution";
+import {
   applyBodyweightDataCrecheSuccessfulRun,
   applyDirectSuccessfulRunTriggers,
   buildSuccessfulRunFollowupActions,
   cleanupDelayedSuccessfulRunTemporaryIce,
-  finalizeDelayedSuccessfulRunAfterPassedIce,
   resolveSuccessfulRunFollowupAbility,
   resolveSuccessfulRunInterventionChoice as resolveSuccessfulRunInterventionChoiceInRunModule,
   successfulRunInterventionCost,
@@ -360,11 +363,7 @@ import {
   type RunDurationPaymentHost,
 } from "./game/run/run-duration-payment";
 import {
-  appendUnpaidPayOrEndRunEffects,
-  cleanupEncounterDurationMarkers,
   encounterResolutionHost,
-  preparePayOrEndRunSubroutinePayment,
-  resolveFatalAttractorPostEncounter,
   resolvePassRezzedIceProgramTrashChoice as resolvePassRezzedIceProgramTrashChoiceInRunModule,
   resolveViral15ProgramTrashChoice as resolveViral15ProgramTrashChoiceInRunModule,
   type EncounterResolutionHost,
@@ -375,7 +374,6 @@ import {
   fullyBrokenPassedIcePostPassActions,
   isSubmarineUplinkSource,
   markSubmarineUplinkJackOutAfterEncounter,
-  resolveEncounterSpecialWindowSubroutine,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
   resolveStartupImmolatorTrashIce as resolveStartupImmolatorTrashIceInRunModule,
   resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
@@ -386,14 +384,11 @@ import {
   applyPrintedTraceSuccessFollowups,
   encounterPrintedEffectHost,
   isSupportedEncounterTraceSuccessEffect,
-  resolvePrintedDamageSubroutine,
-  startTraceFromPrintedSubroutine,
   type EncounterPrintedEffectHost,
 } from "./game/run/encounter-printed-effects";
 import {
   encounterPrintedNonTraceHost,
   resolveDirectTrashProgramSubroutine,
-  resolveEncounterPrintedNonTraceEffect,
   type EncounterPrintedNonTraceHost,
 } from "./game/run/encounter-printed-nontrace-effects";
 import {
@@ -637,7 +632,6 @@ import {
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
-  BARTMOSS_ID,
   BIZARRE_ENCRYPTION_SCHEME_ID,
   BLINK_ID,
   BODYWEIGHT_DATA_CRECHE_ID,
@@ -5549,166 +5543,56 @@ function applyAiBoonRunStart(
 }
 
 function continueRun(state: GameState, legalAction?: LegalAction): void {
-  const run = mustRun(state);
-  if (run.phase !== "encounter_ice" || !run.encounteredIceId) {
-    if (run.phase === "access") {
-      finishRun(state, true, legalAction);
-      return;
-    }
-    throw new Error("Run kann in diesem Schritt nicht fortgesetzt werden.");
-  }
-  const definition = definitionFor(state, run.encounteredIceId);
-  let ended = false;
-  const damageSummaries: DamageSummary[] = [];
-  const subroutines = subroutinesForCurrentEncounter(state, definition);
-  const payOrEndRunPayment = preparePayOrEndRunSubroutinePayment(
-    encounterResolutionHostForState(state),
-    subroutines,
+  continueRunFromRunContinuation(
+    runContinuationExecutionHost(state),
     legalAction,
   );
-  const payOrEndRunIndexesForThisContinue =
-    payOrEndRunPayment.payOrEndRunIndexesForThisContinue ?? new Set<number>();
-  const paidPayOrEndRunIndexes =
-    payOrEndRunPayment.paidPayOrEndRunIndexes ?? new Set<number>();
-  const printedNonTraceHost = encounterPrintedNonTraceHostForState(
-    state,
-    legalAction,
-  );
-  for (let index = 0; index < subroutines.length; index += 1) {
-    const subroutine = subroutines[index];
-    if (
-      !subroutine ||
-      state.winner ||
-      run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index) ||
-      ended
-    )
-      continue;
-    if (subroutine.requiresSuccessfulTraceSubroutineIndex !== undefined) {
-      const traceIndex = subroutine.requiresSuccessfulTraceSubroutineIndex;
-      if (run.traceSuccessBySubroutineIndex?.[traceIndex] !== true) {
-        if (!run.resolvedSubroutineIndexes.includes(index))
-          run.resolvedSubroutineIndexes.push(index);
-        continue;
-      }
-    }
-    if (subroutine.type === "initiate_trace") {
-      startTraceFromPrintedSubroutine(
-        encounterPrintedEffectHostForState(state, legalAction),
-        {
-          sourceCardInstanceId: run.encounteredIceId,
-          subroutineIndex: index,
-          subroutine,
-          legalAction,
-        },
-      );
-      return;
-    }
-    if (subroutine.type === "do_damage") {
-      const damageResult = resolvePrintedDamageSubroutine(
-        encounterPrintedEffectHostForState(state, legalAction),
-        {
-          definition,
-          subroutine,
-          subroutineIndex: index,
-          damageSummaries,
-          legalAction,
-        },
-      );
-      if (damageResult.suspended) return;
-      if (state.winner) return;
-    }
-    const nonTraceResult = resolveEncounterPrintedNonTraceEffect(
-      printedNonTraceHost,
-      {
-        definition,
-        subroutine,
-        subroutineIndex: index,
-        legalAction,
-        paidPayOrEndRunIndexes: paidPayOrEndRunIndexes,
-      },
-    );
-    if (nonTraceResult.suspended) return;
-    if (nonTraceResult.runShouldEnd) ended = true;
-    const specialWindow = resolveEncounterSpecialWindowSubroutine(
-      encounterSpecialWindowHostForState(state),
-      { definition, subroutine, subroutineIndex: index, legalAction },
-    );
-    if (specialWindow.suspended) return;
-  }
-  ended = appendUnpaidPayOrEndRunEffects({
-    definition,
-    subroutines,
-    legalAction,
-    payOrEndRunIndexesForThisContinue,
-    paidPayOrEndRunIndexes,
-    ended,
-  }).ended;
-  if (state.winner) return;
-  const encounteredIceId = run.encounteredIceId;
-  resolveFatalAttractorPostEncounter(encounterResolutionHostForState(state), {
-    subroutines,
-    damageSummaries,
-    legalAction,
-    dealDamage: (input) => doDamage(state, input),
-    setDamagePayload: (summary) => {
-      if (legalAction) setDamagePayload(legalAction, summary);
-    },
-  });
-  if (state.winner) return;
-  cleanupEncounterDurationMarkers(encounterResolutionHostForState(state));
-  resetBreakerStrength(state);
-  if (ended) {
-    finishRun(state, false, legalAction);
-    return;
-  }
-  applyBartmossPostEncounterTrigger(state, run, legalAction);
-  if (encounteredIceId)
-    finalizeDelayedSuccessfulRunAfterPassedIce(
-      successfulRunInterventionHost(state),
-      encounteredIceId,
-      legalAction,
-    );
-  movePastCurrentIce(runMovementHostForState(state), legalAction);
 }
 
-function applyBartmossPostEncounterTrigger(
+function runContinuationExecutionHost(
   state: GameState,
-  run: ActiveRun,
-  legalAction?: LegalAction,
-): void {
-  const usedBreakerIds = run.bartmossUsedBreakerIdsThisEncounter?.slice() ?? [];
-  if (usedBreakerIds.length === 0) return;
-  const encounteredIceId = run.encounteredIceId ?? "unknown_ice";
-  const outcomes: Array<{
-    breakerId: CardInstanceId;
-    die: number;
-    trashed: boolean;
-  }> = [];
-  for (const breakerId of usedBreakerIds) {
-    if (!state.runner.rig.programs.includes(breakerId)) continue;
-    if (!icebreakerHasSpecial(state, breakerId, "bartmoss_post_encounter_self_trash_check"))
-      continue;
-    const die = rollDeterministicDie(
-      state,
-      `${BARTMOSS_ID}.post_encounter.${run.runId}.${encounteredIceId}.${breakerId}`,
-    );
-    const trashed = die === 1;
-    if (trashed) trashRunnerInstalledProgram(state, breakerId);
-    outcomes.push({ breakerId, die, trashed });
-  }
-  if (legalAction && outcomes.length > 0) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      bartmossPostEncounterChecked: true,
-      bartmossPostEncounterOutcomes: outcomes
-        .map(
-          (outcome) =>
-            `${outcome.breakerId}:${outcome.die}:${outcome.trashed ? "trashed" : "survived"}`,
-        )
-        .join(","),
-    };
-  }
+): RunContinuationExecutionHost {
+  return {
+    state,
+    cards: {
+      definitionFor: (cardId) => definitionFor(state, cardId),
+    },
+    encounter: {
+      currentSubroutines: (iceDefinition) =>
+        subroutinesForCurrentEncounter(state, iceDefinition),
+      resolutionHost: () => encounterResolutionHostForState(state),
+      printedEffectHost: (legalAction) =>
+        encounterPrintedEffectHostForState(state, legalAction),
+      printedNonTraceHost: (legalAction) =>
+        encounterPrintedNonTraceHostForState(state, legalAction),
+      specialWindowHost: () => encounterSpecialWindowHostForState(state),
+      successfulRunInterventionHost: () => successfulRunInterventionHost(state),
+    },
+    movement: {
+      host: () => runMovementHostForState(state),
+    },
+    damage: {
+      dealDamage: (input) => doDamage(state, input),
+      setDamagePayload: (legalAction, summary) =>
+        setDamagePayload(legalAction, summary),
+    },
+    cleanup: {
+      resetBreakerStrength: () => resetBreakerStrength(state),
+    },
+    callbacks: {
+      finishRun: (successful, legalAction) =>
+        finishRun(state, successful, legalAction),
+      icebreakerHasBartmossPostEncounterSelfTrashCheck: (breakerId) =>
+        icebreakerHasSpecial(
+          state,
+          breakerId,
+          "bartmoss_post_encounter_self_trash_check",
+        ),
+      rollDeterministicDie: (purpose) => rollDeterministicDie(state, purpose),
+      trashRunnerInstalledProgram: (breakerId) =>
+        trashRunnerInstalledProgram(state, breakerId),
+    },
+  };
 }
 
 function resolveBlinkBreakSubroutineAction(
