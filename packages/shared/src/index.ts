@@ -1075,6 +1075,12 @@ export type TraceState = {
   baseLinkSourceId?: CardInstanceId;
   baseLinkValue?: number;
   baseLinkCostPaid?: number;
+  traceAvoidRewardUsages?: Array<{
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    amount: number;
+    timing: "trace_base_link_window" | "trace_post_bid_link_window";
+  }>;
   runnerBid?: number;
   runnerStrength?: number;
   postBidLinkSourceIds?: CardInstanceId[];

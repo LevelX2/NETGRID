@@ -809,6 +809,15 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     state = apply(state, "runner", (candidate) => candidate.actionId === action.actionId);
     expect(state.corp.archives).toContain(iceId);
     expect(state.runner.tags).toBe(3);
+    const remoteDetonatorEffect =
+      cardImplementationForDefinitionId("onr_proteus_121_remote-detonator")?.abilities
+        ?.flatMap((ability) => ("effects" in ability ? ability.effects : []))
+        .find(
+          (effect) =>
+            effect.kind ===
+            "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags",
+        );
+    expect(remoteDetonatorEffect).toMatchObject({ tagAmount: 3 });
     expect(state.eventLog.some((event) => event.publicPayload?.tagsAdded === 3)).toBe(
       true,
     );
@@ -876,27 +885,39 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     });
   });
 
-  it("rewards Back Door to Rivals and Runner Sensei when their link avoids a trace", () => {
+  function traceRewardState(
+    definitionId:
+      | "onr_proteus_130_back-door-to-rivals"
+      | "onr_proteus_148_runner-sensei",
+    seed: string,
+  ): GameState {
+    let state = corpActionStateForProteusPro007(seed);
+    state.corp.credits = 30;
+    state.runner.credits = 30;
+    addRunnerResourceToRigForTest(state, definitionId, definitionId);
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runAttemptsThisGame: 1,
+    };
+    state = playCorpOperationByDefinition(
+      state,
+      "onr_proteus_052_schlaghund-pointers",
+    );
+    return applyChoice(state, "corp", "bid_0");
+  }
+
+  it("rewards exactly the chosen base-link ability when it avoids a trace", () => {
     for (const definitionId of [
       "onr_proteus_130_back-door-to-rivals",
       "onr_proteus_148_runner-sensei",
     ] as const) {
-      let state = corpActionStateForProteusPro007(`proteus-pro008-trace-${definitionId}`);
-      state.corp.credits = 30;
-      state.runner.credits = 30;
-      addRunnerResourceToRigForTest(state, definitionId, definitionId);
-      state.runnerTurnFlags = {
-        ...(state.runnerTurnFlags ?? {
-          stoleAgendaThisTurn: false,
-          stoleAgendaLastTurn: false,
-        }),
-        runAttemptsThisGame: 1,
-      };
-      state = playCorpOperationByDefinition(
-        state,
-        "onr_proteus_052_schlaghund-pointers",
+      let state = traceRewardState(
+        definitionId,
+        `proteus-pro008-base-reward-${definitionId}`,
       );
-      state = applyChoice(state, "corp", "bid_0");
       const beforeBaseLinkCredits = state.runner.credits;
       state = applyChoice(
         state,
@@ -911,15 +932,43 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       );
       state = applyChoice(state, "runner", "pass");
       expect(state.runner.tags).toBe(0);
-      const expectedMinimum =
+      const expectedCredits =
         beforeBaseLinkCredits -
         (definitionId.endsWith("runner-sensei") ? 2 : 0) -
         (definitionId.endsWith("back-door-to-rivals") ? 1 : 0) +
         1;
-      expect(state.runner.credits).toBeGreaterThanOrEqual(expectedMinimum);
+      expect(state.runner.credits).toBe(expectedCredits);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceSuccessful: false,
-        gainedCredits: expect.any(Number),
+        gainedCredits: 1,
+      });
+    }
+  });
+
+  it("rewards exactly the chosen post-bid link ability when it avoids a trace", () => {
+    for (const definitionId of [
+      "onr_proteus_130_back-door-to-rivals",
+      "onr_proteus_148_runner-sensei",
+    ] as const) {
+      let state = traceRewardState(
+        definitionId,
+        `proteus-pro008-post-reward-${definitionId}`,
+      );
+      state = applyChoice(state, "runner", "pass");
+      const beforeRunnerBidCredits = state.runner.credits;
+      state = applyChoice(state, "runner", "bid_2");
+      state = applyChoice(
+        state,
+        "runner",
+        traceChoiceOptionIdForDefinition(state, definitionId, "trace_link_"),
+      );
+      state = applyChoice(state, "runner", "pass");
+      const postBidCost = definitionId.endsWith("back-door-to-rivals") ? 3 : 2;
+      expect(state.runner.tags).toBe(0);
+      expect(state.runner.credits).toBe(beforeRunnerBidCredits - 2 - postBidCost + 1);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        traceSuccessful: false,
+        gainedCredits: 1,
       });
     }
   });

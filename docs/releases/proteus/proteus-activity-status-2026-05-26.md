@@ -18,7 +18,7 @@ Führend ist die eindeutige CardImplementation-Abdeckung:
 
 PRO001 hat dafür bereits den Guard in `packages/engine/src/card-implementations/coverage.test.ts` ergänzt: `reconciles Proteus manifest support against concrete files and registry`. Dieser Guard prüft 154 Karten in `data/cards/proteus-cards.json`, 154 Manifest-Einträge, eindeutige CardImplementation-Dateien, Registry-Parität, `implemented`-Manifestparität, `resolverRef = engine:<cardId>` für implementierte Karten und `resolverRef = null` für nicht implementierte Karten. PRO002 etabliert keine zweite konkurrierende Zählweise.
 
-Aktueller Stand nach PRO008:
+Aktueller Stand nach PRO008 und PRO008-1:
 
 | Kennzahl | Wert | Führende Quelle |
 | --- | ---: | --- |
@@ -33,6 +33,8 @@ PRO006-1 ist ausschließlich Test- und Typ-Härtung für den bereits umgesetzten
 PRO007 ist umgesetzt: `Credit Consolidation`, `Data Sifters`, `Manhunt`, `Schlaghund Pointers` und `Underworld Mole` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Runner-History-Conditions für getrashte Nodes, installierte Resources und Run-Versuche im Spiel, Trace-Margin-Tags, Trace-Zielauswahl für last-turn Resources und ein deklaratives Trace-Zusatzkostenmodell. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
 PRO008 ist umgesetzt: `On the Fast Track`, `Prearranged Drop`, `Back Door to Rivals`, `Runner Sensei`, `All-Hands`, `Rush Hour`, `Decoy Signal`, `Demolition Run`, `Remote Detonator`, `Disgruntled Ice Technician`, `Drone for a Day`, `Reconnaissance` und `Weefle Initiation` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Runner-Event-Run-Flags, Advertisement-/Transactions-Trash-History, einmaliger Agenda-Access-Credit-Reward, Trace-Link-Rewards, erfolgreiche-Run-Followups, Event-Source-Post-Pass-Derez, Rezzed-ICE-Trash-Replacements, Corp-Rez-Rewards und rungebundene Damage-Prevention-Pools. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
+
+PRO008-1 ist ausschließlich Härtung für den bereits umgesetzten PRO008-Scope. Trace-Avoid-Rewards werden aus den konkret genutzten Base-Link-/Post-Bid-Link-Abilities gezählt statt aus allen Reward-Effekten derselben Karte rekonstruiert; Remote Detonator nutzt im Followup-Pfad den Descriptor-`tagAmount`. Es setzt keine neue Proteus-Karte um, ändert keine Manifest-Freigaben und hält den Implementierungsstand bei 80/154.
 
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
 
@@ -95,6 +97,7 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-26-proteus-pro006-1-simple-ice-hardening.md` | `done` | PRO006-1 | Test-/Typ-Härtung für PRO006; keine neue Kartenpromotion, Implementierungszählung bleibt 62/154, Phase-6b-Rest geht in PRO010. |
 | `done/act-2026-05-27-proteus-pro007-corp-operation-economy-trace-history.md` | `done` | PRO007 | 5 Karten: `Credit Consolidation`, `Data Sifters`, `Manhunt`, `Schlaghund Pointers`, `Underworld Mole`; neue Implementierungszählung 67/154, Phase 6c abgeschlossen. |
 | `done/act-2026-05-27-proteus-pro008-runner-event-run-economy-followup.md` | `done` | PRO008 | 13 Karten: `All-Hands`, `Decoy Signal`, `Demolition Run`, `Disgruntled Ice Technician`, `Drone for a Day`, `On the Fast Track`, `Prearranged Drop`, `Reconnaissance`, `Remote Detonator`, `Rush Hour`, `Weefle Initiation`, `Back Door to Rivals`, `Runner Sensei`; neue Implementierungszählung 80/154. |
+| `done/act-2026-05-27-proteus-pro008-1-trace-reward-followup-hardening.md` | `done` | PRO008-1 | Trace-Avoid-Reward-Zählung und Remote-Detonator-Descriptor-Followup gehärtet; keine neue Kartenpromotion, Implementierungszählung bleibt 80/154. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
 | `done/act-2026-05-24-proteus-phase-7a-hardware-deck-foundation.md` | `done` | Phase 7a | 1 Karte: `Deck, The`. |
 | `done/act-2026-05-24-proteus-phase-7b-icebreaker-credit-decks.md` | `done` | Phase 7b | 2 Karten: `Cortical Cybermodem`, `Sunburst Cranial Interface`. |
@@ -185,7 +188,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | PRO005 | umgesetzt | Zwei Simple-Runner-Economy-/Draw-Events (`Cruising for Netwatch`, `Stakeout`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
 | PRO006 | umgesetzt; PRO006-1 Nacharbeit erledigt | Vier Simple-Corp-ICE-Resolver (`Brain Wash`, `Colonel Failure`, `Misleading Access Menus`, `Snowbank`) sind konkrete Dateien, registriert und im Manifest engine-/human-playable. PRO006-1 ergänzt Typ-/Mapping-Härtung für variable `end_the_run_unless_runner_pays`-Beträge und Colonel-Failure-Regressionen für 0/1 installierte Programme. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. Phase-6b-Rest geht in PRO010; `trash_program` bleibt im PRO006-Scope automatischer Subroutine-Effekt. |
 | PRO007 | umgesetzt | Corp Operation Economy/Trace/History: `Credit Consolidation`, `Data Sifters`, `Manhunt`, `Schlaghund Pointers`, `Underworld Mole` sind konkrete Dateien, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
-| PRO008 | umgesetzt | Runner Event Run/Economy/Followup Suite mit 13 Runner-Events ist umgesetzt, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
+| PRO008 | umgesetzt; PRO008-1 Nacharbeit erledigt | Runner Event Run/Economy/Followup Suite mit 13 Runner-Events ist umgesetzt, registriert und im Manifest engine-/human-playable. PRO008-1 härtet Trace-Avoid-Rewards und den Remote-Detonator-Followup. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
 | PRO009 | neu zu schneiden | Runner Icebreaker Choice/Modifier Suite mit 7 Icebreaker-/Modifier-/Supportkarten. |
 | PRO010 | neu zu schneiden | Corp ICE Trace/Conditional/Lifecycle Suite mit 10 Corp-ICE-Karten. |
 | PRO011 | neu zu schneiden | Hidden Resource Economy/Access Suite mit 8 Karten. |

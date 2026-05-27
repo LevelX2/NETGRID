@@ -4952,13 +4952,15 @@ function resolvePostOnPlayGenericFollowups(
   legalAction: LegalAction,
 ): void {
   const effects = onPlayCardImplementationEffects(definition);
-  if (
-    effects.some(
-      (effect) =>
-        effect.kind ===
-        "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags",
-    )
-  ) {
+  const remoteDetonatorEffect = effects.find(
+    (effect) =>
+      effect.kind ===
+      "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags",
+  );
+  if (remoteDetonatorEffect) {
+    const tagAmount = remoteDetonatorEffect.tagAmount;
+    if (!Number.isInteger(tagAmount) || tagAmount <= 0)
+      throw new Error("Remote-Detonator-Tagmenge ist ungueltig.");
     const serverId = state.runnerTurnFlags?.lastSuccessfulRunServerId;
     if (!serverId)
       throw new Error("Es gibt keinen erfolgreichen Run-Fort in diesem Zug.");
@@ -4969,7 +4971,7 @@ function resolvePostOnPlayGenericFollowups(
       trashedDefinitionIds.push(definitionFor(state, iceId).id);
       trashCorpInstalledCardToArchives(state, iceId, legalAction);
     }
-    state.runner.tags += 3;
+    state.runner.tags += tagAmount;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       remoteDetonatorResolved: true,
@@ -4979,7 +4981,7 @@ function resolvePostOnPlayGenericFollowups(
       ...(trashedDefinitionIds.length > 0
         ? { trashedCardDefinitionIds: trashedDefinitionIds.sort().join(",") }
         : {}),
-      tagsAdded: 3,
+      tagsAdded: tagAmount,
       runnerTagsAfter: state.runner.tags,
     };
   }
