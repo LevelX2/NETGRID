@@ -1375,6 +1375,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
   const TWISTY_PASSAGES = "onr_proteus_043_twisty-passages";
   const WASHED_UP_SOLO_CONSTRUCT =
     "onr_proteus_045_washed-up-solo-construct";
+  const RASMIN_BRIDGER = "onr_proteus_070_rasmin-bridger";
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
@@ -1394,6 +1395,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       TUMBLERS,
       TWISTY_PASSAGES,
       WASHED_UP_SOLO_CONSTRUCT,
+      RASMIN_BRIDGER,
     ]);
     const runnerOverrideIds = new Set([
       "simple_decoder",
@@ -1432,6 +1434,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
           { id: TUMBLERS, quantity: 1 },
           { id: TWISTY_PASSAGES, quantity: 1 },
           { id: WASHED_UP_SOLO_CONSTRUCT, quantity: 1 },
+          { id: RASMIN_BRIDGER, quantity: 1 },
           ...ONR_V1_6_2_CORP_DECK.cards.filter(
             (card) => !corpOverrideIds.has(card.id),
           ),
@@ -2000,4 +2003,85 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       expect(hashState(replay.state)).toBe(hashState(state));
     },
   );
+
+  it("PRO010 prioritizes corp lifecycle over Rasmin Bridger post-pass Fort payment", () => {
+    let state = proteusSimpleCorpIceGame("proteus-pro010-rasmin-priority");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 30;
+    state.runner.credits = 20;
+    const rasminId = putCorpRootInRemote(state, RASMIN_BRIDGER);
+    const iceId = putCorpIceOnServer(state, "remote_1", DATACOMB);
+    setRezzed(state, rasminId);
+    setRezzed(state, iceId);
+    state = enterEncounterFromMovementWindow(
+      apply(
+        toRunnerTurnFromCorpMain(state),
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "remote_1",
+      ),
+    );
+    state.run!.brokenSubroutineIndexes = [0];
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run?.corpPostPassIceReturnToHq).toBeDefined();
+    expect(state.run?.postPassPayOrEndRun).toBeDefined();
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.payload?.fortRunWindowAbility ===
+          "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+      ),
+    ).toBe(false);
+    const corpPay = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.corpPostPassIceAbility === "return_passed_ice_to_hq" &&
+        action.payload?.decision === "pay",
+    );
+    expect(corpPay.costs).toEqual([{ credits: 1 }]);
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: corpPay.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "proteus-pro010-rasmin-corp-window-wrong-side",
+      }).ok,
+    ).toBe(false);
+    state = apply(state, "corp", (action) => action.actionId === corpPay.actionId);
+    expect(state.run?.corpPostPassIceReturnToHq).toBeUndefined();
+    expect(state.run?.postPassPayOrEndRun).toBeDefined();
+
+    const runnerPay = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.fortRunWindowAbility ===
+          "runner_pay_or_end_run_after_passing_ice_on_this_fort" &&
+        action.payload?.decision === "pay",
+    );
+    expect(runnerPay.costs).toEqual([{ credits: 1 }]);
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: runnerPay.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "proteus-pro010-rasmin-stale-runner-pay",
+    });
+    expect(stale.ok).toBe(false);
+    state = apply(state, "runner", (action) => action.actionId === runnerPay.actionId);
+    expect(state.run?.postPassPayOrEndRun).toBeUndefined();
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
 });

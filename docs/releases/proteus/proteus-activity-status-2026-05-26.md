@@ -40,7 +40,7 @@ PRO009 ist umgesetzt: `Black Widow`, `Fubar`, `Morphing Tool`, `Bulldozer`, `Loc
 
 PRO009-2 ist ausschließlich UI-/PlayerView-Härtung für bereits umgesetzte PRO009-Zustände: `selectedSubtype` wird mit Label sichtbar, Black Widows Ziel-ICE wird nur redigiert als erlaubte Titel- oder Positionszusammenfassung angezeigt, Hosting-Beziehungen erhalten `hostedOnLabel`, und `power`-Counter werden als CounterDisplay sichtbar. Es setzt keine neue Proteus-Karte um, ändert keine Manifest-Freigaben und hält den Implementierungsstand bei 97/154.
 
-PRO010 ist umgesetzt: `Chihuahua`, `Coyote`, `Iceberg`, `Washed-Up Solo Construct`, `Datacomb`, `Death Yo-Yo`, `Marionette`, `Scaffolding`, `Tumblers` und `Twisty Passages` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Bausteine für preventable Net-Damage als Trace-Erfolg, Runner-pay-or-trash-program, Future-ICE-Strength-Cancel beim Passieren der Quelle und Korp-Post-Pass-ICE-zurück-nach-HQ-Fenster. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
+PRO010 ist umgesetzt: `Chihuahua`, `Coyote`, `Iceberg`, `Washed-Up Solo Construct`, `Datacomb`, `Death Yo-Yo`, `Marionette`, `Scaffolding`, `Tumblers` und `Twisty Passages` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Bausteine für preventable Net-Damage als Trace-Erfolg, Runner-pay-or-trash-program, Future-ICE-Strength-Cancel beim Passieren der Quelle und Korp-Post-Pass-ICE-zurück-nach-HQ-Fenster. PRO010-1 härtet die Priorität gleichzeitiger Post-Pass-Fenster ohne neue Karten- oder Manifestfreigabe: `corpPostPassIceReturnToHq` wird vor `postPassCancellableFutureIceStrength` und `postPassPayOrEndRun` angeboten und ausgeführt. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
 
@@ -71,12 +71,12 @@ Geprüft wurden alle Activity-Unterordner unter `docs/activities/`: `inbox/`, `i
 
 | Kategorie | Anzahl | Bedeutung |
 | --- | ---: | --- |
-| `done + implemented/foundation` | 32 | Erledigte Runtime-, Foundation- oder gezielte Härtungsslices; Implementierungsfortschritt wird trotzdem nur über Dateien plus Registry gezählt. |
+| `done + implemented/foundation` | 33 | Erledigte Runtime-, Foundation- oder gezielte Härtungsslices; Implementierungsfortschritt wird trotzdem nur über Dateien plus Registry gezählt. |
 | `done + planning/contract/historical` | 13 | Erledigte Import-, Analyse-, Vertrags-, Harness- oder Planungsactivities ohne direkte CardImplementation-Zählung. |
 | `done + superseded` | 8 | Grobe Phase-Activities, die ersetzt oder aufgeteilt wurden; sie zählen nie als Kartenimplementierung. |
 | `in-progress + blocked` | 23 | Offene Detail-Activities mit fehlender PRO-, Regel- oder generischer Vertragsarbeit. |
 | `inbox/open` | 0 | Keine Proteus-Activity liegt aktuell in `docs/activities/inbox/`. |
-| Gesamt | 76 | Proteus-Activity-Dateien im Board. |
+| Gesamt | 77 | Proteus-Activity-Dateien im Board. |
 
 ## Done + implemented/foundation
 
@@ -108,6 +108,7 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-27-proteus-pro009-1-icebreaker-correctness-hardening.md` | `done` | PRO009-1 | Nachhärtung für `Fubar`, `Bulldozer` und `Lockjaw`; keine Zähländerung. |
 | `done/act-2026-05-27-proteus-pro009-2-ui-state-surface-hardening.md` | `done` | PRO009-2 | UI-/PlayerView-Härtung für PRO009-Zustände: selectedSubtype-Labels, redigierte Black-Widow-Ziele, Hosting-Labels und Power-Counter; keine Zähländerung. |
 | `done/act-2026-05-27-proteus-pro010-corp-ice-trace-conditional-lifecycle-suite.md` | `done` | PRO010 | 10 Corp-ICE: `Chihuahua`, `Coyote`, `Iceberg`, `Washed-Up Solo Construct`, `Datacomb`, `Death Yo-Yo`, `Marionette`, `Scaffolding`, `Tumblers`, `Twisty Passages`; neue Implementierungszählung 97/154. |
+| `done/act-2026-05-27-proteus-pro010-1-post-pass-window-priority-hardening.md` | `done` | PRO010-1 | Priorität gleichzeitiger Post-Pass-Fenster gehärtet; keine neue Kartenpromotion, Implementierungszählung bleibt 97/154. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
 | `done/act-2026-05-24-proteus-phase-7a-hardware-deck-foundation.md` | `done` | Phase 7a | 1 Karte: `Deck, The`. |
 | `done/act-2026-05-24-proteus-phase-7b-icebreaker-credit-decks.md` | `done` | Phase 7b | 2 Karten: `Cortical Cybermodem`, `Sunburst Cranial Interface`. |
@@ -202,6 +203,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | PRO009 | umgesetzt | Runner Icebreaker Choice/Modifier Suite mit 7 Icebreaker-/Modifier-/Supportkarten ist umgesetzt, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
 | PRO009-2 | umgesetzt | UI-/PlayerView-Härtung für bereits implementierte PRO009-Zustände; keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
 | PRO010 | umgesetzt | Corp ICE Trace/Conditional/Lifecycle Suite mit 10 Corp-ICE-Karten ist umgesetzt, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
+| PRO010-1 | umgesetzt | Post-Pass-Window-Priorität für PRO010-Lifecycle-ICE plus Rasmin Bridger gehärtet; keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
 | PRO011 | neu zu schneiden | Hidden Resource Economy/Access Suite mit 8 Karten. |
 | PRO012 | neu zu schneiden | Hidden Resource Prevention/Sabotage Suite mit 8 Karten. |
 | PRO013 | neu zu schneiden | Agenda/Steal/Overadvance Suite mit 8 Karten. |

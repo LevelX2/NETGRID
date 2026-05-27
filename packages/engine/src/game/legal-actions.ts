@@ -91,19 +91,19 @@ export function buildLegalActions(
     return side === state.pendingChoice.side
       ? [host.actions.buildChoiceAction(state.pendingChoice)]
       : [];
-  if (state.run?.postPassPayOrEndRun)
-    return side === "runner"
-      ? buildRunnerMovementActions(
-          host.hosts.runnerEncounterActionHost(),
-        ).legalActions
+  if (state.run?.corpPostPassIceReturnToHq)
+    return side === "corp"
+      ? buildCorpPostPassIceReturnToHqActions(host.hosts.runMovementHost())
       : [];
   if (state.run?.postPassCancellableFutureIceStrength)
     return side === "runner"
       ? buildRunnerPostPassFutureStrengthActions(host.hosts.runMovementHost())
       : [];
-  if (state.run?.corpPostPassIceReturnToHq)
-    return side === "corp"
-      ? buildCorpPostPassIceReturnToHqActions(host.hosts.runMovementHost())
+  if (state.run?.postPassPayOrEndRun)
+    return side === "runner"
+      ? buildRunnerMovementActions(
+          host.hosts.runnerEncounterActionHost(),
+        ).legalActions
       : [];
   if (state.runnerVirusPurgeWindow)
     return side === "corp" && host.counters.purgeableRunnerVirusCounterTotal() > 0
