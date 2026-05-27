@@ -70,11 +70,9 @@ Die einfachen öffentlichen Proteus-Corp-ICE-Resolver über generische Printed-S
 
 ## Ergebnisnotiz
 
-Blockiert. Mehrere Zielkarten passen in bestehende Familien, aber der Slice ist als Ganzes nicht vollstaendig umsetzbar:
+Statusreferenz. Die Zielkarten sind durch PRO006 und PRO010 umgesetzt; diese alte Umbrella-Activity bleibt ohne zusätzliche Komplettzählung offen.
 
 - PRO006 ist abgeschlossen: `Brain Wash`, `Colonel Failure`, `Misleading Access Menus` und `Snowbank` sind als konkrete CardImplementation-Dateien umgesetzt, registriert, im Manifest engine-/human-playable und durch Coverage-/Behavior-Tests abgedeckt.
-- `Iceberg` bleibt bei PRO010, weil seine Conditional-ICE-Details nicht in den Simple-Resolver-Scope von PRO006 gezogen wurden.
-- `Chihuahua` braucht aber eine Trace-Erfolg-Folge fuer preventable Net damage; die aktuelle Trace-Success-Union deckt diesen Effekt nicht ab.
-- `Coyote` braucht eine rungebundene Future-ICE-Strength-Erhoehung mit Runner-Zahlungsfenster beim Passieren genau dieser Quelle. Der vorhandene `run_duration_ice_strength`-Baustein hat keine solche Cancel-/Pass-Window-Revalidierung.
-- `Washed-Up Solo Construct` braucht ein generisches "Runner zahlt sonst trash program"-Printed-Subroutine-Fenster; `trash_program` ist aktuell unmittelbar.
-- Phase 6b bleibt deshalb nur noch fuer PRO010 blockiert; keine PRO010-Restkarte wurde in PRO006 umgesetzt oder freigegeben.
+- PRO010 ist abgeschlossen: `Chihuahua`, `Coyote`, `Iceberg` und `Washed-Up Solo Construct` sind als konkrete CardImplementation-Dateien umgesetzt, registriert, im Manifest engine-/human-playable und durch Coverage-/Behavior-Tests abgedeckt.
+- Die generischen Lücken aus diesem Umbrella-Slice sind geschlossen: preventable Net-Damage als Trace-Erfolg, Coyote-Future-ICE-Strength-Cancel und Runner-pay-or-trash-program.
+- Keine Decklegalität, Formatlegalität oder AI-Unterstützung wurde freigegeben.

@@ -145,6 +145,8 @@ export function isSupportedEncounterTraceSuccessEffect(
   }
   if (effect.type === "end_run_trash_hardware_and_unpreventable_meat_damage")
     return Number.isInteger(effect.amount) && effect.amount > 0;
+  if (effect.type === "net_damage")
+    return Number.isInteger(effect.amount) && effect.amount > 0;
   if (effect.type === "add_tags_by_trace_margin_over_runner_link") return true;
   if (effect.type === "trash_runner_resource_and_add_tag")
     return (
@@ -381,6 +383,7 @@ export function applyPrintedTraceSuccessFollowups(
     : applyTraceAvoidRewards(host, trace);
   let runnerRunLockCreditCost = 0;
   let runnerRunEnded = false;
+  let traceDamagePayload: Record<string, unknown> = {};
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
   let traceResourceTrashPayload: Record<string, unknown> = {};
   if (successful) state.runner.tags += tagsAdded;
@@ -407,6 +410,57 @@ export function applyPrintedTraceSuccessFollowups(
     runnerRunEnded = true;
     if (trace.successEffect.type === "end_run_trash_program_and_run_lock")
       host.callbacks.resolveTrashInstalledProgramSubroutine(legalAction);
+  }
+  if (successful && trace.successEffect.type === "net_damage") {
+    const damageAmount = Math.max(0, Math.floor(trace.successEffect.amount));
+    const event = host.callbacks.createDamageImminentEvent({
+      damageId: `${trace.traceId}.success.net_damage`,
+      damageType: "net",
+      amount: damageAmount,
+      source: `trace:${trace.sourceDefinitionId}:${trace.traceId}`,
+    });
+    if (
+      host.callbacks.openReplacementWindow(event, legalAction) ||
+      host.callbacks.openEventModificationWindow(event, legalAction)
+    ) {
+      if (options.deletePendingChoice) delete state.pendingChoice;
+      delete state.trace;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        traceId: trace.traceId,
+        traceStep,
+        sourceDefinitionId: trace.sourceDefinitionId,
+        traceSuccessful: true,
+        traceNetDamageAmount: damageAmount,
+        damagePreventionWindowOpened: true,
+      };
+      return {
+        handled: true,
+        suspended: true,
+        traceSuccessful: true,
+        tagsAdded,
+        hackerTrackerCountersAdded,
+        runnerRunEnded,
+        runnerRunLockCreditCost,
+        payload: legalAction.payload,
+        stateChanged: true,
+      };
+    }
+    const summary = host.callbacks.resolveDamageImminentEvent(event);
+    host.callbacks.setDamagePayload(summary);
+    traceDamagePayload = {
+      traceNetDamageAmount: damageAmount,
+      damageType: summary.damageType,
+      damageAmount: summary.amount,
+      cardsTrashed: summary.cardsTrashed,
+      flatline: summary.flatline,
+      ...(summary.coreDamageAfter !== undefined
+        ? { coreDamageAfter: summary.coreDamageAfter }
+        : {}),
+      ...(summary.runnerMaxHandSizeAfter !== undefined
+        ? { runnerMaxHandSizeAfter: summary.runnerMaxHandSizeAfter }
+        : {}),
+    };
   }
   if (options.deletePendingChoice) delete state.pendingChoice;
   delete state.trace;
@@ -486,6 +540,7 @@ export function applyPrintedTraceSuccessFollowups(
       : {}),
     ...traceHardwareWreckerPayload,
     ...traceResourceTrashPayload,
+    ...traceDamagePayload,
   };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),

@@ -48,6 +48,16 @@ export type RunMovementHost = {
     corpRunRootRezActionsAvailable: () => boolean;
     approachIceExposeCanBeOfferedForCurrentIce: () => boolean;
   };
+  actions?: {
+    buildLegalAction: (
+      side: "corp" | "runner",
+      type: LegalAction["type"],
+      label: string,
+      source: LegalAction["source"],
+      costs?: LegalAction["costs"],
+      payload?: LegalAction["payload"],
+    ) => LegalAction;
+  };
   encounter: {
     encounterResolutionHost: () => EncounterResolutionHost;
     encounterSpecialWindowHost: () => EncounterSpecialWindowHost;
@@ -89,10 +99,123 @@ export function handleRunMovementAction(
   host: RunMovementHost,
   legalAction: LegalAction,
 ): RunMovementActionResult {
+  if (legalAction.type === "continue_run" && host.state.run?.corpPostPassIceReturnToHq)
+    return resolveCorpPostPassIceReturnToHq(host, legalAction);
+  if (
+    legalAction.type === "continue_run" &&
+    host.state.run?.postPassCancellableFutureIceStrength
+  )
+    return resolvePostPassCancellableFutureStrength(host, legalAction);
   if (legalAction.type === "jack_out") return jackOutRunner(host, legalAction);
   if (legalAction.type === "continue_run" && host.state.run?.phase === "movement")
     return continueFromMovement(host, legalAction);
   return { handled: false };
+}
+
+export function buildCorpPostPassIceReturnToHqActions(
+  host: RunMovementHost,
+): LegalAction[] {
+  const pending = host.state.run?.corpPostPassIceReturnToHq;
+  if (!pending) return [];
+  const sourceTitle = host.cards.definitionFor(pending.sourceCardInstanceId).title;
+  const serverLabel = host.servers.publicServerLabel(pending.serverId);
+  const basePayload = {
+    corpPostPassIceAbility: "return_passed_ice_to_hq",
+    sourceCardId: pending.sourceCardInstanceId,
+    sourceDefinitionId: pending.sourceDefinitionId,
+    passedIceId: pending.passedIceId,
+    passedIceDefinitionId: host.cards.definitionFor(pending.passedIceId).id,
+    serverId: pending.serverId,
+    ...(serverLabel ? { serverLabel } : {}),
+  };
+  const actions: LegalAction[] = [];
+  if (!host.actions) throw new Error("Post-Pass-Action-Builder fehlt.");
+  if (pending.mode === "required_pay_or_return") {
+    const amount = Math.max(0, Math.floor(pending.paymentAmount ?? 0));
+    if (host.state.corp.credits >= amount) {
+      actions.push(
+        host.actions.buildLegalAction(
+          "corp",
+          "continue_run",
+          `${sourceTitle}: ${amount} Credit zahlen`,
+          `${pending.sourceCardInstanceId}.pay`,
+          amount > 0 ? [{ credits: amount }] : [],
+          { ...basePayload, decision: "pay", paymentAmount: amount },
+        ),
+      );
+    }
+  } else {
+    actions.push(
+      host.actions.buildLegalAction(
+        "corp",
+        "continue_run",
+        `${sourceTitle}: liegen lassen`,
+        `${pending.sourceCardInstanceId}.decline`,
+        [],
+        { ...basePayload, decision: "decline" },
+      ),
+    );
+  }
+  actions.push(
+    host.actions.buildLegalAction(
+      "corp",
+      "continue_run",
+      `${sourceTitle}: nach HQ zurücknehmen`,
+      `${pending.sourceCardInstanceId}.return_to_hq`,
+      [],
+      {
+        ...basePayload,
+        decision: "return_to_hq",
+        ...(pending.gainCredits ? { gainCredits: pending.gainCredits } : {}),
+      },
+    ),
+  );
+  return actions;
+}
+
+export function buildRunnerPostPassFutureStrengthActions(
+  host: RunMovementHost,
+): LegalAction[] {
+  const pending = host.state.run?.postPassCancellableFutureIceStrength;
+  if (!pending) return [];
+  const sourceTitle = host.cards.definitionFor(pending.sourceCardInstanceId).title;
+  const serverLabel = host.servers.publicServerLabel(pending.serverId);
+  const basePayload = {
+    postPassFutureStrengthAbility: "cancel_future_ice_strength_bonus",
+    sourceCardId: pending.sourceCardInstanceId,
+    sourceDefinitionId: pending.sourceDefinitionId,
+    passedIceId: pending.passedIceId,
+    passedIceDefinitionId: host.cards.definitionFor(pending.passedIceId).id,
+    serverId: pending.serverId,
+    ...(serverLabel ? { serverLabel } : {}),
+    strengthBonusAmount: pending.amount,
+    paymentAmount: pending.paymentAmount,
+  };
+  const actions: LegalAction[] = [];
+  if (!host.actions) throw new Error("Post-Pass-Action-Builder fehlt.");
+  if (host.state.runner.credits >= pending.paymentAmount) {
+    actions.push(
+      host.actions.buildLegalAction(
+        "runner",
+        "continue_run",
+        `${sourceTitle}: Strength-Bonus verhindern (${pending.paymentAmount} Credit)`,
+        "game_rule",
+        pending.paymentAmount > 0 ? [{ credits: pending.paymentAmount }] : [],
+        { ...basePayload, decision: "pay" },
+      ),
+    );
+  }
+  actions.push(
+    host.actions.buildLegalAction(
+      "runner",
+      "continue_run",
+      `${sourceTitle}: Strength-Bonus zulassen`,
+      "game_rule",
+      [],
+      { ...basePayload, decision: "continue" },
+    ),
+  );
+  return actions;
 }
 
 export function jackOutRunner(
@@ -277,7 +400,7 @@ export function movePastCurrentIce(
         resolvedSubroutineIndexes: [],
       };
       state.timingPoint = "run.jack_out_window";
-      state.activeSide = "runner";
+      state.activeSide = state.run.corpPostPassIceReturnToHq ? "corp" : "runner";
       return {
         handled: true,
         runContinues: true,
@@ -314,7 +437,7 @@ export function movePastCurrentIce(
       ...fortPassFollowupsForPassedIce(host, server, passedIceId),
     };
     state.timingPoint = "run.jack_out_window";
-    state.activeSide = "runner";
+    state.activeSide = state.run.corpPostPassIceReturnToHq ? "corp" : "runner";
     return {
       handled: true,
       runContinues: true,
@@ -436,12 +559,147 @@ function resolvePostPassPayOrEndRun(
   throw new Error("Die Fort-Pass-Entscheidung ist ungueltig.");
 }
 
+function resolvePostPassCancellableFutureStrength(
+  host: RunMovementHost,
+  legalAction: LegalAction,
+): PostPassIceResult {
+  const run = mustRun(host.state);
+  const pending = run.postPassCancellableFutureIceStrength;
+  if (!pending) return { handled: false };
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf dieses Post-Pass-Fenster entscheiden.");
+  if (
+    legalAction.payload?.postPassFutureStrengthAbility !==
+    "cancel_future_ice_strength_bonus"
+  )
+    throw new Error("Die Post-Pass-Aktion passt nicht zum Strength-Fenster.");
+  if (String(legalAction.payload?.passedIceId ?? "") !== pending.passedIceId)
+    throw new Error("Das passierte ICE passt nicht mehr.");
+  if (String(legalAction.payload?.sourceCardId ?? "") !== pending.sourceCardInstanceId)
+    throw new Error("Die Strength-Quelle passt nicht mehr.");
+  const decision = String(legalAction.payload?.decision ?? "");
+  if (decision === "pay") {
+    const amount = Math.max(0, Math.floor(pending.paymentAmount));
+    const paid = Number(legalAction.payload?.paymentAmount ?? amount);
+    if (!Number.isInteger(paid) || paid !== amount)
+      throw new Error("Die Strength-Cancel-Kosten passen nicht mehr.");
+    spendRunnerRunCredits(runDurationPaymentHost(host.state), amount);
+    run.futureEncounterIceStrengthBonus = Math.max(
+      0,
+      Math.floor(run.futureEncounterIceStrengthBonus ?? 0) -
+        Math.max(0, Math.floor(pending.amount)),
+    );
+    delete run.postPassCancellableFutureIceStrength;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      paidCredits: amount,
+      futureEncounterIceStrengthBonus: run.futureEncounterIceStrengthBonus,
+      runnerCreditsAfter: host.state.runner.credits,
+    };
+    return { handled: true, runContinues: true, stateChanged: true };
+  }
+  if (decision === "continue") {
+    delete run.postPassCancellableFutureIceStrength;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      futureEncounterIceStrengthBonus: run.futureEncounterIceStrengthBonus ?? 0,
+    };
+    return { handled: true, runContinues: true, stateChanged: true };
+  }
+  throw new Error("Die Strength-Fenster-Entscheidung ist ungueltig.");
+}
+
+function resolveCorpPostPassIceReturnToHq(
+  host: RunMovementHost,
+  legalAction: LegalAction,
+): PostPassIceResult {
+  const run = mustRun(host.state);
+  const pending = run.corpPostPassIceReturnToHq;
+  if (!pending) return { handled: false };
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf dieses Post-Pass-Fenster entscheiden.");
+  if (legalAction.payload?.corpPostPassIceAbility !== "return_passed_ice_to_hq")
+    throw new Error("Die Post-Pass-Aktion passt nicht zum ICE-Lifecycle-Fenster.");
+  if (String(legalAction.payload?.passedIceId ?? "") !== pending.passedIceId)
+    throw new Error("Das passierte ICE passt nicht mehr.");
+  if (String(legalAction.payload?.sourceCardId ?? "") !== pending.sourceCardInstanceId)
+    throw new Error("Die Lifecycle-Quelle passt nicht mehr.");
+  const decision = String(legalAction.payload?.decision ?? "");
+  if (decision === "pay") {
+    if (pending.mode !== "required_pay_or_return")
+      throw new Error("Diese ICE-Lifecycle-Faehigkeit hat keine Pflichtzahlung.");
+    const amount = Math.max(0, Math.floor(pending.paymentAmount ?? 0));
+    const paid = Number(legalAction.payload?.paymentAmount ?? amount);
+    if (!Number.isInteger(paid) || paid !== amount)
+      throw new Error("Die ICE-Lifecycle-Kosten passen nicht mehr.");
+    if (host.state.corp.credits < amount)
+      throw new Error("Die Korp hat nicht genug Credits.");
+    host.state.corp.credits -= amount;
+    delete run.corpPostPassIceReturnToHq;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      paidCredits: amount,
+      corpCreditsAfter: host.state.corp.credits,
+    };
+    host.state.activeSide = "runner";
+    return { handled: true, runContinues: true, stateChanged: true };
+  }
+  if (decision === "decline") {
+    if (pending.mode !== "optional_return_gain")
+      throw new Error("Diese ICE-Lifecycle-Faehigkeit darf nicht abgelehnt werden.");
+    delete run.corpPostPassIceReturnToHq;
+    host.state.activeSide = "runner";
+    return { handled: true, runContinues: true, stateChanged: true };
+  }
+  if (decision === "return_to_hq") {
+    returnPassedIceToHq(host, pending.passedIceId);
+    const gain = Math.max(0, Math.floor(pending.gainCredits ?? 0));
+    if (gain > 0) host.state.corp.credits += gain;
+    delete run.corpPostPassIceReturnToHq;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      returnedToHq: true,
+      returnedCardDefinitionId: pending.sourceDefinitionId,
+      ...(gain > 0 ? { gainedCredits: gain } : {}),
+      corpCreditsAfter: host.state.corp.credits,
+    };
+    host.state.activeSide = "runner";
+    return { handled: true, runContinues: true, stateChanged: true };
+  }
+  throw new Error("Die ICE-Lifecycle-Entscheidung ist ungueltig.");
+}
+
+function returnPassedIceToHq(host: RunMovementHost, iceId: CardInstanceId): void {
+  const instance = host.cards.cardInstanceFor(iceId);
+  if (instance.zone.zone !== "serverIce")
+    throw new Error("Das ICE ist nicht mehr installiert.");
+  const server = host.servers.mustServer(instance.zone.serverId);
+  const index = server.ice.indexOf(iceId);
+  if (index < 0) throw new Error("Das ICE liegt nicht mehr auf diesem Fort.");
+  server.ice.splice(index, 1);
+  host.state.corp.hq.push(iceId);
+  host.state.cardInstances[iceId] = {
+    ...instance,
+    zone: { side: "corp", zone: "hq" },
+    rezzed: false,
+    faceup: false,
+  };
+}
+
 function fortPassFollowupsForPassedIce(
   host: RunMovementHost,
   server: CorpServer,
   passedIceId: CardInstanceId | undefined,
-): Pick<RunState, "lastPassedIceId" | "postPassPayOrEndRun"> {
+): Pick<
+  RunState,
+  "lastPassedIceId" | "postPassPayOrEndRun" | "corpPostPassIceReturnToHq"
+> {
   if (!passedIceId) return {};
+  const passedIceLifecycle = fortRunWindowImplementationForCard(
+    host,
+    passedIceId,
+    "corp_return_passed_ice_to_hq",
+  );
   const payOrEndSources = server.root
     .filter((cardId) => {
       const instance = host.state.cardInstances[cardId];
@@ -454,7 +712,25 @@ function fortPassFollowupsForPassedIce(
       return Boolean(implementation);
     })
     .sort();
-  if (payOrEndSources.length === 0) return { lastPassedIceId: passedIceId };
+  const lifecycleFollowup = passedIceLifecycle
+    ? {
+        corpPostPassIceReturnToHq: {
+          sourceCardInstanceId: passedIceId,
+          sourceDefinitionId: host.cards.definitionFor(passedIceId).id,
+          passedIceId,
+          serverId: server.id,
+          mode: passedIceLifecycle.mode,
+          ...(passedIceLifecycle.paymentAmount !== undefined
+            ? { paymentAmount: passedIceLifecycle.paymentAmount }
+            : {}),
+          ...(passedIceLifecycle.gainCredits !== undefined
+            ? { gainCredits: passedIceLifecycle.gainCredits }
+            : {}),
+        },
+      }
+    : {};
+  if (payOrEndSources.length === 0)
+    return { lastPassedIceId: passedIceId, ...lifecycleFollowup };
   const amount = payOrEndSources.reduce((sum, cardId) => {
     const implementation = fortRunWindowImplementationForCard(
       host,
@@ -466,6 +742,7 @@ function fortPassFollowupsForPassedIce(
   if (amount <= 0) return { lastPassedIceId: passedIceId };
   return {
     lastPassedIceId: passedIceId,
+    ...lifecycleFollowup,
     postPassPayOrEndRun: {
       sourceCardInstanceIds: payOrEndSources,
       sourceDefinitionIds: payOrEndSources.map(

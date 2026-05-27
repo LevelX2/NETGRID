@@ -1968,6 +1968,7 @@ function legalActionGenerationHost(state: GameState): LegalActionGenerationHost 
       runnerEncounterActionHost: () => runnerEncounterActionHostForState(state),
       encounterEntryHost: () => encounterEntryHostForState(state),
       runRezWindowHost: () => runRezWindowHostForState(state),
+      runMovementHost: () => runMovementHostForState(state),
       runCardImplementationActionHost: () =>
         runCardImplementationActionHost(state),
       runnerAccessActionHost: () => runnerAccessActionHost(state),
@@ -10295,6 +10296,10 @@ function runMovementHostForState(state: GameState): RunMovementHost {
         approachIceExposeCanBeOfferedForCurrentIce(
           encounterEntryHostForState(state),
         ),
+    },
+    actions: {
+      buildLegalAction: (side, type, label, source, costs, payload) =>
+        action(state, side, type, label, source, costs, payload),
     },
     encounter: {
       encounterResolutionHost: () => encounterResolutionHostForState(state),

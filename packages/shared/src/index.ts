@@ -175,6 +175,7 @@ export type CounterType =
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
+  | { type: "net_damage"; amount: number }
   | { type: "add_tags_by_trace_margin_over_runner_link" }
   | { type: "add_counter"; counterType: CounterType; amount: number }
   | {
@@ -201,6 +202,7 @@ export type SubroutineType =
   | "do_damage"
   | "initiate_trace"
   | "trash_installed_program"
+  | "trash_installed_program_unless_runner_pays"
   | "set_run_encounter_tax"
   | "set_run_break_subroutine_cost_modifier"
   | "set_run_future_end_the_run_subroutine"
@@ -227,6 +229,7 @@ export type SubroutineDefinition = {
   baseTraceStrength?: number;
   traceBidLimit?: number;
   traceSuccessEffect?: TraceSuccessEffect;
+  runFutureStrengthCancelPaymentAmount?: number;
   requiresSuccessfulTraceSubroutineIndex?: number;
   breakTags?: string[];
 };
@@ -963,6 +966,23 @@ export type RunState = {
     passedIceId: CardInstanceId;
     serverId: Exclude<ServerId, "new_remote">;
     amount: number;
+  };
+  postPassCancellableFutureIceStrength?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    passedIceId: CardInstanceId;
+    serverId: Exclude<ServerId, "new_remote">;
+    amount: number;
+    paymentAmount: number;
+  };
+  corpPostPassIceReturnToHq?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    passedIceId: CardInstanceId;
+    serverId: Exclude<ServerId, "new_remote">;
+    mode: "required_pay_or_return" | "optional_return_gain";
+    paymentAmount?: number;
+    gainCredits?: number;
   };
   aiBoonSourceCardId?: CardInstanceId;
   aiBoonRunStrength?: number;

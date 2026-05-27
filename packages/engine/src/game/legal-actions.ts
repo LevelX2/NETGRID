@@ -12,6 +12,11 @@ import {
   type RunnerEncounterActionHost,
 } from "./run/encounter-actions";
 import {
+  buildCorpPostPassIceReturnToHqActions,
+  buildRunnerPostPassFutureStrengthActions,
+  type RunMovementHost,
+} from "./run/run-movement";
+import {
   buildCorpApproachActions,
   buildCorpRunRootRezWindowActions,
   isCorpRunRootRezWindowOpen,
@@ -50,6 +55,7 @@ export type LegalActionGenerationHost = {
     runnerEncounterActionHost: HostFn<RunnerEncounterActionHost>;
     encounterEntryHost: HostFn<EncounterEntryHost>;
     runRezWindowHost: HostFn<RunRezWindowHost>;
+    runMovementHost: HostFn<RunMovementHost>;
     runCardImplementationActionHost: HostFn<RunCardImplementationActionHost>;
     runnerAccessActionHost: HostFn<RunnerAccessActionHost>;
   };
@@ -90,6 +96,14 @@ export function buildLegalActions(
       ? buildRunnerMovementActions(
           host.hosts.runnerEncounterActionHost(),
         ).legalActions
+      : [];
+  if (state.run?.postPassCancellableFutureIceStrength)
+    return side === "runner"
+      ? buildRunnerPostPassFutureStrengthActions(host.hosts.runMovementHost())
+      : [];
+  if (state.run?.corpPostPassIceReturnToHq)
+    return side === "corp"
+      ? buildCorpPostPassIceReturnToHqActions(host.hosts.runMovementHost())
       : [];
   if (state.runnerVirusPurgeWindow)
     return side === "corp" && host.counters.purgeableRunnerVirusCounterTotal() > 0

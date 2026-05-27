@@ -527,6 +527,8 @@ function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
   }
   if (effect.type === "end_run_trash_hardware_and_unpreventable_meat_damage")
     return Number.isInteger(effect.amount) && effect.amount > 0;
+  if (effect.type === "net_damage")
+    return Number.isInteger(effect.amount) && effect.amount > 0;
   if (effect.type === "add_tags_by_trace_margin_over_runner_link") return true;
   if (effect.type === "trash_runner_resource_and_add_tag")
     return (

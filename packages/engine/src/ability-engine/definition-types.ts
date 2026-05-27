@@ -371,6 +371,14 @@ export type CardFortRunWindowImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "corp_return_passed_ice_to_hq";
+      timing: "after_runner_passes_this_ice";
+      mode: "required_pay_or_return" | "optional_return_gain";
+      paymentAmount?: number;
+      gainCredits?: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "move_self_to_different_position_on_same_fort";
       timing: "start_of_run_on_this_fort";
       cost: { kind: "credit"; amount: number };
@@ -1256,6 +1264,13 @@ export type CardTraceSuccessEffectImplementation =
       visibility: EventVisibilityClass;
     }
   | {
+      kind: "preventable_damage";
+      recipient: "runner";
+      damageType: Extract<DamageType, "net" | "core">;
+      amount: number;
+      visibility: EventVisibilityClass;
+    }
+  | {
       kind: "runner_run_lock_until_action_paid";
       amount: number;
       visibility: EventVisibilityClass;
@@ -1776,6 +1791,11 @@ export type CardPrintedSubroutineImplementation =
       text: "*Trash a program.";
     }
   | {
+      kind: "trash_program_unless_runner_pays";
+      amount: number;
+      text: `*Trash a program unless Runner pays [${number}].`;
+    }
+  | {
       kind: "damage";
       damageType: "net" | "brain";
       amount: number;
@@ -1795,6 +1815,7 @@ export type CardPrintedSubroutineImplementation =
   | {
       kind: "run_duration_ice_strength";
       amount: number;
+      runnerMayCancelOnPassingSource?: { amount: number };
       text: string;
       breakTags?: readonly string[];
     }
