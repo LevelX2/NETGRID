@@ -1,0 +1,1126 @@
+{
+  "schemaVersion": "ai-generated-fact-batch12-runner-economy-closeout-v1",
+  "generatedAt": "2026-05-25",
+  "taskId": "Aufgabe 026",
+  "batch": "batch_12_runner_economy_resource_hardware_longtail",
+  "sourceReports": {
+    "activeHintsPath": "data/ai/ai-card-hints-active.json",
+    "catalogPath": "data/cards/originalset-v1-cards.json",
+    "pilotCardsPath": "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json",
+    "derivedFactsReportPath": "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json",
+    "compiledIndexReportPath": "docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json",
+    "manualOverlayReportPath": "docs/reviews/ai/ai-manual-overlay-pilot-report-2026-05-25.json",
+    "compiledIndexSchemaVersion": "ai-hint-compiled-index-pilot-v1",
+    "manualOverlaySchemaVersion": "ai-manual-overlay-pilot-report-v1"
+  },
+  "candidateCardCount": 35,
+  "includedCardCount": 18,
+  "excludedCardCount": 17,
+  "confirmedGeneratedFactCount": 45,
+  "previewAddedFactCount": 34,
+  "hardErrorCount": 0,
+  "conflictCount": 0,
+  "realSemanticConflictCount": 0,
+  "normalizedDifferenceCount": 37,
+  "remainingDifferenceCount": 0,
+  "paymentContextInfoCount": 3,
+  "actionContextInfoCount": 1,
+  "memoryContextInfoCount": 2,
+  "handSizeContextInfoCount": 2,
+  "hiddenZoneContextInfoCount": 8,
+  "delayedPenaltyContextInfoCount": 1,
+  "descriptorFollowupCount": 24,
+  "readiness": "ready_read_only_split_subbatches",
+  "subBatchReadiness": {
+    "runner_action_economy": {
+      "cardCount": 1,
+      "readiness": "ready_read_only_with_payment_memory_context"
+    },
+    "runner_burst_economy": {
+      "cardCount": 2,
+      "readiness": "ready_read_only_with_payment_memory_context"
+    },
+    "runner_economy_with_downside": {
+      "cardCount": 1,
+      "readiness": "ready_read_only_with_payment_memory_context"
+    },
+    "runner_finite_pool_economy": {
+      "cardCount": 2,
+      "readiness": "ready_read_only_with_payment_memory_context"
+    },
+    "runner_hand_size_or_damage_resilience": {
+      "cardCount": 2,
+      "readiness": "ready_read_only_with_payment_memory_context"
+    },
+    "runner_loan_or_debt_economy": {
+      "cardCount": 1,
+      "readiness": "ready_read_only_with_payment_memory_context"
+    },
+    "runner_recovery_or_trash_recursion": {
+      "cardCount": 3,
+      "readiness": "ready_read_only_with_payment_memory_context"
+    },
+    "runner_search_or_install_support": {
+      "cardCount": 5,
+      "readiness": "ready_read_only_with_payment_memory_context"
+    },
+    "runner_setup_support": {
+      "cardCount": 1,
+      "readiness": "ready_read_only_with_payment_memory_context"
+    }
+  },
+  "normalizationRuleCounts": {
+    "hidden_zone_context_normalization": 4,
+    "runner_action_economy_normalization": 3,
+    "runner_economy_strategy_overlay_split": 13,
+    "runner_finite_pool_economy_normalization": 2,
+    "runner_hand_size_normalization": 2,
+    "runner_install_discount_context_normalization": 1,
+    "runner_loan_debt_normalization": 3,
+    "runner_resource_economy_risk_split": 1,
+    "runner_search_recovery_normalization": 8
+  },
+  "normalizationRules": [
+    "runner_burst_economy_normalization",
+    "runner_action_economy_normalization",
+    "runner_finite_pool_economy_normalization",
+    "runner_loan_debt_normalization",
+    "runner_resource_economy_risk_split",
+    "runner_memory_hardware_normalization",
+    "runner_hand_size_normalization",
+    "runner_search_recovery_normalization",
+    "runner_install_discount_context_normalization",
+    "runner_economy_strategy_overlay_split",
+    "hidden_zone_context_normalization",
+    "payment_context_required_classification",
+    "legalaction_context_required_classification",
+    "board_context_required_classification",
+    "legacy_keep_for_compat"
+  ],
+  "global": {
+    "runnerEconomyFactCount": 10,
+    "runnerMemoryFactCount": 0,
+    "runnerHandSizeFactCount": 2,
+    "runnerSearchRecoveryFactCount": 9,
+    "finitePoolFactCount": 2,
+    "debtOrDownsideFactCount": 1,
+    "consumerReadiness": "ready_for_runner_economy_setup_diagnostic_design",
+    "recommendStrategyWork": false
+  },
+  "includedCards": [
+    {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "subBatch": "runner_action_economy",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "program",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/newsgroup-filter.ts",
+      "generatedFactsConfirmed": ["effect:action_economy", "effect:economy"],
+      "previewAdds": ["effect:action_economy"],
+      "normalizedDifferences": [
+        {
+          "kind": "effect:action_economy",
+          "rule": "runner_action_economy_normalization",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [
+        {
+          "kind": "payment_context_info",
+          "rule": "payment_context_required_classification",
+          "message": "Credits/counters are mechanical resource context; current affordability and pool size remain board state."
+        }
+      ],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "title": "Forgotten Backup Chip",
+      "subBatch": "runner_recovery_or_trash_recursion",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "event",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/forgotten-backup-chip.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:search"
+      ],
+      "previewAdds": ["condition:requires_heap_card", "effect:card_recovery"],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_heap_card",
+          "rule": "hidden_zone_context_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:card_recovery",
+          "rule": "runner_search_recovery_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:zone_shuffle",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_normalization",
+          "message": "Zone and target class are represented without hidden card identity or order."
+        }
+      ],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "title": "Gideon's Pawnshop",
+      "subBatch": "runner_recovery_or_trash_recursion",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "event",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/gideons-pawnshop.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:search"
+      ],
+      "previewAdds": ["condition:requires_heap_card", "effect:card_recovery"],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_heap_card",
+          "rule": "hidden_zone_context_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:card_recovery",
+          "rule": "runner_search_recovery_normalization",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_normalization",
+          "message": "Zone and target class are represented without hidden card identity or order."
+        }
+      ],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "title": "If You Want It Done Right . . .",
+      "subBatch": "runner_search_or_install_support",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "event",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/if-you-want-it-done-right.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "previewAdds": ["condition:requires_stack_search"],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_stack_search",
+          "rule": "runner_search_recovery_normalization",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_normalization",
+          "message": "Zone and target class are represented without hidden card identity or order."
+        }
+      ],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_095_jack-n-joe",
+      "title": "Jack 'n' Joe",
+      "subBatch": "runner_setup_support",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "event",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/jack-n-joe.ts",
+      "generatedFactsConfirmed": ["effect:draw"],
+      "previewAdds": [],
+      "normalizedDifferences": [],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_payment_memory_context"
+    },
+    {
+      "cardId": "onr_v1_097_livewires-contacts",
+      "title": "Livewire's Contacts",
+      "subBatch": "runner_burst_economy",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "event",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/livewires-contacts.ts",
+      "generatedFactsConfirmed": ["effect:economy"],
+      "previewAdds": [],
+      "normalizedDifferences": [],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_payment_memory_context"
+    },
+    {
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "title": "Mantis, Fixer-at-Large",
+      "subBatch": "runner_search_or_install_support",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "event",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/mantis-fixer-at-large.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "previewAdds": ["condition:requires_stack_search"],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_stack_search",
+          "rule": "runner_search_recovery_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:draw",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_normalization",
+          "message": "Zone and target class are represented without hidden card identity or order."
+        }
+      ],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_103_organ-donor",
+      "title": "Organ Donor",
+      "subBatch": "runner_economy_with_downside",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "event",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/organ-donor.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_grip_card",
+        "effect:economy"
+      ],
+      "previewAdds": ["condition:requires_grip_card", "effect:economy"],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_grip_card",
+          "rule": "hidden_zone_context_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:economy",
+          "rule": "runner_resource_economy_risk_split",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_normalization",
+          "message": "Zone and target class are represented without hidden card identity or order."
+        }
+      ],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_108_score",
+      "title": "Score!",
+      "subBatch": "runner_burst_economy",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "event",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
+      "generatedFactsConfirmed": ["effect:economy"],
+      "previewAdds": [],
+      "normalizedDifferences": [],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_payment_memory_context"
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "subBatch": "runner_search_or_install_support",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "event",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/temple-microcode-outlet.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "previewAdds": ["condition:requires_stack_search"],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_stack_search",
+          "rule": "runner_search_recovery_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:draw",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_normalization",
+          "message": "Zone and target class are represented without hidden card identity or order."
+        }
+      ],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "subBatch": "runner_recovery_or_trash_recursion",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "hardware",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/microtech-backup-drive.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_installed_hardware",
+        "condition:requires_program_trash",
+        "effect:card_recovery",
+        "effect:program_trash_prevention"
+      ],
+      "previewAdds": [
+        "condition:requires_installed_hardware",
+        "condition:requires_program_trash",
+        "effect:card_recovery",
+        "effect:program_trash_prevention"
+      ],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_installed_hardware",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
+          "kind": "condition:requires_program_trash",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:card_recovery",
+          "rule": "runner_search_recovery_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:program_trash_prevention",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_133_militech-mram-chip",
+      "title": "Militech MRAM Chip",
+      "subBatch": "runner_hand_size_or_damage_resilience",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "hardware",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/militech-mram-chip.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_installed_card",
+        "effect:hand_size_modifier"
+      ],
+      "previewAdds": [
+        "condition:requires_installed_card",
+        "effect:hand_size_modifier"
+      ],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_installed_card",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:hand_size_modifier",
+          "rule": "runner_hand_size_normalization",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [
+        {
+          "kind": "memory_context_info",
+          "rule": "runner_memory_hardware_normalization",
+          "message": "Implementation is hand-size hardware, not memory; no memory effect is emitted."
+        }
+      ],
+      "handSizeContextInfos": [
+        {
+          "kind": "hand_size_context_info",
+          "rule": "runner_hand_size_normalization",
+          "message": "Persistent hand-size modifier is visible; generated facts do not infer current hand safety or hand contents."
+        }
+      ],
+      "hiddenZoneContextInfos": [],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_134_mram-chip",
+      "title": "MRAM Chip",
+      "subBatch": "runner_hand_size_or_damage_resilience",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "hardware",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/mram-chip.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_installed_card",
+        "effect:hand_size_modifier"
+      ],
+      "previewAdds": [
+        "condition:requires_installed_card",
+        "effect:hand_size_modifier"
+      ],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_installed_card",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:hand_size_modifier",
+          "rule": "runner_hand_size_normalization",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [
+        {
+          "kind": "memory_context_info",
+          "rule": "runner_memory_hardware_normalization",
+          "message": "Implementation is hand-size hardware, not memory; no memory effect is emitted."
+        }
+      ],
+      "handSizeContextInfos": [
+        {
+          "kind": "hand_size_context_info",
+          "rule": "runner_hand_size_normalization",
+          "message": "Persistent hand-size modifier is visible; generated facts do not infer current hand safety or hand contents."
+        }
+      ],
+      "hiddenZoneContextInfos": [],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_154_broker",
+      "title": "Broker",
+      "subBatch": "runner_finite_pool_economy",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "resource",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/broker.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "previewAdds": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_installed_resource",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:action_economy",
+          "rule": "runner_action_economy_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:counter_economy",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:finite_economy_pool",
+          "rule": "runner_finite_pool_economy_normalization",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [
+        {
+          "kind": "payment_context_info",
+          "rule": "payment_context_required_classification",
+          "message": "Credits/counters are mechanical resource context; current affordability and pool size remain board state."
+        }
+      ],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "title": "Loan from Chiba",
+      "subBatch": "runner_loan_or_debt_economy",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "resource",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/loan-from-chiba.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:delayed_penalty",
+        "effect:economy"
+      ],
+      "previewAdds": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:delayed_penalty"
+      ],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_start_of_turn",
+          "rule": "runner_loan_debt_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:counter_economy",
+          "rule": "runner_loan_debt_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:delayed_penalty",
+          "rule": "runner_loan_debt_normalization",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "delayedPenaltyContextInfos": [
+        {
+          "kind": "delayed_penalty_context_info",
+          "rule": "runner_loan_debt_normalization",
+          "message": "Debt/downside is retained as delayed penalty context and not collapsed into pure economy."
+        }
+      ],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_176_the-shell-traders",
+      "title": "The Shell Traders",
+      "subBatch": "runner_search_or_install_support",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "resource",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_grip_card",
+        "condition:requires_installed_resource",
+        "effect:install_discount"
+      ],
+      "previewAdds": [
+        "condition:requires_grip_card",
+        "condition:requires_installed_resource",
+        "effect:install_discount"
+      ],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_grip_card",
+          "rule": "hidden_zone_context_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "condition:requires_installed_resource",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:install_discount",
+          "rule": "runner_install_discount_context_normalization",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_normalization",
+          "message": "Zone and target class are represented without hidden card identity or order."
+        }
+      ],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "subBatch": "runner_search_or_install_support",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "resource",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/the-short-circuit.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "previewAdds": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_runner_action",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
+          "kind": "condition:requires_stack_search",
+          "rule": "runner_search_recovery_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:search",
+          "rule": "runner_search_recovery_normalization",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [],
+      "actionContextInfos": [
+        {
+          "kind": "action_context_info",
+          "rule": "runner_action_economy_normalization",
+          "message": "Action cost is visible as context; no playability or priority is inferred."
+        }
+      ],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [
+        {
+          "kind": "hidden_zone_context_info",
+          "rule": "hidden_zone_context_normalization",
+          "message": "Zone and target class are represented without hidden card identity or order."
+        }
+      ],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    },
+    {
+      "cardId": "onr_v1_178_short-term-contract",
+      "title": "Short-Term Contract",
+      "subBatch": "runner_finite_pool_economy",
+      "activeHintFound": true,
+      "catalogCardFound": true,
+      "implementationFound": true,
+      "aiSupportStatus": "ai_supported",
+      "side": "runner",
+      "cardType": "resource",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/short-term-contract.ts",
+      "generatedFactsConfirmed": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "previewAdds": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:finite_economy_pool"
+      ],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_installed_resource",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:action_economy",
+          "rule": "runner_action_economy_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:finite_economy_pool",
+          "rule": "runner_finite_pool_economy_normalization",
+          "status": "normalized"
+        }
+      ],
+      "paymentContextInfos": [
+        {
+          "kind": "payment_context_info",
+          "rule": "payment_context_required_classification",
+          "message": "Credits/counters are mechanical resource context; current affordability and pool size remain board state."
+        }
+      ],
+      "actionContextInfos": [],
+      "memoryContextInfos": [],
+      "handSizeContextInfos": [],
+      "hiddenZoneContextInfos": [],
+      "delayedPenaltyContextInfos": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "remainingIssues": [],
+      "readiness": "ready_read_only_with_context_followup"
+    }
+  ],
+  "excludedCards": [
+    {
+      "cardId": "onr_v1_148_access-through-alpha",
+      "title": "Access through Alpha",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "link/run-pressure resource is outside this economy/resource/hardware closeout slice",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "All-Hands",
+      "title": "All-Hands",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "Proteus implementation exists outside active Original Set AI-support scope",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_120_armadillo-armored-road-home",
+      "title": "Armadillo Armored Road Home",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "tag-protection hardware is survival/prevention scope, not Runner economy/memory/hand-size closeout",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+      "title": "Bodyweight Synthetic Blood",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "already fully covered by Aufgabe 021/Batch 10 as burst draw/survival-adjacent hand refill; kept out of Batch 12 pilot to avoid duplicate closeout scope",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+      "title": "Crash Everett, Inventive Fixer",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "already fully covered by Aufgabe 021/Batch 10 as draw/survival payoff resource",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "Credit Subversion",
+      "title": "Credit Subversion",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "not present in active Original Set catalog/hints/implementation scope",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "Enterprise, Inc., Shields",
+      "title": "Enterprise, Inc., Shields",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "not present in active Original Set catalog/hints/implementation scope",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_161_fall-guy",
+      "title": "Fall Guy",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "already fully covered by Aufgabe 021/Batch 10 as tag-prevention survival resource",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_129_hq-interface",
+      "title": "HQ Interface",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "multiaccess pressure hardware is not economy, memory, hand-size, recovery or setup economy scope",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_094_inside-job",
+      "title": "Inside Job",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "run-bypass event is pressure/conversion scope, not Runner economy/memory/hand-size closeout",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "Liberated Savings Account",
+      "title": "Liberated Savings Account",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "not present in active Original Set catalog/hints/implementation scope",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_135_nasuko-cycle",
+      "title": "Nasuko Cycle",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "already fully covered by Aufgabe 021/Batch 10 as tag-prevention survival hardware",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "onr_v1_139_r-and-d-interface",
+      "title": "R&D Interface",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "multiaccess pressure hardware is not economy, memory, hand-size, recovery or setup economy scope",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "Rogue AI",
+      "title": "Rogue AI",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "not present in active Original Set catalog/hints/implementation scope",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "Shell Traders",
+      "title": "Shell Traders",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "alias resolved to included card The Shell Traders",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "Streetware Distributor",
+      "title": "Streetware Distributor",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "not present in active Original Set AI-support scope; Proteus/out-of-scope candidate",
+      "info": "excluded_from_batch_with_reason"
+    },
+    {
+      "cardId": "Time to Collect",
+      "title": "Time to Collect",
+      "subBatch": "excluded_or_out_of_scope",
+      "excludedReason": "not present in active Original Set catalog/hints/implementation scope",
+      "info": "excluded_from_batch_with_reason"
+    }
+  ],
+  "hardErrors": [],
+  "consumerReadiness": {
+    "runnerEconomyConsumerReady": true,
+    "runnerMemoryConsumerReady": true,
+    "runnerHandSizeConsumerReady": true,
+    "runnerSearchRecoveryConsumerReady": true,
+    "activeRuntimeConsumer": false,
+    "recommendedNextDiagnostic": "Aufgabe 027 Runner Economy / Setup Consumer Diagnostic Slice: installierbare Economy sichtbar/legal, Economy genommen/übersprungen, finite/debt/downside getrennt, Memory-/Hand-size-Bottlenecks und Runner-starved-but-economy-available messen."
+  },
+  "nextBatchRecommendation": {
+    "recommendedTaskId": "Aufgabe 027",
+    "batchName": "runner_economy_setup_consumer_diagnostic_slice",
+    "rationale": "Batch 12 liefert ausreichend klare read-only Economy-/Hand-size-/Search-Facts; der nächste größere Schritt sollte deshalb ein Consumer-Diagnose-Slice ohne Strategieänderung sein.",
+    "candidateCards": [
+      "Broker",
+      "Forgotten Backup Chip",
+      "Gideon's Pawnshop",
+      "If You Want It Done Right . . .",
+      "Jack 'n' Joe",
+      "Livewire's Contacts",
+      "Loan from Chiba",
+      "MRAM Chip",
+      "Mantis, Fixer-at-Large",
+      "Microtech Backup Drive",
+      "Militech MRAM Chip",
+      "Newsgroup Filter",
+      "Organ Donor",
+      "Score!",
+      "Short-Term Contract",
+      "Temple Microcode Outlet",
+      "The Shell Traders",
+      "The Short Circuit"
+    ]
+  }
+}

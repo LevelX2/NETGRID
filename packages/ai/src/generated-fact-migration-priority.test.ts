@@ -43,19 +43,19 @@ describe("generated fact migration priority report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("prioritizes all 177 compiled generated-fact candidates", () => {
+  it("prioritizes all 193 compiled generated-fact candidates", () => {
     const report = readReport();
     expect(report.taskId).toBe("Aufgabe 002");
-    expect(report.candidateCount).toBe(177);
+    expect(report.candidateCount).toBe(193);
     expect(report.priorityCounts).toEqual({
       P0: 13,
-      P1: 160,
+      P1: 176,
       P2: 4,
       P3: 0,
     });
     expect(report.riskCounts).toEqual({
       low: 29,
-      medium: 148,
+      medium: 164,
       high: 0,
     });
   });
@@ -63,7 +63,7 @@ describe("generated fact migration priority report", () => {
   it("keeps strategic and compatibility fields out of generated migration", () => {
     const report = readReport();
     expect(report.fieldCategoryCounts.overlay_only).toBe(6);
-    expect(report.fieldCategoryCounts.legacy_keep_for_compat).toBe(177);
+    expect(report.fieldCategoryCounts.legacy_keep_for_compat).toBe(193);
     for (const card of report.cards) {
       expect(card.doNotMigrateFields).toContain("aiSupportStatus");
       expect(card.doNotMigrateFields).toContain("roles");
@@ -86,7 +86,7 @@ describe("generated fact migration priority report", () => {
   it("orders the later migration batches without changing runtime sources", () => {
     const report = readReport();
     expect(report.batchPlan.map((batch) => batch.cardIds.length)).toEqual([
-      11, 6, 2, 3, 26, 13, 24, 30, 45, 15, 2,
+      11, 6, 2, 3, 26, 13, 24, 30, 45, 15, 2, 16,
     ]);
     expect(
       report.cards
@@ -153,6 +153,17 @@ describe("generated fact migration priority report", () => {
           ),
         ),
     ).toBe(true);
+    expect(
+      report.cards
+        .filter((card) => card.recommendedMigrationBatch === 12)
+        .map((card) => card.cardId),
+    ).toEqual(
+      expect.arrayContaining([
+        "onr_v1_045_newsgroup-filter",
+        "onr_v1_168_loan-from-chiba",
+        "onr_v1_178_short-term-contract",
+      ]),
+    );
     expect(report.cards.every((card) => card.generatedFields.length > 0)).toBe(
       true,
     );
