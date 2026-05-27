@@ -90,6 +90,16 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(actionButtonLabel(actions[1]!)).toBe("Run auf R&D");
   });
 
+  it("keeps All-Nighter bonus run choices visible in the main action panel", () => {
+    const bonusRun = legalAction("runner", "start_run", "basic_action", "Bonus-Run auf HQ", { serverId: "hq", bonusRunNoClick: true });
+
+    const split = splitLegalActions([bonusRun]);
+
+    expect(split.primaryActions).toEqual([bonusRun]);
+    expect(split.contextualActions).toEqual([]);
+    expect(actionButtonLabel(bonusRun)).toBe("Bonus-Run auf HQ");
+  });
+
   it("keeps Olivia Salazar reduced rez source and paid cost visible in the button label", () => {
     const action = legalAction(
       "corp",

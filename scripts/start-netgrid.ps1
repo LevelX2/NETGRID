@@ -1,6 +1,8 @@
 param(
   [string]$OpenUrl = "",
-  [string]$OpenPath = "/"
+  [string]$OpenPath = "/",
+  [switch]$ServerDevMode,
+  [switch]$RestartServer
 )
 
 $ErrorActionPreference = "Stop"
@@ -191,7 +193,13 @@ $targetWebUrl = Get-UrlOrigin -Url $targetOpenUrl
 if (-not $targetWebUrl) {
   $targetWebUrl = $webUrl
 }
-Write-LauncherLog "Launcher start lanIp=$lanIp webUrl=$webUrl serverUrl=$serverUrl openUrl=$targetOpenUrl"
+$serverMode = if ($ServerDevMode) { "dev-watch" } else { "normal" }
+$serverCommand = if ($ServerDevMode) {
+  "corepack pnpm --filter @netgrid/server dev"
+} else {
+  "corepack pnpm --filter @netgrid/server exec tsx src/index.ts"
+}
+Write-LauncherLog "Launcher start lanIp=$lanIp webUrl=$webUrl serverUrl=$serverUrl openUrl=$targetOpenUrl serverMode=$serverMode restartServer=$($RestartServer.IsPresent)"
 
 $serverEnvironment = @{
   HOST = "0.0.0.0"
@@ -213,6 +221,12 @@ $maintenanceRequested = $targetOpenUrl -match "/maintenance($|[/?#])"
 $maintenanceReadyLanBefore = if ($maintenanceRequested) { Test-EndpointOk -Url $maintenanceSummaryUrl } else { $true }
 Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore maintenanceRequested=$maintenanceRequested maintenanceLan=$maintenanceReadyLanBefore"
 
+if ($RestartServer) {
+  Stop-PortListeners -Ports @(8787)
+  $serverReadyLanBefore = $false
+  $serverReadyLocalBefore = $false
+}
+
 if ($serverReadyLanBefore -and $maintenanceRequested -and -not $maintenanceReadyLanBefore) {
   Stop-PortListeners -Ports @(8787)
   $serverReadyLanBefore = $false
@@ -221,8 +235,8 @@ if ($serverReadyLanBefore -and $maintenanceRequested -and -not $maintenanceReady
 
 if (-not $serverReadyLanBefore) {
   Stop-PortListeners -Ports @(8787)
-  Write-LauncherLog "Starting server command"
-  Start-NetgridProcess -Command "corepack pnpm --filter @netgrid/server exec tsx src/index.ts" -LogPath $serverLog -Environment $serverEnvironment
+  Write-LauncherLog "Starting server command mode=$serverMode"
+  Start-NetgridProcess -Command $serverCommand -LogPath $serverLog -Environment $serverEnvironment
 }
 
 $webReadyLanBefore = Test-Endpoint -Url $webUrl

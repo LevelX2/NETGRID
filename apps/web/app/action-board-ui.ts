@@ -432,6 +432,7 @@ export function automaticCorpMandatoryDrawAction(view: PlayerView, actions: Lega
 }
 
 export function isContextualLegalAction(action: LegalAction): boolean {
+  if (action.type === "start_run" && action.payload?.bonusRunNoClick === true) return false;
   if (action.type === "start_run" && serverRefsForAction(action).length > 0) return true;
   if (action.type === "rez_ice" && cardRefsForAction(action).length > 0 && !action.timingPoint.startsWith("run.")) return true;
   if (action.type === "activated_card_ability" && cardRefsForAction(action).length > 0) return true;
