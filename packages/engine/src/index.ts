@@ -67,10 +67,6 @@ import {
   legalActionsFor as legalActionsForFromGame,
   type LegalActionGenerationHost,
 } from "./game/legal-actions";
-import {
-  configureBuildEventHost,
-  type BuildEventHost,
-} from "./game/events/build-event";
 export {
   eventVisibilityForAction,
   isHiddenInfoBarrierEvent,
@@ -468,16 +464,14 @@ export {
   createGameAfterSetup,
 } from "./game/create-game";
 import { hashState } from "./game/hash";
-import {
-  applyAction as applyActionFromGame,
-  configureApplyActionCoreHost,
-} from "./game/apply-action";
+import { applyAction as applyActionFromGame } from "./game/apply-action";
 export { applyAction } from "./game/apply-action";
-import { createPerformActionExecutorFromDependencies } from "./game/apply/perform-action";
-import { configureApplyGameActionHost } from "./game/apply-game-action";
+import {
+  configureApplyActionHostComposition,
+  type ApplyActionHostCompositionHost,
+} from "./game/apply/apply-action-hosts";
 export { applyGameAction } from "./game/apply-game-action";
 export { getPlayerView, playerViewFor } from "./game/player-view";
-import { configureReplayHost } from "./game/replay";
 export { replayEvents, replayGameEvents } from "./game/replay";
 import {
   hiddenRunnerResourceSlotId,
@@ -1163,18 +1157,6 @@ type VisibleCounterPayload = {
   removedCounterAmount?: number;
   remainingCounters: number;
 };
-
-const buildEventHost: BuildEventHost = {
-  publicContext: {
-    publicContextForAction,
-    deps: publicContextDeps,
-  },
-  constants: {
-    badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD,
-  },
-};
-
-configureBuildEventHost(buildEventHost);
 
 const damageCoreHost: DamageCoreHost = {
   cards: {
@@ -2001,41 +1983,41 @@ function legalActionGenerationHost(state: GameState): LegalActionGenerationHost 
 
 configureLegalActionGenerationHost(legalActionGenerationHost);
 
-configureApplyActionCoreHost({
-  actions: {
-    performAction: createPerformActionExecutorFromDependencies({
-      turn: { turnBasicExecutionHost },
-      economy: { creditEconomyExecutionHost },
-      abilities: { triggerAbilityExecutionHost },
-      cardImplementation: { activatedCardImplementationExecutionHost },
-      play: { playCardExecutionHost },
-      install: { installCardHost },
-      board: { boardStateActionExecutionHost },
-      corp: { scoredAgendaFlowHost },
-      run: {
-        startRunActionExecutionHost,
-        runMovementHostForState,
-        runnerBreakerActionExecutionHost,
-        continueRun: (state, legalAction) => runFlow.continueRun(state, legalAction),
-      },
-      rez: { rezActionExecutionHost },
-      access: { accessFlowHost },
-      choices: { pendingChoiceResolutionHost },
-    }),
-  },
-});
-
-configureApplyGameActionHost({
+const applyActionHostComposition: ApplyActionHostCompositionHost = {
   actions: {
     applyAction: applyActionFromGame,
   },
-});
-
-configureReplayHost({
-  actions: {
-    applyAction: applyActionFromGame,
+  events: {
+    publicContext: {
+      publicContextForAction,
+      deps: publicContextDeps,
+    },
+    constants: {
+      badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD,
+    },
   },
-});
+  perform: {
+    turn: { turnBasicExecutionHost },
+    economy: { creditEconomyExecutionHost },
+    abilities: { triggerAbilityExecutionHost },
+    cardImplementation: { activatedCardImplementationExecutionHost },
+    play: { playCardExecutionHost },
+    install: { installCardHost },
+    board: { boardStateActionExecutionHost },
+    corp: { scoredAgendaFlowHost },
+    run: {
+      startRunActionExecutionHost,
+      runMovementHostForState,
+      runnerBreakerActionExecutionHost,
+      continueRun: (state, legalAction) => runFlow.continueRun(state, legalAction),
+    },
+    rez: { rezActionExecutionHost },
+    access: { accessFlowHost },
+    choices: { pendingChoiceResolutionHost },
+  },
+};
+
+configureApplyActionHostComposition(applyActionHostComposition);
 
 export function validateDeckDefinition(
   deck: DeckDefinition,
