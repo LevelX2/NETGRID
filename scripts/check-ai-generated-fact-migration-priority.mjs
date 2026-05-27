@@ -565,11 +565,39 @@ const BATCH10_RUNNER_SURVIVAL_PRIORITY_POLICY = Object.fromEntries(
   ]),
 );
 
+const BATCH11_TAG_PUNISH_PRIORITY_POLICY = Object.fromEntries(
+  [
+    [
+      "onr_v1_213_private-cybernet-police",
+      "Scored agenda Trace 5 into tag source is derivable, but trace success and score-area action legality remain engine/LegalAction context.",
+    ],
+    [
+      "onr_v1_301_punitive-counterstrike",
+      "Tagged-runner meat-damage payoff is derivable, but visible tag state, prevention and playability remain LegalAction/board context.",
+    ],
+  ].map(([cardId, rationale]) => [
+    cardId,
+    {
+      migrationPriority: "P1",
+      migrationRisk: "medium",
+      fieldCategories: [
+        "safe_generated_now",
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+      ],
+      recommendedMigrationBatch: 11,
+      rationale,
+    },
+  ]),
+);
+
 const PRIORITY_POLICY = {
   ...BATCH7_CORP_ICE_PRIORITY_POLICY,
   ...BATCH8_CORP_ECONOMY_PRIORITY_POLICY,
   ...BATCH9_CORP_NODES_PRIORITY_POLICY,
   ...BATCH10_RUNNER_SURVIVAL_PRIORITY_POLICY,
+  ...BATCH11_TAG_PUNISH_PRIORITY_POLICY,
   "onr_v1_017_deep-thought": {
     migrationPriority: "P2",
     migrationRisk: "medium",
@@ -1446,7 +1474,7 @@ export function buildGeneratedFactMigrationPriorityReport() {
     };
   });
 
-  const batchPlan = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((batch) => ({
+  const batchPlan = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((batch) => ({
     batch,
     title: {
       1: "Scored-agenda and tag/trace/punish generated facts",
@@ -1459,6 +1487,7 @@ export function buildGeneratedFactMigrationPriorityReport() {
       8: "Corp economy, operation and advance-burst score conversion support",
       9: "Corp nodes, assets, ambush and economy remotes",
       10: "Runner prevention, damage and survival tools",
+      11: "Corp tag/punish funnel cross-batch closeout",
     }[batch],
     cardIds: cards
       .filter((card) => card.recommendedMigrationBatch === batch)

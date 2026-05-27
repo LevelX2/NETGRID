@@ -838,6 +838,20 @@
       "rationale": "Free ICE rez is derivable as a when-scored rez/discount fact, with target/legal choice staying engine-owned. Batch 8 subbatch: when_scored_economy_or_rez."
     },
     {
+      "cardId": "onr_v1_213_private-cybernet-police",
+      "title": "Private Cybernet Police",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/private-cybernet-police.ts",
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_scored_agenda",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Batch 11 tag/punish funnel: scored agenda action starts Trace 5 and gives the Runner a tag only on trace success; LegalActions and trace bidding remain engine-owned."
+    },
+    {
       "cardId": "onr_v1_215_security-net-optimization",
       "title": "Security Net Optimization",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/security-net-optimization.ts",
@@ -1390,6 +1404,18 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Advancement-counter burst is directly represented by distribute_advancement_counters; score legality remains LegalAction context. Batch 8 subbatch: corp_advance_burst."
+    },
+    {
+      "cardId": "onr_v1_301_punitive-counterstrike",
+      "title": "Punitive Counterstrike",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/punitive-counterstrike.ts",
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Batch 11 tag/punish funnel: operation deals meat damage only if the Runner is tagged; visible tag state and playability remain LegalActions/engine context."
     },
     {
       "cardId": "onr_v1_302_scorched-earth",

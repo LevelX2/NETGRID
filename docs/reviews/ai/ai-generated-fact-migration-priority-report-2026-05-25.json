@@ -14,23 +14,23 @@
     "activeHints": "data/ai/ai-card-hints-active.json"
   },
   "mode": "read-only prioritization; no active hint migration, no runtime compile, no planner or consumer binding",
-  "candidateCount": 175,
+  "candidateCount": 177,
   "priorityCounts": {
     "P0": 13,
-    "P1": 158,
+    "P1": 160,
     "P2": 4,
     "P3": 0
   },
   "fieldCategoryCounts": {
-    "generated_with_board_context": 170,
-    "generated_with_descriptor_limitations": 132,
-    "legacy_keep_for_compat": 175,
+    "generated_with_board_context": 172,
+    "generated_with_descriptor_limitations": 134,
+    "legacy_keep_for_compat": 177,
     "overlay_only": 6,
-    "safe_generated_now": 168
+    "safe_generated_now": 170
   },
   "riskCounts": {
     "low": 29,
-    "medium": 146,
+    "medium": 148,
     "high": 0
   },
   "batchPlan": [
@@ -267,6 +267,14 @@
         "onr_v1_135_nasuko-cycle",
         "onr_v1_157_crash-everett-inventive-fixer",
         "onr_v1_161_fall-guy"
+      ]
+    },
+    {
+      "batch": 11,
+      "title": "Corp tag/punish funnel cross-batch closeout",
+      "cardIds": [
+        "onr_v1_213_private-cybernet-police",
+        "onr_v1_301_punitive-counterstrike"
       ]
     }
   ],
@@ -3368,6 +3376,50 @@
       "derivedRationale": "Free ICE rez is derivable as a when-scored rez/discount fact, with target/legal choice staying engine-owned. Batch 8 subbatch: when_scored_economy_or_rez."
     },
     {
+      "cardId": "onr_v1_213_private-cybernet-police",
+      "title": "Private Cybernet Police",
+      "side": "corp",
+      "cardType": "agenda",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_scored_agenda",
+        "condition:requires_trace_success",
+        "effect:scored_agenda_action",
+        "effect:tag_source",
+        "effect:trace"
+      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 11,
+      "rationale": "Scored agenda Trace 5 into tag source is derivable, but trace success and score-area action legality remain engine/LegalAction context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Batch 11 tag/punish funnel: scored agenda action starts Trace 5 and gives the Runner a tag only on trace success; LegalActions and trace bidding remain engine-owned."
+    },
+    {
       "cardId": "onr_v1_215_security-net-optimization",
       "title": "Security Net Optimization",
       "side": "corp",
@@ -5347,6 +5399,48 @@
         "valueHints"
       ],
       "derivedRationale": "Advancement-counter burst is directly represented by distribute_advancement_counters; score legality remains LegalAction context. Batch 8 subbatch: corp_advance_burst."
+    },
+    {
+      "cardId": "onr_v1_301_punitive-counterstrike",
+      "title": "Punitive Counterstrike",
+      "side": "corp",
+      "cardType": "operation",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_tagged",
+        "effect:damage",
+        "effect:tag_punish_payoff"
+      ],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 11,
+      "rationale": "Tagged-runner meat-damage payoff is derivable, but visible tag state, prevention and playability remain LegalAction/board context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Batch 11 tag/punish funnel: operation deals meat damage only if the Runner is tagged; visible tag state and playability remain LegalActions/engine context."
     },
     {
       "cardId": "onr_v1_302_scorched-earth",

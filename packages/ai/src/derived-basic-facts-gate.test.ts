@@ -66,12 +66,12 @@ describe("derived basic facts gate report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("keeps the 175-card pilot complete", () => {
+  it("keeps the 177-card pilot complete", () => {
     const report = readReport();
-    expect(report.pilotCardCount).toBe(175);
-    expect(report.implementationFoundCount).toBe(175);
-    expect(report.cardsWithDerivedFacts).toBe(175);
-    expect(report.cardsWithManualOntologyOverlap).toBe(87);
+    expect(report.pilotCardCount).toBe(177);
+    expect(report.implementationFoundCount).toBe(177);
+    expect(report.cardsWithDerivedFacts).toBe(177);
+    expect(report.cardsWithManualOntologyOverlap).toBe(89);
     expect(report.cardsNeedingManualOverlay).toBe(118);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
@@ -452,6 +452,38 @@ describe("derived basic facts gate report", () => {
         expect.objectContaining({ kind: "base_link" }),
         expect.objectContaining({ kind: "trace_defense" }),
       ]),
+    );
+
+    const privateCybernetPolice = cardById(
+      report,
+      "onr_v1_213_private-cybernet-police",
+    );
+    expect(privateCybernetPolice.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "scored_agenda_action" }),
+        expect.objectContaining({ kind: "trace" }),
+        expect.objectContaining({ kind: "tag_source" }),
+      ]),
+    );
+    expect(privateCybernetPolice.derivedFacts.conditions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "requires_scored_agenda" }),
+        expect.objectContaining({ kind: "requires_trace_success" }),
+      ]),
+    );
+
+    const punitiveCounterstrike = cardById(
+      report,
+      "onr_v1_301_punitive-counterstrike",
+    );
+    expect(punitiveCounterstrike.derivedFacts.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "damage", amount: 2 }),
+        expect.objectContaining({ kind: "tag_punish_payoff" }),
+      ]),
+    );
+    expect(punitiveCounterstrike.derivedFacts.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_runner_tagged" }),
     );
   });
 

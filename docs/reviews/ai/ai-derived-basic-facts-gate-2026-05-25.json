@@ -6,10 +6,10 @@
     "pilotCardsPath": "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json",
     "derivationMode": "read-only CardImplementation text/descriptor scan; no runtime, planner, or strategy consumption"
   },
-  "pilotCardCount": 175,
-  "implementationFoundCount": 175,
-  "cardsWithDerivedFacts": 175,
-  "cardsWithManualOntologyOverlap": 87,
+  "pilotCardCount": 177,
+  "implementationFoundCount": 177,
+  "cardsWithDerivedFacts": 177,
+  "cardsWithManualOntologyOverlap": 89,
   "cardsNeedingManualOverlay": 118,
   "effectKindCounts": {
     "access_punish": 5,
@@ -25,7 +25,7 @@
     "breaker": 21,
     "card_recovery": 1,
     "counter_economy": 14,
-    "damage": 19,
+    "damage": 20,
     "damage_prevention": 3,
     "draw": 9,
     "economy": 17,
@@ -64,17 +64,17 @@
     "run_lock": 4,
     "run_tax": 9,
     "score_acceleration": 8,
-    "scored_agenda_action": 10,
+    "scored_agenda_action": 11,
     "search": 2,
     "shuffle_draw": 1,
     "start_of_turn_economy": 3,
     "survival_payoff": 2,
     "tag": 1,
     "tag_prevention": 3,
-    "tag_punish_payoff": 10,
-    "tag_source": 14,
+    "tag_punish_payoff": 11,
+    "tag_source": 15,
     "topdeck_info": 6,
-    "trace": 17,
+    "trace": 18,
     "trace_credit": 2,
     "trace_defense": 3,
     "trash_credit": 2,
@@ -107,21 +107,21 @@
     "requires_rnd_top": 2,
     "requires_runner_draw": 1,
     "requires_runner_pay_or_take_tag": 1,
-    "requires_runner_tagged": 14,
+    "requires_runner_tagged": 15,
     "requires_score_window": 11,
-    "requires_scored_agenda": 22,
+    "requires_scored_agenda": 23,
     "requires_start_of_turn": 8,
     "requires_stolen_agenda_last_turn": 2,
     "requires_successful_run": 9,
     "requires_trace_attempt": 3,
-    "requires_trace_success": 17,
+    "requires_trace_success": 18,
     "requires_turn_limit_available": 3,
     "requires_unbroken_subroutine": 24
   },
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 921,
+  "warningCount": 923,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -1664,6 +1664,11 @@
       "cardId": "onr_v1_212_priority-requisition"
     },
     {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_213_private-cybernet-police"
+    },
+    {
       "kind": "confidence_mismatch",
       "message": "Generated confidence high differs from manual confidence low.",
       "cardId": "onr_v1_215_security-net-optimization"
@@ -3142,6 +3147,11 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_300_project-consultants"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_301_punitive-counterstrike"
     },
     {
       "kind": "text_pattern_derivation",
@@ -12376,6 +12386,139 @@
       ]
     },
     {
+      "cardId": "onr_v1_213_private-cybernet-police",
+      "title": "Private Cybernet Police",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/private-cybernet-police.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:scored_agenda_action",
+        "effect:trace",
+        "effect:tag_source",
+        "condition:requires_scored_agenda",
+        "condition:requires_trace_success"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Batch 11 tag/punish funnel: scored agenda action starts Trace 5 and gives the Runner a tag only on trace success; LegalActions and trace bidding remain engine-owned.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area",
+            "source": "implementation.abilities.activated.score_area"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_source",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "source": "implementation.effect.trace.onSuccess.add_tags"
+          },
+          {
+            "confidence": "high",
+            "kind": "trace",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "source": "implementation.effect.trace"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_scored_agenda",
+            "source": "implementation.cardType.agenda.activated"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_trace_success",
+            "source": "implementation.effect.trace.onSuccess"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "agenda",
+        "roles": ["agenda", "score_plan", "tag_agenda", "trace_agenda"],
+        "planRoles": ["protect_rnd", "score_next_turn", "score_now"],
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "tag",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          },
+          {
+            "kind": "trace",
+            "timing": "scored_activated",
+            "scope": "runner",
+            "amount": 5
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_scored_agenda",
+          "condition:requires_trace_success",
+          "effect:scored_agenda_action",
+          "effect:tag",
+          "effect:tag_source",
+          "effect:trace"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_215_security-net-optimization",
       "title": "Security Net Optimization",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/agendas/security-net-optimization.ts",
@@ -18091,6 +18234,109 @@
           "kind": "generated_fact_without_manual_match",
           "message": "Generated remoteRole:asset_economy has no manual ontology match."
         },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_301_punitive-counterstrike",
+      "title": "Punitive Counterstrike",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/operations/punitive-counterstrike.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:damage",
+        "effect:tag_punish_payoff",
+        "condition:requires_runner_tagged"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Batch 11 tag/punish funnel: operation deals meat damage only if the Runner is tagged; visible tag state and playability remain LegalActions/engine context.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2,
+            "source": "implementation.effect.damage"
+          },
+          {
+            "confidence": "high",
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "source": "implementation.condition.runner_is_tagged.effect.damage"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_tagged",
+            "source": "implementation.condition.runner_is_tagged"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "corp",
+        "cardType": "operation",
+        "roles": ["damage_operation", "operation", "tag_punishment_operation"],
+        "planRoles": ["bait_runner"],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["tag_trace_punish"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": [
+          "condition:requires_runner_tagged",
+          "effect:damage",
+          "effect:tag_punish_payoff"
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
