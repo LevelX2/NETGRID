@@ -3376,6 +3376,141 @@ select {
   text-align: center;
 }
 
+.damageImpactOverlay {
+  --damage-impact: #39d0ff;
+  position: fixed;
+  z-index: 94;
+  top: 50%;
+  left: 50%;
+  width: min(520px, calc(100vw - 28px));
+  display: grid;
+  gap: 13px;
+  padding: 16px;
+  transform: translate(-50%, -50%);
+  border: 1px solid color-mix(in srgb, var(--damage-impact), var(--line) 26%);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--panel), var(--damage-impact) 18%), color-mix(in srgb, var(--panel), #111 16%));
+  box-shadow:
+    0 26px 72px rgb(0 0 0 / 0.52),
+    0 0 0 9999px rgb(0 0 0 / 0.28);
+}
+
+.damageImpactOverlay.damage-meat {
+  --damage-impact: #ff5f57;
+}
+
+.damageImpactOverlay.damage-core {
+  --damage-impact: #b98cff;
+}
+
+.damageImpactOverlay.is-flatline {
+  --damage-impact: #ff3b30;
+  border-width: 2px;
+}
+
+.damageImpactHeader,
+.damageImpactFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.damageImpactHeader {
+  align-items: flex-start;
+}
+
+.damageImpactHeader > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.damageImpactHeader strong {
+  font-size: 20px;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.damageImpactHeader span:not(.damageImpactIcon) {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.damageImpactIcon {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--damage-impact), transparent 38%);
+  border-radius: 8px;
+  color: color-mix(in srgb, var(--damage-impact), white 18%);
+  background: color-mix(in srgb, var(--damage-impact), transparent 86%);
+}
+
+.damageImpactMeter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18px, 1fr));
+  gap: 5px;
+  min-height: 42px;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--damage-impact), transparent 62%);
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.2);
+}
+
+.damageImpactMeter span {
+  min-width: 0;
+  min-height: 26px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--damage-impact), transparent 48%);
+  background: color-mix(in srgb, var(--damage-impact), transparent 38%);
+}
+
+.damageImpactMeter span.is-empty {
+  border-style: dashed;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.damageImpactMeter span.is-hit {
+  box-shadow:
+    inset 0 -4px 0 color-mix(in srgb, var(--danger), black 20%),
+    0 0 16px color-mix(in srgb, var(--damage-impact), transparent 40%);
+}
+
+.damageImpactStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.damageImpactStats span {
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--damage-impact), transparent 58%);
+  border-radius: 6px;
+  color: color-mix(in srgb, var(--damage-impact), var(--text) 26%);
+  background: color-mix(in srgb, var(--damage-impact), transparent 90%);
+  font-size: 12px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.damageImpactFooter small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.damageImpactDismiss {
+  flex: 0 0 auto;
+}
+
 .cueAdvanceButton {
   min-height: 34px;
   padding: 0 11px;

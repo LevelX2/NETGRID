@@ -104,10 +104,12 @@ import { deckAgendaStatusForEditor, type DeckAgendaStatus } from "./deck-editor-
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
+  deriveDamageImpactCues,
   deriveOpponentActionCues,
   turnStartAudioCue,
   type ActionSoundKind,
   type BoardHighlight,
+  type DamageImpactCue,
   type OpponentActionCue,
   type TurnStartAudioState
 } from "./action-cues";
@@ -2228,6 +2230,8 @@ export default function Page() {
   };
   const [actionCueQueue, setActionCueQueue] = useState<OpponentActionCue[]>([]);
   const [currentActionCue, setCurrentActionCue] = useState<OpponentActionCue | null>(null);
+  const [damageImpactQueue, setDamageImpactQueue] = useState<DamageImpactCue[]>([]);
+  const [currentDamageImpact, setCurrentDamageImpact] = useState<DamageImpactCue | null>(null);
   const [aiPacingFallbackVisible, setAiPacingFallbackVisible] = useState(false);
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
   const [seriesTransitioning, setSeriesTransitioning] = useState(false);
@@ -3342,6 +3346,8 @@ export default function Page() {
     lastTurnStartAudioCueKeyRef.current = null;
     setActionCueQueue([]);
     setCurrentActionCue(null);
+    setDamageImpactQueue([]);
+    setCurrentDamageImpact(null);
     pendingAiAdvanceKeyRef.current = null;
     setFocusedCard(null);
   }, [session?.matchId, session?.sessionToken]);
@@ -3399,8 +3405,15 @@ export default function Page() {
           contextByEventId
         })
       : [];
+    const damageImpacts = deriveDamageImpactCues({
+      viewerSide: payload.side,
+      playerView: payload.playerView,
+      events: payload.eventTail,
+      lastPresentedEventId: lastSeen
+    });
     lastSeenCueEventIdRef.current = latestId;
     if (cues.length > 0) setActionCueQueue((current) => [...current, ...cues]);
+    if (damageImpacts.length > 0) setDamageImpactQueue((current) => [...current, ...damageImpacts]);
     if (!audioEnabled || newEvents.length === 0) return;
     const overlayEventIds = new Set(cues.map((cue) => cue.eventId));
     for (const event of newEvents) {
@@ -3421,6 +3434,20 @@ export default function Page() {
     setCurrentActionCue(nextCue);
     setActionCueQueue(rest);
   }, [actionCueQueue, currentActionCue]);
+
+  useEffect(() => {
+    if (currentDamageImpact || damageImpactQueue.length === 0) return;
+    const [nextCue, ...rest] = damageImpactQueue;
+    if (!nextCue) return;
+    setCurrentDamageImpact(nextCue);
+    setDamageImpactQueue(rest);
+  }, [damageImpactQueue, currentDamageImpact]);
+
+  useEffect(() => {
+    if (!currentDamageImpact || currentDamageImpact.flatline) return;
+    const timeout = window.setTimeout(() => setCurrentDamageImpact(null), 5200);
+    return () => window.clearTimeout(timeout);
+  }, [currentDamageImpact]);
 
   useEffect(() => {
     if (!currentActionCue) return;
@@ -5515,6 +5542,13 @@ export default function Page() {
         onRequest={requestUndo}
         onResolve={resolveUndo}
       />
+      {activeMatchIsGame ? (
+      <DamageImpactOverlay
+        cue={currentDamageImpact}
+        queued={damageImpactQueue.length}
+        onDismiss={() => setCurrentDamageImpact(null)}
+      />
+      ) : null}
       {activeMatchIsGame ? (
       <OpponentActionOverlay
         cue={currentActionCue}
@@ -7848,6 +7882,76 @@ function AudioSettings({
       </label>
     </div>
   );
+}
+
+function DamageImpactOverlay({
+  cue,
+  queued,
+  onDismiss
+}: {
+  cue: DamageImpactCue | null;
+  queued: number;
+  onDismiss(): void;
+}) {
+  if (!cue) return null;
+  const maxSegments = Math.max(1, cue.runnerGripBefore ?? cue.runnerGripAfter ?? cue.amount);
+  const segmentCount = Math.min(12, maxSegments);
+  const hitSegments = Math.min(segmentCount, Math.max(1, Math.ceil((cue.amount / maxSegments) * segmentCount)));
+  const filledAfter = cue.runnerGripAfter === undefined ? null : Math.max(0, Math.min(segmentCount, Math.round((cue.runnerGripAfter / maxSegments) * segmentCount)));
+  const title = cue.flatline ? "Flatline" : `${damageTypeLabel(cue.damageType)} Impact`;
+  const gripLabel = cue.runnerGripBefore !== undefined && cue.runnerGripAfter !== undefined
+    ? `Grip ${cue.runnerGripBefore} -> ${cue.runnerGripAfter}`
+    : cue.runnerGripAfter !== undefined
+      ? `Grip jetzt ${cue.runnerGripAfter}`
+      : "Grip-Pool";
+  const summary = cue.flatline && cue.runnerGripBefore !== undefined
+    ? `Runner hatte nicht genug Grip für ${cue.amount} ${damageTypeLabel(cue.damageType)}.`
+    : `${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}.`;
+  const coreDetail = cue.damageType === "core"
+    ? [
+        cue.coreDamageAfter !== undefined ? `Core Damage: ${cue.coreDamageAfter}` : "Core Damage",
+        cue.runnerMaxHandSizeAfter !== undefined ? `Handlimit: ${cue.runnerMaxHandSizeAfter}` : null
+      ].filter(Boolean).join(" · ")
+    : null;
+
+  return (
+    <aside className={`damageImpactOverlay damage-${cue.damageType} ${cue.flatline ? "is-flatline" : ""}`} aria-live="assertive" data-testid="damage-impact">
+      <div className="damageImpactHeader">
+        <span className="damageImpactIcon" aria-hidden="true">
+          {cue.flatline ? <AlertTriangle size={22} /> : cue.damageType === "core" ? <Brain size={22} /> : <Zap size={22} />}
+        </span>
+        <div>
+          <strong>{title}</strong>
+          <span>{summary}</span>
+        </div>
+      </div>
+      <div className="damageImpactMeter" aria-label={gripLabel}>
+        {Array.from({ length: segmentCount }, (_, index) => {
+          const isHit = index >= segmentCount - hitSegments;
+          const isFilled = filledAfter === null || index < filledAfter;
+          return <span key={index} className={`${isFilled ? "is-filled" : "is-empty"} ${isHit ? "is-hit" : ""}`} />;
+        })}
+      </div>
+      <div className="damageImpactStats">
+        <span>{gripLabel}</span>
+        <span>-{cue.amount}</span>
+        {coreDetail ? <span>{coreDetail}</span> : null}
+      </div>
+      <div className="damageImpactFooter">
+        {queued > 0 ? <small>{queued} weitere Damage-Meldung{queued === 1 ? "" : "en"}</small> : <span aria-hidden="true" />}
+        <button className="button damageImpactDismiss" onClick={onDismiss} aria-label="Damage-Fenster schließen" title="Damage-Fenster schließen" type="button">
+          <Check size={14} />
+          Schließen
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function damageTypeLabel(type: DamageImpactCue["damageType"]): string {
+  if (type === "meat") return "Meat Damage";
+  if (type === "core") return "Core Damage";
+  return "Net Damage";
 }
 
 function OpponentActionOverlay({

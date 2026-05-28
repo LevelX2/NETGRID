@@ -1,19 +1,30 @@
 ---
 activityId: act-2026-05-28-damage-impact-overlay
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-05-28
-startedAt:
-completedAt:
+startedAt: 2026-05-28
+completedAt: 2026-05-28
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/action-cues.ts
+  - apps/web/app/action-cues.test.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/globals.css
+  - packages/engine/src/game/damage/damage-core.ts
+  - packages/engine/src/game/damage/damage-core.test.ts
+  - packages/engine/src/public-context.ts
+checks:
+  - corepack pnpm vitest run apps/web/app/action-cues.test.ts packages/engine/src/game/damage/damage-core.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - git diff --check
 ---
 
 # Damage Impact Overlay für Runner-Grip als Lebenspool
@@ -66,16 +77,16 @@ Net Damage, Meat Damage und Core Damage sollen in der Web UI deutlich stärker u
 
 ## Akzeptanzkriterien
 
-- [ ] Bei Net Damage erscheint ein auffälliges Damage-Impact-Overlay mit Damage-Typ, Damage-Menge und abstraktem Runner-Grip-Pool vor/nach dem Damage.
-- [ ] Bei Meat Damage erscheint dasselbe Muster mit visuell unterscheidbarer Meat-Damage-Gestaltung.
-- [ ] Bei Core Damage erscheint dasselbe Muster plus side-sicherer Hinweis auf Core Damage beziehungsweise reduziertes Runner-Handlimit, sofern im PlayerView/PublicPayload vorhanden.
-- [ ] Bei Flatline durch Damage erscheint eine klare Flatline-Variante statt nur eines kleinen Statushinweises.
-- [ ] Das Overlay zeigt keine konkreten Grip-Karten, keine versteckten DefinitionIds, keine vor-Damage-Grip-Liste und keine nicht öffentlichen Kartentitel.
-- [ ] Korp-Sicht und Runner-Sicht bleiben side-sicher: Die Korp sieht nur Counts und öffentliche Quelle; der Runner erhält keine zusätzlichen Informationen außerhalb seiner ohnehin sichtbaren Zone-/Heap-Sicht.
-- [ ] Reconnect und EventTail erzeugen keine mehrfach störenden alten Damage-Overlays; es soll nur für neue beziehungsweise noch nicht präsentierte Events erscheinen.
-- [ ] Das Overlay ist auf Desktop und Mobile lesbar, verdeckt nicht dauerhaft die Spielfläche und kann geschlossen werden.
-- [ ] Bestehende Action-Cue-Auto-Dismiss-/Audio-/KI-Pacing-Pfade hängen nicht durch das neue Overlay.
-- [ ] Webtests oder fokussierte Unit-Tests decken Cue-/Overlay-Ableitung, Hidden-Info-Redaction und mindestens einen Flatline-Fall ab.
+- [x] Bei Net Damage erscheint ein auffälliges Damage-Impact-Overlay mit Damage-Typ, Damage-Menge und abstraktem Runner-Grip-Pool vor/nach dem Damage.
+- [x] Bei Meat Damage erscheint dasselbe Muster mit visuell unterscheidbarer Meat-Damage-Gestaltung.
+- [x] Bei Core Damage erscheint dasselbe Muster plus side-sicherer Hinweis auf Core Damage beziehungsweise reduziertes Runner-Handlimit, sofern im PlayerView/PublicPayload vorhanden.
+- [x] Bei Flatline durch Damage erscheint eine klare Flatline-Variante statt nur eines kleinen Statushinweises.
+- [x] Das Overlay zeigt keine konkreten Grip-Karten, keine versteckten DefinitionIds, keine vor-Damage-Grip-Liste und keine nicht öffentlichen Kartentitel.
+- [x] Korp-Sicht und Runner-Sicht bleiben side-sicher: Die Korp sieht nur Counts und öffentliche Quelle; der Runner erhält keine zusätzlichen Informationen außerhalb seiner ohnehin sichtbaren Zone-/Heap-Sicht.
+- [x] Reconnect und EventTail erzeugen keine mehrfach störenden alten Damage-Overlays; es soll nur für neue beziehungsweise noch nicht präsentierte Events erscheinen.
+- [x] Das Overlay ist auf Desktop und Mobile lesbar, verdeckt nicht dauerhaft die Spielfläche und kann geschlossen werden.
+- [x] Bestehende Action-Cue-Auto-Dismiss-/Audio-/KI-Pacing-Pfade hängen nicht durch das neue Overlay.
+- [x] Webtests oder fokussierte Unit-Tests decken Cue-/Overlay-Ableitung, Hidden-Info-Redaction und mindestens einen Flatline-Fall ab.
 
 ## Umsetzungshinweise
 
@@ -101,4 +112,13 @@ Net Damage, Meat Damage und Core Damage sollen in der Web UI deutlich stärker u
 
 ## Ergebnisnotiz
 
-Noch nicht umgesetzt. Dieses Paket beschreibt den abgestimmten Vorschlag und soll als sorgfältige Umsetzungsvorlage für eine side-sichere, deutlichere Damage-Präsentation dienen.
+Umgesetzt: Damage-Resolutionen transportieren jetzt öffentliche Runner-Grip-Counts vor/nach dem Schaden, ohne konkrete Grip-Karten oder verdeckte Quellen offenzulegen. Die Web-UI leitet daraus deduplizierte Damage-Impact-Cues ab und zeigt ein zentriertes Overlay mit Damage-Typ, Menge, abstraktem Grip-Balken, Flatline-Variante und Core-Damage-/Handlimit-Hinweisen, wenn diese side-sicher im Payload stehen. Fokussierte Tests decken Cue-Ableitung, Hidden-Info-Redaction, Reconnect-Deduplication und Damage-Core-Counts ab.
+
+Checks grün:
+
+- `corepack pnpm vitest run apps/web/app/action-cues.test.ts packages/engine/src/game/damage/damage-core.test.ts`
+- `corepack pnpm --filter @netgrid/web typecheck`
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `git diff --check`
+
+Nicht ausgeführt: Browser-Smoke, weil kein lokaler NETGRID-Server auf `127.0.0.1:3000`, `3001` oder `5173` lief; normaler Projektstart bleibt `scripts/start-netgrid.ps1`.
