@@ -17297,6 +17297,101 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.corpEconomyBeforeScoreFixGateSuspiciousRepeatedEconomy).toBe(
       1,
     );
+    expect(metrics.corpRepeatedEconomyBeforeScoreWindows).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreCreditsAlreadyEnough).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreScoreLegal).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreThenRunnerSteal).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreSuspicious).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionRepeatedEconomy).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionRunnerSteal).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreNoConversionSuspicious).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreNoConversionPlausible).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreCreditsEnoughWindows).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreCreditsEnoughTaken).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreCreditsEnoughScoreLegal).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreCreditsEnoughSuspicious).toBe(2);
+  });
+
+  it("separates corp economy-before-score attribution blockers", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "gain_credit", undefined, 1, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithReadyRemote: true,
+            corpEconomyBeforeScoreWindowCreditsShort: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenAsNecessaryCredits: true,
+            corpEconomyBeforeScoreFixGateBlockedByCredits: true,
+          }),
+          progressionAction("corp", 2, "gain_credit", undefined, 1, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithReadyRemote: true,
+            corpEconomyBeforeScoreWindowCreditsShort: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenAsNecessaryCredits: true,
+            corpEconomyBeforeScoreFixGateBlockedByCredits: true,
+          }),
+        ],
+        "economy-before-score-still-short-repeat-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "gain_credit", undefined, 1, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithReadyRemote: true,
+            corpEconomyBeforeScoreWindowCreditsAlreadyEnough: true,
+            corpEconomyBeforeScoreWindowRemoteContestHigh: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenDespiteCreditsEnough: true,
+            corpEconomyBeforeScoreFixGateBlockedByRunnerContest: true,
+          }),
+        ],
+        "economy-before-score-runner-contest-blocked-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "gain_credit", undefined, 1, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowCreditsAlreadyEnough: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenDespiteCreditsEnough: true,
+            corpEconomyBeforeScoreFixGateBlockedBySafety: true,
+          }),
+        ],
+        "economy-before-score-safety-blocked-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "gain_credit", undefined, 1, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithReadyRemote: true,
+            corpEconomyBeforeScoreWindowWithScoreLegalNext: true,
+            corpEconomyBeforeScoreWindowCreditsAlreadyEnough: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenDespiteCreditsEnough: true,
+            corpEconomyBeforeScoreFixGateEligible: true,
+            corpEconomyBeforeScoreFixGateSuspicious: true,
+          }),
+          progressionAction("corp", 2, "draw_card", undefined, 1),
+        ],
+        "economy-before-score-plan-drift-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpRepeatedEconomyBeforeScoreWindows).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreCreditsStillShort).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScorePlausible).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreSuspicious).toBe(0);
+    expect(metrics.corpEconomyBeforeScoreNoConversionCreditsStillShort).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreNoConversionRunnerContestHigh).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionRemoteUnsafe).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionSafetyBlocked).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionPlanDrift).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionRepeatedEconomy).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionDrawLoop).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionSuspicious).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionPlausible).toBe(4);
   });
 
   it("summarizes scored-agenda action metrics", () => {
