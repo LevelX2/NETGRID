@@ -420,6 +420,22 @@ type CorpScoreWindowCompressionContext = {
   opportunity: boolean;
 };
 
+export type CorpScoreTerminalWindowAssessment = {
+  terminalWindow: boolean;
+  scoreActionIds: string[];
+  advanceToScoreActionIds: string[];
+  agendaInstallActionIds: string[];
+  protectedRemoteIds: string[];
+  remoteContestLow: boolean;
+  creditsSufficient: boolean;
+  runnerAccessThreatHigh: boolean;
+  blockedByCheapContest: boolean;
+  blockedByCredits: boolean;
+  blockedByRunnerContest: boolean;
+  blockedByHqThreat: boolean;
+  evidence: string[];
+};
+
 type CorpRemotePortfolioContext = {
   newRemoteActionIds: string[];
   newRemoteWithPlanActionIds: string[];
@@ -2386,6 +2402,146 @@ function corpScoreWindowCompressionContext(
     opportunity:
       scorePathActions.length > 0 || economyNecessaryActionIds.length > 0,
   };
+}
+
+export function assessCorpScoreTerminalWindow(
+  input: AiDecisionInput,
+  contextOrBelief:
+    | BeliefState
+    | CorpEvaluationContext = createCorpEvaluationContext(input),
+): CorpScoreTerminalWindowAssessment {
+  const context = corpEvaluationContext(input, contextOrBelief);
+  const features = extractCorpPlanFeatures(input);
+  const compression = corpScoreWindowCompressionContext(input, context);
+  const scoreActionIds = compression.scoreActionIds;
+  const advanceToScoreActionIds = input.legalActions
+    .filter((action) => {
+      if (action.type !== "advance_card") return false;
+      if (!compression.advanceActionIds.includes(action.actionId)) return false;
+      const horizon = remoteScoreHorizonForAction(input, action, context);
+      return (horizon?.advancesRemainingAfterAction ?? 99) <= 0;
+    })
+    .map((action) => action.actionId);
+  const agendaInstallActionIds = compression.agendaInstallActionIds;
+  const terminalActionIds = [
+    ...scoreActionIds,
+    ...advanceToScoreActionIds,
+    ...agendaInstallActionIds,
+  ];
+  const terminalServers = sortedUnique(
+    input.legalActions
+      .filter((action) => terminalActionIds.includes(action.actionId))
+      .map(
+        (action) =>
+          remoteScoreHorizonForAction(input, action, context)?.serverId ??
+          remoteServerIdForAction(input, action),
+      )
+      .filter(
+        (serverId): serverId is string =>
+          typeof serverId === "string" && serverId.startsWith("remote_"),
+      ),
+  );
+  const safetyAssessments = terminalServers.map((serverId) =>
+    assessCorpEffectiveRemoteSafety(input, serverId, context),
+  );
+  const reserveNeeds = terminalServers
+    .map((serverId) => remoteRezReserveNeedForServer(input, serverId, context))
+    .filter((need): need is { serverId: string; reserveTarget: number } =>
+      Boolean(need),
+    );
+  const blockedByCredits = reserveNeeds.some(
+    (need) => features.credits < need.reserveTarget,
+  );
+  const blockedByCheapContest = safetyAssessments.some(
+    (safety) => safety.cheaplyContestable && !safety.sameTurnScoreAllowed,
+  );
+  const blockedByRunnerContest = safetyAssessments.some(
+    (safety) =>
+      safety.contestCapacity === "high" &&
+      !safety.effectivelyProtected &&
+      !safety.sameTurnScoreAllowed,
+  );
+  const memory = evaluateRemoteIntentMemory(input, context.beliefState);
+  const runnerAccessThreatHigh =
+    features.ownAgendaPressure >= 110 ||
+    memory.centralRunSignals.hq >= 3 ||
+    memory.centralRunSignals.rd >= 3;
+  const blockedByHqThreat =
+    runnerAccessThreatHigh && terminalActionIds.length === 0;
+  const remoteContestLow = safetyAssessments.some(
+    (safety) => safety.contestCapacity === "low",
+  );
+  const creditsSufficient = !blockedByCredits;
+  const terminalWindow =
+    terminalActionIds.length > 0 ||
+    compression.compressionActionIds.length > 0 ||
+    compression.economyNecessaryActionIds.length > 0;
+  return {
+    terminalWindow,
+    scoreActionIds,
+    advanceToScoreActionIds,
+    agendaInstallActionIds,
+    protectedRemoteIds: compression.protectedRemoteIds,
+    remoteContestLow,
+    creditsSufficient,
+    runnerAccessThreatHigh,
+    blockedByCheapContest,
+    blockedByCredits,
+    blockedByRunnerContest,
+    blockedByHqThreat,
+    evidence: [
+      "corp_score_terminal_window:true",
+      `corp_score_terminal_score_actions:${scoreActionIds.length}`,
+      `corp_score_terminal_advance_to_score_actions:${advanceToScoreActionIds.length}`,
+      `corp_score_terminal_agenda_install_actions:${agendaInstallActionIds.length}`,
+      `corp_score_terminal_protected_remote_count:${compression.protectedRemoteIds.length}`,
+      `corp_score_terminal_remote_contest_low:${remoteContestLow}`,
+      `corp_score_terminal_credits_sufficient:${creditsSufficient}`,
+      `corp_score_terminal_runner_access_threat_high:${runnerAccessThreatHigh}`,
+      `corp_score_terminal_blocked_by_cheap_contest:${blockedByCheapContest}`,
+      `corp_score_terminal_blocked_by_credits:${blockedByCredits}`,
+      `corp_score_terminal_blocked_by_runner_contest:${blockedByRunnerContest}`,
+      `corp_score_terminal_blocked_by_hq_threat:${blockedByHqThreat}`,
+    ],
+  };
+}
+
+function corpScoreTerminalActionPriorityBonus(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+): number {
+  const terminal = assessCorpScoreTerminalWindow(input, context);
+  if (!terminal.terminalWindow) return 0;
+  const immediateScoreWindow =
+    terminal.scoreActionIds.length > 0 ||
+    terminal.advanceToScoreActionIds.length > 0;
+  if (terminal.scoreActionIds.includes(action.actionId)) return 140;
+  if (terminal.advanceToScoreActionIds.includes(action.actionId)) return 105;
+  if (terminal.agendaInstallActionIds.includes(action.actionId)) return 30;
+  if (!immediateScoreWindow) return 0;
+  if (
+    terminal.blockedByCheapContest ||
+    terminal.blockedByCredits ||
+    terminal.blockedByRunnerContest
+  )
+    return 0;
+  if (action.type === "draw_card") return -40;
+  if (isCorpEconomyOrDrawAction(input, action, context)) return -55;
+  if (
+    action.type === "install_card" &&
+    action.payload?.placement === "ice" &&
+    typeof action.payload.serverId === "string" &&
+    action.payload.serverId.startsWith("remote_")
+  )
+    return -65;
+  if (
+    action.type === "install_card" &&
+    action.payload?.placement !== "ice" &&
+    !rolesForAction(input, action).some(isAgendaRole)
+  )
+    return -50;
+  return 0;
 }
 
 function evaluateCorpRemotePortfolioDiscipline(
@@ -6821,7 +6977,11 @@ function actionPriority(
   context: CorpEvaluationContext,
 ): number {
   if (kind === "score_now" && action.type === "score_agenda")
-    return 150 + scoreConversionActionBonus(input, action, context);
+    return (
+      150 +
+      scoreConversionActionBonus(input, action, context) +
+      corpScoreTerminalActionPriorityBonus(input, action, context)
+    );
   const extraActionOperation = classifyCorpExtraActionOperation(
     input,
     action,
@@ -6837,7 +6997,8 @@ function actionPriority(
       90 +
       boundedScoreHorizonActionBonus(input, action, context) -
       riskyAdvanceActionPriorityPenalty(input, action, context) +
-      corpUnsafeScoreConversionActionBonus(input, action, context)
+      corpUnsafeScoreConversionActionBonus(input, action, context) +
+      corpScoreTerminalActionPriorityBonus(input, action, context)
     );
   if (
     kind === "score_next_turn" &&
@@ -6846,7 +7007,8 @@ function actionPriority(
     return (
       92 +
       boundedScoreHorizonActionBonus(input, action, context) +
-      corpUnsafeScoreConversionActionBonus(input, action, context)
+      corpUnsafeScoreConversionActionBonus(input, action, context) +
+      corpScoreTerminalActionPriorityBonus(input, action, context)
     );
   if (
     (kind === "protect_hq" || kind === "protect_rnd") &&
@@ -6861,10 +7023,14 @@ function actionPriority(
   )
     return 35;
   if (kind === "recover_economy" && extraActionOperation)
-    return extraActionOperation.scoreWindowAfterExtraActions
-      ? 88
-      : 60 + Math.max(0, extraActionOperation.netValue) * 4;
-  if (kind === "recover_economy" && action.type === "play_operation") return 80;
+    return (
+      (extraActionOperation.scoreWindowAfterExtraActions
+        ? 88
+        : 60 + Math.max(0, extraActionOperation.netValue) * 4) +
+      corpScoreTerminalActionPriorityBonus(input, action, context)
+    );
+  if (kind === "recover_economy" && action.type === "play_operation")
+    return 80 + corpScoreTerminalActionPriorityBonus(input, action, context);
   if (kind === "recover_economy" && action.type === "draw_card") {
     const density = corpHqAgendaDensityContext(input, context);
     const features = extractCorpPlanFeatures(input);
@@ -6888,7 +7054,7 @@ function actionPriority(
     action.type === "draw_card" &&
     shouldCorpDrawForScoring(input)
   )
-    return 78;
+    return 78 + corpScoreTerminalActionPriorityBonus(input, action, context);
   if (
     kind === "recover_economy" &&
     (action.type === "gain_credit" ||
@@ -6896,7 +7062,10 @@ function actionPriority(
       action.type === "activated_card_ability") &&
     classifyCorpInstalledEconomyAction(input, action)
   )
-    return corpInstalledEconomyPriority(input, action);
+    return (
+      corpInstalledEconomyPriority(input, action) +
+      corpScoreTerminalActionPriorityBonus(input, action, context)
+    );
   if (kind === "recover_economy") {
     const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
     if (scoredAgenda) {
@@ -6908,7 +7077,8 @@ function actionPriority(
       );
     }
   }
-  if (kind === "recover_economy" && action.type === "gain_credit") return 65;
+  if (kind === "recover_economy" && action.type === "gain_credit")
+    return 65 + corpScoreTerminalActionPriorityBonus(input, action, context);
   if (
     kind === "build_scoring_remote" &&
     action.type === "install_card" &&
@@ -6918,6 +7088,7 @@ function actionPriority(
     return (
       82 +
       corpFutureRunIceOrderingActionBonus(input, action) +
+      corpScoreTerminalActionPriorityBonus(input, action, context) +
       corpRemotePortfolioActionPriorityBonus(input, action, context) +
       (hasRiskyAdvanceWindowForServer(
         input,
@@ -6935,6 +7106,7 @@ function actionPriority(
   )
     return (
       65 +
+      corpScoreTerminalActionPriorityBonus(input, action, context) +
       boundedRemotePriorityBonus(input, action, context) +
       boundedScoreHorizonActionBonus(input, action, context) +
       corpUnsafeScoreConversionActionBonus(input, action, context)
@@ -6946,6 +7118,7 @@ function actionPriority(
   )
     return (
       75 +
+      corpScoreTerminalActionPriorityBonus(input, action, context) +
       boundedRemotePriorityBonus(input, action, context) +
       boundedScoreHorizonActionBonus(input, action, context) +
       corpUnsafeScoreConversionActionBonus(input, action, context)

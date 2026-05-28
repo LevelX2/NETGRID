@@ -30,6 +30,7 @@ import {
   buildDeckDoctrineProfile,
   buildObservedFacts,
   buildAiDecisionInput,
+  assessCorpScoreTerminalWindow,
   assessCorpFutureRunIcePlacement,
   chooseAiAction,
   chooseCorpBaselineAction,
@@ -5757,6 +5758,111 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.score.evidence).toContain(
       "corp_protection_followed_by_agenda_install:true",
     );
+  });
+
+  it("keeps legal score terminal over further protection in a safe remote", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-score-terminal-score-now",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 3);
+        moveCorpCardToHq(state, "simple_code_gate_ice");
+      },
+    );
+    const score = input.legalActions.find(
+      (action) => action.type === "score_agenda",
+    );
+    const protection = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
+    expect(score).toBeDefined();
+    expect(protection).toBeDefined();
+    if (!score || !protection)
+      throw new Error("Missing score terminal score/protection fixture");
+
+    const scopedInput = { ...input, legalActions: [score, protection] };
+    const terminal = assessCorpScoreTerminalWindow(scopedInput);
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(terminal.terminalWindow).toBe(true);
+    expect(terminal.scoreActionIds).toContain(score.actionId);
+    expect(decision.selectedActionId).toBe(score.actionId);
+    expect(decision.debug.planKind).toBe("score_now");
+  });
+
+  it("keeps legal advance-to-score over economy in a safe remote", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-score-terminal-advance",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain)
+      throw new Error("Missing score terminal advance/economy fixture");
+
+    const scopedInput = { ...input, legalActions: [advance, gain] };
+    const terminal = assessCorpScoreTerminalWindow(scopedInput);
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(terminal.advanceToScoreActionIds).toContain(advance.actionId);
+    expect(decision.selectedActionId).toBe(advance.actionId);
+    expect(decision.debug.planKind).toBe("score_next_turn");
+  });
+
+  it("uses a ready scoring remote for agenda install over economy", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-score-terminal-agenda-install",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        moveCorpCardToHq(state, "simple_agenda");
+      },
+    );
+    const agendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(agendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!agendaInstall || !gain)
+      throw new Error("Missing score terminal agenda install fixture");
+
+    const scopedInput = { ...input, legalActions: [agendaInstall, gain] };
+    const terminal = assessCorpScoreTerminalWindow(scopedInput);
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(terminal.agendaInstallActionIds).toContain(agendaInstall.actionId);
+    expect(decision.selectedActionId).toBe(agendaInstall.actionId);
+    expect(decision.debug.planKind).toBe("score_next_turn");
   });
 
   it("penalizes protection without safety delta when a protected score path is ready", () => {
@@ -17019,6 +17125,85 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.corpRunnerStealAfterDelayedScoreWindow).toBe(1);
     expect(metrics.corpAdvanceToScoreLineCompressedWithin2).toBe(1);
     expect(metrics.corpAdvanceToScoreLineCompressedWithin3).toBe(1);
+  });
+
+  it("summarizes corp score-terminal conversion skips and followups", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "install_card", "remote_1", 1, {
+            installPlacement: "ice",
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowScoreLegal: true,
+            corpScoreTerminalWindowProtectedRemoteReady: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForProtection: true,
+            corpScoreConversionFixGateEligible: true,
+            corpScoreConversionFixGateSuspiciousProtectionLoop: true,
+          }),
+          progressionAction("corp", 2, "gain_credit", undefined, 1, {
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowScoreLegal: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForEconomy: true,
+            evidence: ["corp_protection_loop_after_remote_safe:true"],
+            corpScoreConversionFixGateEligible: true,
+            corpScoreConversionFixGateSuspiciousEconomyLoop: true,
+          }),
+          progressionAction("runner", 3, "steal_agenda", "remote_1", 1),
+        ],
+        "score-terminal-protection-loop-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "draw_card", undefined, 2, {
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowAdvanceToScoreLegal: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForDraw: true,
+            corpScoreConversionFixGateEligible: true,
+            corpScoreConversionFixGateSuspiciousDraw: true,
+          }),
+          progressionAction("corp", 2, "advance_card", "remote_1", 2, {
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowAdvanceToScoreLegal: true,
+            corpScoreTerminalAdvanceTaken: true,
+          }),
+        ],
+        "score-terminal-score-next-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "install_card", "new_remote", 3, {
+            installPlacement: "root",
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowAgendaInstallLegal: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForRemotePortfolio: true,
+            corpScoreConversionFixGateBlockedByCheapContest: true,
+          }),
+        ],
+        "score-terminal-cheap-contest-blocked-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpScoreTerminalWindow).toBe(5);
+    expect(metrics.corpScoreTerminalAdvanceTaken).toBe(1);
+    expect(metrics.corpScoreTerminalSkipped).toBe(4);
+    expect(metrics.corpScoreTerminalSkippedForProtection).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedForEconomy).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedForDraw).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedForRemotePortfolio).toBe(1);
+    expect(metrics.corpScoreConversionFixGateEligible).toBe(3);
+    expect(metrics.corpScoreConversionFixGateBlockedByCheapContest).toBe(1);
+    expect(metrics.corpScoreConversionFixGateSuspiciousProtectionLoop).toBe(1);
+    expect(metrics.corpScoreConversionFixGateSuspiciousEconomyLoop).toBe(1);
+    expect(metrics.corpScoreConversionFixGateSuspiciousDraw).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedThenAgendaStolen).toBe(2);
+    expect(metrics.corpScoreTerminalSkippedThenProtectionLoop).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedThenEconomyLoop).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedThenRemoteStillSafe).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedThenScoreNextDecision).toBe(1);
   });
 
   it("summarizes scored-agenda action metrics", () => {
