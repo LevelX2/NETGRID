@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-6a-agenda-scoring-steal-baseline
-status: blocked
+status: done-reference
 kind: implementation
 area: cards
 priority: normal
@@ -8,16 +8,12 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-28
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 6a
 proReferences:
   - PRO013
-blockedBy:
-  - Corporate Headhunters needs a scored-agenda activated meat-damage ability gated by runner tags plus a source-bound "if this damage succeeds, reduce Runner hand size" effect; current scoredAgenda/special damage families do not model that source-bound successful-damage follow-up.
-  - Fetal AI can partially reuse accessEffects for net damage and R&D reveal, but its printed steal cost is on the accessed agenda itself; current steal_cost modifiers model rezzed root sources, not current-access self steal costs from any access zone.
-  - Project Zurich needs an overadvance-on-score persistent start-of-corp-turn credit income based on every two excess advancement counters; current overadvance support is agenda-point counters, not recurring scored-agenda economy.
-  - World Domination needs fixed additional agenda points on score; current Project Babylon overadvance scoring cannot express a fixed +4 agenda points.
+blockedBy: []
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-6a-agenda-scoring-steal-baseline.md
   - docs/releases/proteus/README.md
@@ -68,12 +64,8 @@ Die Proteus-Agenda-Scoring-, Steal- und Access-Ambush-Basis über generische Age
 
 ## Ergebnisnotiz
 
-Blockiert. Der Slice enthaelt mehrere Agenda-Baseline-Mechaniken, die vor einer regelkonformen Promotion als generische Bausteine ergänzt werden muessen:
+Durch PRO013 erledigt. Die fünf Phase-6a-Zielkarten sind als konkrete CardImplementation-Dateien umgesetzt und im Manifest engine-/human-playable markiert, ohne Decklegalität, Formatlegalität oder AI-Unterstützung.
 
-- `Corporate Headhunters` braucht eine scored-agenda-Aktivierung mit Meat-Damage gegen getaggten Runner und eine source-bound Folge "wenn genau dieser Schaden erfolgreich ist, reduziere Runner-Handsize um 1". Die vorhandenen Damage-/Handsize-Modifikatoren bilden diesen erfolgreichen Schaden nicht als Quelle ab.
-- `Fetal AI` und `Marked Accounts` passen teilweise in die vorhandene `accessEffects`-Familie. `Fetal AI` braucht aber zusätzlich eine Self-Steal-Cost auf der aktuell accesseten Agenda aus installierter Zone, HQ oder R&D; die vorhandene `steal_cost`-Familie ist auf rezzed Root-Modifikatoren am gleichen Server zugeschnitten.
-- `Project Zurich` braucht eine beim Scoren berechnete, persistente Start-of-Corp-Turn-Economy aus Overadvance-Countern. Der vorhandene Project-Babylon-Baustein berechnet nur zusätzliche Agenda-Punkte.
-- `World Domination` braucht einen festen +4-Agenda-Point-Score-Effekt; auch das ist nicht mit dem bestehenden Overadvance-Agenda-Point-Baustein ausdrückbar.
-- `Marked Accounts` ist isoliert als Access-Tag-Ambush voraussichtlich machbar, wird aber nicht einzeln promotet, solange der vollständige 6a-Slice nicht alle Akzeptanzkriterien erfüllt.
+Ergänzt wurden generische Bausteine für source-bound scored-agenda Meat-Damage mit Handgrößenreduktion bei erfolgreichem Schaden, current-access Self-Steal-Cost, Agenda-Access-Ambush mit R&D-Reveal-Barriere, fixe Score-Agenda-Punktmodifikatoren und overadvance-basierte scored-agenda Start-of-Corp-Turn-Credits.
 
-Keine CardImplementation wurde fuer 6a angelegt und keine Manifest-/Coverage-Promotion vorgenommen.
+Diese alte Umbrella-Activity bleibt nur Statusreferenz. Die Zählung erfolgt über die neue Done-Activity `docs/activities/done/act-2026-05-28-proteus-pro013-agenda-steal-overadvance-suite.md`, damit PRO013 nicht doppelt gezählt wird.

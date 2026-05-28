@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-6e-runner-agenda-overadvance-events
-status: blocked
+status: done-reference
 kind: implementation
 area: cards
 priority: normal
@@ -8,16 +8,12 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-28
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 6e
 proReferences:
   - PRO013
-blockedBy:
-  - act-2026-05-24-proteus-phase-6a-agenda-scoring-steal-baseline
-  - successful-run-access-replacement-runner-agenda-point
-  - event-run-sequence-action-debt-contract
-  - next-agenda-access-agenda-point-modifier
+blockedBy: []
 resultArtifacts:
   - docs/releases/proteus/README.md
 checks:
@@ -62,17 +58,10 @@ Die Runner-Events mit Agenda-, Run- und Overadvance-Bezug nach der Agenda-Baseli
 - [ ] Wrong-Side-, stale-action-, Kosten-, Ziel-, Hidden-Info- und Replay-/StateHash-Tests sind vorhanden.
 - [ ] Registry-/Coverage-/Manifest-Nachweis ist erbracht.
 
-## Blocker
-
-Der Slice ist ohne neue generische Agenda-/Run-Event-Bausteine nicht vollständig und nicht regelkonform umsetzbar:
-
-- `Blackmail` braucht ein successful-run access replacement für HQ, das den normalen Access unterdrückt und stattdessen 1 Runner-Agenda-Punkt vergibt. Die vorhandenen `successfulRunAccessReplacement`-Varianten decken nur Corp-Credit-Verlust, Runner-Spend-zu-Corp-Credit-Verlust, privaten R&D-Blick und Archives-Faceup-to-R&D ab.
-- `Pirate Broadcast` braucht eine generische Sequenz "run on each data fort", Erfolg-/Fehlschlag-Aggregation über alle Teilruns, 1 Runner-Agenda-Punkt bei vollständigem Erfolg und Action-Debt über `forgoNextActionsPending`, falls ein Teilrun nicht erfolgreich ist. Vorhandene Event-Run-Bausteine starten Einzelruns und bilden keine mehrstufige Run-Queue mit Abschlussauswertung ab.
-- `Promises, Promises` braucht einen einmaligen "next agenda access this turn"-Modifier, der beim nächsten Agenda-Zugriff 1 zusätzlichen Runner-Agenda-Punkt vergibt. Der vorhandene `gain_runner_event_agenda_point` ist ein unmittelbarer Play-Effekt mit Agenda-Point-Kontext, kein Access-Trigger.
-- Alle drei Zielkarten hängen damit an der in 6a blockierten Agenda-/Steal-/Agenda-Point-Baseline, weil Agenda-Punkt-Vergabe und Victory-Priorität im Run-/Access-Kontext verbindlich geklärt werden müssen.
-
-Es wurden bewusst keine Teil-CardImplementations promotet, weil der Slice sonst entweder Kartennamen-/ID-Sonderlogik oder unvollständige Access-/Agenda-Punkt-Semantik erzwingen würde.
-
 ## Ergebnisnotiz
 
-Blockiert dokumentiert. Nächster unblockender Schritt ist ein generischer Vertrag für Runner-Agenda-Punkt-Gewinne im Access-/Successful-Run-Kontext, plus ein event-run sequence/action-debt contract für mehrstufige Runner-Events.
+Durch PRO013 erledigt. Die drei Phase-6e-Zielkarten sind als konkrete CardImplementation-Dateien umgesetzt und im Manifest engine-/human-playable markiert, ohne Decklegalität, Formatlegalität oder AI-Unterstützung.
+
+Ergänzt wurden ein successful-run access replacement für Runner-Event-Agenda-Punkte, eine deterministische mehrstufige Data-Fort-Run-Sequenz mit Action-Debt bei Fehlschlag und ein einmaliger Next-Agenda-Access-Agenda-Punktmodifier für den Runner-Zug.
+
+Diese alte Umbrella-Activity bleibt nur Statusreferenz. Die Zählung erfolgt über die neue Done-Activity `docs/activities/done/act-2026-05-28-proteus-pro013-agenda-steal-overadvance-suite.md`, damit PRO013 nicht doppelt gezählt wird.

@@ -310,7 +310,7 @@ describe("access flow execution", () => {
     });
   });
 
-  it("steals an accessed agenda after spending the legal action credit cost", () => {
+  it("steals an accessed agenda after revalidating the current steal cost", () => {
     const { host, state, spentRunnerCredits, finishedRuns } = makeHost({
       run: {
         runId: "run_1",
@@ -331,16 +331,16 @@ describe("access flow execution", () => {
       actionId: "runner.steal_agenda.agenda",
       label: "Steal",
       source: "agenda",
-      costs: [{ credits: 2 }],
+      costs: [] as LegalAction["costs"],
     } as LegalAction);
 
     expect(result).toMatchObject({
       handled: true,
       stolenAgendaId: "agenda",
-      paidCredits: 2,
+      paidCredits: 0,
       runFinished: true,
     });
-    expect(spentRunnerCredits).toEqual([2]);
+    expect(spentRunnerCredits).toEqual([0]);
     expect(state.runner.scoreArea).toEqual(["agenda"]);
     expect(state.cardInstances.agenda!.zone).toEqual({
       side: "runner",

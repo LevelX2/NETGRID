@@ -263,7 +263,8 @@ export type CardEffectMakeRunOptions = {
     | "runner_spend_corp_lose_credits"
     | "private_look_top_rd"
     | "archives_faceup_to_rd"
-    | "trash_rezzed_ice_on_fort_and_tag_runner";
+    | "trash_rezzed_ice_on_fort_and_tag_runner"
+    | "runner_gain_agenda_point";
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunRunnerCreditGain?: number;
@@ -284,6 +285,7 @@ export type CardEffectMakeRunOptions = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
+  pirateBroadcast?: NonNullable<GameState["runnerTurnFlags"]>["pirateBroadcastPending"];
 };
 
 export type CardEffectMakeRunResult = {
@@ -301,6 +303,21 @@ export type CardEffectHiddenInfoResult = {
 export type CardEffectAdvancementChoiceResult = {
   publicPayload?: Record<string, string | number | boolean>;
 };
+
+function dataFortServerIds(
+  state: GameState,
+): Exclude<ServerId, "new_remote">[] {
+  return state.corp.servers
+    .map((server) => server.id)
+    .sort((a, b) => dataFortOrder(a).localeCompare(dataFortOrder(b)));
+}
+
+function dataFortOrder(serverId: Exclude<ServerId, "new_remote">): string {
+  if (serverId === "hq") return "0:hq";
+  if (serverId === "rd") return "1:rd";
+  if (serverId === "archives") return "2:archives";
+  return `3:${serverId}`;
+}
 
 function recipientSide(
   context: CardEffectExecutionContext,
@@ -1181,6 +1198,56 @@ export function executeCardImplementationEffects(
         mergePublicPayload(publicPayload, {
           prearrangedDropPending: true,
           prearrangedDropCreditGain: effect.amount,
+        });
+        return;
+      }
+      case "mark_next_agenda_access_agenda_point": {
+        assertPublicVisibility("mark_next_agenda_access_agenda_point", effect.visibility);
+        state.runnerTurnFlags ??= {
+          stoleAgendaThisTurn: false,
+          stoleAgendaLastTurn: false,
+        };
+        state.runnerTurnFlags.promisesPromisesNextAgendaAccess = true;
+        if (context.sourceDefinitionId)
+          state.runnerTurnFlags.promisesPromisesSourceDefinitionId =
+            context.sourceDefinitionId;
+        if (context.sourceTitle)
+          state.runnerTurnFlags.promisesPromisesSourceTitle = context.sourceTitle;
+        mergePublicPayload(publicPayload, {
+          promisesPromisesPending: true,
+          agendaPointBonus: effect.amount,
+        });
+        return;
+      }
+      case "make_run_each_data_fort_sequence": {
+        assertPublicVisibility("make_run_each_data_fort_sequence", effect.visibility);
+        if (!context.startRun)
+          throw new Error("make_run_each_data_fort_sequence requires a startRun context.");
+        const serverIds = dataFortServerIds(state);
+        if (serverIds.length === 0) {
+          mergePublicPayload(publicPayload, { pirateBroadcastNoDataForts: true });
+          return;
+        }
+        const [firstServerId, ...pendingServerIds] = serverIds;
+        const flags = (state.runnerTurnFlags ??= {
+          stoleAgendaThisTurn: false,
+          stoleAgendaLastTurn: false,
+        });
+        const sequence = {
+          sourceCardId: context.sourceCardId,
+          sourceDefinitionId: context.sourceDefinitionId ?? "card_implementation",
+          sourceTitle: context.sourceTitle ?? "Pirate Broadcast",
+          pendingServerIds,
+          successfulServerIds: [],
+        };
+        flags.pirateBroadcastPending = sequence;
+        const runResult = context.startRun(firstServerId!, {
+          pirateBroadcast: sequence,
+        });
+        mergePublicPayload(publicPayload, runResult.publicPayload);
+        mergePublicPayload(publicPayload, {
+          pirateBroadcastSequenceStarted: true,
+          pirateBroadcastServerCount: serverIds.length,
         });
         return;
       }

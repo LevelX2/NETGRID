@@ -43,6 +43,7 @@ export type StartRunOptions = Pick<
   | "eventApproachIceExposeBeforeRez"
   | "runnerCreditGainOnCorpRez"
   | "damagePreventionPool"
+  | "pirateBroadcast"
 >;
 
 export type RunCoreExecutionHost = {
@@ -220,6 +221,9 @@ export function startRun(
       : {}),
     ...(options?.damagePreventionPool
       ? { damagePreventionPool: { ...options.damagePreventionPool } }
+      : {}),
+    ...(options?.pirateBroadcast
+      ? { pirateBroadcast: { ...options.pirateBroadcast } }
       : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };

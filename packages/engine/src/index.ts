@@ -1024,6 +1024,7 @@ const runFlow = createRunFlowAdapters({
   callbacks: {
     finishRun,
     drawCorpCards,
+    awardRunnerEventAgendaPoint,
     acmeSavingsAndLoanObligationCount,
     addAcmeSavingsAndLoanObligation,
     applyRunnerForgoNextAction,
@@ -6642,6 +6643,9 @@ function endTurn(
     flags.trashedAdvertisementThisTurn = false;
     flags.trashedTransactionsThisTurn = false;
     flags.prearrangedDropPending = false;
+    flags.promisesPromisesNextAgendaAccess = false;
+    delete flags.promisesPromisesSourceDefinitionId;
+    delete flags.promisesPromisesSourceTitle;
     flags.installedResourceIdsLastTurn = (
       flags.installedResourceIdsThisTurn ?? []
     ).slice();
@@ -7040,6 +7044,9 @@ function startRunnerTurn(
   flags.trashedAdvertisementThisTurn = false;
   flags.trashedTransactionsThisTurn = false;
   flags.prearrangedDropPending = false;
+  flags.promisesPromisesNextAgendaAccess = false;
+  delete flags.promisesPromisesSourceDefinitionId;
+  delete flags.promisesPromisesSourceTitle;
   flags.damagePreventionUsage = {};
   flags.brokerActionCardIdsThisTurn = [];
   flags.startOfTurnFloatingCreditsApplied = false;
@@ -7122,6 +7129,7 @@ function applyCorpStartOfTurnEffects(
   state: GameState,
   effects?: AutomaticEffectCollector,
 ): void {
+  applyScoredAgendaCorpStartEconomyEffects(state, effects);
   applyProteusPurgeableRunnerVirusCorpStartEffects(state, effects);
   const skivvissDraws = virusCounterDrawsAtCorpStart(state);
   if (skivvissDraws > 0) {
@@ -7237,6 +7245,29 @@ function applyCorpStartOfTurnEffects(
     );
   if (!state.pendingChoice)
     startEmployeeEmpowermentStartDrawChoice(scoredAgendaFlowHost(state));
+}
+
+function applyScoredAgendaCorpStartEconomyEffects(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  for (const cardId of state.corp.scoreArea.slice().sort()) {
+    const definition = definitionFor(state, cardId);
+    const implementation = scoredAgendaImplementationForDefinition(definition);
+    if (implementation?.kind !== "overadvance_start_of_corp_turn_credits")
+      continue;
+    const amount = cardCounter(state, cardId, "mark");
+    if (amount <= 0) continue;
+    credits(state, "corp", amount);
+    effects?.push(
+      automaticGainCreditsEffect(
+        `corp.start.scored_agenda.${cardId}`,
+        "corp",
+        amount,
+        definition.id,
+      ),
+    );
+  }
 }
 
 function applyProteusPurgeableRunnerVirusCorpStartEffects(
@@ -9877,6 +9908,23 @@ function scoredAgendaAbilityHost(
     credits: {
       gainCorpCredits: (amount) => credits(state, "corp", amount),
     },
+    damage: {
+      dealRunnerMeatDamage: (sourceCardId, amount) => {
+        const sourceDefinition = definitionFor(state, sourceCardId);
+        const summary = doDamage(state, {
+          damageId: `scored_agenda.${sourceCardId}.${state.stateVersion + 1}`,
+          damageType: "meat",
+          amount,
+          source: `scored_agenda:${sourceDefinition.id}`,
+        });
+        if (legalAction) setDamagePayload(legalAction, summary);
+        return {
+          damageAmount: summary.amount,
+          cardsTrashed: summary.cardsTrashed,
+          flatline: summary.flatline,
+        };
+      },
+    },
     actionProfiles: {
       scoredAgendaCounterCreditProfileForDefinition: (definitionId) =>
         scoredAgendaCounterCreditProfileForDefinition(definitionId),
@@ -10190,7 +10238,25 @@ function startRunActionExecutionHost(
           serverId,
         ),
       startRun: (serverId, legalAction) =>
-        startRun(state, serverId, undefined, 1, undefined, legalAction),
+        startRun(
+          state,
+          serverId,
+          undefined,
+          1,
+          legalAction.payload?.pirateBroadcastRun === true &&
+          state.runnerTurnFlags?.pirateBroadcastPending
+            ? {
+                pirateBroadcast: {
+                  ...state.runnerTurnFlags.pirateBroadcastPending,
+                  pendingServerIds:
+                    state.runnerTurnFlags.pirateBroadcastPending.pendingServerIds.slice(
+                      1,
+                    ),
+                },
+              }
+            : undefined,
+          legalAction,
+        ),
       activeWilsonSourceIds: () =>
         activeWilsonSourceIds(runDurationPaymentHost(state)),
     },

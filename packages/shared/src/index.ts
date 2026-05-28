@@ -883,7 +883,8 @@ export type RunState = {
     | "runner_spend_corp_lose_credits"
     | "private_look_top_rd"
     | "archives_faceup_to_rd"
-    | "trash_rezzed_ice_on_fort_and_tag_runner";
+    | "trash_rezzed_ice_on_fort_and_tag_runner"
+    | "runner_gain_agenda_point";
   successfulRunSourceCardId?: CardInstanceId;
   successfulRunSourceDefinitionId?: CardDefinitionId;
   successfulRunSourceTitle?: string;
@@ -1050,6 +1051,19 @@ export type RunState = {
     sourceCardInstanceId: CardInstanceId;
     limit: number;
     spent: number;
+  };
+  promisesPromisesAgendaPointBonus?: {
+    sourceDefinitionId: CardDefinitionId;
+    sourceTitle: string;
+    amount: 1;
+    cardId?: CardInstanceId;
+  };
+  pirateBroadcast?: {
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    sourceTitle: string;
+    pendingServerIds: Exclude<ServerId, "new_remote">[];
+    successfulServerIds: Exclude<ServerId, "new_remote">[];
   };
 };
 
@@ -1226,6 +1240,16 @@ export type GameState = {
     trashedAdvertisementThisTurn?: boolean;
     trashedTransactionsThisTurn?: boolean;
     prearrangedDropPending?: boolean;
+    promisesPromisesNextAgendaAccess?: boolean;
+    promisesPromisesSourceDefinitionId?: CardDefinitionId;
+    promisesPromisesSourceTitle?: string;
+    pirateBroadcastPending?: {
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      sourceTitle: string;
+      pendingServerIds: Exclude<ServerId, "new_remote">[];
+      successfulServerIds: Exclude<ServerId, "new_remote">[];
+    };
     installedResourceIdsThisTurn?: CardInstanceId[];
     installedResourceIdsLastTurn?: CardInstanceId[];
     successfulHqRunThisTurn?: boolean;

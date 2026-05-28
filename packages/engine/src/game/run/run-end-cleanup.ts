@@ -91,6 +91,12 @@ export type RunEndCleanupHost = {
   runner: {
     ensureTurnFlags: () => RunnerTurnFlags;
     consumeFutureActionDebt: () => void;
+    awardEventAgendaPoint?: (
+      sourceCardId: CardInstanceId,
+      sourceDefinitionId: CardDefinitionId,
+      legalAction?: LegalAction,
+    ) => void;
+    addFutureActionDebt?: (amount: number) => void;
   };
   choices: {
     selectedChoiceIds: (selectedChoices: PlayerAction["selectedChoices"]) => string[];
@@ -300,6 +306,9 @@ export function handleRunEndCleanup(
     flags.lastSuccessfulRunServerId = run.attackedServerId;
     if (run.attackedServerId === "hq") flags.successfulHqRunThisTurn = true;
   }
+  const pirateBroadcast = run
+    ? applyPirateBroadcastRunResult(host, run, successful, legalAction)
+    : { handled: false };
   const allNighterBonusRunOnFinish =
     run?.grantAllNighterBonusRunOnFinish === true;
   const bonus = successful ? (run?.pendingSuccessBonusCredits ?? 0) : 0;
@@ -362,6 +371,71 @@ export function handleRunEndCleanup(
     ...(legalAction?.payload ? { resolvedPayload: legalAction.payload } : {}),
     stateChanged: true,
   };
+}
+
+function applyPirateBroadcastRunResult(
+  host: RunEndCleanupHost,
+  run: ActiveRun,
+  successful: boolean,
+  legalAction?: LegalAction,
+): { handled: boolean } {
+  const sequence = run.pirateBroadcast;
+  if (!sequence) return { handled: false };
+  if (!successful) {
+    if (host.runner.addFutureActionDebt) {
+      host.runner.addFutureActionDebt(1);
+    } else {
+      const flags = host.runner.ensureTurnFlags();
+      flags.forgoNextActionsPending =
+        Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + 1;
+    }
+    delete host.runner.ensureTurnFlags().pirateBroadcastPending;
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        pirateBroadcastFailed: true,
+        actionDebtAdded: 1,
+        sourceDefinitionId: sequence.sourceDefinitionId,
+      };
+    }
+    return { handled: true };
+  }
+  const successfulServerIds = [
+    ...sequence.successfulServerIds,
+    run.attackedServerId,
+  ];
+  if (sequence.pendingServerIds.length > 0) {
+    host.runner.ensureTurnFlags().pirateBroadcastPending = {
+      ...sequence,
+      successfulServerIds,
+    };
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        pirateBroadcastRunSuccessful: true,
+        pirateBroadcastPendingServerCount: sequence.pendingServerIds.length,
+        sourceDefinitionId: sequence.sourceDefinitionId,
+      };
+    }
+    return { handled: true };
+  }
+  delete host.runner.ensureTurnFlags().pirateBroadcastPending;
+  if (!host.runner.awardEventAgendaPoint)
+    throw new Error("Runner-Agenda-Punkt-Callback fehlt.");
+  host.runner.awardEventAgendaPoint(
+    sequence.sourceCardId,
+    sequence.sourceDefinitionId,
+    legalAction,
+  );
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      pirateBroadcastComplete: true,
+      pirateBroadcastSuccessfulServerCount: successfulServerIds.length,
+      sourceDefinitionId: sequence.sourceDefinitionId,
+    };
+  }
+  return { handled: true };
 }
 
 export function recordDupreBreakUsage(

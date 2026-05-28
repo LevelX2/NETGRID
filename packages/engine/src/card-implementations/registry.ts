@@ -380,7 +380,12 @@ import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team"
 import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella-policy";
 import { wilsonWeeflerunnerApprenticeImplementation } from "./onr-v1/runner/resources/wilson-weeflerunner-apprentice";
 import { proteusCharityTakeoverImplementation } from "./proteus/corp/agendas/charity-takeover";
+import { corporateHeadhuntersImplementation } from "./proteus/corp/agendas/corporate-headhunters";
+import { fetalAiImplementation } from "./proteus/corp/agendas/fetal-ai";
+import { markedAccountsImplementation } from "./proteus/corp/agendas/marked-accounts";
+import { projectZurichImplementation } from "./proteus/corp/agendas/project-zurich";
 import { proteusViralBreedingGroundImplementation } from "./proteus/corp/agendas/viral-breeding-ground";
+import { worldDominationImplementation } from "./proteus/corp/agendas/world-domination";
 import { belDigmoAntibodyImplementation } from "./proteus/corp/assets/bel-digmo-antibody";
 import { doppelgangerAntibodyImplementation } from "./proteus/corp/assets/doppelganger-antibody";
 import { pattelAntibodyImplementation } from "./proteus/corp/assets/pattel-antibody";
@@ -431,6 +436,7 @@ import { proteusResearchBunkerImplementation } from "./proteus/corp/upgrades/res
 import { proteusWeaponsDepotImplementation } from "./proteus/corp/upgrades/weapons-depot";
 import { proteusFakedHitImplementation } from "./proteus/runner/events/faked-hit";
 import { proteusAllHandsImplementation } from "./proteus/runner/events/all-hands";
+import { blackmailImplementation } from "./proteus/runner/events/blackmail";
 import { proteusCruisingForNetwatchImplementation } from "./proteus/runner/events/cruising-for-netwatch";
 import { proteusDecoySignalImplementation } from "./proteus/runner/events/decoy-signal";
 import { proteusDemolitionRunImplementation } from "./proteus/runner/events/demolition-run";
@@ -438,7 +444,9 @@ import { proteusDisgruntledIceTechnicianImplementation } from "./proteus/runner/
 import { proteusDroneForADayImplementation } from "./proteus/runner/events/drone-for-a-day";
 import { proteusOnTheFastTrackImplementation } from "./proteus/runner/events/on-the-fast-track";
 import { proteusPersonalTouchTheImplementation } from "./proteus/runner/events/personal-touch-the";
+import { pirateBroadcastImplementation } from "./proteus/runner/events/pirate-broadcast";
 import { proteusPrearrangedDropImplementation } from "./proteus/runner/events/prearranged-drop";
+import { promisesPromisesImplementation } from "./proteus/runner/events/promises-promises";
 import { proteusReconnaissanceImplementation } from "./proteus/runner/events/reconnaissance";
 import { proteusRemoteDetonatorImplementation } from "./proteus/runner/events/remote-detonator";
 import { proteusRushHourImplementation } from "./proteus/runner/events/rush-hour";
@@ -913,13 +921,19 @@ export const CARD_IMPLEMENTATIONS = [
   proteusResearchBunkerImplementation,
   proteusWeaponsDepotImplementation,
   proteusCharityTakeoverImplementation,
+  corporateHeadhuntersImplementation,
+  fetalAiImplementation,
+  markedAccountsImplementation,
+  projectZurichImplementation,
   proteusViralBreedingGroundImplementation,
+  worldDominationImplementation,
   belDigmoAntibodyImplementation,
   doppelgangerAntibodyImplementation,
   pattelAntibodyImplementation,
   stereogramAntibodyImplementation,
   proteusFakedHitImplementation,
   proteusAllHandsImplementation,
+  blackmailImplementation,
   proteusCruisingForNetwatchImplementation,
   proteusDecoySignalImplementation,
   proteusDemolitionRunImplementation,
@@ -927,7 +941,9 @@ export const CARD_IMPLEMENTATIONS = [
   proteusDroneForADayImplementation,
   proteusOnTheFastTrackImplementation,
   proteusPersonalTouchTheImplementation,
+  pirateBroadcastImplementation,
   proteusPrearrangedDropImplementation,
+  promisesPromisesImplementation,
   proteusReconnaissanceImplementation,
   proteusRemoteDetonatorImplementation,
   proteusRushHourImplementation,

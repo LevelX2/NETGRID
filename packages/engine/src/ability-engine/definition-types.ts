@@ -674,6 +674,23 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "fixed_bonus_agenda_points_on_score";
+      amount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "overadvance_start_of_corp_turn_credits";
+      perExcessAdvancementCounters: number;
+      creditPerGroup: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "tagged_runner_meat_damage_reduce_hand_size_on_success";
+      damageAmount: number;
+      handSizeReduction: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "choose_fort_ice_strength_bonus";
       amount: number;
       visibility: Extract<EventVisibilityClass, "public">;
@@ -964,8 +981,10 @@ export type CardEffectImplementation =
   | TrashOwnInstalledCardsForCreditsEffectImplementation
   | TrashCardsFromGripForCreditsEffectImplementation
   | ShuffleGripTrashAndStackThenDrawEffectImplementation
-  | PayRezCostToTrashRezzedIceEffectImplementation
   | MarkPrearrangedDropEffectImplementation
+  | MarkNextAgendaAccessAgendaPointEffectImplementation
+  | MakeRunEachDataFortSequenceEffectImplementation
+  | PayRezCostToTrashRezzedIceEffectImplementation
   | TrashRezzedIceOnLastSuccessfulRunFortEffectImplementation
   | TrashUnrezzedIceEffectImplementation
   | CorpChoiceRezOrTrashIceEffectImplementation
@@ -1368,7 +1387,8 @@ export type MakeRunEffectImplementation = {
     | "runner_spend_corp_lose_credits"
     | "private_look_top_rd"
     | "archives_faceup_to_rd"
-    | "trash_rezzed_ice_on_fort_and_tag_runner";
+    | "trash_rezzed_ice_on_fort_and_tag_runner"
+    | "runner_gain_agenda_point";
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunRunnerCreditGain?: number;
@@ -1401,6 +1421,19 @@ export type PayRezCostToTrashRezzedIceEffectImplementation = {
 export type MarkPrearrangedDropEffectImplementation = {
   kind: "mark_next_agenda_access_credit_gain";
   amount: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type MarkNextAgendaAccessAgendaPointEffectImplementation = {
+  kind: "mark_next_agenda_access_agenda_point";
+  amount: 1;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type MakeRunEachDataFortSequenceEffectImplementation = {
+  kind: "make_run_each_data_fort_sequence";
+  onAllSuccessful: "gain_runner_event_agenda_point";
+  onAnyUnsuccessful: "forgo_next_action";
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -1543,6 +1576,14 @@ export type CardStealCostModifierImplementation = {
   };
   sameServerAsSource: true;
   persistsForCurrentAccessIfSourceTrashed: true;
+};
+
+export type CardSelfStealCostImplementation = {
+  kind: "current_access_self_steal_cost";
+  amount: number;
+  sourceZones: readonly CardAccessZone[];
+  ignoreIfAccessedFrom?: readonly CardAccessZone[];
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
 
 export type CardIceStrengthModifierImplementation = {

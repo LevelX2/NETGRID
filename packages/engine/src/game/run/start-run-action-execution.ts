@@ -44,8 +44,11 @@ export function executeStartRunAction(
   >;
   host.run.validateRovingSubmarineRunGate(serverId);
   if (legalAction.payload?.bonusRunNoClick === true) {
-    host.turn.ensureRunnerTurnFlags().allNighterBonusRunPending = false;
-    host.turn.ensureRunnerTurnFlags().bodyweightDataCrecheExtraRunPending = false;
+    const flags = host.turn.ensureRunnerTurnFlags();
+    if (legalAction.payload?.pirateBroadcastRun !== true) {
+      flags.allNighterBonusRunPending = false;
+      flags.bodyweightDataCrecheExtraRunPending = false;
+    }
   } else {
     host.payment.spendRunnerClick();
   }

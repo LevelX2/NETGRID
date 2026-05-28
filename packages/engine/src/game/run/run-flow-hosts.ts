@@ -368,6 +368,11 @@ export type RunFlowHost = {
       legalAction?: LegalAction,
     ) => void;
     drawCorpCards: (state: GameState, count: number) => void;
+    awardRunnerEventAgendaPoint?: (
+      state: GameState,
+      legalAction: LegalAction,
+      sourceDefinitionId: CardDefinitionId,
+    ) => void;
     acmeSavingsAndLoanObligationCount: (state: GameState) => number;
     addAcmeSavingsAndLoanObligation: (state: GameState, amount: number) => void;
     applyRunnerForgoNextAction: (state: GameState) => void;
@@ -1040,6 +1045,27 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         consumeFutureActionDebt: () => {
           host.turn.consumeRunnerFutureActionDebt(state);
         },
+        awardEventAgendaPoint: (sourceCardId, sourceDefinitionId, legalAction) => {
+          if (!legalAction)
+            throw new Error("Runner-Agenda-Punkt braucht eine LegalAction.");
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            cardId: sourceCardId,
+          };
+          if (!host.callbacks.awardRunnerEventAgendaPoint)
+            throw new Error("Runner-Agenda-Punkt-Callback fehlt.");
+          host.callbacks.awardRunnerEventAgendaPoint(
+            state,
+            legalAction,
+            sourceDefinitionId,
+          );
+        },
+        addFutureActionDebt: (amount) => {
+          const flags = host.turn.ensureRunnerTurnFlags(state);
+          flags.forgoNextActionsPending =
+            Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) +
+            amount;
+        },
       },
       choices: {
         selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
@@ -1131,6 +1157,21 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       runner: {
         ensureTurnFlags: () => host.turn.ensureRunnerTurnFlags(state),
+        awardEventAgendaPoint: (sourceCardId, sourceDefinitionId, legalAction) => {
+          if (!legalAction)
+            throw new Error("Runner-Agenda-Punkt braucht eine LegalAction.");
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            cardId: sourceCardId,
+          };
+          if (!host.callbacks.awardRunnerEventAgendaPoint)
+            throw new Error("Runner-Agenda-Punkt-Callback fehlt.");
+          host.callbacks.awardRunnerEventAgendaPoint(
+            state,
+            legalAction,
+            sourceDefinitionId,
+          );
+        },
       },
       draw: {
         drawCorpCards: (count) => host.callbacks.drawCorpCards(state, count),

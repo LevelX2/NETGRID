@@ -259,7 +259,12 @@ export function buildRunnerMainActions(
   const actions: LegalAction[] = [];
   const flags = ensureRunnerTurnFlags(state);
   const hasClicks = state.runner.clicks > 0;
-  const bonusRunPending = flags.allNighterBonusRunPending === true;
+  const pirateBroadcastPending = flags.pirateBroadcastPending;
+  const pirateBroadcastNextServerId =
+    pirateBroadcastPending?.pendingServerIds[0];
+  const bonusRunPending =
+    flags.allNighterBonusRunPending === true ||
+    pirateBroadcastNextServerId !== undefined;
   if (!hasClicks && !bonusRunPending) {
     pushCardImplementationEndOfRunnerTurnActions(
       cardImplementationRuntimeDeps,
@@ -1134,6 +1139,7 @@ export function buildRunnerMainActions(
     }
     if (
       bonusRunPending &&
+      (!pirateBroadcastNextServerId || pirateBroadcastNextServerId === server.id) &&
       !rovingRunBlocked &&
       (runStartTaxCredits === 0 ||
         availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
@@ -1151,9 +1157,14 @@ export function buildRunnerMainActions(
             ...runPayload,
             bonusRunNoClick: true,
             bonusRunSource:
-              flags.bodyweightDataCrecheExtraRunPending === true
+              pirateBroadcastNextServerId
+                ? pirateBroadcastPending?.sourceDefinitionId
+                : flags.bodyweightDataCrecheExtraRunPending === true
                 ? BODYWEIGHT_DATA_CRECHE_ID
                 : ALL_NIGHTER_ID,
+            ...(pirateBroadcastNextServerId
+              ? { pirateBroadcastRun: true }
+              : {}),
           },
         ),
       );

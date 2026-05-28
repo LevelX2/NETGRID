@@ -174,6 +174,34 @@ export function scoreAgenda(
       };
     }
   }
+  if (scoredAgenda?.kind === "fixed_bonus_agenda_points_on_score") {
+    bonusAgendaPoints += scoredAgenda.amount;
+    host.counters.setCardCounter(cardId, "agenda", scoredAgenda.amount);
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        fixedBonusAgendaPoints: scoredAgenda.amount,
+        bonusAgendaPoints,
+      };
+    }
+  }
+  if (scoredAgenda?.kind === "overadvance_start_of_corp_turn_credits") {
+    overadvancedBy = Math.max(
+      0,
+      instanceBefore.advancementCounters - requiredDifficulty,
+    );
+    const recurringCredits =
+      Math.floor(overadvancedBy / scoredAgenda.perExcessAdvancementCounters) *
+      scoredAgenda.creditPerGroup;
+    host.counters.setCardCounter(cardId, "mark", recurringCredits);
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        overadvanceRecurringCredits: recurringCredits,
+        projectZurichOveradvance: overadvancedBy,
+      };
+    }
+  }
   applySimpleScoreEffects(host, cardId, definition, scoredAgenda);
   startScoreTimeChoices(host, cardId, definition, instanceBefore, scoredAgenda);
   host.zones.cleanupEmptyRemotes();

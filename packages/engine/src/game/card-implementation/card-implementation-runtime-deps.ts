@@ -349,6 +349,9 @@ function startRunForCardImplementation(
             },
           }
         : {}),
+      ...(options.pirateBroadcast
+        ? { pirateBroadcast: options.pirateBroadcast }
+        : {}),
       ...(options.runTraceLinkBonus !== undefined && sourceDefinitionId
         ? {
             runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,
@@ -410,6 +413,13 @@ function startRunForCardImplementation(
       : {}),
     ...(options.damagePreventionPool !== undefined
       ? { damagePreventionPool: options.damagePreventionPool }
+      : {}),
+    ...(options.pirateBroadcast
+      ? {
+          pirateBroadcastSequenceActive: true,
+          pirateBroadcastPendingServerCount:
+            options.pirateBroadcast.pendingServerIds.length,
+        }
       : {}),
   };
   return { publicPayload: legalAction.payload ?? {} };
