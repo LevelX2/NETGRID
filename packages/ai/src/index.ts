@@ -1520,6 +1520,48 @@ export type AiMatchProgressionMetrics = {
   runnerHandSizeFixGateAttributionEligible: number;
   runnerHandSizeFixGateAttributionBlocked: number;
   runnerHandSizeFixGateAttributionSuspicious: number;
+  runnerSearchRecoveryNormalizedWindows: number;
+  runnerSearchRecoveryNormalizedTaken: number;
+  runnerSearchRecoveryNormalizedSkipped: number;
+  runnerSearchRecoveryNormalizedBlocked: number;
+  runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest: number;
+  runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve: number;
+  runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough: number;
+  runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup: number;
+  runnerSearchRecoveryNormalizedMetricArtifact: number;
+  runnerSearchRecoveryNormalizedUnclassified: number;
+  runnerSearchRecoveryNormalizedSuspicious: number;
+  runnerSearchRecoveryNormalizedTrueMissedCoverage: number;
+  runnerSearchRecoveryNormalizedFixGateEligible: number;
+  runnerMemoryNormalizedWindows: number;
+  runnerMemoryNormalizedTaken: number;
+  runnerMemoryNormalizedSkipped: number;
+  runnerMemoryNormalizedBlocked: number;
+  runnerMemoryNormalizedBlockedByPressureOrRemoteContest: number;
+  runnerMemoryNormalizedBlockedByEconomyOrReserve: number;
+  runnerMemoryNormalizedBlockedByNoProgramPressure: number;
+  runnerMemoryNormalizedMetricArtifact: number;
+  runnerMemoryNormalizedUnclassified: number;
+  runnerMemoryNormalizedSuspicious: number;
+  runnerMemoryNormalizedTrueRigBottleneck: number;
+  runnerMemoryNormalizedFixGateEligible: number;
+  runnerHandSizeNormalizedWindows: number;
+  runnerHandSizeNormalizedTaken: number;
+  runnerHandSizeNormalizedSkipped: number;
+  runnerHandSizeNormalizedBlocked: number;
+  runnerHandSizeNormalizedSuspicious: number;
+  runnerHandSizeNormalizedMetricArtifact: number;
+  runnerSetupNormalizedWindows: number;
+  runnerSetupNormalizedSuspicious: number;
+  runnerSetupNormalizedBlocked: number;
+  runnerSetupNormalizedMetricArtifact: number;
+  runnerSetupNormalizedUnclassified: number;
+  runnerSetupNormalizedFixGateEligible: number;
+  runnerSetupNormalizedRecommendedFixKindNone: number;
+  runnerSetupNormalizedRecommendedFixKindSearchRecovery: number;
+  runnerSetupNormalizedRecommendedFixKindMemory: number;
+  runnerSetupNormalizedRecommendedFixKindHandSize: number;
+  runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis: number;
   runnerSetupAttributionWindows: number;
   runnerSetupAttributionSuspicious: number;
   runnerSetupAttributionBlocked: number;
@@ -16081,6 +16123,48 @@ type RunnerSetupAttributionMetricKey =
   | "runnerHandSizeFixGateAttributionEligible"
   | "runnerHandSizeFixGateAttributionBlocked"
   | "runnerHandSizeFixGateAttributionSuspicious"
+  | "runnerSearchRecoveryNormalizedWindows"
+  | "runnerSearchRecoveryNormalizedTaken"
+  | "runnerSearchRecoveryNormalizedSkipped"
+  | "runnerSearchRecoveryNormalizedBlocked"
+  | "runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest"
+  | "runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve"
+  | "runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough"
+  | "runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup"
+  | "runnerSearchRecoveryNormalizedMetricArtifact"
+  | "runnerSearchRecoveryNormalizedUnclassified"
+  | "runnerSearchRecoveryNormalizedSuspicious"
+  | "runnerSearchRecoveryNormalizedTrueMissedCoverage"
+  | "runnerSearchRecoveryNormalizedFixGateEligible"
+  | "runnerMemoryNormalizedWindows"
+  | "runnerMemoryNormalizedTaken"
+  | "runnerMemoryNormalizedSkipped"
+  | "runnerMemoryNormalizedBlocked"
+  | "runnerMemoryNormalizedBlockedByPressureOrRemoteContest"
+  | "runnerMemoryNormalizedBlockedByEconomyOrReserve"
+  | "runnerMemoryNormalizedBlockedByNoProgramPressure"
+  | "runnerMemoryNormalizedMetricArtifact"
+  | "runnerMemoryNormalizedUnclassified"
+  | "runnerMemoryNormalizedSuspicious"
+  | "runnerMemoryNormalizedTrueRigBottleneck"
+  | "runnerMemoryNormalizedFixGateEligible"
+  | "runnerHandSizeNormalizedWindows"
+  | "runnerHandSizeNormalizedTaken"
+  | "runnerHandSizeNormalizedSkipped"
+  | "runnerHandSizeNormalizedBlocked"
+  | "runnerHandSizeNormalizedSuspicious"
+  | "runnerHandSizeNormalizedMetricArtifact"
+  | "runnerSetupNormalizedWindows"
+  | "runnerSetupNormalizedSuspicious"
+  | "runnerSetupNormalizedBlocked"
+  | "runnerSetupNormalizedMetricArtifact"
+  | "runnerSetupNormalizedUnclassified"
+  | "runnerSetupNormalizedFixGateEligible"
+  | "runnerSetupNormalizedRecommendedFixKindNone"
+  | "runnerSetupNormalizedRecommendedFixKindSearchRecovery"
+  | "runnerSetupNormalizedRecommendedFixKindMemory"
+  | "runnerSetupNormalizedRecommendedFixKindHandSize"
+  | "runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis"
   | "runnerSetupAttributionWindows"
   | "runnerSetupAttributionSuspicious"
   | "runnerSetupAttributionBlocked"
@@ -16210,6 +16294,48 @@ const RUNNER_SETUP_ATTRIBUTION_METRIC_KEYS: RunnerSetupAttributionMetricKey[] =
     "runnerHandSizeFixGateAttributionEligible",
     "runnerHandSizeFixGateAttributionBlocked",
     "runnerHandSizeFixGateAttributionSuspicious",
+    "runnerSearchRecoveryNormalizedWindows",
+    "runnerSearchRecoveryNormalizedTaken",
+    "runnerSearchRecoveryNormalizedSkipped",
+    "runnerSearchRecoveryNormalizedBlocked",
+    "runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest",
+    "runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve",
+    "runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough",
+    "runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup",
+    "runnerSearchRecoveryNormalizedMetricArtifact",
+    "runnerSearchRecoveryNormalizedUnclassified",
+    "runnerSearchRecoveryNormalizedSuspicious",
+    "runnerSearchRecoveryNormalizedTrueMissedCoverage",
+    "runnerSearchRecoveryNormalizedFixGateEligible",
+    "runnerMemoryNormalizedWindows",
+    "runnerMemoryNormalizedTaken",
+    "runnerMemoryNormalizedSkipped",
+    "runnerMemoryNormalizedBlocked",
+    "runnerMemoryNormalizedBlockedByPressureOrRemoteContest",
+    "runnerMemoryNormalizedBlockedByEconomyOrReserve",
+    "runnerMemoryNormalizedBlockedByNoProgramPressure",
+    "runnerMemoryNormalizedMetricArtifact",
+    "runnerMemoryNormalizedUnclassified",
+    "runnerMemoryNormalizedSuspicious",
+    "runnerMemoryNormalizedTrueRigBottleneck",
+    "runnerMemoryNormalizedFixGateEligible",
+    "runnerHandSizeNormalizedWindows",
+    "runnerHandSizeNormalizedTaken",
+    "runnerHandSizeNormalizedSkipped",
+    "runnerHandSizeNormalizedBlocked",
+    "runnerHandSizeNormalizedSuspicious",
+    "runnerHandSizeNormalizedMetricArtifact",
+    "runnerSetupNormalizedWindows",
+    "runnerSetupNormalizedSuspicious",
+    "runnerSetupNormalizedBlocked",
+    "runnerSetupNormalizedMetricArtifact",
+    "runnerSetupNormalizedUnclassified",
+    "runnerSetupNormalizedFixGateEligible",
+    "runnerSetupNormalizedRecommendedFixKindNone",
+    "runnerSetupNormalizedRecommendedFixKindSearchRecovery",
+    "runnerSetupNormalizedRecommendedFixKindMemory",
+    "runnerSetupNormalizedRecommendedFixKindHandSize",
+    "runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis",
     "runnerSetupAttributionWindows",
     "runnerSetupAttributionSuspicious",
     "runnerSetupAttributionBlocked",
@@ -16268,6 +16394,48 @@ function summarizeRunnerSetupAttributionMetrics(
       metrics.runnerSetupAttributionSuspicious -
       metrics.runnerSetupAttributionBlocked,
   );
+  metrics.runnerSetupNormalizedWindows =
+    metrics.runnerSearchRecoveryNormalizedWindows +
+    metrics.runnerMemoryNormalizedWindows +
+    metrics.runnerHandSizeNormalizedWindows;
+  metrics.runnerSetupNormalizedSuspicious =
+    metrics.runnerSearchRecoveryNormalizedSuspicious +
+    metrics.runnerMemoryNormalizedSuspicious +
+    metrics.runnerHandSizeNormalizedSuspicious;
+  metrics.runnerSetupNormalizedBlocked =
+    metrics.runnerSearchRecoveryNormalizedBlocked +
+    metrics.runnerMemoryNormalizedBlocked +
+    metrics.runnerHandSizeNormalizedBlocked;
+  metrics.runnerSetupNormalizedMetricArtifact =
+    metrics.runnerSearchRecoveryNormalizedMetricArtifact +
+    metrics.runnerMemoryNormalizedMetricArtifact +
+    metrics.runnerHandSizeNormalizedMetricArtifact;
+  metrics.runnerSetupNormalizedUnclassified =
+    metrics.runnerSearchRecoveryNormalizedUnclassified +
+    metrics.runnerMemoryNormalizedUnclassified;
+  metrics.runnerSetupNormalizedFixGateEligible =
+    metrics.runnerSearchRecoveryNormalizedFixGateEligible +
+    metrics.runnerMemoryNormalizedFixGateEligible +
+    metrics.runnerHandSizeNormalizedSuspicious;
+  const normalizedStrongest = [
+    {
+      key: "runnerSetupNormalizedRecommendedFixKindSearchRecovery" as const,
+      value: metrics.runnerSearchRecoveryNormalizedSuspicious,
+    },
+    {
+      key: "runnerSetupNormalizedRecommendedFixKindMemory" as const,
+      value: metrics.runnerMemoryNormalizedSuspicious,
+    },
+    {
+      key: "runnerSetupNormalizedRecommendedFixKindHandSize" as const,
+      value: metrics.runnerHandSizeNormalizedSuspicious,
+    },
+  ].sort((left, right) => right.value - left.value);
+  if (metrics.runnerSetupNormalizedSuspicious === 0)
+    metrics.runnerSetupNormalizedRecommendedFixKindNone = 1;
+  else if (normalizedStrongest[0]!.value === normalizedStrongest[1]!.value)
+    metrics.runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis = 1;
+  else metrics[normalizedStrongest[0]!.key] = 1;
   const strongest = [
     {
       key: "runnerSetupRecommendedFixKindEconomyStarvedSkip" as const,
@@ -16300,18 +16468,28 @@ function attributeRunnerSetupSupportWindows(
 ): void {
   if (entry.runnerMemoryBottleneckDecisionWindow === true) {
     metrics.runnerMemoryAttributionWindows += 1;
+    metrics.runnerMemoryNormalizedWindows += 1;
     if ((entry.runnerLegalMemoryHardwareActions ?? 0) > 0)
       metrics.runnerMemoryAttributionLegalSupport += 1;
   }
   if (entry.runnerHandSizeBottleneckDecisionWindow === true) {
     metrics.runnerHandSizeAttributionWindows += 1;
+    metrics.runnerHandSizeNormalizedWindows += 1;
     if ((entry.runnerLegalHandSizeActions ?? 0) > 0)
       metrics.runnerHandSizeAttributionLegalSupport += 1;
   }
   if (entry.runnerMemoryHardwareTaken === true)
     metrics.runnerMemoryAttributionSupportTaken += 1;
+  if (entry.runnerMemoryHardwareTaken === true)
+    metrics.runnerMemoryNormalizedTaken += 1;
   if (entry.runnerHandSizeSupportTaken === true)
     metrics.runnerHandSizeAttributionSupportTaken += 1;
+  if (entry.runnerHandSizeSupportTaken === true)
+    metrics.runnerHandSizeNormalizedTaken += 1;
+  if (entry.runnerSearchTaken === true || entry.runnerRecoveryTaken === true) {
+    metrics.runnerSearchRecoveryNormalizedWindows += 1;
+    metrics.runnerSearchRecoveryNormalizedTaken += 1;
+  }
 }
 
 function attributeStarvedEconomySkip(
@@ -16486,6 +16664,90 @@ function attributeSearchRecoverySkip(
   metrics.runnerSearchRecoveryFixGateAttributionEligible += 1;
   if (blocked) metrics.runnerSearchRecoveryFixGateAttributionBlocked += 1;
   if (suspicious) metrics.runnerSearchRecoveryFixGateAttributionSuspicious += 1;
+  attributeNormalizedSearchRecoverySkip(metrics, entry, {
+    installFollowup,
+    coverageResolved,
+    knownUnaffordableRun,
+    noProgress,
+    actionLimit,
+  });
+}
+
+function attributeNormalizedSearchRecoverySkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  entry: PlanConversionActionEntry,
+  followup: {
+    installFollowup: boolean;
+    coverageResolved: boolean;
+    knownUnaffordableRun: boolean;
+    noProgress: boolean;
+    actionLimit: boolean;
+  },
+): void {
+  metrics.runnerSearchRecoveryNormalizedWindows += 1;
+  if (entry.runnerSearchTaken === true || entry.runnerRecoveryTaken === true)
+    metrics.runnerSearchRecoveryNormalizedTaken += 1;
+  else metrics.runnerSearchRecoveryNormalizedSkipped += 1;
+
+  const blockedPressure =
+    entry.runnerPressureActionTaken === true ||
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true ||
+    entry.runnerRemoteTrashTaken === true;
+  if (blockedPressure) {
+    metrics.runnerSearchRecoveryNormalizedBlocked += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest += 1;
+    return;
+  }
+
+  if (
+    entry.runnerEconomyTaken === true ||
+    entry.runnerEconomyActionTaken === true
+  ) {
+    metrics.runnerSearchRecoveryNormalizedBlocked += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve += 1;
+    return;
+  }
+
+  if (
+    entry.runnerPressureReadyTrue === true &&
+    entry.runnerPathBlockedByMissingCoverage !== true
+  ) {
+    metrics.runnerSearchRecoveryNormalizedMetricArtifact += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough += 1;
+    return;
+  }
+
+  const missingCoverage =
+    (entry.runnerSetupMissingCoverageTypes ?? []).length > 0;
+  const legalSearchRecovery =
+    (entry.runnerLegalSearchActions ?? 0) +
+      (entry.runnerLegalRecoveryActions ?? 0) >
+    0;
+  if (!missingCoverage || !legalSearchRecovery) {
+    metrics.runnerSearchRecoveryNormalizedMetricArtifact += 1;
+    return;
+  }
+
+  const followupProblem =
+    !followup.coverageResolved &&
+    (followup.knownUnaffordableRun ||
+      followup.noProgress ||
+      followup.actionLimit);
+  if (followupProblem) {
+    metrics.runnerSearchRecoveryNormalizedSuspicious += 1;
+    metrics.runnerSearchRecoveryNormalizedTrueMissedCoverage += 1;
+    metrics.runnerSearchRecoveryNormalizedFixGateEligible += 1;
+    return;
+  }
+
+  if (!followup.installFollowup && !followup.coverageResolved) {
+    metrics.runnerSearchRecoveryNormalizedMetricArtifact += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup += 1;
+    return;
+  }
+
+  metrics.runnerSearchRecoveryNormalizedUnclassified += 1;
 }
 
 function attributeMemorySkip(
@@ -16551,6 +16813,78 @@ function attributeMemorySkip(
   metrics.runnerMemoryFixGateAttributionEligible += 1;
   if (blocked) metrics.runnerMemoryFixGateAttributionBlocked += 1;
   if (suspicious) metrics.runnerMemoryFixGateAttributionSuspicious += 1;
+  attributeNormalizedMemorySkip(metrics, entry, {
+    memoryInstalled,
+    programBlocked,
+    coverageStillMissing,
+    noProgress,
+    actionLimit,
+  });
+}
+
+function attributeNormalizedMemorySkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  entry: PlanConversionActionEntry,
+  followup: {
+    memoryInstalled: boolean;
+    programBlocked: boolean;
+    coverageStillMissing: boolean;
+    noProgress: boolean;
+    actionLimit: boolean;
+  },
+): void {
+  if (entry.runnerMemoryBottleneckDecisionWindow !== true)
+    metrics.runnerMemoryNormalizedWindows += 1;
+  if (entry.runnerMemoryHardwareTaken === true)
+    metrics.runnerMemoryNormalizedTaken += 1;
+  else metrics.runnerMemoryNormalizedSkipped += 1;
+
+  const legalMemorySupport = (entry.runnerLegalMemoryHardwareActions ?? 0) > 0;
+  if (!legalMemorySupport) {
+    metrics.runnerMemoryNormalizedMetricArtifact += 1;
+    return;
+  }
+
+  const blockedPressure =
+    entry.runnerPressureActionTaken === true ||
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true ||
+    entry.runnerRemoteTrashTaken === true;
+  if (blockedPressure) {
+    metrics.runnerMemoryNormalizedBlocked += 1;
+    metrics.runnerMemoryNormalizedBlockedByPressureOrRemoteContest += 1;
+    return;
+  }
+
+  if (
+    entry.runnerEconomyTaken === true ||
+    entry.runnerEconomyActionTaken === true
+  ) {
+    metrics.runnerMemoryNormalizedBlocked += 1;
+    metrics.runnerMemoryNormalizedBlockedByEconomyOrReserve += 1;
+    return;
+  }
+
+  if (entry.runnerMemorySupportSkippedWhileGripHasPrograms !== true) {
+    metrics.runnerMemoryNormalizedBlocked += 1;
+    metrics.runnerMemoryNormalizedBlockedByNoProgramPressure += 1;
+    return;
+  }
+
+  const followupProblem =
+    !followup.memoryInstalled &&
+    (followup.programBlocked ||
+      followup.coverageStillMissing ||
+      followup.noProgress ||
+      followup.actionLimit);
+  if (followupProblem) {
+    metrics.runnerMemoryNormalizedSuspicious += 1;
+    metrics.runnerMemoryNormalizedTrueRigBottleneck += 1;
+    metrics.runnerMemoryNormalizedFixGateEligible += 1;
+    return;
+  }
+
+  metrics.runnerMemoryNormalizedUnclassified += 1;
 }
 
 function attributeHandSizeSkip(
@@ -16580,6 +16914,37 @@ function attributeHandSizeSkip(
   );
   if (suspicious) metrics.runnerHandSizeSkipThenDiscardOrDamagePressure += 1;
   if (suspicious) metrics.runnerHandSizeFixGateAttributionSuspicious += 1;
+  attributeNormalizedHandSizeSkip(metrics, entry, { blocked, suspicious });
+}
+
+function attributeNormalizedHandSizeSkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  entry: PlanConversionActionEntry,
+  context: { blocked: boolean; suspicious: boolean },
+): void {
+  if (entry.runnerHandSizeBottleneckDecisionWindow !== true)
+    metrics.runnerHandSizeNormalizedWindows += 1;
+  if (entry.runnerHandSizeSupportTaken === true)
+    metrics.runnerHandSizeNormalizedTaken += 1;
+  else metrics.runnerHandSizeNormalizedSkipped += 1;
+
+  const legalHandSizeSupport = (entry.runnerLegalHandSizeActions ?? 0) > 0;
+  if (!legalHandSizeSupport) {
+    metrics.runnerHandSizeNormalizedMetricArtifact += 1;
+    return;
+  }
+
+  if (context.blocked) {
+    metrics.runnerHandSizeNormalizedBlocked += 1;
+    return;
+  }
+
+  if (context.suspicious) {
+    metrics.runnerHandSizeNormalizedSuspicious += 1;
+    return;
+  }
+
+  metrics.runnerHandSizeNormalizedMetricArtifact += 1;
 }
 
 function incrementChosenFamily(

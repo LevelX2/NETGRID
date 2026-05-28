@@ -16631,6 +16631,119 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     });
   });
 
+  it("normalizes Runner setup diagnostics into disjoint blocked, suspicious, and artifact buckets", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("runner", 1, "start_run", "remote_1", 1, {
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+            runnerLegalSearchActions: 1,
+            runnerSearchSkippedWhileMissingBreakerCoverage: true,
+            runnerSetupMissingCoverageTypes: ["code_gate"],
+            runnerRemoteRunAgainstAdvancedRemote: true,
+          }),
+          progressionAction("runner", 2, "gain_credit", undefined, 1, {
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+            runnerLegalSearchActions: 1,
+            runnerSearchSkippedWhileMissingBreakerCoverage: true,
+            runnerSetupMissingCoverageTypes: ["sentry"],
+            runnerEconomyTaken: true,
+          }),
+          progressionAction("runner", 3, "draw_card", undefined, 2, {
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+            runnerLegalSearchActions: 1,
+            runnerSearchSkippedWhileMissingBreakerCoverage: true,
+            runnerSetupMissingCoverageTypes: ["wall"],
+            runnerDrawAction: true,
+          }),
+          progressionAction("runner", 4, "draw_card", undefined, 2, {
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+            runnerLegalSearchActions: 1,
+            runnerSearchSkippedWhileMissingBreakerCoverage: true,
+            runnerSetupMissingCoverageTypes: ["code_gate"],
+            runnerPressureReadyTrue: true,
+            runnerDrawAction: true,
+          }),
+          progressionAction("runner", 5, "draw_card", undefined, 3, {
+            runnerSetupFixGateEligibleMemorySkip: true,
+            runnerLegalMemoryHardwareActions: 1,
+            runnerDrawAction: true,
+          }),
+          progressionAction("runner", 6, "draw_card", undefined, 3, {
+            runnerSetupFixGateEligibleMemorySkip: true,
+            runnerLegalMemoryHardwareActions: 1,
+            runnerMemorySupportSkippedWhileGripHasPrograms: true,
+            runnerDrawAction: true,
+          }),
+          progressionAction("runner", 7, "draw_card", undefined, 4, {
+            runnerHandSizeSupportSkippedWhileDamageRiskVisible: true,
+            runnerLegalHandSizeActions: 1,
+            runnerDrawAction: true,
+          }),
+          progressionAction("runner", 8, "draw_card", undefined, 4, {
+            runnerDiscardChoice: true,
+          }),
+          progressionAction("runner", 9, "install_card", undefined, 5, {
+            runnerHandSizeBottleneckDecisionWindow: true,
+            runnerLegalHandSizeActions: 1,
+            runnerHandSizeSupportTaken: true,
+            runnerHandSizeFactUsedForDiagnosis: true,
+            runnerRigInstallAction: true,
+          }),
+        ],
+        "runner-setup-normalized-fixture",
+      ),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerSearchRecoveryNormalizedWindows: 4,
+      runnerSearchRecoveryNormalizedSkipped: 4,
+      runnerSearchRecoveryNormalizedBlocked: 2,
+      runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest: 1,
+      runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve: 1,
+      runnerSearchRecoveryNormalizedMetricArtifact: 1,
+      runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough: 1,
+      runnerSearchRecoveryNormalizedSuspicious: 1,
+      runnerSearchRecoveryNormalizedTrueMissedCoverage: 1,
+      runnerSearchRecoveryNormalizedFixGateEligible: 1,
+      runnerMemoryNormalizedWindows: 2,
+      runnerMemoryNormalizedSkipped: 2,
+      runnerMemoryNormalizedBlocked: 1,
+      runnerMemoryNormalizedBlockedByNoProgramPressure: 1,
+      runnerMemoryNormalizedSuspicious: 1,
+      runnerMemoryNormalizedTrueRigBottleneck: 1,
+      runnerMemoryNormalizedFixGateEligible: 1,
+      runnerHandSizeNormalizedWindows: 2,
+      runnerHandSizeNormalizedTaken: 1,
+      runnerHandSizeNormalizedSkipped: 1,
+      runnerHandSizeNormalizedSuspicious: 1,
+      runnerSetupNormalizedWindows: 8,
+      runnerSetupNormalizedSuspicious: 3,
+      runnerSetupNormalizedBlocked: 3,
+      runnerSetupNormalizedMetricArtifact: 1,
+      runnerSetupNormalizedFixGateEligible: 3,
+      runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis: 1,
+    });
+    expect(metrics.runnerSearchRecoveryNormalizedWindows).toBe(
+      metrics.runnerSearchRecoveryNormalizedBlocked +
+        metrics.runnerSearchRecoveryNormalizedMetricArtifact +
+        metrics.runnerSearchRecoveryNormalizedUnclassified +
+        metrics.runnerSearchRecoveryNormalizedSuspicious,
+    );
+    expect(metrics.runnerMemoryNormalizedWindows).toBe(
+      metrics.runnerMemoryNormalizedBlocked +
+        metrics.runnerMemoryNormalizedMetricArtifact +
+        metrics.runnerMemoryNormalizedUnclassified +
+        metrics.runnerMemoryNormalizedSuspicious,
+    );
+    expect(metrics.runnerHandSizeNormalizedSkipped).toBe(
+      metrics.runnerHandSizeNormalizedBlocked +
+        metrics.runnerHandSizeNormalizedMetricArtifact +
+        metrics.runnerHandSizeNormalizedSuspicious,
+    );
+    expect(metrics.runnerMemoryNormalizedSuspicious).toBe(1);
+  });
+
   it("keeps Runner setup attribution diagnostics hidden-state invariant and redaction-safe", () => {
     const visibleActions = [
       progressionAction("runner", 1, "draw_card", undefined, 1, {
