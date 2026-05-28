@@ -592,12 +592,96 @@ const BATCH11_TAG_PUNISH_PRIORITY_POLICY = Object.fromEntries(
   ]),
 );
 
+const BATCH12_RUNNER_ECONOMY_PRIORITY_POLICY = Object.fromEntries(
+  [
+    [
+      "onr_v1_045_newsgroup-filter",
+      "Activated Runner credit gain is derivable action economy, but click availability and action choice remain LegalAction/consumer context.",
+    ],
+    [
+      "onr_v1_087_forgotten-backup-chip",
+      "Trash-to-grip program recovery is derivable by zone/target class, but generated facts must not expose hidden heap or grip identity.",
+    ],
+    [
+      "onr_v1_089_gideons-pawnshop",
+      "Trash-to-grip recovery is derivable by zone/target class, but generated facts must not expose hidden heap or grip identity.",
+    ],
+    [
+      "onr_v1_093_if-you-want-it-done-right",
+      "Top-stack selection is derivable as search/topdeck context, but hidden stack order and card identity remain hidden-zone context.",
+    ],
+    [
+      "onr_v1_095_jack-n-joe",
+      "Burst draw is mechanically derivable, while actual hand value remains hidden state and setup valuation remains strategy/consumer context.",
+    ],
+    [
+      "onr_v1_097_livewires-contacts",
+      "Burst Runner credit gain is mechanically derivable, while tempo valuation remains strategy/consumer context.",
+    ],
+    [
+      "onr_v1_099_mantis-fixer-at-large",
+      "Stack-to-grip search is derivable by zone/target class, but generated facts must not expose hidden stack order or card identity.",
+    ],
+    [
+      "onr_v1_103_organ-donor",
+      "Grip-trash economy is derivable as gain-per-trashed-card, but downside, hand quality and hidden grip identity remain context.",
+    ],
+    [
+      "onr_v1_108_score",
+      "Burst Runner credit gain is mechanically derivable, while action timing and tempo valuation remain strategy/consumer context.",
+    ],
+    [
+      "onr_v1_114_temple-microcode-outlet",
+      "Program search-to-grip is derivable by zone/target class, but generated facts must not expose hidden stack order or card identity.",
+    ],
+    [
+      "onr_v1_131_microtech-backup-drive",
+      "Program-trash replacement and recovery are derivable as installed-hardware context, but hosted-card identity remains hidden/runtime context.",
+    ],
+    [
+      "onr_v1_154_broker",
+      "Hosted-credit put/take abilities are derivable finite action economy, but current hosted pool and once-per-turn choice remain board/LegalAction context.",
+    ],
+    [
+      "onr_v1_168_loan-from-chiba",
+      "Install burst credits are derivable only with debt/downside and delayed-penalty context; migration must not collapse the card into pure economy.",
+    ],
+    [
+      "onr_v1_176_the-shell-traders",
+      "Delayed no-cost install support is derivable as install-discount context, but hidden hand choice and install legality remain runtime context.",
+    ],
+    [
+      "onr_v1_177_the-short-circuit",
+      "Activated program search is derivable by action and stack context, but generated facts must not expose hidden stack identity.",
+    ],
+    [
+      "onr_v1_178_short-term-contract",
+      "Hosted-credit depot and A: take credits are derivable finite action economy; remaining pool stays board state and must not become infinite economy.",
+    ],
+  ].map(([cardId, rationale]) => [
+    cardId,
+    {
+      migrationPriority: "P1",
+      migrationRisk: "medium",
+      fieldCategories: [
+        "safe_generated_now",
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+      ],
+      recommendedMigrationBatch: 12,
+      rationale,
+    },
+  ]),
+);
+
 const PRIORITY_POLICY = {
   ...BATCH7_CORP_ICE_PRIORITY_POLICY,
   ...BATCH8_CORP_ECONOMY_PRIORITY_POLICY,
   ...BATCH9_CORP_NODES_PRIORITY_POLICY,
   ...BATCH10_RUNNER_SURVIVAL_PRIORITY_POLICY,
   ...BATCH11_TAG_PUNISH_PRIORITY_POLICY,
+  ...BATCH12_RUNNER_ECONOMY_PRIORITY_POLICY,
   "onr_v1_017_deep-thought": {
     migrationPriority: "P2",
     migrationRisk: "medium",
@@ -1474,7 +1558,7 @@ export function buildGeneratedFactMigrationPriorityReport() {
     };
   });
 
-  const batchPlan = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((batch) => ({
+  const batchPlan = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((batch) => ({
     batch,
     title: {
       1: "Scored-agenda and tag/trace/punish generated facts",
@@ -1488,6 +1572,7 @@ export function buildGeneratedFactMigrationPriorityReport() {
       9: "Corp nodes, assets, ambush and economy remotes",
       10: "Runner prevention, damage and survival tools",
       11: "Corp tag/punish funnel cross-batch closeout",
+      12: "Runner economy, resource, hardware and setup longtail",
     }[batch],
     cardIds: cards
       .filter((card) => card.recommendedMigrationBatch === batch)

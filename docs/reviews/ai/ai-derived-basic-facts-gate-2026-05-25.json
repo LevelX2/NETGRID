@@ -6,15 +6,15 @@
     "pilotCardsPath": "data/ai/ai-derived-basic-facts-pilot-cards-2026-05-25.json",
     "derivationMode": "read-only CardImplementation text/descriptor scan; no runtime, planner, or strategy consumption"
   },
-  "pilotCardCount": 177,
-  "implementationFoundCount": 177,
-  "cardsWithDerivedFacts": 177,
-  "cardsWithManualOntologyOverlap": 89,
-  "cardsNeedingManualOverlay": 118,
+  "pilotCardCount": 193,
+  "implementationFoundCount": 193,
+  "cardsWithDerivedFacts": 193,
+  "cardsWithManualOntologyOverlap": 100,
+  "cardsNeedingManualOverlay": 131,
   "effectKindCounts": {
     "access_punish": 5,
     "access_replacement": 3,
-    "action_economy": 4,
+    "action_economy": 7,
     "action_penalty": 1,
     "advance_burst": 3,
     "advanceable_economy": 6,
@@ -23,16 +23,17 @@
     "base_link": 1,
     "brain_damage_prevention": 2,
     "breaker": 21,
-    "card_recovery": 1,
-    "counter_economy": 14,
+    "card_recovery": 4,
+    "counter_economy": 17,
     "damage": 20,
     "damage_prevention": 3,
-    "draw": 9,
-    "economy": 17,
+    "delayed_penalty": 2,
+    "draw": 10,
+    "economy": 22,
     "etr": 11,
     "expose_info": 4,
     "extra_action": 6,
-    "finite_economy_pool": 8,
+    "finite_economy_pool": 10,
     "flatline_prevention": 1,
     "future_encounter_effect": 9,
     "future_run_effect": 8,
@@ -41,7 +42,7 @@
     "hardware_trash": 4,
     "hq_info": 2,
     "install": 2,
-    "install_discount": 3,
+    "install_discount": 4,
     "link": 2,
     "link_penalty": 1,
     "meat_damage_prevention": 1,
@@ -52,7 +53,7 @@
     "persistent_survival_modifier": 1,
     "prevention_replacement": 1,
     "program_trash": 5,
-    "program_trash_prevention": 1,
+    "program_trash_prevention": 2,
     "recurring_economy": 4,
     "remote_build": 1,
     "remote_protection": 26,
@@ -65,7 +66,7 @@
     "run_tax": 9,
     "score_acceleration": 8,
     "scored_agenda_action": 11,
-    "search": 2,
+    "search": 8,
     "shuffle_draw": 1,
     "start_of_turn_economy": 3,
     "survival_payoff": 2,
@@ -92,25 +93,31 @@
     "requires_during_run": 17,
     "requires_encounter": 24,
     "requires_flatline": 1,
+    "requires_grip_card": 2,
+    "requires_heap_card": 2,
     "requires_hq_agenda": 1,
     "requires_installed_card": 2,
+    "requires_installed_hardware": 1,
     "requires_installed_ice": 2,
     "requires_installed_program": 1,
+    "requires_installed_resource": 3,
     "requires_later_encounter": 5,
     "requires_net_damage": 3,
     "requires_prevention_window": 8,
-    "requires_program_trash": 1,
+    "requires_program_trash": 2,
     "requires_remaining_ice": 5,
     "requires_remote_server": 3,
     "requires_rezzed_card": 6,
     "requires_rezzed_ice": 1,
     "requires_rnd_top": 2,
+    "requires_runner_action": 1,
     "requires_runner_draw": 1,
     "requires_runner_pay_or_take_tag": 1,
     "requires_runner_tagged": 15,
     "requires_score_window": 11,
     "requires_scored_agenda": 23,
-    "requires_start_of_turn": 8,
+    "requires_stack_search": 4,
+    "requires_start_of_turn": 9,
     "requires_stolen_agenda_last_turn": 2,
     "requires_successful_run": 9,
     "requires_trace_attempt": 3,
@@ -121,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 923,
+  "warningCount": 1017,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -599,6 +606,26 @@
       "cardId": "onr_v1_043_mystery-box"
     },
     {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_045_newsgroup-filter"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:action_economy has no manual ontology match.",
+      "cardId": "onr_v1_045_newsgroup-filter"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_045_newsgroup-filter"
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_047_pile-driver"
@@ -884,6 +911,236 @@
       "cardId": "onr_v1_085_executive-wiretaps"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_087_forgotten-backup-chip"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_087_forgotten-backup-chip"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
+      "cardId": "onr_v1_087_forgotten-backup-chip"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison.",
+      "cardId": "onr_v1_087_forgotten-backup-chip"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_heap_card has no manual ontology match.",
+      "cardId": "onr_v1_087_forgotten-backup-chip"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:card_recovery has no manual ontology match.",
+      "cardId": "onr_v1_087_forgotten-backup-chip"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:zone_shuffle has no generated basic fact match.",
+      "cardId": "onr_v1_087_forgotten-backup-chip"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_087_forgotten-backup-chip"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_089_gideons-pawnshop"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_089_gideons-pawnshop"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison.",
+      "cardId": "onr_v1_089_gideons-pawnshop"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_heap_card has no manual ontology match.",
+      "cardId": "onr_v1_089_gideons-pawnshop"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:card_recovery has no manual ontology match.",
+      "cardId": "onr_v1_089_gideons-pawnshop"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_089_gideons-pawnshop"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_093_if-you-want-it-done-right"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_093_if-you-want-it-done-right"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison.",
+      "cardId": "onr_v1_093_if-you-want-it-done-right"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_stack_search has no manual ontology match.",
+      "cardId": "onr_v1_093_if-you-want-it-done-right"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_093_if-you-want-it-done-right"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_095_jack-n-joe"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_095_jack-n-joe"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_097_livewires-contacts"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_097_livewires-contacts"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_099_mantis-fixer-at-large"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
+      "cardId": "onr_v1_099_mantis-fixer-at-large"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison.",
+      "cardId": "onr_v1_099_mantis-fixer-at-large"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_stack_search has no manual ontology match.",
+      "cardId": "onr_v1_099_mantis-fixer-at-large"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:draw has no generated basic fact match.",
+      "cardId": "onr_v1_099_mantis-fixer-at-large"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_099_mantis-fixer-at-large"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_103_organ-donor"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_grip_card has no manual ontology match.",
+      "cardId": "onr_v1_103_organ-donor"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:economy has no manual ontology match.",
+      "cardId": "onr_v1_103_organ-donor"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_103_organ-donor",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_103_organ-donor"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_108_score"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_114_temple-microcode-outlet"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
+      "cardId": "onr_v1_114_temple-microcode-outlet"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison.",
+      "cardId": "onr_v1_114_temple-microcode-outlet"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_stack_search has no manual ontology match.",
+      "cardId": "onr_v1_114_temple-microcode-outlet"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:draw has no generated basic fact match.",
+      "cardId": "onr_v1_114_temple-microcode-outlet"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_114_temple-microcode-outlet"
+    },
+    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_116_total-genetic-retrofit"
@@ -917,6 +1174,46 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_116_total-genetic-retrofit"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_131_microtech-backup-drive"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_131_microtech-backup-drive"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_installed_hardware has no manual ontology match.",
+      "cardId": "onr_v1_131_microtech-backup-drive"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_program_trash has no manual ontology match.",
+      "cardId": "onr_v1_131_microtech-backup-drive"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:card_recovery has no manual ontology match.",
+      "cardId": "onr_v1_131_microtech-backup-drive"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:program_trash_prevention has no manual ontology match.",
+      "cardId": "onr_v1_131_microtech-backup-drive"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_131_microtech-backup-drive"
     },
     {
       "kind": "confidence_mismatch",
@@ -1004,6 +1301,46 @@
       "cardId": "onr_v1_135_nasuko-cycle"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_154_broker"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_154_broker"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_installed_resource has no manual ontology match.",
+      "cardId": "onr_v1_154_broker"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:action_economy has no manual ontology match.",
+      "cardId": "onr_v1_154_broker"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:counter_economy has no manual ontology match.",
+      "cardId": "onr_v1_154_broker"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:finite_economy_pool has no manual ontology match.",
+      "cardId": "onr_v1_154_broker"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_154_broker",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_154_broker"
+    },
+    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_157_crash-everett-inventive-fixer"
@@ -1057,6 +1394,146 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_161_fall-guy"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_168_loan-from-chiba"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_168_loan-from-chiba"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_start_of_turn has no manual ontology match.",
+      "cardId": "onr_v1_168_loan-from-chiba"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:counter_economy has no manual ontology match.",
+      "cardId": "onr_v1_168_loan-from-chiba"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:delayed_penalty has no manual ontology match.",
+      "cardId": "onr_v1_168_loan-from-chiba"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_168_loan-from-chiba"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_176_the-shell-traders"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_176_the-shell-traders"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_grip_card has no manual ontology match.",
+      "cardId": "onr_v1_176_the-shell-traders"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_installed_resource has no manual ontology match.",
+      "cardId": "onr_v1_176_the-shell-traders"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:install_discount has no manual ontology match.",
+      "cardId": "onr_v1_176_the-shell-traders"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_176_the-shell-traders",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_176_the-shell-traders"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence low.",
+      "cardId": "onr_v1_177_the-short-circuit"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_177_the-short-circuit"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison.",
+      "cardId": "onr_v1_177_the-short-circuit"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_runner_action has no manual ontology match.",
+      "cardId": "onr_v1_177_the-short-circuit"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_stack_search has no manual ontology match.",
+      "cardId": "onr_v1_177_the-short-circuit"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:search has no manual ontology match.",
+      "cardId": "onr_v1_177_the-short-circuit"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_177_the-short-circuit",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_177_the-short-circuit"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_178_short-term-contract"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_installed_resource has no manual ontology match.",
+      "cardId": "onr_v1_178_short-term-contract"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:action_economy has no manual ontology match.",
+      "cardId": "onr_v1_178_short-term-contract"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:finite_economy_pool has no manual ontology match.",
+      "cardId": "onr_v1_178_short-term-contract"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_178_short-term-contract",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_178_short-term-contract"
     },
     {
       "kind": "confidence_mismatch",
@@ -7068,6 +7545,95 @@
       ]
     },
     {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/newsgroup-filter.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:economy", "effect:action_economy"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Installed A:-credit ability is mechanical runner action economy; action availability remains LegalAction/runtime context.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "action_economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2,
+            "source": "implementation.effect.gain_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2,
+            "source": "implementation.effect.gain_credits"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["per_card_longtail", "program", "runner"],
+        "planRoles": ["runner_install_program", "runner_program_ability"],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["economy_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:economy"],
+        "generatedOnly": ["effect:action_economy"],
+        "manualOnly": []
+      },
+      "missingManualOverlay": ["effect:action_economy"],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:action_economy has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_047_pile-driver",
       "title": "Pile Driver",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/pile-driver.ts",
@@ -9190,6 +9756,847 @@
       ]
     },
     {
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "title": "Forgotten Backup Chip",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/forgotten-backup-chip.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:card_recovery",
+        "effect:search",
+        "condition:requires_heap_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trash-to-grip program recovery is mechanical heap context; generated facts do not expose hidden heap/grip card identity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "card_recovery",
+            "timing": "action",
+            "scope": "heap",
+            "resource": "cards",
+            "source": "implementation.effect.search_trash_to_grip"
+          },
+          {
+            "confidence": "high",
+            "kind": "search",
+            "timing": "action",
+            "scope": "heap",
+            "resource": "cards",
+            "source": "implementation.effect.search_trash_to_grip"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_heap_card",
+            "source": "implementation.effect.search_trash_to_grip"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Search/recovery is represented by zone and target class only; generated facts do not expose hidden stack, heap or grip identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "hidden_zone_tool", "stack_search"],
+        "planRoles": ["build_rig", "recover_rig"],
+        "effects": [
+          {
+            "kind": "search",
+            "timing": "action",
+            "scope": "runner"
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "action",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["breaker_search_first", "rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:search"],
+        "generatedOnly": [
+          "condition:requires_heap_card",
+          "effect:card_recovery"
+        ],
+        "manualOnly": ["effect:zone_shuffle"]
+      },
+      "missingManualOverlay": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:zone_shuffle"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_heap_card has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:card_recovery has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:zone_shuffle has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "title": "Gideon's Pawnshop",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/gideons-pawnshop.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:card_recovery",
+        "effect:search",
+        "condition:requires_heap_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trash-to-grip card recovery is mechanical heap context; generated facts do not expose hidden heap/grip card identity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "card_recovery",
+            "timing": "action",
+            "scope": "heap",
+            "resource": "cards",
+            "source": "implementation.effect.search_trash_to_grip"
+          },
+          {
+            "confidence": "high",
+            "kind": "search",
+            "timing": "action",
+            "scope": "heap",
+            "resource": "cards",
+            "source": "implementation.effect.search_trash_to_grip"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_heap_card",
+            "source": "implementation.effect.search_trash_to_grip"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Search/recovery is represented by zone and target class only; generated facts do not expose hidden stack, heap or grip identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "trash_recovery"],
+        "planRoles": ["build_rig", "recover_rig"],
+        "effects": [
+          {
+            "kind": "search",
+            "timing": "action",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "lineSupport": ["breaker_search_first", "rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": ["effect:search"],
+        "generatedOnly": [
+          "condition:requires_heap_card",
+          "effect:card_recovery"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_heap_card",
+        "effect:card_recovery"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_heap_card has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:card_recovery has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "title": "If You Want It Done Right . . .",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/if-you-want-it-done-right.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:search",
+        "condition:requires_stack_search"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Top-stack selection is mechanical search/topdeck context; generated facts do not expose hidden stack order or card identity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "search",
+            "timing": "action",
+            "scope": "stack",
+            "resource": "cards",
+            "amount": 5,
+            "source": "implementation.effect.look_top_stack_take_one_arrange_rest"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_stack_search",
+            "source": "implementation.effect.search_stack_or_top_stack"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Search/recovery is represented by zone and target class only; generated facts do not expose hidden stack, heap or grip identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "per_card_longtail", "runner"],
+        "planRoles": ["runner_event_choice", "runner_play_event"],
+        "effects": [
+          {
+            "kind": "search",
+            "timing": "action",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "lineSupport": ["breaker_search_first", "rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": ["effect:search"],
+        "generatedOnly": ["condition:requires_stack_search"],
+        "manualOnly": []
+      },
+      "missingManualOverlay": ["condition:requires_stack_search"],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_stack_search has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_095_jack-n-joe",
+      "title": "Jack 'n' Joe",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/jack-n-joe.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:draw"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Burst draw is a mechanical hand-refill/setup fact without hidden stack identity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "draw",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "cards",
+            "amount": 3,
+            "source": "implementation.effect.draw_cards"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["draw", "setup"],
+        "planRoles": ["draw_for_answers"],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "lineSupport": ["breaker_search_first", "rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": ["effect:draw"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_097_livewires-contacts",
+      "title": "Livewire's Contacts",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/livewires-contacts.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:economy"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Burst credit gain is mechanical runner economy; tempo valuation remains consumer/strategy context.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 3,
+            "source": "implementation.effect.gain_credits"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["economy", "tempo"],
+        "planRoles": ["recover_economy"],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "lineSupport": ["economy_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": ["effect:economy"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "title": "Mantis, Fixer-at-Large",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/mantis-fixer-at-large.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:search",
+        "condition:requires_stack_search"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Stack-to-grip search is mechanical hidden-zone context; generated facts do not expose stack order or chosen card identity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "search",
+            "timing": "action",
+            "scope": "stack",
+            "resource": "cards",
+            "source": "implementation.effect.search_stack_to_grip"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_stack_search",
+            "source": "implementation.effect.search_stack_or_top_stack"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Search/recovery is represented by zone and target class only; generated facts do not expose hidden stack, heap or grip identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["connection", "event", "hidden_zone_tool", "stack_search"],
+        "planRoles": ["build_rig", "recover_rig"],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "cards",
+            "amount": 1
+          },
+          {
+            "kind": "search",
+            "timing": "action",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["breaker_search_first", "economy_first", "rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:search"],
+        "generatedOnly": ["condition:requires_stack_search"],
+        "manualOnly": ["effect:draw"]
+      },
+      "missingManualOverlay": [
+        "condition:requires_stack_search",
+        "effect:draw"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_stack_search has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:draw has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_103_organ-donor",
+      "title": "Organ Donor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/organ-donor.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "condition:requires_grip_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Grip-trash-for-credits is mechanical economy with downside/hidden-zone context; generated facts record gain-per-card, not current hand value.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2,
+            "source": "implementation.effect.trash_cards_from_grip_for_credits"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_grip_card",
+            "source": "implementation.effect.trash_cards_from_grip_for_credits"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Grip-trash economy records gain-per-trashed-card only; selected hand cards remain hidden-zone context."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "per_card_longtail", "runner"],
+        "planRoles": ["runner_event_choice", "runner_play_event"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": []
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": ["condition:requires_grip_card", "effect:economy"],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_grip_card",
+        "effect:economy"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_grip_card has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:economy has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_108_score",
+      "title": "Score!",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": ["effect:economy"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Burst credit gain is mechanical runner economy; when to spend the click remains strategy context.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 9,
+            "source": "implementation.effect.gain_credits"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["economy", "run_pressure"],
+        "planRoles": ["pressure_rnd", "recover_economy"],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 9
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "lineSupport": ["closeout_pressure", "economy_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:economy"],
+        "generatedOnly": [],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/temple-microcode-outlet.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:search",
+        "condition:requires_stack_search"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Program search-to-grip is mechanical stack context; generated facts do not expose hidden stack order or card identity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "search",
+            "timing": "action",
+            "scope": "stack",
+            "resource": "cards",
+            "source": "implementation.effect.search_stack_to_grip"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_stack_search",
+            "source": "implementation.effect.search_stack_or_top_stack"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Search/recovery is represented by zone and target class only; generated facts do not expose hidden stack, heap or grip identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "hidden_zone_tool", "program_search"],
+        "planRoles": ["build_rig", "draw_for_answers"],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "cards",
+            "amount": 1
+          },
+          {
+            "kind": "search",
+            "timing": "action",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["breaker_search_first", "rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:search"],
+        "generatedOnly": ["condition:requires_stack_search"],
+        "manualOnly": ["effect:draw"]
+      },
+      "missingManualOverlay": [
+        "condition:requires_stack_search",
+        "effect:draw"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_stack_search has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:draw has no generated basic fact match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_116_total-genetic-retrofit",
       "title": "Total Genetic Retrofit",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/total-genetic-retrofit.ts",
@@ -9288,6 +10695,124 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:tag_prevention has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/microtech-backup-drive.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:card_recovery",
+        "effect:program_trash_prevention",
+        "condition:requires_installed_hardware",
+        "condition:requires_program_trash"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Program-trash replacement and top-card recovery are mechanical installed-hardware context without hosted-card identity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "card_recovery",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "cards",
+            "source": "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement"
+          },
+          {
+            "confidence": "high",
+            "kind": "program_trash_prevention",
+            "timing": "prevention_window",
+            "scope": "installed_program",
+            "resource": "cards",
+            "source": "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_installed_hardware",
+            "source": "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_program_trash",
+            "source": "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Backup-drive recovery is represented without hosted-card identity or hidden stack/grip contents."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "hardware",
+        "roles": ["hardware", "per_card_longtail", "runner"],
+        "planRoles": ["runner_install_hardware"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_installed_hardware",
+          "condition:requires_program_trash",
+          "effect:card_recovery",
+          "effect:program_trash_prevention"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_installed_hardware",
+        "condition:requires_program_trash",
+        "effect:card_recovery",
+        "effect:program_trash_prevention"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_installed_hardware has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_program_trash has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:card_recovery has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:program_trash_prevention has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -9557,6 +11082,126 @@
       ]
     },
     {
+      "cardId": "onr_v1_154_broker",
+      "title": "Broker",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/broker.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:action_economy",
+        "condition:requires_installed_resource"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Put/take hosted credits is finite resource economy with action and hosted-pool context, not a free repeatable economy fact.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "action_economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "source": "implementation.effect.take_hosted_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "source": "implementation.effect.take_hosted_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "finite_economy_pool",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 3,
+            "source": "implementation.effect.add_hosted_credits"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_installed_resource",
+            "source": "implementation.effect.add_hosted_credits"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "resource",
+        "roles": ["recursion", "resource", "tag_risk", "trash_recovery"],
+        "planRoles": ["build_rig", "recover_key_card", "resource_value_engine"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_installed_resource",
+          "effect:action_economy",
+          "effect:counter_economy",
+          "effect:finite_economy_pool"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_installed_resource has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:action_economy has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:counter_economy has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:finite_economy_pool has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
       "title": "Crash Everett, Inventive Fixer",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/crash-everett-inventive-fixer.ts",
@@ -9716,6 +11361,501 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:tag_prevention has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "title": "Loan from Chiba",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/loan-from-chiba.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:delayed_penalty",
+        "condition:requires_start_of_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Install burst credits are paired with start-turn loss and leave-play pay-or-lose debt context; generated facts must not treat this as pure economy.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "source": "implementation.effect.lose_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "delayed_penalty",
+            "timing": "on_leave_play",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 10,
+            "source": "implementation.lifecycle.on_leave_play.pay_credits_or_lose_game"
+          },
+          {
+            "confidence": "high",
+            "kind": "delayed_penalty",
+            "timing": "start_of_turn",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 1,
+            "source": "implementation.lifecycle.start_of_runner_turn.lose_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 12,
+            "source": "implementation.effect.gain_credits"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_start_of_turn",
+            "source": "implementation.lifecycle.start_of_runner_turn"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Pay-or-lose-game debt is recorded as delayed penalty context, not as pure economy value."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "resource",
+        "roles": ["economy", "persistent", "resource", "runner"],
+        "planRoles": ["credit_swing"],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 12
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "reserveRisk": "medium",
+          "opportunityCost": "high"
+        },
+        "lineSupport": ["economy_first", "rig_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:economy"],
+        "generatedOnly": [
+          "condition:requires_start_of_turn",
+          "effect:counter_economy",
+          "effect:delayed_penalty"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:delayed_penalty"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_start_of_turn has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:counter_economy has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:delayed_penalty has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_176_the-shell-traders",
+      "title": "The Shell Traders",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:install_discount",
+        "condition:requires_installed_resource",
+        "condition:requires_grip_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Delayed no-cost install support is mechanical resource/setup context; actual hand choice and install legality remain engine/hidden-zone context.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "install_discount",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "credits",
+            "source": "implementation.hiddenReplacementLongtail.shell_traders_delayed_install"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_grip_card",
+            "source": "implementation.hiddenReplacementLongtail.shell_traders_delayed_install"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_installed_resource",
+            "source": "implementation.hiddenReplacementLongtail.shell_traders_delayed_install"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "The Shell Traders is represented as delayed install-discount context only; generated facts do not create install legality or hidden hand identity."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "resource",
+        "roles": [
+          "counter",
+          "delayed_install",
+          "resource",
+          "set_aside_install",
+          "shell_counter"
+        ],
+        "planRoles": ["build_rig", "delayed_install"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_grip_card",
+          "condition:requires_installed_resource",
+          "effect:install_discount"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_grip_card",
+        "condition:requires_installed_resource",
+        "effect:install_discount"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_grip_card has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_installed_resource has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:install_discount has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/the-short-circuit.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:search",
+        "condition:requires_runner_action",
+        "condition:requires_stack_search"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated program search is mechanical action/stack context; generated facts do not expose hidden stack identity.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "search",
+            "timing": "action",
+            "scope": "stack",
+            "resource": "cards",
+            "source": "implementation.effect.search_stack_to_grip"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_action",
+            "source": "implementation.ability.cost.action"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_stack_search",
+            "source": "implementation.effect.search_stack_or_top_stack"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [
+          "Search/recovery is represented by zone and target class only; generated facts do not expose hidden stack, heap or grip identities."
+        ],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "resource",
+        "roles": [
+          "hidden_zone_tool",
+          "repeatable_resource_ability",
+          "resource",
+          "stack_search"
+        ],
+        "planRoles": ["build_rig", "recover_rig"],
+        "effects": [],
+        "conditions": [],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "overlap": {
+        "matches": [],
+        "generatedOnly": [
+          "condition:requires_runner_action",
+          "condition:requires_stack_search",
+          "effect:search"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_runner_action has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_stack_search has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:search has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_178_short-term-contract",
+      "title": "Short-Term Contract",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/short-term-contract.ts",
+      "implementationFound": true,
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:action_economy",
+        "condition:requires_installed_resource"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted 12-credit depot and A: take up to 2 credits are finite action economy; remaining pool is board state, not a repeatable generated fact.",
+      "derivedFacts": {
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "action_economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 2,
+            "source": "implementation.effect.take_hosted_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 2,
+            "source": "implementation.effect.take_hosted_credits"
+          },
+          {
+            "confidence": "high",
+            "kind": "finite_economy_pool",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 12,
+            "source": "implementation.effect.add_hosted_credits"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_installed_resource",
+            "source": "implementation.effect.add_hosted_credits"
+          }
+        ],
+        "costProfile": {},
+        "derivationNotes": [],
+        "needsManualOverlayReasons": []
+      },
+      "manualOntologySummary": {
+        "hintPresent": true,
+        "side": "runner",
+        "cardType": "resource",
+        "roles": [
+          "bit_depot",
+          "click_economy",
+          "drip_economy",
+          "economy",
+          "resource"
+        ],
+        "planRoles": [
+          "build_rig",
+          "click_for_credits_when_safe",
+          "recover_economy"
+        ],
+        "effects": [
+          {
+            "kind": "counter_economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "lineSupport": ["economy_first"],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
+      },
+      "overlap": {
+        "matches": ["effect:counter_economy"],
+        "generatedOnly": [
+          "condition:requires_installed_resource",
+          "effect:action_economy",
+          "effect:finite_economy_pool"
+        ],
+        "manualOnly": []
+      },
+      "missingManualOverlay": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:finite_economy_pool"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
+      "confidence": "high",
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_installed_resource has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:action_economy has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:finite_economy_pool has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",

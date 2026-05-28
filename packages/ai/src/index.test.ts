@@ -30,6 +30,8 @@ import {
   buildDeckDoctrineProfile,
   buildObservedFacts,
   buildAiDecisionInput,
+  assessCorpScoreTerminalWindow,
+  assessCorpFutureRunIcePlacement,
   chooseAiAction,
   chooseCorpBaselineAction,
   chooseCorpAction,
@@ -673,7 +675,7 @@ describe("MVP 0.3 AI controller contract", () => {
         breakerInstanceId: breaker.instanceId,
         endingStrength: pair.expectedEndingStrength,
       });
-      expect(affordable, pair.role).toEqual({
+      expect(affordable, pair.role).toMatchObject({
         blocked: false,
         visibleBreakCost: pair.expectedCost,
       });
@@ -711,13 +713,57 @@ describe("MVP 0.3 AI controller contract", () => {
     };
     const breaker = runtimeVisibleBreaker(cardsById["onr_v1_021_dwarf"]);
 
-    expect(assessKnownRezzedIcePath([ice], [breaker], 2)).toEqual({
+    expect(assessKnownRezzedIcePath([ice], [breaker], 2)).toMatchObject({
       blocked: true,
       visibleBreakCost: 3,
     });
-    expect(assessKnownRezzedIcePath([ice], [breaker], 3)).toEqual({
+    expect(assessKnownRezzedIcePath([ice], [breaker], 3)).toMatchObject({
       blocked: false,
       visibleBreakCost: 3,
+    });
+  });
+
+  it("projects known rezzed ICE paths sequentially through later ICE", () => {
+    const cardsById = createRuntimeCardsById();
+    const outerSentry = runtimeVisibleIce(cardsById["onr_v1_259_in-the-face"]);
+    const innerCodeGate = runtimeVisibleIce(cardsById["onr_v1_261_quandary"]);
+    const killer = runtimeVisibleBreaker(cardsById["onr_v1_023_evil-twin"]);
+    const decoder = runtimeVisibleBreaker(cardsById["onr_v1_014_codecracker"]);
+
+    expect(assessKnownRezzedIcePath([outerSentry], [killer], 4)).toEqual({
+      blocked: false,
+      visibleBreakCost: 3,
+      canReachAccess: true,
+      creditsAfterPath: 1,
+      canBreakNextIceButNotFullPath: false,
+      creditsSpentBeforeUnpayableIce: 0,
+      assessedKnownIceCount: 1,
+    });
+    expect(assessKnownRezzedIcePath([innerCodeGate], [decoder], 4)).toEqual({
+      blocked: false,
+      visibleBreakCost: 2,
+      canReachAccess: true,
+      creditsAfterPath: 2,
+      canBreakNextIceButNotFullPath: false,
+      creditsSpentBeforeUnpayableIce: 0,
+      assessedKnownIceCount: 1,
+    });
+    expect(
+      assessKnownRezzedIcePath(
+        [innerCodeGate, outerSentry],
+        [killer, decoder],
+        4,
+      ),
+    ).toEqual({
+      blocked: true,
+      visibleBreakCost: 5,
+      canReachAccess: false,
+      creditsAfterPath: -1,
+      canBreakNextIceButNotFullPath: true,
+      unpayableIceIndex: 0,
+      creditsSpentBeforeUnpayableIce: 3,
+      assessedKnownIceCount: 2,
+      unpayableReason: "later_ice_unaffordable_after_prior_ice_cost",
     });
   });
 
@@ -734,7 +780,7 @@ describe("MVP 0.3 AI controller contract", () => {
       },
     ] satisfies VisibleCard[];
 
-    expect(assessKnownRezzedIcePath([ice], [breaker], 1, root)).toEqual({
+    expect(assessKnownRezzedIcePath([ice], [breaker], 1, root)).toMatchObject({
       blocked: false,
       visibleBreakCost: 1,
     });
@@ -891,7 +937,7 @@ describe("MVP 0.3 AI controller contract", () => {
         1,
         rdServer?.root ?? [],
       ),
-    ).toEqual({ blocked: true, visibleBreakCost: 2 });
+    ).toMatchObject({ blocked: true, visibleBreakCost: 2 });
     expect(assertAiInputIsSideSafe(input)).toBe(true);
   });
 
@@ -964,7 +1010,7 @@ describe("MVP 0.3 AI controller contract", () => {
         1,
         rdServer?.root ?? [],
       ),
-    ).toEqual({ blocked: true, visibleBreakCost: 2 });
+    ).toMatchObject({ blocked: true, visibleBreakCost: 2 });
     expect(assertAiInputIsSideSafe(input)).toBe(true);
   });
 
@@ -4101,6 +4147,269 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
   });
 
+  it("does not install Ball and Chain first on an empty remote when direct ICE is also installable", () => {
+    const input = corpFutureIceOrderingInput("ai-corp-ball-empty-remote", [
+      "onr_v1_222_ball-and-chain",
+      "simple_barrier_ice",
+      "simple_code_gate_ice",
+    ]);
+    const remoteIceActions = input.legalActions.filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        [
+          "onr_v1_222_ball-and-chain",
+          "simple_barrier_ice",
+          "simple_code_gate_ice",
+        ].includes(sourceDefinitionFromInput(input, action) ?? ""),
+    );
+
+    expect(remoteIceActions.length).toBeGreaterThanOrEqual(2);
+    const ballAction = remoteIceActions.find(
+      (action) =>
+        sourceDefinitionFromInput(input, action) ===
+        "onr_v1_222_ball-and-chain",
+    );
+    expect(ballAction).toBeDefined();
+    const ballPlacement = assessCorpFutureRunIcePlacement(input, ballAction!);
+    expect(ballPlacement).toMatchObject({
+      installedOnEmptyServer: true,
+      deadEffect: true,
+    });
+    expect(ballPlacement?.directImpactAlternativeCount).toBeGreaterThanOrEqual(
+      2,
+    );
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: remoteIceActions,
+    });
+    const selected = remoteIceActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(sourceDefinitionFromInput(input, selected!)).not.toBe(
+      "onr_v1_222_ball-and-chain",
+    );
+    expect(decision.reasonCode).toBe("corp.plan.build_scoring_remote");
+  });
+
+  it("allows Ball and Chain as outer ICE on an already iced remote", () => {
+    const input = corpFutureIceOrderingInput(
+      "ai-corp-ball-outer-remote",
+      ["onr_v1_222_ball-and-chain"],
+      (state) => {
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+      },
+    );
+    const ballAction = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_222_ball-and-chain",
+    );
+
+    expect(ballAction).toBeDefined();
+    expect(assessCorpFutureRunIcePlacement(input, ballAction!)).toMatchObject({
+      existingIceCount: 1,
+      hasLaterIceAfterInstall: true,
+      liveEffect: true,
+    });
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [ballAction!],
+    });
+
+    expect(decision.actionId).toBe(ballAction!.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.build_scoring_remote");
+  });
+
+  it("prefers direct/direct/future order for a three-ICE remote build", () => {
+    const firstInput = corpFutureIceOrderingInput("ai-corp-three-ice-first", [
+      "onr_v1_222_ball-and-chain",
+      "simple_barrier_ice",
+      "simple_code_gate_ice",
+    ]);
+    const firstActions = firstInput.legalActions.filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        [
+          "onr_v1_222_ball-and-chain",
+          "simple_barrier_ice",
+          "simple_code_gate_ice",
+        ].includes(sourceDefinitionFromInput(firstInput, action) ?? ""),
+    );
+    const firstDecision = chooseCorpAction({
+      ...firstInput,
+      legalActions: firstActions,
+    });
+    const firstSelected = firstActions.find(
+      (action) => action.actionId === firstDecision.actionId,
+    );
+
+    expect(sourceDefinitionFromInput(firstInput, firstSelected!)).not.toBe(
+      "onr_v1_222_ball-and-chain",
+    );
+
+    const secondInput = corpFutureIceOrderingInput(
+      "ai-corp-three-ice-second",
+      ["onr_v1_222_ball-and-chain", "simple_code_gate_ice"],
+      (state) => {
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+      },
+    );
+    const secondActions = secondInput.legalActions.filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        ["onr_v1_222_ball-and-chain", "simple_code_gate_ice"].includes(
+          sourceDefinitionFromInput(secondInput, action) ?? "",
+        ),
+    );
+    const secondDecision = chooseCorpAction({
+      ...secondInput,
+      legalActions: secondActions,
+    });
+    const secondSelected = secondActions.find(
+      (action) => action.actionId === secondDecision.actionId,
+    );
+
+    expect(sourceDefinitionFromInput(secondInput, secondSelected!)).toBe(
+      "onr_v1_222_ball-and-chain",
+    );
+  });
+
+  it.each([
+    ["onr_v1_225_canis-major", "corpCanisInstalledWithoutLaterIce"],
+    ["onr_v1_226_canis-minor", "corpCanisInstalledWithoutLaterIce"],
+    [
+      "onr_v1_224_bolter-cluster",
+      "corpBolterOrDataDartsInstalledWithoutNextIce",
+    ],
+    ["onr_v1_234_data-darts", "corpBolterOrDataDartsInstalledWithoutNextIce"],
+  ])("diagnoses %s as dead on an empty remote", (definitionId, metric) => {
+    const input = corpFutureIceOrderingInput(
+      `ai-corp-future-empty-${definitionId}`,
+      [definitionId],
+    );
+    const action = input.legalActions.find(
+      (candidate) =>
+        candidate.type === "install_card" &&
+        candidate.payload?.placement === "ice" &&
+        candidate.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, candidate) === definitionId,
+    );
+
+    expect(action).toBeDefined();
+    expect(assessCorpFutureRunIcePlacement(input, action!)).toMatchObject({
+      installedOnEmptyServer: true,
+      deadEffect: true,
+    });
+
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary([
+        progressionAction("corp", 1, "install_card", "remote_1", 1, {
+          installPlacement: "ice",
+          corpFutureRunIceInstalled: true,
+          corpFutureRunIceInstalledAsDeadEffect: true,
+          corpFutureRunIceInstalledWithoutLaterIce: true,
+          corpIceOrderFutureEffectDead: true,
+          [metric]: true,
+        }),
+      ]),
+    ]);
+
+    expect(metrics.corpFutureRunIceInstalledAsDeadEffect).toBe(1);
+    expect(metrics[metric as keyof typeof metrics]).toBe(1);
+  });
+
+  it("continues to allow direct ETR ICE and emergency future ICE installs on empty remotes", () => {
+    const directInput = corpFutureIceOrderingInput(
+      "ai-corp-direct-empty-allowed",
+      ["simple_barrier_ice"],
+    );
+    const directAction = directInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(directInput, action) === "simple_barrier_ice",
+    );
+    expect(directAction).toBeDefined();
+    expect(
+      chooseCorpAction({ ...directInput, legalActions: [directAction!] })
+        .actionId,
+    ).toBe(directAction!.actionId);
+
+    const emergencyInput = corpFutureIceOrderingInput(
+      "ai-corp-future-emergency-empty",
+      ["onr_v1_222_ball-and-chain"],
+    );
+    const emergencyAction = emergencyInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(emergencyInput, action) ===
+          "onr_v1_222_ball-and-chain",
+    );
+    expect(emergencyAction).toBeDefined();
+    expect(
+      chooseCorpAction({ ...emergencyInput, legalActions: [emergencyAction!] })
+        .actionId,
+    ).toBe(emergencyAction!.actionId);
+  });
+
+  it("keeps Future ICE ordering diagnostics invariant to hidden Runner zones and sanitized", () => {
+    const first = corpFutureIceOrderingInput("ai-corp-future-hidden-a", [
+      "onr_v1_222_ball-and-chain",
+      "simple_barrier_ice",
+    ]);
+    const second = {
+      ...first,
+      seed: "ai-corp-future-hidden-b",
+    };
+    const narrow = (input: AiDecisionInput) => ({
+      ...input,
+      legalActions: input.legalActions.filter(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.placement === "ice" &&
+          action.payload?.serverId === "remote_1",
+      ),
+    });
+
+    const firstDecision = chooseCorpAction(narrow(first));
+    const secondDecision = chooseCorpAction(narrow(second));
+
+    expect(firstDecision.reasonCode).toBe(secondDecision.reasonCode);
+    expect(
+      sourceDefinitionFromInput(
+        first,
+        first.legalActions.find(
+          (action) => action.actionId === firstDecision.actionId,
+        )!,
+      ),
+    ).toBe(
+      sourceDefinitionFromInput(
+        second,
+        second.legalActions.find(
+          (action) => action.actionId === secondDecision.actionId,
+        )!,
+      ),
+    );
+    expect(JSON.stringify(firstDecision.decisionDebug)).not.toMatch(
+      /privatePayload|cardInstances|fullGameState/i,
+    );
+  });
+
   it("keeps multiple installed Corp BBS economy actions source-bound above basic credit", () => {
     const input = installedCorpBbsEconomyInput(
       "ai-corp-multiple-installed-bbs-economy",
@@ -5449,6 +5758,111 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.score.evidence).toContain(
       "corp_protection_followed_by_agenda_install:true",
     );
+  });
+
+  it("keeps legal score terminal over further protection in a safe remote", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-score-terminal-score-now",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 3);
+        moveCorpCardToHq(state, "simple_code_gate_ice");
+      },
+    );
+    const score = input.legalActions.find(
+      (action) => action.type === "score_agenda",
+    );
+    const protection = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_code_gate_ice",
+    );
+    expect(score).toBeDefined();
+    expect(protection).toBeDefined();
+    if (!score || !protection)
+      throw new Error("Missing score terminal score/protection fixture");
+
+    const scopedInput = { ...input, legalActions: [score, protection] };
+    const terminal = assessCorpScoreTerminalWindow(scopedInput);
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(terminal.terminalWindow).toBe(true);
+    expect(terminal.scoreActionIds).toContain(score.actionId);
+    expect(decision.selectedActionId).toBe(score.actionId);
+    expect(decision.debug.planKind).toBe("score_now");
+  });
+
+  it("keeps legal advance-to-score over economy in a safe remote", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-score-terminal-advance",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain)
+      throw new Error("Missing score terminal advance/economy fixture");
+
+    const scopedInput = { ...input, legalActions: [advance, gain] };
+    const terminal = assessCorpScoreTerminalWindow(scopedInput);
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(terminal.advanceToScoreActionIds).toContain(advance.actionId);
+    expect(decision.selectedActionId).toBe(advance.actionId);
+    expect(decision.debug.planKind).toBe("score_next_turn");
+  });
+
+  it("uses a ready scoring remote for agenda install over economy", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-score-terminal-agenda-install",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        moveCorpCardToHq(state, "simple_agenda");
+      },
+    );
+    const agendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(agendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!agendaInstall || !gain)
+      throw new Error("Missing score terminal agenda install fixture");
+
+    const scopedInput = { ...input, legalActions: [agendaInstall, gain] };
+    const terminal = assessCorpScoreTerminalWindow(scopedInput);
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(terminal.agendaInstallActionIds).toContain(agendaInstall.actionId);
+    expect(decision.selectedActionId).toBe(agendaInstall.actionId);
+    expect(decision.debug.planKind).toBe("score_next_turn");
   });
 
   it("penalizes protection without safety delta when a protected score path is ready", () => {
@@ -10439,6 +10853,91 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|Simple Agenda|v08_project_agenda/,
+    );
+  });
+
+  it("penalizes remote runs that can break the next ICE but not the known full path", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-known-full-path-no-access",
+        runnerDeck: {
+          id: "ai_known_full_path_runner",
+          name: "AI Known Full Path Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_023_evil-twin", quantity: 2 },
+            { id: "onr_v1_014_codecracker", quantity: 2 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+        corpDeck: {
+          id: "ai_known_full_path_corp",
+          name: "AI Known Full Path Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_259_in-the-face", quantity: 1 },
+            { id: "onr_v1_261_quandary", quantity: 1 },
+            { id: "simple_agenda", quantity: 4 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    moveRunnerProgramToRig(state, "onr_v1_023_evil-twin");
+    moveRunnerProgramToRig(state, "onr_v1_014_codecracker");
+    ensureRemoteServer(state, "remote_1");
+    putCorpRootInRemote(state, "simple_agenda", 0);
+    const innerCodeGate = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_261_quandary",
+    );
+    const outerSentry = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_259_in-the-face",
+    );
+    for (const iceId of [innerCodeGate, outerSentry]) {
+      state.cardInstances[iceId] = {
+        ...state.cardInstances[iceId]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    state.runner.credits = 4;
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const economy = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!remoteRun || !economy)
+      throw new Error("Missing known-full-path run fixture actions");
+
+    const scopedInput = { ...input, legalActions: [remoteRun, economy] };
+    const runCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(runCandidate).toBeDefined();
+    if (!runCandidate) throw new Error("Missing contest remote candidate");
+    const runCost = estimateRunCost(scopedInput, runCandidate);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(runCost.reasons).toContain("known_full_path_no_access");
+    expect(runCost.reasons).toContain("can_break_next_ice_but_not_full_path");
+    expect(decision.actionId).toBe(economy.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
     );
   });
 
@@ -15505,6 +16004,14 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
             runCreditsMissingForKnownPath: 1,
             runStartedAgainstKnownUnaffordablePath: true,
             centralRunStartedAgainstKnownUnaffordablePath: true,
+            runnerRunStartedAgainstKnownUnpayableFullPath: true,
+            runnerRunStartedAgainstKnownUnpayableCentralPath: true,
+            runnerKnownPathCanReachAccessFalse: true,
+            runnerKnownPathCanBreakNextIceButNotFullPath: true,
+            runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce: true,
+            runnerRunCostQuoteUnderestimatedFullPath: true,
+            runnerRepeatRunOnKnownUnpayablePath: true,
+            runnerRunPenalizedAsKnownNoAccess: true,
             lowValueUnaffordableRun: true,
           }),
           progressionAction("runner", 2, "draw_card", undefined, 1, {
@@ -15751,6 +16258,15 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
       runsStartedAgainstKnownUnaffordablePath: 1,
       remoteRunsStartedAgainstKnownUnaffordablePath: 0,
       centralRunsStartedAgainstKnownUnaffordablePath: 1,
+      runnerRunStartedAgainstKnownUnpayableFullPath: 1,
+      runnerRunStartedAgainstKnownUnpayableRemotePath: 0,
+      runnerRunStartedAgainstKnownUnpayableCentralPath: 1,
+      runnerKnownPathCanReachAccessFalse: 1,
+      runnerKnownPathCanBreakNextIceButNotFullPath: 1,
+      runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce: 1,
+      runnerRunCostQuoteUnderestimatedFullPath: 1,
+      runnerRepeatRunOnKnownUnpayablePath: 1,
+      runnerRunPenalizedAsKnownNoAccess: 1,
       runsEndedAfterFirstIceDueToCredits: 0,
       creditsMissingForKnownPath: 1,
       knownPathCostAtRunStart: 4,
@@ -15777,6 +16293,383 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
       turnsFromRemoteThreatCreatedToContest: 2,
       turnsFromRemoteThreatCreatedToScoreOrSteal: 2.5,
     });
+  });
+
+  it("summarizes Runner economy decision windows, skips, and fix gates", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("runner", 1, "play_event", undefined, 1, {
+            runnerEconomyDecisionWindow: true,
+            runnerLegalEconomyActions: 1,
+            runnerLegalBurstEconomyActions: 1,
+            runnerEconomyTaken: true,
+            runnerEconomyActionTaken: true,
+            runnerLowCreditDecisionWindow: true,
+            runnerCreditStarvedWithLegalEconomy: true,
+            runnerCreditStarvedEconomyTaken: true,
+            runnerEconomyTakenToReachRunReserve: true,
+            runnerEconomyChosenAsReserveSetup: true,
+            runnerEconomyChoicePlausible: true,
+          }),
+          progressionAction("runner", 2, "start_run", "rd", 1, {
+            runnerEconomyDecisionWindow: true,
+            runnerLegalEconomyActions: 1,
+            runnerEconomySkipped: true,
+            runnerEconomySkippedWhileLowCredits: true,
+            runnerEconomySkippedWhileKnownUnaffordablePath: true,
+            runnerEconomySkippedForRun: true,
+            runnerLowCreditDecisionWindow: true,
+            runnerCreditStarvedWithLegalEconomy: true,
+            runnerCreditStarvedEconomySkipped: true,
+            runnerKnownUnaffordablePathWithLegalEconomy: true,
+            runnerEconomySkippedThenUnaffordableRun: true,
+            runnerRunStartedBelowKnownPathCost: true,
+            runnerRunStartedAfterSkippingEconomy: true,
+            runnerEconomyFixGateEligibleStarvedSkip: true,
+          }),
+          progressionAction("runner", 3, "gain_credit", undefined, 1, {
+            runnerEconomyDecisionWindow: true,
+            runnerLegalEconomyActions: 1,
+            runnerLegalActionEconomyActions: 1,
+            runnerEconomyTaken: true,
+            runnerEconomyActionTaken: true,
+            runnerEconomyChosenWhileRich: true,
+            runnerEconomyChosenOverFreshCentralPressure: true,
+            runnerEconomyChosenWhilePressureReady: true,
+            runnerEconomyChoiceSuspicious: true,
+            runnerEconomyFixGateSuspiciousRichEconomy: true,
+            runnerEconomyFixGateSuspiciousEconomyOverPressure: true,
+          }),
+        ],
+        "runner-economy-window-fixture",
+      ),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerEconomyDecisionWindows: 3,
+      runnerLegalEconomyActions: 3,
+      runnerLegalBurstEconomyActions: 1,
+      runnerLegalActionEconomyActions: 1,
+      runnerEconomyTaken: 2,
+      runnerEconomySkipped: 1,
+      runnerEconomySkippedWhileLowCredits: 1,
+      runnerEconomySkippedWhileKnownUnaffordablePath: 1,
+      runnerCreditStarvedWithLegalEconomy: 2,
+      runnerCreditStarvedEconomyTaken: 1,
+      runnerCreditStarvedEconomySkipped: 1,
+      runnerKnownUnaffordablePathWithLegalEconomy: 1,
+      runnerEconomyTakenToReachRunReserve: 1,
+      runnerEconomySkippedThenUnaffordableRun: 1,
+      runnerRunStartedBelowKnownPathCost: 1,
+      runnerRunStartedAfterSkippingEconomy: 1,
+      runnerEconomyChosenOverFreshCentralPressure: 1,
+      runnerEconomyChosenWhileRich: 1,
+      runnerEconomyChoicePlausible: 1,
+      runnerEconomyChoiceSuspicious: 1,
+      runnerEconomyFixGateEligibleStarvedSkip: 1,
+      runnerEconomyFixGateSuspiciousRichEconomy: 1,
+      runnerEconomyFixGateSuspiciousEconomyOverPressure: 1,
+    });
+  });
+
+  it("keeps finite, debt, hand-size, memory, and search recovery diagnostics separated", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction(
+            "runner",
+            1,
+            "activated_card_ability",
+            undefined,
+            1,
+            {
+              runnerEconomyDecisionWindow: true,
+              runnerLegalEconomyActions: 1,
+              runnerLegalFinitePoolEconomyActions: 1,
+              runnerEconomyTaken: true,
+              runnerFinitePoolEconomySeen: true,
+              runnerFinitePoolEconomyTaken: true,
+            },
+          ),
+          progressionAction("runner", 2, "install_card", undefined, 1, {
+            runnerEconomyDecisionWindow: true,
+            runnerLegalEconomyActions: 1,
+            runnerLegalLoanDebtEconomyActions: 1,
+            runnerLegalResourceEconomyActions: 1,
+            runnerEconomyTaken: true,
+            runnerDebtEconomySeen: true,
+            runnerDebtEconomyTaken: true,
+            runnerDebtEconomyTakenWithoutNeed: true,
+            runnerEconomyWithDownsideSeen: true,
+            runnerEconomyWithDownsideTaken: true,
+            runnerDelayedPenaltyEconomyTaken: true,
+            runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed: true,
+          }),
+          progressionAction("runner", 3, "install_card", undefined, 1, {
+            runnerHandSizeBottleneckDecisionWindow: true,
+            runnerLegalHandSizeActions: 1,
+            runnerHandSizeSupportTaken: true,
+            runnerHandSizeFactUsedForDiagnosis: true,
+            runnerEconomySetupEvidence: [
+              "mram_militech_classified_as_hand_size:true",
+            ],
+          }),
+          progressionAction("runner", 4, "end_turn", undefined, 1, {
+            runnerMemoryBottleneckDecisionWindow: true,
+            runnerLegalMemoryHardwareActions: 1,
+            runnerMemorySupportSkippedWhileGripHasPrograms: true,
+            runnerSetupFixGateEligibleMemorySkip: true,
+          }),
+          progressionAction("runner", 5, "play_event", undefined, 2, {
+            runnerLegalSearchActions: 1,
+            runnerSearchSkippedWhileMissingBreakerCoverage: true,
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+          }),
+          progressionAction("runner", 6, "play_event", undefined, 2, {
+            runnerLegalRecoveryActions: 1,
+            runnerRecoveryTaken: true,
+            runnerRecoveryTakenForBreakerCoverage: true,
+          }),
+          progressionAction("runner", 7, "draw_card", undefined, 2),
+          progressionAction("runner", 8, "end_turn", undefined, 2),
+        ],
+        "runner-setup-classification-fixture",
+      ),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerLegalFinitePoolEconomyActions: 1,
+      runnerFinitePoolEconomySeen: 1,
+      runnerFinitePoolEconomyTaken: 1,
+      runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted: 0,
+      runnerLegalLoanDebtEconomyActions: 1,
+      runnerDebtEconomySeen: 1,
+      runnerDebtEconomyTaken: 1,
+      runnerDebtEconomyTakenWithoutNeed: 1,
+      runnerEconomyWithDownsideSeen: 1,
+      runnerDelayedPenaltyEconomyTaken: 1,
+      runnerMemoryBottleneckDecisionWindows: 1,
+      runnerHandSizeBottleneckDecisionWindows: 1,
+      runnerLegalMemoryHardwareActions: 1,
+      runnerLegalHandSizeActions: 1,
+      runnerMemoryAttributionWindows: 1,
+      runnerHandSizeAttributionWindows: 1,
+      runnerMemoryAttributionLegalSupport: 1,
+      runnerHandSizeAttributionLegalSupport: 1,
+      runnerMemoryAttributionSupportTaken: 0,
+      runnerHandSizeAttributionSupportTaken: 1,
+      runnerMemoryHardwareTaken: 0,
+      runnerHandSizeSupportTaken: 1,
+      runnerHandSizeFactUsedForDiagnosis: 1,
+      runnerMemorySupportSkippedWhileGripHasPrograms: 1,
+      runnerLegalSearchActions: 1,
+      runnerLegalRecoveryActions: 1,
+      runnerSearchSkippedWhileMissingBreakerCoverage: 1,
+      runnerRecoveryTaken: 1,
+      runnerRecoveryTakenForBreakerCoverage: 1,
+      runnerSearchOrRecoveryWindowWithNoInstallFollowup: 1,
+      runnerSetupFixGateEligibleMemorySkip: 1,
+      runnerSetupFixGateEligibleSearchRecoverySkip: 1,
+    });
+  });
+
+  it("keeps Runner economy setup diagnostic evidence side-safe and hidden-state invariant", () => {
+    const visibleActions = [
+      progressionAction("runner", 1, "play_event", undefined, 1, {
+        runnerEconomyDecisionWindow: true,
+        runnerLegalEconomyActions: 1,
+        runnerEconomyTaken: true,
+        runnerEconomySetupClassifications: ["runner_economy_taken"],
+        runnerEconomySetupEvidence: [
+          "runner_credits:2",
+          "runner_reserve_target:5",
+          "legal_economy_actions:1",
+          "known_unaffordable_path:false",
+        ],
+      }),
+    ];
+    const first = summarizeMatchProgressionMetrics([
+      progressionSummary(visibleActions, "runner-economy-visible-a"),
+    ]);
+    const second = summarizeMatchProgressionMetrics([
+      {
+        ...progressionSummary(visibleActions, "runner-economy-visible-b"),
+        finalStateHash: "fnv1a:different-hidden-state",
+      },
+    ]);
+
+    expect(first.runnerEconomyDecisionWindows).toBe(
+      second.runnerEconomyDecisionWindows,
+    );
+    expect(first.runnerEconomyTaken).toBe(second.runnerEconomyTaken);
+    expect(JSON.stringify({ visibleActions })).not.toMatch(
+      /cardInstances|privatePayload|fullGameState|corp_hq|corp_rd|runner_stack|runner_grip/i,
+    );
+  });
+
+  it("attributes Runner setup fix gates across starved economy, search recovery, and memory", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("runner", 1, "start_run", "rd", 1, {
+            runnerEconomyFixGateEligibleStarvedSkip: true,
+            runnerEconomySkippedForRun: true,
+            runStartedAgainstKnownUnaffordablePath: true,
+            lowValueUnaffordableRun: true,
+          }),
+          progressionAction("runner", 2, "draw_card", undefined, 1, {
+            runnerDrawAction: true,
+          }),
+          progressionAction("runner", 3, "start_run", "remote_1", 2, {
+            runnerEconomyFixGateEligibleStarvedSkip: true,
+            runnerEconomySkippedForRemoteContest: true,
+            runnerRemoteRunAgainstAdvancedRemote: true,
+          }),
+          progressionAction("runner", 4, "draw_card", undefined, 2, {
+            runnerEconomyFixGateEligibleStarvedSkip: true,
+            runnerEconomySkippedForDraw: true,
+            runnerDrawAction: true,
+          }),
+          progressionAction("runner", 5, "gain_credit", undefined, 2, {
+            runnerEconomyTaken: true,
+            runnerCreditsAfter: 5,
+            runnerReserveTarget: 5,
+          }),
+          progressionAction("runner", 6, "draw_card", undefined, 3, {
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+            runnerLegalSearchActions: 1,
+            runnerSearchSkippedWhileMissingBreakerCoverage: true,
+            runnerSetupMissingCoverageTypes: ["wall"],
+            runnerDrawAction: true,
+          }),
+          progressionAction("runner", 7, "end_turn", undefined, 3),
+          progressionAction("runner", 8, "install_card", undefined, 4, {
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+            runnerLegalRecoveryActions: 1,
+            runnerRecoverySkippedWhileMissingBreakerCoverage: true,
+            runnerSetupMissingCoverageTypes: ["code_gate", "sentry"],
+            runnerRigInstallAction: true,
+            runnerCoverageImproved: true,
+          }),
+          progressionAction("runner", 9, "install_card", undefined, 4, {
+            runnerSetupFixGateEligibleMemorySkip: true,
+            runnerLegalMemoryHardwareActions: 1,
+            runnerMemorySupportSkippedWhileGripHasPrograms: true,
+            runnerRigInstallAction: true,
+          }),
+          progressionAction("runner", 10, "start_run", "hq", 5, {
+            runnerSetupFixGateEligibleSearchRecoverySkip: true,
+          }),
+          progressionAction("runner", 11, "draw_card", undefined, 5, {
+            runnerHandSizeSupportSkippedWhileDamageRiskVisible: true,
+            runnerDiscardChoice: true,
+          }),
+        ],
+        "runner-setup-attribution-fixture",
+      ),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerStarvedEconomySkipWindows: 3,
+      runnerStarvedEconomySkipChosenRun: 2,
+      runnerStarvedEconomySkipChosenDraw: 1,
+      runnerStarvedEconomySkipThenUnaffordableRun: 1,
+      runnerStarvedEconomySkipThenFailedRun: 1,
+      runnerStarvedEconomySkipThenEconomyNextDecision: 1,
+      runnerStarvedEconomySkipThenReserveRecovered: 3,
+      runnerStarvedEconomySkipPlausibleRemoteContest: 1,
+      runnerStarvedEconomySkipSuspiciousLowValueRun: 1,
+      runnerStarvedEconomySkipSuspiciousDraw: 0,
+      runnerEconomyFixGateAttributionEligible: 3,
+      runnerEconomyFixGateAttributionBlocked: 1,
+      runnerEconomyFixGateAttributionSuspicious: 1,
+      runnerSearchRecoveryFixGateWindows: 3,
+      runnerSearchRecoveryFixGateLegalSearch: 1,
+      runnerSearchRecoveryFixGateLegalRecovery: 1,
+      runnerSearchRecoveryFixGateMissingWall: 1,
+      runnerSearchRecoveryFixGateMissingCodeGate: 1,
+      runnerSearchRecoveryFixGateMissingSentry: 1,
+      runnerSearchRecoveryAttributionWindows: 3,
+      runnerSearchRecoveryAttributionLegalSearch: 1,
+      runnerSearchRecoveryAttributionLegalRecovery: 1,
+      runnerSearchRecoveryAttributionMissingWall: 1,
+      runnerSearchRecoveryAttributionMissingCodeGate: 1,
+      runnerSearchRecoveryAttributionMissingSentry: 1,
+      runnerSearchRecoveryAttributionSkipped: 3,
+      runnerSearchRecoverySkipChosenDraw: 1,
+      runnerSearchRecoverySkipChosenInstall: 1,
+      runnerSearchRecoverySkipChosenRun: 1,
+      runnerSearchRecoverySkipThenCoverageResolved: 1,
+      runnerSearchRecoverySkipThenCoverageStillMissing: 2,
+      runnerSearchRecoverySkipThenActionLimit: 1,
+      runnerSearchRecoverySkipSuspiciousCoverageStillMissing: 1,
+      runnerSearchRecoveryFixGateAttributionEligible: 3,
+      runnerSearchRecoveryFixGateAttributionSuspicious: 1,
+      runnerMemoryFixGateWindows: 1,
+      runnerMemoryFixGateLegalSupport: 1,
+      runnerMemoryFixGateSkipped: 1,
+      runnerMemoryAttributionSkipped: 1,
+      runnerMemorySkipChosenInstallNonMemory: 1,
+      runnerMemorySkipThenProgramInstallBlocked: 1,
+      runnerMemorySkipThenCoverageStillMissing: 1,
+      runnerMemorySkipSuspiciousRigBlocked: 1,
+      runnerMemorySkipSuspiciousCoverageStillMissing: 1,
+      runnerMemoryFixGateAttributionEligible: 1,
+      runnerMemoryFixGateAttributionSuspicious: 1,
+      runnerHandSizeFixGateWindows: 1,
+      runnerHandSizeFixGateLegalSupport: 1,
+      runnerHandSizeFixGateSkipped: 1,
+      runnerHandSizeAttributionSkipped: 1,
+      runnerHandSizeSkipThenDamageRiskWindow: 1,
+      runnerSetupAttributionByKindStarvedEconomy: 3,
+      runnerSetupAttributionByKindSearchRecovery: 3,
+      runnerSetupAttributionByKindMemory: 1,
+      runnerSetupAttributionByKindHandSize: 1,
+      runnerSetupAttributionSuspicious: 3,
+      runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis: 1,
+    });
+  });
+
+  it("keeps Runner setup attribution diagnostics hidden-state invariant and redaction-safe", () => {
+    const visibleActions = [
+      progressionAction("runner", 1, "draw_card", undefined, 1, {
+        runnerSetupFixGateEligibleSearchRecoverySkip: true,
+        runnerLegalSearchActions: 1,
+        runnerSearchSkippedWhileMissingBreakerCoverage: true,
+        runnerSetupMissingCoverageTypes: ["universal", "special"],
+        runnerSetupAttributionEvidence: [
+          "chosen_action_type:draw_card",
+          "chosen_reason_family:draw",
+          "missing_coverage_types:universal,special",
+        ],
+      }),
+    ];
+    const first = summarizeMatchProgressionMetrics([
+      progressionSummary(visibleActions, "runner-setup-visible-a"),
+    ]);
+    const second = summarizeMatchProgressionMetrics([
+      {
+        ...progressionSummary(visibleActions, "runner-setup-visible-b"),
+        finalStateHash: "fnv1a:different-hidden-state",
+      },
+    ]);
+
+    expect(first.runnerSearchRecoveryFixGateMissingUniversal).toBe(
+      second.runnerSearchRecoveryFixGateMissingUniversal,
+    );
+    expect(first.runnerSearchRecoveryFixGateMissingSpecial).toBe(
+      second.runnerSearchRecoveryFixGateMissingSpecial,
+    );
+    expect(first.runnerSearchRecoveryAttributionMissingUniversal).toBe(
+      second.runnerSearchRecoveryAttributionMissingUniversal,
+    );
+    expect(first.runnerSearchRecoveryAttributionMissingSpecial).toBe(
+      second.runnerSearchRecoveryAttributionMissingSpecial,
+    );
+    expect(JSON.stringify({ visibleActions })).not.toMatch(
+      /cardInstances|privatePayload|fullGameState|corp_hq|corp_rd|runner_stack|runner_grip/i,
+    );
   });
 
   it("summarizes first-class breaker ontology metrics from action evidence", () => {
@@ -16258,6 +17151,273 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.corpAdvanceToScoreLineCompressedWithin3).toBe(1);
   });
 
+  it("summarizes corp score-terminal conversion skips and followups", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "install_card", "remote_1", 1, {
+            installPlacement: "ice",
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowScoreLegal: true,
+            corpScoreTerminalWindowProtectedRemoteReady: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForProtection: true,
+            corpScoreConversionFixGateEligible: true,
+            corpScoreConversionFixGateSuspiciousProtectionLoop: true,
+          }),
+          progressionAction("corp", 2, "gain_credit", undefined, 1, {
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowScoreLegal: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForEconomy: true,
+            evidence: ["corp_protection_loop_after_remote_safe:true"],
+            corpScoreConversionFixGateEligible: true,
+            corpScoreConversionFixGateSuspiciousEconomyLoop: true,
+          }),
+          progressionAction("runner", 3, "steal_agenda", "remote_1", 1),
+        ],
+        "score-terminal-protection-loop-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "draw_card", undefined, 2, {
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowAdvanceToScoreLegal: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForDraw: true,
+            corpScoreConversionFixGateEligible: true,
+            corpScoreConversionFixGateSuspiciousDraw: true,
+          }),
+          progressionAction("corp", 2, "advance_card", "remote_1", 2, {
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowAdvanceToScoreLegal: true,
+            corpScoreTerminalAdvanceTaken: true,
+          }),
+        ],
+        "score-terminal-score-next-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "install_card", "new_remote", 3, {
+            installPlacement: "root",
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowAgendaInstallLegal: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForRemotePortfolio: true,
+            corpScoreConversionFixGateBlockedByCheapContest: true,
+          }),
+        ],
+        "score-terminal-cheap-contest-blocked-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpScoreTerminalWindow).toBe(5);
+    expect(metrics.corpScoreTerminalAdvanceTaken).toBe(1);
+    expect(metrics.corpScoreTerminalSkipped).toBe(4);
+    expect(metrics.corpScoreTerminalSkippedForProtection).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedForEconomy).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedForDraw).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedForRemotePortfolio).toBe(1);
+    expect(metrics.corpScoreConversionFixGateEligible).toBe(3);
+    expect(metrics.corpScoreConversionFixGateBlockedByCheapContest).toBe(1);
+    expect(metrics.corpScoreConversionFixGateSuspiciousProtectionLoop).toBe(1);
+    expect(metrics.corpScoreConversionFixGateSuspiciousEconomyLoop).toBe(1);
+    expect(metrics.corpScoreConversionFixGateSuspiciousDraw).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedThenAgendaStolen).toBe(2);
+    expect(metrics.corpScoreTerminalSkippedThenProtectionLoop).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedThenEconomyLoop).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedThenRemoteStillSafe).toBe(1);
+    expect(metrics.corpScoreTerminalSkippedThenScoreNextDecision).toBe(1);
+  });
+
+  it("summarizes corp economy-before-score loop attribution", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "gain_credit", undefined, 1, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithInstalledAgenda: true,
+            corpEconomyBeforeScoreWindowWithAdvancedAgenda: true,
+            corpEconomyBeforeScoreWindowWithReadyRemote: true,
+            corpEconomyBeforeScoreWindowRemoteSafe: true,
+            corpEconomyBeforeScoreWindowCreditsShort: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenAsNecessaryCredits: true,
+            corpEconomyBeforeScorePlausibleCreditsNeeded: true,
+            corpEconomyBeforeScoreFixGateBlockedByCredits: true,
+          }),
+          progressionAction("corp", 2, "advance_card", "remote_1", 1, {
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalAdvanceTaken: true,
+          }),
+        ],
+        "economy-before-score-necessary-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "gain_credit", undefined, 2, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithScoreLegalNext: true,
+            corpEconomyBeforeScoreWindowCreditsAlreadyEnough: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenDespiteCreditsEnough: true,
+            corpEconomyBeforeScoreTakenOverScoreLegal: true,
+            corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough: true,
+            corpEconomyBeforeScoreFixGateEligible: true,
+            corpEconomyBeforeScoreFixGateSuspicious: true,
+          }),
+          progressionAction("corp", 2, "gain_credit", undefined, 2, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithScoreLegalNext: true,
+            corpEconomyBeforeScoreWindowCreditsAlreadyEnough: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenDespiteCreditsEnough: true,
+            corpEconomyBeforeScoreFixGateEligible: true,
+            corpEconomyBeforeScoreFixGateSuspicious: true,
+          }),
+          progressionAction("runner", 3, "steal_agenda", "remote_1", 2),
+        ],
+        "economy-before-score-repeat-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "install_card", "remote_1", 3, {
+            installPlacement: "root",
+            targetCardType: "agenda",
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote: true,
+            corpEconomyBeforeScoreWindowWithReadyRemote: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote: true,
+            corpEconomyBeforeScoreTakenOverHqAgendaExit: true,
+            corpEconomyBeforeScoreFixGateBlockedByCheapContest: true,
+          }),
+        ],
+        "economy-before-score-cheap-contest-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpEconomyBeforeScoreWindow).toBe(4);
+    expect(metrics.corpEconomyBeforeScoreWindowNecessary).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreTaken).toBe(4);
+    expect(metrics.corpEconomyBeforeScoreTakenAsNecessaryCredits).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreTakenDespiteCreditsEnough).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreTakenOverScoreLegal).toBe(1);
+    expect(
+      metrics.corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote,
+    ).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreConvertedToAdvanceNextDecision).toBe(
+      1,
+    );
+    expect(metrics.corpEconomyBeforeScoreConvertedWithin3CorpActions).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreRepeatedEconomyNextDecision).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreRepeatedEconomyWithin3).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreThenRunnerSteal).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreSuspiciousRepeatedEconomy).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreSuspiciousRunnerStealFollowup).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreFixGateBlockedByCredits).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreFixGateBlockedByCheapContest).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreFixGateSuspicious).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreFixGateSuspiciousRepeatedEconomy).toBe(
+      1,
+    );
+    expect(metrics.corpRepeatedEconomyBeforeScoreWindows).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreCreditsAlreadyEnough).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreScoreLegal).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreThenRunnerSteal).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreSuspicious).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionRepeatedEconomy).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionRunnerSteal).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreNoConversionSuspicious).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreNoConversionPlausible).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreCreditsEnoughWindows).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreCreditsEnoughTaken).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreCreditsEnoughScoreLegal).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreCreditsEnoughSuspicious).toBe(2);
+  });
+
+  it("separates corp economy-before-score attribution blockers", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "gain_credit", undefined, 1, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithReadyRemote: true,
+            corpEconomyBeforeScoreWindowCreditsShort: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenAsNecessaryCredits: true,
+            corpEconomyBeforeScoreFixGateBlockedByCredits: true,
+          }),
+          progressionAction("corp", 2, "gain_credit", undefined, 1, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithReadyRemote: true,
+            corpEconomyBeforeScoreWindowCreditsShort: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenAsNecessaryCredits: true,
+            corpEconomyBeforeScoreFixGateBlockedByCredits: true,
+          }),
+        ],
+        "economy-before-score-still-short-repeat-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "gain_credit", undefined, 1, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithReadyRemote: true,
+            corpEconomyBeforeScoreWindowCreditsAlreadyEnough: true,
+            corpEconomyBeforeScoreWindowRemoteContestHigh: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenDespiteCreditsEnough: true,
+            corpEconomyBeforeScoreFixGateBlockedByRunnerContest: true,
+          }),
+        ],
+        "economy-before-score-runner-contest-blocked-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "gain_credit", undefined, 1, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowCreditsAlreadyEnough: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenDespiteCreditsEnough: true,
+            corpEconomyBeforeScoreFixGateBlockedBySafety: true,
+          }),
+        ],
+        "economy-before-score-safety-blocked-fixture",
+      ),
+      progressionSummary(
+        [
+          progressionAction("corp", 1, "gain_credit", undefined, 1, {
+            corpEconomyBeforeScoreDiagnosticWindow: true,
+            corpEconomyBeforeScoreWindowWithReadyRemote: true,
+            corpEconomyBeforeScoreWindowWithScoreLegalNext: true,
+            corpEconomyBeforeScoreWindowCreditsAlreadyEnough: true,
+            corpEconomyBeforeScoreTaken: true,
+            corpEconomyBeforeScoreTakenDespiteCreditsEnough: true,
+            corpEconomyBeforeScoreFixGateEligible: true,
+            corpEconomyBeforeScoreFixGateSuspicious: true,
+          }),
+          progressionAction("corp", 2, "draw_card", undefined, 1),
+        ],
+        "economy-before-score-plan-drift-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpRepeatedEconomyBeforeScoreWindows).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreCreditsStillShort).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScorePlausible).toBe(1);
+    expect(metrics.corpRepeatedEconomyBeforeScoreSuspicious).toBe(0);
+    expect(metrics.corpEconomyBeforeScoreNoConversionCreditsStillShort).toBe(2);
+    expect(metrics.corpEconomyBeforeScoreNoConversionRunnerContestHigh).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionRemoteUnsafe).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionSafetyBlocked).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionPlanDrift).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionRepeatedEconomy).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionDrawLoop).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionSuspicious).toBe(1);
+    expect(metrics.corpEconomyBeforeScoreNoConversionPlausible).toBe(4);
+  });
+
   it("summarizes scored-agenda action metrics", () => {
     const metrics = summarizeMatchProgressionMetrics([
       progressionSummary(
@@ -16669,6 +17829,347 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(metrics.runnerSurvivalCounterContextAvailable).toBe(1);
     expect(metrics.runnerFlatlinePreventionVisibleAtPayoffWindow).toBe(1);
     expect(metrics.runnerSurvivalCounterContextSuppressedPunishValue).toBe(1);
+  });
+
+  it("summarizes tag/punish unknown-skip attribution and fix-gate buckets", () => {
+    const unknownSkip = (
+      actionType: LegalAction["type"],
+      attribution: NonNullable<
+        AiSimulationSummary["actionSequence"][number]["corpVisibleTagPunishUnknownSkipAttribution"]
+      >,
+      plausibility: NonNullable<
+        AiSimulationSummary["actionSequence"][number]["corpVisibleTagPunishUnknownSkipPlausibility"]
+      >,
+      family: NonNullable<
+        AiSimulationSummary["actionSequence"][number]["corpVisibleTagPunishUnknownSkipChosenFamily"]
+      >,
+      extra: Partial<AiSimulationSummary["actionSequence"][number]> = {},
+    ) =>
+      progressionAction("corp", 10, actionType, undefined, 3, {
+        runnerTagsBeforeAction: 1,
+        runnerTaggedAtCorpDecision: true,
+        runnerTaggedAtCorpDecisionWithFunnelPayoffKnown: true,
+        corpPunishOpportunity: true,
+        corpPunishKind: "scorched_earth_like",
+        corpPunishSkippedReason: "unknown_higher_priority",
+        corpVisibleTagPunishLegalActions: 1,
+        corpVisibleTagPayoffLegalActionKinds: ["damage"],
+        corpVisibleTagPayoffLegalActionCards: ["onr_v1_302_scorched-earth"],
+        corpVisibleTagDamagePunishLegalActions: true,
+        corpVisibleTagPunishSkipped: true,
+        corpVisibleTagPunishSkippedReason: "unknown_higher_priority",
+        corpVisibleTagPunishUnknownSkipAttribution: attribution,
+        corpVisibleTagPunishUnknownSkipPlausibility: plausibility,
+        corpVisibleTagPunishUnknownSkipChosenFamily: family,
+        corpVisibleTagPunishUnknownSkipChosenActionType: actionType,
+        ...extra,
+      });
+
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          unknownSkip(
+            "gain_credit",
+            "unknown_skip_suspicious_basic_credit",
+            "suspicious",
+            "basic_credit",
+            {
+              corpVisibleTagPunishUnknownSkipFixGateEligible: true,
+              corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal: true,
+            },
+          ),
+          unknownSkip(
+            "end_turn",
+            "unknown_skip_suspicious_end_turn",
+            "suspicious",
+            "end_turn",
+            { corpVisibleTagPunishUnknownSkipFixGateEligible: true },
+          ),
+          unknownSkip(
+            "score_agenda",
+            "unknown_skip_plausible_score_window",
+            "plausible",
+            "score",
+            { corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "score" },
+          ),
+          unknownSkip(
+            "advance_card",
+            "unknown_skip_plausible_advance_to_score",
+            "plausible",
+            "advance",
+            {
+              corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "advance_score",
+            },
+          ),
+          unknownSkip(
+            "rez_ice",
+            "unknown_skip_plausible_hq_or_rnd_safety",
+            "plausible",
+            "rez",
+            { corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "safety" },
+          ),
+          unknownSkip(
+            "play_operation",
+            "unknown_skip_plausible_payoff_unaffordable",
+            "plausible",
+            "operation",
+            {
+              corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "affordability",
+            },
+          ),
+          unknownSkip(
+            "activated_card_ability",
+            "unknown_skip_plausible_payoff_low_impact",
+            "plausible",
+            "ability",
+            {
+              corpVisibleTagPayoffLegalActionKinds: ["run_lock"],
+              corpVisibleTagRunLockPunishLegalActions: true,
+              corpVisibleTagDamagePunishLegalActions: false,
+              corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "low_impact",
+            },
+          ),
+          unknownSkip(
+            "install_card",
+            "unknown_skip_suspicious_low_value_install",
+            "suspicious",
+            "install_asset_or_upgrade",
+            { corpVisibleTagPunishUnknownSkipFixGateEligible: true },
+          ),
+          unknownSkip(
+            "draw_card",
+            "unknown_skip_plausible_survival_countercontext",
+            "plausible",
+            "draw",
+            {
+              corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "safety",
+              runnerDamagePreventionVisibleAtPayoffWindow: true,
+            },
+          ),
+          unknownSkip(
+            "trigger_ability",
+            "unknown_skip_unclassified_missing_evidence",
+            "unclassified",
+            "unknown",
+          ),
+        ],
+        "tag-punish-unknown-skip-attribution-fixture",
+      ),
+    ]);
+
+    expect(metrics.corpVisibleTagPunishSkippedForUnknownHigherPriority).toBe(
+      10,
+    );
+    expect(metrics.corpVisibleTagPunishUnknownSkipPlausible).toBe(6);
+    expect(metrics.corpVisibleTagPunishUnknownSkipSuspicious).toBe(3);
+    expect(metrics.corpVisibleTagPunishUnknownSkipUnclassified).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenBasicCredit).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenEndTurn).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenScore).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenAdvance).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenRez).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenOperation).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenAbility).toBe(1);
+    expect(
+      metrics.corpVisibleTagPunishSkippedUnknownChosenInstallAssetOrUpgrade,
+    ).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenDraw).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownChosenUnknown).toBe(1);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownByReasonCode).toBe(10);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownByChosenActionType).toBe(
+      10,
+    );
+    expect(metrics.corpVisibleTagPunishSkippedUnknownByPayoffCard).toBe(10);
+    expect(metrics.corpVisibleTagPunishSkippedUnknownByPayoffKind).toBe(10);
+    expect(metrics.corpVisibleTagPunishUnknownSkipPayoffDamage).toBe(9);
+    expect(metrics.corpVisibleTagPunishUnknownSkipPayoffRunLock).toBe(1);
+    expect(
+      metrics.corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal,
+    ).toBe(1);
+    expect(metrics.corpVisibleTagPunishUnknownSkipPayoffNonLethal).toBe(9);
+    expect(metrics.corpVisibleTagPunishFixGateEligibleWindow).toBe(3);
+    expect(metrics.corpVisibleTagPunishFixGateSuspiciousSkip).toBe(3);
+    expect(metrics.corpVisibleTagPunishFixGateBlockedByScore).toBe(1);
+    expect(metrics.corpVisibleTagPunishFixGateBlockedByAdvanceScore).toBe(1);
+    expect(metrics.corpVisibleTagPunishFixGateBlockedBySafety).toBe(2);
+    expect(metrics.corpVisibleTagPunishFixGateBlockedByAffordability).toBe(1);
+    expect(metrics.corpVisibleTagPunishFixGateBlockedByLowImpact).toBe(1);
+  });
+
+  it("normalizes visible tag/punish payoff windows by corp decision", () => {
+    const payoffWindow = (
+      actionType: LegalAction["type"],
+      extra: Partial<AiSimulationSummary["actionSequence"][number]>,
+    ) =>
+      progressionAction("corp", 20, actionType, undefined, 5, {
+        runnerTagsBeforeAction: 1,
+        runnerTaggedAtCorpDecision: true,
+        corpVisibleTagPunishLegalActions: 2,
+        corpVisibleTagPayoffLegalActionKinds: ["damage", "economic"],
+        corpVisibleTagPayoffLegalActionCards: [
+          "onr_v1_285_closed-accounts",
+          "onr_v1_302_scorched-earth",
+        ],
+        corpVisibleTagDamagePunishLegalActions: true,
+        corpVisibleTagEconomicPunishLegalActions: true,
+        corpVisibleTagPunishDecisionWindow: true,
+        corpVisibleTagPunishDecisionWindowWithMultiplePayoffs: true,
+        ...extra,
+      });
+
+    const visibleTaken = payoffWindow("play_operation", {
+      corpVisibleTagPunishTaken: true,
+      corpVisibleTagPunishDecisionWindowTaken: true,
+      corpVisibleTagPunishAlternativePayoffsNotChosen: 1,
+      corpVisibleTagPunishChosenPayoffAmongAlternatives: true,
+      corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff: true,
+      corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken: true,
+      corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization: true,
+      corpVisibleTagPunishOperationChoiceAmongPayoffs: true,
+      corpVisibleTagPunishChosenDamageOverEconomic: true,
+    });
+    const lethalMissed = payoffWindow("play_operation", {
+      corpVisibleTagPunishTaken: true,
+      corpVisibleTagPunishDecisionWindowTaken: true,
+      corpVisibleTagPunishAlternativePayoffsNotChosen: 1,
+      corpVisibleTagPunishChosenPayoffAmongAlternatives: true,
+      corpVisibleTagPunishOperationChoiceAmongPayoffs: true,
+      corpVisibleTagPunishChosenEconomicOverDamage: true,
+      corpVisibleTagPunishChosenNonLethalOverLethal: true,
+      corpVisibleTagPunishChosenLowerImpactOverHigherImpact: true,
+      corpVisibleTagPunishPotentialPayoffOrderingIssue: true,
+      corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed: true,
+      corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage: true,
+    });
+    const basicCreditSkip = payoffWindow("gain_credit", {
+      corpVisibleTagPunishLegalActions: 1,
+      corpVisibleTagPayoffLegalActionKinds: ["damage"],
+      corpVisibleTagPunishDecisionWindowWithMultiplePayoffs: false,
+      corpVisibleTagPunishSkipped: true,
+      corpVisibleTagPunishSkippedReason: "unknown_higher_priority",
+      corpVisibleTagPunishDecisionWindowSkipped: true,
+      corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen: true,
+      corpVisibleTagPunishUnknownSkipAttribution:
+        "unknown_skip_suspicious_basic_credit",
+      corpVisibleTagPunishUnknownSkipPlausibility: "suspicious",
+      corpVisibleTagPunishUnknownSkipChosenFamily: "basic_credit",
+      corpVisibleTagPunishUnknownSkipFixGateEligible: true,
+      corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization: true,
+      corpVisibleTagPunishFixGateEligibleWindowNormalized: true,
+      corpVisibleTagPunishFixGateSuspiciousSkipNormalized: true,
+    });
+    const endTurnSkip = payoffWindow("end_turn", {
+      corpVisibleTagPunishLegalActions: 1,
+      corpVisibleTagPayoffLegalActionKinds: ["damage"],
+      corpVisibleTagPunishDecisionWindowWithMultiplePayoffs: false,
+      corpVisibleTagPunishSkipped: true,
+      corpVisibleTagPunishSkippedReason: "unknown_higher_priority",
+      corpVisibleTagPunishDecisionWindowSkipped: true,
+      corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen: true,
+      corpVisibleTagPunishUnknownSkipAttribution:
+        "unknown_skip_suspicious_end_turn",
+      corpVisibleTagPunishUnknownSkipPlausibility: "suspicious",
+      corpVisibleTagPunishUnknownSkipChosenFamily: "end_turn",
+      corpVisibleTagPunishUnknownSkipFixGateEligible: true,
+      corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization: true,
+      corpVisibleTagPunishFixGateEligibleWindowNormalized: true,
+      corpVisibleTagPunishFixGateSuspiciousSkipNormalized: true,
+    });
+    const scoreSkip = payoffWindow("score_agenda", {
+      corpVisibleTagPunishLegalActions: 1,
+      corpVisibleTagPayoffLegalActionKinds: ["damage"],
+      corpVisibleTagPunishDecisionWindowWithMultiplePayoffs: false,
+      corpVisibleTagPunishSkipped: true,
+      corpVisibleTagPunishSkippedReason: "unknown_higher_priority",
+      corpVisibleTagPunishDecisionWindowSkipped: true,
+      corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen: true,
+      corpVisibleTagPunishUnknownSkipAttribution:
+        "unknown_skip_plausible_score_window",
+      corpVisibleTagPunishUnknownSkipPlausibility: "plausible",
+      corpVisibleTagPunishUnknownSkipChosenFamily: "score",
+      corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "score",
+      corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization: true,
+    });
+    const unaffordableSkip = payoffWindow("play_operation", {
+      corpVisibleTagPunishLegalActions: 1,
+      corpVisibleTagPayoffLegalActionKinds: ["damage"],
+      corpVisibleTagPunishDecisionWindowWithMultiplePayoffs: false,
+      corpVisibleTagPunishSkipped: true,
+      corpVisibleTagPunishSkippedReason: "unknown_higher_priority",
+      corpVisibleTagPunishDecisionWindowSkipped: true,
+      corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen: true,
+      corpVisibleTagPunishUnknownSkipAttribution:
+        "unknown_skip_plausible_payoff_unaffordable",
+      corpVisibleTagPunishUnknownSkipPlausibility: "plausible",
+      corpVisibleTagPunishUnknownSkipChosenFamily: "operation",
+      corpVisibleTagPunishUnknownSkipFixGateBlockedBy: "affordability",
+      corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization: true,
+    });
+
+    const first = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          visibleTaken,
+          lethalMissed,
+          basicCreditSkip,
+          endTurnSkip,
+          scoreSkip,
+          unaffordableSkip,
+        ],
+        "tag-punish-window-normalization-a",
+      ),
+    ]);
+    const second = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [visibleTaken, lethalMissed].map((entry) => ({
+          ...entry,
+          evidence: ["hidden_runner_zone_variant_not_used"],
+        })),
+        "tag-punish-window-normalization-b",
+      ),
+    ]);
+
+    expect(first.corpVisibleTagPunishDecisionWindows).toBe(6);
+    expect(first.corpVisibleTagPunishDecisionWindowsTaken).toBe(2);
+    expect(first.corpVisibleTagPunishDecisionWindowsSkipped).toBe(4);
+    expect(first.corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs).toBe(
+      2,
+    );
+    expect(first.corpVisibleTagPunishAlternativePayoffsNotChosen).toBe(2);
+    expect(first.corpVisibleTagPunishChosenPayoffAmongAlternatives).toBe(2);
+    expect(first.corpVisibleTagPunishSkippedForUnknownHigherPriority).toBe(4);
+    expect(
+      first.corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff,
+    ).toBe(1);
+    expect(
+      first.corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization,
+    ).toBe(4);
+    expect(first.corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen).toBe(4);
+    expect(
+      first.corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization,
+    ).toBe(1);
+    expect(first.corpVisibleTagPunishOperationChoiceAmongPayoffs).toBe(2);
+    expect(first.corpVisibleTagPunishChosenDamageOverEconomic).toBe(1);
+    expect(first.corpVisibleTagPunishChosenEconomicOverDamage).toBe(1);
+    expect(first.corpVisibleTagPunishChosenNonLethalOverLethal).toBe(1);
+    expect(first.corpVisibleTagPunishChosenLowerImpactOverHigherImpact).toBe(1);
+    expect(first.corpVisibleTagPunishFixGateEligibleWindowNormalized).toBe(2);
+    expect(first.corpVisibleTagPunishFixGateSuspiciousSkipNormalized).toBe(2);
+    expect(
+      first.corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken,
+    ).toBe(1);
+    expect(first.corpVisibleTagPunishPotentialPayoffOrderingIssue).toBe(1);
+    expect(
+      first.corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed,
+    ).toBe(1);
+    expect(
+      first.corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage,
+    ).toBe(1);
+    expect(second.corpVisibleTagPunishDecisionWindows).toBe(2);
+    expect(second.corpVisibleTagPunishDecisionWindowsTaken).toBe(2);
+    expect(JSON.stringify(visibleTaken)).not.toMatch(
+      /runnerHand|runnerStack|hidden|grip|heap/i,
+    );
   });
 
   it("does not count generic central endgame runs as true runner closeout", () => {
@@ -18379,6 +19880,61 @@ function corpActionPhaseInput(
   let state = createGameAfterSetup({ seed });
   state = apply(state, "corp", (action) => action.type === "mandatory_draw");
   mutate(state);
+  return buildAiDecisionInput(state, "corp", {
+    difficulty: "normal",
+    profileId: "corp-ai-v1.4.0-normal",
+  });
+}
+
+function corpFutureIceOrderingInput(
+  seed: string,
+  hqDefinitionIds: string[],
+  mutate?: (state: GameState) => void,
+): AiDecisionInput {
+  let state = createGameAfterSetup({
+    seed,
+    baseline: CURRENT_RULES_BASELINE,
+    runnerDeck: {
+      id: `ai_corp_future_ice_runner_${seed}`,
+      name: "AI Corp Future ICE Ordering Runner Fixture",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "simple_fracter", quantity: 3 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    },
+    corpDeck: {
+      id: `ai_corp_future_ice_corp_${seed}`,
+      name: "AI Corp Future ICE Ordering Corp Fixture",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "simple_agenda", quantity: 6 },
+        { id: "simple_economy_operation", quantity: 6 },
+        { id: "simple_barrier_ice", quantity: 4 },
+        { id: "simple_code_gate_ice", quantity: 4 },
+        { id: "onr_v1_222_ball-and-chain", quantity: 2 },
+        { id: "onr_v1_224_bolter-cluster", quantity: 1 },
+        { id: "onr_v1_225_canis-major", quantity: 1 },
+        { id: "onr_v1_226_canis-minor", quantity: 1 },
+        { id: "onr_v1_234_data-darts", quantity: 1 },
+        { id: "onr_v1_242_fatal-attractor", quantity: 1 },
+        { id: "onr_v1_274_tutor", quantity: 1 },
+        { id: "onr_v1_276_viral-15", quantity: 1 },
+        { id: "onr_v1_277_virizz", quantity: 1 },
+      ],
+    },
+    agendaPointsToWin: 7,
+  });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  ensureRemoteServer(state, "remote_1");
+  state.corp.credits = 12;
+  state.corp.clicks = 3;
+  for (const definitionId of hqDefinitionIds) {
+    moveCorpCardToHq(state, definitionId);
+  }
+  mutate?.(state);
   return buildAiDecisionInput(state, "corp", {
     difficulty: "normal",
     profileId: "corp-ai-v1.4.0-normal",

@@ -86,6 +86,7 @@ const KNOWN_EFFECT_KINDS = new Set([
   "persistent_survival_modifier",
   "prevention_replacement",
   "survival_payoff",
+  "delayed_penalty",
 ]);
 
 const KNOWN_TIMINGS = new Set([
@@ -106,6 +107,8 @@ const KNOWN_TIMINGS = new Set([
   "damage_window",
   "flatline_replacement",
   "trace_window",
+  "install",
+  "on_leave_play",
 ]);
 
 const KNOWN_SCOPES = new Set([
@@ -125,6 +128,10 @@ const KNOWN_SCOPES = new Set([
   "installed_program",
   "trace",
   "damage",
+  "hardware",
+  "resource",
+  "heap",
+  "stack",
 ]);
 
 const KNOWN_RESOURCES = new Set([
@@ -189,6 +196,13 @@ const KNOWN_CONDITIONS = new Set([
   "requires_trace_attempt",
   "requires_prevention_window",
   "requires_turn_limit_available",
+  "requires_runner_action",
+  "requires_installed_resource",
+  "requires_installed_hardware",
+  "requires_grip_card",
+  "requires_stack_search",
+  "requires_heap_card",
+  "requires_credit_pool",
 ]);
 
 const KNOWN_BREAKER_COVERAGES = new Set([
@@ -605,6 +619,59 @@ function deriveFromImplementation(card, implementationText, hint) {
         resource: "credits",
         amount: amountNear(implementationText, "gain_credits"),
         source: "implementation.effect.gain_credits",
+      });
+    }
+  }
+
+  if (/kind:\s*"trash_cards_from_grip_for_credits"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "economy",
+      timing: "action",
+      scope: "runner",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "gainPerTrashed"),
+      source: "implementation.effect.trash_cards_from_grip_for_credits",
+    });
+    addCondition(facts, {
+      kind: "requires_grip_card",
+      source: "implementation.effect.trash_cards_from_grip_for_credits",
+    });
+    facts.derivationNotes.push(
+      "Grip-trash economy records gain-per-trashed-card only; selected hand cards remain hidden-zone context.",
+    );
+  }
+
+  if (/kind:\s*"pay_credits_or_lose_game"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "delayed_penalty",
+      timing: "on_leave_play",
+      scope: hint?.side ?? "runner",
+      resource: "credits",
+      amount: amountNear(implementationText, "pay_credits_or_lose_game"),
+      source: "implementation.lifecycle.on_leave_play.pay_credits_or_lose_game",
+    });
+    facts.derivationNotes.push(
+      "Pay-or-lose-game debt is recorded as delayed penalty context, not as pure economy value.",
+    );
+  }
+
+  if (
+    /start_of_runner_turn[\s\S]*?kind:\s*"lose_credits"/.test(
+      implementationText,
+    )
+  ) {
+    addEffect(facts, {
+      kind: "delayed_penalty",
+      timing: "start_of_turn",
+      scope: "runner",
+      resource: "credits",
+      amount: amountNear(implementationText, "lose_credits"),
+      source: "implementation.lifecycle.start_of_runner_turn.lose_credits",
+    });
+    if (expectsKind("condition:requires_start_of_turn")) {
+      addCondition(facts, {
+        kind: "requires_start_of_turn",
+        source: "implementation.lifecycle.start_of_runner_turn",
       });
     }
   }
@@ -1040,13 +1107,26 @@ function deriveFromImplementation(card, implementationText, hint) {
     addEffect(facts, {
       kind: "finite_economy_pool",
       timing: isAgenda ? "when_scored" : "action",
-      scope: isAgenda ? "score_area" : "remote",
+      scope: isAgenda
+        ? "score_area"
+        : hint?.side === "runner"
+          ? "runner"
+          : "remote",
       resource: "credits",
       amount: amountNear(implementationText, "add_hosted_credits"),
       source: isAgenda
         ? "implementation.lifecycle.on_score.add_hosted_credits"
         : "implementation.effect.add_hosted_credits",
     });
+    if (hint?.side === "runner") {
+      addCondition(facts, {
+        kind:
+          hint?.cardType === "resource"
+            ? "requires_installed_resource"
+            : "requires_installed_card",
+        source: "implementation.effect.add_hosted_credits",
+      });
+    }
   }
 
   if (
@@ -1755,6 +1835,59 @@ function deriveFromImplementation(card, implementationText, hint) {
         source: "implementation.effect.search_stack_install",
       });
     }
+  }
+
+  if (
+    /kind:\s*"search_stack_to_grip"/.test(implementationText) ||
+    /kind:\s*"search_trash_to_grip"/.test(implementationText) ||
+    /kind:\s*"look_top_stack_take_one_arrange_rest"/.test(implementationText)
+  ) {
+    const searchesTrash = /kind:\s*"search_trash_to_grip"/.test(
+      implementationText,
+    );
+    const looksTopStack = /look_top_stack_take_one_arrange_rest/.test(
+      implementationText,
+    );
+    addEffect(facts, {
+      kind: searchesTrash ? "card_recovery" : "search",
+      timing: "action",
+      scope: searchesTrash ? "heap" : "stack",
+      resource: "cards",
+      amount: looksTopStack
+        ? propertyNumber(implementationText, "count")
+        : undefined,
+      source: searchesTrash
+        ? "implementation.effect.search_trash_to_grip"
+        : looksTopStack
+          ? "implementation.effect.look_top_stack_take_one_arrange_rest"
+          : "implementation.effect.search_stack_to_grip",
+    });
+    if (searchesTrash && expectsKind("effect:search")) {
+      addEffect(facts, {
+        kind: "search",
+        timing: "action",
+        scope: "heap",
+        resource: "cards",
+        source: "implementation.effect.search_trash_to_grip",
+      });
+    }
+    addCondition(facts, {
+      kind: searchesTrash ? "requires_heap_card" : "requires_stack_search",
+      source: searchesTrash
+        ? "implementation.effect.search_trash_to_grip"
+        : "implementation.effect.search_stack_or_top_stack",
+    });
+    if (
+      /kind:\s*"activated"[\s\S]*?kind:\s*"action"/.test(implementationText)
+    ) {
+      addCondition(facts, {
+        kind: "requires_runner_action",
+        source: "implementation.ability.cost.action",
+      });
+    }
+    facts.derivationNotes.push(
+      "Search/recovery is represented by zone and target class only; generated facts do not expose hidden stack, heap or grip identities.",
+    );
   }
 
   if (
@@ -3073,6 +3206,66 @@ function deriveFromImplementation(card, implementationText, hint) {
         });
       }
     }
+  }
+
+  if (/kind:\s*"shell_traders_delayed_install"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "install_discount",
+      timing: "persistent",
+      scope: "runner",
+      resource: "credits",
+      source:
+        "implementation.hiddenReplacementLongtail.shell_traders_delayed_install",
+    });
+    addCondition(facts, {
+      kind: "requires_installed_resource",
+      source:
+        "implementation.hiddenReplacementLongtail.shell_traders_delayed_install",
+    });
+    addCondition(facts, {
+      kind: "requires_grip_card",
+      source:
+        "implementation.hiddenReplacementLongtail.shell_traders_delayed_install",
+    });
+    facts.derivationNotes.push(
+      "The Shell Traders is represented as delayed install-discount context only; generated facts do not create install legality or hidden hand identity.",
+    );
+  }
+
+  if (
+    /kind:\s*"microtech_backup_drive_program_trash_replacement"/.test(
+      implementationText,
+    )
+  ) {
+    addEffect(facts, {
+      kind: "card_recovery",
+      timing: "persistent",
+      scope: "runner",
+      resource: "cards",
+      source:
+        "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement",
+    });
+    addEffect(facts, {
+      kind: "program_trash_prevention",
+      timing: "prevention_window",
+      scope: "installed_program",
+      resource: "cards",
+      source:
+        "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement",
+    });
+    addCondition(facts, {
+      kind: "requires_installed_hardware",
+      source:
+        "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement",
+    });
+    addCondition(facts, {
+      kind: "requires_program_trash",
+      source:
+        "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement",
+    });
+    facts.derivationNotes.push(
+      "Backup-drive recovery is represented without hosted-card identity or hidden stack/grip contents.",
+    );
   }
 
   if (!facts.remoteRole && expectsKind("remoteRole:asset_economy")) {

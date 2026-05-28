@@ -442,6 +442,14 @@
       "rationale": "Wall breaker coverage and break/pump costs are directly represented in CardImplementation icebreaker abilities."
     },
     {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/newsgroup-filter.ts",
+      "expectedDerivableKinds": ["effect:economy", "effect:action_economy"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Installed A:-credit ability is mechanical runner action economy; action availability remains LegalAction/runtime context."
+    },
+    {
       "cardId": "onr_v1_079_bodyweight-synthetic-blood",
       "title": "Bodyweight Synthetic Blood",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
@@ -485,6 +493,98 @@
       "rationale": "HQ run event and additional HQ access count are mechanically derivable; strategic HQ pressure remains overlay/consumer context."
     },
     {
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "title": "Forgotten Backup Chip",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/forgotten-backup-chip.ts",
+      "expectedDerivableKinds": [
+        "effect:card_recovery",
+        "effect:search",
+        "condition:requires_heap_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trash-to-grip program recovery is mechanical heap context; generated facts do not expose hidden heap/grip card identity."
+    },
+    {
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "title": "Gideon's Pawnshop",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/gideons-pawnshop.ts",
+      "expectedDerivableKinds": [
+        "effect:card_recovery",
+        "effect:search",
+        "condition:requires_heap_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Trash-to-grip card recovery is mechanical heap context; generated facts do not expose hidden heap/grip card identity."
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "title": "If You Want It Done Right . . .",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/if-you-want-it-done-right.ts",
+      "expectedDerivableKinds": [
+        "effect:search",
+        "condition:requires_stack_search"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Top-stack selection is mechanical search/topdeck context; generated facts do not expose hidden stack order or card identity."
+    },
+    {
+      "cardId": "onr_v1_095_jack-n-joe",
+      "title": "Jack 'n' Joe",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/jack-n-joe.ts",
+      "expectedDerivableKinds": ["effect:draw"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Burst draw is a mechanical hand-refill/setup fact without hidden stack identity."
+    },
+    {
+      "cardId": "onr_v1_097_livewires-contacts",
+      "title": "Livewire's Contacts",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/livewires-contacts.ts",
+      "expectedDerivableKinds": ["effect:economy"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Burst credit gain is mechanical runner economy; tempo valuation remains consumer/strategy context."
+    },
+    {
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "title": "Mantis, Fixer-at-Large",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/mantis-fixer-at-large.ts",
+      "expectedDerivableKinds": [
+        "effect:search",
+        "condition:requires_stack_search"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Stack-to-grip search is mechanical hidden-zone context; generated facts do not expose stack order or chosen card identity."
+    },
+    {
+      "cardId": "onr_v1_103_organ-donor",
+      "title": "Organ Donor",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/organ-donor.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "condition:requires_grip_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Grip-trash-for-credits is mechanical economy with downside/hidden-zone context; generated facts record gain-per-card, not current hand value."
+    },
+    {
+      "cardId": "onr_v1_108_score",
+      "title": "Score!",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
+      "expectedDerivableKinds": ["effect:economy"],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Burst credit gain is mechanical runner economy; when to spend the click remains strategy context."
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/temple-microcode-outlet.ts",
+      "expectedDerivableKinds": [
+        "effect:search",
+        "condition:requires_stack_search"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Program search-to-grip is mechanical stack context; generated facts do not expose hidden stack order or card identity."
+    },
+    {
       "cardId": "onr_v1_116_total-genetic-retrofit",
       "title": "Total Genetic Retrofit",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/preps/total-genetic-retrofit.ts",
@@ -496,6 +596,19 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Tag removal and next-tag avoidance are represented without asserting the Runner is currently untagged."
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/microtech-backup-drive.ts",
+      "expectedDerivableKinds": [
+        "effect:card_recovery",
+        "effect:program_trash_prevention",
+        "condition:requires_installed_hardware",
+        "condition:requires_program_trash"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Program-trash replacement and top-card recovery are mechanical installed-hardware context without hosted-card identity."
     },
     {
       "cardId": "onr_v1_133_militech-mram-chip",
@@ -531,6 +644,19 @@
       "rationale": "Paid tag avoidance is mechanical prevention-window context, not a current untagged state."
     },
     {
+      "cardId": "onr_v1_154_broker",
+      "title": "Broker",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/broker.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:action_economy",
+        "condition:requires_installed_resource"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Put/take hosted credits is finite resource economy with action and hosted-pool context, not a free repeatable economy fact."
+    },
+    {
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
       "title": "Crash Everett, Inventive Fixer",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/crash-everett-inventive-fixer.ts",
@@ -548,6 +674,55 @@
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Trash-to-avoid-tag is mechanical prevention-window context, not a current untagged state."
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "title": "Loan from Chiba",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/loan-from-chiba.ts",
+      "expectedDerivableKinds": [
+        "effect:economy",
+        "effect:delayed_penalty",
+        "condition:requires_start_of_turn"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Install burst credits are paired with start-turn loss and leave-play pay-or-lose debt context; generated facts must not treat this as pure economy."
+    },
+    {
+      "cardId": "onr_v1_176_the-shell-traders",
+      "title": "The Shell Traders",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts",
+      "expectedDerivableKinds": [
+        "effect:install_discount",
+        "condition:requires_installed_resource",
+        "condition:requires_grip_card"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Delayed no-cost install support is mechanical resource/setup context; actual hand choice and install legality remain engine/hidden-zone context."
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/the-short-circuit.ts",
+      "expectedDerivableKinds": [
+        "effect:search",
+        "condition:requires_runner_action",
+        "condition:requires_stack_search"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Activated program search is mechanical action/stack context; generated facts do not expose hidden stack identity."
+    },
+    {
+      "cardId": "onr_v1_178_short-term-contract",
+      "title": "Short-Term Contract",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/resources/short-term-contract.ts",
+      "expectedDerivableKinds": [
+        "effect:finite_economy_pool",
+        "effect:counter_economy",
+        "effect:action_economy",
+        "condition:requires_installed_resource"
+      ],
+      "expectedManualOverlayNeeded": false,
+      "rationale": "Hosted 12-credit depot and A: take up to 2 credits are finite action economy; remaining pool is board state, not a repeatable generated fact."
     },
     {
       "cardId": "onr_v1_188_ai-chief-financial-officer",

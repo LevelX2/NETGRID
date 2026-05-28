@@ -66,13 +66,13 @@ describe("derived basic facts gate report", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("keeps the 177-card pilot complete", () => {
+  it("keeps the 193-card pilot complete", () => {
     const report = readReport();
-    expect(report.pilotCardCount).toBe(177);
-    expect(report.implementationFoundCount).toBe(177);
-    expect(report.cardsWithDerivedFacts).toBe(177);
-    expect(report.cardsWithManualOntologyOverlap).toBe(89);
-    expect(report.cardsNeedingManualOverlay).toBe(118);
+    expect(report.pilotCardCount).toBe(193);
+    expect(report.implementationFoundCount).toBe(193);
+    expect(report.cardsWithDerivedFacts).toBe(193);
+    expect(report.cardsWithManualOntologyOverlap).toBe(100);
+    expect(report.cardsNeedingManualOverlay).toBe(131);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
       report.cards.every(

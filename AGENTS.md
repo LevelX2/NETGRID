@@ -63,6 +63,12 @@ Eine kompakte Rollenübersicht liegt in `agents/README.md`.
 - Keine offiziellen Artworks, Card Frames, Logos, Card Backs oder externen Kartendatenbank-Abhängigkeiten ohne eigenes Asset-/Rechts-Gate.
 - Agentendateien dürfen diese globalen NETGRID-Prinzipien konkretisieren, aber nicht abschwächen.
 
+## Version-0-Umgebung und Legacy-Stand
+
+NETGRID ist bis auf Weiteres eine private Version-0-/Vor-Produktionsumgebung. Es gibt keinen Produktivbetrieb, keine externen Nutzer, keine stabilen Datenmigrationszusagen und keine Pflicht zur Rückwärtskompatibilität für Code, APIs, Datenformate, lokale Runtime-/SQLite-Daten, Replays, Testdaten, UI-Zustände oder Dokumentationsstände.
+
+Wenn ein neuer Stand fachlich besser ist, darf der alte Stand ersetzt, gelöscht oder ignoriert werden. Historische Daten, Legacy-Artefakte, Migrationspfade oder Verweise auf historische Stände werden nicht aus Prinzip erhalten; sie bleiben nur dann relevant, wenn sie ausdrücklich als aktuelle Entscheidungs-, Regel-, Gate- oder Review-Evidence gebraucht werden. Default-Annahme ist: keine Legacy-Pflege, keine History-Konservierung und keine Rückwärtskompatibilitätsarbeit ohne ausdrücklichen aktuellen Nutzen.
+
 ## Git und lokale Artefakte
 
 - `main` ist der lokale Integrationsbranch.
