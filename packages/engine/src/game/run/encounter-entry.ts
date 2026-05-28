@@ -111,6 +111,21 @@ export function beginEncounter(
     };
   }
   const encounteredDefinition = host.cards.definitionFor(encounteredIceId);
+  if (
+    encounteredDefinition.type === "ice" &&
+    host.cards
+      .effectiveSubtypesForCard(encounteredIceId, encounteredDefinition)
+      .some((subtype) => normalizeSubtypeLabel(subtype) === "black_ice")
+  ) {
+    run.encounteredBlackIceCount =
+      Math.max(0, Math.floor(run.encounteredBlackIceCount ?? 0)) + 1;
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        encounteredBlackIceCount: run.encounteredBlackIceCount,
+      };
+    }
+  }
   const temporaryTraceCredits = grantEncounterTemporaryTraceCredits(
     host,
     run,
@@ -129,6 +144,13 @@ export function beginEncounter(
     resolvedPayload: legalAction?.payload,
     stateChanged: true,
   };
+}
+
+function normalizeSubtypeLabel(subtype: string): string {
+  return subtype
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
 
 function bindOrExpireNextSentryFreeBreak(

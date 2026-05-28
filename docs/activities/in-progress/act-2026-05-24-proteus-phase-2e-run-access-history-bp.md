@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-2e-run-access-history-bp
-status: blocked
+status: resolved-by-done-activity
 kind: implementation
 area: cards
 priority: normal
@@ -8,16 +8,15 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-28
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 2e
 proReferences:
   - PRO015
-blockedBy:
-  - act-2026-05-24-proteus-phase-2a-bad-publicity-foundation
-  - proteus-run-scoped-history-contract
+blockedBy: []
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-2e-run-access-history-bp.md
+  - docs/activities/done/act-2026-05-28-proteus-pro015-bad-publicity-run-replacement-suite.md
 checks:
   - Lokale Quellenprüfung `data/cards/proteus-cards.json` für `Frame-Up`, `Live News Feed` und `Subliminal Corruption`
   - Codebestandprüfung `packages/shared/src/index.ts`, `packages/engine/src/index.ts`, `packages/engine/src/ability-engine/card-implementation-runtime.ts`
@@ -54,6 +53,8 @@ Bad-Publicity-Karten mit Run-, Access- und Trash-Historie umsetzen.
 - [ ] PublicPayloads leaken keine verdeckten Kartendaten.
 
 ## Ergebnisnotiz
+
+Erledigt durch PRO015 am 2026-05-28. Die Zielkarten `Frame-Up`, `Live News Feed` und `Subliminal Corruption` sind in der Done-Activity `act-2026-05-28-proteus-pro015-bad-publicity-run-replacement-suite` umgesetzt. Diese alte Umbrella-Activity bleibt nur Statusreferenz; daraus entsteht keine zweite Implementierungszählung.
 
 Blockiert am 2026-05-24 vor Codeänderungen.
 

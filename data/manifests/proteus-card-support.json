@@ -3261,24 +3261,31 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_109_frame-up",
+        "coverage": [
+          "bad_publicity_loss_gate",
+          "card_implementation",
+          "legal_action",
+          "replay_statehash",
+          "run_history",
+          "turn_history",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [],
+        "notes": "PRO015: Frame-Up uses runner-turn HQ/R&D successful-run history and successful-run Black Ops access history, with Bad Publicity resolved through the central loss gate."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_110_hijack",
@@ -3339,24 +3346,32 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_112_identity-donor",
+        "coverage": [
+          "bad_publicity_loss_gate",
+          "card_implementation",
+          "damage_replacement",
+          "grip_replacement",
+          "hidden_info_barrier",
+          "legal_action",
+          "replay_statehash",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [],
+        "notes": "PRO015: Identity Donor is playable only as a hidden-info-safe grip replacement for source-bound Corp-turn meat damage and resolves through the central Bad Publicity path."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_113_live-news-feed",
@@ -3365,24 +3380,32 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_113_live-news-feed",
+        "coverage": [
+          "bad_publicity_loss_gate",
+          "card_implementation",
+          "legal_action",
+          "post_run_aftermath",
+          "replay_statehash",
+          "run_history",
+          "tags",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [],
+        "notes": "PRO015: Live News Feed starts a scoped run and resolves successful-run tags plus Bad Publicity from run-scoped Black ICE, Black Ops rez, and liberated Black Ops agenda counters."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_114_on-the-fast-track",
@@ -3638,24 +3661,32 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_123_senatorial-field-trip",
+        "coverage": [
+          "bad_publicity_loss_gate",
+          "card_implementation",
+          "corp_choice",
+          "legal_action",
+          "replay_statehash",
+          "stale_action_revalidation",
+          "turn_history",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [],
+        "notes": "PRO015: Senatorial Field Trip stores and revalidates the exact Black ICE rezzed this turn before offering the Corp derez-or-Bad-Publicity choice."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_124_stakeout",
@@ -3688,24 +3719,31 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_125_subliminal-corruption",
+        "coverage": [
+          "bad_publicity_loss_gate",
+          "card_implementation",
+          "legal_action",
+          "post_run_aftermath",
+          "replay_statehash",
+          "run_history",
+          "unit_test"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [],
+        "notes": "PRO015: Subliminal Corruption starts a scoped run and awards Bad Publicity from Advertisement cards trashed during that run only."
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_126_test-spin",

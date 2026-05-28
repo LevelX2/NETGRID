@@ -443,6 +443,7 @@ import { proteusRasminBridgerImplementation } from "./proteus/corp/upgrades/rasm
 import { proteusResearchBunkerImplementation } from "./proteus/corp/upgrades/research-bunker";
 import { proteusWeaponsDepotImplementation } from "./proteus/corp/upgrades/weapons-depot";
 import { proteusFakedHitImplementation } from "./proteus/runner/events/faked-hit";
+import { proteusFrameUpImplementation } from "./proteus/runner/events/frame-up";
 import { proteusAllHandsImplementation } from "./proteus/runner/events/all-hands";
 import { blackmailImplementation } from "./proteus/runner/events/blackmail";
 import { proteusCruisingForNetwatchImplementation } from "./proteus/runner/events/cruising-for-netwatch";
@@ -450,6 +451,8 @@ import { proteusDecoySignalImplementation } from "./proteus/runner/events/decoy-
 import { proteusDemolitionRunImplementation } from "./proteus/runner/events/demolition-run";
 import { proteusDisgruntledIceTechnicianImplementation } from "./proteus/runner/events/disgruntled-ice-technician";
 import { proteusDroneForADayImplementation } from "./proteus/runner/events/drone-for-a-day";
+import { proteusIdentityDonorImplementation } from "./proteus/runner/events/identity-donor";
+import { proteusLiveNewsFeedImplementation } from "./proteus/runner/events/live-news-feed";
 import { proteusOnTheFastTrackImplementation } from "./proteus/runner/events/on-the-fast-track";
 import { proteusPersonalTouchTheImplementation } from "./proteus/runner/events/personal-touch-the";
 import { pirateBroadcastImplementation } from "./proteus/runner/events/pirate-broadcast";
@@ -458,6 +461,8 @@ import { promisesPromisesImplementation } from "./proteus/runner/events/promises
 import { proteusReconnaissanceImplementation } from "./proteus/runner/events/reconnaissance";
 import { proteusRemoteDetonatorImplementation } from "./proteus/runner/events/remote-detonator";
 import { proteusRushHourImplementation } from "./proteus/runner/events/rush-hour";
+import { proteusSenatorialFieldTripImplementation } from "./proteus/runner/events/senatorial-field-trip";
+import { proteusSubliminalCorruptionImplementation } from "./proteus/runner/events/subliminal-corruption";
 import { proteusWeefleInitiationImplementation } from "./proteus/runner/events/weefle-initiation";
 import { proteusCorticalCybermodemImplementation } from "./proteus/runner/hardware/cortical-cybermodem";
 import { proteusCorticalStimulatorsImplementation } from "./proteus/runner/hardware/cortical-stimulators";
@@ -948,6 +953,7 @@ export const CARD_IMPLEMENTATIONS = [
   pattelAntibodyImplementation,
   stereogramAntibodyImplementation,
   proteusFakedHitImplementation,
+  proteusFrameUpImplementation,
   proteusAllHandsImplementation,
   blackmailImplementation,
   proteusCruisingForNetwatchImplementation,
@@ -955,6 +961,8 @@ export const CARD_IMPLEMENTATIONS = [
   proteusDemolitionRunImplementation,
   proteusDisgruntledIceTechnicianImplementation,
   proteusDroneForADayImplementation,
+  proteusIdentityDonorImplementation,
+  proteusLiveNewsFeedImplementation,
   proteusOnTheFastTrackImplementation,
   proteusPersonalTouchTheImplementation,
   pirateBroadcastImplementation,
@@ -963,6 +971,8 @@ export const CARD_IMPLEMENTATIONS = [
   proteusReconnaissanceImplementation,
   proteusRemoteDetonatorImplementation,
   proteusRushHourImplementation,
+  proteusSenatorialFieldTripImplementation,
+  proteusSubliminalCorruptionImplementation,
   proteusWeefleInitiationImplementation,
   proteusCorticalCybermodemImplementation,
   proteusCorticalStimulatorsImplementation,

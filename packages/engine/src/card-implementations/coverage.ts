@@ -873,10 +873,20 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/wrecking-ball.ts",
   "onr_proteus_103_cruising-for-netwatch":
     "packages/engine/src/card-implementations/proteus/runner/events/cruising-for-netwatch.ts",
+  "onr_proteus_109_frame-up":
+    "packages/engine/src/card-implementations/proteus/runner/events/frame-up.ts",
+  "onr_proteus_112_identity-donor":
+    "packages/engine/src/card-implementations/proteus/runner/events/identity-donor.ts",
+  "onr_proteus_113_live-news-feed":
+    "packages/engine/src/card-implementations/proteus/runner/events/live-news-feed.ts",
   "onr_proteus_115_personal-touch-the":
     "packages/engine/src/card-implementations/proteus/runner/events/personal-touch-the.ts",
+  "onr_proteus_123_senatorial-field-trip":
+    "packages/engine/src/card-implementations/proteus/runner/events/senatorial-field-trip.ts",
   "onr_proteus_124_stakeout":
     "packages/engine/src/card-implementations/proteus/runner/events/stakeout.ts",
+  "onr_proteus_125_subliminal-corruption":
+    "packages/engine/src/card-implementations/proteus/runner/events/subliminal-corruption.ts",
   "onr_proteus_134_cortical-cybermodem":
     "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-cybermodem.ts",
   "onr_proteus_135_cortical-stimulators":

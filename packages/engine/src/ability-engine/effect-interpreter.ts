@@ -171,6 +171,7 @@ export type CardEffectExecutionContext = {
   startPayRezCostToTrashRezzedIceChoice?: () => CardEffectHiddenInfoResult;
   startTrashUnrezzedIceChoice?: () => CardEffectHiddenInfoResult;
   startCorpChoiceRezOrTrashIceChoice?: () => CardEffectHiddenInfoResult;
+  startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice?: () => CardEffectHiddenInfoResult;
   startDistributeAdvancementCounters?: (
     amount: number,
     distribution:
@@ -286,6 +287,7 @@ export type CardEffectMakeRunOptions = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
+  badPublicityRunAftermath?: "live_news_feed" | "subliminal_corruption";
   pirateBroadcast?: NonNullable<GameState["runnerTurnFlags"]>["pirateBroadcastPending"];
 };
 
@@ -543,6 +545,49 @@ export function executeCardImplementationEffects(
           ...(sourceVisibility === "public" && context.sourceTitle
             ? { sourceTitle: context.sourceTitle }
             : {}),
+        });
+        return;
+      }
+      case "add_bad_publicity_from_frame_up_history": {
+        assertPositiveIntegerAmount(
+          "add_bad_publicity_from_frame_up_history",
+          effect.baseAmount,
+        );
+        assertPositiveIntegerAmount(
+          "add_bad_publicity_from_frame_up_history",
+          effect.additionalAmount,
+        );
+        assertPublicVisibility(
+          "add_bad_publicity_from_frame_up_history",
+          effect.visibility,
+        );
+        const additional =
+          state.runnerTurnFlags
+            ?.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn ===
+          true
+            ? effect.additionalAmount
+            : 0;
+        const amount = effect.baseAmount + additional;
+        const before = state.corp.badPublicity;
+        state.corp.badPublicity += amount;
+        publicPayload.badPublicityAdded =
+          Number(publicPayload.badPublicityAdded ?? 0) + amount;
+        publicPayload.frameUpBaseBadPublicity = effect.baseAmount;
+        publicPayload.frameUpAdditionalBadPublicity = additional;
+        if (typeof publicPayload.corpBadPublicityBefore !== "number")
+          publicPayload.corpBadPublicityBefore = before;
+        publicPayload.corpBadPublicityAfter = state.corp.badPublicity;
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "add_bad_publicity"),
+          kind: "add_bad_publicity",
+          visibility: effect.visibility,
+          side: "corp",
+          amount,
+          reason: effectReason(context),
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
         });
         return;
       }
@@ -1185,6 +1230,9 @@ export function executeCardImplementationEffects(
           ...(effect.damagePreventionPool !== undefined
             ? { damagePreventionPool: effect.damagePreventionPool }
             : {}),
+          ...(effect.badPublicityRunAftermath !== undefined
+            ? { badPublicityRunAftermath: effect.badPublicityRunAftermath }
+            : {}),
         });
         mergePublicPayload(publicPayload, runResult.publicPayload);
         return;
@@ -1290,6 +1338,22 @@ export function executeCardImplementationEffects(
         if (!context.startCorpChoiceRezOrTrashIceChoice)
           throw new Error("corp_choice_rez_or_trash_ice requires a choice context.");
         const result = context.startCorpChoiceRezOrTrashIceChoice();
+        mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
+      case "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity": {
+        assertPublicVisibility(
+          "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity",
+          effect.visibility,
+        );
+        if (effect.badPublicity !== 2)
+          throw new Error("Senatorial Field Trip Bad-Publicity amount is invalid.");
+        if (!context.startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice)
+          throw new Error(
+            "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity requires a choice context.",
+          );
+        const result =
+          context.startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice();
         mergePublicPayload(publicPayload, result.publicPayload);
         return;
       }

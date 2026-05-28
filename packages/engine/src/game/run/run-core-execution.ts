@@ -43,6 +43,7 @@ export type StartRunOptions = Pick<
   | "eventApproachIceExposeBeforeRez"
   | "runnerCreditGainOnCorpRez"
   | "damagePreventionPool"
+  | "badPublicityRunAftermath"
   | "pirateBroadcast"
 >;
 
@@ -225,6 +226,9 @@ export function startRun(
       : {}),
     ...(options?.damagePreventionPool
       ? { damagePreventionPool: { ...options.damagePreventionPool } }
+      : {}),
+    ...(options?.badPublicityRunAftermath
+      ? { badPublicityRunAftermath: { ...options.badPublicityRunAftermath } }
       : {}),
     ...(options?.pirateBroadcast
       ? { pirateBroadcast: { ...options.pirateBroadcast } }

@@ -47,6 +47,7 @@ export type PendingChoiceResolutionHost = {
     resolveProteusRunnerProgramReturnChoice: HostFn<void>;
     resolveRunnerPrivateLookChoice: HostFn<void>;
     resolveExposePreventionChoice: HostFn<void>;
+    resolveSenatorialFieldTripChoice: HostFn<void>;
   };
   corp: {
     handleCorpInstallRezSequenceChoice: HostFn<{ handled: boolean }>;
@@ -163,6 +164,8 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveRunnerPrivateLookChoice;
   const resolveExposePreventionChoice =
     host.hiddenZone.resolveExposePreventionChoice;
+  const resolveSenatorialFieldTripChoice =
+    host.hiddenZone.resolveSenatorialFieldTripChoice;
   const handleCorpInstallRezSequenceChoice =
     host.corp.handleCorpInstallRezSequenceChoice;
   const corpInstallRezSequenceHandlerHost =
@@ -299,6 +302,14 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("corp.expose_prevention")) {
     resolveExposePreventionChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.derez_last_rezzed_black_ice_or_bad_publicity",
+    )
+  ) {
+    resolveSenatorialFieldTripChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_36.expose_installed_cards")) {

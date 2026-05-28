@@ -87,7 +87,7 @@ export type CardImplementationRuntimeDependencies = {
   runnerWasDamagedDuringLastThreeActions: (state: GameState) => boolean;
   runnerMadeSuccessfulRunOnServerThisTurn: (
     state: GameState,
-    server: Extract<ServerId, "hq"> | "any_data_fort",
+    server: Extract<ServerId, "hq" | "rd"> | "any_data_fort",
   ) => boolean;
   runnerLiberatedAgendaSubtypeThisTurn: (
     state: GameState,
@@ -333,6 +333,11 @@ export type CardImplementationRuntimeDependencies = {
     legalAction: LegalAction,
     sourceCardId: CardInstanceId,
   ) => CardEffectHiddenInfoResult;
+  startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
   startDerezRezzedBlackIceChoice: (
     state: GameState,
     legalAction: LegalAction,
@@ -531,6 +536,30 @@ function cardImplementationConditionMet(
         state,
         condition.server,
       );
+    case "runner_made_successful_hq_and_rd_runs_this_turn":
+      return (
+        deps.runnerMadeSuccessfulRunOnServerThisTurn(state, "hq") &&
+        deps.runnerMadeSuccessfulRunOnServerThisTurn(state, "rd")
+      );
+    case "corp_rezzed_black_ice_this_turn": {
+      const target = state.runnerTurnFlags?.lastRezzedBlackIceThisTurn;
+      const instance = target ? state.cardInstances[target.cardId] : undefined;
+      if (
+        !target ||
+        !instance ||
+        instance.zone.side !== "corp" ||
+        instance.zone.zone !== "serverIce" ||
+        instance.zone.serverId !== target.serverId ||
+        instance.rezzed !== true
+      )
+        return false;
+      const definition = deps.definitionFor(state, target.cardId);
+      return (
+        definition.id === target.definitionId &&
+        definition.type === "ice" &&
+        hasNormalizedSubtype(definition.subtypes, "black_ice")
+      );
+    }
     case "current_encounter_ice":
       return (
         state.timingPoint === "run.encounter_ice" &&
@@ -736,6 +765,12 @@ function assertOnPlayCardImplementationAbilityCanResolve(
     throw new Error(
       "Der Runner hat in diesem Zug keinen passenden erfolgreichen Run gemacht.",
     );
+  if (ability.condition?.kind === "runner_made_successful_hq_and_rd_runs_this_turn")
+    throw new Error(
+      "Der Runner hat in diesem Zug nicht erfolgreich HQ und R&D angegriffen.",
+    );
+  if (ability.condition?.kind === "corp_rezzed_black_ice_this_turn")
+    throw new Error("Die Korp hat in diesem Zug kein Black ICE gerezzt.");
   if (ability.condition?.kind === "runner_liberated_agenda_subtype_this_turn")
     throw new Error(
       "Der Runner hat in diesem Zug keine passende Agenda befreit.",
@@ -859,6 +894,22 @@ export function executeCardImplementationLifecycleEffects(
     ...result.publicPayload,
   };
   deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
+}
+
+function normalizeSubtypeLabel(subtype: string): string {
+  return subtype
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function hasNormalizedSubtype(
+  subtypes: readonly string[] | undefined,
+  subtype: string,
+): boolean {
+  const target = normalizeSubtypeLabel(subtype);
+  return subtypes?.some((candidate) => normalizeSubtypeLabel(candidate) === target) ??
+    false;
 }
 
 function cardImplementationStartOfCorpTurnAbilities(
@@ -2433,6 +2484,12 @@ export function executeOnPlayCardImplementationAbility(
         deps.startTrashUnrezzedIceChoice(state, legalAction, cardId),
       startCorpChoiceRezOrTrashIceChoice: () =>
         deps.startCorpChoiceRezOrTrashIceChoice(state, legalAction, cardId),
+      startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: () =>
+        deps.startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice(
+          state,
+          legalAction,
+          cardId,
+        ),
       startDerezRezzedBlackIceChoice: () =>
         deps.startDerezRezzedBlackIceChoice(state, legalAction, cardId),
       startCorpDiscardHqWithRetainPayment: (retainCostPerCard) =>

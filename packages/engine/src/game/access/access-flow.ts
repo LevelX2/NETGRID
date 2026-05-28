@@ -471,8 +471,15 @@ function stealAgenda(
     flags.stoleResearchAgendaThisTurn = true;
   if (host.cards.cardHasSubtype(definition, "gray_ops"))
     flags.stoleGrayOpsAgendaThisTurn = true;
-  if (host.cards.cardHasSubtype(definition, "black_ops"))
+  if (host.cards.cardHasSubtype(definition, "black_ops")) {
     flags.stoleBlackOpsAgendaThisTurn = true;
+    if (host.state.run)
+      host.state.run.liberatedBlackOpsAgendaCount =
+        Math.max(
+          0,
+          Math.floor(host.state.run.liberatedBlackOpsAgendaCount ?? 0),
+        ) + 1;
+  }
   applyPendingAgendaPointBonusToStolenAgenda(host, cardId as CardInstanceId, legalAction);
   const agendaPointValue = host.steal.agendaPointsForScoredCard(
     cardId as CardInstanceId,
@@ -744,6 +751,13 @@ function trashAccessedCard(
   }
   if (host.cards.cardHasSubtype(definition, "advertisement")) {
     host.runner.ensureTurnFlags().trashedAdvertisementThisTurn = true;
+    if (run)
+      run.trashedAdvertisementCount =
+        Math.max(0, Math.floor(run.trashedAdvertisementCount ?? 0)) + 1;
+  }
+  if (host.cards.cardHasSubtype(definition, "black_ops") && run) {
+    run.trashedBlackOpsCount =
+      Math.max(0, Math.floor(run.trashedBlackOpsCount ?? 0)) + 1;
   }
   if (host.cards.cardHasSubtype(definition, "transactions")) {
     host.runner.ensureTurnFlags().trashedTransactionsThisTurn = true;

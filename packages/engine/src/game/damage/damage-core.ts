@@ -1167,6 +1167,44 @@ function collectReplacementCandidates(
   if (event.payload.cannotBePrevented === true) return [];
   const candidates: ReplacementCandidate[] = [];
   const damageAmount = numberPayload(event, "amount");
+  const damageType = damageTypePayload(event);
+  if (
+    event.affectedSide === "runner" &&
+    damageAmount > 0 &&
+    damageType === "meat" &&
+    isCorpTurnDamageWindow(state)
+  ) {
+    const identityDonorId = state.runner.grip.find((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return flatlineReplacementSourcesForDefinition(definition).some(
+        (source) =>
+          source.kind === "damage_replacement_from_grip" &&
+          source.replacement === "prevent_meat_damage_add_bad_publicity" &&
+          source.damageType === "meat" &&
+          source.activeOnlyDuring === "corp_turn" &&
+          source.badPublicity === 2 &&
+          source.visibility === "public",
+      );
+    });
+    if (identityDonorId) {
+      const definition = definitionFor(state, identityDonorId);
+      candidates.push({
+        candidateId: `grip_meat_damage_replacement_${identityDonorId}`,
+        controller: "runner",
+        sourceRef: {
+          kind: "card",
+          instanceId: identityDonorId,
+          definitionId: definition.id,
+          label: "Meat-Damage-Replacement",
+        },
+        replacesEventType: "damage",
+        replacementEventType: "prevent_damage",
+        priority: 81,
+        visibility: "hidden_info_barrier",
+        optional: true,
+      });
+    }
+  }
   if (
     event.affectedSide === "runner" &&
     damageAmount > state.runner.grip.length
@@ -1260,6 +1298,15 @@ function collectReplacementCandidates(
   ];
 }
 
+function isCorpTurnDamageWindow(state: GameState): boolean {
+  return (
+    state.phase === "corp_draw_phase" ||
+    state.phase === "corp_action_phase" ||
+    state.phase === "corp_discard_phase" ||
+    state.activeSide === "corp"
+  );
+}
+
 function replacementChoice(
   window: ReplacementWindow,
   event: ImminentEvent,
@@ -1287,7 +1334,9 @@ function replacementChoice(
             : candidate.sourceRef.definitionId ===
                 EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID
               ? "Emergency Self-Construct ausloesen"
-              : `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`,
+              : isIdentityDonorReplacementCandidateForChoice(candidate)
+                ? "Identity Donor spielen"
+                : `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`,
         publicLabel: "Replacement",
       },
     ],
@@ -1296,6 +1345,15 @@ function replacementChoice(
     stateVersion,
     visibility: candidate.visibility,
   };
+}
+
+function isIdentityDonorReplacementCandidateForChoice(
+  candidate: ReplacementCandidate,
+): boolean {
+  return (
+    candidate.replacementEventType === "prevent_damage" &&
+    candidate.candidateId.startsWith("grip_meat_damage_replacement_")
+  );
 }
 
 function eventModificationChoice(
@@ -1784,6 +1842,11 @@ export function resolveReplacementChoice(
     clearReplacementState(state);
     return;
   }
+  if (isIdentityDonorReplacementCandidate(state, candidate)) {
+    resolveIdentityDonorReplacement(state, legalAction, event, candidate);
+    clearReplacementState(state);
+    return;
+  }
   if (
     candidate.replacesEventType !== event.eventType ||
     candidate.replacementEventType !== "add_tag"
@@ -1807,6 +1870,88 @@ export function resolveReplacementChoice(
     sourceKind: candidate.sourceRef.kind,
   };
   clearReplacementState(state);
+}
+
+function isIdentityDonorReplacementCandidate(
+  state: GameState,
+  candidate: ReplacementCandidate,
+): boolean {
+  const cardId = candidate.sourceRef.instanceId;
+  if (!cardId || !state.runner.grip.includes(cardId)) return false;
+  return flatlineReplacementSourcesForDefinition(definitionFor(state, cardId)).some(
+    (source) =>
+      source.kind === "damage_replacement_from_grip" &&
+      source.replacement === "prevent_meat_damage_add_bad_publicity" &&
+      source.damageType === "meat" &&
+      source.activeOnlyDuring === "corp_turn" &&
+      source.badPublicity === 2,
+  );
+}
+
+function resolveIdentityDonorReplacement(
+  state: GameState,
+  legalAction: LegalAction,
+  event: ImminentEvent,
+  candidate: ReplacementCandidate,
+): void {
+  const cardId = candidate.sourceRef.instanceId;
+  if (
+    !cardId ||
+    !state.runner.grip.includes(cardId) ||
+    !isIdentityDonorReplacementCandidate(state, candidate)
+  )
+    throw new Error("Identity Donor ist nicht in der Grip verfuegbar.");
+  if (
+    event.eventType !== "damage" ||
+    event.affectedSide !== "runner" ||
+    damageTypePayload(event) !== "meat" ||
+    !isCorpTurnDamageWindow(state)
+  )
+    throw new Error("Identity Donor passt nicht zu diesem Damage-Event.");
+  windowConsumeReplacementCandidate(state, candidate.candidateId);
+  const originalAmount = numberPayload(event, "amount");
+  const definition = definitionFor(state, cardId);
+  removeFromAllZones(state, cardId);
+  state.runner.heap.push(cardId);
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "heap" },
+  };
+  const before = state.corp.badPublicity;
+  state.corp.badPublicity += 2;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    replacementDecision: "apply",
+    replacementOutcome: "replaced",
+    candidateId: candidate.candidateId,
+    replacementEventId: `replacement_${event.eventId}`,
+    replacementEventType: "prevent_damage",
+    originalAmount,
+    preventedAmount: originalAmount,
+    runnerEventAbility: "grip_meat_damage_replacement",
+    sourceDefinitionId: definition.id,
+    cardDefinitionId: definition.id,
+    trashedCardDefinitionId: definition.id,
+    badPublicityAdded: 2,
+    corpBadPublicityBefore: before,
+    corpBadPublicityAfter: state.corp.badPublicity,
+    sourceKind: "card",
+  };
+  legalAction.resolvedEffects = [
+    ...(legalAction.resolvedEffects ?? []),
+    {
+      effectId: `${event.eventId}.${cardId}.identity_donor_bad_publicity`,
+      kind: "add_bad_publicity",
+      visibility: "public",
+      side: "corp",
+      amount: 2,
+      reason: "identity_donor_replacement",
+      sourceDefinitionId: definition.id,
+      sourceTitle: definition.title,
+    },
+  ];
 }
 
 function resolveArasakaOwnsYouReplacement(

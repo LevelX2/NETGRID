@@ -171,6 +171,23 @@ export function rezCard(
     const flags = host.runner.ensureTurnFlags();
     flags.corpRezzedIceThisTurn =
       Math.max(0, Math.floor(flags.corpRezzedIceThisTurn ?? 0)) + 1;
+    if (hasSubtype(definition, "black_ice")) {
+      const instance = host.cards.mustInstance(cardId);
+      if (instance.zone.side === "corp" && instance.zone.zone === "serverIce") {
+        flags.lastRezzedBlackIceThisTurn = {
+          cardId,
+          definitionId: definition.id,
+          serverId: instance.zone.serverId,
+        };
+      }
+    }
+  }
+  if (
+    state.run &&
+    hasSubtype(definition, "black_ops")
+  ) {
+    state.run.rezzedBlackOpsCount =
+      Math.max(0, Math.floor(state.run.rezzedBlackOpsCount ?? 0)) + 1;
   }
   const runRezReward = Math.max(
     0,
@@ -212,6 +229,23 @@ export function rezCard(
     return;
   }
   host.run.beginEncounter(cardId, legalAction);
+}
+
+function normalizeSubtypeLabel(subtype: string): string {
+  return subtype
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function hasSubtype(
+  definition: { subtypes?: readonly string[] },
+  subtype: string,
+): boolean {
+  const target = normalizeSubtypeLabel(subtype);
+  return definition.subtypes?.some(
+    (candidate) => normalizeSubtypeLabel(candidate) === target,
+  ) ?? false;
 }
 
 function variableIceStateForRezAction(

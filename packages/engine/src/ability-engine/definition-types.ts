@@ -836,8 +836,10 @@ export type CardConditionImplementation =
     }
   | {
       kind: "runner_made_successful_run_on_server_this_turn";
-      server: Extract<ServerId, "hq"> | "any_data_fort";
+      server: Extract<ServerId, "hq" | "rd"> | "any_data_fort";
     }
+  | { kind: "runner_made_successful_hq_and_rd_runs_this_turn" }
+  | { kind: "corp_rezzed_black_ice_this_turn" }
   | { kind: "current_encounter_ice" }
   | {
       kind: "current_encounter_ice_subtype";
@@ -1010,6 +1012,7 @@ export type CardEffectImplementation =
   | GainCreditsEffectImplementation
   | GainCreditsForRunnerTrashHistoryEffectImplementation
   | AddBadPublicityEffectImplementation
+  | AddBadPublicityFromFrameUpHistoryEffectImplementation
   | DrawCardsEffectImplementation
   | LoseCreditsEffectImplementation
   | AddTagsEffectImplementation
@@ -1051,6 +1054,7 @@ export type CardEffectImplementation =
   | TrashRezzedIceOnLastSuccessfulRunFortEffectImplementation
   | TrashUnrezzedIceEffectImplementation
   | CorpChoiceRezOrTrashIceEffectImplementation
+  | CorpChoiceDerezLastRezzedBlackIceOrBadPublicityEffectImplementation
   | GainCreditsPerAdvancementCounterOnSourceEffectImplementation
   | AddCounterToAllInstalledRunnerIcebreakersEffectImplementation
   | GainRunnerEventAgendaPointEffectImplementation
@@ -1091,6 +1095,13 @@ export type AddBadPublicityEffectImplementation = {
   amount: number;
   visibility: Extract<EventVisibilityClass, "public">;
   sourceVisibility?: "public" | "redacted";
+};
+
+export type AddBadPublicityFromFrameUpHistoryEffectImplementation = {
+  kind: "add_bad_publicity_from_frame_up_history";
+  baseAmount: 1;
+  additionalAmount: 1;
+  visibility: Extract<EventVisibilityClass, "public">;
 };
 
 export type GainCreditsPerAdvancementCounterOnSourceEffectImplementation = {
@@ -1509,6 +1520,7 @@ export type MakeRunEffectImplementation = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
+  badPublicityRunAftermath?: "live_news_feed" | "subliminal_corruption";
   visibility: EventVisibilityClass;
 };
 
@@ -1552,6 +1564,12 @@ export type TrashUnrezzedIceEffectImplementation = {
 export type CorpChoiceRezOrTrashIceEffectImplementation = {
   kind: "corp_choice_rez_or_trash_ice";
   target: "chosen_installed_ice";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type CorpChoiceDerezLastRezzedBlackIceOrBadPublicityEffectImplementation = {
+  kind: "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity";
+  badPublicity: 2;
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -1940,6 +1958,14 @@ export type CardFlatlineReplacementSourceImplementation =
   | {
       kind: "flatline_replacement_from_grip";
       replacement: "arasaka_owns_you";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "damage_replacement_from_grip";
+      replacement: "prevent_meat_damage_add_bad_publicity";
+      damageType: Extract<DamageType, "meat">;
+      activeOnlyDuring: "corp_turn";
+      badPublicity: 2;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

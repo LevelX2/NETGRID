@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-2f-replacement-choice-bp
-status: blocked
+status: resolved-by-done-activity
 kind: implementation
 area: cards
 priority: normal
@@ -8,17 +8,15 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-28
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 2f
 proReferences:
   - PRO015
-blockedBy:
-  - act-2026-05-24-proteus-phase-2a-bad-publicity-foundation
-  - proteus-grip-event-damage-prevention-contract
-  - proteus-last-rezzed-black-ice-contract
+blockedBy: []
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-2f-replacement-choice-bp.md
+  - docs/activities/done/act-2026-05-28-proteus-pro015-bad-publicity-run-replacement-suite.md
 checks:
   - Lokale Quellenprüfung `data/cards/proteus-cards.json` für `Identity Donor` und `Senatorial Field Trip`
   - Codebestandprüfung `packages/shared/src/index.ts`, `packages/engine/src/index.ts`, `packages/engine/src/game/damage`, `packages/engine/src/card-implementations/onr-v1`
@@ -56,6 +54,8 @@ Bad-Publicity-Karten mit Replacement- und Korp-Choice-Fenstern umsetzen.
 - [ ] PublicPayload, Replay und StateHash sind stabil.
 
 ## Ergebnisnotiz
+
+Erledigt durch PRO015 am 2026-05-28. Die Zielkarten `Identity Donor` und `Senatorial Field Trip` sind in der Done-Activity `act-2026-05-28-proteus-pro015-bad-publicity-run-replacement-suite` umgesetzt. Diese alte Umbrella-Activity bleibt nur Statusreferenz; daraus entsteht keine zweite Implementierungszählung.
 
 Blockiert am 2026-05-24 vor Codeänderungen.
 

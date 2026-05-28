@@ -198,6 +198,9 @@ function pendingChoiceHost(
       ),
       resolveRunnerPrivateLookChoice: unexpected("resolveRunnerPrivateLookChoice"),
       resolveExposePreventionChoice: unexpected("resolveExposePreventionChoice"),
+      resolveSenatorialFieldTripChoice: unexpected(
+        "resolveSenatorialFieldTripChoice",
+      ),
       ...overrides.hiddenZone,
     },
     corp: {

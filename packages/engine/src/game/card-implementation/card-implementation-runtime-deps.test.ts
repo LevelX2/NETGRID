@@ -248,6 +248,10 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       startOpenEndedMileageProgramReturnChoice: () => {
         calls.push("return_choice");
       },
+      startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: () => {
+        calls.push("senatorial_field_trip_choice");
+        return { publicPayload: { choiceOpened: true } };
+      },
     },
   };
 }
@@ -337,6 +341,7 @@ describe("game card implementation runtime deps root", () => {
         "trashSource",
         "startDistributeAdvancementCounters",
         "startMoveAdvancementCounters",
+        "startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice",
         "addCurrentEncounterAdditionalSubroutine",
         "addCurrentRunAccessCount",
         "passCurrentEncounteredIce",

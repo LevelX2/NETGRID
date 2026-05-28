@@ -881,12 +881,13 @@ function gameCardImplementationRuntimeDepsHost(): GameCardImplementationRuntimeD
       startDistributeAdvancementCounters:
         startCardImplementationAdvancementDistributionChoice,
       startMoveAdvancementCounters: startCardImplementationMoveAdvancementChoice,
-      revealHiddenRunnerResource: (state, sourceCardId) =>
-        hiddenRunnerResourceRevealPayload(state, sourceCardId),
-      addCurrentRunAccessCount,
-      passCurrentEncounteredIce,
-      startOpenEndedMileageProgramReturnChoice,
-    },
+    revealHiddenRunnerResource: (state, sourceCardId) =>
+      hiddenRunnerResourceRevealPayload(state, sourceCardId),
+    addCurrentRunAccessCount,
+    passCurrentEncounteredIce,
+    startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice,
+    startOpenEndedMileageProgramReturnChoice,
+  },
   };
 }
 
@@ -5867,6 +5868,144 @@ function resolveSirenStartRunRedirectChoice(
   continueRunAfterStartOfRunRedirect(state, legalAction);
 }
 
+function revalidateLastRezzedBlackIceForSenatorialFieldTrip(
+  state: GameState,
+): NonNullable<NonNullable<GameState["runnerTurnFlags"]>["lastRezzedBlackIceThisTurn"]> {
+  const target = state.runnerTurnFlags?.lastRezzedBlackIceThisTurn;
+  if (!target?.cardId) throw new Error("In diesem Zug wurde kein Black ICE gerezzt.");
+  const instance = state.cardInstances[target.cardId];
+  const definition = instance ? definitionFor(state, target.cardId) : undefined;
+  if (
+    !instance ||
+    !definition ||
+    instance.controller !== "corp" ||
+    instance.zone.side !== "corp" ||
+    instance.zone.zone !== "serverIce" ||
+    instance.zone.serverId !== target.serverId ||
+    instance.rezzed !== true ||
+    definition.id !== target.definitionId ||
+    definition.type !== "ice" ||
+    !cardHasSubtype(definition, "black_ice")
+  )
+    throw new Error("Das zuletzt gerezzte Black ICE ist nicht mehr legal.");
+  return target;
+}
+
+function startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+): { publicPayload: Record<string, string | number | boolean> } {
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  const target = revalidateLastRezzedBlackIceForSenatorialFieldTrip(state);
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  state.pendingChoice = {
+    choiceId: `derez_last_rezzed_black_ice_or_bad_publicity_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `card_implementation.derez_last_rezzed_black_ice_or_bad_publicity:${sourceCardId}:${sourceDefinition.id}:${target.cardId}:${target.definitionId}:${target.serverId}:${state.stateVersion + 1}`,
+    prompt: "Senatorial Field Trip",
+    kind: "select_option",
+    options: [
+      {
+        id: "derez",
+        label: `${definitionFor(state, target.cardId).title} derezzen`,
+        publicLabel: "Black ICE derezzen",
+        value: "derez",
+      },
+      {
+        id: "bad_publicity",
+        label: "2 Bad Publicity erhalten",
+        publicLabel: "2 Bad Publicity erhalten",
+        value: "bad_publicity",
+      },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  state.activeSide = "corp";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    senatorialFieldTripChoiceOpened: true,
+    sourceDefinitionId: sourceDefinition.id,
+    targetCardDefinitionId: target.definitionId,
+    targetServerId: target.serverId,
+  };
+  return { publicPayload: legalAction.payload };
+}
+
+function resolveSenatorialFieldTripChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (
+    !choice ||
+    !choice.source.startsWith(
+      "card_implementation.derez_last_rezzed_black_ice_or_bad_publicity:",
+    )
+  )
+    throw new Error("Es ist keine Senatorial-Field-Trip-Choice offen.");
+  const [
+    ,
+    sourceCardId = "",
+    sourceDefinitionId = "",
+    targetCardId = "",
+    targetDefinitionId = "",
+    targetServerId = "",
+  ] = choice.source.split(":");
+  if (!state.runner.heap.includes(sourceCardId as CardInstanceId))
+    throw new Error("Senatorial Field Trip liegt nicht mehr im Heap.");
+  if (definitionFor(state, sourceCardId as CardInstanceId).id !== sourceDefinitionId)
+    throw new Error("Senatorial Field Trip passt nicht mehr zur Quelle.");
+  const target = revalidateLastRezzedBlackIceForSenatorialFieldTrip(state);
+  if (
+    target.cardId !== targetCardId ||
+    target.definitionId !== targetDefinitionId ||
+    target.serverId !== targetServerId
+  )
+    throw new Error("Das Senatorial-Field-Trip-Ziel ist veraltet.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  delete state.pendingChoice;
+  if (selected === "derez") {
+    state.cardInstances[target.cardId] = {
+      ...withoutVariableIceState(mustInstance(state.cardInstances, target.cardId)),
+      faceup: false,
+      rezzed: false,
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      senatorialFieldTripDecision: "derez",
+      sourceDefinitionId,
+      targetCardDefinitionId: target.definitionId,
+      derezzedCardDefinitionId: target.definitionId,
+    };
+    return;
+  }
+  if (selected !== "bad_publicity")
+    throw new Error("Die Senatorial-Field-Trip-Auswahl ist ungültig.");
+  const result = executeCardImplementationEffects(
+    state,
+    {
+      sourceCardId: sourceCardId as CardInstanceId,
+      sourceDefinitionId: sourceDefinitionId as CardDefinitionId,
+      sourceTitle: "Senatorial Field Trip",
+      controller: "runner",
+    },
+    [{ kind: "add_bad_publicity", amount: 2, visibility: "public" }],
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    senatorialFieldTripDecision: "bad_publicity",
+    sourceDefinitionId,
+    targetCardDefinitionId: target.definitionId,
+    ...result.publicPayload,
+  };
+  appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
+}
+
 function continueRun(state: GameState, legalAction?: LegalAction): void {
   runFlow.continueRun(state, legalAction);
 }
@@ -6854,8 +6993,10 @@ function endTurn(
     ).slice();
     flags.installedResourceIdsThisTurn = [];
     flags.successfulHqRunThisTurn = false;
+    flags.successfulRdRunThisTurn = false;
     flags.successfulRunThisTurn = false;
     delete flags.lastSuccessfulRunServerId;
+    flags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn = false;
     flags.runnerActionsTakenThisTurn = 0;
     delete flags.lastDamageRunnerActionOrdinal;
   } else {
@@ -7210,9 +7351,11 @@ function startCorpTurn(
   state.runner.clicks = 0;
   clearValuPakProgramInstallFlags(state);
   clearRovingSubmarineActivityMarkers(fortRunSideFamiliesHostForState(state));
-  ensureRunnerTurnFlags(state).damagePreventionUsage = {};
-  ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
-  ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
+  const runnerFlags = ensureRunnerTurnFlags(state);
+  runnerFlags.damagePreventionUsage = {};
+  runnerFlags.runnerReceivedTagThisTurn = false;
+  runnerFlags.corpRezzedIceThisTurn = 0;
+  delete runnerFlags.lastRezzedBlackIceThisTurn;
   ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
   ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds = [];
   applyCorpStartOfTurnEffects(state, effects);
@@ -7243,8 +7386,10 @@ function startRunnerTurn(
   flags.runAttemptsThisTurn = 0;
   flags.runAttemptsLastTurn = 0;
   flags.successfulHqRunThisTurn = false;
+  flags.successfulRdRunThisTurn = false;
   flags.successfulRunThisTurn = false;
   delete flags.lastSuccessfulRunServerId;
+  flags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn = false;
   flags.trashedAdvertisementThisTurn = false;
   flags.trashedTransactionsThisTurn = false;
   flags.prearrangedDropPending = false;
@@ -7264,6 +7409,7 @@ function startRunnerTurn(
   flags.preyingMantisUsedSourceIdsThisTurn = [];
   flags.preyingMantisDamageDueSourceIdsThisTurn = [];
   flags.corpRezzedIceThisTurn = 0;
+  delete flags.lastRezzedBlackIceThisTurn;
   ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
   delete flags.incubatorPendingTransforms;
   consumeRunnerFutureActionDebt(state);
@@ -8240,6 +8386,17 @@ function runnerStoleAgendaSubtypeThisTurn(
   if (subtype === "gray_ops")
     return state.runnerTurnFlags?.stoleGrayOpsAgendaThisTurn === true;
   return state.runnerTurnFlags?.stoleBlackOpsAgendaThisTurn === true;
+}
+
+function runnerMadeSuccessfulRunOnServerThisTurn(
+  state: GameState,
+  server: Extract<ServerId, "hq" | "rd"> | "any_data_fort",
+): boolean {
+  if (server === "hq")
+    return state.runnerTurnFlags?.successfulHqRunThisTurn === true;
+  if (server === "rd")
+    return state.runnerTurnFlags?.successfulRdRunThisTurn === true;
+  return state.runnerTurnFlags?.successfulRunThisTurn === true;
 }
 
 function serverDifficultyIncreaseFromFaitAccompli(
@@ -10712,6 +10869,7 @@ function pendingChoiceResolutionHost(
       resolveProteusRunnerProgramReturnChoice,
       resolveRunnerPrivateLookChoice,
       resolveExposePreventionChoice,
+      resolveSenatorialFieldTripChoice,
     },
     corp: {
       handleCorpInstallRezSequenceChoice,
@@ -15063,7 +15221,9 @@ function ensureRunnerTurnFlags(
   flags.installedResourceIdsThisTurn ??= [];
   flags.installedResourceIdsLastTurn ??= [];
   flags.successfulHqRunThisTurn ??= false;
+  flags.successfulRdRunThisTurn ??= false;
   flags.successfulRunThisTurn ??= false;
+  flags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn ??= false;
   flags.damagePreventionUsage ??= {};
   flags.runnerActionsTakenThisTurn ??= 0;
   flags.brokerActionCardIdsThisTurn ??= [];

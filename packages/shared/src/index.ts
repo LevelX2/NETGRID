@@ -886,6 +886,19 @@ export type RunState = {
     | "archives_faceup_to_rd"
     | "trash_rezzed_ice_on_fort_and_tag_runner"
     | "runner_gain_agenda_point";
+  badPublicityRunAftermath?:
+    | {
+        kind: "live_news_feed";
+        sourceCardId: CardInstanceId;
+        sourceDefinitionId: CardDefinitionId;
+        sourceTitle: string;
+      }
+    | {
+        kind: "subliminal_corruption";
+        sourceCardId: CardInstanceId;
+        sourceDefinitionId: CardDefinitionId;
+        sourceTitle: string;
+      };
   successfulRunSourceCardId?: CardInstanceId;
   successfulRunSourceDefinitionId?: CardDefinitionId;
   successfulRunSourceTitle?: string;
@@ -906,6 +919,11 @@ export type RunState = {
     | { kind: "server"; serverId: Exclude<ServerId, "new_remote"> };
   approachedIceId?: CardInstanceId;
   encounteredIceId?: CardInstanceId;
+  encounteredBlackIceCount?: number;
+  rezzedBlackOpsCount?: number;
+  liberatedBlackOpsAgendaCount?: number;
+  trashedBlackOpsCount?: number;
+  trashedAdvertisementCount?: number;
   approachIceExposeUsedSourceIdsThisRun?: CardInstanceId[];
   approachIceExposeSkippedIceIdsThisRun?: CardInstanceId[];
   approachIceExposeViewingIceId?: CardInstanceId;
@@ -1286,8 +1304,10 @@ export type GameState = {
     installedResourceIdsThisTurn?: CardInstanceId[];
     installedResourceIdsLastTurn?: CardInstanceId[];
     successfulHqRunThisTurn?: boolean;
+    successfulRdRunThisTurn?: boolean;
     successfulRunThisTurn?: boolean;
     lastSuccessfulRunServerId?: Exclude<ServerId, "new_remote">;
+    blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn?: boolean;
     damagePreventionUsage?: Record<CardInstanceId, number>;
     runnerActionsTakenThisTurn?: number;
     lastDamageRunnerActionOrdinal?: number;
@@ -1309,6 +1329,11 @@ export type GameState = {
     preyingMantisDamageDueSourceIdsThisTurn?: CardInstanceId[];
     questForCattekinPermanentActionGain?: boolean;
     corpRezzedIceThisTurn?: number;
+    lastRezzedBlackIceThisTurn?: {
+      cardId: CardInstanceId;
+      definitionId: CardDefinitionId;
+      serverId: Exclude<ServerId, "new_remote">;
+    };
     wilsonUsedSourceIdsThisTurn?: CardInstanceId[];
     wilsonRunOnlyActionsRemaining?: number;
   };

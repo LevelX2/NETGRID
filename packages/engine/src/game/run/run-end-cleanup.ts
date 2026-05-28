@@ -305,7 +305,16 @@ export function handleRunEndCleanup(
     flags.successfulRunThisTurn = true;
     flags.lastSuccessfulRunServerId = run.attackedServerId;
     if (run.attackedServerId === "hq") flags.successfulHqRunThisTurn = true;
+    if (run.attackedServerId === "rd") flags.successfulRdRunThisTurn = true;
+    if (
+      (run.attackedServerId === "hq" || run.attackedServerId === "rd") &&
+      (Math.max(0, Math.floor(run.liberatedBlackOpsAgendaCount ?? 0)) > 0 ||
+        Math.max(0, Math.floor(run.trashedBlackOpsCount ?? 0)) > 0)
+    ) {
+      flags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn = true;
+    }
   }
+  if (run) applyBadPublicityRunAftermath(host, run, successful, legalAction);
   const pirateBroadcast = run
     ? applyPirateBroadcastRunResult(host, run, successful, legalAction)
     : { handled: false };
@@ -372,6 +381,86 @@ export function handleRunEndCleanup(
     ...(legalAction?.payload ? { resolvedPayload: legalAction.payload } : {}),
     stateChanged: true,
   };
+}
+
+function applyBadPublicityRunAftermath(
+  host: RunEndCleanupHost,
+  run: ActiveRun,
+  successful: boolean,
+  legalAction?: LegalAction,
+): void {
+  const aftermath = run.badPublicityRunAftermath;
+  if (!aftermath) return;
+  let badPublicityAdded = 0;
+  if (aftermath.kind === "live_news_feed") {
+    if (!successful) return;
+    const tagAmount = 2;
+    host.state.runner.tags += tagAmount;
+    badPublicityAdded =
+      Math.max(0, Math.floor(run.encounteredBlackIceCount ?? 0)) +
+      Math.max(0, Math.floor(run.rezzedBlackOpsCount ?? 0)) +
+      Math.max(0, Math.floor(run.liberatedBlackOpsAgendaCount ?? 0));
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        tagsAdded: tagAmount,
+        runnerTagsAfter: host.state.runner.tags,
+        liveNewsFeedEncounteredBlackIceCount: Math.max(
+          0,
+          Math.floor(run.encounteredBlackIceCount ?? 0),
+        ),
+        liveNewsFeedRezzedBlackOpsCount: Math.max(
+          0,
+          Math.floor(run.rezzedBlackOpsCount ?? 0),
+        ),
+        liveNewsFeedLiberatedBlackOpsAgendaCount: Math.max(
+          0,
+          Math.floor(run.liberatedBlackOpsAgendaCount ?? 0),
+        ),
+      };
+    }
+  } else {
+    badPublicityAdded = Math.max(
+      0,
+      Math.floor(run.trashedAdvertisementCount ?? 0),
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        subliminalCorruptionTrashedAdvertisementCount: badPublicityAdded,
+      };
+    }
+  }
+  if (badPublicityAdded <= 0) return;
+  const before = host.state.corp.badPublicity;
+  host.state.corp.badPublicity += badPublicityAdded;
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      sourceDefinitionId: aftermath.sourceDefinitionId,
+      badPublicityAdded:
+        Math.max(0, Math.floor(Number(legalAction.payload?.badPublicityAdded ?? 0))) +
+        badPublicityAdded,
+      corpBadPublicityBefore:
+        typeof legalAction.payload?.corpBadPublicityBefore === "number"
+          ? legalAction.payload.corpBadPublicityBefore
+          : before,
+      corpBadPublicityAfter: host.state.corp.badPublicity,
+    };
+    legalAction.resolvedEffects = [
+      ...(legalAction.resolvedEffects ?? []),
+      {
+        effectId: `${run.runId}.${aftermath.sourceCardId}.bad_publicity_after_run`,
+        kind: "add_bad_publicity",
+        visibility: "public",
+        side: "corp",
+        amount: badPublicityAdded,
+        reason: aftermath.kind,
+        sourceDefinitionId: aftermath.sourceDefinitionId,
+        sourceTitle: aftermath.sourceTitle,
+      },
+    ];
+  }
 }
 
 function applyPirateBroadcastRunResult(
