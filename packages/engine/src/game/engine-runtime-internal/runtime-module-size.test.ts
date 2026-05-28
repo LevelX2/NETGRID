@@ -53,7 +53,20 @@ describe("engine runtime module size gates", () => {
     }
     expect(
       lineCount(join(runtimeInternalDir, "runtime-bootstrap.ts")),
-    ).toBeLessThanOrEqual(3200);
+    ).toBeLessThanOrEqual(700);
+    for (const module of [
+      "action-runtime-bootstrap.ts",
+      "card-runtime-bootstrap.ts",
+      "flow-runtime-bootstrap.ts",
+      "public-event-runtime-bootstrap.ts",
+      "runtime-bootstrap-support.ts",
+      "state-runtime-bootstrap.ts",
+    ]) {
+      expect(
+        lineCount(join(runtimeInternalDir, module)),
+        `${module} exceeds the runtime bootstrap phase ceiling`,
+      ).toBeLessThanOrEqual(1500);
+    }
     expect(
       lineCount(join(runtimeInternalDir, "runtime-delegates.ts")),
     ).toBeLessThanOrEqual(600);

@@ -1,8 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createActivatedCardRuntimeHosts } from "./activated-card-runtime-hosts";
+import { configureActionRuntimeBootstrap } from "./action-runtime-bootstrap";
 import { createActionRuntimeHosts } from "./action-runtime-hosts";
 import { corpRunnerActionPaidWindowActions as delegatedCorpRunnerActionPaidWindowActions } from "./action-runtime-delegates";
+import { configureCardRuntimeBootstrap } from "./card-runtime-bootstrap";
 import { createCardLifecycleRuntimeHosts } from "./card-lifecycle-runtime-hosts";
 import { triggerAbilityExecutionHost as delegatedTriggerAbilityExecutionHost } from "./card-runtime-delegates";
 import { createCardRuntimeDepsHosts } from "./card-runtime-deps-hosts";
@@ -13,6 +15,7 @@ import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { hiddenZoneSearchHandlerHostBase as delegatedHiddenZoneSearchHandlerHostBase } from "./choice-runtime-delegates";
 import { createCorpRuntimeResolvers } from "./corp-runtime-resolvers";
 import { createCorpZoneRuntimeHosts } from "./corp-zone-runtime-hosts";
+import { configureFlowRuntimeBootstrap } from "./flow-runtime-bootstrap";
 import { createFlowRuntimeHosts } from "./flow-runtime-hosts";
 import { runMovementHostForState as delegatedRunMovementHostForState } from "./flow-runtime-delegates";
 import { createHiddenZoneArrangeRuntime } from "./hidden-zone-arrange-runtime";
@@ -21,7 +24,12 @@ import { createHiddenZoneNonSearchRuntime } from "./hidden-zone-nonsearch-runtim
 import { createHiddenZoneSearchRuntime } from "./hidden-zone-search-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createPendingChoiceRuntimeHosts } from "./pending-choice-runtime-hosts";
+import {
+  RUNNER_EVENT_RESOLVERS,
+  validateDeckDefinition,
+} from "./public-event-runtime-bootstrap";
 import { createStateCorpRuntimeResolvers } from "./state-corp-runtime-resolvers";
+import { initializeStateRuntimeBootstrap } from "./state-runtime-bootstrap";
 import { runnerRecurringCredits as delegatedRunnerRecurringCredits } from "./state-runtime-delegates";
 import { createStateRuntimeResolvers } from "./state-runtime-resolvers";
 import { createStateRuntimeServices } from "./state-runtime-services";
@@ -54,6 +62,12 @@ describe("engine runtime internal domains", () => {
       "./hidden-zone-search-runtime.ts",
       "./lifecycle-runtime.ts",
       "./pending-choice-runtime-hosts.ts",
+      "./action-runtime-bootstrap.ts",
+      "./card-runtime-bootstrap.ts",
+      "./flow-runtime-bootstrap.ts",
+      "./public-event-runtime-bootstrap.ts",
+      "./runtime-bootstrap-support.ts",
+      "./state-runtime-bootstrap.ts",
       "./runtime-delegate-store.ts",
       "./state-runtime-delegates.ts",
       "./state-corp-runtime-resolvers.ts",
@@ -154,6 +168,14 @@ describe("engine runtime internal domains", () => {
       typeof createTurnRuntimeResolvers({}).applyCorpStartOfTurnEffects,
     ).toBe("function");
     expect(typeof initializeRuntimeDelegates).toBe("function");
+    expect(typeof configureCardRuntimeBootstrap).toBe("function");
+    expect(typeof configureFlowRuntimeBootstrap).toBe("function");
+    expect(typeof configureActionRuntimeBootstrap).toBe("function");
+    expect(typeof initializeStateRuntimeBootstrap).toBe("function");
+    expect(typeof RUNNER_EVENT_RESOLVERS.simple_economy_event?.resolve).toBe(
+      "function",
+    );
+    expect(typeof validateDeckDefinition).toBe("function");
     expect(typeof delegatedCorpRunnerActionPaidWindowActions).toBe("function");
     expect(typeof delegatedRunMovementHostForState).toBe("function");
     expect(typeof delegatedTriggerAbilityExecutionHost).toBe("function");

@@ -35,4 +35,15 @@ These files wire existing CardImplementation, trigger, install, rez and lifecycl
 
 Delegate modules are mechanical forwarders. Do not add new features permanently to `runtime-bootstrap.ts`, `runtime-delegates.ts` or delegate modules. New runtime domain logic belongs in the appropriate `game/*` module or in a focused internal runtime module.
 
+`runtime-bootstrap.ts` is now only the import-time bootstrap orchestrator. ARCH-111 split the previous broad bootstrap file into explicit phases:
+
+- `card-runtime-bootstrap.ts`
+- `flow-runtime-bootstrap.ts`
+- `action-runtime-bootstrap.ts`
+- `state-runtime-bootstrap.ts`
+- `public-event-runtime-bootstrap.ts`
+- `runtime-bootstrap-support.ts`
+
+The orchestrator owns the global bootstrap order. Phase modules expose configure/initialize functions and must not configure each other at import time. Preserve the import-time side effect from `public-api.ts`: importing the public runtime must still execute the bootstrap exactly once through `runtime-bootstrap.ts`. New gameplay logic does not belong in bootstrap modules; put it in the owning game/domain module and wire it through a focused runtime bridge only when necessary.
+
 The target architecture is now a small package facade, a small runtime facade, and private runtime domain modules protected by size and import gates. Future work should improve specific internal domain modules instead of growing the facades.
