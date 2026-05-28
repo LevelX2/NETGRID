@@ -42,9 +42,27 @@ export function executeStartRunAction(
     ServerId,
     "new_remote"
   >;
+  const flags = host.turn.ensureRunnerTurnFlags();
+  const pirateBroadcastNextServerId =
+    flags.pirateBroadcastPending?.pendingServerIds[0];
+  if (pirateBroadcastNextServerId) {
+    if (
+      legalAction.payload?.pirateBroadcastRun !== true ||
+      legalAction.payload?.bonusRunNoClick !== true
+    )
+      throw new Error("Pirate Broadcast erzwingt den nächsten Data-Fort-Run.");
+    if (serverId !== pirateBroadcastNextServerId)
+      throw new Error("Pirate Broadcast verlangt den nächsten Data Fort.");
+    if (
+      legalAction.payload?.bonusRunSource !==
+      flags.pirateBroadcastPending?.sourceDefinitionId
+    )
+      throw new Error("Die Pirate-Broadcast-Quelle passt nicht zur Sequenz.");
+  } else if (legalAction.payload?.pirateBroadcastRun === true) {
+    throw new Error("Es ist keine Pirate-Broadcast-Sequenz offen.");
+  }
   host.run.validateRovingSubmarineRunGate(serverId);
   if (legalAction.payload?.bonusRunNoClick === true) {
-    const flags = host.turn.ensureRunnerTurnFlags();
     if (legalAction.payload?.pirateBroadcastRun !== true) {
       flags.allNighterBonusRunPending = false;
       flags.bodyweightDataCrecheExtraRunPending = false;

@@ -262,6 +262,30 @@ export function buildRunnerMainActions(
   const pirateBroadcastPending = flags.pirateBroadcastPending;
   const pirateBroadcastNextServerId =
     pirateBroadcastPending?.pendingServerIds[0];
+  if (pirateBroadcastPending && pirateBroadcastNextServerId) {
+    const forcedRunActions = buildPirateBroadcastForcedRunActions(host, {
+      pirateBroadcastPending,
+      pirateBroadcastNextServerId,
+      runDurationPaymentHost: runDurationPaymentHost(state),
+    });
+    if (forcedRunActions.length > 0) return forcedRunActions;
+    return [
+      action(
+        state,
+        "runner",
+        "trigger_ability",
+        "Pirate Broadcast: Sequenz scheitert",
+        "game_rule",
+        [],
+        {
+          runnerAbility: "pirate_broadcast_sequence_failed",
+          sourceDefinitionId: pirateBroadcastPending.sourceDefinitionId,
+          pirateBroadcastSequenceFailed: true,
+          actionDebtAdded: 1,
+        },
+      ),
+    ];
+  }
   const bonusRunPending =
     flags.allNighterBonusRunPending === true ||
     pirateBroadcastNextServerId !== undefined;
@@ -1216,6 +1240,77 @@ export function buildRunnerMainActions(
     );
   }
   return actions;
+}
+
+function buildPirateBroadcastForcedRunActions(
+  host: RunnerMainActionGenerationHost,
+  input: {
+    pirateBroadcastPending: NonNullable<
+      NonNullable<GameState["runnerTurnFlags"]>["pirateBroadcastPending"]
+    >;
+    pirateBroadcastNextServerId: string;
+    runDurationPaymentHost: unknown;
+  },
+): LegalAction[] {
+  const state = host.state;
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === input.pirateBroadcastNextServerId,
+  );
+  if (!server) return [];
+  if (
+    host.run.isRovingSubmarineRunBlocked(
+      host.run.fortRunSideFamiliesHostForState(state),
+      server.id,
+    )
+  )
+    return [];
+  const upgradeRunStartTax = host.run.runStartTaxForServerUpgrades(
+    state,
+    server.id,
+  );
+  const newsgroupRunTax = host.run.newsgroupTauntingRunStartTax(state);
+  const runStartTaxCredits =
+    upgradeRunStartTax.amount + newsgroupRunTax.amount;
+  if (
+    runStartTaxCredits > 0 &&
+    host.runner.availableRunnerRunStartCredits(input.runDurationPaymentHost) <
+      runStartTaxCredits
+  )
+    return [];
+  const runPayload = {
+    serverId: server.id,
+    ...(upgradeRunStartTax.amount > 0
+      ? {
+          v1918UpgradeAbility: "run_start_tax",
+          runStartTaxCredits: upgradeRunStartTax.amount,
+          runStartTaxSourceDefinitionIds:
+            upgradeRunStartTax.sourceDefinitionIds.join(","),
+        }
+      : {}),
+    ...(newsgroupRunTax.amount > 0
+      ? {
+          v1920AssetAbility: "newsgroup_taunting_run_start_tax",
+          newsgroupTauntingRunStartTaxCredits: newsgroupRunTax.amount,
+          newsgroupTauntingSourceDefinitionIds:
+            newsgroupRunTax.sourceDefinitionIds.join(","),
+        }
+      : {}),
+    ...(runStartTaxCredits > 0 ? { runStartTaxCredits } : {}),
+    bonusRunNoClick: true,
+    bonusRunSource: input.pirateBroadcastPending.sourceDefinitionId,
+    pirateBroadcastRun: true,
+  };
+  return [
+    host.actions.buildLegalAction(
+      state,
+      "runner",
+      "start_run",
+      `Pirate-Broadcast-Run auf ${server.label}`,
+      "game_rule",
+      runStartTaxCredits > 0 ? [{ credits: runStartTaxCredits }] : [],
+      runPayload,
+    ),
+  ];
 }
 
 function installedCorpIceTargetIds(state: GameState): string[] {

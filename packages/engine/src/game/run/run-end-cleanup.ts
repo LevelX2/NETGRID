@@ -344,7 +344,8 @@ export function handleRunEndCleanup(
   host.state.phase = "runner_action_phase";
   host.state.timingPoint = "runner_action.main";
   host.state.activeSide = "runner";
-  host.runner.consumeFutureActionDebt();
+  if (!pirateBroadcast.deferActionDebtConsumption)
+    host.runner.consumeFutureActionDebt();
   host.cleanup.cleanupEmptyRemotes();
   return {
     handled: true,
@@ -378,7 +379,7 @@ function applyPirateBroadcastRunResult(
   run: ActiveRun,
   successful: boolean,
   legalAction?: LegalAction,
-): { handled: boolean } {
+): { handled: boolean; deferActionDebtConsumption?: boolean } {
   const sequence = run.pirateBroadcast;
   if (!sequence) return { handled: false };
   if (!successful) {
@@ -398,7 +399,7 @@ function applyPirateBroadcastRunResult(
         sourceDefinitionId: sequence.sourceDefinitionId,
       };
     }
-    return { handled: true };
+    return { handled: true, deferActionDebtConsumption: true };
   }
   const successfulServerIds = [
     ...sequence.successfulServerIds,
@@ -417,7 +418,7 @@ function applyPirateBroadcastRunResult(
         sourceDefinitionId: sequence.sourceDefinitionId,
       };
     }
-    return { handled: true };
+    return { handled: true, deferActionDebtConsumption: true };
   }
   delete host.runner.ensureTurnFlags().pirateBroadcastPending;
   if (!host.runner.awardEventAgendaPoint)

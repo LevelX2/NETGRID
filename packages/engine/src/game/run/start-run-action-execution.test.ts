@@ -208,4 +208,42 @@ describe("start-run-action-execution", () => {
     handleStartRunActionExecution(hostFor(state(), calls), taxAction);
     expect(taxAction.payload).toMatchObject({ runStartTaxPaid: 2 });
   });
+
+  it("revalidates pending Pirate Broadcast sequence runs", () => {
+    const gameState = state();
+    const calls: string[] = [];
+    gameState.runnerTurnFlags!.pirateBroadcastPending = {
+      sourceCardId: "pirate_1" as CardInstanceId,
+      sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+      sourceTitle: "Pirate Broadcast",
+      pendingServerIds: ["rd", "archives"],
+      successfulServerIds: ["hq"],
+    };
+
+    expect(() =>
+      handleStartRunActionExecution(
+        hostFor(gameState, calls),
+        action({ serverId: "hq", bonusRunNoClick: true, pirateBroadcastRun: true }),
+      ),
+    ).toThrow("Pirate Broadcast verlangt den nächsten Data Fort.");
+    expect(() =>
+      handleStartRunActionExecution(
+        hostFor(gameState, calls),
+        action({ serverId: "rd" }),
+      ),
+    ).toThrow("Pirate Broadcast erzwingt den nächsten Data-Fort-Run.");
+
+    handleStartRunActionExecution(
+      hostFor(gameState, calls),
+      action({
+        serverId: "rd",
+        bonusRunNoClick: true,
+        pirateBroadcastRun: true,
+        bonusRunSource: "onr_proteus_116_pirate-broadcast",
+      }),
+    );
+
+    expect(gameState.runner.clicks).toBe(3);
+    expect(gameState.run?.attackedServerId).toBe("rd");
+  });
 });
