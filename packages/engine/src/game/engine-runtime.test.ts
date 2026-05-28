@@ -16,18 +16,29 @@ import {
   hashState as runtimeHashState,
   replayEvents as runtimeReplayEvents,
 } from "./engine-runtime";
+import {
+  applyAction as internalApplyAction,
+  createGame as internalCreateGame,
+  getLegalActions as internalGetLegalActions,
+  getPlayerView as internalGetPlayerView,
+  hashState as internalHashState,
+  replayEvents as internalReplayEvents,
+} from "./engine-runtime-internal/public-api";
 
 describe("engine runtime boundary", () => {
   it("does not import the public index facade", () => {
-    const source = readFileSync(
-      new URL("./engine-runtime.ts", import.meta.url),
-      "utf8",
-    );
+    const sources = [
+      "./engine-runtime.ts",
+      "./engine-runtime-internal/public-api.ts",
+      "./engine-runtime-internal/runtime-implementation.ts",
+    ].map((path) => readFileSync(new URL(path, import.meta.url), "utf8"));
 
-    expect(source).not.toContain('from "../index"');
-    expect(source).not.toContain("from '../index'");
-    expect(source).not.toContain('from "../../index"');
-    expect(source).not.toContain("from '../../index'");
+    for (const source of sources) {
+      expect(source).not.toContain('from "../index"');
+      expect(source).not.toContain("from '../index'");
+      expect(source).not.toContain('from "../../index"');
+      expect(source).not.toContain("from '../../index'");
+    }
   });
 
   it("keeps the index public API wired to the runtime exports", () => {
@@ -37,6 +48,12 @@ describe("engine runtime boundary", () => {
     expect(publicGetPlayerView).toBe(runtimeGetPlayerView);
     expect(publicReplayEvents).toBe(runtimeReplayEvents);
     expect(publicHashState).toBe(runtimeHashState);
+    expect(runtimeCreateGame).toBe(internalCreateGame);
+    expect(runtimeApplyAction).toBe(internalApplyAction);
+    expect(runtimeGetLegalActions).toBe(internalGetLegalActions);
+    expect(runtimeGetPlayerView).toBe(internalGetPlayerView);
+    expect(runtimeReplayEvents).toBe(internalReplayEvents);
+    expect(runtimeHashState).toBe(internalHashState);
   });
 
   it("runs representative public API flows through both import paths", () => {
