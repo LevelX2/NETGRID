@@ -1,19 +1,32 @@
 ---
 activityId: act-2026-05-28-recent-results-series-matchpoints
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-28
-startedAt:
-completedAt:
+startedAt: 2026-05-28
+completedAt: 2026-05-28
 branch:
 releaseTarget: Private Result History UX
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/api-contracts.ts
+  - packages/shared/src/index.ts
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/multiplayer.test.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/globals.css
+  - apps/web/app/recent-results-ui.ts
+  - apps/web/app/recent-results-ui.test.ts
+checks:
+  - corepack pnpm vitest run apps/server/src/multiplayer.test.ts apps/web/app/recent-results-ui.test.ts
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - git diff --check
 ---
 
 # Letzte Ergebnisse: Matchserien aggregieren und Matchpunkte anzeigen
@@ -56,18 +69,18 @@ Die Menüleistenansicht für letzte Spiele soll fachlich letzte Ergebnisse zeige
 
 ## Akzeptanzkriterien
 
-- [ ] Eine abgeschlossene `two_game_side_swap`-Serie erscheint in der Menüleistenansicht genau einmal, auch wenn zwei Einzelspiele abgeschlossen wurden.
-- [ ] Einzelspiele ohne `seriesId` erscheinen weiterhin jeweils als eigener Eintrag.
-- [ ] Die Recent-Liste ist nach dem letzten Ergebniszeitpunkt sortiert; bei Serien zählt das späteste beendete Serienspiel.
-- [ ] Einzelspiel-Einträge zeigen die vergebenen Matchpunkte: Gewinner 10, Verlierer seine erzielten Agenda-Punkte; bei Draw beide ihre Agenda-Punkte.
-- [ ] Serien-Einträge zeigen die Gesamt-Matchpunkte beider Spieler und die Einzelspiel-Aufschlüsselung.
-- [ ] Die Serienwertung stimmt mit der bestehenden `GameResultSummary.series`-Wertung überein.
-- [ ] Forfeit-Ergebnisse innerhalb einer Serie werden mit der bestehenden Serienwertung abgebildet: Gewinner 10 Matchpunkte, Verlierer tatsächliche Agenda-Punkte, letzter echter Engine-StateHash bleibt nur Nachweisfeld.
-- [ ] Die API-Antwort enthält keine Session-Tokens, Reconnect-Tokens, Join-Tokens, Token-Hashes, Decklisten, `cardInstances`, privaten Payloads oder verdeckten Kartendaten.
-- [ ] Die Web-UI zeigt bei Serien nicht mehr nur `Spiel 1/2` oder `Spiel 2/2` als Einzelkarten, sondern eine Serienkarte.
-- [ ] Der bestehende `limit`-Parameter bleibt sinnvoll begrenzt; die Begrenzung bezieht sich auf Ergebnis-Einträge, nicht auf einzelne Spiele vor Serienaggregation.
-- [ ] Server-Tests decken Serienaggregation, Matchpunktberechnung, Sortierung und Redaction ab.
-- [ ] Web-Tests decken Einzelspielkarte, Serienkarte mit zwei Spielen und leeren/ladefehlerhaften Zustand ab.
+- [x] Eine abgeschlossene `two_game_side_swap`-Serie erscheint in der Menüleistenansicht genau einmal, auch wenn zwei Einzelspiele abgeschlossen wurden.
+- [x] Einzelspiele ohne `seriesId` erscheinen weiterhin jeweils als eigener Eintrag.
+- [x] Die Recent-Liste ist nach dem letzten Ergebniszeitpunkt sortiert; bei Serien zählt das späteste beendete Serienspiel.
+- [x] Einzelspiel-Einträge zeigen die vergebenen Matchpunkte: Gewinner 10, Verlierer seine erzielten Agenda-Punkte; bei Draw beide ihre Agenda-Punkte.
+- [x] Serien-Einträge zeigen die Gesamt-Matchpunkte beider Spieler und die Einzelspiel-Aufschlüsselung.
+- [x] Die Serienwertung stimmt mit der bestehenden `GameResultSummary.series`-Wertung überein.
+- [x] Forfeit-Ergebnisse innerhalb einer Serie werden mit der bestehenden Serienwertung abgebildet: Gewinner 10 Matchpunkte, Verlierer tatsächliche Agenda-Punkte, letzter echter Engine-StateHash bleibt nur Nachweisfeld.
+- [x] Die API-Antwort enthält keine Session-Tokens, Reconnect-Tokens, Join-Tokens, Token-Hashes, Decklisten, `cardInstances`, privaten Payloads oder verdeckten Kartendaten.
+- [x] Die Web-UI zeigt bei Serien nicht mehr nur `Spiel 1/2` oder `Spiel 2/2` als Einzelkarten, sondern eine Serienkarte.
+- [x] Der bestehende `limit`-Parameter bleibt sinnvoll begrenzt; die Begrenzung bezieht sich auf Ergebnis-Einträge, nicht auf einzelne Spiele vor Serienaggregation.
+- [x] Server-Tests decken Serienaggregation, Matchpunktberechnung, Sortierung und Redaction ab.
+- [x] Web-Tests decken Einzelspielkarte, Serienkarte mit zwei Spielen und leeren/ladefehlerhaften Zustand ab.
 
 ## Umsetzungshinweise
 
@@ -80,4 +93,14 @@ Die Menüleistenansicht für letzte Spiele soll fachlich letzte Ergebnisse zeige
 
 ## Ergebnisnotiz
 
-Noch nicht umgesetzt.
+Umgesetzt: Die Recent-Results-API liefert jetzt Ergebnis-Einträge über `ApiRecentResultEntry`. Einzelspiele bleiben als eigene Einträge erhalten und enthalten serverseitig berechnete Matchpunkte. `two_game_side_swap`-Serien werden nach `seriesId` aggregiert, nach dem spätesten Serienspiel sortiert und als genau eine Serienkarte mit Gesamt-Matchpunkten, Agenda-Summen, Siegen und kompakten Spielzeilen ausgeliefert. Die Web-UI zeigt Serien nicht mehr als einzelne Spielkarten, sondern als Serienergebnis mit Spielaufschlüsselung.
+
+Checks grün:
+
+- `corepack pnpm vitest run apps/server/src/multiplayer.test.ts apps/web/app/recent-results-ui.test.ts`
+- `corepack pnpm --filter @netgrid/server typecheck`
+- `corepack pnpm --filter @netgrid/web typecheck`
+- `corepack pnpm --filter @netgrid/shared typecheck`
+- `git diff --check`
+
+Nicht ausgeführt: Browser-Smoke, weil kein lokaler NETGRID-Server auf `127.0.0.1:3000`, `3001` oder `5173` lief; normaler Projektstart bleibt `scripts/start-netgrid.ps1`.

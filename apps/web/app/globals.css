@@ -980,7 +980,7 @@ select {
 
 .recentGamePrimary {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: start;
   gap: 12px;
 }
@@ -1043,6 +1043,12 @@ select {
   font-size: 11px;
 }
 
+.recentGameScore.matchPoints {
+  border-color: color-mix(in srgb, var(--accent), var(--line) 34%);
+  color: var(--accent-strong);
+  background: color-mix(in srgb, var(--accent), var(--panel) 86%);
+}
+
 .recentGameDetails,
 .recentGameDecks {
   display: flex;
@@ -1060,6 +1066,43 @@ select {
   border-radius: 6px;
   background: var(--panel);
   padding: 4px 7px;
+}
+
+.recentSeriesGames {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recentSeriesGames li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  padding: 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.recentSeriesGames span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .recentGamePrimary,
+  .recentSeriesGames li {
+    grid-template-columns: 1fr;
+  }
+
+  .recentGameScore {
+    justify-items: start;
+  }
 }
 
 .joinLinkField {
@@ -3374,6 +3417,32 @@ select {
   font-weight: 700;
   line-height: 1.15;
   text-align: center;
+}
+
+.recentSeriesGames {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recentSeriesGames li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  padding: 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.recentSeriesGames span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .damageImpactOverlay {

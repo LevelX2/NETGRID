@@ -24,6 +24,9 @@ import {
   type ApiMatchStatus,
   type ApiSeriesPlayerSlot,
   type ApiRecentGameResult,
+  type ApiRecentResultEntry,
+  type ApiRecentSeriesGameResult,
+  type ApiRecentSeriesResult,
   type ApiSeriesResultSummary,
   type ApiSeriesStatus,
   type ApiServicePayload,
@@ -43,7 +46,8 @@ import {
   type PlayerView,
   type PublicGameEvent,
   type RulesBaseline,
-  type Side
+  type Side,
+  type Winner
 } from "@netgrid/shared";
 import {
   deckSetupForParticipants,
@@ -383,7 +387,7 @@ export type OpenMatchListEntry = {
   ageSeconds: number;
 };
 
-export type RecentGameResultEntry = ApiRecentGameResult;
+export type RecentGameResultEntry = ApiRecentResultEntry;
 
 export type ReplayStateHashCheck = {
   ok: boolean;
@@ -1702,12 +1706,21 @@ export class MultiplayerService {
     const records = this.storage.list ? await this.storage.list() : [];
     const normalizedLimit = Number.isFinite(limit) ? Math.floor(limit) : 20;
     const cappedLimit = Math.max(1, Math.min(50, normalizedLimit));
-    return records
-      .filter((record) => record.match.status === "finished" && Boolean(record.gameState?.winner))
-      .sort((left, right) => right.match.updatedAt.localeCompare(left.match.updatedAt))
-      .slice(0, cappedLimit)
-      .map((record) => recentGameResultEntryFor(record))
-      .filter((entry): entry is RecentGameResultEntry => Boolean(entry));
+    const seriesGroups = new Map<string, StoredMatch[]>();
+    const entries: RecentGameResultEntry[] = [];
+    for (const record of records.filter((candidate) => candidate.match.status === "finished" && Boolean(candidate.gameState?.winner))) {
+      const seriesId = record.match.series?.seriesId;
+      if (seriesId) seriesGroups.set(seriesId, [...(seriesGroups.get(seriesId) ?? []), record]);
+      else {
+        const entry = recentGameResultEntryFor(record);
+        if (entry) entries.push(entry);
+      }
+    }
+    for (const group of seriesGroups.values()) {
+      const entry = recentSeriesResultEntryFor(group);
+      if (entry) entries.push(entry);
+    }
+    return entries.sort((left, right) => right.finishedAt.localeCompare(left.finishedAt)).slice(0, cappedLimit);
   }
 
   async loadReplayView(matchId: string, perspective: ReplayPerspective): Promise<{ ok: true; replay: ReplayView } | { ok: false; error: SafeErrorPayload }> {
@@ -3230,7 +3243,11 @@ function recentGameResultEntryFor(record: StoredMatch): RecentGameResultEntry | 
   const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
   const actionEvents = record.eventLog.filter((event) => event.publicPayload.type !== "game_created");
   const finalStateHash = record.lifecycleResult?.finalEngineStateHash ?? hashState(state);
+  const runnerMatchPoints = singleGameMatchPointsFor(winner, "runner", runnerAgendaPoints);
+  const corpMatchPoints = singleGameMatchPointsFor(winner, "corp", corpAgendaPoints);
   return {
+    entryType: "single_game",
+    resultId: `match:${record.match.matchId}`,
     matchId: record.match.matchId,
     matchStatus: "finished",
     matchMode: record.match.mode,
@@ -3243,11 +3260,13 @@ function recentGameResultEntryFor(record: StoredMatch): RecentGameResultEntry | 
     runner: {
       displayName: publicDisplayNameForSide(record, "runner"),
       agendaPoints: runnerAgendaPoints,
+      matchPoints: runnerMatchPoints,
       ...(record.match.deckSetup.runner.deckName ? { deckName: record.match.deckSetup.runner.deckName } : {})
     },
     corp: {
       displayName: publicDisplayNameForSide(record, "corp"),
       agendaPoints: corpAgendaPoints,
+      matchPoints: corpMatchPoints,
       ...(record.match.deckSetup.corp.deckName ? { deckName: record.match.deckSetup.corp.deckName } : {})
     },
     actionCount: actionEvents.length,
@@ -3264,6 +3283,83 @@ function recentGameResultEntryFor(record: StoredMatch): RecentGameResultEntry | 
         }
       : {})
   };
+}
+
+function recentSeriesResultEntryFor(records: StoredMatch[]): ApiRecentSeriesResult | undefined {
+  const latestRecord = records.slice().sort((left, right) => right.match.updatedAt.localeCompare(left.match.updatedAt))[0];
+  const latestSeries = latestRecord?.match.series;
+  if (!latestRecord || !latestSeries) return undefined;
+  const resultsByMatchId = new Map<string, SeriesGameResult>();
+  for (const record of records) {
+    for (const result of record.match.series?.results ?? []) resultsByMatchId.set(result.matchId, result);
+  }
+  const games = [...resultsByMatchId.values()].sort((left, right) => left.gameNumber - right.gameNumber || left.finishedAt.localeCompare(right.finishedAt));
+  if (games.length === 0) return undefined;
+  const playerStats: ApiRecentSeriesResult["players"] = {
+    player_a: { displayName: publicDisplayNameForSeriesPlayer(latestRecord, "player_a"), matchPoints: 0, agendaPoints: 0, wins: 0 },
+    player_b: { displayName: publicDisplayNameForSeriesPlayer(latestRecord, "player_b"), matchPoints: 0, agendaPoints: 0, wins: 0 }
+  };
+  const gameEntries: ApiRecentSeriesGameResult[] = games.map((result) => {
+    const winnerPlayer = winningSeriesPlayer(result);
+    if (winnerPlayer !== "draw") playerStats[winnerPlayer].wins += 1;
+    playerStats[result.runnerPlayer].agendaPoints += result.runnerAgendaPoints;
+    playerStats[result.corpPlayer].agendaPoints += result.corpAgendaPoints;
+    const runnerMatchPoints = seriesMatchPointsFor(result, result.runnerPlayer);
+    const corpMatchPoints = seriesMatchPointsFor(result, result.corpPlayer);
+    playerStats[result.runnerPlayer].matchPoints += runnerMatchPoints;
+    playerStats[result.corpPlayer].matchPoints += corpMatchPoints;
+    return {
+      matchId: result.matchId,
+      gameNumber: result.gameNumber,
+      finishedAt: result.finishedAt,
+      winner: result.winner,
+      ...(winnerPlayer === "draw" ? {} : { winnerPlayer }),
+      reason: result.reason ?? "unknown",
+      runnerPlayer: result.runnerPlayer,
+      corpPlayer: result.corpPlayer,
+      runnerDisplayName: playerStats[result.runnerPlayer].displayName,
+      corpDisplayName: playerStats[result.corpPlayer].displayName,
+      runnerAgendaPoints: result.runnerAgendaPoints,
+      corpAgendaPoints: result.corpAgendaPoints,
+      runnerMatchPoints,
+      corpMatchPoints,
+      finalStateHash: result.finalStateHash
+    };
+  });
+  const outcome = playerStats.player_a.matchPoints > playerStats.player_b.matchPoints ? "player_a" : playerStats.player_b.matchPoints > playerStats.player_a.matchPoints ? "player_b" : "draw";
+  const finishedAt = gameEntries.reduce((latest, game) => game.finishedAt > latest ? game.finishedAt : latest, latestRecord.match.updatedAt);
+  const startedAt = records.reduce((earliest, record) => record.match.createdAt < earliest ? record.match.createdAt : earliest, latestRecord.match.createdAt);
+  return {
+    entryType: "series",
+    resultId: `series:${latestSeries.seriesId}`,
+    seriesId: latestSeries.seriesId,
+    mode: latestSeries.mode,
+    status: latestSeries.status,
+    matchMode: latestRecord.match.mode,
+    matchFormat: "two_game_side_swap",
+    startedAt,
+    finishedAt,
+    gamesPlayed: gameEntries.length,
+    gamesPlanned: latestSeries.gamesPlanned,
+    ...(outcome === "draw" ? {} : { winnerPlayer: outcome }),
+    outcome,
+    decision: outcome === "draw" ? "draw" : "match_points",
+    players: playerStats,
+    games: gameEntries
+  };
+}
+
+function singleGameMatchPointsFor(winner: Winner, side: Side, agendaPoints: number): number {
+  if (winner === "draw") return agendaPoints;
+  return winner === side ? SERIES_WIN_MATCH_POINTS : agendaPoints;
+}
+
+function publicDisplayNameForSeriesPlayer(record: StoredMatch, player: SeriesPlayerSlot): string {
+  const series = record.match.series;
+  if (!series) return player === "player_a" ? "Spieler A" : "Spieler B";
+  if (series.runnerPlayer === player) return publicDisplayNameForSide(record, "runner");
+  if (series.corpPlayer === player) return publicDisplayNameForSide(record, "corp");
+  return player === "player_a" ? "Spieler A" : "Spieler B";
 }
 
 function publicDisplayNameForSide(record: StoredMatch, side: Side): string {

@@ -71,6 +71,8 @@ import type {
   ApiMatchStatus,
   ApiPlayerClockSnapshot,
   ApiRecentGameResult,
+  ApiRecentResultEntry,
+  ApiRecentSeriesResult,
   ApiSeriesResultSummary,
   ApiServerMessage,
   ApiSidePayload,
@@ -114,6 +116,7 @@ import {
   type TurnStartAudioState
 } from "./action-cues";
 import { localizedDeCardTitle } from "./card-image-manifest";
+import { recentResultsEmptyText, recentSeriesWinnerLabel, seriesStatusLabel, singleRecentMatchPoints } from "./recent-results-ui";
 import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
@@ -469,7 +472,7 @@ type OpenMatchesResponse = {
 };
 
 type RecentGameResultsResponse = {
-  results?: ApiRecentGameResult[];
+  results?: ApiRecentResultEntry[];
   error?: { message: string };
 };
 
@@ -2142,7 +2145,7 @@ export default function Page() {
   const [openLanLoading, setOpenLanLoading] = useState(false);
   const [openLanError, setOpenLanError] = useState("");
   const [openLanUpdatedAt, setOpenLanUpdatedAt] = useState<string | null>(null);
-  const [recentGameResults, setRecentGameResults] = useState<ApiRecentGameResult[]>([]);
+  const [recentGameResults, setRecentGameResults] = useState<ApiRecentResultEntry[]>([]);
   const [recentGameResultsLoading, setRecentGameResultsLoading] = useState(false);
   const [recentGameResultsError, setRecentGameResultsError] = useState("");
   const [recentGameResultsUpdatedAt, setRecentGameResultsUpdatedAt] = useState<string | null>(null);
@@ -7125,7 +7128,7 @@ function RecentGamesPanel({
   updatedAt,
   onRefresh
 }: {
-  results: ApiRecentGameResult[];
+  results: ApiRecentResultEntry[];
   loading: boolean;
   error: string;
   updatedAt: string | null;
@@ -7149,12 +7152,12 @@ function RecentGamesPanel({
         </p>
       ) : null}
       {results.length === 0 ? (
-        <p className="recentGamesEmpty">{loading ? "Lade letzte Spiele ..." : "Noch keine vollständig beendeten Spiele gefunden."}</p>
+        <p className="recentGamesEmpty">{recentResultsEmptyText(loading)}</p>
       ) : (
         <ol className="recentGamesList">
           {results.map((result) => (
-            <li key={result.matchId}>
-              <RecentGameResultCard result={result} />
+            <li key={result.resultId ?? (result.entryType === "series" ? result.seriesId : result.matchId)}>
+              {result.entryType === "series" ? <RecentSeriesResultCard result={result} /> : <RecentGameResultCard result={result} />}
             </li>
           ))}
         </ol>
@@ -7167,6 +7170,8 @@ function RecentGamesPanel({
 function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
   const winnerName = result.winner === "draw" ? "Unentschieden" : result.winner === "runner" ? result.runner.displayName : result.corp.displayName;
   const scoreText = `${result.runner.agendaPoints} : ${result.corp.agendaPoints}`;
+  const runnerMatchPoints = result.runner.matchPoints ?? singleRecentMatchPoints(result.winner, "runner", result.runner.agendaPoints);
+  const corpMatchPoints = result.corp.matchPoints ?? singleRecentMatchPoints(result.winner, "corp", result.corp.agendaPoints);
   return (
     <article className="recentGameCard">
       <div className="recentGamePrimary">
@@ -7186,6 +7191,10 @@ function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
         <div className="recentGameScore" aria-label={`Endstand Runner ${result.runner.agendaPoints} zu Korp ${result.corp.agendaPoints}`}>
           <span>{scoreText}</span>
           <small>Agenda-Punkte</small>
+        </div>
+        <div className="recentGameScore matchPoints" aria-label={`Matchpunkte Runner ${runnerMatchPoints} zu Korp ${corpMatchPoints}`}>
+          <span>{runnerMatchPoints} : {corpMatchPoints}</span>
+          <small>Matchpunkte</small>
         </div>
       </div>
       <div className="recentGameDetails">
@@ -7945,6 +7954,54 @@ function DamageImpactOverlay({
         </button>
       </div>
     </aside>
+  );
+}
+
+function RecentSeriesResultCard({ result }: { result: ApiRecentSeriesResult }) {
+  const winnerLabel = recentSeriesWinnerLabel(result);
+  return (
+    <article className="recentGameCard recentSeriesCard">
+      <div className="recentGamePrimary">
+        <div>
+          <p className="recentGameMatchup">
+            <strong>{result.players.player_a.displayName}</strong>
+            <span>Spieler A</span>
+            <em>gegen</em>
+            <strong>{result.players.player_b.displayName}</strong>
+            <span>Spieler B</span>
+          </p>
+          <p className="recentGameMeta">
+            {formatRecentGameDate(result.finishedAt)} · Matchserie · {result.gamesPlayed}/{result.gamesPlanned} Spiele · {seriesStatusLabel(result.status)}
+          </p>
+        </div>
+        <div className="recentGameScore matchPoints" aria-label={`Serien-Matchpunkte Spieler A ${result.players.player_a.matchPoints} zu Spieler B ${result.players.player_b.matchPoints}`}>
+          <span>{result.players.player_a.matchPoints} : {result.players.player_b.matchPoints}</span>
+          <small>Matchpunkte</small>
+        </div>
+        <div className="recentGameScore" aria-label={`Serien-Agenda-Punkte Spieler A ${result.players.player_a.agendaPoints} zu Spieler B ${result.players.player_b.agendaPoints}`}>
+          <span>{result.players.player_a.agendaPoints} : {result.players.player_b.agendaPoints}</span>
+          <small>Agenda-Punkte</small>
+        </div>
+      </div>
+      <div className="recentGameDetails">
+        <span>
+          <Award size={14} />
+          {winnerLabel}
+        </span>
+        <span>{result.players.player_a.wins} : {result.players.player_b.wins} Siege</span>
+        <span title={result.seriesId}>Serie {result.seriesId.slice(0, 8)}</span>
+      </div>
+      <ol className="recentSeriesGames">
+        {result.games.map((game) => (
+          <li key={game.matchId}>
+            <span>Spiel {game.gameNumber}</span>
+            <span>{game.runnerDisplayName} als Runner {game.runnerAgendaPoints} AP / {game.runnerMatchPoints} MP</span>
+            <span>{game.corpDisplayName} als Korp {game.corpAgendaPoints} AP / {game.corpMatchPoints} MP</span>
+            <span>{shortResultReasonLabel(game.reason)}</span>
+          </li>
+        ))}
+      </ol>
+    </article>
   );
 }
 
