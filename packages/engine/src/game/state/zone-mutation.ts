@@ -1,5 +1,6 @@
 import {
   type CardInstanceId,
+  type CorpServer,
   type GameState,
   type SpecialZoneState,
 } from "@netgrid/shared";
@@ -47,6 +48,50 @@ export function removeFromAllZones(state: GameState, cardId: string): void {
   if (wasRunnerRigCard) clearCardCounters(state, cardId);
 }
 
+export function hostedCardsOn(
+  state: GameState,
+  hostId: CardInstanceId,
+): CardInstanceId[] {
+  return Object.entries(state.cardInstances)
+    .filter(([, instance]) => instance.hostedOn === hostId)
+    .map(([cardId]) => cardId)
+    .sort();
+}
+
+export function setHostedOn(
+  state: GameState,
+  cardId: CardInstanceId,
+  hostId: CardInstanceId,
+): void {
+  if (cardId === hostId)
+    throw new Error("Eine Karte kann nicht auf sich selbst gehostet werden.");
+  if (!state.cardInstances[hostId]) throw new Error("Host-Karte fehlt.");
+  let current: CardInstanceId | undefined = hostId;
+  while (current) {
+    if (current === cardId)
+      throw new Error("Hosting-Zyklus ist nicht erlaubt.");
+    current = state.cardInstances[current]?.hostedOn;
+  }
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    hostedOn: hostId,
+  };
+}
+
+export function hasHostingCycle(
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  const seen = new Set<CardInstanceId>([cardId]);
+  let current = state.cardInstances[cardId]?.hostedOn;
+  while (current) {
+    if (seen.has(current)) return true;
+    seen.add(current);
+    current = state.cardInstances[current]?.hostedOn;
+  }
+  return false;
+}
+
 export function uninstallCorpInstalledCardToHq(
   state: GameState,
   cardId: CardInstanceId,
@@ -60,4 +105,30 @@ export function uninstallCorpInstalledCardToHq(
     rezzed: false,
     zone: { side: "corp", zone: "hq" },
   };
+}
+
+export function createRemote(state: GameState): CorpServer {
+  const remoteIds = state.corp.servers
+    .filter((server) => server.kind === "remote")
+    .map((server) => Number(server.id.replace("remote_", "")));
+  const nextId = Math.max(0, ...remoteIds) + 1;
+  const server: CorpServer = {
+    id: `remote_${nextId}`,
+    kind: "remote",
+    label: `Remote ${nextId}`,
+    ice: [],
+    root: [],
+  };
+  state.corp.servers.push(server);
+  return server;
+}
+
+export function cleanupEmptyRemotes(state: GameState): void {
+  state.corp.servers = state.corp.servers.filter(
+    (server) =>
+      server.kind !== "remote" ||
+      server.ice.length > 0 ||
+      server.root.length > 0 ||
+      state.run?.attackedServerId === server.id,
+  );
 }

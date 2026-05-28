@@ -8,8 +8,13 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { setCardCounter } from "./turn-flags-counters";
 import {
+  cleanupEmptyRemotes,
+  createRemote,
   ensureSpecialZones,
+  hasHostingCycle,
+  hostedCardsOn,
   removeFromAllZones,
+  setHostedOn,
   uninstallCorpInstalledCardToHq,
 } from "./zone-mutation";
 
@@ -129,5 +134,61 @@ describe("zone-mutation", () => {
       rezzed: false,
       zone: { side: "corp", zone: "hq" },
     });
+  });
+
+  it("manages hosted card links and rejects cycles with existing errors", () => {
+    const current = state();
+
+    setHostedOn(current, CORP_ASSET, RUNNER_PROGRAM);
+
+    expect(current.cardInstances[CORP_ASSET]?.hostedOn).toBe(RUNNER_PROGRAM);
+    expect(hostedCardsOn(current, RUNNER_PROGRAM)).toEqual([CORP_ASSET]);
+    expect(hasHostingCycle(current, CORP_ASSET)).toBe(false);
+    expect(() => setHostedOn(current, RUNNER_PROGRAM, CORP_ASSET)).toThrow(
+      "Hosting-Zyklus ist nicht erlaubt.",
+    );
+    expect(() => setHostedOn(current, RUNNER_PROGRAM, RUNNER_PROGRAM)).toThrow(
+      "Eine Karte kann nicht auf sich selbst gehostet werden.",
+    );
+    expect(() =>
+      setHostedOn(current, RUNNER_PROGRAM, "missing" as CardInstanceId),
+    ).toThrow("Host-Karte fehlt.");
+  });
+
+  it("creates remotes and removes only empty inactive remotes", () => {
+    const current = state();
+
+    const created = createRemote(current);
+    expect(created).toMatchObject({
+      id: "remote_2",
+      kind: "remote",
+      label: "Remote 2",
+      ice: [],
+      root: [],
+    });
+    expect(current.corp.servers).toContain(created);
+
+    current.run = {
+      runId: "run_1",
+      attackedServerId: "remote_2",
+      brokenSubroutineIndexes: [],
+      phase: "approach_server",
+      position: "approach_server",
+      resolvedSubroutineIndexes: [],
+      successful: false,
+    } as unknown as NonNullable<GameState["run"]>;
+    cleanupEmptyRemotes(current);
+    expect(current.corp.servers.map((server) => server.id)).toContain(
+      "remote_2",
+    );
+
+    delete current.run;
+    cleanupEmptyRemotes(current);
+    expect(current.corp.servers.map((server) => server.id)).not.toContain(
+      "remote_2",
+    );
+    expect(current.corp.servers.map((server) => server.id)).toContain(
+      "remote_1",
+    );
   });
 });

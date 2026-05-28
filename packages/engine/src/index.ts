@@ -105,8 +105,12 @@ import {
   spendCardCounter,
 } from "./game/state/turn-flags-counters";
 import {
+  cleanupEmptyRemotes,
+  createRemote,
   ensureSpecialZones,
+  hostedCardsOn,
   removeFromAllZones,
+  setHostedOn,
   uninstallCorpInstalledCardToHq,
 } from "./game/state/zone-mutation";
 export {
@@ -13101,16 +13105,6 @@ function resolveCodeViralCachePurgeChoice(
   delete state.pendingChoice;
 }
 
-function hostedCardsOn(
-  state: GameState,
-  hostId: CardInstanceId,
-): CardInstanceId[] {
-  return Object.entries(state.cardInstances)
-    .filter(([, instance]) => instance.hostedOn === hostId)
-    .map(([cardId]) => cardId)
-    .sort();
-}
-
 function microtechBackupDriveIds(state: GameState): CardInstanceId[] {
   return state.runner.rig.hardware
     .filter(
@@ -13120,37 +13114,6 @@ function microtechBackupDriveIds(state: GameState): CardInstanceId[] {
         definitionFor(state, cardId).id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
     )
     .sort();
-}
-
-function setHostedOn(
-  state: GameState,
-  cardId: CardInstanceId,
-  hostId: CardInstanceId,
-): void {
-  if (cardId === hostId)
-    throw new Error("Eine Karte kann nicht auf sich selbst gehostet werden.");
-  if (!state.cardInstances[hostId]) throw new Error("Host-Karte fehlt.");
-  let current: CardInstanceId | undefined = hostId;
-  while (current) {
-    if (current === cardId)
-      throw new Error("Hosting-Zyklus ist nicht erlaubt.");
-    current = state.cardInstances[current]?.hostedOn;
-  }
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    hostedOn: hostId,
-  };
-}
-
-function hasHostingCycle(state: GameState, cardId: CardInstanceId): boolean {
-  const seen = new Set<CardInstanceId>([cardId]);
-  let current = state.cardInstances[cardId]?.hostedOn;
-  while (current) {
-    if (seen.has(current)) return true;
-    seen.add(current);
-    current = state.cardInstances[current]?.hostedOn;
-  }
-  return false;
 }
 
 function availableRunnerProgramInstallCredits(state: GameState): number {
@@ -13472,32 +13435,6 @@ function isVersionAtLeast(state: GameState, minorGate: number): boolean {
   if (major !== 0) return major > 0;
   if (minor !== minorGate) return minor > minorGate;
   return patch >= 0;
-}
-
-function createRemote(state: GameState): CorpServer {
-  const remoteIds = state.corp.servers
-    .filter((server) => server.kind === "remote")
-    .map((server) => Number(server.id.replace("remote_", "")));
-  const nextId = Math.max(0, ...remoteIds) + 1;
-  const server: CorpServer = {
-    id: `remote_${nextId}`,
-    kind: "remote",
-    label: `Remote ${nextId}`,
-    ice: [],
-    root: [],
-  };
-  state.corp.servers.push(server);
-  return server;
-}
-
-function cleanupEmptyRemotes(state: GameState): void {
-  state.corp.servers = state.corp.servers.filter(
-    (server) =>
-      server.kind !== "remote" ||
-      server.ice.length > 0 ||
-      server.root.length > 0 ||
-      state.run?.attackedServerId === server.id,
-  );
 }
 
 function cloneState<T>(state: T): T {
