@@ -158,3 +158,47 @@ export function buildCorpEncounterCardImplementationActions(
   );
   return { handled: true, legalActions };
 }
+
+function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
+  return state.corp.servers
+    .flatMap((server) => server.root)
+    .filter((cardId): cardId is CardInstanceId => {
+      const instance = state.cardInstances[cardId];
+      return Boolean(instance?.rezzed && instance.controller === "corp");
+    })
+    .sort();
+}
+
+export function buildCorpDuringRunCardImplementationActions(
+  host: RunCardImplementationActionHost,
+): RunCardImplementationActionBuildResult {
+  if (!host.state.run) return { handled: true, legalActions: [] };
+  const legalActions: LegalAction[] = [];
+  for (const cardId of rezzedCorpRootCardIds(host.state)) {
+    host.runtime.pushActivatedActionsForTiming(
+      legalActions,
+      "corp",
+      cardId,
+      host.cards.definitionFor(cardId),
+      "corp_during_run",
+    );
+  }
+  return { handled: true, legalActions };
+}
+
+export function buildCorpTraceCardImplementationActions(
+  host: RunCardImplementationActionHost,
+): RunCardImplementationActionBuildResult {
+  if (!host.state.trace) return { handled: true, legalActions: [] };
+  const legalActions: LegalAction[] = [];
+  for (const cardId of rezzedCorpRootCardIds(host.state)) {
+    host.runtime.pushActivatedActionsForTiming(
+      legalActions,
+      "corp",
+      cardId,
+      host.cards.definitionFor(cardId),
+      "corp_trace_window",
+    );
+  }
+  return { handled: true, legalActions };
+}

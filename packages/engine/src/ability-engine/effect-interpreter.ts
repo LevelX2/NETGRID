@@ -27,6 +27,7 @@ export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
+  targetCardId?: CardInstanceId;
   controller: Side;
   reason?: string;
   drawCards?: (
@@ -1735,6 +1736,152 @@ export function executeCardImplementationEffects(
           effect.maxAmount,
         );
         mergePublicPayload(publicPayload, choiceResult.publicPayload);
+        return;
+      }
+      case "gain_temporary_corp_credits": {
+        assertPositiveIntegerAmount("gain_temporary_corp_credits", effect.amount);
+        assertPublicVisibility("gain_temporary_corp_credits", effect.visibility);
+        if (effect.recipient !== "corp" || effect.usableFor !== "install_or_rez")
+          throw new Error("gain_temporary_corp_credits profile is invalid.");
+        if (!context.sourceDefinitionId)
+          throw new Error("Temporary Corp Credits brauchen eine Quellenkarte.");
+        state.corp.credits += effect.amount;
+        state.corpTemporaryInstallRezCredits = {
+          sourceCardInstanceId: context.sourceCardId,
+          sourceDefinitionId: context.sourceDefinitionId,
+          remaining:
+            Math.max(
+              0,
+              Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
+            ) + effect.amount,
+          usableFor: "corp_install_or_rez",
+          returnUnusedAtTurnEnd: true,
+        };
+        mergePublicPayload(publicPayload, {
+          temporaryCreditsProvided: effect.amount,
+          temporaryCreditsRemaining:
+            state.corpTemporaryInstallRezCredits.remaining,
+          corpCreditsAfter: state.corp.credits,
+        });
+        return;
+      }
+      case "gain_temporary_trace_credits": {
+        assertPositiveIntegerAmount("gain_temporary_trace_credits", effect.amount);
+        assertPublicVisibility("gain_temporary_trace_credits", effect.visibility);
+        if (!state.trace)
+          throw new Error("Temporary Trace Credits brauchen einen laufenden Trace.");
+        if (effect.recipient !== "corp" || effect.usableFor !== "current_trace")
+          throw new Error("gain_temporary_trace_credits profile is invalid.");
+        if (!context.sourceDefinitionId)
+          throw new Error("Temporary Trace Credits brauchen eine Quellenkarte.");
+        state.trace.corpTemporaryTraceCredits = {
+          sourceCardInstanceId: context.sourceCardId,
+          sourceDefinitionId: context.sourceDefinitionId,
+          remaining:
+            Math.max(
+              0,
+              Math.floor(state.trace.corpTemporaryTraceCredits?.remaining ?? 0),
+            ) + effect.amount,
+          returnUnusedAtTraceEnd: true,
+        };
+        mergePublicPayload(publicPayload, {
+          temporaryTraceCredits: effect.amount,
+          temporaryTraceCreditsAvailable:
+            state.trace.corpTemporaryTraceCredits.remaining,
+          temporaryTraceCreditsSourceDefinitionId:
+            state.trace.corpTemporaryTraceCredits.sourceDefinitionId,
+        });
+        return;
+      }
+      case "remove_same_fort_advancement_counters_for_run_credits": {
+        assertPublicVisibility(
+          "remove_same_fort_advancement_counters_for_run_credits",
+          effect.visibility,
+        );
+        assertPositiveIntegerAmount(
+          "remove_same_fort_advancement_counters_for_run_credits",
+          effect.creditsPerCounter,
+        );
+        if (!state.run)
+          throw new Error("Run-Credits brauchen einen laufenden Run.");
+        const source = state.cardInstances[context.sourceCardId];
+        const serverId =
+          source?.zone.side === "corp" && source.zone.zone === "serverRoot"
+            ? source.zone.serverId
+            : undefined;
+        if (!serverId)
+          throw new Error("Die Quelle ist nicht in einem Fort installiert.");
+        const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+        if (!server) throw new Error("Das Quellen-Fort existiert nicht mehr.");
+        let removed = 0;
+        for (const cardId of [...server.root, ...server.ice].sort()) {
+          const instance = state.cardInstances[cardId];
+          if (!instance) continue;
+          const amount = Math.max(0, Math.floor(instance.advancementCounters ?? 0));
+          if (amount <= 0) continue;
+          instance.advancementCounters = 0;
+          removed += amount;
+        }
+        if (removed <= 0)
+          throw new Error("In diesem Fort liegen keine Advancement-Counter.");
+        const gained = removed * effect.creditsPerCounter;
+        if (!context.sourceDefinitionId)
+          throw new Error("Run-Credits brauchen eine Quellenkarte.");
+        state.corp.credits += gained;
+        state.run.corpRunTemporaryCredits = {
+          sourceCardInstanceId: context.sourceCardId,
+          sourceDefinitionId: context.sourceDefinitionId,
+          remaining:
+            Math.max(0, Math.floor(state.run.corpRunTemporaryCredits?.remaining ?? 0)) +
+            gained,
+          usableFor: "corp_costs_during_this_run",
+          returnUnusedAtRunEnd: true,
+        };
+        mergePublicPayload(publicPayload, {
+          advancementCounterCount: removed,
+          temporaryRunCredits: gained,
+          temporaryRunCreditsRemaining:
+            state.run.corpRunTemporaryCredits.remaining,
+          corpCreditsAfter: state.corp.credits,
+          serverId,
+        });
+        return;
+      }
+      case "trash_own_rezzed_ice_for_credits": {
+        assertPublicVisibility("trash_own_rezzed_ice_for_credits", effect.visibility);
+        assertPositiveIntegerAmount("trash_own_rezzed_ice_for_credits", effect.gainCredits);
+        const targetCardId = context.targetCardId;
+        const instance = targetCardId ? state.cardInstances[targetCardId] : undefined;
+        if (
+          !targetCardId ||
+          !instance ||
+          instance.controller !== "corp" ||
+          instance.zone.side !== "corp" ||
+          instance.zone.zone !== "serverIce" ||
+          instance.rezzed !== true
+        )
+          throw new Error("Das Ziel ist kein eigenes gerezztes ICE.");
+        const serverId = instance.zone.serverId;
+        const server = state.corp.servers.find(
+          (candidate) => candidate.id === serverId,
+        );
+        if (!server) throw new Error("Das Ziel-Fort existiert nicht mehr.");
+        server.ice = server.ice.filter((id) => id !== targetCardId);
+        state.corp.archives.push(targetCardId);
+        state.cardInstances[targetCardId] = {
+          ...instance,
+          zone: { side: "corp", zone: "archives" },
+          faceup: true,
+          rezzed: true,
+        };
+        state.corp.credits += effect.gainCredits;
+        mergePublicPayload(publicPayload, {
+          targetCardDefinitionId: instance.definitionId,
+          trashedIceCount: 1,
+          gainedCredits: effect.gainCredits,
+          corpCreditsAfter: state.corp.credits,
+          serverId,
+        });
         return;
       }
       case "add_hosted_credits": {

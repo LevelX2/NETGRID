@@ -385,6 +385,12 @@ import { fetalAiImplementation } from "./proteus/corp/agendas/fetal-ai";
 import { markedAccountsImplementation } from "./proteus/corp/agendas/marked-accounts";
 import { projectZurichImplementation } from "./proteus/corp/agendas/project-zurich";
 import { proteusViralBreedingGroundImplementation } from "./proteus/corp/agendas/viral-breeding-ground";
+import { proteusCybertechThinkTankImplementation } from "./proteus/corp/assets/cybertech-think-tank";
+import { proteusDepartmentOfMisinformationImplementation } from "./proteus/corp/assets/department-of-misinformation";
+import { proteusGovernmentContractImplementation } from "./proteus/corp/assets/government-contract";
+import { proteusLdlTrafficAnalyzersImplementation } from "./proteus/corp/assets/ldl-traffic-analyzers";
+import { proteusSirenImplementation } from "./proteus/corp/assets/siren";
+import { proteusSydMeyerSuperstoresImplementation } from "./proteus/corp/assets/syd-meyer-superstores";
 import { worldDominationImplementation } from "./proteus/corp/agendas/world-domination";
 import { belDigmoAntibodyImplementation } from "./proteus/corp/assets/bel-digmo-antibody";
 import { doppelgangerAntibodyImplementation } from "./proteus/corp/assets/doppelganger-antibody";
@@ -431,6 +437,8 @@ import { proteusMinotaurImplementation } from "./proteus/corp/ice/minotaur";
 import { proteusRiddlerImplementation } from "./proteus/corp/ice/riddler";
 import { proteusLesleyMajorImplementation } from "./proteus/corp/upgrades/lesley-major";
 import { proteusNetworkedCenterImplementation } from "./proteus/corp/upgrades/networked-center";
+import { proteusPanicButtonImplementation } from "./proteus/corp/upgrades/panic-button";
+import { proteusRaymondEllisonImplementation } from "./proteus/corp/upgrades/raymond-ellison";
 import { proteusRasminBridgerImplementation } from "./proteus/corp/upgrades/rasmin-bridger";
 import { proteusResearchBunkerImplementation } from "./proteus/corp/upgrades/research-bunker";
 import { proteusWeaponsDepotImplementation } from "./proteus/corp/upgrades/weapons-depot";
@@ -915,10 +923,18 @@ export const CARD_IMPLEMENTATIONS = [
   proteusWashedUpSoloConstructImplementation,
   proteusMinotaurImplementation,
   proteusRiddlerImplementation,
+  proteusCybertechThinkTankImplementation,
+  proteusDepartmentOfMisinformationImplementation,
+  proteusGovernmentContractImplementation,
+  proteusLdlTrafficAnalyzersImplementation,
   proteusLesleyMajorImplementation,
   proteusNetworkedCenterImplementation,
+  proteusPanicButtonImplementation,
+  proteusRaymondEllisonImplementation,
   proteusRasminBridgerImplementation,
   proteusResearchBunkerImplementation,
+  proteusSirenImplementation,
+  proteusSydMeyerSuperstoresImplementation,
   proteusWeaponsDepotImplementation,
   proteusCharityTakeoverImplementation,
   corporateHeadhuntersImplementation,

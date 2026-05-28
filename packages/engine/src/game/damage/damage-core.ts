@@ -39,6 +39,8 @@ import type {
   CardTrashPreventionSourceImplementation,
 } from "../../ability-engine/definition-types";
 
+const CYBERTECH_THINK_TANK_ID = "onr_proteus_055_cybertech-think-tank";
+
 export type DamageSummary = {
   damageType: DamageType;
   amount: number;
@@ -445,7 +447,13 @@ export function createDamageImminentEvent(
     request.damageType === "meat" && corpHasScoredBioweaponsEngineering(state)
       ? 1
       : 0;
-  const amount = request.amount + bioweaponsModifier;
+  const cybertechSourceId =
+    request.damageType === "meat" &&
+    !request.source.includes(CYBERTECH_THINK_TANK_ID)
+      ? consumeCybertechThinkTankBoost(state)
+      : undefined;
+  const cybertechModifier = cybertechSourceId ? 1 : 0;
+  const amount = request.amount + bioweaponsModifier + cybertechModifier;
   return {
     eventId: `imminent_damage_${state.stateVersion + 1}_${sanitizeId(request.damageId)}`,
     eventType: "damage",
@@ -462,11 +470,42 @@ export function createDamageImminentEvent(
             bioweaponsEngineeringModifier: bioweaponsModifier,
           }
         : {}),
+      ...(cybertechModifier > 0
+        ? {
+            baseDamageAmount: request.amount,
+            cybertechThinkTankModifier: cybertechModifier,
+            cybertechThinkTankSourceCardId: cybertechSourceId,
+            cybertechThinkTankSourceDefinitionId: CYBERTECH_THINK_TANK_ID,
+          }
+        : {}),
       source: request.source,
     },
     visibility: "hidden_info_barrier",
     createdAtStateVersion: state.stateVersion + 1,
   };
+}
+
+function consumeCybertechThinkTankBoost(
+  state: GameState,
+): CardInstanceId | undefined {
+  for (const server of state.corp.servers.slice().sort((left, right) => left.id.localeCompare(right.id))) {
+    for (const cardId of server.root.slice().sort() as CardInstanceId[]) {
+      const instance = state.cardInstances[cardId];
+      if (
+        !instance?.rezzed ||
+        instance.controller !== "corp" ||
+        instance.definitionId !== CYBERTECH_THINK_TANK_ID ||
+        Math.floor(instance.advancementCounters ?? 0) <= 0
+      )
+        continue;
+      instance.advancementCounters = Math.max(
+        0,
+        Math.floor(instance.advancementCounters ?? 0) - 1,
+      );
+      return cardId;
+    }
+  }
+  return undefined;
 }
 
 function corpHasScoredBioweaponsEngineering(state: GameState): boolean {

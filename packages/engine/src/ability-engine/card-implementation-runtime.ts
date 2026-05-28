@@ -684,6 +684,12 @@ function canResolveActivatedCardImplementationAbility(
       return deps.trashOwnInstalledCardTargetCount(state) >= effect.min;
     if (effect.kind === "trash_cards_from_grip_for_credits")
       return effect.max >= 0;
+    if (effect.kind === "trash_own_rezzed_ice_for_credits")
+      return ownRezzedIceTargetIds(state).length > 0;
+    if (effect.kind === "gain_temporary_trace_credits")
+      return Boolean(state.trace);
+    if (effect.kind === "remove_same_fort_advancement_counters_for_run_credits")
+      return Boolean(state.run);
     if (effect.kind === "gain_credits_for_runner_trash_history")
       return (
         state.runnerTurnFlags?.trashedAdvertisementThisTurn === true ||
@@ -1522,6 +1528,36 @@ function moveTopTrashToGripEffect(
     : undefined;
 }
 
+function trashOwnRezzedIceForCreditsEffect(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<
+      CardEffectImplementation,
+      { kind: "trash_own_rezzed_ice_for_credits" }
+    >
+  | undefined {
+  return ability.effects.length === 1 &&
+    ability.effects[0]?.kind === "trash_own_rezzed_ice_for_credits"
+    ? ability.effects[0]
+    : undefined;
+}
+
+function ownRezzedIceTargetIds(state: GameState): CardInstanceId[] {
+  return state.corp.servers
+    .flatMap((server) => server.ice)
+    .filter((cardId): cardId is CardInstanceId => {
+      const instance = state.cardInstances[cardId];
+      return Boolean(
+        instance &&
+          instance.controller === "corp" &&
+          instance.zone.side === "corp" &&
+          instance.zone.zone === "serverIce" &&
+          instance.rezzed === true,
+      );
+    })
+    .sort();
+}
+
 /**
  * Adds LegalActions for active declarative abilities on an already-valid source.
  *
@@ -1619,6 +1655,29 @@ export function pushActivatedCardImplementationActionsForTiming(
           },
         ),
       );
+      continue;
+    }
+    const trashRezzedIceEffect = trashOwnRezzedIceForCreditsEffect(ability);
+    if (trashRezzedIceEffect) {
+      for (const targetCardId of ownRezzedIceTargetIds(state)) {
+        const targetDefinition = deps.definitionFor(state, targetCardId);
+        actions.push(
+          deps.createAction(
+            state,
+            side,
+            "activated_card_ability",
+            `${definition.title}: ${targetDefinition.title} trashen`,
+            sourceCardId,
+            activatedAbilityLegalActionCosts(ability),
+            {
+              ...activatedAbilityPayload(sourceCardId, ability, index),
+              targetCardId,
+              targetDefinitionId: targetDefinition.id,
+              gainedCredits: trashRezzedIceEffect.gainCredits,
+            },
+          ),
+        );
+      }
       continue;
     }
     actions.push(
@@ -1811,6 +1870,50 @@ function validateActivatedCardImplementationAbility(
     );
     return;
   }
+  if (ability.timing === "corp_during_run") {
+    if (legalAction.side !== "corp")
+      throw new Error("Nur die Korp darf diese Run-Kartenfaehigkeit nutzen.");
+    if (!state.run)
+      throw new Error("Diese Kartenfaehigkeit ist nur waehrend eines Runs nutzbar.");
+    if (
+      !corpActivatedCardImplementationSourceIsAvailable(
+        deps,
+        state,
+        cardId,
+        match.definition,
+      )
+    )
+      throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
+  if (ability.timing === "corp_trace_window") {
+    if (legalAction.side !== "corp")
+      throw new Error("Nur die Korp darf diese Trace-Kartenfaehigkeit nutzen.");
+    if (!state.trace)
+      throw new Error("Diese Kartenfaehigkeit ist nur waehrend eines Trace nutzbar.");
+    if (
+      !corpActivatedCardImplementationSourceIsAvailable(
+        deps,
+        state,
+        cardId,
+        match.definition,
+      )
+    )
+      throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf diese aktivierte Kartenfaehigkeit nutzen.");
   if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
@@ -1832,6 +1935,12 @@ function validateActivatedCardImplementationAbility(
     ability,
     cardId,
   );
+  const trashRezzedIceEffect = trashOwnRezzedIceForCreditsEffect(ability);
+  if (trashRezzedIceEffect) {
+    const targetCardId = String(legalAction.payload?.targetCardId ?? "");
+    if (!ownRezzedIceTargetIds(state).includes(targetCardId as CardInstanceId))
+      throw new Error("Das zu trashende ICE ist nicht mehr gueltig.");
+  }
 }
 
 /**
@@ -1862,6 +1971,9 @@ export function resolveActivatedCardImplementationAbility(
       sourceCardId: match.cardId,
       sourceDefinitionId: match.definition.id,
       sourceTitle: match.definition.title,
+      ...(typeof legalAction.payload?.targetCardId === "string"
+        ? { targetCardId: legalAction.payload.targetCardId as CardInstanceId }
+        : {}),
       controller: deps.mustInstance(state.cardInstances, match.cardId).controller,
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>

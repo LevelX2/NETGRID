@@ -931,6 +931,13 @@ export type RunState = {
     remaining: number;
     returnUnusedAtRunEnd: true;
   };
+  corpRunTemporaryCredits?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    remaining: number;
+    usableFor: "corp_costs_during_this_run";
+    returnUnusedAtRunEnd: true;
+  };
   unpreventableCoreDamageAtRunEnd?: {
     sourceDefinitionId: CardDefinitionId;
     amount: number;
@@ -1136,6 +1143,12 @@ export type TraceState = {
   postBidLinkSourceIds?: CardInstanceId[];
   postBidLinkBonus?: number;
   successful?: boolean;
+  corpTemporaryTraceCredits?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    remaining: number;
+    returnUnusedAtTraceEnd: true;
+  };
 };
 
 export type RandomDrawRecord = {
@@ -1216,6 +1229,13 @@ export type GameState = {
     serverId: Exclude<ServerId, "new_remote">;
   }>;
   acmeSavingsAndLoanObligations?: number;
+  corpTemporaryInstallRezCredits?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    remaining: number;
+    usableFor: "corp_install_or_rez";
+    returnUnusedAtTurnEnd: true;
+  };
   corpBonusAgendaPoints?: number;
   identityAbilityUsage?: Partial<
     Record<

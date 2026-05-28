@@ -3497,6 +3497,10 @@ function mustInstallInsideSubsidiaryDataFort(
   );
 }
 
+function mustInstallInHq(definition: CardDefinition): boolean {
+  return hasInstallCapabilityKindForDefinition(definition.id, "install_only_in_hq");
+}
+
 function fortCapacityModifiersForCard(
   state: GameState,
   cardId: CardInstanceId,
@@ -5333,6 +5337,7 @@ function canInstallCorpRootCardInServer(
   definition: CardDefinition,
   server: CorpServer,
 ): boolean {
+  if (mustInstallInHq(definition) && server.id !== "hq") return false;
   if (mustInstallInsideSubsidiaryDataFort(definition) && server.kind !== "remote")
     return false;
   if (definition.type === "upgrade") return server.kind !== "archives";
@@ -7019,6 +7024,7 @@ function startRunnerTurn(
   state: GameState,
   effects?: AutomaticEffectCollector,
 ): void {
+  returnCorpTemporaryInstallRezCredits(state, effects);
   state.activeSide = "runner";
   state.phase = "runner_action_phase";
   state.timingPoint = "runner_action.main";
@@ -7067,6 +7073,28 @@ function startRunnerTurn(
   refreshRecurringCredits(state, "runner", effects);
   untapRunnerCardsAtTurnStart(state);
   applyRunnerStartOfTurnEffects(state, effects);
+}
+
+function returnCorpTemporaryInstallRezCredits(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  const temporaryCredits = state.corpTemporaryInstallRezCredits;
+  if (!temporaryCredits) return;
+  const returned = Math.max(0, Math.floor(temporaryCredits.remaining ?? 0));
+  if (returned > 0)
+    state.corp.credits = Math.max(0, state.corp.credits - returned);
+  effects?.push({
+    effectId: `corp.end.${temporaryCredits.sourceCardInstanceId}.temporary_install_rez_credits`,
+    kind: "lose_credits",
+    visibility: "public",
+    side: "corp",
+    amount: returned,
+    reason: "end_of_turn",
+    sourceDefinitionId: temporaryCredits.sourceDefinitionId,
+    sourceTitle: publicCardTitle(temporaryCredits.sourceDefinitionId),
+  });
+  delete state.corpTemporaryInstallRezCredits;
 }
 
 function untapRunnerCardsAtTurnStart(state: GameState): void {
@@ -12481,6 +12509,22 @@ function exposeInstalledCorpCardForImplementation(
   const legalTargets = new Set(exposeInstalledCorpCardTargets(state, scope));
   if (!legalTargets.has(targetCardId))
     throw new Error("Diese installierte Korp-Karte kann nicht exposed werden.");
+  const prevention = preventExposeWithDepartmentOfMisinformation(state);
+  if (prevention) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      exposePrevented: true,
+      sourceCardId,
+      sourceDefinitionId,
+      preventionSourceCardId: prevention.sourceCardId,
+      preventionSourceDefinitionId: prevention.sourceDefinitionId,
+      preventionRezzedDuringExpose: prevention.rezzedDuringExpose,
+      paidCredits: prevention.paidCredits,
+      corpCreditsAfter: state.corp.credits,
+    };
+    return { publicPayload: legalAction.payload };
+  }
   const targetDefinition = definitionFor(state, targetCardId);
   const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
   const context = installedCorpCardServerContext(state, targetCardId);
@@ -12512,6 +12556,49 @@ function exposeInstalledCorpCardForImplementation(
     ...payload,
   };
   return { publicPayload: payload };
+}
+
+function preventExposeWithDepartmentOfMisinformation(
+  state: GameState,
+):
+  | {
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      rezzedDuringExpose: boolean;
+      paidCredits: number;
+    }
+  | undefined {
+  const departmentId =
+    "onr_proteus_056_department-of-misinformation" as CardDefinitionId;
+  for (const server of state.corp.servers.slice().sort((left, right) => left.id.localeCompare(right.id))) {
+    for (const cardId of server.root.slice().sort() as CardInstanceId[]) {
+      const instance = state.cardInstances[cardId];
+      if (
+        !instance ||
+        instance.controller !== "corp" ||
+        instance.definitionId !== departmentId
+      )
+        continue;
+      const definition = definitionFor(state, cardId);
+      const rezCost = instance.rezzed ? 0 : Math.max(0, definition.rezCost ?? 0);
+      const totalCost = rezCost + 1;
+      if (state.corp.credits < totalCost) continue;
+      state.corp.credits -= totalCost;
+      const rezzedDuringExpose = !instance.rezzed;
+      state.cardInstances[cardId] = {
+        ...instance,
+        rezzed: true,
+        faceup: true,
+      };
+      return {
+        sourceCardId: cardId,
+        sourceDefinitionId: departmentId,
+        rezzedDuringExpose,
+        paidCredits: totalCost,
+      };
+    }
+  }
+  return undefined;
 }
 
 function installedRunnerIcebreakerIds(state: GameState): CardInstanceId[] {
@@ -13631,6 +13718,24 @@ function spendCredits(state: GameState, side: Side, amount: number): void {
   if (side === "corp") {
     if (state.corp.credits < amount)
       throw new Error("Die Korp kann die Kosten nicht bezahlen.");
+    const installRezTemporarySpend = Math.min(
+      amount,
+      Math.max(0, Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0)),
+    );
+    if (installRezTemporarySpend > 0 && state.corpTemporaryInstallRezCredits)
+      state.corpTemporaryInstallRezCredits.remaining = Math.max(
+        0,
+        state.corpTemporaryInstallRezCredits.remaining - installRezTemporarySpend,
+      );
+    const runTemporarySpend = Math.min(
+      amount - installRezTemporarySpend,
+      Math.max(0, Math.floor(state.run?.corpRunTemporaryCredits?.remaining ?? 0)),
+    );
+    if (runTemporarySpend > 0 && state.run?.corpRunTemporaryCredits)
+      state.run.corpRunTemporaryCredits.remaining = Math.max(
+        0,
+        state.run.corpRunTemporaryCredits.remaining - runTemporarySpend,
+      );
     state.corp.credits -= amount;
     return;
   }

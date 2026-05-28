@@ -517,9 +517,20 @@ function applyRunnerRunTemporaryCreditCleanupAndDamage(
 ): RunTemporaryCreditCleanupResult {
   if (!run) return { handled: false };
   const runTemporaryCredits = run.runnerRunTemporaryCredits;
+  const corpRunTemporaryCredits = run.corpRunTemporaryCredits;
   const unpreventableCoreDamage = run.unpreventableCoreDamageAtRunEnd;
-  if (!runTemporaryCredits && !unpreventableCoreDamage) return { handled: false };
+  if (!runTemporaryCredits && !corpRunTemporaryCredits && !unpreventableCoreDamage)
+    return { handled: false };
   const unusedTemporaryCredits = runTemporaryCredits?.remaining ?? 0;
+  const unusedCorpTemporaryCredits = Math.max(
+    0,
+    Math.floor(corpRunTemporaryCredits?.remaining ?? 0),
+  );
+  if (unusedCorpTemporaryCredits > 0)
+    host.state.corp.credits = Math.max(
+      0,
+      host.state.corp.credits - unusedCorpTemporaryCredits,
+    );
   let damageSummary: RunEndDamageSummary | undefined;
   if (unpreventableCoreDamage && unpreventableCoreDamage.amount > 0) {
     damageSummary = host.damage.dealUnpreventableCoreDamage(
@@ -535,6 +546,13 @@ function applyRunnerRunTemporaryCreditCleanupAndDamage(
         ? {
             temporaryRunCreditsReturned: unusedTemporaryCredits,
             temporaryRunCreditsRemaining: 0,
+          }
+        : {}),
+      ...(corpRunTemporaryCredits
+        ? {
+            corpTemporaryRunCreditsReturned: unusedCorpTemporaryCredits,
+            corpTemporaryRunCreditsRemaining: 0,
+            corpCreditsAfter: host.state.corp.credits,
           }
         : {}),
       ...(damageSummary

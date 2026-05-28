@@ -293,8 +293,13 @@ export function quoteCorpTraceBidPayment(
     };
   }
 
+  const implementationTemporaryTraceCreditsAvailable = Math.max(
+    0,
+    Math.floor(trace.corpTemporaryTraceCredits?.remaining ?? 0),
+  );
   const temporaryTraceCreditsToPay = Math.min(
-    deps.encounterTemporaryTraceCreditsAvailable(state, trace),
+    deps.encounterTemporaryTraceCreditsAvailable(state, trace) +
+      implementationTemporaryTraceCreditsAvailable,
     bid,
   );
   const parisCityGridPoolAvailable =
@@ -334,8 +339,10 @@ export function quoteCorpTraceBidPayment(
       paymentBreakdown(
         "temporary_trace_credit",
         temporaryTraceCreditsToPay,
-        trace.encounterTemporaryTraceCreditSourceIceId,
-        trace.encounterTemporaryTraceCreditSourceDefinitionId,
+        trace.corpTemporaryTraceCredits?.sourceCardInstanceId ??
+          trace.encounterTemporaryTraceCreditSourceIceId,
+        trace.corpTemporaryTraceCredits?.sourceDefinitionId ??
+          trace.encounterTemporaryTraceCreditSourceDefinitionId,
       ),
       paymentBreakdown(
         "paris_city_grid_pool",
@@ -606,12 +613,28 @@ export function payCorpTraceBidQuote(
     trace,
     quote,
   );
-  const temporaryTraceCreditsSpent =
+  let remainingTemporaryTracePayment = validQuote.temporaryTraceCreditsToPay;
+  let implementationTemporaryTraceCreditsSpent = 0;
+  if (trace.corpTemporaryTraceCredits && remainingTemporaryTracePayment > 0) {
+    implementationTemporaryTraceCreditsSpent = Math.min(
+      Math.max(0, Math.floor(trace.corpTemporaryTraceCredits.remaining ?? 0)),
+      remainingTemporaryTracePayment,
+    );
+    trace.corpTemporaryTraceCredits.remaining = Math.max(
+      0,
+      Math.floor(trace.corpTemporaryTraceCredits.remaining ?? 0) -
+        implementationTemporaryTraceCreditsSpent,
+    );
+    remainingTemporaryTracePayment -= implementationTemporaryTraceCreditsSpent;
+  }
+  const encounterTemporaryTraceCreditsSpent =
     deps.spendEncounterTemporaryTraceCredits(
       state,
       trace,
-      validQuote.temporaryTraceCreditsToPay,
+      remainingTemporaryTracePayment,
     );
+  const temporaryTraceCreditsSpent =
+    implementationTemporaryTraceCreditsSpent + encounterTemporaryTraceCreditsSpent;
   if (temporaryTraceCreditsSpent !== validQuote.temporaryTraceCreditsToPay)
     throw new Error("Temporary Trace Credits sind nicht mehr gueltig.");
   const parisCityGridPoolSpent = deps.spendParisCityGridTracePool(
@@ -645,7 +668,8 @@ export function payCorpTraceBidQuote(
   };
   if (temporaryTraceCreditsSpent > 0) {
     receipt.temporaryTraceCreditsRemaining =
-      state.run?.encounterTemporaryTraceCredits?.remaining ?? 0;
+      (trace.corpTemporaryTraceCredits?.remaining ?? 0) +
+      (state.run?.encounterTemporaryTraceCredits?.remaining ?? 0);
   }
   if (parisCityGridPoolSpent > 0 && trace.parisCityGridPoolSourceCardInstanceId) {
     receipt.parisCityGridPoolRemaining = deps.cardCounter(
@@ -673,6 +697,7 @@ export function corpTracePaymentPublicPayload(
           temporaryTraceCreditsRemaining:
             receipt.temporaryTraceCreditsRemaining ?? 0,
           temporaryTraceCreditsSourceDefinitionId:
+            trace.corpTemporaryTraceCredits?.sourceDefinitionId ??
             trace.encounterTemporaryTraceCreditSourceDefinitionId,
         }
       : {}),

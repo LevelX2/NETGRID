@@ -1,6 +1,6 @@
 # Proteus-Dokumentation
 
-`docs/releases/proteus/` bündelt die Artefakte für den importierten Proteus-Kartenstand. Import, Coverage, Slicing und Mechanikverträge bleiben die führenden Handoffs; die abgeschlossenen Detail-Slices geben einzelne Karten beziehungsweise Foundations eng begrenzt für die Runtime frei. Nach PRO013 und der reinen PRO013-1-Härtung stehen 121 von 154 Proteus-Karten als konkrete CardImplementation-Dateien bereit; 33 fehlen noch. Proteus ist weiterhin nicht decklegal, nicht formatlegal und nicht AI-unterstützt.
+`docs/releases/proteus/` bündelt die Artefakte für den importierten Proteus-Kartenstand. Import, Coverage, Slicing und Mechanikverträge bleiben die führenden Handoffs; die abgeschlossenen Detail-Slices geben einzelne Karten beziehungsweise Foundations eng begrenzt für die Runtime frei. Nach PRO014 stehen 129 von 154 Proteus-Karten als konkrete CardImplementation-Dateien bereit; 25 fehlen noch. Proteus ist weiterhin nicht decklegal, nicht formatlegal und nicht AI-unterstützt.
 
 ## Enthaltene Artefakte
 
@@ -21,7 +21,7 @@
 
 ## Gate
 
-Proteus bleibt außerhalb explizit abgeschlossener Implementierungsslices blockiert. Abgeschlossen sind die Done-Activities für Phase 1a, 1b, 1d, 1g, 2a bis 2d, 3a bis 3c, 3e, 4a, 5b, 7a bis 7d, 8a bis 8f, 9d sowie PRO007, PRO008, PRO009, PRO009-1, PRO009-2, PRO010, PRO010-1, PRO011, PRO011-1, PRO012, PRO012-1, PRO013 und PRO013-1. Die freigegebenen Karten sind `human_playable`, aber nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`. PRO013 ergänzt acht Agenda-/Steal-/Overadvance-Karten über current-access Self-Steal-Cost, Agenda-Access-Ambush, source-bound scored-agenda Damage-Handsize-Followup, fixe Score-Agenda-Punkte, overadvance-basierte Start-of-Corp-Turn-Credits, successful-run Runner-Agenda-Punkte, deterministische Data-Fort-Mehrfachruns und Next-Agenda-Access-Bonus. PRO013-1 härtet Pirate Broadcast als verpflichtende Folgerun-Sequenz und ergänzt fokussierte Verhaltenstests ohne neue Kartenpromotion. Der Harness steht danach weiter bei 154/121/33 ohne Drift. Jeder spätere Slice braucht eigene Requirements, Tests und Gate-Nachweise. Die übrigen Phase-Activities bleiben entlang von `detailed-phase-slice-plan-2026-05-24.md` weiter zu bearbeiten.
+Proteus bleibt außerhalb explizit abgeschlossener Implementierungsslices blockiert. Abgeschlossen sind die Done-Activities für Phase 1a, 1b, 1d, 1g, 2a bis 2d, 3a bis 3c, 3e, 4a, 5b, 7a bis 7d, 8a bis 8f, 9d sowie PRO007, PRO008, PRO009, PRO009-1, PRO009-2, PRO010, PRO010-1, PRO011, PRO011-1, PRO012, PRO012-1, PRO013, PRO013-1 und PRO014. Die freigegebenen Karten sind `human_playable`, aber nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`. PRO014 ergänzt acht Corp-Asset-/Upgrade-Utility-Karten mit Install-/Run-/Trace-Kontexten, temporären Corp-Credit-Pools, Start-of-run-Redirect und eigenem ICE-Trash-Zielfenster. Der Harness steht danach bei 154/129/25 ohne Drift. Jeder spätere Slice braucht eigene Requirements, Tests und Gate-Nachweise. Die übrigen Phase-Activities bleiben entlang von `detailed-phase-slice-plan-2026-05-24.md` weiter zu bearbeiten.
 
 Phase 1c ist aktuell blockiert: `Emergency Rig` enthält in den lokalen Quellen eine positive, aber unbegrenzte `X`-Counter-Auswahl ohne Kosten- oder Wertbezug. Der Blocker ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md` dokumentiert; `Rent-to-Own Contract` wird nicht isoliert promotet, solange der gemeinsame Slice nicht vollständig erfüllbar ist.
 
@@ -51,7 +51,7 @@ Phase 6b bleibt als alte Umbrella-Activity nur Statusreferenz: PRO006 und PRO010
 
 Phase 6c ist aktuell blockiert: `Credit Consolidation` ist zwar einfach, aber `Data Sifters`, `Manhunt`, `Schlaghund Pointers` und `Underworld Mole` benötigen Runner-History-Conditions, Trace-Erfolg nach Trace-Marge, ein Trace-Zusatzkostenmodell beziehungsweise Zielauswahl aus im letzten Runner-Zug installierten Resources. Diese generischen Operation-/Trace-Bausteine fehlen. Der Blocker ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-6c-corp-operation-trace-tag-economy.md` dokumentiert.
 
-Phase 6d ist aktuell blockiert: Die Zielkarten brauchen neue generische Asset-/Upgrade-Fenster für Expose-Verhinderung, advancement-counter-basierte Damage-Boosts, trace-/run-/turngebundene temporäre Credits, HQ-/Fort-Install- und Run-Kontextbedingungen, Start-of-run-Redirects sowie Corp-Zielfenster zum Trashen eigener rezzed ICE. Der Blocker ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-6d-corp-asset-upgrade-utility.md` dokumentiert.
+Phase 6d/PRO014 ist abgeschlossen und in `docs/activities/done/act-2026-05-28-proteus-pro014-corp-asset-upgrade-utility-suite.md` dokumentiert. Die alte Umbrella-Activity bleibt als Referenz ohne doppelte Zählung bestehen.
 
 Phase 6e bleibt als alte Scope-Blocker-Activity nur Statusreferenz: Die PRO013-Zielkarten `Blackmail`, `Pirate Broadcast` und `Promises, Promises` sind durch PRO013 umgesetzt. Daraus folgt keine zusätzliche Komplettzählung der Umbrella-Activity.
 

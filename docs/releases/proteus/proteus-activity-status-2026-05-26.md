@@ -23,10 +23,10 @@ Aktueller Stand nach PRO013:
 | Kennzahl | Wert | Führende Quelle |
 | --- | ---: | --- |
 | Proteus-Gesamtbasis | 154 | `data/cards/proteus-cards.json` |
-| Konkrete Proteus-CardImplementation-Dateien | 121 | `packages/engine/src/card-implementations/proteus/*.ts` |
-| Registry-paritätische Implementierungen | 121 | `coverage.test.ts`-Guard gegen Registry |
-| Fehlende konkrete CardImplementation-Dateien | 33 | Gesamtbasis minus konkrete Dateien |
-| Manifest-`implemented`-Einträge | 121 | Driftprüfung in `data/manifests/proteus-card-support.json` |
+| Konkrete Proteus-CardImplementation-Dateien | 129 | `packages/engine/src/card-implementations/proteus/*.ts` |
+| Registry-paritätische Implementierungen | 129 | `coverage.test.ts`-Guard gegen Registry |
+| Fehlende konkrete CardImplementation-Dateien | 25 | Gesamtbasis minus konkrete Dateien |
+| Manifest-`implemented`-Einträge | 129 | Driftprüfung in `data/manifests/proteus-card-support.json` |
 
 PRO006-1 ist ausschließlich Test- und Typ-Härtung für den bereits umgesetzten PRO006-Scope. Es setzt keine neue Proteus-Karte um, ändert keine Manifest-Freigaben und zieht keine PRO010-Mechaniken vor. `trash_program` bleibt für PRO006 ein automatischer Printed-Subroutine-Effekt; Payment- und Zielwahlvarianten gehören zu PRO010.
 
@@ -66,7 +66,7 @@ Der führende Detailplan `proteus-cardimplementation-detailplan-2026-05-26.md` w
 | PRO012 | umgesetzt | 8 Hidden-Resource-Prevention-/Sabotage-Karten. |
 | PRO012-1 | umgesetzt | Test-/Resolve-Härtung für PRO012; keine neue Kartenpromotion. |
 | PRO013 | umgesetzt | 8 Agenda-/Steal-/Overadvance-Karten. |
-| PRO014 | neu zu schneiden | 8 Corp-Asset-/Upgrade-Utility-Karten. |
+| PRO014 | erledigt | 8 Corp-Asset-/Upgrade-Utility-Karten; Implementierungszählung 129/154. |
 | PRO015 | neu zu schneiden | 5 Bad-Publicity-Run-/Replacement-Karten. |
 | PRO016 | neu zu schneiden | 4 Random-/Dice-/Encounter-Karten. |
 | PRO017 | neu zu schneiden | 6 Action-Economy-/Action-Debt-Karten. |
@@ -124,6 +124,7 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-27-proteus-pro012-1-hidden-resource-hardening.md` | `done` | PRO012-1 | Resolve- und Test-Härtung für PRO012-Hidden-Resources; keine neue Kartenpromotion, Implementierungszählung bleibt 113/154. |
 | `done/act-2026-05-28-proteus-pro013-agenda-steal-overadvance-suite.md` | `done` | PRO013 | 8 Agenda-/Steal-/Overadvance-Karten; neue Implementierungszählung 121/154. |
 | `done/act-2026-05-28-proteus-pro013-1-agenda-suite-hardening.md` | `done` | PRO013-1 | Pirate-Broadcast-Pflichtsequenz und PRO013-Verhaltenstests gehärtet; keine neue Kartenpromotion, Implementierungszählung bleibt 121/154. |
+| `done/act-2026-05-28-proteus-pro014-corp-asset-upgrade-utility-suite.md` | `done` | PRO014 | 8 Corp-Asset-/Upgrade-Utility-Karten; neue Implementierungszählung 129/154. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
 | `done/act-2026-05-24-proteus-phase-7a-hardware-deck-foundation.md` | `done` | Phase 7a | 1 Karte: `Deck, The`. |
 | `done/act-2026-05-24-proteus-phase-7b-icebreaker-credit-decks.md` | `done` | Phase 7b | 2 Karten: `Cortical Cybermodem`, `Sunburst Cranial Interface`. |
@@ -196,7 +197,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | `in-progress/act-2026-05-24-proteus-phase-6a-agenda-scoring-steal-baseline.md` | `done-reference` | Phase 6a | PRO013-Zielkarten sind umgesetzt; alte Umbrella-Activity bleibt Statusreferenz ohne zusätzliche Komplettzählung. | `PRO013` |
 | `in-progress/act-2026-05-24-proteus-phase-6b-corp-ice-simple-resolver.md` | `blocked` | Phase 6b | PRO006- und PRO010-Zielkarten sind umgesetzt; die alte Umbrella-Activity bleibt nur als Statusreferenz ohne zusätzliche Komplettzählung. | `PRO006`, `PRO010` |
 | `in-progress/act-2026-05-24-proteus-phase-6c-corp-operation-trace-tag-economy.md` | `done` | Phase 6c | PRO007 umgesetzt: `Credit Consolidation`, `Data Sifters`, `Manhunt`, `Schlaghund Pointers`, `Underworld Mole`. | `PRO007` |
-| `in-progress/act-2026-05-24-proteus-phase-6d-corp-asset-upgrade-utility.md` | `blocked` | Phase 6d | `Department of Misinformation`, `Government Contract`, `LDL Traffic Analyzers`, `Panic Button`, `Cybertech Think Tank`, `Raymond Ellison`, `Siren`, `Syd Meyer Superstores`; Asset/Upgrade Utility. | `PRO014` |
+| `in-progress/act-2026-05-24-proteus-phase-6d-corp-asset-upgrade-utility.md` | `resolved-by-done-activity` | Phase 6d | PRO014 ist in `done/act-2026-05-28-proteus-pro014-corp-asset-upgrade-utility-suite.md` abgeschlossen; Umbrella bleibt nur Referenz ohne doppelte Zählung. | `PRO014` |
 | `in-progress/act-2026-05-24-proteus-phase-6e-runner-agenda-overadvance-events.md` | `done-reference` | Phase 6e | PRO013-Zielkarten sind umgesetzt; alte Umbrella-Activity bleibt Statusreferenz ohne zusätzliche Komplettzählung. | `PRO013` |
 | `in-progress/act-2026-05-24-proteus-phase-9a-random-dice-foundation.md` | `blocked` | Phase 9a | `Forward's Legacy`, `Roadblock`, `Executive Boot Camp`, `Lisa Blight`; Random Foundation und Encounter/Cost/Subroutine. | `PRO016` |
 | `in-progress/act-2026-05-24-proteus-phase-9b-action-economy-debt.md` | `blocked` | Phase 9b | `Lucidrine™ Drip Feed`, `AI Board Member`, `Please Don't Choke Anyone`, `Project Venice`, `Corporate Guard(R) Temps`, `Bargain with Viacox`; Action Economy/Replacement. | `PRO017` |
@@ -225,7 +226,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | PRO012-1 | umgesetzt | Reine Test-/Resolve-Härtung für PRO012: Mercenary-Current-Access-Revalidierung, sequenzielle Access-Interpretation und konkrete Hidden-Resource-Verhaltenstests. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
 | PRO013 | umgesetzt | Agenda/Steal/Overadvance Suite mit 8 Karten ist umgesetzt, registriert und im Manifest engine-/human-playable. Keine Decklegalität, Formatlegalität oder AI-Unterstützung. |
 | PRO013-1 | umgesetzt | Reine Behavior-Härtung für PRO013: Pirate-Broadcast-Folgeruns werden exklusiv erzwungen, StartRun revalidiert den Sequenzstatus, Action-Debt wird nicht im selben Run-Ende verbraucht, und `agenda-suite.test.ts` deckt die acht PRO013-Karten ab. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
-| PRO014 | neu zu schneiden | Corp Asset/Upgrade Utility Suite mit 8 Karten. |
+| PRO014 | erledigt | Corp Asset/Upgrade Utility Suite mit 8 Karten. |
 | PRO015 | neu zu schneiden | Bad-Publicity Run/Replacement Suite mit 5 Karten. |
 | PRO016 | neu zu schneiden | Random/Dice/Encounter Suite mit 4 Karten. |
 | PRO017 | neu zu schneiden | Action Economy/Action Debt Suite mit 6 Karten. |

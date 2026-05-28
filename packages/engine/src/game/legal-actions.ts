@@ -25,7 +25,9 @@ import {
 import { buildRunnerAccessActions, type RunnerAccessActionHost } from "./access/access-actions";
 import {
   buildRunnerAccessStartCardImplementationActions,
+  buildCorpDuringRunCardImplementationActions,
   buildCorpEncounterCardImplementationActions,
+  buildCorpTraceCardImplementationActions,
   buildRunnerCostPenaltySupportCardImplementationActions,
   type RunCardImplementationActionHost,
 } from "./run/card-implementation-run-actions";
@@ -109,6 +111,18 @@ export function buildLegalActions(
           host.hosts.runCardImplementationActionHost(),
         ).legalActions
       : [];
+  if (
+    state.pendingChoice &&
+    side === "corp" &&
+    state.trace?.status === "corp_bid" &&
+    state.pendingChoice.side === "corp"
+  )
+    return [
+      ...buildCorpTraceCardImplementationActions(
+        host.hosts.runCardImplementationActionHost(),
+      ).legalActions,
+      host.actions.buildChoiceAction(state.pendingChoice),
+    ];
   if (state.pendingChoice)
     return side === state.pendingChoice.side
       ? [host.actions.buildChoiceAction(state.pendingChoice)]
@@ -188,7 +202,12 @@ export function buildLegalActions(
   }
   if (state.timingPoint === "run.jack_out_window") {
     if (side === "corp")
-      return buildCorpRunRootRezWindowActions(host.hosts.runRezWindowHost());
+      return [
+        ...buildCorpRunRootRezWindowActions(host.hosts.runRezWindowHost()),
+        ...buildCorpDuringRunCardImplementationActions(
+          host.hosts.runCardImplementationActionHost(),
+        ).legalActions,
+      ];
     if (isCorpRunRootRezWindowOpen(host.hosts.runRezWindowHost())) return [];
     return side === "runner"
       ? buildRunnerMovementActions(
