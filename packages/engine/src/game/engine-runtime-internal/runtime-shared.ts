@@ -19,3 +19,13 @@ export type HiddenZoneArrangeChoiceHandlerHost = any;
 export type HiddenZoneNonSearchChoiceHandlerHost = any;
 export type CorpZoneChoiceHandlerHost = any;
 export type CardRunnerEventLongtailImplementation = any;
+
+export function runtimeBinding(
+  runtime: Record<string, any>,
+  property: string | symbol,
+): any {
+  const key = property as string;
+  const value = runtime[key];
+  if (value !== undefined && typeof value !== "function") return value;
+  return (...args: any[]) => runtime[key](...args);
+}

@@ -37,7 +37,20 @@ describe("engine runtime module size gates", () => {
     }
     expect(
       lineCount(join(runtimeInternalDir, "choice-hidden-zone-runtime.ts")),
-    ).toBeLessThanOrEqual(3200);
+    ).toBeLessThanOrEqual(1000);
+    for (const module of [
+      "pending-choice-runtime-hosts.ts",
+      "hidden-zone-search-runtime.ts",
+      "hidden-zone-arrange-runtime.ts",
+      "hidden-zone-nonsearch-runtime.ts",
+      "hidden-zone-nonsearch-playful-ai-runtime.ts",
+      "corp-zone-runtime-hosts.ts",
+    ]) {
+      expect(
+        lineCount(join(runtimeInternalDir, module)),
+        `${module} exceeds the choice/hidden-zone submodule ceiling`,
+      ).toBeLessThanOrEqual(1500);
+    }
     expect(
       lineCount(join(runtimeInternalDir, "runtime-bootstrap.ts")),
     ).toBeLessThanOrEqual(3200);
