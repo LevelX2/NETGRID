@@ -41,6 +41,9 @@ import {
   structuredBreakerProfileCoversIce,
 } from "./breaker-ontology-consumer";
 
+const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
+  "onr_v1_309_bbs-whispering-campaign";
+
 export type RunnerPlanKind =
   | "pressure_rnd"
   | "pressure_hq"
@@ -1804,16 +1807,26 @@ function evaluateRunnerRemoteContestAndTrashDiscipline(
               ? 220
               : 190;
       score += highImpactBonus;
+      if (context.finitePoolEconomy) {
+        score += context.bbsWhisperingCampaign ? 430 : 300;
+        if (context.corpValueRemaining >= Math.max(context.trashCost + 4, 8)) {
+          score += 120;
+        }
+      }
       if (context.acuteThreat) score += 110;
       if (context.dedicatedTrashCredits > 0) score += 80;
       reasons.push(
-        context.role === "scoring_protection"
-          ? "trash_scoring_protection_upgrade"
-          : context.role === "run_tax"
-            ? "trash_run_tax_upgrade_when_budget_ok"
-            : context.role === "economy"
-              ? "trash_economy_node"
-              : "trash_high_value_remote_asset",
+        context.bbsWhisperingCampaign
+          ? "trash_bbs_whispering_campaign_pool"
+          : context.finitePoolEconomy
+            ? "trash_finite_pool_economy_asset"
+            : context.role === "scoring_protection"
+              ? "trash_scoring_protection_upgrade"
+              : context.role === "run_tax"
+                ? "trash_run_tax_upgrade_when_budget_ok"
+                : context.role === "economy"
+                  ? "trash_economy_node"
+                  : "trash_high_value_remote_asset",
       );
     } else if (context.trashable && context.role === "low_value") {
       score -= 260;
@@ -1825,6 +1838,15 @@ function evaluateRunnerRemoteContestAndTrashDiscipline(
   }
 
   if (candidate.kind === "contest_remote") {
+    const target = targetServerId(input, candidate);
+    if (
+      target !== undefined &&
+      recentRunnerDeclinedRelevantRemoteTrash(input, target)
+    ) {
+      score -= 560;
+      reasons.push("avoid_repeat_remote_after_declined_trash");
+      evidence.push("runner_repeat_remote_after_declined_trash_penalized:true");
+    }
     if (opportunity.selectedTargetAdvanced) {
       score += opportunity.selectedTargetContestable ? 360 : 80;
       reasons.push(
@@ -2364,9 +2386,24 @@ function evaluateRunnerOutcomeFollowup(
       break;
     case "remote_empty_or_low_value":
       if (sameTargetRun) {
-        score -= 560;
-        reasons.push("avoid_empty_remote_repeat");
+        const sameRemoteStillHasKnownRelevantTrash =
+          outcome.targetServerId !== undefined &&
+          remoteServerHasKnownRelevantTrashTarget(
+            input,
+            outcome.targetServerId,
+          );
+        score -= sameRemoteStillHasKnownRelevantTrash ? 640 : 560;
+        reasons.push(
+          sameRemoteStillHasKnownRelevantTrash
+            ? "avoid_repeat_remote_after_declined_trash"
+            : "avoid_empty_remote_repeat",
+        );
         evidence.push("bad_outcome_repeated_without_new_info:true");
+        if (sameRemoteStillHasKnownRelevantTrash) {
+          evidence.push(
+            "runner_repeat_remote_after_declined_trash_penalized:true",
+          );
+        }
       } else if (
         pivot &&
         (economyProgression || rigProgression || runPivotProgression)
@@ -2389,7 +2426,19 @@ function evaluateRunnerOutcomeFollowup(
           outcome.targetServerId,
           features,
         );
-        if (!contestable) {
+        const sameRemoteStillHasKnownRelevantTrash =
+          remoteServerHasKnownRelevantTrashTarget(
+            input,
+            outcome.targetServerId,
+          );
+        if (sameRemoteStillHasKnownRelevantTrash) {
+          score -= 520;
+          reasons.push("avoid_repeat_remote_after_declined_trash");
+          evidence.push(
+            "bad_outcome_repeated_without_new_info:true",
+            "runner_repeat_remote_after_declined_trash_penalized:true",
+          );
+        } else if (!contestable) {
           score -= 210;
           reasons.push("avoid_finished_remote_repeat");
           evidence.push("bad_outcome_repeated_without_new_info:true");
@@ -7242,7 +7291,10 @@ function remoteServerHasKnownRelevantTrashTarget(
     const trashCost = remoteRootTrashCost(card);
     if (trashCost === undefined || creditsAfterIce < trashCost) return false;
     const role = remoteTrashRoleForCard(card);
-    return role !== "low_value" && role !== "unknown";
+    return (
+      (role !== "low_value" && role !== "unknown") ||
+      remoteTrashCardLooksLikeFinitePool(card)
+    );
   });
 }
 
@@ -7252,6 +7304,9 @@ function currentRemoteTrashAccessContext(input: AiDecisionInput): {
   expensive: boolean;
   highImpact: boolean;
   acuteThreat: boolean;
+  finitePoolEconomy: boolean;
+  bbsWhisperingCampaign: boolean;
+  corpValueRemaining: number;
   trashCost: number;
   generalCreditCost: number;
   dedicatedTrashCredits: number;
@@ -7279,6 +7334,9 @@ function currentRemoteTrashAccessContext(input: AiDecisionInput): {
       expensive: false,
       highImpact: false,
       acuteThreat: false,
+      finitePoolEconomy: false,
+      bbsWhisperingCampaign: false,
+      corpValueRemaining: 0,
       trashCost: 0,
       generalCreditCost: 0,
       dedicatedTrashCredits: 0,
@@ -7298,7 +7356,15 @@ function currentRemoteTrashAccessContext(input: AiDecisionInput): {
     : (remoteRootTrashCost(accessed) ?? 0);
   const trashable = remoteRootTrashCost(accessed) !== undefined;
   const role = remoteTrashRoleForAccessedCard(input, accessed);
-  const relevant = role !== "low_value" && role !== "unknown";
+  const bbsWhisperingCampaign =
+    accessed.definitionId === BBS_WHISPERING_CAMPAIGN_DEFINITION_ID;
+  const corpValueRemaining = remoteTrashVisibleCorpValueRemaining(accessed);
+  const finitePoolEconomy =
+    bbsWhisperingCampaign ||
+    (role === "economy" &&
+      (corpValueRemaining > 0 || remoteTrashCardLooksLikeFinitePool(accessed)));
+  const relevant =
+    (role !== "low_value" && role !== "unknown") || finitePoolEconomy;
   const dedicatedTrashCredits = trashAction
     ? remoteTrashDedicatedCredits(input, trashAction, accessed)
     : 0;
@@ -7315,18 +7381,24 @@ function currentRemoteTrashAccessContext(input: AiDecisionInput): {
       role === "run_tax" ||
       role === "remote_capacity" ||
       role === "economy" ||
-      role === "tag_punish");
+      role === "tag_punish" ||
+      finitePoolEconomy);
   const acuteThreat = remoteTrashAccessProtectsAcuteThreat(
     input,
     run.attackedServerId,
   );
+  const highRemainingFinitePool =
+    finitePoolEconomy &&
+    corpValueRemaining >= Math.max(trashCost + 2, 8) &&
+    trashCost > 0;
   const deferredByBudget =
     trashable &&
     highImpact &&
     expensive &&
     dropsBelowReserve &&
     dedicatedTrashCredits <= 0 &&
-    !acuteThreat;
+    !acuteThreat &&
+    !highRemainingFinitePool;
   const affordableRelevant =
     trashable && relevant && trashAction !== undefined && !deferredByBudget;
   return {
@@ -7335,6 +7407,9 @@ function currentRemoteTrashAccessContext(input: AiDecisionInput): {
     expensive,
     highImpact,
     acuteThreat,
+    finitePoolEconomy,
+    bbsWhisperingCampaign,
+    corpValueRemaining,
     trashCost,
     generalCreditCost,
     dedicatedTrashCredits,
@@ -7352,9 +7427,91 @@ function currentRemoteTrashAccessContext(input: AiDecisionInput): {
       `remote_trash_drops_below_reserve:${dropsBelowReserve}`,
       `remote_trash_acute_threat:${acuteThreat}`,
       `remote_trash_deferred_by_budget:${deferredByBudget}`,
+      `remote_trash_finite_pool_economy:${finitePoolEconomy}`,
+      `remote_trash_bbs_whispering_campaign:${bbsWhisperingCampaign}`,
+      `remote_trash_corp_value_remaining:${corpValueRemaining}`,
     ],
     role,
   };
+}
+
+function recentRunnerDeclinedRelevantRemoteTrash(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  let currentRunTarget: string | undefined;
+  let sawAccessOnTarget = false;
+  let declinedOnTarget = false;
+  for (const event of input.eventTail.slice(-40)) {
+    if (event.publicPayload.actor !== "runner") continue;
+    const actionType = publicActionType(event);
+    if (actionType === "start_run") {
+      currentRunTarget = serverIdFromEvent(event);
+      sawAccessOnTarget = false;
+      if (currentRunTarget !== serverId) declinedOnTarget = false;
+      continue;
+    }
+    if (currentRunTarget !== serverId) continue;
+    if (actionType === "access_card") {
+      sawAccessOnTarget = true;
+      continue;
+    }
+    if (actionType === "trash_accessed_card") {
+      declinedOnTarget = false;
+      sawAccessOnTarget = false;
+      continue;
+    }
+    if (actionType === "decline_trash" && sawAccessOnTarget) {
+      declinedOnTarget = true;
+    }
+  }
+  return (
+    declinedOnTarget && remoteServerHasKnownRelevantTrashTarget(input, serverId)
+  );
+}
+
+function remoteTrashVisibleCorpValueRemaining(card: VisibleCard): number {
+  return Math.max(
+    0,
+    card.counters?.bit ?? 0,
+    card.counters?.recurring_credit ?? 0,
+  );
+}
+
+function remoteTrashCardLooksLikeFinitePool(card: VisibleCard): boolean {
+  if (card.definitionId === BBS_WHISPERING_CAMPAIGN_DEFINITION_ID) return true;
+  const runtimeDefinition = card.definitionId
+    ? RUNTIME_CARDS[card.definitionId]
+    : undefined;
+  const demoDefinition = card.definitionId
+    ? DEMO_CARDS_BY_ID[card.definitionId]
+    : undefined;
+  const mechanics = [
+    ...("mechanics" in (runtimeDefinition ?? {})
+      ? ((runtimeDefinition as { mechanics?: string[] } | undefined)
+          ?.mechanics ?? [])
+      : []),
+    ...(demoDefinition?.mechanics ?? []),
+  ];
+  const runtimeText =
+    (runtimeDefinition as { text?: string } | undefined)?.text ?? "";
+  const demoText =
+    (demoDefinition as { text?: string } | undefined)?.text ?? "";
+  const rulesText = `${runtimeText} ${demoText} ${
+    card.rulesText ?? ""
+  }`.toLowerCase();
+  return (
+    mechanics.some(
+      (mechanic: string) =>
+        mechanic.includes("finite_economy_pool") ||
+        mechanic.includes("hosted_credits") ||
+        mechanic.includes("bit_counter"),
+    ) ||
+    (rulesText.includes("put") &&
+      rulesText.includes("from the bank") &&
+      rulesText.includes("take") &&
+      rulesText.includes("bits"))
+  );
 }
 
 function remoteTrashRoleForAccessedCard(

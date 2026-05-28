@@ -11701,6 +11701,148 @@ describe("V1.4.1 plan-based Runner AI", () => {
     ).toBe("trash_accessed_card");
   });
 
+  it("trashes an affordable BBS Whispering Campaign with visible pool remaining", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-bbs-trash-pool",
+        corpDeck: {
+          id: "ai_runner_bbs_trash_pool_corp",
+          name: "AI Runner BBS Trash Pool Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 4;
+    putInstalledCorpBbsInRemote(state, "remote_1", 12);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(input.playerView.run?.accessedCard?.definitionId).toBe(
+      "onr_v1_309_bbs-whispering-campaign",
+    );
+    expect(input.playerView.run?.accessedCard?.counters?.bit).toBe(12);
+    expect(decision.reasonCode).toBe("runner.plan.trash_asset");
+    expect(
+      input.legalActions.find((action) => action.actionId === decision.actionId)
+        ?.type,
+    ).toBe("trash_accessed_card");
+    expect(decision.evidence).toContain(
+      "remote_trash_bbs_whispering_campaign:true",
+    );
+    expect(decision.evidence).toContain(
+      "remote_trash_deferred_by_budget:false",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload|corp\.hq|corp\.rd/i,
+    );
+  });
+
+  it("does not flag unaffordable BBS trash as suspicious when only decline is legal", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-bbs-trash-low-credits",
+        corpDeck: {
+          id: "ai_runner_bbs_trash_low_credits_corp",
+          name: "AI Runner BBS Trash Low Credits Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 3;
+    putInstalledCorpBbsInRemote(state, "remote_1", 12);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(
+      input.legalActions.some(
+        (action) => action.type === "trash_accessed_card",
+      ),
+    ).toBe(false);
+    expect(decision.reasonCode).toBe("runner.access.decline_trash");
+    expect(decision.evidence).toContain(
+      "remote_trash_bbs_whispering_campaign:true",
+    );
+  });
+
+  it("penalizes repeating the same known BBS remote after declining affordable trash", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-bbs-repeat-after-decline",
+        corpDeck: {
+          id: "ai_runner_bbs_repeat_after_decline_corp",
+          name: "AI Runner BBS Repeat After Decline Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 4;
+    putInstalledCorpBbsInRemote(state, "remote_1", 12);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const repeatCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) =>
+        candidate.kind === "contest_remote" &&
+        candidate.steps.some((step) => step.targetServerId === "remote_1"),
+    );
+    if (!repeatCandidate) throw new Error("Missing repeated BBS remote run");
+    const repeatScore = evaluateRunnerPlan(input, repeatCandidate);
+
+    expect(repeatScore.reasons).toContain(
+      "avoid_repeat_remote_after_declined_trash",
+    );
+    expect(repeatScore.evidence).toContain(
+      "runner_repeat_remote_after_declined_trash_penalized:true",
+    );
+  });
+
   it("defers an early expensive run-tax region trash when no acute remote threat exists", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -16292,6 +16434,67 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
       remoteRunStartedWithSufficientPostRunReserve: 1,
       turnsFromRemoteThreatCreatedToContest: 2,
       turnsFromRemoteThreatCreatedToScoreOrSteal: 2.5,
+    });
+  });
+
+  it("summarizes BBS remote-trash and repeat-run diagnostics from side-safe traces", () => {
+    const metrics = summarizeMatchProgressionMetrics([
+      progressionSummary(
+        [
+          progressionAction("runner", 1, "decline_trash", "remote_2", 1, {
+            runnerRemoteAccessWithTrashableCard: true,
+            runnerRemoteAccessWithRelevantTrashableCard: true,
+            runnerAffordableRelevantRemoteTrashOpportunity: true,
+            runnerSkippedAffordableRelevantRemoteTrash: true,
+            runnerRemoteTrashDeclined: true,
+            runnerRemoteTrashTargetType: "asset_node",
+            runnerRemoteTrashRole: "economy",
+            runnerRemoteTrashCost: 4,
+            runnerRemoteTrashLegalActionCount: 1,
+            runnerRemoteTrashAssetEconomy: true,
+            runnerRemoteTrashFinitePoolEconomy: true,
+            runnerRemoteTrashCorpValueRemaining: 12,
+            runnerBbsWhisperingCampaignAccessed: true,
+            runnerBbsWhisperingCampaignTrashLegal: true,
+            runnerBbsWhisperingCampaignTrashSkipped: true,
+            runnerBbsWhisperingCampaignTrashSkippedAffordable: true,
+            runnerFinitePoolAssetAccessed: true,
+            runnerFinitePoolAssetTrashLegal: true,
+            runnerFinitePoolAssetTrashSkippedAffordable: true,
+            runnerRemoteTrashFixGateEligible: true,
+            runnerRemoteTrashFixGateSuspicious: true,
+          }),
+          progressionAction("runner", 2, "start_run", "remote_2", 1),
+        ],
+        "runner-remote-trash-repeat-fixture",
+      ),
+    ]);
+
+    expect(metrics).toMatchObject({
+      runnerRemoteTrashDecisionWindows: 1,
+      runnerRemoteTrashLegalActions: 1,
+      runnerRemoteTrashSkipped: 1,
+      runnerRemoteTrashSkippedAffordableRelevant: 1,
+      runnerRemoteTrashSkippedAssetEconomy: 1,
+      runnerRemoteTrashSkippedFinitePoolEconomy: 1,
+      runnerRemoteTrashSkippedWithCorpValueRemaining: 1,
+      runnerBbsWhisperingCampaignAccessed: 1,
+      runnerBbsWhisperingCampaignTrashLegal: 1,
+      runnerBbsWhisperingCampaignTrashSkipped: 1,
+      runnerBbsWhisperingCampaignTrashSkippedAffordable: 1,
+      runnerBbsWhisperingCampaignTrashSkippedWithCreditsRemaining: 1,
+      runnerFinitePoolAssetAccessed: 1,
+      runnerFinitePoolAssetTrashLegal: 1,
+      runnerFinitePoolAssetTrashSkippedAffordable: 1,
+      runnerRepeatAccessKnownRemote: 1,
+      runnerRepeatAccessKnownTrashableRemote: 1,
+      runnerRepeatAccessKnownTrashableRemoteWithoutTrash: 1,
+      runnerRepeatRunOnSameRemoteAfterDecliningTrash: 1,
+      runnerRepeatRunOnSameRemoteNoNewInfo: 1,
+      runnerRepeatRemoteAccessNoProgress: 1,
+      runnerRemoteTrashFixGateEligible: 1,
+      runnerRemoteTrashFixGateSuspicious: 1,
+      runnerRepeatRemoteNoTrashFixGateSuspicious: 1,
     });
   });
 

@@ -1579,6 +1579,40 @@ export type AiMatchProgressionMetrics = {
   runnerRigInstallActions: number;
   runnerRemoteTrashOpportunities: number;
   runnerRemoteTrashTaken: number;
+  runnerRemoteTrashDecisionWindows: number;
+  runnerRemoteTrashLegalActions: number;
+  runnerRemoteTrashSkipped: number;
+  runnerRemoteTrashSkippedAffordableRelevant: number;
+  runnerRemoteTrashSkippedAssetEconomy: number;
+  runnerRemoteTrashSkippedFinitePoolEconomy: number;
+  runnerRemoteTrashSkippedWithCorpValueRemaining: number;
+  runnerRemoteTrashSkippedDueToReserve: number;
+  runnerRemoteTrashSkippedDueToLowCredits: number;
+  runnerRemoteTrashSkippedDueToUnknownHigherPriority: number;
+  runnerBbsWhisperingCampaignAccessed: number;
+  runnerBbsWhisperingCampaignTrashLegal: number;
+  runnerBbsWhisperingCampaignTrashTaken: number;
+  runnerBbsWhisperingCampaignTrashSkipped: number;
+  runnerBbsWhisperingCampaignTrashSkippedAffordable: number;
+  runnerBbsWhisperingCampaignTrashSkippedWithCreditsRemaining: number;
+  runnerFinitePoolAssetAccessed: number;
+  runnerFinitePoolAssetTrashLegal: number;
+  runnerFinitePoolAssetTrashTaken: number;
+  runnerFinitePoolAssetTrashSkippedAffordable: number;
+  runnerRepeatAccessKnownRemote: number;
+  runnerRepeatAccessKnownTrashableRemote: number;
+  runnerRepeatAccessKnownTrashableRemoteWithoutTrash: number;
+  runnerRepeatRunOnSameRemoteAfterDecliningTrash: number;
+  runnerRepeatRunOnSameRemoteNoNewInfo: number;
+  runnerRepeatRemoteAccessNoProgress: number;
+  runnerRepeatRemoteRunSuppressedAfterNoTrash: number;
+  runnerRepeatRemoteRunPenalizedAfterNoTrash: number;
+  runnerRemoteTrashFixGateEligible: number;
+  runnerRemoteTrashFixGateBlockedByReserve: number;
+  runnerRemoteTrashFixGateBlockedByLowCredits: number;
+  runnerRemoteTrashFixGateBlockedByHigherThreat: number;
+  runnerRemoteTrashFixGateSuspicious: number;
+  runnerRepeatRemoteNoTrashFixGateSuspicious: number;
   handUseRate: number;
   runnerAverageCredits: number;
   runnerMedianCredits: number;
@@ -2393,6 +2427,24 @@ export type AiSimulationSummary = {
     runnerRemoteTrashProtectedScoreThreat?: boolean;
     runnerRemoteTrashWithoutImmediateThreat?: boolean;
     runnerRemoteTrashCostBucket?: "0_1" | "2_3" | "4_5" | "6_plus";
+    runnerRemoteTrashLegalActionCount?: number;
+    runnerRemoteTrashAssetEconomy?: boolean;
+    runnerRemoteTrashFinitePoolEconomy?: boolean;
+    runnerRemoteTrashCorpValueRemaining?: number;
+    runnerBbsWhisperingCampaignAccessed?: boolean;
+    runnerBbsWhisperingCampaignTrashLegal?: boolean;
+    runnerBbsWhisperingCampaignTrashTaken?: boolean;
+    runnerBbsWhisperingCampaignTrashSkipped?: boolean;
+    runnerBbsWhisperingCampaignTrashSkippedAffordable?: boolean;
+    runnerFinitePoolAssetAccessed?: boolean;
+    runnerFinitePoolAssetTrashLegal?: boolean;
+    runnerFinitePoolAssetTrashTaken?: boolean;
+    runnerFinitePoolAssetTrashSkippedAffordable?: boolean;
+    runnerRemoteTrashFixGateEligible?: boolean;
+    runnerRemoteTrashFixGateBlockedByReserve?: boolean;
+    runnerRemoteTrashFixGateBlockedByLowCredits?: boolean;
+    runnerRemoteTrashFixGateBlockedByHigherThreat?: boolean;
+    runnerRemoteTrashFixGateSuspicious?: boolean;
     dedicatedTrashCreditsUsed?: number;
     generalCreditsSpentOnTrash?: number;
     trashDecisionLeftRunnerUnableToContest?: boolean;
@@ -2797,6 +2849,9 @@ type RemoteTrashRole =
   | "ambush"
   | "low_value"
   | "unknown";
+
+const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
+  "onr_v1_309_bbs-whispering-campaign";
 
 type CorpPunishKind =
   | "scorched_earth_like"
@@ -8128,10 +8183,20 @@ function scoreRunnerAction(
               ? 940
               : trashContext.role === "run_tax"
                 ? 875
-                : 890
+                : trashContext.finitePoolEconomy
+                  ? trashContext.bbsWhisperingCampaign
+                    ? 1120
+                    : 1040
+                  : 890
             : trashContext.trashable && trashContext.role === "low_value"
               ? 430
               : 780;
+        if (
+          trashContext.finitePoolEconomy &&
+          trashContext.corpValueRemaining >=
+            Math.max(trashContext.trashCost + 4, 8)
+        )
+          score += 90;
         if (trashContext.dedicatedTrashCredits > 0) score += 80;
         evidence.push(...trashContext.evidence);
       }
@@ -8147,11 +8212,13 @@ function scoreRunnerAction(
         const trashContext = runnerRemoteTrashAccessContext(input, action);
         score = trashContext.deferredByBudget
           ? 900
-          : trashContext.affordableRelevant
-            ? 120
-            : trashContext.trashable && trashContext.role === "low_value"
-              ? 760
-              : 650;
+          : trashContext.affordableRelevant && trashContext.finitePoolEconomy
+            ? 35
+            : trashContext.affordableRelevant
+              ? 120
+              : trashContext.trashable && trashContext.role === "low_value"
+                ? 760
+                : 650;
         evidence.push(...trashContext.evidence);
       }
       reasonCode = "runner.access.decline_trash";
@@ -12456,6 +12523,40 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "runnerRigInstallActions",
   "runnerRemoteTrashOpportunities",
   "runnerRemoteTrashTaken",
+  "runnerRemoteTrashDecisionWindows",
+  "runnerRemoteTrashLegalActions",
+  "runnerRemoteTrashSkipped",
+  "runnerRemoteTrashSkippedAffordableRelevant",
+  "runnerRemoteTrashSkippedAssetEconomy",
+  "runnerRemoteTrashSkippedFinitePoolEconomy",
+  "runnerRemoteTrashSkippedWithCorpValueRemaining",
+  "runnerRemoteTrashSkippedDueToReserve",
+  "runnerRemoteTrashSkippedDueToLowCredits",
+  "runnerRemoteTrashSkippedDueToUnknownHigherPriority",
+  "runnerBbsWhisperingCampaignAccessed",
+  "runnerBbsWhisperingCampaignTrashLegal",
+  "runnerBbsWhisperingCampaignTrashTaken",
+  "runnerBbsWhisperingCampaignTrashSkipped",
+  "runnerBbsWhisperingCampaignTrashSkippedAffordable",
+  "runnerBbsWhisperingCampaignTrashSkippedWithCreditsRemaining",
+  "runnerFinitePoolAssetAccessed",
+  "runnerFinitePoolAssetTrashLegal",
+  "runnerFinitePoolAssetTrashTaken",
+  "runnerFinitePoolAssetTrashSkippedAffordable",
+  "runnerRepeatAccessKnownRemote",
+  "runnerRepeatAccessKnownTrashableRemote",
+  "runnerRepeatAccessKnownTrashableRemoteWithoutTrash",
+  "runnerRepeatRunOnSameRemoteAfterDecliningTrash",
+  "runnerRepeatRunOnSameRemoteNoNewInfo",
+  "runnerRepeatRemoteAccessNoProgress",
+  "runnerRepeatRemoteRunSuppressedAfterNoTrash",
+  "runnerRepeatRemoteRunPenalizedAfterNoTrash",
+  "runnerRemoteTrashFixGateEligible",
+  "runnerRemoteTrashFixGateBlockedByReserve",
+  "runnerRemoteTrashFixGateBlockedByLowCredits",
+  "runnerRemoteTrashFixGateBlockedByHigherThreat",
+  "runnerRemoteTrashFixGateSuspicious",
+  "runnerRepeatRemoteNoTrashFixGateSuspicious",
   "handUseRate",
   "runnerAverageCredits",
   "runnerMedianCredits",
@@ -12701,6 +12802,52 @@ export function summarizeMatchProgressionMetrics(
   const skippedAffordableRelevantRemoteTrash = actionSequence.filter(
     (entry) => entry.runnerSkippedAffordableRelevantRemoteTrash === true,
   ).length;
+  const repeatRemoteNoTrashMetrics =
+    summarizeRunnerRepeatRemoteNoTrashMetrics(summaries);
+  const runnerRemoteTrashDecisionWindows = actionSequence.filter(
+    (entry) => entry.runnerRemoteAccessWithTrashableCard === true,
+  ).length;
+  const runnerRemoteTrashLegalActions = actionSequence.reduce(
+    (sum, entry) => sum + (entry.runnerRemoteTrashLegalActionCount ?? 0),
+    0,
+  );
+  const runnerRemoteTrashSkipped = actionSequence.filter(
+    (entry) =>
+      entry.runnerRemoteAccessWithTrashableCard === true &&
+      entry.runnerRemoteTrashTaken !== true,
+  ).length;
+  const runnerRemoteTrashSkippedAffordableRelevant =
+    skippedAffordableRelevantRemoteTrash;
+  const runnerRemoteTrashSkippedAssetEconomy = actionSequence.filter(
+    (entry) =>
+      entry.runnerRemoteTrashAssetEconomy === true &&
+      entry.runnerRemoteTrashTaken !== true,
+  ).length;
+  const runnerRemoteTrashSkippedFinitePoolEconomy = actionSequence.filter(
+    (entry) =>
+      entry.runnerRemoteTrashFinitePoolEconomy === true &&
+      entry.runnerRemoteTrashTaken !== true,
+  ).length;
+  const runnerRemoteTrashSkippedWithCorpValueRemaining = actionSequence.filter(
+    (entry) =>
+      (entry.runnerRemoteTrashCorpValueRemaining ?? 0) > 0 &&
+      entry.runnerRemoteTrashTaken !== true,
+  ).length;
+  const runnerRemoteTrashSkippedDueToReserve = actionSequence.filter(
+    (entry) => entry.runnerRemoteTrashFixGateBlockedByReserve === true,
+  ).length;
+  const runnerRemoteTrashSkippedDueToLowCredits = actionSequence.filter(
+    (entry) => entry.runnerRemoteTrashFixGateBlockedByLowCredits === true,
+  ).length;
+  const runnerRemoteTrashSkippedDueToUnknownHigherPriority =
+    actionSequence.filter(
+      (entry) =>
+        entry.runnerRemoteTrashFixGateEligible === true &&
+        entry.runnerRemoteTrashFixGateBlockedByReserve !== true &&
+        entry.runnerRemoteTrashFixGateBlockedByLowCredits !== true &&
+        entry.runnerRemoteTrashFixGateBlockedByHigherThreat !== true &&
+        entry.runnerRemoteTrashTaken !== true,
+    ).length;
   const remoteRunOpportunitiesAgainstAdvancedRemote = actionSequence.filter(
     (entry) => entry.runnerRemoteRunOpportunityAgainstAdvancedRemote === true,
   ).length;
@@ -14013,6 +14160,68 @@ export function summarizeMatchProgressionMetrics(
     ).length,
     runnerRemoteTrashOpportunities,
     runnerRemoteTrashTaken,
+    runnerRemoteTrashDecisionWindows,
+    runnerRemoteTrashLegalActions,
+    runnerRemoteTrashSkipped,
+    runnerRemoteTrashSkippedAffordableRelevant,
+    runnerRemoteTrashSkippedAssetEconomy,
+    runnerRemoteTrashSkippedFinitePoolEconomy,
+    runnerRemoteTrashSkippedWithCorpValueRemaining,
+    runnerRemoteTrashSkippedDueToReserve,
+    runnerRemoteTrashSkippedDueToLowCredits,
+    runnerRemoteTrashSkippedDueToUnknownHigherPriority,
+    runnerBbsWhisperingCampaignAccessed: actionSequence.filter(
+      (entry) => entry.runnerBbsWhisperingCampaignAccessed === true,
+    ).length,
+    runnerBbsWhisperingCampaignTrashLegal: actionSequence.filter(
+      (entry) => entry.runnerBbsWhisperingCampaignTrashLegal === true,
+    ).length,
+    runnerBbsWhisperingCampaignTrashTaken: actionSequence.filter(
+      (entry) => entry.runnerBbsWhisperingCampaignTrashTaken === true,
+    ).length,
+    runnerBbsWhisperingCampaignTrashSkipped: actionSequence.filter(
+      (entry) => entry.runnerBbsWhisperingCampaignTrashSkipped === true,
+    ).length,
+    runnerBbsWhisperingCampaignTrashSkippedAffordable: actionSequence.filter(
+      (entry) =>
+        entry.runnerBbsWhisperingCampaignTrashSkippedAffordable === true,
+    ).length,
+    runnerBbsWhisperingCampaignTrashSkippedWithCreditsRemaining:
+      actionSequence.filter(
+        (entry) =>
+          entry.runnerBbsWhisperingCampaignTrashSkipped === true &&
+          (entry.runnerRemoteTrashCorpValueRemaining ?? 0) > 0,
+      ).length,
+    runnerFinitePoolAssetAccessed: actionSequence.filter(
+      (entry) => entry.runnerFinitePoolAssetAccessed === true,
+    ).length,
+    runnerFinitePoolAssetTrashLegal: actionSequence.filter(
+      (entry) => entry.runnerFinitePoolAssetTrashLegal === true,
+    ).length,
+    runnerFinitePoolAssetTrashTaken: actionSequence.filter(
+      (entry) => entry.runnerFinitePoolAssetTrashTaken === true,
+    ).length,
+    runnerFinitePoolAssetTrashSkippedAffordable: actionSequence.filter(
+      (entry) => entry.runnerFinitePoolAssetTrashSkippedAffordable === true,
+    ).length,
+    ...repeatRemoteNoTrashMetrics,
+    runnerRemoteTrashFixGateEligible: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashFixGateEligible === true,
+    ).length,
+    runnerRemoteTrashFixGateBlockedByReserve: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashFixGateBlockedByReserve === true,
+    ).length,
+    runnerRemoteTrashFixGateBlockedByLowCredits: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashFixGateBlockedByLowCredits === true,
+    ).length,
+    runnerRemoteTrashFixGateBlockedByHigherThreat: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashFixGateBlockedByHigherThreat === true,
+    ).length,
+    runnerRemoteTrashFixGateSuspicious: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashFixGateSuspicious === true,
+    ).length,
+    runnerRepeatRemoteNoTrashFixGateSuspicious:
+      repeatRemoteNoTrashMetrics.runnerRepeatRemoteNoTrashFixGateSuspicious,
     handUseRate:
       runnerHandUseOpportunityWindows > 0
         ? round(runnerHandUseActionsTaken / runnerHandUseOpportunityWindows)
@@ -14368,6 +14577,84 @@ function averageRunnerContestRisk(
 }
 
 type PlanConversionActionEntry = AiSimulationSummary["actionSequence"][number];
+
+function summarizeRunnerRepeatRemoteNoTrashMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "runnerRepeatAccessKnownRemote"
+  | "runnerRepeatAccessKnownTrashableRemote"
+  | "runnerRepeatAccessKnownTrashableRemoteWithoutTrash"
+  | "runnerRepeatRunOnSameRemoteAfterDecliningTrash"
+  | "runnerRepeatRunOnSameRemoteNoNewInfo"
+  | "runnerRepeatRemoteAccessNoProgress"
+  | "runnerRepeatRemoteRunSuppressedAfterNoTrash"
+  | "runnerRepeatRemoteRunPenalizedAfterNoTrash"
+  | "runnerRepeatRemoteNoTrashFixGateSuspicious"
+> {
+  const metrics = {
+    runnerRepeatAccessKnownRemote: 0,
+    runnerRepeatAccessKnownTrashableRemote: 0,
+    runnerRepeatAccessKnownTrashableRemoteWithoutTrash: 0,
+    runnerRepeatRunOnSameRemoteAfterDecliningTrash: 0,
+    runnerRepeatRunOnSameRemoteNoNewInfo: 0,
+    runnerRepeatRemoteAccessNoProgress: 0,
+    runnerRepeatRemoteRunSuppressedAfterNoTrash: 0,
+    runnerRepeatRemoteRunPenalizedAfterNoTrash: 0,
+    runnerRepeatRemoteNoTrashFixGateSuspicious: 0,
+  };
+  for (const summary of summaries) {
+    let declinedTrashRemote: string | undefined;
+    for (const entry of progressionEntriesWithRunTargets(
+      summary.actionSequence,
+    )) {
+      if (entry.side !== "runner") continue;
+      if (
+        entry.runnerRemoteAccessWithRelevantTrashableCard === true &&
+        isRemoteServerTarget(entry.targetServerId)
+      ) {
+        metrics.runnerRepeatAccessKnownRemote += 1;
+        if (entry.runnerRemoteAccessWithTrashableCard === true) {
+          metrics.runnerRepeatAccessKnownTrashableRemote += 1;
+        }
+        if (entry.runnerRemoteTrashTaken === true) {
+          declinedTrashRemote = undefined;
+        } else if (entry.runnerRemoteAccessWithTrashableCard === true) {
+          metrics.runnerRepeatAccessKnownTrashableRemoteWithoutTrash += 1;
+          declinedTrashRemote = entry.targetServerId;
+        }
+      }
+      if (
+        entry.actionType === "start_run" &&
+        entry.targetServerId &&
+        entry.targetServerId === declinedTrashRemote
+      ) {
+        metrics.runnerRepeatRunOnSameRemoteAfterDecliningTrash += 1;
+        metrics.runnerRepeatRunOnSameRemoteNoNewInfo += 1;
+        metrics.runnerRepeatRemoteAccessNoProgress += 1;
+        metrics.runnerRepeatRemoteNoTrashFixGateSuspicious += 1;
+      }
+      if (
+        hasEvidenceFlag(
+          entry,
+          "runner_repeat_remote_after_declined_trash_penalized:true",
+        )
+      ) {
+        metrics.runnerRepeatRemoteRunPenalizedAfterNoTrash += 1;
+      }
+      if (
+        declinedTrashRemote &&
+        entry.actionType !== "start_run" &&
+        entry.actionType !== "decline_trash" &&
+        entry.runnerRemoteTrashTaken !== true
+      ) {
+        metrics.runnerRepeatRemoteRunSuppressedAfterNoTrash += 1;
+        declinedTrashRemote = undefined;
+      }
+    }
+  }
+  return metrics;
+}
 
 function summarizePlanConversionMetrics(
   summaries: AiSimulationSummary[],
@@ -22928,7 +23215,65 @@ function runnerHandUseDiagnosticsForSimulationAction(
           runnerRemoteTrashCostBucket: remoteTrashCostBucket(
             remoteTrash.trashCost,
           ),
+          runnerRemoteTrashLegalActionCount: remoteTrash.legalTrashActionCount,
         }
+      : {}),
+    ...(remoteTrash.role === "economy"
+      ? { runnerRemoteTrashAssetEconomy: true }
+      : {}),
+    ...(remoteTrash.finitePoolEconomy
+      ? { runnerRemoteTrashFinitePoolEconomy: true }
+      : {}),
+    ...(remoteTrash.corpValueRemaining > 0
+      ? { runnerRemoteTrashCorpValueRemaining: remoteTrash.corpValueRemaining }
+      : {}),
+    ...(remoteTrash.bbsWhisperingCampaign
+      ? { runnerBbsWhisperingCampaignAccessed: true }
+      : {}),
+    ...(remoteTrash.bbsWhisperingCampaign &&
+    remoteTrash.legalTrashActionCount > 0
+      ? { runnerBbsWhisperingCampaignTrashLegal: true }
+      : {}),
+    ...(remoteTrash.bbsWhisperingCampaign && remoteTrashTaken
+      ? { runnerBbsWhisperingCampaignTrashTaken: true }
+      : {}),
+    ...(remoteTrash.bbsWhisperingCampaign && action.type === "decline_trash"
+      ? { runnerBbsWhisperingCampaignTrashSkipped: true }
+      : {}),
+    ...(remoteTrash.bbsWhisperingCampaign &&
+    remoteTrash.skippedAffordableRelevant
+      ? { runnerBbsWhisperingCampaignTrashSkippedAffordable: true }
+      : {}),
+    ...(remoteTrash.finitePoolEconomy
+      ? { runnerFinitePoolAssetAccessed: true }
+      : {}),
+    ...(remoteTrash.finitePoolEconomy && remoteTrash.legalTrashActionCount > 0
+      ? { runnerFinitePoolAssetTrashLegal: true }
+      : {}),
+    ...(remoteTrash.finitePoolEconomy && remoteTrashTaken
+      ? { runnerFinitePoolAssetTrashTaken: true }
+      : {}),
+    ...(remoteTrash.finitePoolEconomy && remoteTrash.skippedAffordableRelevant
+      ? { runnerFinitePoolAssetTrashSkippedAffordable: true }
+      : {}),
+    ...(remoteTrash.skippedAffordableRelevant
+      ? { runnerRemoteTrashFixGateEligible: true }
+      : {}),
+    ...(remoteTrash.deferredByBudget
+      ? { runnerRemoteTrashFixGateBlockedByReserve: true }
+      : {}),
+    ...(remoteTrash.trashable &&
+    remoteTrash.legalTrashActionCount === 0 &&
+    input.playerView.own.credits < remoteTrash.trashCost
+      ? { runnerRemoteTrashFixGateBlockedByLowCredits: true }
+      : {}),
+    ...(remoteTrash.skippedAffordableRelevant && action.type === "steal_agenda"
+      ? { runnerRemoteTrashFixGateBlockedByHigherThreat: true }
+      : {}),
+    ...(remoteTrash.skippedAffordableRelevant &&
+    action.type !== "steal_agenda" &&
+    !remoteTrash.deferredByBudget
+      ? { runnerRemoteTrashFixGateSuspicious: true }
       : {}),
     ...(remoteTrash.expensive
       ? { runnerExpensiveRemoteTrashOpportunity: true }
@@ -25640,6 +25985,10 @@ function runnerRemoteTrashAccessContext(
   reserveTarget: number;
   dropsBelowReserve: boolean;
   deferredByBudget: boolean;
+  finitePoolEconomy: boolean;
+  bbsWhisperingCampaign: boolean;
+  corpValueRemaining: number;
+  legalTrashActionCount: number;
   evidence: string[];
   targetType?: RemoteTrashTargetType;
   role?: RemoteTrashRole;
@@ -25663,6 +26012,10 @@ function runnerRemoteTrashAccessContext(
       reserveTarget: runnerCreditReserveTargetForInput(input),
       dropsBelowReserve: false,
       deferredByBudget: false,
+      finitePoolEconomy: false,
+      bbsWhisperingCampaign: false,
+      corpValueRemaining: 0,
+      legalTrashActionCount: 0,
       evidence: ["remote_trash_access:none"],
     };
   }
@@ -25674,13 +26027,26 @@ function runnerRemoteTrashAccessContext(
   const trashAction = input.legalActions.find(
     (candidate) => candidate.type === "trash_accessed_card",
   );
+  const legalTrashActionCount = input.legalActions.filter(
+    (candidate) => candidate.type === "trash_accessed_card",
+  ).length;
   const trashCost = trashAction
     ? remoteTrashActionTotalCostForMetrics(trashAction)
     : (remoteTrashCostForVisibleCard(accessed) ?? 0);
   const trashable =
     targetType !== "unknown" &&
     remoteTrashCostForVisibleCard(accessed) !== undefined;
-  const relevant = trashable && role !== "low_value" && role !== "unknown";
+  const bbsWhisperingCampaign =
+    accessed.definitionId === BBS_WHISPERING_CAMPAIGN_DEFINITION_ID;
+  const corpValueRemaining = remoteTrashVisibleCorpValueRemaining(accessed);
+  const finitePoolEconomy =
+    bbsWhisperingCampaign ||
+    (role === "economy" &&
+      (corpValueRemaining > 0 ||
+        remoteTrashCardLooksLikeFinitePoolForMetrics(accessed)));
+  const relevant =
+    trashable &&
+    ((role !== "low_value" && role !== "unknown") || finitePoolEconomy);
   const dedicatedTrashCredits =
     trashAction !== undefined
       ? remoteTrashDedicatedCreditsForMetrics(input, trashAction, accessed)
@@ -25698,18 +26064,24 @@ function runnerRemoteTrashAccessContext(
       role === "run_tax" ||
       role === "remote_capacity" ||
       role === "economy" ||
-      role === "tag_punish");
+      role === "tag_punish" ||
+      finitePoolEconomy);
   const acuteThreat = remoteTrashAccessProtectsAcuteThreatForMetrics(
     input,
     run.attackedServerId,
   );
+  const highRemainingFinitePool =
+    finitePoolEconomy &&
+    corpValueRemaining >= Math.max(trashCost + 2, 8) &&
+    trashCost > 0;
   const deferredByBudget =
     trashable &&
     highImpact &&
     expensive &&
     dropsBelowReserve &&
     dedicatedTrashCredits <= 0 &&
-    !acuteThreat;
+    !acuteThreat &&
+    !highRemainingFinitePool;
   const affordableRelevant =
     relevant && trashAction !== undefined && !deferredByBudget;
   const relevantTaken =
@@ -25731,6 +26103,10 @@ function runnerRemoteTrashAccessContext(
     reserveTarget,
     dropsBelowReserve,
     deferredByBudget,
+    finitePoolEconomy,
+    bbsWhisperingCampaign,
+    corpValueRemaining,
+    legalTrashActionCount,
     evidence: [
       `remote_trash_role:${role}`,
       ...(structuredRemoteRole
@@ -25758,10 +26134,59 @@ function runnerRemoteTrashAccessContext(
       `remote_trash_drops_below_reserve:${dropsBelowReserve}`,
       `remote_trash_acute_threat:${acuteThreat}`,
       `remote_trash_deferred_by_budget:${deferredByBudget}`,
+      `remote_trash_finite_pool_economy:${finitePoolEconomy}`,
+      `remote_trash_bbs_whispering_campaign:${bbsWhisperingCampaign}`,
+      `remote_trash_corp_value_remaining:${corpValueRemaining}`,
     ],
     ...(trashable ? { targetType } : {}),
     ...(trashable ? { role } : {}),
   };
+}
+
+function remoteTrashVisibleCorpValueRemaining(card: VisibleCard): number {
+  return Math.max(
+    0,
+    card.counters?.bit ?? 0,
+    card.counters?.recurring_credit ?? 0,
+  );
+}
+
+function remoteTrashCardLooksLikeFinitePoolForMetrics(
+  card: VisibleCard,
+): boolean {
+  if (card.definitionId === BBS_WHISPERING_CAMPAIGN_DEFINITION_ID) return true;
+  const runtimeDefinition = card.definitionId
+    ? RUNTIME_CARDS[card.definitionId]
+    : undefined;
+  const demoDefinition = card.definitionId
+    ? DEMO_CARDS_BY_ID[card.definitionId]
+    : undefined;
+  const mechanics = [
+    ...("mechanics" in (runtimeDefinition ?? {})
+      ? ((runtimeDefinition as { mechanics?: string[] } | undefined)
+          ?.mechanics ?? [])
+      : []),
+    ...(demoDefinition?.mechanics ?? []),
+  ];
+  const runtimeText =
+    (runtimeDefinition as { text?: string } | undefined)?.text ?? "";
+  const demoText =
+    (demoDefinition as { text?: string } | undefined)?.text ?? "";
+  const rulesText = `${runtimeText} ${demoText} ${
+    card.rulesText ?? ""
+  }`.toLowerCase();
+  return (
+    mechanics.some(
+      (mechanic: string) =>
+        mechanic.includes("finite_economy_pool") ||
+        mechanic.includes("hosted_credits") ||
+        mechanic.includes("bit_counter"),
+    ) ||
+    (rulesText.includes("put") &&
+      rulesText.includes("from the bank") &&
+      rulesText.includes("take") &&
+      rulesText.includes("bits"))
+  );
 }
 
 function runnerAdvancedRemoteContestContext(
