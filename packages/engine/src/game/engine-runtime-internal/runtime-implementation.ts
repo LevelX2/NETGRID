@@ -5,6 +5,12 @@ import { createActionRuntimeHosts } from "./action-runtime-hosts";
 import { createCardRuntimeHosts } from "./card-runtime-hosts";
 import { createFlowRuntimeHosts } from "./flow-runtime-hosts";
 import { createStateRuntimeServices } from "./state-runtime-services";
+import { createCardRuntimeResolvers } from "./card-runtime-resolvers";
+import { createChoiceHiddenZoneResolvers } from "./choice-hidden-zone-resolvers";
+import { createCorpRuntimeResolvers } from "./corp-runtime-resolvers";
+import { createStateRuntimeResolvers } from "./state-runtime-resolvers";
+import { createTurnRuntimeResolvers } from "./turn-runtime-resolvers";
+import { createStateCorpRuntimeResolvers } from "./state-corp-runtime-resolvers";
 import {
   DEMO_CARDS_BY_ID,
   type ActionType,
@@ -824,7 +830,6 @@ function hiddenZoneRuntimeDepsHost(): HiddenZoneRuntimeDepsHost {
     },
   };
 }
-
 function traceRuntimeDepsHost(): TraceRuntimeDepsHost {
   return {
     trace: {
@@ -855,7 +860,6 @@ function installRezRuntimeDepsHost(): InstallRezRuntimeDepsHost {
     runner: { ensureTurnFlags: ensureRunnerTurnFlags },
   };
 }
-
 function counterLifecycleRuntimeDepsHost(): CounterLifecycleRuntimeDepsHost {
   return {
     counters: {
@@ -1210,152 +1214,17 @@ const damageCoreHost: DamageCoreHost = {
 
 configureDamageCoreHost(damageCoreHost);
 
-function openPostMeatDamageReactionWindow(
-  state: GameState,
-  summary: DamageSummary,
-): boolean {
-  if (
-    summary.damageType !== "meat" ||
-    summary.cardsTrashed <= 0 ||
-    state.winner ||
-    state.pendingChoice
-  )
-    return false;
-  const candidates = postMeatDamageHiddenResourceCandidates(state);
-  if (candidates.length === 0) return false;
-  state.pendingChoice = {
-    choiceId: `hidden_resource_post_meat_damage_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `hidden_resource.post_meat_damage:${summary.cardsTrashed}`,
-    prompt: "Hidden Resource nach Meat Damage nutzen",
-    kind: "select_option",
-    options: [
-      { id: "pass", label: "Keine Hidden Resource nutzen" },
-      ...candidates.map((candidate) => ({
-        id: `post_meat_damage_${candidate.cardId}`,
-        label: `${candidate.title}: Korp wirft ${candidate.amount} HQ-Karten ab`,
-        publicLabel: "Hidden Resource",
-        value: candidate.cardId,
-      })),
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  state.activeSide = "runner";
-  return true;
+function openPostMeatDamageReactionWindow(...args: any[]): any {
+  return (cardRuntimeResolvers.openPostMeatDamageReactionWindow as any)(...args);
 }
-
-function postMeatDamageHiddenResourceCandidates(
-  state: GameState,
-): Array<{
-  cardId: CardInstanceId;
-  definitionId: CardDefinitionId;
-  title: string;
-  amount: number;
-}> {
-  return state.runner.rig.resources
-    .slice()
-    .sort()
-    .flatMap((cardId) => {
-      const instance = state.cardInstances[cardId];
-      if (!instance || instance.tapped === true) return [];
-      const definition = definitionFor(state, cardId);
-      const implementation = runnerUtilityLongtailImplementationForCard(
-        state,
-        cardId,
-      );
-      if (
-        implementation?.kind !==
-        "hidden_resource_post_meat_damage_random_hq_discard"
-      )
-        return [];
-      const amount = Math.max(0, Math.floor(implementation.amount));
-      if (amount <= 0) return [];
-      return [{ cardId, definitionId: definition.id, title: definition.title, amount }];
-    });
+function postMeatDamageHiddenResourceCandidates(...args: any[]): any {
+  return (cardRuntimeResolvers.postMeatDamageHiddenResourceCandidates as any)(...args);
 }
-
-function resolvePostMeatDamageHiddenResourceChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("hidden_resource.post_meat_damage"))
-    throw new Error("Es ist kein Hidden-Resource-Meat-Damage-Fenster offen.");
-  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  if (selected === "pass") {
-    delete state.pendingChoice;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenResourcePostMeatDamageDecision: "pass",
-    };
-    return;
-  }
-  const option = choice.options.find((candidate) => candidate.id === selected);
-  const sourceCardId =
-    typeof option?.value === "string"
-      ? (option.value as CardInstanceId)
-      : undefined;
-  const candidate = postMeatDamageHiddenResourceCandidates(state).find(
-    (item) => item.cardId === sourceCardId,
-  );
-  if (!candidate)
-    throw new Error("Diese Hidden-Resource-Reaktion ist nicht legal.");
-  const sourceInstance = mustInstance(state.cardInstances, candidate.cardId);
-  const revealPayload = hiddenRunnerResourceRevealPayload(state, candidate.cardId);
-  state.cardInstances[candidate.cardId] = {
-    ...sourceInstance,
-    faceup: true,
-    rezzed: true,
-    tapped: true,
-  };
-  const discardedIds = randomCorpHqDiscard(
-    state,
-    candidate.amount,
-    `hidden_resource.post_meat_damage.${candidate.definitionId}.${choice.choiceId}`,
-  );
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenResourcePostMeatDamageDecision: "apply",
-    sourceDefinitionId: candidate.definitionId,
-    ...revealPayload,
-    sourceTapped: true,
-    discardedHqCount: discardedIds.length,
-    corpHqAfter: state.corp.hq.length,
-    randomCounterAfter: state.randomCounter,
-  };
+function resolvePostMeatDamageHiddenResourceChoice(...args: any[]): any {
+  return (cardRuntimeResolvers.resolvePostMeatDamageHiddenResourceChoice as any)(...args);
 }
-
-function randomCorpHqDiscard(
-  state: GameState,
-  amount: number,
-  purposePrefix: string,
-): CardInstanceId[] {
-  const discarded: CardInstanceId[] = [];
-  const discardCount = Math.min(Math.max(0, Math.floor(amount)), state.corp.hq.length);
-  for (let index = 0; index < discardCount; index += 1) {
-    const value = nextRandom(state, `${purposePrefix}:selection:${index}`);
-    const selectedIndex = Math.floor(value * state.corp.hq.length);
-    const cardId = mustArrayValue(
-      state.corp.hq,
-      selectedIndex,
-      "HQ-Discard-Auswahl fehlt.",
-    );
-    removeFromAllZones(state, cardId);
-    state.corp.archives.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      rezzed: true,
-      zone: { side: "corp", zone: "archives" },
-    };
-    discarded.push(cardId);
-  }
-  return discarded;
+function randomCorpHqDiscard(...args: any[]): any {
+  return (cardRuntimeResolvers.randomCorpHqDiscard as any)(...args);
 }
 
 export {
@@ -1436,117 +1305,29 @@ type RunnerEventResolver = {
   resolve: (state: GameState, legalAction: LegalAction) => void;
 };
 
-function installTargetBindingForDefinition(definition: CardDefinition) {
-  return cardImplementationForDefinitionId(definition.id)?.installTargetBinding;
+function installTargetBindingForDefinition(...args: any[]): any {
+  return (cardRuntimeResolvers.installTargetBindingForDefinition as any)(...args);
 }
-
-function requiresDataFortInstallTarget(definition: CardDefinition): boolean {
-  return (
-    installTargetBindingForDefinition(definition)?.kind ===
-    "choose_data_fort_on_install"
-  );
+function requiresDataFortInstallTarget(...args: any[]): any {
+  return (cardRuntimeResolvers.requiresDataFortInstallTarget as any)(...args);
 }
-
-function runnerEventLongtailForDefinition(
-  definition: CardDefinition,
-): CardRunnerEventLongtailImplementation | undefined {
-  return cardImplementationForDefinitionId(definition.id)?.runnerEventLongtail;
+function runnerEventLongtailForDefinition(...args: any[]): any {
+  return (cardRuntimeResolvers.runnerEventLongtailForDefinition as any)(...args);
 }
-
-function variableRezForDefinition(
-  definition: CardDefinition,
-): CardVariableRezImplementation | undefined {
-  return cardImplementationForDefinitionId(definition.id)?.variableRez;
+function variableRezForDefinition(...args: any[]): any {
+  return (cardRuntimeResolvers.variableRezForDefinition as any)(...args);
 }
-
-function runnerEventLongtailKindForDefinition(
-  definition: CardDefinition,
-): CardRunnerEventLongtailImplementation["kind"] | undefined {
-  return runnerEventLongtailForDefinition(definition)?.kind;
+function runnerEventLongtailKindForDefinition(...args: any[]): any {
+  return (cardRuntimeResolvers.runnerEventLongtailKindForDefinition as any)(...args);
 }
-
-function hiddenReplacementLongtailForDefinition(
-  definition: CardDefinition,
-): CardHiddenReplacementLongtailImplementation | undefined {
-  return cardImplementationForDefinitionId(definition.id)
-    ?.hiddenReplacementLongtail;
+function hiddenReplacementLongtailForDefinition(...args: any[]): any {
+  return (cardRuntimeResolvers.hiddenReplacementLongtailForDefinition as any)(...args);
 }
-
-function cardImplementationRunnerEventResolver(
-  definition: CardDefinition,
-): RunnerEventResolver | undefined {
-  const longtail = runnerEventLongtailForDefinition(definition);
-  if (longtail) {
-    switch (longtail.kind) {
-      case "playful_ai_dice_loop":
-        return {
-          name: "card_implementation_runner_event_playful_ai_dice_loop",
-          resolve: (state, legalAction) =>
-            resolvePlayfulAiDiceLoopEvent(
-              state,
-              legalAction,
-              definition.id,
-              longtail,
-            ),
-        };
-      case "trash_installed_runner_connections_then_add_bad_publicity":
-        return {
-          name: "card_implementation_runner_event_trash_installed_runner_connections_then_add_bad_publicity",
-          canPlay: (state) =>
-            canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity(
-              state,
-              longtail,
-            ),
-          resolve: (state, legalAction) =>
-            resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent(
-              state,
-              legalAction,
-              definition.id,
-              longtail,
-            ),
-        };
-      default: {
-        const unknown = longtail as { kind?: string };
-        throw new Error(
-          `Unsupported runner event longtail: ${unknown.kind ?? "unknown"}`,
-        );
-      }
-    }
-  }
-  const hiddenLongtail = hiddenReplacementLongtailForDefinition(definition);
-  if (hiddenLongtail?.kind === "fortress_respecification_ice_reorder") {
-    return {
-      name: "card_implementation_runner_event_fortress_respecification_ice_reorder",
-      canPlay: (state) => hasSuccessfulRunThisTurn(state),
-      resolve: (state, legalAction) => {
-        if (!hasSuccessfulRunThisTurn(state))
-          throw new Error(
-            "Fortress Respecification benoetigt einen erfolgreichen Run in diesem Zug.",
-          );
-        startFortressRespecificationReorderChoice(
-          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-          String(legalAction.payload?.cardId ?? ""),
-        );
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          hiddenZoneBarrier: true,
-          hiddenZoneAction: "p3_58_fortress_respecification_reorder",
-        };
-      },
-    };
-  }
-  return undefined;
+function cardImplementationRunnerEventResolver(...args: any[]): any {
+  return (cardRuntimeResolvers.cardImplementationRunnerEventResolver as any)(...args);
 }
-
-function printedCostCardImplementationMakeRunEffect(
-  definition: CardDefinition,
-): MakeRunEffectImplementation | undefined {
-  const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.find(
-    (candidate) => candidate.kind === "on_play" && candidate.costs === "printed",
-  );
-  return ability?.effects.find(
-    (effect): effect is MakeRunEffectImplementation => effect.kind === "make_run",
-  );
+function printedCostCardImplementationMakeRunEffect(...args: any[]): any {
+  return (cardRuntimeResolvers.printedCostCardImplementationMakeRunEffect as any)(...args);
 }
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -1557,22 +1338,14 @@ const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
   DRIFTER_MOBILE_ENVIRONMENT_ID,
 ]);
 
-function scoredAgendaImplementationForDefinitionId(
-  definitionId: CardDefinitionId,
-): CardScoredAgendaImplementation | undefined {
-  return cardImplementationForDefinitionId(definitionId)?.scoredAgenda;
+function scoredAgendaImplementationForDefinitionId(...args: any[]): any {
+  return (cardRuntimeResolvers.scoredAgendaImplementationForDefinitionId as any)(...args);
 }
-
-function scoredAgendaImplementationForDefinition(
-  definition: CardDefinition,
-): CardScoredAgendaImplementation | undefined {
-  return scoredAgendaImplementationForDefinitionId(definition.id);
+function scoredAgendaImplementationForDefinition(...args: any[]): any {
+  return (cardRuntimeResolvers.scoredAgendaImplementationForDefinition as any)(...args);
 }
-
-function scoredAgendaKindForDefinition(
-  definition: CardDefinition,
-): CardScoredAgendaImplementation["kind"] | undefined {
-  return scoredAgendaImplementationForDefinition(definition)?.kind;
+function scoredAgendaKindForDefinition(...args: any[]): any {
+  return (cardRuntimeResolvers.scoredAgendaKindForDefinition as any)(...args);
 }
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
@@ -2027,80 +1800,17 @@ type RunnerDrawSummary = {
 
 type CitySurveillanceDrawDecision = "auto" | "pay" | "tag";
 
-function emptyRunnerDrawSummary(): RunnerDrawSummary {
-  return {
-    drawnCount: 0,
-    drawnCardIds: [],
-    citySurveillanceSourceCount: 0,
-    citySurveillanceCreditsPaid: 0,
-    citySurveillanceTagsAdded: 0,
-  };
+function emptyRunnerDrawSummary(...args: any[]): any {
+  return (cardRuntimeResolvers.emptyRunnerDrawSummary as any)(...args);
 }
-
-function mergeRunnerDrawSummary(
-  left: RunnerDrawSummary,
-  right: RunnerDrawSummary,
-): RunnerDrawSummary {
-  return {
-    drawnCount: left.drawnCount + right.drawnCount,
-    drawnCardIds: [...(left.drawnCardIds ?? []), ...(right.drawnCardIds ?? [])],
-    citySurveillanceSourceCount: Math.max(
-      left.citySurveillanceSourceCount,
-      right.citySurveillanceSourceCount,
-    ),
-    citySurveillanceCreditsPaid:
-      left.citySurveillanceCreditsPaid + right.citySurveillanceCreditsPaid,
-    citySurveillanceTagsAdded:
-      left.citySurveillanceTagsAdded + right.citySurveillanceTagsAdded,
-    crashEverettChoiceOpened:
-      left.crashEverettChoiceOpened === true ||
-      right.crashEverettChoiceOpened === true,
-    ...((left.crashEverettSourceCardId ?? right.crashEverettSourceCardId)
-      ? {
-          crashEverettSourceCardId:
-            left.crashEverettSourceCardId ?? right.crashEverettSourceCardId,
-        }
-      : {}),
-  };
+function mergeRunnerDrawSummary(...args: any[]): any {
+  return (cardRuntimeResolvers.mergeRunnerDrawSummary as any)(...args);
 }
-
-function applyRunnerDrawSummaryPayload(
-  state: GameState,
-  legalAction: LegalAction,
-  summary: RunnerDrawSummary,
-): void {
-  if (summary.drawnCount <= 0) return;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ...runnerDrawSummaryPublicPayload(state, summary),
-  };
+function applyRunnerDrawSummaryPayload(...args: any[]): any {
+  return (cardRuntimeResolvers.applyRunnerDrawSummaryPayload as any)(...args);
 }
-
-function runnerDrawSummaryPublicPayload(
-  state: GameState,
-  summary: RunnerDrawSummary,
-): Record<string, string | number | boolean> {
-  if (summary.drawnCount <= 0) return {};
-  return {
-    drawnCount: summary.drawnCount,
-    ...(summary.crashEverettChoiceOpened && summary.crashEverettSourceCardId
-      ? {
-          drawReplacementSourceTitle: "Crash Everett, Inventive Fixer",
-          drawReplacementExtraDrawn: 1,
-          crashEverettChoiceOpened: true,
-        }
-      : {}),
-    ...(summary.citySurveillanceSourceCount > 0
-      ? {
-          citySurveillanceSourceCount: summary.citySurveillanceSourceCount,
-          citySurveillanceCreditsPaid: summary.citySurveillanceCreditsPaid,
-          citySurveillanceTagsAdded: summary.citySurveillanceTagsAdded,
-          citySurveillanceTags: summary.citySurveillanceTagsAdded,
-          runnerCreditsAfter: state.runner.credits,
-          runnerTagsAfter: state.runner.tags,
-        }
-      : {}),
-  };
+function runnerDrawSummaryPublicPayload(...args: any[]): any {
+  return (cardRuntimeResolvers.runnerDrawSummaryPublicPayload as any)(...args);
 }
 
 const mainActionHostComposition = createMainActionHostComposition({
@@ -2431,163 +2141,123 @@ export function applyEffectCommands(
 function corpRunnerActionPaidWindowActions(...args: any[]): any {
   return (actionRuntimeHosts.corpRunnerActionPaidWindowActions as any)(...args);
 }
-
 function expireCorporateRetreatInstallCreditAbilities(...args: any[]): any {
   return (stateRuntimeServices.expireCorporateRetreatInstallCreditAbilities as any)(...args);
 }
-
 function isCorpInstallableCardType(...args: any[]): any {
   return (stateRuntimeServices.isCorpInstallableCardType as any)(...args);
 }
-
 function edgerunnerTempsInstallActionsRemaining(...args: any[]): any {
   return (stateRuntimeServices.edgerunnerTempsInstallActionsRemaining as any)(...args);
 }
-
 function clearEdgerunnerTempsInstallFlags(...args: any[]): any {
   return (stateRuntimeServices.clearEdgerunnerTempsInstallFlags as any)(...args);
 }
-
 function consumeEdgerunnerTempsInstallAction(...args: any[]): any {
   return (stateRuntimeServices.consumeEdgerunnerTempsInstallAction as any)(...args);
 }
-
 function valuPakProgramInstallActionsRemaining(...args: any[]): any {
   return (stateRuntimeServices.valuPakProgramInstallActionsRemaining as any)(...args);
 }
-
 function valuPakTemporaryProgramInstallCredits(...args: any[]): any {
   return (stateRuntimeServices.valuPakTemporaryProgramInstallCredits as any)(...args);
 }
-
 function runnerInstallableProgramIdsForValuPak(...args: any[]): any {
   return (stateRuntimeServices.runnerInstallableProgramIdsForValuPak as any)(...args);
 }
-
 function installedRunnerProgramTrashOptionsForInstall(...args: any[]): any {
   return (stateRuntimeServices.installedRunnerProgramTrashOptionsForInstall as any)(...args);
 }
-
 function runnerProgramInstallMemoryReachableAfterTrash(...args: any[]): any {
   return (stateRuntimeServices.runnerProgramInstallMemoryReachableAfterTrash as any)(...args);
 }
-
 function shouldOfferRunnerProgramTrashBeforeInstall(...args: any[]): any {
   return (stateRuntimeServices.shouldOfferRunnerProgramTrashBeforeInstall as any)(...args);
 }
-
 function clearValuPakProgramInstallFlags(...args: any[]): any {
   return (stateRuntimeServices.clearValuPakProgramInstallFlags as any)(...args);
 }
-
 function consumeValuPakProgramInstallAction(...args: any[]): any {
   return (stateRuntimeServices.consumeValuPakProgramInstallAction as any)(...args);
 }
-
 function runnerDrawActionContext(...args: any[]): any {
   return (stateRuntimeServices.runnerDrawActionContext as any)(...args);
 }
-
 function normalizeSubtypeLabel(...args: any[]): any {
   return (stateRuntimeServices.normalizeSubtypeLabel as any)(...args);
 }
-
 function cardHasSubtype(...args: any[]): any {
   return (stateRuntimeServices.cardHasSubtype as any)(...args);
 }
-
 function stableSubtypeList(...args: any[]): any {
   return (stateRuntimeServices.stableSubtypeList as any)(...args);
 }
-
 function effectiveSubtypesForCard(...args: any[]): any {
   return (stateRuntimeServices.effectiveSubtypesForCard as any)(...args);
 }
-
 function rezzedIceOutsideThisIceCount(...args: any[]): any {
   return (stateRuntimeServices.rezzedIceOutsideThisIceCount as any)(...args);
 }
-
 function relativeIceStrengthBonusFor(...args: any[]): any {
   return (stateRuntimeServices.relativeIceStrengthBonusFor as any)(...args);
 }
-
 function isRegionUpgrade(...args: any[]): any {
   return (stateRuntimeServices.isRegionUpgrade as any)(...args);
 }
-
 function isUniqueCard(...args: any[]): any {
   return (stateRuntimeServices.isUniqueCard as any)(...args);
 }
-
 function rezzedBlackIceIds(...args: any[]): any {
   return (stateRuntimeServices.rezzedBlackIceIds as any)(...args);
 }
-
 function rezzedInstalledIceIds(...args: any[]): any {
   return (stateRuntimeServices.rezzedInstalledIceIds as any)(...args);
 }
-
 function affordableRezzedInstalledIceIdsForRunner(...args: any[]): any {
   return (stateRuntimeServices.affordableRezzedInstalledIceIdsForRunner as any)(...args);
 }
-
 function unrezzedInstalledIceIds(...args: any[]): any {
   return (stateRuntimeServices.unrezzedInstalledIceIds as any)(...args);
 }
-
 function hasInstalledUniqueCardDefinition(...args: any[]): any {
   return (stateRuntimeServices.hasInstalledUniqueCardDefinition as any)(...args);
 }
-
 function daemonHostingCapacity(...args: any[]): any {
   return (stateRuntimeServices.daemonHostingCapacity as any)(...args);
 }
-
 function daemonHostedMemoryUsed(...args: any[]): any {
   return (stateRuntimeServices.daemonHostedMemoryUsed as any)(...args);
 }
-
 function canHostProgramOnDaemon(...args: any[]): any {
   return (stateRuntimeServices.canHostProgramOnDaemon as any)(...args);
 }
-
 function hostedProgramStrengthModifier(...args: any[]): any {
   return (stateRuntimeServices.hostedProgramStrengthModifier as any)(...args);
 }
-
 function icebreakerEncounterStrengthBonus(...args: any[]): any {
   return (stateRuntimeServices.icebreakerEncounterStrengthBonus as any)(...args);
 }
-
 function canOverlayProgramOnZetatechSoftwareInstaller(...args: any[]): any {
   return (stateRuntimeServices.canOverlayProgramOnZetatechSoftwareInstaller as any)(...args);
 }
-
 function rezzedCorpRootCardIds(...args: any[]): any {
   return (stateRuntimeServices.rezzedCorpRootCardIds as any)(...args);
 }
-
 function visibleVirusCounterTargetIds(...args: any[]): any {
   return (stateRuntimeServices.visibleVirusCounterTargetIds as any)(...args);
 }
-
 function iceStrengthBonusFor(...args: any[]): any {
   return (stateRuntimeServices.iceStrengthBonusFor as any)(...args);
 }
-
 function iceStrengthFor(...args: any[]): any {
   return (stateRuntimeServices.iceStrengthFor as any)(...args);
 }
-
 function runRemainderStrengthBonusForBreaker(...args: any[]): any {
   return (stateRuntimeServices.runRemainderStrengthBonusForBreaker as any)(...args);
 }
-
 function runBreakSubroutineAdditionalCost(...args: any[]): any {
   return (stateRuntimeServices.runBreakSubroutineAdditionalCost as any)(...args);
 }
-
 function microtechTrodeSetBreakAdditionalCost(...args: any[]): any {
   return (stateRuntimeServices.microtechTrodeSetBreakAdditionalCost as any)(...args);
 }
@@ -2605,262 +2275,198 @@ type BreakSubroutineCostBreakdown = {
 function breakSubroutineCostBreakdown(...args: any[]): any {
   return (stateRuntimeServices.breakSubroutineCostBreakdown as any)(...args);
 }
-
 function hasInstalledMicrotechTrodeSet(...args: any[]): any {
   return (stateRuntimeServices.hasInstalledMicrotechTrodeSet as any)(...args);
 }
-
 function runnerHasInstalledCardDefinition(...args: any[]): any {
   return (stateRuntimeServices.runnerHasInstalledCardDefinition as any)(...args);
 }
-
 function runnerInstalledCardCountByDefinition(...args: any[]): any {
   return (stateRuntimeServices.runnerInstalledCardCountByDefinition as any)(...args);
 }
-
 function installedVirusCounterTotalForDefinition(...args: any[]): any {
   return (stateRuntimeServices.installedVirusCounterTotalForDefinition as any)(...args);
 }
-
 function virusCounterImplementationForDefinition(...args: any[]): any {
   return (stateRuntimeServices.virusCounterImplementationForDefinition as any)(...args);
 }
-
 function virusCounterImplementationForCard(...args: any[]): any {
   return (stateRuntimeServices.virusCounterImplementationForCard as any)(...args);
 }
-
 function corpUtilityImplementationForCard(...args: any[]): any {
   return (stateRuntimeServices.corpUtilityImplementationForCard as any)(...args);
 }
-
 function hasCorpUtilityKind(...args: any[]): any {
   return (stateRuntimeServices.hasCorpUtilityKind as any)(...args);
 }
-
 function cardInstallCapabilitiesForDefinition(...args: any[]): any {
   return (stateRuntimeServices.cardInstallCapabilitiesForDefinition as any)(...args);
 }
-
 function hasInstallCapabilityKindForDefinition(...args: any[]): any {
   return (stateRuntimeServices.hasInstallCapabilityKindForDefinition as any)(...args);
 }
-
 function rootInstallRezzesOnInstall(...args: any[]): any {
   return (stateRuntimeServices.rootInstallRezzesOnInstall as any)(...args);
 }
-
 function mustInstallInsideSubsidiaryDataFort(...args: any[]): any {
   return (stateRuntimeServices.mustInstallInsideSubsidiaryDataFort as any)(...args);
 }
-
 function fortCapacityModifiersForCard(...args: any[]): any {
   return (stateRuntimeServices.fortCapacityModifiersForCard as any)(...args);
 }
-
 function leavePlayCleanupImplementationsForCard(...args: any[]): any {
   return (stateRuntimeServices.leavePlayCleanupImplementationsForCard as any)(...args);
 }
-
 function installedRunnerVirusSourceIds(...args: any[]): any {
   return (stateRuntimeServices.installedRunnerVirusSourceIds as any)(...args);
 }
-
 function cockroachCounterTotal(...args: any[]): any {
   return (stateRuntimeServices.cockroachCounterTotal as any)(...args);
 }
-
 function incubatorCounterTotal(...args: any[]): any {
   return (stateRuntimeServices.incubatorCounterTotal as any)(...args);
 }
-
 function cockroachRandomHqDiscardActive(...args: any[]): any {
   return (stateRuntimeServices.cockroachRandomHqDiscardActive as any)(...args);
 }
-
 function isVisibleVirusCounterCardForRunner(...args: any[]): any {
   return (stateRuntimeServices.isVisibleVirusCounterCardForRunner as any)(...args);
 }
-
 function corpIceInstallBaseCost(...args: any[]): any {
   return (stateRuntimeServices.corpIceInstallBaseCost as any)(...args);
 }
-
 function outermostIceIndex(...args: any[]): any {
   return (stateRuntimeServices.outermostIceIndex as any)(...args);
 }
-
 function poxCountersForServer(...args: any[]): any {
   return (stateRuntimeServices.poxCountersForServer as any)(...args);
 }
-
 function spyCountersForServer(...args: any[]): any {
   return (stateRuntimeServices.spyCountersForServer as any)(...args);
 }
-
 function poxInstallTax(...args: any[]): any {
   return (stateRuntimeServices.poxInstallTax as any)(...args);
 }
-
 function corpIceInstallAdditionalCost(...args: any[]): any {
   return (stateRuntimeServices.corpIceInstallAdditionalCost as any)(...args);
 }
-
 function corpIceInstallTotalCost(...args: any[]): any {
   return (stateRuntimeServices.corpIceInstallTotalCost as any)(...args);
 }
-
 function assertCorpIceInstallCostValid(...args: any[]): any {
   return (stateRuntimeServices.assertCorpIceInstallCostValid as any)(...args);
 }
-
 function specialZoneHarnessActions(...args: any[]): any {
   return (actionRuntimeHosts.specialZoneHarnessActions as any)(...args);
 }
-
 function dupreStrengthCounterBonus(...args: any[]): any {
   return (cardRuntimeHosts.dupreStrengthCounterBonus as any)(...args);
 }
-
 function permanentIcebreakerStrengthCounterBonus(...args: any[]): any {
   return (cardRuntimeHosts.permanentIcebreakerStrengthCounterBonus as any)(...args);
 }
-
 function pumpAmountForLegalAction(...args: any[]): any {
   return (cardRuntimeHosts.pumpAmountForLegalAction as any)(...args);
 }
-
 function pumpAbilityForLegalAction(...args: any[]): any {
   return (cardRuntimeHosts.pumpAbilityForLegalAction as any)(...args);
 }
-
 function breakAbilityForLegalAction(...args: any[]): any {
   return (cardRuntimeHosts.breakAbilityForLegalAction as any)(...args);
 }
-
 function pumpDurationForLegalAction(...args: any[]): any {
   return (cardRuntimeHosts.pumpDurationForLegalAction as any)(...args);
 }
-
 function assertCurrentSubroutineMatchesLegalAction(...args: any[]): any {
   return (cardRuntimeHosts.assertCurrentSubroutineMatchesLegalAction as any)(...args);
 }
-
 function resolveMultiBreakSubroutinesAction(...args: any[]): any {
   return (cardRuntimeHosts.resolveMultiBreakSubroutinesAction as any)(...args);
 }
-
 function assertBreakSubroutineCostQuoteValid(...args: any[]): any {
   return (cardRuntimeHosts.assertBreakSubroutineCostQuoteValid as any)(...args);
 }
-
 function subroutinesForCurrentEncounter(...args: any[]): any {
   return (cardRuntimeHosts.subroutinesForCurrentEncounter as any)(...args);
 }
-
 function variableTraceSubroutineForCurrentEncounter(...args: any[]): any {
   return (cardRuntimeHosts.variableTraceSubroutineForCurrentEncounter as any)(...args);
 }
-
 function relativeDamageSubroutineForCurrentEncounter(...args: any[]): any {
   return (cardRuntimeHosts.relativeDamageSubroutineForCurrentEncounter as any)(...args);
 }
-
 function relativeTraceSubroutinesForCurrentEncounter(...args: any[]): any {
   return (cardRuntimeHosts.relativeTraceSubroutinesForCurrentEncounter as any)(...args);
 }
-
 function runCardImplementationActionHost(...args: any[]): any {
   return (cardRuntimeHosts.runCardImplementationActionHost as any)(...args);
 }
-
 function runStartTaxForServerUpgrades(...args: any[]): any {
   return (cardRuntimeHosts.runStartTaxForServerUpgrades as any)(...args);
 }
-
 function newsgroupTauntingRunStartTax(...args: any[]): any {
   return (cardRuntimeHosts.newsgroupTauntingRunStartTax as any)(...args);
 }
-
 function spendRunnerAccessTrashCredits(...args: any[]): any {
   return (cardRuntimeHosts.spendRunnerAccessTrashCredits as any)(...args);
 }
-
 function turnBasicExecutionHost(...args: any[]): any {
   return (actionRuntimeHosts.turnBasicExecutionHost as any)(...args);
 }
-
 function creditEconomyExecutionHost(...args: any[]): any {
   return (actionRuntimeHosts.creditEconomyExecutionHost as any)(...args);
 }
-
 function runnerSpecialTriggerExecutionHost(...args: any[]): any {
   return (cardRuntimeHosts.runnerSpecialTriggerExecutionHost as any)(...args);
 }
-
 function runFortTriggerExecutionHost(...args: any[]): any {
   return (cardRuntimeHosts.runFortTriggerExecutionHost as any)(...args);
 }
-
 function counterUtilityTriggerExecutionHost(...args: any[]): any {
   return (cardRuntimeHosts.counterUtilityTriggerExecutionHost as any)(...args);
 }
-
 function triggerAbilityExecutionHost(...args: any[]): any {
   return (cardRuntimeHosts.triggerAbilityExecutionHost as any)(...args);
 }
-
 function installCardHost(...args: any[]): any {
   return (cardRuntimeHosts.installCardHost as any)(...args);
 }
-
 function rezCardHost(...args: any[]): any {
   return (cardRuntimeHosts.rezCardHost as any)(...args);
 }
-
 function traceOrchestrationHost(...args: any[]): any {
   return (cardRuntimeHosts.traceOrchestrationHost as any)(...args);
 }
-
 function activatedCardImplementationExecutionHost(...args: any[]): any {
   return (cardRuntimeHosts.activatedCardImplementationExecutionHost as any)(...args);
 }
 function resolveRunnerTargetedEventImplementation(...args: any[]): any {
   return (cardRuntimeHosts.resolveRunnerTargetedEventImplementation as any)(...args);
 }
-
 function resolvePostOnPlayGenericFollowups(...args: any[]): any {
   return (cardRuntimeHosts.resolvePostOnPlayGenericFollowups as any)(...args);
 }
-
 function resolveMitWestTier(...args: any[]): any {
   return (cardRuntimeHosts.resolveMitWestTier as any)(...args);
 }
-
 function shuffleGripTrashAndStackThenDrawForCardImplementation(...args: any[]): any {
   return (cardRuntimeHosts.shuffleGripTrashAndStackThenDrawForCardImplementation as any)(...args);
 }
-
 function startRunnerProgramTrashBeforeInstallChoice(...args: any[]): any {
   return (cardRuntimeHosts.startRunnerProgramTrashBeforeInstallChoice as any)(...args);
 }
-
 function resolveRunnerProgramTrashBeforeInstallChoice(...args: any[]): any {
   return (cardRuntimeHosts.resolveRunnerProgramTrashBeforeInstallChoice as any)(...args);
 }
-
 function canInstallCorpRootCardInServer(...args: any[]): any {
   return (flowRuntimeHosts.canInstallCorpRootCardInServer as any)(...args);
 }
-
 function corpRootAgendaOrNodeCapacityInServer(...args: any[]): any {
   return (flowRuntimeHosts.corpRootAgendaOrNodeCapacityInServer as any)(...args);
 }
-
 function corpRegionUpgradeIdsInServer(...args: any[]): any {
   return (flowRuntimeHosts.corpRegionUpgradeIdsInServer as any)(...args);
 }
-
 function startRun(...args: any[]): any {
   return (flowRuntimeHosts.startRun as any)(...args);
 }
@@ -2873,134 +2479,102 @@ type RunnerTraceCounterEffectRuntime =
 function runnerTraceCounterEffectDefinitions(...args: any[]): any {
   return (flowRuntimeHosts.runnerTraceCounterEffectDefinitions as any)(...args);
 }
-
 function runnerCounterDisplayName(...args: any[]): any {
   return (flowRuntimeHosts.runnerCounterDisplayName as any)(...args);
 }
-
 function traceCounterEffectDefinitionFor(...args: any[]): any {
   return (flowRuntimeHosts.traceCounterEffectDefinitionFor as any)(...args);
 }
-
 function runnerUtilityLongtailKindForDefinition(...args: any[]): any {
   return (flowRuntimeHosts.runnerUtilityLongtailKindForDefinition as any)(...args);
 }
-
 function runnerUtilityLongtailKindForCard(...args: any[]): any {
   return (flowRuntimeHosts.runnerUtilityLongtailKindForCard as any)(...args);
 }
-
 function runnerUtilityLongtailImplementationForCard(...args: any[]): any {
   return (flowRuntimeHosts.runnerUtilityLongtailImplementationForCard as any)(...args);
 }
-
 function uniqueDirectLongtailImplementationForDefinition(...args: any[]): any {
   return (flowRuntimeHosts.uniqueDirectLongtailImplementationForDefinition as any)(...args);
 }
-
 function uniqueDirectLongtailKindForDefinition(...args: any[]): any {
   return (flowRuntimeHosts.uniqueDirectLongtailKindForDefinition as any)(...args);
 }
-
 function uniqueDirectLongtailImplementationForCard(...args: any[]): any {
   return (flowRuntimeHosts.uniqueDirectLongtailImplementationForCard as any)(...args);
 }
-
 function uniqueDirectLongtailKindForCard(...args: any[]): any {
   return (flowRuntimeHosts.uniqueDirectLongtailKindForCard as any)(...args);
 }
-
 function remainingReplacementLongtailImplementationForDefinition(...args: any[]): any {
   return (flowRuntimeHosts.remainingReplacementLongtailImplementationForDefinition as any)(...args);
 }
-
 function remainingReplacementLongtailKindForDefinition(...args: any[]): any {
   return (flowRuntimeHosts.remainingReplacementLongtailKindForDefinition as any)(...args);
 }
-
 function remainingReplacementLongtailImplementationForCard(...args: any[]): any {
   return (flowRuntimeHosts.remainingReplacementLongtailImplementationForCard as any)(...args);
 }
-
 function remainingReplacementLongtailKindForCard(...args: any[]): any {
   return (flowRuntimeHosts.remainingReplacementLongtailKindForCard as any)(...args);
 }
-
 function isAcmeSavingsAndLoanDefinition(...args: any[]): any {
   return (flowRuntimeHosts.isAcmeSavingsAndLoanDefinition as any)(...args);
 }
-
 function isCitySurveillanceCard(...args: any[]): any {
   return (flowRuntimeHosts.isCitySurveillanceCard as any)(...args);
 }
-
 function isInvestmentFirmCard(...args: any[]): any {
   return (flowRuntimeHosts.isInvestmentFirmCard as any)(...args);
 }
-
 function isHackerTrackerCentralCard(...args: any[]): any {
   return (flowRuntimeHosts.isHackerTrackerCentralCard as any)(...args);
 }
-
 function applyRunnerTraceCounterRunStartEffects(...args: any[]): any {
   return (flowRuntimeHosts.applyRunnerTraceCounterRunStartEffects as any)(...args);
 }
-
 function applyAiBoonRunStart(...args: any[]): any {
   return (flowRuntimeHosts.applyAiBoonRunStart as any)(...args);
 }
-
 function continueRun(...args: any[]): any {
   return (flowRuntimeHosts.continueRun as any)(...args);
 }
-
 function addCurrentRunAccessCount(...args: any[]): any {
   return (flowRuntimeHosts.addCurrentRunAccessCount as any)(...args);
 }
-
 function passCurrentEncounteredIce(...args: any[]): any {
   return (flowRuntimeHosts.passCurrentEncounteredIce as any)(...args);
 }
 function resolveBlinkBreakSubroutineAction(...args: any[]): any {
   return (flowRuntimeHosts.resolveBlinkBreakSubroutineAction as any)(...args);
 }
-
 function recordBartmossEncounterUsage(...args: any[]): any {
   return (flowRuntimeHosts.recordBartmossEncounterUsage as any)(...args);
 }
-
 function recordSnowballBreakUsage(...args: any[]): any {
   return (flowRuntimeHosts.recordSnowballBreakUsage as any)(...args);
 }
-
 function icebreakerHasSpecial(...args: any[]): any {
   return (flowRuntimeHosts.icebreakerHasSpecial as any)(...args);
 }
-
 function hackerTrackerCardIds(...args: any[]): any {
   return (flowRuntimeHosts.hackerTrackerCardIds as any)(...args);
 }
-
 function hackerTrackerCounterType(...args: any[]): any {
   return (flowRuntimeHosts.hackerTrackerCounterType as any)(...args);
 }
-
 function hackerTrackerCounterTotal(...args: any[]): any {
   return (flowRuntimeHosts.hackerTrackerCounterTotal as any)(...args);
 }
-
 function spendHackerTrackerCounters(...args: any[]): any {
   return (flowRuntimeHosts.spendHackerTrackerCounters as any)(...args);
 }
-
 function addHackerTrackerTraceCounters(...args: any[]): any {
   return (flowRuntimeHosts.addHackerTrackerTraceCounters as any)(...args);
 }
-
 function rabbitTraceLimitReductionForIceTrace(...args: any[]): any {
   return (flowRuntimeHosts.rabbitTraceLimitReductionForIceTrace as any)(...args);
 }
-
 function archivesAccessRequiresDecisionOrEffect(...args: any[]): any {
   return (flowRuntimeHosts.archivesAccessRequiresDecisionOrEffect as any)(...args);
 }
@@ -3016,218 +2590,28 @@ function privateLookCardIds(
   return ids.slice(0, limit);
 }
 
-function startRunnerPrivateLookChoice(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  sourceDefinitionId: CardDefinitionId,
-  zone: Extract<ServerId, "rd" | "hq">,
-  count: number | "all",
-  reason: "ability" | "successful_run" | "post_access",
-  legalAction?: LegalAction,
-): boolean {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const cardIds = privateLookCardIds(state, zone, count);
-  if (cardIds.length === 0) return false;
-  const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
-  state.pendingChoice = {
-    choiceId: `p3_33_private_look_${zone}_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_33.private_look:${reason}:${sourceCardId}:${zone}:${state.stateVersion + 1}`,
-    prompt:
-      zone === "rd"
-        ? `R&D ansehen (${cardIds.length})`
-        : `HQ ansehen (${cardIds.length})`,
-    kind: "select_cards",
-    options: [
-      ...cardIds.map((cardId, index) => ({
-        id: `card_${cardId}`,
-        label: definitionFor(state, cardId).title,
-        publicLabel: "Verdeckte Korp-Karte",
-        value: cardId,
-        selectable: false,
-      })),
-      { id: "done", label: "Fertig", publicLabel: "Fertig", value: "done" },
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "p3_33_private_look",
-      privateLookZone: zone,
-      privateLookCount: cardIds.length,
-      sourceDefinitionId,
-      ...(sourceDefinition ? { sourceTitle: sourceDefinition.title } : {}),
-    };
-  }
-  return true;
+function startRunnerPrivateLookChoice(...args: any[]): any {
+  return (choiceHiddenZoneResolvers.startRunnerPrivateLookChoice as any)(...args);
 }
-
-function resolveRunnerPrivateLookChoice(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_33.private_look"))
-    throw new Error("Es ist keine private Look-Choice offen.");
-  const [, reason, sourceCardId, zone] = choice.source.split(":");
-  if (zone !== "rd" && zone !== "hq")
-    throw new Error("Die private Look-Zone ist ungueltig.");
-  if (
-    reason === "ability" &&
-    (!sourceCardId || !runnerInstalledCardIds(state).includes(sourceCardId))
-  )
-    throw new Error("Die private Look-Quelle ist nicht mehr installiert.");
-  const privateLookCount = choice.options.filter((option) =>
-    option.id.startsWith("card_"),
-  ).length;
-  const knownPrivateLookDefinitionIds = choice.options
-    .filter((option) => option.id.startsWith("card_"))
-    .map((option) =>
-      typeof option.value === "string" &&
-      state.cardInstances[option.value]
-        ? definitionFor(state, option.value).id
-        : undefined,
-    )
-    .filter((definitionId): definitionId is CardDefinitionId =>
-      Boolean(definitionId),
-    );
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_33_private_look",
-    privateLookZone: zone,
-    privateLookCount,
-    ...(knownPrivateLookDefinitionIds.length > 0
-      ? {
-          knownPrivateLookDefinitionIdsCsv:
-            knownPrivateLookDefinitionIds.join("|"),
-        }
-      : {}),
-    ...(sourceCardId ? { cardId: sourceCardId } : {}),
-    ...(sourceCardId && state.cardInstances[sourceCardId]
-      ? {
-          sourceDefinitionId: definitionFor(state, sourceCardId).id,
-          sourceTitle: definitionFor(state, sourceCardId).title,
-        }
-      : {}),
-  };
-  if (reason === "successful_run" || reason === "post_access")
-    finishRun(state, true, legalAction);
+function resolveRunnerPrivateLookChoice(...args: any[]): any {
+  return (choiceHiddenZoneResolvers.resolveRunnerPrivateLookChoice as any)(...args);
 }
-
-function startExpertScheduleAnalyzerPostAccessChoice(
-  state: GameState,
-  run: ActiveRun,
-  legalAction?: LegalAction,
-): boolean {
-  const breach = run.breach;
-  if (!breach || breach.serverId !== "hq" || !breach.completed) return false;
-  if (breach.accessedSummaries.length === 0) return false;
-  const sourceCardId = state.runner.rig.programs
-    .slice()
-    .sort()
-    .find((cardId) =>
-      cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-        ?.accessHooks?.some(
-          (hook) =>
-            hook.kind === "post_access_private_look" &&
-            hook.afterAccessServer === "hq" &&
-            hook.lookZone === "hq",
-        ),
-    );
-  if (!sourceCardId) return false;
-  return startRunnerPrivateLookChoice(
-    state,
-    sourceCardId,
-    definitionFor(state, sourceCardId).id,
-    "hq",
-    "all",
-    "post_access",
-    legalAction,
-  );
+function startExpertScheduleAnalyzerPostAccessChoice(...args: any[]): any {
+  return (choiceHiddenZoneResolvers.startExpertScheduleAnalyzerPostAccessChoice as any)(...args);
 }
-
-function v1915InstalledRevealHelperIds(state: GameState): CardDefinitionId[] {
-  const helperIds = [MYSTERY_BOX_ID, SMARTEYE_ID];
-  return helperIds.filter((definitionId) =>
-    runnerHasInstalledDefinition(state, definitionId),
-  );
+function v1915InstalledRevealHelperIds(...args: any[]): any {
+  return (choiceHiddenZoneResolvers.v1915InstalledRevealHelperIds as any)(...args);
 }
-
-function runnerHasInstalledDefinition(
-  state: GameState,
-  definitionId: CardDefinitionId,
-): boolean {
-  return [
-    ...state.runner.rig.programs,
-    ...state.runner.rig.hardware,
-    ...state.runner.rig.resources,
-  ].some((cardId) => definitionFor(state, cardId).id === definitionId);
+function runnerHasInstalledDefinition(...args: any[]): any {
+  return (choiceHiddenZoneResolvers.runnerHasInstalledDefinition as any)(...args);
 }
 
 
-function trashOlderRegionUpgradesInServer(
-  state: GameState,
-  server: CorpServer,
-  keepCardId: CardInstanceId,
-  legalAction?: LegalAction,
-): void {
-  const olderRegions = server.root
-    .filter((cardId) => cardId !== keepCardId)
-    .filter((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return (
-        definition.type === "upgrade" && cardHasSubtype(definition, "region")
-      );
-    })
-    .sort();
-  for (const cardId of olderRegions) {
-    appendRegionReplacementTrashEffect(state, server, keepCardId, cardId, legalAction);
-    trashCorpInstalledCardToArchives(state, cardId);
-  }
+function trashOlderRegionUpgradesInServer(...args: any[]): any {
+  return (choiceHiddenZoneResolvers.trashOlderRegionUpgradesInServer as any)(...args);
 }
-
-function appendRegionReplacementTrashEffect(
-  state: GameState,
-  server: CorpServer,
-  sourceCardId: CardInstanceId,
-  trashedCardId: CardInstanceId,
-  legalAction?: LegalAction,
-): void {
-  if (!legalAction) return;
-  const sourceDefinition = definitionFor(state, sourceCardId);
-  const trashedInstance = mustInstance(state.cardInstances, trashedCardId);
-  const trashedDefinition = definitionFor(state, trashedCardId);
-  const trashedRegionWasPublic =
-    trashedInstance.faceup === true || trashedInstance.rezzed === true;
-  const effectIndex = legalAction.resolvedEffects?.length ?? 0;
-  legalAction.resolvedEffects = [
-    ...(legalAction.resolvedEffects ?? []),
-    {
-      effectId: `corp.region_replacement.${server.id}.${effectIndex}`,
-      kind: "trash_card",
-      visibility: "public",
-      side: "corp",
-      reason: "region_limit",
-      serverId: server.id,
-      serverLabel: server.label,
-      sourceDefinitionId: sourceDefinition.id,
-      sourceTitle: sourceDefinition.title,
-      ...(trashedRegionWasPublic ? {} : { redactedKind: "installed_card" }),
-      ...(trashedRegionWasPublic
-        ? {
-            cardDefinitionId: trashedDefinition.id,
-            cardTitle: trashedDefinition.title,
-          }
-        : {}),
-    },
-  ];
+function appendRegionReplacementTrashEffect(...args: any[]): any {
+  return (choiceHiddenZoneResolvers.appendRegionReplacementTrashEffect as any)(...args);
 }
 
 function finishRun(
@@ -3238,1238 +2622,122 @@ function finishRun(
   handleRunEndCleanup(runEndCleanupHost(state), successful, legalAction);
 }
 
-function resolveOmniscienceFoundationEndTurnTag(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (state.runnerTurnFlags?.runnerReceivedTagThisTurn !== true) return;
-  const sourceIds = rezzedCorpRootCardIds(state)
-    .filter((cardId: CardInstanceId) =>
-      hasCorpUtilityKind(state, cardId, "omniscience_foundation_end_turn_tag"),
-    )
-    .sort();
-  if (sourceIds.length === 0) return;
-  const tagsBefore = state.runner.tags;
-  for (const _sourceId of sourceIds) {
-    addRunnerTagsWithPrevention(state, legalAction, 1, "omniscience_foundation");
-  }
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1951CorpUtilityAbility: "omniscience_foundation_end_turn_tag",
-    omniscienceFoundationTagsAdded: Math.max(0, state.runner.tags - tagsBefore),
-    sourceCount: sourceIds.length,
-    runnerTagsAfter: state.runner.tags,
-  };
+function resolveOmniscienceFoundationEndTurnTag(...args: any[]): any {
+  return (turnRuntimeResolvers.resolveOmniscienceFoundationEndTurnTag as any)(...args);
 }
-
-function resolveFieldReporterEndOfRunnerTurn(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const sourceIds = state.runner.rig.resources
-    .slice()
-    .sort()
-    .filter(
-      (cardId) =>
-        runnerUtilityLongtailKindForCard(state, cardId) ===
-        "field_reporter_end_turn_rezzed_ice_payout",
-    );
-  if (sourceIds.length === 0) return;
-  const rezzedIceCount = Math.max(
-    0,
-    Math.floor(ensureRunnerTurnFlags(state).corpRezzedIceThisTurn ?? 0),
-  );
-  if (rezzedIceCount <= 0) return;
-  let gained = 0;
-  for (const sourceId of sourceIds) {
-    const implementation = runnerUtilityLongtailImplementationForCard(
-      state,
-      sourceId,
-    );
-    if (
-      implementation?.kind !==
-      "field_reporter_end_turn_rezzed_ice_payout"
-    )
-      continue;
-    gained += rezzedIceCount * implementation.amountPerRezzedIce;
-  }
-  if (gained <= 0) return;
-  credits(state, "runner", gained);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    runnerUtilityAbility: "field_reporter_end_turn_rezzed_ice_payout",
-    corpRezzedIceThisTurnCount: rezzedIceCount,
-    gainedCredits: gained,
-    runnerCreditsAfter: state.runner.credits,
-    sourceDefinitionId: definitionFor(state, sourceIds[0]!).id,
-    sourceCount: sourceIds.length,
-  };
+function resolveFieldReporterEndOfRunnerTurn(...args: any[]): any {
+  return (turnRuntimeResolvers.resolveFieldReporterEndOfRunnerTurn as any)(...args);
 }
-
-function resolvePreyingMantisEndOfRunnerTurnDamage(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const dueSourceIds =
-    ensureRunnerTurnFlags(state).preyingMantisDamageDueSourceIdsThisTurn ?? [];
-  if (dueSourceIds.length === 0) return;
-  const damageSummary = doDamage(state, {
-    damageId: `runner.end.preying_mantis.${state.stateVersion}`,
-    damageType: "core",
-    amount: dueSourceIds.length,
-    source: "runner_end:preying_mantis",
-  });
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    runnerUtilityAbility: "preying_mantis_end_turn_damage",
-    damageCannotBePrevented: true,
-    damageResolved: true,
-    damageType: damageSummary.damageType,
-    damageAmount: damageSummary.amount,
-    cardsTrashed: damageSummary.cardsTrashed,
-    flatline: damageSummary.flatline,
-    sourceDefinitionId: definitionFor(state, dueSourceIds[0]!).id,
-    sourceCount: dueSourceIds.length,
-    ...(damageSummary.coreDamageAfter !== undefined
-      ? { coreDamageAfter: damageSummary.coreDamageAfter }
-      : {}),
-  };
-  ensureRunnerTurnFlags(state).preyingMantisDamageDueSourceIdsThisTurn = [];
+function resolvePreyingMantisEndOfRunnerTurnDamage(...args: any[]): any {
+  return (turnRuntimeResolvers.resolvePreyingMantisEndOfRunnerTurnDamage as any)(...args);
 }
-
-function endTurn(
-  state: GameState,
-  side: Side,
-  legalAction: LegalAction,
-): void {
-  if (side === "runner") {
-    resolveCardImplementationEndOfRunnerTurnAction(
-      cardImplementationRuntimeDeps,
-      state,
-      legalAction,
-    );
-    if (state.winner) return;
-    resolveFieldReporterEndOfRunnerTurn(state, legalAction);
-    resolvePreyingMantisEndOfRunnerTurnDamage(state, legalAction);
-    resolveOmniscienceFoundationEndTurnTag(state, legalAction);
-    resolveSneakPreviewTemporaryInstallReturns(state, legalAction);
-    const flags = ensureRunnerTurnFlags(state);
-    flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
-    flags.stolenAgendaAdvancementCountersLastTurn =
-      flags.stolenAgendaAdvancementCountersThisTurn ?? 0;
-    flags.stoleAgendaThisTurn = false;
-    flags.stolenAgendaAdvancementCountersThisTurn = 0;
-    flags.runnerReceivedTagThisTurn = false;
-    flags.stoleResearchAgendaThisTurn = false;
-    flags.stoleGrayOpsAgendaThisTurn = false;
-    flags.stoleBlackOpsAgendaThisTurn = false;
-    flags.runAttemptsLastTurn = flags.runAttemptsThisTurn ?? 0;
-    flags.runAttemptsThisTurn = 0;
-    flags.trashedNodeLastTurn = flags.trashedNodeThisTurn === true;
-    flags.trashedNodeThisTurn = false;
-    flags.trashedAdvertisementThisTurn = false;
-    flags.trashedTransactionsThisTurn = false;
-    flags.prearrangedDropPending = false;
-    flags.installedResourceIdsLastTurn = (
-      flags.installedResourceIdsThisTurn ?? []
-    ).slice();
-    flags.installedResourceIdsThisTurn = [];
-    flags.successfulHqRunThisTurn = false;
-    flags.successfulRunThisTurn = false;
-    delete flags.lastSuccessfulRunServerId;
-    flags.runnerActionsTakenThisTurn = 0;
-    delete flags.lastDamageRunnerActionOrdinal;
-  } else {
-    resolveOmniscienceFoundationEndTurnTag(state, legalAction);
-    const corpFlags = ensureCorpTurnFlags(state);
-    corpFlags.scoredBlackOpsAgendaLastTurn =
-      corpFlags.scoredBlackOpsAgendaThisTurn;
-    corpFlags.scoredBlackOpsAgendaThisTurn = false;
-    resolveAcmeSavingsAndLoanEndOfCorpTurn(state, legalAction);
-    if (state.winner) return;
-    ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
-  }
-  delete state.cancelledDamagePreventionSourceIdsUntilEndOfTurn;
-  startDiscardPhase(state, side, legalAction);
+function endTurn(...args: any[]): any {
+  return (turnRuntimeResolvers.endTurn as any)(...args);
 }
-
-function resolveSneakPreviewTemporaryInstallReturns(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const pending = state.sneakPreviewTemporaryInstalls ?? [];
-  if (pending.length === 0) return;
-  const returnedDefinitionIds: string[] = [];
-  for (const entry of pending) {
-    const cardId = entry.cardId;
-    const instance = state.cardInstances[cardId];
-    if (
-      instance &&
-      state.runner.rig.programs.includes(cardId) &&
-      instance.zone.side === "runner" &&
-      instance.zone.zone === "rig"
-    ) {
-      const definition = definitionFor(state, cardId);
-      removeFromAllZones(state, cardId);
-      state.runner.grip.push(cardId);
-      if (runnerProgramUsesMemory(state, cardId)) {
-        state.runner.memoryUsed = Math.max(
-          0,
-          state.runner.memoryUsed - (definition.memoryCost ?? 0),
-        );
-      }
-      state.cardInstances[cardId] = {
-        ...cardInstanceWithoutCounters(instance),
-        faceup: true,
-        rezzed: true,
-        zone: { side: "runner", zone: "grip" },
-      };
-      returnedDefinitionIds.push(definition.id);
-    }
-  }
-  state.sneakPreviewTemporaryInstalls = [];
-  if (returnedDefinitionIds.length > 0) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "sneak_preview_end_turn_return",
-      returnedCount: returnedDefinitionIds.length,
-      returnedCardDefinitionIds: returnedDefinitionIds.join(","),
-    };
-  }
+function resolveSneakPreviewTemporaryInstallReturns(...args: any[]): any {
+  return (turnRuntimeResolvers.resolveSneakPreviewTemporaryInstallReturns as any)(...args);
 }
-
-function resolveAcmeSavingsAndLoanEndOfCorpTurn(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const obligations = acmeSavingsAndLoanObligationCount(state);
-  if (obligations <= 0) return;
-  const creditsBefore = state.corp.credits;
-  if (creditsBefore < obligations) {
-    state.winner = "runner";
-    state.gameEndReason = "acme_savings_and_loan_unpaid";
-    state.phase = "game_over";
-    state.timingPoint = "game.checkpoint";
-    delete state.pendingChoice;
-    delete state.run;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      acmeSavingsAndLoanAbility: "end_of_turn_payment",
-      acmeSavingsAndLoanObligations: obligations,
-      acmeSavingsAndLoanPaymentDue: obligations,
-      acmeSavingsAndLoanPaymentPaid: 0,
-      acmeSavingsAndLoanPaymentFailed: true,
-      corpCreditsBefore: creditsBefore,
-      corpCreditsAfter: state.corp.credits,
-    };
-    return;
-  }
-  state.corp.credits -= obligations;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    acmeSavingsAndLoanAbility: "end_of_turn_payment",
-    acmeSavingsAndLoanObligations: obligations,
-    acmeSavingsAndLoanPaymentDue: obligations,
-    acmeSavingsAndLoanPaymentPaid: obligations,
-    corpCreditsBefore: creditsBefore,
-    corpCreditsAfter: state.corp.credits,
-  };
+function resolveAcmeSavingsAndLoanEndOfCorpTurn(...args: any[]): any {
+  return (turnRuntimeResolvers.resolveAcmeSavingsAndLoanEndOfCorpTurn as any)(...args);
 }
-
-function startDiscardPhase(
-  state: GameState,
-  side: Side,
-  legalAction?: LegalAction,
-): void {
-  state.activeSide = side;
-  if (side === "runner") {
-    state.phase = "runner_discard_phase";
-    state.timingPoint = "runner_discard.flatline_check";
-    if (maxHandSize(state, "runner") < 0) {
-      state.winner = "corp";
-      state.gameEndReason = "flatline";
-      state.phase = "game_over";
-      state.timingPoint = "game.checkpoint";
-      delete state.pendingChoice;
-      delete state.run;
-      return;
-    }
-    processDiscardStep(state, "runner", legalAction);
-    return;
-  }
-
-  state.phase = "corp_discard_phase";
-  state.timingPoint = "corp_discard.select_cards";
-  processDiscardStep(state, "corp", legalAction);
+function startDiscardPhase(...args: any[]): any {
+  return (turnRuntimeResolvers.startDiscardPhase as any)(...args);
 }
-
-function processDiscardStep(
-  state: GameState,
-  side: Side,
-  legalAction?: LegalAction,
-): void {
-  const hand = handForSide(state, side);
-  const requiredDiscardCount = hand.length - maxHandSize(state, side);
-  if (requiredDiscardCount <= 0) {
-    completeDiscardPhase(state, side, legalAction);
-    return;
-  }
-  state.timingPoint =
-    side === "corp"
-      ? "corp_discard.select_cards"
-      : "runner_discard.select_cards";
-  state.pendingChoice = discardChoice(
-    state,
-    side,
-    requiredDiscardCount,
-    state.stateVersion + 1,
-  );
+function processDiscardStep(...args: any[]): any {
+  return (turnRuntimeResolvers.processDiscardStep as any)(...args);
 }
-
-function completeDiscardPhase(
-  state: GameState,
-  side: Side,
-  legalAction?: LegalAction,
-): void {
-  const effects: AutomaticEffectCollector = [];
-  if (side === "runner") {
-    startCorpTurn(state, effects);
-    appendResolvedEffectsToPayload(legalAction, effects);
-    return;
-  }
-  startRunnerTurn(state, effects);
-  appendResolvedEffectsToPayload(legalAction, effects);
+function completeDiscardPhase(...args: any[]): any {
+  return (turnRuntimeResolvers.completeDiscardPhase as any)(...args);
 }
-
-function appendResolvedEffectsToPayload(
-  legalAction: LegalAction | undefined,
-  effects: AutomaticEffectCollector,
-): void {
-  if (!legalAction || effects.length === 0) return;
-  legalAction.resolvedEffects = [
-    ...(legalAction.resolvedEffects ?? []),
-    ...effects,
-  ];
+function appendResolvedEffectsToPayload(...args: any[]): any {
+  return (turnRuntimeResolvers.appendResolvedEffectsToPayload as any)(...args);
 }
-
-function automaticGainCreditsEffect(
-  effectId: string,
-  side: Side,
-  amount: number,
-  sourceDefinitionId: CardDefinitionId,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "gain_credits",
-    visibility: "public",
-    side,
-    amount,
-    reason: "start_of_turn",
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
+function automaticGainCreditsEffect(...args: any[]): any {
+  return (turnRuntimeResolvers.automaticGainCreditsEffect as any)(...args);
 }
-
-function automaticLoseCreditsEffect(
-  effectId: string,
-  side: Side,
-  amount: number,
-  sourceDefinitionId: CardDefinitionId,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "lose_credits",
-    visibility: "public",
-    side,
-    amount,
-    reason: "start_of_turn",
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
+function automaticLoseCreditsEffect(...args: any[]): any {
+  return (turnRuntimeResolvers.automaticLoseCreditsEffect as any)(...args);
 }
-
-function automaticDrawCardsEffect(
-  effectId: string,
-  side: Side,
-  amount: number,
-  sourceDefinitionId: CardDefinitionId,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "draw_cards",
-    visibility: "public",
-    side,
-    amount,
-    reason: "start_of_turn",
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
+function automaticDrawCardsEffect(...args: any[]): any {
+  return (turnRuntimeResolvers.automaticDrawCardsEffect as any)(...args);
 }
-
-function automaticTagEffect(
-  effectId: string,
-  amount: number,
-  sourceDefinitionId: CardDefinitionId,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "add_tags",
-    visibility: "public",
-    side: "runner",
-    amount,
-    reason: "start_of_turn",
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
+function automaticTagEffect(...args: any[]): any {
+  return (turnRuntimeResolvers.automaticTagEffect as any)(...args);
 }
-
-function automaticTrashCardEffect(
-  effectId: string,
-  side: Side,
-  cardDefinitionId: CardDefinitionId,
-  sourceDefinitionId: CardDefinitionId,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "trash_card",
-    visibility: "public",
-    side,
-    reason: "start_of_turn",
-    cardDefinitionId,
-    cardTitle: publicCardTitle(cardDefinitionId),
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
+function automaticTrashCardEffect(...args: any[]): any {
+  return (turnRuntimeResolvers.automaticTrashCardEffect as any)(...args);
 }
-
-function automaticCounterChangeEffect(
-  effectId: string,
-  side: Side,
-  sourceDefinitionId: CardDefinitionId,
-  counterType: CounterType,
-  remainingCounters: number,
-  addedCounterAmount: number,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "counter_change",
-    visibility: "public",
-    side,
-    amount: remainingCounters,
-    reason: "start_of_turn",
-    counterType,
-    remainingCounters,
-    addedCounterAmount,
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
+function automaticCounterChangeEffect(...args: any[]): any {
+  return (turnRuntimeResolvers.automaticCounterChangeEffect as any)(...args);
 }
-
-function automaticStealAgendaEffect(
-  effectId: string,
-  cardDefinitionId: CardDefinitionId,
-  sourceDefinitionId: CardDefinitionId,
-  amount: number,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "steal_agenda",
-    visibility: "public",
-    side: "runner",
-    amount,
-    reason: "start_of_turn",
-    cardDefinitionId,
-    cardTitle: publicCardTitle(cardDefinitionId),
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
+function automaticStealAgendaEffect(...args: any[]): any {
+  return (turnRuntimeResolvers.automaticStealAgendaEffect as any)(...args);
 }
-
-function publicCardTitle(definitionId: CardDefinitionId): string {
-  return DEMO_CARDS_BY_ID[definitionId]?.title ?? definitionId;
+function publicCardTitle(...args: any[]): any {
+  return (turnRuntimeResolvers.publicCardTitle as any)(...args);
 }
-
-function applyRunnerForgoNextAction(state: GameState): void {
-  if (state.runner.clicks > 0) {
-    state.runner.clicks = Math.max(0, state.runner.clicks - 1);
-    return;
-  }
-  addRunnerFutureActionDebt(state, 1);
+function applyRunnerForgoNextAction(...args: any[]): any {
+  return (turnRuntimeResolvers.applyRunnerForgoNextAction as any)(...args);
 }
-
-function addRunnerFutureActionDebt(state: GameState, amount: number): void {
-  if (!Number.isInteger(amount) || amount <= 0) return;
-  const flags = ensureRunnerTurnFlags(state);
-  flags.forgoNextActionsPending =
-    Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + amount;
+function addRunnerFutureActionDebt(...args: any[]): any {
+  return (turnRuntimeResolvers.addRunnerFutureActionDebt as any)(...args);
 }
-
-function consumeRunnerFutureActionDebt(state: GameState): number {
-  const flags = ensureRunnerTurnFlags(state);
-  let pending = Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0));
-  if (flags.forgoNextActionPending === true) pending += 1;
-  flags.forgoNextActionPending = false;
-  if (pending <= 0 || state.runner.clicks <= 0) {
-    flags.forgoNextActionsPending = pending;
-    return 0;
-  }
-  const consumed = Math.min(state.runner.clicks, pending);
-  state.runner.clicks -= consumed;
-  flags.forgoNextActionsPending = pending - consumed;
-  return consumed;
+function consumeRunnerFutureActionDebt(...args: any[]): any {
+  return (turnRuntimeResolvers.consumeRunnerFutureActionDebt as any)(...args);
 }
-
-function startCorpTurn(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  state.activeSide = "corp";
-  state.phase = "corp_draw_phase";
-  state.timingPoint = "corp_draw.mandatory_draw";
-  state.corp.clicks = 3;
-  state.runner.clicks = 0;
-  clearValuPakProgramInstallFlags(state);
-  clearRovingSubmarineActivityMarkers(fortRunSideFamiliesHostForState(state));
-  ensureRunnerTurnFlags(state).damagePreventionUsage = {};
-  ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
-  ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
-  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
-  ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds = [];
-  applyCorpStartOfTurnEffects(state, effects);
+function startCorpTurn(...args: any[]): any {
+  return (turnRuntimeResolvers.startCorpTurn as any)(...args);
 }
-
-function startRunnerTurn(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  state.activeSide = "runner";
-  state.phase = "runner_action_phase";
-  state.timingPoint = "runner_action.main";
-  state.runner.clicks = runnerActionsPerTurn(state);
-  if (state.runnerTurnFlags?.questForCattekinPermanentActionGain)
-    state.runner.clicks += 1;
-  state.corp.clicks = 0;
-  clearEdgerunnerTempsInstallFlags(state);
-  const flags = ensureRunnerTurnFlags(state);
-  flags.stoleAgendaThisTurn = false;
-  flags.stoleAgendaLastTurn = false;
-  flags.stolenAgendaAdvancementCountersThisTurn = 0;
-  flags.stolenAgendaAdvancementCountersLastTurn = 0;
-  flags.runnerReceivedTagThisTurn = false;
-  flags.stoleResearchAgendaThisTurn = false;
-  flags.stoleGrayOpsAgendaThisTurn = false;
-  flags.stoleBlackOpsAgendaThisTurn = false;
-  flags.runAttemptsThisTurn = 0;
-  flags.runAttemptsLastTurn = 0;
-  flags.successfulHqRunThisTurn = false;
-  flags.successfulRunThisTurn = false;
-  delete flags.lastSuccessfulRunServerId;
-  flags.trashedAdvertisementThisTurn = false;
-  flags.trashedTransactionsThisTurn = false;
-  flags.prearrangedDropPending = false;
-  flags.damagePreventionUsage = {};
-  flags.brokerActionCardIdsThisTurn = [];
-  flags.startOfTurnFloatingCreditsApplied = false;
-  flags.allNighterBonusRunPending = false;
-  flags.valuPakProgramInstallActionsRemaining = 0;
-  flags.valuPakTemporaryProgramInstallCredits = 0;
-  flags.shellTradersStartTurnResolvedSourceIds = [];
-  flags.bodyweightDataCrecheExtraRunPending = false;
-  flags.bodyweightDataCrecheExtraRunUsedThisTurn = false;
-  flags.startupImmolatorUsedSourceIdsThisTurn = [];
-  flags.preyingMantisUsedSourceIdsThisTurn = [];
-  flags.preyingMantisDamageDueSourceIdsThisTurn = [];
-  flags.corpRezzedIceThisTurn = 0;
-  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
-  delete flags.incubatorPendingTransforms;
-  consumeRunnerFutureActionDebt(state);
-  resolveBizarreEncryptionDelayedAgendas(state, effects);
-  refreshRecurringCredits(state, "runner", effects);
-  untapRunnerCardsAtTurnStart(state);
-  applyRunnerStartOfTurnEffects(state, effects);
+function startRunnerTurn(...args: any[]): any {
+  return (turnRuntimeResolvers.startRunnerTurn as any)(...args);
 }
-
-function untapRunnerCardsAtTurnStart(state: GameState): void {
-  for (const cardId of runnerInstalledCardIds(state)) {
-    const instance = state.cardInstances[cardId];
-    if (!instance?.tapped) continue;
-    state.cardInstances[cardId] = { ...instance, tapped: false };
-  }
+function untapRunnerCardsAtTurnStart(...args: any[]): any {
+  return (turnRuntimeResolvers.untapRunnerCardsAtTurnStart as any)(...args);
 }
-
-function resolveBizarreEncryptionDelayedAgendas(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  const delayed = state.bizarreEncryptionDelayedAgendas ?? [];
-  if (delayed.length === 0) return;
-  const remaining: NonNullable<GameState["bizarreEncryptionDelayedAgendas"]> =
-    [];
-  for (const entry of delayed) {
-    const instance = state.cardInstances[entry.agendaId];
-    const server = state.corp.servers.find(
-      (candidate) => candidate.id === entry.serverId,
-    );
-    if (
-      !instance ||
-      instance.zone.side !== "corp" ||
-      instance.zone.zone !== "serverRoot" ||
-      instance.zone.serverId !== entry.serverId ||
-      !server?.root.includes(entry.agendaId)
-    ) {
-      continue;
-    }
-    const definition = DEMO_CARDS_BY_ID[instance.definitionId];
-    if (!definition || definition.type !== "agenda") {
-      remaining.push(entry);
-      continue;
-    }
-    removeFromAllZones(state, entry.agendaId);
-    state.runner.scoreArea.push(entry.agendaId);
-    state.cardInstances[entry.agendaId] = {
-      ...instance,
-      faceup: true,
-      rezzed: true,
-      zone: { side: "runner", zone: "scoreArea" },
-    };
-    effects?.push(
-      automaticStealAgendaEffect(
-        `runner.start.bizarre_encryption.${entry.agendaId}`,
-        definition.id,
-        BIZARRE_ENCRYPTION_SCHEME_ID,
-        agendaPointsForScoredCard(state, entry.agendaId),
-      ),
-    );
-  }
-  if (remaining.length > 0) state.bizarreEncryptionDelayedAgendas = remaining;
-  else delete state.bizarreEncryptionDelayedAgendas;
+function resolveBizarreEncryptionDelayedAgendas(...args: any[]): any {
+  return (turnRuntimeResolvers.resolveBizarreEncryptionDelayedAgendas as any)(...args);
 }
-
-function applyCorpStartOfTurnEffects(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  applyProteusPurgeableRunnerVirusCorpStartEffects(state, effects);
-  const skivvissDraws = virusCounterDrawsAtCorpStart(state);
-  if (skivvissDraws > 0) {
-    drawCorpCards(state, skivvissDraws);
-    effects?.push(
-      automaticDrawCardsEffect(
-        "corp.start.skivviss",
-        "corp",
-        skivvissDraws,
-        SKIVVISS_ID,
-      ),
-    );
-  }
-  const cascadeTrash = virusCounterCascadeTrashAtCorpStart(state);
-  if (cascadeTrash.amount > 0) {
-    if (!cascadeTrash.sourceDefinitionId)
-      throw new Error("Cascade-Virus-Quelle fehlt.");
-    const trashed = trashFaceupRdCardsForCascade(state, cascadeTrash.amount);
-    if (trashed.length > 0) {
-      effects?.push({
-        effectId: "corp.start.cascade.trash_faceup_rd",
-        kind: "trash_card",
-        visibility: "hidden_info_barrier",
-        side: "corp",
-        amount: trashed.length,
-        reason: "start_of_turn",
-        sourceDefinitionId: cascadeTrash.sourceDefinitionId,
-        sourceTitle: publicCardTitle(cascadeTrash.sourceDefinitionId),
-        cardDefinitionId: definitionFor(state, trashed[0]!).id,
-        cardTitle: publicCardTitle(definitionFor(state, trashed[0]!).id),
-      });
-    }
-  }
-  executeCardImplementationStartOfCorpTurnEffects(
-    cardImplementationRuntimeDeps,
-    state,
-    effects,
-  );
-  for (const cardId of rezzedCorpRootCardIds(state)) {
-    const definitionId = definitionFor(state, cardId).id;
-    if (
-      (definitionId === KRUMZ_TRACE_ASSET_CARD_ID ||
-        hasCorpUtilityKind(state, cardId, "krumz_trace_bit")) &&
-      cardCounter(state, cardId, "bit") <= 0
-    ) {
-      setCardCounter(state, cardId, "bit", 1);
-      effects?.push(
-        automaticCounterChangeEffect(
-          `corp.start.krumz.${cardId}`,
-          "corp",
-          definitionId,
-          "bit",
-          1,
-          1,
-        ),
-      );
-    }
-    if (isParisTracePoolSource(fortRunSideFamiliesHostForState(state), cardId)) {
-      const capacity = parisTracePoolCapacityForCard(
-        fortRunSideFamiliesHostForState(state),
-        cardId,
-      );
-      if (cardCounter(state, cardId, "bit") < capacity)
-        setCardCounter(state, cardId, "bit", capacity);
-    }
-    if (isInvestmentFirmCard(state, cardId)) {
-      if (cardCounter(state, cardId, "recurring_credit") > 0) {
-        spendCardCounter(state, cardId, "recurring_credit", 1);
-        credits(state, "corp", 1);
-        const remainingCounters = cardCounter(state, cardId, "recurring_credit");
-        effects?.push(
-          automaticGainCreditsEffect(
-            `corp.start.investment_firm.${cardId}`,
-            "corp",
-            1,
-            definitionId,
-          ),
-        );
-        effects?.push({
-          effectId: `corp.start.investment_firm.counter.${cardId}`,
-          kind: "counter_change",
-          visibility: "public",
-          side: "corp",
-          amount: remainingCounters,
-          reason: "start_of_turn",
-          counterType: "recurring_credit",
-          removedCounterAmount: 1,
-          remainingCounters,
-          sourceDefinitionId: definitionId,
-          sourceTitle: publicCardTitle(definitionId),
-        });
-      }
-      continue;
-    }
-    if (CORP_RECURRING_ASSET_CARD_IDS.has(definitionId)) {
-      credits(state, "corp", 1);
-      effects?.push(
-        automaticGainCreditsEffect(
-          `corp.start.recurring_asset.${cardId}`,
-          "corp",
-          1,
-          definitionId,
-        ),
-      );
-    }
-  }
-  if (!state.pendingChoice)
-    startCorporateNegotiatingCenterChoice(
-      corpZoneChoiceHandlerHost(
-        state,
-        { side: "corp", payload: {} } as LegalAction,
-      ),
-    );
-  if (!state.pendingChoice)
-    startEmployeeEmpowermentStartDrawChoice(scoredAgendaFlowHost(state));
+function applyCorpStartOfTurnEffects(...args: any[]): any {
+  return (turnRuntimeResolvers.applyCorpStartOfTurnEffects as any)(...args);
 }
-
-function applyProteusPurgeableRunnerVirusCorpStartEffects(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  const corpCounters = state.purgeableRunnerVirusCounters?.corp;
-  const scaldanCounters = purgeableRunnerVirusCounterAmount(
-    corpCounters,
-    "scaldan",
-  );
-  for (let index = 0; index < scaldanCounters; index += 1) {
-    const randomPurpose = `proteus.scaldan.corp_start.${state.stateVersion}.${index}`;
-    const dieRoll = rollDeterministicDie(state, randomPurpose);
-    const badPublicityAdded = dieRoll >= 5 ? 1 : 0;
-    if (badPublicityAdded > 0) state.corp.badPublicity += badPublicityAdded;
-    effects?.push({
-      effectId: `corp.start.proteus.scaldan.${index}`,
-      kind: badPublicityAdded > 0 ? "add_bad_publicity" : "counter_change",
-      visibility: "public",
-      side: "corp",
-      amount: badPublicityAdded,
-      reason: "start_of_turn",
-      counterType: "scaldan",
-      remainingCounters: scaldanCounters,
-      sourceDefinitionId: PROTEUS_SCALDAN_ID,
-      sourceTitle: publicCardTitle(PROTEUS_SCALDAN_ID),
-      randomPurpose,
-      dieSize: 6,
-      dieRoll,
-      randomCounterAfter: state.randomCounter,
-      ...(badPublicityAdded > 0
-        ? {
-            badPublicityAdded,
-            corpBadPublicityAfter: state.corp.badPublicity,
-          }
-        : {}),
-    } as ResolvedGameEffect);
-  }
-  const taxCounters = purgeableRunnerVirusCounterAmount(corpCounters, "tax");
-  const taxLoss = Math.min(state.corp.credits, Math.floor(taxCounters / 2));
-  if (taxLoss > 0) {
-    state.corp.credits -= taxLoss;
-    effects?.push(
-      automaticLoseCreditsEffect(
-        "corp.start.proteus.taxman",
-        "corp",
-        taxLoss,
-        PROTEUS_TAXMAN_ID,
-      ),
-    );
-  }
-
-  const pipeCounters = purgeableRunnerVirusCounterAmount(corpCounters, "pipe");
-  if (pipeCounters <= 0) return;
-  addCorpActionDebt(state, {
-    amount: pipeCounters,
-    reason: "pipe_counter",
-    source: "start_of_turn_effect",
-  });
-  effects?.push({
-    effectId: "corp.start.proteus.viral_pipeline.pipe",
-    kind: "counter_change",
-    visibility: "public",
-    side: "corp",
-    amount: pipeCounters,
-    reason: "start_of_turn",
-    counterType: "pipe",
-    remainingCounters: pipeCounters,
-    sourceDefinitionId: PROTEUS_VIRAL_PIPELINE_ID,
-    sourceTitle: publicCardTitle(PROTEUS_VIRAL_PIPELINE_ID),
-  });
+function applyProteusPurgeableRunnerVirusCorpStartEffects(...args: any[]): any {
+  return (turnRuntimeResolvers.applyProteusPurgeableRunnerVirusCorpStartEffects as any)(...args);
 }
-
-function virusCounterDrawsAtCorpStart(state: GameState): number {
-  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
-    const implementation = virusCounterImplementationForCard(state, cardId);
-    const start = implementation?.startOfCorpTurn;
-    if (start?.kind !== "draw_extra_cards_per_counter") return sum;
-    return sum + cardCounter(state, cardId, "virus") * start.amountPerCounter;
-  }, 0);
+function virusCounterDrawsAtCorpStart(...args: any[]): any {
+  return (turnRuntimeResolvers.virusCounterDrawsAtCorpStart as any)(...args);
 }
-
-function skivvissCounterTotal(state: GameState): number {
-  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
-    if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
-    return sum + cardCounter(state, cardId, "virus");
-  }, 0);
+function skivvissCounterTotal(...args: any[]): any {
+  return (turnRuntimeResolvers.skivvissCounterTotal as any)(...args);
 }
-
-function virusCounterCascadeTrashAtCorpStart(state: GameState): {
-  amount: number;
-  sourceDefinitionId?: CardDefinitionId;
-} {
-  return Object.keys(state.cardInstances).reduce((result, cardId) => {
-    const implementation = virusCounterImplementationForCard(state, cardId);
-    const start = implementation?.startOfCorpTurn;
-    if (start?.kind !== "trash_faceup_rd_cards_per_two_counters") return result;
-    const amount =
-      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
-      start.countPerGroup;
-    return {
-      amount: result.amount + amount,
-      sourceDefinitionId:
-        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
-    };
-  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
+function virusCounterCascadeTrashAtCorpStart(...args: any[]): any {
+  return (turnRuntimeResolvers.virusCounterCascadeTrashAtCorpStart as any)(...args);
 }
-
-function trashFaceupRdCardsForCascade(
-  state: GameState,
-  maxCount: number,
-): CardInstanceId[] {
-  const selected = state.corp.rd
-    .filter((cardId) => state.cardInstances[cardId]?.faceup === true)
-    .slice(0, Math.max(0, Math.floor(maxCount)));
-  for (const cardId of selected) {
-    removeFromAllZones(state, cardId);
-    state.corp.archives.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      rezzed: true,
-      zone: { side: "corp", zone: "archives" },
-    };
-  }
-  return selected;
+function trashFaceupRdCardsForCascade(...args: any[]): any {
+  return (turnRuntimeResolvers.trashFaceupRdCardsForCascade as any)(...args);
 }
-
-function applyRunnerStartOfTurnEffects(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  const flags = ensureRunnerTurnFlags(state);
-  for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
-    if (!counterEffect.startOfRunnerTurn) continue;
-    const counterCount = cardCounter(
-      state,
-      state.runner.identity,
-      counterEffect.counterType,
-    );
-    if (counterCount <= 0) continue;
-    const amount = counterCount * counterEffect.startOfRunnerTurn.amountPerCounter;
-    if (counterEffect.startOfRunnerTurn.kind === "add_tags") {
-      state.runner.tags += amount;
-      effects?.push(
-        automaticTagEffect(
-          `runner.start.${counterEffect.counterType}`,
-          amount,
-          counterEffect.sourceDefinitionId,
-        ),
-      );
-    }
-    if (counterEffect.startOfRunnerTurn.kind === "lose_credits") {
-      const lost = Math.min(state.runner.credits, amount);
-      state.runner.credits -= lost;
-      effects?.push(
-        automaticLoseCreditsEffect(
-          `runner.start.${counterEffect.counterType}`,
-          "runner",
-          lost,
-          counterEffect.sourceDefinitionId,
-        ),
-      );
-    }
-  }
-  executeCardImplementationStartOfRunnerTurnEffects(
-    cardImplementationRuntimeDeps,
-    state,
-    effects,
-  );
-  applyQuestForCattekinStartOfTurn(state, effects);
-  if (!flags.startOfTurnFloatingCreditsApplied) {
-    const virusCredits = virusCounterCreditsAtRunnerStart(state);
-    if (virusCredits.amount > 0) {
-      if (!virusCredits.sourceDefinitionId)
-        throw new Error("Virus-Credit-Quelle fehlt.");
-      credits(state, "runner", virusCredits.amount);
-      effects?.push(
-        automaticGainCreditsEffect(
-          "runner.start.virus_counter_credits",
-          "runner",
-          virusCredits.amount,
-          virusCredits.sourceDefinitionId,
-        ),
-      );
-    }
-    flags.startOfTurnFloatingCreditsApplied = true;
-  }
-  applyShellTradersStartOfTurn(
-    runnerSpecialTriggerExecutionHost(state),
-    effects,
-  );
-  if (state.pendingChoice) return;
-  if (queueIncubatorStartOfTurnTransforms(state)) return;
-  if (startVirusCounterRunnerPrivateLookAtStart(state)) return;
-  for (const cardId of state.runner.rig.resources.slice().sort()) {
-    if (state.pendingChoice) break;
-    if (
-      uniqueDirectLongtailKindForCard(state, cardId) ===
-      "smiths_pawnshop_start_turn_trash_for_credits"
-    )
-      startSmithsPawnshopChoice(
-        hiddenZoneNonSearchChoiceHandlerHost(state, {
-          side: "runner",
-          payload: {},
-        } as LegalAction),
-        cardId,
-      );
-  }
+function applyRunnerStartOfTurnEffects(...args: any[]): any {
+  return (turnRuntimeResolvers.applyRunnerStartOfTurnEffects as any)(...args);
 }
-
-function applyQuestForCattekinStartOfTurn(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  const sourceIds = state.runner.rig.resources
-    .slice()
-    .sort()
-    .filter(
-      (cardId) =>
-        runnerUtilityLongtailKindForCard(state, cardId) ===
-        "quest_for_cattekin_start_turn_random_permanent_action",
-    );
-  for (const sourceId of sourceIds) {
-    const sourceDefinitionId = definitionFor(state, sourceId).id;
-    const randomPurpose = `p3_59.die.${sourceDefinitionId}.start_runner_turn.${state.stateVersion}.${sourceId}`;
-    const dieRoll = rollDeterministicDie(state, randomPurpose);
-    let damageSummary: DamageSummary | undefined;
-    if (dieRoll === 6) {
-      ensureRunnerTurnFlags(state).questForCattekinPermanentActionGain = true;
-      state.runner.clicks += 1;
-      trashRunnerInstalledCardToHeap(state, sourceId);
-    } else if (dieRoll === 1) {
-      damageSummary = doDamage(state, {
-        damageId: `runner.start.${sourceDefinitionId}.core.${state.stateVersion}`,
-        damageType: "core",
-        amount: 1,
-        source: `runner_start:${sourceDefinitionId}`,
-      });
-    } else if (dieRoll === 2) {
-      damageSummary = doDamage(state, {
-        damageId: `runner.start.${sourceDefinitionId}.net.${state.stateVersion}`,
-        damageType: "net",
-        amount: 1,
-        source: `runner_start:${sourceDefinitionId}`,
-      });
-    }
-    effects?.push({
-      effectId: `runner.start.quest_for_cattekin.${sourceId}`,
-      kind:
-        dieRoll === 6
-          ? "gain_actions"
-        : dieRoll === 1 || dieRoll === 2
-            ? "damage"
-            : "counter_change",
-      visibility: "public",
-      side: "runner",
-      amount: dieRoll === 6 ? 1 : damageSummary?.amount ?? 0,
-      reason: "start_of_turn",
-      sourceDefinitionId,
-      sourceTitle: publicCardTitle(sourceDefinitionId),
-      v1921DieRoll: dieRoll,
-      questForCattekinOutcome:
-        dieRoll === 6
-          ? "permanent_action"
-          : dieRoll === 1
-            ? "core_damage"
-            : dieRoll === 2
-              ? "net_damage"
-              : "no_effect",
-      randomPurpose,
-      randomCounterAfter: state.randomCounter,
-      ...(dieRoll === 6
-        ? {
-            permanentActionGain: true,
-            sourceTrashed: true,
-            runnerClicksAfter: state.runner.clicks,
-          }
-        : {}),
-      ...(damageSummary
-        ? {
-            damageCannotBePrevented: true,
-            damageType: damageSummary.damageType,
-            cardsTrashed: damageSummary.cardsTrashed,
-            flatline: damageSummary.flatline,
-            ...(damageSummary.coreDamageAfter !== undefined
-              ? { coreDamageAfter: damageSummary.coreDamageAfter }
-              : {}),
-          }
-        : {}),
-    } as ResolvedGameEffect);
-  }
+function applyQuestForCattekinStartOfTurn(...args: any[]): any {
+  return (turnRuntimeResolvers.applyQuestForCattekinStartOfTurn as any)(...args);
 }
-
-function virusCounterCreditsAtRunnerStart(state: GameState): {
-  amount: number;
-  sourceDefinitionId?: CardDefinitionId;
-} {
-  return Object.keys(state.cardInstances).reduce((result, cardId) => {
-    const implementation = virusCounterImplementationForCard(state, cardId);
-    const start = implementation?.startOfRunnerTurn;
-    if (start?.kind !== "gain_credits_per_two_counters") return result;
-    const amount =
-      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
-      start.amountPerGroup;
-    return {
-      amount: result.amount + amount,
-      sourceDefinitionId:
-        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
-    };
-  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
+function virusCounterCreditsAtRunnerStart(...args: any[]): any {
+  return (turnRuntimeResolvers.virusCounterCreditsAtRunnerStart as any)(...args);
 }
-
-function startVirusCounterRunnerPrivateLookAtStart(state: GameState): boolean {
-  const boardwalk = Object.keys(state.cardInstances).reduce((result, cardId) => {
-    const implementation = virusCounterImplementationForCard(state, cardId);
-    const start = implementation?.startOfRunnerTurn;
-    if (start?.kind !== "random_reveal_hq_cards_per_two_counters") return result;
-    const amount =
-      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
-      start.countPerGroup;
-    return {
-      amount: result.amount + amount,
-      sourceDefinitionId:
-        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
-    };
-  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
-  if (boardwalk.amount > 0 && state.corp.hq.length > 0) {
-    const selected = randomCorpHqCardsWithoutReplacement(
-      state,
-      Math.min(boardwalk.amount, state.corp.hq.length),
-      `p3_49.random.boardwalk.hq_reveal.${state.stateVersion}`,
-    );
-    return startRunnerPrivateLookAtSpecificCorpCards(
-      state,
-      boardwalk.sourceDefinitionId ?? definitionFor(state, state.runner.identity).id,
-      "hq",
-      selected,
-      "Boardwalk: zufällige HQ-Karten ansehen.",
-    );
-  }
-
-  const deepThoughtSourceCardId = Object.keys(state.cardInstances).find((cardId) => {
-    const implementation = virusCounterImplementationForCard(state, cardId);
-    const start = implementation?.startOfRunnerTurn;
-    return (
-      start?.kind === "private_look_top_rd_at_threshold" &&
-      cardCounter(state, cardId, "virus") >= start.threshold
-    );
-  });
-  if (!deepThoughtSourceCardId || state.corp.rd.length === 0) return false;
-  return startRunnerPrivateLookChoice(
-    state,
-    deepThoughtSourceCardId,
-    definitionFor(state, deepThoughtSourceCardId).id,
-    "rd",
-    1,
-    "ability",
-  );
+function startVirusCounterRunnerPrivateLookAtStart(...args: any[]): any {
+  return (turnRuntimeResolvers.startVirusCounterRunnerPrivateLookAtStart as any)(...args);
 }
-
-function randomCorpHqCardsWithoutReplacement(
-  state: GameState,
-  count: number,
-  purpose: string,
-): CardInstanceId[] {
-  const pool = state.corp.hq.slice();
-  const selected: CardInstanceId[] = [];
-  const limit = Math.min(Math.max(0, Math.floor(count)), pool.length);
-  for (let index = 0; index < limit; index += 1) {
-    const value = nextRandom(state, `${purpose}.${index}`);
-    const selectedIndex = Math.floor(value * pool.length);
-    const [cardId] = pool.splice(selectedIndex, 1);
-    if (cardId) selected.push(cardId);
-  }
-  return selected;
+function randomCorpHqCardsWithoutReplacement(...args: any[]): any {
+  return (turnRuntimeResolvers.randomCorpHqCardsWithoutReplacement as any)(...args);
 }
-
-function startRunnerPrivateLookAtSpecificCorpCards(
-  state: GameState,
-  sourceDefinitionId: CardDefinitionId,
-  zone: Extract<ServerId, "rd" | "hq">,
-  cardIds: CardInstanceId[],
-  prompt: string,
-): boolean {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const visibleIds = cardIds.filter((cardId) => {
-    const instance = state.cardInstances[cardId];
-    return instance?.owner === "corp";
-  });
-  if (visibleIds.length === 0) return false;
-  state.pendingChoice = {
-    choiceId: `p3_49_virus_private_look_${zone}_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_33.private_look:ability:${sourceDefinitionId}:${zone}:${state.stateVersion + 1}`,
-    prompt,
-    kind: "select_cards",
-    options: [
-      ...visibleIds.map((cardId) => ({
-        id: `card_${cardId}`,
-        label: definitionFor(state, cardId).title,
-        publicLabel: "Verdeckte Korp-Karte",
-        value: cardId,
-        selectable: false,
-      })),
-      { id: "done", label: "Fertig", publicLabel: "Fertig", value: "done" },
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  return true;
+function startRunnerPrivateLookAtSpecificCorpCards(...args: any[]): any {
+  return (turnRuntimeResolvers.startRunnerPrivateLookAtSpecificCorpCards as any)(...args);
 }
-
-function queueIncubatorStartOfTurnTransforms(state: GameState): boolean {
-  const flags = ensureRunnerTurnFlags(state);
-  if (flags.incubatorPendingTransforms === undefined) {
-    const counterTotal = incubatorCounterTotal(state);
-    let pending = 0;
-    for (let index = 0; index < counterTotal; index += 1) {
-      const die = rollDeterministicDie(
-        state,
-        `v191.die.${INCUBATOR_ID}.start_of_turn.roll.${state.stateVersion}.${index}`,
-      );
-      if (die === 6) pending += 1;
-    }
-    flags.incubatorPendingTransforms = pending;
-  }
-  if ((flags.incubatorPendingTransforms ?? 0) <= 0) return false;
-  return startIncubatorTransformChoice(state);
+function queueIncubatorStartOfTurnTransforms(...args: any[]): any {
+  return (turnRuntimeResolvers.queueIncubatorStartOfTurnTransforms as any)(...args);
 }
-
-function startIncubatorTransformChoice(state: GameState): boolean {
-  const flags = ensureRunnerTurnFlags(state);
-  const pending = Math.max(
-    0,
-    Math.floor(flags.incubatorPendingTransforms ?? 0),
-  );
-  if (pending <= 0) return false;
-
-  const cardTargets = Object.keys(state.cardInstances)
-    .sort()
-    .filter((cardId) => cardCounter(state, cardId, "virus") > 0)
-    .filter((cardId) => isVisibleVirusCounterCardForRunner(state, cardId))
-    .map((cardId) => {
-      const title = definitionFor(state, cardId).title;
-      const amount = cardCounter(state, cardId, "virus");
-      return {
-        id: `card_${cardId}`,
-        label: `${title} (${amount})`,
-        publicLabel: "Virus-Counter",
-        value: `card:${cardId}`,
-      };
-    });
-
-  const poxTargets = state.corp.servers
-    .map((server) => ({
-      serverId: server.id,
-      amount: poxCountersForServer(state, server.id),
-    }))
-    .filter((entry) => entry.amount > 0)
-    .map((entry) => ({
-      id: `pox_${entry.serverId}`,
-      label: `Pox auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
-      publicLabel: "Virus-Counter",
-      value: `pox:${entry.serverId}`,
-    }));
-
-  const faitTargets = state.corp.servers
-    .map((server) => ({
-      serverId: server.id,
-      amount: Math.max(
-        0,
-        Math.floor(state.faitAccompliCountersByServer?.[server.id] ?? 0),
-      ),
-    }))
-    .filter((entry) => entry.amount > 0)
-    .map((entry) => ({
-      id: `fait_${entry.serverId}`,
-      label: `Fait auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
-      publicLabel: "Virus-Counter",
-      value: `fait:${entry.serverId}`,
-    }));
-
-  const options = [...cardTargets, ...poxTargets, ...faitTargets];
-  if (options.length === 0) {
-    flags.incubatorPendingTransforms = 0;
-    return false;
-  }
-
-  state.pendingChoice = {
-    choiceId: `v191_incubator_transform_${state.stateVersion + 1}_${pending}`,
-    side: "runner",
-    source: `v191.incubator_transform:${state.stateVersion + 1}`,
-    prompt: "Incubator: Wähle einen Virus-Counter für die Verdopplung.",
-    kind: "select_option",
-    options,
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  return true;
+function startIncubatorTransformChoice(...args: any[]): any {
+  return (turnRuntimeResolvers.startIncubatorTransformChoice as any)(...args);
 }
 
 function handForSide(state: GameState, side: Side): CardInstanceId[] {
@@ -4582,39 +2850,11 @@ function runnerStoleAgendaSubtypeThisTurn(
   return state.runnerTurnFlags?.stoleBlackOpsAgendaThisTurn === true;
 }
 
-function serverDifficultyIncreaseFromFaitAccompli(
-  state: GameState,
-  agendaId: CardInstanceId,
-): number {
-  const zone = mustInstance(state.cardInstances, agendaId).zone;
-  if (zone.side !== "corp" || zone.zone !== "serverRoot" || !zone.serverId)
-    return 0;
-  return Math.max(
-    0,
-    Math.floor(
-      Math.max(
-        0,
-        Math.floor(state.faitAccompliCountersByServer?.[zone.serverId] ?? 0),
-      ) / 2,
-    ),
-  );
+function serverDifficultyIncreaseFromFaitAccompli(...args: any[]): any {
+  return (stateCorpRuntimeResolvers.serverDifficultyIncreaseFromFaitAccompli as any)(...args);
 }
-
-function serverDifficultyReductionFromUpgrades(
-  state: GameState,
-  agendaId: CardInstanceId,
-): number {
-  const zone = mustInstance(state.cardInstances, agendaId).zone;
-  if (zone.side !== "corp" || zone.zone !== "serverRoot" || !zone.serverId)
-    return 0;
-  const server = mustServer(state, zone.serverId);
-  return server.root.reduce((sum, rootCardId) => {
-    if (rootCardId === agendaId) return sum;
-    const instance = mustInstance(state.cardInstances, rootCardId);
-    if (!instance.rezzed) return sum;
-    const definitionId = definitionFor(state, rootCardId).id;
-    return SERVER_DIFFICULTY_UPGRADE_CARD_IDS.has(definitionId) ? sum + 1 : sum;
-  }, 0);
+function serverDifficultyReductionFromUpgrades(...args: any[]): any {
+  return (stateCorpRuntimeResolvers.serverDifficultyReductionFromUpgrades as any)(...args);
 }
 
 function agendaPointsForScoredCard(
@@ -4641,73 +2881,20 @@ function pickRunnerAgendaForAgendaPointCost(
     .find((cardId) => agendaPointsForScoredCard(state, cardId) >= 1);
 }
 
-function forfeitRunnerAgendaForPointCost(
-  state: GameState,
-  cardId: CardInstanceId,
-): void {
-  if (!cardId || !state.runner.scoreArea.includes(cardId))
-    throw new Error(
-      "Der Runner kann diese Agenda nicht fuer Kosten forfeiten.",
-    );
-  if (agendaPointsForScoredCard(state, cardId) < 1)
-    throw new Error(
-      "Die gewaehlte Runner-Agenda liefert keinen Agenda-Punkt fuer Kosten.",
-    );
-  const instance = mustInstance(state.cardInstances, cardId);
-  removeFromAllZones(state, cardId);
-  const specialZones = ensureSpecialZones(state);
-  specialZones.removedFromGame.push(cardId);
-  specialZones.removedFromGame.sort();
-  state.cardInstances[cardId] = {
-    ...instance,
-    faceup: true,
-    rezzed: true,
-    zone: { side: "special", zone: "removed_from_game", visibility: "public" },
-  };
+function forfeitRunnerAgendaForPointCost(...args: any[]): any {
+  return (corpRuntimeResolvers.forfeitRunnerAgendaForPointCost as any)(...args);
 }
-
-function forfeitCorpAgendaForPointCost(
-  state: GameState,
-  cardId: CardInstanceId,
-): void {
-  if (!cardId || !state.corp.scoreArea.includes(cardId))
-    throw new Error("Die Korp kann diese Agenda nicht fuer Kosten forfeiten.");
-  if (agendaPointsForScoredCard(state, cardId) < 1)
-    throw new Error(
-      "Die gewaehlte Korp-Agenda liefert keinen Agenda-Punkt fuer Kosten.",
-    );
-  const instance = mustInstance(state.cardInstances, cardId);
-  removeFromAllZones(state, cardId);
-  const specialZones = ensureSpecialZones(state);
-  specialZones.removedFromGame.push(cardId);
-  specialZones.removedFromGame.sort();
-  state.cardInstances[cardId] = {
-    ...instance,
-    faceup: true,
-    rezzed: true,
-    zone: { side: "special", zone: "removed_from_game", visibility: "public" },
-  };
+function forfeitCorpAgendaForPointCost(...args: any[]): any {
+  return (corpRuntimeResolvers.forfeitCorpAgendaForPointCost as any)(...args);
 }
-
-function acmeSavingsAndLoanObligationCount(state: GameState): number {
-  return Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0));
+function acmeSavingsAndLoanObligationCount(...args: any[]): any {
+  return (corpRuntimeResolvers.acmeSavingsAndLoanObligationCount as any)(...args);
 }
-
-function addAcmeSavingsAndLoanObligation(
-  state: GameState,
-  amount: number,
-): void {
-  if (!Number.isInteger(amount) || amount <= 0)
-    throw new Error("ACME-Verpflichtungsmenge ist ungueltig.");
-  state.acmeSavingsAndLoanObligations =
-    acmeSavingsAndLoanObligationCount(state) + amount;
+function addAcmeSavingsAndLoanObligation(...args: any[]): any {
+  return (corpRuntimeResolvers.addAcmeSavingsAndLoanObligation as any)(...args);
 }
-
-function removeAcmeSavingsAndLoanObligation(state: GameState): void {
-  const current = acmeSavingsAndLoanObligationCount(state);
-  if (current <= 0)
-    throw new Error("Es gibt keine ACME-Savings-and-Loan-Verpflichtung.");
-  state.acmeSavingsAndLoanObligations = current - 1;
+function removeAcmeSavingsAndLoanObligation(...args: any[]): any {
+  return (corpRuntimeResolvers.removeAcmeSavingsAndLoanObligation as any)(...args);
 }
 
 type CorpAgendaPointCostResult = {
@@ -4717,1267 +2904,509 @@ type CorpAgendaPointCostResult = {
   forfeitedAgendaDefinitionIds: CardDefinitionId[];
 };
 
-function spendCorpAgendaPointCost(
-  state: GameState,
-  requiredPoints: number,
-): CorpAgendaPointCostResult {
-  if (!Number.isInteger(requiredPoints) || requiredPoints <= 0)
-    throw new Error("Agenda-Punkt-Kosten sind ungueltig.");
-  let remaining = requiredPoints;
-  let paidPoints = 0;
-  const bonusBefore = Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0));
-  const bonusPointsSpent = Math.min(bonusBefore, remaining);
-  if (bonusPointsSpent > 0) {
-    state.corpBonusAgendaPoints = bonusBefore - bonusPointsSpent;
-    remaining -= bonusPointsSpent;
-    paidPoints += bonusPointsSpent;
-  }
-  const forfeitedAgendaIds: CardInstanceId[] = [];
-  const forfeitedAgendaDefinitionIds: CardDefinitionId[] = [];
-  if (remaining > 0) {
-    for (const agendaId of corpScoredAgendaForfeitTargets(state)) {
-      const points = agendaPointsForScoredCard(state, agendaId);
-      forfeitedAgendaIds.push(agendaId);
-      forfeitedAgendaDefinitionIds.push(definitionFor(state, agendaId).id);
-      paidPoints += points;
-      remaining -= points;
-      forfeitCorpAgendaForPointCost(state, agendaId);
-      if (remaining <= 0) break;
-    }
-  }
-  if (paidPoints < requiredPoints)
-    throw new Error("Die Korp hat nicht genug Agenda-Punkte.");
-  return {
-    paidPoints,
-    bonusPointsSpent,
-    forfeitedAgendaIds,
-    forfeitedAgendaDefinitionIds,
-  };
+function spendCorpAgendaPointCost(...args: any[]): any {
+  return (corpRuntimeResolvers.spendCorpAgendaPointCost as any)(...args);
 }
-
-function installedAgendaOperationTarget(
-  state: GameState,
-): CardInstanceId | undefined {
-  return state.corp.servers
-    .flatMap((server) => server.root)
-    .filter((cardId) => definitionFor(state, cardId).type === "agenda")
-    .sort((left, right) => {
-      const leftRemaining = Math.max(
-        0,
-        effectiveAgendaDifficulty(effectiveAgendaDifficultyDeps, state, left) -
-          mustInstance(state.cardInstances, left).advancementCounters,
-      );
-      const rightRemaining = Math.max(
-        0,
-        effectiveAgendaDifficulty(effectiveAgendaDifficultyDeps, state, right) -
-          mustInstance(state.cardInstances, right).advancementCounters,
-      );
-      return rightRemaining - leftRemaining || left.localeCompare(right);
-    })[0];
+function installedAgendaOperationTarget(...args: any[]): any {
+  return (corpRuntimeResolvers.installedAgendaOperationTarget as any)(...args);
 }
-
-function corpAgendaCounterOperationTarget(
-  state: GameState,
-): CardInstanceId | undefined {
-  const scored = state.corp.scoreArea.slice().sort()[0];
-  if (scored) return scored;
-  return installedAgendaOperationTarget(state);
+function corpAgendaCounterOperationTarget(...args: any[]): any {
+  return (corpRuntimeResolvers.corpAgendaCounterOperationTarget as any)(...args);
 }
-
-function corpScoredAgendaForfeitTargets(
-  state: GameState,
-): CardInstanceId[] {
-  return state.corp.scoreArea
-    .slice()
-    .sort((left, right) => {
-      const byPoints =
-        agendaPointsForScoredCard(state, left) -
-        agendaPointsForScoredCard(state, right);
-      return byPoints !== 0 ? byPoints : left.localeCompare(right);
-    })
-    .filter((cardId) => agendaPointsForScoredCard(state, cardId) >= 1);
+function corpScoredAgendaForfeitTargets(...args: any[]): any {
+  return (corpRuntimeResolvers.corpScoredAgendaForfeitTargets as any)(...args);
 }
-
-function powerGridOverloadEligibleHardwareIds(
-  state: GameState,
-): CardInstanceId[] {
-  return state.runner.rig.hardware
-    .slice()
-    .filter((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return (
-        definition.type === "hardware" &&
-        !cardHasSubtype(definition, "cybernetics")
-      );
-    })
-    .sort((left, right) => {
-      const leftDefinition = definitionFor(state, left);
-      const rightDefinition = definitionFor(state, right);
-      const byTitle = leftDefinition.title.localeCompare(rightDefinition.title);
-      if (byTitle !== 0) return byTitle;
-      return left.localeCompare(right);
-    });
+function powerGridOverloadEligibleHardwareIds(...args: any[]): any {
+  return (corpRuntimeResolvers.powerGridOverloadEligibleHardwareIds as any)(...args);
 }
-
-function powerGridOverloadLegalActions(
-  state: GameState,
-  cardId: CardInstanceId,
-  definition: CardDefinition,
-): LegalAction[] {
-  const eligibleHardwareIds = powerGridOverloadEligibleHardwareIds(state);
-  const maxTrashCount = Math.min(eligibleHardwareIds.length, state.corp.credits);
-  const actions: LegalAction[] = [];
-  for (let trashCount = 1; trashCount <= maxTrashCount; trashCount += 1) {
-    actions.push(
-      action(
-        state,
-        "corp",
-        "play_operation",
-        `${definition.title}: ${trashCount} Hardware trashen`,
-        cardId,
-        [{ clicks: 1, credits: trashCount }],
-        {
-          cardId,
-          powerGridOverloadTrashCount: trashCount,
-          eligibleHardwareCount: eligibleHardwareIds.length,
-        },
-      ),
-    );
-  }
-  return actions;
+function powerGridOverloadLegalActions(...args: any[]): any {
+  return (corpRuntimeResolvers.powerGridOverloadLegalActions as any)(...args);
 }
-
-function powerGridOverloadTrashCountFromPayload(
-  legalAction: LegalAction,
-): number {
-  const trashCount = Number(
-    legalAction.payload?.powerGridOverloadTrashCount ?? 1,
-  );
-  if (!Number.isInteger(trashCount) || trashCount <= 0)
-    throw new Error("Power Grid Overload braucht eine gueltige X-Auswahl.");
-  return trashCount;
+function powerGridOverloadTrashCountFromPayload(...args: any[]): any {
+  return (corpRuntimeResolvers.powerGridOverloadTrashCountFromPayload as any)(...args);
 }
-
-function resolvePowerGridOverloadOperation(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const trashCount = powerGridOverloadTrashCountFromPayload(legalAction);
-  const eligibleHardwareIds = powerGridOverloadEligibleHardwareIds(state);
-  if (eligibleHardwareIds.length < trashCount)
-    throw new Error(
-      "Power Grid Overload findet nicht genug nicht-Cybernetics-Hardware.",
-    );
-  if (eligibleHardwareIds.length > trashCount) {
-    startPowerGridOverloadChoice(
-      state,
-      eligibleHardwareIds,
-      trashCount,
-      legalAction,
-    );
-    return;
-  }
-  trashPowerGridOverloadHardware(state, eligibleHardwareIds, legalAction);
+function resolvePowerGridOverloadOperation(...args: any[]): any {
+  return (corpRuntimeResolvers.resolvePowerGridOverloadOperation as any)(...args);
 }
-
-function startPowerGridOverloadChoice(
-  state: GameState,
-  eligibleHardwareIds: CardInstanceId[],
-  trashCount: number,
-  legalAction: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  state.pendingChoice = {
-    choiceId: `v1914_power_grid_overload_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1914.power_grid_overload:${trashCount}:${state.stateVersion + 1}`,
-    prompt: `Power Grid Overload: ${trashCount} Hardware trashen`,
-    kind: "select_cards",
-    options: eligibleHardwareIds.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return {
-        id: `card_${cardId}`,
-        label: definition.title,
-        publicLabel: definition.title,
-        value: cardId,
-      };
-    }),
-    minSelections: trashCount,
-    maxSelections: trashCount,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    powerGridOverloadChoiceOpened: true,
-    eligibleHardwareCount: eligibleHardwareIds.length,
-    powerGridOverloadTrashCount: trashCount,
-  };
+function startPowerGridOverloadChoice(...args: any[]): any {
+  return (corpRuntimeResolvers.startPowerGridOverloadChoice as any)(...args);
 }
-
-function powerGridOverloadTrashCountFromChoiceSource(source: string): number {
-  const [, rawTrashCount] = source.split(":");
-  const trashCount = Number(rawTrashCount);
-  if (!Number.isInteger(trashCount) || trashCount <= 0)
-    throw new Error("Power-Grid-Overload-Choice hat keine gueltige X-Auswahl.");
-  return trashCount;
+function powerGridOverloadTrashCountFromChoiceSource(...args: any[]): any {
+  return (corpRuntimeResolvers.powerGridOverloadTrashCountFromChoiceSource as any)(...args);
 }
-
-function resolvePowerGridOverloadChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1914.power_grid_overload"))
-    throw new Error("Es ist keine Power-Grid-Overload-Choice offen.");
-  const trashCount = powerGridOverloadTrashCountFromChoiceSource(choice.source);
-  const selectedIds = selectedChoiceCardIds(choice, playerAction) as CardInstanceId[];
-  if (selectedIds.length !== trashCount)
-    throw new Error("Power Grid Overload braucht genau X Hardware-Ziele.");
-  const legalTargets = new Set(powerGridOverloadEligibleHardwareIds(state));
-  for (const cardId of selectedIds) {
-    if (!legalTargets.has(cardId))
-      throw new Error(
-        "Power Grid Overload darf dieses Hardware-Ziel nicht trashen.",
-      );
-  }
-  delete state.pendingChoice;
-  trashPowerGridOverloadHardware(state, selectedIds, legalAction);
+function resolvePowerGridOverloadChoice(...args: any[]): any {
+  return (corpRuntimeResolvers.resolvePowerGridOverloadChoice as any)(...args);
 }
-
-function trashPowerGridOverloadHardware(
-  state: GameState,
-  hardwareIds: CardInstanceId[],
-  legalAction: LegalAction,
-): void {
-  const definitionIds = hardwareIds.map(
-    (cardId) => definitionFor(state, cardId).id,
-  );
-  if (
-    openRunnerInstalledTrashPreventionWindow(
-      state,
-      legalAction,
-      hardwareIds,
-      "power_grid_overload",
-    )
-  )
-    return;
-  for (const cardId of hardwareIds) {
-    if (!powerGridOverloadEligibleHardwareIds(state).includes(cardId))
-      throw new Error(
-        "Power Grid Overload darf dieses Hardware-Ziel nicht mehr trashen.",
-      );
-    trashRunnerInstalledCardToHeap(state, cardId);
-  }
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    powerGridOverloadTrashCount: hardwareIds.length,
-    trashedHardwareCount: hardwareIds.length,
-    trashedHardwareDefinitionIds: definitionIds.join(","),
-  };
+function trashPowerGridOverloadHardware(...args: any[]): any {
+  return (corpRuntimeResolvers.trashPowerGridOverloadHardware as any)(...args);
 }
-
-function systematicLayoffsLegalActions(
-  state: GameState,
-  cardId: CardInstanceId,
-  definition: CardDefinition,
-): LegalAction[] {
-  return [
-    action(
-      state,
-      "corp",
-      "play_operation",
-      `${definition.title} spielen`,
-      cardId,
-      [{ clicks: 1, credits: definition.cost ?? 0 }],
-      { cardId },
-    ),
-  ];
+function systematicLayoffsLegalActions(...args: any[]): any {
+  return (corpRuntimeResolvers.systematicLayoffsLegalActions as any)(...args);
 }
-
-function resolveAgendaCounterOperation(
-  state: GameState,
-  legalAction: LegalAction,
-  sourceDefinitionId: CardDefinitionId,
-): void {
-  const targetAgendaId = corpAgendaCounterOperationTarget(state);
-  if (!targetAgendaId)
-    throw new Error("Die V1.9.19-Counter-Operation findet kein Agenda-Ziel.");
-  if (!COUNTER_OPERATION_CARD_IDS.has(sourceDefinitionId))
-    throw new Error("Die V1.9.19-Counter-Operation passt nicht zur Quelle.");
-  addCardCounter(state, targetAgendaId, "power", 1);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1919OperationAbility: "add_power_counter",
-    targetCardId: targetAgendaId,
-    targetCardDefinitionId: definitionFor(state, targetAgendaId).id,
-    addedCounterAmount: 1,
-    remainingCounters: cardCounter(state, targetAgendaId, "power"),
-  };
+function resolveAgendaCounterOperation(...args: any[]): any {
+  return (corpRuntimeResolvers.resolveAgendaCounterOperation as any)(...args);
 }
-
-function resolveSystematicLayoffsAdvancementOperation(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const options = systematicLayoffsPlacementOptions(state);
-  if (options.length === 0)
-    throw new Error("Systematic Layoffs findet kein advancebares Ziel.");
-  startSystematicLayoffsAdvancementChoice(state, options, legalAction);
+function resolveSystematicLayoffsAdvancementOperation(...args: any[]): any {
+  return (corpRuntimeResolvers.resolveSystematicLayoffsAdvancementOperation as any)(...args);
 }
-
-function systematicLayoffsPlacementOptions(state: GameState): Array<{
-  firstTargetId: CardInstanceId;
-  secondTargetId?: CardInstanceId;
-  id: string;
-  label: string;
-  publicLabel: string;
-  value: string;
-}> {
-  const targets = advanceableInstalledCardTargets(state) as CardInstanceId[];
-  const options: Array<{
-    firstTargetId: CardInstanceId;
-    secondTargetId?: CardInstanceId;
-    id: string;
-    label: string;
-    publicLabel: string;
-    value: string;
-  }> = [];
-  for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
-    const firstTargetId = mustArrayValue(
-      targets,
-      firstIndex,
-      "Systematic-Layoffs-Ziel fehlt.",
-    );
-    for (
-      let secondIndex = firstIndex;
-      secondIndex < targets.length;
-      secondIndex += 1
-    ) {
-      const secondTargetId = mustArrayValue(
-        targets,
-        secondIndex,
-        "Systematic-Layoffs-Ziel fehlt.",
-      );
-      const splitTargets = firstTargetId !== secondTargetId;
-      const firstTitle = definitionFor(state, firstTargetId).title;
-      const secondTitle = definitionFor(state, secondTargetId).title;
-      const label = splitTargets
-        ? `Je 1 Advancement-Counter auf ${firstTitle} und ${secondTitle}`
-        : `2 Advancement-Counter auf ${firstTitle}`;
-      options.push({
-        firstTargetId,
-        ...(splitTargets ? { secondTargetId } : {}),
-        id: `placement_${sanitizeId(firstTargetId)}_${sanitizeId(secondTargetId)}`,
-        label,
-        publicLabel: label,
-        value: splitTargets
-          ? `${firstTargetId}|${secondTargetId}`
-          : `${firstTargetId}|${firstTargetId}`,
-      });
-    }
-  }
-  return options;
+function systematicLayoffsPlacementOptions(...args: any[]): any {
+  return (corpRuntimeResolvers.systematicLayoffsPlacementOptions as any)(...args);
 }
-
-function startSystematicLayoffsAdvancementChoice(
-  state: GameState,
-  options: ReturnType<typeof systematicLayoffsPlacementOptions>,
-  legalAction: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  state.pendingChoice = {
-    choiceId: `v1919_systematic_layoffs_advancement_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1919.systematic_layoffs_advancement:${state.stateVersion + 1}`,
-    prompt: "Systematic Layoffs: Advancement-Counter legen",
-    kind: "select_option",
-    options: options.map((option) => ({
-      id: option.id,
-      label: option.label,
-      publicLabel: option.publicLabel,
-      value: option.value,
-    })),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1919OperationAbility: "add_advancement_counters_choice",
-    eligiblePlacementCount: options.length,
-  };
+function startSystematicLayoffsAdvancementChoice(...args: any[]): any {
+  return (corpRuntimeResolvers.startSystematicLayoffsAdvancementChoice as any)(...args);
 }
-
-function resolveSystematicLayoffsAdvancementChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1919.systematic_layoffs_advancement"))
-    throw new Error("Es ist keine Systematic-Layoffs-Advancement-Choice offen.");
-  const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
-  const selectedOption = choice.options.find(
-    (option) => option.id === selectedOptionId,
-  );
-  if (!selectedOption || typeof selectedOption.value !== "string")
-    throw new Error("Systematic Layoffs braucht genau eine Placement-Auswahl.");
-  const [firstTargetId, secondTargetId] = selectedOption.value.split("|") as [
-    CardInstanceId | undefined,
-    CardInstanceId | undefined,
-  ];
-  if (!firstTargetId || !secondTargetId)
-    throw new Error("Systematic Layoffs hat keine gueltige Placement-Auswahl.");
-  applySystematicLayoffsAdvancementPlacement(
-    state,
-    firstTargetId,
-    secondTargetId === firstTargetId ? undefined : secondTargetId,
-    legalAction,
-  );
-  delete state.pendingChoice;
+function resolveSystematicLayoffsAdvancementChoice(...args: any[]): any {
+  return (corpRuntimeResolvers.resolveSystematicLayoffsAdvancementChoice as any)(...args);
 }
-
-function applySystematicLayoffsAdvancementPlacement(
-  state: GameState,
-  firstTargetId: CardInstanceId,
-  secondTargetId: CardInstanceId | undefined,
-  legalAction: LegalAction,
-): void {
-  const eligibleTargets = new Set<CardInstanceId>(
-    advanceableInstalledCardTargets(state) as CardInstanceId[],
-  );
-  if (!firstTargetId || !eligibleTargets.has(firstTargetId))
-    throw new Error("Systematic Layoffs findet kein advancebares Ziel.");
-  if (secondTargetId && !eligibleTargets.has(secondTargetId))
-    throw new Error("Systematic Layoffs findet kein zweites advancebares Ziel.");
-
-  const placements: Record<CardInstanceId, number> = {
-    [firstTargetId]: secondTargetId ? 1 : 2,
-  };
-  if (secondTargetId) placements[secondTargetId] = 1;
-  for (const [targetId, amount] of Object.entries(placements)) {
-    mustInstance(state.cardInstances, targetId).advancementCounters += amount;
-  }
-  const placementEntries = Object.entries(placements);
-  const targetCount = placementEntries.length;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
-    v1919OperationAbility: "add_advancement_counters",
-    targetCardId: firstTargetId,
-    targetCardDefinitionId: definitionFor(state, firstTargetId).id,
-    targetCardDefinitionIds: placementEntries
-      .map(([targetId]) => definitionFor(state, targetId).id)
-      .join(","),
-    addedAdvancementCounters: 2,
-    targetCount,
-    systematicLayoffsDistribution: placementEntries
-      .map(([targetId, amount]) => `${sanitizeId(targetId)}:${amount}`)
-      .join(","),
-    ...(targetCount === 1
-      ? {
-          advancementCountersAfter: mustInstance(
-            state.cardInstances,
-            firstTargetId,
-          ).advancementCounters,
-        }
-      : {}),
-  };
+function applySystematicLayoffsAdvancementPlacement(...args: any[]): any {
+  return (corpRuntimeResolvers.applySystematicLayoffsAdvancementPlacement as any)(...args);
 }
-
 function advanceableInstalledCardTargets(...args: any[]): any {
-  return (turnCorpRuntime.advanceableInstalledCardTargets as any)(...args);
+  return (corpRuntimeResolvers.advanceableInstalledCardTargets as any)(...args);
 }
-
 function isInstalledCorpCardAdvanceable(...args: any[]): any {
-  return (turnCorpRuntime.isInstalledCorpCardAdvanceable as any)(...args);
+  return (corpRuntimeResolvers.isInstalledCorpCardAdvanceable as any)(...args);
 }
-
 function advancementDistributionOptions(...args: any[]): any {
-  return (turnCorpRuntime.advancementDistributionOptions as any)(...args);
+  return (corpRuntimeResolvers.advancementDistributionOptions as any)(...args);
 }
-
 function startCardImplementationAdvancementDistributionChoice(...args: any[]): any {
-  return (turnCorpRuntime.startCardImplementationAdvancementDistributionChoice as any)(...args);
+  return (corpRuntimeResolvers.startCardImplementationAdvancementDistributionChoice as any)(...args);
 }
-
 function parseAdvancementDistributionValue(...args: any[]): any {
-  return (turnCorpRuntime.parseAdvancementDistributionValue as any)(...args);
+  return (corpRuntimeResolvers.parseAdvancementDistributionValue as any)(...args);
 }
-
 function sourcePartsForP334Choice(...args: any[]): any {
-  return (turnCorpRuntime.sourcePartsForP334Choice as any)(...args);
+  return (corpRuntimeResolvers.sourcePartsForP334Choice as any)(...args);
 }
-
 function validateAdvancementDistribution(...args: any[]): any {
-  return (turnCorpRuntime.validateAdvancementDistribution as any)(...args);
+  return (corpRuntimeResolvers.validateAdvancementDistribution as any)(...args);
 }
-
 function resolveCardImplementationAdvancementDistributionChoice(...args: any[]): any {
-  return (turnCorpRuntime.resolveCardImplementationAdvancementDistributionChoice as any)(...args);
+  return (corpRuntimeResolvers.resolveCardImplementationAdvancementDistributionChoice as any)(...args);
 }
-
 function movableAdvancementSourceIds(...args: any[]): any {
-  return (turnCorpRuntime.movableAdvancementSourceIds as any)(...args);
+  return (corpRuntimeResolvers.movableAdvancementSourceIds as any)(...args);
 }
-
 function moveAdvancementOptions(...args: any[]): any {
-  return (turnCorpRuntime.moveAdvancementOptions as any)(...args);
+  return (corpRuntimeResolvers.moveAdvancementOptions as any)(...args);
 }
-
 function startCardImplementationMoveAdvancementChoice(...args: any[]): any {
-  return (turnCorpRuntime.startCardImplementationMoveAdvancementChoice as any)(...args);
+  return (corpRuntimeResolvers.startCardImplementationMoveAdvancementChoice as any)(...args);
 }
-
 function resolveCardImplementationMoveAdvancementChoice(...args: any[]): any {
-  return (turnCorpRuntime.resolveCardImplementationMoveAdvancementChoice as any)(...args);
+  return (corpRuntimeResolvers.resolveCardImplementationMoveAdvancementChoice as any)(...args);
 }
-
 function resolveManagementShakeUpOperation(...args: any[]): any {
-  return (turnCorpRuntime.resolveManagementShakeUpOperation as any)(...args);
+  return (corpRuntimeResolvers.resolveManagementShakeUpOperation as any)(...args);
 }
-
 function awardRunnerEventAgendaPoint(...args: any[]): any {
-  return (turnCorpRuntime.awardRunnerEventAgendaPoint as any)(...args);
+  return (corpRuntimeResolvers.awardRunnerEventAgendaPoint as any)(...args);
 }
-function choiceAction(state: GameState, choice: ChoiceRequest): LegalAction {
-  return action(
-    state,
-    choice.side,
-    "resolve_choice",
-    choice.prompt,
-    "game_rule",
-    [],
-    {
-      choiceId: choice.choiceId,
-      choiceVisibility: choice.visibility,
-      choiceKind: choice.kind,
-    },
-    {
-      choiceRequirements: [
-        {
-          choiceId: choice.choiceId,
-          minSelections: choice.minSelections,
-          maxSelections: choice.maxSelections,
-          optionIds: choice.options.map((option) => option.id),
-        },
-      ],
-    },
-  );
+function choiceAction(...args: any[]): any {
+  return (corpRuntimeResolvers.choiceAction as any)(...args);
 }
-
-function abilityMetadata(
-  sourceCardInstanceId: CardInstanceId,
-  abilityId: string,
-  encounteredIceId?: CardInstanceId,
-): Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements"> {
-  return {
-    abilityRef: { sourceCardInstanceId, abilityId },
-    effectRef: `effect.${abilityId}`,
-    targetRequirements: [
-      { id: "encounteredIce", kind: "card", visibility: "public" },
-      {
-        id: "subroutine",
-        kind: "subroutine",
-        ...(encounteredIceId ? { sourceIceRef: encounteredIceId } : {}),
-      },
-    ],
-  };
+function abilityMetadata(...args: any[]): any {
+  return (corpRuntimeResolvers.abilityMetadata as any)(...args);
 }
-
-function resolveCorpInstalledEconomyAction(
-  state: GameState,
-  legalAction: LegalAction,
-): boolean {
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  if (!sourceCardId) return false;
-  const definition = state.cardInstances[sourceCardId]
-    ? definitionFor(state, sourceCardId)
-    : undefined;
-  if (!definition) return false;
-  const profile = corpInstalledEconomyActionProfileForPayload(
-    definition.id,
-    legalAction.payload,
-  );
-  if (!profile) return false;
-  validateCorpInstalledEconomyAction(state, legalAction, sourceCardId, profile);
-  for (let spentClicks = 1; spentClicks < profile.clickCost; spentClicks += 1) {
-    spendClick(state, "corp");
-  }
-  if (profile.creditCost > 0) spendCredits(state, "corp", profile.creditCost);
-  credits(state, "corp", profile.creditGain);
-  if (profile.trashSource) trashCorpInstalledCardToArchives(state, sourceCardId);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: profile.sourceDefinitionId,
-    gainedCredits: profile.creditGain,
-    ...(profile.trashSource ? { selfTrashed: true } : {}),
-    corpCreditsAfter: state.corp.credits,
-  };
-  return true;
+function resolveCorpInstalledEconomyAction(...args: any[]): any {
+  return (corpRuntimeResolvers.resolveCorpInstalledEconomyAction as any)(...args);
 }
-
-function validateCorpInstalledEconomyAction(
-  state: GameState,
-  legalAction: LegalAction,
-  sourceCardId: string,
-  profile: EconomyActionProfile,
-): void {
-  if (legalAction.side !== profile.side)
-    throw new Error("Nur die Korp darf diese Economy-Faehigkeit nutzen.");
-  if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
-    throw new Error("Diese Economy-Faehigkeit ist nur in der Korp-Aktionsphase nutzbar.");
-  if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-    throw new Error("Die Economy-Faehigkeit ist nicht rezzed installiert.");
-  if (definitionFor(state, sourceCardId).id !== profile.sourceDefinitionId)
-    throw new Error("Die Economy-Faehigkeit passt nicht zur Karte.");
-  if (
-    legalAction.payload?.[profile.abilityPayloadKey] !==
-    profile.abilityPayloadValue
-  )
-    throw new Error("Die Economy-Faehigkeit passt nicht zum Profil.");
-  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-  if (!Number.isInteger(gainAmount) || gainAmount !== profile.creditGain)
-    throw new Error("Die Economy-Faehigkeit hat einen ungueltigen Creditbetrag.");
-  if (Boolean(legalAction.payload?.trashOnUse) !== Boolean(profile.trashSource))
-    throw new Error("Die Economy-Faehigkeit hat einen ungueltigen Trash-Parameter.");
+function validateCorpInstalledEconomyAction(...args: any[]): any {
+  return (corpRuntimeResolvers.validateCorpInstalledEconomyAction as any)(...args);
 }
-
-function rezzedInvestmentFirmIds(state: GameState): CardInstanceId[] {
-  return rezzedCorpRootCardIds(state)
-    .filter((cardId: CardInstanceId) => isInvestmentFirmCard(state, cardId))
-    .sort();
+function rezzedInvestmentFirmIds(...args: any[]): any {
+  return (corpRuntimeResolvers.rezzedInvestmentFirmIds as any)(...args);
 }
-
-function shouldOpenInvestmentFirmCreditChoice(
-  state: GameState,
-  legalAction: LegalAction,
-): boolean {
-  return (
-    legalAction.side === "corp" &&
-    legalAction.source === "basic_action" &&
-    legalAction.type === "gain_credit" &&
-    Object.keys(legalAction.payload ?? {}).length === 0 &&
-    rezzedInvestmentFirmIds(state).length > 0
-  );
+function shouldOpenInvestmentFirmCreditChoice(...args: any[]): any {
+  return (corpRuntimeResolvers.shouldOpenInvestmentFirmCreditChoice as any)(...args);
 }
-
-function startInvestmentFirmCreditChoice(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const investmentFirmIds = rezzedInvestmentFirmIds(state);
-  if (investmentFirmIds.length === 0)
-    throw new Error("Investment Firm ist nicht rezzed installiert.");
-  const sourceDefinitionId = definitionFor(state, investmentFirmIds[0]!).id;
-  state.pendingChoice = {
-    choiceId: `v1917_investment_firm_credit_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1917.investment_firm_credit:${state.stateVersion + 1}`,
-    prompt: "Investment Firm: Credit nehmen oder 2 Credits auf die Karte legen?",
-    kind: "select_option",
-    options: [
-      {
-        id: "take_credit",
-        label: "1 Credit nehmen",
-        publicLabel: "1 Credit genommen",
-        value: "take_credit",
-      },
-      ...investmentFirmIds.map((cardId, index) => ({
-        id: `investment_firm_${cardId}`,
-        label:
-          investmentFirmIds.length === 1
-            ? "2 Credits auf Investment Firm legen"
-            : `2 Credits auf Investment Firm ${index + 1} legen`,
-        publicLabel: "2 Credits auf Investment Firm gelegt",
-        value: cardId,
-      })),
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
-  legalAction.payload = {
-    investmentFirmChoiceOpened: true,
-    gainCreditsAmount: 0,
-    sourceDefinitionId,
-  };
+function startInvestmentFirmCreditChoice(...args: any[]): any {
+  return (corpRuntimeResolvers.startInvestmentFirmCreditChoice as any)(...args);
 }
-
-function resolveInvestmentFirmCreditChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1917.investment_firm_credit"))
-    throw new Error("Es ist keine Investment-Firm-Choice offen.");
-  if (choice.side !== "corp" || legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf Investment Firm nutzen.");
-  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  if (selected === "take_credit") {
-    const sourceDefinitionId = definitionFor(
-      state,
-      rezzedInvestmentFirmIds(state)[0]!,
-    ).id;
-    credits(state, "corp", 1);
-    delete state.pendingChoice;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      choiceVisibility: "public",
-      sourceDefinitionId,
-      gainCreditsAmount: 1,
-      gainedCredits: 1,
-      corpCreditsAfter: state.corp.credits,
-    };
-    return;
-  }
-  const selectedOption = choice.options.find((option) => option.id === selected);
-  const sourceCardId = String(selectedOption?.value ?? "");
-  if (!rezzedInvestmentFirmIds(state).includes(sourceCardId))
-    throw new Error("Die gewaehlte Investment Firm ist nicht mehr legal.");
-  const counterPayload = addVisibleCardCounter(
-    state,
-    sourceCardId,
-    "recurring_credit",
-    2,
-  );
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    choiceVisibility: "public",
-    cardDefinitionId: definitionFor(state, sourceCardId).id,
-    sourceDefinitionId: definitionFor(state, sourceCardId).id,
-    ...counterPayload,
-    gainCreditsAmount: 0,
-    gainedCredits: 0,
-    corpCreditsAfter: state.corp.credits,
-  };
+function resolveInvestmentFirmCreditChoice(...args: any[]): any {
+  return (corpRuntimeResolvers.resolveInvestmentFirmCreditChoice as any)(...args);
 }
-
 function discardRandomCorpHqCards(...args: any[]): any {
   return (lifecycleRuntime.discardRandomCorpHqCards as any)(...args);
 }
-
 function trashRunnerInstalledProgram(...args: any[]): any {
   return (lifecycleRuntime.trashRunnerInstalledProgram as any)(...args);
 }
-
 function backupProgramsOnMicrotechBeforeTrash(...args: any[]): any {
   return (lifecycleRuntime.backupProgramsOnMicrotechBeforeTrash as any)(...args);
 }
-
 function runnerProgramUsesMemory(...args: any[]): any {
   return (lifecycleRuntime.runnerProgramUsesMemory as any)(...args);
 }
-
 function trashRunnerInstalledCardToHeap(...args: any[]): any {
   return (lifecycleRuntime.trashRunnerInstalledCardToHeap as any)(...args);
 }
-
 function returnRunnerInstalledCardToGrip(...args: any[]): any {
   return (lifecycleRuntime.returnRunnerInstalledCardToGrip as any)(...args);
 }
-
 function returnRunnerInstalledProgramsToGripForAccess(...args: any[]): any {
   return (lifecycleRuntime.returnRunnerInstalledProgramsToGripForAccess as any)(...args);
 }
-
 function trashCorpInstalledCardToArchives(...args: any[]): any {
   return (lifecycleRuntime.trashCorpInstalledCardToArchives as any)(...args);
 }
-
 function cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay(...args: any[]): any {
   return (lifecycleRuntime.cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay as any)(...args);
 }
-
 function drawRunnerCard(...args: any[]): any {
   return (lifecycleRuntime.drawRunnerCard as any)(...args);
 }
-
 function activeCrashEverettSourceId(...args: any[]): any {
   return (lifecycleRuntime.activeCrashEverettSourceId as any)(...args);
 }
-
 function startCrashEverettDrawChoice(...args: any[]): any {
   return (lifecycleRuntime.startCrashEverettDrawChoice as any)(...args);
 }
-
 function drawRunnerCards(...args: any[]): any {
   return (lifecycleRuntime.drawRunnerCards as any)(...args);
 }
-
 function resolveCrashEverettDrawChoice(...args: any[]): any {
   return (lifecycleRuntime.resolveCrashEverettDrawChoice as any)(...args);
 }
-
 function corpInstallRezSequenceHandlerHost(...args: any[]): any {
   return (actionRuntimeHosts.corpInstallRezSequenceHandlerHost as any)(...args);
 }
-
 function scoredAgendaFlowHost(...args: any[]): any {
   return (actionRuntimeHosts.scoredAgendaFlowHost as any)(...args);
 }
-
 function scoredAgendaAbilityHost(...args: any[]): any {
   return (actionRuntimeHosts.scoredAgendaAbilityHost as any)(...args);
 }
-
 function corpTraceDamageAbilityHost(...args: any[]): any {
   return (actionRuntimeHosts.corpTraceDamageAbilityHost as any)(...args);
 }
-
 function corpSpecialDamageAbilityHost(...args: any[]): any {
   return (actionRuntimeHosts.corpSpecialDamageAbilityHost as any)(...args);
 }
-
 function runnerAccessActionHost(...args: any[]): any {
   return (flowRuntimeHosts.runnerAccessActionHost as any)(...args);
 }
-
 function runnerEncounterActionHostForState(...args: any[]): any {
   return (flowRuntimeHosts.runnerEncounterActionHostForState as any)(...args);
 }
-
 function runMovementHostForState(...args: any[]): any {
   return (flowRuntimeHosts.runMovementHostForState as any)(...args);
 }
-
 function runRezWindowHostForState(...args: any[]): any {
   return (flowRuntimeHosts.runRezWindowHostForState as any)(...args);
 }
-
 function fortPassWindowHostForState(...args: any[]): any {
   return (flowRuntimeHosts.fortPassWindowHostForState as any)(...args);
 }
-
 function fortRunSideFamiliesHostForState(...args: any[]): any {
   return (flowRuntimeHosts.fortRunSideFamiliesHostForState as any)(...args);
 }
-
 function encounterEntryHostForState(...args: any[]): any {
   return (flowRuntimeHosts.encounterEntryHostForState as any)(...args);
 }
-
 function successfulRunInterventionHost(...args: any[]): any {
   return (flowRuntimeHosts.successfulRunInterventionHost as any)(...args);
 }
-
 function encounterResolutionHostForState(...args: any[]): any {
   return (flowRuntimeHosts.encounterResolutionHostForState as any)(...args);
 }
-
 function encounterSpecialWindowHostForState(...args: any[]): any {
   return (flowRuntimeHosts.encounterSpecialWindowHostForState as any)(...args);
 }
-
 function encounterPrintedEffectHostForState(...args: any[]): any {
   return (flowRuntimeHosts.encounterPrintedEffectHostForState as any)(...args);
 }
-
 function encounterPrintedNonTraceHostForState(...args: any[]): any {
   return (flowRuntimeHosts.encounterPrintedNonTraceHostForState as any)(...args);
 }
-
 function runEndCleanupHost(...args: any[]): any {
   return (flowRuntimeHosts.runEndCleanupHost as any)(...args);
 }
-
 function runnerBreakerActionExecutionHost(...args: any[]): any {
   return (flowRuntimeHosts.runnerBreakerActionExecutionHost as any)(...args);
 }
-
 function startRunActionExecutionHost(...args: any[]): any {
   return (flowRuntimeHosts.startRunActionExecutionHost as any)(...args);
 }
-
 function rezActionExecutionHost(...args: any[]): any {
   return (flowRuntimeHosts.rezActionExecutionHost as any)(...args);
 }
-
 function playCardExecutionHost(...args: any[]): any {
   return (actionRuntimeHosts.playCardExecutionHost as any)(...args);
 }
-
 function corpOperationResolutionHost(...args: any[]): any {
   return (actionRuntimeHosts.corpOperationResolutionHost as any)(...args);
 }
-
 function boardStateActionExecutionHost(...args: any[]): any {
   return (actionRuntimeHosts.boardStateActionExecutionHost as any)(...args);
 }
-
 function breachStateHost(...args: any[]): any {
   return (flowRuntimeHosts.breachStateHost as any)(...args);
 }
-
 function accessFlowHost(...args: any[]): any {
   return (flowRuntimeHosts.accessFlowHost as any)(...args);
 }
-
 function runAccessTransitionHost(...args: any[]): any {
   return (flowRuntimeHosts.runAccessTransitionHost as any)(...args);
 }
-
 function hasHiddenResourceAccessStartActions(...args: any[]): any {
   return (actionRuntimeHosts.hasHiddenResourceAccessStartActions as any)(...args);
 }
-
 function accessEffectHandlerHost(...args: any[]): any {
   return (flowRuntimeHosts.accessEffectHandlerHost as any)(...args);
 }
-
 function pushCorpTraceDamageOrCardImplementationActions(...args: any[]): any {
   return (actionRuntimeHosts.pushCorpTraceDamageOrCardImplementationActions as any)(...args);
 }
-
 function hiddenZoneSearchHandlerHostBase(...args: any[]): any {
   return (choiceHiddenZoneRuntime.hiddenZoneSearchHandlerHostBase as any)(...args);
 }
-
 function hiddenZoneSearchActivationTargetHost(...args: any[]): any {
   return (choiceHiddenZoneRuntime.hiddenZoneSearchActivationTargetHost as any)(...args);
 }
-
 function hiddenZoneSearchChoiceHandlerHost(...args: any[]): any {
   return (choiceHiddenZoneRuntime.hiddenZoneSearchChoiceHandlerHost as any)(...args);
 }
-
 function hiddenZoneSearchActivationHandlerHost(...args: any[]): any {
   return (choiceHiddenZoneRuntime.hiddenZoneSearchActivationHandlerHost as any)(...args);
 }
-
 function hiddenZoneArrangeChoiceHandlerHost(...args: any[]): any {
   return (choiceHiddenZoneRuntime.hiddenZoneArrangeChoiceHandlerHost as any)(...args);
 }
-
 function hiddenZoneNonSearchChoiceHandlerHost(...args: any[]): any {
   return (choiceHiddenZoneRuntime.hiddenZoneNonSearchChoiceHandlerHost as any)(...args);
 }
-
 function corpZoneChoiceHandlerHost(...args: any[]): any {
   return (choiceHiddenZoneRuntime.corpZoneChoiceHandlerHost as any)(...args);
 }
-
 function pendingChoiceResolutionHost(...args: any[]): any {
   return (choiceHiddenZoneRuntime.pendingChoiceResolutionHost as any)(...args);
 }
-
 function setupMulliganChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.setupMulliganChoice as any)(...args);
 }
-
 function discardChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.discardChoice as any)(...args);
 }
-
 function resolveDiscardChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveDiscardChoice as any)(...args);
 }
-
 function resolveSetupMulliganChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveSetupMulliganChoice as any)(...args);
 }
-
 function takeSetupMulligan(...args: any[]): any {
   return (choiceHiddenZoneRuntime.takeSetupMulligan as any)(...args);
 }
-
 function installRunnerProgramFromStackWithoutClick(...args: any[]): any {
   return (choiceHiddenZoneRuntime.installRunnerProgramFromStackWithoutClick as any)(...args);
 }
-
 function canInstallRunnerProgramFromZone(...args: any[]): any {
   return (choiceHiddenZoneRuntime.canInstallRunnerProgramFromZone as any)(...args);
 }
-
 function installRunnerProgramFromZoneWithoutClick(...args: any[]): any {
   return (choiceHiddenZoneRuntime.installRunnerProgramFromZoneWithoutClick as any)(...args);
 }
-
 function startSelfModifyingCodeFreeMuChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.startSelfModifyingCodeFreeMuChoice as any)(...args);
 }
-
 function installRunnerProgramForFree(...args: any[]): any {
   return (choiceHiddenZoneRuntime.installRunnerProgramForFree as any)(...args);
 }
-
 function startAnonymousTipDerezBlackIceChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.startAnonymousTipDerezBlackIceChoice as any)(...args);
 }
-
 function resolveAnonymousTipDerezBlackIceChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveAnonymousTipDerezBlackIceChoice as any)(...args);
 }
-
 function startCoreCommandJettisonIceChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.startCoreCommandJettisonIceChoice as any)(...args);
 }
-
 function resolveCoreCommandJettisonIceChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveCoreCommandJettisonIceChoice as any)(...args);
 }
-
 function publicIcePositionLabelForCard(...args: any[]): any {
   return (choiceHiddenZoneRuntime.publicIcePositionLabelForCard as any)(...args);
 }
-
 function publicIceSelectionLabelForCard(...args: any[]): any {
   return (choiceHiddenZoneRuntime.publicIceSelectionLabelForCard as any)(...args);
 }
-
 function startForgedActivationOrdersTargetChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.startForgedActivationOrdersTargetChoice as any)(...args);
 }
-
 function resolveForgedActivationOrdersTargetChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveForgedActivationOrdersTargetChoice as any)(...args);
 }
-
 function resolveForgedActivationOrdersCorpChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveForgedActivationOrdersCorpChoice as any)(...args);
 }
-
 function startSecurityCodeWormChipTrashIceChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.startSecurityCodeWormChipTrashIceChoice as any)(...args);
 }
-
 function resolveSecurityCodeWormChipTrashIceChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveSecurityCodeWormChipTrashIceChoice as any)(...args);
 }
-
 function startOpenEndedMileageProgramReturnChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.startOpenEndedMileageProgramReturnChoice as any)(...args);
 }
-
 function resolveOpenEndedMileageProgramReturnChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveOpenEndedMileageProgramReturnChoice as any)(...args);
 }
-
 function corpAgendaPointTotal(...args: any[]): any {
   return (choiceHiddenZoneRuntime.corpAgendaPointTotal as any)(...args);
 }
-
 function chooseCorpAgendasForPointCost(...args: any[]): any {
   return (choiceHiddenZoneRuntime.chooseCorpAgendasForPointCost as any)(...args);
 }
-
 function startRunnerHostingChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.startRunnerHostingChoice as any)(...args);
 }
-
 function resolveRunnerHostingChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveRunnerHostingChoice as any)(...args);
 }
-
 function resolveIncubatorTransformChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveIncubatorTransformChoice as any)(...args);
 }
-
 function resolveChimeraDaemonTrashChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveChimeraDaemonTrashChoice as any)(...args);
 }
-
 function resolveCardImplementationAccessPaymentChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveCardImplementationAccessPaymentChoice as any)(...args);
 }
-
 function resolveProteusRunnerProgramReturnChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveProteusRunnerProgramReturnChoice as any)(...args);
 }
-
 function selectedChoiceCardIds(...args: any[]): any {
   return (choiceHiddenZoneRuntime.selectedChoiceCardIds as any)(...args);
 }
-
 function iceChoiceLabelForSide(...args: any[]): any {
   return (choiceHiddenZoneRuntime.iceChoiceLabelForSide as any)(...args);
 }
-
 function resolveP358HiddenReplacementChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveP358HiddenReplacementChoice as any)(...args);
 }
-
 function installedRunnerConnectionIds(...args: any[]): any {
   return (choiceHiddenZoneRuntime.installedRunnerConnectionIds as any)(...args);
 }
-
 function canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity(...args: any[]): any {
   return (choiceHiddenZoneRuntime.canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity as any)(...args);
 }
-
 function resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent as any)(...args);
 }
-
 function parseRunnerInstalledConnectionTrashBadPublicityChoiceSource(...args: any[]): any {
   return (choiceHiddenZoneRuntime.parseRunnerInstalledConnectionTrashBadPublicityChoiceSource as any)(...args);
 }
-
 function selectedChoiceCardIdsForChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.selectedChoiceCardIdsForChoice as any)(...args);
 }
-
 function resolveRunnerInstalledConnectionTrashBadPublicityChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveRunnerInstalledConnectionTrashBadPublicityChoice as any)(...args);
 }
-
 function resolvePlayfulAiDiceLoopEvent(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolvePlayfulAiDiceLoopEvent as any)(...args);
 }
-
 function startV1921PlayfulAiChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.startV1921PlayfulAiChoice as any)(...args);
 }
-
 function creditTextForPrompt(...args: any[]): any {
   return (choiceHiddenZoneRuntime.creditTextForPrompt as any)(...args);
 }
-
 function diePromptText(...args: any[]): any {
   return (choiceHiddenZoneRuntime.diePromptText as any)(...args);
 }
-
 function playfulAiSplitOptions(...args: any[]): any {
   return (choiceHiddenZoneRuntime.playfulAiSplitOptions as any)(...args);
 }
-
 function parsePlayfulAiChoiceSource(...args: any[]): any {
   return (choiceHiddenZoneRuntime.parsePlayfulAiChoiceSource as any)(...args);
 }
-
 function parsePlayfulAiSplit(...args: any[]): any {
   return (choiceHiddenZoneRuntime.parsePlayfulAiSplit as any)(...args);
 }
-
 function continueV1921PlayfulAiLoop(...args: any[]): any {
   return (choiceHiddenZoneRuntime.continueV1921PlayfulAiLoop as any)(...args);
 }
-
 function resolveV1921PlayfulAiChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveV1921PlayfulAiChoice as any)(...args);
 }
-
 function shuffleRunnerStack(...args: any[]): any {
   return (choiceHiddenZoneRuntime.shuffleRunnerStack as any)(...args);
 }
-
 function revealRunnerStackTop(...args: any[]): any {
   return (choiceHiddenZoneRuntime.revealRunnerStackTop as any)(...args);
 }
-
 function revealCorpRdTop(...args: any[]): any {
   return (choiceHiddenZoneRuntime.revealCorpRdTop as any)(...args);
 }
-
 function resolveV1911RunnerHiddenZoneAbility(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveV1911RunnerHiddenZoneAbility as any)(...args);
 }
-
 function resolveV1911CorporateDownsizing(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveV1911CorporateDownsizing as any)(...args);
 }
-
 function exposedCorpCardInServer(...args: any[]): any {
   return (choiceHiddenZoneRuntime.exposedCorpCardInServer as any)(...args);
 }
-
 function exposeCorpCardInServer(...args: any[]): any {
   return (choiceHiddenZoneRuntime.exposeCorpCardInServer as any)(...args);
 }
-
 function installedCorpCardServerContext(...args: any[]): any {
   return (choiceHiddenZoneRuntime.installedCorpCardServerContext as any)(...args);
 }
-
 function exposeInstalledCorpCardTargets(...args: any[]): any {
   return (choiceHiddenZoneRuntime.exposeInstalledCorpCardTargets as any)(...args);
 }
-
 function exposeInstalledCorpCardLabel(...args: any[]): any {
   return (choiceHiddenZoneRuntime.exposeInstalledCorpCardLabel as any)(...args);
 }
-
 function exposeInstalledCorpCardForImplementation(...args: any[]): any {
   return (choiceHiddenZoneRuntime.exposeInstalledCorpCardForImplementation as any)(...args);
 }
-
 function installedRunnerIcebreakerIds(...args: any[]): any {
   return (choiceHiddenZoneRuntime.installedRunnerIcebreakerIds as any)(...args);
 }
-
 function addCounterToAllInstalledRunnerIcebreakers(...args: any[]): any {
   return (choiceHiddenZoneRuntime.addCounterToAllInstalledRunnerIcebreakers as any)(...args);
 }
-
 function shuffleCorpCardIntoRd(...args: any[]): any {
   return (choiceHiddenZoneRuntime.shuffleCorpCardIntoRd as any)(...args);
 }
-
 function trashCorpInstalledCardsInScoredSourceServer(...args: any[]): any {
   return (choiceHiddenZoneRuntime.trashCorpInstalledCardsInScoredSourceServer as any)(...args);
 }
-
 function resolveDealWithMilitech(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveDealWithMilitech as any)(...args);
 }
-
 function huntClubBbsExposeTargets(...args: any[]): any {
   return (choiceHiddenZoneRuntime.huntClubBbsExposeTargets as any)(...args);
 }
-
 function huntClubBbsExposeOptionLabel(...args: any[]): any {
   return (choiceHiddenZoneRuntime.huntClubBbsExposeOptionLabel as any)(...args);
 }
-
 function exposeInstalledCorpCardsChoiceOptions(...args: any[]): any {
   return (choiceHiddenZoneRuntime.exposeInstalledCorpCardsChoiceOptions as any)(...args);
 }
-
 function startHuntClubBbsExposeChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.startHuntClubBbsExposeChoice as any)(...args);
 }
-
 function startExposeInstalledCorpCardsChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.startExposeInstalledCorpCardsChoice as any)(...args);
 }
-
 function resolveHuntClubBbsExposeChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveHuntClubBbsExposeChoice as any)(...args);
 }
-
 function resolveExposeInstalledCorpCardsChoice(...args: any[]): any {
   return (choiceHiddenZoneRuntime.resolveExposeInstalledCorpCardsChoice as any)(...args);
 }
-
 function outermostIceExposures(...args: any[]): any {
   return (choiceHiddenZoneRuntime.outermostIceExposures as any)(...args);
 }
-
 function exposeOutermostIceOfEachDataFort(...args: any[]): any {
   return (choiceHiddenZoneRuntime.exposeOutermostIceOfEachDataFort as any)(...args);
 }
-function swapCorpHqAndRdTop(state: GameState): void {
-  const hqCardId = state.corp.hq[0];
-  const rdCardId = state.corp.rd[0];
-  if (!hqCardId || !rdCardId)
-    throw new Error("HQ und R&D brauchen je eine Karte fuer Swap.");
-  state.corp.hq[0] = rdCardId;
-  state.corp.rd[0] = hqCardId;
-  state.cardInstances[hqCardId] = {
-    ...mustInstance(state.cardInstances, hqCardId),
-    zone: { side: "corp", zone: "rd" },
-  };
-  state.cardInstances[rdCardId] = {
-    ...mustInstance(state.cardInstances, rdCardId),
-    zone: { side: "corp", zone: "hq" },
-  };
+function swapCorpHqAndRdTop(...args: any[]): any {
+  return (stateCorpRuntimeResolvers.swapCorpHqAndRdTop as any)(...args);
 }
 
 function krumzTraceBitCardIds(state: GameState): CardInstanceId[] {
@@ -5998,21 +3427,8 @@ function krumzTraceBitTotal(state: GameState): number {
   );
 }
 
-function spendKrumzTraceBits(state: GameState, amount: number): number {
-  if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Krumz-Bit-Ausgabe ist ungueltig.");
-  let remaining = amount;
-  let spent = 0;
-  for (const cardId of krumzTraceBitCardIds(state)) {
-    if (remaining <= 0) break;
-    const current = cardCounter(state, cardId, "bit");
-    const spend = Math.min(current, remaining);
-    spendCardCounter(state, cardId, "bit", spend);
-    remaining -= spend;
-    spent += spend;
-  }
-  if (remaining > 0) throw new Error("Krumz hat nicht genug Bits.");
-  return spent;
+function spendKrumzTraceBits(...args: any[]): any {
+  return (stateCorpRuntimeResolvers.spendKrumzTraceBits as any)(...args);
 }
 
 function runnerInstalledHardwareTrashTarget(
@@ -6029,100 +3445,17 @@ function runnerInstalledHardwareTrashTarget(
     })[0];
 }
 
-function resolveTraceHardwareWreckerSuccess(
-  state: GameState,
-  sourceDefinitionId: CardDefinitionId,
-  sourceCardInstanceId: CardInstanceId,
-  traceId: string,
-): Record<string, unknown> {
-  const targetHardwareId = runnerInstalledHardwareTrashTarget(state);
-  const targetDefinitionId = targetHardwareId
-    ? definitionFor(state, targetHardwareId).id
-    : undefined;
-  if (targetHardwareId) trashRunnerInstalledCardToHeap(state, targetHardwareId);
-  const damageAmount = 2;
-  const summary = doDamage(state, {
-    damageId: `${traceId}.${sourceCardInstanceId}.unpreventable_meat`,
-    damageType: "meat",
-    amount: damageAmount,
-    source: `trace_success:${sourceDefinitionId}`,
-  });
-  return {
-    traceSuccessEffect: "hardware_trash_meat_damage_end_run",
-    sourceDefinitionId,
-    trashedCardType: "hardware",
-    trashedCount: targetHardwareId ? 1 : 0,
-    ...(targetDefinitionId ? { trashedCardDefinitionId: targetDefinitionId } : {}),
-    damageCannotBePrevented: true,
-    damageResolved: true,
-    damageType: summary.damageType,
-    damageAmount: summary.amount,
-    cardsTrashed: summary.cardsTrashed,
-    flatline: summary.flatline,
-  };
+function resolveTraceHardwareWreckerSuccess(...args: any[]): any {
+  return (stateRuntimeResolvers.resolveTraceHardwareWreckerSuccess as any)(...args);
 }
-
-function resolveTraceTrashRunnerResourceSuccess(
-  state: GameState,
-  sourceDefinitionId: CardDefinitionId,
-  sourceCardInstanceId: CardInstanceId,
-  traceId: string,
-  targetCardId: CardInstanceId,
-): Record<string, unknown> {
-  if (!runnerLastTurnInstalledResourceIds(state).includes(targetCardId))
-    throw new Error("Die Runner-Resource ist fuer diesen Trace nicht mehr legal.");
-  const hiddenResource = isConcealedRunnerResource(state, targetCardId);
-  const hiddenResourceSlotId = hiddenRunnerResourceSlotId(targetCardId);
-  const targetDefinitionId = definitionFor(state, targetCardId).id;
-  trashRunnerInstalledCardToHeap(state, targetCardId);
-  return {
-    traceSuccessEffect: "trash_runner_resource_and_add_tag",
-    sourceDefinitionId,
-    sourceCardInstanceId,
-    traceId,
-    trashedCardType: "resource",
-    trashedCount: 1,
-    trashedCardDefinitionId: targetDefinitionId,
-    ...(hiddenResource
-      ? {
-          hiddenResourceSlotId,
-          hiddenRunnerResource: true,
-          hiddenRunnerResourceRevealed: true,
-          redactedKind: "hidden_runner_resource",
-        }
-      : {}),
-  };
+function resolveTraceTrashRunnerResourceSuccess(...args: any[]): any {
+  return (stateRuntimeResolvers.resolveTraceTrashRunnerResourceSuccess as any)(...args);
 }
-
-function encounterTemporaryTraceCreditsAvailable(
-  state: GameState,
-  trace: NonNullable<GameState["trace"]>,
-): number {
-  const credits = state.run?.encounterTemporaryTraceCredits;
-  if (
-    !credits ||
-    credits.sourceIceId !== trace.sourceCardInstanceId ||
-    credits.sourceIceId !== trace.encounterTemporaryTraceCreditSourceIceId
-  )
-    return 0;
-  return Math.max(0, Math.floor(credits.remaining ?? 0));
+function encounterTemporaryTraceCreditsAvailable(...args: any[]): any {
+  return (stateRuntimeResolvers.encounterTemporaryTraceCreditsAvailable as any)(...args);
 }
-
-function spendEncounterTemporaryTraceCredits(
-  state: GameState,
-  trace: NonNullable<GameState["trace"]>,
-  amount: number,
-): number {
-  const credits = state.run?.encounterTemporaryTraceCredits;
-  if (
-    !credits ||
-    credits.sourceIceId !== trace.sourceCardInstanceId ||
-    amount <= 0
-  )
-    return 0;
-  const spent = Math.min(Math.max(0, Math.floor(amount)), credits.remaining);
-  credits.remaining = Math.max(0, credits.remaining - spent);
-  return spent;
+function spendEncounterTemporaryTraceCredits(...args: any[]): any {
+  return (stateRuntimeResolvers.spendEncounterTemporaryTraceCredits as any)(...args);
 }
 
 const corpTracePaymentDeps: CorpTracePaymentDependencies = {
@@ -6167,769 +3500,115 @@ const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
   hellsRunDefinitionId: HELLS_RUN_ID,
 };
 
-function identityModifierAmount(
-  state: GameState,
-  side: Side,
-  kind: ModifierKind,
-  duration: "setup" | "static",
-): number {
-  const identity = identityDefinition(state, side);
-  return (identity.modifiers ?? [])
-    .filter(
-      (modifier) =>
-        modifier.side === side &&
-        modifier.kind === kind &&
-        modifier.duration === duration,
-    )
-    .reduce((sum, modifier) => {
-      if (!Number.isInteger(modifier.amount))
-        throw new Error("Identity-Modifier ist ungueltig.");
-      return sum + modifier.amount;
-    }, 0);
+function identityModifierAmount(...args: any[]): any {
+  return (stateRuntimeResolvers.identityModifierAmount as any)(...args);
 }
-
-function identityDefinition(state: GameState, side: Side): CardDefinition {
-  return definitionFor(
-    state,
-    side === "runner" ? state.runner.identity : state.corp.identity,
-  );
+function identityDefinition(...args: any[]): any {
+  return (stateRuntimeResolvers.identityDefinition as any)(...args);
 }
-
-function executeEffectCommands(
-  state: GameState,
-  commands: EffectCommand[],
-): void {
-  for (const command of commands) {
-    switch (command.type) {
-      case "gain_credits":
-        assertNonNegativeAmount(command.amount);
-        credits(state, command.side, command.amount);
-        break;
-      case "spend_credits":
-        assertNonNegativeAmount(command.amount);
-        spendCredits(state, command.side, command.amount);
-        break;
-      case "draw_card":
-        if (command.side === "corp") {
-          for (let count = 0; count < (command.amount ?? 1); count += 1)
-            drawCorpCard(state);
-        } else {
-          drawRunnerCards(state, command.amount ?? 1);
-        }
-        break;
-      case "do_damage":
-        doDamage(state, {
-          damageId: `effect.${command.source ?? "unknown"}.${state.stateVersion}.${state.randomCounter}`,
-          damageType: command.damageType,
-          amount: command.amount,
-          source: command.source ?? "effect_command",
-        });
-        break;
-      case "add_tag":
-        assertNonNegativeAmount(command.amount);
-        state.runner.tags += command.amount;
-        break;
-      case "remove_tag":
-        assertNonNegativeAmount(command.amount);
-        state.runner.tags = Math.max(0, state.runner.tags - command.amount);
-        break;
-      case "change_breaker_strength":
-        mustInstance(state.cardInstances, command.breakerId).strengthModifier +=
-          command.amount;
-        break;
-      case "break_subroutine": {
-        const run = mustRun(state);
-        if (!run.brokenSubroutineIndexes.includes(command.subroutineIndex))
-          run.brokenSubroutineIndexes.push(command.subroutineIndex);
-        break;
-      }
-      case "set_pending_choice":
-        if (state.pendingChoice)
-          throw new Error("Es ist bereits eine Choice offen.");
-        state.pendingChoice = cloneState(command.choice);
-        break;
-      case "complete_pending_choice":
-        if (
-          !state.pendingChoice ||
-          state.pendingChoice.choiceId !== command.choiceId
-        )
-          throw new Error("Diese Choice ist nicht offen.");
-        delete state.pendingChoice;
-        break;
-      case "emit_event":
-        throw new Error(
-          "Effect-Event-Emission wird in V0.93 nur spezifiziert, aber nicht vom State-Only-Executor geschrieben.",
-        );
-    }
-  }
+function executeEffectCommands(...args: any[]): any {
+  return (stateRuntimeResolvers.executeEffectCommands as any)(...args);
 }
-
-function assertNonNegativeAmount(amount: number): void {
-  if (!Number.isFinite(amount) || amount < 0)
-    throw new Error("Effect amount ist ungueltig.");
+function assertNonNegativeAmount(...args: any[]): any {
+  return (stateRuntimeResolvers.assertNonNegativeAmount as any)(...args);
 }
-
-function assertPositiveIntegerAmount(amount: number): void {
-  if (!Number.isInteger(amount) || amount <= 0)
-    throw new Error("Damage amount ist ungueltig.");
+function assertPositiveIntegerAmount(...args: any[]): any {
+  return (stateRuntimeResolvers.assertPositiveIntegerAmount as any)(...args);
 }
-
-function withoutVariableIceState(instance: CardInstance): CardInstance {
-  const { variableIceState: _variableIceState, ...rest } =
-    instance;
-  void _variableIceState;
-  return rest;
+function withoutVariableIceState(...args: any[]): any {
+  return (stateRuntimeResolvers.withoutVariableIceState as any)(...args);
 }
-
-function clickCostForAction(legalAction: LegalAction): number {
-  return legalAction.costs.reduce(
-    (sum, cost) =>
-      sum + (Number.isInteger(cost.clicks) && cost.clicks ? cost.clicks : 0),
-    0,
-  );
+function clickCostForAction(...args: any[]): any {
+  return (stateRuntimeResolvers.clickCostForAction as any)(...args);
 }
-
-function creditCostForAction(legalAction: LegalAction): number {
-  return legalAction.costs.reduce(
-    (sum, cost) =>
-      sum + (Number.isInteger(cost.credits) && cost.credits ? cost.credits : 0),
-    0,
-  );
+function creditCostForAction(...args: any[]): any {
+  return (stateRuntimeResolvers.creditCostForAction as any)(...args);
 }
-
-function runnerActionsPerTurn(state: GameState): number {
-  const override = Math.floor(state.runnerActionsPerTurnOverride ?? 4);
-  return Math.max(0, override);
+function runnerActionsPerTurn(...args: any[]): any {
+  return (stateRuntimeResolvers.runnerActionsPerTurn as any)(...args);
 }
-
-function agendaPoints(state: GameState, side: Side): number {
-  const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
-  const scoredPoints = ids.reduce(
-    (sum, id) => sum + agendaPointsForScoredCard(state, id),
-    0,
-  );
-  return side === "corp"
-    ? scoredPoints + Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0))
-    : scoredPoints;
+function agendaPoints(...args: any[]): any {
+  return (stateRuntimeResolvers.agendaPoints as any)(...args);
 }
-
-function addVirusCounterWithDisinfectantPrevention(
-  state: GameState,
-  targetCardId: CardInstanceId,
-  amount: number,
-  legalAction?: LegalAction,
-): number {
-  if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Virus-Counter amount ist ungueltig.");
-  let added = 0;
-  let prevented = 0;
-  let creditsPaid = 0;
-  for (let index = 0; index < amount; index += 1) {
-    const prevention = preventOneVirusCounterWithDisinfectant(state);
-    if (prevention.prevented) {
-      prevented += 1;
-      creditsPaid += prevention.creditsPaid;
-      continue;
-    }
-    addCardCounter(state, targetCardId, "virus", 1);
-    added += 1;
-  }
-  if (legalAction && prevented > 0) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      virusCounterAvoided: prevented,
-      disinfectantCreditsPaid: creditsPaid,
-      corpCreditsAfter: state.corp.credits,
-    };
-  }
-  return added;
+function addVirusCounterWithDisinfectantPrevention(...args: any[]): any {
+  return (stateRuntimeResolvers.addVirusCounterWithDisinfectantPrevention as any)(...args);
 }
-
-function preventOneVirusCounterWithDisinfectant(
-  state: GameState,
-): { prevented: boolean; creditsPaid: number } {
-  const flags = ensureCorpTurnFlags(state);
-  const used = new Set(flags.disinfectantUsedSourceIdsThisTurn ?? []);
-  const sourceId = rezzedCorpRootCardIds(state)
-    .filter((cardId: CardInstanceId) =>
-      hasCorpUtilityKind(state, cardId, "disinfectant_avoid_virus_counter"),
-    )
-    .filter((cardId: CardInstanceId) => !used.has(cardId))
-    .sort()[0];
-  if (!sourceId || state.corp.credits < 1) return { prevented: false, creditsPaid: 0 };
-  state.corp.credits -= 1;
-  flags.disinfectantUsedSourceIdsThisTurn = [
-    ...(flags.disinfectantUsedSourceIdsThisTurn ?? []),
-    sourceId,
-  ];
-  return { prevented: true, creditsPaid: 1 };
+function preventOneVirusCounterWithDisinfectant(...args: any[]): any {
+  return (stateRuntimeResolvers.preventOneVirusCounterWithDisinfectant as any)(...args);
 }
-
-function addVisibleCardCounter(
-  state: GameState,
-  cardId: CardInstanceId,
-  counterType: CounterType,
-  amount: number,
-): VisibleCounterPayload {
-  addCardCounter(state, cardId, counterType, amount);
-  return {
-    counterType,
-    addedCounterAmount: amount,
-    remainingCounters: cardCounter(state, cardId, counterType),
-  };
+function addVisibleCardCounter(...args: any[]): any {
+  return (stateRuntimeResolvers.addVisibleCardCounter as any)(...args);
 }
-
-function spendVisibleCardCounter(
-  state: GameState,
-  cardId: CardInstanceId,
-  counterType: CounterType,
-  amount: number,
-): VisibleCounterPayload {
-  spendCardCounter(state, cardId, counterType, amount);
-  return {
-    counterType,
-    removedCounterAmount: amount,
-    remainingCounters: cardCounter(state, cardId, counterType),
-  };
+function spendVisibleCardCounter(...args: any[]): any {
+  return (stateRuntimeResolvers.spendVisibleCardCounter as any)(...args);
 }
-
-function totalCounters(state: GameState, counterType: CounterType): number {
-  const cardCounterTotal = Object.keys(state.cardInstances).reduce(
-    (sum, cardId) => sum + cardCounter(state, cardId, counterType),
-    0,
-  );
-  if (counterType !== "virus") return cardCounterTotal;
-  let poxTotal = 0;
-  for (const amount of Object.values(state.poxCountersByServer ?? {})) {
-    poxTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
-  }
-  let faitTotal = 0;
-  for (const amount of Object.values(state.faitAccompliCountersByServer ?? {})) {
-    faitTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
-  }
-  return cardCounterTotal + poxTotal + faitTotal;
+function totalCounters(...args: any[]): any {
+  return (stateRuntimeResolvers.totalCounters as any)(...args);
 }
 
 type CodeViralCachePreserveTarget =
   | { kind: "card"; cardId: CardInstanceId; index: number }
   | { kind: "pox"; serverId: Exclude<ServerId, "new_remote">; index: number };
 
-function installedCodeViralCacheIds(state: GameState): CardInstanceId[] {
-  return state.runner.rig.resources
-    .filter((cardId) => definitionFor(state, cardId).id === CODE_VIRAL_CACHE_ID)
-    .sort();
+function installedCodeViralCacheIds(...args: any[]): any {
+  return (stateRuntimeResolvers.installedCodeViralCacheIds as any)(...args);
 }
-
-function codeViralCachePurgePreserveTargets(
-  state: GameState,
-): Array<CodeViralCachePreserveTarget & { optionId: string; publicLabel: string }> {
-  const targets: Array<
-    CodeViralCachePreserveTarget & { optionId: string; publicLabel: string }
-  > = [];
-  for (const cardId of visibleVirusCounterTargetIds(state).sort()) {
-    const amount = cardCounter(state, cardId, "virus");
-    const title = definitionFor(state, cardId).title;
-    for (let index = 1; index <= amount; index += 1) {
-      targets.push({
-        kind: "card",
-        cardId,
-        index,
-        optionId: `card:${cardId}:${index}`,
-        publicLabel: `${title} Virus-Counter ${index}`,
-      });
-    }
-  }
-  for (const [serverId, rawAmount] of Object.entries(
-    state.poxCountersByServer ?? {},
-  ).sort(([left], [right]) => left.localeCompare(right))) {
-    const amount = Math.max(0, Math.floor(Number(rawAmount ?? 0)));
-    if (amount <= 0) continue;
-    const typedServerId = serverId as Exclude<ServerId, "new_remote">;
-    const label = publicServerLabel(state, typedServerId) ?? typedServerId;
-    for (let index = 1; index <= amount; index += 1) {
-      targets.push({
-        kind: "pox",
-        serverId: typedServerId,
-        index,
-        optionId: `pox:${typedServerId}:${index}`,
-        publicLabel: `Pox auf ${label} ${index}`,
-      });
-    }
-  }
-  return targets;
+function codeViralCachePurgePreserveTargets(...args: any[]): any {
+  return (stateRuntimeResolvers.codeViralCachePurgePreserveTargets as any)(...args);
 }
-
-function startCodeViralCachePurgeChoice(
-  state: GameState,
-  legalAction: LegalAction,
-): boolean {
-  const sourceIds = installedCodeViralCacheIds(state);
-  if (sourceIds.length === 0) return false;
-  const targets = codeViralCachePurgePreserveTargets(state);
-  if (targets.length === 0) return false;
-  const sourceCardId = sourceIds[0];
-  state.pendingChoice = {
-    choiceId: `v1913_code_viral_cache_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `v1913.code_viral_cache_purge:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Code Viral Cache: bis zu zwei Virus-Counter behalten.",
-    kind: "select_cards",
-    options: targets.map((target) => ({
-      id: target.optionId,
-      label: target.publicLabel,
-      publicLabel: target.publicLabel,
-      value: target.optionId,
-    })),
-    minSelections: 0,
-    maxSelections: Math.min(2, targets.length),
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
-  state.activeSide = "runner";
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: CODE_VIRAL_CACHE_ID,
-    codeViralCachePurgeReplacementOpened: true,
-    codeViralCacheEligibleCounterCount: targets.length,
-    codeViralCacheMaxPreserveCounters: Math.min(2, targets.length),
-    purgedCounterType: "virus",
-  };
-  return true;
+function startCodeViralCachePurgeChoice(...args: any[]): any {
+  return (stateRuntimeResolvers.startCodeViralCachePurgeChoice as any)(...args);
 }
-
-function parseCodeViralCachePreserveOption(
-  optionId: string,
-): CodeViralCachePreserveTarget | undefined {
-  const [kind, id, indexRaw] = optionId.split(":");
-  const index = Number(indexRaw);
-  if (!Number.isInteger(index) || index <= 0) return undefined;
-  if (kind === "card" && id)
-    return { kind: "card", cardId: id as CardInstanceId, index };
-  if (kind === "pox" && id && id !== "new_remote")
-    return {
-      kind: "pox",
-      serverId: id as Exclude<ServerId, "new_remote">,
-      index,
-    };
-  return undefined;
+function parseCodeViralCachePreserveOption(...args: any[]): any {
+  return (stateRuntimeResolvers.parseCodeViralCachePreserveOption as any)(...args);
 }
-
-function restoreCodeViralCachePreservedCounters(
-  state: GameState,
-  selectedOptionIds: string[],
-): { preserved: number; preservedCardDefinitionIds: CardDefinitionId[] } {
-  const selectedTargets = selectedOptionIds
-    .map(parseCodeViralCachePreserveOption)
-    .filter((target): target is CodeViralCachePreserveTarget => Boolean(target));
-  if (selectedTargets.length !== selectedOptionIds.length)
-    throw new Error("Die Code-Viral-Cache-Auswahl ist ungueltig.");
-  if (selectedTargets.length > 2)
-    throw new Error("Code Viral Cache kann hoechstens 2 Counter behalten.");
-  const beforeCardCounts = new Map<CardInstanceId, number>();
-  const beforePoxCounts = new Map<Exclude<ServerId, "new_remote">, number>();
-  const preservedCardDefinitionIds: CardDefinitionId[] = [];
-  for (const target of selectedTargets) {
-    if (target.kind === "card") {
-      if (!visibleVirusCounterTargetIds(state).includes(target.cardId))
-        throw new Error("Ein Code-Viral-Cache-Counterziel ist nicht mehr legal.");
-      const count =
-        beforeCardCounts.get(target.cardId) ??
-        cardCounter(state, target.cardId, "virus");
-      if (target.index > count)
-        throw new Error("Ein Code-Viral-Cache-Counter existiert nicht mehr.");
-      beforeCardCounts.set(target.cardId, count);
-    } else {
-      mustServer(state, target.serverId);
-      const count =
-        beforePoxCounts.get(target.serverId) ??
-        Math.max(
-          0,
-          Math.floor(Number(state.poxCountersByServer?.[target.serverId] ?? 0)),
-        );
-      if (target.index > count)
-        throw new Error("Ein Code-Viral-Cache-Pox-Counter existiert nicht mehr.");
-      beforePoxCounts.set(target.serverId, count);
-    }
-  }
-
-  purgeVirusCounters(state);
-
-  const cardPreserveCounts = new Map<CardInstanceId, number>();
-  const poxPreserveCounts = new Map<Exclude<ServerId, "new_remote">, number>();
-  for (const target of selectedTargets) {
-    if (target.kind === "card") {
-      cardPreserveCounts.set(
-        target.cardId,
-        (cardPreserveCounts.get(target.cardId) ?? 0) + 1,
-      );
-    } else {
-      poxPreserveCounts.set(
-        target.serverId,
-        (poxPreserveCounts.get(target.serverId) ?? 0) + 1,
-      );
-    }
-  }
-  for (const [cardId, amount] of cardPreserveCounts) {
-    setCardCounter(state, cardId, "virus", amount);
-    preservedCardDefinitionIds.push(definitionFor(state, cardId).id);
-  }
-  for (const [serverId, amount] of poxPreserveCounts) {
-    state.poxCountersByServer = {
-      ...(state.poxCountersByServer ?? {}),
-      [serverId]: amount,
-    };
-  }
-  return {
-    preserved: selectedTargets.length,
-    preservedCardDefinitionIds: preservedCardDefinitionIds.sort(),
-  };
+function restoreCodeViralCachePreservedCounters(...args: any[]): any {
+  return (stateRuntimeResolvers.restoreCodeViralCachePreservedCounters as any)(...args);
 }
-
-function resolveCodeViralCachePurgeChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1913.code_viral_cache_purge"))
-    throw new Error("Es ist keine Code-Viral-Cache-Choice offen.");
-  const [, sourceCardId] = choice.source.split(":");
-  if (!sourceCardId || !installedCodeViralCacheIds(state).includes(sourceCardId))
-    throw new Error("Code Viral Cache ist nicht mehr installiert.");
-  const selected = selectedChoiceIds(playerAction.selectedChoices);
-  const legalOptionIds = new Set(choice.options.map((option) => option.id));
-  if (selected.some((optionId) => !legalOptionIds.has(optionId)))
-    throw new Error("Die Code-Viral-Cache-Auswahl ist nicht legal.");
-  const result = restoreCodeViralCachePreservedCounters(state, selected);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: CODE_VIRAL_CACHE_ID,
-    purgedCounterType: "virus",
-    codeViralCachePreservedCounters: result.preserved,
-    preservedCounterAmount: result.preserved,
-    ...(result.preservedCardDefinitionIds.length > 0
-      ? {
-          preservedCardDefinitionIds:
-            result.preservedCardDefinitionIds.join(","),
-        }
-      : {}),
-    remainingVirusCounters: totalCounters(state, "virus"),
-  };
-  delete state.pendingChoice;
+function resolveCodeViralCachePurgeChoice(...args: any[]): any {
+  return (stateRuntimeResolvers.resolveCodeViralCachePurgeChoice as any)(...args);
 }
-
-function microtechBackupDriveIds(state: GameState): CardInstanceId[] {
-  return state.runner.rig.hardware
-    .filter(
-      (cardId) =>
-        runnerUtilityLongtailKindForCard(state, cardId) ===
-          "microtech_backup_drive_program_trash_replacement" ||
-        definitionFor(state, cardId).id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
-    )
-    .sort();
+function microtechBackupDriveIds(...args: any[]): any {
+  return (stateRuntimeResolvers.microtechBackupDriveIds as any)(...args);
 }
-
-function availableRunnerProgramInstallCredits(state: GameState): number {
-  return (
-    state.runner.credits +
-    runnerRecurringCredits(state) +
-    restrictedHostedCredits(state, "install_programs", {
-      installCardType: "program",
-    }) +
-    valuPakTemporaryProgramInstallCredits(state)
-  );
+function availableRunnerProgramInstallCredits(...args: any[]): any {
+  return (stateRuntimeResolvers.availableRunnerProgramInstallCredits as any)(...args);
 }
-
-function runnerCanPayInstallCost(
-  state: GameState,
-  amount: number,
-  cardType: CardDefinition["type"],
-): boolean {
-  if (amount <= 0) return true;
-  if (cardType === "program")
-    return availableRunnerProgramInstallCredits(state) >= amount;
-  return state.runner.credits >= amount;
+function runnerCanPayInstallCost(...args: any[]): any {
+  return (stateRuntimeResolvers.runnerCanPayInstallCost as any)(...args);
 }
-
-function runnerCostPenaltySupportCreditCapacity(state: GameState): number {
-  let availableCredits = state.runner.credits;
-  let gainedCredits = 0;
-  for (const cardId of runnerInstalledCardIds(state).slice().sort()) {
-    const instance = state.cardInstances[cardId];
-    if (!instance || instance.tapped === true) continue;
-    const implementation = cardImplementationForDefinitionId(instance.definitionId);
-    const abilities = implementation?.abilities ?? [];
-    let bestNet = 0;
-    for (const ability of abilities) {
-      if (ability.kind !== "activated") continue;
-      if (ability.timing !== "runner_cost_penalty_support") continue;
-      if (ability.costs.some((cost) => cost.kind === "action")) continue;
-      const creditCost = ability.costs
-        .filter((cost) => cost.kind === "credit")
-        .reduce((sum, cost) => sum + cost.amount, 0);
-      if (creditCost > availableCredits) continue;
-      const creditGain = ability.effects.reduce((sum, effect) => {
-        if (
-          effect.kind !== "gain_credits" ||
-          (effect.recipient !== "runner" && effect.recipient !== "controller")
-        )
-          return sum;
-        return sum + effect.amount;
-      }, 0);
-      const net = creditGain - creditCost;
-      if (net > bestNet) bestNet = net;
-    }
-    if (bestNet <= 0) continue;
-    availableCredits += bestNet;
-    gainedCredits += bestNet;
-  }
-  return gainedCredits;
+function runnerCostPenaltySupportCreditCapacity(...args: any[]): any {
+  return (stateRuntimeResolvers.runnerCostPenaltySupportCreditCapacity as any)(...args);
 }
-
-function openRunnerCostPenaltySupportWindow(
-  state: GameState,
-  legalAction: LegalAction,
-  amount: number,
-  cardType: CardDefinition["type"],
-): boolean {
-  const available = cardType === "program"
-    ? availableRunnerProgramInstallCredits(state)
-    : state.runner.credits;
-  if (
-    legalAction.side !== "runner" ||
-    amount <= 0 ||
-    available + runnerCostPenaltySupportCreditCapacity(state) < amount
-  )
-    return false;
-  state.runnerCostPenaltySupportWindow = {
-    windowId: `runner_cost_penalty_support.${state.stateVersion + 1}`,
-    originalActionId: legalAction.actionId,
-    amountDue: amount,
-    kind: "cost",
-    createdAtStateVersion: state.stateVersion,
-  };
-  state.activeSide = "runner";
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    runnerCostPenaltySupportWindowOpened: true,
-    runnerCostPenaltySupportWindowId: state.runnerCostPenaltySupportWindow.windowId,
-  };
-  return true;
+function openRunnerCostPenaltySupportWindow(...args: any[]): any {
+  return (stateRuntimeResolvers.openRunnerCostPenaltySupportWindow as any)(...args);
 }
-
-function closeRunnerCostPenaltySupportWindowForPayment(
-  state: GameState,
-  legalAction: LegalAction,
-  amount: number,
-): void {
-  const window = state.runnerCostPenaltySupportWindow;
-  if (!window) return;
-  if (
-    window.originalActionId !== legalAction.actionId ||
-    window.kind !== "cost" ||
-    window.amountDue !== amount
-  )
-    throw new Error("Das Runner-Kostenfenster passt nicht zur Zahlung.");
-  delete state.runnerCostPenaltySupportWindow;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    runnerCostPenaltySupportWindowClosed: true,
-  };
+function closeRunnerCostPenaltySupportWindowForPayment(...args: any[]): any {
+  return (stateRuntimeResolvers.closeRunnerCostPenaltySupportWindowForPayment as any)(...args);
 }
-
-function runnerRecurringCredits(state: GameState): number {
-  return runnerProgramInstallRecurringCreditSourceIds(state).reduce(
-    (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
-    0,
-  );
+function runnerRecurringCredits(...args: any[]): any {
+  return (stateRuntimeResolvers.runnerRecurringCredits as any)(...args);
 }
-
-function runnerProgramInstallRecurringCreditSourceIds(
-  state: GameState,
-): CardInstanceId[] {
-  return [
-    ...state.runner.rig.hardware.filter(
-      (cardId) => definitionFor(state, cardId).id === "v099_recurring_chip",
-    ),
-    ...state.runner.rig.programs.filter(
-      (cardId) =>
-        definitionFor(state, cardId).id === ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
-    ),
-  ].filter((cardId) => !isRestrictedHostedCreditSource(definitionFor(state, cardId)));
+function runnerProgramInstallRecurringCreditSourceIds(...args: any[]): any {
+  return (stateRuntimeResolvers.runnerProgramInstallRecurringCreditSourceIds as any)(...args);
 }
-
-function spendRunnerInstallCredits(
-  state: GameState,
-  amount: number,
-  cardType: CardDefinition["type"],
-): void {
-  if (amount <= 0) return;
-  if (cardType !== "program") {
-    spendCredits(state, "runner", amount);
-    return;
-  }
-  if (availableRunnerProgramInstallCredits(state) < amount)
-    throw new Error("Der Runner kann die Installationskosten nicht bezahlen.");
-  let remaining = amount;
-  const flags = ensureRunnerTurnFlags(state);
-  const temporary = Math.min(
-    valuPakTemporaryProgramInstallCredits(state),
-    remaining,
-  );
-  if (temporary > 0) {
-    flags.valuPakTemporaryProgramInstallCredits = Math.max(
-      0,
-      valuPakTemporaryProgramInstallCredits(state) - temporary,
-    );
-    remaining -= temporary;
-  }
-  const restricted = spendRestrictedHostedCredits(
-    state,
-    "install_programs",
-    remaining,
-    { installCardType: cardType },
-  );
-  remaining -= restricted.spent;
-  for (const cardId of runnerProgramInstallRecurringCreditSourceIds(state)) {
-    if (remaining <= 0) break;
-    const available = hostedPaymentCredits(state, cardId);
-    const spent = Math.min(available, remaining);
-    if (spent > 0) {
-      spendHostedPaymentCredits(state, cardId, spent);
-      remaining -= spent;
-    }
-  }
-  spendCredits(state, "runner", remaining);
+function spendRunnerInstallCredits(...args: any[]): any {
+  return (stateRuntimeResolvers.spendRunnerInstallCredits as any)(...args);
 }
-
-function runnerTagRemovalRecurringCreditSourceIds(
-  state: GameState,
-): CardInstanceId[] {
-  return [
-    ...restrictedHostedCreditSourceIds(state, "remove_tags"),
-    ...state.runner.rig.hardware.filter(
-      (cardId) =>
-        !isRestrictedHostedCreditSource(definitionFor(state, cardId)) &&
-        TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS.has(
-          definitionFor(state, cardId).id,
-        ) &&
-        cardCounter(state, cardId, "recurring_credit") > 0,
-    ),
-  ].sort();
+function runnerTagRemovalRecurringCreditSourceIds(...args: any[]): any {
+  return (stateRuntimeResolvers.runnerTagRemovalRecurringCreditSourceIds as any)(...args);
 }
-
-function runnerTagRemovalRecurringCredits(state: GameState): number {
-  return runnerTagRemovalRecurringCreditSourceIds(state).reduce(
-    (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
-    0,
-  );
+function runnerTagRemovalRecurringCredits(...args: any[]): any {
+  return (stateRuntimeResolvers.runnerTagRemovalRecurringCredits as any)(...args);
 }
-
-function availableRunnerTagRemovalCredits(state: GameState): number {
-  return state.runner.credits + runnerTagRemovalRecurringCredits(state);
+function availableRunnerTagRemovalCredits(...args: any[]): any {
+  return (stateRuntimeResolvers.availableRunnerTagRemovalCredits as any)(...args);
 }
-
-function spendRunnerTagRemovalCredits(
-  state: GameState,
-  amount: number,
-  legalAction: LegalAction,
-): void {
-  if (amount <= 0) return;
-  if (availableRunnerTagRemovalCredits(state) < amount)
-    throw new Error("Der Runner kann die Tag-Entfernung nicht bezahlen.");
-  let remaining = amount;
-  let recurringSpent = 0;
-  let armadilloRecurringSpent = 0;
-  const recurringSourceDefinitionIds: string[] = [];
-  for (const cardId of runnerTagRemovalRecurringCreditSourceIds(state)) {
-    if (remaining <= 0) break;
-    const spent = Math.min(
-      hostedPaymentCredits(state, cardId),
-      remaining,
-    );
-    if (spent <= 0) continue;
-    spendHostedPaymentCredits(state, cardId, spent);
-    const sourceDefinitionId = definitionFor(state, cardId).id;
-    if (sourceDefinitionId === ARMADILLO_ARMORED_ROAD_HOME_ID)
-      armadilloRecurringSpent += spent;
-    recurringSourceDefinitionIds.push(sourceDefinitionId);
-    recurringSpent += spent;
-    remaining -= spent;
-  }
-  spendCredits(state, "runner", remaining);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    removeTagAmount: 1,
-    ...(recurringSpent > 0
-      ? {
-          ...(armadilloRecurringSpent > 0
-            ? { armadilloRecurringCreditsSpent: armadilloRecurringSpent }
-            : {}),
-          tagRemovalRecurringCreditsSpent: recurringSpent,
-          runnerCreditsSpent: remaining,
-          tagRemovalCreditSourceDefinitionIds:
-            recurringSourceDefinitionIds.join(","),
-        }
-      : {}),
-  };
+function spendRunnerTagRemovalCredits(...args: any[]): any {
+  return (stateRuntimeResolvers.spendRunnerTagRemovalCredits as any)(...args);
 }
-
-function refreshRecurringCredits(
-  state: GameState,
-  side: Side,
-  effects?: AutomaticEffectCollector,
-): void {
-  if (side !== "runner" || !isV099OrLater(state)) return;
-  for (const cardId of runnerInstalledCardIds(state)) {
-    const definition = definitionFor(state, cardId);
-    const restrictedSource = restrictedHostedCreditSourceForDefinition(definition);
-    if (restrictedSource) {
-      if (
-        restrictedSource.counterType !== "bit" ||
-        restrictedSource.refresh.timing !== "start_of_runner_turn" ||
-        restrictedSource.refresh.mode !== "refill_to_capacity_if_used"
-      )
-        throw new Error("Restricted hosted credit source is invalid.");
-      const capacity = Math.max(0, Math.floor(restrictedSource.capacity));
-      const previous = cardCounter(state, cardId, "bit");
-      if (previous < capacity) {
-        setCardCounter(state, cardId, "bit", capacity);
-        effects?.push(
-          automaticCounterChangeEffect(
-            `runner.start.restricted_hosted_credit.${cardId}`,
-            "runner",
-            definition.id,
-            "bit",
-            capacity,
-            capacity - previous,
-          ),
-        );
-      }
-      continue;
-    }
-    const recurringCredits = definition.recurringCredits ?? 0;
-    if (recurringCredits > 0) {
-      const previous = cardCounter(state, cardId, "recurring_credit");
-      setCardCounter(
-        state,
-        cardId,
-        "recurring_credit",
-        recurringCredits,
-      );
-      if (previous !== recurringCredits) {
-        effects?.push(
-          automaticCounterChangeEffect(
-            `runner.start.recurring_credit.${cardId}`,
-            "runner",
-            definition.id,
-            "recurring_credit",
-            recurringCredits,
-            Math.max(0, recurringCredits - previous),
-          ),
-        );
-      }
-    }
-  }
+function refreshRecurringCredits(...args: any[]): any {
+  return (stateRuntimeResolvers.refreshRecurringCredits as any)(...args);
 }
 
 
@@ -7496,7 +4175,17 @@ const runtimeDomainDeps = {
   virusCounterImplementationForCard,
   virusCounterImplementationForDefinition,
   visibleVirusCounterTargetIds,
+
 };
+
+const turnCorpRuntime = createTurnCorpRuntime(runtimeDomainDeps);
+(runtimeDomainDeps as Record<string, unknown>).turnCorpRuntime = turnCorpRuntime;
+const stateCorpRuntimeResolvers = createStateCorpRuntimeResolvers(runtimeDomainDeps);
+const cardRuntimeResolvers = createCardRuntimeResolvers(runtimeDomainDeps);
+const choiceHiddenZoneResolvers = createChoiceHiddenZoneResolvers(runtimeDomainDeps);
+const corpRuntimeResolvers = createCorpRuntimeResolvers(runtimeDomainDeps);
+const stateRuntimeResolvers = createStateRuntimeResolvers(runtimeDomainDeps);
+const turnRuntimeResolvers = createTurnRuntimeResolvers(runtimeDomainDeps);
 
 const stateRuntimeServices = createStateRuntimeServices(runtimeDomainDeps);
 const cardRuntimeHosts = createCardRuntimeHosts(runtimeDomainDeps);
@@ -7504,7 +4193,6 @@ const flowRuntimeHosts = createFlowRuntimeHosts(runtimeDomainDeps);
 const actionRuntimeHosts = createActionRuntimeHosts(runtimeDomainDeps);
 
 const lifecycleRuntime = createLifecycleRuntime(runtimeDomainDeps);
-const turnCorpRuntime = createTurnCorpRuntime(runtimeDomainDeps);
 const choiceHiddenZoneRuntime = createChoiceHiddenZoneRuntime(runtimeDomainDeps);
 
 function isV097OrLater(state: GameState): boolean {
