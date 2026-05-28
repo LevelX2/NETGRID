@@ -981,10 +981,18 @@ export type RunState = {
     remaining: number;
     usableFor: "this_ice_printed_trace_subroutines";
   };
+  encounterTemporaryIceStrengthModifiers?: Array<{
+    sourceIceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    amount: number;
+    expires: "encounter_end";
+  }>;
   encounterAdditionalSubroutines?: Array<{
     sourceCardInstanceId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
     sourceTitle: string;
+    targetIceId?: CardInstanceId;
+    originalSubroutineId?: string;
     subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
     amount?: number;
   }>;

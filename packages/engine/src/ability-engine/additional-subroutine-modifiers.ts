@@ -213,6 +213,7 @@ export function currentEncounterAdditionalSubroutinesForIce(
   const records = run.encounterAdditionalSubroutines ?? [];
   const subroutines: SubroutineDefinition[] = [];
   records.forEach((record, index) => {
+    if (record.originalSubroutineId) return;
     if (record.sourceCardInstanceId !== iceId) return;
     const publicId = `card_implementation.${record.sourceDefinitionId}.current_encounter_additional_subroutine.${index + 1}.${record.subroutineKind}`;
     const dynamicSubroutine: DynamicSubroutineAttribution = {

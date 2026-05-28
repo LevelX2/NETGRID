@@ -917,6 +917,10 @@ export type CardAbilityCostImplementation =
   | {
       kind: "tap_source";
       amount: 1;
+    }
+  | {
+      kind: "corp_random_discard_hq";
+      amount: number;
     };
 
 export type CardUniqueDirectLongtailImplementation =
@@ -1071,8 +1075,10 @@ export type CardEffectImplementation =
   | DistributeAdvancementCountersEffectImplementation
   | MoveAdvancementCountersEffectImplementation
   | GainTemporaryCorpCreditsEffectImplementation
+  | GainTemporaryCorpRunCreditsEffectImplementation
   | GainTemporaryTraceCreditsEffectImplementation
   | RemoveSameFortAdvancementCountersForRunCreditsEffectImplementation
+  | CopySameFortIceSubroutineForRunEffectImplementation
   | TrashOwnRezzedIceForCreditsEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
@@ -1218,6 +1224,15 @@ export type GainTemporaryCorpCreditsEffectImplementation = {
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
+export type GainTemporaryCorpRunCreditsEffectImplementation = {
+  kind: "gain_temporary_corp_run_credits";
+  recipient: "corp";
+  amount: number;
+  usableFor: "corp_costs_during_this_run";
+  cleanup: "run_end";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
 export type GainTemporaryTraceCreditsEffectImplementation = {
   kind: "gain_temporary_trace_credits";
   recipient: "corp";
@@ -1231,6 +1246,14 @@ export type RemoveSameFortAdvancementCountersForRunCreditsEffectImplementation =
   kind: "remove_same_fort_advancement_counters_for_run_credits";
   creditsPerCounter: number;
   maxAmount: "all";
+  cleanup: "run_end";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type CopySameFortIceSubroutineForRunEffectImplementation = {
+  kind: "copy_same_fort_ice_subroutine_for_run";
+  target: "chosen_same_fort_ice_subroutine";
+  append: "immediately_after_original";
   cleanup: "run_end";
   visibility: Extract<EventVisibilityClass, "public">;
 };
@@ -2130,14 +2153,22 @@ export type CardPrintedSubroutineImplementation =
       breakTags?: readonly string[];
     };
 
-export type CardIceEncounterImplementation = {
-  kind: "add_encounter_temporary_credits";
-  side: "corp";
-  amount: number;
-  usableFor: "this_ice_printed_trace_subroutines";
-  returnUnusedAtEncounterEnd: true;
-  visibility: Extract<EventVisibilityClass, "public">;
-};
+export type CardIceEncounterImplementation =
+  | {
+      kind: "add_encounter_temporary_credits";
+      side: "corp";
+      amount: number;
+      usableFor: "this_ice_printed_trace_subroutines";
+      returnUnusedAtEncounterEnd: true;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "roll_die_strength_or_derez_auto_pass";
+      dieFaces: 6;
+      successValue: 6;
+      strengthDuration: "current_encounter";
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
 
 export type RunnerTraceCounterEffectImplementation = {
   counterType: Extract<

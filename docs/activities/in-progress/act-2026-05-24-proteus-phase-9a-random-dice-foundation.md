@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-9a-random-dice-foundation
-status: blocked
+status: resolved-by-done-activity
 kind: implementation
 area: cards
 priority: normal
@@ -8,17 +8,13 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-28
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 9a
 proReferences:
   - PRO016
 blockedBy:
-  - act-2026-05-24-proteus-phase-8f-random-bad-publicity-virus-longtail
-  - roadblock_encounter_entry_random_pass_derez_contract
-  - corp_random_discard_cost_contract
-  - run_temporary_corp_credit_pool_contract
-  - lisa_blight_subroutine_copy_target_contract
+  - resolved-by-done/act-2026-05-28-proteus-pro016-random-dice-encounter-suite
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-9a-random-dice-foundation.md
   - docs/releases/proteus/README.md
@@ -83,4 +79,4 @@ Es wurden bewusst keine Teil-CardImplementations promotet. Der sinnvolle nächst
 
 ## Ergebnisnotiz
 
-Blockiert dokumentiert. Keine Runtime-Änderung, keine Manifest-Promotion und keine Deck-/AI-Freigabe.
+Durch PRO016 erledigt. Die Umsetzungsactivity liegt unter `docs/activities/done/act-2026-05-28-proteus-pro016-random-dice-encounter-suite.md`; diese alte Phase-9a-Datei bleibt nur Statusreferenz ohne doppelte Zählung. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.

@@ -804,6 +804,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       callbacks: {
         finishRun: (successful, legalAction) =>
           host.callbacks.finishRun(state, successful, legalAction),
+        continueRun: (legalAction) => continueRun(state, legalAction),
+        rollDie: (purpose) => host.rng.rollDie(state, purpose),
       },
     };
   }

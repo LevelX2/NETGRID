@@ -187,6 +187,7 @@ export type CardEffectExecutionContext = {
     subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
     amount?: number;
   }) => CardEffectHiddenInfoResult;
+  copySameFortIceSubroutineForRun?: () => CardEffectHiddenInfoResult;
   addCurrentRunAccessCount?: (
     server: Extract<ServerId, "hq" | "rd">,
     amount: number,
@@ -788,6 +789,27 @@ export function executeCardImplementationEffects(
             : {}),
         });
         mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
+      case "copy_same_fort_ice_subroutine_for_run": {
+        assertPublicVisibility(
+          "copy_same_fort_ice_subroutine_for_run",
+          effect.visibility,
+        );
+        if (
+          effect.target !== "chosen_same_fort_ice_subroutine" ||
+          effect.append !== "immediately_after_original" ||
+          effect.cleanup !== "run_end"
+        )
+          throw new Error("copy_same_fort_ice_subroutine_for_run profile is invalid.");
+        if (!context.copySameFortIceSubroutineForRun)
+          throw new Error(
+            "copy_same_fort_ice_subroutine_for_run requires a target context.",
+          );
+        mergePublicPayload(
+          publicPayload,
+          context.copySameFortIceSubroutineForRun().publicPayload,
+        );
         return;
       }
       case "remove_tags": {
@@ -1825,6 +1847,45 @@ export function executeCardImplementationEffects(
           temporaryCreditsProvided: effect.amount,
           temporaryCreditsRemaining:
             state.corpTemporaryInstallRezCredits.remaining,
+          corpCreditsAfter: state.corp.credits,
+        });
+        return;
+      }
+      case "gain_temporary_corp_run_credits": {
+        assertPositiveIntegerAmount(
+          "gain_temporary_corp_run_credits",
+          effect.amount,
+        );
+        assertPublicVisibility(
+          "gain_temporary_corp_run_credits",
+          effect.visibility,
+        );
+        if (
+          effect.recipient !== "corp" ||
+          effect.usableFor !== "corp_costs_during_this_run" ||
+          effect.cleanup !== "run_end"
+        )
+          throw new Error("gain_temporary_corp_run_credits profile is invalid.");
+        if (!state.run)
+          throw new Error("Run-Credits brauchen einen laufenden Run.");
+        if (!context.sourceDefinitionId)
+          throw new Error("Run-Credits brauchen eine Quellenkarte.");
+        state.corp.credits += effect.amount;
+        state.run.corpRunTemporaryCredits = {
+          sourceCardInstanceId: context.sourceCardId,
+          sourceDefinitionId: context.sourceDefinitionId,
+          remaining:
+            Math.max(
+              0,
+              Math.floor(state.run.corpRunTemporaryCredits?.remaining ?? 0),
+            ) + effect.amount,
+          usableFor: "corp_costs_during_this_run",
+          returnUnusedAtRunEnd: true,
+        };
+        mergePublicPayload(publicPayload, {
+          temporaryRunCredits: effect.amount,
+          temporaryRunCreditsRemaining:
+            state.run.corpRunTemporaryCredits.remaining,
           corpCreditsAfter: state.corp.credits,
         });
         return;

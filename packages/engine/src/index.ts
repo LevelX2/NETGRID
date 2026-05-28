@@ -3301,6 +3301,15 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
     state.run?.encounteredIceId === iceId
       ? Math.max(0, Math.floor(state.run.futureEncounterIceStrengthBonus ?? 0))
       : 0;
+  const encounterTemporaryBonus =
+    state.run?.encounteredIceId === iceId
+      ? (state.run.encounterTemporaryIceStrengthModifiers ?? [])
+          .filter((modifier) => modifier.sourceIceId === iceId)
+          .reduce(
+            (sum, modifier) => sum + Math.max(0, Math.floor(modifier.amount)),
+            0,
+          )
+      : 0;
   const pattelsReduction = cardCounter(state, iceId, "virus");
   const baseStrength =
     instance.variableIceState?.family === "x_strength" &&
@@ -3312,6 +3321,7 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
     instance.strengthModifier +
     iceStrengthBonusFor(state, iceId) +
     relativeIceStrengthBonusFor(state, iceId) +
+    encounterTemporaryBonus +
     runEncounterBonus -
     pattelsReduction;
   return Math.max(0, total);
@@ -4194,8 +4204,8 @@ function subroutinesForCurrentEncounter(
         id: `${subroutine.id}.v1920_ice_transmutation.${index + 1}`,
       });
     }
-    return copies.map((copy) =>
-      relativeDamageSubroutineForCurrentEncounter(
+    return copies.flatMap((copy) => {
+      const resolved = relativeDamageSubroutineForCurrentEncounter(
         state,
         run?.encounteredIceId,
         variableTraceSubroutineForCurrentEncounter(
@@ -4203,8 +4213,14 @@ function subroutinesForCurrentEncounter(
           run?.encounteredIceId,
           copy,
         ),
-      ),
-    );
+      );
+      const copied = copiedRunSubroutinesAfterOriginal(
+        state,
+        run?.encounteredIceId,
+        subroutine.id,
+      );
+      return [resolved, ...copied];
+    });
   });
   if (
     run?.encounteredIceId &&
@@ -4238,6 +4254,33 @@ function subroutinesForCurrentEncounter(
     subroutines.push(...additionalSubroutinesForIce(state, run.encounteredIceId));
   }
   return subroutines;
+}
+
+function copiedRunSubroutinesAfterOriginal(
+  state: GameState,
+  iceId: CardInstanceId | undefined,
+  originalSubroutineId: string,
+): NonNullable<CardDefinition["subroutines"]> {
+  if (!iceId) return [];
+  const run = state.run;
+  const records = run?.encounterAdditionalSubroutines ?? [];
+  return records
+    .filter(
+      (record) =>
+        record.targetIceId === iceId &&
+        record.originalSubroutineId === originalSubroutineId,
+    )
+    .map((record, index) => {
+      const id = `card_implementation.${record.sourceDefinitionId}.copied_subroutine.${index + 1}.${record.subroutineKind}`;
+      if (record.subroutineKind === "end_the_run") {
+        return { id, type: "end_the_run" };
+      }
+      return {
+        id,
+        type: "end_the_run_unless_runner_pays",
+        amount: Math.max(0, Math.floor(record.amount ?? 0)),
+      };
+    });
 }
 
 function variableTraceSubroutineForCurrentEncounter(

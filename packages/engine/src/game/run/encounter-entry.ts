@@ -9,6 +9,7 @@ import type {
 } from "@netgrid/shared";
 import type { CardRunEncounterInterventionImplementation } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
 import { buildLegalAction } from "../turn/action-builders";
 import {
   payEncounterTaxForFutureIce,
@@ -39,6 +40,8 @@ export type EncounterEntryHost = {
   };
   callbacks: {
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
+    continueRun?: (legalAction?: LegalAction) => void;
+    rollDie?: (purpose: string) => number;
   };
 };
 
@@ -72,6 +75,7 @@ export function beginEncounter(
   run.resolvedSubroutineIndexes = [];
   run.traceSuccessBySubroutineIndex = {};
   delete run.encounterTemporaryTraceCredits;
+  delete run.encounterTemporaryIceStrengthModifiers;
   delete run.encounterAdditionalSubroutines;
   run.bartmossUsedBreakerIdsThisEncounter = [];
   run.blinkUsedSubroutinesByBreakerThisEncounter = {};
@@ -133,6 +137,25 @@ export function beginEncounter(
     encounteredDefinition,
     legalAction,
   );
+  const roadblockResult = resolveRandomStrengthOrDerezAutoPassEncounter(
+    host,
+    run,
+    encounteredIceId,
+    encounteredDefinition,
+    legalAction,
+  );
+  if (roadblockResult.autoPassed) {
+    host.state.timingPoint = "run.encounter_ice";
+    host.state.activeSide = "runner";
+    return {
+      handled: true,
+      encounterStarted: true,
+      iceId: encounteredIceId,
+      sourceDefinitionId: encounteredDefinition.id,
+      resolvedPayload: legalAction?.payload,
+      stateChanged: true,
+    };
+  }
   host.state.timingPoint = "run.encounter_ice";
   host.state.activeSide = "runner";
   return {
@@ -144,6 +167,80 @@ export function beginEncounter(
     resolvedPayload: legalAction?.payload,
     stateChanged: true,
   };
+}
+
+function resolveRandomStrengthOrDerezAutoPassEncounter(
+  host: EncounterEntryHost,
+  run: ActiveRun,
+  encounteredIceId: CardInstanceId,
+  encounteredDefinition: CardDefinition,
+  legalAction?: LegalAction,
+): { autoPassed: boolean } {
+  const iceEncounter = cardImplementationForDefinitionId(
+    encounteredDefinition.id,
+  )?.iceEncounter;
+  if (iceEncounter?.kind !== "roll_die_strength_or_derez_auto_pass")
+    return { autoPassed: false };
+  if (iceEncounter.visibility !== "public" || iceEncounter.dieFaces !== 6)
+    throw new Error("Random-Encounter-Profil ist ungueltig.");
+  if (!host.callbacks.rollDie)
+    throw new Error("Random-Encounter braucht einen deterministischen Wuerfel.");
+  const dieRoll = host.callbacks.rollDie(
+    `card_implementation.die.${encounteredDefinition.id}.encounter.${run.runId}.${encounteredIceId}`,
+  );
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      randomPurpose: `card_implementation.die.${encounteredDefinition.id}.encounter`,
+      dieSize: 6,
+      dieRoll,
+      randomCounterAfter: host.state.randomCounter,
+      sourceDefinitionId: encounteredDefinition.id,
+    };
+  }
+  if (dieRoll === iceEncounter.successValue) {
+    const instance = host.cards.cardInstanceFor(encounteredIceId);
+    host.state.cardInstances[encounteredIceId] = {
+      ...instance,
+      rezzed: false,
+      faceup: false,
+    };
+    const subroutineCount = (
+      printedSubroutinesForCardImplementation(encounteredDefinition) ??
+      encounteredDefinition.subroutines ??
+      []
+    ).length;
+    run.resolvedSubroutineIndexes = Array.from(
+      { length: subroutineCount },
+      (_, index) => index,
+    );
+    legalAction &&
+      (legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        derezzedEncounteredIce: true,
+        autoPassedEncounteredIce: true,
+        targetCardDefinitionId: encounteredDefinition.id,
+      });
+    host.callbacks.continueRun?.(legalAction);
+    return { autoPassed: true };
+  }
+  run.encounterTemporaryIceStrengthModifiers = [
+    ...(run.encounterTemporaryIceStrengthModifiers ?? []),
+    {
+      sourceIceId: encounteredIceId,
+      sourceDefinitionId: encounteredDefinition.id,
+      amount: dieRoll,
+      expires: "encounter_end",
+    },
+  ];
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      temporaryIceStrengthModifier: dieRoll,
+      targetCardDefinitionId: encounteredDefinition.id,
+    };
+  }
+  return { autoPassed: false };
 }
 
 function normalizeSubtypeLabel(subtype: string): string {

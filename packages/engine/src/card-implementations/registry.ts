@@ -388,6 +388,7 @@ import { proteusViralBreedingGroundImplementation } from "./proteus/corp/agendas
 import { proteusCybertechThinkTankImplementation } from "./proteus/corp/assets/cybertech-think-tank";
 import { proteusDepartmentOfMisinformationImplementation } from "./proteus/corp/assets/department-of-misinformation";
 import { proteusGovernmentContractImplementation } from "./proteus/corp/assets/government-contract";
+import { proteusExecutiveBootCampImplementation } from "./proteus/corp/assets/executive-boot-camp";
 import { proteusLdlTrafficAnalyzersImplementation } from "./proteus/corp/assets/ldl-traffic-analyzers";
 import { proteusSirenImplementation } from "./proteus/corp/assets/siren";
 import { proteusSydMeyerSuperstoresImplementation } from "./proteus/corp/assets/syd-meyer-superstores";
@@ -423,6 +424,7 @@ import { proteusMarionetteImplementation } from "./proteus/corp/ice/marionette";
 import { proteusMastermindImplementation } from "./proteus/corp/ice/mastermind";
 import { proteusMisleadingAccessMenusImplementation } from "./proteus/corp/ice/misleading-access-menus";
 import { proteusMobileBarricadeImplementation } from "./proteus/corp/ice/mobile-barricade";
+import { proteusRoadblockImplementation } from "./proteus/corp/ice/roadblock";
 import { proteusSandstormImplementation } from "./proteus/corp/ice/sandstorm";
 import { proteusScaffoldingImplementation } from "./proteus/corp/ice/scaffolding";
 import { proteusSnowbankImplementation } from "./proteus/corp/ice/snowbank";
@@ -436,6 +438,7 @@ import { proteusWashedUpSoloConstructImplementation } from "./proteus/corp/ice/w
 import { proteusMinotaurImplementation } from "./proteus/corp/ice/minotaur";
 import { proteusRiddlerImplementation } from "./proteus/corp/ice/riddler";
 import { proteusLesleyMajorImplementation } from "./proteus/corp/upgrades/lesley-major";
+import { proteusLisaBlightImplementation } from "./proteus/corp/upgrades/lisa-blight";
 import { proteusNetworkedCenterImplementation } from "./proteus/corp/upgrades/networked-center";
 import { proteusPanicButtonImplementation } from "./proteus/corp/upgrades/panic-button";
 import { proteusRaymondEllisonImplementation } from "./proteus/corp/upgrades/raymond-ellison";
@@ -480,6 +483,7 @@ import { proteusCorrosionImplementation } from "./proteus/runner/programs/corros
 import { proteusCrumbleImplementation } from "./proteus/runner/programs/crumble";
 import { proteusDisintegratorImplementation } from "./proteus/runner/programs/disintegrator";
 import { proteusEnterpriseIncShieldsImplementation } from "./proteus/runner/programs/enterprise-inc-shields";
+import { proteusForwardsLegacyImplementation } from "./proteus/runner/programs/forwards-legacy";
 import { proteusFubarImplementation } from "./proteus/runner/programs/fubar";
 import { proteusGarbageInImplementation } from "./proteus/runner/programs/garbage-in";
 import { proteusHighlighterImplementation } from "./proteus/runner/programs/highlighter";
@@ -917,6 +921,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusMastermindImplementation,
   proteusMisleadingAccessMenusImplementation,
   proteusMobileBarricadeImplementation,
+  proteusRoadblockImplementation,
   proteusSandstormImplementation,
   proteusScaffoldingImplementation,
   proteusSnowbankImplementation,
@@ -931,8 +936,10 @@ export const CARD_IMPLEMENTATIONS = [
   proteusCybertechThinkTankImplementation,
   proteusDepartmentOfMisinformationImplementation,
   proteusGovernmentContractImplementation,
+  proteusExecutiveBootCampImplementation,
   proteusLdlTrafficAnalyzersImplementation,
   proteusLesleyMajorImplementation,
+  proteusLisaBlightImplementation,
   proteusNetworkedCenterImplementation,
   proteusPanicButtonImplementation,
   proteusRaymondEllisonImplementation,
@@ -990,6 +997,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusCrumbleImplementation,
   proteusDisintegratorImplementation,
   proteusEnterpriseIncShieldsImplementation,
+  proteusForwardsLegacyImplementation,
   proteusFubarImplementation,
   proteusGarbageInImplementation,
   proteusHighlighterImplementation,

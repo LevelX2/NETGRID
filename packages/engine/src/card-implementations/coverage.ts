@@ -785,6 +785,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/ice/mobile-barricade.ts",
   "onr_proteus_034_riddler":
     "packages/engine/src/card-implementations/proteus/corp/ice/riddler.ts",
+  "onr_proteus_035_roadblock":
+    "packages/engine/src/card-implementations/proteus/corp/ice/roadblock.ts",
   "onr_proteus_037_scaffolding":
     "packages/engine/src/card-implementations/proteus/corp/ice/scaffolding.ts",
   "onr_proteus_038_snowbank":
@@ -815,12 +817,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/assets/bel-digmo-antibody.ts",
   "onr_proteus_057_doppelganger-antibody":
     "packages/engine/src/card-implementations/proteus/corp/assets/doppelganger-antibody.ts",
+  "onr_proteus_058_executive-boot-camp":
+    "packages/engine/src/card-implementations/proteus/corp/assets/executive-boot-camp.ts",
   "onr_proteus_068_pattel-antibody":
     "packages/engine/src/card-implementations/proteus/corp/assets/pattel-antibody.ts",
   "onr_proteus_075_stereogram-antibody":
     "packages/engine/src/card-implementations/proteus/corp/assets/stereogram-antibody.ts",
   "onr_proteus_062_lesley-major":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/lesley-major.ts",
+  "onr_proteus_063_lisa-blight":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/lisa-blight.ts",
   "onr_proteus_065_networked-center":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/networked-center.ts",
   "onr_proteus_070_rasmin-bridger":
@@ -845,6 +851,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/crumble.ts",
   "onr_proteus_086_enterprise-inc-shields":
     "packages/engine/src/card-implementations/proteus/runner/programs/enterprise-inc-shields.ts",
+  "onr_proteus_087_forwards-legacy":
+    "packages/engine/src/card-implementations/proteus/runner/programs/forwards-legacy.ts",
   "onr_proteus_088_fubar":
     "packages/engine/src/card-implementations/proteus/runner/programs/fubar.ts",
   "onr_proteus_089_garbage-in":
