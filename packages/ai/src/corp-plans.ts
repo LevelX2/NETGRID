@@ -2527,7 +2527,7 @@ function corpScoreTerminalActionPriorityBonus(
   )
     return 0;
   if (action.type === "draw_card") return -40;
-  if (isCorpEconomyOrDrawAction(input, action, context)) return -55;
+  if (isCorpEconomyOrDrawAction(input, action, context)) return -95;
   if (
     action.type === "install_card" &&
     action.payload?.placement === "ice" &&

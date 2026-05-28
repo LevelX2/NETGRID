@@ -595,6 +595,57 @@ export type AiMatchProgressionMetrics = {
   corpNonEssentialActionBeforeScoreWindow: number;
   corpEconomyBeforeScoreWindow: number;
   corpEconomyBeforeScoreWindowNecessary: number;
+  corpEconomyBeforeScoreWindowWithInstalledAgenda: number;
+  corpEconomyBeforeScoreWindowWithAdvancedAgenda: number;
+  corpEconomyBeforeScoreWindowWithScoreLegalNext: number;
+  corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext: number;
+  corpEconomyBeforeScoreWindowWithReadyRemote: number;
+  corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote: number;
+  corpEconomyBeforeScoreWindowCreditsShort: number;
+  corpEconomyBeforeScoreWindowCreditsAlreadyEnough: number;
+  corpEconomyBeforeScoreWindowRemoteSafe: number;
+  corpEconomyBeforeScoreWindowRemoteContestHigh: number;
+  corpEconomyBeforeScoreTaken: number;
+  corpEconomyBeforeScoreTakenAsNecessaryCredits: number;
+  corpEconomyBeforeScoreTakenDespiteCreditsEnough: number;
+  corpEconomyBeforeScoreTakenOverScoreLegal: number;
+  corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal: number;
+  corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote: number;
+  corpEconomyBeforeScoreTakenOverHqAgendaExit: number;
+  corpEconomyBeforeScoreTakenOverScoreAreaAbility: number;
+  corpEconomyBeforeScoreConvertedToScoreNextDecision: number;
+  corpEconomyBeforeScoreConvertedToAdvanceNextDecision: number;
+  corpEconomyBeforeScoreConvertedToAgendaInstallNextDecision: number;
+  corpEconomyBeforeScoreConvertedWithin2CorpActions: number;
+  corpEconomyBeforeScoreConvertedWithin3CorpActions: number;
+  corpEconomyBeforeScoreNotConvertedWithin3CorpActions: number;
+  corpEconomyBeforeScoreRepeatedEconomyNextDecision: number;
+  corpEconomyBeforeScoreRepeatedEconomyWithin3: number;
+  corpEconomyBeforeScoreThenDraw: number;
+  corpEconomyBeforeScoreThenProtect: number;
+  corpEconomyBeforeScoreThenNewRemote: number;
+  corpEconomyBeforeScoreThenRunnerSteal: number;
+  corpEconomyBeforeScoreThenActionLimit: number;
+  corpEconomyBeforeScorePlausibleCreditsNeeded: number;
+  corpEconomyBeforeScorePlausibleRezOrAdvanceReserve: number;
+  corpEconomyBeforeScorePlausibleHqOrRndSafety: number;
+  corpEconomyBeforeScorePlausibleRunnerContestTooHigh: number;
+  corpEconomyBeforeScorePlausibleNoAgendaExit: number;
+  corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough: number;
+  corpEconomyBeforeScoreSuspiciousRepeatedEconomy: number;
+  corpEconomyBeforeScoreSuspiciousDelayedTerminalAction: number;
+  corpEconomyBeforeScoreSuspiciousRemoteStillSafe: number;
+  corpEconomyBeforeScoreSuspiciousRunnerStealFollowup: number;
+  corpEconomyBeforeScoreUnclassified: number;
+  corpEconomyBeforeScoreFixGateEligible: number;
+  corpEconomyBeforeScoreFixGateBlockedByCredits: number;
+  corpEconomyBeforeScoreFixGateBlockedByCheapContest: number;
+  corpEconomyBeforeScoreFixGateBlockedByRunnerContest: number;
+  corpEconomyBeforeScoreFixGateBlockedBySafety: number;
+  corpEconomyBeforeScoreFixGateSuspicious: number;
+  corpEconomyBeforeScoreFixGateSuspiciousRepeatedEconomy: number;
+  corpEconomyBeforeScoreFixGateSuspiciousNoConversion: number;
+  corpEconomyBeforeScoreFixGateSuspiciousStealFollowup: number;
   corpProtectionBeforeScoreWindow: number;
   corpProtectionBeforeScoreWindowNoSafetyDelta: number;
   corpCentralProtectionBeforeScoreWindow: number;
@@ -2285,6 +2336,41 @@ export type AiSimulationSummary = {
     corpScoreConversionFixGateSuspiciousRemotePortfolio?: boolean;
     corpScoreConversionFixGateSuspiciousUnknown?: boolean;
     corpScoreTerminalEvidence?: string[];
+    corpEconomyBeforeScoreDiagnosticWindow?: boolean;
+    corpEconomyBeforeScoreWindowWithInstalledAgenda?: boolean;
+    corpEconomyBeforeScoreWindowWithAdvancedAgenda?: boolean;
+    corpEconomyBeforeScoreWindowWithScoreLegalNext?: boolean;
+    corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext?: boolean;
+    corpEconomyBeforeScoreWindowWithReadyRemote?: boolean;
+    corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote?: boolean;
+    corpEconomyBeforeScoreWindowCreditsShort?: boolean;
+    corpEconomyBeforeScoreWindowCreditsAlreadyEnough?: boolean;
+    corpEconomyBeforeScoreWindowRemoteSafe?: boolean;
+    corpEconomyBeforeScoreWindowRemoteContestHigh?: boolean;
+    corpEconomyBeforeScoreTaken?: boolean;
+    corpEconomyBeforeScoreTakenAsNecessaryCredits?: boolean;
+    corpEconomyBeforeScoreTakenDespiteCreditsEnough?: boolean;
+    corpEconomyBeforeScoreTakenOverScoreLegal?: boolean;
+    corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal?: boolean;
+    corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote?: boolean;
+    corpEconomyBeforeScoreTakenOverHqAgendaExit?: boolean;
+    corpEconomyBeforeScoreTakenOverScoreAreaAbility?: boolean;
+    corpEconomyBeforeScorePlausibleCreditsNeeded?: boolean;
+    corpEconomyBeforeScorePlausibleRezOrAdvanceReserve?: boolean;
+    corpEconomyBeforeScorePlausibleHqOrRndSafety?: boolean;
+    corpEconomyBeforeScorePlausibleRunnerContestTooHigh?: boolean;
+    corpEconomyBeforeScorePlausibleNoAgendaExit?: boolean;
+    corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough?: boolean;
+    corpEconomyBeforeScoreSuspiciousDelayedTerminalAction?: boolean;
+    corpEconomyBeforeScoreSuspiciousRemoteStillSafe?: boolean;
+    corpEconomyBeforeScoreUnclassified?: boolean;
+    corpEconomyBeforeScoreFixGateEligible?: boolean;
+    corpEconomyBeforeScoreFixGateBlockedByCredits?: boolean;
+    corpEconomyBeforeScoreFixGateBlockedByCheapContest?: boolean;
+    corpEconomyBeforeScoreFixGateBlockedByRunnerContest?: boolean;
+    corpEconomyBeforeScoreFixGateBlockedBySafety?: boolean;
+    corpEconomyBeforeScoreFixGateSuspicious?: boolean;
+    corpEconomyBeforeScoreEvidence?: string[];
     hqKnownCards?: number;
     hqUnknownCards?: number;
     hqKnownFraction?: number;
@@ -3084,6 +3170,8 @@ export function simulateAiGame(
       input,
       action,
     );
+    const corpEconomyBeforeScore =
+      corpEconomyBeforeScoreDiagnosticsForSimulationAction(input, action);
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
@@ -3133,6 +3221,7 @@ export function simulateAiGame(
       ...tagPunishDiagnostics,
       ...corpFutureRunIce,
       ...corpScoreTerminal,
+      ...corpEconomyBeforeScore,
       ...(typeof action.payload?.placement === "string"
         ? { installPlacement: action.payload.placement }
         : {}),
@@ -4976,6 +5065,54 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.baseline.corpEconomyBeforeScoreWindowNecessary,
       benchmark.candidate.corpEconomyBeforeScoreWindowNecessary,
       benchmark.delta.corpEconomyBeforeScoreWindowNecessary,
+    ],
+    [
+      "corpEconomyBeforeScoreTaken",
+      benchmark.baseline.corpEconomyBeforeScoreTaken,
+      benchmark.candidate.corpEconomyBeforeScoreTaken,
+      benchmark.delta.corpEconomyBeforeScoreTaken,
+    ],
+    [
+      "corpEconomyBeforeScoreTakenAsNecessaryCredits",
+      benchmark.baseline.corpEconomyBeforeScoreTakenAsNecessaryCredits,
+      benchmark.candidate.corpEconomyBeforeScoreTakenAsNecessaryCredits,
+      benchmark.delta.corpEconomyBeforeScoreTakenAsNecessaryCredits,
+    ],
+    [
+      "corpEconomyBeforeScoreTakenDespiteCreditsEnough",
+      benchmark.baseline.corpEconomyBeforeScoreTakenDespiteCreditsEnough,
+      benchmark.candidate.corpEconomyBeforeScoreTakenDespiteCreditsEnough,
+      benchmark.delta.corpEconomyBeforeScoreTakenDespiteCreditsEnough,
+    ],
+    [
+      "corpEconomyBeforeScoreConvertedWithin3CorpActions",
+      benchmark.baseline.corpEconomyBeforeScoreConvertedWithin3CorpActions,
+      benchmark.candidate.corpEconomyBeforeScoreConvertedWithin3CorpActions,
+      benchmark.delta.corpEconomyBeforeScoreConvertedWithin3CorpActions,
+    ],
+    [
+      "corpEconomyBeforeScoreRepeatedEconomyWithin3",
+      benchmark.baseline.corpEconomyBeforeScoreRepeatedEconomyWithin3,
+      benchmark.candidate.corpEconomyBeforeScoreRepeatedEconomyWithin3,
+      benchmark.delta.corpEconomyBeforeScoreRepeatedEconomyWithin3,
+    ],
+    [
+      "corpEconomyBeforeScoreNotConvertedWithin3CorpActions",
+      benchmark.baseline.corpEconomyBeforeScoreNotConvertedWithin3CorpActions,
+      benchmark.candidate.corpEconomyBeforeScoreNotConvertedWithin3CorpActions,
+      benchmark.delta.corpEconomyBeforeScoreNotConvertedWithin3CorpActions,
+    ],
+    [
+      "corpEconomyBeforeScoreThenRunnerSteal",
+      benchmark.baseline.corpEconomyBeforeScoreThenRunnerSteal,
+      benchmark.candidate.corpEconomyBeforeScoreThenRunnerSteal,
+      benchmark.delta.corpEconomyBeforeScoreThenRunnerSteal,
+    ],
+    [
+      "corpEconomyBeforeScoreFixGateSuspicious",
+      benchmark.baseline.corpEconomyBeforeScoreFixGateSuspicious,
+      benchmark.candidate.corpEconomyBeforeScoreFixGateSuspicious,
+      benchmark.delta.corpEconomyBeforeScoreFixGateSuspicious,
     ],
     [
       "corpProtectionBeforeScoreWindowNoSafetyDelta",
@@ -11300,6 +11437,57 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpNonEssentialActionBeforeScoreWindow",
   "corpEconomyBeforeScoreWindow",
   "corpEconomyBeforeScoreWindowNecessary",
+  "corpEconomyBeforeScoreWindowWithInstalledAgenda",
+  "corpEconomyBeforeScoreWindowWithAdvancedAgenda",
+  "corpEconomyBeforeScoreWindowWithScoreLegalNext",
+  "corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext",
+  "corpEconomyBeforeScoreWindowWithReadyRemote",
+  "corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote",
+  "corpEconomyBeforeScoreWindowCreditsShort",
+  "corpEconomyBeforeScoreWindowCreditsAlreadyEnough",
+  "corpEconomyBeforeScoreWindowRemoteSafe",
+  "corpEconomyBeforeScoreWindowRemoteContestHigh",
+  "corpEconomyBeforeScoreTaken",
+  "corpEconomyBeforeScoreTakenAsNecessaryCredits",
+  "corpEconomyBeforeScoreTakenDespiteCreditsEnough",
+  "corpEconomyBeforeScoreTakenOverScoreLegal",
+  "corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal",
+  "corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote",
+  "corpEconomyBeforeScoreTakenOverHqAgendaExit",
+  "corpEconomyBeforeScoreTakenOverScoreAreaAbility",
+  "corpEconomyBeforeScoreConvertedToScoreNextDecision",
+  "corpEconomyBeforeScoreConvertedToAdvanceNextDecision",
+  "corpEconomyBeforeScoreConvertedToAgendaInstallNextDecision",
+  "corpEconomyBeforeScoreConvertedWithin2CorpActions",
+  "corpEconomyBeforeScoreConvertedWithin3CorpActions",
+  "corpEconomyBeforeScoreNotConvertedWithin3CorpActions",
+  "corpEconomyBeforeScoreRepeatedEconomyNextDecision",
+  "corpEconomyBeforeScoreRepeatedEconomyWithin3",
+  "corpEconomyBeforeScoreThenDraw",
+  "corpEconomyBeforeScoreThenProtect",
+  "corpEconomyBeforeScoreThenNewRemote",
+  "corpEconomyBeforeScoreThenRunnerSteal",
+  "corpEconomyBeforeScoreThenActionLimit",
+  "corpEconomyBeforeScorePlausibleCreditsNeeded",
+  "corpEconomyBeforeScorePlausibleRezOrAdvanceReserve",
+  "corpEconomyBeforeScorePlausibleHqOrRndSafety",
+  "corpEconomyBeforeScorePlausibleRunnerContestTooHigh",
+  "corpEconomyBeforeScorePlausibleNoAgendaExit",
+  "corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough",
+  "corpEconomyBeforeScoreSuspiciousRepeatedEconomy",
+  "corpEconomyBeforeScoreSuspiciousDelayedTerminalAction",
+  "corpEconomyBeforeScoreSuspiciousRemoteStillSafe",
+  "corpEconomyBeforeScoreSuspiciousRunnerStealFollowup",
+  "corpEconomyBeforeScoreUnclassified",
+  "corpEconomyBeforeScoreFixGateEligible",
+  "corpEconomyBeforeScoreFixGateBlockedByCredits",
+  "corpEconomyBeforeScoreFixGateBlockedByCheapContest",
+  "corpEconomyBeforeScoreFixGateBlockedByRunnerContest",
+  "corpEconomyBeforeScoreFixGateBlockedBySafety",
+  "corpEconomyBeforeScoreFixGateSuspicious",
+  "corpEconomyBeforeScoreFixGateSuspiciousRepeatedEconomy",
+  "corpEconomyBeforeScoreFixGateSuspiciousNoConversion",
+  "corpEconomyBeforeScoreFixGateSuspiciousStealFollowup",
   "corpProtectionBeforeScoreWindow",
   "corpProtectionBeforeScoreWindowNoSafetyDelta",
   "corpCentralProtectionBeforeScoreWindow",
@@ -12439,6 +12627,8 @@ export function summarizeMatchProgressionMetrics(
   const corpScoreTerminalEntries = actionSequence.filter(
     (entry) => entry.corpScoreTerminalWindow === true,
   );
+  const corpEconomyBeforeScoreMetrics =
+    summarizeCorpEconomyBeforeScoreMetrics(summaries);
   const hqMemoryEntries = actionSequence.filter(
     (entry) =>
       entry.side === "runner" && typeof entry.hqKnownCards === "number",
@@ -12485,6 +12675,7 @@ export function summarizeMatchProgressionMetrics(
     ...breakerOntologyMetrics,
     ...remoteRoleOntologyMetrics,
     ...runnerSetupAttributionMetrics,
+    ...corpEconomyBeforeScoreMetrics,
     corpScoreTerminalWindow: corpScoreTerminalEntries.length,
     corpScoreTerminalWindowScoreLegal: corpScoreTerminalEntries.filter(
       (entry) => entry.corpScoreTerminalWindowScoreLegal === true,
@@ -17147,6 +17338,298 @@ function summarizeStrategicLineMetrics(
   };
 }
 
+function summarizeCorpEconomyBeforeScoreMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "corpEconomyBeforeScoreWindow"
+  | "corpEconomyBeforeScoreWindowNecessary"
+  | "corpEconomyBeforeScoreWindowWithInstalledAgenda"
+  | "corpEconomyBeforeScoreWindowWithAdvancedAgenda"
+  | "corpEconomyBeforeScoreWindowWithScoreLegalNext"
+  | "corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext"
+  | "corpEconomyBeforeScoreWindowWithReadyRemote"
+  | "corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote"
+  | "corpEconomyBeforeScoreWindowCreditsShort"
+  | "corpEconomyBeforeScoreWindowCreditsAlreadyEnough"
+  | "corpEconomyBeforeScoreWindowRemoteSafe"
+  | "corpEconomyBeforeScoreWindowRemoteContestHigh"
+  | "corpEconomyBeforeScoreTaken"
+  | "corpEconomyBeforeScoreTakenAsNecessaryCredits"
+  | "corpEconomyBeforeScoreTakenDespiteCreditsEnough"
+  | "corpEconomyBeforeScoreTakenOverScoreLegal"
+  | "corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal"
+  | "corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote"
+  | "corpEconomyBeforeScoreTakenOverHqAgendaExit"
+  | "corpEconomyBeforeScoreTakenOverScoreAreaAbility"
+  | "corpEconomyBeforeScoreConvertedToScoreNextDecision"
+  | "corpEconomyBeforeScoreConvertedToAdvanceNextDecision"
+  | "corpEconomyBeforeScoreConvertedToAgendaInstallNextDecision"
+  | "corpEconomyBeforeScoreConvertedWithin2CorpActions"
+  | "corpEconomyBeforeScoreConvertedWithin3CorpActions"
+  | "corpEconomyBeforeScoreNotConvertedWithin3CorpActions"
+  | "corpEconomyBeforeScoreRepeatedEconomyNextDecision"
+  | "corpEconomyBeforeScoreRepeatedEconomyWithin3"
+  | "corpEconomyBeforeScoreThenDraw"
+  | "corpEconomyBeforeScoreThenProtect"
+  | "corpEconomyBeforeScoreThenNewRemote"
+  | "corpEconomyBeforeScoreThenRunnerSteal"
+  | "corpEconomyBeforeScoreThenActionLimit"
+  | "corpEconomyBeforeScorePlausibleCreditsNeeded"
+  | "corpEconomyBeforeScorePlausibleRezOrAdvanceReserve"
+  | "corpEconomyBeforeScorePlausibleHqOrRndSafety"
+  | "corpEconomyBeforeScorePlausibleRunnerContestTooHigh"
+  | "corpEconomyBeforeScorePlausibleNoAgendaExit"
+  | "corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough"
+  | "corpEconomyBeforeScoreSuspiciousRepeatedEconomy"
+  | "corpEconomyBeforeScoreSuspiciousDelayedTerminalAction"
+  | "corpEconomyBeforeScoreSuspiciousRemoteStillSafe"
+  | "corpEconomyBeforeScoreSuspiciousRunnerStealFollowup"
+  | "corpEconomyBeforeScoreUnclassified"
+  | "corpEconomyBeforeScoreFixGateEligible"
+  | "corpEconomyBeforeScoreFixGateBlockedByCredits"
+  | "corpEconomyBeforeScoreFixGateBlockedByCheapContest"
+  | "corpEconomyBeforeScoreFixGateBlockedByRunnerContest"
+  | "corpEconomyBeforeScoreFixGateBlockedBySafety"
+  | "corpEconomyBeforeScoreFixGateSuspicious"
+  | "corpEconomyBeforeScoreFixGateSuspiciousRepeatedEconomy"
+  | "corpEconomyBeforeScoreFixGateSuspiciousNoConversion"
+  | "corpEconomyBeforeScoreFixGateSuspiciousStealFollowup"
+> {
+  const actionSequence = summaries.flatMap((summary) => summary.actionSequence);
+  const entries = actionSequence.filter(
+    (entry) =>
+      entry.corpEconomyBeforeScoreDiagnosticWindow === true ||
+      hasEvidenceFlag(entry, "corp_economy_before_score_window:true"),
+  );
+  const takenEntries = summaries.flatMap((summary) =>
+    summary.actionSequence
+      .map((entry, index) => ({
+        entry,
+        index,
+        sequence: summary.actionSequence,
+      }))
+      .filter(({ entry }) => entry.corpEconomyBeforeScoreTaken === true),
+  );
+  let convertedToScoreNext = 0;
+  let convertedToAdvanceNext = 0;
+  let convertedToAgendaInstallNext = 0;
+  let convertedWithin2 = 0;
+  let convertedWithin3 = 0;
+  let notConvertedWithin3 = 0;
+  let repeatedEconomyNext = 0;
+  let repeatedEconomyWithin3 = 0;
+  let thenDraw = 0;
+  let thenProtect = 0;
+  let thenNewRemote = 0;
+  let thenRunnerSteal = 0;
+  let thenActionLimit = 0;
+  let suspiciousRepeated = 0;
+  let suspiciousNoConversion = 0;
+  let suspiciousStealFollowup = 0;
+
+  const converted = (entry: PlanConversionActionEntry) =>
+    entry.corpScoreTerminalScoreTaken === true ||
+    entry.corpScoreTerminalAdvanceTaken === true ||
+    entry.corpScoreTerminalAgendaInstalled === true ||
+    entry.actionType === "score_agenda" ||
+    (entry.actionType === "advance_card" &&
+      entry.corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext === true) ||
+    (entry.actionType === "install_card" &&
+      entry.installPlacement !== "ice" &&
+      entry.targetCardType === "agenda");
+  const economy = (entry: PlanConversionActionEntry) =>
+    entry.corpEconomyBeforeScoreTaken === true ||
+    entry.corpScoreTerminalSkippedForEconomy === true ||
+    entry.actionType === "gain_credit" ||
+    hasEvidenceFlag(entry, "corp_economy_before_score_window:true");
+
+  for (const { entry, index, sequence } of takenEntries) {
+    const future = sequence.slice(index + 1, index + 13);
+    const futureCorp = future.filter((candidate) => candidate.side === "corp");
+    const nextCorp = futureCorp[0];
+    const next3 = futureCorp.slice(0, 3);
+    if (nextCorp?.corpScoreTerminalScoreTaken === true)
+      convertedToScoreNext += 1;
+    if (nextCorp?.corpScoreTerminalAdvanceTaken === true)
+      convertedToAdvanceNext += 1;
+    if (nextCorp?.corpScoreTerminalAgendaInstalled === true)
+      convertedToAgendaInstallNext += 1;
+    if (futureCorp.slice(0, 2).some(converted)) convertedWithin2 += 1;
+    if (next3.some(converted)) convertedWithin3 += 1;
+    else {
+      notConvertedWithin3 += 1;
+      if (entry.corpEconomyBeforeScoreFixGateEligible === true)
+        suspiciousNoConversion += 1;
+    }
+    if (nextCorp && economy(nextCorp)) {
+      repeatedEconomyNext += 1;
+      if (entry.corpEconomyBeforeScoreFixGateEligible === true)
+        suspiciousRepeated += 1;
+    }
+    if (next3.some(economy)) repeatedEconomyWithin3 += 1;
+    if (nextCorp?.actionType === "draw_card") thenDraw += 1;
+    if (
+      nextCorp?.corpScoreTerminalSkippedForProtection === true ||
+      nextCorp?.corpScoreTerminalSkippedForHqProtection === true ||
+      nextCorp?.corpScoreTerminalSkippedForRndProtection === true
+    )
+      thenProtect += 1;
+    if (
+      nextCorp?.actionType === "install_card" &&
+      nextCorp.targetServerId === "new_remote"
+    )
+      thenNewRemote += 1;
+    if (
+      future.some(
+        (candidate) =>
+          candidate.side === "runner" &&
+          candidate.actionType === "steal_agenda",
+      )
+    ) {
+      thenRunnerSteal += 1;
+      if (entry.corpEconomyBeforeScoreFixGateEligible === true)
+        suspiciousStealFollowup += 1;
+    }
+    if (index >= sequence.length - 6 && !futureCorp.some(converted))
+      thenActionLimit += 1;
+  }
+
+  const count = (flag: keyof AiSimulationSummary["actionSequence"][number]) =>
+    entries.filter((entry) => entry[flag] === true).length;
+
+  return {
+    corpEconomyBeforeScoreWindow: entries.length,
+    corpEconomyBeforeScoreWindowNecessary: entries.filter(
+      (entry) =>
+        entry.corpEconomyBeforeScoreTakenAsNecessaryCredits === true ||
+        hasEvidenceFlag(
+          entry,
+          "corp_economy_before_score_window_necessary:true",
+        ),
+    ).length,
+    corpEconomyBeforeScoreWindowWithInstalledAgenda: count(
+      "corpEconomyBeforeScoreWindowWithInstalledAgenda",
+    ),
+    corpEconomyBeforeScoreWindowWithAdvancedAgenda: count(
+      "corpEconomyBeforeScoreWindowWithAdvancedAgenda",
+    ),
+    corpEconomyBeforeScoreWindowWithScoreLegalNext: count(
+      "corpEconomyBeforeScoreWindowWithScoreLegalNext",
+    ),
+    corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext: count(
+      "corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext",
+    ),
+    corpEconomyBeforeScoreWindowWithReadyRemote: count(
+      "corpEconomyBeforeScoreWindowWithReadyRemote",
+    ),
+    corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote: count(
+      "corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote",
+    ),
+    corpEconomyBeforeScoreWindowCreditsShort: count(
+      "corpEconomyBeforeScoreWindowCreditsShort",
+    ),
+    corpEconomyBeforeScoreWindowCreditsAlreadyEnough: count(
+      "corpEconomyBeforeScoreWindowCreditsAlreadyEnough",
+    ),
+    corpEconomyBeforeScoreWindowRemoteSafe: count(
+      "corpEconomyBeforeScoreWindowRemoteSafe",
+    ),
+    corpEconomyBeforeScoreWindowRemoteContestHigh: count(
+      "corpEconomyBeforeScoreWindowRemoteContestHigh",
+    ),
+    corpEconomyBeforeScoreTaken: count("corpEconomyBeforeScoreTaken"),
+    corpEconomyBeforeScoreTakenAsNecessaryCredits: count(
+      "corpEconomyBeforeScoreTakenAsNecessaryCredits",
+    ),
+    corpEconomyBeforeScoreTakenDespiteCreditsEnough: count(
+      "corpEconomyBeforeScoreTakenDespiteCreditsEnough",
+    ),
+    corpEconomyBeforeScoreTakenOverScoreLegal: count(
+      "corpEconomyBeforeScoreTakenOverScoreLegal",
+    ),
+    corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal: count(
+      "corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal",
+    ),
+    corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote: count(
+      "corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote",
+    ),
+    corpEconomyBeforeScoreTakenOverHqAgendaExit: count(
+      "corpEconomyBeforeScoreTakenOverHqAgendaExit",
+    ),
+    corpEconomyBeforeScoreTakenOverScoreAreaAbility: count(
+      "corpEconomyBeforeScoreTakenOverScoreAreaAbility",
+    ),
+    corpEconomyBeforeScoreConvertedToScoreNextDecision: convertedToScoreNext,
+    corpEconomyBeforeScoreConvertedToAdvanceNextDecision:
+      convertedToAdvanceNext,
+    corpEconomyBeforeScoreConvertedToAgendaInstallNextDecision:
+      convertedToAgendaInstallNext,
+    corpEconomyBeforeScoreConvertedWithin2CorpActions: convertedWithin2,
+    corpEconomyBeforeScoreConvertedWithin3CorpActions: convertedWithin3,
+    corpEconomyBeforeScoreNotConvertedWithin3CorpActions: notConvertedWithin3,
+    corpEconomyBeforeScoreRepeatedEconomyNextDecision: repeatedEconomyNext,
+    corpEconomyBeforeScoreRepeatedEconomyWithin3: repeatedEconomyWithin3,
+    corpEconomyBeforeScoreThenDraw: thenDraw,
+    corpEconomyBeforeScoreThenProtect: thenProtect,
+    corpEconomyBeforeScoreThenNewRemote: thenNewRemote,
+    corpEconomyBeforeScoreThenRunnerSteal: thenRunnerSteal,
+    corpEconomyBeforeScoreThenActionLimit: thenActionLimit,
+    corpEconomyBeforeScorePlausibleCreditsNeeded: count(
+      "corpEconomyBeforeScorePlausibleCreditsNeeded",
+    ),
+    corpEconomyBeforeScorePlausibleRezOrAdvanceReserve: count(
+      "corpEconomyBeforeScorePlausibleRezOrAdvanceReserve",
+    ),
+    corpEconomyBeforeScorePlausibleHqOrRndSafety: count(
+      "corpEconomyBeforeScorePlausibleHqOrRndSafety",
+    ),
+    corpEconomyBeforeScorePlausibleRunnerContestTooHigh: count(
+      "corpEconomyBeforeScorePlausibleRunnerContestTooHigh",
+    ),
+    corpEconomyBeforeScorePlausibleNoAgendaExit: count(
+      "corpEconomyBeforeScorePlausibleNoAgendaExit",
+    ),
+    corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough: count(
+      "corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough",
+    ),
+    corpEconomyBeforeScoreSuspiciousRepeatedEconomy: suspiciousRepeated,
+    corpEconomyBeforeScoreSuspiciousDelayedTerminalAction: count(
+      "corpEconomyBeforeScoreSuspiciousDelayedTerminalAction",
+    ),
+    corpEconomyBeforeScoreSuspiciousRemoteStillSafe: count(
+      "corpEconomyBeforeScoreSuspiciousRemoteStillSafe",
+    ),
+    corpEconomyBeforeScoreSuspiciousRunnerStealFollowup:
+      suspiciousStealFollowup,
+    corpEconomyBeforeScoreUnclassified: count(
+      "corpEconomyBeforeScoreUnclassified",
+    ),
+    corpEconomyBeforeScoreFixGateEligible: count(
+      "corpEconomyBeforeScoreFixGateEligible",
+    ),
+    corpEconomyBeforeScoreFixGateBlockedByCredits: count(
+      "corpEconomyBeforeScoreFixGateBlockedByCredits",
+    ),
+    corpEconomyBeforeScoreFixGateBlockedByCheapContest: count(
+      "corpEconomyBeforeScoreFixGateBlockedByCheapContest",
+    ),
+    corpEconomyBeforeScoreFixGateBlockedByRunnerContest: count(
+      "corpEconomyBeforeScoreFixGateBlockedByRunnerContest",
+    ),
+    corpEconomyBeforeScoreFixGateBlockedBySafety: count(
+      "corpEconomyBeforeScoreFixGateBlockedBySafety",
+    ),
+    corpEconomyBeforeScoreFixGateSuspicious: count(
+      "corpEconomyBeforeScoreFixGateSuspicious",
+    ),
+    corpEconomyBeforeScoreFixGateSuspiciousRepeatedEconomy: suspiciousRepeated,
+    corpEconomyBeforeScoreFixGateSuspiciousNoConversion: suspiciousNoConversion,
+    corpEconomyBeforeScoreFixGateSuspiciousStealFollowup:
+      suspiciousStealFollowup,
+  };
+}
+
 function corpScoreTerminalFollowupMetrics(
   actionSequence: AiSimulationSummary["actionSequence"],
 ): Pick<
@@ -20793,6 +21276,157 @@ function corpScoreTerminalDiagnosticsForSimulationAction(
         }
       : {}),
     corpScoreTerminalEvidence: terminal.evidence,
+  };
+}
+
+function corpEconomyBeforeScoreDiagnosticsForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  if (input.side !== "corp" || action.side !== "corp") return {};
+  const terminal = assessCorpScoreTerminalWindow(input);
+  if (!terminal.terminalWindow) return {};
+  const family = corpScoreTerminalChosenFamily(input, action);
+  const economyTaken = family === "economy";
+  const hasInstalledAgenda =
+    terminal.scoreActionIds.length > 0 ||
+    terminal.advanceToScoreActionIds.length > 0;
+  const hasAdvancedAgenda = hasInstalledAgenda;
+  const scoreLegal = terminal.scoreActionIds.length > 0;
+  const advanceToScoreLegal = terminal.advanceToScoreActionIds.length > 0;
+  const agendaInstallReadyRemoteLegal =
+    terminal.agendaInstallActionIds.length > 0 &&
+    terminal.protectedRemoteIds.length > 0;
+  const fixGateBlockedBySafety = terminal.blockedByHqThreat;
+  const fixGateBlocked =
+    terminal.blockedByCredits ||
+    terminal.blockedByCheapContest ||
+    terminal.blockedByRunnerContest ||
+    fixGateBlockedBySafety;
+  const creditsNeeded = economyTaken && terminal.blockedByCredits;
+  const creditsAlreadyEnough = !terminal.blockedByCredits;
+  const suspiciousCreditsAlreadyEnough =
+    economyTaken && creditsAlreadyEnough && !fixGateBlocked;
+  const suspiciousDelayedTerminalAction =
+    economyTaken &&
+    !fixGateBlocked &&
+    (scoreLegal || advanceToScoreLegal || agendaInstallReadyRemoteLegal);
+  const suspiciousRemoteStillSafe =
+    economyTaken && !fixGateBlocked && terminal.protectedRemoteIds.length > 0;
+  const unclassified =
+    economyTaken &&
+    !creditsNeeded &&
+    !suspiciousCreditsAlreadyEnough &&
+    !suspiciousDelayedTerminalAction &&
+    !suspiciousRemoteStillSafe &&
+    !fixGateBlocked;
+  const evidence = [
+    "corp_economy_before_score_diagnostic_window:true",
+    `corp_economy_before_score_score_legal:${scoreLegal}`,
+    `corp_economy_before_score_advance_to_score_legal:${advanceToScoreLegal}`,
+    `corp_economy_before_score_agenda_install_ready_remote_legal:${agendaInstallReadyRemoteLegal}`,
+    `corp_economy_before_score_credits_short:${terminal.blockedByCredits}`,
+    `corp_economy_before_score_credits_already_enough:${creditsAlreadyEnough}`,
+    `corp_economy_before_score_remote_safe:${terminal.protectedRemoteIds.length > 0}`,
+    `corp_economy_before_score_runner_contest_high:${terminal.blockedByRunnerContest}`,
+  ];
+
+  return {
+    corpEconomyBeforeScoreDiagnosticWindow: true,
+    ...(hasInstalledAgenda
+      ? { corpEconomyBeforeScoreWindowWithInstalledAgenda: true }
+      : {}),
+    ...(hasAdvancedAgenda
+      ? { corpEconomyBeforeScoreWindowWithAdvancedAgenda: true }
+      : {}),
+    ...(scoreLegal
+      ? { corpEconomyBeforeScoreWindowWithScoreLegalNext: true }
+      : {}),
+    ...(advanceToScoreLegal
+      ? { corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext: true }
+      : {}),
+    ...(terminal.protectedRemoteIds.length > 0
+      ? {
+          corpEconomyBeforeScoreWindowWithReadyRemote: true,
+          corpEconomyBeforeScoreWindowRemoteSafe: true,
+        }
+      : {}),
+    ...(agendaInstallReadyRemoteLegal
+      ? { corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote: true }
+      : {}),
+    ...(terminal.blockedByCredits
+      ? { corpEconomyBeforeScoreWindowCreditsShort: true }
+      : { corpEconomyBeforeScoreWindowCreditsAlreadyEnough: true }),
+    ...(terminal.blockedByRunnerContest
+      ? { corpEconomyBeforeScoreWindowRemoteContestHigh: true }
+      : {}),
+    ...(economyTaken ? { corpEconomyBeforeScoreTaken: true } : {}),
+    ...(creditsNeeded
+      ? {
+          corpEconomyBeforeScoreTakenAsNecessaryCredits: true,
+          corpEconomyBeforeScorePlausibleCreditsNeeded: true,
+          corpEconomyBeforeScorePlausibleRezOrAdvanceReserve: true,
+        }
+      : {}),
+    ...(economyTaken && creditsAlreadyEnough
+      ? { corpEconomyBeforeScoreTakenDespiteCreditsEnough: true }
+      : {}),
+    ...(economyTaken && scoreLegal
+      ? { corpEconomyBeforeScoreTakenOverScoreLegal: true }
+      : {}),
+    ...(economyTaken && advanceToScoreLegal
+      ? { corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal: true }
+      : {}),
+    ...(economyTaken && agendaInstallReadyRemoteLegal
+      ? { corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote: true }
+      : {}),
+    ...(economyTaken && agendaInstallReadyRemoteLegal
+      ? { corpEconomyBeforeScoreTakenOverHqAgendaExit: true }
+      : {}),
+    ...(terminal.blockedByHqThreat
+      ? { corpEconomyBeforeScorePlausibleHqOrRndSafety: true }
+      : {}),
+    ...(terminal.blockedByRunnerContest
+      ? { corpEconomyBeforeScorePlausibleRunnerContestTooHigh: true }
+      : {}),
+    ...(economyTaken &&
+    !scoreLegal &&
+    !advanceToScoreLegal &&
+    !agendaInstallReadyRemoteLegal
+      ? { corpEconomyBeforeScorePlausibleNoAgendaExit: true }
+      : {}),
+    ...(suspiciousCreditsAlreadyEnough
+      ? { corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough: true }
+      : {}),
+    ...(suspiciousDelayedTerminalAction
+      ? { corpEconomyBeforeScoreSuspiciousDelayedTerminalAction: true }
+      : {}),
+    ...(suspiciousRemoteStillSafe
+      ? { corpEconomyBeforeScoreSuspiciousRemoteStillSafe: true }
+      : {}),
+    ...(unclassified ? { corpEconomyBeforeScoreUnclassified: true } : {}),
+    ...(terminal.blockedByCredits
+      ? { corpEconomyBeforeScoreFixGateBlockedByCredits: true }
+      : {}),
+    ...(terminal.blockedByCheapContest
+      ? { corpEconomyBeforeScoreFixGateBlockedByCheapContest: true }
+      : {}),
+    ...(terminal.blockedByRunnerContest
+      ? { corpEconomyBeforeScoreFixGateBlockedByRunnerContest: true }
+      : {}),
+    ...(fixGateBlockedBySafety
+      ? { corpEconomyBeforeScoreFixGateBlockedBySafety: true }
+      : {}),
+    ...(economyTaken && !fixGateBlocked
+      ? {
+          corpEconomyBeforeScoreFixGateEligible: true,
+          corpEconomyBeforeScoreFixGateSuspicious:
+            suspiciousCreditsAlreadyEnough ||
+            suspiciousDelayedTerminalAction ||
+            suspiciousRemoteStillSafe,
+        }
+      : {}),
+    corpEconomyBeforeScoreEvidence: evidence,
   };
 }
 
