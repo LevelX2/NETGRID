@@ -52,6 +52,7 @@ export type TriggerAbilityExecutionHost = {
     acceptExtraActionOffer: (state: GameState, legalAction: LegalAction) => void;
     declineExtraActionOffer: (state: GameState, legalAction: LegalAction) => void;
     resolvePdcaCounterAction: (state: GameState, legalAction: LegalAction) => void;
+    resolveForcedActionNotPossible: (state: GameState, legalAction: LegalAction) => void;
   };
   runnerSpecial: {
     handleRunnerSpecialTriggerExecution: (
@@ -103,6 +104,11 @@ export function handleTriggerAbilityExecution(
   if (legalAction.payload?.actionEconomyAbility === "pdca_counter_gain_action") {
     if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
     host.actionEconomy.resolvePdcaCounterAction(state, legalAction);
+    return handled(legalAction);
+  }
+  if (legalAction.payload?.actionEconomyAbility === "forced_action_not_possible") {
+    if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
+    host.actionEconomy.resolveForcedActionNotPossible(state, legalAction);
     return handled(legalAction);
   }
   if (host.runnerSpecial.handleRunnerSpecialTriggerExecution(legalAction).handled)

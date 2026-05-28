@@ -305,6 +305,7 @@ export type TurnBoundExtraActionOffer = {
   dieRoll?: number;
   randomPurpose?: string;
   createdAtStateVersion: number;
+  createdDuringTurnSerial?: number;
 };
 
 export type TurnBoundExtraActionGrant = TurnBoundExtraActionOffer & {
@@ -1255,6 +1256,7 @@ export type GameState = {
   matchId: string;
   baseline: RulesBaseline;
   stateVersion: number;
+  turnSerial?: number;
   seed: string;
   randomCounter: number;
   randomDrawRecords: RandomDrawRecord[];

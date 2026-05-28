@@ -11,6 +11,7 @@ export type PendingChoiceResolutionHost = {
   replacement: {
     resolveReplacementChoice: HostFn<void>;
     resolveEventModificationChoice: HostFn<void>;
+    resolvePdcaDamageReplacementChoice: HostFn<void>;
   };
   trace: {
     resolveTraceChoice: HostFn<void>;
@@ -104,6 +105,8 @@ export function resolvePendingChoice(
   const resolveReplacementChoice = host.replacement.resolveReplacementChoice;
   const resolveEventModificationChoice =
     host.replacement.resolveEventModificationChoice;
+  const resolvePdcaDamageReplacementChoice =
+    host.replacement.resolvePdcaDamageReplacementChoice;
   const resolveTraceChoice = host.trace.resolveTraceChoice;
   const handleHiddenZoneArrangeChoice =
     host.hiddenZone.handleHiddenZoneArrangeChoice;
@@ -237,6 +240,10 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v120.event_modification")) {
     resolveEventModificationChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("proteus.pdca_damage_replacement")) {
+    resolvePdcaDamageReplacementChoice(state, legalAction, playerAction);
     return;
   }
   if (state.trace) {

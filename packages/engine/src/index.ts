@@ -173,11 +173,13 @@ import {
   hiddenRunnerResourceRevealPayload,
   isRunnerHardwareDeckDefinition,
   openEventModificationWindow,
+  openPdcaDamageReplacementChoice,
   openReplacementWindow,
   openRunnerInstalledTrashPreventionWindow,
   resolveDamageImminentEvent,
   resolveDamageOperation,
   resolveEventModificationChoice,
+  resolvePdcaDamageReplacementChoice,
   resolveReplacementChoice,
   resolveRunnerInstalledTrashImminentEvent,
   setDamagePayload,
@@ -4757,6 +4759,7 @@ function triggerAbilityExecutionHost(
       acceptExtraActionOffer,
       declineExtraActionOffer,
       resolvePdcaCounterAction,
+      resolveForcedActionNotPossible,
     },
     runnerSpecial: {
       handleRunnerSpecialTriggerExecution: (legalAction) =>
@@ -7372,7 +7375,10 @@ type ActionEconomyGrant = NonNullable<
 function compactActionEconomy(state: GameState): void {
   const economy = state.actionEconomy;
   if (!economy) return;
-  if (economy.grants) economy.grants = economy.grants.filter((grant) => grant.remaining > 0);
+  if (economy.grants)
+    economy.grants = economy.grants.filter(
+      (grant) => grant.remaining > 0 && isTurnBoundExtraActionGrantCurrent(state, grant),
+    );
   if (economy.futureGrants)
     economy.futureGrants = economy.futureGrants.filter((grant) => grant.remainingTurns > 0);
   if (economy.corpCreditForfeitDebt && economy.corpCreditForfeitDebt.remaining <= 0)
@@ -7384,6 +7390,30 @@ function compactActionEconomy(state: GameState): void {
     !economy.corpCreditForfeitDebt
   )
     delete state.actionEconomy;
+}
+
+function currentTurnSerial(state: GameState): number {
+  return Math.max(0, Math.floor(state.turnSerial ?? 0));
+}
+
+function expireTurnBoundExtraActionGrants(state: GameState): void {
+  const economy = state.actionEconomy;
+  if (!economy?.grants) return;
+  economy.grants = economy.grants.filter(
+    (grant) => grant.remaining > 0 && isTurnBoundExtraActionGrantCurrent(state, grant),
+  );
+  compactActionEconomy(state);
+}
+
+function isTurnBoundExtraActionGrantCurrent(
+  state: GameState,
+  grant: ActionEconomyGrant,
+): boolean {
+  if (grant.side !== state.activeSide) return false;
+  if (grant.side === "corp" && state.phase !== "corp_action_phase") return false;
+  if (grant.side === "runner" && state.phase !== "runner_action_phase") return false;
+  if (grant.createdDuringTurnSerial === undefined) return true;
+  return grant.createdDuringTurnSerial === currentTurnSerial(state);
 }
 
 function restrictedActionFamilyForAiBoardMemberRoll(
@@ -7420,6 +7450,7 @@ function addTurnBoundExtraActionGrant(
       optional: !input.forced,
       remaining: 1,
       createdAtStateVersion: state.stateVersion,
+      createdDuringTurnSerial: currentTurnSerial(state),
       ...(input.forced ? { forced: true } : {}),
       ...(input.targetServerId ? { targetServerId: input.targetServerId } : {}),
       ...(input.targetCardInstanceId
@@ -7486,7 +7517,10 @@ function activeRestrictedGrantsForSide(
   side: Side,
 ): ActionEconomyGrant[] {
   return (state.actionEconomy?.grants ?? []).filter(
-    (grant) => grant.side === side && grant.remaining > 0,
+    (grant) =>
+      grant.side === side &&
+      grant.remaining > 0 &&
+      isTurnBoundExtraActionGrantCurrent(state, grant),
   );
 }
 
@@ -7513,7 +7547,35 @@ function filterActionsForRestrictedExtraActions(
   const matching = actions.filter((candidate) =>
     relevant.some((grant) => actionMatchesRestrictedGrant(state, candidate, grant)),
   );
-  if (forced.length > 0) return matching.length > 0 ? matching : actions.filter((a) => a.type === "end_turn");
+  if (forced.length > 0) {
+    if (matching.length > 0) return matching;
+    return forced.map((grant) =>
+      action(
+        state,
+        side,
+        "trigger_ability",
+        "Erzwungene Aktion ist nicht möglich",
+        "card",
+        [],
+        {
+          actionEconomyAbility: "forced_action_not_possible",
+          cardId: grant.sourceCardInstanceId,
+          sourceDefinitionId: grant.sourceDefinitionId,
+          restrictedActionFamily: grant.restriction,
+          ...(grant.revealToCorpOnly !== true && grant.targetCardInstanceId
+            ? { targetCardInstanceId: grant.targetCardInstanceId }
+            : {}),
+          ...(grant.targetServerId ? { targetServerId: grant.targetServerId } : {}),
+          ...(grant.dieRoll !== undefined ? { dieRoll: grant.dieRoll } : {}),
+          createdAtStateVersion: grant.createdAtStateVersion,
+          ...(grant.createdDuringTurnSerial !== undefined
+            ? { createdDuringTurnSerial: grant.createdDuringTurnSerial }
+            : {}),
+          hiddenZoneBarrier: grant.revealToCorpOnly === true,
+        },
+      ),
+    );
+  }
   return [
     ...matching,
     ...actions.filter((candidate) => candidate.type === "end_turn"),
@@ -7662,6 +7724,46 @@ function resolvePdcaCounterAction(state: GameState, legalAction: LegalAction): v
   };
 }
 
+function resolveForcedActionNotPossible(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const sourceId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const restriction = String(legalAction.payload?.restrictedActionFamily ?? "");
+  const targetCardId = legalAction.payload?.targetCardInstanceId
+    ? (String(legalAction.payload.targetCardInstanceId) as CardInstanceId)
+    : undefined;
+  const grants = state.actionEconomy?.grants ?? [];
+  const grant = grants.find(
+    (candidate) =>
+      candidate.side === legalAction.side &&
+      candidate.forced === true &&
+      candidate.remaining > 0 &&
+      candidate.sourceCardInstanceId === sourceId &&
+      candidate.restriction === restriction &&
+      isTurnBoundExtraActionGrantCurrent(state, candidate) &&
+      (targetCardId === undefined ||
+        candidate.targetCardInstanceId === targetCardId),
+  );
+  if (!grant)
+    throw new Error("Es gibt keine passende erzwungene Aktion zum Auflösen.");
+  if (
+    grant.restriction === "play_or_install_card" &&
+    (!grant.targetCardInstanceId ||
+      !state.runner.grip.includes(grant.targetCardInstanceId))
+  )
+    throw new Error("Die Viacox-Zielkarte liegt nicht mehr in der Grip.");
+  grant.remaining = 0;
+  compactActionEconomy(state);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    forcedActionResolvedAsNotPossible: true,
+    restrictedActionFamily: grant.restriction,
+    sourceDefinitionId: grant.sourceDefinitionId,
+    targetCardKnownToRunnerOnly: grant.revealToCorpOnly === true,
+  };
+}
+
 function publicCardTitle(definitionId: CardDefinitionId): string {
   return DEMO_CARDS_BY_ID[definitionId]?.title ?? definitionId;
 }
@@ -7700,6 +7802,8 @@ function startCorpTurn(
   state: GameState,
   effects?: AutomaticEffectCollector,
 ): void {
+  expireTurnBoundExtraActionGrants(state);
+  state.turnSerial = currentTurnSerial(state) + 1;
   state.activeSide = "corp";
   state.phase = "corp_draw_phase";
   state.timingPoint = "corp_draw.mandatory_draw";
@@ -7724,6 +7828,8 @@ function startRunnerTurn(
   state: GameState,
   effects?: AutomaticEffectCollector,
 ): void {
+  expireTurnBoundExtraActionGrants(state);
+  state.turnSerial = currentTurnSerial(state) + 1;
   returnCorpTemporaryInstallRezCredits(state, effects);
   state.activeSide = "runner";
   state.phase = "runner_action_phase";
@@ -10861,12 +10967,25 @@ function scoredAgendaAbilityHost(
     damage: {
       dealRunnerMeatDamage: (sourceCardId, amount) => {
         const sourceDefinition = definitionFor(state, sourceCardId);
-        const summary = doDamage(state, {
+        const event = createDamageImminentEvent(state, {
           damageId: `scored_agenda.${sourceCardId}.${state.stateVersion + 1}`,
           damageType: "meat",
           amount,
           source: `scored_agenda:${sourceDefinition.id}`,
         });
+        if (
+          legalAction &&
+          (openReplacementWindow(state, event, legalAction) ||
+            openEventModificationWindow(state, event, legalAction) ||
+            openPdcaDamageReplacementChoice(state, event, legalAction))
+        ) {
+          return {
+            damageAmount: 0,
+            cardsTrashed: 0,
+            flatline: false,
+          };
+        }
+        const summary = resolveDamageImminentEvent(state, event);
         if (legalAction) setDamagePayload(legalAction, summary);
         return {
           damageAmount: summary.amount,
@@ -11395,6 +11514,7 @@ function pendingChoiceResolutionHost(
     replacement: {
       resolveReplacementChoice,
       resolveEventModificationChoice,
+      resolvePdcaDamageReplacementChoice,
     },
     trace: {
       resolveTraceChoice: (_state, actionToResolve, playerActionToResolve) =>

@@ -136,6 +136,7 @@ function pendingChoiceHost(
     replacement: {
       resolveReplacementChoice: unexpected("resolveReplacementChoice"),
       resolveEventModificationChoice: unexpected("resolveEventModificationChoice"),
+      resolvePdcaDamageReplacementChoice: unexpected("resolvePdcaDamageReplacementChoice"),
     },
     trace: {
       resolveTraceChoice: unexpected("resolveTraceChoice"),

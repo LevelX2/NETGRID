@@ -3,6 +3,7 @@ import {
   applyAction,
   createGameAfterSetup,
   getLegalActions,
+  getPlayerView,
   hashState,
   replayEvents,
 } from "../../index";
@@ -34,6 +35,7 @@ const LUCIDRINE_DRIP_FEED = "onr_proteus_144_lucidrinetm-drip-feed";
 const INSTALLABLE_CORP_ASSET = "onr_v1_309_bbs-whispering-campaign";
 const RUNNER_EVENT = "onr_v1_077_anonymous-tip";
 const RUNNER_INSTALLABLE_HARDWARE = "onr_v1_144_tycho-mem-chip";
+const CORP_OPERATION = "onr_v1_290_efficiency-experts";
 
 function baseState(seed: string): GameState {
   const state = toRunnerTurn(
@@ -75,7 +77,26 @@ function applyLegal(state: GameState, side: Side, action: LegalAction): GameStat
 function applyOptionalDiscard(state: GameState, side: Side): GameState {
   if (state.pendingChoice?.source !== "discard_phase") return state;
   if (state.pendingChoice.side !== side) return state;
-  return applyChoice(state, side, String(state.pendingChoice.options[0]?.id));
+  const selectedOptionIds = state.pendingChoice.options
+    .slice(0, state.pendingChoice.maxSelections)
+    .map((option) => String(option.id));
+  const actionToResolve = getLegalActions(state, side).find(
+    (action) => action.type === "resolve_choice",
+  );
+  if (!actionToResolve) throw new Error("Discard-Choice ist nicht legal.");
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: actionToResolve.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey: `${side}-${state.stateVersion}-discard-all`,
+    selectedChoices: {
+      choiceId: state.pendingChoice.choiceId,
+      selectedOptionIds,
+    },
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
 }
 
 function nextCorpActionPhase(state: GameState): GameState {
@@ -244,12 +265,15 @@ function aiBoardStateForRoll(roll: number): GameState {
   throw new Error(`No AI Board Member seed for roll ${roll}`);
 }
 
-function viacoxStateForRoll(roll: number): GameState {
+function viacoxStateForRoll(
+  roll: number,
+  gripDefinitionId = RUNNER_INSTALLABLE_HARDWARE,
+): GameState {
   for (let index = 0; index < 500; index += 1) {
     const state = baseState(`pro017-viacox-${roll}-${index}`);
     clearRunnerGrip(state);
     installRunnerCard(state, BARGAIN_WITH_VIACOX, `viacox_${index}`, "resources");
-    addRunnerGrip(state, RUNNER_INSTALLABLE_HARDWARE, `runner_hardware_${index}`);
+    addRunnerGrip(state, gripDefinitionId, `runner_grip_${index}`);
     addRemote(state, "remote_1");
     const next = nextRunnerActionPhase(state);
     if (next.actionEconomy?.grants?.[0]?.dieRoll === roll) return next;
@@ -296,7 +320,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     }
   });
 
-  it("Please Don't Choke Anyone replaces Corp damage with PDCA counters and spends one per Corp turn", () => {
+  it("Please Don't Choke Anyone opens a Corp choice instead of auto-replacing damage", () => {
     let state = nextCorpActionPhase(baseState("pro017-pdca"));
     const pdcaId = scoreCorpAgenda(state, PDCA, "pdca");
     scoreCorpAgenda(state, CORPORATE_HEADHUNTERS, "headhunter");
@@ -309,6 +333,50 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       "corp",
       (action) => action.payload?.agendaAbility === "proteus_corporate_headhunters",
     );
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining(`proteus.pdca_damage_replacement:${pdcaId}`),
+    });
+    expect(state.cardInstances[pdcaId]?.counters?.pdca).toBeUndefined();
+    expect(state.runner.grip).toHaveLength(1);
+  });
+
+  it("Please Don't Choke Anyone can pass the damage through, including flatline", () => {
+    let state = nextCorpActionPhase(baseState("pro017-pdca-pass"));
+    scoreCorpAgenda(state, PDCA, "pdca_pass");
+    scoreCorpAgenda(state, CORPORATE_HEADHUNTERS, "headhunter_pass");
+    state.runner.tags = 1;
+    clearRunnerGrip(state);
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.payload?.agendaAbility === "proteus_corporate_headhunters",
+    );
+    state = applyChoice(state, "corp", "pass");
+    expect(state.runner.grip).toHaveLength(0);
+    expect(state.winner).toBe("corp");
+    expect(state.gameEndReason).toBe("flatline");
+  });
+
+  it("Please Don't Choke Anyone can replace the full damage slice with PDCA counters", () => {
+    let state = nextCorpActionPhase(baseState("pro017-pdca-replace"));
+    const pdcaId = scoreCorpAgenda(state, PDCA, "pdca_replace");
+    scoreCorpAgenda(state, CORPORATE_HEADHUNTERS, "headhunter_replace");
+    state.runner.tags = 1;
+    clearRunnerGrip(state);
+    addRunnerGrip(state, RUNNER_EVENT, "runner_event_pdca_replace");
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.payload?.agendaAbility === "proteus_corporate_headhunters",
+    );
+    const replaceOption = state.pendingChoice?.options.find((option) =>
+      String(option.id).startsWith("replace_"),
+    )?.id;
+    expect(replaceOption).toBeDefined();
+    state = applyChoice(state, "corp", String(replaceOption));
     expect(state.cardInstances[pdcaId]?.counters?.pdca).toBe(1);
     expect(state.runner.grip).toHaveLength(1);
 
@@ -325,6 +393,42 @@ describe("Proteus PRO017 action economy and debt suite", () => {
         (action) => action.payload?.actionEconomyAbility === "pdca_counter_gain_action",
       ),
     ).toBe(false);
+  });
+
+  it("Please Don't Choke Anyone rejects stale or invalid choices", () => {
+    let state = nextCorpActionPhase(baseState("pro017-pdca-invalid"));
+    scoreCorpAgenda(state, PDCA, "pdca_invalid");
+    scoreCorpAgenda(state, CORPORATE_HEADHUNTERS, "headhunter_invalid");
+    state.runner.tags = 1;
+    clearRunnerGrip(state);
+    addRunnerGrip(state, RUNNER_EVENT, "runner_event_pdca_invalid");
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.payload?.agendaAbility === "proteus_corporate_headhunters",
+    );
+    const choiceAction = getLegalActions(state, "corp").find(
+      (action) => action.type === "resolve_choice",
+    )!;
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "stale-pdca-choice",
+      selectedChoices: { selectedOptionIds: ["pass"] },
+    });
+    expect(stale.ok).toBe(false);
+    const invalid = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "invalid-pdca-choice",
+      selectedChoices: { selectedOptionIds: ["replace_missing_pdca"] },
+    });
+    expect(invalid.ok).toBe(false);
   });
 
   it("Project Venice records overadvance at score and grants recurring Corp actions", () => {
@@ -388,6 +492,59 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       const after = applyLegal(state, "runner", actions[0]!);
       expectReplayStable(before, after);
     }
+  });
+
+  it("Bargain with Viacox resolves an impossible roll-6 target without leaking hidden grip identity", () => {
+    let state = viacoxStateForRoll(6, CORP_OPERATION);
+    const grant = state.actionEconomy?.grants?.[0];
+    expect(grant?.targetCardInstanceId).toBeDefined();
+    const targetCardId = grant!.targetCardInstanceId!;
+    const actions = getLegalActions(state, "runner");
+    expect(actions).toHaveLength(1);
+    expect(actions[0]?.payload?.actionEconomyAbility).toBe(
+      "forced_action_not_possible",
+    );
+    expect(JSON.stringify(actions[0])).not.toContain(targetCardId);
+
+    const before = structuredClone(state) as GameState;
+    state = applyLegal(state, "runner", actions[0]!);
+    expect(state.actionEconomy?.grants ?? []).toHaveLength(0);
+    expectReplayStable(before, state);
+    const publicViews = [
+      JSON.stringify(getPlayerView(state, "corp").publicEvents),
+      JSON.stringify(getPlayerView(state, "runner").publicEvents),
+    ];
+    for (const view of publicViews) {
+      expect(view).not.toContain(targetCardId);
+      expect(view).not.toContain(CORP_OPERATION);
+    }
+  });
+
+  it("turn-bound extra-action grants expire if unused and consumed grants still compact", () => {
+    let state = aiBoardStateForRoll(1);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.payload?.actionEconomyAbility === "accept_extra_action_offer",
+    );
+    expect(state.actionEconomy?.grants).toHaveLength(1);
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    state = applyOptionalDiscard(state, "corp");
+    expect(state.actionEconomy?.grants ?? []).toHaveLength(0);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = applyOptionalDiscard(state, "runner");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    expect(state.actionEconomy?.grants ?? []).toHaveLength(0);
+
+    state = aiBoardStateForRoll(2);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.payload?.actionEconomyAbility === "accept_extra_action_offer",
+    );
+    state.corp.clicks = 1;
+    state = apply(state, "corp", (action) => action.type === "gain_credit");
+    expect(state.actionEconomy?.grants ?? []).toHaveLength(0);
   });
 
   it("Lucidrine Drip Feed builds Drip counters, grants actions, then resets for unpreventable core damage", () => {
