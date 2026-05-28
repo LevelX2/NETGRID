@@ -1,6 +1,10 @@
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
+import { createActionRuntimeHosts } from "./action-runtime-hosts";
+import { createCardRuntimeHosts } from "./card-runtime-hosts";
+import { createFlowRuntimeHosts } from "./flow-runtime-hosts";
+import { createStateRuntimeServices } from "./state-runtime-services";
 import {
   DEMO_CARDS_BY_ID,
   type ActionType,
@@ -2424,575 +2428,168 @@ export function applyEffectCommands(
   return next;
 }
 
-function corpRunnerActionPaidWindowActions(state: GameState): LegalAction[] {
-  const actions: LegalAction[] = [];
-  for (const server of state.corp.servers) {
-    for (const id of server.root) {
-      const definition = definitionFor(state, id);
-      const instance = mustInstance(state.cardInstances, id);
-      if (
-        (definition.type !== "asset" && definition.type !== "upgrade") ||
-        instance.rezzed
-      )
-        continue;
-      const rezCost = rezCostForCard(state, id);
-      if (state.corp.credits < rezCost) continue;
-      if (
-        isAcmeSavingsAndLoanDefinition(definition.id) &&
-        corpAgendaPointTotal(state) < 1
-      )
-        continue;
-      const rezCostReductionSourceDefinitionIds =
-        rezCostReductionSourceDefinitionIdsFor(state, id, definition);
-      const acmeRezCost = isAcmeSavingsAndLoanDefinition(definition.id)
-        ? {
-            agendaPointCost: 1,
-            acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
-          }
-        : {};
-      actions.push(
-        action(
-          state,
-          "corp",
-          "rez_ice",
-          `${definition.title} in ${server.label} rezzen`,
-          id,
-          [{ credits: rezCost }],
-          {
-            cardId: id,
-            rootRez: true,
-            runnerActionPaidWindowRez: true,
-            serverId: server.id,
-            ...acmeRezCost,
-            ...(rezCostReductionSourceDefinitionIds.length > 0
-              ? {
-                  rezCostReductionSourceDefinitionIds:
-                    rezCostReductionSourceDefinitionIds.join(","),
-                  rezCostReductionAmount: (definition.rezCost ?? 0) - rezCost,
-                  rezCostPaid: rezCost,
-                }
-              : {}),
-          },
-        ),
-      );
-    }
-  }
-  return actions;
+function corpRunnerActionPaidWindowActions(...args: any[]): any {
+  return (actionRuntimeHosts.corpRunnerActionPaidWindowActions as any)(...args);
 }
 
-function expireCorporateRetreatInstallCreditAbilities(state: GameState): void {
-  for (const agendaId of state.corp.scoreArea) {
-    const definition = definitionFor(state, agendaId);
-    if (
-      scoredAgendaKindForDefinition(definition) ===
-      "corporate_retreat_disable_on_rez_or_install"
-    )
-      setCardCounter(state, agendaId, "mark", 0);
-  }
+function expireCorporateRetreatInstallCreditAbilities(...args: any[]): any {
+  return (stateRuntimeServices.expireCorporateRetreatInstallCreditAbilities as any)(...args);
 }
 
-function isCorpInstallableCardType(definition: CardDefinition): boolean {
-  return (
-    definition.side === "corp" &&
-    (definition.type === "ice" ||
-      definition.type === "agenda" ||
-      definition.type === "asset" ||
-      definition.type === "upgrade")
-  );
+function isCorpInstallableCardType(...args: any[]): any {
+  return (stateRuntimeServices.isCorpInstallableCardType as any)(...args);
 }
 
-function edgerunnerTempsInstallActionsRemaining(state: GameState): number {
-  return Math.max(
-    0,
-    Math.floor(
-      state.corpTurnFlags?.edgerunnerTempsInstallActionsRemaining ?? 0,
-    ),
-  );
+function edgerunnerTempsInstallActionsRemaining(...args: any[]): any {
+  return (stateRuntimeServices.edgerunnerTempsInstallActionsRemaining as any)(...args);
 }
 
-function clearEdgerunnerTempsInstallFlags(state: GameState): void {
-  ensureCorpTurnFlags(state).edgerunnerTempsInstallActionsRemaining = 0;
+function clearEdgerunnerTempsInstallFlags(...args: any[]): any {
+  return (stateRuntimeServices.clearEdgerunnerTempsInstallFlags as any)(...args);
 }
 
-function consumeEdgerunnerTempsInstallAction(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (
-    legalAction.side !== "corp" ||
-    legalAction.type !== "install_card" ||
-    legalAction.payload?.v1922EdgerunnerTempsInstallAction !== true
-  )
-    return;
-  const flags = ensureCorpTurnFlags(state);
-  const remainingBefore = edgerunnerTempsInstallActionsRemaining(state);
-  if (remainingBefore <= 0)
-    throw new Error(
-      "Edgerunner, Inc., Temps hat keine Installationsaktionen mehr.",
-    );
-  flags.edgerunnerTempsInstallActionsRemaining = Math.max(
-    0,
-    remainingBefore - 1,
-  );
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1922CorpOperationAbility: "install_action_bundle",
-    edgerunnerTempsInstallActionSpent: true,
-    edgerunnerTempsInstallActionsRemaining:
-      flags.edgerunnerTempsInstallActionsRemaining,
-  };
+function consumeEdgerunnerTempsInstallAction(...args: any[]): any {
+  return (stateRuntimeServices.consumeEdgerunnerTempsInstallAction as any)(...args);
 }
 
-function valuPakProgramInstallActionsRemaining(state: GameState): number {
-  return Math.max(
-    0,
-    Math.floor(
-      ensureRunnerTurnFlags(state).valuPakProgramInstallActionsRemaining ?? 0,
-    ),
-  );
+function valuPakProgramInstallActionsRemaining(...args: any[]): any {
+  return (stateRuntimeServices.valuPakProgramInstallActionsRemaining as any)(...args);
 }
 
-function valuPakTemporaryProgramInstallCredits(state: GameState): number {
-  return Math.max(
-    0,
-    Math.floor(
-      ensureRunnerTurnFlags(state).valuPakTemporaryProgramInstallCredits ?? 0,
-    ),
-  );
+function valuPakTemporaryProgramInstallCredits(...args: any[]): any {
+  return (stateRuntimeServices.valuPakTemporaryProgramInstallCredits as any)(...args);
 }
 
-function runnerInstallableProgramIdsForValuPak(
-  state: GameState,
-): CardInstanceId[] {
-  return state.runner.grip.filter((cardId) => {
-    const definition = definitionFor(state, cardId);
-    const uniqueBlocked =
-      isUniqueCard(definition) &&
-      hasInstalledUniqueCardDefinition(state, "runner", definition.id);
-    return (
-      definition.type === "program" &&
-      !uniqueBlocked &&
-      availableRunnerProgramInstallCredits(state) >=
-        (definition.installCost ?? 0) &&
-      state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
-        runnerMemoryLimit(state)
-    );
-  });
+function runnerInstallableProgramIdsForValuPak(...args: any[]): any {
+  return (stateRuntimeServices.runnerInstallableProgramIdsForValuPak as any)(...args);
 }
 
-function installedRunnerProgramTrashOptionsForInstall(
-  state: GameState,
-): CardInstanceId[] {
-  return state.runner.rig.programs.slice().sort();
+function installedRunnerProgramTrashOptionsForInstall(...args: any[]): any {
+  return (stateRuntimeServices.installedRunnerProgramTrashOptionsForInstall as any)(...args);
 }
 
-function runnerProgramInstallMemoryReachableAfterTrash(
-  state: GameState,
-  definition: CardDefinition,
-): boolean {
-  const memoryCost = definition.memoryCost ?? 0;
-  if (state.runner.memoryUsed + memoryCost <= runnerMemoryLimit(state))
-    return true;
-  const maximumFreedMemory = installedRunnerProgramTrashOptionsForInstall(
-    state,
-  ).reduce((sum, cardId) => {
-    if (!runnerProgramUsesMemory(state, cardId)) return sum;
-    return sum + (definitionFor(state, cardId).memoryCost ?? 0);
-  }, 0);
-  return (
-    state.runner.memoryUsed + memoryCost - maximumFreedMemory <=
-    runnerMemoryLimit(state)
-  );
+function runnerProgramInstallMemoryReachableAfterTrash(...args: any[]): any {
+  return (stateRuntimeServices.runnerProgramInstallMemoryReachableAfterTrash as any)(...args);
 }
 
-function shouldOfferRunnerProgramTrashBeforeInstall(
-  state: GameState,
-  definition: CardDefinition,
-): boolean {
-  return (
-    definition.type === "program" &&
-    installedRunnerProgramTrashOptionsForInstall(state).length > 0 &&
-    runnerProgramInstallMemoryReachableAfterTrash(state, definition)
-  );
+function shouldOfferRunnerProgramTrashBeforeInstall(...args: any[]): any {
+  return (stateRuntimeServices.shouldOfferRunnerProgramTrashBeforeInstall as any)(...args);
 }
 
-function clearValuPakProgramInstallFlags(state: GameState): void {
-  const flags = ensureRunnerTurnFlags(state);
-  flags.valuPakProgramInstallActionsRemaining = 0;
-  flags.valuPakTemporaryProgramInstallCredits = 0;
+function clearValuPakProgramInstallFlags(...args: any[]): any {
+  return (stateRuntimeServices.clearValuPakProgramInstallFlags as any)(...args);
 }
 
-function consumeValuPakProgramInstallAction(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (
-    legalAction.side !== "runner" ||
-    legalAction.type !== "install_card" ||
-    legalAction.payload?.v1922ValuPakInstallAction !== true
-  )
-    return;
-  const flags = ensureRunnerTurnFlags(state);
-  const remainingBefore = valuPakProgramInstallActionsRemaining(state);
-  if (remainingBefore <= 0)
-    throw new Error(
-      "Valu-Pak Software Bundle hat keine Installationsaktionen mehr.",
-    );
-  flags.valuPakProgramInstallActionsRemaining = Math.max(
-    0,
-    remainingBefore - 1,
-  );
-  if (flags.valuPakProgramInstallActionsRemaining <= 0)
-    flags.valuPakTemporaryProgramInstallCredits = 0;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1922RunnerEventAbility: "program_install_action_bundle",
-    valuPakInstallActionSpent: true,
-    valuPakProgramInstallActionsRemaining:
-      flags.valuPakProgramInstallActionsRemaining,
-    valuPakTemporaryProgramInstallCreditsAfter:
-      valuPakTemporaryProgramInstallCredits(state),
-  };
+function consumeValuPakProgramInstallAction(...args: any[]): any {
+  return (stateRuntimeServices.consumeValuPakProgramInstallAction as any)(...args);
 }
 
-function runnerDrawActionContext(state: GameState): RunnerDrawActionContext {
-  return {
-    citySurveillanceSourceCount: citySurveillanceSourceIds(state).length,
-    projectedDrawCount: activeCrashEverettSourceId(state) ? 2 : 1,
-  };
+function runnerDrawActionContext(...args: any[]): any {
+  return (stateRuntimeServices.runnerDrawActionContext as any)(...args);
 }
 
-function normalizeSubtypeLabel(subtype: string): string {
-  return subtype
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+function normalizeSubtypeLabel(...args: any[]): any {
+  return (stateRuntimeServices.normalizeSubtypeLabel as any)(...args);
 }
 
-function cardHasSubtype(definition: CardDefinition, subtype: string): boolean {
-  const target = normalizeSubtypeLabel(subtype);
-  return definition.subtypes.some(
-    (candidate) => normalizeSubtypeLabel(candidate) === target,
-  );
+function cardHasSubtype(...args: any[]): any {
+  return (stateRuntimeServices.cardHasSubtype as any)(...args);
 }
 
-function stableSubtypeList(subtypes: readonly string[]): string[] {
-  return [...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype)))]
-    .sort();
+function stableSubtypeList(...args: any[]): any {
+  return (stateRuntimeServices.stableSubtypeList as any)(...args);
 }
 
-function effectiveSubtypesForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-  definition = definitionFor(state, cardId),
-): string[] {
-  const instance = state.cardInstances[cardId];
-  const selectedSubtypes = instance?.variableIceState?.selectedSubtypes;
-  if (
-    definition.type === "ice" &&
-    instance?.rezzed &&
-    selectedSubtypes &&
-    selectedSubtypes.length > 0
-  )
-    return stableSubtypeList(selectedSubtypes);
-  return stableSubtypeList(definition.subtypes);
+function effectiveSubtypesForCard(...args: any[]): any {
+  return (stateRuntimeServices.effectiveSubtypesForCard as any)(...args);
 }
 
-function rezzedIceOutsideThisIceCount(
-  state: GameState,
-  iceId: CardInstanceId,
-): number {
-  const instance = state.cardInstances[iceId];
-  if (!instance || instance.zone.side !== "corp" || instance.zone.zone !== "serverIce")
-    return 0;
-  const server = mustServer(state, instance.zone.serverId);
-  const iceIndex = server.ice.indexOf(iceId);
-  if (iceIndex < 0) return 0;
-  return server.ice
-    .slice(iceIndex + 1)
-    .filter((candidateId) => state.cardInstances[candidateId]?.rezzed === true)
-    .length;
+function rezzedIceOutsideThisIceCount(...args: any[]): any {
+  return (stateRuntimeServices.rezzedIceOutsideThisIceCount as any)(...args);
 }
 
-function relativeIceStrengthBonusFor(
-  state: GameState,
-  iceId: CardInstanceId,
-): number {
-  const relativeIce =
-    cardImplementationForDefinitionId(definitionFor(state, iceId).id)?.relativeIce;
-  const bonusPerCount = relativeIce?.strengthBonusPerCount;
-  if (!bonusPerCount) return 0;
-  return rezzedIceOutsideThisIceCount(state, iceId) * bonusPerCount;
+function relativeIceStrengthBonusFor(...args: any[]): any {
+  return (stateRuntimeServices.relativeIceStrengthBonusFor as any)(...args);
 }
 
-function isRegionUpgrade(definition: CardDefinition): boolean {
-  return definition.type === "upgrade" && cardHasSubtype(definition, "region");
+function isRegionUpgrade(...args: any[]): any {
+  return (stateRuntimeServices.isRegionUpgrade as any)(...args);
 }
 
-function isUniqueCard(definition: CardDefinition): boolean {
-  return (
-    cardHasSubtype(definition, "unique") ||
-    cardImplementationForDefinitionId(definition.id)?.unique?.kind ===
-      "unique_by_title"
-  );
+function isUniqueCard(...args: any[]): any {
+  return (stateRuntimeServices.isUniqueCard as any)(...args);
 }
 
-function rezzedBlackIceIds(state: GameState): CardInstanceId[] {
-  return corpInstalledCardIds(state).filter((cardId) => {
-    const instance = mustInstance(state.cardInstances, cardId);
-    return (
-      instance.zone.zone === "serverIce" &&
-      instance.rezzed &&
-      cardHasSubtype(definitionFor(state, cardId), "black_ice")
-    );
-  });
+function rezzedBlackIceIds(...args: any[]): any {
+  return (stateRuntimeServices.rezzedBlackIceIds as any)(...args);
 }
 
-function rezzedInstalledIceIds(state: GameState): CardInstanceId[] {
-  return corpInstalledCardIds(state).filter((cardId) => {
-    const instance = mustInstance(state.cardInstances, cardId);
-    return instance.zone.zone === "serverIce" && instance.rezzed;
-  });
+function rezzedInstalledIceIds(...args: any[]): any {
+  return (stateRuntimeServices.rezzedInstalledIceIds as any)(...args);
 }
 
-function affordableRezzedInstalledIceIdsForRunner(
-  state: GameState,
-): CardInstanceId[] {
-  return rezzedInstalledIceIds(state).filter(
-    (cardId) => state.runner.credits >= rezCostForCard(state, cardId),
-  );
+function affordableRezzedInstalledIceIdsForRunner(...args: any[]): any {
+  return (stateRuntimeServices.affordableRezzedInstalledIceIdsForRunner as any)(...args);
 }
 
-function unrezzedInstalledIceIds(state: GameState): CardInstanceId[] {
-  return corpInstalledCardIds(state).filter((cardId) => {
-    const instance = mustInstance(state.cardInstances, cardId);
-    return instance.zone.zone === "serverIce" && !instance.rezzed;
-  });
+function unrezzedInstalledIceIds(...args: any[]): any {
+  return (stateRuntimeServices.unrezzedInstalledIceIds as any)(...args);
 }
 
-function hasInstalledUniqueCardDefinition(
-  state: GameState,
-  side: Side,
-  definitionId: CardDefinitionId,
-): boolean {
-  const installed =
-    side === "runner"
-      ? runnerInstalledCardIds(state)
-      : corpInstalledCardIds(state);
-  return installed.some(
-    (cardId) => definitionFor(state, cardId).id === definitionId,
-  );
+function hasInstalledUniqueCardDefinition(...args: any[]): any {
+  return (stateRuntimeServices.hasInstalledUniqueCardDefinition as any)(...args);
 }
 
-function daemonHostingCapacity(definition: CardDefinition): number {
-  return Math.max(
-    0,
-    Math.floor(
-      cardImplementationForDefinitionId(definition.id)?.hostedProgramCapacity
-        ?.capacityMu ?? 0,
-    ),
-  );
+function daemonHostingCapacity(...args: any[]): any {
+  return (stateRuntimeServices.daemonHostingCapacity as any)(...args);
 }
 
-function daemonHostedMemoryUsed(
-  state: GameState,
-  hostId: CardInstanceId,
-): number {
-  return hostedCardsOn(state, hostId).reduce((sum, cardId) => {
-    const definition = definitionFor(state, cardId);
-    if (definition.type !== "program") return sum;
-    return sum + (definition.memoryCost ?? 0);
-  }, 0);
+function daemonHostedMemoryUsed(...args: any[]): any {
+  return (stateRuntimeServices.daemonHostedMemoryUsed as any)(...args);
 }
 
-function canHostProgramOnDaemon(
-  state: GameState,
-  hostId: CardInstanceId,
-  programDefinition: CardDefinition,
-): boolean {
-  if (programDefinition.type !== "program") return false;
-  if (cardHasSubtype(programDefinition, "daemon")) return false;
-  const hostInstance = mustInstance(state.cardInstances, hostId);
-  if (hostInstance.hostedOn) return false;
-  const hostDefinition = definitionFor(state, hostId);
-  if (
-    hostDefinition.type !== "program" &&
-    hostDefinition.type !== "hardware"
-  )
-    return false;
-  const implementation = cardImplementationForDefinitionId(hostDefinition.id);
-  if (
-    implementation?.hostedProgramCapacity?.hostedProgramsAreInstalled !== true ||
-    !implementation.hostedProgramCapacity.allowedCardTypes.includes("program")
-  )
-    return false;
-  const allowedProgramSubtypes =
-    implementation.hostedProgramCapacity.allowedProgramSubtypes;
-  if (
-    allowedProgramSubtypes?.length &&
-    !allowedProgramSubtypes.some((subtype) =>
-      cardHasSubtype(programDefinition, subtype),
-    )
-  )
-    return false;
-  const maxHostedPrograms =
-    implementation.hostedProgramCapacity.maxHostedPrograms;
-  if (
-    typeof maxHostedPrograms === "number" &&
-    hostedCardsOn(state, hostId).length >= maxHostedPrograms
-  )
-    return false;
-  const capacity = daemonHostingCapacity(hostDefinition);
-  if (capacity <= 0) return false;
-  return (
-    daemonHostedMemoryUsed(state, hostId) +
-      (programDefinition.memoryCost ?? 0) <=
-    capacity
-  );
+function canHostProgramOnDaemon(...args: any[]): any {
+  return (stateRuntimeServices.canHostProgramOnDaemon as any)(...args);
 }
 
-function hostedProgramStrengthModifier(
-  state: GameState,
-  cardId: CardInstanceId,
-): number {
-  const instance = state.cardInstances[cardId];
-  if (!instance?.hostedOn) return 0;
-  const definition = definitionFor(state, cardId);
-  if (definition.type !== "program" || !cardHasSubtype(definition, "icebreaker"))
-    return 0;
-  const hostDefinition = definitionFor(state, instance.hostedOn);
-  const modifiers =
-    cardImplementationForDefinitionId(hostDefinition.id)?.hostedProgramModifiers ??
-    [];
-  return modifiers.reduce((sum, modifier) => {
-    if (
-      modifier.appliesTo !== "hosted_icebreakers" ||
-      modifier.kind !== "icebreaker_strength"
-    )
-      return sum;
-    const amount = Math.max(0, Math.floor(modifier.amount));
-    return sum + (modifier.operation === "reduce" ? -amount : amount);
-  }, 0);
+function hostedProgramStrengthModifier(...args: any[]): any {
+  return (stateRuntimeServices.hostedProgramStrengthModifier as any)(...args);
 }
 
-function icebreakerEncounterStrengthBonus(
-  state: GameState,
-  breakerId: CardInstanceId,
-  encounteredIceId: CardInstanceId,
-): number {
-  const instance = state.cardInstances[breakerId];
-  if (!instance || instance.selectedCardId !== encounteredIceId) return 0;
-  const bonus =
-    cardImplementationForDefinitionId(definitionFor(state, breakerId).id)
-      ?.icebreakerEncounterStrengthBonus;
-  if (bonus?.kind !== "against_selected_installed_ice") return 0;
-  return Math.max(0, Math.floor(bonus.amount));
+function icebreakerEncounterStrengthBonus(...args: any[]): any {
+  return (stateRuntimeServices.icebreakerEncounterStrengthBonus as any)(...args);
 }
 
-function canOverlayProgramOnZetatechSoftwareInstaller(
-  state: GameState,
-  hostId: CardInstanceId,
-  programDefinition: CardDefinition,
-): boolean {
-  if (programDefinition.type !== "program") return false;
-  const hostInstance = mustInstance(state.cardInstances, hostId);
-  const hostDefinition = definitionFor(state, hostId);
-  return (
-    hostDefinition.id === ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID &&
-    hostDefinition.type === "program" &&
-    state.runner.rig.programs.includes(hostId) &&
-    !hostInstance.hostedOn &&
-    hostedCardsOn(state, hostId).length === 0
-  );
+function canOverlayProgramOnZetatechSoftwareInstaller(...args: any[]): any {
+  return (stateRuntimeServices.canOverlayProgramOnZetatechSoftwareInstaller as any)(...args);
 }
 
-function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
-  const ids: CardInstanceId[] = [];
-  for (const server of state.corp.servers) {
-    for (const cardId of server.root) {
-      if (mustInstance(state.cardInstances, cardId).rezzed) ids.push(cardId);
-    }
-  }
-  return ids;
+function rezzedCorpRootCardIds(...args: any[]): any {
+  return (stateRuntimeServices.rezzedCorpRootCardIds as any)(...args);
 }
 
-function visibleVirusCounterTargetIds(state: GameState): CardInstanceId[] {
-  const targets = new Set<CardInstanceId>();
-  for (const cardId of runnerInstalledCardIds(state)) {
-    if (cardCounter(state, cardId, "virus") > 0) targets.add(cardId);
-  }
-  for (const cardId of corpInstalledCardIds(state)) {
-    const instance = state.cardInstances[cardId];
-    if (!instance?.rezzed) continue;
-    if (cardCounter(state, cardId, "virus") > 0) targets.add(cardId);
-  }
-  return [...targets];
+function visibleVirusCounterTargetIds(...args: any[]): any {
+  return (stateRuntimeServices.visibleVirusCounterTargetIds as any)(...args);
 }
 
-function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
-  const iceServerId = corpServerIdForInstalledCard(state, iceId);
-  let bonus = 0;
-  for (const agendaId of scoredCorpAgendaIds(state)) {
-    const agendaDefinition = definitionFor(state, agendaId);
-    const scoredAgenda = scoredAgendaImplementationForDefinition(agendaDefinition);
-    if (scoredAgenda?.kind === "choose_fort_ice_strength_bonus") {
-      if (
-        iceServerId &&
-        mustInstance(state.cardInstances, agendaId).selectedServerId === iceServerId
-      )
-        bonus += scoredAgenda.amount;
-    }
-  }
-  bonus += iceStrengthModifierBonusFor(state, iceId);
-  bonus += cardCounter(state, iceId, "mark");
-  return bonus;
+function iceStrengthBonusFor(...args: any[]): any {
+  return (stateRuntimeServices.iceStrengthBonusFor as any)(...args);
 }
 
-function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
-  const definition = definitionFor(state, iceId);
-  const instance = mustInstance(state.cardInstances, iceId);
-  const runEncounterBonus =
-    state.run?.encounteredIceId === iceId
-      ? Math.max(0, Math.floor(state.run.futureEncounterIceStrengthBonus ?? 0))
-      : 0;
-  const pattelsReduction = cardCounter(state, iceId, "virus");
-  const baseStrength =
-    instance.variableIceState?.family === "x_strength" &&
-    typeof instance.variableIceState.strength === "number"
-      ? instance.variableIceState.strength
-      : (definition.strength ?? 0);
-  const total =
-    baseStrength +
-    instance.strengthModifier +
-    iceStrengthBonusFor(state, iceId) +
-    relativeIceStrengthBonusFor(state, iceId) +
-    runEncounterBonus -
-    pattelsReduction;
-  return Math.max(0, total);
+function iceStrengthFor(...args: any[]): any {
+  return (stateRuntimeServices.iceStrengthFor as any)(...args);
 }
 
-function runRemainderStrengthBonusForBreaker(
-  run: GameState["run"],
-  breakerId: CardInstanceId,
-): number {
-  if (!run) return 0;
-  return Math.max(
-    0,
-    Math.floor(run.remainderStrengthBonusByBreaker?.[breakerId] ?? 0),
-  );
+function runRemainderStrengthBonusForBreaker(...args: any[]): any {
+  return (stateRuntimeServices.runRemainderStrengthBonusForBreaker as any)(...args);
 }
 
-function runBreakSubroutineAdditionalCost(run: GameState["run"]): number {
-  if (!run) return 0;
-  return Math.max(0, Math.floor(run.breakSubroutineAdditionalCost ?? 0));
+function runBreakSubroutineAdditionalCost(...args: any[]): any {
+  return (stateRuntimeServices.runBreakSubroutineAdditionalCost as any)(...args);
 }
 
-function microtechTrodeSetBreakAdditionalCost(state: GameState): number {
-  return state.runner.rig.hardware.some(
-    (cardId) => definitionFor(state, cardId).id === MICROTECH_TRODE_SET_ID,
-  )
-    ? 1
-    : 0;
+function microtechTrodeSetBreakAdditionalCost(...args: any[]): any {
+  return (stateRuntimeServices.microtechTrodeSetBreakAdditionalCost as any)(...args);
 }
 
 type BreakSubroutineCostBreakdown = {
@@ -3005,2036 +2602,267 @@ type BreakSubroutineCostBreakdown = {
   publicPayload: NonNullable<LegalAction["payload"]>;
 };
 
-function breakSubroutineCostBreakdown(
-  state: GameState,
-  baseCost: number,
-  subroutineCount = 1,
-): BreakSubroutineCostBreakdown {
-  const run = mustRun(state);
-  const encounteredIceId = run.encounteredIceId;
-  if (!encounteredIceId)
-    throw new Error("Break-Subroutine-Kosten brauchen ein encountered ICE.");
-  const legacyRunAdditionalCost = runBreakSubroutineAdditionalCost(run);
-  const runnerHardwareAdditionalCost =
-    microtechTrodeSetBreakAdditionalCost(state);
-  const cardImplementationQuote = quoteBreakSubroutineCostModifiers(
-    state,
-    encounteredIceId,
-    subroutineCount,
-  );
-  const cardImplementationAdditionalCost =
-    cardImplementationQuote.totalAdditionalCost;
-  const additionalCost =
-    legacyRunAdditionalCost +
-    runnerHardwareAdditionalCost +
-    cardImplementationAdditionalCost;
-  const totalCost = baseCost + additionalCost;
-  return {
-    baseCost,
-    legacyRunAdditionalCost,
-    runnerHardwareAdditionalCost,
-    cardImplementationAdditionalCost,
-    additionalCost,
-    totalCost,
-    publicPayload: {
-      breakSubroutineBaseCost: baseCost,
-      ...(additionalCost > 0
-        ? {
-            breakSubroutineAdditionalCost: additionalCost,
-            breakSubroutineTotalCost: totalCost,
-            ...(legacyRunAdditionalCost > 0
-              ? { v1922CorpIceAbility: "virizz_break_cost_modifier" }
-              : {}),
-            ...(runnerHardwareAdditionalCost > 0
-              ? {
-                  runnerHardwareAbility:
-                    "microtech_trode_set_break_cost_modifier",
-                }
-              : {}),
-            ...cardImplementationQuote.publicPayload,
-          }
-        : {}),
-    },
-  };
-}
-
-function hasInstalledMicrotechTrodeSet(state: GameState): boolean {
-  return state.runner.rig.hardware.some(
-    (cardId) => definitionFor(state, cardId).id === MICROTECH_TRODE_SET_ID,
-  );
-}
-
-function runnerHasInstalledCardDefinition(
-  state: GameState,
-  side: Side,
-  definitionId: CardDefinitionId,
-): boolean {
-  const installed =
-    side === "runner"
-      ? runnerInstalledCardIds(state)
-      : corpInstalledCardIds(state);
-  return installed.some(
-    (cardId) => definitionFor(state, cardId).id === definitionId,
-  );
-}
-
-function runnerInstalledCardCountByDefinition(
-  state: GameState,
-  definitionId: CardDefinitionId,
-): number {
-  return runnerInstalledCardIds(state).reduce(
-    (count, cardId) =>
-      definitionFor(state, cardId).id === definitionId ? count + 1 : count,
-    0,
-  );
-}
-
-function installedVirusCounterTotalForDefinition(
-  state: GameState,
-  definitionId: CardDefinitionId,
-): number {
-  return runnerInstalledCardIds(state).reduce((sum, cardId) => {
-    if (definitionFor(state, cardId).id !== definitionId) return sum;
-    return sum + cardCounter(state, cardId, "virus");
-  }, 0);
-}
-
-function virusCounterImplementationForDefinition(
-  definitionId: CardDefinitionId,
-): CardVirusCounterImplementation | undefined {
-  return cardImplementationForDefinitionId(definitionId)?.virusCounter;
-}
-
-function virusCounterImplementationForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-): CardVirusCounterImplementation | undefined {
-  return virusCounterImplementationForDefinition(definitionFor(state, cardId).id);
-}
-
-function corpUtilityImplementationForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-): CardCorpUtilityImplementation | undefined {
-  return corpUtilityImplementationForDefinition(definitionFor(state, cardId).id);
-}
-
-function hasCorpUtilityKind(
-  state: GameState,
-  cardId: CardInstanceId,
-  kind: CardCorpUtilityImplementation["kind"],
-): boolean {
-  return corpUtilityImplementationForCard(state, cardId)?.kind === kind;
-}
-
-function cardInstallCapabilitiesForDefinition(
-  definitionId: CardDefinitionId,
-) {
-  return cardImplementationForDefinitionId(definitionId)?.installCapabilities ?? [];
-}
-
-function hasInstallCapabilityKindForDefinition(
-  definitionId: CardDefinitionId,
-  kind: NonNullable<
-    ReturnType<typeof cardInstallCapabilitiesForDefinition>
-  >[number]["kind"],
-): boolean {
-  return cardInstallCapabilitiesForDefinition(definitionId).some(
-    (capability) => capability.kind === kind,
-  );
-}
-
-function rootInstallRezzesOnInstall(definition: CardDefinition): boolean {
-  return (
-    isRegionUpgrade(definition) ||
-    hasInstallCapabilityKindForDefinition(definition.id, "rez_on_install")
-  );
-}
-
-function mustInstallInsideSubsidiaryDataFort(
-  definition: CardDefinition,
-): boolean {
-  return hasInstallCapabilityKindForDefinition(
-    definition.id,
-    "install_only_inside_subsidiary_data_fort",
-  );
-}
-
-function fortCapacityModifiersForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-) {
-  return (
-    cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-      ?.fortCapacityModifiers ?? []
-  );
-}
-
-function leavePlayCleanupImplementationsForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-) {
-  return (
-    cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-      ?.leavePlayCleanup ?? []
-  );
-}
-
-function installedRunnerVirusSourceIds(
-  state: GameState,
-  predicate?: (implementation: CardVirusCounterImplementation) => boolean,
-): CardInstanceId[] {
-  return state.runner.rig.programs
-    .slice()
-    .sort()
-    .filter((cardId) => {
-      const implementation = virusCounterImplementationForCard(state, cardId);
-      return implementation !== undefined && (!predicate || predicate(implementation));
-    });
-}
-
-function cockroachCounterTotal(state: GameState): number {
-  const implementationTotal = Object.keys(state.cardInstances).reduce(
-    (sum, cardId) => {
-      const implementation = virusCounterImplementationForCard(state, cardId);
-      if (
-        implementation?.continuousEffect?.kind !==
-        "randomize_corp_hq_discards_at_threshold"
-      )
-        return sum;
-      return sum + cardCounter(state, cardId, "virus");
-    },
-    0,
-  );
-  return implementationTotal > 0
-    ? implementationTotal
-    : installedVirusCounterTotalForDefinition(state, COCKROACH_ID);
-}
-
-function incubatorCounterTotal(state: GameState): number {
-  const implementationTotal = Object.keys(state.cardInstances).reduce(
-    (sum, cardId) => {
-      const implementation = virusCounterImplementationForCard(state, cardId);
-      if (implementation?.startOfRunnerTurn?.kind !== "incubator_duplicate_virus_counter")
-        return sum;
-      return sum + cardCounter(state, cardId, "virus");
-    },
-    0,
-  );
-  return implementationTotal > 0
-    ? implementationTotal
-    : installedVirusCounterTotalForDefinition(state, INCUBATOR_ID);
-}
-
-function cockroachRandomHqDiscardActive(state: GameState): boolean {
-  return cockroachCounterTotal(state) >= 2;
-}
-
-function isVisibleVirusCounterCardForRunner(
-  state: GameState,
-  cardId: CardInstanceId,
-): boolean {
-  const instance = mustInstance(state.cardInstances, cardId);
-  if (instance.owner === "runner") return true;
-  if (instance.rezzed) return true;
-  if (state.corp.scoreArea.includes(cardId)) return true;
-  if (state.corp.archives.includes(cardId) && instance.faceup) return true;
-  if (state.run?.accessedCardId === cardId) return true;
-  return false;
-}
-
-function corpIceInstallBaseCost(server: CorpServer): number {
-  return Math.max(0, server.ice.length);
-}
-
-function outermostIceIndex(server: CorpServer): number {
-  return server.ice.length - 1;
-}
-
-function poxCountersForServer(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): number {
-  return Math.max(0, Math.floor(state.poxCountersByServer?.[serverId] ?? 0));
-}
-
-function spyCountersForServer(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): number {
-  return Math.max(0, Math.floor(state.spyCountersByServer?.[serverId] ?? 0));
-}
-
-function poxInstallTax(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): number {
-  return Math.floor(poxCountersForServer(state, serverId) / 2);
-}
-
-function corpIceInstallAdditionalCost(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): number {
-  return poxInstallTax(state, serverId);
-}
-
-function corpIceInstallTotalCost(
-  state: GameState,
-  cardId: CardInstanceId,
-  server: CorpServer,
-): {
-  baseCost: number;
-  additionalCost: number;
-  reduction: number;
-  reductionSourceDefinitionIds?: string;
-  increaseSourceDefinitionIds?: string;
-  totalCost: number;
-} {
-  const additionalCost = corpIceInstallAdditionalCost(state, server.id);
-  const quote = quoteCorpIceInstallCost(state, cardId, server, {
-    additionalCredits: additionalCost,
-  });
-  return {
-    baseCost: quote.baseCredits,
-    additionalCost:
-      typeof quote.publicPayload.iceInstallAdditionalCost === "number"
-        ? quote.publicPayload.iceInstallAdditionalCost
-        : additionalCost,
-    reduction: quote.modifiers.reduce(
-      (sum, modifier) =>
-        modifier.kind === "reduction" ? sum + modifier.amount : sum,
-      0,
-    ),
-    reductionSourceDefinitionIds: quote.modifiers
-      .filter((modifier) => modifier.kind === "reduction")
-      .map((modifier) => modifier.sourceDefinitionId)
-      .join(","),
-    increaseSourceDefinitionIds: quote.modifiers
-      .filter((modifier) => modifier.kind === "increase")
-      .map((modifier) => modifier.sourceDefinitionId)
-      .join(","),
-    totalCost: quote.finalCredits,
-  };
-}
-
-function assertCorpIceInstallCostValid(
-  state: GameState,
-  cardId: CardInstanceId,
-  definition: CardDefinition,
-  legalAction: LegalAction,
-) {
-  if (
-    legalAction.side !== "corp" ||
-    legalAction.type !== "install_card" ||
-    legalAction.payload?.placement !== "ice"
-  )
-    return undefined;
-  if (definition.type !== "ice")
-    throw new Error("Corp-ICE-Installkosten gelten nur fuer ICE.");
-  const serverId = legalAction.payload?.serverId;
-  if (serverId === "new_remote") {
-    if ((legalAction.costs[0]?.credits ?? 0) !== 0)
-      throw new Error("Corp-ICE-Installkosten sind nicht mehr gueltig.");
-    return undefined;
-  }
-  const server = mustServer(state, String(serverId));
-  const additionalCost = corpIceInstallAdditionalCost(state, server.id);
-  const quote = quoteCorpIceInstallCost(state, cardId, server, {
-    additionalCredits: additionalCost,
-  });
-  if (!quote.canPay) throw new Error("Corp kann die Installkosten nicht zahlen.");
-  if ((legalAction.costs[0]?.credits ?? 0) !== quote.finalCredits)
-    throw new Error("Corp-ICE-Installkosten sind nicht mehr gueltig.");
-  return quote;
-}
-
-function specialZoneHarnessActions(
-  state: GameState,
-  side: Side,
-): LegalAction[] {
-  const harness = state.specialZoneHarness;
-  if (
-    !harness ||
-    harness.actor !== side ||
-    !state.cardInstances[harness.cardInstanceId]
-  )
-    return [];
-  const cardId = harness.cardInstanceId;
-  const instance = mustInstance(state.cardInstances, cardId);
-  const actions: LegalAction[] = [];
-  if (harness.setAside && instance.zone.side !== "special") {
-    actions.push(
-      action(
-        state,
-        side,
-        "move_to_set_aside",
-        "Karte testweise set-aside legen",
-        "game_rule",
-        [],
-        {
-          cardId,
-          specialZone: "set_aside",
-          specialZoneVisibility: harness.setAside.visibility,
-          ...(harness.setAside.visibilitySide
-            ? { specialZoneVisibilitySide: harness.setAside.visibilitySide }
-            : {}),
-          specialZoneReason: harness.setAside.reason ?? "v1.2.2_test_harness",
-        },
-        {
-          targetRequirements: [
-            { id: "card", kind: "card", visibility: "engine_only" },
-          ],
-        },
-      ),
-    );
-  }
-  if (harness.removedFromGame && instance.zone.side !== "special") {
-    actions.push(
-      action(
-        state,
-        side,
-        "move_to_removed_from_game",
-        "Karte testweise aus dem Spiel entfernen",
-        "game_rule",
-        [],
-        {
-          cardId,
-          specialZone: "removed_from_game",
-          specialZoneVisibility: harness.removedFromGame.visibility,
-          ...(harness.removedFromGame.visibilitySide
-            ? {
-                specialZoneVisibilitySide:
-                  harness.removedFromGame.visibilitySide,
-              }
-            : {}),
-          specialZoneReason:
-            harness.removedFromGame.reason ?? "v1.2.2_test_harness",
-        },
-        {
-          targetRequirements: [
-            { id: "card", kind: "card", visibility: "engine_only" },
-          ],
-        },
-      ),
-    );
-  }
-  if (
-    harness.setAside?.allowReturn &&
-    instance.zone.side === "special" &&
-    instance.zone.zone === "set_aside"
-  ) {
-    actions.push(
-      action(
-        state,
-        side,
-        "return_from_set_aside",
-        "Karte testweise aus Set Aside zurückholen",
-        "game_rule",
-        [],
-        {
-          cardId,
-          specialZone: "set_aside",
-          specialZoneReason:
-            harness.setAside.reason ?? "v1.2.2_test_harness_return",
-        },
-        {
-          targetRequirements: [
-            {
-              id: "card",
-              kind: "card",
-              zoneScope: ["special.set_aside"],
-              visibility: "engine_only",
-            },
-          ],
-        },
-      ),
-    );
-  }
-  if (
-    harness.controlChange &&
-    instance.controller !== harness.controlChange.newController
-  ) {
-    actions.push(
-      action(
-        state,
-        side,
-        "change_card_control",
-        "Kartenkontrolle testweise wechseln",
-        "game_rule",
-        [],
-        {
-          cardId,
-          oldController: instance.controller,
-          newController: harness.controlChange.newController,
-          controlChangeVisibility: harness.controlChange.visibility ?? "public",
-          controlChangeReason:
-            harness.controlChange.reason ?? "v1.2.2_test_harness",
-        },
-        {
-          targetRequirements: [
-            { id: "card", kind: "card", visibility: "engine_only" },
-            {
-              id: "controller",
-              kind: "side",
-              allowedSides: ["corp", "runner"],
-            },
-          ],
-        },
-      ),
-    );
-  }
-  return actions;
-}
-
-function dupreStrengthCounterBonus(
-  state: GameState,
-  breakerId: CardInstanceId,
-): number {
-  if (!icebreakerHasSpecial(state, breakerId, "dupre_strength_counter_and_last_fort"))
-    return 0;
-  const selectedServerId = mustInstance(state.cardInstances, breakerId)
-    .selectedServerId;
-  if (
-    state.run &&
-    selectedServerId &&
-    selectedServerId !== state.run.attackedServerId
-  )
-    return 0;
-  return cardCounter(state, breakerId, "power");
-}
-
-function permanentIcebreakerStrengthCounterBonus(
-  state: GameState,
-  breakerId: CardInstanceId,
-): number {
-  if (icebreakerHasSpecial(state, breakerId, "dupre_strength_counter_and_last_fort"))
-    return 0;
-  return cardCounter(state, breakerId, "power");
-}
-
-function pumpAmountForLegalAction(
-  state: GameState,
-  legalAction: LegalAction,
-): number {
-  const payloadAmount = Number(legalAction.payload?.pumpAmount);
-  if (Number.isInteger(payloadAmount) && payloadAmount >= 0)
-    return payloadAmount;
-  const breakerId = String(legalAction.payload?.breakerId ?? "");
-  const abilityId = legalAction.abilityRef?.abilityId;
-  const definition = state.cardInstances[breakerId]
-    ? definitionFor(state, breakerId)
-    : undefined;
-  const ability = definition
-    ? icebreakerAbilitiesForDefinition(definition).find(
-        (candidate) =>
-          candidate.type === "pump_strength" &&
-          (!abilityId || candidate.id === abilityId),
-      )
-    : undefined;
-  const amount = ability?.amount ?? 1;
-  return Number.isInteger(amount) ? amount : 1;
-}
-
-function pumpAbilityForLegalAction(
-  state: GameState,
-  legalAction: LegalAction,
-): RuntimeIcebreakerAbility | undefined {
-  const breakerId = String(legalAction.payload?.breakerId ?? "");
-  const abilityId = legalAction.abilityRef?.abilityId;
-  const definition = state.cardInstances[breakerId]
-    ? definitionFor(state, breakerId)
-    : undefined;
-  return definition
-    ? icebreakerAbilitiesForDefinition(definition).find(
-        (candidate) =>
-          candidate.type === "pump_strength" &&
-          (!abilityId || candidate.id === abilityId),
-      )
-    : undefined;
-}
-
-function breakAbilityForLegalAction(
-  state: GameState,
-  legalAction: LegalAction,
-): RuntimeIcebreakerAbility | undefined {
-  const breakerId = String(legalAction.payload?.breakerId ?? "");
-  const abilityId = legalAction.abilityRef?.abilityId;
-  const definition = state.cardInstances[breakerId]
-    ? definitionFor(state, breakerId)
-    : undefined;
-  return definition
-    ? icebreakerAbilitiesForDefinition(definition).find(
-        (candidate) =>
-          candidate.type === "break_subroutine" &&
-          (!abilityId || candidate.id === abilityId),
-      )
-    : undefined;
-}
-
-function pumpDurationForLegalAction(
-  state: GameState,
-  legalAction: LegalAction,
-): "current_encounter" | "current_run" {
-  const breakerId = String(legalAction.payload?.breakerId ?? "");
-  const abilityId = legalAction.abilityRef?.abilityId;
-  const definition = state.cardInstances[breakerId]
-    ? definitionFor(state, breakerId)
-    : undefined;
-  const ability = definition
-    ? icebreakerAbilitiesForDefinition(definition).find(
-        (candidate) =>
-          candidate.type === "pump_strength" &&
-          (!abilityId || candidate.id === abilityId),
-      )
-    : undefined;
-  return ability?.strengthDuration ?? "current_encounter";
-}
-
-function assertCurrentSubroutineMatchesLegalAction(
-  state: GameState,
-  iceDefinition: CardDefinition,
-  subroutineIndex: number,
-  legalAction: LegalAction,
-): NonNullable<CardDefinition["subroutines"]>[number] {
-  const subroutine = subroutinesForCurrentEncounter(
-    state,
-    iceDefinition,
-  )[subroutineIndex];
-  if (!subroutine) throw new Error("Subroutine existiert nicht mehr.");
-  const expectedSubroutineId =
-    typeof legalAction.payload?.subroutineId === "string"
-      ? legalAction.payload.subroutineId
-      : undefined;
-  if (expectedSubroutineId && subroutine.id !== expectedSubroutineId)
-    throw new Error("Subroutine-Ziel ist nicht mehr gueltig.");
-  return subroutine;
-}
-
-function resolveMultiBreakSubroutinesAction(
-  state: GameState,
-  breakerId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  const run = mustRun(state);
-  const iceId = String(legalAction.payload?.iceId ?? "");
-  if (run.phase !== "encounter_ice" || !run.encounteredIceId)
-    throw new Error("Multi-Break kann nur im ICE-Encounter genutzt werden.");
-  if (run.encounteredIceId !== iceId)
-    throw new Error("Multi-Break zielt nicht auf das encountered ICE.");
-  if (run.noBreakSubroutinesActive)
-    throw new Error("Subroutinen koennen in diesem Encounter nicht gebrochen werden.");
-  if (!state.runner.rig.programs.includes(breakerId))
-    throw new Error("Der Icebreaker ist nicht installiert.");
-  const breakerDefinition = definitionFor(state, breakerId);
-  const iceDefinition = definitionFor(state, iceId);
-  if (legalAction.payload?.targetIceDefinitionId !== iceDefinition.id)
-    throw new Error("Multi-Break zielt auf die falsche ICE-Definition.");
-  const ability = icebreakerAbilitiesForDefinition(breakerDefinition).find(
-    (candidate) =>
-      candidate.id === legalAction.abilityRef?.abilityId &&
-      candidate.type === "break_subroutine",
-  );
-  if (
-    !ability ||
-    !breakAbilityMatchesIce(
-      ability,
-      effectiveSubtypesForCard(state, iceId as CardInstanceId, iceDefinition),
-    )
-  )
-    throw new Error("Der Icebreaker hat keine gueltige Multi-Break-Faehigkeit.");
-  if (
-    ability.selectedIceSubtypeFromBreaker &&
-    !effectiveSubtypesForCard(state, iceId as CardInstanceId, iceDefinition).includes(
-      normalizeSubtypeLabel(
-        mustInstance(state.cardInstances, breakerId).selectedSubtype ?? "",
-      ),
-    )
-  )
-    throw new Error("Der gewählte Icebreaker-Typ passt nicht zum ICE.");
-  const breakerStrength =
-    (breakerDefinition.strength ?? 0) +
-    mustInstance(state.cardInstances, breakerId).strengthModifier +
-    hostedProgramStrengthModifier(state, breakerId) +
-    icebreakerEncounterStrengthBonus(state, breakerId, iceId) +
-    cardCounter(state, breakerId, "militech") +
-    permanentIcebreakerStrengthCounterBonus(state, breakerId) +
-    cardCounter(state, breakerId, "pattel_antibody") * -1 +
-    dupreStrengthCounterBonus(state, breakerId) +
-    runRemainderStrengthBonusForBreaker(run, breakerId);
-  if (breakerStrength < iceStrengthFor(state, iceId))
-    throw new Error("Der Icebreaker ist nicht stark genug fuer dieses ICE.");
-  const rawIndexes =
-    typeof legalAction.payload?.subroutineIndexes === "string"
-      ? legalAction.payload.subroutineIndexes
-      : "";
-  if (!rawIndexes) throw new Error("Multi-Break braucht Subroutine-Ziele.");
-  const subroutineIndexes = rawIndexes.split(",").map((value) => Number(value));
-  const subroutines = subroutinesForCurrentEncounter(state, iceDefinition);
-  if (
-    subroutineIndexes.length < 1 ||
-    subroutineIndexes.length > Math.min(ability.count ?? 4, subroutines.length) ||
-    new Set(subroutineIndexes).size !== subroutineIndexes.length ||
-    subroutineIndexes.some((index) => !Number.isInteger(index) || index < 0)
-  ) {
-    throw new Error("Multi-Break hat ungueltige Subroutine-Ziele.");
-  }
-  for (const subroutineIndex of subroutineIndexes) {
-    const subroutine = subroutines[subroutineIndex];
-    if (!subroutine)
-      throw new Error("Multi-Break zielt auf eine fehlende Subroutine.");
-    if (!breakAbilityMatchesSubroutine(ability, subroutine))
-      throw new Error("Multi-Break kann diese Subroutine nicht brechen.");
-    if (
-      run.brokenSubroutineIndexes.includes(subroutineIndex) ||
-      run.resolvedSubroutineIndexes.includes(subroutineIndex)
-    ) {
-      throw new Error("Multi-Break zielt auf eine bereits erledigte Subroutine.");
-    }
-  }
-  const stealthLoss = ability.postBreakStealthLoss ?? 0;
-  if (runnerStealthRecurringCredits(fortRunSideFamiliesHostForState(state)) < stealthLoss)
-    throw new Error("Nicht genug Stealth-Credits fuer Multi-Break.");
-  const expectedCost = breakSubroutineCostBreakdown(
-    state,
-    ability.cost.credits,
-    subroutineIndexes.length,
-  ).totalCost;
-  if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
-    throw new Error("Multi-Break-Kosten sind nicht mehr gueltig.");
-  spendRunnerRunCredits(runDurationPaymentHost(state), expectedCost, breakerId);
-  executeEffectCommands(
-    state,
-    subroutineIndexes.map((subroutineIndex) => ({
-      type: "break_subroutine",
-      subroutineIndex,
-    })),
-  );
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    breakSubroutineCount: subroutineIndexes.length,
-    multiBreakSubroutines: true,
-    // Kept for PublicContext and older Pile Driver regression tests.
-    pileDriverMultiBreak: true,
-    sourceDefinitionId: breakerDefinition.id,
-  };
-  applyPostBreakStealthLoss(
-    fortRunSideFamiliesHostForState(state),
-    breakerId,
-    legalAction,
-  );
-}
-
-function assertBreakSubroutineCostQuoteValid(
-  state: GameState,
-  breakerId: CardInstanceId | undefined,
-  legalAction: LegalAction,
-  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
-): void {
-  if (!breakerId) throw new Error("Break-Subroutine-Quelle fehlt.");
-  const run = mustRun(state);
-  if (run.phase !== "encounter_ice" || !run.encounteredIceId)
-    throw new Error("Subroutine kann nur im ICE-Encounter gebrochen werden.");
-  if (!state.runner.rig.programs.includes(breakerId))
-    throw new Error("Breaker ist nicht installiert.");
-  const breakerDefinition = definitionFor(state, breakerId);
-  const iceDefinition = definitionFor(state, run.encounteredIceId);
-  const ability = icebreakerAbilitiesForDefinition(breakerDefinition).find(
-    (candidate) =>
-      candidate.id === legalAction.abilityRef?.abilityId &&
-      candidate.type === "break_subroutine",
-  );
-  if (
-    !ability ||
-    !breakAbilityMatchesIce(
-      ability,
-      effectiveSubtypesForCard(state, run.encounteredIceId, iceDefinition),
-    )
-  )
-    throw new Error("Breaker hat keine gueltige Break-Faehigkeit.");
-  if (
-    ability.selectedIceSubtypeFromBreaker &&
-    !effectiveSubtypesForCard(state, run.encounteredIceId, iceDefinition).includes(
-      normalizeSubtypeLabel(
-        mustInstance(state.cardInstances, breakerId).selectedSubtype ?? "",
-      ),
-    )
-  )
-    throw new Error("Der gewählte Icebreaker-Typ passt nicht zum ICE.");
-  if (!breakAbilityMatchesSubroutine(ability, subroutine))
-    throw new Error("Breaker kann diese Subroutine nicht brechen.");
-  const breakerStrength =
-    (breakerDefinition.strength ?? 0) +
-    mustInstance(state.cardInstances, breakerId).strengthModifier +
-    hostedProgramStrengthModifier(state, breakerId) +
-    icebreakerEncounterStrengthBonus(state, breakerId, run.encounteredIceId) +
-    cardCounter(state, breakerId, "militech") +
-    permanentIcebreakerStrengthCounterBonus(state, breakerId) +
-    cardCounter(state, breakerId, "pattel_antibody") * -1 +
-    dupreStrengthCounterBonus(state, breakerId) +
-    runRemainderStrengthBonusForBreaker(run, breakerId);
-  if (breakerStrength < iceStrengthFor(state, run.encounteredIceId))
-    throw new Error("Der Icebreaker ist nicht stark genug fuer dieses ICE.");
-  const expectedCost = breakSubroutineCostBreakdown(
-    state,
-    ability.cost.credits,
-    1,
-  ).totalCost;
-  if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
-    throw new Error("Break-Subroutine-Kosten sind nicht mehr gueltig.");
-}
-
-function subroutinesForCurrentEncounter(
-  state: GameState,
-  iceDefinition: CardDefinition,
-): NonNullable<CardDefinition["subroutines"]> {
-  const run = state.run;
-  const transmutationCopies = run?.encounteredIceId
-    ? cardCounter(state, run.encounteredIceId, "mark")
-    : 0;
-  const printedSubroutines =
-    printedSubroutinesForCardImplementation(iceDefinition) ??
-    iceDefinition.subroutines ??
-    [];
-  const subroutines = printedSubroutines.flatMap((subroutine) => {
-    const copies = [subroutine];
-    for (let index = 0; index < transmutationCopies; index += 1) {
-      copies.push({
-        ...subroutine,
-        id: `${subroutine.id}.v1920_ice_transmutation.${index + 1}`,
-      });
-    }
-    return copies.map((copy) =>
-      relativeDamageSubroutineForCurrentEncounter(
-        state,
-        run?.encounteredIceId,
-        variableTraceSubroutineForCurrentEncounter(
-          state,
-          run?.encounteredIceId,
-          copy,
-        ),
-      ),
-    );
-  });
-  if (
-    run?.encounteredIceId &&
-    run.futureEncounterEndTheRunSourceIceId &&
-    run.encounteredIceId !== run.futureEncounterEndTheRunSourceIceId
-  ) {
-    subroutines.push({
-      id: "v1922_tutor_future_end_the_run",
-      type: "end_the_run",
-    });
-  }
-  if (run?.encounteredIceId) {
-    const variableIceState =
-      state.cardInstances[run.encounteredIceId]?.variableIceState;
-    if (variableIceState?.family === "paid_end_the_run_subroutines") {
-      const subroutineCount = Math.max(
-        0,
-        Math.floor(variableIceState.subroutineCount ?? 0),
-      );
-      for (let index = 0; index < subroutineCount; index += 1) {
-        subroutines.push({
-          id: `variable_ice_paid_end_the_run_${index + 1}`,
-          type: "end_the_run",
-        });
-      }
-    }
-    subroutines.push(
-      ...currentEncounterAdditionalSubroutinesForIce(state, run.encounteredIceId),
-    );
-    subroutines.push(...relativeTraceSubroutinesForCurrentEncounter(state, run.encounteredIceId));
-    subroutines.push(...additionalSubroutinesForIce(state, run.encounteredIceId));
-  }
-  return subroutines;
-}
-
-function variableTraceSubroutineForCurrentEncounter(
-  state: GameState,
-  iceId: CardInstanceId | undefined,
-  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
-): NonNullable<CardDefinition["subroutines"]>[number] {
-  if (!iceId || subroutine.type !== "initiate_trace") return subroutine;
-  const instance = state.cardInstances[iceId];
-  const variableRez = cardImplementationForDefinitionId(instance?.definitionId ?? "")
-    ?.variableRez;
-  const variableIceState = instance?.variableIceState;
-  if (variableRez?.kind !== "x_strength" || variableIceState?.family !== "x_strength")
-    return subroutine;
-  const value = Math.max(0, Math.floor(variableIceState.value));
-  return {
-    ...subroutine,
-    ...(variableRez.traceBaseFromValue ? { baseTraceStrength: value } : {}),
-    ...(variableRez.traceBidLimitFromValue ? { traceBidLimit: value } : {}),
-  };
-}
-
-function relativeDamageSubroutineForCurrentEncounter(
-  state: GameState,
-  iceId: CardInstanceId | undefined,
-  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
-): NonNullable<CardDefinition["subroutines"]>[number] {
-  if (!iceId || subroutine.type !== "do_damage") return subroutine;
-  const relativeIce =
-    cardImplementationForDefinitionId(definitionFor(state, iceId).id)?.relativeIce;
-  const dynamicDamage = relativeIce?.dynamicDamageSubroutine;
-  if (!dynamicDamage || dynamicDamage.subroutineId !== subroutine.id)
-    return subroutine;
-  return {
-    ...subroutine,
-    amount:
-      rezzedIceOutsideThisIceCount(state, iceId) *
-      dynamicDamage.amountPerCount,
-  };
-}
-
-function relativeTraceSubroutinesForCurrentEncounter(
-  state: GameState,
-  iceId: CardInstanceId,
-): NonNullable<CardDefinition["subroutines"]> {
-  const definition = definitionFor(state, iceId);
-  const dynamicTrace =
-    cardImplementationForDefinitionId(definition.id)?.relativeIce
-      ?.dynamicTraceSubroutines;
-  if (!dynamicTrace) return [];
-  const count = rezzedIceOutsideThisIceCount(state, iceId);
-  return Array.from({ length: count }, (_, index) => ({
-    id: `relative_ice_outside_${definition.id}.trace.${index + 1}`,
-    type: "initiate_trace",
-    baseTraceStrength: dynamicTrace.baseTraceStrength,
-    traceSuccessEffect: dynamicTrace.traceSuccessEffect,
-  }));
-}
-
-function runCardImplementationActionHost(state: GameState) {
-  return {
-    state,
-    cards: {
-      cardInstanceFor: (cardId: CardInstanceId) => state.cardInstances[cardId],
-      definitionFor: (cardId: CardInstanceId) => definitionFor(state, cardId),
-      runnerInstalledCardIds: () => runnerInstalledCardIds(state),
-      cardImplementationForDefinitionId: (definitionId: string) =>
-        cardImplementationForDefinitionId(definitionId as CardDefinitionId),
-    },
-    actions: {
-      buildLegalAction: (
-        type: LegalAction["type"],
-        label: string,
-        source: LegalAction["source"],
-        costs?: LegalAction["costs"],
-        payload?: LegalAction["payload"],
-      ) => action(state, "runner", type, label, source, costs, payload),
-    },
-    runtime: {
-      pushActivatedActionsForTiming: (
-        actions: LegalAction[],
-        side: Side,
-        sourceCardId: CardInstanceId,
-        definition: CardDefinition,
-        timing: ActivatedCardAbilityImplementation["timing"],
-      ) =>
-        pushActivatedCardImplementationActionsForTiming(
-          cardImplementationRuntimeDeps,
-          state,
-          actions,
-          side,
-          sourceCardId,
-          definition,
-          timing,
-        ),
-    },
-  };
-}
-
-function runStartTaxForServerUpgrades(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): { amount: number; sourceDefinitionIds: CardDefinitionId[] } {
-  const server = mustServer(state, serverId);
-  const sourceDefinitionIds = server.root
-    .filter((cardId) => mustInstance(state.cardInstances, cardId).rezzed)
-    .map((cardId) => definitionFor(state, cardId).id)
-    .filter(
-      (definitionId) =>
-        RUN_TAX_UPGRADE_CARD_IDS.has(definitionId) &&
-        !cardImplementationForDefinitionId(definitionId),
-    );
-  return {
-    amount: sourceDefinitionIds.length,
-    sourceDefinitionIds,
-  };
-}
-
-function newsgroupTauntingRunStartTax(
-  state: GameState,
-): { amount: number; sourceDefinitionIds: CardDefinitionId[] } {
-  const sourceDefinitionIds = rezzedCorpRootCardIds(state)
-    .filter(
-      (cardId) =>
-        definitionFor(state, cardId).id === NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID ||
-        hasCorpUtilityKind(state, cardId, "newsgroup_taunting_run_start_tax"),
-    )
-    .map((cardId) => definitionFor(state, cardId).id);
-  return {
-    amount: sourceDefinitionIds.length,
-    sourceDefinitionIds,
-  };
-}
-
-function spendRunnerAccessTrashCredits(
-  state: GameState,
-  amount: number,
-  accessedCardId: CardInstanceId,
-): { recurringSpent: number; runnerCreditsSpent: number } {
-  if (amount <= 0) return { recurringSpent: 0, runnerCreditsSpent: 0 };
-  const host = runnerAccessActionHost(state);
-  if (availableRunnerAccessTrashCredits(host, accessedCardId) < amount)
-    throw new Error("Der Runner kann die Trashkosten nicht bezahlen.");
-  let remaining = amount;
-  let recurringSpent = 0;
-  for (const cardId of runnerAccessTrashRecurringCreditSourceIds(host, accessedCardId)) {
-    if (remaining <= 0) break;
-    const available = hostedPaymentCredits(state, cardId);
-    const spent = Math.min(available, remaining);
-    if (spent > 0) {
-      spendHostedPaymentCredits(state, cardId, spent);
-      recurringSpent += spent;
-      remaining -= spent;
-    }
-  }
-  spendCredits(state, "runner", remaining);
-  return { recurringSpent, runnerCreditsSpent: remaining };
-}
-
-function turnBasicExecutionHost(state: GameState): TurnBasicExecutionHost {
-  return {
-    state,
-    draw: {
-      drawCorpCard,
-      drawRunnerCards,
-      applyRunnerDrawSummaryPayload,
-    },
-    turn: {
-      spendClick,
-      spendClicks,
-      endTurn,
-    },
-    credits: {
-      spendRunnerTagRemovalCredits,
-    },
-    cards: {
-      trashRunnerInstalledCardToHeap,
-    },
-    callbacks: {
-      startCodeViralCachePurgeChoice,
-    },
-  };
-}
-
-function creditEconomyExecutionHost(
-  state: GameState,
-): CreditEconomyExecutionHost {
-  return {
-    state,
-    actions: {
-      spendClick,
-    },
-    cards: {
-      definitionFor,
-      mustInstance,
-      publicServerLabelForCard,
-      hasCardImplementationForDefinition: (definitionId) =>
-        Boolean(cardImplementationForDefinitionId(definitionId)),
-      hasCorpUtilityKind,
-      uniqueDirectLongtailImplementationForCard,
-    },
-    credits: {
-      gain: credits,
-      spend: spendCredits,
-    },
-    counters: {
-      cardCounter,
-      addCardCounter,
-      spendCardCounter,
-      visibleVirusCounterTargetIds,
-    },
-    runner: {
-      installedCardIds: runnerInstalledCardIds,
-      trashInstalledCardToHeap: trashRunnerInstalledCardToHeap,
-      forfeitAgendaForPointCost: forfeitRunnerAgendaForPointCost,
-      drawCards: drawRunnerCards,
-      applyDrawSummaryPayload: applyRunnerDrawSummaryPayload,
-      ensureTurnFlags: ensureRunnerTurnFlags,
-    },
-    corp: {
-      rezzedRootCardIds: rezzedCorpRootCardIds,
-      installedCardIds: corpInstalledCardIds,
-      publicInstalledCardIdentityKnown: publicInstalledCorpCardIdentityKnown,
-      uninstallInstalledCardToHq: uninstallCorpInstalledCardToHq,
-      trashInstalledCardToArchives: trashCorpInstalledCardToArchives,
-    },
-    hiddenZone: {
-      resolveV1911RunnerHiddenZoneAbility,
-      resolveV1911CorporateDownsizing,
-      revealRunnerStackTop,
-      revealCorpRdTop,
-      resolveReschedulerHqShuffleDraw: (
-        stateForAction,
-        legalAction,
-        sourceCardId,
-      ) =>
-        resolveReschedulerHqShuffleDraw(
-          corpZoneChoiceHandlerHost(stateForAction, legalAction),
-          sourceCardId,
-        ),
-      startCorpAssetRdTopReorderChoice: (
-        stateForAction,
-        legalAction,
-        sourceCardId,
-      ) =>
-        startCorpAssetRdTopReorderChoice(
-          hiddenZoneArrangeChoiceHandlerHost(stateForAction, legalAction),
-          sourceCardId,
-        ),
-    },
-    delegates: {
-      shouldOpenInvestmentFirmCreditChoice,
-      startInvestmentFirmCreditChoice,
-      resolveCorpInstalledEconomyAction,
-      handleTraceOrchestrationAction: (legalAction) =>
-        handleTraceOrchestrationAction(
-          traceOrchestrationHost(state),
-          legalAction,
-        ),
-      handleCorpSpecialDamageAbilityAction: (legalAction) =>
-        handleCorpSpecialDamageAbilityAction(
-          corpSpecialDamageAbilityHost(state, legalAction),
-        ),
-      handleScoredAgendaActivatedAbilityAction: (legalAction) =>
-        handleScoredAgendaActivatedAbilityAction(
-          scoredAgendaAbilityHost(state, legalAction),
-        ),
-    },
-    random: {
-      nextRandom,
-    },
-    constants: {
-      COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID,
-      CORP_HQ_SHUFFLE_DRAW_CARD_ID,
-      HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS,
-      HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
-      COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
-      DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
-      COUNTER_UPGRADE_CARD_IDS,
-      TAG_CONDITION_UPGRADE_CARD_IDS,
-      COUNTER_ASSET_CARD_IDS,
-      INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID,
-      ACTION_ASSET_CARD_IDS,
-      RUNNER_RANDOM_PROGRAM_CARD_IDS,
-      QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
-      FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
-    },
-  };
-}
-
-function runnerSpecialTriggerExecutionHost(
-  state: GameState,
-): RunnerSpecialTriggerExecutionHost {
-  return {
-    state,
-    actions: {
-      spendClick,
-    },
-    cards: {
-      definitionFor,
-      mustInstance,
-      isUniqueCard,
-      hasInstalledUniqueCardDefinition,
-      hasCardImplementationMemoryUnitModifier,
-      shouldLoadLegacyRecurringCredits,
-      publicTitle: publicCardTitle,
-    },
-    credits: {
-      spend: spendCredits,
-    },
-    counters: {
-      cardCounter,
-      setCardCounter,
-      addCardCounter,
-      spendCardCounter,
-    },
-    zones: {
-      removeFromAllZones,
-      ensureSpecialZones,
-      trashRunnerInstalledCardToHeap,
-    },
-    runner: {
-      runnerMemoryLimit,
-    },
-    hiddenZone: {
-      startSelfModifyingCodeStackActivation: (sourceCardId, legalAction) =>
-        startSelfModifyingCodeStackActivation(
-          hiddenZoneSearchActivationHandlerHost(state, legalAction),
-          sourceCardId,
-        ),
-    },
-    constants: {
-      BUTCHER_BOY_ID,
-      JUNKYARD_BBS_ID,
-      SELF_MODIFYING_CODE_ID,
-      SHELL_TRADERS_ID,
-      SKIVVISS_ID,
-    },
-  };
-}
-
-function runFortTriggerExecutionHost(
-  state: GameState,
-): RunFortTriggerExecutionHost {
-  return {
-    state,
-    actions: {
-      spendClick,
-    },
-    cards: {
-      definitionFor,
-      mustInstance,
-    },
-    zones: {
-      removeFromAllZones,
-    },
-    run: {
-      resolveSuccessfulRunFollowupAbility: (legalAction) =>
-        resolveSuccessfulRunFollowupAbility(
-          successfulRunInterventionHost(state),
-          legalAction,
-        ),
-      resolveFullyBrokenPassedIceDerezAndEndRun: (legalAction) =>
-        resolveFullyBrokenPassedIceDerezAndEndRunInRunModule(
-          encounterSpecialWindowHostForState(state),
-          legalAction,
-        ),
-      resolveStartupImmolatorTrashIce: (legalAction) =>
-        resolveStartupImmolatorTrashIceInRunModule(
-          encounterSpecialWindowHostForState(state),
-          legalAction,
-        ),
-      resolveFortPassAdvancementWindow: (legalAction) =>
-        resolveFortPassAdvancementWindow(
-          fortPassWindowHostForState(state),
-          legalAction,
-        ),
-      resolveStartRunIceRepositionWindow: (legalAction) =>
-        resolveStartRunIceRepositionWindow(
-          fortPassWindowHostForState(state),
-          legalAction,
-        ),
-      resolveApproachIceExposeAbility: (legalAction) =>
-        resolveApproachIceExposeAbility(
-          encounterEntryHostForState(state),
-          legalAction,
-        ),
-      resolveApproachIceExposeViewingDecision: (legalAction) =>
-        resolveApproachIceExposeViewingDecision(
-          encounterEntryHostForState(state),
-          legalAction,
-        ),
-      startSingaporeCityGridSwapChoice: (legalAction) =>
-        startSingaporeCityGridSwapChoice(
-          fortPassWindowHostForState(state),
-          legalAction,
-        ),
-    },
-    constants: {
-      MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
-    },
-  };
-}
-
-function counterUtilityTriggerExecutionHost(
-  state: GameState,
-): CounterUtilityTriggerExecutionHost {
-  return {
-    state,
-    actions: {
-      spendClick,
-      spendClicks,
-    },
-    cards: {
-      definitionFor,
-      runnerUtilityLongtailKindForCard,
-    },
-    credits: {
-      spend: spendCredits,
-    },
-    counters: {
-      cardCounter,
-      spendCardCounter,
-      spyCountersForServer,
-      traceCounterEffectDefinitionFor,
-    },
-    runner: {
-      ensureTurnFlags: ensureRunnerTurnFlags,
-      trashInstalledCardToHeap: trashRunnerInstalledCardToHeap,
-    },
-    servers: {
-      mustServer,
-      publicServerLabel,
-    },
-    dataFort: {
-      newDataFortCreationLockForSource,
-    },
-  };
-}
-
-function triggerAbilityExecutionHost(
-  state: GameState,
-): TriggerAbilityExecutionHost {
-  return {
-    state,
-    actions: {
-      spendClick,
-    },
-    cards: {
-      definitionFor,
-      remainingReplacementLongtailKindForCard,
-      cardImplementationForDefinitionId: (definitionId) =>
-        cardImplementationForDefinitionId(definitionId as CardDefinitionId),
-    },
-    credits: {
-      spend: spendCredits,
-    },
-    runner: {
-      trashInstalledCardToHeap: trashRunnerInstalledCardToHeap,
-      ensureTurnFlags: ensureRunnerTurnFlags,
-    },
-    corp: {
-      acmeSavingsAndLoanObligationCount,
-      removeAcmeSavingsAndLoanObligation,
-    },
-    runnerSpecial: {
-      handleRunnerSpecialTriggerExecution: (legalAction) =>
-        handleRunnerSpecialTriggerExecution(
-          runnerSpecialTriggerExecutionHost(state),
-          legalAction,
-        ),
-    },
-    runFort: {
-      handleRunFortTriggerExecution: (legalAction) =>
-        handleRunFortTriggerExecution(
-          runFortTriggerExecutionHost(state),
-          legalAction,
-        ),
-    },
-    counterUtility: {
-      handleCounterUtilityTriggerExecution: (legalAction) =>
-        handleCounterUtilityTriggerExecution(
-          counterUtilityTriggerExecutionHost(state),
-          legalAction,
-        ),
-    },
-    hiddenZone: {
-      handleHiddenZoneTriggerExecution: (legalAction) =>
-        handleHiddenZoneTriggerExecution(
-          hiddenZoneSearchActivationHandlerHost(state, legalAction),
-          legalAction,
-        ),
-    },
-    constants: {
-      CODE_VIRAL_CACHE_ID,
-    },
-  };
-}
-
-function installCardHost(state: GameState): InstallCardHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
-      isUniqueCard,
-      hasInstalledUniqueCardDefinition: (side, definitionId) =>
-        hasInstalledUniqueCardDefinition(state, side, definitionId),
-      cardHasSubtype,
-      isRunnerHardwareDeckDefinition,
-      hasCardImplementationMemoryUnitModifier,
-      shouldLoadLegacyRecurringCredits,
-      damagePreventionSourcesForDefinition,
-      cardImplementationAgendaPointInstallCost,
-    },
-    servers: {
-      assertCorpCanCreateNewDataFort: () => assertCorpCanCreateNewDataFort(state),
-      mustServer: (serverId) => mustServer(state, serverId),
-      createRemote: () => createRemote(state),
-      serverChoiceDisplayLabel: (serverId) =>
-        serverChoiceDisplayLabel(state, serverId),
-      canInstallCorpRootCardInServer: (definition, server) =>
-        canInstallCorpRootCardInServer(state, definition, server),
-      corpRootAgendaOrNodeCapacityInServer: (server) =>
-        corpRootAgendaOrNodeCapacityInServer(state, server),
-      corpRootAssetIdsInServer: (server) =>
-        corpRootAssetIdsInServer(state, server),
-      corpRootMainCardIdsInServer: (server) =>
-        corpRootMainCardIdsInServer(state, server),
-      rootInstallRezzesOnInstall,
-      trashOlderRegionUpgradesInServer: (server, keepCardId, legalAction) =>
-        trashOlderRegionUpgradesInServer(state, server, keepCardId, legalAction),
-      markRovingSubmarineActivityForServer: (serverId, legalAction) =>
-        markRovingSubmarineActivityForServer(
-          fortRunSideFamiliesHostForState(state),
-          serverId,
-          legalAction,
-        ),
-    },
-    zones: {
-      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
-      trashRunnerInstalledCardToHeap: (cardId) =>
-        trashRunnerInstalledCardToHeap(state, cardId),
-      trashCorpInstalledCardToArchives: (cardId, legalAction) =>
-        trashCorpInstalledCardToArchives(state, cardId, legalAction),
-    },
-    runner: {
-      ensureTurnFlags: () => ensureRunnerTurnFlags(state),
-      requiresDataFortInstallTarget,
-      startRunnerProgramTrashBeforeInstallChoice: (cardId) =>
-        startRunnerProgramTrashBeforeInstallChoice(state, cardId),
-      forfeitRunnerAgendaForPointCost: (cardId) =>
-        forfeitRunnerAgendaForPointCost(state, cardId),
-      consumeValuPakProgramInstallAction: (legalAction) =>
-        consumeValuPakProgramInstallAction(state, legalAction),
-      startRunnerHostingChoice: (cardId, legalAction) =>
-        startRunnerHostingChoice(state, cardId, legalAction),
-      hiddenRunnerResourceSlotId,
-    },
-    corp: {
-      expireCorporateRetreatInstallCreditAbilities: () =>
-        expireCorporateRetreatInstallCreditAbilities(state),
-      consumeEdgerunnerTempsInstallAction: (legalAction) =>
-        consumeEdgerunnerTempsInstallAction(state, legalAction),
-      isRegionUpgrade,
-      isParisTracePoolSource: (cardId) =>
-        isParisTracePoolSource(fortRunSideFamiliesHostForState(state), cardId),
-      parisTracePoolCapacityForCard: (cardId) =>
-        parisTracePoolCapacityForCard(
-          fortRunSideFamiliesHostForState(state),
-          cardId,
-        ),
-    },
-    hosting: {
-      canHostProgramOnDaemon: (hostCardId, definition) =>
-        canHostProgramOnDaemon(state, hostCardId, definition),
-      canOverlayProgramOnZetatechSoftwareInstaller: (hostCardId, definition) =>
-        canOverlayProgramOnZetatechSoftwareInstaller(
-          state,
-          hostCardId,
-          definition,
-        ),
-      hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
-    },
-    payment: {
-      assertCorpIceInstallCostValid: (cardId, definition, legalAction) =>
-        assertCorpIceInstallCostValid(state, cardId, definition, legalAction),
-      spendClick: (side) => spendClick(state, side),
-      spendRunnerInstallCredits: (amount, cardType) =>
-        spendRunnerInstallCredits(state, amount, cardType),
-      runnerCanPayInstallCost: (amount, cardType) =>
-        runnerCanPayInstallCost(state, amount, cardType),
-      openRunnerCostPenaltySupportWindow: (legalAction, amount, cardType) =>
-        openRunnerCostPenaltySupportWindow(state, legalAction, amount, cardType),
-      closeRunnerCostPenaltySupportWindowForPayment: (legalAction, amount) =>
-        closeRunnerCostPenaltySupportWindowForPayment(
-          state,
-          legalAction,
-          amount,
-        ),
-      spendCredits: (side, amount) => spendCredits(state, side, amount),
-      rezCostForCard: (cardId) => rezCostForCard(state, cardId),
-    },
-    counters: {
-      setCardCounter: (cardId, counterType, amount) =>
-        setCardCounter(state, cardId, counterType as CounterType, amount),
-      addCardCounter: (cardId, counterType, amount) =>
-        addCardCounter(state, cardId, counterType as CounterType, amount),
-      rollDeterministicDie: (purpose) => rollDeterministicDie(state, purpose),
-    },
-    lifecycle: {
-      executeOnInstall: (legalAction, definition, cardId) =>
-        executeCardImplementationLifecycleEffects(
-          cardImplementationRuntimeDeps,
-          state,
-          legalAction,
-          definition,
-          cardId,
-          "on_install",
-        ),
-    },
-    constants: {
-      PROTEUS_ARMAGEDDON_ID,
-    },
-  };
-}
-
-function rezCardHost(state: GameState): RezCardHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
-      hasCardImplementationForDefinition: (definitionId) =>
-        Boolean(cardImplementationForDefinitionId(definitionId)),
-      variableRezForDefinition,
-      stableSubtypeList,
-    },
-    run: {
-      mustRun: () => mustRun(state),
-      handleRunRootRezPostRez: (cardId, legalAction) =>
-        handleRunRootRezPostRez(
-          runRezWindowHostForState(state),
-          cardId,
-          legalAction,
-        ),
-      beginEncounter: (cardId, legalAction) =>
-        beginEncounter(encounterEntryHostForState(state), cardId, legalAction),
-    },
-    payment: {
-      rezCostForCard: (cardId) => rezCostForCard(state, cardId),
-      assertCorpRezCostQuoteValid: (cardId, legalAction) =>
-        assertCorpRezCostQuoteValid(state, cardId, legalAction),
-      creditCostForAction,
-      spendCredits: (side, amount) => spendCredits(state, side, amount),
-    },
-    corp: {
-      isAcmeSavingsAndLoanDefinition,
-      spendCorpAgendaPointCost: (requiredPoints) =>
-        spendCorpAgendaPointCost(state, requiredPoints),
-      acmeSavingsAndLoanObligationCount: () =>
-        acmeSavingsAndLoanObligationCount(state),
-    },
-    runner: {
-      ensureTurnFlags: () => ensureRunnerTurnFlags(state),
-    },
-    counters: {
-      setCardCounter: (cardId, counterType, amount) =>
-        setCardCounter(state, cardId, counterType as CounterType, amount),
-    },
-    lifecycle: {
-      executeOnRez: (legalAction, definition, cardId) =>
-        executeCardImplementationLifecycleEffects(
-          cardImplementationRuntimeDeps,
-          state,
-          legalAction,
-          definition,
-          cardId,
-          "on_rez",
-        ),
-    },
-    fort: {
-      isParisTracePoolSource: (cardId) =>
-        isParisTracePoolSource(fortRunSideFamiliesHostForState(state), cardId),
-      parisTracePoolCapacityForCard: (cardId) =>
-        parisTracePoolCapacityForCard(
-          fortRunSideFamiliesHostForState(state),
-          cardId,
-        ),
-    },
-    constants: {
-      KRUMZ_TRACE_ASSET_CARD_ID,
-    },
-  };
-}
-
-function traceOrchestrationHost(state: GameState): TraceOrchestrationHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      runnerInstalledCardIds: () => runnerInstalledCardIds(state),
-      hasCardImplementationForDefinition: (definitionId) =>
-        Boolean(cardImplementationForDefinitionId(definitionId)),
-      activatedTraceAbilities: (definition, timing) =>
-        cardImplementationForDefinitionId(definition.id)?.abilities
-          ?.map((ability, index) => ({ ability, index }))
-          .filter(
-            (
-              entry,
-            ): entry is {
-              ability: ActivatedCardAbilityImplementation;
-              index: number;
-            } =>
-              entry.ability.kind === "activated" &&
-              entry.ability.timing === timing,
-          ) ?? [],
-      isSubmarineUplinkSource: (cardId) =>
-        isSubmarineUplinkSource(state, cardId),
-    },
-    payment: {
-      corpTracePaymentDeps,
-      runnerTracePaymentDeps,
-      runnerTraceLinkCreditSourceIds: () =>
-        runnerTracePaymentDeps.runnerTraceLinkCreditSourceIds(state),
-      hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
-      spendRunnerCredits: (amount) => spendCredits(state, "runner", amount),
-    },
-    runner: {
-      identityModifierAmount: (side, kind, duration) =>
-        identityModifierAmount(state, side, kind, duration),
-    },
-    corp: {
-      rezzedCorpRootCardIds: () => rezzedCorpRootCardIds(state),
-    },
-    counters: {
-      cardCounter: (cardId, counterType) =>
-        cardCounter(state, cardId, counterType as CounterType),
-      hackerTrackerCounterTotal: () => hackerTrackerCounterTotal(state),
-      krumzTraceBitTotal: () => krumzTraceBitTotal(state),
-    },
-    fort: {
-      parisCityGridTracePoolSource: () =>
-        parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state)),
-    },
-    run: {
-      markSubmarineUplinkJackOutAfterEncounter: (cardId, legalAction) =>
-        markSubmarineUplinkJackOutAfterEncounter(
-          encounterSpecialWindowHostForState(state),
-          cardId,
-          legalAction,
-        ),
-      applyPrintedTraceSuccessFollowups: (options) =>
-        applyPrintedTraceSuccessFollowups(
-          encounterPrintedEffectHostForState(state, options.legalAction),
-          options,
-        ),
-    },
-    trace: {
-      supportsTraceSuccessEffect: (effect) =>
-        isSupportedEncounterTraceSuccessEffect(
-          effect,
-          traceCounterEffectDefinitionFor,
-        ),
-    },
-    callbacks: {
-      sanitizeId,
-    },
-    constants: {
-      PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
-    },
-  };
-}
-
-function activatedCardImplementationExecutionHost(
-  state: GameState,
-  legalAction: LegalAction,
-) {
-  return {
-    state,
-    action: { legalAction },
-    callbacks: {
-      handleCorpTraceDamageActivatedAbility: (actionToResolve: LegalAction) =>
-        handleCorpTraceDamageActivatedAbility(
-          corpTraceDamageAbilityHost(state, actionToResolve),
-        ).handled,
-      handleScoredAgendaActivatedAbilityAction: (actionToResolve: LegalAction) =>
-        handleScoredAgendaActivatedAbilityAction(
-          scoredAgendaAbilityHost(state, actionToResolve),
-        ).handled,
-      resolveActivatedCardImplementationAbility: (actionToResolve: LegalAction) =>
-        resolveActivatedCardImplementationAbility(
-          cardImplementationRuntimeDeps,
-          state,
-          actionToResolve,
-        ),
-    },
-  };
-}
-function resolveRunnerTargetedEventImplementation(
-  state: GameState,
-  definition: CardDefinition,
-  legalAction: LegalAction,
-): boolean {
-  const effect =
-    cardImplementationForDefinitionId(definition.id)?.runnerEventTargetedEffect;
-  if (effect?.kind !== "add_strength_counter_to_installed_icebreaker")
-    return false;
-  const targetCardId = String(legalAction.payload?.targetCardId ?? "") as CardInstanceId;
-  if (!state.runner.rig.programs.includes(targetCardId))
-    throw new Error("Das Ziel-Icebreaker-Programm ist nicht installiert.");
-  const targetDefinition = definitionFor(state, targetCardId);
-  if (!cardHasSubtype(targetDefinition, "icebreaker"))
-    throw new Error("Das Ziel ist kein Icebreaker.");
-  addCardCounter(state, targetCardId, effect.counterType, effect.amount);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    targetDefinitionId: targetDefinition.id,
-    counterType: effect.counterType,
-    counterAmountAdded: effect.amount,
-    remainingCounters: cardCounter(state, targetCardId, effect.counterType),
-  };
-  return true;
-}
-
-function resolvePostOnPlayGenericFollowups(
-  state: GameState,
-  definition: CardDefinition,
-  legalAction: LegalAction,
-): void {
-  const effects = onPlayCardImplementationEffects(definition);
-  const remoteDetonatorEffect = effects.find(
-    (effect) =>
-      effect.kind ===
-      "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags",
-  );
-  if (remoteDetonatorEffect) {
-    const tagAmount = remoteDetonatorEffect.tagAmount;
-    if (!Number.isInteger(tagAmount) || tagAmount <= 0)
-      throw new Error("Remote-Detonator-Tagmenge ist ungueltig.");
-    const serverId = state.runnerTurnFlags?.lastSuccessfulRunServerId;
-    if (!serverId)
-      throw new Error("Es gibt keinen erfolgreichen Run-Fort in diesem Zug.");
-    const server = mustServer(state, serverId);
-    const trashedDefinitionIds: CardDefinitionId[] = [];
-    for (const iceId of server.ice.slice()) {
-      if (mustInstance(state.cardInstances, iceId).rezzed !== true) continue;
-      trashedDefinitionIds.push(definitionFor(state, iceId).id);
-      trashCorpInstalledCardToArchives(state, iceId, legalAction);
-    }
-    state.runner.tags += tagAmount;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      remoteDetonatorResolved: true,
-      serverId,
-      trashedRezzedIceCount: trashedDefinitionIds.length,
-      trashedCount: trashedDefinitionIds.length,
-      ...(trashedDefinitionIds.length > 0
-        ? { trashedCardDefinitionIds: trashedDefinitionIds.sort().join(",") }
-        : {}),
-      tagsAdded: tagAmount,
-      runnerTagsAfter: state.runner.tags,
-    };
-  }
-}
-
-function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
-  const cardId = String(legalAction.payload?.cardId);
-  removeFromAllZones(state, cardId);
-  const specialZones = ensureSpecialZones(state);
-  specialZones.removedFromGame.push(cardId);
-  specialZones.removedFromGame.sort();
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    faceup: true,
-    zone: { side: "special", zone: "removed_from_game", visibility: "public" },
-  };
-
-  const allIds = [
-    ...state.runner.grip,
-    ...state.runner.heap,
-    ...state.runner.stack,
-  ].filter((id) => id !== cardId);
-  state.runner.grip = [];
-  state.runner.heap = [];
-  state.runner.stack = shuffleStateIds(
-    state,
-    allIds,
-    `${MIT_WEST_TIER_REMOVED_FROM_GAME_REASON}:${state.stateVersion + 1}`,
-  );
-  for (const id of state.runner.stack) {
-    state.cardInstances[id] = {
-      ...mustInstance(state.cardInstances, id),
-      zone: { side: "runner", zone: "stack" },
-    };
-  }
-  const drawSummary = drawRunnerCards(state, 5);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    cardId,
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "mit_west_tier_shuffle_grip_heap_stack",
-    specialZone: "removed_from_game",
-    specialZoneVisibility: "public",
-    specialZoneReason: MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
-  };
-  applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
-}
-
-function shuffleGripTrashAndStackThenDrawForCardImplementation(
-  state: GameState,
-  legalAction: LegalAction,
-  sourceCardId: CardInstanceId,
-  sourceDefinitionId: CardDefinition["id"],
-  drawCount: number,
-  removePlayedCardFromGame: true,
-): { publicPayload: Record<string, string | number | boolean> } {
-  if (removePlayedCardFromGame !== true)
-    throw new Error("MIT West Tier muss aus dem Spiel entfernt werden.");
-  removeFromAllZones(state, sourceCardId);
-  const specialZones = ensureSpecialZones(state);
-  specialZones.removedFromGame.push(sourceCardId);
-  specialZones.removedFromGame.sort();
-  state.cardInstances[sourceCardId] = {
-    ...mustInstance(state.cardInstances, sourceCardId),
-    faceup: true,
-    zone: { side: "special", zone: "removed_from_game", visibility: "public" },
-  };
-
-  const gripCount = state.runner.grip.length;
-  const heapCount = state.runner.heap.length;
-  const stackCount = state.runner.stack.length;
-  const allIds = [
-    ...state.runner.grip,
-    ...state.runner.heap,
-    ...state.runner.stack,
-  ].filter((id) => id !== sourceCardId);
-  state.runner.grip = [];
-  state.runner.heap = [];
-  state.runner.stack = shuffleStateIds(
-    state,
-    allIds,
-    `${sourceDefinitionId}.shuffle_grip_heap_stack:${state.stateVersion + 1}`,
-  );
-  for (const id of state.runner.stack) {
-    state.cardInstances[id] = {
-      ...mustInstance(state.cardInstances, id),
-      zone: { side: "runner", zone: "stack" },
-    };
-  }
-  const drawSummary = drawRunnerCards(state, drawCount);
-  const payload = {
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "p3_47_shuffle_grip_heap_stack_then_draw",
-    sourceDefinitionId,
-    shuffledGripCount: gripCount,
-    shuffledTrashCount: heapCount,
-    shuffledStackCount: stackCount,
-    shuffledCardsCount: allIds.length,
-    drawnCount: drawSummary.drawnCount,
-    removedFromGame: true,
-    specialZone: "removed_from_game",
-    specialZoneVisibility: "public",
-    specialZoneReason: sourceDefinitionId,
-    randomCounterAfter: state.randomCounter,
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ...payload,
-  };
-  applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
-  return { publicPayload: legalAction.payload ?? payload };
-}
-
-function startRunnerProgramTrashBeforeInstallChoice(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-): void {
-  if (!state.runner.grip.includes(sourceCardId))
-    throw new Error("Die Programmquelle liegt nicht mehr im Grip.");
-  const definition = definitionFor(state, sourceCardId);
-  if (definition.type !== "program")
-    throw new Error(
-      "Nur Programme koennen vor der Installation Programmtrash oeffnen.",
-    );
-  if (
-    isUniqueCard(definition) &&
-    hasInstalledUniqueCardDefinition(state, "runner", definition.id)
-  )
-    throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
-  if (availableRunnerProgramInstallCredits(state) < (definition.installCost ?? 0))
-    throw new Error("Nicht genug Credits fuer die Programminstallation.");
-  const options = installedRunnerProgramTrashOptionsForInstall(state).map(
-    (cardId) => {
-      const optionDefinition = definitionFor(state, cardId);
-      return {
-        id: `card_${cardId}`,
-        label: optionDefinition.title,
-        value: cardId,
-      };
-    },
-  );
-  if (options.length === 0)
-    throw new Error("Es gibt kein installiertes Programm zum Trashen.");
-  if (!runnerProgramInstallMemoryReachableAfterTrash(state, definition))
-    throw new Error("Durch Programmtrash kann nicht genug MU freigemacht werden.");
-  state.pendingChoice = {
-    choiceId: `runner_program_trash_before_install_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `runner_program_trash_before_install:${sourceCardId}:${state.stateVersion + 1}`,
-    prompt: "Programme vor Installation trashen",
-    kind: "select_cards",
-    options,
-    minSelections: 0,
-    maxSelections: options.length,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-}
-
-function resolveRunnerProgramTrashBeforeInstallChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("runner_program_trash_before_install"))
-    throw new Error("Es ist keine Programmtrash-Installationschoice offen.");
-  const sourceCardId = choice.source.split(":")[1] as
-    | CardInstanceId
-    | undefined;
-  if (!sourceCardId || !state.runner.grip.includes(sourceCardId))
-    throw new Error("Die Programmquelle liegt nicht mehr im Grip.");
-  if (state.phase !== "runner_action_phase" || state.timingPoint !== "runner_action.main")
-    throw new Error("Programme koennen nur im Runner-Aktionsfenster installiert werden.");
-  if (state.runner.clicks <= 0)
-    throw new Error("Der Runner hat keinen Klick fuer die Installation.");
-  const definition = definitionFor(state, sourceCardId);
-  if (definition.type !== "program")
-    throw new Error("Nur Programme koennen ueber diese Choice installiert werden.");
-  if (
-    isUniqueCard(definition) &&
-    hasInstalledUniqueCardDefinition(state, "runner", definition.id)
-  )
-    throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
-  if (availableRunnerProgramInstallCredits(state) < (definition.installCost ?? 0))
-    throw new Error("Nicht genug Credits fuer die Programminstallation.");
-
-  const trashIds = selectedChoiceCardIds(choice, playerAction) as CardInstanceId[];
-  const uniqueTrashIds = [...new Set(trashIds)];
-  if (uniqueTrashIds.length !== trashIds.length)
-    throw new Error("Die Programmtrash-Auswahl enthaelt doppelte Karten.");
-  for (const cardId of uniqueTrashIds) {
-    if (!state.runner.rig.programs.includes(cardId))
-      throw new Error("Die Programmtrash-Auswahl enthaelt kein installiertes Programm.");
-    if (definitionFor(state, cardId).type !== "program")
-      throw new Error("Nur installierte Programme koennen getrasht werden.");
-  }
-
-  const memoryAfterSelection =
-    state.runner.memoryUsed +
-    (definition.memoryCost ?? 0) -
-    uniqueTrashIds.reduce((sum, cardId) => {
-      if (!runnerProgramUsesMemory(state, cardId)) return sum;
-      return sum + (definitionFor(state, cardId).memoryCost ?? 0);
-    }, 0);
-  const needsMemory = memoryAfterSelection > runnerMemoryLimit(state);
-  if (needsMemory && uniqueTrashIds.length === 0) {
-    delete state.pendingChoice;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      sourceDefinitionId: definition.id,
-      runnerProgramTrashBeforeInstall: true,
-      installed: false,
-      installCancelled: true,
-      installBlockedReason: "insufficient_memory",
-    };
-    return;
-  }
-  if (needsMemory)
-    throw new Error("Die Programmtrash-Auswahl macht nicht genug MU frei.");
-
-  const trashedDefinitionIds = uniqueTrashIds.map(
-    (cardId) => definitionFor(state, cardId).id,
-  );
-  for (const cardId of uniqueTrashIds) trashRunnerInstalledCardToHeap(state, cardId);
-  delete state.pendingChoice;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    cardId: sourceCardId,
-    runnerProgramTrashBeforeInstall: true,
-    runnerProgramTrashBeforeInstallResolved: true,
-    trashedCount: uniqueTrashIds.length,
-    ...(trashedDefinitionIds.length > 0
-      ? { trashedCardDefinitionIds: trashedDefinitionIds.join(",") }
-      : {}),
-  };
-  executeInstallCard(installCardHost(state), legalAction);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    sourceDefinitionId: definition.id,
-    installed: true,
-    memoryUsedAfter: state.runner.memoryUsed,
-    memoryLimitAfter: runnerMemoryLimit(state),
-  };
-}
-
-function canInstallCorpRootCardInServer(
-  state: GameState,
-  definition: CardDefinition,
-  server: CorpServer,
-): boolean {
-  if (mustInstallInsideSubsidiaryDataFort(definition) && server.kind !== "remote")
-    return false;
-  if (definition.type === "upgrade") return server.kind !== "archives";
-  if (server.kind !== "remote") return false;
-  if (definition.type !== "agenda" && definition.type !== "asset") return false;
-  const capacity = corpRootAgendaOrNodeCapacityInServer(state, server);
-  const mainIds = corpRootMainCardIdsInServer(state, server);
-  if (mainIds.length < capacity) return true;
-  if (definition.type === "agenda") {
-    const hasAgenda = server.root.some(
-      (id) => definitionFor(state, id).type === "agenda",
-    );
-    return !hasAgenda && corpRootAssetIdsInServer(state, server).length > 0;
-  }
-  return false;
-}
-
-function corpRootAgendaOrNodeCapacityInServer(
-  state: GameState,
-  server: CorpServer,
-): number {
-  return (
-    1 +
-    server.root.reduce((sum, cardId) => {
-      const instance = state.cardInstances[cardId];
-      if (
-        instance?.zone.side !== "corp" ||
-        instance.zone.zone !== "serverRoot" ||
-        instance.zone.serverId !== server.id
-      )
-        return sum;
-      return (
-        sum +
-        fortCapacityModifiersForCard(state, cardId)
-          .filter(
-            (modifier) =>
-              modifier.kind === "additional_agenda_or_node_slot_inside_fort" &&
-              modifier.activeWhile === "installed",
-          )
-          .reduce((innerSum, modifier) => innerSum + modifier.amount, 0)
-      );
-    }, 0)
-  );
-}
-
-function corpRegionUpgradeIdsInServer(
-  state: GameState,
-  server: CorpServer,
-): CardInstanceId[] {
-  return server.root
-    .filter((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return definition.type === "upgrade" && cardHasSubtype(definition, "region");
-    })
-    .sort();
-}
-
-function startRun(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-  pendingSuccessBonusCredits?: number,
-  accessCount = 1,
-  options?: StartRunOptions,
-  legalAction?: LegalAction,
-): void {
-  runFlow.startRun(
-    state,
-    serverId,
-    pendingSuccessBonusCredits,
-    accessCount,
-    options,
-    legalAction,
-  );
+function breakSubroutineCostBreakdown(...args: any[]): any {
+  return (stateRuntimeServices.breakSubroutineCostBreakdown as any)(...args);
+}
+
+function hasInstalledMicrotechTrodeSet(...args: any[]): any {
+  return (stateRuntimeServices.hasInstalledMicrotechTrodeSet as any)(...args);
+}
+
+function runnerHasInstalledCardDefinition(...args: any[]): any {
+  return (stateRuntimeServices.runnerHasInstalledCardDefinition as any)(...args);
+}
+
+function runnerInstalledCardCountByDefinition(...args: any[]): any {
+  return (stateRuntimeServices.runnerInstalledCardCountByDefinition as any)(...args);
+}
+
+function installedVirusCounterTotalForDefinition(...args: any[]): any {
+  return (stateRuntimeServices.installedVirusCounterTotalForDefinition as any)(...args);
+}
+
+function virusCounterImplementationForDefinition(...args: any[]): any {
+  return (stateRuntimeServices.virusCounterImplementationForDefinition as any)(...args);
+}
+
+function virusCounterImplementationForCard(...args: any[]): any {
+  return (stateRuntimeServices.virusCounterImplementationForCard as any)(...args);
+}
+
+function corpUtilityImplementationForCard(...args: any[]): any {
+  return (stateRuntimeServices.corpUtilityImplementationForCard as any)(...args);
+}
+
+function hasCorpUtilityKind(...args: any[]): any {
+  return (stateRuntimeServices.hasCorpUtilityKind as any)(...args);
+}
+
+function cardInstallCapabilitiesForDefinition(...args: any[]): any {
+  return (stateRuntimeServices.cardInstallCapabilitiesForDefinition as any)(...args);
+}
+
+function hasInstallCapabilityKindForDefinition(...args: any[]): any {
+  return (stateRuntimeServices.hasInstallCapabilityKindForDefinition as any)(...args);
+}
+
+function rootInstallRezzesOnInstall(...args: any[]): any {
+  return (stateRuntimeServices.rootInstallRezzesOnInstall as any)(...args);
+}
+
+function mustInstallInsideSubsidiaryDataFort(...args: any[]): any {
+  return (stateRuntimeServices.mustInstallInsideSubsidiaryDataFort as any)(...args);
+}
+
+function fortCapacityModifiersForCard(...args: any[]): any {
+  return (stateRuntimeServices.fortCapacityModifiersForCard as any)(...args);
+}
+
+function leavePlayCleanupImplementationsForCard(...args: any[]): any {
+  return (stateRuntimeServices.leavePlayCleanupImplementationsForCard as any)(...args);
+}
+
+function installedRunnerVirusSourceIds(...args: any[]): any {
+  return (stateRuntimeServices.installedRunnerVirusSourceIds as any)(...args);
+}
+
+function cockroachCounterTotal(...args: any[]): any {
+  return (stateRuntimeServices.cockroachCounterTotal as any)(...args);
+}
+
+function incubatorCounterTotal(...args: any[]): any {
+  return (stateRuntimeServices.incubatorCounterTotal as any)(...args);
+}
+
+function cockroachRandomHqDiscardActive(...args: any[]): any {
+  return (stateRuntimeServices.cockroachRandomHqDiscardActive as any)(...args);
+}
+
+function isVisibleVirusCounterCardForRunner(...args: any[]): any {
+  return (stateRuntimeServices.isVisibleVirusCounterCardForRunner as any)(...args);
+}
+
+function corpIceInstallBaseCost(...args: any[]): any {
+  return (stateRuntimeServices.corpIceInstallBaseCost as any)(...args);
+}
+
+function outermostIceIndex(...args: any[]): any {
+  return (stateRuntimeServices.outermostIceIndex as any)(...args);
+}
+
+function poxCountersForServer(...args: any[]): any {
+  return (stateRuntimeServices.poxCountersForServer as any)(...args);
+}
+
+function spyCountersForServer(...args: any[]): any {
+  return (stateRuntimeServices.spyCountersForServer as any)(...args);
+}
+
+function poxInstallTax(...args: any[]): any {
+  return (stateRuntimeServices.poxInstallTax as any)(...args);
+}
+
+function corpIceInstallAdditionalCost(...args: any[]): any {
+  return (stateRuntimeServices.corpIceInstallAdditionalCost as any)(...args);
+}
+
+function corpIceInstallTotalCost(...args: any[]): any {
+  return (stateRuntimeServices.corpIceInstallTotalCost as any)(...args);
+}
+
+function assertCorpIceInstallCostValid(...args: any[]): any {
+  return (stateRuntimeServices.assertCorpIceInstallCostValid as any)(...args);
+}
+
+function specialZoneHarnessActions(...args: any[]): any {
+  return (actionRuntimeHosts.specialZoneHarnessActions as any)(...args);
+}
+
+function dupreStrengthCounterBonus(...args: any[]): any {
+  return (cardRuntimeHosts.dupreStrengthCounterBonus as any)(...args);
+}
+
+function permanentIcebreakerStrengthCounterBonus(...args: any[]): any {
+  return (cardRuntimeHosts.permanentIcebreakerStrengthCounterBonus as any)(...args);
+}
+
+function pumpAmountForLegalAction(...args: any[]): any {
+  return (cardRuntimeHosts.pumpAmountForLegalAction as any)(...args);
+}
+
+function pumpAbilityForLegalAction(...args: any[]): any {
+  return (cardRuntimeHosts.pumpAbilityForLegalAction as any)(...args);
+}
+
+function breakAbilityForLegalAction(...args: any[]): any {
+  return (cardRuntimeHosts.breakAbilityForLegalAction as any)(...args);
+}
+
+function pumpDurationForLegalAction(...args: any[]): any {
+  return (cardRuntimeHosts.pumpDurationForLegalAction as any)(...args);
+}
+
+function assertCurrentSubroutineMatchesLegalAction(...args: any[]): any {
+  return (cardRuntimeHosts.assertCurrentSubroutineMatchesLegalAction as any)(...args);
+}
+
+function resolveMultiBreakSubroutinesAction(...args: any[]): any {
+  return (cardRuntimeHosts.resolveMultiBreakSubroutinesAction as any)(...args);
+}
+
+function assertBreakSubroutineCostQuoteValid(...args: any[]): any {
+  return (cardRuntimeHosts.assertBreakSubroutineCostQuoteValid as any)(...args);
+}
+
+function subroutinesForCurrentEncounter(...args: any[]): any {
+  return (cardRuntimeHosts.subroutinesForCurrentEncounter as any)(...args);
+}
+
+function variableTraceSubroutineForCurrentEncounter(...args: any[]): any {
+  return (cardRuntimeHosts.variableTraceSubroutineForCurrentEncounter as any)(...args);
+}
+
+function relativeDamageSubroutineForCurrentEncounter(...args: any[]): any {
+  return (cardRuntimeHosts.relativeDamageSubroutineForCurrentEncounter as any)(...args);
+}
+
+function relativeTraceSubroutinesForCurrentEncounter(...args: any[]): any {
+  return (cardRuntimeHosts.relativeTraceSubroutinesForCurrentEncounter as any)(...args);
+}
+
+function runCardImplementationActionHost(...args: any[]): any {
+  return (cardRuntimeHosts.runCardImplementationActionHost as any)(...args);
+}
+
+function runStartTaxForServerUpgrades(...args: any[]): any {
+  return (cardRuntimeHosts.runStartTaxForServerUpgrades as any)(...args);
+}
+
+function newsgroupTauntingRunStartTax(...args: any[]): any {
+  return (cardRuntimeHosts.newsgroupTauntingRunStartTax as any)(...args);
+}
+
+function spendRunnerAccessTrashCredits(...args: any[]): any {
+  return (cardRuntimeHosts.spendRunnerAccessTrashCredits as any)(...args);
+}
+
+function turnBasicExecutionHost(...args: any[]): any {
+  return (actionRuntimeHosts.turnBasicExecutionHost as any)(...args);
+}
+
+function creditEconomyExecutionHost(...args: any[]): any {
+  return (actionRuntimeHosts.creditEconomyExecutionHost as any)(...args);
+}
+
+function runnerSpecialTriggerExecutionHost(...args: any[]): any {
+  return (cardRuntimeHosts.runnerSpecialTriggerExecutionHost as any)(...args);
+}
+
+function runFortTriggerExecutionHost(...args: any[]): any {
+  return (cardRuntimeHosts.runFortTriggerExecutionHost as any)(...args);
+}
+
+function counterUtilityTriggerExecutionHost(...args: any[]): any {
+  return (cardRuntimeHosts.counterUtilityTriggerExecutionHost as any)(...args);
+}
+
+function triggerAbilityExecutionHost(...args: any[]): any {
+  return (cardRuntimeHosts.triggerAbilityExecutionHost as any)(...args);
+}
+
+function installCardHost(...args: any[]): any {
+  return (cardRuntimeHosts.installCardHost as any)(...args);
+}
+
+function rezCardHost(...args: any[]): any {
+  return (cardRuntimeHosts.rezCardHost as any)(...args);
+}
+
+function traceOrchestrationHost(...args: any[]): any {
+  return (cardRuntimeHosts.traceOrchestrationHost as any)(...args);
+}
+
+function activatedCardImplementationExecutionHost(...args: any[]): any {
+  return (cardRuntimeHosts.activatedCardImplementationExecutionHost as any)(...args);
+}
+function resolveRunnerTargetedEventImplementation(...args: any[]): any {
+  return (cardRuntimeHosts.resolveRunnerTargetedEventImplementation as any)(...args);
+}
+
+function resolvePostOnPlayGenericFollowups(...args: any[]): any {
+  return (cardRuntimeHosts.resolvePostOnPlayGenericFollowups as any)(...args);
+}
+
+function resolveMitWestTier(...args: any[]): any {
+  return (cardRuntimeHosts.resolveMitWestTier as any)(...args);
+}
+
+function shuffleGripTrashAndStackThenDrawForCardImplementation(...args: any[]): any {
+  return (cardRuntimeHosts.shuffleGripTrashAndStackThenDrawForCardImplementation as any)(...args);
+}
+
+function startRunnerProgramTrashBeforeInstallChoice(...args: any[]): any {
+  return (cardRuntimeHosts.startRunnerProgramTrashBeforeInstallChoice as any)(...args);
+}
+
+function resolveRunnerProgramTrashBeforeInstallChoice(...args: any[]): any {
+  return (cardRuntimeHosts.resolveRunnerProgramTrashBeforeInstallChoice as any)(...args);
+}
+
+function canInstallCorpRootCardInServer(...args: any[]): any {
+  return (flowRuntimeHosts.canInstallCorpRootCardInServer as any)(...args);
+}
+
+function corpRootAgendaOrNodeCapacityInServer(...args: any[]): any {
+  return (flowRuntimeHosts.corpRootAgendaOrNodeCapacityInServer as any)(...args);
+}
+
+function corpRegionUpgradeIdsInServer(...args: any[]): any {
+  return (flowRuntimeHosts.corpRegionUpgradeIdsInServer as any)(...args);
+}
+
+function startRun(...args: any[]): any {
+  return (flowRuntimeHosts.startRun as any)(...args);
 }
 
 type RunnerTraceCounterEffectRuntime =
@@ -5042,513 +2870,139 @@ type RunnerTraceCounterEffectRuntime =
     sourceDefinitionId: CardDefinitionId;
   };
 
-function runnerTraceCounterEffectDefinitions(): RunnerTraceCounterEffectRuntime[] {
-  return CARD_IMPLEMENTATIONS.flatMap((implementation) =>
-    (implementation.runnerCounterEffects ?? []).map((counterEffect) => ({
-      ...counterEffect,
-      sourceDefinitionId: implementation.cardDefinitionId,
-    })),
-  );
+function runnerTraceCounterEffectDefinitions(...args: any[]): any {
+  return (flowRuntimeHosts.runnerTraceCounterEffectDefinitions as any)(...args);
 }
 
-function runnerCounterDisplayName(counterType: CounterType): string {
-  if (counterType === "data_raven") return "Data-Raven-Counter";
-  if (counterType === "cerberus") return "Cerberus-Counter";
-  if (counterType === "mastiff") return "Mastiff-Counter";
-  if (counterType === "doppelganger_antibody") return "Doppelganger-Counter";
-  return "Counter";
+function runnerCounterDisplayName(...args: any[]): any {
+  return (flowRuntimeHosts.runnerCounterDisplayName as any)(...args);
 }
 
-function traceCounterEffectDefinitionFor(
-  counterType: unknown,
-): RunnerTraceCounterEffectRuntime | undefined {
-  return runnerTraceCounterEffectDefinitions().find(
-    (effect) => effect.counterType === counterType,
-  );
+function traceCounterEffectDefinitionFor(...args: any[]): any {
+  return (flowRuntimeHosts.traceCounterEffectDefinitionFor as any)(...args);
 }
 
-function runnerUtilityLongtailKindForDefinition(
-  definitionId: CardDefinitionId,
-): CardRunnerUtilityLongtailImplementation["kind"] | undefined {
-  return cardImplementationForDefinitionId(definitionId)?.runnerUtilityLongtail
-    ?.kind;
+function runnerUtilityLongtailKindForDefinition(...args: any[]): any {
+  return (flowRuntimeHosts.runnerUtilityLongtailKindForDefinition as any)(...args);
 }
 
-function runnerUtilityLongtailKindForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-): CardRunnerUtilityLongtailImplementation["kind"] | undefined {
-  return runnerUtilityLongtailKindForDefinition(definitionFor(state, cardId).id);
+function runnerUtilityLongtailKindForCard(...args: any[]): any {
+  return (flowRuntimeHosts.runnerUtilityLongtailKindForCard as any)(...args);
 }
 
-function runnerUtilityLongtailImplementationForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-): CardRunnerUtilityLongtailImplementation | undefined {
-  return cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-    ?.runnerUtilityLongtail;
+function runnerUtilityLongtailImplementationForCard(...args: any[]): any {
+  return (flowRuntimeHosts.runnerUtilityLongtailImplementationForCard as any)(...args);
 }
 
-function uniqueDirectLongtailImplementationForDefinition(
-  definitionId: CardDefinitionId,
-): CardUniqueDirectLongtailImplementation | undefined {
-  return cardImplementationForDefinitionId(definitionId)?.uniqueDirectLongtail;
+function uniqueDirectLongtailImplementationForDefinition(...args: any[]): any {
+  return (flowRuntimeHosts.uniqueDirectLongtailImplementationForDefinition as any)(...args);
 }
 
-function uniqueDirectLongtailKindForDefinition(
-  definitionId: CardDefinitionId,
-): CardUniqueDirectLongtailImplementation["kind"] | undefined {
-  return uniqueDirectLongtailImplementationForDefinition(definitionId)?.kind;
+function uniqueDirectLongtailKindForDefinition(...args: any[]): any {
+  return (flowRuntimeHosts.uniqueDirectLongtailKindForDefinition as any)(...args);
 }
 
-function uniqueDirectLongtailImplementationForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-): CardUniqueDirectLongtailImplementation | undefined {
-  return uniqueDirectLongtailImplementationForDefinition(
-    definitionFor(state, cardId).id,
-  );
+function uniqueDirectLongtailImplementationForCard(...args: any[]): any {
+  return (flowRuntimeHosts.uniqueDirectLongtailImplementationForCard as any)(...args);
 }
 
-function uniqueDirectLongtailKindForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-): CardUniqueDirectLongtailImplementation["kind"] | undefined {
-  return uniqueDirectLongtailImplementationForCard(state, cardId)?.kind;
+function uniqueDirectLongtailKindForCard(...args: any[]): any {
+  return (flowRuntimeHosts.uniqueDirectLongtailKindForCard as any)(...args);
 }
 
-function remainingReplacementLongtailImplementationForDefinition(
-  definitionId: CardDefinitionId,
-): CardRemainingReplacementLongtailImplementation | undefined {
-  return cardImplementationForDefinitionId(definitionId)
-    ?.remainingReplacementLongtail;
+function remainingReplacementLongtailImplementationForDefinition(...args: any[]): any {
+  return (flowRuntimeHosts.remainingReplacementLongtailImplementationForDefinition as any)(...args);
 }
 
-function remainingReplacementLongtailKindForDefinition(
-  definitionId: CardDefinitionId,
-): CardRemainingReplacementLongtailImplementation["kind"] | undefined {
-  return remainingReplacementLongtailImplementationForDefinition(definitionId)
-    ?.kind;
+function remainingReplacementLongtailKindForDefinition(...args: any[]): any {
+  return (flowRuntimeHosts.remainingReplacementLongtailKindForDefinition as any)(...args);
 }
 
-function remainingReplacementLongtailImplementationForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-): CardRemainingReplacementLongtailImplementation | undefined {
-  return remainingReplacementLongtailImplementationForDefinition(
-    definitionFor(state, cardId).id,
-  );
+function remainingReplacementLongtailImplementationForCard(...args: any[]): any {
+  return (flowRuntimeHosts.remainingReplacementLongtailImplementationForCard as any)(...args);
 }
 
-function remainingReplacementLongtailKindForCard(
-  state: GameState,
-  cardId: CardInstanceId,
-): CardRemainingReplacementLongtailImplementation["kind"] | undefined {
-  return remainingReplacementLongtailImplementationForCard(state, cardId)?.kind;
+function remainingReplacementLongtailKindForCard(...args: any[]): any {
+  return (flowRuntimeHosts.remainingReplacementLongtailKindForCard as any)(...args);
 }
 
-function isAcmeSavingsAndLoanDefinition(definitionId: CardDefinitionId): boolean {
-  return (
-    remainingReplacementLongtailKindForDefinition(definitionId) ===
-    "acme_savings_and_loan_debt"
-  );
+function isAcmeSavingsAndLoanDefinition(...args: any[]): any {
+  return (flowRuntimeHosts.isAcmeSavingsAndLoanDefinition as any)(...args);
 }
 
-function isCitySurveillanceCard(state: GameState, cardId: CardInstanceId): boolean {
-  return (
-    remainingReplacementLongtailKindForCard(state, cardId) ===
-    "city_surveillance_draw_tag"
-  );
+function isCitySurveillanceCard(...args: any[]): any {
+  return (flowRuntimeHosts.isCitySurveillanceCard as any)(...args);
 }
 
-function isInvestmentFirmCard(state: GameState, cardId: CardInstanceId): boolean {
-  return (
-    remainingReplacementLongtailKindForCard(state, cardId) ===
-    "investment_firm_credit_diversion"
-  );
+function isInvestmentFirmCard(...args: any[]): any {
+  return (flowRuntimeHosts.isInvestmentFirmCard as any)(...args);
 }
 
-function isHackerTrackerCentralCard(
-  state: GameState,
-  cardId: CardInstanceId,
-): boolean {
-  return (
-    remainingReplacementLongtailKindForCard(state, cardId) ===
-    "hacker_tracker_trace_bits"
-  );
+function isHackerTrackerCentralCard(...args: any[]): any {
+  return (flowRuntimeHosts.isHackerTrackerCentralCard as any)(...args);
 }
 
-function applyRunnerTraceCounterRunStartEffects(
-  state: GameState,
-  legalAction?: LegalAction,
-): void {
-  for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
-    if (!counterEffect.runStart) continue;
-    const counterCount = cardCounter(
-      state,
-      state.runner.identity,
-      counterEffect.counterType,
-    );
-    if (counterCount <= 0) continue;
-    const damageAmount =
-      counterCount * counterEffect.runStart.amountPerCounter;
-    const damageType =
-      counterEffect.runStart.damageType === "brain" ? "core" : "net";
-    const summary = doDamage(state, {
-      damageId: `${state.run?.runId ?? `run_${state.stateVersion + 1}`}.${counterEffect.counterType}_counter_start_damage`,
-      damageType,
-      amount: damageAmount,
-      source: `counter:${counterEffect.sourceDefinitionId}`,
-    });
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        sourceDefinitionId: counterEffect.sourceDefinitionId,
-        counterType: counterEffect.counterType,
-        counterCount,
-        [`${counterEffect.counterType}CounterCount`]: counterCount,
-        damageResolved: true,
-        damageType: summary.damageType,
-        damageAmount: summary.amount,
-        cardsTrashed: summary.cardsTrashed,
-        flatline: summary.flatline,
-        ...(summary.coreDamageAfter !== undefined
-          ? {
-              coreDamageAfter: summary.coreDamageAfter,
-              runnerMaxHandSizeAfter: summary.runnerMaxHandSizeAfter,
-            }
-          : {}),
-      };
-    }
-    if (state.winner) return;
-  }
+function applyRunnerTraceCounterRunStartEffects(...args: any[]): any {
+  return (flowRuntimeHosts.applyRunnerTraceCounterRunStartEffects as any)(...args);
 }
 
-function applyAiBoonRunStart(
-  state: GameState,
-  legalAction?: LegalAction,
-): void {
-  const sourceCardIds = state.runner.rig.programs
-    .slice()
-    .sort()
-    .filter((cardId) =>
-      icebreakerHasSpecial(state, cardId, "ai_boon_run_start_random_strength"),
-    );
-  if (sourceCardIds.length === 0 || !state.run) return;
-  const outcomes: string[] = [];
-  for (const sourceCardId of sourceCardIds) {
-    const definition = definitionFor(state, sourceCardId);
-    const randomPurpose = `v1921.die.${definition.id}.run_start_strength`;
-    const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
-    const baseStrength = definition.strength ?? 0;
-    const runStrength = baseStrength + dieRoll;
-    state.run.aiBoonRunStrengthByBreaker = {
-      ...(state.run.aiBoonRunStrengthByBreaker ?? {}),
-      [sourceCardId]: runStrength,
-    };
-    state.run.aiBoonSourceCardId = sourceCardId;
-    state.run.aiBoonRunStrength = runStrength;
-    outcomes.push(`${sourceCardId}:${dieRoll}:${runStrength}`);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1921RunnerProgramAbility: "ai_boon_run_start_strength",
-        sourceDefinitionId: definition.id,
-        aiBoonSourceCardId: sourceCardId,
-        randomPurpose,
-        v1921DieRoll: dieRoll,
-        aiBoonRunStrength: runStrength,
-        randomCounterAfter: state.randomCounter,
-      };
-    }
-  }
-  if (legalAction && outcomes.length > 1) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      v1921RunnerProgramAbility: "ai_boon_run_start_strength",
-      aiBoonRunStrengthOutcomes: outcomes.join(","),
-      randomCounterAfter: state.randomCounter,
-    };
-  }
+function applyAiBoonRunStart(...args: any[]): any {
+  return (flowRuntimeHosts.applyAiBoonRunStart as any)(...args);
 }
 
-function continueRun(state: GameState, legalAction?: LegalAction): void {
-  runFlow.continueRun(state, legalAction);
+function continueRun(...args: any[]): any {
+  return (flowRuntimeHosts.continueRun as any)(...args);
 }
 
-function addCurrentRunAccessCount(
-  state: GameState,
-  server: Extract<ServerId, "hq" | "rd">,
-  amount: number,
-): { publicPayload: Record<string, string | number | boolean> } {
-  const run = state.run;
-  if (!run || run.phase === "access")
-    throw new Error("Zusaetzlicher Access ist nur vor dem Access-Fenster moeglich.");
-  if (run.attackedServerId !== server)
-    throw new Error("Diese Access-Faehigkeit passt nicht zum aktuellen Server.");
-  if (!Number.isInteger(amount) || amount <= 0)
-    throw new Error("Die Access-Anzahl ist ungueltig.");
-  run.accessCount = Math.max(0, Math.floor(run.accessCount ?? 1)) + amount;
-  return {
-    publicPayload: {
-      hiddenZoneBarrier: true,
-      hiddenResourceAccessBonus: true,
-      accessedServerId: server,
-      additionalAccessCount: amount,
-      runAccessCountAfter: run.accessCount,
-    },
-  };
+function addCurrentRunAccessCount(...args: any[]): any {
+  return (flowRuntimeHosts.addCurrentRunAccessCount as any)(...args);
 }
 
-function passCurrentEncounteredIce(
-  state: GameState,
-  legalAction: LegalAction,
-  subtypeRequired?: "ap",
-): { publicPayload: Record<string, string | number | boolean> } {
-  const run = state.run;
-  if (
-    state.timingPoint !== "run.encounter_ice" ||
-    run?.phase !== "encounter_ice" ||
-    !run.encounteredIceId
-  )
-    throw new Error("Es gibt keine aktuelle ICE-Encounter zum Passieren.");
-  const iceDefinition = definitionFor(state, run.encounteredIceId);
-  if (subtypeRequired && !cardHasSubtype(iceDefinition, subtypeRequired))
-    throw new Error("Diese ICE hat nicht den benoetigten Subtyp.");
-  const subroutines = subroutinesForCurrentEncounter(state, iceDefinition);
-  for (let index = 0; index < subroutines.length; index += 1) {
-    if (
-      !run.brokenSubroutineIndexes.includes(index) &&
-      !run.resolvedSubroutineIndexes.includes(index)
-    ) {
-      run.resolvedSubroutineIndexes.push(index);
-    }
-  }
-  continueRun(state, legalAction);
-  return {
-    publicPayload: {
-      passedEncounteredIce: true,
-      passedIceDefinitionId: iceDefinition.id,
-      skippedSubroutineCount: subroutines.length,
-    },
-  };
+function passCurrentEncounteredIce(...args: any[]): any {
+  return (flowRuntimeHosts.passCurrentEncounteredIce as any)(...args);
 }
-function resolveBlinkBreakSubroutineAction(
-  state: GameState,
-  breakerId: CardInstanceId,
-  subroutineIndex: number,
-  legalAction: LegalAction,
-): void {
-  const run = mustRun(state);
-  const encounteredIceId = run.encounteredIceId;
-  if (!encounteredIceId)
-    throw new Error(
-      "Blink kann nur waehrend eines ICE-Encounters verwendet werden.",
-    );
-  if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
-    throw new Error("Blink-Subroutinenziel ist ungueltig.");
-  const iceDefinition = definitionFor(state, encounteredIceId);
-  assertCurrentSubroutineMatchesLegalAction(
-    state,
-    iceDefinition,
-    subroutineIndex,
-    legalAction,
-  );
-  if (
-    run.brokenSubroutineIndexes.includes(subroutineIndex) ||
-    run.resolvedSubroutineIndexes.includes(subroutineIndex)
-  ) {
-    throw new Error("Diese Subroutine ist bereits aufgeloest.");
-  }
-  const blinkUsageByBreaker =
-    (run.blinkUsedSubroutinesByBreakerThisEncounter ??= {});
-  const usedIndexes = blinkUsageByBreaker[breakerId] ?? [];
-  if (usedIndexes.includes(subroutineIndex))
-    throw new Error(
-      "Blink darf diese Subroutine in diesem Encounter nicht erneut anvisieren.",
-    );
-  usedIndexes.push(subroutineIndex);
-  blinkUsageByBreaker[breakerId] = usedIndexes;
-
-  const die = rollDeterministicDie(
-    state,
-    `${BLINK_ID}.break.${run.runId}.${encounteredIceId}.${breakerId}.${subroutineIndex}`,
-  );
-  legalAction.payload = { ...(legalAction.payload ?? {}), blinkDieRoll: die };
-  if (die >= 4) {
-    executeEffectCommands(state, [
-      { type: "break_subroutine", subroutineIndex },
-    ]);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      blinkBreakSuccess: true,
-      blinkDamageAmount: 0,
-    };
-    return;
-  }
-
-  const damageSummary = doDamage(state, {
-    damageId: `v190.blink.${run.runId}.${encounteredIceId}.${breakerId}.${subroutineIndex}`,
-    damageType: "net",
-    amount: die,
-    source: `ability:${BLINK_ID}`,
-  });
-  setDamagePayload(legalAction, damageSummary);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    blinkBreakSuccess: false,
-    blinkDamageAmount: die,
-  };
+function resolveBlinkBreakSubroutineAction(...args: any[]): any {
+  return (flowRuntimeHosts.resolveBlinkBreakSubroutineAction as any)(...args);
 }
 
-function recordBartmossEncounterUsage(
-  state: GameState,
-  breakerId: CardInstanceId,
-): void {
-  const run = state.run;
-  if (!run || run.phase !== "encounter_ice") return;
-  if (!icebreakerHasSpecial(state, breakerId, "bartmoss_post_encounter_self_trash_check"))
-    return;
-  const usedBreakerIds = run.bartmossUsedBreakerIdsThisEncounter ?? [];
-  if (!usedBreakerIds.includes(breakerId)) usedBreakerIds.push(breakerId);
-  run.bartmossUsedBreakerIdsThisEncounter = usedBreakerIds;
+function recordBartmossEncounterUsage(...args: any[]): any {
+  return (flowRuntimeHosts.recordBartmossEncounterUsage as any)(...args);
 }
 
-function recordSnowballBreakUsage(
-  state: GameState,
-  breakerId: CardInstanceId,
-): void {
-  const run = state.run;
-  if (!run || !icebreakerHasSpecial(state, breakerId, "snowball_run_strength_per_successful_break"))
-    return;
-  const previous = runRemainderStrengthBonusForBreaker(run, breakerId);
-  run.remainderStrengthBonusByBreaker = {
-    ...(run.remainderStrengthBonusByBreaker ?? {}),
-    [breakerId]: previous + 1,
-  };
+function recordSnowballBreakUsage(...args: any[]): any {
+  return (flowRuntimeHosts.recordSnowballBreakUsage as any)(...args);
 }
 
-function icebreakerHasSpecial(
-  state: GameState,
-  breakerId: CardInstanceId,
-  special: NonNullable<RuntimeIcebreakerAbility["special"]>,
-): boolean {
-  if (!state.cardInstances[breakerId]) return false;
-  return icebreakerAbilitiesForDefinition(definitionFor(state, breakerId)).some(
-    (ability) => ability.special === special,
-  );
+function icebreakerHasSpecial(...args: any[]): any {
+  return (flowRuntimeHosts.icebreakerHasSpecial as any)(...args);
 }
 
-function hackerTrackerCardIds(state: GameState): CardInstanceId[] {
-  return corpInstalledCardIds(state)
-    .filter((cardId) => {
-      const instance = state.cardInstances[cardId];
-      return (
-        instance?.rezzed === true &&
-        isHackerTrackerCentralCard(state, cardId)
-      );
-    })
-    .sort();
+function hackerTrackerCardIds(...args: any[]): any {
+  return (flowRuntimeHosts.hackerTrackerCardIds as any)(...args);
 }
 
-function hackerTrackerCounterType(
-  state: GameState,
-  cardId: CardInstanceId,
-): "bit" | "power" {
-  return remainingReplacementLongtailImplementationForCard(state, cardId)
-    ?.kind === "hacker_tracker_trace_bits"
-    ? "bit"
-    : "power";
+function hackerTrackerCounterType(...args: any[]): any {
+  return (flowRuntimeHosts.hackerTrackerCounterType as any)(...args);
 }
 
-function hackerTrackerCounterTotal(state: GameState): number {
-  return hackerTrackerCardIds(state).reduce(
-    (sum, cardId) =>
-      sum + cardCounter(state, cardId, hackerTrackerCounterType(state, cardId)),
-    0,
-  );
+function hackerTrackerCounterTotal(...args: any[]): any {
+  return (flowRuntimeHosts.hackerTrackerCounterTotal as any)(...args);
 }
 
-function spendHackerTrackerCounters(
-  state: GameState,
-  amount: number,
-): number {
-  let remaining = Math.max(0, Math.floor(amount));
-  let spent = 0;
-  for (const cardId of hackerTrackerCardIds(state)) {
-    if (remaining <= 0) break;
-    const counterType = hackerTrackerCounterType(state, cardId);
-    const available = cardCounter(state, cardId, counterType);
-    const cardSpent = Math.min(available, remaining);
-    if (cardSpent <= 0) continue;
-    spendCardCounter(state, cardId, counterType, cardSpent);
-    remaining -= cardSpent;
-    spent += cardSpent;
-  }
-  return spent;
+function spendHackerTrackerCounters(...args: any[]): any {
+  return (flowRuntimeHosts.spendHackerTrackerCounters as any)(...args);
 }
 
-function addHackerTrackerTraceCounters(state: GameState): number {
-  let added = 0;
-  for (const cardId of hackerTrackerCardIds(state)) {
-    addCardCounter(state, cardId, hackerTrackerCounterType(state, cardId), 1);
-    added += 1;
-  }
-  return added;
+function addHackerTrackerTraceCounters(...args: any[]): any {
+  return (flowRuntimeHosts.addHackerTrackerTraceCounters as any)(...args);
 }
 
-function rabbitTraceLimitReductionForIceTrace(state: GameState): number {
-  const reductions = state.runner.rig.programs.map((cardId) => {
-    const implementation = runnerUtilityLongtailImplementationForCard(state, cardId);
-    if (
-      implementation?.kind === "rabbit_ice_trace_limit_reduction" &&
-      mustInstance(state.cardInstances, cardId).rezzed
-    )
-      return implementation.amount;
-    if (
-      !implementation &&
-      definitionFor(state, cardId).id === RABBIT_HQ_INTERFACE_PROGRAM_ID &&
-      mustInstance(state.cardInstances, cardId).rezzed
-    )
-      return 1;
-    return 0;
-  });
-  return Math.max(0, ...reductions);
+function rabbitTraceLimitReductionForIceTrace(...args: any[]): any {
+  return (flowRuntimeHosts.rabbitTraceLimitReductionForIceTrace as any)(...args);
 }
 
-function archivesAccessRequiresDecisionOrEffect(
-  state: GameState,
-  cardId: CardInstanceId,
-): boolean {
-  const definition = definitionFor(state, cardId);
-  if (definition.type === "agenda") return true;
-  if (
-    state.ambushHarness?.enabled &&
-    (!state.ambushHarness.triggerDefinitionId ||
-      state.ambushHarness.triggerDefinitionId === definition.id)
-  )
-    return true;
-  if (
-    definition.id === SETUP_ACCESS_AMBUSH_ASSET_CARD_ID ||
-    definition.id === TRAP_ACCESS_AMBUSH_ASSET_CARD_ID ||
-    definition.id === DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID ||
-    definition.id === DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID ||
-    definition.id === TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID ||
-    definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID ||
-    definition.id === EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID ||
-    definition.id === VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID ||
-    definition.id === VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID ||
-    definition.id === BIZARRE_ENCRYPTION_SCHEME_ID ||
-    definition.id === CHIMERA_ID
-  ) {
-    return true;
-  }
-  return (definition.mechanics ?? []).some(
-    (mechanic) =>
-      mechanic === "access_ambush" ||
-      mechanic === "access_trace" ||
-      mechanic === "access_replacement",
-  );
+function archivesAccessRequiresDecisionOrEffect(...args: any[]): any {
+  return (flowRuntimeHosts.archivesAccessRequiresDecisionOrEffect as any)(...args);
 }
 
 function privateLookCardIds(
@@ -5790,7 +3244,7 @@ function resolveOmniscienceFoundationEndTurnTag(
 ): void {
   if (state.runnerTurnFlags?.runnerReceivedTagThisTurn !== true) return;
   const sourceIds = rezzedCorpRootCardIds(state)
-    .filter((cardId) =>
+    .filter((cardId: CardInstanceId) =>
       hasCorpUtilityKind(state, cardId, "omniscience_foundation_end_turn_tag"),
     )
     .sort();
@@ -7045,7 +4499,7 @@ function cardImplementationAgendaPointInstallCost(
 }
 
 function citySurveillanceSourceIds(state: GameState): CardInstanceId[] {
-  return rezzedCorpRootCardIds(state).filter((sourceId) =>
+  return rezzedCorpRootCardIds(state).filter((sourceId: CardInstanceId) =>
     isCitySurveillanceCard(state, sourceId),
   );
 }
@@ -7894,7 +5348,7 @@ function validateCorpInstalledEconomyAction(
 
 function rezzedInvestmentFirmIds(state: GameState): CardInstanceId[] {
   return rezzedCorpRootCardIds(state)
-    .filter((cardId) => isInvestmentFirmCard(state, cardId))
+    .filter((cardId: CardInstanceId) => isInvestmentFirmCard(state, cardId))
     .sort();
 }
 
@@ -8062,788 +5516,124 @@ function resolveCrashEverettDrawChoice(...args: any[]): any {
   return (lifecycleRuntime.resolveCrashEverettDrawChoice as any)(...args);
 }
 
-function corpInstallRezSequenceHandlerHost(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction?: PlayerAction,
-): CorpInstallRezSequenceHandlerHost {
-  return {
-    state,
-    legalAction,
-    ...(playerAction ? { playerAction } : {}),
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
-      scoredAgendaKind: (cardId) =>
-        scoredAgendaKindForDefinition(definitionFor(state, cardId)),
-      isCorpInstallableCardType: (definition) =>
-        isCorpInstallableCardType(definition),
-      canInstallCorpRootCardInServer: (definition, server) =>
-        canInstallCorpRootCardInServer(state, definition, server),
-      rezCostForCard: (cardId) => rezCostForCard(state, cardId),
-      isPriorityRequisitionCandidate: (cardId) => {
-        const instance = state.cardInstances[cardId];
-        return (
-          instance?.zone.side === "corp" &&
-          instance.zone.zone === "serverIce" &&
-          !instance.rezzed
-        );
-      },
-    },
-    zones: {
-      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
-      moveCardToArchivesFaceup: (cardId) => {
-        state.corp.archives.unshift(cardId);
-        state.cardInstances[cardId] = {
-          ...mustInstance(state.cardInstances, cardId),
-          faceup: true,
-          rezzed: true,
-          zone: { side: "corp", zone: "archives" },
-        };
-      },
-    },
-    servers: {
-      createRemote: () => createRemote(state),
-      mustServer: (serverId) => mustServer(state, serverId),
-    },
-    credits: {
-      spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
-    },
-    callbacks: {
-      resolveCorpRootRez: (cardId) => {
-        resolveCorpRootRezEffect(runRezWindowHostForState(state), cardId);
-      },
-    },
-  };
+function corpInstallRezSequenceHandlerHost(...args: any[]): any {
+  return (actionRuntimeHosts.corpInstallRezSequenceHandlerHost as any)(...args);
 }
 
-function scoredAgendaFlowHost(
-  state: GameState,
-  legalAction?: LegalAction,
-  playerAction?: PlayerAction,
-): ScoredAgendaFlowHost {
-  return {
-    state,
-    ...(legalAction ? { legalAction } : {}),
-    ...(playerAction ? { playerAction } : {}),
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
-      scoredAgendaForDefinition: (definition) =>
-        scoredAgendaImplementationForDefinition(definition),
-      effectiveAgendaDifficulty: (cardId) =>
-        effectiveAgendaDifficulty(effectiveAgendaDifficultyDeps, state, cardId),
-      hasSubtype: (definition, subtype) => cardHasSubtype(definition, subtype),
-      isOveradvanceAgendaDefinition: (definitionId) =>
-        OVERADVANCE_AGENDA_CARD_IDS.has(definitionId as CardDefinitionId),
-    },
-    constants: {
-      employeeEmpowermentId: EMPLOYEE_EMPOWERMENT_ID,
-    },
-    zones: {
-      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
-      cleanupEmptyRemotes: () => cleanupEmptyRemotes(state),
-      corpInstalledCardIds: () => corpInstalledCardIds(state),
-      mustServer: (serverId) => mustServer(state, serverId),
-    },
-    counters: {
-      setCardCounter: (cardId, counterType, amount) =>
-        setCardCounter(state, cardId, counterType, amount),
-      addCardCounter: (cardId, counterType, amount) =>
-        addCardCounter(state, cardId, counterType, amount),
-      cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
-    },
-    credits: {
-      gainCredits: (side, amount) => credits(state, side, amount),
-      setCorpCredits: (amount) => {
-        state.corp.credits = amount;
-      },
-    },
-    flags: {
-      markScoredBlackOpsAgendaThisTurn: () => {
-        ensureCorpTurnFlags(state).scoredBlackOpsAgendaThisTurn = true;
-      },
-      employeeEmpowermentResolvedSourceIds: () =>
-        ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds ??
-        [],
-      markEmployeeEmpowermentResolved: (cardId) => {
-        const flags = ensureCorpTurnFlags(state);
-        flags.employeeEmpowermentStartTurnResolvedSourceIds = [
-          ...(flags.employeeEmpowermentStartTurnResolvedSourceIds ?? []),
-          cardId,
-        ];
-      },
-    },
-    effects: {
-      executeOnScore: (definition, cardId) => {
-        if (!legalAction) return;
-        executeCardImplementationLifecycleEffects(
-          cardImplementationRuntimeDeps,
-          state,
-          legalAction,
-          definition,
-          cardId,
-          "on_score",
-        );
-      },
-      appendEmployeeEmpowermentDrawEffect: (cardId, drawnCount) => {
-        if (!legalAction) return;
-        legalAction.resolvedEffects = [
-          ...(legalAction.resolvedEffects ?? []),
-          automaticDrawCardsEffect(
-            `corp.start.employee_empowerment.${cardId}`,
-            "corp",
-            drawnCount,
-            EMPLOYEE_EMPOWERMENT_ID,
-          ),
-        ];
-      },
-    },
-    draw: {
-      drawCorpCard: () => drawCorpCard(state),
-    },
-    choices: {
-      startDataFortReclamation: (cardId) => {
-        if (!legalAction) throw new Error("Data Fort Reclamation braucht eine LegalAction.");
-        startDataFortReclamationChoice(
-          corpInstallRezSequenceHandlerHost(state, legalAction),
-          cardId,
-        );
-      },
-      startPriorityRequisition: (cardId) => {
-        if (!legalAction) throw new Error("Priority Requisition braucht eine LegalAction.");
-        startPriorityRequisitionChoice(
-          corpInstallRezSequenceHandlerHost(state, legalAction),
-          cardId,
-        );
-      },
-      startCorporateDownsizing: (cardId, creditPerAgendaPoint) => {
-        if (!legalAction) throw new Error("Corporate Downsizing braucht eine LegalAction.");
-        startCorporateDownsizingScoreChoice(
-          corpZoneChoiceHandlerHost(state, legalAction),
-          { sourceCardId: cardId, creditPerAgendaPoint },
-        );
-      },
-      resolveSecurityPurge: () => {
-        if (!legalAction) throw new Error("Security Purge braucht eine LegalAction.");
-        resolveSecurityPurgeAgendaPurge(
-          corpInstallRezSequenceHandlerHost(state, legalAction),
-        );
-      },
-    },
-  };
+function scoredAgendaFlowHost(...args: any[]): any {
+  return (actionRuntimeHosts.scoredAgendaFlowHost as any)(...args);
 }
 
-function scoredAgendaAbilityHost(
-  state: GameState,
-  legalAction?: LegalAction,
-): ScoredAgendaAbilityHost {
-  return {
-    state,
-    ...(legalAction ? { legalAction } : {}),
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      scoredAgendaKindForDefinition: (definition) =>
-        scoredAgendaKindForDefinition(definition),
-      scoredAgendaForDefinition: (definition) =>
-        scoredAgendaImplementationForDefinition(definition),
-      isScoredRevealAgendaDefinition: (definitionId) =>
-        SCORED_REVEAL_AGENDA_CARD_IDS.has(definitionId as CardDefinitionId),
-    },
-    actions: {
-      createLegalAction: (side, type, label, source, costs, payload) =>
-        action(state, side, type, label, source, costs, payload),
-    },
-    counters: {
-      cardCounter: (cardId, counterType) => cardCounter(state, cardId, counterType),
-      spendVisibleCardCounter: (cardId, counterType, amount) =>
-        spendVisibleCardCounter(state, cardId, counterType, amount),
-    },
-    credits: {
-      gainCorpCredits: (amount) => credits(state, "corp", amount),
-    },
-    actionProfiles: {
-      scoredAgendaCounterCreditProfileForDefinition: (definitionId) =>
-        scoredAgendaCounterCreditProfileForDefinition(definitionId),
-      scoredAgendaCounterCreditProfileForPayload: (definitionId, payload) =>
-        scoredAgendaCounterCreditProfileForPayload(definitionId, payload),
-      scoredAgendaCounterCreditPayload: (profile, cardId) =>
-        scoredAgendaCounterCreditPayload(profile, cardId),
-    },
-    callbacks: {
-      pushActivatedCardImplementationActions: (actions, cardId, definition) =>
-        pushActivatedCardImplementationActions(
-          cardImplementationRuntimeDeps,
-          state,
-          actions,
-          "corp",
-          cardId,
-          definition,
-        ),
-      resolveActivatedCardImplementationAbility: () => {
-        if (!legalAction) return false;
-        return resolveActivatedCardImplementationAbility(
-          cardImplementationRuntimeDeps,
-          state,
-          legalAction,
-        );
-      },
-      revealCorpRdTop: () => {
-        if (!legalAction) throw new Error("Scored-Agenda-Aktion fehlt.");
-        revealCorpRdTop(state, legalAction);
-      },
-      resolveAiChiefFinancialOfficer: (sourceCardId) => {
-        if (!legalAction) throw new Error("AI CFO braucht eine LegalAction.");
-        resolveAiChiefFinancialOfficer(
-          corpZoneChoiceHandlerHost(state, legalAction),
-          sourceCardId,
-        );
-      },
-    },
-  };
+function scoredAgendaAbilityHost(...args: any[]): any {
+  return (actionRuntimeHosts.scoredAgendaAbilityHost as any)(...args);
 }
 
-function corpTraceDamageAbilityHost(
-  state: GameState,
-  legalAction?: LegalAction,
-): CorpTraceDamageAbilityHost {
-  return {
-    state,
-    ...(legalAction ? { legalAction } : {}),
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-    },
-    callbacks: {
-      pushActivatedCardImplementationActions: (actions, cardId, definition) =>
-        pushActivatedCardImplementationActions(
-          cardImplementationRuntimeDeps,
-          state,
-          actions,
-          "corp",
-          cardId,
-          definition,
-        ),
-      resolveActivatedCardImplementationAbility: () => {
-        if (!legalAction) return false;
-        return resolveActivatedCardImplementationAbility(
-          cardImplementationRuntimeDeps,
-          state,
-          legalAction,
-        );
-      },
-    },
-  };
+function corpTraceDamageAbilityHost(...args: any[]): any {
+  return (actionRuntimeHosts.corpTraceDamageAbilityHost as any)(...args);
 }
 
-function corpSpecialDamageAbilityHost(
-  state: GameState,
-  legalAction?: LegalAction,
-): CorpSpecialDamageAbilityHost {
-  return {
-    state,
-    ...(legalAction ? { legalAction } : {}),
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      uniqueDirectLongtailImplementationForCard: (cardId) =>
-        uniqueDirectLongtailImplementationForCard(state, cardId),
-      uniqueDirectLongtailImplementationForDefinition: (definitionId) =>
-        uniqueDirectLongtailImplementationForDefinition(definitionId),
-      rezzedCorpRootCardIds: () => rezzedCorpRootCardIds(state),
-    },
-    actions: {
-      buildLegalAction: (side, type, label, source, costs, payload) =>
-        action(state, side, type, label, source, costs, payload),
-    },
-    agendaPoints: {
-      total: () => corpAgendaPointTotal(state),
-      scoredForfeitTargets: () => corpScoredAgendaForfeitTargets(state),
-      pointsForScoredCard: (cardId) => agendaPointsForScoredCard(state, cardId),
-      forfeitCorpAgendaForPointCost: (cardId) =>
-        forfeitCorpAgendaForPointCost(state, cardId),
-    },
-    damage: {
-      resolveDamageOperation: (damageType, amount, sourceDefinitionId) => {
-        if (!legalAction) throw new Error("Damage-Aktion fehlt.");
-        resolveDamageOperation(
-          state,
-          legalAction,
-          damageType,
-          amount,
-          sourceDefinitionId,
-        );
-      },
-    },
-    rng: {
-      rollDie: (purpose) => rollDeterministicDie(state, purpose),
-      randomCounter: () => state.randomCounter,
-    },
-    trash: {
-      trashCorpInstalledCardToArchives: (cardId) =>
-        trashCorpInstalledCardToArchives(state, cardId),
-    },
-  };
+function corpSpecialDamageAbilityHost(...args: any[]): any {
+  return (actionRuntimeHosts.corpSpecialDamageAbilityHost as any)(...args);
 }
 
-function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
-  return accessFlow.runnerAccessActionHost(state);
+function runnerAccessActionHost(...args: any[]): any {
+  return (flowRuntimeHosts.runnerAccessActionHost as any)(...args);
 }
 
-function runnerEncounterActionHostForState(
-  state: GameState,
-): RunnerEncounterActionHost {
-  return runFlow.runnerEncounterActionHostForState(state);
+function runnerEncounterActionHostForState(...args: any[]): any {
+  return (flowRuntimeHosts.runnerEncounterActionHostForState as any)(...args);
 }
 
-function runMovementHostForState(state: GameState): RunMovementHost {
-  return runFlow.runMovementHostForState(state);
+function runMovementHostForState(...args: any[]): any {
+  return (flowRuntimeHosts.runMovementHostForState as any)(...args);
 }
 
-function runRezWindowHostForState(state: GameState): RunRezWindowHost {
-  return runFlow.runRezWindowHostForState(state);
+function runRezWindowHostForState(...args: any[]): any {
+  return (flowRuntimeHosts.runRezWindowHostForState as any)(...args);
 }
 
-function fortPassWindowHostForState(state: GameState): FortPassWindowHost {
-  return runFlow.fortPassWindowHostForState(state);
+function fortPassWindowHostForState(...args: any[]): any {
+  return (flowRuntimeHosts.fortPassWindowHostForState as any)(...args);
 }
 
-function fortRunSideFamiliesHostForState(
-  state: GameState,
-): FortRunSideFamiliesHost {
-  return runFlow.fortRunSideFamiliesHostForState(state);
+function fortRunSideFamiliesHostForState(...args: any[]): any {
+  return (flowRuntimeHosts.fortRunSideFamiliesHostForState as any)(...args);
 }
 
-function encounterEntryHostForState(state: GameState): EncounterEntryHost {
-  return runFlow.encounterEntryHostForState(state);}
-
-function successfulRunInterventionHost(
-  state: GameState,
-): SuccessfulRunInterventionHost {
-  return runFlow.successfulRunInterventionHost(state);
+function encounterEntryHostForState(...args: any[]): any {
+  return (flowRuntimeHosts.encounterEntryHostForState as any)(...args);
 }
 
-function encounterResolutionHostForState(state: GameState): EncounterResolutionHost {
-  return runFlow.encounterResolutionHostForState(state);
+function successfulRunInterventionHost(...args: any[]): any {
+  return (flowRuntimeHosts.successfulRunInterventionHost as any)(...args);
 }
 
-function encounterSpecialWindowHostForState(
-  state: GameState,
-): EncounterSpecialWindowHost {
-  return runFlow.encounterSpecialWindowHostForState(state);
+function encounterResolutionHostForState(...args: any[]): any {
+  return (flowRuntimeHosts.encounterResolutionHostForState as any)(...args);
 }
 
-function encounterPrintedEffectHostForState(
-  state: GameState,
-  legalAction?: LegalAction,
-): EncounterPrintedEffectHost {
-  return runFlow.encounterPrintedEffectHostForState(state, legalAction);
+function encounterSpecialWindowHostForState(...args: any[]): any {
+  return (flowRuntimeHosts.encounterSpecialWindowHostForState as any)(...args);
 }
 
-function encounterPrintedNonTraceHostForState(
-  state: GameState,
-  legalAction?: LegalAction,
-): EncounterPrintedNonTraceHost {
-  return runFlow.encounterPrintedNonTraceHostForState(state, legalAction);
+function encounterPrintedEffectHostForState(...args: any[]): any {
+  return (flowRuntimeHosts.encounterPrintedEffectHostForState as any)(...args);
 }
 
-function runEndCleanupHost(state: GameState): RunEndCleanupHost {
-  return runFlow.runEndCleanupHost(state);
+function encounterPrintedNonTraceHostForState(...args: any[]): any {
+  return (flowRuntimeHosts.encounterPrintedNonTraceHostForState as any)(...args);
 }
 
-function runnerBreakerActionExecutionHost(
-  state: GameState,
-): RunnerBreakerActionExecutionHost {
-  return {
-    state,
-    cards: {
-      definitionFor: (cardId) => definitionFor(state, cardId),
-      cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
-      effectiveSubtypesForCard: (cardId, definition) =>
-        effectiveSubtypesForCard(state, cardId, definition),
-    },
-    run: {
-      currentRun: () => mustRun(state),
-      currentEncounterSubroutines: (iceDefinition) =>
-        subroutinesForCurrentEncounter(state, iceDefinition),
-      runRemainderStrengthBonusForBreaker,
-      finishRun: (successful, legalAction) => finishRun(state, successful, legalAction),
-    },
-    breaker: {
-      pumpAbilityForLegalAction: (legalAction) =>
-        pumpAbilityForLegalAction(state, legalAction),
-      pumpAmountForLegalAction: (legalAction) =>
-        pumpAmountForLegalAction(state, legalAction),
-      pumpDurationForLegalAction: (legalAction) =>
-        pumpDurationForLegalAction(state, legalAction),
-      breakAbilityForLegalAction: (legalAction) =>
-        breakAbilityForLegalAction(state, legalAction),
-      assertCurrentSubroutineMatchesLegalAction: (
-        iceDefinition,
-        subroutineIndex,
-        legalAction,
-      ) =>
-        assertCurrentSubroutineMatchesLegalAction(
-          state,
-          iceDefinition,
-          subroutineIndex,
-          legalAction,
-        ),
-      assertBreakSubroutineCostQuoteValid: (
-        breakerId,
-        legalAction,
-        subroutine,
-      ) =>
-        assertBreakSubroutineCostQuoteValid(
-          state,
-          breakerId,
-          legalAction,
-          subroutine,
-        ),
-      resolveMultiBreakSubroutinesAction: (breakerId, legalAction) =>
-        resolveMultiBreakSubroutinesAction(state, breakerId, legalAction),
-      resolveBlinkBreakSubroutineAction: (
-        breakerId,
-        subroutineIndex,
-        legalAction,
-      ) =>
-        resolveBlinkBreakSubroutineAction(
-          state,
-          breakerId,
-          subroutineIndex,
-          legalAction,
-        ),
-    },
-    payment: {
-      spendRunnerRunCredits: (amount, breakerId) =>
-        spendRunnerRunCredits(runDurationPaymentHost(state), amount, breakerId),
-    },
-    fort: {
-      shouldOpenAardvarkInterception: (breakerId) =>
-        shouldOpenAardvarkInterception(
-          fortRunSideFamiliesHostForState(state),
-          breakerId,
-        ),
-      startAardvarkInterceptionChoice: (breakerId, actionType, legalAction) =>
-        startAardvarkInterceptionChoice(
-          fortRunSideFamiliesHostForState(state),
-          breakerId,
-          actionType,
-          legalAction,
-        ),
-      applyPostBreakStealthLoss: (breakerId, legalAction) =>
-        applyPostBreakStealthLoss(
-          fortRunSideFamiliesHostForState(state),
-          breakerId,
-          legalAction,
-        ),
-    },
-    effects: {
-      executeEffectCommands: (commands) => executeEffectCommands(state, commands),
-      addRunnerFutureActionDebt: (amount) =>
-        addRunnerFutureActionDebt(state, amount),
-    },
-    turn: {
-      ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
-    },
-    tracking: {
-      recordBartmossEncounterUsage: (breakerId) =>
-        recordBartmossEncounterUsage(state, breakerId),
-      recordDupreBreakUsage: (breakerId) =>
-        recordDupreBreakUsage(runEndCleanupHost(state), breakerId),
-      recordSnowballBreakUsage: (breakerId) =>
-        recordSnowballBreakUsage(state, breakerId),
-    },
-  };
+function runEndCleanupHost(...args: any[]): any {
+  return (flowRuntimeHosts.runEndCleanupHost as any)(...args);
 }
 
-function startRunActionExecutionHost(
-  state: GameState,
-): StartRunActionExecutionHost {
-  return {
-    state,
-    payment: {
-      spendRunnerClick: () => spendClick(state, "runner"),
-      payRunStartTaxCredits: (legalAction) =>
-        payRunStartTaxCredits(runDurationPaymentHost(state), legalAction),
-    },
-    turn: {
-      ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
-    },
-    run: {
-      validateRovingSubmarineRunGate: (serverId) =>
-        validateRovingSubmarineRunGate(
-          fortRunSideFamiliesHostForState(state),
-          serverId,
-        ),
-      startRun: (serverId, legalAction) =>
-        startRun(state, serverId, undefined, 1, undefined, legalAction),
-      activeWilsonSourceIds: () =>
-        activeWilsonSourceIds(runDurationPaymentHost(state)),
-    },
-  };
+function runnerBreakerActionExecutionHost(...args: any[]): any {
+  return (flowRuntimeHosts.runnerBreakerActionExecutionHost as any)(...args);
 }
 
-function rezActionExecutionHost(state: GameState): RezActionExecutionHost {
-  return {
-    rez: {
-      executeRezCard: (cardId, rootRez, legalAction) =>
-        executeRezCard(rezCardHost(state), cardId, rootRez, legalAction),
-      expireCorporateRetreatInstallCreditAbilities: () =>
-        expireCorporateRetreatInstallCreditAbilities(state),
-    },
-    run: {
-      passCorpRunRootRezWindow: (legalAction) =>
-        passCorpRunRootRezWindow(runRezWindowHostForState(state), legalAction),
-      passApproachedIce: () => passApproachedIce(runMovementHostForState(state)),
-    },
-  };
+function startRunActionExecutionHost(...args: any[]): any {
+  return (flowRuntimeHosts.startRunActionExecutionHost as any)(...args);
 }
 
-function playCardExecutionHost(state: GameState): PlayCardExecutionHost {
-  const operationHost = corpOperationResolutionHost(state);
-  return {
-    state,
-    zones: {
-      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
-    },
-    payment: {
-      spendClick: (side) => spendClick(state, side),
-      spendCredits: (side, amount) => spendCredits(state, side, amount),
-    },
-    events: {
-      runnerEventResolver: (definition) =>
-        cardImplementationRunnerEventResolver(definition) ??
-        RUNNER_EVENT_RESOLVERS[definition.id],
-    },
-    operations: {
-      canPlayCorpOperation: (definition) =>
-        canPlayCorpOperation(operationHost, definition),
-      resolveCorpOperation: (definition, legalAction) =>
-        resolveCorpOperation(operationHost, definition, legalAction),
-      resolveRunnerLastTurnInstalledResourceTargetId: (targetCardId) =>
-        resolveRunnerLastTurnInstalledResourceTargetId(state, targetCardId),
-    },
-    cardImplementation: {
-      canPlayPrintedCostOnPlay: (definition) =>
-        canPlayPrintedCostOnPlayImplementation(
-          cardImplementationRuntimeDeps,
-          state,
-          definition,
-        ),
-      executeOnPlayAbility: (legalAction, definition, cardId) =>
-        executeOnPlayCardImplementationAbility(
-          cardImplementationRuntimeDeps,
-          state,
-          legalAction,
-          definition,
-          cardId,
-        ),
-      resolveRunnerTargetedEventImplementation: (definition, legalAction) =>
-        resolveRunnerTargetedEventImplementation(state, definition, legalAction),
-      resolvePostOnPlayGenericFollowups: (definition, legalAction) =>
-        resolvePostOnPlayGenericFollowups(state, definition, legalAction),
-      hasPrintedCostOnPlay: hasPrintedCostOnPlayCardImplementation,
-      additionalOperationCost: onPlayCardImplementationAdditionalOperationCost,
-      needsLastTurnResourceTarget:
-        onPlayCardImplementationNeedsLastTurnResourceTarget,
-    },
-  };
+function rezActionExecutionHost(...args: any[]): any {
+  return (flowRuntimeHosts.rezActionExecutionHost as any)(...args);
 }
 
-function corpOperationResolutionHost(
-  state: GameState,
-): CorpOperationResolutionHost {
-  return {
-    state,
-    actions: {
-      buildLegalAction: action,
-    },
-    cards: {
-      isCorpInstallableCardType,
-    },
-    corp: {
-      drawCorpCard: () => drawCorpCard(state),
-      ensureTurnFlags: () => ensureCorpTurnFlags(state),
-      runnerStoleAgendaLastTurn: () => runnerStoleAgendaLastTurn(state),
-      runnerStolenAgendaAdvancementCountersLastTurn: () =>
-        runnerStolenAgendaAdvancementCountersLastTurn(state),
-      swapCorpHqAndRdTop: () => swapCorpHqAndRdTop(state),
-    },
-    runner: {
-      requireRunnerTagged: () => requireRunnerTagged(state),
-      runnerLastTurnInstalledResourceIds: () =>
-        runnerLastTurnInstalledResourceIds(state),
-      isConcealedRunnerResource: (cardId) =>
-        isConcealedRunnerResource(state, cardId),
-      hiddenRunnerResourceSlotId,
-    },
-    economy: {
-      gainCorpCredits: (amount) => credits(state, "corp", amount),
-    },
-    zones: {
-      trashRunnerInstalledCardToHeap: (cardId) =>
-        trashRunnerInstalledCardToHeap(state, cardId),
-    },
-    damage: {
-      resolveDamageOperation: (legalAction, damageType, amount, sourceDefinitionId) =>
-        resolveDamageOperation(
-          state,
-          legalAction,
-          damageType,
-          amount,
-          sourceDefinitionId,
-        ),
-      addRunnerTagsWithPrevention: (legalAction, amount, source) =>
-        addRunnerTagsWithPrevention(state, legalAction, amount, source),
-    },
-    hiddenZone: {
-      startCorpArchivesToHqChoice: (legalAction, sourceCardId) =>
-        startCorpArchivesToHqChoice(
-          hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
-          sourceCardId,
-        ),
-      startCorpRdTopReorderChoice: (legalAction, sourceCardId) =>
-        startCorpRdTopReorderChoice(
-          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-          sourceCardId,
-        ),
-      resolveNewBloodConcealAndReorder: (legalAction) =>
-        resolveNewBloodConcealAndReorder(
-          hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-        ),
-    },
-    board: {
-      installedAgendaOperationTarget: () => installedAgendaOperationTarget(state),
-      advanceableInstalledCardTargets: () => advanceableInstalledCardTargets(state),
-      advancementDistributionOptions: (amount, distribution) =>
-        advancementDistributionOptions(state, amount, distribution as never),
-      moveAdvancementOptions: (sourceCardId, source, maxAmount) =>
-        moveAdvancementOptions(state, sourceCardId, source as never, maxAmount),
-      resolveAgendaCounterOperation: (legalAction, sourceDefinitionId) =>
-        resolveAgendaCounterOperation(state, legalAction, sourceDefinitionId),
-      resolveManagementShakeUpOperation: (legalAction) =>
-        resolveManagementShakeUpOperation(state, legalAction),
-      resolveSystematicLayoffsAdvancementOperation: (legalAction) =>
-        resolveSystematicLayoffsAdvancementOperation(state, legalAction),
-    },
-    operations: {
-      powerGridOverloadEligibleHardwareIds: () =>
-        powerGridOverloadEligibleHardwareIds(state),
-      resolvePowerGridOverloadOperation: (legalAction) =>
-        resolvePowerGridOverloadOperation(state, legalAction),
-    },
-    cardImplementation: {
-      canPlayPrintedCostOnPlay: (definition) =>
-        canPlayPrintedCostOnPlayImplementation(
-          cardImplementationRuntimeDeps,
-          state,
-          definition,
-        ),
-      executeOnPlayAbility: (legalAction, definition, cardId) =>
-        executeOnPlayCardImplementationAbility(
-          cardImplementationRuntimeDeps,
-          state,
-          legalAction,
-          definition,
-          cardId,
-        ),
-    },
-  };
+function playCardExecutionHost(...args: any[]): any {
+  return (actionRuntimeHosts.playCardExecutionHost as any)(...args);
 }
 
-function boardStateActionExecutionHost(
-  state: GameState,
-): BoardStateActionExecutionHost {
-  return {
-    state,
-    zones: {
-      removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
-      serverById: (serverId) => mustServer(state, serverId),
-    },
-    payment: {
-      spendClick: (side) => spendClick(state, side),
-      spendCredits: (side, amount) => spendCredits(state, side, amount),
-    },
-    runner: {
-      resolveHiddenRunnerResourceSlot: (slotId) =>
-        resolveHiddenRunnerResourceSlot(state, slotId),
-      isConcealedRunnerResource: (cardId) =>
-        isConcealedRunnerResource(state, cardId),
-      hiddenRunnerResourceSlotId,
-      trashInstalledCardToHeap: (cardId, legalAction) =>
-        trashRunnerInstalledCardToHeap(state, cardId, legalAction),
-    },
-    fort: {
-      markRovingSubmarineActivityForServer: (serverId, legalAction) =>
-        markRovingSubmarineActivityForServer(
-          fortRunSideFamiliesHostForState(state),
-          serverId,
-          legalAction,
-        ),
-    },
-  };
+function corpOperationResolutionHost(...args: any[]): any {
+  return (actionRuntimeHosts.corpOperationResolutionHost as any)(...args);
 }
 
-function breachStateHost(state: GameState): BreachStateHost {
-  return accessFlow.breachStateHost(state);
+function boardStateActionExecutionHost(...args: any[]): any {
+  return (actionRuntimeHosts.boardStateActionExecutionHost as any)(...args);
 }
 
-function accessFlowHost(state: GameState): AccessFlowHost {
-  return accessFlow.accessFlowHost(state);
+function breachStateHost(...args: any[]): any {
+  return (flowRuntimeHosts.breachStateHost as any)(...args);
 }
 
-function runAccessTransitionHost(state: GameState): RunAccessTransitionHost {
-  return runFlow.runAccessTransitionHost(state);
+function accessFlowHost(...args: any[]): any {
+  return (flowRuntimeHosts.accessFlowHost as any)(...args);
 }
 
-function hasHiddenResourceAccessStartActions(
-  state: GameState,
-  run: NonNullable<GameState["run"]>,
-  serverId: Exclude<ServerId, "new_remote">,
-): boolean {
-  if (run.breach || run.hiddenRunnerResourceAccessStartServerId) return false;
-  const previous = run.hiddenRunnerResourceAccessStartServerId;
-  run.hiddenRunnerResourceAccessStartServerId = serverId;
-  try {
-    return (
-      buildRunnerAccessStartCardImplementationActions(
-        runCardImplementationActionHost(state),
-      ).legalActions.length > 1
-    );
-  } finally {
-    if (previous) run.hiddenRunnerResourceAccessStartServerId = previous;
-    else delete run.hiddenRunnerResourceAccessStartServerId;
-  }
+function runAccessTransitionHost(...args: any[]): any {
+  return (flowRuntimeHosts.runAccessTransitionHost as any)(...args);
 }
 
-function accessEffectHandlerHost(
-  state: GameState,
-  legalAction?: LegalAction,
-): AccessEffectHandlerHost {
-  return accessFlow.accessEffectHandlerHost(state, legalAction);
+function hasHiddenResourceAccessStartActions(...args: any[]): any {
+  return (actionRuntimeHosts.hasHiddenResourceAccessStartActions as any)(...args);
 }
 
-function pushCorpTraceDamageOrCardImplementationActions(
-  state: GameState,
-  actions: LegalAction[],
-  cardId: CardInstanceId,
-  host: CorpTraceDamageAbilityHost = corpTraceDamageAbilityHost(state),
-): void {
-  const traceDamageActions = buildCorpTraceDamageAbilityActionsForCard(
-    host,
-    cardId,
-  );
-  if (traceDamageActions.handled) {
-    actions.push(...traceDamageActions.actions);
-    return;
-  }
-  pushActivatedCardImplementationActions(
-    cardImplementationRuntimeDeps,
-    state,
-    actions,
-    "corp",
-    cardId,
-    definitionFor(state, cardId),
-  );
+function accessEffectHandlerHost(...args: any[]): any {
+  return (flowRuntimeHosts.accessEffectHandlerHost as any)(...args);
+}
+
+function pushCorpTraceDamageOrCardImplementationActions(...args: any[]): any {
+  return (actionRuntimeHosts.pushCorpTraceDamageOrCardImplementationActions as any)(...args);
 }
 
 function hiddenZoneSearchHandlerHostBase(...args: any[]): any {
@@ -9193,7 +5983,7 @@ function swapCorpHqAndRdTop(state: GameState): void {
 function krumzTraceBitCardIds(state: GameState): CardInstanceId[] {
   return rezzedCorpRootCardIds(state)
     .filter(
-      (cardId) =>
+      (cardId: CardInstanceId) =>
         (definitionFor(state, cardId).id === KRUMZ_TRACE_ASSET_CARD_ID ||
           hasCorpUtilityKind(state, cardId, "krumz_trace_bit")) &&
         cardCounter(state, cardId, "bit") > 0,
@@ -9561,10 +6351,10 @@ function preventOneVirusCounterWithDisinfectant(
   const flags = ensureCorpTurnFlags(state);
   const used = new Set(flags.disinfectantUsedSourceIdsThisTurn ?? []);
   const sourceId = rezzedCorpRootCardIds(state)
-    .filter((cardId) =>
+    .filter((cardId: CardInstanceId) =>
       hasCorpUtilityKind(state, cardId, "disinfectant_avoid_virus_counter"),
     )
-    .filter((cardId) => !used.has(cardId))
+    .filter((cardId: CardInstanceId) => !used.has(cardId))
     .sort()[0];
   if (!sourceId || state.corp.credits < 1) return { prevented: false, creditsPaid: 0 };
   state.corp.credits -= 1;
@@ -10303,7 +7093,415 @@ const runtimeDomainDeps = {
   mustInstance,
   credits,
   withoutVariableIceState,
+  DEFAULT_CONTROLLERS,
+  PROTEUS_ARMAGEDDON_ID,
+  PROTEUS_SCALDAN_ID,
+  PROTEUS_TAXMAN_ID,
+  PROTEUS_VIRAL_PIPELINE_ID,
+  RUNNER_EVENT_RESOLVERS,
+  TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS,
+  abilityMetadata,
+  accessFlow,
+  accessFlowHost,
+  acmeSavingsAndLoanObligationCount,
+  activatedCardImplementationExecutionHost,
+  activeCrashEverettSourceId,
+  addAcmeSavingsAndLoanObligation,
+  addCounterToAllInstalledRunnerIcebreakers,
+  addCurrentRunAccessCount,
+  addHackerTrackerTraceCounters,
+  addRunnerFutureActionDebt,
+  addVirusCounterWithDisinfectantPrevention,
+  addVisibleCardCounter,
+  advanceableInstalledCardTargets,
+  advancementDistributionOptions,
+  agendaPoints,
+  appendRegionReplacementTrashEffect,
+  applyActionHostComposition,
+  applyAiBoonRunStart,
+  applyCorpStartOfTurnEffects,
+  applyEffectCommands,
+  applyProteusPurgeableRunnerVirusCorpStartEffects,
+  applyQuestForCattekinStartOfTurn,
+  applyRunnerDrawSummaryPayload,
+  applyRunnerForgoNextAction,
+  applyRunnerTraceCounterRunStartEffects,
+  applySystematicLayoffsAdvancementPlacement,
+  archivesAccessRequiresDecisionOrEffect,
+  assertBreakSubroutineCostQuoteValid,
+  assertCorpIceInstallCostValid,
+  assertCurrentSubroutineMatchesLegalAction,
+  assertNonNegativeAmount,
+  assertPositiveIntegerAmount,
+  automaticCounterChangeEffect,
+  automaticDrawCardsEffect,
+  automaticGainCreditsEffect,
+  automaticLoseCreditsEffect,
+  automaticStealAgendaEffect,
+  automaticTagEffect,
+  automaticTrashCardEffect,
+  availableRunnerTagRemovalCredits,
+  awardRunnerEventAgendaPoint,
+  backupProgramsOnMicrotechBeforeTrash,
+  boardStateActionExecutionHost,
+  breachStateHost,
+  breakAbilityForLegalAction,
+  breakSubroutineCostBreakdown,
+  canHostProgramOnDaemon,
+  canInstallCorpRootCardInServer,
+  canInstallRunnerProgramFromZone,
+  canOverlayProgramOnZetatechSoftwareInstaller,
+  canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
+  cardImplementationAgendaPointInstallCost,
+  cardImplementationEffectAdapters,
+  cardImplementationRunnerEventResolver,
+  cardInstallCapabilitiesForDefinition,
+  choiceAction,
+  chooseCorpAgendasForPointCost,
+  cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay,
+  clearEdgerunnerTempsInstallFlags,
+  clearValuPakProgramInstallFlags,
+  clickCostForAction,
+  closeRunnerCostPenaltySupportWindowForPayment,
+  codeViralCachePurgePreserveTargets,
+  consumeEdgerunnerTempsInstallAction,
+  consumeRunnerFutureActionDebt,
+  consumeValuPakProgramInstallAction,
+  continueRun,
+  continueV1921PlayfulAiLoop,
+  corpAgendaCounterOperationTarget,
+  corpAgendaPointTotal,
+  corpIceInstallAdditionalCost,
+  corpIceInstallBaseCost,
+  corpIceInstallTotalCost,
+  corpOperationResolutionHost,
+  corpRegionUpgradeIdsInServer,
+  corpRunnerActionPaidWindowActions,
+  corpScoredBlackOpsAgendaLastTurn,
+  corpSpecialDamageAbilityHost,
+  corpTraceDamageAbilityHost,
+  corpTracePaymentDeps,
+  corpUtilityImplementationForCard,
+  corpZoneChoiceHandlerHost,
+  counterLifecycleRuntimeDepsHost,
+  counterUtilityTriggerExecutionHost,
+  creditEconomyExecutionHost,
+  creditTextForPrompt,
+  daemonHostedMemoryUsed,
+  daemonHostingCapacity,
+  damageCoreHost,
+  diePromptText,
+  discardChoice,
+  drawRunnerCard,
+  drawRunnerCards,
+  dupreStrengthCounterBonus,
+  edgerunnerTempsInstallActionsRemaining,
+  effectiveAgendaDifficultyDeps,
+  effectiveSubtypesForCard,
+  encounterEntryHostForState,
+  encounterPrintedEffectHostForState,
+  encounterPrintedNonTraceHostForState,
+  encounterTemporaryTraceCreditsAvailable,
+  endTurn,
+  executeEffectCommands,
+  expireCorporateRetreatInstallCreditAbilities,
+  exposeCorpCardInServer,
+  exposeInstalledCorpCardForImplementation,
+  exposeInstalledCorpCardLabel,
+  exposeInstalledCorpCardTargets,
+  exposeInstalledCorpCardsChoiceOptions,
+  exposeOutermostIceOfEachDataFort,
+  exposedCorpCardInServer,
+  finishRun,
+  forfeitCorpAgendaForPointCost,
+  forfeitRunnerAgendaForPointCost,
+  fortCapacityModifiersForCard,
+  gameCardImplementationRuntimeDepsHost,
+  hackerTrackerCardIds,
+  hackerTrackerCounterTotal,
+  hackerTrackerCounterType,
+  hasHiddenResourceAccessStartActions,
+  hasInstallCapabilityKindForDefinition,
+  hasInstalledMicrotechTrodeSet,
+  hiddenReplacementLongtailForDefinition,
+  hiddenZoneArrangeChoiceHandlerHost,
+  hiddenZoneNonSearchChoiceHandlerHost,
+  hiddenZoneRuntimeDepsHost,
+  hiddenZoneSearchActivationHandlerHost,
+  hiddenZoneSearchActivationTargetHost,
+  hiddenZoneSearchChoiceHandlerHost,
+  hiddenZoneSearchHandlerHostBase,
+  hostedProgramStrengthModifier,
+  huntClubBbsExposeOptionLabel,
+  huntClubBbsExposeTargets,
+  iceChoiceLabelForSide,
+  iceStrengthBonusFor,
+  iceStrengthFor,
+  icebreakerEncounterStrengthBonus,
+  icebreakerHasSpecial,
+  identityDefinition,
+  identityModifierAmount,
+  incubatorCounterTotal,
+  installCardHost,
+  installRezRuntimeDepsHost,
+  installRunnerProgramForFree,
+  installRunnerProgramFromStackWithoutClick,
+  installRunnerProgramFromZoneWithoutClick,
+  installTargetBindingForDefinition,
+  installedAgendaOperationTarget,
+  installedCodeViralCacheIds,
+  installedCorpCardServerContext,
+  installedRunnerConnectionIds,
+  installedRunnerIcebreakerIds,
+  installedRunnerProgramTrashOptionsForInstall,
+  installedRunnerVirusSourceIds,
+  installedVirusCounterTotalForDefinition,
+  isAcmeSavingsAndLoanDefinition,
+  isCitySurveillanceCard,
+  isCorpInstallableCardType,
+  isHackerTrackerCentralCard,
+  isInstalledCorpCardAdvanceable,
+  isInvestmentFirmCard,
+  isRegionUpgrade,
+  isV097OrLater,
+  isV099OrLater,
+  isVersionAtLeast,
+  isVisibleVirusCounterCardForRunner,
+  krumzTraceBitCardIds,
+  krumzTraceBitTotal,
+  legalActionHostComposition,
+  mainActionHostComposition,
+  microtechTrodeSetBreakAdditionalCost,
+  movableAdvancementSourceIds,
+  moveAdvancementOptions,
+  mustInstallInsideSubsidiaryDataFort,
+  newsgroupTauntingRunStartTax,
+  normalizeSubtypeLabel,
+  openPostMeatDamageReactionWindow,
+  openRunnerCostPenaltySupportWindow,
+  outermostIceExposures,
+  parseAdvancementDistributionValue,
+  parseCodeViralCachePreserveOption,
+  parsePlayfulAiChoiceSource,
+  parsePlayfulAiSplit,
+  parseRunnerInstalledConnectionTrashBadPublicityChoiceSource,
+  passCurrentEncounteredIce,
+  pendingChoiceResolutionHost,
+  permanentIcebreakerStrengthCounterBonus,
+  pickRunnerAgendaForAgendaPointCost,
+  playCardExecutionHost,
+  playfulAiSplitOptions,
+  postMeatDamageHiddenResourceCandidates,
+  powerGridOverloadEligibleHardwareIds,
+  powerGridOverloadLegalActions,
+  powerGridOverloadTrashCountFromChoiceSource,
+  powerGridOverloadTrashCountFromPayload,
+  poxInstallTax,
+  preventOneVirusCounterWithDisinfectant,
+  printedCostCardImplementationMakeRunEffect,
+  privateLookCardIds,
+  processDiscardStep,
+  publicIcePositionLabelForCard,
+  publicIceSelectionLabelForCard,
+  pumpAbilityForLegalAction,
+  pumpAmountForLegalAction,
+  pumpDurationForLegalAction,
+  pushCorpTraceDamageOrCardImplementationActions,
+  queueIncubatorStartOfTurnTransforms,
+  rabbitTraceLimitReductionForIceTrace,
+  randomCorpHqCardsWithoutReplacement,
+  randomCorpHqDiscard,
+  recordBartmossEncounterUsage,
+  recordSnowballBreakUsage,
+  refreshRecurringCredits,
+  relativeDamageSubroutineForCurrentEncounter,
+  relativeIceStrengthBonusFor,
+  relativeTraceSubroutinesForCurrentEncounter,
+  remainingReplacementLongtailImplementationForCard,
+  remainingReplacementLongtailImplementationForDefinition,
+  remainingReplacementLongtailKindForDefinition,
+  removeAcmeSavingsAndLoanObligation,
+  requireRunnerTagged,
+  requiresDataFortInstallTarget,
+  resolveAcmeSavingsAndLoanEndOfCorpTurn,
+  resolveAgendaCounterOperation,
+  resolveAnonymousTipDerezBlackIceChoice,
+  resolveBizarreEncryptionDelayedAgendas,
+  resolveBlinkBreakSubroutineAction,
+  resolveCardImplementationAccessPaymentChoice,
+  resolveChimeraDaemonTrashChoice,
+  resolveCoreCommandJettisonIceChoice,
+  resolveCorpInstalledEconomyAction,
+  resolveDealWithMilitech,
+  resolveDiscardChoice,
+  resolveExposeInstalledCorpCardsChoice,
+  resolveFieldReporterEndOfRunnerTurn,
+  resolveForgedActivationOrdersCorpChoice,
+  resolveForgedActivationOrdersTargetChoice,
+  resolveHuntClubBbsExposeChoice,
+  resolveIncubatorTransformChoice,
+  resolveManagementShakeUpOperation,
+  resolveMitWestTier,
+  resolveMultiBreakSubroutinesAction,
+  resolveOmniscienceFoundationEndTurnTag,
+  resolveOpenEndedMileageProgramReturnChoice,
+  resolveP358HiddenReplacementChoice,
+  resolvePlayfulAiDiceLoopEvent,
+  resolvePostOnPlayGenericFollowups,
+  resolvePowerGridOverloadOperation,
+  resolvePreyingMantisEndOfRunnerTurnDamage,
+  resolveProteusRunnerProgramReturnChoice,
+  resolveRunnerHostingChoice,
+  resolveRunnerInstalledConnectionTrashBadPublicityChoice,
+  resolveRunnerLastTurnInstalledResourceTargetId,
+  resolveRunnerTargetedEventImplementation,
+  resolveSecurityCodeWormChipTrashIceChoice,
+  resolveSetupMulliganChoice,
+  resolveSneakPreviewTemporaryInstallReturns,
+  resolveSystematicLayoffsAdvancementOperation,
+  resolveTraceHardwareWreckerSuccess,
+  resolveTraceTrashRunnerResourceSuccess,
+  resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
+  resolveV1911CorporateDownsizing,
+  resolveV1911RunnerHiddenZoneAbility,
+  resolveV1921PlayfulAiChoice,
+  restoreCodeViralCachePreservedCounters,
+  returnRunnerInstalledCardToGrip,
+  returnRunnerInstalledProgramsToGripForAccess,
+  revealCorpRdTop,
+  revealRunnerStackTop,
+  rezActionExecutionHost,
+  rezCardHost,
+  rezzedIceOutsideThisIceCount,
+  rezzedInvestmentFirmIds,
+  rootInstallRezzesOnInstall,
+  runAccessLegalActionHostComposition,
+  runBreakSubroutineAdditionalCost,
+  runCardImplementationActionHost,
+  runFlow,
+  runFortTriggerExecutionHost,
+  runMovementHostForState,
+  runRemainderStrengthBonusForBreaker,
+  runStartTaxForServerUpgrades,
+  runnerAccessActionHost,
+  runnerActionsPerTurn,
+  runnerBreakerActionExecutionHost,
+  runnerCanPayInstallCost,
+  runnerCostPenaltySupportCreditCapacity,
+  runnerCounterDisplayName,
+  runnerDrawActionContext,
+  runnerDrawSummaryPublicPayload,
+  runnerEncounterActionHostForState,
+  runnerHasInstalledCardDefinition,
+  runnerHasInstalledDefinition,
+  runnerInstallableProgramIdsForValuPak,
+  runnerInstalledCardCountByDefinition,
+  runnerInstalledHardwareTrashTarget,
+  runnerInstalledResourceLastTurn,
+  runnerLastTurnInstalledResourceIds,
+  runnerProgramInstallMemoryReachableAfterTrash,
+  runnerProgramInstallRecurringCreditSourceIds,
+  runnerRecurringCredits,
+  runnerRunAttemptsLastTurn,
+  runnerRunAttemptsThisGame,
+  runnerSpecialTriggerExecutionHost,
+  runnerStoleAgendaLastTurn,
+  runnerStolenAgendaAdvancementCountersLastTurn,
+  runnerTagRemovalRecurringCreditSourceIds,
+  runnerTagRemovalRecurringCredits,
+  runnerTraceCounterEffectDefinitions,
+  runnerTracePaymentDeps,
+  runnerTrashedNodeLastTurn,
+  runnerUtilityLongtailImplementationForCard,
+  runnerUtilityLongtailKindForCard,
+  scoredAgendaAbilityHost,
+  scoredAgendaImplementationForDefinitionId,
+  selectedChoiceCardIds,
+  selectedChoiceCardIdsForChoice,
+  serverDifficultyIncreaseFromFaitAccompli,
+  serverDifficultyReductionFromUpgrades,
+  setupMulliganChoice,
+  shouldOfferRunnerProgramTrashBeforeInstall,
+  shouldOpenInvestmentFirmCreditChoice,
+  shuffleCorpCardIntoRd,
+  shuffleGripTrashAndStackThenDrawForCardImplementation,
+  shuffleRunnerStack,
+  skivvissCounterTotal,
+  sourcePartsForP334Choice,
+  specialZoneHarnessActions,
+  spendCorpAgendaPointCost,
+  spendEncounterTemporaryTraceCredits,
+  spendHackerTrackerCounters,
+  spendKrumzTraceBits,
+  spendRunnerAccessTrashCredits,
+  spendRunnerTagRemovalCredits,
+  spendVisibleCardCounter,
+  spyCountersForServer,
+  stableSubtypeList,
+  startAnonymousTipDerezBlackIceChoice,
+  startCardImplementationAdvancementDistributionChoice,
+  startCardImplementationMoveAdvancementChoice,
+  startCodeViralCachePurgeChoice,
+  startCoreCommandJettisonIceChoice,
+  startCorpTurn,
+  startCrashEverettDrawChoice,
+  startDiscardPhase,
+  startExpertScheduleAnalyzerPostAccessChoice,
+  startExposeInstalledCorpCardsChoice,
+  startForgedActivationOrdersTargetChoice,
+  startHuntClubBbsExposeChoice,
+  startInvestmentFirmCreditChoice,
+  startOpenEndedMileageProgramReturnChoice,
+  startPowerGridOverloadChoice,
+  startRunActionExecutionHost,
+  startRunnerHostingChoice,
+  startRunnerPrivateLookAtSpecificCorpCards,
+  startRunnerPrivateLookChoice,
+  startRunnerProgramTrashBeforeInstallChoice,
+  startRunnerTurn,
+  startSecurityCodeWormChipTrashIceChoice,
+  startSelfModifyingCodeFreeMuChoice,
+  startSystematicLayoffsAdvancementChoice,
+  startV1921PlayfulAiChoice,
+  startVirusCounterRunnerPrivateLookAtStart,
+  subroutinesForCurrentEncounter,
+  swapCorpHqAndRdTop,
+  systematicLayoffsLegalActions,
+  systematicLayoffsPlacementOptions,
+  takeSetupMulligan,
+  totalCounters,
+  traceCounterEffectDefinitionFor,
+  traceRuntimeDepsHost,
+  trashCorpInstalledCardsInScoredSourceServer,
+  trashFaceupRdCardsForCascade,
+  trashOlderRegionUpgradesInServer,
+  trashPowerGridOverloadHardware,
+  trashRunnerInstalledProgram,
+  triggerAbilityExecutionHost,
+  turnBasicExecutionHost,
+  uniqueDirectLongtailImplementationForCard,
+  uniqueDirectLongtailKindForCard,
+  untapRunnerCardsAtTurnStart,
+  v1915InstalledRevealHelperIds,
+  validateAdvancementDistribution,
+  validateCorpInstalledEconomyAction,
+  validateDeckDefinition,
+  valuPakProgramInstallActionsRemaining,
+  valuPakTemporaryProgramInstallCredits,
+  variableRezForDefinition,
+  variableTraceSubroutineForCurrentEncounter,
+  virusCounterCascadeTrashAtCorpStart,
+  virusCounterCreditsAtRunnerStart,
+  virusCounterDrawsAtCorpStart,
+  virusCounterImplementationForCard,
+  virusCounterImplementationForDefinition,
+  visibleVirusCounterTargetIds,
 };
+
+const stateRuntimeServices = createStateRuntimeServices(runtimeDomainDeps);
+const cardRuntimeHosts = createCardRuntimeHosts(runtimeDomainDeps);
+const flowRuntimeHosts = createFlowRuntimeHosts(runtimeDomainDeps);
+const actionRuntimeHosts = createActionRuntimeHosts(runtimeDomainDeps);
 
 const lifecycleRuntime = createLifecycleRuntime(runtimeDomainDeps);
 const turnCorpRuntime = createTurnCorpRuntime(runtimeDomainDeps);
