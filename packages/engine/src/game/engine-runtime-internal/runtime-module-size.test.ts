@@ -56,7 +56,33 @@ describe("engine runtime module size gates", () => {
     ).toBeLessThanOrEqual(3200);
     expect(
       lineCount(join(runtimeInternalDir, "runtime-delegates.ts")),
-    ).toBeLessThanOrEqual(2000);
+    ).toBeLessThanOrEqual(600);
+    expect(
+      lineCount(join(runtimeInternalDir, "card-runtime-hosts.ts")),
+    ).toBeLessThanOrEqual(900);
+    for (const module of [
+      "activated-card-runtime-hosts.ts",
+      "card-lifecycle-runtime-hosts.ts",
+      "card-runtime-deps-hosts.ts",
+      "trigger-ability-runtime-hosts.ts",
+    ]) {
+      expect(
+        lineCount(join(runtimeInternalDir, module)),
+        `${module} exceeds the card runtime host submodule ceiling`,
+      ).toBeLessThanOrEqual(1500);
+    }
+    for (const module of [
+      "action-runtime-delegates.ts",
+      "card-runtime-delegates.ts",
+      "choice-runtime-delegates.ts",
+      "flow-runtime-delegates.ts",
+      "state-runtime-delegates.ts",
+    ]) {
+      expect(
+        lineCount(join(runtimeInternalDir, module)),
+        `${module} exceeds the runtime delegate submodule ceiling`,
+      ).toBeLessThanOrEqual(1200);
+    }
   });
 
   it("keeps internal runtime modules from becoming new monoliths", () => {
