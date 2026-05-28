@@ -3068,6 +3068,7 @@ export default function Page() {
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
   const canReturnToStart = Boolean(payload && (resultSummary || payload.winner || payload.matchStatus === "finished" || payload.matchStatus === "forfeited"));
+  const canStartNextSeriesGame = Boolean(resultSummary?.series?.nextAvailable);
   const opponentDisplayName = payload?.opponentStatus.displayName ?? lobby?.opponentStatus.displayName ?? null;
   const canForfeit = Boolean(payload && payload.matchStatus === "active" && !payload.winner);
   const matchClockDisplay =
@@ -5459,8 +5460,14 @@ export default function Page() {
           >
             {matchDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
+          {canStartNextSeriesGame ? (
+            <button className="button primary" onClick={startNextSeriesGame} disabled={seriesTransitioning} title="Nächstes Serienspiel mit Seitenwechsel erstellen" type="button">
+              <Play size={16} />
+              {seriesTransitioning ? "Erstelle..." : "Matchserie fortsetzen"}
+            </button>
+          ) : null}
           {canReturnToStart ? (
-            <button className="button primary" onClick={leaveMatch} title="Zurück zum Startbildschirm" type="button">
+            <button className={canStartNextSeriesGame ? "button" : "button primary"} onClick={leaveMatch} title="Zurück zum Startbildschirm" type="button">
               <Play size={16} />
               Startbildschirm
             </button>
@@ -6323,7 +6330,7 @@ export default function Page() {
           retentionProtected={payload?.retentionProtected === true}
           onRetentionProtection={setRetentionProtection}
           {...(opponentDisplayName ? { opponentName: opponentDisplayName } : {})}
-          {...(resultSummary.series?.nextAvailable ? { onNextSeriesGame: startNextSeriesGame } : {})}
+          {...(canStartNextSeriesGame ? { onNextSeriesGame: startNextSeriesGame } : {})}
         />
       ) : null}
       {activeMatchIsGame && showAccessReveal && accessReveal ? (
