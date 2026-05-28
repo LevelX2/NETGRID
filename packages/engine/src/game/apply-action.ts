@@ -22,6 +22,7 @@ export type ApplyActionCoreHost = {
       legalAction: LegalAction,
       playerAction: PlayerAction,
     ) => void;
+    afterPerformAction?: (state: GameState, legalAction: LegalAction) => void;
   };
 };
 
@@ -92,6 +93,7 @@ export function buildApplyAction(
 
   try {
     host.actions.performAction(next, legalAction, playerAction);
+    host.actions.afterPerformAction?.(next, legalAction);
     checkWinConditions(next);
     next.stateVersion = before + 1;
     const validation = validateGameState(next);

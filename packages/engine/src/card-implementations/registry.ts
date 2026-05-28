@@ -379,10 +379,13 @@ import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/to
 import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team";
 import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella-policy";
 import { wilsonWeeflerunnerApprenticeImplementation } from "./onr-v1/runner/resources/wilson-weeflerunner-apprentice";
+import { proteusAiBoardMemberImplementation } from "./proteus/corp/agendas/ai-board-member";
 import { proteusCharityTakeoverImplementation } from "./proteus/corp/agendas/charity-takeover";
 import { corporateHeadhuntersImplementation } from "./proteus/corp/agendas/corporate-headhunters";
 import { fetalAiImplementation } from "./proteus/corp/agendas/fetal-ai";
 import { markedAccountsImplementation } from "./proteus/corp/agendas/marked-accounts";
+import { proteusPleaseDontChokeAnyoneImplementation } from "./proteus/corp/agendas/please-dont-choke-anyone";
+import { proteusProjectVeniceImplementation } from "./proteus/corp/agendas/project-venice";
 import { projectZurichImplementation } from "./proteus/corp/agendas/project-zurich";
 import { proteusViralBreedingGroundImplementation } from "./proteus/corp/agendas/viral-breeding-ground";
 import { proteusCybertechThinkTankImplementation } from "./proteus/corp/assets/cybertech-think-tank";
@@ -400,6 +403,7 @@ import { stereogramAntibodyImplementation } from "./proteus/corp/assets/stereogr
 import { proteusBrainWashImplementation } from "./proteus/corp/ice/brain-wash";
 import { proteusChihuahuaImplementation } from "./proteus/corp/ice/chihuahua";
 import { proteusCoyoteImplementation } from "./proteus/corp/ice/coyote";
+import { proteusCorporateGuardRTempsImplementation } from "./proteus/corp/operations/corporate-guard-r-temps";
 import { proteusCreditConsolidationImplementation } from "./proteus/corp/operations/credit-consolidation";
 import { proteusDataSiftersImplementation } from "./proteus/corp/operations/data-sifters";
 import { proteusManhuntImplementation } from "./proteus/corp/operations/manhunt";
@@ -471,6 +475,7 @@ import { proteusCorticalCybermodemImplementation } from "./proteus/runner/hardwa
 import { proteusCorticalStimulatorsImplementation } from "./proteus/runner/hardware/cortical-stimulators";
 import { proteusDeckTheImplementation } from "./proteus/runner/hardware/deck-the";
 import { proteusEurocorpseTmSpinChipImplementation } from "./proteus/runner/hardware/eurocorpse-tm-spin-chip";
+import { proteusLucidrineDripFeedImplementation } from "./proteus/runner/hardware/lucidrinetm-drip-feed";
 import { proteusSunburstCranialInterfaceImplementation } from "./proteus/runner/hardware/sunburst-cranial-interface";
 import { proteusPoisonedWaterSupplyImplementation } from "./proteus/runner/events/poisoned-water-supply";
 import { proteusStakeoutImplementation } from "./proteus/runner/events/stakeout";
@@ -498,6 +503,7 @@ import { proteusVienna22Implementation } from "./proteus/runner/programs/vienna-
 import { proteusViralPipelineImplementation } from "./proteus/runner/programs/viral-pipeline";
 import { proteusWreckingBallImplementation } from "./proteus/runner/programs/wrecking-ball";
 import { proteusAirportLockerImplementation } from "./proteus/runner/resources/airport-locker";
+import { proteusBargainWithViacoxImplementation } from "./proteus/runner/resources/bargain-with-viacox";
 import { proteusBackDoorToNetwatchImplementation } from "./proteus/runner/resources/back-door-to-netwatch";
 import { proteusPrecisionBriberyImplementation } from "./proteus/runner/resources/precision-bribery";
 import { proteusBackDoorToRivalsImplementation } from "./proteus/runner/resources/back-door-to-rivals";
@@ -896,6 +902,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusBrainWashImplementation,
   proteusChihuahuaImplementation,
   proteusCoyoteImplementation,
+  proteusCorporateGuardRTempsImplementation,
   proteusCreditConsolidationImplementation,
   proteusDataSiftersImplementation,
   proteusManhuntImplementation,
@@ -948,10 +955,13 @@ export const CARD_IMPLEMENTATIONS = [
   proteusSirenImplementation,
   proteusSydMeyerSuperstoresImplementation,
   proteusWeaponsDepotImplementation,
+  proteusAiBoardMemberImplementation,
   proteusCharityTakeoverImplementation,
   corporateHeadhuntersImplementation,
   fetalAiImplementation,
   markedAccountsImplementation,
+  proteusPleaseDontChokeAnyoneImplementation,
+  proteusProjectVeniceImplementation,
   projectZurichImplementation,
   proteusViralBreedingGroundImplementation,
   worldDominationImplementation,
@@ -985,6 +995,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusCorticalStimulatorsImplementation,
   proteusDeckTheImplementation,
   proteusEurocorpseTmSpinChipImplementation,
+  proteusLucidrineDripFeedImplementation,
   proteusSunburstCranialInterfaceImplementation,
   proteusPoisonedWaterSupplyImplementation,
   proteusStakeoutImplementation,
@@ -1012,6 +1023,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusViralPipelineImplementation,
   proteusWreckingBallImplementation,
   proteusAirportLockerImplementation,
+  proteusBargainWithViacoxImplementation,
   proteusBackDoorToNetwatchImplementation,
   proteusBackDoorToRivalsImplementation,
   proteusBoltHoleImplementation,

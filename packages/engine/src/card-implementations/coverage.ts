@@ -801,6 +801,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/ice/walking-wall.ts",
   "onr_proteus_045_washed-up-solo-construct":
     "packages/engine/src/card-implementations/proteus/corp/ice/washed-up-solo-construct.ts",
+  "onr_proteus_046_corporate-guard-r-temps":
+    "packages/engine/src/card-implementations/proteus/corp/operations/corporate-guard-r-temps.ts",
   "onr_proteus_047_credit-consolidation":
     "packages/engine/src/card-implementations/proteus/corp/operations/credit-consolidation.ts",
   "onr_proteus_048_data-sifters":
@@ -811,6 +813,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/operations/schlaghund-pointers.ts",
   "onr_proteus_053_underworld-mole":
     "packages/engine/src/card-implementations/proteus/corp/operations/underworld-mole.ts",
+  "onr_proteus_001_ai-board-member":
+    "packages/engine/src/card-implementations/proteus/corp/agendas/ai-board-member.ts",
+  "onr_proteus_006_please-dont-choke-anyone":
+    "packages/engine/src/card-implementations/proteus/corp/agendas/please-dont-choke-anyone.ts",
+  "onr_proteus_007_project-venice":
+    "packages/engine/src/card-implementations/proteus/corp/agendas/project-venice.ts",
   "onr_proteus_009_viral-breeding-ground":
     "packages/engine/src/card-implementations/proteus/corp/agendas/viral-breeding-ground.ts",
   "onr_proteus_054_bel-digmo-antibody":
@@ -903,10 +911,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/hardware/deck-the.ts",
   "onr_proteus_139_eurocorpse-tm-spin-chip":
     "packages/engine/src/card-implementations/proteus/runner/hardware/eurocorpse-tm-spin-chip.ts",
+  "onr_proteus_144_lucidrinetm-drip-feed":
+    "packages/engine/src/card-implementations/proteus/runner/hardware/lucidrinetm-drip-feed.ts",
   "onr_proteus_151_sunburst-cranial-interface":
     "packages/engine/src/card-implementations/proteus/runner/hardware/sunburst-cranial-interface.ts",
   "onr_proteus_128_airport-locker":
     "packages/engine/src/card-implementations/proteus/runner/resources/airport-locker.ts",
+  "onr_proteus_131_bargain-with-viacox":
+    "packages/engine/src/card-implementations/proteus/runner/resources/bargain-with-viacox.ts",
   "onr_proteus_133_chiba-bank-account":
     "packages/engine/src/card-implementations/proteus/runner/resources/chiba-bank-account.ts",
   "onr_proteus_142_hq-mole":

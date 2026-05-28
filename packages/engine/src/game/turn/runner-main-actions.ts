@@ -36,6 +36,7 @@ export type RunnerMainActionGenerationHost = {
   };
   runner: {
     ensureRunnerTurnFlags: HostFn<any>;
+    filterActionsForRestrictedExtraActions?: HostFn<LegalAction[]>;
     availableRunnerTagRemovalCredits: HostFn<number>;
     availableRunnerProgramInstallCredits: HostFn<number>;
     runnerCostPenaltySupportCreditCapacity: HostFn<number>;
@@ -168,6 +169,10 @@ export function buildRunnerMainActions(
   const cardImplementationForDefinitionId =
     host.cardImplementation.cardImplementationForDefinitionId;
   const ensureRunnerTurnFlags = host.runner.ensureRunnerTurnFlags;
+  const filterActionsForRestrictedExtraActions =
+    host.runner.filterActionsForRestrictedExtraActions ??
+    ((_state: GameState, _side: "runner", candidateActions: LegalAction[]) =>
+      candidateActions);
   const availableRunnerTagRemovalCredits =
     host.runner.availableRunnerTagRemovalCredits;
   const availableRunnerProgramInstallCredits =
@@ -1237,14 +1242,18 @@ export function buildRunnerMainActions(
     Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0),
   );
   if (wilsonRestrictedActions > 0 && state.runner.clicks <= wilsonRestrictedActions) {
-    return actions.filter(
+    return filterActionsForRestrictedExtraActions(
+      state,
+      "runner",
+      actions.filter(
       (candidate) =>
         candidate.type === "end_turn" ||
         (candidate.type === "start_run" &&
           candidate.payload?.wilsonRunOnlyAction === true),
+      ),
     );
   }
-  return actions;
+  return filterActionsForRestrictedExtraActions(state, "runner", actions);
 }
 
 function buildPirateBroadcastForcedRunActions(

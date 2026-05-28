@@ -48,6 +48,11 @@ export type TriggerAbilityExecutionHost = {
     acmeSavingsAndLoanObligationCount: (state: GameState) => number;
     removeAcmeSavingsAndLoanObligation: (state: GameState) => void;
   };
+  actionEconomy?: {
+    acceptExtraActionOffer: (state: GameState, legalAction: LegalAction) => void;
+    declineExtraActionOffer: (state: GameState, legalAction: LegalAction) => void;
+    resolvePdcaCounterAction: (state: GameState, legalAction: LegalAction) => void;
+  };
   runnerSpecial: {
     handleRunnerSpecialTriggerExecution: (
       legalAction: LegalAction,
@@ -85,6 +90,21 @@ export function handleTriggerAbilityExecution(
   if (legalAction.type !== "trigger_ability") return { handled: false };
 
   const { state } = host;
+  if (legalAction.payload?.actionEconomyAbility === "accept_extra_action_offer") {
+    if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
+    host.actionEconomy.acceptExtraActionOffer(state, legalAction);
+    return handled(legalAction);
+  }
+  if (legalAction.payload?.actionEconomyAbility === "decline_extra_action_offer") {
+    if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
+    host.actionEconomy.declineExtraActionOffer(state, legalAction);
+    return handled(legalAction);
+  }
+  if (legalAction.payload?.actionEconomyAbility === "pdca_counter_gain_action") {
+    if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
+    host.actionEconomy.resolvePdcaCounterAction(state, legalAction);
+    return handled(legalAction);
+  }
   if (host.runnerSpecial.handleRunnerSpecialTriggerExecution(legalAction).handled)
     return handled(legalAction);
   if (legalAction.payload?.corpAbility === "trash_code_viral_cache") {

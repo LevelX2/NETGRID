@@ -13,7 +13,12 @@ type ScoredAgendaAbilityPayload = Record<string, string | number | boolean>;
 export type ScoredAgendaAbilityHost = {
   state: Pick<
     GameState,
-    "corp" | "runner" | "cardInstances" | "phase" | "activeSide"
+    | "corp"
+    | "runner"
+    | "cardInstances"
+    | "phase"
+    | "activeSide"
+    | "corpTurnFlags"
   >;
   legalAction?: LegalAction;
   cards: {
@@ -39,7 +44,7 @@ export type ScoredAgendaAbilityHost = {
   counters: {
     cardCounter: (
       cardId: CardInstanceId,
-      counterType: "mark" | "power",
+      counterType: "mark" | "power" | "pdca",
     ) => number;
     spendVisibleCardCounter: (
       cardId: CardInstanceId,
@@ -188,6 +193,38 @@ export function buildScoredAgendaAbilityActionsForCard(
         },
       ),
     );
+    return { handled: true, actions };
+  }
+  if (
+    host.cards.scoredAgendaKindForDefinition(definition) ===
+    "corp_damage_replacement_pdca_action_counter"
+  ) {
+    const alreadyUsed =
+      host.state.corpTurnFlags?.pdcaUsedSourceIdsThisTurn?.includes(agendaId) ===
+      true;
+    if (
+      host.state.phase === "corp_action_phase" &&
+      host.state.activeSide === "corp" &&
+      !alreadyUsed &&
+      host.counters.cardCounter(agendaId, "pdca") > 0
+    ) {
+      actions.push(
+        host.actions.createLegalAction(
+          "corp",
+          "trigger_ability",
+          `${definition.title}: PDCA-Counter fuer 1 Aktion ausgeben`,
+          agendaId,
+          [],
+          {
+            cardId: agendaId,
+            actionEconomyAbility: "pdca_counter_gain_action",
+            sourceDefinitionId: definition.id,
+            counterType: "pdca",
+            removeCounterAmount: 1,
+          },
+        ),
+      );
+    }
     return { handled: true, actions };
   }
   const scoredCounterCreditProfile =

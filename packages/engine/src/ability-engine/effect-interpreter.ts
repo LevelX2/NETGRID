@@ -331,8 +331,19 @@ function recipientSide(
 }
 
 function gainCredits(state: GameState, side: Side, amount: number): void {
-  if (side === "corp") state.corp.credits += amount;
-  else state.runner.credits += amount;
+  if (side === "corp") {
+    const debt = state.actionEconomy?.corpCreditForfeitDebt;
+    const forfeited = Math.min(
+      amount,
+      Math.max(0, Math.floor(debt?.remaining ?? 0)),
+    );
+    if (debt) {
+      debt.remaining = Math.max(0, Math.floor(debt.remaining) - forfeited);
+      if (debt.remaining <= 0 && state.actionEconomy)
+        delete state.actionEconomy.corpCreditForfeitDebt;
+    }
+    state.corp.credits += amount - forfeited;
+  } else state.runner.credits += amount;
 }
 
 function creditsForSide(state: GameState, side: Side): number {

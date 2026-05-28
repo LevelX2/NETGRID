@@ -202,6 +202,26 @@ export function scoreAgenda(
       };
     }
   }
+  if (scoredAgenda?.kind === "overadvance_start_of_corp_turn_actions") {
+    overadvancedBy = Math.max(
+      0,
+      instanceBefore.advancementCounters - requiredDifficulty,
+    );
+    const recurringActions =
+      Math.floor(overadvancedBy / scoredAgenda.perExcessAdvancementCounters) *
+      scoredAgenda.actionPerGroup;
+    host.counters.setCardCounter(cardId, "mark", recurringActions);
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        overadvanceRecurringActions: recurringActions,
+        overadvanceActionGroups: Math.floor(
+          overadvancedBy / scoredAgenda.perExcessAdvancementCounters,
+        ),
+        projectVeniceOveradvance: overadvancedBy,
+      };
+    }
+  }
   applySimpleScoreEffects(host, cardId, definition, scoredAgenda);
   startScoreTimeChoices(host, cardId, definition, instanceBefore, scoredAgenda);
   host.zones.cleanupEmptyRemotes();

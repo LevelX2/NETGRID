@@ -150,6 +150,11 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "x_future_actions_and_credit_forfeit";
+      costMultiplier: 2;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "siren_start_run_redirect";
       cost: { kind: "credit"; amount: number };
       timing: "start_of_run";
@@ -745,6 +750,21 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "overadvance_start_of_corp_turn_actions";
+      perExcessAdvancementCounters: number;
+      actionPerGroup: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corp_start_turn_random_restricted_optional_action";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corp_damage_replacement_pdca_action_counter";
+      counterType: Extract<CounterType, "pdca">;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "tagged_runner_meat_damage_reduce_hand_size_on_success";
       damageAmount: number;
       handSizeReduction: number;
@@ -939,6 +959,17 @@ export type CardUniqueDirectLongtailImplementation =
       agendaPointCost: 1;
       gainCredits: 10;
       trashSource: true;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "runner_start_turn_forced_random_action";
+      startsTurnAfterInstall: true;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "runner_start_turn_drip_counter_action_or_core_damage";
+      counterType: Extract<CounterType, "drip">;
+      threshold: 2;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

@@ -172,7 +172,9 @@ export type CounterType =
   | "crying"
   | "ablative"
   | "trauma"
-  | "boon";
+  | "boon"
+  | "pdca"
+  | "drip";
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
@@ -285,6 +287,52 @@ export type CorpActionDebtEntry = {
 export type CorpActionDebtState = {
   forgoActionsPending: number;
   entries: CorpActionDebtEntry[];
+};
+
+export type RestrictedActionFamily =
+  | "corp_install"
+  | "gain_credit"
+  | "draw_card"
+  | "start_run"
+  | "play_or_install_card";
+
+export type TurnBoundExtraActionOffer = {
+  side: Side;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  restriction: RestrictedActionFamily;
+  optional: boolean;
+  dieRoll?: number;
+  randomPurpose?: string;
+  createdAtStateVersion: number;
+};
+
+export type TurnBoundExtraActionGrant = TurnBoundExtraActionOffer & {
+  remaining: number;
+  forced?: boolean;
+  targetServerId?: Exclude<ServerId, "new_remote">;
+  targetCardInstanceId?: CardInstanceId;
+  revealToCorpOnly?: boolean;
+};
+
+export type FutureExtraActionGrant = {
+  side: Side;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  remainingTurns: number;
+  amountPerTurn: number;
+  restriction?: RestrictedActionFamily;
+};
+
+export type ActionEconomyState = {
+  pendingOffer?: TurnBoundExtraActionOffer;
+  grants?: TurnBoundExtraActionGrant[];
+  futureGrants?: FutureExtraActionGrant[];
+  corpCreditForfeitDebt?: {
+    remaining: number;
+    sourceCardInstanceId?: CardInstanceId;
+    sourceDefinitionId?: CardDefinitionId;
+  };
 };
 
 export type RunnerVirusPurgeWindowState = {
@@ -1351,6 +1399,7 @@ export type GameState = {
     edgerunnerTempsInstallActionsRemaining?: number;
     disinfectantUsedSourceIdsThisTurn?: CardInstanceId[];
     employeeEmpowermentStartTurnResolvedSourceIds?: CardInstanceId[];
+    pdcaUsedSourceIdsThisTurn?: CardInstanceId[];
   };
   ambushHarness?: {
     enabled: boolean;
@@ -1365,6 +1414,7 @@ export type GameState = {
   spyCountersByServer?: Partial<Record<Exclude<ServerId, "new_remote">, number>>;
   purgeableRunnerVirusCounters?: PurgeableRunnerVirusCounterState;
   corpActionDebt?: CorpActionDebtState;
+  actionEconomy?: ActionEconomyState;
   runnerVirusPurgeWindow?: RunnerVirusPurgeWindowState;
   runnerAgendaPointsToForfeit?: number;
   cancelledDamagePreventionSourceIdsUntilEndOfTurn?: CardInstanceId[];

@@ -9,24 +9,27 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_001_ai-board-member",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "state_hash",
+          "deterministic_replay"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_002_charity-takeover",
@@ -150,24 +153,27 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_006_please-dont-choke-anyone",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "state_hash",
+          "deterministic_replay"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_007_project-venice",
@@ -176,24 +182,27 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_007_project-venice",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "state_hash",
+          "deterministic_replay"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_008_project-zurich",
@@ -1444,24 +1453,27 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_046_corporate-guard-r-temps",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "state_hash",
+          "deterministic_replay"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_047_credit-consolidation",
@@ -3880,24 +3892,27 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_131_bargain-with-viacox",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "state_hash",
+          "deterministic_replay"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_132_bolt-hole",
@@ -4243,24 +4258,27 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_144_lucidrinetm-drip-feed",
+        "coverage": [
+          "card_implementation",
+          "legal_action",
+          "state_hash",
+          "deterministic_replay"
+        ],
         "aiHintRef": null,
         "scenarioRefs": []
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_proteus_145_mercenary-subcontract",

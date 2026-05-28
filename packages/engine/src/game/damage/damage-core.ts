@@ -293,6 +293,29 @@ export function doDamage(
   },
 ): DamageSummary {
   assertPositiveIntegerAmount(request.amount);
+  const pdcaSource = state.corp.scoreArea
+    .slice()
+    .sort()
+    .find((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return (
+        scoredAgendaKindForDefinition(definition) ===
+        "corp_damage_replacement_pdca_action_counter"
+      );
+    });
+  if (pdcaSource && isCorpDamageSource(request.source)) {
+    const source = mustInstance(state.cardInstances, pdcaSource);
+    source.counters = {
+      ...(source.counters ?? {}),
+      pdca: Math.max(0, Math.floor(source.counters?.pdca ?? 0)) + request.amount,
+    };
+    return {
+      damageType: request.damageType,
+      amount: 0,
+      cardsTrashed: 0,
+      flatline: false,
+    };
+  }
   if (request.amount > state.runner.grip.length) {
     state.winner = "corp";
     state.gameEndReason = "flatline";
@@ -357,6 +380,18 @@ export function doDamage(
       summary,
     );
   return summary;
+}
+
+function isCorpDamageSource(source: string): boolean {
+  return (
+    source.includes("corp") ||
+    source.startsWith("scored_agenda:") ||
+    source.startsWith("trace:") ||
+    source.startsWith("subroutine:") ||
+    source.startsWith("ice:") ||
+    source.startsWith("operation:") ||
+    source.startsWith("asset:")
+  );
 }
 
 export function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSummary {

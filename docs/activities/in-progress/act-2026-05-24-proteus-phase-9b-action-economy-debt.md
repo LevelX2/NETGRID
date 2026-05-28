@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-9b-action-economy-debt
-status: blocked
+status: done
 kind: implementation
 area: cards
 priority: normal
@@ -8,21 +8,17 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-28
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 9b
 proReferences:
   - PRO017
-blockedBy:
-  - act-2026-05-24-proteus-phase-8a-counter-taxonomy-purge-foundation
-  - agenda_damage_replacement_counter_contract
-  - recurring_restricted_extra_action_contract
-  - action_forfeit_penalty_contract
-  - forced_random_action_resolution_contract
+blockedBy: []
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-9b-action-economy-debt.md
   - docs/releases/proteus/README.md
   - docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md
+  - docs/activities/done/act-2026-05-28-proteus-pro017-action-economy-debt-suite.md
 checks:
   - rg AI Board Member/Please Don't Choke Anyone/Project Venice/Corporate Guard(R) Temps/Bargain with Viacox/Lucidrine Drip Feed in Proteus cards, errata and engine action-economy paths
   - rg corpActionDebt/forgo_action/gain_actions/CardAbilityCostImplementation/actionGain in engine
@@ -64,11 +60,11 @@ checks:
 
 ## Akzeptanzkriterien
 
-- [ ] Jede Zielkarte besitzt eine eigene CardImplementation-Datei.
-- [ ] Action-Economy-/Debt-Fakten sind strukturiert, StateHash-relevant und replaystabil.
-- [ ] LegalActions werden für Seite, Timing, Kosten, Ziele und verfügbare Aktionen revalidiert.
-- [ ] Wrong-Side-, stale-action-, Kosten-, Action-Debt- und Replay-/StateHash-Tests sind vorhanden.
-- [ ] Registry-/Coverage-/Manifest-Nachweis ist erbracht.
+- [x] Jede Zielkarte besitzt eine eigene CardImplementation-Datei.
+- [x] Action-Economy-/Debt-Fakten sind strukturiert, StateHash-relevant und replaystabil.
+- [x] LegalActions werden für Seite, Timing, Kosten, Ziele und verfügbare Aktionen revalidiert.
+- [x] Wrong-Side-, stale-action-, Kosten-, Action-Debt- und Replay-/StateHash-Tests sind vorhanden.
+- [x] Registry-/Coverage-/Manifest-Nachweis ist erbracht.
 
 ## Blocker
 
@@ -85,4 +81,4 @@ Es wurden bewusst keine Teil-CardImplementations promotet. Nächster unblockende
 
 ## Ergebnisnotiz
 
-Blockiert dokumentiert. Keine Runtime-Änderung, keine Manifest-Promotion und keine Deck-/AI-Freigabe.
+Erledigt durch PRO017-Done-Activity `docs/activities/done/act-2026-05-28-proteus-pro017-action-economy-debt-suite.md`. Die sechs Zielkarten sind als CardImplementation-Dateien registriert und im Manifest engine-/human-playable, aber weiterhin nicht decklegal, nicht formatlegal und nicht AI-unterstützt.

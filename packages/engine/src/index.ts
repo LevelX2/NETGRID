@@ -32,6 +32,7 @@ import {
   type PurgeableRunnerVirusCounterType,
   type ReplacementCandidate,
   type ReplacementWindow,
+  type RestrictedActionFamily,
   type ResolvedGameEffect,
   type ReplayResult,
   type SpecialZoneKind,
@@ -2385,6 +2386,10 @@ configureApplyActionCoreHost({
       access: { accessFlowHost },
       choices: { pendingChoiceResolutionHost },
     }),
+    afterPerformAction: (state, legalAction) => {
+      if (clickCostForAction(legalAction) > 0)
+        consumeRestrictedExtraActionForAction(state, legalAction);
+    },
   },
 });
 
@@ -2580,6 +2585,7 @@ function corpMainActionGenerationHost(
     },
     corp: {
       corpActionDebtPending,
+      filterActionsForRestrictedExtraActions,
       acmeSavingsAndLoanObligationCount,
       canPlayCorpOperation,
       cardImplementationOperationLegalActions,
@@ -2890,6 +2896,7 @@ function runnerMainActionGenerationHost(
     },
     runner: {
       ensureRunnerTurnFlags,
+      filterActionsForRestrictedExtraActions,
       availableRunnerTagRemovalCredits,
       availableRunnerProgramInstallCredits,
       runnerCostPenaltySupportCreditCapacity,
@@ -4745,6 +4752,11 @@ function triggerAbilityExecutionHost(
     corp: {
       acmeSavingsAndLoanObligationCount,
       removeAcmeSavingsAndLoanObligation,
+    },
+    actionEconomy: {
+      acceptExtraActionOffer,
+      declineExtraActionOffer,
+      resolvePdcaCounterAction,
     },
     runnerSpecial: {
       handleRunnerSpecialTriggerExecution: (legalAction) =>
@@ -7349,6 +7361,307 @@ function automaticStealAgendaEffect(
   };
 }
 
+function ensureActionEconomy(state: GameState): NonNullable<GameState["actionEconomy"]> {
+  return (state.actionEconomy ??= {});
+}
+
+type ActionEconomyGrant = NonNullable<
+  NonNullable<GameState["actionEconomy"]>["grants"]
+>[number];
+
+function compactActionEconomy(state: GameState): void {
+  const economy = state.actionEconomy;
+  if (!economy) return;
+  if (economy.grants) economy.grants = economy.grants.filter((grant) => grant.remaining > 0);
+  if (economy.futureGrants)
+    economy.futureGrants = economy.futureGrants.filter((grant) => grant.remainingTurns > 0);
+  if (economy.corpCreditForfeitDebt && economy.corpCreditForfeitDebt.remaining <= 0)
+    delete economy.corpCreditForfeitDebt;
+  if (
+    !economy.pendingOffer &&
+    (!economy.grants || economy.grants.length === 0) &&
+    (!economy.futureGrants || economy.futureGrants.length === 0) &&
+    !economy.corpCreditForfeitDebt
+  )
+    delete state.actionEconomy;
+}
+
+function restrictedActionFamilyForAiBoardMemberRoll(
+  dieRoll: number,
+): RestrictedActionFamily {
+  if (dieRoll === 1) return "corp_install";
+  if (dieRoll === 2 || dieRoll === 3) return "gain_credit";
+  return "draw_card";
+}
+
+function addTurnBoundExtraActionGrant(
+  state: GameState,
+  input: {
+    side: Side;
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    restriction: RestrictedActionFamily;
+    forced?: boolean;
+    targetServerId?: Exclude<ServerId, "new_remote">;
+    targetCardInstanceId?: CardInstanceId;
+    revealToCorpOnly?: boolean;
+    dieRoll?: number;
+    randomPurpose?: string;
+  },
+): void {
+  const economy = ensureActionEconomy(state);
+  economy.grants = [
+    ...(economy.grants ?? []),
+    {
+      side: input.side,
+      sourceCardInstanceId: input.sourceCardInstanceId,
+      sourceDefinitionId: input.sourceDefinitionId,
+      restriction: input.restriction,
+      optional: !input.forced,
+      remaining: 1,
+      createdAtStateVersion: state.stateVersion,
+      ...(input.forced ? { forced: true } : {}),
+      ...(input.targetServerId ? { targetServerId: input.targetServerId } : {}),
+      ...(input.targetCardInstanceId
+        ? { targetCardInstanceId: input.targetCardInstanceId }
+        : {}),
+      ...(input.revealToCorpOnly ? { revealToCorpOnly: true } : {}),
+      ...(input.dieRoll ? { dieRoll: input.dieRoll } : {}),
+      ...(input.randomPurpose ? { randomPurpose: input.randomPurpose } : {}),
+    },
+  ];
+  if (input.side === "corp") state.corp.clicks += 1;
+  else state.runner.clicks += 1;
+}
+
+function consumeRestrictedExtraActionForAction(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const grants = state.actionEconomy?.grants;
+  if (!grants || grants.length === 0) return;
+  const index = grants.findIndex(
+    (grant) =>
+      grant.side === legalAction.side &&
+      grant.remaining > 0 &&
+      actionMatchesRestrictedGrant(state, legalAction, grant),
+  );
+  if (index < 0) return;
+  const grant = grants[index]!;
+  grant.remaining = Math.max(0, grant.remaining - 1);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    restrictedExtraActionConsumed: true,
+    restrictedExtraActionSourceDefinitionId: grant.sourceDefinitionId,
+    restrictedExtraActionFamily: grant.restriction,
+  };
+  compactActionEconomy(state);
+}
+
+function actionMatchesRestrictedGrant(
+  state: GameState,
+  legalAction: LegalAction,
+  grant: ActionEconomyGrant,
+): boolean {
+  if (grant.restriction === "corp_install") return legalAction.type === "install_card";
+  if (grant.restriction === "gain_credit") return legalAction.type === "gain_credit";
+  if (grant.restriction === "draw_card") return legalAction.type === "draw_card";
+  if (grant.restriction === "start_run") {
+    if (legalAction.type !== "start_run") return false;
+    return !grant.targetServerId || legalAction.payload?.serverId === grant.targetServerId;
+  }
+  if (grant.restriction === "play_or_install_card") {
+    const target = grant.targetCardInstanceId;
+    if (!target || legalAction.payload?.cardId !== target) return false;
+    const definition = definitionFor(state, target);
+    return definition.type === "event"
+      ? legalAction.type === "play_event"
+      : legalAction.type === "install_card";
+  }
+  return false;
+}
+
+function activeRestrictedGrantsForSide(
+  state: GameState,
+  side: Side,
+): ActionEconomyGrant[] {
+  return (state.actionEconomy?.grants ?? []).filter(
+    (grant) => grant.side === side && grant.remaining > 0,
+  );
+}
+
+function forcedRestrictedGrantsForSide(
+  state: GameState,
+  side: Side,
+): ActionEconomyGrant[] {
+  return activeRestrictedGrantsForSide(state, side).filter(
+    (grant) => grant.forced === true,
+  );
+}
+
+function filterActionsForRestrictedExtraActions(
+  state: GameState,
+  side: Side,
+  actions: LegalAction[],
+): LegalAction[] {
+  const grants = activeRestrictedGrantsForSide(state, side);
+  if (grants.length === 0) return actions;
+  const clicks = side === "corp" ? state.corp.clicks : state.runner.clicks;
+  const forced = forcedRestrictedGrantsForSide(state, side);
+  const relevant = forced.length > 0 ? forced : clicks <= grants.length ? grants : [];
+  if (relevant.length === 0) return actions;
+  const matching = actions.filter((candidate) =>
+    relevant.some((grant) => actionMatchesRestrictedGrant(state, candidate, grant)),
+  );
+  if (forced.length > 0) return matching.length > 0 ? matching : actions.filter((a) => a.type === "end_turn");
+  return [
+    ...matching,
+    ...actions.filter((candidate) => candidate.type === "end_turn"),
+  ];
+}
+
+function addFutureExtraActionGrant(
+  state: GameState,
+  input: {
+    side: Side;
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    remainingTurns: number;
+    amountPerTurn: number;
+    restriction?: RestrictedActionFamily;
+  },
+): void {
+  const economy = ensureActionEconomy(state);
+  economy.futureGrants = [
+    ...(economy.futureGrants ?? []),
+    {
+      side: input.side,
+      sourceCardInstanceId: input.sourceCardInstanceId,
+      sourceDefinitionId: input.sourceDefinitionId,
+      remainingTurns: input.remainingTurns,
+      amountPerTurn: input.amountPerTurn,
+      ...(input.restriction ? { restriction: input.restriction } : {}),
+    },
+  ];
+}
+
+function applyFutureExtraActionGrantsAtTurnStart(
+  state: GameState,
+  side: Side,
+  effects?: AutomaticEffectCollector,
+): void {
+  const future = state.actionEconomy?.futureGrants ?? [];
+  for (const grant of future) {
+    if (grant.side !== side || grant.remainingTurns <= 0) continue;
+    const amount = Math.max(0, Math.floor(grant.amountPerTurn));
+    if (amount <= 0) continue;
+    if (side === "corp") state.corp.clicks += amount;
+    else state.runner.clicks += amount;
+    grant.remainingTurns -= 1;
+    for (let i = 0; i < amount; i += 1) {
+      if (grant.restriction) {
+        addTurnBoundExtraActionGrant(state, {
+          side,
+          sourceCardInstanceId: grant.sourceCardInstanceId,
+          sourceDefinitionId: grant.sourceDefinitionId,
+          restriction: grant.restriction,
+        });
+        if (side === "corp") state.corp.clicks -= 1;
+        else state.runner.clicks -= 1;
+      }
+    }
+    effects?.push({
+      effectId: `${side}.start.future_extra_action.${grant.sourceCardInstanceId}.${grant.remainingTurns}`,
+      kind: "gain_actions",
+      visibility: "public",
+      side,
+      amount,
+      reason: "start_of_turn",
+      sourceDefinitionId: grant.sourceDefinitionId,
+      sourceTitle: publicCardTitle(grant.sourceDefinitionId),
+    });
+  }
+  compactActionEconomy(state);
+}
+
+function acceptExtraActionOffer(state: GameState, legalAction: LegalAction): void {
+  const offer = state.actionEconomy?.pendingOffer;
+  if (!offer) throw new Error("Es gibt kein Extra-Action-Angebot.");
+  if (offer.side !== legalAction.side)
+    throw new Error("Dieses Extra-Action-Angebot gehoert der anderen Seite.");
+  const sourceId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  if (sourceId !== offer.sourceCardInstanceId)
+    throw new Error("Die Extra-Action-Quelle passt nicht mehr.");
+  delete state.actionEconomy!.pendingOffer;
+  addTurnBoundExtraActionGrant(state, {
+    side: offer.side,
+    sourceCardInstanceId: offer.sourceCardInstanceId,
+    sourceDefinitionId: offer.sourceDefinitionId,
+    restriction: offer.restriction,
+    ...(offer.dieRoll !== undefined ? { dieRoll: offer.dieRoll } : {}),
+    ...(offer.randomPurpose !== undefined
+      ? { randomPurpose: offer.randomPurpose }
+      : {}),
+  });
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    extraActionAccepted: true,
+    gainedActions: 1,
+    restrictedActionFamily: offer.restriction,
+    ...(offer.side === "corp"
+      ? { corpClicksAfter: state.corp.clicks }
+      : { runnerClicksAfter: state.runner.clicks }),
+  };
+}
+
+function declineExtraActionOffer(state: GameState, legalAction: LegalAction): void {
+  const offer = state.actionEconomy?.pendingOffer;
+  if (!offer) throw new Error("Es gibt kein Extra-Action-Angebot.");
+  if (offer.side !== legalAction.side)
+    throw new Error("Dieses Extra-Action-Angebot gehoert der anderen Seite.");
+  delete state.actionEconomy!.pendingOffer;
+  compactActionEconomy(state);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    extraActionAccepted: false,
+    restrictedActionFamily: offer.restriction,
+  };
+}
+
+function resolvePdcaCounterAction(state: GameState, legalAction: LegalAction): void {
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf PDCA-Counter nutzen.");
+  if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
+    throw new Error("PDCA-Counter sind nur im Korp-Zug nutzbar.");
+  const sourceId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  if (!state.corp.scoreArea.includes(sourceId))
+    throw new Error("Please Don't Choke Anyone ist nicht gescored.");
+  const definition = definitionFor(state, sourceId);
+  if (
+    scoredAgendaImplementationForDefinition(definition)?.kind !==
+    "corp_damage_replacement_pdca_action_counter"
+  )
+    throw new Error("Die PDCA-Faehigkeit passt nicht zur Quelle.");
+  const flags = ensureCorpTurnFlags(state);
+  if (flags.pdcaUsedSourceIdsThisTurn?.includes(sourceId))
+    throw new Error("Diese PDCA-Faehigkeit wurde diesen Zug bereits genutzt.");
+  if (cardCounter(state, sourceId, "pdca") <= 0)
+    throw new Error("Es ist kein PDCA-Counter vorhanden.");
+  spendCardCounter(state, sourceId, "pdca", 1);
+  flags.pdcaUsedSourceIdsThisTurn = [
+    ...(flags.pdcaUsedSourceIdsThisTurn ?? []),
+    sourceId,
+  ].sort();
+  state.corp.clicks += 1;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    gainedActions: 1,
+    removedCounterAmount: 1,
+    remainingCounters: cardCounter(state, sourceId, "pdca"),
+    corpClicksAfter: state.corp.clicks,
+  };
+}
+
 function publicCardTitle(definitionId: CardDefinitionId): string {
   return DEMO_CARDS_BY_ID[definitionId]?.title ?? definitionId;
 }
@@ -7401,7 +7714,10 @@ function startCorpTurn(
   delete runnerFlags.lastRezzedBlackIceThisTurn;
   ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
   ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds = [];
+  ensureCorpTurnFlags(state).pdcaUsedSourceIdsThisTurn = [];
+  applyFutureExtraActionGrantsAtTurnStart(state, "corp", effects);
   applyCorpStartOfTurnEffects(state, effects);
+  openCorpStartTurnRandomRestrictedActionOffers(state, effects);
 }
 
 function startRunnerTurn(
@@ -7415,6 +7731,7 @@ function startRunnerTurn(
   state.runner.clicks = runnerActionsPerTurn(state);
   if (state.runnerTurnFlags?.questForCattekinPermanentActionGain)
     state.runner.clicks += 1;
+  applyFutureExtraActionGrantsAtTurnStart(state, "runner", effects);
   state.corp.clicks = 0;
   clearEdgerunnerTempsInstallFlags(state);
   const flags = ensureRunnerTurnFlags(state);
@@ -7459,6 +7776,7 @@ function startRunnerTurn(
   resolveBizarreEncryptionDelayedAgendas(state, effects);
   refreshRecurringCredits(state, "runner", effects);
   untapRunnerCardsAtTurnStart(state);
+  applyProteusActionEconomyRunnerStartOfTurn(state, effects);
   applyRunnerStartOfTurnEffects(state, effects);
 }
 
@@ -7670,7 +7988,24 @@ function applyScoredAgendaCorpStartEconomyEffects(
     const definition = definitionFor(state, cardId);
     const implementation = scoredAgendaImplementationForDefinition(definition);
     if (implementation?.kind !== "overadvance_start_of_corp_turn_credits")
+    {
+      if (implementation?.kind === "overadvance_start_of_corp_turn_actions") {
+        const amount = cardCounter(state, cardId, "mark");
+        if (amount <= 0) continue;
+        state.corp.clicks += amount;
+        effects?.push({
+          effectId: `corp.start.scored_agenda.action.${cardId}`,
+          kind: "gain_actions",
+          visibility: "public",
+          side: "corp",
+          amount,
+          reason: "start_of_turn",
+          sourceDefinitionId: definition.id,
+          sourceTitle: publicCardTitle(definition.id),
+        });
+      }
       continue;
+    }
     const amount = cardCounter(state, cardId, "mark");
     if (amount <= 0) continue;
     credits(state, "corp", amount);
@@ -7755,6 +8090,49 @@ function applyProteusPurgeableRunnerVirusCorpStartEffects(
     sourceDefinitionId: PROTEUS_VIRAL_PIPELINE_ID,
     sourceTitle: publicCardTitle(PROTEUS_VIRAL_PIPELINE_ID),
   });
+}
+
+function openCorpStartTurnRandomRestrictedActionOffers(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  if (state.actionEconomy?.pendingOffer) return;
+  for (const sourceId of state.corp.scoreArea.slice().sort()) {
+    const definition = definitionFor(state, sourceId);
+    if (
+      scoredAgendaImplementationForDefinition(definition)?.kind !==
+      "corp_start_turn_random_restricted_optional_action"
+    )
+      continue;
+    const randomPurpose = `proteus.action_economy.${definition.id}.corp_start.${state.stateVersion}.${sourceId}`;
+    const dieRoll = rollDeterministicDie(state, randomPurpose);
+    const restriction = restrictedActionFamilyForAiBoardMemberRoll(dieRoll);
+    ensureActionEconomy(state).pendingOffer = {
+      side: "corp",
+      sourceCardInstanceId: sourceId,
+      sourceDefinitionId: definition.id,
+      restriction,
+      optional: true,
+      dieRoll,
+      randomPurpose,
+      createdAtStateVersion: state.stateVersion,
+    };
+    effects?.push({
+      effectId: `corp.start.action_economy.offer.${sourceId}`,
+      kind: "counter_change",
+      visibility: "public",
+      side: "corp",
+      amount: 0,
+      reason: "start_of_turn",
+      sourceDefinitionId: definition.id,
+      sourceTitle: definition.title,
+      dieRoll,
+      randomPurpose,
+      restrictedActionFamily: restriction,
+      randomCounterAfter: state.randomCounter,
+    } as ResolvedGameEffect);
+    return;
+  }
 }
 
 function virusCounterDrawsAtCorpStart(state: GameState): number {
@@ -7976,6 +8354,152 @@ function applyQuestForCattekinStartOfTurn(
         : {}),
     } as ResolvedGameEffect);
   }
+}
+
+function applyProteusActionEconomyRunnerStartOfTurn(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  for (const sourceId of state.runner.rig.hardware.slice().sort()) {
+    const definition = definitionFor(state, sourceId);
+    const longtail =
+      cardImplementationForDefinitionId(definition.id)?.uniqueDirectLongtail;
+    if (
+      longtail?.kind !==
+      "runner_start_turn_drip_counter_action_or_core_damage"
+    )
+      continue;
+    const current = cardCounter(state, sourceId, "drip");
+    if (current >= longtail.threshold) {
+      setCardCounter(state, sourceId, "drip", 0);
+      const damageSummary = doDamage(state, {
+        damageId: `runner.start.${definition.id}.drip_core.${state.stateVersion}`,
+        damageType: "core",
+        amount: 1,
+        source: `runner_start:${definition.id}`,
+      });
+      effects?.push({
+        effectId: `runner.start.drip.${sourceId}`,
+        kind: "damage",
+        visibility: "public",
+        side: "runner",
+        amount: 1,
+        reason: "start_of_turn",
+        counterType: "drip",
+        remainingCounters: 0,
+        sourceDefinitionId: definition.id,
+        sourceTitle: definition.title,
+        damageCannotBePrevented: true,
+        damageType: "core",
+        cardsTrashed: damageSummary.cardsTrashed,
+        ...(damageSummary.coreDamageAfter !== undefined
+          ? { coreDamageAfter: damageSummary.coreDamageAfter }
+          : {}),
+      } as ResolvedGameEffect);
+    } else {
+      setCardCounter(state, sourceId, "drip", current + 1);
+      state.runner.clicks += 1;
+      effects?.push({
+        effectId: `runner.start.drip.${sourceId}`,
+        kind: "gain_actions",
+        visibility: "public",
+        side: "runner",
+        amount: 1,
+        reason: "start_of_turn",
+        counterType: "drip",
+        remainingCounters: current + 1,
+        addedCounterAmount: 1,
+        sourceDefinitionId: definition.id,
+        sourceTitle: definition.title,
+      });
+    }
+  }
+
+  for (const sourceId of state.runner.rig.resources.slice().sort()) {
+    const definition = definitionFor(state, sourceId);
+    const longtail =
+      cardImplementationForDefinitionId(definition.id)?.uniqueDirectLongtail;
+    if (longtail?.kind !== "runner_start_turn_forced_random_action") continue;
+    const flags = ensureRunnerTurnFlags(state);
+    if ((flags.installedResourceIdsLastTurn ?? []).includes(sourceId)) continue;
+    const randomPurpose = `proteus.action_economy.${definition.id}.runner_start.${state.stateVersion}.${sourceId}`;
+    const dieRoll = rollDeterministicDie(state, randomPurpose);
+    const grant = bargainWithViacoxGrantForRoll(state, sourceId, definition.id, dieRoll);
+    if (!grant) continue;
+    addTurnBoundExtraActionGrant(state, {
+      side: "runner",
+      sourceCardInstanceId: sourceId,
+      sourceDefinitionId: definition.id,
+      restriction: grant.restriction,
+      forced: true,
+      dieRoll,
+      randomPurpose,
+      ...(grant.targetServerId ? { targetServerId: grant.targetServerId } : {}),
+      ...(grant.targetCardInstanceId
+        ? { targetCardInstanceId: grant.targetCardInstanceId }
+        : {}),
+      ...(grant.revealToCorpOnly ? { revealToCorpOnly: true } : {}),
+    });
+    effects?.push({
+      effectId: `runner.start.viacox.${sourceId}`,
+      kind: "gain_actions",
+      visibility: grant.revealToCorpOnly ? "hidden_info_barrier" : "public",
+      side: "runner",
+      amount: 1,
+      reason: "start_of_turn",
+      sourceDefinitionId: definition.id,
+      sourceTitle: definition.title,
+      dieRoll,
+      randomPurpose,
+      randomCounterAfter: state.randomCounter,
+      restrictedActionFamily: grant.restriction,
+      ...(grant.targetServerId ? { serverId: grant.targetServerId } : {}),
+    } as ResolvedGameEffect);
+  }
+}
+
+function bargainWithViacoxGrantForRoll(
+  state: GameState,
+  sourceId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+  dieRoll: number,
+):
+  | {
+      restriction: RestrictedActionFamily;
+      targetServerId?: Exclude<ServerId, "new_remote">;
+      targetCardInstanceId?: CardInstanceId;
+      revealToCorpOnly?: boolean;
+    }
+  | undefined {
+  void sourceId;
+  void sourceDefinitionId;
+  if (dieRoll === 1) return { restriction: "draw_card" };
+  if (dieRoll === 2) return { restriction: "gain_credit" };
+  if (dieRoll === 3) return { restriction: "start_run", targetServerId: "rd" };
+  if (dieRoll === 4) return { restriction: "start_run", targetServerId: "hq" };
+  if (dieRoll === 5) {
+    const remote = state.corp.servers
+      .filter((server) => server.kind === "remote")
+      .sort((a, b) => a.id.localeCompare(b.id))[0];
+    if (!remote) return undefined;
+    return { restriction: "start_run", targetServerId: remote.id };
+  }
+  const target = randomRunnerGripCardId(state, "proteus.viacox.random_grip");
+  if (!target) return undefined;
+  return {
+    restriction: "play_or_install_card",
+    targetCardInstanceId: target,
+    revealToCorpOnly: true,
+  };
+}
+
+function randomRunnerGripCardId(
+  state: GameState,
+  purpose: string,
+): CardInstanceId | undefined {
+  if (state.runner.grip.length === 0) return undefined;
+  const value = nextRandom(state, `${purpose}.${state.stateVersion}`);
+  return state.runner.grip[Math.floor(value * state.runner.grip.length)];
 }
 
 function virusCounterCreditsAtRunnerStart(state: GameState): {
@@ -13801,8 +14325,18 @@ function agendaPoints(state: GameState, side: Side): number {
 }
 
 function credits(state: GameState, side: Side, amount: number): void {
-  if (side === "corp") state.corp.credits += amount;
-  else state.runner.credits += amount;
+  const normalized = Math.max(0, Math.floor(amount));
+  if (normalized <= 0) return;
+  if (side === "corp") {
+    const debt = state.actionEconomy?.corpCreditForfeitDebt;
+    const forfeited = Math.min(normalized, Math.max(0, Math.floor(debt?.remaining ?? 0)));
+    const net = normalized - forfeited;
+    if (debt) {
+      debt.remaining = Math.max(0, Math.floor(debt.remaining) - forfeited);
+      compactActionEconomy(state);
+    }
+    state.corp.credits += net;
+  } else state.runner.credits += normalized;
 }
 
 function cardCounter(
@@ -14878,6 +15412,8 @@ function canPlayCorpUtilityOperation(
       return state.corp.hq.some((cardId) =>
         isCorpInstallableCardType(definitionFor(state, cardId)),
       );
+    case "x_future_actions_and_credit_forfeit":
+      return state.corp.credits >= utility.costMultiplier;
     case "corp_archives_to_hq":
       return state.corp.archives.some((cardId) => {
         const sourceCardId = state.corp.hq.find(
@@ -14929,6 +15465,42 @@ function resolveCorpUtilityOperation(
         edgerunnerTempsInstallActionsRemaining:
           flags.edgerunnerTempsInstallActionsRemaining,
         corpClicksAfter: state.corp.clicks,
+      };
+      return;
+    }
+    case "x_future_actions_and_credit_forfeit": {
+      const x = Number(legalAction.payload?.xValue ?? 0);
+      if (!Number.isInteger(x) || x <= 0)
+        throw new Error("Corporate Guard(R) Temps benötigt ein positives X.");
+      const expectedCost = x * utility.costMultiplier;
+      if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
+        throw new Error("Corporate Guard(R) Temps hat falsche X-Kosten.");
+      const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+      addFutureExtraActionGrant(state, {
+        side: "corp",
+        sourceCardInstanceId: sourceCardId,
+        sourceDefinitionId: definition.id,
+        remainingTurns: x,
+        amountPerTurn: 1,
+      });
+      ensureActionEconomy(state).corpCreditForfeitDebt = {
+        remaining:
+          Math.max(
+            0,
+            Math.floor(
+              state.actionEconomy?.corpCreditForfeitDebt?.remaining ?? 0,
+            ),
+          ) + x,
+        sourceCardInstanceId: sourceCardId,
+        sourceDefinitionId: definition.id,
+      };
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        xValue: x,
+        futureActionTurns: x,
+        corpCreditForfeitAdded: x,
+        corpCreditForfeitRemaining:
+          state.actionEconomy?.corpCreditForfeitDebt?.remaining ?? x,
       };
       return;
     }
@@ -15078,6 +15650,29 @@ function cardImplementationOperationLegalActions(
   cardId: CardInstanceId,
   definition: CardDefinition,
 ): LegalAction[] {
+  const utility = corpUtilityImplementationForDefinition(definition.id);
+  if (utility?.kind === "x_future_actions_and_credit_forfeit") {
+    const maxX = Math.floor(state.corp.credits / utility.costMultiplier);
+    const actions: LegalAction[] = [];
+    for (let x = 1; x <= maxX; x += 1) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "play_operation",
+          `${definition.title}: X=${x}`,
+          cardId,
+          [{ clicks: 1, credits: x * utility.costMultiplier }],
+          {
+            cardId,
+            xValue: x,
+            corpUtilityAbility: "x_future_actions_and_credit_forfeit",
+          },
+        ),
+      );
+    }
+    return actions;
+  }
   if (!hasPrintedCostOnPlayCardImplementation(definition)) return [];
   const additionalCost =
     onPlayCardImplementationAdditionalOperationCost(definition);
@@ -15308,6 +15903,7 @@ function ensureCorpTurnFlags(
   flags.edgerunnerTempsInstallActionsRemaining ??= 0;
   flags.disinfectantUsedSourceIdsThisTurn ??= [];
   flags.employeeEmpowermentStartTurnResolvedSourceIds ??= [];
+  flags.pdcaUsedSourceIdsThisTurn ??= [];
   return flags;
 }
 
