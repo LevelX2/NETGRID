@@ -1,0 +1,348 @@
+{
+  "schemaVersion": "ai-default-gate-observation-suite-v1",
+  "generatedAt": "2026-05-25",
+  "taskId": "Aufgabe 033",
+  "baselineProfile": "belief_ai_v1_4_2",
+  "candidateProfile": "current_candidate",
+  "suite": {
+    "kind": "runMatchProgressionBenchmarkSuite",
+    "includeHoldout": true,
+    "maxActions": 160,
+    "seedCount": 9,
+    "runnableSlotCount": 8,
+    "repeatCount": 1,
+    "note": "Ein einzelner deterministischer 8-Slot-Beobachtungspunkt; keine statistische Default-Freigabe."
+  },
+  "runs": [
+    {
+      "runId": "aufgabe-033-observation-8slot-2026-05-25",
+      "baselineProfile": "belief_ai_v1_4_2",
+      "candidateProfile": "current_candidate",
+      "runnableSlotCount": 8,
+      "maxActions": 160
+    }
+  ],
+  "global": {
+    "safety": {
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "timeoutRate": 0,
+      "fallbackRate": 0
+    },
+    "progression": {
+      "baseline": {
+        "games": 72,
+        "actionLimitRate": 0.347,
+        "corpScores": 52,
+        "runnerSteals": 132,
+        "scoreOrStealActions": 184,
+        "scoreOrStealActionsPerMatch": 2.556
+      },
+      "candidate": {
+        "games": 72,
+        "actionLimitRate": 0.347,
+        "corpScores": 61,
+        "runnerSteals": 118,
+        "scoreOrStealActions": 179,
+        "scoreOrStealActionsPerMatch": 2.486
+      },
+      "delta": {
+        "actionLimitRate": 0,
+        "corpScores": 9,
+        "runnerSteals": -14,
+        "scoreOrStealActions": -5,
+        "scoreOrStealActionsPerMatch": -0.07
+      }
+    },
+    "guardrails": {
+      "candidate": {
+        "corpAgendaInstalledInCheaplyContestableRemote": 0,
+        "corpAdvanceInCheaplyContestableRemote": 0,
+        "runsStartedAgainstKnownUnaffordablePath": 10,
+        "runnerRunStartedAgainstKnownUnpayableFullPath": 0,
+        "runnerRunSuppressedAsKnownNoAccess": 379,
+        "runnerRunAllowedAsFirstProbeUnknownIce": 339,
+        "corpFutureRunIceInstalledAsDeadEffect": 1,
+        "corpMultiIceInstallOrderFutureEffectDead": 0,
+        "corpBallAndChainInstalledWithoutLaterIce": 1,
+        "corpRemotePortfolioOverExpanded": 0,
+        "corpNewRemoteCreatedWithoutPayloadPlan": 10
+      },
+      "delta": {
+        "corpAgendaInstalledInCheaplyContestableRemote": 0,
+        "corpAdvanceInCheaplyContestableRemote": 0,
+        "runsStartedAgainstKnownUnaffordablePath": 5,
+        "runnerRunStartedAgainstKnownUnpayableFullPath": 0,
+        "runnerRunSuppressedAsKnownNoAccess": -32,
+        "runnerRunAllowedAsFirstProbeUnknownIce": 49,
+        "corpFutureRunIceInstalledAsDeadEffect": 0,
+        "corpMultiIceInstallOrderFutureEffectDead": -1,
+        "corpBallAndChainInstalledWithoutLaterIce": 0,
+        "corpRemotePortfolioOverExpanded": -6,
+        "corpNewRemoteCreatedWithoutPayloadPlan": -5
+      }
+    },
+    "recentFixes": {
+      "tagPunish": {
+        "corpVisibleTagPunishDecisionWindows": 36,
+        "corpVisibleTagPunishDecisionWindowsTaken": 35,
+        "corpVisibleTagPunishDecisionWindowsSkipped": 1,
+        "corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization": 0,
+        "corpVisibleTagPunishFixGateSuspiciousSkipNormalized": 0
+      },
+      "runnerKnownPath": {
+        "runnerRunStartedAgainstKnownUnpayableFullPath": 0,
+        "runnerKnownPathCanBreakNextIceButNotFullPath": 0,
+        "runnerRunPenalizedAsKnownNoAccess": 0,
+        "runnerRunSuppressedAsKnownNoAccess": 379,
+        "runnerRunAllowedAsFirstProbeUnknownIce": 339
+      },
+      "corpIceOrdering": {
+        "corpFutureRunIceInstalledAsLiveEffect": 6,
+        "corpFutureRunIceInstalledAsDeadEffect": 1,
+        "corpMultiIceInstallOrderFutureEffectDead": 0,
+        "corpBallAndChainInstalledWithoutLaterIce": 1
+      },
+      "corpScoreTerminal": {
+        "corpScoreTerminalWindow": 505,
+        "corpScoreTerminalScoreTaken": 61,
+        "corpScoreTerminalAdvanceTaken": 52,
+        "corpScoreTerminalSkipped": 261,
+        "corpScoreConversionFixGateSuspiciousEconomyLoop": 26,
+        "corpScoreConversionFixGateSuspiciousProtectionLoop": 0
+      },
+      "economyBeforeScore": {
+        "corpEconomyBeforeScoreWindow": 505,
+        "corpEconomyBeforeScoreTaken": 86,
+        "corpEconomyBeforeScoreRepeatedEconomyWithin3": 44,
+        "corpEconomyBeforeScoreNotConvertedWithin3CorpActions": 71,
+        "corpEconomyBeforeScoreThenRunnerSteal": 10
+      }
+    },
+    "openRisks": {
+      "runnerEconomyFixGateEligibleStarvedSkip": 60,
+      "runnerSetupFixGateEligibleSearchRecoverySkip": 134,
+      "runnerSetupFixGateEligibleMemorySkip": 105,
+      "runnerEconomySkippedWhileKnownUnaffordablePath": 123,
+      "runnerSearchRecoveryWindowWithNoInstallFollowup": 99,
+      "runnerMemorySupportSkippedWhileGripHasPrograms": 105
+    }
+  },
+  "slots": [
+    {
+      "slotId": "safety_smoke_demo_008",
+      "label": "Safety-Smoke demo_008",
+      "slotType": "smoke",
+      "baseline": {
+        "actionLimitRate": 0.667,
+        "corpScores": 7,
+        "runnerSteals": 14,
+        "scoreOrStealActions": 21
+      },
+      "candidate": {
+        "actionLimitRate": 0.667,
+        "corpScores": 10,
+        "runnerSteals": 15,
+        "scoreOrStealActions": 25,
+        "corpEconomyBeforeScoreRepeatedEconomyWithin3": 0,
+        "corpEconomyBeforeScoreNotConvertedWithin3CorpActions": 1,
+        "runnerSetupFixGateEligibleSearchRecoverySkip": 0,
+        "runnerSetupFixGateEligibleMemorySkip": 37
+      },
+      "gate": "warn",
+      "notes": [
+        "Corp Scores steigen, Runner Steals steigen leicht, ActionLimit bleibt hoch."
+      ]
+    },
+    {
+      "slotId": "progression_tuning_origin_rig_vs_tax",
+      "label": "Progression-Tuning A / Snapshot Rig",
+      "slotType": "snapshot_tuning",
+      "baseline": {
+        "actionLimitRate": 0.222,
+        "corpScores": 10,
+        "runnerSteals": 22,
+        "scoreOrStealActions": 32
+      },
+      "candidate": {
+        "actionLimitRate": 0.111,
+        "corpScores": 11,
+        "runnerSteals": 17,
+        "scoreOrStealActions": 28,
+        "corpEconomyBeforeScoreRepeatedEconomyWithin3": 2,
+        "corpEconomyBeforeScoreNotConvertedWithin3CorpActions": 7,
+        "runnerSetupFixGateEligibleSearchRecoverySkip": 0,
+        "runnerSetupFixGateEligibleMemorySkip": 2
+      },
+      "gate": "pass",
+      "notes": ["Scores steigen, Steals und ActionLimit sinken."]
+    },
+    {
+      "slotId": "progression_tuning_origin_pressure_vs_tax",
+      "label": "Progression-Tuning B / Snapshot Pressure",
+      "slotType": "snapshot_tuning",
+      "baseline": {
+        "actionLimitRate": 0.222,
+        "corpScores": 10,
+        "runnerSteals": 27,
+        "scoreOrStealActions": 37
+      },
+      "candidate": {
+        "actionLimitRate": 0.333,
+        "corpScores": 13,
+        "runnerSteals": 22,
+        "scoreOrStealActions": 35,
+        "corpEconomyBeforeScoreRepeatedEconomyWithin3": 1,
+        "corpEconomyBeforeScoreNotConvertedWithin3CorpActions": 2,
+        "runnerSetupFixGateEligibleSearchRecoverySkip": 0,
+        "runnerSetupFixGateEligibleMemorySkip": 19
+      },
+      "gate": "warn",
+      "notes": [
+        "Score/Steal-Bilanz verbessert sich, ActionLimit steigt leicht."
+      ]
+    },
+    {
+      "slotId": "snapshot_holdout_origin_pressure_vs_tag_ops",
+      "label": "Snapshot-Holdout",
+      "slotType": "snapshot_holdout",
+      "baseline": {
+        "actionLimitRate": 0.556,
+        "corpScores": 9,
+        "runnerSteals": 19,
+        "scoreOrStealActions": 28
+      },
+      "candidate": {
+        "actionLimitRate": 0.556,
+        "corpScores": 6,
+        "runnerSteals": 21,
+        "scoreOrStealActions": 27,
+        "corpEconomyBeforeScoreRepeatedEconomyWithin3": 5,
+        "corpEconomyBeforeScoreNotConvertedWithin3CorpActions": 11,
+        "runnerSetupFixGateEligibleSearchRecoverySkip": 0,
+        "runnerSetupFixGateEligibleMemorySkip": 9
+      },
+      "gate": "warn",
+      "notes": [
+        "Holdout bleibt schwächer: weniger Corp Scores, mehr Runner Steals."
+      ]
+    },
+    {
+      "slotId": "local_realistic_pair_1",
+      "label": "Local Realistic Holdout 1",
+      "slotType": "local_realistic_holdout",
+      "baseline": {
+        "actionLimitRate": 0,
+        "corpScores": 2,
+        "runnerSteals": 10,
+        "scoreOrStealActions": 12
+      },
+      "candidate": {
+        "actionLimitRate": 0,
+        "corpScores": 2,
+        "runnerSteals": 8,
+        "scoreOrStealActions": 10,
+        "corpEconomyBeforeScoreRepeatedEconomyWithin3": 8,
+        "corpEconomyBeforeScoreNotConvertedWithin3CorpActions": 16,
+        "runnerSetupFixGateEligibleSearchRecoverySkip": 38,
+        "runnerSetupFixGateEligibleMemorySkip": 6
+      },
+      "gate": "warn",
+      "notes": [
+        "Steals sinken, aber Economy-before-score und Search/Recovery bleiben sichtbar."
+      ]
+    },
+    {
+      "slotId": "local_realistic_pair_2",
+      "label": "Local Realistic Holdout 2",
+      "slotType": "local_realistic_holdout",
+      "baseline": {
+        "actionLimitRate": 0,
+        "corpScores": 0,
+        "runnerSteals": 19,
+        "scoreOrStealActions": 19
+      },
+      "candidate": {
+        "actionLimitRate": 0.222,
+        "corpScores": 3,
+        "runnerSteals": 15,
+        "scoreOrStealActions": 18,
+        "corpEconomyBeforeScoreRepeatedEconomyWithin3": 13,
+        "corpEconomyBeforeScoreNotConvertedWithin3CorpActions": 11,
+        "runnerSetupFixGateEligibleSearchRecoverySkip": 2,
+        "runnerSetupFixGateEligibleMemorySkip": 0
+      },
+      "gate": "warn",
+      "notes": [
+        "Scores/Steals verbessern sich, aber ActionLimit und repeated Economy-before-score bleiben Warnungen."
+      ]
+    },
+    {
+      "slotId": "real_scene_pair_1",
+      "label": "Real Scene Holdout 1",
+      "slotType": "real_scene_holdout",
+      "baseline": {
+        "actionLimitRate": 0.556,
+        "corpScores": 8,
+        "runnerSteals": 15,
+        "scoreOrStealActions": 23
+      },
+      "candidate": {
+        "actionLimitRate": 0.556,
+        "corpScores": 10,
+        "runnerSteals": 14,
+        "scoreOrStealActions": 24,
+        "corpEconomyBeforeScoreRepeatedEconomyWithin3": 14,
+        "corpEconomyBeforeScoreNotConvertedWithin3CorpActions": 22,
+        "runnerSetupFixGateEligibleSearchRecoverySkip": 67,
+        "runnerSetupFixGateEligibleMemorySkip": 25
+      },
+      "gate": "warn",
+      "notes": [
+        "Score/Steal-Bilanz leicht positiv, Economy-before-score und Runner-Setup bleiben hoch."
+      ]
+    },
+    {
+      "slotId": "real_scene_pair_2",
+      "label": "Real Scene Holdout 2",
+      "slotType": "real_scene_holdout",
+      "baseline": {
+        "actionLimitRate": 0.556,
+        "corpScores": 6,
+        "runnerSteals": 6,
+        "scoreOrStealActions": 12
+      },
+      "candidate": {
+        "actionLimitRate": 0.333,
+        "corpScores": 6,
+        "runnerSteals": 6,
+        "scoreOrStealActions": 12,
+        "corpEconomyBeforeScoreRepeatedEconomyWithin3": 1,
+        "corpEconomyBeforeScoreNotConvertedWithin3CorpActions": 1,
+        "runnerSetupFixGateEligibleSearchRecoverySkip": 27,
+        "runnerSetupFixGateEligibleMemorySkip": 7
+      },
+      "gate": "warn",
+      "notes": [
+        "Progression stabil und ActionLimit besser, Search/Recovery-FixGates bleiben sichtbar."
+      ]
+    }
+  ],
+  "gateResults": {
+    "safety": "pass",
+    "cheapRemote": "pass",
+    "knownNoAccessRuns": "pass",
+    "iceOrdering": "pass",
+    "progression": "warn",
+    "economyBeforeScore": "warn",
+    "tagPunish": "pass",
+    "runnerSetup": "warn"
+  },
+  "overallRecommendation": "observe_more",
+  "technicalReadiness": {
+    "merge": "merge_ready_with_documented_risk",
+    "profileGated": "profile_gated_ready_with_risks",
+    "default": "default_not_ready_observe_more"
+  },
+  "nextPracticalStep": "Profile-gated Beobachtung fortsetzen; bei gleichem Muster eine kleine Economy-before-score-Folgeaufgabe oder Runner-Setup-Attribution schneiden."
+}
