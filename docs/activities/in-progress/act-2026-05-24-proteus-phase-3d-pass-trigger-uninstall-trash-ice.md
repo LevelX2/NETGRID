@@ -48,14 +48,12 @@ checks: []
 
 ## Ergebnisnotiz
 
-Blockiert.
+Statusreferenz. Die Zielkarten sind durch PRO010 umgesetzt; diese alte Umbrella-Activity bleibt ohne zusätzliche Komplettzählung offen.
 
-Phase 3d braucht einen generischen Korp-seitigen Post-Pass-ICE-Timingvertrag für die gerade passierte ICE-Instanz:
+PRO010 ergänzt den generischen Korp-seitigen Post-Pass-ICE-Vertrag für die gerade passierte ICE-Instanz:
 
 - Pflicht-/Optional-Fenster für die Korp nach dem Passieren einzelner ICE, bevor der Run weiterläuft.
 - Frische LegalAction-Projektion und `applyAction`-Revalidierung für `passedIceId`, Server/Position, StateVersion, Kosten, Rezzed-/Installed-Zustand und Run-Fortsetzung.
 - Generische HQ-Rückführung installierter Korp-ICE inklusive Zone-/Serverlisten-Update, Redaction und StateHash-stabilem PublicPayload.
 - Einheitliche Semantik für Pflichtzahlung oder HQ-Rückführung (`Datacomb`, `Marionette`, `Twisty Passages`) gegenüber optionaler HQ-Rückführung mit Credit-Gain (`Death Yo-Yo`, `Scaffolding`, `Tumblers`).
 - Public Server-/ICE-Positionslabels ohne unrezzed ICE-Identitätsleak.
-
-Der vorhandene Post-Pass-Unterbau deckt Runner-seitige Fenster (`postPassPayOrEndRun`, Disintegrator/Startup-Immolator) und Fort-Upgrades ab, aber keinen CardImplementation-deklarativen Korp-Post-Pass-Choice für die passierte ICE selbst. Eine Umsetzung ohne diesen Vertrag würde neue Spezialfälle im Run-Movement-Pfad erzwingen und die Slice-Akzeptanzkriterien für LegalAction-/Choice-Revalidierung und Replay nicht belastbar erfüllen.

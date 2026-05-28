@@ -303,6 +303,21 @@ export function counterDisplaysForRendering(card: Pick<VisibleCard, "counterDisp
   );
 }
 
+export function selectedSubtypeDetailLabel(card: Pick<VisibleCard, "selectedSubtypeLabel">): string | null {
+  if (!card.selectedSubtypeLabel) return null;
+  return `Gewählter Typ: ${card.selectedSubtypeLabel}`;
+}
+
+export function selectedTargetDetailLabel(card: Pick<VisibleCard, "selectedTargetLabel">): string | null {
+  if (!card.selectedTargetLabel) return null;
+  return `Ziel-ICE: ${card.selectedTargetLabel}`;
+}
+
+export function hostedOnDetailLabel(card: Pick<VisibleCard, "hostedOnLabel">): string | null {
+  if (!card.hostedOnLabel) return null;
+  return `Gehostet auf: ${card.hostedOnLabel}`;
+}
+
 export function identityCounterChipsForDisplays(counterDisplays: VisibleCard["counterDisplays"]): IdentityCounterChipView[] {
   return (counterDisplays ?? [])
     .filter(
@@ -432,6 +447,7 @@ export function automaticCorpMandatoryDrawAction(view: PlayerView, actions: Lega
 }
 
 export function isContextualLegalAction(action: LegalAction): boolean {
+  if (action.type === "start_run" && action.payload?.bonusRunNoClick === true) return false;
   if (action.type === "start_run" && serverRefsForAction(action).length > 0) return true;
   if (action.type === "rez_ice" && cardRefsForAction(action).length > 0 && !action.timingPoint.startsWith("run.")) return true;
   if (action.type === "activated_card_ability" && cardRefsForAction(action).length > 0) return true;
@@ -711,7 +727,8 @@ function playEventContextLabel(action: LegalAction): string {
   if (!serverId) return "Spielen";
   const serverLabel = serverDisplayLabel(serverId);
   const fullLabel = actionButtonLabel(action);
-  if (/\bRun\b/i.test(fullLabel) || /\bDeep Dive\b/i.test(fullLabel)) return `Run auf ${serverLabel}`;
+  if (action.payload?.runnerEventRun === true || /\bRun\b/i.test(fullLabel) || /\bDeep Dive\b/i.test(fullLabel))
+    return `Run auf ${serverLabel}`;
   return `Spielen auf ${serverLabel}`;
 }
 

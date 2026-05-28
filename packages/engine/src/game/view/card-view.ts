@@ -39,12 +39,42 @@ const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
 };
 
 export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
+  return visibleKnownCardWithReferenceViewer(state, id, "own");
+}
+
+export function visibleOwnCardForViewer(
+  state: GameState,
+  id: CardInstanceId,
+  viewer: Side,
+): VisibleCard {
+  return visibleKnownCardWithReferenceViewer(state, id, viewer);
+}
+
+function visibleKnownCardWithReferenceViewer(
+  state: GameState,
+  id: CardInstanceId,
+  referenceViewer: Side | "own",
+): VisibleCard {
   const definition = definitionFor(state, id);
   const instance = mustInstance(state.cardInstances, id);
   const runRemainderStrengthBonus =
     definition.type === "program"
       ? runRemainderStrengthBonusForBreaker(state.run, id)
       : 0;
+  const visibleStrength =
+    definition.strength !== undefined
+      ? definition.type === "ice"
+        ? iceStrengthFor(state, id)
+        : definition.strength +
+          instance.strengthModifier +
+          hostedProgramStrengthModifier(state, id) +
+          runRemainderStrengthBonus -
+          pattelAntibodyStrengthPenalty(instance)
+      : undefined;
+  const visibleStrengthModifier =
+    visibleStrength !== undefined
+      ? visibleStrengthModifierForKnownCard(state, id, definition, visibleStrength)
+      : undefined;
   return {
     instanceId: id,
     known: true,
@@ -86,17 +116,11 @@ export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCar
               : definition.advancementRequirement,
         }
       : {}),
-    ...(definition.strength !== undefined
-      ? {
-          strength:
-            definition.type === "ice"
-              ? iceStrengthFor(state, id)
-              : definition.strength +
-                instance.strengthModifier +
-                hostedProgramStrengthModifier(state, id) +
-                runRemainderStrengthBonus -
-                pattelAntibodyStrengthPenalty(instance),
-        }
+    ...(visibleStrength !== undefined
+      ? { strength: visibleStrength }
+      : {}),
+    ...(visibleStrengthModifier !== undefined
+      ? { strengthModifier: visibleStrengthModifier }
       : {}),
     ...(definition.agendaPoints !== undefined
       ? { agendaPoints: definition.agendaPoints }
@@ -107,13 +131,37 @@ export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCar
     ...visibleCountersField(visibleCountersForKnownCard(definition, instance)),
     ...counterDisplaysField(counterDisplaysForKnownCard(definition, instance)),
     ...(instance.tapped ? { tapped: true } : {}),
-    ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {}),
+    ...(instance.hostedOn
+      ? {
+          hostedOn: instance.hostedOn,
+          hostedOnLabel: visibleCardReferenceLabel(
+            state,
+            instance.hostedOn,
+            referenceViewer,
+          ),
+        }
+      : {}),
     ...(instance.selectedServerId
       ? {
           selectedServerId: instance.selectedServerId,
           selectedServerLabel: serverChoiceDisplayLabel(
             state,
             instance.selectedServerId,
+          ),
+        }
+      : {}),
+    ...(instance.selectedSubtype
+      ? {
+          selectedSubtype: instance.selectedSubtype,
+          selectedSubtypeLabel: icebreakerSubtypeLabel(instance.selectedSubtype),
+        }
+      : {}),
+    ...(instance.selectedCardId
+      ? {
+          selectedTargetLabel: visibleCardReferenceLabel(
+            state,
+            instance.selectedCardId,
+            referenceViewer,
           ),
         }
       : {}),
@@ -376,6 +424,14 @@ function specialCounterDisplays(
       counterType: "militech",
       usageHint: "spendable",
     }),
+    ...singleCounterDisplay(counters.power, {
+      id: "power",
+      displayKind: "generic_counter",
+      label: "Power-Counter",
+      ariaLabelName: "Power-Counter",
+      counterType: "power",
+      usageHint: "status_marker",
+    }),
     ...singleCounterDisplay(counters.doppelganger_antibody, {
       id: "doppelganger_antibody",
       displayKind: "generic_counter",
@@ -567,7 +623,7 @@ export function visibleRunnerRigCardForViewer(
   viewer: Side,
 ): VisibleCard {
   if (viewer !== "corp" || !isConcealedRunnerResource(state, id))
-    return visibleOwnCard(state, id);
+    return visibleKnownCardWithReferenceViewer(state, id, viewer);
   const instance = mustInstance(state.cardInstances, id);
   return {
     instanceId: hiddenRunnerResourceSlotId(id),
@@ -578,6 +634,65 @@ export function visibleRunnerRigCardForViewer(
     owner: instance.owner,
     controller: instance.controller,
   };
+}
+
+function visibleKnownCardForReference(
+  state: GameState,
+  id: CardInstanceId,
+  viewer: Side | "own",
+): VisibleCard {
+  const instance = mustInstance(state.cardInstances, id);
+  if (viewer === "own") return visibleOwnCard(state, id);
+  if (instance.zone.side === "corp") {
+    return visibleCorpCard(
+      state,
+      id,
+      viewer,
+      instance.zone.zone === "serverIce" ? "ice" : "root",
+    );
+  }
+  if (instance.zone.side === "runner") {
+    return visibleRunnerRigCardForViewer(state, id, viewer);
+  }
+  return visibleSpecialZoneCard(state, id, viewer);
+}
+
+function visibleCardReferenceLabel(
+  state: GameState,
+  id: CardInstanceId,
+  viewer: Side | "own",
+): string {
+  const visible = visibleKnownCardForReference(state, id, viewer);
+  if (visible.known && visible.title) return visible.title;
+  const instance = state.cardInstances[id];
+  if (!instance) return "unbekannte Karte";
+  if (instance.zone.side === "corp") {
+    if (instance.zone.zone === "serverIce")
+      return corpIcePositionLabel(state, id, instance.zone.serverId);
+    if (instance.zone.zone === "serverRoot")
+      return `Karte in ${serverChoiceDisplayLabel(state, instance.zone.serverId)}`;
+    if (instance.zone.zone === "hq") return "Karte in HQ";
+    if (instance.zone.zone === "rd") return "Karte in R&D";
+    if (instance.zone.zone === "archives") return "Karte im Archiv";
+  }
+  if (instance.zone.side === "runner") {
+    if (instance.zone.zone === "rig") return "installierte Runner-Karte";
+    if (instance.zone.zone === "grip") return "Karte im Grip";
+    if (instance.zone.zone === "stack") return "Karte im Stack";
+    if (instance.zone.zone === "heap") return "Karte im Heap";
+  }
+  return "verdeckte Karte";
+}
+
+function corpIcePositionLabel(
+  state: GameState,
+  id: CardInstanceId,
+  serverId: Exclude<ServerId, "new_remote">,
+): string {
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  const position = server ? server.ice.indexOf(id) + 1 : 0;
+  const positionSuffix = position > 0 ? ` Position ${position}` : "";
+  return `ICE auf ${serverChoiceDisplayLabel(state, serverId)}${positionSuffix}`;
 }
 
 export function isConcealedRunnerResource(
@@ -833,6 +948,24 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
   return Math.max(0, total);
 }
 
+function visibleStrengthModifierForKnownCard(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  visibleStrength: number,
+): number | undefined {
+  if (definition.strength === undefined) return undefined;
+  const instance = mustInstance(state.cardInstances, cardId);
+  const baseStrength =
+    definition.type === "ice" &&
+    instance.variableIceState?.family === "x_strength" &&
+    typeof instance.variableIceState.strength === "number"
+      ? instance.variableIceState.strength
+      : definition.strength;
+  const modifier = Math.floor(visibleStrength - baseStrength);
+  return modifier > 0 ? modifier : undefined;
+}
+
 function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   const iceDefinition = definitionFor(state, iceId);
   const iceSubtypes = effectiveSubtypesForCard(state, iceId, iceDefinition);
@@ -913,6 +1046,19 @@ function normalizeSubtypeLabel(subtype: string): string {
 function stableSubtypeList(subtypes: readonly string[]): string[] {
   return [...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype)))]
     .sort();
+}
+
+function icebreakerSubtypeLabel(subtype: string): string {
+  switch (normalizeSubtypeLabel(subtype)) {
+    case "code_gate":
+      return "Code Gate";
+    case "sentry":
+      return "Sentry";
+    case "wall":
+      return "Wall";
+    default:
+      return subtype;
+  }
 }
 
 function effectiveSubtypesForCard(

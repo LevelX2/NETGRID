@@ -383,6 +383,203 @@ describe("access flow execution", () => {
     expect(finishedRuns).toEqual([true]);
   });
 
+  it("revalidates Mercenary-style hidden resource current-access trash and pays its source cost", () => {
+    const definitions = {
+      operation: definition("operation_def", "operation"),
+      mercenary: definition(
+        "onr_proteus_145_mercenary-subcontract",
+        "resource",
+      ),
+      boltHole: definition("onr_proteus_132_bolt-hole", "resource"),
+      agenda: definition("agenda_def", "agenda"),
+    };
+    const { host, state, spentRunnerCredits, trashPayments, trashedCards } =
+      makeHost({
+        run: {
+          runId: "run_1",
+          attackedServerId: "rd",
+          accessedCardId: "operation",
+        } as unknown as NonNullable<GameState["run"]>,
+        definitions,
+        instances: {
+          operation: instance("operation", "operation_def", {
+            side: "corp",
+            zone: "rd",
+          }),
+          mercenary: {
+            id: "mercenary" as CardInstanceId,
+            instanceId: "mercenary" as CardInstanceId,
+            definitionId: "onr_proteus_145_mercenary-subcontract",
+            owner: "runner",
+            controller: "runner",
+            zone: { side: "runner", zone: "rig" },
+            faceup: true,
+            rezzed: true,
+            tapped: false,
+            advancementCounters: 0,
+          } as unknown as CardInstance,
+          bolt: {
+            id: "bolt" as CardInstanceId,
+            instanceId: "bolt" as CardInstanceId,
+            definitionId: "onr_proteus_132_bolt-hole",
+            owner: "runner",
+            controller: "runner",
+            zone: { side: "runner", zone: "rig" },
+            faceup: false,
+            rezzed: false,
+            tapped: false,
+            advancementCounters: 0,
+          } as unknown as CardInstance,
+          agenda: instance("agenda", "agenda_def", {
+            side: "corp",
+            zone: "rd",
+          }),
+        },
+        corpRd: ["operation"],
+      });
+    state.runner.rig.resources = ["mercenary" as CardInstanceId];
+
+    const legalAction = {
+      side: "runner",
+      type: "trash_accessed_card",
+      actionId: "runner.trash_accessed_card.operation.mercenary",
+      label: "Mercenary",
+      source: "operation",
+      costs: [{ credits: 4 }],
+      payload: {
+        cardId: "operation",
+        accessTrashCostOverride: 0,
+        freeAccessTrash: true,
+        hiddenResourceCurrentAccessTrash: true,
+        hiddenResourceSourceCardId: "mercenary",
+        hiddenResourceSourceDefinitionId:
+          "onr_proteus_145_mercenary-subcontract",
+      },
+    } as unknown as LegalAction;
+
+    const result = handleAccessExecution(host, legalAction);
+
+    expect(result).toMatchObject({
+      handled: true,
+      trashedCardId: "operation",
+      runFinished: true,
+    });
+    expect(spentRunnerCredits).toEqual([4]);
+    expect(trashPayments).toEqual([{ amount: 0, cardId: "operation" }]);
+    expect(trashedCards).toEqual(["operation"]);
+    expect(state.runner.credits).toBe(6);
+    expect(state.cardInstances.mercenary?.tapped).toBe(true);
+    expect(state.cardInstances.mercenary?.faceup).toBe(true);
+    expect(legalAction.payload).toMatchObject({
+      sourceTapped: true,
+      hiddenZoneAction: "proteus_hidden_current_access_free_trash",
+    });
+
+    const wrongKindAction = structuredClone(legalAction);
+    wrongKindAction.payload = {
+      ...wrongKindAction.payload,
+      hiddenResourceSourceCardId: "bolt",
+    };
+    const wrongKind = makeHost({
+      run: {
+        runId: "run_2",
+        attackedServerId: "rd",
+        accessedCardId: "operation",
+      } as unknown as NonNullable<GameState["run"]>,
+      definitions,
+      instances: {
+        operation: instance("operation", "operation_def", {
+          side: "corp",
+          zone: "rd",
+        }),
+        bolt: {
+          id: "bolt" as CardInstanceId,
+          instanceId: "bolt" as CardInstanceId,
+          definitionId: "onr_proteus_132_bolt-hole",
+          owner: "runner",
+          controller: "runner",
+          zone: { side: "runner", zone: "rig" },
+          faceup: false,
+          rezzed: false,
+          tapped: false,
+          advancementCounters: 0,
+        } as unknown as CardInstance,
+      },
+      corpRd: ["operation"],
+    });
+    wrongKind.state.runner.rig.resources = ["bolt" as CardInstanceId];
+    expect(() =>
+      handleAccessExecution(wrongKind.host, wrongKindAction),
+    ).toThrow("Die Hidden-Resource-Faehigkeit passt nicht zur Quelle.");
+
+    const agendaState = makeHost({
+      run: {
+        runId: "run_3",
+        attackedServerId: "rd",
+        accessedCardId: "agenda",
+      } as unknown as NonNullable<GameState["run"]>,
+      definitions,
+      instances: {
+        agenda: instance("agenda", "agenda_def", {
+          side: "corp",
+          zone: "rd",
+        }),
+        mercenary: {
+          id: "mercenary" as CardInstanceId,
+          instanceId: "mercenary" as CardInstanceId,
+          definitionId: "onr_proteus_145_mercenary-subcontract",
+          owner: "runner",
+          controller: "runner",
+          zone: { side: "runner", zone: "rig" },
+          faceup: false,
+          rezzed: false,
+          tapped: false,
+          advancementCounters: 0,
+        } as unknown as CardInstance,
+      },
+      corpRd: ["agenda"],
+    });
+    agendaState.state.runner.rig.resources = ["mercenary" as CardInstanceId];
+    const agendaAction = structuredClone(legalAction);
+    agendaAction.payload = { ...agendaAction.payload, cardId: "agenda" };
+    expect(() =>
+      handleAccessExecution(agendaState.host, agendaAction),
+    ).toThrow("Agendas koennen nicht als Hidden-Resource-Trash-Ziel");
+
+    const poorState = makeHost({
+      run: {
+        runId: "run_4",
+        attackedServerId: "rd",
+        accessedCardId: "operation",
+      } as unknown as NonNullable<GameState["run"]>,
+      definitions,
+      instances: {
+        operation: instance("operation", "operation_def", {
+          side: "corp",
+          zone: "rd",
+        }),
+        mercenary: {
+          id: "mercenary" as CardInstanceId,
+          instanceId: "mercenary" as CardInstanceId,
+          definitionId: "onr_proteus_145_mercenary-subcontract",
+          owner: "runner",
+          controller: "runner",
+          zone: { side: "runner", zone: "rig" },
+          faceup: false,
+          rezzed: false,
+          tapped: false,
+          advancementCounters: 0,
+        } as unknown as CardInstance,
+      },
+      corpRd: ["operation"],
+      runnerCredits: 3,
+    });
+    poorState.state.runner.rig.resources = ["mercenary" as CardInstanceId];
+    expect(() => handleAccessExecution(poorState.host, legalAction)).toThrow(
+      "Runner kann die Hidden-Resource-Kosten nicht bezahlen.",
+    );
+  });
+
   it("adds Highlighter access context to each breached R&D access", () => {
     const breach = {
       breachId: "run_1.breach",

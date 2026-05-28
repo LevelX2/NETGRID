@@ -6369,6 +6369,27 @@ describe("V1.9.2 Mechanikpaket K", () => {
           action.payload?.bonusRunNoClick === true,
       ),
     ).toBe(false);
+
+    let hqState = toRunnerTurn(v192CardReleaseGame("v192-all-nighter-hq"));
+    hqState.runner.credits = 30;
+    moveRunnerCardToGrip(hqState, "onr_v1_076_all-nighter");
+    const hqCard = moveCorpCardToHq(hqState, "simple_economy_operation");
+    keepOnlyCorpHqCard(hqState, hqCard);
+    hqState = apply(
+      hqState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(hqState, action) === "onr_v1_076_all-nighter" &&
+        action.payload?.serverId === "hq",
+    );
+    hqState = apply(hqState, "runner", (action) => action.type === "access_card");
+
+    const hqBonusActions = getLegalActions(hqState, "runner").filter(
+      (action) =>
+        action.type === "start_run" && action.payload?.bonusRunNoClick === true,
+    );
+    expect(hqBonusActions.length).toBeGreaterThan(0);
   });
 
   it("allows Kilroy and Romp to trash accessed HQ/R&D cards at no cost", () => {

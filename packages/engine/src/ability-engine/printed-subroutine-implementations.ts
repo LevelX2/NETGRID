@@ -41,6 +41,16 @@ export function printedSubroutineDefinitionForImplementation(
       type: "trash_installed_program",
     };
   }
+  if (subroutine.kind === "trash_program_unless_runner_pays") {
+    const amount = Math.max(0, Math.floor(subroutine.amount));
+    if (amount <= 0)
+      throw new Error("Pay-or-trash-program subroutines require a positive amount.");
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "trash_installed_program_unless_runner_pays",
+      amount,
+    };
+  }
   if (
     subroutine.kind === "prohibit_break_next_ice" ||
     subroutine.kind === "prohibit_break_and_jack_out_next_ice"
@@ -64,6 +74,14 @@ export function printedSubroutineDefinitionForImplementation(
       id: printedSubroutineId(definition, index, subroutine),
       type: "set_run_future_strength_bonus",
       amount,
+      ...(subroutine.runnerMayCancelOnPassingSource
+        ? {
+            runFutureStrengthCancelPaymentAmount: Math.max(
+              0,
+              Math.floor(subroutine.runnerMayCancelOnPassingSource.amount),
+            ),
+          }
+        : {}),
       ...(breakTags.length ? { breakTags } : {}),
     };
   }

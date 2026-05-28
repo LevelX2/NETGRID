@@ -451,7 +451,10 @@ export function payEncounterSubroutineRunCost(
   if (expectedPayment <= 0) return { handled: false, paid: false, amount: 0 };
   const declaredPayment = Math.max(
     0,
-    Math.floor(Number(legalAction?.payload?.payOrEndRunSubroutinePayment ?? 0)),
+    Math.floor(
+      Number(legalAction?.payload?.payOrEndRunSubroutinePayment ?? 0) +
+        Number(legalAction?.payload?.payOrTrashProgramSubroutinePayment ?? 0),
+    ),
   );
   const declaredCost = Math.max(
     0,

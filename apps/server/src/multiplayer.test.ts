@@ -24,6 +24,40 @@ function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
   expect(state.baseline.engineSchemaVersion).toBe(CURRENT_RULES_BASELINE.engineSchemaVersion);
 }
 
+describe("recent match results", () => {
+  it("lists the newest fully finished games without session tokens", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "recent-results-test", now: () => "2026-05-27T12:00:00.000Z" });
+    await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", displayName: "Ludwig", seed: "recent-results-finished" });
+    await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", displayName: "Offen", seed: "recent-results-active" });
+
+    const records = await storage.list();
+    const finished = records.find((record) => record.match.seed === "recent-results-finished");
+    if (!finished?.gameState) throw new Error("Missing finished test match");
+    finished.gameState.winner = "runner";
+    finished.match.status = "finished";
+    finished.match.winner = "runner";
+    finished.match.updatedAt = "2026-05-27T12:10:00.000Z";
+    await storage.save(finished);
+
+    const results = await service.listRecentGameResults(20);
+
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      matchId: finished.match.matchId,
+      matchStatus: "finished",
+      matchMode: "human_runner_vs_corp_ai",
+      winner: "runner",
+      runner: { displayName: "Ludwig" },
+      corp: { displayName: "Korp-KI" }
+    });
+    const serialized = JSON.stringify(results[0]);
+    expect(serialized).not.toContain("sessionToken");
+    expect(serialized).not.toContain("reconnectToken");
+    expect(serialized).not.toContain("tokenHash");
+  });
+});
+
 describe("V1.0.9 private internet hardening", () => {
   it("uses a LAN-capable default bind address for direct server starts", async () => {
     const previousPublicHost = process.env.NETGRID_PUBLIC_HOST;

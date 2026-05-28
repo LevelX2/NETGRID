@@ -23,6 +23,9 @@ export function traceSuccessEffectForCardImplementation(
   const marginTagEffects = effects.filter(
     (effect) => effect.kind === "add_tags_by_trace_margin_over_runner_link",
   );
+  const preventableDamageEffects = effects.filter(
+    (effect) => effect.kind === "preventable_damage",
+  );
   const endRunEffects = effects.filter((effect) => effect.kind === "end_run");
   const runLockEffects = effects.filter(
     (effect) => effect.kind === "runner_run_lock_until_action_paid",
@@ -43,6 +46,7 @@ export function traceSuccessEffectForCardImplementation(
     tagEffects.length === 1 &&
     counterEffects.length === 0 &&
     marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
     endRunEffects.length === 0 &&
     runLockEffects.length === 0 &&
     trashProgramEffects.length === 0 &&
@@ -59,6 +63,7 @@ export function traceSuccessEffectForCardImplementation(
     tagEffects.length === 0 &&
     counterEffects.length === 1 &&
     marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
     endRunEffects.length === 0 &&
     runLockEffects.length === 0 &&
     trashProgramEffects.length === 0 &&
@@ -79,6 +84,7 @@ export function traceSuccessEffectForCardImplementation(
     tagEffects.length === 1 &&
     counterEffects.length === 1 &&
     marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
     endRunEffects.length === 0 &&
     runLockEffects.length === 0 &&
     trashProgramEffects.length === 0 &&
@@ -103,6 +109,7 @@ export function traceSuccessEffectForCardImplementation(
     tagEffects.length === 0 &&
     counterEffects.length === 0 &&
     marginTagEffects.length === 1 &&
+    preventableDamageEffects.length === 0 &&
     endRunEffects.length === 0 &&
     runLockEffects.length === 0 &&
     trashProgramEffects.length === 0 &&
@@ -116,6 +123,27 @@ export function traceSuccessEffectForCardImplementation(
     tagEffects.length === 0 &&
     counterEffects.length === 0 &&
     marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 1 &&
+    endRunEffects.length === 0 &&
+    runLockEffects.length === 0 &&
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0 &&
+    trashResourceTagEffects.length === 0
+  ) {
+    const effect = preventableDamageEffects[0]!;
+    const amount = effect.amount;
+    if (effect.damageType !== "net")
+      throw new Error("Printed trace preventable damage supports Net damage only.");
+    if (!Number.isInteger(amount) || amount <= 0)
+      throw new Error("Trace Net damage success effect requires a positive amount.");
+    return { type: "net_damage", amount };
+  }
+  if (
+    tagEffects.length === 0 &&
+    counterEffects.length === 0 &&
+    marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
     endRunEffects.length === 1 &&
     runLockEffects.length === 1 &&
     trashProgramEffects.length === 0 &&
@@ -132,6 +160,7 @@ export function traceSuccessEffectForCardImplementation(
     tagEffects.length === 0 &&
     counterEffects.length === 0 &&
     marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
     endRunEffects.length === 1 &&
     runLockEffects.length === 1 &&
     trashProgramEffects.length === 1 &&
@@ -148,6 +177,7 @@ export function traceSuccessEffectForCardImplementation(
     tagEffects.length === 0 &&
     counterEffects.length === 0 &&
     marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
     endRunEffects.length === 1 &&
     runLockEffects.length === 0 &&
     trashProgramEffects.length === 0 &&
@@ -167,6 +197,7 @@ export function traceSuccessEffectForCardImplementation(
     tagEffects.length === 0 &&
     counterEffects.length === 0 &&
     marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
     endRunEffects.length === 0 &&
     runLockEffects.length === 0 &&
     trashProgramEffects.length === 0 &&

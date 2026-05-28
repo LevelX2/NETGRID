@@ -157,6 +157,7 @@ select {
 }
 
 .activeMatchWorkspace > .catalogPanel,
+.activeMatchWorkspace > .recentGamesPanel,
 .activeMatchWorkspace > .optionsPanel {
   width: min(1100px, 100%);
 }
@@ -507,7 +508,7 @@ select {
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   padding: 4px;
   border: 1px solid var(--line);
@@ -531,6 +532,7 @@ select {
 
 .entryContent > .catalogPanel,
 .entryContent > .deckPanel,
+.entryContent > .recentGamesPanel,
 .entryContent > .optionsPanel {
   width: 100%;
 }
@@ -930,6 +932,134 @@ select {
 
 .openLanNotice {
   margin: 0;
+}
+
+.recentGamesPanel {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 14px;
+}
+
+.recentGamesHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recentGamesHeader h2,
+.recentGamesHeader .eyebrow {
+  margin: 0;
+}
+
+.recentGamesHeader h2 {
+  margin-top: 4px;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.recentGamesList {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.recentGameCard {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field-bg);
+  padding: 12px;
+}
+
+.recentGamePrimary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+}
+
+.recentGameMatchup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+}
+
+.recentGameMatchup strong {
+  overflow-wrap: anywhere;
+}
+
+.recentGameMatchup span,
+.recentGameMatchup em,
+.recentGameMeta,
+.recentGameDecks,
+.recentGamesEmpty,
+.recentGamesTimestamp {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.recentGameMatchup em {
+  font-style: normal;
+}
+
+.recentGameMeta,
+.recentGameDecks,
+.recentGamesEmpty,
+.recentGamesTimestamp,
+.recentGamesNotice {
+  margin: 0;
+}
+
+.recentGameScore {
+  min-width: 96px;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  border: 1px solid var(--system-chip-border);
+  border-radius: 8px;
+  color: var(--system-chip-text);
+  background: var(--system-chip-bg);
+  padding: 8px 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.recentGameScore span {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.recentGameScore small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.recentGameDetails,
+.recentGameDecks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.recentGameDetails span,
+.recentGameDecks span {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  padding: 4px 7px;
 }
 
 .joinLinkField {
@@ -11385,6 +11515,7 @@ select,
   .setup.v07Entry .resumeSessionPanel,
   .setup.v07Entry .catalogPanel,
   .setup.v07Entry .deckPanel,
+  .setup.v07Entry .recentGamesPanel,
   .setup.v07Entry .optionsPanel {
     background: color-mix(in srgb, var(--panel), transparent 40%);
   }

@@ -66,6 +66,8 @@ Die verdeckten Proteus-Economy- und Bank-Resources als eigene CardImplementation
 
 Blockiert am 2026-05-24.
 
+Statusreferenz 2026-05-27: Die PRO011-Zielkarten dieser alten Phase-4b-Activity sind durch `docs/activities/done/act-2026-05-27-proteus-pro011-hidden-resource-economy-access-suite.md` umgesetzt. Diese Datei bleibt nur als historische Scope-/Blocker-Referenz bestehen und zählt nicht zusätzlich zum Implementierungsfortschritt.
+
 Die Activity kann nach 4a noch nicht vollständig umgesetzt werden, ohne neue, ungeschnittene Runtime-Fenster in den Kosten- und Access-/Encounter-Pfaden zu erzwingen.
 
 Blocker 1: `Chiba Bank Account`, `Liberated Savings Account` und `Swiss Bank Account` verlangen laut lokalem Kartentext Aktivierung "whenever you pay any cost or penalty". Der Vertrag `docs/releases/proteus/hidden-runner-resources-contract-2026-05-17.md` beschreibt dafür ein noch fehlendes Cost-/Penalty-Support-Fenster:

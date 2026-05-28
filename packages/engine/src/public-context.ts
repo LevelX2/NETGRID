@@ -455,6 +455,10 @@ export function publicContextForAction(
       "ambushPaymentAmount",
       "ambushPaidCost",
       "ambushPaymentDeclined",
+      "hiddenResourcePostMeatDamageDecision",
+      "discardedHqCount",
+      "corpHqAfter",
+      "randomCounterAfter",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -528,6 +532,8 @@ export function publicContextForAction(
       "postBidTraceLinkCostPaid",
       "postBidTraceLinkDelta",
       "postBidTraceLinkBonus",
+      "traceEffectCanceled",
+      "traceSuccessCancelCostPaid",
       "traceSuccessful",
       "tagsAdded",
       "cryingCounterCount",

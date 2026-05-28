@@ -763,8 +763,20 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/washington-d-c-city-grid.ts",
   "onr_proteus_011_brain-wash":
     "packages/engine/src/card-implementations/proteus/corp/ice/brain-wash.ts",
+  "onr_proteus_014_chihuahua":
+    "packages/engine/src/card-implementations/proteus/corp/ice/chihuahua.ts",
   "onr_proteus_015_colonel-failure":
     "packages/engine/src/card-implementations/proteus/corp/ice/colonel-failure.ts",
+  "onr_proteus_016_coyote":
+    "packages/engine/src/card-implementations/proteus/corp/ice/coyote.ts",
+  "onr_proteus_018_datacomb":
+    "packages/engine/src/card-implementations/proteus/corp/ice/datacomb.ts",
+  "onr_proteus_019_death-yo-yo":
+    "packages/engine/src/card-implementations/proteus/corp/ice/death-yo-yo.ts",
+  "onr_proteus_027_iceberg":
+    "packages/engine/src/card-implementations/proteus/corp/ice/iceberg.ts",
+  "onr_proteus_029_marionette":
+    "packages/engine/src/card-implementations/proteus/corp/ice/marionette.ts",
   "onr_proteus_031_minotaur":
     "packages/engine/src/card-implementations/proteus/corp/ice/minotaur.ts",
   "onr_proteus_032_misleading-access-menus":
@@ -773,12 +785,20 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/ice/mobile-barricade.ts",
   "onr_proteus_034_riddler":
     "packages/engine/src/card-implementations/proteus/corp/ice/riddler.ts",
+  "onr_proteus_037_scaffolding":
+    "packages/engine/src/card-implementations/proteus/corp/ice/scaffolding.ts",
   "onr_proteus_038_snowbank":
     "packages/engine/src/card-implementations/proteus/corp/ice/snowbank.ts",
+  "onr_proteus_042_tumblers":
+    "packages/engine/src/card-implementations/proteus/corp/ice/tumblers.ts",
+  "onr_proteus_043_twisty-passages":
+    "packages/engine/src/card-implementations/proteus/corp/ice/twisty-passages.ts",
   "onr_proteus_041_toughoniumtm-wall":
     "packages/engine/src/card-implementations/proteus/corp/ice/toughonium-wall.ts",
   "onr_proteus_044_walking-wall":
     "packages/engine/src/card-implementations/proteus/corp/ice/walking-wall.ts",
+  "onr_proteus_045_washed-up-solo-construct":
+    "packages/engine/src/card-implementations/proteus/corp/ice/washed-up-solo-construct.ts",
   "onr_proteus_047_credit-consolidation":
     "packages/engine/src/card-implementations/proteus/corp/operations/credit-consolidation.ts",
   "onr_proteus_048_data-sifters":
@@ -867,10 +887,26 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/hardware/eurocorpse-tm-spin-chip.ts",
   "onr_proteus_151_sunburst-cranial-interface":
     "packages/engine/src/card-implementations/proteus/runner/hardware/sunburst-cranial-interface.ts",
+  "onr_proteus_128_airport-locker":
+    "packages/engine/src/card-implementations/proteus/runner/resources/airport-locker.ts",
+  "onr_proteus_133_chiba-bank-account":
+    "packages/engine/src/card-implementations/proteus/runner/resources/chiba-bank-account.ts",
+  "onr_proteus_142_hq-mole":
+    "packages/engine/src/card-implementations/proteus/runner/resources/hq-mole.ts",
+  "onr_proteus_143_liberated-savings-account":
+    "packages/engine/src/card-implementations/proteus/runner/resources/liberated-savings-account.ts",
   "onr_proteus_146_precision-bribery":
     "packages/engine/src/card-implementations/proteus/runner/resources/precision-bribery.ts",
+  "onr_proteus_147_r-and-d-mole":
+    "packages/engine/src/card-implementations/proteus/runner/resources/r-and-d-mole.ts",
+  "onr_proteus_149_simulacrum":
+    "packages/engine/src/card-implementations/proteus/runner/resources/simulacrum.ts",
   "onr_proteus_150_streetware-distributor":
     "packages/engine/src/card-implementations/proteus/runner/resources/streetware-distributor.ts",
+  "onr_proteus_152_swiss-bank-account":
+    "packages/engine/src/card-implementations/proteus/runner/resources/swiss-bank-account.ts",
+  "onr_proteus_153_time-to-collect":
+    "packages/engine/src/card-implementations/proteus/runner/resources/time-to-collect.ts",
 };
 
 const CURRENT_RELEASE_CARD_DEFINITION_ID_PATTERN = /^onr_v1_\d{3}_/;

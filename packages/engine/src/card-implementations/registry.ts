@@ -386,6 +386,8 @@ import { doppelgangerAntibodyImplementation } from "./proteus/corp/assets/doppel
 import { pattelAntibodyImplementation } from "./proteus/corp/assets/pattel-antibody";
 import { stereogramAntibodyImplementation } from "./proteus/corp/assets/stereogram-antibody";
 import { proteusBrainWashImplementation } from "./proteus/corp/ice/brain-wash";
+import { proteusChihuahuaImplementation } from "./proteus/corp/ice/chihuahua";
+import { proteusCoyoteImplementation } from "./proteus/corp/ice/coyote";
 import { proteusCreditConsolidationImplementation } from "./proteus/corp/operations/credit-consolidation";
 import { proteusDataSiftersImplementation } from "./proteus/corp/operations/data-sifters";
 import { proteusManhuntImplementation } from "./proteus/corp/operations/manhunt";
@@ -395,6 +397,8 @@ import { proteusBugZapperImplementation } from "./proteus/corp/ice/bug-zapper";
 import { proteusCaryatidImplementation } from "./proteus/corp/ice/caryatid";
 import { proteusColonelFailureImplementation } from "./proteus/corp/ice/colonel-failure";
 import { proteusCreditBlocksImplementation } from "./proteus/corp/ice/credit-blocks";
+import { proteusDatacombImplementation } from "./proteus/corp/ice/datacomb";
+import { proteusDeathYoYoImplementation } from "./proteus/corp/ice/death-yo-yo";
 import { proteusDigicondaImplementation } from "./proteus/corp/ice/digiconda";
 import { proteusDogPileImplementation } from "./proteus/corp/ice/dog-pile";
 import { proteusFoodFightImplementation } from "./proteus/corp/ice/food-fight";
@@ -402,16 +406,22 @@ import { proteusGalateaImplementation } from "./proteus/corp/ice/galatea";
 import { proteusGatekeeperImplementation } from "./proteus/corp/ice/gatekeeper";
 import { proteusHomingMissileImplementation } from "./proteus/corp/ice/homing-missile";
 import { proteusHuntingPackImplementation } from "./proteus/corp/ice/hunting-pack";
+import { proteusIcebergImplementation } from "./proteus/corp/ice/iceberg";
 import { proteusLesserArcanaImplementation } from "./proteus/corp/ice/lesser-arcana";
+import { proteusMarionetteImplementation } from "./proteus/corp/ice/marionette";
 import { proteusMastermindImplementation } from "./proteus/corp/ice/mastermind";
 import { proteusMisleadingAccessMenusImplementation } from "./proteus/corp/ice/misleading-access-menus";
 import { proteusMobileBarricadeImplementation } from "./proteus/corp/ice/mobile-barricade";
 import { proteusSandstormImplementation } from "./proteus/corp/ice/sandstorm";
+import { proteusScaffoldingImplementation } from "./proteus/corp/ice/scaffolding";
 import { proteusSnowbankImplementation } from "./proteus/corp/ice/snowbank";
 import { proteusSphinx2006Implementation } from "./proteus/corp/ice/sphinx-2006";
 import { proteusSumo2008Implementation } from "./proteus/corp/ice/sumo-2008";
 import { proteusToughoniumWallImplementation } from "./proteus/corp/ice/toughonium-wall";
+import { proteusTumblersImplementation } from "./proteus/corp/ice/tumblers";
+import { proteusTwistyPassagesImplementation } from "./proteus/corp/ice/twisty-passages";
 import { proteusWalkingWallImplementation } from "./proteus/corp/ice/walking-wall";
+import { proteusWashedUpSoloConstructImplementation } from "./proteus/corp/ice/washed-up-solo-construct";
 import { proteusMinotaurImplementation } from "./proteus/corp/ice/minotaur";
 import { proteusRiddlerImplementation } from "./proteus/corp/ice/riddler";
 import { proteusLesleyMajorImplementation } from "./proteus/corp/upgrades/lesley-major";
@@ -462,10 +472,26 @@ import { proteusTaxmanImplementation } from "./proteus/runner/programs/taxman";
 import { proteusVienna22Implementation } from "./proteus/runner/programs/vienna-22";
 import { proteusViralPipelineImplementation } from "./proteus/runner/programs/viral-pipeline";
 import { proteusWreckingBallImplementation } from "./proteus/runner/programs/wrecking-ball";
+import { proteusAirportLockerImplementation } from "./proteus/runner/resources/airport-locker";
+import { proteusBackDoorToNetwatchImplementation } from "./proteus/runner/resources/back-door-to-netwatch";
 import { proteusPrecisionBriberyImplementation } from "./proteus/runner/resources/precision-bribery";
 import { proteusBackDoorToRivalsImplementation } from "./proteus/runner/resources/back-door-to-rivals";
+import { proteusBoltHoleImplementation } from "./proteus/runner/resources/bolt-hole";
+import { proteusChibaBankAccountImplementation } from "./proteus/runner/resources/chiba-bank-account";
+import { proteusCreditSubversionImplementation } from "./proteus/runner/resources/credit-subversion";
+import { proteusDeathFromAboveImplementation } from "./proteus/runner/resources/death-from-above";
+import { proteusExpendableFamilyMemberImplementation } from "./proteus/runner/resources/expendable-family-member";
+import { proteusGetReadyToRumbleImplementation } from "./proteus/runner/resources/get-ready-to-rumble";
+import { proteusHqMoleImplementation } from "./proteus/runner/resources/hq-mole";
+import { proteusLiberatedSavingsAccountImplementation } from "./proteus/runner/resources/liberated-savings-account";
+import { proteusMercenarySubcontractImplementation } from "./proteus/runner/resources/mercenary-subcontract";
+import { proteusRAndDMoleImplementation } from "./proteus/runner/resources/r-and-d-mole";
 import { proteusRunnerSenseiImplementation } from "./proteus/runner/resources/runner-sensei";
+import { proteusSimulacrumImplementation } from "./proteus/runner/resources/simulacrum";
 import { proteusStreetwareDistributorImplementation } from "./proteus/runner/resources/streetware-distributor";
+import { proteusSwissBankAccountImplementation } from "./proteus/runner/resources/swiss-bank-account";
+import { proteusTimeToCollectImplementation } from "./proteus/runner/resources/time-to-collect";
+import { proteusWiredSwitchboardImplementation } from "./proteus/runner/resources/wired-switchboard";
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
@@ -843,6 +869,8 @@ export const CARD_IMPLEMENTATIONS = [
   turbeauDelacroixImplementation,
   washingtonDcCityGridImplementation,
   proteusBrainWashImplementation,
+  proteusChihuahuaImplementation,
+  proteusCoyoteImplementation,
   proteusCreditConsolidationImplementation,
   proteusDataSiftersImplementation,
   proteusManhuntImplementation,
@@ -853,6 +881,8 @@ export const CARD_IMPLEMENTATIONS = [
   proteusCaryatidImplementation,
   proteusColonelFailureImplementation,
   proteusCreditBlocksImplementation,
+  proteusDatacombImplementation,
+  proteusDeathYoYoImplementation,
   proteusDigicondaImplementation,
   proteusDogPileImplementation,
   proteusFoodFightImplementation,
@@ -860,15 +890,21 @@ export const CARD_IMPLEMENTATIONS = [
   proteusGatekeeperImplementation,
   proteusHomingMissileImplementation,
   proteusHuntingPackImplementation,
+  proteusIcebergImplementation,
   proteusLesserArcanaImplementation,
+  proteusMarionetteImplementation,
   proteusMastermindImplementation,
   proteusMisleadingAccessMenusImplementation,
   proteusMobileBarricadeImplementation,
   proteusSandstormImplementation,
+  proteusScaffoldingImplementation,
   proteusSnowbankImplementation,
   proteusSphinx2006Implementation,
   proteusSumo2008Implementation,
+  proteusTumblersImplementation,
+  proteusTwistyPassagesImplementation,
   proteusWalkingWallImplementation,
+  proteusWashedUpSoloConstructImplementation,
   proteusMinotaurImplementation,
   proteusRiddlerImplementation,
   proteusLesleyMajorImplementation,
@@ -925,10 +961,26 @@ export const CARD_IMPLEMENTATIONS = [
   proteusVienna22Implementation,
   proteusViralPipelineImplementation,
   proteusWreckingBallImplementation,
+  proteusAirportLockerImplementation,
+  proteusBackDoorToNetwatchImplementation,
   proteusBackDoorToRivalsImplementation,
+  proteusBoltHoleImplementation,
+  proteusChibaBankAccountImplementation,
+  proteusCreditSubversionImplementation,
+  proteusDeathFromAboveImplementation,
+  proteusExpendableFamilyMemberImplementation,
+  proteusGetReadyToRumbleImplementation,
+  proteusHqMoleImplementation,
+  proteusLiberatedSavingsAccountImplementation,
+  proteusMercenarySubcontractImplementation,
   proteusPrecisionBriberyImplementation,
+  proteusRAndDMoleImplementation,
   proteusRunnerSenseiImplementation,
+  proteusSimulacrumImplementation,
   proteusStreetwareDistributorImplementation,
+  proteusSwissBankAccountImplementation,
+  proteusTimeToCollectImplementation,
+  proteusWiredSwitchboardImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 
 export const CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: Partial<

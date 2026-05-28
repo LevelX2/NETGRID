@@ -143,6 +143,62 @@ describe("trace orchestration", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
+  it("opens a trace success cancel window from a real successful trace result", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const backDoorId = "back_door" as CardInstanceId;
+    const backDoorDefinition = definition(
+      "onr_proteus_129_back-door-to-netwatch",
+      "resource",
+    );
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        [backDoorId]: instance(backDoorId, backDoorDefinition.id, "runner"),
+      },
+      runnerResources: [backDoorId],
+    });
+    state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
+      corpBid: 0,
+      traceStrength: 5,
+      runnerLink: 1,
+      baseTraceStrength: 5,
+      successEffect: { type: "net_damage", amount: 1 },
+    });
+    state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
+    const calls = testCalls();
+    const action = actionFor("runner", "resolve_choice");
+
+    resolveTraceChoice(
+      testHost(
+        state,
+        {
+          [sourceDefinition.id]: sourceDefinition,
+          [backDoorDefinition.id]: backDoorDefinition,
+        },
+        calls,
+        { successCancelSourceId: backDoorId },
+      ),
+      action,
+      playerChoice("bid_0"),
+    );
+
+    expect(calls.followups).toEqual([]);
+    expect(state.trace).toMatchObject({ status: "trace_success_cancel" });
+    expect(state.pendingChoice).toMatchObject({
+      source: "trace_success_cancel:trace_1",
+      side: "runner",
+      visibility: "hidden_info_barrier",
+    });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toContain(
+      `trace_success_cancel_${backDoorId}`,
+    );
+    expect(action.payload).toMatchObject({
+      traceStep: "runner_bid",
+      traceSuccessCancelChoiceOpened: true,
+    });
+  });
+
   it("resolves post-bid link choices through existing runner trace payment", () => {
     const sourceId = "source_1" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");
@@ -314,6 +370,7 @@ function instance(
 function minimalState(input: {
   cardInstances: Record<CardInstanceId, CardInstance>;
   runnerPrograms?: CardInstanceId[];
+  runnerResources?: CardInstanceId[];
 }): GameState {
   return {
     stateVersion: 1,
@@ -332,7 +389,11 @@ function minimalState(input: {
       tags: 0,
       memoryUsed: 0,
       memoryLimit: 4,
-      rig: { programs: [...(input.runnerPrograms ?? [])], hardware: [], resources: [] },
+      rig: {
+        programs: [...(input.runnerPrograms ?? [])],
+        hardware: [],
+        resources: [...(input.runnerResources ?? [])],
+      },
     },
     corp: {
       clicks: 3,
@@ -443,6 +504,9 @@ function testHost(
   calls = testCalls(),
   options: {
     postBidLinkSourceId?: CardInstanceId;
+    postBidLinkAmount?: number;
+    postBidLinkTap?: boolean;
+    successCancelSourceId?: CardInstanceId;
     parisTraceDefinitionId?: CardDefinitionId;
     rezzedCorpRootCardIds?: CardInstanceId[];
   } = {},
@@ -494,6 +558,25 @@ function testHost(
         ...state.runner.rig.resources,
       ],
       activatedTraceAbilities: (_definition, timing) => {
+        if (
+          timing === "trace_success_cancel_window" &&
+          options.successCancelSourceId
+        ) {
+          return [
+            {
+              index: 0,
+              ability: {
+                kind: "activated",
+                timing: "trace_success_cancel_window",
+                costs: [
+                  { kind: "credit", amount: 3 },
+                  { kind: "tap_source", amount: 1 },
+                ],
+                effects: [],
+              } as ActivatedCardAbilityImplementation,
+            },
+          ];
+        }
         if (timing !== "trace_post_bid_link_window") return [];
         if (!options.postBidLinkSourceId) return [];
         return [
@@ -502,11 +585,13 @@ function testHost(
             ability: {
               kind: "activated",
               timing: "trace_post_bid_link_window",
-              costs: [{ kind: "credit", amount: 1 }],
+              costs: options.postBidLinkTap
+                ? [{ kind: "tap_source", amount: 1 }]
+                : [{ kind: "credit", amount: 1 }],
               effects: [
                 {
                   kind: "increase_trace_link",
-                  amount: 1,
+                  amount: options.postBidLinkAmount ?? 1,
                   visibility: "public",
                 },
               ],

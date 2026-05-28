@@ -13,6 +13,7 @@ import { SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID } from "../../mechanics/longtail-
 import { quoteStealCostForAccessedAgenda } from "../../ability-engine/steal-cost-modifiers";
 import { quoteAccessTrashCost } from "../../ability-engine/trash-cost-modifiers";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
@@ -186,6 +187,7 @@ export function buildRunnerAccessActions(
   }
   if (definition.type === "asset" || definition.type === "upgrade") {
     const legalActions: LegalAction[] = [];
+    legalActions.push(...hiddenResourceCurrentAccessTrashActions(host, run));
     const trashCost = effectiveAccessTrashCost(host, run.accessedCardId);
     if (freeTrashEnabled) {
       legalActions.push(
@@ -273,6 +275,7 @@ export function buildRunnerAccessActions(
     return {
       handled: true,
       legalActions: [
+        ...hiddenResourceCurrentAccessTrashActions(host, run),
         host.actions.buildLegalAction(
           "runner",
           "trash_accessed_card",
@@ -302,6 +305,7 @@ export function buildRunnerAccessActions(
   return {
     handled: true,
     legalActions: [
+      ...hiddenResourceCurrentAccessTrashActions(host, run),
       host.actions.buildLegalAction(
         "runner",
         "decline_trash",
@@ -310,6 +314,46 @@ export function buildRunnerAccessActions(
       ),
     ],
   };
+}
+
+function hiddenResourceCurrentAccessTrashActions(
+  host: RunnerAccessActionHost,
+  run: ActiveRun,
+): LegalAction[] {
+  const accessedCardId = run.accessedCardId;
+  if (!accessedCardId) return [];
+  const accessedDefinition = host.cards.definitionFor(accessedCardId);
+  if (accessedDefinition.type === "agenda") return [];
+  return host.state.runner.rig.resources
+    .slice()
+    .sort()
+    .flatMap((sourceCardId) => {
+      const sourceInstance = host.cards.cardInstanceFor(sourceCardId);
+      if (sourceInstance.tapped === true) return [];
+      const sourceDefinition = host.cards.definitionFor(sourceCardId);
+      const utility =
+        cardImplementationForDefinitionId(sourceDefinition.id)?.runnerUtilityLongtail;
+      if (utility?.kind !== "hidden_resource_current_access_free_trash")
+        return [];
+      if (host.state.runner.credits < utility.cost.amount) return [];
+      return [
+        host.actions.buildLegalAction(
+          "runner",
+          "trash_accessed_card",
+          `${sourceDefinition.title}: aktuelle Karte kostenlos trashen`,
+          accessedCardId,
+          [{ credits: utility.cost.amount }],
+          {
+            cardId: accessedCardId,
+            accessTrashCostOverride: 0,
+            freeAccessTrash: true,
+            hiddenResourceCurrentAccessTrash: true,
+            hiddenResourceSourceCardId: sourceCardId,
+            hiddenResourceSourceDefinitionId: sourceDefinition.id,
+          },
+        ),
+      ];
+    });
 }
 
 export function canFreeTrashCurrentAccessCard(

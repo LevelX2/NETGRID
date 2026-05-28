@@ -23,6 +23,7 @@ import {
   type ApiMatchStartLobbyPayload,
   type ApiMatchStatus,
   type ApiSeriesPlayerSlot,
+  type ApiRecentGameResult,
   type ApiSeriesResultSummary,
   type ApiSeriesStatus,
   type ApiServicePayload,
@@ -381,6 +382,8 @@ export type OpenMatchListEntry = {
   createdAt: string;
   ageSeconds: number;
 };
+
+export type RecentGameResultEntry = ApiRecentGameResult;
 
 export type ReplayStateHashCheck = {
   ok: boolean;
@@ -1693,6 +1696,18 @@ export class MultiplayerService {
       })
       .filter((entry): entry is OpenMatchListEntry => Boolean(entry))
       .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
+  async listRecentGameResults(limit = 20): Promise<RecentGameResultEntry[]> {
+    const records = this.storage.list ? await this.storage.list() : [];
+    const normalizedLimit = Number.isFinite(limit) ? Math.floor(limit) : 20;
+    const cappedLimit = Math.max(1, Math.min(50, normalizedLimit));
+    return records
+      .filter((record) => record.match.status === "finished" && Boolean(record.gameState?.winner))
+      .sort((left, right) => right.match.updatedAt.localeCompare(left.match.updatedAt))
+      .slice(0, cappedLimit)
+      .map((record) => recentGameResultEntryFor(record))
+      .filter((entry): entry is RecentGameResultEntry => Boolean(entry));
   }
 
   async loadReplayView(matchId: string, perspective: ReplayPerspective): Promise<{ ok: true; replay: ReplayView } | { ok: false; error: SafeErrorPayload }> {
@@ -3205,6 +3220,64 @@ function resultSummaryFor(record: StoredMatch, viewerSide: Side, finalStateHash:
     ...(record.lifecycleResult?.finalEngineStateHash ? { finalEngineStateHash: record.lifecycleResult.finalEngineStateHash } : {}),
     ...(record.match.series ? { series: seriesSummaryFor(record, viewerSide) } : {})
   };
+}
+
+function recentGameResultEntryFor(record: StoredMatch): RecentGameResultEntry | undefined {
+  const state = record.gameState;
+  const winner = state?.winner;
+  if (!state || !winner || record.match.status !== "finished") return undefined;
+  const runnerAgendaPoints = getPlayerView(state, "runner").own.agendaPoints;
+  const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
+  const actionEvents = record.eventLog.filter((event) => event.publicPayload.type !== "game_created");
+  const finalStateHash = record.lifecycleResult?.finalEngineStateHash ?? hashState(state);
+  return {
+    matchId: record.match.matchId,
+    matchStatus: "finished",
+    matchMode: record.match.mode,
+    matchFormat: record.match.settings.matchFormat,
+    finishedAt: record.match.updatedAt,
+    startedAt: record.match.createdAt,
+    winner,
+    ...(winner === "runner" || winner === "corp" ? { winnerSide: winner } : {}),
+    reason: resultReason(state, winner, runnerAgendaPoints, corpAgendaPoints, record.match.settings.agendaPointsToWin),
+    runner: {
+      displayName: publicDisplayNameForSide(record, "runner"),
+      agendaPoints: runnerAgendaPoints,
+      ...(record.match.deckSetup.runner.deckName ? { deckName: record.match.deckSetup.runner.deckName } : {})
+    },
+    corp: {
+      displayName: publicDisplayNameForSide(record, "corp"),
+      agendaPoints: corpAgendaPoints,
+      ...(record.match.deckSetup.corp.deckName ? { deckName: record.match.deckSetup.corp.deckName } : {})
+    },
+    actionCount: actionEvents.length,
+    runCount: actionEvents.filter((event) => event.publicPayload.type === "start_run").length,
+    finalStateHash,
+    ...(record.match.series
+      ? {
+          series: {
+            seriesId: record.match.series.seriesId,
+            gameNumber: record.match.series.gameNumber,
+            gamesPlanned: record.match.series.gamesPlanned,
+            status: record.match.series.status
+          }
+        }
+      : {})
+  };
+}
+
+function publicDisplayNameForSide(record: StoredMatch, side: Side): string {
+  const sessionName = record.sessions.find((session) => session.side === side)?.displayName?.trim();
+  if (sessionName) return sessionName;
+  const aiSide = aiSideForMode(record.match.mode);
+  if (aiSide === side) return side === "runner" ? "Runner-KI" : "Korp-KI";
+  return side === "runner" ? "Runner" : "Korp";
+}
+
+function aiSideForMode(mode: MatchMode): Side | undefined {
+  if (mode === "human_runner_vs_corp_ai") return "corp";
+  if (mode === "human_corp_vs_runner_ai") return "runner";
+  return undefined;
 }
 
 function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSummary {

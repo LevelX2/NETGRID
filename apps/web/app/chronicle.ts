@@ -595,6 +595,24 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(temporaryInstall ? ["Temporär"] : []), ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
         break;
       }
+      if (hiddenZoneAction === "p3_37_search_stack_to_grip") {
+        const revealedTitle =
+          titleForDefinitionId(stringValue(payload.publicRevealDefinitionId)) ??
+          titleForDefinitionId(cardDefinitionId) ??
+          cardTitle;
+        const isPublicReveal =
+          stringValue(payload.publicRevealKind) === "reveal" ||
+          Boolean(stringValue(payload.publicRevealDefinitionId)) ||
+          Boolean(cardDefinitionId);
+        category = isPublicReveal ? "card" : "hidden";
+        importance = "important";
+        visibility = isPublicReveal ? "public" : "redacted";
+        title = isPublicReveal
+          ? phrase(subject, `${revealedTitle ?? "eine Karte"} aus dem Stack vorgezeigt und auf die Hand genommen`)
+          : phrase(subject, `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack auf die Hand genommen`);
+        chips.push("Stack", isPublicReveal ? "Vorgezeigt" : "Verdeckt", "Hand", ...(payload.shufflePerformed === true || payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
       if (hiddenZoneAction === "v1911_aujourdoui_top5") {
         const revealedTitles = titlesForDefinitionIds(stringValue(payload.publicRevealDefinitionIds));
         const selectedCount = numberValue(payload.selectedCount) ?? revealedTitles.length;
@@ -1469,7 +1487,58 @@ export function formatChronicleEffectItems(event: PublicGameEvent, side: Side): 
     .filter((effect) => !shouldMergeCardResolverEffect(event, effect))
     .map((effect, index) => formatChronicleEffect(event, effect, index, side));
   const payloadItem = endTurnCreditPayoutChronicleItem(event, side);
-  return payloadItem ? [payloadItem, ...effectItems] : effectItems;
+  const traceHardwareWreckerItem = traceHardwareWreckerChronicleItem(event, side);
+  return [
+    ...(payloadItem ? [payloadItem] : []),
+    ...(traceHardwareWreckerItem ? [traceHardwareWreckerItem] : []),
+    ...effectItems,
+  ];
+}
+
+function traceHardwareWreckerChronicleItem(event: PublicGameEvent, side: Side): ChronicleItem | undefined {
+  const payload = event.publicPayload ?? {};
+  if (
+    payload.traceSuccessful !== true ||
+    payload.traceSuccessEffect !== "hardware_trash_meat_damage_end_run"
+  )
+    return undefined;
+  const actor = sideValue(payload.actor);
+  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  const sourceTitle = titleForDefinitionId(sourceDefinitionId) ?? stringValue(payload.title) ?? "Karteneffekt";
+  const trashedCount = numberValue(payload.trashedCount) ?? 0;
+  const trashedTitle = titleForDefinitionId(stringValue(payload.trashedCardDefinitionId));
+  const damageAmount = numberValue(payload.damageAmount) ?? 0;
+  const damageType = damageTypeLabel(stringValue(payload.damageType) ?? "meat");
+  const trashText = trashedTitle
+    ? `${trashedTitle} getrasht`
+    : trashedCount > 0
+      ? `${trashedCount} Hardware getrasht`
+      : "keine Hardware getrasht";
+  const damageText = damageAmount > 0
+    ? `${damageAmount} ${damageType} verursacht`
+    : `kein ${damageType} verursacht`;
+  return {
+    id: `${event.eventId}:trace-hardware-wrecker`,
+    category: "danger",
+    importance: "critical",
+    visibility: "public",
+    ...(actor ? { actor } : {}),
+    title: ensurePeriod(`${sourceTitle}: ${trashText} und ${damageText}`),
+    description: ensurePeriod(`Der erfolgreiche Trace beendet den Run${payload.damageCannotBePrevented === true ? "; der Schaden kann nicht verhindert werden" : ""}`),
+    chips: uniqueChips([
+      ...baseChips(actor, false),
+      sourceTitle,
+      "Trace-Erfolg",
+      trashedTitle ?? (trashedCount > 0 ? `${trashedCount} Hardware` : "Keine Hardware"),
+      `${damageAmount} ${damageType}`,
+      ...(payload.damageCannotBePrevented === true ? ["Nicht verhinderbar"] : []),
+      "Run endet",
+    ]),
+    ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
+    cardTitle: sourceTitle,
+    cardDetailLines: [],
+    groupLabel: groupLabelFor("run", actor, undefined, displayServerLabel(stringValue(payload.serverLabel)), undefined),
+  };
 }
 
 export function shouldSuppressChronicleEventItem(event: PublicGameEvent): boolean {
@@ -1703,8 +1772,17 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       break;
     case "rez_card":
       category = "card";
-      importance = effect.reason === "region_install" || effect.reason === "on_score" ? "important" : "normal";
-      title = `${cardTitle ?? sourceTitle ?? "Eine Karte"} wurde${effect.reason === "region_install" ? " sofort" : ""} gerezzt`;
+      importance =
+        effect.reason === "region_install" ||
+        effect.reason === "install_rez" ||
+        effect.reason === "on_score"
+          ? "important"
+          : "normal";
+      title = `${cardTitle ?? sourceTitle ?? "Eine Karte"} wurde${
+        effect.reason === "region_install" || effect.reason === "install_rez"
+          ? " sofort"
+          : ""
+      } gerezzt`;
       chips.push("Rez", "Automatisch");
       break;
     case "steal_agenda":

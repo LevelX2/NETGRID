@@ -107,6 +107,37 @@ export type ApiGameResultSummary = {
   series?: ApiSeriesResultSummary;
 };
 
+export type ApiRecentGameResult = {
+  matchId: string;
+  matchStatus: Extract<ApiMatchStatus, "finished">;
+  matchMode: ApiMatchMode;
+  matchFormat: ApiMatchFormat;
+  finishedAt: string;
+  startedAt: string;
+  winner: Winner;
+  winnerSide?: Side;
+  reason: ApiGameResultReason;
+  runner: {
+    displayName: string;
+    agendaPoints: number;
+    deckName?: string;
+  };
+  corp: {
+    displayName: string;
+    agendaPoints: number;
+    deckName?: string;
+  };
+  actionCount: number;
+  runCount: number;
+  finalStateHash: string;
+  series?: {
+    seriesId: string;
+    gameNumber: number;
+    gamesPlanned: number;
+    status: ApiSeriesStatus;
+  };
+};
+
 export type ApiLifecycleResultSummary = {
   status: Extract<ApiMatchStatus, "cancelled" | "abandoned" | "forfeited" | "finished">;
   reason: "cancel" | "leave" | "forfeit" | "time_expired";

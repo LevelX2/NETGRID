@@ -56,6 +56,8 @@ export type EncounterResolutionResult = {
   handled: boolean;
   paidPayOrEndRunIndexes?: Set<number>;
   payOrEndRunIndexesForThisContinue?: Set<number>;
+  paidPayOrTrashProgramIndexes?: Set<number>;
+  payOrTrashProgramIndexesForThisContinue?: Set<number>;
   stateChanged?: boolean;
 };
 
@@ -92,6 +94,12 @@ export function preparePayOrEndRunSubroutinePayment(
         subroutines[index]?.type === "end_the_run_unless_runner_pays",
     ),
   );
+  const payOrTrashProgramIndexesForThisContinue = new Set(
+    encounterSubroutineIndexesForNextContinue(run, subroutines).filter(
+      (index) =>
+        subroutines[index]?.type === "trash_installed_program_unless_runner_pays",
+    ),
+  );
   const expectedSubroutineIds =
     typeof legalAction?.payload?.encounterSubroutineIds === "string"
       ? String(legalAction.payload.encounterSubroutineIds)
@@ -107,6 +115,7 @@ export function preparePayOrEndRunSubroutinePayment(
       throw new Error("Die Encounter-Subroutinen sind nicht mehr gueltig.");
   }
   const paidPayOrEndRunIndexes = new Set<number>();
+  const paidPayOrTrashProgramIndexes = new Set<number>();
   const payOrEndRunIndexPayload =
     typeof legalAction?.payload?.payOrEndRunSubroutineIndexes === "string"
       ? String(legalAction.payload.payOrEndRunSubroutineIndexes)
@@ -117,6 +126,17 @@ export function preparePayOrEndRunSubroutinePayment(
     if (!Number.isInteger(index) || index < 0)
       throw new Error("Die Pay-or-End-the-Run-Subroutine ist ungueltig.");
     paidPayOrEndRunIndexes.add(index);
+  }
+  const payOrTrashProgramIndexPayload =
+    typeof legalAction?.payload?.payOrTrashProgramSubroutineIndexes === "string"
+      ? String(legalAction.payload.payOrTrashProgramSubroutineIndexes)
+      : "";
+  for (const rawIndex of payOrTrashProgramIndexPayload.split(",")) {
+    if (!rawIndex) continue;
+    const index = Number(rawIndex);
+    if (!Number.isInteger(index) || index < 0)
+      throw new Error("Die Pay-or-Trash-Program-Subroutine ist ungueltig.");
+    paidPayOrTrashProgramIndexes.add(index);
   }
   let expectedPayOrEndRunPayment = 0;
   for (const index of paidPayOrEndRunIndexes) {
@@ -134,16 +154,35 @@ export function preparePayOrEndRunSubroutinePayment(
       Math.floor(subroutine.amount ?? 0),
     );
   }
+  let expectedPayOrTrashProgramPayment = 0;
+  for (const index of paidPayOrTrashProgramIndexes) {
+    const subroutine = subroutines[index];
+    if (
+      !subroutine ||
+      subroutine.type !== "trash_installed_program_unless_runner_pays" ||
+      run.brokenSubroutineIndexes.includes(index) ||
+      run.resolvedSubroutineIndexes.includes(index)
+    ) {
+      throw new Error("Die Pay-or-Trash-Program-Subroutine ist nicht mehr gueltig.");
+    }
+    expectedPayOrTrashProgramPayment += Math.max(
+      0,
+      Math.floor(subroutine.amount ?? 0),
+    );
+  }
   payEncounterSubroutineRunCost(
     runDurationPaymentHost(host.state),
     legalAction,
-    expectedPayOrEndRunPayment,
+    expectedPayOrEndRunPayment + expectedPayOrTrashProgramPayment,
   );
   return {
     handled: true,
     paidPayOrEndRunIndexes,
     payOrEndRunIndexesForThisContinue,
-    stateChanged: expectedPayOrEndRunPayment > 0,
+    paidPayOrTrashProgramIndexes,
+    payOrTrashProgramIndexesForThisContinue,
+    stateChanged:
+      expectedPayOrEndRunPayment > 0 || expectedPayOrTrashProgramPayment > 0,
   };
 }
 
@@ -261,11 +300,27 @@ export function resolveRunDurationMarkerSubroutine(
     run.futureEncounterIceStrengthBonus =
       Math.max(0, Math.floor(run.futureEncounterIceStrengthBonus ?? 0)) +
       amount;
+    const cancelPayment = subroutine.runFutureStrengthCancelPaymentAmount;
+    if (cancelPayment !== undefined && run.encounteredIceId) {
+      run.postPassCancellableFutureIceStrength = {
+        sourceCardInstanceId: run.encounteredIceId,
+        sourceDefinitionId: definition.id,
+        passedIceId: run.encounteredIceId,
+        serverId: run.attackedServerId,
+        amount,
+        paymentAmount: Math.max(0, Math.floor(cancelPayment)),
+      };
+    }
     return {
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["futureEncounterIceStrengthBonus"],
+      setRunMarkers: [
+        "futureEncounterIceStrengthBonus",
+        ...(cancelPayment !== undefined
+          ? ["postPassCancellableFutureIceStrength"]
+          : []),
+      ],
       stateChanged: amount > 0,
     };
   }

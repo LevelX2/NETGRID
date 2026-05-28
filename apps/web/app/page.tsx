@@ -70,6 +70,7 @@ import type {
   ApiMatchStartLobbyPayload,
   ApiMatchStatus,
   ApiPlayerClockSnapshot,
+  ApiRecentGameResult,
   ApiSeriesResultSummary,
   ApiServerMessage,
   ApiSidePayload,
@@ -142,6 +143,9 @@ import {
   cardChoiceUsesReadableCards,
   counterDisplayTooltipText,
   counterDisplaysForRendering,
+  hostedOnDetailLabel,
+  selectedSubtypeDetailLabel,
+  selectedTargetDetailLabel,
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
@@ -337,8 +341,8 @@ type ChronicleDetailMode = "simple" | "medium" | "full";
 type ColorScheme = "black" | "white";
 type ResourceStripMode = "auto" | "on" | "off";
 type ActionPanelMode = "docked" | "floating";
-type EntryTab = "play" | "catalog" | "decks" | "options";
-type ActiveMatchWorkspace = "game" | "catalog" | "decks" | "options";
+type EntryTab = "play" | "catalog" | "decks" | "recent" | "options";
+type ActiveMatchWorkspace = "game" | "catalog" | "decks" | "recent" | "options";
 type DeckSideFilter = Side | "all";
 type CueAutoDismissMs = 0 | 1500 | 2500 | 4000 | 6000;
 type CardTooltipHoverDelayMs = (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
@@ -459,6 +463,11 @@ type OpenMatchEntry = {
 
 type OpenMatchesResponse = {
   matches?: OpenMatchEntry[];
+  error?: { message: string };
+};
+
+type RecentGameResultsResponse = {
+  results?: ApiRecentGameResult[];
   error?: { message: string };
 };
 
@@ -2131,6 +2140,10 @@ export default function Page() {
   const [openLanLoading, setOpenLanLoading] = useState(false);
   const [openLanError, setOpenLanError] = useState("");
   const [openLanUpdatedAt, setOpenLanUpdatedAt] = useState<string | null>(null);
+  const [recentGameResults, setRecentGameResults] = useState<ApiRecentGameResult[]>([]);
+  const [recentGameResultsLoading, setRecentGameResultsLoading] = useState(false);
+  const [recentGameResultsError, setRecentGameResultsError] = useState("");
+  const [recentGameResultsUpdatedAt, setRecentGameResultsUpdatedAt] = useState<string | null>(null);
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [payload, setPayload] = useState<ClientPayload | null>(null);
   const [lobby, setLobby] = useState<LobbyClientPayload | null>(null);
@@ -3687,6 +3700,28 @@ export default function Page() {
     }
   };
 
+  const refreshRecentGameResults = async () => {
+    setRecentGameResultsLoading(true);
+    setRecentGameResultsError("");
+    try {
+      const response = await fetchRecentGameResults();
+      if (response.error) {
+        setRecentGameResults([]);
+        setRecentGameResultsError(response.error.message);
+        setRecentGameResultsUpdatedAt(new Date().toISOString());
+        return;
+      }
+      setRecentGameResults(response.results ?? []);
+      setRecentGameResultsUpdatedAt(new Date().toISOString());
+    } catch (error) {
+      setRecentGameResults([]);
+      setRecentGameResultsError(serverErrorNotice(error, "Letzte Spiele konnten nicht geladen werden."));
+      setRecentGameResultsUpdatedAt(new Date().toISOString());
+    } finally {
+      setRecentGameResultsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (mode !== "join" || session || recoveryTabSelected) return;
     void refreshOpenLanMatches();
@@ -3697,6 +3732,16 @@ export default function Page() {
       window.clearInterval(timer);
     };
   }, [mode, recoveryTabSelected, session?.matchId]);
+
+  useEffect(() => {
+    if (entryTab !== "recent" || session) return;
+    void refreshRecentGameResults();
+  }, [entryTab, session?.matchId]);
+
+  useEffect(() => {
+    if (activeMatchWorkspace !== "recent" || !session) return;
+    void refreshRecentGameResults();
+  }, [activeMatchWorkspace, session?.matchId]);
 
   const updateJoinLinkInput = (value: string) => {
     setJoinLinkInput(value);
@@ -4725,6 +4770,10 @@ export default function Page() {
               <Layers3 size={16} />
               Deck-Editor
             </button>
+            <button className={`entryTab ${entryTab === "recent" ? "active" : ""}`} onClick={() => setEntryTab("recent")} type="button" aria-current={entryTab === "recent" ? "page" : undefined}>
+              <Award size={16} />
+              Letzte Spiele
+            </button>
             <button className={`entryTab ${entryTab === "options" ? "active" : ""}`} onClick={() => setEntryTab("options")} type="button" aria-current={entryTab === "options" ? "page" : undefined}>
               <SlidersHorizontal size={16} />
               Optionen
@@ -5282,6 +5331,15 @@ export default function Page() {
             onImportText={setDeckImportText}
             onImport={importLocalDeck}
           />
+          ) : null}
+          {entryTab === "recent" ? (
+            <RecentGamesPanel
+              results={recentGameResults}
+              loading={recentGameResultsLoading}
+              error={recentGameResultsError}
+              updatedAt={recentGameResultsUpdatedAt}
+              onRefresh={refreshRecentGameResults}
+            />
           ) : null}
           {entryTab === "options" ? (
             <OptionsPanel
@@ -6182,6 +6240,15 @@ export default function Page() {
               onImport={importLocalDeck}
             />
           ) : null}
+          {activeMatchWorkspace === "recent" ? (
+            <RecentGamesPanel
+              results={recentGameResults}
+              loading={recentGameResultsLoading}
+              error={recentGameResultsError}
+              updatedAt={recentGameResultsUpdatedAt}
+              onRefresh={refreshRecentGameResults}
+            />
+          ) : null}
           {activeMatchWorkspace === "options" ? (
             <OptionsPanel
               actionCueAutoDismissMs={actionCueAutoDismissMs}
@@ -6401,12 +6468,14 @@ function ActiveMatchWorkspaceNav({
       ? [
           { id: "catalog", label: "Katalog", title: "Katalog öffnen", icon: <ListFilter size={16} /> },
           { id: "decks", label: "Decks", title: "Decks öffnen", icon: <Layers3 size={16} /> },
+          { id: "recent", label: "Letzte Spiele", title: "Letzte Spiele öffnen", icon: <Award size={16} /> },
           { id: "options", label: "Optionen", title: "Optionen öffnen", icon: <SlidersHorizontal size={16} /> }
         ]
       : [
           { id: "game", label: "Aktives Spiel", title: "Zurück zum aktiven Spiel", icon: <Play size={16} /> },
           { id: "catalog", label: "Katalog", title: "Katalog öffnen", icon: <ListFilter size={16} /> },
           { id: "decks", label: "Decks", title: "Decks öffnen", icon: <Layers3 size={16} /> },
+          { id: "recent", label: "Letzte Spiele", title: "Letzte Spiele öffnen", icon: <Award size={16} /> },
           { id: "options", label: "Optionen", title: "Optionen öffnen", icon: <SlidersHorizontal size={16} /> }
         ];
 
@@ -7006,6 +7075,114 @@ function seriesStatusText(series: SeriesResultSummary, viewerLabel = "Du", oppon
     return "Die Matchserie endet unentschieden.";
   }
   return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";
+}
+
+function RecentGamesPanel({
+  results,
+  loading,
+  error,
+  updatedAt,
+  onRefresh
+}: {
+  results: ApiRecentGameResult[];
+  loading: boolean;
+  error: string;
+  updatedAt: string | null;
+  onRefresh: () => void;
+}) {
+  return (
+    <section className="recentGamesPanel" aria-label="Letzte Spiele" data-testid="recent-games-panel">
+      <div className="recentGamesHeader">
+        <div>
+          <p className="eyebrow">Letzte Spiele</p>
+          <h2>Abgeschlossene Ergebnisse</h2>
+        </div>
+        <button className="button" onClick={onRefresh} type="button" disabled={loading} data-testid="refresh-recent-games">
+          <RotateCcw size={14} />
+          Aktualisieren
+        </button>
+      </div>
+      {error ? (
+        <p className="notice recentGamesNotice" role="status">
+          {error}
+        </p>
+      ) : null}
+      {results.length === 0 ? (
+        <p className="recentGamesEmpty">{loading ? "Lade letzte Spiele ..." : "Noch keine vollständig beendeten Spiele gefunden."}</p>
+      ) : (
+        <ol className="recentGamesList">
+          {results.map((result) => (
+            <li key={result.matchId}>
+              <RecentGameResultCard result={result} />
+            </li>
+          ))}
+        </ol>
+      )}
+      {updatedAt ? <p className="recentGamesTimestamp">Zuletzt aktualisiert: {formatLobbyTime(updatedAt)}</p> : null}
+    </section>
+  );
+}
+
+function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
+  const winnerName = result.winner === "draw" ? "Unentschieden" : result.winner === "runner" ? result.runner.displayName : result.corp.displayName;
+  const scoreText = `${result.runner.agendaPoints} : ${result.corp.agendaPoints}`;
+  return (
+    <article className="recentGameCard">
+      <div className="recentGamePrimary">
+        <div>
+          <p className="recentGameMatchup">
+            <strong>{result.runner.displayName}</strong>
+            <span>Runner</span>
+            <em>gegen</em>
+            <strong>{result.corp.displayName}</strong>
+            <span>Korp</span>
+          </p>
+          <p className="recentGameMeta">
+            {formatRecentGameDate(result.finishedAt)} · {matchModeLabel(result.matchMode)} · {matchFormatLabel(result.matchFormat)}
+            {result.series ? ` · Spiel ${result.series.gameNumber}/${result.series.gamesPlanned}` : ""}
+          </p>
+        </div>
+        <div className="recentGameScore" aria-label={`Endstand Runner ${result.runner.agendaPoints} zu Korp ${result.corp.agendaPoints}`}>
+          <span>{scoreText}</span>
+          <small>Agenda-Punkte</small>
+        </div>
+      </div>
+      <div className="recentGameDetails">
+        <span>
+          <Award size={14} />
+          {result.winner === "draw" ? winnerName : `${winnerName} gewinnt`}
+        </span>
+        <span title={resultReasonLabel(result.reason)}>{shortResultReasonLabel(result.reason)}</span>
+        <span>{result.actionCount} Aktionen</span>
+        <span>{result.runCount} Runs</span>
+        <span title={result.finalStateHash}>Hash {result.finalStateHash.slice(0, 8)}</span>
+      </div>
+      <div className="recentGameDecks">
+        <span>{result.runner.deckName ? `Runner-Deck: ${result.runner.deckName}` : "Runner-Deck"}</span>
+        <span>{result.corp.deckName ? `Korp-Deck: ${result.corp.deckName}` : "Korp-Deck"}</span>
+      </div>
+    </article>
+  );
+}
+
+function matchModeLabel(mode: ApiRecentGameResult["matchMode"]): string {
+  if (mode === "human_vs_human") return "Mensch vs Mensch";
+  if (mode === "human_runner_vs_corp_ai") return "Runner vs Korp-KI";
+  return "Korp vs Runner-KI";
+}
+
+function shortResultReasonLabel(reason: ApiRecentGameResult["reason"]): string {
+  if (reason === "agenda_points") return "Agenda-Ziel";
+  if (reason === "bad_publicity_7") return "Bad Publicity";
+  if (reason === "corp_deck_empty") return "Korp-Deck leer";
+  if (reason === "flatline") return "Flatline";
+  if (reason === "draw") return "Unentschieden";
+  if (reason === "time_expired") return "Spielerzeit";
+  return "Abgeschlossen";
+}
+
+function formatRecentGameDate(value: string): string {
+  return new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 }
 
 function OptionsPanel({
@@ -9754,6 +9931,7 @@ function chronicleEventBelongsToActiveRun(
 function chronicleResolveChoiceBelongsToRun(event: PublicGameEvent): boolean {
   const payload = event.publicPayload ?? {};
   if (
+    typeof payload.traceStep === "string" ||
     payload.ambushDefinitionId ||
     payload.accessEffectSourceDefinitionId ||
     payload.ambushPaidCost !== undefined ||
@@ -14227,6 +14405,9 @@ function cardDetailLines(card: VisibleCard): string[] {
     valueLabel("Agenda", card.agendaPoints),
     valueLabel("Stärke", card.strength),
     selectedServerLabel(card),
+    selectedSubtypeDetailLabel(card),
+    selectedTargetDetailLabel(card),
+    hostedOnDetailLabel(card),
     ...counterDisplayDetailLabels(card)
   ]
     .filter(Boolean)
@@ -14613,6 +14794,29 @@ async function fetchOpenLanMatches(): Promise<OpenMatchesResponse> {
     return { error: { message: "Offene Spiele konnten nicht geladen werden." } };
   }
   return (await response.json()) as OpenMatchesResponse;
+}
+
+async function fetchRecentGameResults(): Promise<RecentGameResultsResponse> {
+  let response: Response;
+  try {
+    response = await fetch(`${SERVER_HTTP}/api/matches/recent-results?limit=20`, { cache: "no-store" });
+  } catch {
+    throw new ServerConnectionError();
+  }
+  if (!response.ok) {
+    let payload: RecentGameResultsResponse | undefined;
+    try {
+      payload = (await response.json()) as RecentGameResultsResponse;
+    } catch {
+      payload = undefined;
+    }
+    if (payload?.error?.message) return { error: { message: payload.error.message } };
+    if (response.status === 404) {
+      return { error: { message: "Dein Multiplayer-Server unterstützt letzte Spiele noch nicht. Bitte den Server neu starten oder auf den aktuellen Stand bringen." } };
+    }
+    return { error: { message: "Letzte Spiele konnten nicht geladen werden." } };
+  }
+  return (await response.json()) as RecentGameResultsResponse;
 }
 
 function playerSlotForSide(lobby: MatchStartLobby, side: Side): "player_a" | "player_b" {

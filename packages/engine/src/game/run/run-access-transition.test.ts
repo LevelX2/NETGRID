@@ -174,6 +174,7 @@ function makeHost(options: {
       shuffleStateIds: (ids) => ids.slice(),
     },
     access: {
+      hasHiddenResourceAccessStartActions: () => false,
       advanceArchivesBreachPastNonDecisionCards: () => {
         archivesAutoAdvanced += 1;
       },

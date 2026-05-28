@@ -2521,6 +2521,57 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(["Runner", "Stack", "Vorgezeigt", "den Grip", "Shuffle"]);
   });
 
+  it("describes card-implementation stack-to-hand searches with the revealed selected card", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "p3_37_search_stack_to_grip",
+        sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+        selectedCount: 1,
+        movedCardCount: 1,
+        searchDestination: "runner_grip",
+        publicRevealKind: "reveal",
+        publicRevealDefinitionId: "onr_v1_039_krash",
+        cardDefinitionId: "onr_v1_039_krash",
+        shuffled: true,
+        aiReasonCode: "runner_stack_search_program"
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Die Runner-KI hat Krash aus dem Stack vorgezeigt und auf die Hand genommen.");
+    expect(item.category).toBe("card");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("onr_v1_039_krash");
+    expect(item.chips).toEqual(["Runner", "KI", "Stack", "Vorgezeigt", "Hand", "Shuffle"]);
+    expect(item.title).not.toContain("Entscheidung beantwortet");
+  });
+
+  it("redacts private card-implementation stack-to-hand searches", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "p3_37_search_stack_to_grip",
+        sourceDefinitionId: "onr_v1_105_mantis-fixer-at-large",
+        selectedCount: 1,
+        movedCardCount: 1,
+        searchDestination: "runner_grip",
+        shuffled: true,
+        aiReasonCode: "runner_stack_search_card"
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Die Runner-KI hat eine Karte verdeckt aus dem Stack auf die Hand genommen.");
+    expect(item.category).toBe("hidden");
+    expect(item.visibility).toBe("redacted");
+    expect(item.cardDefinitionId).toBeUndefined();
+    expect(JSON.stringify(item)).not.toContain("Mantis");
+    expect(item.chips).toEqual(["Runner", "KI", "Stack", "Verdeckt", "Hand", "Shuffle"]);
+  });
+
   it("describes Aujourd'Oui top-five program choices with revealed selected programs only", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -2704,23 +2755,24 @@ describe("formatChronicleEvent", () => {
   });
 
   it("keeps Cinderella trace outcome and break costs distinct", () => {
-    const trace = formatChronicleEvent(
-      makeEvent("resolve_choice", {
-        actor: "runner",
-        traceStep: "runner_bid",
-        sourceDefinitionId: "onr_v1_228_cinderella",
-        corpBid: 1,
-        traceStrength: 7,
-        runnerBid: 0,
-        runnerStrength: 0,
-        traceSuccessful: true,
-        traceSuccessEffect: "hardware_trash_meat_damage_end_run",
-        trashedCount: 1,
-        damageAmount: 2,
-        damageCannotBePrevented: true
-      }),
-      "runner"
-    );
+    const traceEvent = makeEvent("resolve_choice", {
+      actor: "runner",
+      traceStep: "runner_bid",
+      sourceDefinitionId: "onr_v1_228_cinderella",
+      corpBid: 1,
+      traceStrength: 7,
+      runnerBid: 0,
+      runnerStrength: 0,
+      traceSuccessful: true,
+      traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+      trashedCount: 1,
+      trashedCardDefinitionId: "onr_v1_028_force-shield",
+      damageAmount: 2,
+      damageType: "meat",
+      damageCannotBePrevented: true
+    });
+    const trace = formatChronicleEvent(traceEvent, "runner");
+    const traceEffects = formatChronicleEffectItems(traceEvent, "runner");
     const breakAction = formatChronicleEvent(
       makeEvent("break_subroutine", {
         actor: "runner",
@@ -2735,6 +2787,10 @@ describe("formatChronicleEvent", () => {
     expect(trace.title).toBe("Trace entschieden: Korp 1 Credit, Du 0 Credits; Trace erfolgreich.");
     expect(trace.description).toBe("Endstand: Trace 7 gegen Runner-Stärke 0; Karteneffekt: 1 Hardware getrasht, 2 Meat-Schaden nicht verhinderbar, Run endet.");
     expect(trace.chips).toEqual(expect.arrayContaining(["Trace", "Erfolg", "Hardware -1", "2 Schaden", "Run endet"]));
+    expect(traceEffects).toHaveLength(1);
+    expect(traceEffects[0]?.title).toBe("Cinderella: Force Shield getrasht und 2 Meat Damage verursacht.");
+    expect(traceEffects[0]?.description).toBe("Der erfolgreiche Trace beendet den Run; der Schaden kann nicht verhindert werden.");
+    expect(traceEffects[0]?.chips).toEqual(expect.arrayContaining(["Trace-Erfolg", "Force Shield", "2 Meat Damage", "Nicht verhinderbar", "Run endet"]));
     expect(breakAction.title).toBe("Du hast mit Replicator Subroutine 1 auf Cinderella gebrochen.");
     expect(breakAction.description).toBe("0 Credits: Subroutine 1 auf Cinderella gebrochen.");
     expect(breakAction.chips).toEqual(expect.arrayContaining(["Subroutine 1", "0 Credits", "Replicator", "Cinderella"]));
@@ -3181,6 +3237,33 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.title).toBe("Tokyo-Chiba Infighting wurde sofort gerezzt.");
     expect(items[0]?.importance).toBe("important");
     expect(items[0]?.chips).toContain("Automatisch");
+  });
+
+  it("formats generic rez-on-install effects", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("install_card", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "install-rez",
+            kind: "rez_card",
+            visibility: "public",
+            side: "corp",
+            cardDefinitionId: "onr_v1_356_namatoki-plaza",
+            cardTitle: "Namatoki Plaza",
+            sourceDefinitionId: "onr_v1_356_namatoki-plaza",
+            sourceTitle: "Namatoki Plaza",
+            reason: "install_rez"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items[0]?.title).toBe("Namatoki Plaza wurde sofort gerezzt.");
+    expect(items[0]?.importance).toBe("important");
+    expect(items[0]?.visibility).toBe("public");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Rez", "Automatisch"]));
   });
 
   it("formats region replacement trash effects without leaking hidden old names", () => {
