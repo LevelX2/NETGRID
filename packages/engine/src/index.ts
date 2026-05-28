@@ -75,6 +75,40 @@ import {
   scoredCorpAgendaIds,
   unrezzedRootCardIdOnServer,
 } from "./game/state/card-server-lookup";
+import {
+  drawCorpCard,
+  drawCorpCards,
+  randomHqAccess,
+  rollDeterministicDie,
+  shuffleStateIds,
+  mustArrayValue,
+  nextRandom,
+  recordStateRandomMarkers,
+} from "./game/state/draw-random";
+import {
+  credits,
+  spendClick,
+  spendClicks,
+  spendCredits,
+} from "./game/state/economy-mutation";
+import {
+  addCardCounter,
+  cardCounter,
+  cardInstanceWithoutCounters,
+  clearCardCounters,
+  ensureCorpTurnFlags,
+  ensureRunnerTurnFlags,
+  hasSuccessfulHqRunThisTurn,
+  hasSuccessfulRunThisTurn,
+  recordRunnerActionSpent,
+  setCardCounter,
+  spendCardCounter,
+} from "./game/state/turn-flags-counters";
+import {
+  ensureSpecialZones,
+  removeFromAllZones,
+  uninstallCorpInstalledCardToHq,
+} from "./game/state/zone-mutation";
 export {
   getLegalActions,
   legalActionsFor,
@@ -7338,26 +7372,6 @@ function cardImplementationAgendaPointInstallCost(
   }, 0);
 }
 
-function drawCorpCard(state: GameState): void {
-  const cardId = state.corp.rd.shift();
-  if (!cardId) {
-    state.winner = "runner";
-    state.gameEndReason = "corp_deck_empty";
-    state.phase = "game_over";
-    state.timingPoint = "game.checkpoint";
-    return;
-  }
-  state.corp.hq.push(cardId);
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    zone: { side: "corp", zone: "hq" },
-  };
-}
-
-function drawCorpCards(state: GameState, amount: number): void {
-  for (let index = 0; index < amount; index += 1) drawCorpCard(state);
-}
-
 function citySurveillanceSourceIds(state: GameState): CardInstanceId[] {
   return rezzedCorpRootCardIds(state).filter((sourceId) =>
     isCitySurveillanceCard(state, sourceId),
@@ -7529,13 +7543,6 @@ function resolveRunnerLastTurnInstalledResourceTargetId(
 
 function runnerInstalledResourceLastTurn(state: GameState): boolean {
   return runnerLastTurnInstalledResourceIds(state).length > 0;
-}
-
-function recordRunnerActionSpent(state: GameState, amount: number): void {
-  if (!Number.isInteger(amount) || amount <= 0) return;
-  const flags = ensureRunnerTurnFlags(state);
-  flags.runnerActionsTakenThisTurn =
-    Math.max(0, Math.floor(flags.runnerActionsTakenThisTurn ?? 0)) + amount;
 }
 
 function corpScoredBlackOpsAgendaLastTurn(state: GameState): boolean {
@@ -12789,69 +12796,6 @@ function agendaPoints(state: GameState, side: Side): number {
     : scoredPoints;
 }
 
-function credits(state: GameState, side: Side, amount: number): void {
-  if (side === "corp") state.corp.credits += amount;
-  else state.runner.credits += amount;
-}
-
-function cardCounter(
-  state: GameState,
-  cardId: CardInstanceId,
-  counterType: CounterType,
-): number {
-  return mustInstance(state.cardInstances, cardId).counters?.[counterType] ?? 0;
-}
-
-// Counter mutation stays in index.ts because many legacy mechanics still share
-// this primitive. CardImplementation adapters call through dependencies instead
-// of importing these functions directly.
-function setCardCounter(
-  state: GameState,
-  cardId: CardInstanceId,
-  counterType: CounterType,
-  amount: number,
-): void {
-  if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Counter amount ist ungueltig.");
-  const instance = mustInstance(state.cardInstances, cardId);
-  const counters = { ...(instance.counters ?? {}) };
-  if (amount === 0) delete counters[counterType];
-  else counters[counterType] = amount;
-  const { counters: _counters, ...withoutCounters } = instance;
-  void _counters;
-  state.cardInstances[cardId] =
-    Object.keys(counters).length > 0
-      ? { ...withoutCounters, counters }
-      : withoutCounters;
-}
-
-function clearCardCounters(state: GameState, cardId: CardInstanceId): void {
-  const instance = mustInstance(state.cardInstances, cardId);
-  state.cardInstances[cardId] = cardInstanceWithoutCounters(instance);
-}
-
-function cardInstanceWithoutCounters(instance: CardInstance): CardInstance {
-  const { counters: _counters, ...withoutCounters } = instance;
-  void _counters;
-  return withoutCounters;
-}
-
-function addCardCounter(
-  state: GameState,
-  cardId: CardInstanceId,
-  counterType: CounterType,
-  amount: number,
-): void {
-  if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Counter amount ist ungueltig.");
-  setCardCounter(
-    state,
-    cardId,
-    counterType,
-    cardCounter(state, cardId, counterType) + amount,
-  );
-}
-
 function addVirusCounterWithDisinfectantPrevention(
   state: GameState,
   targetCardId: CardInstanceId,
@@ -12902,19 +12846,6 @@ function preventOneVirusCounterWithDisinfectant(
     sourceId,
   ];
   return { prevented: true, creditsPaid: 1 };
-}
-
-function spendCardCounter(
-  state: GameState,
-  cardId: CardInstanceId,
-  counterType: CounterType,
-  amount: number,
-): void {
-  if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Counter amount ist ungueltig.");
-  const current = cardCounter(state, cardId, counterType);
-  if (current < amount) throw new Error("Nicht genug Counter vorhanden.");
-  setCardCounter(state, cardId, counterType, current - amount);
 }
 
 function addVisibleCardCounter(
@@ -13222,19 +13153,6 @@ function hasHostingCycle(state: GameState, cardId: CardInstanceId): boolean {
   return false;
 }
 
-function spendCredits(state: GameState, side: Side, amount: number): void {
-  if (amount <= 0) return;
-  if (side === "corp") {
-    if (state.corp.credits < amount)
-      throw new Error("Die Korp kann die Kosten nicht bezahlen.");
-    state.corp.credits -= amount;
-    return;
-  }
-  if (state.runner.credits < amount)
-    throw new Error("Der Runner kann die Kosten nicht bezahlen.");
-  state.runner.credits -= amount;
-}
-
 function availableRunnerProgramInstallCredits(state: GameState): number {
   return (
     state.runner.credits +
@@ -13538,152 +13456,6 @@ function refreshRecurringCredits(
   }
 }
 
-function spendClick(state: GameState, side: Side): void {
-  // Click payment is a host primitive. CardImplementation runtime revalidates
-  // abilities first, then calls this through dependencies so stale actions do
-  // not pay costs before source/timing/limit checks pass.
-  if (side === "corp") {
-    if (state.corp.clicks <= 0)
-      throw new Error("Die Korp hat keine Clicks mehr.");
-    state.corp.clicks -= 1;
-    return;
-  }
-  if (state.runner.clicks <= 0)
-    throw new Error("Der Runner hat keine Clicks mehr.");
-  state.runner.clicks -= 1;
-  recordRunnerActionSpent(state, 1);
-  consumeRunnerRunLockAction(state);
-}
-
-function consumeRunnerRunLockAction(state: GameState): void {
-  const flags = ensureRunnerTurnFlags(state);
-  const pending = Math.max(0, Math.floor(flags.runLockActionsPending ?? 0));
-  flags.runLockActionsPending = pending > 0 ? pending - 1 : 0;
-}
-
-function spendClicks(state: GameState, side: Side, amount: number): void {
-  if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Click amount ist ungueltig.");
-  if (side === "corp") {
-    if (state.corp.clicks < amount)
-      throw new Error("Die Korp hat nicht genug Clicks.");
-    state.corp.clicks -= amount;
-    return;
-  }
-  if (state.runner.clicks < amount)
-    throw new Error("Der Runner hat nicht genug Clicks.");
-  state.runner.clicks -= amount;
-  recordRunnerActionSpent(state, amount);
-}
-
-function randomHqAccess(state: GameState): CardInstanceId | undefined {
-  if (state.corp.hq.length === 0) return undefined;
-  const value = nextRandom(state, "hq_random_access");
-  const index = Math.floor(value * state.corp.hq.length);
-  return state.corp.hq[index];
-}
-
-function nextRandom(state: GameState, purpose: string): number {
-  const value = deterministicNumber(
-    `${state.seed}:${purpose}:${state.randomCounter}`,
-  );
-  state.randomDrawRecords.push({
-    counter: state.randomCounter,
-    purpose,
-    value,
-  });
-  state.randomCounter += 1;
-  return value;
-}
-
-function rollDeterministicDie(state: GameState, purpose: string): number {
-  const scopedPurpose = /^v\d+\.die\./.test(purpose)
-    ? purpose
-    : `v190.die.${purpose}`;
-  const value = nextRandom(state, scopedPurpose);
-  return Math.floor(value * 6) + 1;
-}
-
-function deterministicNumber(input: string): number {
-  let hashA = 0xdeadbeef ^ input.length;
-  let hashB = 0x41c6ce57 ^ input.length;
-  for (let index = 0; index < input.length; index += 1) {
-    const code = input.charCodeAt(index);
-    hashA = Math.imul(hashA ^ code, 0x9e3779b1);
-    hashB = Math.imul(hashB ^ code, 0x5f356495);
-  }
-  hashA =
-    Math.imul(hashA ^ (hashA >>> 16), 0x85ebca6b) ^
-    Math.imul(hashB ^ (hashB >>> 13), 0xc2b2ae35);
-  hashB =
-    Math.imul(hashB ^ (hashB >>> 16), 0x85ebca6b) ^
-    Math.imul(hashA ^ (hashA >>> 13), 0xc2b2ae35);
-  return (0x100000000 * (hashB & 0x1fffff) + (hashA >>> 0)) / 0x20000000000000;
-}
-
-function shuffleIds(
-  ids: CardInstanceId[],
-  seed: string,
-  purpose: string,
-  random: { counter: number; records: GameState["randomDrawRecords"] },
-): CardInstanceId[] {
-  const shuffled = ids.slice();
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const value = deterministicNumber(`${seed}:${purpose}:${random.counter}`);
-    random.records.push({ counter: random.counter, purpose, value });
-    random.counter += 1;
-    const swapIndex = Math.floor(value * (index + 1));
-    const current = mustArrayValue(shuffled, index, "Shuffle index missing.");
-    shuffled[index] = mustArrayValue(
-      shuffled,
-      swapIndex,
-      "Shuffle swap missing.",
-    );
-    shuffled[swapIndex] = current;
-  }
-  return shuffled;
-}
-
-function shuffleStateIds(
-  state: GameState,
-  ids: CardInstanceId[],
-  purpose: string,
-): CardInstanceId[] {
-  const random = {
-    counter: state.randomCounter,
-    records: state.randomDrawRecords,
-  };
-  const shuffled = shuffleIds(ids, state.seed, purpose, random);
-  state.randomCounter = random.counter;
-  return shuffled;
-}
-
-function recordRandomMarkers(
-  seed: string,
-  purpose: string,
-  amount: number,
-  random: { counter: number; records: GameState["randomDrawRecords"] },
-): void {
-  for (let index = 0; index < amount; index += 1) {
-    const value = deterministicNumber(`${seed}:${purpose}:${random.counter}`);
-    random.records.push({ counter: random.counter, purpose, value });
-    random.counter += 1;
-  }
-}
-
-function recordStateRandomMarkers(
-  state: GameState,
-  purpose: string,
-  amount: number,
-): void {
-  const random = {
-    counter: state.randomCounter,
-    records: state.randomDrawRecords,
-  };
-  recordRandomMarkers(state.seed, purpose, amount, random);
-  state.randomCounter = random.counter;
-}
-
 function isV097OrLater(state: GameState): boolean {
   return isVersionAtLeast(state, 97);
 }
@@ -13700,161 +13472,6 @@ function isVersionAtLeast(state: GameState, minorGate: number): boolean {
   if (major !== 0) return major > 0;
   if (minor !== minorGate) return minor > minorGate;
   return patch >= 0;
-}
-
-function removeFromAllZones(state: GameState, cardId: string): void {
-  const wasRunnerRigCard = runnerInstalledCardIds(state).includes(cardId);
-  state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
-  state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
-  state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
-  state.corp.scoreArea = state.corp.scoreArea.filter((id) => id !== cardId);
-  for (const server of state.corp.servers) {
-    server.ice = server.ice.filter((id) => id !== cardId);
-    server.root = server.root.filter((id) => id !== cardId);
-  }
-  state.runner.grip = state.runner.grip.filter((id) => id !== cardId);
-  state.runner.stack = state.runner.stack.filter((id) => id !== cardId);
-  state.runner.heap = state.runner.heap.filter((id) => id !== cardId);
-  state.runner.scoreArea = state.runner.scoreArea.filter((id) => id !== cardId);
-  state.runner.rig.programs = state.runner.rig.programs.filter(
-    (id) => id !== cardId,
-  );
-  state.runner.rig.hardware = state.runner.rig.hardware.filter(
-    (id) => id !== cardId,
-  );
-  state.runner.rig.resources = state.runner.rig.resources.filter(
-    (id) => id !== cardId,
-  );
-  const specialZones = ensureSpecialZones(state);
-  specialZones.setAside = specialZones.setAside.filter((id) => id !== cardId);
-  specialZones.removedFromGame = specialZones.removedFromGame.filter(
-    (id) => id !== cardId,
-  );
-  if (wasRunnerRigCard) clearCardCounters(state, cardId);
-}
-
-function uninstallCorpInstalledCardToHq(
-  state: GameState,
-  cardId: CardInstanceId,
-): void {
-  const instance = mustInstance(state.cardInstances, cardId);
-  removeFromAllZones(state, cardId);
-  state.corp.hq.unshift(cardId);
-  state.cardInstances[cardId] = {
-    ...instance,
-    faceup: false,
-    rezzed: false,
-    zone: { side: "corp", zone: "hq" },
-  };
-}
-
-function ensureSpecialZones(state: GameState): SpecialZoneState {
-  state.specialZones ??= { setAside: [], removedFromGame: [] };
-  state.specialZones.setAside ??= [];
-  state.specialZones.removedFromGame ??= [];
-  return state.specialZones;
-}
-
-function ensureRunnerTurnFlags(
-  state: GameState,
-): NonNullable<GameState["runnerTurnFlags"]> {
-  const flags = (state.runnerTurnFlags ??= {
-    stoleAgendaThisTurn: false,
-    stoleAgendaLastTurn: false,
-    stolenAgendaAdvancementCountersThisTurn: 0,
-    stolenAgendaAdvancementCountersLastTurn: 0,
-    runnerReceivedTagThisTurn: false,
-    stoleResearchAgendaThisTurn: false,
-    stoleGrayOpsAgendaThisTurn: false,
-    stoleBlackOpsAgendaThisTurn: false,
-    runAttemptsThisTurn: 0,
-    runAttemptsLastTurn: 0,
-    runAttemptsThisGame: 0,
-    trashedNodeThisTurn: false,
-    trashedNodeLastTurn: false,
-    trashedAdvertisementThisTurn: false,
-    trashedTransactionsThisTurn: false,
-    prearrangedDropPending: false,
-    installedResourceIdsThisTurn: [],
-    installedResourceIdsLastTurn: [],
-    successfulHqRunThisTurn: false,
-    successfulRunThisTurn: false,
-    damagePreventionUsage: {},
-    runnerActionsTakenThisTurn: 0,
-    brokerActionCardIdsThisTurn: [],
-    startOfTurnFloatingCreditsApplied: false,
-    allNighterBonusRunPending: false,
-    forgoNextActionPending: false,
-    forgoNextActionsPending: 0,
-    runLockActionsPending: 0,
-    fangRunLockCreditCost: 0,
-    valuPakProgramInstallActionsRemaining: 0,
-    valuPakTemporaryProgramInstallCredits: 0,
-    shellTradersStartTurnResolvedSourceIds: [],
-    bodyweightDataCrecheExtraRunPending: false,
-    bodyweightDataCrecheExtraRunUsedThisTurn: false,
-    startupImmolatorUsedSourceIdsThisTurn: [],
-  });
-  flags.stolenAgendaAdvancementCountersThisTurn ??= 0;
-  flags.stolenAgendaAdvancementCountersLastTurn ??= 0;
-  flags.runnerReceivedTagThisTurn ??= false;
-  flags.stoleResearchAgendaThisTurn ??= false;
-  flags.stoleGrayOpsAgendaThisTurn ??= false;
-  flags.stoleBlackOpsAgendaThisTurn ??= false;
-  flags.runAttemptsThisTurn ??= 0;
-  flags.runAttemptsLastTurn ??= 0;
-  flags.runAttemptsThisGame ??= 0;
-  flags.trashedNodeThisTurn ??= false;
-  flags.trashedNodeLastTurn ??= false;
-  flags.trashedAdvertisementThisTurn ??= false;
-  flags.trashedTransactionsThisTurn ??= false;
-  flags.prearrangedDropPending ??= false;
-  flags.installedResourceIdsThisTurn ??= [];
-  flags.installedResourceIdsLastTurn ??= [];
-  flags.successfulHqRunThisTurn ??= false;
-  flags.successfulRunThisTurn ??= false;
-  flags.damagePreventionUsage ??= {};
-  flags.runnerActionsTakenThisTurn ??= 0;
-  flags.brokerActionCardIdsThisTurn ??= [];
-  flags.startOfTurnFloatingCreditsApplied ??= false;
-  flags.allNighterBonusRunPending ??= false;
-  flags.forgoNextActionPending ??= false;
-  flags.forgoNextActionsPending ??= 0;
-  flags.runLockActionsPending ??= 0;
-  flags.fangRunLockCreditCost ??= 0;
-  flags.valuPakProgramInstallActionsRemaining ??= 0;
-  flags.valuPakTemporaryProgramInstallCredits ??= 0;
-  flags.shellTradersStartTurnResolvedSourceIds ??= [];
-  flags.bodyweightDataCrecheExtraRunPending ??= false;
-  flags.bodyweightDataCrecheExtraRunUsedThisTurn ??= false;
-  flags.startupImmolatorUsedSourceIdsThisTurn ??= [];
-  flags.preyingMantisUsedSourceIdsThisTurn ??= [];
-  flags.preyingMantisDamageDueSourceIdsThisTurn ??= [];
-  flags.corpRezzedIceThisTurn ??= 0;
-  return flags;
-}
-
-function hasSuccessfulHqRunThisTurn(state: GameState): boolean {
-  return state.runnerTurnFlags?.successfulHqRunThisTurn === true;
-}
-
-function hasSuccessfulRunThisTurn(state: GameState): boolean {
-  return state.runnerTurnFlags?.successfulRunThisTurn === true;
-}
-
-function ensureCorpTurnFlags(
-  state: GameState,
-): NonNullable<GameState["corpTurnFlags"]> {
-  const flags = (state.corpTurnFlags ??= {
-    scoredBlackOpsAgendaThisTurn: false,
-    scoredBlackOpsAgendaLastTurn: false,
-  });
-  flags.scoredBlackOpsAgendaThisTurn ??= false;
-  flags.scoredBlackOpsAgendaLastTurn ??= false;
-  flags.edgerunnerTempsInstallActionsRemaining ??= 0;
-  flags.disinfectantUsedSourceIdsThisTurn ??= [];
-  flags.employeeEmpowermentStartTurnResolvedSourceIds ??= [];
-  return flags;
 }
 
 function createRemote(state: GameState): CorpServer {
@@ -13881,12 +13498,6 @@ function cleanupEmptyRemotes(state: GameState): void {
       server.root.length > 0 ||
       state.run?.attackedServerId === server.id,
   );
-}
-
-function mustArrayValue<T>(values: T[], index: number, message: string): T {
-  const value = values[index];
-  if (value === undefined) throw new Error(message);
-  return value;
 }
 
 function cloneState<T>(state: T): T {
