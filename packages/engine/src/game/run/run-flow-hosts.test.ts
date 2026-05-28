@@ -180,6 +180,7 @@ function hostFor(calls: string[]): RunFlowHost {
     },
     payment: {
       spendCredits: () => undefined,
+      spendCorpRunTemporaryCreditsForCurrentRunCost: () => undefined,
       credits: () => undefined,
       rezCostForCard: () => 0,
       creditCostForAction: () => 0,

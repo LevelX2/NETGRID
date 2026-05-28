@@ -251,6 +251,10 @@ export type RunFlowHost = {
   };
   payment: {
     spendCredits: (state: GameState, side: Side, amount: number) => void;
+    spendCorpRunTemporaryCreditsForCurrentRunCost: (
+      state: GameState,
+      amount: number,
+    ) => void;
     credits: (state: GameState, side: Side, amount: number) => void;
     rezCostForCard: (state: GameState, cardId: CardInstanceId) => number;
     creditCostForAction: (legalAction: LegalAction) => number;
@@ -721,7 +725,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         mustServer: (serverId) => host.servers.mustServer(state, serverId),
       },
       payment: {
-        spendCorpCredits: (amount) => host.payment.spendCredits(state, "corp", amount),
+        spendCorpCredits: (amount) =>
+          host.payment.spendCorpRunTemporaryCreditsForCurrentRunCost(
+            state,
+            amount,
+          ),
       },
     };
   }
@@ -755,7 +763,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         spendHostedPaymentCredits: (cardId, amount) =>
           spendHostedPaymentCredits(state, cardId, amount),
         rezCostForCard: (cardId) => host.payment.rezCostForCard(state, cardId),
-        spendCorpCredits: (amount) => host.payment.spendCredits(state, "corp", amount),
+        spendCorpCredits: (amount) =>
+          host.payment.spendCorpRunTemporaryCreditsForCurrentRunCost(
+            state,
+            amount,
+          ),
       },
       breaker: {
         breakAbilityForLegalAction: (legalAction) =>
@@ -823,7 +835,13 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         rezCostForCard: (cardId) => host.payment.rezCostForCard(state, cardId),
       },
       credits: {
-        spend: (side, amount) => host.payment.spendCredits(state, side, amount),
+        spend: (side, amount) =>
+          side === "corp"
+            ? host.payment.spendCorpRunTemporaryCreditsForCurrentRunCost(
+                state,
+                amount,
+              )
+            : host.payment.spendCredits(state, side, amount),
         gainRunner: (amount) => host.payment.credits(state, "runner", amount),
       },
       counters: {
@@ -902,7 +920,13 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       quoteIceRezCost: (iceId) => host.payment.rezCostForCard(state, iceId),
       resetBreakerStrength: () => host.ice.resetBreakerStrength(state),
       rollDie: (purpose) => host.rng.rollDie(state, purpose),
-      spendCredits: (side, amount) => host.payment.spendCredits(state, side, amount),
+      spendCredits: (side, amount) =>
+        side === "corp"
+          ? host.payment.spendCorpRunTemporaryCreditsForCurrentRunCost(
+              state,
+              amount,
+            )
+          : host.payment.spendCredits(state, side, amount),
       trashCorpInstalledCard: (cardId) =>
         host.zones.trashCorpInstalledCardToArchives(state, cardId),
     });

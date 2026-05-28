@@ -586,6 +586,125 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     expect(state.corp.credits).toBe(26);
   });
 
+  it("spends Raymond Ellison credits only through explicit current-run corp costs", () => {
+    let state = baseState("pro014-raymond-spend");
+    const raymondId = addCorpRoot(state, RAYMOND, "raymond_spend", "remote_1", true);
+    const sameFortIce = addCorpIce(state, WALL, "raymond_spend_wall", "remote_1", true);
+    const panicId = addCorpRoot(state, PANIC_BUTTON, "raymond_spend_panic", "hq", true);
+    addCorpRd(state, WALL, "raymond_spend_draw");
+    state.cardInstances[sameFortIce]!.advancementCounters = 2;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state.timingPoint = "run.jack_out_window";
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "activated_card_ability" && action.source === raymondId,
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      amounts: {
+        temporaryRunCredits: 6,
+        temporaryRunCreditsRemaining: 6,
+      },
+    });
+
+    const panic = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "activated_card_ability" && action.source === panicId,
+    );
+    const beforeSpend = state;
+    state = applyLegal(state, "corp", panic.actionId);
+    expect(state.run?.corpRunTemporaryCredits?.remaining).toBe(5);
+    expect(state.corp.credits).toBe(25);
+    expectReplayStable(beforeSpend, state);
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: panic.actionId,
+      clientKnownStateVersion: beforeSpend.stateVersion,
+      idempotencyKey: "stale-raymond-panic",
+    });
+    expect(stale.ok).toBe(false);
+  });
+
+  it("returns unused Raymond Ellison credits at run end and removes the pool", () => {
+    let state = baseState("pro014-raymond-cleanup");
+    const raymondId = addCorpRoot(state, RAYMOND, "raymond_cleanup", "remote_1", true);
+    const sameFortIce = addCorpIce(state, WALL, "raymond_cleanup_wall", "remote_1", true);
+    state.cardInstances[sameFortIce]!.advancementCounters = 2;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state.timingPoint = "run.jack_out_window";
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "activated_card_ability" && action.source === raymondId,
+    );
+    expect(state.corp.credits).toBe(26);
+
+    state = apply(state, "runner", (action) => action.type === "jack_out");
+    expect(state.run).toBeUndefined();
+    expect(state.corp.credits).toBe(20);
+  });
+
+  it("does not offer or spend Raymond Ellison credits outside a run", () => {
+    let state = baseState("pro014-raymond-outside-run");
+    const raymondId = addCorpRoot(state, RAYMOND, "raymond_outside", "remote_1", true);
+    const sameFortIce = addCorpIce(state, WALL, "raymond_outside_wall", "remote_1", true);
+    state.cardInstances[sameFortIce]!.advancementCounters = 1;
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.type === "activated_card_ability" && action.source === raymondId,
+      ),
+    ).toBe(false);
+
+    state.corp.credits = 4;
+    state.run = {
+      runId: "raymond_orphan_pool",
+      attackedServerId: "hq",
+      phase: "movement",
+      position: { kind: "server", serverId: "hq" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: false,
+      corpRunTemporaryCredits: {
+        sourceCardInstanceId: raymondId,
+        sourceDefinitionId: RAYMOND as CardDefinitionId,
+        remaining: 3,
+        usableFor: "corp_costs_during_this_run",
+        returnUnusedAtRunEnd: true,
+      },
+    };
+    const unrezzedIce = addCorpIce(state, WALL, "raymond_unintended_wall", "hq", false);
+    state.pendingChoice = {
+      choiceId: "raymond_unintended_fao",
+      side: "corp",
+      source: `v1922.forged_activation_orders_corp:${unrezzedIce}:${state.stateVersion}`,
+      prompt: "Forged Activation Orders: ICE rezzen oder trashen.",
+      kind: "select_option",
+      options: [
+        { id: "rez_ice", label: "Rez ICE", publicLabel: "Rez ICE", value: "rez_ice" },
+        { id: "trash_ice", label: "Trash ICE", publicLabel: "Trash ICE", value: "trash_ice" },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion,
+      visibility: "public",
+    };
+    state = applyChoice(state, "corp", "rez_ice");
+    expect(state.run?.corpRunTemporaryCredits?.remaining).toBe(3);
+    expect(state.corp.credits).toBe(1);
+    expect(state.cardInstances[unrezzedIce]?.rezzed).toBe(true);
+  });
+
   it("lets Syd Meyer Superstores trash only own rezzed ICE for credits", () => {
     let state = baseState("pro014-syd");
     const sydId = addCorpRoot(state, SYD, "syd_1", "remote_1", true);

@@ -827,7 +827,10 @@ function gameCardImplementationRuntimeDepsHost(): GameCardImplementationRuntimeD
     },
     credits: {
       spendClick,
-      spendCredits,
+      spendCredits: (state, side, amount) =>
+        side === "corp" && state.run
+          ? spendCorpRunTemporaryCreditsForCurrentRunCost(state, amount)
+          : spendCredits(state, side, amount),
     },
     actions: {
       createAction: action,
@@ -974,8 +977,12 @@ const runFlow = createRunFlowAdapters({
     setDamagePayload,
   },
   payment: {
-    spendCredits,
+    spendCredits: (state, side, amount) =>
+      side === "corp" && state.run
+        ? spendCorpRunTemporaryCreditsForCurrentRunCost(state, amount)
+        : spendCredits(state, side, amount),
     credits,
+    spendCorpRunTemporaryCreditsForCurrentRunCost,
     rezCostForCard,
     creditCostForAction,
   },
@@ -1088,7 +1095,10 @@ const accessFlow = createAccessFlowAdapters({
     traceSuccessEffectForCardImplementation,
   },
   payment: {
-    spendCredits,
+    spendCredits: (state, side, amount) =>
+      side === "corp" && state.run
+        ? spendCorpRunTemporaryCreditsForCurrentRunCost(state, amount)
+        : spendCredits(state, side, amount),
     hostedPaymentCredits,
     restrictedHostedCreditSourceIds,
     isRestrictedHostedCreditSource,
@@ -13411,7 +13421,10 @@ const corpTracePaymentDeps: CorpTracePaymentDependencies = {
       amount,
     ),
   corpCreditsAvailable: (state) => state.corp.credits,
-  spendCorpCredits: (state, amount) => spendCredits(state, "corp", amount),
+  spendCorpCredits: (state, amount) =>
+    state.run
+      ? spendCorpRunTemporaryCreditsForCurrentRunCost(state, amount)
+      : spendCredits(state, "corp", amount),
   krumzTraceBitTotal,
   spendKrumzTraceBits,
   hackerTrackerCounterTotal,
@@ -14029,15 +14042,6 @@ function spendCredits(state: GameState, side: Side, amount: number): void {
     const spendableCorpCredits = Math.max(0, state.corp.credits - installRezReserved);
     if (spendableCorpCredits < amount)
       throw new Error("Die Korp kann die Kosten nicht bezahlen.");
-    const runTemporarySpend = Math.min(
-      amount,
-      Math.max(0, Math.floor(state.run?.corpRunTemporaryCredits?.remaining ?? 0)),
-    );
-    if (runTemporarySpend > 0 && state.run?.corpRunTemporaryCredits)
-      state.run.corpRunTemporaryCredits.remaining = Math.max(
-        0,
-        state.run.corpRunTemporaryCredits.remaining - runTemporarySpend,
-      );
     state.corp.credits -= amount;
     return;
   }
@@ -14059,8 +14063,38 @@ function spendCorpInstallRezCredits(state: GameState, amount: number): void {
       0,
       state.corpTemporaryInstallRezCredits.remaining - installRezTemporarySpend,
     );
-  const runTemporarySpend = Math.min(
+  spendCorpRunTemporaryCreditsForCurrentRunCostTrackingOnly(
+    state,
     amount - installRezTemporarySpend,
+  );
+  state.corp.credits -= amount;
+}
+
+function spendCorpRunTemporaryCreditsForCurrentRunCost(
+  state: GameState,
+  amount: number,
+): void {
+  if (amount <= 0) return;
+  if (!state.run)
+    throw new Error("Raymond-Ellison-Credits brauchen einen laufenden Run.");
+  const installRezReserved = Math.max(
+    0,
+    Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
+  );
+  const spendableCorpCredits = Math.max(0, state.corp.credits - installRezReserved);
+  if (spendableCorpCredits < amount)
+    throw new Error("Die Korp kann die Run-Kosten nicht bezahlen.");
+  spendCorpRunTemporaryCreditsForCurrentRunCostTrackingOnly(state, amount);
+  state.corp.credits -= amount;
+}
+
+function spendCorpRunTemporaryCreditsForCurrentRunCostTrackingOnly(
+  state: GameState,
+  amount: number,
+): void {
+  if (amount <= 0) return;
+  const runTemporarySpend = Math.min(
+    amount,
     Math.max(0, Math.floor(state.run?.corpRunTemporaryCredits?.remaining ?? 0)),
   );
   if (runTemporarySpend > 0 && state.run?.corpRunTemporaryCredits)
@@ -14068,7 +14102,6 @@ function spendCorpInstallRezCredits(state: GameState, amount: number): void {
       0,
       state.run.corpRunTemporaryCredits.remaining - runTemporarySpend,
     );
-  state.corp.credits -= amount;
 }
 
 function availableRunnerProgramInstallCredits(state: GameState): number {

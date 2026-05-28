@@ -84,6 +84,8 @@ const AMOUNT_KEYS = [
   "temporaryCreditsRemaining",
   "temporaryRunCreditsRemaining",
   "temporaryRunCreditsReturned",
+  "corpTemporaryRunCreditsRemaining",
+  "corpTemporaryRunCreditsReturned",
   "afterRunUnpreventableCoreDamage",
   "corpCreditsAfter",
   "runnerCreditsAfter",

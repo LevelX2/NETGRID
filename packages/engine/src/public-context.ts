@@ -820,6 +820,12 @@ export function publicContextForAction(
     if (typeof legalAction.payload.temporaryCreditsRemaining === "number")
       context.temporaryCreditsRemaining =
         legalAction.payload.temporaryCreditsRemaining;
+    if (typeof legalAction.payload.corpTemporaryRunCreditsReturned === "number")
+      context.corpTemporaryRunCreditsReturned =
+        legalAction.payload.corpTemporaryRunCreditsReturned;
+    if (typeof legalAction.payload.corpTemporaryRunCreditsRemaining === "number")
+      context.corpTemporaryRunCreditsRemaining =
+        legalAction.payload.corpTemporaryRunCreditsRemaining;
     if (typeof legalAction.payload.rezzedCount === "number")
       context.rezzedCount = legalAction.payload.rezzedCount;
     if (typeof legalAction.payload.rezzedIceCount === "number")
