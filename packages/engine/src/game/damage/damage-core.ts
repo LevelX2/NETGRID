@@ -39,8 +39,6 @@ import type {
   CardTrashPreventionSourceImplementation,
 } from "../../ability-engine/definition-types";
 
-const CYBERTECH_THINK_TANK_ID = "onr_proteus_055_cybertech-think-tank";
-
 export type DamageSummary = {
   damageType: DamageType;
   amount: number;
@@ -447,13 +445,7 @@ export function createDamageImminentEvent(
     request.damageType === "meat" && corpHasScoredBioweaponsEngineering(state)
       ? 1
       : 0;
-  const cybertechSourceId =
-    request.damageType === "meat" &&
-    !request.source.includes(CYBERTECH_THINK_TANK_ID)
-      ? consumeCybertechThinkTankBoost(state)
-      : undefined;
-  const cybertechModifier = cybertechSourceId ? 1 : 0;
-  const amount = request.amount + bioweaponsModifier + cybertechModifier;
+  const amount = request.amount + bioweaponsModifier;
   return {
     eventId: `imminent_damage_${state.stateVersion + 1}_${sanitizeId(request.damageId)}`,
     eventType: "damage",
@@ -470,14 +462,6 @@ export function createDamageImminentEvent(
             bioweaponsEngineeringModifier: bioweaponsModifier,
           }
         : {}),
-      ...(cybertechModifier > 0
-        ? {
-            baseDamageAmount: request.amount,
-            cybertechThinkTankModifier: cybertechModifier,
-            cybertechThinkTankSourceCardId: cybertechSourceId,
-            cybertechThinkTankSourceDefinitionId: CYBERTECH_THINK_TANK_ID,
-          }
-        : {}),
       source: request.source,
     },
     visibility: "hidden_info_barrier",
@@ -485,27 +469,52 @@ export function createDamageImminentEvent(
   };
 }
 
-function consumeCybertechThinkTankBoost(
+function cybertechThinkTankBoostCandidates(
   state: GameState,
-): CardInstanceId | undefined {
+  event: ImminentEvent,
+): EventModificationCandidate[] {
+  if (
+    event.eventType !== "damage" ||
+    event.affectedSide !== "runner" ||
+    damageTypePayload(event) !== "meat"
+  )
+    return [];
+  const candidates: EventModificationCandidate[] = [];
   for (const server of state.corp.servers.slice().sort((left, right) => left.id.localeCompare(right.id))) {
     for (const cardId of server.root.slice().sort() as CardInstanceId[]) {
       const instance = state.cardInstances[cardId];
+      const implementation = instance
+        ? cardImplementationForDefinitionId(instance.definitionId)
+        : undefined;
+      const sourceText = String(event.payload.source ?? "");
       if (
         !instance?.rezzed ||
         instance.controller !== "corp" ||
-        instance.definitionId !== CYBERTECH_THINK_TANK_ID ||
-        Math.floor(instance.advancementCounters ?? 0) <= 0
+        implementation?.corpUtility?.kind !== "meat_damage_boost" ||
+        Math.floor(instance.advancementCounters ?? 0) <= 0 ||
+        sourceText.includes(cardId) ||
+        sourceText.includes(instance.definitionId)
       )
         continue;
-      instance.advancementCounters = Math.max(
-        0,
-        Math.floor(instance.advancementCounters ?? 0) - 1,
-      );
-      return cardId;
+      candidates.push({
+        candidateId: `cybertech_meat_damage_boost_${cardId}`,
+        eventId: event.eventId,
+        kind: "increase",
+        controller: "corp",
+        sourceRef: {
+          kind: "card",
+          instanceId: cardId,
+          definitionId: instance.definitionId,
+          label: "Meat-Damage-Boost",
+        },
+        priority: 80,
+        visibility: "public",
+        optional: true,
+        increaseAmount: 1,
+      });
     }
   }
-  return undefined;
+  return candidates;
 }
 
 function corpHasScoredBioweaponsEngineering(state: GameState): boolean {
@@ -641,6 +650,8 @@ function collectEventModificationCandidates(
 ): EventModificationCandidate[] {
   if (event.payload.cannotBePrevented === true) return [];
   if (event.eventType === "damage") {
+    const cybertech = cybertechThinkTankBoostCandidates(state, event);
+    if (cybertech.length > 0) return cybertech;
     const runtime = collectRuntimeDamagePreventionCandidates(state, event);
     const harness = collectHarnessDamagePreventionCandidates(state, event);
     return [...runtime, ...harness];
@@ -1344,7 +1355,9 @@ function eventModificationChoice(
           ? "Tag nicht vermeiden"
           : event.eventType === "runner_installed_trash"
             ? "Trash nicht verhindern"
-            : "Nicht verhindern",
+            : window.kind === "increase"
+              ? "Nicht erhöhen"
+              : "Nicht verhindern",
       publicLabel: "Event Modification",
     },
     {
@@ -1356,6 +1369,8 @@ function eventModificationChoice(
             ? `${candidate.sourceRef.label}: ${candidate.preventedTags ?? 1} Tag vermeiden`
             : event.eventType === "runner_installed_trash"
               ? `${candidate.sourceRef.label}: ${candidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
+            : window.kind === "increase"
+              ? `${candidate.sourceRef.label}: Schaden um ${candidate.increaseAmount ?? 1} erhöhen`
               : candidate.sourceRef.kind === "card"
                 ? `${candidate.sourceRef.label}: ${candidate.preventAmount ?? amount} Schaden verhindern`
                 : `${candidate.preventAmount ?? amount} Schaden verhindern`,
@@ -1542,6 +1557,7 @@ export function resolveEventModificationChoice(
     candidate.eventId !== event.eventId ||
     !(
       candidate.kind === "prevent" ||
+      candidate.kind === "increase" ||
       (event.eventType === "add_tag" && candidate.kind === "avoid")
     )
   )
@@ -1610,6 +1626,61 @@ export function resolveEventModificationChoice(
         : {}),
       ...preventionCostPayload,
     };
+    clearEventModificationState(state);
+    return;
+  }
+  if (candidate.kind === "increase") {
+    const sourceId = candidate.sourceRef.instanceId;
+    const source = sourceId ? state.cardInstances[sourceId] : undefined;
+    const implementation = source
+      ? cardImplementationForDefinitionId(source.definitionId)
+      : undefined;
+    if (
+      event.eventType !== "damage" ||
+      event.affectedSide !== "runner" ||
+      damageTypePayload(event) !== "meat" ||
+      implementation?.corpUtility?.kind !== "meat_damage_boost"
+    )
+      throw new Error("Dieser Damage-Boost passt nicht zum Fenster.");
+    if (
+      !sourceId ||
+      !source?.rezzed ||
+      source.controller !== "corp" ||
+      Math.floor(source.advancementCounters ?? 0) <= 0
+    )
+      throw new Error("Cybertech Think Tank ist nicht mehr legal.");
+    source.advancementCounters = Math.max(
+      0,
+      Math.floor(source.advancementCounters ?? 0) - 1,
+    );
+    const originalAmount = numberPayload(event, "amount");
+    const increaseAmount = Math.max(1, Math.floor(candidate.increaseAmount ?? 1));
+    const finalAmount = originalAmount + increaseAmount;
+    const summary = resolveDamageImminentEvent(state, {
+      ...event,
+      payload: {
+        ...event.payload,
+        amount: finalAmount,
+        baseDamageAmount: originalAmount,
+        cybertechThinkTankModifier: increaseAmount,
+        cybertechThinkTankSourceCardId: sourceId,
+        cybertechThinkTankSourceDefinitionId: source.definitionId,
+      },
+    });
+    legalAction.payload = {
+      ...basePayload,
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "increased",
+      candidateId: candidate.candidateId,
+      originalAmount,
+      increaseAmount,
+      finalAmount,
+      sourceKind: candidate.sourceRef.kind,
+      sourceDefinitionId: source.definitionId,
+      sourceCardId: sourceId,
+      remainingCounters: source.advancementCounters,
+    };
+    setDamagePayload(legalAction, summary);
     clearEventModificationState(state);
     return;
   }

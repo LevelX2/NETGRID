@@ -1367,7 +1367,15 @@ function canPayActivatedCardImplementationCosts(
   const credits = legalCosts[0]?.credits ?? 0;
   if ((side === "corp" ? state.corp.clicks : state.runner.clicks) < clicks)
     return false;
-  if ((side === "corp" ? state.corp.credits : state.runner.credits) < credits)
+  const corpReservedInstallRezCredits = Math.max(
+    0,
+    Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
+  );
+  const corpSpendableCredits = Math.max(
+    0,
+    state.corp.credits - corpReservedInstallRezCredits,
+  );
+  if ((side === "corp" ? corpSpendableCredits : state.runner.credits) < credits)
     return false;
   const advancementCounterCost = advancementCounterCostForActivatedAbility(ability);
   if (advancementCounterCost > 0) {

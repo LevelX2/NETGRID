@@ -197,6 +197,7 @@ function pendingChoiceHost(
         "resolveProteusRunnerProgramReturnChoice",
       ),
       resolveRunnerPrivateLookChoice: unexpected("resolveRunnerPrivateLookChoice"),
+      resolveExposePreventionChoice: unexpected("resolveExposePreventionChoice"),
       ...overrides.hiddenZone,
     },
     corp: {
@@ -243,6 +244,9 @@ function pendingChoiceHost(
       successfulRunInterventionHost: () => ({}),
       resolvePostMeatDamageHiddenResourceChoice: unexpected(
         "resolvePostMeatDamageHiddenResourceChoice",
+      ),
+      resolveSirenStartRunRedirectChoice: unexpected(
+        "resolveSirenStartRunRedirectChoice",
       ),
     },
     access: {

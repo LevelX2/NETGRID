@@ -42,30 +42,6 @@ export function executeStartRunAction(
     ServerId,
     "new_remote"
   >;
-  const sirenSourceCardId =
-    typeof legalAction.payload?.sirenRedirectSourceCardId === "string"
-      ? (legalAction.payload.sirenRedirectSourceCardId as CardInstanceId)
-      : undefined;
-  if (sirenSourceCardId) {
-    const instance = host.state.cardInstances[sirenSourceCardId];
-    if (
-      !instance?.rezzed ||
-      instance.controller !== "corp" ||
-      instance.definitionId !== "onr_proteus_074_siren" ||
-      instance.zone.side !== "corp" ||
-      instance.zone.zone !== "serverRoot" ||
-      instance.zone.serverId !== serverId
-    )
-      throw new Error("Siren ist fuer diesen Redirect nicht mehr legal.");
-    if (host.state.corp.credits < 1)
-      throw new Error("Die Korp kann Siren nicht bezahlen.");
-    host.state.corp.credits -= 1;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      sirenRedirectResolved: true,
-      corpCreditsAfter: host.state.corp.credits,
-    };
-  }
   const flags = host.turn.ensureRunnerTurnFlags();
   const pirateBroadcastNextServerId =
     flags.pirateBroadcastPending?.pendingServerIds[0];

@@ -395,7 +395,7 @@ export type ImminentEventType =
   | "add_tag"
   | "runner_installed_trash"
   | "test_interrupt";
-export type EventModificationKind = "prevent" | "avoid" | "interrupt";
+export type EventModificationKind = "prevent" | "avoid" | "interrupt" | "increase";
 export type ReplacementEventType = ImminentEventType | "prevent_damage";
 
 export type ImminentEvent = {
@@ -429,6 +429,7 @@ export type EventModificationCandidate = {
   visibility: EventVisibilityClass;
   optional: boolean;
   preventAmount?: number;
+  increaseAmount?: number;
   preventionSourceIndex?: number;
   preventedTags?: number;
   tagPreventionSourceIndex?: number;
@@ -1072,6 +1073,11 @@ export type RunState = {
     pendingServerIds: Exclude<ServerId, "new_remote">[];
     successfulServerIds: Exclude<ServerId, "new_remote">[];
   };
+  sirenStartRunRedirect?: {
+    originalServerId: Exclude<ServerId, "new_remote">;
+    sourceCardInstanceIds: CardInstanceId[];
+    sourceDefinitionIds: CardDefinitionId[];
+  };
 };
 
 export type AccessQueueEntry = {
@@ -1235,6 +1241,13 @@ export type GameState = {
     remaining: number;
     usableFor: "corp_install_or_rez";
     returnUnusedAtTurnEnd: true;
+  };
+  exposePreventionWindow?: {
+    targetCardId: CardInstanceId;
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    scope: "inside_data_fort" | "any_installed";
+    createdAtStateVersion: number;
   };
   corpBonusAgendaPoints?: number;
   identityAbilityUsage?: Partial<

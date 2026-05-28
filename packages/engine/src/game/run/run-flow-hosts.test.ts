@@ -147,6 +147,7 @@ function hostFor(calls: string[]): RunFlowHost {
       applyRunnerTraceCounterRunStartEffects: () =>
         calls.push("traceCounterRunStart"),
       applyAiBoonRunStart: () => calls.push("aiBoonRunStart"),
+      openCorpStartOfRunRedirectWindow: () => false,
     },
     trace: {
       calculateRunnerLink: () => 0,

@@ -208,6 +208,10 @@ export type RunFlowHost = {
       legalAction?: LegalAction,
     ) => void;
     applyAiBoonRunStart: (state: GameState, legalAction?: LegalAction) => void;
+    openCorpStartOfRunRedirectWindow: (
+      state: GameState,
+      legalAction?: LegalAction,
+    ) => boolean;
   };
   trace: {
     calculateRunnerLink: (state: GameState) => number;
@@ -480,6 +484,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         applyRunnerTraceCounterRunStartEffects:
           host.run.applyRunnerTraceCounterRunStartEffects,
         applyAiBoonRunStart: host.run.applyAiBoonRunStart,
+        openCorpStartOfRunRedirectWindow:
+          host.run.openCorpStartOfRunRedirectWindow,
       },
     };
   }

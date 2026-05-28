@@ -5,8 +5,6 @@ import {
   type LegalAction,
 } from "@netgrid/shared";
 
-const SIREN_ID = "onr_proteus_074_siren";
-
 type HostFn<T = unknown> = (...args: any[]) => T;
 
 export type RunnerMainActionGenerationHost = {
@@ -1143,14 +1141,6 @@ export function buildRunnerMainActions(
             runPayload,
           ),
         );
-        actions.push(
-          ...buildSirenRedirectStartRunActions(
-            host,
-            server.id,
-            runCosts,
-            runPayload,
-          ),
-        );
       }
     }
     if (
@@ -1326,47 +1316,6 @@ function buildPirateBroadcastForcedRunActions(
       runPayload,
     ),
   ];
-}
-
-function buildSirenRedirectStartRunActions(
-  host: RunnerMainActionGenerationHost,
-  originalServerId: string,
-  runCosts: LegalAction["costs"],
-  runPayload: NonNullable<LegalAction["payload"]>,
-): LegalAction[] {
-  const state = host.state;
-  if (state.corp.credits < 1) return [];
-  const actions: LegalAction[] = [];
-  for (const server of state.corp.servers.slice().sort((left, right) => left.id.localeCompare(right.id))) {
-    if (server.id === originalServerId) continue;
-    for (const cardId of server.root.slice().sort() as CardInstanceId[]) {
-      const instance = state.cardInstances[cardId];
-      if (
-        !instance?.rezzed ||
-        instance.controller !== "corp" ||
-        instance.definitionId !== SIREN_ID
-      )
-        continue;
-      actions.push(
-        host.actions.buildLegalAction(
-          state,
-          "runner",
-          "start_run",
-          `Siren: Run auf ${server.label}`,
-          "basic_action",
-          runCosts,
-          {
-            ...runPayload,
-            serverId: server.id,
-            sirenRedirectSourceCardId: cardId,
-            sirenOriginalServerId: originalServerId,
-            sirenRedirectCost: 1,
-          },
-        ),
-      );
-    }
-  }
-  return actions;
 }
 
 function installedCorpIceTargetIds(state: GameState): string[] {

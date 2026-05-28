@@ -67,6 +67,7 @@ export type CorpMainActionGenerationHost = {
     corpNewDataFortCreationLocked: HostFn<boolean>;
     corpIceInstallTotalCost: HostFn<any>;
     canInstallCorpRootCardInServer: HostFn<boolean>;
+    canInstallCorpRootCardInNewRemote: HostFn<boolean>;
     isRegionUpgrade: HostFn<boolean>;
     corpRegionUpgradeIdsInServer: HostFn<string[]>;
     corpRootAgendaOrNodeCapacityInServer: HostFn<number>;
@@ -487,7 +488,11 @@ export function buildCorpMainActions(
       const regionInstallCost = rootRezOnInstall
         ? rezCostForCard(state, id)
         : 0;
-      if (state.corp.credits >= regionInstallCost && !newDataFortCreationLocked) {
+      if (
+        state.corp.credits >= regionInstallCost &&
+        !newDataFortCreationLocked &&
+        host.install.canInstallCorpRootCardInNewRemote(definition)
+      ) {
         actions.push(
           buildCorpNewRemoteRootInstallAction(state, id, regionInstallCost),
         );

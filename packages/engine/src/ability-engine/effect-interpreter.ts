@@ -1784,6 +1784,11 @@ export function executeCardImplementationEffects(
             ) + effect.amount,
           returnUnusedAtTraceEnd: true,
         };
+        if (state.pendingChoice?.source === `trace:${state.trace.traceId}`)
+          state.pendingChoice = {
+            ...state.pendingChoice,
+            stateVersion: state.stateVersion + 1,
+          };
         mergePublicPayload(publicPayload, {
           temporaryTraceCredits: effect.amount,
           temporaryTraceCreditsAvailable:

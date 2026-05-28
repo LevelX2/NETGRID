@@ -46,6 +46,7 @@ export type PendingChoiceResolutionHost = {
     resolveChimeraDaemonTrashChoice: HostFn<void>;
     resolveProteusRunnerProgramReturnChoice: HostFn<void>;
     resolveRunnerPrivateLookChoice: HostFn<void>;
+    resolveExposePreventionChoice: HostFn<void>;
   };
   corp: {
     handleCorpInstallRezSequenceChoice: HostFn<{ handled: boolean }>;
@@ -74,6 +75,7 @@ export type PendingChoiceResolutionHost = {
     resolveSuccessfulRunInterventionChoiceInRunModule: HostFn<void>;
     successfulRunInterventionHost: HostFn<unknown>;
     resolvePostMeatDamageHiddenResourceChoice: HostFn<void>;
+    resolveSirenStartRunRedirectChoice: HostFn<void>;
   };
   access: {
     resolvePriorityWreckSpendChoice: HostFn<void>;
@@ -159,6 +161,8 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveProteusRunnerProgramReturnChoice;
   const resolveRunnerPrivateLookChoice =
     host.hiddenZone.resolveRunnerPrivateLookChoice;
+  const resolveExposePreventionChoice =
+    host.hiddenZone.resolveExposePreventionChoice;
   const handleCorpInstallRezSequenceChoice =
     host.corp.handleCorpInstallRezSequenceChoice;
   const corpInstallRezSequenceHandlerHost =
@@ -197,6 +201,8 @@ export function resolvePendingChoice(
   const successfulRunInterventionHost = host.run.successfulRunInterventionHost;
   const resolvePostMeatDamageHiddenResourceChoice =
     host.run.resolvePostMeatDamageHiddenResourceChoice;
+  const resolveSirenStartRunRedirectChoice =
+    host.run.resolveSirenStartRunRedirectChoice;
   const resolvePriorityWreckSpendChoice =
     host.access.resolvePriorityWreckSpendChoice;
   const runAccessTransitionHost = host.access.runAccessTransitionHost;
@@ -236,6 +242,10 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("hidden_resource.post_meat_damage")) {
     resolvePostMeatDamageHiddenResourceChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("corp.start_of_run_redirect")) {
+    resolveSirenStartRunRedirectChoice(state, legalAction, playerAction);
     return;
   }
   const hiddenZoneArrangeChoice = handleHiddenZoneArrangeChoice(
@@ -285,6 +295,10 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1912.hunt_club_bbs_expose")) {
     resolveHuntClubBbsExposeChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("corp.expose_prevention")) {
+    resolveExposePreventionChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_36.expose_installed_cards")) {

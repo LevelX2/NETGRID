@@ -303,6 +303,7 @@ import {
   type BreachStateHost,
 } from "./game/access/breach-state";
 import {
+  enterAccessFromSuccessfulRun,
   resolveMicrotechAiInterfacePreAccessChoice,
   resolvePriorityWreckSpendChoice,
   sourcePayloadForSuccessfulRunReplacement,
@@ -438,6 +439,7 @@ import {
   type FortRunSideFamiliesHost,
 } from "./game/run/fort-run-side-families";
 import {
+  approachOrEncounterIce,
   handleRunMovementAction,
   passApproachedIce,
   type RunMovementHost,
@@ -945,6 +947,7 @@ const runFlow = createRunFlowAdapters({
       ),
     applyRunnerTraceCounterRunStartEffects,
     applyAiBoonRunStart,
+    openCorpStartOfRunRedirectWindow,
   },
   trace: {
     calculateRunnerLink: (state) =>
@@ -2586,6 +2589,7 @@ function corpMainActionGenerationHost(
       corpNewDataFortCreationLocked,
       corpIceInstallTotalCost,
       canInstallCorpRootCardInServer,
+      canInstallCorpRootCardInNewRemote,
       isRegionUpgrade,
       corpRegionUpgradeIdsInServer,
       corpRootAgendaOrNodeCapacityInServer,
@@ -4823,7 +4827,10 @@ function installCardHost(state: GameState): InstallCardHost {
           legalAction,
           amount,
         ),
-      spendCredits: (side, amount) => spendCredits(state, side, amount),
+      spendCredits: (side, amount) =>
+        side === "corp"
+          ? spendCorpInstallRezCredits(state, amount)
+          : spendCredits(state, side, amount),
       rezCostForCard: (cardId) => rezCostForCard(state, cardId),
     },
     counters: {
@@ -4877,7 +4884,10 @@ function rezCardHost(state: GameState): RezCardHost {
       assertCorpRezCostQuoteValid: (cardId, legalAction) =>
         assertCorpRezCostQuoteValid(state, cardId, legalAction),
       creditCostForAction,
-      spendCredits: (side, amount) => spendCredits(state, side, amount),
+      spendCredits: (side, amount) =>
+        side === "corp"
+          ? spendCorpInstallRezCredits(state, amount)
+          : spendCredits(state, side, amount),
     },
     corp: {
       isAcmeSavingsAndLoanDefinition,
@@ -5355,6 +5365,12 @@ function canInstallCorpRootCardInServer(
   return false;
 }
 
+function canInstallCorpRootCardInNewRemote(definition: CardDefinition): boolean {
+  if (mustInstallInHq(definition)) return false;
+  if (definition.type === "upgrade") return true;
+  return definition.type === "agenda" || definition.type === "asset";
+}
+
 function corpRootAgendaOrNodeCapacityInServer(
   state: GameState,
   server: CorpServer,
@@ -5667,6 +5683,178 @@ function applyAiBoonRunStart(
       randomCounterAfter: state.randomCounter,
     };
   }
+}
+
+function sirenRedirectSourceIds(
+  state: GameState,
+  originalServerId: Exclude<ServerId, "new_remote">,
+): CardInstanceId[] {
+  return state.corp.servers
+    .slice()
+    .sort((left, right) => left.id.localeCompare(right.id))
+    .flatMap((server) =>
+      server.id === originalServerId
+        ? []
+        : server.root.slice().sort().filter((cardId): cardId is CardInstanceId => {
+            const instance = state.cardInstances[cardId];
+            return Boolean(
+              instance?.rezzed === true &&
+                instance.controller === "corp" &&
+                corpUtilityImplementationForDefinition(instance.definitionId)
+                  ?.kind === "siren_start_run_redirect",
+            );
+          }),
+    );
+}
+
+function openCorpStartOfRunRedirectWindow(
+  state: GameState,
+  legalAction?: LegalAction,
+): boolean {
+  const run = state.run;
+  const availableCredits = Math.max(
+    0,
+    state.corp.credits -
+      Math.max(0, Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0)),
+  );
+  if (!run || state.pendingChoice || availableCredits < 1) return false;
+  const originalServerId = run.attackedServerId;
+  const sourceCardInstanceIds = sirenRedirectSourceIds(state, originalServerId);
+  if (sourceCardInstanceIds.length === 0) return false;
+  run.sirenStartRunRedirect = {
+    originalServerId,
+    sourceCardInstanceIds,
+    sourceDefinitionIds: sourceCardInstanceIds
+      .map((cardId) => definitionFor(state, cardId).id)
+      .sort(),
+  };
+  state.pendingChoice = {
+    choiceId: `corp_start_of_run_redirect_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `corp.start_of_run_redirect:${run.runId}:${originalServerId}`,
+    prompt: "Start-of-run Redirect",
+    kind: "select_option",
+    options: [
+      { id: "pass", label: "Run nicht umlenken" },
+      ...sourceCardInstanceIds.map((cardId) => {
+        const serverId = corpServerIdForInstalledCard(state, cardId) ?? originalServerId;
+        return {
+          id: `siren_${cardId}`,
+          label: `${definitionFor(state, cardId).title}: Run umlenken`,
+          publicLabel: "Start-of-run Redirect",
+          value: cardId,
+          serverId,
+        };
+      }),
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  state.activeSide = "corp";
+  legalAction && (legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    startOfRunRedirectWindowOpened: true,
+    originalServerId,
+    redirectSourceDefinitionIds:
+      run.sirenStartRunRedirect.sourceDefinitionIds.join(","),
+  });
+  return true;
+}
+
+function continueRunAfterStartOfRunRedirect(
+  state: GameState,
+  legalAction?: LegalAction,
+): void {
+  const run = mustRun(state);
+  const server = mustServer(state, run.attackedServerId);
+  state.activeSide = "runner";
+  delete run.sirenStartRunRedirect;
+  if (server.ice.length > 0) {
+    const iceIndex = server.ice.length - 1;
+    const approachedIceId = mustArrayValue(
+      server.ice,
+      iceIndex,
+      "Server has no approached ice.",
+    );
+    run.phase = "approach_ice";
+    run.position = { kind: "ice", serverId: server.id, iceIndex };
+    run.approachedIceId = approachedIceId;
+    approachOrEncounterIce(runMovementHostForState(state), approachedIceId, legalAction);
+    return;
+  }
+  run.phase = "approach_ice";
+  run.position = { kind: "server", serverId: server.id };
+  enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction);
+}
+
+function resolveSirenStartRunRedirectChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  const run = state.run;
+  if (
+    !choice ||
+    !choice.source.startsWith("corp.start_of_run_redirect") ||
+    !run?.sirenStartRunRedirect
+  )
+    throw new Error("Es ist kein Start-of-run-Redirect-Fenster offen.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  if (selected === "pass") {
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      startOfRunRedirectDecision: "pass",
+      originalServerId: run.sirenStartRunRedirect.originalServerId,
+    };
+    continueRunAfterStartOfRunRedirect(state, legalAction);
+    return;
+  }
+  const option = choice.options.find((candidate) => candidate.id === selected);
+  const sourceCardId =
+    typeof option?.value === "string"
+      ? (option.value as CardInstanceId)
+      : undefined;
+  if (
+    !sourceCardId ||
+    !run.sirenStartRunRedirect.sourceCardInstanceIds.includes(sourceCardId)
+  )
+    throw new Error("Diese Siren-Quelle ist nicht legal.");
+  const source = state.cardInstances[sourceCardId];
+  const targetServerId = corpServerIdForInstalledCard(state, sourceCardId);
+  if (
+    !source?.rezzed ||
+    source.controller !== "corp" ||
+    !targetServerId ||
+    targetServerId === run.sirenStartRunRedirect.originalServerId ||
+    corpUtilityImplementationForDefinition(source.definitionId)?.kind !==
+      "siren_start_run_redirect"
+  )
+    throw new Error("Siren ist fuer diesen Redirect nicht mehr legal.");
+  const availableCredits = Math.max(
+    0,
+    state.corp.credits -
+      Math.max(0, Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0)),
+  );
+  if (availableCredits < 1)
+    throw new Error("Die Korp kann Siren nicht bezahlen.");
+  state.corp.credits -= 1;
+  run.attackedServerId = targetServerId;
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    startOfRunRedirectDecision: "apply",
+    sourceCardId,
+    sourceDefinitionId: source.definitionId,
+    originalServerId: run.sirenStartRunRedirect.originalServerId,
+    redirectedServerId: targetServerId,
+    paidCredits: 1,
+    corpCreditsAfter: state.corp.credits,
+  };
+  continueRunAfterStartOfRunRedirect(state, legalAction);
 }
 
 function continueRun(state: GameState, legalAction?: LegalAction): void {
@@ -10513,6 +10701,7 @@ function pendingChoiceResolutionHost(
       resolveChimeraDaemonTrashChoice,
       resolveProteusRunnerProgramReturnChoice,
       resolveRunnerPrivateLookChoice,
+      resolveExposePreventionChoice,
     },
     corp: {
       handleCorpInstallRezSequenceChoice,
@@ -10541,6 +10730,7 @@ function pendingChoiceResolutionHost(
       resolveSuccessfulRunInterventionChoiceInRunModule,
       successfulRunInterventionHost,
       resolvePostMeatDamageHiddenResourceChoice,
+      resolveSirenStartRunRedirectChoice,
     },
     access: {
       resolvePriorityWreckSpendChoice,
@@ -12509,19 +12699,23 @@ function exposeInstalledCorpCardForImplementation(
   const legalTargets = new Set(exposeInstalledCorpCardTargets(state, scope));
   if (!legalTargets.has(targetCardId))
     throw new Error("Diese installierte Korp-Karte kann nicht exposed werden.");
-  const prevention = preventExposeWithDepartmentOfMisinformation(state);
-  if (prevention) {
+  if (
+    !legalAction.payload?.exposePreventionResolved &&
+    openExposePreventionChoice(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      targetCardId,
+      scope,
+    )
+  ) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      exposePrevented: true,
       sourceCardId,
       sourceDefinitionId,
-      preventionSourceCardId: prevention.sourceCardId,
-      preventionSourceDefinitionId: prevention.sourceDefinitionId,
-      preventionRezzedDuringExpose: prevention.rezzedDuringExpose,
-      paidCredits: prevention.paidCredits,
-      corpCreditsAfter: state.corp.credits,
+      exposePreventionWindowOpened: true,
     };
     return { publicPayload: legalAction.payload };
   }
@@ -12558,47 +12752,159 @@ function exposeInstalledCorpCardForImplementation(
   return { publicPayload: payload };
 }
 
-function preventExposeWithDepartmentOfMisinformation(
+function departmentOfMisinformationCandidates(
   state: GameState,
-):
-  | {
-      sourceCardId: CardInstanceId;
-      sourceDefinitionId: CardDefinitionId;
-      rezzedDuringExpose: boolean;
-      paidCredits: number;
-    }
-  | undefined {
-  const departmentId =
-    "onr_proteus_056_department-of-misinformation" as CardDefinitionId;
+): Array<{
+  sourceCardId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  rezzedDuringExpose: boolean;
+  totalCost: number;
+}> {
+  const candidates: Array<{
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    rezzedDuringExpose: boolean;
+    totalCost: number;
+  }> = [];
   for (const server of state.corp.servers.slice().sort((left, right) => left.id.localeCompare(right.id))) {
     for (const cardId of server.root.slice().sort() as CardInstanceId[]) {
       const instance = state.cardInstances[cardId];
       if (
         !instance ||
         instance.controller !== "corp" ||
-        instance.definitionId !== departmentId
+        corpUtilityImplementationForDefinition(instance.definitionId)?.kind !==
+          "expose_prevention"
       )
         continue;
       const definition = definitionFor(state, cardId);
       const rezCost = instance.rezzed ? 0 : Math.max(0, definition.rezCost ?? 0);
       const totalCost = rezCost + 1;
-      if (state.corp.credits < totalCost) continue;
-      state.corp.credits -= totalCost;
-      const rezzedDuringExpose = !instance.rezzed;
-      state.cardInstances[cardId] = {
-        ...instance,
-        rezzed: true,
-        faceup: true,
-      };
-      return {
+      const availableCredits = Math.max(
+        0,
+        state.corp.credits -
+          Math.max(
+            0,
+            Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
+          ),
+      );
+      if (availableCredits < totalCost) continue;
+      candidates.push({
         sourceCardId: cardId,
-        sourceDefinitionId: departmentId,
-        rezzedDuringExpose,
-        paidCredits: totalCost,
-      };
+        sourceDefinitionId: instance.definitionId,
+        rezzedDuringExpose: !instance.rezzed,
+        totalCost,
+      });
     }
   }
-  return undefined;
+  return candidates;
+}
+
+function openExposePreventionChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+  targetCardId: CardInstanceId,
+  scope: "inside_data_fort" | "any_installed",
+): boolean {
+  if (state.pendingChoice) return false;
+  const candidates = departmentOfMisinformationCandidates(state);
+  if (candidates.length === 0) return false;
+  state.exposePreventionWindow = {
+    targetCardId,
+    sourceCardId,
+    sourceDefinitionId,
+    scope,
+    createdAtStateVersion: state.stateVersion + 1,
+  };
+  state.pendingChoice = {
+    choiceId: `corp_expose_prevention_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `corp.expose_prevention:${targetCardId}:${sourceCardId}`,
+    prompt: "Expose verhindern",
+    kind: "select_option",
+    options: [
+      { id: "pass", label: "Expose zulassen" },
+      ...candidates.map((candidate) => ({
+        id: `department_${candidate.sourceCardId}`,
+        label: `${publicCardTitle(candidate.sourceDefinitionId)}: Expose verhindern`,
+        publicLabel: "Expose Prevention",
+        value: candidate.sourceCardId,
+        cost: candidate.totalCost,
+      })),
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    exposeTargetCardId: targetCardId,
+    exposeSourceCardId: sourceCardId,
+    exposeSourceDefinitionId: sourceDefinitionId,
+  };
+  return true;
+}
+
+function resolveExposePreventionChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  const window = state.exposePreventionWindow;
+  if (!choice || !choice.source.startsWith("corp.expose_prevention") || !window)
+    throw new Error("Es ist kein Expose-Prevention-Fenster offen.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  delete state.pendingChoice;
+  delete state.exposePreventionWindow;
+  if (selected === "pass") {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      exposePreventionDecision: "pass",
+      exposePreventionResolved: true,
+    };
+    exposeInstalledCorpCardForImplementation(
+      state,
+      legalAction,
+      window.sourceCardId,
+      window.sourceDefinitionId,
+      window.targetCardId,
+      window.scope,
+    );
+    return;
+  }
+  const option = choice.options.find((candidate) => candidate.id === selected);
+  const sourceCardId =
+    typeof option?.value === "string"
+      ? (option.value as CardInstanceId)
+      : undefined;
+  const candidate = departmentOfMisinformationCandidates(state).find(
+    (item) => item.sourceCardId === sourceCardId,
+  );
+  if (!candidate) throw new Error("Diese Expose-Prevention ist nicht legal.");
+  const instance = mustInstance(state.cardInstances, candidate.sourceCardId);
+  state.corp.credits -= candidate.totalCost;
+  state.cardInstances[candidate.sourceCardId] = {
+    ...instance,
+    rezzed: true,
+    faceup: true,
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    exposePreventionDecision: "apply",
+    exposePrevented: true,
+    targetCardId: window.targetCardId,
+    sourceCardId: window.sourceCardId,
+    sourceDefinitionId: window.sourceDefinitionId,
+    preventionSourceCardId: candidate.sourceCardId,
+    preventionSourceDefinitionId: candidate.sourceDefinitionId,
+    preventionRezzedDuringExpose: candidate.rezzedDuringExpose,
+    paidCredits: candidate.totalCost,
+    corpCreditsAfter: state.corp.credits,
+  };
 }
 
 function installedRunnerIcebreakerIds(state: GameState): CardInstanceId[] {
@@ -13716,19 +14022,15 @@ function hasHostingCycle(state: GameState, cardId: CardInstanceId): boolean {
 function spendCredits(state: GameState, side: Side, amount: number): void {
   if (amount <= 0) return;
   if (side === "corp") {
-    if (state.corp.credits < amount)
-      throw new Error("Die Korp kann die Kosten nicht bezahlen.");
-    const installRezTemporarySpend = Math.min(
-      amount,
-      Math.max(0, Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0)),
+    const installRezReserved = Math.max(
+      0,
+      Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
     );
-    if (installRezTemporarySpend > 0 && state.corpTemporaryInstallRezCredits)
-      state.corpTemporaryInstallRezCredits.remaining = Math.max(
-        0,
-        state.corpTemporaryInstallRezCredits.remaining - installRezTemporarySpend,
-      );
+    const spendableCorpCredits = Math.max(0, state.corp.credits - installRezReserved);
+    if (spendableCorpCredits < amount)
+      throw new Error("Die Korp kann die Kosten nicht bezahlen.");
     const runTemporarySpend = Math.min(
-      amount - installRezTemporarySpend,
+      amount,
       Math.max(0, Math.floor(state.run?.corpRunTemporaryCredits?.remaining ?? 0)),
     );
     if (runTemporarySpend > 0 && state.run?.corpRunTemporaryCredits)
@@ -13742,6 +14044,31 @@ function spendCredits(state: GameState, side: Side, amount: number): void {
   if (state.runner.credits < amount)
     throw new Error("Der Runner kann die Kosten nicht bezahlen.");
   state.runner.credits -= amount;
+}
+
+function spendCorpInstallRezCredits(state: GameState, amount: number): void {
+  if (amount <= 0) return;
+  if (state.corp.credits < amount)
+    throw new Error("Die Korp kann die Kosten nicht bezahlen.");
+  const installRezTemporarySpend = Math.min(
+    amount,
+    Math.max(0, Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0)),
+  );
+  if (installRezTemporarySpend > 0 && state.corpTemporaryInstallRezCredits)
+    state.corpTemporaryInstallRezCredits.remaining = Math.max(
+      0,
+      state.corpTemporaryInstallRezCredits.remaining - installRezTemporarySpend,
+    );
+  const runTemporarySpend = Math.min(
+    amount - installRezTemporarySpend,
+    Math.max(0, Math.floor(state.run?.corpRunTemporaryCredits?.remaining ?? 0)),
+  );
+  if (runTemporarySpend > 0 && state.run?.corpRunTemporaryCredits)
+    state.run.corpRunTemporaryCredits.remaining = Math.max(
+      0,
+      state.run.corpRunTemporaryCredits.remaining - runTemporarySpend,
+    );
+  state.corp.credits -= amount;
 }
 
 function availableRunnerProgramInstallCredits(state: GameState): number {
