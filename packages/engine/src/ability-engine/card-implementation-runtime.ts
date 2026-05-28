@@ -1719,6 +1719,15 @@ function sameFortSubroutineTargets(
         subroutine.type !== "end_the_run_unless_runner_pays"
       )
         return;
+      if (
+        state.run?.encounterAdditionalSubroutines?.some(
+          (record) =>
+            record.sourceCardInstanceId === sourceCardId &&
+            record.targetIceId === iceId &&
+            record.originalSubroutineId === subroutine.id,
+        )
+      )
+        return;
       targets.push({
         iceId,
         iceDefinition: definition,

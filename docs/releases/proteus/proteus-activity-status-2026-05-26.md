@@ -54,7 +54,7 @@ PRO014 ist umgesetzt und PRO014-1 sowie PRO014-2 sind als reine Behavior-Härtun
 
 PRO015 ist umgesetzt und PRO015-1 ist als reine Härtung erledigt: `Frame-Up`, `Identity Donor`, `Live News Feed`, `Senatorial Field Trip` und `Subliminal Corruption` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden run-scoped Bad-Publicity-Aftermath, Run-History-Zähler, Frame-Up-Turn-History, ein Grip-basiertes Meat-Damage-Replacement und eine stale-sichere Last-Rezzed-Black-ICE-Corp-Choice. PRO015-1 engt `Identity Donor` auf echte Korp-Zugphasen ein und härtet die Run-History-Tests über Produktionshooks. Das bestehende Bad-Publicity-7+-Loss-Gate bleibt die einzige Game-End-Autorität. Implementierungszählung bleibt 134/154, 20 fehlend, kein Drift. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
-PRO016 ist umgesetzt: `Forward's Legacy`, `Roadblock`, `Executive Boot Camp` und `Lisa Blight` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Bausteine für deterministische d6-Run-/Encounter-Würfe, encountergebundene ICE-Strength-Modifier, Roadblock-Derez mit automatischem Passieren, Random-HQ-Discard-Kosten, rungebundene temporäre Korp-Credits und rungebundene Subroutine-Copies auf ICE im selben Fort. Implementierungszählung steigt auf 138/154, 16 fehlend, kein Drift. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
+PRO016 ist umgesetzt und PRO016-1 ist als reine Härtung erledigt: `Forward's Legacy`, `Roadblock`, `Executive Boot Camp` und `Lisa Blight` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Bausteine für deterministische d6-Run-/Encounter-Würfe, encountergebundene ICE-Strength-Modifier, Roadblock-Derez mit automatischem Passieren, Random-HQ-Discard-Kosten, bewusst breite rungebundene temporäre Korp-Credits für Korp-Run-Kosten und rungebundene Subroutine-Copies auf ICE im selben Fort. PRO016-1 härtet Executive-Boot-Camp-Verbrauch/Cleanup/Hidden-Info-Tests und Lisa-Blight-Duplikat-Revalidierung: dieselbe Quellen-/Ziel-/Subroutine-Kombination wird im Run nicht doppelt angeboten oder resolved. Implementierungszählung bleibt 138/154, 16 fehlend, kein Drift. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
 
@@ -75,7 +75,7 @@ Der führende Detailplan `proteus-cardimplementation-detailplan-2026-05-26.md` w
 | PRO014 | erledigt | 8 Corp-Asset-/Upgrade-Utility-Karten; Implementierungszählung 129/154. |
 | PRO014-1 | umgesetzt | Behavior-Härtung für PRO014; keine neue Kartenpromotion. |
 | PRO015 | umgesetzt; PRO015-1 Nacharbeit erledigt | 5 Bad-Publicity-Run-/Replacement-Karten; Implementierungszählung 134/154. |
-| PRO016 | umgesetzt | 4 Random-/Dice-/Encounter-Karten; Implementierungszählung 138/154. |
+| PRO016 | umgesetzt; PRO016-1 Nacharbeit erledigt | 4 Random-/Dice-/Encounter-Karten; Implementierungszählung 138/154. |
 | PRO017 | neu zu schneiden | 6 Action-Economy-/Action-Debt-Karten. |
 | PRO018 | neu zu schneiden | 2 Hidden-Zone-Search-/Install-Tutor-Karten. |
 | PRO019 | neu zu schneiden | 8 regelvertragliche Baseline-/Utility-Karten. |
@@ -137,6 +137,7 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-28-proteus-pro015-bad-publicity-run-replacement-suite.md` | `done` | PRO015 | 5 Bad-Publicity-Run-/Replacement-Karten; neue Implementierungszählung 134/154. |
 | `done/act-2026-05-28-proteus-pro015-1-bad-publicity-hardening.md` | `done` | PRO015-1 | Identity-Donor-Timing und PRO015-Run-History-Tests gehärtet; keine neue Kartenpromotion, Implementierungszählung bleibt 134/154. |
 | `done/act-2026-05-28-proteus-pro016-random-dice-encounter-suite.md` | `done` | PRO016 | 4 Random-/Dice-/Encounter-Karten; neue Implementierungszählung 138/154. |
+| `done/act-2026-05-28-proteus-pro016-1-random-dice-hardening.md` | `done` | PRO016-1 | Executive-Boot-Camp-Run-Credits und Lisa-Blight-Subroutine-Duplikate gehärtet; keine neue Kartenpromotion, Implementierungszählung bleibt 138/154. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
 | `done/act-2026-05-24-proteus-phase-7a-hardware-deck-foundation.md` | `done` | Phase 7a | 1 Karte: `Deck, The`. |
 | `done/act-2026-05-24-proteus-phase-7b-icebreaker-credit-decks.md` | `done` | Phase 7b | 2 Karten: `Cortical Cybermodem`, `Sunburst Cranial Interface`. |
@@ -242,7 +243,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | PRO014-1 | umgesetzt | Reine Behavior-Härtung für PRO014: Siren, Department of Misinformation, Cybertech Think Tank und Government Contract laufen über explizite LegalAction-/Choice-/Kosten-Revalidierung; `corp-asset-upgrade-utility.test.ts` deckt die acht PRO014-Karten ab. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
 | PRO014-2 | umgesetzt | Reine Raymond-Ellison-Härtung für PRO014: temporäre Credits gelten für Korp-Kosten während des aktuellen Runs, werden am Run-Ende zurückgegeben und werden nicht mehr implizit durch globale Korp-`spendCredits`-Pfade verbraucht. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
 | PRO015 | umgesetzt; PRO015-1 Nacharbeit erledigt | Bad-Publicity Run/Replacement Suite mit 5 Karten; PRO015-1 ist reine Härtung ohne Zähländerung. |
-| PRO016 | umgesetzt | Random/Dice/Encounter Suite mit 4 Karten. |
+| PRO016 | umgesetzt; PRO016-1 Nacharbeit erledigt | Random/Dice/Encounter Suite mit 4 Karten; Härtung ohne neue Karten- oder Manifestfreigabe. |
 | PRO017 | neu zu schneiden | Action Economy/Action Debt Suite mit 6 Karten. |
 | PRO018 | neu zu schneiden | Hidden-Zone Search/Install Tutor Suite mit 2 Karten. |
 | PRO019 | neu zu schneiden | Rule-Contract Baseline Utilities mit 8 Karten. |

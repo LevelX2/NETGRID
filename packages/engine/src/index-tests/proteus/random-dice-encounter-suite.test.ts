@@ -3,6 +3,7 @@ import {
   applyAction,
   createGameAfterSetup,
   getLegalActions,
+  getPlayerView,
   hashState,
   replayEvents,
 } from "../../index";
@@ -186,6 +187,10 @@ function expectReplayStable(before: GameState, after: GameState): void {
   expect(hashState(replay.state)).toBe(hashState(after));
 }
 
+function jackOut(state: GameState): GameState {
+  return apply(state, "runner", (action) => action.type === "jack_out");
+}
+
 function payloadNumber(payload: unknown, key: string): number | undefined {
   const amounts = (payload as { amounts?: Record<string, unknown> } | undefined)
     ?.amounts;
@@ -274,7 +279,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
     expect(state!.run?.lastPassedIceId).toBe(roadblock);
   });
 
-  it("uses Executive Boot Camp only during runs with side-safe random HQ discard and run credit cleanup", () => {
+  it("uses Executive Boot Camp only during runs with side-safe random HQ discard", () => {
     let state = baseState("pro016-boot-camp");
     const bootCamp = addCorpRoot(state, EXECUTIVE_BOOT_CAMP, "boot_camp_1", "remote_1", true);
     addCorpHq(state, SCORCHED_EARTH, "boot_hq_1");
@@ -303,10 +308,80 @@ describe("Proteus PRO016 random dice encounter suite", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
       SCORCHED_EARTH,
     );
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      SCORCHED_EARTH,
+    );
     expectReplayStable(before, state);
   });
 
-  it("copies a same-fort subroutine with Lisa Blight and rejects empty-HQ costs", () => {
+  it("spends Executive Boot Camp credits on Korp costs during the run and returns unused credits at run end", () => {
+    let state = baseState("pro016-boot-camp-spend-cleanup");
+    const bootCamp = addCorpRoot(state, EXECUTIVE_BOOT_CAMP, "boot_camp_2", "remote_1", true);
+    const lisa = addCorpRoot(state, LISA_BLIGHT, "boot_lisa", "remote_1", true);
+    const wall = addCorpIce(state, WALL, "boot_wall", "remote_1", true);
+    addCorpHq(state, SCORCHED_EARTH, "boot_spend_hq_1");
+    addCorpHq(state, SCORCHED_EARTH, "boot_spend_hq_2");
+    state = encounterIce(state, "remote_1", wall);
+    state.timingPoint = "run.jack_out_window";
+    const bootAction = mustAction(
+      state,
+      "corp",
+      (candidate) =>
+        candidate.type === "activated_card_ability" && candidate.source === bootCamp,
+    );
+    state = applyLegal(state, "corp", bootAction.actionId);
+    expect(state.corp.credits).toBe(22);
+    expect(state.run?.corpRunTemporaryCredits?.remaining).toBe(2);
+    const lisaAction = mustAction(
+      state,
+      "corp",
+      (candidate) =>
+        candidate.type === "activated_card_ability" &&
+        candidate.source === lisa &&
+        candidate.payload?.targetCardId === wall,
+    );
+    state = applyLegal(state, "corp", lisaAction.actionId);
+    expect(state.corp.credits).toBe(21);
+    expect(state.run?.corpRunTemporaryCredits?.remaining).toBe(1);
+    const beforeCleanup = state;
+    state = jackOut(state);
+    expect(state.run).toBeUndefined();
+    expect(state.corp.credits).toBe(20);
+    expectReplayStable(beforeCleanup, state);
+  });
+
+  it("removes unspent Executive Boot Camp credits at run end without leaving a post-run pool", () => {
+    let state = baseState("pro016-boot-camp-unspent-cleanup");
+    const bootCamp = addCorpRoot(state, EXECUTIVE_BOOT_CAMP, "boot_camp_3", "remote_1", true);
+    addCorpHq(state, SCORCHED_EARTH, "boot_unspent_hq_1");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state.timingPoint = "run.jack_out_window";
+    state = applyLegal(
+      state,
+      "corp",
+      mustAction(
+        state,
+        "corp",
+        (candidate) =>
+          candidate.type === "activated_card_ability" && candidate.source === bootCamp,
+      ).actionId,
+    );
+    expect(state.corp.credits).toBe(22);
+    state = jackOut(state);
+    expect(state.run).toBeUndefined();
+    expect(state.corp.credits).toBe(20);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.type === "activated_card_ability" && action.source === bootCamp,
+      ),
+    ).toBe(false);
+  });
+
+  it("copies a same-fort subroutine directly after the original with Lisa Blight and rejects empty-HQ costs", () => {
     let state = baseState("pro016-lisa");
     const lisa = addCorpRoot(state, LISA_BLIGHT, "lisa_1", "remote_1", true);
     const wall = addCorpIce(state, WALL, "lisa_wall", "remote_1", true);
@@ -332,6 +407,18 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       subroutineKind: "end_the_run",
     });
     expectReplayStable(before, state);
+    state.timingPoint = "run.encounter_ice";
+    state.run!.phase = "encounter_ice";
+    const subroutines =
+      getPlayerView(state, "runner")
+        .servers.find((server) => server.id === "remote_1")
+        ?.ice.find((ice) => ice.instanceId === wall)
+        ?.effectiveRunQuote?.subroutines ?? [];
+    const originalIndex = subroutines.findIndex(
+      (subroutine) => subroutine.id === action.payload?.subroutineId,
+    );
+    expect(originalIndex).toBeGreaterThanOrEqual(0);
+    expect(subroutines[originalIndex + 1]?.id).toContain("copied_subroutine");
 
     let emptyHq = baseState("pro016-lisa-empty");
     addCorpRoot(emptyHq, LISA_BLIGHT, "lisa_empty", "remote_1", true);
@@ -343,6 +430,79 @@ describe("Proteus PRO016 random dice encounter suite", () => {
     expect(
       getLegalActions(emptyHq, "corp").some(
         (candidate) => candidate.type === "activated_card_ability",
+      ),
+    ).toBe(false);
+  });
+
+  it("keeps Lisa Blight subroutine copies run-scoped and rejects stale duplicate targets", () => {
+    let state = baseState("pro016-lisa-duplicate");
+    const lisa = addCorpRoot(state, LISA_BLIGHT, "lisa_duplicate", "remote_1", true);
+    const wall = addCorpIce(state, WALL, "lisa_duplicate_wall", "remote_1", true);
+    addCorpHq(state, SCORCHED_EARTH, "lisa_duplicate_hq_1");
+    addCorpHq(state, SCORCHED_EARTH, "lisa_duplicate_hq_2");
+    state = encounterIce(state, "remote_1", wall);
+    state.timingPoint = "run.jack_out_window";
+    const firstAction = mustAction(
+      state,
+      "corp",
+      (candidate) =>
+        candidate.type === "activated_card_ability" &&
+        candidate.source === lisa &&
+        candidate.payload?.targetCardId === wall &&
+        candidate.payload?.subroutineIndex === 0,
+    );
+    const staleState = structuredClone(state) as GameState;
+    staleState.run!.encounterAdditionalSubroutines = [
+      ...(staleState.run!.encounterAdditionalSubroutines ?? []),
+      {
+        sourceCardInstanceId: lisa,
+        sourceDefinitionId: LISA_BLIGHT,
+        sourceTitle: "Lisa Blight",
+        targetIceId: wall,
+        originalSubroutineId: String(firstAction.payload?.subroutineId ?? ""),
+        subroutineKind: "end_the_run",
+      },
+    ];
+    const staleResult = applyAction(staleState, {
+      matchId: staleState.matchId,
+      side: "corp",
+      actionId: firstAction.actionId,
+      clientKnownStateVersion: staleState.stateVersion,
+      idempotencyKey: "corp-stale-lisa-duplicate",
+    });
+    expect(staleResult.ok).toBe(false);
+
+    state = applyLegal(state, "corp", firstAction.actionId);
+    expect(
+      getLegalActions(state, "corp").some(
+        (candidate) =>
+          candidate.type === "activated_card_ability" &&
+          candidate.source === lisa &&
+          candidate.payload?.targetCardId === wall &&
+          candidate.payload?.subroutineIndex === 0,
+      ),
+    ).toBe(false);
+    state = jackOut(state);
+    expect(state.run).toBeUndefined();
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(state.run?.encounterAdditionalSubroutines).toBeUndefined();
+  });
+
+  it("keeps Lisa Blight illegal for other forts", () => {
+    let state = baseState("pro016-lisa-wrong-fort");
+    const lisa = addCorpRoot(state, LISA_BLIGHT, "lisa_wrong_fort", "remote_2", true);
+    const wall = addCorpIce(state, WALL, "lisa_wrong_wall", "remote_1", true);
+    addCorpHq(state, SCORCHED_EARTH, "lisa_wrong_hq_1");
+    state = encounterIce(state, "remote_1", wall);
+    state.timingPoint = "run.jack_out_window";
+    expect(
+      getLegalActions(state, "corp").some(
+        (candidate) =>
+          candidate.type === "activated_card_ability" && candidate.source === lisa,
       ),
     ).toBe(false);
   });

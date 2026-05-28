@@ -15,6 +15,8 @@ export const proteusExecutiveBootCampImplementation: CardImplementationDefinitio
           kind: "gain_temporary_corp_run_credits",
           recipient: "corp",
           amount: 2,
+          // Executive Boot Camp's temporary pool is intentionally broad: any
+          // generic Korp cost routed through the current-run payment context may use it.
           usableFor: "corp_costs_during_this_run",
           cleanup: "run_end",
           visibility: "public",

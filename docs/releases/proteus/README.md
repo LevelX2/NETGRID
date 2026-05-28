@@ -1,6 +1,6 @@
 # Proteus-Dokumentation
 
-`docs/releases/proteus/` bündelt die Artefakte für den importierten Proteus-Kartenstand. Import, Coverage, Slicing und Mechanikverträge bleiben die führenden Handoffs; die abgeschlossenen Detail-Slices geben einzelne Karten beziehungsweise Foundations eng begrenzt für die Runtime frei. Nach PRO016 stehen 138 von 154 Proteus-Karten als konkrete CardImplementation-Dateien bereit; 16 fehlen noch. Proteus ist weiterhin nicht decklegal, nicht formatlegal und nicht AI-unterstützt.
+`docs/releases/proteus/` bündelt die Artefakte für den importierten Proteus-Kartenstand. Import, Coverage, Slicing und Mechanikverträge bleiben die führenden Handoffs; die abgeschlossenen Detail-Slices geben einzelne Karten beziehungsweise Foundations eng begrenzt für die Runtime frei. Nach PRO016-1 stehen unverändert 138 von 154 Proteus-Karten als konkrete CardImplementation-Dateien bereit; 16 fehlen noch. Proteus ist weiterhin nicht decklegal, nicht formatlegal und nicht AI-unterstützt.
 
 ## Enthaltene Artefakte
 
@@ -21,7 +21,7 @@
 
 ## Gate
 
-Proteus bleibt außerhalb explizit abgeschlossener Implementierungsslices blockiert. Abgeschlossen sind die Done-Activities für Phase 1a, 1b, 1d, 1g, 2a bis 2d, 3a bis 3c, 3e, 4a, 5b, 7a bis 7d, 8a bis 8f, 9d sowie PRO007, PRO008, PRO009, PRO009-1, PRO009-2, PRO010, PRO010-1, PRO011, PRO011-1, PRO012, PRO012-1, PRO013, PRO013-1, PRO014, PRO014-1, PRO014-2, PRO015, PRO015-1 und PRO016. Die freigegebenen Karten sind `human_playable`, aber nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`. PRO016 ergänzt vier Random-/Dice-/Encounter-Karten mit deterministischen d6-Würfen, Random-HQ-Discard-Kosten, rungebundenen Korp-Credits und Subroutine-Copy-Zielen. Der Harness steht danach bei 154/138/16 ohne Drift. Jeder spätere Slice braucht eigene Requirements, Tests und Gate-Nachweise. Die übrigen Phase-Activities bleiben entlang von `detailed-phase-slice-plan-2026-05-24.md` weiter zu bearbeiten.
+Proteus bleibt außerhalb explizit abgeschlossener Implementierungsslices blockiert. Abgeschlossen sind die Done-Activities für Phase 1a, 1b, 1d, 1g, 2a bis 2d, 3a bis 3c, 3e, 4a, 5b, 7a bis 7d, 8a bis 8f, 9d sowie PRO007, PRO008, PRO009, PRO009-1, PRO009-2, PRO010, PRO010-1, PRO011, PRO011-1, PRO012, PRO012-1, PRO013, PRO013-1, PRO014, PRO014-1, PRO014-2, PRO015, PRO015-1, PRO016 und PRO016-1. Die freigegebenen Karten sind `human_playable`, aber nicht `deck_legal`, nicht `format_legal` und nicht `ai_supported`. PRO016 ergänzt vier Random-/Dice-/Encounter-Karten mit deterministischen d6-Würfen, Random-HQ-Discard-Kosten, rungebundenen Korp-Credits und Subroutine-Copy-Zielen; PRO016-1 härtet Executive-Boot-Camp-Cleanup und Lisa-Blight-Duplikat-Revalidierung ohne neue Kartenzählung. Der Harness steht danach bei 154/138/16 ohne Drift. Jeder spätere Slice braucht eigene Requirements, Tests und Gate-Nachweise. Die übrigen Phase-Activities bleiben entlang von `detailed-phase-slice-plan-2026-05-24.md` weiter zu bearbeiten.
 
 Phase 1c ist aktuell blockiert: `Emergency Rig` enthält in den lokalen Quellen eine positive, aber unbegrenzte `X`-Counter-Auswahl ohne Kosten- oder Wertbezug. Der Blocker ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md` dokumentiert; `Rent-to-Own Contract` wird nicht isoliert promotet, solange der gemeinsame Slice nicht vollständig erfüllbar ist.
 
@@ -57,7 +57,7 @@ Phase 2e/2f/PRO015 ist abgeschlossen; dokumentiert ist dies in `docs/activities/
 
 Phase 6e bleibt als alte Scope-Blocker-Activity nur Statusreferenz: Die PRO013-Zielkarten `Blackmail`, `Pirate Broadcast` und `Promises, Promises` sind durch PRO013 umgesetzt. Daraus folgt keine zusätzliche Komplettzählung der Umbrella-Activity.
 
-Phase 9a/PRO016 ist abgeschlossen; dokumentiert ist dies in `docs/activities/done/act-2026-05-28-proteus-pro016-random-dice-encounter-suite.md`. Die alte Phase-9a-Activity bleibt als Referenz ohne doppelte Zählung bestehen.
+Phase 9a/PRO016 ist abgeschlossen; dokumentiert ist dies in `docs/activities/done/act-2026-05-28-proteus-pro016-random-dice-encounter-suite.md`. PRO016-1 ist als reine Härtung in `docs/activities/done/act-2026-05-28-proteus-pro016-1-random-dice-hardening.md` dokumentiert. Die alte Phase-9a-Activity bleibt als Referenz ohne doppelte Zählung bestehen.
 
 Phase 9b ist aktuell blockiert: `AI Board Member`, `Project Venice` und `Corporate Guard(R) Temps` brauchen turngebundene zusätzliche beziehungsweise restricted/forfeit Actions; `Please Don't Choke Anyone` braucht ein Korp-Agenda-Damage-Replacement-Fenster nach Runner-Prevention; `Bargain with Viacox` braucht forced start-of-turn Random-Actions mit Hidden-Grip-Reveal und Play-/Install-Revalidierung. `Lucidrine™ Drip Feed` wird nicht isoliert promotet, solange der gemeinsame Action-Economy-/Action-Debt-Vertrag nicht vollständig ist. Der Blocker ist in `docs/activities/in-progress/act-2026-05-24-proteus-phase-9b-action-economy-debt.md` dokumentiert.
 
