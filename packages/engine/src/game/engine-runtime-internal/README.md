@@ -46,4 +46,24 @@ Delegate modules are mechanical forwarders. Do not add new features permanently 
 
 The orchestrator owns the global bootstrap order. Phase modules expose configure/initialize functions and must not configure each other at import time. Preserve the import-time side effect from `public-api.ts`: importing the public runtime must still execute the bootstrap exactly once through `runtime-bootstrap.ts`. New gameplay logic does not belong in bootstrap modules; put it in the owning game/domain module and wire it through a focused runtime bridge only when necessary.
 
+`action-runtime-hosts.ts`, `flow-runtime-hosts.ts` and `state-runtime-services.ts` are now aggregators for smaller host/service families. ARCH-112 split them into:
+
+- `apply-action-runtime-hosts.ts`
+- `legal-action-runtime-hosts.ts`
+- `play-board-runtime-hosts.ts`
+- `scored-economy-runtime-hosts.ts`
+- `run-flow-runtime-hosts.ts`
+- `access-flow-runtime-hosts.ts`
+- `damage-trace-runtime-hosts.ts`
+- `install-rez-runtime-hosts.ts`
+- `encounter-movement-runtime-hosts.ts`
+- `lookup-runtime-services.ts`
+- `zone-runtime-services.ts`
+- `economy-runtime-services.ts`
+- `draw-random-runtime-services.ts` is intentionally not present yet because draw/random-specific services still live in the broader state/flow families.
+- `counter-turn-runtime-services.ts`
+- `card-strength-cost-runtime-services.ts`
+
+These files are runtime wiring and adapter families. Aggregators must not grow new domain behavior; new gameplay, state, run/access, payment, damage, trace or action semantics belong in the owning `game/*` or `ability-engine/*` module first.
+
 The target architecture is now a small package facade, a small runtime facade, and private runtime domain modules protected by size and import gates. Future work should improve specific internal domain modules instead of growing the facades.

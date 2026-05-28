@@ -73,6 +73,36 @@ describe("engine runtime module size gates", () => {
     expect(
       lineCount(join(runtimeInternalDir, "card-runtime-hosts.ts")),
     ).toBeLessThanOrEqual(900);
+    expect(
+      lineCount(join(runtimeInternalDir, "action-runtime-hosts.ts")),
+    ).toBeLessThanOrEqual(600);
+    expect(
+      lineCount(join(runtimeInternalDir, "flow-runtime-hosts.ts")),
+    ).toBeLessThanOrEqual(700);
+    expect(
+      lineCount(join(runtimeInternalDir, "state-runtime-services.ts")),
+    ).toBeLessThanOrEqual(700);
+    for (const module of [
+      "apply-action-runtime-hosts.ts",
+      "legal-action-runtime-hosts.ts",
+      "play-board-runtime-hosts.ts",
+      "scored-economy-runtime-hosts.ts",
+      "access-flow-runtime-hosts.ts",
+      "damage-trace-runtime-hosts.ts",
+      "encounter-movement-runtime-hosts.ts",
+      "install-rez-runtime-hosts.ts",
+      "run-flow-runtime-hosts.ts",
+      "card-strength-cost-runtime-services.ts",
+      "counter-turn-runtime-services.ts",
+      "economy-runtime-services.ts",
+      "lookup-runtime-services.ts",
+      "zone-runtime-services.ts",
+    ]) {
+      expect(
+        lineCount(join(runtimeInternalDir, module)),
+        `${module} exceeds the host/service submodule ceiling`,
+      ).toBeLessThanOrEqual(1400);
+    }
     for (const module of [
       "activated-card-runtime-hosts.ts",
       "card-lifecycle-runtime-hosts.ts",

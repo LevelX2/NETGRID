@@ -4,6 +4,10 @@ import { createActivatedCardRuntimeHosts } from "./activated-card-runtime-hosts"
 import { configureActionRuntimeBootstrap } from "./action-runtime-bootstrap";
 import { createActionRuntimeHosts } from "./action-runtime-hosts";
 import { corpRunnerActionPaidWindowActions as delegatedCorpRunnerActionPaidWindowActions } from "./action-runtime-delegates";
+import { createApplyActionRuntimeHosts } from "./apply-action-runtime-hosts";
+import { createLegalActionRuntimeHosts } from "./legal-action-runtime-hosts";
+import { createPlayBoardRuntimeHosts } from "./play-board-runtime-hosts";
+import { createScoredEconomyRuntimeHosts } from "./scored-economy-runtime-hosts";
 import { configureCardRuntimeBootstrap } from "./card-runtime-bootstrap";
 import { createCardLifecycleRuntimeHosts } from "./card-lifecycle-runtime-hosts";
 import { triggerAbilityExecutionHost as delegatedTriggerAbilityExecutionHost } from "./card-runtime-delegates";
@@ -17,6 +21,11 @@ import { createCorpRuntimeResolvers } from "./corp-runtime-resolvers";
 import { createCorpZoneRuntimeHosts } from "./corp-zone-runtime-hosts";
 import { configureFlowRuntimeBootstrap } from "./flow-runtime-bootstrap";
 import { createFlowRuntimeHosts } from "./flow-runtime-hosts";
+import { createAccessFlowRuntimeHosts } from "./access-flow-runtime-hosts";
+import { createDamageTraceRuntimeHosts } from "./damage-trace-runtime-hosts";
+import { createEncounterMovementRuntimeHosts } from "./encounter-movement-runtime-hosts";
+import { createInstallRezRuntimeHosts } from "./install-rez-runtime-hosts";
+import { createRunFlowRuntimeHosts } from "./run-flow-runtime-hosts";
 import { runMovementHostForState as delegatedRunMovementHostForState } from "./flow-runtime-delegates";
 import { createHiddenZoneArrangeRuntime } from "./hidden-zone-arrange-runtime";
 import { createHiddenZoneNonSearchPlayfulAiRuntime } from "./hidden-zone-nonsearch-playful-ai-runtime";
@@ -33,6 +42,11 @@ import { initializeStateRuntimeBootstrap } from "./state-runtime-bootstrap";
 import { runnerRecurringCredits as delegatedRunnerRecurringCredits } from "./state-runtime-delegates";
 import { createStateRuntimeResolvers } from "./state-runtime-resolvers";
 import { createStateRuntimeServices } from "./state-runtime-services";
+import { createCardStrengthCostRuntimeServices } from "./card-strength-cost-runtime-services";
+import { createCounterTurnRuntimeServices } from "./counter-turn-runtime-services";
+import { createEconomyRuntimeServices } from "./economy-runtime-services";
+import { createLookupRuntimeServices } from "./lookup-runtime-services";
+import { createZoneRuntimeServices } from "./zone-runtime-services";
 import { createTriggerAbilityRuntimeHosts } from "./trigger-ability-runtime-hosts";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
 import { createTurnRuntimeResolvers } from "./turn-runtime-resolvers";
@@ -44,6 +58,10 @@ describe("engine runtime internal domains", () => {
       "./choice-hidden-zone-runtime.ts",
       "./activated-card-runtime-hosts.ts",
       "./action-runtime-hosts.ts",
+      "./apply-action-runtime-hosts.ts",
+      "./legal-action-runtime-hosts.ts",
+      "./play-board-runtime-hosts.ts",
+      "./scored-economy-runtime-hosts.ts",
       "./action-runtime-delegates.ts",
       "./card-lifecycle-runtime-hosts.ts",
       "./card-runtime-delegates.ts",
@@ -55,6 +73,11 @@ describe("engine runtime internal domains", () => {
       "./corp-runtime-resolvers.ts",
       "./corp-zone-runtime-hosts.ts",
       "./flow-runtime-hosts.ts",
+      "./access-flow-runtime-hosts.ts",
+      "./damage-trace-runtime-hosts.ts",
+      "./encounter-movement-runtime-hosts.ts",
+      "./install-rez-runtime-hosts.ts",
+      "./run-flow-runtime-hosts.ts",
       "./flow-runtime-delegates.ts",
       "./hidden-zone-arrange-runtime.ts",
       "./hidden-zone-nonsearch-playful-ai-runtime.ts",
@@ -70,6 +93,11 @@ describe("engine runtime internal domains", () => {
       "./state-runtime-bootstrap.ts",
       "./runtime-delegate-store.ts",
       "./state-runtime-delegates.ts",
+      "./card-strength-cost-runtime-services.ts",
+      "./counter-turn-runtime-services.ts",
+      "./economy-runtime-services.ts",
+      "./lookup-runtime-services.ts",
+      "./zone-runtime-services.ts",
       "./state-corp-runtime-resolvers.ts",
       "./state-runtime-resolvers.ts",
       "./state-runtime-services.ts",
@@ -141,6 +169,19 @@ describe("engine runtime internal domains", () => {
     expect(typeof createActionRuntimeHosts({}).scoredAgendaFlowHost).toBe(
       "function",
     );
+    expect(typeof createApplyActionRuntimeHosts({}).turnBasicExecutionHost).toBe(
+      "function",
+    );
+    expect(
+      typeof createLegalActionRuntimeHosts({}, {})
+        .corpRunnerActionPaidWindowActions,
+    ).toBe("function");
+    expect(
+      typeof createScoredEconomyRuntimeHosts({}, {}).scoredAgendaAbilityHost,
+    ).toBe("function");
+    expect(typeof createPlayBoardRuntimeHosts({}).playCardExecutionHost).toBe(
+      "function",
+    );
     expect(typeof createCardRuntimeHosts({}).installCardHost).toBe("function");
     expect(
       typeof createCardRuntimeResolvers({})
@@ -155,6 +196,20 @@ describe("engine runtime internal domains", () => {
     expect(typeof createFlowRuntimeHosts({}).runMovementHostForState).toBe(
       "function",
     );
+    expect(typeof createRunFlowRuntimeHosts({}, {}).startRun).toBe("function");
+    expect(
+      typeof createDamageTraceRuntimeHosts({}).traceCounterEffectDefinitionFor,
+    ).toBe("function");
+    expect(
+      typeof createInstallRezRuntimeHosts({}).canInstallCorpRootCardInServer,
+    ).toBe("function");
+    expect(
+      typeof createEncounterMovementRuntimeHosts({}, {})
+        .runnerEncounterActionHostForState,
+    ).toBe("function");
+    expect(typeof createAccessFlowRuntimeHosts({}).accessFlowHost).toBe(
+      "function",
+    );
     expect(typeof createStateCorpRuntimeResolvers({}).spendKrumzTraceBits).toBe(
       "function",
     );
@@ -162,6 +217,22 @@ describe("engine runtime internal domains", () => {
       "function",
     );
     expect(typeof createStateRuntimeServices({}).canHostProgramOnDaemon).toBe(
+      "function",
+    );
+    expect(
+      typeof createEconomyRuntimeServices({}).runnerInstallableProgramIdsForValuPak,
+    ).toBe("function");
+    expect(typeof createLookupRuntimeServices({}).canHostProgramOnDaemon).toBe(
+      "function",
+    );
+    expect(
+      typeof createCardStrengthCostRuntimeServices({}, {})
+        .breakSubroutineCostBreakdown,
+    ).toBe("function");
+    expect(
+      typeof createCounterTurnRuntimeServices({}, {}).cockroachCounterTotal,
+    ).toBe("function");
+    expect(typeof createZoneRuntimeServices({}).corpIceInstallTotalCost).toBe(
       "function",
     );
     expect(
