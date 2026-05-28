@@ -172,8 +172,8 @@ import {
   doDamage,
   hiddenRunnerResourceRevealPayload,
   isRunnerHardwareDeckDefinition,
+  openDamageResolutionWindow,
   openEventModificationWindow,
-  openPdcaDamageReplacementChoice,
   openReplacementWindow,
   openRunnerInstalledTrashPreventionWindow,
   resolveDamageImminentEvent,
@@ -975,6 +975,7 @@ const runFlow = createRunFlowAdapters({
   damage: {
     createDamageImminentEvent,
     doDamage,
+    openDamageResolutionWindow,
     openEventModificationWindow,
     openReplacementWindow,
     resolveDamageImminentEvent,
@@ -10975,9 +10976,7 @@ function scoredAgendaAbilityHost(
         });
         if (
           legalAction &&
-          (openReplacementWindow(state, event, legalAction) ||
-            openEventModificationWindow(state, event, legalAction) ||
-            openPdcaDamageReplacementChoice(state, event, legalAction))
+          openDamageResolutionWindow(state, event, legalAction)
         ) {
           return {
             damageAmount: 0,

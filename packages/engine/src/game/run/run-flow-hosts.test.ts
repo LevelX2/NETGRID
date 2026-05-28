@@ -168,6 +168,7 @@ function hostFor(calls: string[]): RunFlowHost {
         cardsTrashed: 0,
         flatline: false,
       })) as never,
+      openDamageResolutionWindow: (() => false) as never,
       openEventModificationWindow: (() => false) as never,
       openReplacementWindow: (() => false) as never,
       resolveDamageImminentEvent: (() => ({

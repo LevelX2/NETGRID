@@ -52,6 +52,10 @@ export type EncounterPrintedEffectHost = {
       event: ImminentEvent,
       legalAction: LegalAction,
     ) => boolean;
+    openDamageResolutionWindow: (
+      event: ImminentEvent,
+      legalAction: LegalAction,
+    ) => boolean;
     parisCityGridTracePoolSource: () =>
       | { cardId: CardInstanceId; serverId: Exclude<ServerId, "new_remote"> }
       | undefined;
@@ -199,8 +203,7 @@ export function resolvePrintedDamageSubroutine(
   }
   if (
     legalAction &&
-    (host.callbacks.openReplacementWindow(event, legalAction) ||
-      host.callbacks.openEventModificationWindow(event, legalAction))
+    host.callbacks.openDamageResolutionWindow(event, legalAction)
   ) {
     if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
       run.resolvedSubroutineIndexes.push(subroutineIndex);
@@ -419,12 +422,9 @@ export function applyPrintedTraceSuccessFollowups(
       amount: damageAmount,
       source: `trace:${trace.sourceDefinitionId}:${trace.traceId}`,
     });
-    if (
-      host.callbacks.openReplacementWindow(event, legalAction) ||
-      host.callbacks.openEventModificationWindow(event, legalAction)
-    ) {
-      if (options.deletePendingChoice) delete state.pendingChoice;
-      delete state.trace;
+    if (options.deletePendingChoice) delete state.pendingChoice;
+    delete state.trace;
+    if (host.callbacks.openDamageResolutionWindow(event, legalAction)) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         traceId: trace.traceId,

@@ -12,8 +12,11 @@ import type {
   ImminentEvent,
   LegalAction,
   PlayerAction,
+  Phase,
   ReplacementCandidate,
   ReplacementWindow,
+  Side,
+  TimingPointId,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
@@ -384,6 +387,75 @@ function scoredPdcaAgendaIds(state: GameState): CardInstanceId[] {
     });
 }
 
+function pdcaEventWithReturnContext(
+  state: GameState,
+  event: ImminentEvent,
+): ImminentEvent {
+  return {
+    ...event,
+    modificationWindowId: `proteus_pdca_${event.eventId}`,
+    payload: {
+      ...event.payload,
+      pdcaReturnPhase: state.phase,
+      pdcaReturnTimingPoint: state.timingPoint,
+      pdcaReturnActiveSide: state.activeSide,
+    },
+  };
+}
+
+function restorePdcaReturnContext(state: GameState, event: ImminentEvent): void {
+  if (state.winner || state.phase === "game_over") return;
+  const phase = event.payload.pdcaReturnPhase;
+  const timingPoint = event.payload.pdcaReturnTimingPoint;
+  const activeSide = event.payload.pdcaReturnActiveSide;
+  if (
+    !isPhase(phase) ||
+    !isTimingPointId(timingPoint) ||
+    !isSide(activeSide)
+  )
+    return;
+  state.phase = phase;
+  state.timingPoint = timingPoint;
+  state.activeSide = activeSide;
+}
+
+function isPhase(value: unknown): value is Phase {
+  return (
+    value === "setup" ||
+    value === "corp_draw_phase" ||
+    value === "corp_action_phase" ||
+    value === "corp_discard_phase" ||
+    value === "runner_action_phase" ||
+    value === "runner_discard_phase" ||
+    value === "run" ||
+    value === "game_over"
+  );
+}
+
+function isTimingPointId(value: unknown): value is TimingPointId {
+  return (
+    value === "setup.mulligan.runner" ||
+    value === "setup.mulligan.corp" ||
+    value === "corp_draw.mandatory_draw" ||
+    value === "corp_action.main" ||
+    value === "corp_discard.select_cards" ||
+    value === "corp_discard.complete" ||
+    value === "runner_action.main" ||
+    value === "runner_discard.flatline_check" ||
+    value === "runner_discard.select_cards" ||
+    value === "runner_discard.complete" ||
+    value === "run.approach_ice" ||
+    value === "run.encounter_ice" ||
+    value === "run.jack_out_window" ||
+    value === "access.resolve_card" ||
+    value === "game.checkpoint"
+  );
+}
+
+function isSide(value: unknown): value is Side {
+  return value === "corp" || value === "runner";
+}
+
 export function openPdcaDamageReplacementChoice(
   state: GameState,
   event: ImminentEvent,
@@ -402,10 +474,7 @@ export function openPdcaDamageReplacementChoice(
   const sourceCardId = scoredPdcaAgendaIds(state)[0];
   if (!sourceCardId) return false;
   const definition = definitionFor(state, sourceCardId);
-  state.imminentEvent = {
-    ...event,
-    modificationWindowId: `proteus_pdca_${event.eventId}`,
-  };
+  state.imminentEvent = pdcaEventWithReturnContext(state, event);
   state.pendingChoice = {
     choiceId: `proteus_pdca_${state.stateVersion + 1}_${sourceCardId}`,
     side: "corp",
@@ -442,6 +511,18 @@ export function openPdcaDamageReplacementChoice(
     replacementModel: "all_or_nothing_damage_slice",
   };
   return true;
+}
+
+export function openDamageResolutionWindow(
+  state: GameState,
+  event: ImminentEvent,
+  legalAction: LegalAction,
+): boolean {
+  return (
+    openReplacementWindow(state, event, legalAction) ||
+    openEventModificationWindow(state, event, legalAction) ||
+    openPdcaDamageReplacementChoice(state, event, legalAction)
+  );
 }
 
 export function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSummary {
@@ -505,9 +586,7 @@ export function resolveDamageOperation(
     source: `operation:${source}`,
   };
   const event = createDamageImminentEvent(state, request);
-  if (openReplacementWindow(state, event, legalAction)) return;
-  if (openEventModificationWindow(state, event, legalAction)) return;
-  if (openPdcaDamageReplacementChoice(state, event, legalAction)) return;
+  if (openDamageResolutionWindow(state, event, legalAction)) return;
   const summary = resolveDamageImminentEvent(state, event);
   setDamagePayload(legalAction, summary);
   const payload = (legalAction.payload ??= {});
@@ -1614,7 +1693,6 @@ export function resolveEventModificationChoice(
         ];
       }
     }
-    const summary = resolveDamageImminentEvent(state, event);
     legalAction.payload = {
       ...basePayload,
       eventModificationDecision: diplomaticImmunityCancel ? "cancel" : "pass",
@@ -1632,8 +1710,10 @@ export function resolveEventModificationChoice(
           }
         : {}),
     };
-    setDamagePayload(legalAction, summary);
     clearEventModificationState(state);
+    if (openPdcaDamageReplacementChoice(state, event, legalAction)) return;
+    const summary = resolveDamageImminentEvent(state, event);
+    setDamagePayload(legalAction, summary);
     return;
   }
   if (selected.startsWith("full_body_conversion_pay_")) {
@@ -1665,10 +1745,10 @@ export function resolveEventModificationChoice(
     spendCredits(state, "corp", bypassPaid);
     const preventedAmount = Math.max(0, originalAmount - bypassPaid);
     const finalAmount = bypassPaid;
-    const summary = resolveDamageImminentEvent(state, {
+    const finalEvent = {
       ...event,
       payload: { ...event.payload, amount: finalAmount },
-    });
+    };
     legalAction.payload = {
       ...basePayload,
       eventModificationDecision: "apply",
@@ -1687,8 +1767,10 @@ export function resolveEventModificationChoice(
       fullBodyConversionCorpBypassPaid: bypassPaid,
       fullBodyConversionBypassCostPerDamage: 1,
     };
-    setDamagePayload(legalAction, summary);
     clearEventModificationState(state);
+    if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
+    const summary = resolveDamageImminentEvent(state, finalEvent);
+    setDamagePayload(legalAction, summary);
     return;
   }
   const candidate = window.candidates.find(
@@ -1799,7 +1881,7 @@ export function resolveEventModificationChoice(
     const originalAmount = numberPayload(event, "amount");
     const increaseAmount = Math.max(1, Math.floor(candidate.increaseAmount ?? 1));
     const finalAmount = originalAmount + increaseAmount;
-    const summary = resolveDamageImminentEvent(state, {
+    const finalEvent = {
       ...event,
       payload: {
         ...event.payload,
@@ -1809,7 +1891,7 @@ export function resolveEventModificationChoice(
         cybertechThinkTankSourceCardId: sourceId,
         cybertechThinkTankSourceDefinitionId: source.definitionId,
       },
-    });
+    };
     legalAction.payload = {
       ...basePayload,
       eventModificationDecision: "apply",
@@ -1823,8 +1905,10 @@ export function resolveEventModificationChoice(
       sourceCardId: sourceId,
       remainingCounters: source.advancementCounters,
     };
-    setDamagePayload(legalAction, summary);
     clearEventModificationState(state);
+    if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
+    const summary = resolveDamageImminentEvent(state, finalEvent);
+    setDamagePayload(legalAction, summary);
     return;
   }
   revalidateDamagePreventionCandidateSource(state, candidate);
@@ -1846,10 +1930,10 @@ export function resolveEventModificationChoice(
     candidate,
     preventedAmount,
   );
-  const summary = resolveDamageImminentEvent(state, {
+  const finalEvent = {
     ...event,
     payload: { ...event.payload, amount: finalAmount },
-  });
+  };
   legalAction.payload = {
     ...basePayload,
     eventModificationDecision: "apply",
@@ -1865,8 +1949,10 @@ export function resolveEventModificationChoice(
       : {}),
     ...preventionCostPayload,
   };
-  setDamagePayload(legalAction, summary);
   clearEventModificationState(state);
+  if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
+  const summary = resolveDamageImminentEvent(state, finalEvent);
+  setDamagePayload(legalAction, summary);
 }
 
 export function resolveReplacementChoice(
@@ -1889,15 +1975,16 @@ export function resolveReplacementChoice(
     redactedKind: "replacement",
   };
   if (selected === "pass") {
-    const summary = resolveDamageImminentEvent(state, event);
     legalAction.payload = {
       ...basePayload,
       replacementDecision: "pass",
       replacementOutcome: "original_resolved",
       originalAmount: numberPayload(event, "amount"),
     };
-    setDamagePayload(legalAction, summary);
     clearReplacementState(state);
+    if (openPdcaDamageReplacementChoice(state, event, legalAction)) return;
+    const summary = resolveDamageImminentEvent(state, event);
+    setDamagePayload(legalAction, summary);
     return;
   }
   const candidate = window.candidates.find(
@@ -2221,6 +2308,7 @@ export function resolvePdcaDamageReplacementChoice(
       replacementOutcome: "original_resolved",
     };
     setDamagePayload(legalAction, summary);
+    restorePdcaReturnContext(state, event);
     return;
   }
   if (selected !== `replace_${sourceId}`)
@@ -2245,6 +2333,7 @@ export function resolvePdcaDamageReplacementChoice(
     cardsTrashed: 0,
     flatline: false,
   };
+  restorePdcaReturnContext(state, event);
 }
 
 function trashTargetIdsFromEvent(event: ImminentEvent): CardInstanceId[] {

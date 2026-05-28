@@ -13,7 +13,9 @@ import {
   apply,
   applyChoice,
   toRunnerTurn,
+  toRunnerTurnFromCorpMain,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
+import { addRezzedCorpIceForTest, enterEncounterFromMovementWindow } from "../../test-fixtures/index-test-helpers";
 import {
   CURRENT_RULES_BASELINE,
   type CardDefinitionId,
@@ -28,8 +30,10 @@ const AI_BOARD_MEMBER = "onr_proteus_001_ai-board-member";
 const PDCA = "onr_proteus_006_please-dont-choke-anyone";
 const PROJECT_VENICE = "onr_proteus_007_project-venice";
 const CORPORATE_HEADHUNTERS = "onr_proteus_003_corporate-headhunters";
+const CHIHUAHUA = "onr_proteus_014_chihuahua";
 const CORPORATE_GUARD_TEMPS = "onr_proteus_046_corporate-guard-r-temps";
 const CREDIT_CONSOLIDATION = "onr_proteus_047_credit-consolidation";
+const CYBERTECH_THINK_TANK = "onr_proteus_055_cybertech-think-tank";
 const BARGAIN_WITH_VIACOX = "onr_proteus_131_bargain-with-viacox";
 const LUCIDRINE_DRIP_FEED = "onr_proteus_144_lucidrinetm-drip-feed";
 const INSTALLABLE_CORP_ASSET = "onr_v1_309_bbs-whispering-campaign";
@@ -207,6 +211,29 @@ function installCorpAgendaInRemote(
   return cardId;
 }
 
+function installRezzedCorpRoot(
+  state: GameState,
+  definitionId: string,
+  id: string,
+  serverId: Exclude<ServerId, "new_remote">,
+): CardInstanceId {
+  const cardId = id as CardInstanceId;
+  removeEverywhere(state, cardId);
+  addRemote(state, serverId);
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId)!;
+  server.root.push(cardId);
+  state.cardInstances[cardId] = {
+    ...cardInstance(cardId, definitionId, "corp", {
+      side: "corp",
+      zone: "serverRoot",
+      serverId,
+    }),
+    faceup: true,
+    rezzed: true,
+  };
+  return cardId;
+}
+
 function cardInstance(
   cardId: CardInstanceId,
   definitionId: string,
@@ -252,6 +279,27 @@ function expectReplayStable(before: GameState, after: GameState): void {
   const replay = replayEvents(before, after.eventLog.slice(before.eventLog.length));
   expect(replay.ok).toBe(true);
   expect(hashState(replay.state)).toBe(hashState(after));
+}
+
+function startEncounterWithRezzedIce(
+  state: GameState,
+  definitionId: string,
+  suffix: string,
+): GameState {
+  state.corp.credits = 30;
+  state.runner.credits = 20;
+  addRezzedCorpIceForTest(
+    state,
+    definitionId as CardDefinitionId,
+    "rd",
+    suffix,
+  );
+  state = apply(
+    state,
+    "runner",
+    (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+  );
+  return enterEncounterFromMovementWindow(state);
 }
 
 function aiBoardStateForRoll(roll: number): GameState {
@@ -429,6 +477,127 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       selectedChoices: { selectedOptionIds: ["replace_missing_pdca"] },
     });
     expect(invalid.ok).toBe(false);
+  });
+
+  it("Please Don't Choke Anyone restores Runner encounter context after replace and pass", () => {
+    let replaceState = baseState("pro017-2-pdca-encounter-replace");
+    const replacePdcaId = scoreCorpAgenda(replaceState, PDCA, "pdca_encounter_replace");
+    clearRunnerGrip(replaceState);
+    addRunnerGrip(replaceState, RUNNER_EVENT, "runner_event_encounter_replace_a");
+    addRunnerGrip(replaceState, RUNNER_INSTALLABLE_HARDWARE, "runner_event_encounter_replace_b");
+    replaceState = startEncounterWithRezzedIce(
+      replaceState,
+      CHIHUAHUA,
+      "pdca_trace_replace",
+    );
+    replaceState = apply(replaceState, "runner", (action) => action.type === "continue_run");
+    replaceState = applyChoice(replaceState, "corp", "bid_0");
+    replaceState = applyChoice(replaceState, "runner", "bid_0");
+    expect(replaceState.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining(`proteus.pdca_damage_replacement:${replacePdcaId}`),
+    });
+    expect(replaceState.phase).toBe("run");
+    expect(replaceState.timingPoint).toBe("run.encounter_ice");
+
+    const replaceBefore = structuredClone(replaceState) as GameState;
+    const replaceOption = replaceState.pendingChoice?.options.find((option) =>
+      String(option.id).startsWith("replace_"),
+    )?.id;
+    replaceState = applyChoice(replaceState, "corp", String(replaceOption));
+    expect(replaceState.cardInstances[replacePdcaId]?.counters?.pdca).toBe(1);
+    expect(replaceState.runner.grip).toHaveLength(2);
+    expect(replaceState.phase).toBe("run");
+    expect(replaceState.timingPoint).toBe("run.encounter_ice");
+    expect(replaceState.activeSide).toBe("runner");
+    expect(replaceState.run?.encounteredIceId).toBeDefined();
+    expectReplayStable(replaceBefore, replaceState);
+
+    let passState = baseState("pro017-2-pdca-encounter-pass");
+    scoreCorpAgenda(passState, PDCA, "pdca_encounter_pass");
+    clearRunnerGrip(passState);
+    addRunnerGrip(passState, RUNNER_EVENT, "runner_event_encounter_pass_a");
+    addRunnerGrip(passState, RUNNER_INSTALLABLE_HARDWARE, "runner_event_encounter_pass_b");
+    passState = startEncounterWithRezzedIce(passState, CHIHUAHUA, "pdca_trace_pass");
+    passState = apply(passState, "runner", (action) => action.type === "continue_run");
+    passState = applyChoice(passState, "corp", "bid_0");
+    passState = applyChoice(passState, "runner", "bid_0");
+    passState = applyChoice(passState, "corp", "pass");
+    expect(passState.runner.grip).toHaveLength(1);
+    expect(passState.phase).toBe("run");
+    expect(passState.timingPoint).toBe("run.encounter_ice");
+    expect(passState.activeSide).toBe("runner");
+  });
+
+  it("Please Don't Choke Anyone preserves flatline game-over on pass", () => {
+    let state = baseState("pro017-2-pdca-encounter-flatline");
+    scoreCorpAgenda(state, PDCA, "pdca_encounter_flatline");
+    clearRunnerGrip(state);
+    state = startEncounterWithRezzedIce(state, CHIHUAHUA, "pdca_trace_flatline");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "runner", "bid_0");
+    state = applyChoice(state, "corp", "pass");
+    expect(state.phase).toBe("game_over");
+    expect(state.timingPoint).toBe("game.checkpoint");
+    expect(state.activeSide).toBe("corp");
+    expect(state.winner).toBe("corp");
+    expect(state.gameEndReason).toBe("flatline");
+  });
+
+  it("Please Don't Choke Anyone opens after existing event modification windows", () => {
+    let state = nextCorpActionPhase(baseState("pro017-2-pdca-after-modification"));
+    const pdcaId = scoreCorpAgenda(state, PDCA, "pdca_after_modification");
+    const cybertechId = installRezzedCorpRoot(
+      state,
+      CYBERTECH_THINK_TANK,
+      "cybertech_pdca",
+      "remote_1",
+    );
+    state.cardInstances[cybertechId]!.advancementCounters = 1;
+    scoreCorpAgenda(state, CORPORATE_HEADHUNTERS, "headhunter_after_modification");
+    clearRunnerGrip(state);
+    addRunnerGrip(state, RUNNER_EVENT, "runner_event_modified_a");
+    addRunnerGrip(state, RUNNER_INSTALLABLE_HARDWARE, "runner_event_modified_b");
+    addRunnerGrip(state, RUNNER_EVENT, "runner_event_modified_c");
+    state.runner.tags = 1;
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.payload?.agendaAbility === "proteus_corporate_headhunters",
+    );
+    expect(state.pendingChoice?.source).toContain("v120.event_modification.increase");
+    state = applyChoice(state, "corp", `cybertech_meat_damage_boost_${cybertechId}`);
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining(`proteus.pdca_damage_replacement:${pdcaId}`),
+    });
+    state = applyChoice(
+      state,
+      "corp",
+      String(state.pendingChoice?.options.find((option) => String(option.id).startsWith("replace_"))?.id),
+    );
+    expect(state.cardInstances[pdcaId]?.counters?.pdca).toBe(2);
+    expect(state.cardInstances[cybertechId]?.advancementCounters).toBe(0);
+    expect(state.runner.grip).toHaveLength(3);
+    expect(state.phase).toBe("corp_action_phase");
+    expect(state.activeSide).toBe("corp");
+  });
+
+  it("Please Don't Choke Anyone ignores unpreventable core damage", () => {
+    let state = baseState("pro017-2-pdca-core-excluded");
+    scoreCorpAgenda(state, PDCA, "pdca_core_excluded");
+    const dripId = installRunnerCard(state, LUCIDRINE_DRIP_FEED, "drip_core_excluded", "hardware");
+    clearRunnerGrip(state);
+    addRunnerGrip(state, RUNNER_EVENT, "drip_core_excluded_card");
+
+    state = nextRunnerActionPhase(state);
+    state = nextRunnerActionPhase(state);
+    state = nextRunnerActionPhase(state);
+    expect(state.pendingChoice?.source ?? "").not.toContain("proteus.pdca");
+    expect(state.cardInstances[dripId]?.counters?.drip ?? 0).toBe(0);
+    expect(state.runner.coreDamage).toBe(1);
   });
 
   it("Project Venice records overadvance at score and grants recurring Corp actions", () => {

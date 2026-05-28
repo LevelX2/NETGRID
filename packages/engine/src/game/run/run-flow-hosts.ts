@@ -15,7 +15,15 @@ import type {
   TraceSuccessEffect,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
-import { createDamageImminentEvent, doDamage, openEventModificationWindow, openReplacementWindow, resolveDamageImminentEvent, setDamagePayload } from "../damage/damage-core";
+import {
+  createDamageImminentEvent,
+  doDamage,
+  openDamageResolutionWindow,
+  openEventModificationWindow,
+  openReplacementWindow,
+  resolveDamageImminentEvent,
+  setDamagePayload,
+} from "../damage/damage-core";
 import { buildLegalAction as action } from "../turn/action-builders";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
 import {
@@ -246,6 +254,7 @@ export type RunFlowHost = {
     doDamage: typeof doDamage;
     openEventModificationWindow: typeof openEventModificationWindow;
     openReplacementWindow: typeof openReplacementWindow;
+    openDamageResolutionWindow: typeof openDamageResolutionWindow;
     resolveDamageImminentEvent: typeof resolveDamageImminentEvent;
     setDamagePayload: typeof setDamagePayload;
   };
@@ -959,6 +968,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         host.damage.openEventModificationWindow(state, event, action),
       openReplacementWindow: (event, action) =>
         host.damage.openReplacementWindow(state, event, action),
+      openDamageResolutionWindow: (event, action) =>
+        host.damage.openDamageResolutionWindow(state, event, action),
       parisCityGridTracePoolSource: () =>
         parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state)),
       rabbitTraceLimitReductionForIceTrace: () =>

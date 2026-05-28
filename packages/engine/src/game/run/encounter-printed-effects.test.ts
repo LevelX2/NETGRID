@@ -189,6 +189,7 @@ function makeHost(
     hasInstalledMicrotechTrodeSet: () => false,
     hackerTrackerCounterTotal: () => 0,
     krumzTraceBitTotal: () => 0,
+    openDamageResolutionWindow: () => false,
     openEventModificationWindow: () => false,
     openReplacementWindow: () => false,
     parisCityGridTracePoolSource: () => undefined,
@@ -284,7 +285,7 @@ describe("encounter printed effects boundary", () => {
     const legalAction = { payload: {} } as LegalAction;
     const result = resolvePrintedDamageSubroutine(
       makeHost(state, legalAction, {
-        openReplacementWindow: () => true,
+        openDamageResolutionWindow: () => true,
       }),
       {
         definition: definitionFor("ice_1" as CardInstanceId),
