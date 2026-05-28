@@ -29,7 +29,7 @@ describe("engine runtime module size gates", () => {
       100,
     );
     expect(lineCount(join(runtimeInternalDir, "runtime-implementation.ts")))
-      .toBeLessThanOrEqual(4500);
+      .toBeLessThanOrEqual(1800);
     expect(lineCount(join(runtimeInternalDir, "choice-hidden-zone-runtime.ts")))
       .toBeLessThanOrEqual(3200);
   });
@@ -48,6 +48,17 @@ describe("engine runtime module size gates", () => {
         `${relative(srcDir, path)} exceeds the runtime-internal module ceiling`,
       ).toBeLessThanOrEqual(3200);
     }
+  });
+
+  it("keeps the staged public API explicit", () => {
+    const publicApiSource = readFileSync(
+      join(runtimeInternalDir, "public-api.ts"),
+      "utf8",
+    );
+
+    expect(publicApiSource).not.toContain(
+      'export * from "./runtime-implementation"',
+    );
   });
 
   it("keeps production imports out of public and runtime facades", () => {

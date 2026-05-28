@@ -13,6 +13,7 @@ import { createStateRuntimeResolvers } from "./state-runtime-resolvers";
 import { createStateRuntimeServices } from "./state-runtime-services";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
 import { createTurnRuntimeResolvers } from "./turn-runtime-resolvers";
+import { initializeRuntimeDelegates } from "./runtime-delegates";
 
 describe("engine runtime internal domains", () => {
   it("do not import public facades or become dependencies of deep game modules", () => {
@@ -30,6 +31,8 @@ describe("engine runtime internal domains", () => {
       "./state-runtime-services.ts",
       "./turn-corp-runtime.ts",
       "./turn-runtime-resolvers.ts",
+      "./runtime-bootstrap.ts",
+      "./runtime-delegates.ts",
       "./runtime-shared.ts",
     ].map((path) => readFileSync(new URL(path, import.meta.url), "utf8"));
 
@@ -74,5 +77,6 @@ describe("engine runtime internal domains", () => {
     );
     expect(typeof createTurnRuntimeResolvers({}).applyCorpStartOfTurnEffects)
       .toBe("function");
+    expect(typeof initializeRuntimeDelegates).toBe("function");
   });
 });
