@@ -30,7 +30,6 @@ describe("engine runtime boundary", () => {
     const sources = [
       "./engine-runtime.ts",
       "./engine-runtime-internal/public-api.ts",
-      "./engine-runtime-internal/runtime-implementation.ts",
     ].map((path) => readFileSync(new URL(path, import.meta.url), "utf8"));
 
     for (const source of sources) {

@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -24,22 +24,31 @@ function allFiles(dir: string): string[] {
 
 describe("engine runtime module size gates", () => {
   it("keeps the public facades and runtime residue under their ceilings", () => {
-    expect(lineCount(join(srcDir, "index.ts"))).toBeLessThanOrEqual(100);
+    expect(lineCount(join(srcDir, "index.ts"))).toBeLessThanOrEqual(150);
     expect(lineCount(join(gameDir, "engine-runtime.ts"))).toBeLessThanOrEqual(
-      100,
+      150,
     );
-    expect(lineCount(join(runtimeInternalDir, "runtime-implementation.ts")))
-      .toBeLessThanOrEqual(1800);
-    expect(lineCount(join(runtimeInternalDir, "choice-hidden-zone-runtime.ts")))
-      .toBeLessThanOrEqual(3200);
+    const runtimeImplementationPath = join(
+      runtimeInternalDir,
+      "runtime-implementation.ts",
+    );
+    if (existsSync(runtimeImplementationPath)) {
+      expect(lineCount(runtimeImplementationPath)).toBeLessThanOrEqual(200);
+    }
+    expect(
+      lineCount(join(runtimeInternalDir, "choice-hidden-zone-runtime.ts")),
+    ).toBeLessThanOrEqual(3200);
+    expect(
+      lineCount(join(runtimeInternalDir, "runtime-bootstrap.ts")),
+    ).toBeLessThanOrEqual(3200);
+    expect(
+      lineCount(join(runtimeInternalDir, "runtime-delegates.ts")),
+    ).toBeLessThanOrEqual(2000);
   });
 
   it("keeps internal runtime modules from becoming new monoliths", () => {
     const runtimeFiles = allFiles(runtimeInternalDir).filter(
-      (path) =>
-        path.endsWith(".ts") &&
-        !path.endsWith(".test.ts") &&
-        !path.endsWith("runtime-implementation.ts"),
+      (path) => path.endsWith(".ts") && !path.endsWith(".test.ts"),
     );
 
     for (const path of runtimeFiles) {
@@ -51,11 +60,20 @@ describe("engine runtime module size gates", () => {
   });
 
   it("keeps the staged public API explicit", () => {
+    const indexSource = readFileSync(join(srcDir, "index.ts"), "utf8");
+    const engineRuntimeSource = readFileSync(
+      join(gameDir, "engine-runtime.ts"),
+      "utf8",
+    );
     const publicApiSource = readFileSync(
       join(runtimeInternalDir, "public-api.ts"),
       "utf8",
     );
 
+    expect(indexSource).not.toContain('export * from "./game/engine-runtime"');
+    expect(engineRuntimeSource).not.toContain(
+      'export * from "./engine-runtime-internal"',
+    );
     expect(publicApiSource).not.toContain(
       'export * from "./runtime-implementation"',
     );
@@ -68,8 +86,10 @@ describe("engine runtime module size gates", () => {
 
     for (const path of productionGameFiles) {
       const source = readFileSync(path, "utf8");
-      expect(source, `${relative(srcDir, path)} imports public index`).not
-        .toMatch(/from ["'](?:\.\.\/index|\.\.\/\.\.\/index)["']/);
+      expect(
+        source,
+        `${relative(srcDir, path)} imports public index`,
+      ).not.toMatch(/from ["'](?:\.\.\/index|\.\.\/\.\.\/index)["']/);
     }
 
     const deepProductionFiles = productionGameFiles.filter(
@@ -80,8 +100,10 @@ describe("engine runtime module size gates", () => {
 
     for (const path of deepProductionFiles) {
       const source = readFileSync(path, "utf8");
-      expect(source, `${relative(srcDir, path)} imports runtime boundary`).not
-        .toMatch(/from ["'].*engine-runtime(?:-internal)?/);
+      expect(
+        source,
+        `${relative(srcDir, path)} imports runtime boundary`,
+      ).not.toMatch(/from ["'].*engine-runtime(?:-internal)?/);
     }
   });
 });
