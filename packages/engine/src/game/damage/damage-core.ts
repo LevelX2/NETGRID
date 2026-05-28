@@ -1302,8 +1302,7 @@ function isCorpTurnDamageWindow(state: GameState): boolean {
   return (
     state.phase === "corp_draw_phase" ||
     state.phase === "corp_action_phase" ||
-    state.phase === "corp_discard_phase" ||
-    state.activeSide === "corp"
+    state.phase === "corp_discard_phase"
   );
 }
 

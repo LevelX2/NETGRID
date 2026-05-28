@@ -7,6 +7,11 @@ import {
   replayEvents,
 } from "../../index";
 import {
+  createDamageImminentEvent,
+  openReplacementWindow,
+} from "../../game/damage/damage-core";
+import { rezCard } from "../../game/rez/rez-card";
+import {
   ONR_V1_1_2K_CORP_DECK,
   ONR_V1_1_2K_RUNNER_DECK,
   apply,
@@ -17,6 +22,7 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import {
   CURRENT_RULES_BASELINE,
+  type CardDefinition,
   type CardDefinitionId,
   type CardInstanceId,
   type GameState,
@@ -33,6 +39,7 @@ const SENATORIAL_FIELD_TRIP = "onr_proteus_123_senatorial-field-trip";
 const SUBLIMINAL_CORRUPTION = "onr_proteus_125_subliminal-corruption";
 const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
 const BLACK_ICE = "onr_v1_227_cerberus";
+const TEST_BLACK_OPS_ASSET = "test_black_ops_asset";
 const BLACK_OPS_AGENDA = "onr_proteus_002_charity-takeover";
 const ADVERTISEMENT = "onr_v1_309_bbs-whispering-campaign";
 
@@ -115,6 +122,59 @@ function addCorpHqCard(
   return cardId;
 }
 
+function addCorpRdCard(
+  state: GameState,
+  definitionId: string,
+  id: string,
+): CardInstanceId {
+  const cardId = id as CardInstanceId;
+  removeEverywhere(state, cardId);
+  state.corp.rd.unshift(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    id: cardId,
+    definitionId: definitionId as CardDefinitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "rd" },
+    faceup: false,
+    rezzed: false,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  } as GameState["cardInstances"][CardInstanceId];
+  return cardId;
+}
+
+function addCorpRootCard(
+  state: GameState,
+  definitionId: string,
+  id: string,
+  serverId: Exclude<ServerId, "new_remote">,
+  rezzed = false,
+): CardInstanceId {
+  const cardId = id as CardInstanceId;
+  removeEverywhere(state, cardId);
+  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) {
+    server = { id: serverId, kind: "remote", label: "Remote 1", ice: [], root: [] };
+    state.corp.servers.push(server);
+  }
+  server.root.unshift(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    id: cardId,
+    definitionId: definitionId as CardDefinitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "serverRoot", serverId },
+    faceup: rezzed,
+    rezzed,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  } as GameState["cardInstances"][CardInstanceId];
+  return cardId;
+}
+
 function addCorpIce(
   state: GameState,
   definitionId: string,
@@ -159,6 +219,14 @@ function removeEverywhere(state: GameState, cardId: CardInstanceId): void {
   }
 }
 
+function clearCorpZone(state: GameState, zone: "hq" | "rd"): void {
+  for (const cardId of state.corp[zone]) {
+    removeEverywhere(state, cardId);
+    delete state.cardInstances[cardId];
+  }
+  state.corp[zone] = [];
+}
+
 function applyLegal(
   state: GameState,
   side: Side,
@@ -192,18 +260,129 @@ function playRunnerEvent(
   return applyLegal(state, "runner", action);
 }
 
-function finishRun(state: GameState): GameState {
-  let next = state;
-  for (let index = 0; index < 8 && next.run; index += 1) {
-    const actions = getLegalActions(next, "runner");
-    const action =
-      actions.find((candidate) => candidate.type === "trash_accessed_card") ??
-      actions.find((candidate) => candidate.type === "access_card") ??
-      actions.find((candidate) => candidate.type === "continue_run");
-    if (!action) throw new Error("Run konnte im Test nicht beendet werden.");
-    next = applyLegal(next, "runner", action);
-  }
+function takeRunnerAction(
+  state: GameState,
+  predicate: (action: LegalAction) => boolean,
+): GameState {
+  const action = getLegalActions(state, "runner").find(predicate);
+  if (!action)
+    throw new Error(
+      `Missing runner legal action; available=${getLegalActions(state, "runner")
+        .map((candidate) => candidate.type)
+        .join(",")}; timing=${state.timingPoint}; phase=${state.phase}; active=${state.activeSide}; runPhase=${state.run?.phase}; server=${state.run?.attackedServerId}; hq=${state.corp.hq.length}; rd=${state.corp.rd.length}; pending=${state.pendingChoice?.source ?? ""}`,
+    );
+  return applyLegal(state, "runner", action);
+}
+
+function accessAndStealAgenda(state: GameState): GameState {
+  let next = takeRunnerAction(state, (action) => action.type === "access_card");
+  next = takeRunnerAction(next, (action) => action.type === "steal_agenda");
   return next;
+}
+
+function trashAccessedCard(state: GameState): GameState {
+  let next = takeRunnerAction(state, (action) => action.type === "access_card");
+  next = takeRunnerAction(next, (action) => action.type === "trash_accessed_card");
+  return next;
+}
+
+function executeRunScopedBlackOpsRezHook(
+  state: GameState,
+  cardId: CardInstanceId,
+): void {
+  const definition: CardDefinition = {
+    id: TEST_BLACK_OPS_ASSET as CardDefinitionId,
+    title: "Test Black Ops Asset",
+    side: "corp",
+    type: "asset",
+    subtypes: ["black_ops"],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    installCost: 0,
+    memoryCost: 0,
+    strength: 0,
+    rezCost: 0,
+    trashCost: 0,
+    advancementRequirement: 0,
+    agendaPoints: 0,
+    rulesText: "",
+    mechanics: [],
+  };
+  const legalAction = {
+    actionId: `corp.rez_ice.${cardId}`,
+    type: "rez_ice",
+    side: "corp",
+    label: "Rez",
+    source: cardId,
+    costs: [],
+    payload: { cardId, rootRez: true },
+  } as unknown as LegalAction;
+  rezCard(
+    {
+      state,
+      cards: {
+        definitionFor: () => definition,
+        mustInstance: (id) => state.cardInstances[id]!,
+        hasCardImplementationForDefinition: () => false,
+        variableRezForDefinition: () => undefined,
+        stableSubtypeList: (subtypes) => subtypes.slice().sort(),
+      },
+      run: {
+        mustRun: () => state.run!,
+        handleRunRootRezPostRez: () => undefined,
+        beginEncounter: () => undefined,
+      },
+      payment: {
+        rezCostForCard: () => 0,
+        assertCorpRezCostQuoteValid: () => ({
+          purpose: "corp_rez",
+          side: "corp",
+          targetCardId: cardId,
+          baseCredits: 0,
+          finalCredits: 0,
+          costs: [],
+          modifiers: [],
+          canPay: true,
+          publicPayload: {},
+        }),
+        creditCostForAction: () => 0,
+        spendCredits: () => undefined,
+      },
+      corp: {
+        isAcmeSavingsAndLoanDefinition: () => false,
+        spendCorpAgendaPointCost: () => ({
+          paidPoints: 0,
+          bonusPointsSpent: 0,
+          forfeitedAgendaIds: [],
+          forfeitedAgendaDefinitionIds: [],
+        }),
+        acmeSavingsAndLoanObligationCount: () => 0,
+      },
+      runner: {
+        ensureTurnFlags: () =>
+          (state.runnerTurnFlags ??= {
+            stoleAgendaThisTurn: false,
+            stoleAgendaLastTurn: false,
+          }),
+      },
+      counters: {
+        setCardCounter: () => undefined,
+      },
+      lifecycle: {
+        executeOnRez: () => undefined,
+      },
+      fort: {
+        isParisTracePoolSource: () => false,
+        parisTracePoolCapacityForCard: () => 0,
+      },
+      constants: {
+        KRUMZ_TRACE_ASSET_CARD_ID: "onr_v1_312_chicago-branch" as CardDefinitionId,
+      },
+    },
+    cardId,
+    true,
+    legalAction,
+  );
 }
 
 function expectReplayStable(before: GameState, after: GameState): void {
@@ -242,9 +421,20 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
       ),
     ).toBe(false);
 
-    state.runnerTurnFlags ??= { stoleAgendaThisTurn: false, stoleAgendaLastTurn: false };
-    state.runnerTurnFlags.successfulHqRunThisTurn = true;
-    state.runnerTurnFlags.successfulRdRunThisTurn = true;
+    clearCorpZone(state, "hq");
+    addCorpHqCard(state, BLACK_OPS_AGENDA, "frame_up_black_ops_hq");
+    state = takeRunnerAction(
+      state,
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state = accessAndStealAgenda(state);
+    clearCorpZone(state, "rd");
+    addCorpRdCard(state, SCORCHED_EARTH, "frame_up_rd_access");
+    state = takeRunnerAction(
+      state,
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = takeRunnerAction(state, (action) => action.type === "access_card");
     const legal = mustAction(
       state,
       "runner",
@@ -252,30 +442,75 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     );
     expect(legal.costs).toEqual([{ clicks: 1, credits: 2 }]);
     state = applyLegal(state, "runner", legal);
-    expect(state.corp.badPublicity).toBe(1);
-
-    state = baseState("pro015-frame-up-bonus");
-    const bonusFrameId = addRunnerGripCard(state, FRAME_UP, "frame_up_bonus");
-    state.runnerTurnFlags ??= { stoleAgendaThisTurn: false, stoleAgendaLastTurn: false };
-    state.runnerTurnFlags.successfulHqRunThisTurn = true;
-    state.runnerTurnFlags.successfulRdRunThisTurn = true;
-    state.runnerTurnFlags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn =
-      true;
-    state = playRunnerEvent(state, bonusFrameId);
+    expect(state.runnerTurnFlags?.successfulHqRunThisTurn).toBe(true);
+    expect(state.runnerTurnFlags?.successfulRdRunThisTurn).toBe(true);
+    expect(
+      state.runnerTurnFlags?.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn,
+    ).toBe(true);
     expect(state.corp.badPublicity).toBe(2);
+
+    state = baseState("pro015-frame-up-no-bonus");
+    const noBonusFrameId = addRunnerGripCard(state, FRAME_UP, "frame_up_no_bonus");
+    clearCorpZone(state, "hq");
+    addCorpHqCard(state, SCORCHED_EARTH, "frame_up_plain_hq");
+    state = takeRunnerAction(
+      state,
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state = takeRunnerAction(state, (action) => action.type === "access_card");
+    clearCorpZone(state, "rd");
+    addCorpRdCard(state, SCORCHED_EARTH, "frame_up_plain_rd");
+    state = takeRunnerAction(
+      state,
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = takeRunnerAction(state, (action) => action.type === "access_card");
+    state = playRunnerEvent(state, noBonusFrameId);
+    expect(state.corp.badPublicity).toBe(1);
   });
 
-  it("resolves Live News Feed tags and Bad Publicity from this run only", () => {
+  it("resolves Live News Feed tags and Bad Publicity from encounter, rez, and steal production hooks", () => {
     let state = baseState("pro015-live-news-feed");
     const sourceId = addRunnerGripCard(state, LIVE_NEWS_FEED, "live_news");
+    const blackIceId = addCorpIce(state, BLACK_ICE, "live_news_black_ice", "hq", true);
+    clearCorpZone(state, "hq");
+    addCorpHqCard(state, BLACK_OPS_AGENDA, "live_news_black_ops_agenda");
     const before = structuredClone(state);
 
     state = playRunnerEvent(state, sourceId, "hq");
     expect(state.run?.badPublicityRunAftermath?.kind).toBe("live_news_feed");
-    state.run!.encounteredBlackIceCount = 1;
-    state.run!.rezzedBlackOpsCount = 1;
-    state.run!.liberatedBlackOpsAgendaCount = 1;
-    state = finishRun(state);
+    state = takeRunnerAction(state, (action) => action.type === "continue_run");
+    expect(state.run?.encounteredBlackIceCount).toBe(1);
+    expect(state.run?.encounteredIceId).toBe(blackIceId);
+    state.run = {
+      ...state.run!,
+      phase: "access",
+      position: { kind: "server", serverId: "hq" },
+    };
+    delete state.run.approachedIceId;
+    delete state.run.encounteredIceId;
+    delete state.pendingChoice;
+    delete state.trace;
+    state.timingPoint = "access.resolve_card";
+    const blackOpsId = addCorpRootCard(
+      state,
+      TEST_BLACK_OPS_ASSET,
+      "live_news_black_ops_asset",
+      "hq",
+      false,
+    );
+    executeRunScopedBlackOpsRezHook(state, blackOpsId);
+    expect(state.cardInstances[blackOpsId]?.rezzed).toBe(true);
+    expect(state.run?.rezzedBlackOpsCount).toBe(1);
+    removeEverywhere(state, blackOpsId);
+    delete state.cardInstances[blackOpsId];
+
+    state.activeSide = "runner";
+    state.timingPoint = "access.resolve_card";
+    state = accessAndStealAgenda(state);
+    expect(state.run).toBeUndefined();
+    expect(state.runner.tags).toBe(2);
+    expect(state.corp.badPublicity).toBe(3);
 
     expect(state.runner.tags).toBe(2);
     expect(state.corp.badPublicity).toBe(3);
@@ -289,20 +524,51 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
   it("counts only Advertisements trashed during the Subliminal Corruption run", () => {
     let state = baseState("pro015-subliminal");
     const sourceId = addRunnerGripCard(state, SUBLIMINAL_CORRUPTION, "subliminal");
-    addCorpHqCard(state, ADVERTISEMENT, "advertisement_in_hq");
+    addCorpRootCard(state, ADVERTISEMENT, "advertisement_remote", "remote_1", true);
     state.runner.credits = 30;
     const before = structuredClone(state);
 
-    state = playRunnerEvent(state, sourceId, "hq");
+    state = playRunnerEvent(state, sourceId, "remote_1");
     expect(state.run?.badPublicityRunAftermath?.kind).toBe("subliminal_corruption");
-    state.run!.trashedAdvertisementCount = 1;
-    state = finishRun(state);
+    state = trashAccessedCard(state);
 
     expect(state.corp.badPublicity).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       badPublicityAdded: 1,
     });
     expect(before.run).toBeUndefined();
+  });
+
+  it("does not offer Identity Donor in Runner-turn run windows even when activeSide is corp", () => {
+    const state = baseState("pro015-identity-runner-window");
+    state.phase = "runner_action_phase";
+    state.timingPoint = "run.approach_ice";
+    state.activeSide = "corp";
+    state.run = {
+      runId: "identity_runner_window_run",
+      attackedServerId: "hq",
+      phase: "approach_ice",
+      position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+    } as NonNullable<GameState["run"]>;
+    addRunnerGripCard(state, IDENTITY_DONOR, "identity_runner_window");
+    const event = createDamageImminentEvent(state, {
+      damageId: "identity-runner-window",
+      damageType: "meat",
+      amount: 1,
+      source: "test:runner_window",
+    });
+    const legalAction = {
+      actionId: "test.damage",
+      type: "trigger_ability",
+      side: "corp",
+      label: "Damage",
+      source: "test",
+      costs: [],
+    } as unknown as LegalAction;
+
+    expect(openReplacementWindow(state, event, legalAction)).toBe(false);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.replacementWindow).toBeUndefined();
   });
 
   it("opens Identity Donor only for Corp-turn Meat Damage, prevents it, moves the card to Heap, and uses the central BP loss gate", () => {

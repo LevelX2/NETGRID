@@ -18,7 +18,7 @@ Führend ist die eindeutige CardImplementation-Abdeckung:
 
 PRO001 hat dafür bereits den Guard in `packages/engine/src/card-implementations/coverage.test.ts` ergänzt: `reconciles Proteus manifest support against concrete files and registry`. Dieser Guard prüft 154 Karten in `data/cards/proteus-cards.json`, 154 Manifest-Einträge, eindeutige CardImplementation-Dateien, Registry-Parität, `implemented`-Manifestparität, `resolverRef = engine:<cardId>` für implementierte Karten und `resolverRef = null` für nicht implementierte Karten. PRO002 etabliert keine zweite konkurrierende Zählweise.
 
-Aktueller Stand nach PRO015:
+Aktueller Stand nach PRO015-1:
 
 | Kennzahl | Wert | Führende Quelle |
 | --- | ---: | --- |
@@ -52,7 +52,7 @@ PRO013 ist umgesetzt und PRO013-1 ist als reine Behavior-Härtung erledigt: `Cor
 
 PRO014 ist umgesetzt und PRO014-1 sowie PRO014-2 sind als reine Behavior-Härtungen erledigt: `Department of Misinformation`, `Government Contract`, `LDL Traffic Analyzers`, `Panic Button`, `Cybertech Think Tank`, `Raymond Ellison`, `Siren` und `Syd Meyer Superstores` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. PRO014-1 härtet Siren als Korp-Start-of-run-Redirect-Fenster, Department als explizite Expose-Prevention-Choice, Cybertech als source-bound Meat-Damage-Boost-Choice und Government-Contract-Credits als ausschließlich Install-/Rez-gebundenen temporären Pool. PRO014-2 legt Raymond-Ellison-Credits als expliziten Pool für Korp-Kosten während des aktuellen Runs fest; globale Korp-Zahlungspfade verbrauchen diesen Pool nicht mehr implizit. Ergänzt wurde eine fokussierte PRO014-Verhaltenstestdatei für die Corp-Asset-/Upgrade-Utility-Suite. Implementierungszählung bleibt 129/154, 25 fehlend, kein Drift. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
-PRO015 ist umgesetzt: `Frame-Up`, `Identity Donor`, `Live News Feed`, `Senatorial Field Trip` und `Subliminal Corruption` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden run-scoped Bad-Publicity-Aftermath, Run-History-Zähler, Frame-Up-Turn-History, ein Grip-basiertes Meat-Damage-Replacement und eine stale-sichere Last-Rezzed-Black-ICE-Corp-Choice. Das bestehende Bad-Publicity-7+-Loss-Gate bleibt die einzige Game-End-Autorität. Neue Implementierungszählung: 134/154, 20 fehlend, kein Drift. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
+PRO015 ist umgesetzt und PRO015-1 ist als reine Härtung erledigt: `Frame-Up`, `Identity Donor`, `Live News Feed`, `Senatorial Field Trip` und `Subliminal Corruption` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden run-scoped Bad-Publicity-Aftermath, Run-History-Zähler, Frame-Up-Turn-History, ein Grip-basiertes Meat-Damage-Replacement und eine stale-sichere Last-Rezzed-Black-ICE-Corp-Choice. PRO015-1 engt `Identity Donor` auf echte Korp-Zugphasen ein und härtet die Run-History-Tests über Produktionshooks. Das bestehende Bad-Publicity-7+-Loss-Gate bleibt die einzige Game-End-Autorität. Implementierungszählung bleibt 134/154, 20 fehlend, kein Drift. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
 
@@ -72,7 +72,7 @@ Der führende Detailplan `proteus-cardimplementation-detailplan-2026-05-26.md` w
 | PRO013 | umgesetzt | 8 Agenda-/Steal-/Overadvance-Karten. |
 | PRO014 | erledigt | 8 Corp-Asset-/Upgrade-Utility-Karten; Implementierungszählung 129/154. |
 | PRO014-1 | umgesetzt | Behavior-Härtung für PRO014; keine neue Kartenpromotion. |
-| PRO015 | umgesetzt | 5 Bad-Publicity-Run-/Replacement-Karten; Implementierungszählung 134/154. |
+| PRO015 | umgesetzt; PRO015-1 Nacharbeit erledigt | 5 Bad-Publicity-Run-/Replacement-Karten; Implementierungszählung 134/154. |
 | PRO016 | neu zu schneiden | 4 Random-/Dice-/Encounter-Karten. |
 | PRO017 | neu zu schneiden | 6 Action-Economy-/Action-Debt-Karten. |
 | PRO018 | neu zu schneiden | 2 Hidden-Zone-Search-/Install-Tutor-Karten. |
@@ -133,6 +133,7 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-28-proteus-pro014-1-corp-utility-hardening.md` | `done` | PRO014-1 | Siren, Department, Cybertech, Government Contract und PRO014-Verhaltenstests gehärtet; keine neue Kartenpromotion, Implementierungszählung bleibt 129/154. |
 | `done/act-2026-05-28-proteus-pro014-2-raymond-temporary-credit-scope.md` | `done` | PRO014-2 | Raymond-Ellison-Run-Credits explizit auf Korp-Kosten während des aktuellen Runs modelliert; keine neue Kartenpromotion, Implementierungszählung bleibt 129/154. |
 | `done/act-2026-05-28-proteus-pro015-bad-publicity-run-replacement-suite.md` | `done` | PRO015 | 5 Bad-Publicity-Run-/Replacement-Karten; neue Implementierungszählung 134/154. |
+| `done/act-2026-05-28-proteus-pro015-1-bad-publicity-hardening.md` | `done` | PRO015-1 | Identity-Donor-Timing und PRO015-Run-History-Tests gehärtet; keine neue Kartenpromotion, Implementierungszählung bleibt 134/154. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
 | `done/act-2026-05-24-proteus-phase-7a-hardware-deck-foundation.md` | `done` | Phase 7a | 1 Karte: `Deck, The`. |
 | `done/act-2026-05-24-proteus-phase-7b-icebreaker-credit-decks.md` | `done` | Phase 7b | 2 Karten: `Cortical Cybermodem`, `Sunburst Cranial Interface`. |
@@ -237,7 +238,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | PRO014 | erledigt | Corp Asset/Upgrade Utility Suite mit 8 Karten. |
 | PRO014-1 | umgesetzt | Reine Behavior-Härtung für PRO014: Siren, Department of Misinformation, Cybertech Think Tank und Government Contract laufen über explizite LegalAction-/Choice-/Kosten-Revalidierung; `corp-asset-upgrade-utility.test.ts` deckt die acht PRO014-Karten ab. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
 | PRO014-2 | umgesetzt | Reine Raymond-Ellison-Härtung für PRO014: temporäre Credits gelten für Korp-Kosten während des aktuellen Runs, werden am Run-Ende zurückgegeben und werden nicht mehr implizit durch globale Korp-`spendCredits`-Pfade verbraucht. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung. |
-| PRO015 | umgesetzt | Bad-Publicity Run/Replacement Suite mit 5 Karten. |
+| PRO015 | umgesetzt; PRO015-1 Nacharbeit erledigt | Bad-Publicity Run/Replacement Suite mit 5 Karten; PRO015-1 ist reine Härtung ohne Zähländerung. |
 | PRO016 | neu zu schneiden | Random/Dice/Encounter Suite mit 4 Karten. |
 | PRO017 | neu zu schneiden | Action Economy/Action Debt Suite mit 6 Karten. |
 | PRO018 | neu zu schneiden | Hidden-Zone Search/Install Tutor Suite mit 2 Karten. |
