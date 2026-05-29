@@ -6893,8 +6893,8 @@ function GameOverModal({
   const headlineText = seriesHeadline ?? outcomeText;
   const lastGameOutcomeText = resultOutcomeText(result.winner);
   const reasonText = seriesHeadline
-    ? `Letztes Spiel: ${lastGameOutcomeText} ${resultReasonLabel(result.reason)}`
-    : resultReasonLabel(result.reason);
+    ? `Letztes Spiel: ${lastGameOutcomeText} ${resultReasonLabel(result.reason, result.winner)}`
+    : resultReasonLabel(result.reason, result.winner);
   const gameStanding = gameStandingForResult(result, side, playerName, opponentName);
   const winnerMotif = resultWinnerMotifFor(result.winner);
   const winnerMotifUi = resultWinnerMotifUi(winnerMotif);
@@ -7076,8 +7076,10 @@ function matchFormatLabel(format: MatchFormat): string {
   return "Regelmatch";
 }
 
-function resultReasonLabel(reason: GameResultSummary["reason"]): string {
-  if (reason === "agenda_points") return "Das Agenda-Ziel wurde erreicht.";
+function resultReasonLabel(reason: GameResultSummary["reason"], winner?: Winner): string {
+  if (reason === "agenda_points" && winner === "runner") return "Der Runner hat die Pläne der Korp vereitelt.";
+  if (reason === "agenda_points" && winner === "corp") return "Die Korp hat ihre Agendas durchgesetzt.";
+  if (reason === "agenda_points") return "Die entscheidenden Agenda-Punkte wurden erreicht.";
   if (reason === "bad_publicity_7") return "Die Korp hat 7 Bad Publicity erreicht.";
   if (reason === "corp_deck_empty") return "Die Korp konnte keine Karte mehr ziehen.";
   if (reason === "flatline") return "Der Runner wurde flatlined.";
@@ -7203,7 +7205,7 @@ function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
           <Award size={14} />
           {result.winner === "draw" ? winnerName : `${winnerName} gewinnt`}
         </span>
-        <span title={resultReasonLabel(result.reason)}>{shortResultReasonLabel(result.reason)}</span>
+        <span title={resultReasonLabel(result.reason, result.winner)}>{shortResultReasonLabel(result.reason)}</span>
         <span>{result.actionCount} Aktionen</span>
         <span>{result.runCount} Runs</span>
         <span title={result.finalStateHash}>Hash {result.finalStateHash.slice(0, 8)}</span>
