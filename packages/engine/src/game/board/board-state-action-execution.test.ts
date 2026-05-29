@@ -1,5 +1,4 @@
 import type {
-  CardDefinition,
   CardInstance,
   CardInstanceId,
   CorpServer,
@@ -16,6 +15,8 @@ import {
 const ADVANCED_CARD_ID = "advanced_1" as CardInstanceId;
 const RESOURCE_ID = "resource_1" as CardInstanceId;
 const HIDDEN_RESOURCE_SLOT_ID = "hidden_resource_slot_1" as CardInstanceId;
+const ADVANCED_CARD_DEFINITION_ID = "onr_v1_308_acme-savings-and-loan";
+const RESOURCE_DEFINITION_ID = "onr_v1_151_aujourdoui";
 
 function baseState(): GameState {
   const remote: CorpServer = {
@@ -54,12 +55,12 @@ function baseState(): GameState {
       servers: [remote],
     },
     cardInstances: {
-      [ADVANCED_CARD_ID]: instance(ADVANCED_CARD_ID, "advanceable_asset", {
+      [ADVANCED_CARD_ID]: instance(ADVANCED_CARD_ID, ADVANCED_CARD_DEFINITION_ID, {
         owner: "corp",
         controller: "corp",
         zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
       }),
-      [RESOURCE_ID]: instance(RESOURCE_ID, "runner_resource", {
+      [RESOURCE_ID]: instance(RESOURCE_ID, RESOURCE_DEFINITION_ID, {
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
@@ -90,15 +91,6 @@ function instance(
   } as unknown as CardInstance;
 }
 
-function definitionFor(cardId: CardInstanceId): CardDefinition {
-  return {
-    id: cardId === ADVANCED_CARD_ID ? "advanceable_asset" : "runner_resource",
-    title: String(cardId),
-    side: cardId === ADVANCED_CARD_ID ? "corp" : "runner",
-    type: cardId === ADVANCED_CARD_ID ? "asset" : "resource",
-  } as CardDefinition;
-}
-
 function legalAction(
   type: LegalAction["type"],
   payload: NonNullable<LegalAction["payload"]> = {},
@@ -125,10 +117,6 @@ function hostFor(
 ): BoardStateActionExecutionHost {
   return {
     state: targetState,
-    cards: {
-      definitionFor,
-      cardInstanceFor: (cardId) => targetState.cardInstances[cardId] as CardInstance,
-    },
     zones: {
       removeFromAllZones: (cardId) => {
         calls.push(`remove:${cardId}`);
@@ -244,7 +232,7 @@ describe("board-state-action-execution", () => {
       hiddenResourceSlotId: HIDDEN_RESOURCE_SLOT_ID,
       hiddenRunnerResource: true,
       hiddenRunnerResourceRevealed: true,
-      publicRevealDefinitionId: "runner_resource",
+      publicRevealDefinitionId: RESOURCE_DEFINITION_ID,
       redactedKind: "hidden_runner_resource",
     });
     expect(calls).toEqual([
@@ -298,7 +286,7 @@ describe("board-state-action-execution", () => {
     const targetState = baseState();
     targetState.runner.rig.resources = [];
     targetState.specialZones = { setAside: [RESOURCE_ID], removedFromGame: [] };
-    targetState.cardInstances[RESOURCE_ID] = instance(RESOURCE_ID, "runner_resource", {
+    targetState.cardInstances[RESOURCE_ID] = instance(RESOURCE_ID, RESOURCE_DEFINITION_ID, {
       zone: {
         side: "special",
         zone: "set_aside",
@@ -336,7 +324,7 @@ describe("board-state-action-execution", () => {
 
   it("changes card control with stable payload fields", () => {
     const targetState = baseState();
-    targetState.cardInstances[RESOURCE_ID] = instance(RESOURCE_ID, "runner_resource", {
+    targetState.cardInstances[RESOURCE_ID] = instance(RESOURCE_ID, RESOURCE_DEFINITION_ID, {
       controller: "runner",
     });
     targetState.specialZoneHarness = {

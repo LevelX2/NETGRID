@@ -673,6 +673,10 @@ export function publicContextForAction(
     if (typeof legalAction.payload.runnerMaxHandSizeAfter === "number")
       context.runnerMaxHandSizeAfter =
         legalAction.payload.runnerMaxHandSizeAfter;
+    if (typeof legalAction.payload.runnerGripBefore === "number")
+      context.runnerGripBefore = legalAction.payload.runnerGripBefore;
+    if (typeof legalAction.payload.runnerGripAfter === "number")
+      context.runnerGripAfter = legalAction.payload.runnerGripAfter;
     if (typeof legalAction.payload.preventableDamage === "boolean")
       context.preventableDamage = legalAction.payload.preventableDamage;
     if (typeof legalAction.payload.unpreventableDamage === "boolean")

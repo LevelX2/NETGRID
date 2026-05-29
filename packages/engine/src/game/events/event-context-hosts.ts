@@ -1,6 +1,4 @@
 import type {
-  CardDefinition,
-  CardInstance,
   CardInstanceId,
   CounterType,
   GameState,
@@ -12,6 +10,7 @@ import {
   type PublicContextForActionDependencies,
 } from "../../public-context";
 import type { BreachStateHost } from "../access/breach-state";
+import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import { configureBuildEventHost, type BuildEventHost } from "./build-event";
 
 export type EventContextHostCompositionHost = {
@@ -25,15 +24,10 @@ export type EventContextHostCompositionHost = {
       cardId: CardInstanceId,
       counterType: CounterType,
     ) => number;
-    definitionFor: (state: GameState, id: CardInstanceId) => CardDefinition;
     hostedProgramStrengthModifier: (
       state: GameState,
       cardId: CardInstanceId,
     ) => number;
-    mustInstance: (
-      source: Record<CardInstanceId, CardInstance>,
-      cardId: CardInstanceId,
-    ) => CardInstance;
   };
   publicContext: {
     creditCostForAction: (legalAction: LegalAction) => number;
@@ -71,11 +65,11 @@ export function createEventContextHostComposition(
     agendaPointsForScoredCard: cards.agendaPointsForScoredCard,
     cardCounter: cards.cardCounter,
     cardStrengthModifier: (state, cardId) =>
-      cards.mustInstance(state.cardInstances, cardId).strengthModifier +
+      mustInstance(state.cardInstances, cardId).strengthModifier +
       cards.hostedProgramStrengthModifier(state, cardId) -
       cards.cardCounter(state, cardId, "pattel_antibody"),
     creditCostForAction: context.creditCostForAction,
-    definitionFor: cards.definitionFor,
+    definitionFor,
     pumpAmountForLegalAction: context.pumpAmountForLegalAction,
     runnerHqAccessBonus: (state) =>
       callbacks.runnerHqAccessBonusForBreach(callbacks.breachStateHost(state)),

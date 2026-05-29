@@ -15,7 +15,7 @@ proReferences:
   - PRO007
 blockedBy: []
 resultArtifacts:
-  - docs/activities/in-progress/act-2026-05-24-proteus-phase-6c-corp-operation-trace-tag-economy.md
+  - docs/activities/done/act-2026-05-24-proteus-phase-6c-corp-operation-trace-tag-economy.md
   - docs/activities/done/act-2026-05-27-proteus-pro007-corp-operation-economy-trace-history.md
   - docs/releases/proteus/README.md
 checks:

@@ -1,0 +1,2441 @@
+// @ts-nocheck
+import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
+import { createLifecycleRuntime } from "./lifecycle-runtime";
+import { createTurnCorpRuntime } from "./turn-corp-runtime";
+import { createActionRuntimeHosts } from "./action-runtime-hosts";
+import { createCardRuntimeHosts } from "./card-runtime-hosts";
+import { createFlowRuntimeHosts } from "./flow-runtime-hosts";
+import { createStateRuntimeServices } from "./state-runtime-services";
+import {
+  DEMO_CARDS_BY_ID,
+  type ActionType,
+  type ChoiceRequest,
+  type CardDefinition,
+  type CardDefinitionId,
+  type CardInstance,
+  type CardInstanceId,
+  type CardType,
+  type CounterType,
+  type CorpServer,
+  type DeckDefinition,
+  type DemoDeckId,
+  type DamageType,
+  type ApplyActionOptions,
+  type EngineError,
+  type EngineResult,
+  type EventVisibilityClass,
+  type EffectCommand,
+  type EventModificationCandidate,
+  type EventModificationWindow,
+  type GameEvent,
+  type GameEndReason,
+  type GameState,
+  type ImminentEvent,
+  type LegalAction,
+  type LegacyAbilityPayloadField,
+  type PlayerAction,
+  type PlayerController,
+  type PublicGameEvent,
+  type PurgeableRunnerVirusCounterBucket,
+  type PurgeableRunnerVirusCounterType,
+  type ReplacementCandidate,
+  type ReplacementWindow,
+  type ResolvedGameEffect,
+  type ReplayResult,
+  type SpecialZoneKind,
+  type SpecialZoneState,
+  type SpecialZoneVisibility,
+  type ModifierKind,
+  type ServerId,
+  type SetupState,
+  type Side,
+  type StateHash,
+  type TraceSuccessEffect,
+  type ValidationResult,
+  type VisibleCard,
+  type Winner,
+} from "@netgrid/shared";
+import {
+  assertCorpRezCostQuoteValid,
+  corpServerIdForInstalledCard,
+  quoteCorpIceInstallCost,
+  rezCostForCard,
+  rezCostReductionSourceDefinitionIdsFor,
+  type CorpTracePaymentDependencies,
+  type RunnerTracePaymentDependencies,
+} from "../payment";
+import {
+  resolvePendingChoice,
+  type PendingChoiceResolutionHost,
+} from "../choices/pending-choice-resolution";
+import { selectedChoiceIds } from "../choices/choice-validation";
+import {
+  corpInstalledCardIds,
+  corpRootAssetIdsInServer,
+  corpRootMainCardIdsInServer,
+  definitionFor,
+  mustInstance,
+  mustRun,
+  mustServer,
+  publicInstalledCorpCardIdentityKnown,
+  rezzedRootCardIdOnServer,
+  runnerInstalledCardIds,
+  scoredCorpAgendaIds,
+  unrezzedRootCardIdOnServer,
+} from "../state/card-server-lookup";
+import {
+  drawCorpCard,
+  drawCorpCards,
+  randomHqAccess,
+  rollDeterministicDie,
+  shuffleStateIds,
+  mustArrayValue,
+  nextRandom,
+  recordStateRandomMarkers,
+} from "../state/draw-random";
+import {
+  credits,
+  spendClick,
+  spendClicks,
+  spendCredits,
+} from "../state/economy-mutation";
+import {
+  addCardCounter,
+  cardCounter,
+  cardInstanceWithoutCounters,
+  clearCardCounters,
+  ensureCorpTurnFlags,
+  ensureRunnerTurnFlags,
+  hasSuccessfulHqRunThisTurn,
+  hasSuccessfulRunThisTurn,
+  recordRunnerActionSpent,
+  setCardCounter,
+  spendCardCounter,
+} from "../state/turn-flags-counters";
+import {
+  cleanupEmptyRemotes,
+  createRemote,
+  ensureSpecialZones,
+  hostedCardsOn,
+  removeFromAllZones,
+  setHostedOn,
+  uninstallCorpInstalledCardToHq,
+} from "../state/zone-mutation";
+import {
+  configureLegalActionHostComposition,
+  type LegalActionHostCompositionHost,
+} from "../legal-action-hosts";
+import {
+  configureEventContextHostComposition,
+} from "../events/event-context-hosts";
+import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
+import {
+  calculateRunnerLink as calculateRunnerLinkInTrace,
+  handleTraceOrchestrationAction,
+  resolveTraceChoice,
+  traceBidChoice,
+  startTraceFromOperation as startTraceFromOperationInTrace,
+  type TraceOrchestrationHost,
+} from "../trace/trace-orchestration";
+import {
+  buildLegalAction as action,
+  makeActionId,
+} from "../turn/action-builders";
+import {
+  createMainActionHostComposition,
+  type MainActionHostCompositionHost,
+} from "../turn/main-action-hosts";
+import {
+  buildCorpDrawAction,
+  buildCorpEndTurnAction,
+  buildCorpGainCreditAction,
+  buildCorpPurgeVirusAction,
+} from "../turn/corp-basic-actions";
+import {
+  buildCorpNewRemoteIceInstallAction,
+  buildCorpNewRemoteRootInstallAction,
+  buildCorpServerIceInstallAction,
+  buildCorpServerRootInstallAction,
+} from "../turn/corp-install-actions";
+import {
+  assertCorpCanCreateNewDataFort,
+  buildCorpTrashNewDataFortCreationLockActions,
+  corpNewDataFortCreationLocked,
+  newDataFortCreationLockForSource,
+} from "../turn/corp-data-fort-lock";
+import {
+  buildRunnerEndTurnAction,
+  buildRunnerGainCreditAction,
+  buildRunnerRemoveTagAction,
+} from "../turn/runner-basic-actions";
+import {
+  buildRunnerDrawCardActions,
+  type RunnerDrawActionContext,
+} from "../turn/runner-draw-actions";
+import {
+  addCorpActionDebt,
+  corpActionDebtPending,
+  purgeableRunnerVirusCounterAmount,
+  purgeableRunnerVirusCounterTotal,
+  purgeVirusCounters,
+  type TurnBasicExecutionHost,
+} from "../turn/turn-basic-execution";
+import { type CreditEconomyExecutionHost } from "../economy/credit-economy-execution";
+import { type TriggerAbilityExecutionHost } from "../abilities/trigger-ability-execution";
+import {
+  handleCounterUtilityTriggerExecution,
+  type CounterUtilityTriggerExecutionHost,
+} from "../abilities/counter-utility-trigger-execution";
+import { handleHiddenZoneTriggerExecution } from "../abilities/hidden-zone-trigger-execution";
+import {
+  handleRunFortTriggerExecution,
+  microtechHostedProgramIds,
+  topHostedProgramOnMicrotech,
+  type RunFortTriggerExecutionHost,
+} from "../abilities/run-fort-trigger-execution";
+import {
+  applyShellTradersStartOfTurn,
+  handleRunnerSpecialTriggerExecution,
+  shellTradersInstallCost,
+  shellTradersPreparedTargetIds,
+  shellTradersPrepareTargetIds,
+  topRunnerHeapCardId,
+  type RunnerSpecialTriggerExecutionHost,
+} from "../abilities/runner-special-trigger-execution";
+import {
+  installCard as executeInstallCard,
+  type InstallCardHost,
+} from "../install/install-card";
+import {
+  rezCard as executeRezCard,
+  type RezCardHost,
+} from "../rez/rez-card";
+import {
+  addRunnerTagsWithPrevention,
+  aggregateDamageSummaries,
+  configureDamageCoreHost,
+  createDamageImminentEvent,
+  damagePreventionSourcesForDefinition,
+  doDamage,
+  hiddenRunnerResourceRevealPayload,
+  isRunnerHardwareDeckDefinition,
+  openEventModificationWindow,
+  openReplacementWindow,
+  openRunnerInstalledTrashPreventionWindow,
+  resolveDamageImminentEvent,
+  resolveDamageOperation,
+  resolveEventModificationChoice,
+  resolveReplacementChoice,
+  resolveRunnerInstalledTrashImminentEvent,
+  setDamagePayload,
+  type DamageCoreHost,
+  type DamageSummary,
+} from "../damage/damage-core";
+import {
+  buildRunnerHardwareInstallAction,
+  buildRunnerProgramInstallAction,
+  buildRunnerResourceInstallAction,
+} from "../turn/runner-install-actions";
+import {
+  buildRunnerAgendaPointInstallAction,
+  buildRunnerSelectedServerInstallAction,
+} from "../turn/runner-install-context-actions";
+import {
+  buildRunnerHostedProgramInstallAction,
+  buildRunnerZetatechOverlayInstallAction,
+} from "../turn/runner-hosted-install-actions";
+import {
+  buildRunnerProgramTrashBeforeInstallAction,
+} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
+import {
+  buildRunnerShellTradersRemoveCounterAction,
+  buildRunnerShellTradersSetAsideAction,
+  buildRunnerValuPakInstallAction,
+  buildRunnerValuPakSequenceEndAction,
+} from "../turn/runner-special-zone-install-actions";
+import {
+  lookTopStackShowToCorpThenInstallMatchingTargets,
+  searchStackInstallTargets,
+  sneakPreviewInstallableProgramIds,
+  sneakPreviewSourceOptions,
+  startAujourdOuiTop5Activation,
+  startRunnerStackSearchChoiceActivation,
+  startSelfModifyingCodeStackActivation,
+  startSneakPreviewSourceActivation,
+} from "../hidden-zone/search-choice-activations";
+import {
+  handleHiddenZoneSearchChoice,
+  type HiddenZoneSearchActivationHandlerHost,
+  type HiddenZoneSearchChoiceHandlerHost,
+} from "../hidden-zone/search-choice-handlers";
+import {
+  handleHiddenZoneArrangeChoice,
+  resolveNewBloodConcealAndReorder,
+  startCorpAssetRdTopReorderChoice,
+  startCorpRdArrangeChoice,
+  startCorpRdTopReorderChoice,
+  startFortressRespecificationReorderChoice,
+  startRunnerStackArrangeChoice,
+  startRunnerStackTop5Choice,
+  type HiddenZoneArrangeChoiceHandlerHost,
+} from "../hidden-zone/arrange-choice-handlers";
+import {
+  handleHiddenZoneNonSearchChoice,
+  startCorpArchivesToHqChoice,
+  startCorpDiscardHqWithRetainPaymentChoice,
+  startRunnerGripTrashForCreditsChoice,
+  startRunnerInstalledTrashForCreditsChoice,
+  startSmithsPawnshopChoice,
+  startSocialEngineeringHideChoice,
+  startSynchronizedAttackOnHqRetainChoice,
+  type HiddenZoneNonSearchChoiceHandlerHost,
+} from "../hidden-zone/nonsearch-choice-handlers";
+import {
+  handleCorpZoneChoice,
+  resolveAiChiefFinancialOfficer,
+  resolveReschedulerHqShuffleDraw,
+  startCorporateDownsizingScoreChoice,
+  startCorporateNegotiatingCenterChoice,
+  type CorpZoneChoiceHandlerHost,
+} from "../hidden-zone/corp-zone-choice-handlers";
+import {
+  handleCorpInstallRezSequenceChoice,
+  resolveSecurityPurgeAgendaPurge,
+  startDataFortReclamationChoice,
+  startPriorityRequisitionChoice,
+  type CorpInstallRezSequenceHandlerHost,
+} from "../corp/install-rez-sequence-handlers";
+import {
+  handleScoredAgendaFlowChoice,
+  startEmployeeEmpowermentStartDrawChoice,
+  type ScoredAgendaFlowHost,
+} from "../corp/scored-agenda-flow";
+import {
+  buildScoredAgendaAbilityActionsForCard,
+  handleScoredAgendaActivatedAbilityAction,
+  type ScoredAgendaAbilityHost,
+} from "../corp/scored-agenda-abilities";
+import {
+  buildCorpTraceDamageAbilityActionsForCard,
+  handleCorpTraceDamageActivatedAbility,
+  type CorpTraceDamageAbilityHost,
+} from "../corp/trace-damage-abilities";
+import {
+  buildCorpSpecialDamageAbilityActionsForCard,
+  handleCorpSpecialDamageAbilityAction,
+  type CorpSpecialDamageAbilityHost,
+} from "../corp/special-damage-abilities";
+import {
+  availableRunnerAccessTrashCredits,
+  runnerAccessTrashRecurringCreditSourceIds,
+  type RunnerAccessActionHost,
+} from "../access/access-actions";
+import {
+  resolveAccessInstalledRunnerProgramReturnChoice,
+  resolveAccessPaymentChoice,
+  resolveChimeraDaemonTrashChoice as resolveAccessChimeraDaemonTrashChoice,
+  type AccessEffectHandlerHost,
+} from "../access/access-effect-handlers";
+import {
+  advanceArchivesBreachPastNonDecisionCards,
+  type AccessFlowHost,
+} from "../access/access-flow";
+import {
+  installedAccessBonusForServer,
+  runnerHqAccessBonus as runnerHqAccessBonusForBreach,
+  type BreachStateHost,
+} from "../access/breach-state";
+import {
+  resolveMicrotechAiInterfacePreAccessChoice,
+  resolvePriorityWreckSpendChoice,
+  sourcePayloadForSuccessfulRunReplacement,
+  type RunAccessTransitionHost,
+} from "../run/run-access-transition";
+import { type StartRunOptions } from "../run/run-core-execution";
+import {
+  applyBodyweightDataCrecheSuccessfulRun,
+  resolveSuccessfulRunFollowupAbility,
+  resolveSuccessfulRunInterventionChoice as resolveSuccessfulRunInterventionChoiceInRunModule,
+  type SuccessfulRunInterventionHost,
+} from "../run/successful-run-interventions";
+import {
+  handleRunEndCleanup,
+  recordDupreBreakUsage,
+  resetBreakerStrength,
+  resolvePattelsVirusCounterChoice,
+  type RunEndCleanupHost,
+} from "../run/run-end-cleanup";
+import {
+  activeWilsonSourceIds,
+  availableRunnerRunStartCredits,
+  hostedPaymentCredits,
+  isRestrictedHostedCreditSource,
+  payRunStartTaxCredits,
+  recordWilsonRunCapSpend,
+  restrictedHostedCreditSourceForDefinition,
+  restrictedHostedCreditSourceIds,
+  restrictedHostedCredits,
+  runDurationPaymentHost,
+  shouldLoadLegacyRecurringCredits,
+  spendHostedPaymentCredits,
+  spendRestrictedHostedCredits,
+  spendRunnerRunCredits,
+  type RunDurationPaymentHost,
+} from "../run/run-duration-payment";
+import {
+  resolvePassRezzedIceProgramTrashChoice as resolvePassRezzedIceProgramTrashChoiceInRunModule,
+  resolveViral15ProgramTrashChoice as resolveViral15ProgramTrashChoiceInRunModule,
+  type EncounterResolutionHost,
+} from "../run/encounter-resolution";
+import {
+  applyRioDeJaneiroCityGridPassedIceTrigger,
+  isSubmarineUplinkSource,
+  markSubmarineUplinkJackOutAfterEncounter,
+  resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
+  resolveStartupImmolatorTrashIce as resolveStartupImmolatorTrashIceInRunModule,
+  resolveTooManyDoorsSecretSpendChoice as resolveTooManyDoorsSecretSpendChoiceInRunModule,
+  type EncounterSpecialWindowHost,
+} from "../run/encounter-special-windows";
+import {
+  applyPrintedTraceSuccessFollowups,
+  isSupportedEncounterTraceSuccessEffect,
+  type EncounterPrintedEffectHost,
+} from "../run/encounter-printed-effects";
+import {
+  type EncounterPrintedNonTraceHost,
+} from "../run/encounter-printed-nontrace-effects";
+import {
+  breakAbilityMatchesIce,
+  breakAbilityMatchesSubroutine,
+  buildRunnerEncounterActions,
+  buildRunnerMovementActions,
+  type RunnerEncounterActionHost,
+} from "../run/encounter-actions";
+import {
+  buildRunnerAccessStartCardImplementationActions,
+  buildCorpEncounterCardImplementationActions,
+} from "../run/card-implementation-run-actions";
+import {
+  createGameCardImplementationRuntimeDeps,
+  type GameCardImplementationRuntimeDepsHost,
+} from "../card-implementation/card-implementation-runtime-deps";
+import {
+  type HiddenZoneRuntimeDepsHost,
+} from "../card-implementation/hidden-zone-runtime-deps";
+import {
+  type InstallRezRuntimeDepsHost,
+} from "../card-implementation/install-rez-runtime-deps";
+import {
+  type CounterLifecycleRuntimeDepsHost,
+} from "../card-implementation/counter-lifecycle-runtime-deps";
+import {
+  type TraceRuntimeDepsHost,
+} from "../card-implementation/trace-runtime-deps";
+import {
+  beginEncounter,
+  isApproachIceExposeViewingWindowOpen,
+  isApproachIceExposeWindowOpen,
+  resolveApproachIceExposeAbility,
+  resolveApproachIceExposeViewingDecision,
+  runnerApproachIceExposeActions,
+  runnerApproachIceExposeViewingActions,
+  type EncounterEntryHost,
+} from "../run/encounter-entry";
+import {
+  buildCorpApproachActions,
+  buildCorpRunRootRezWindowActions,
+  corpRunRootRezWindowKey,
+  handleRunRootRezPostRez,
+  isCorpRunRootRezWindowOpen,
+  passCorpRunRootRezWindow,
+  resolveCorpRootRezEffect,
+  resolveSpeedTrapRezInterruptChoice,
+  type RunRezWindowHost,
+} from "../run/run-rez-window";
+import {
+  resolveFortPassAdvancementWindow,
+  resolveSingaporeCityGridSwapChoice,
+  resolveStartRunIceRepositionWindow,
+  startSingaporeCityGridSwapChoice,
+  type FortPassWindowHost,
+} from "../run/fort-pass-window";
+import {
+  applyPostBreakStealthLoss,
+  clearRovingSubmarineActivityMarkers,
+  isRovingSubmarineRunBlocked,
+  isParisTracePoolSource,
+  markRovingSubmarineActivityForServer,
+  parisCityGridTracePoolSource,
+  parisCityGridTracePoolTotal,
+  parisTracePoolCapacityForCard,
+  resolveAardvarkInterceptionChoice,
+  resolveHammerStealthLossChoice,
+  runnerStealthRecurringCredits,
+  shouldOpenAardvarkInterception,
+  spendParisCityGridTracePool,
+  startAardvarkInterceptionChoice,
+  validateRovingSubmarineRunGate,
+  type FortRunSideFamiliesHost,
+} from "../run/fort-run-side-families";
+import {
+  handleRunMovementAction,
+  passApproachedIce,
+  type RunMovementHost,
+} from "../run/run-movement";
+import {
+  createRunAccessLegalActionHostComposition,
+  type RunAccessLegalActionHostCompositionHost,
+} from "../run/run-access-legal-action-hosts";
+import { type RunnerBreakerActionExecutionHost } from "../run/runner-breaker-action-execution";
+import { type StartRunActionExecutionHost } from "../run/start-run-action-execution";
+import { type RezActionExecutionHost } from "../rez/rez-action-execution";
+import { type PlayCardExecutionHost } from "../play/play-card-execution";
+import {
+  canPlayCorpOperation,
+  cardImplementationOperationLegalActions,
+  corpUtilityImplementationForDefinition,
+  hasPrintedCostOnPlayCardImplementation,
+  onPlayCardImplementationEffects,
+  onPlayCardImplementationAdditionalOperationCost,
+  onPlayCardImplementationNeedsLastTurnResourceTarget,
+  resolveCorpOperation,
+  type CorpOperationResolutionHost,
+} from "../play/corp-operation-resolution";
+import { type BoardStateActionExecutionHost } from "../board/board-state-action-execution";
+import { shuffleRunnerStackAndRefreshZones } from "../hidden-zone/runner-stack-shuffle";
+import { hashState } from "../hash";
+import { applyAction as applyActionFromGame } from "../apply-action";
+import {
+  configureApplyActionHostComposition,
+  type ApplyActionHostCompositionHost,
+} from "../apply/apply-action-hosts";
+import {
+  hiddenRunnerResourceSlotId,
+  isConcealedRunnerResource,
+  resolveHiddenRunnerResourceSlot,
+} from "../view/card-view";
+import { toPublicEvent } from "../view/public-event-view";
+import { validateGameState } from "../validation";
+import {
+  additionalSubroutinesForIce,
+  currentEncounterAdditionalSubroutinesForIce,
+} from "../../ability-engine/additional-subroutine-modifiers";
+import { quoteBreakSubroutineCostModifiers } from "../../ability-engine/break-subroutine-cost-modifiers";
+import {
+  effectiveAgendaDifficulty,
+  maxHandSize,
+  runnerMemoryLimit,
+  type EffectiveAgendaDifficultyDependencies,
+} from "../../ability-engine/effective-values";
+import {
+  publicServerLabel,
+  publicServerLabelForCard,
+  serverChoiceDisplayLabel,
+} from "../../public-context";
+import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
+import { traceSuccessEffectForCardImplementation } from "../../ability-engine/trace-implementations";
+import {
+  icebreakerAbilitiesForDefinition,
+  type RuntimeIcebreakerAbility,
+} from "../../ability-engine/icebreaker-abilities";
+import { iceStrengthModifierBonusFor } from "../../ability-engine/ice-strength-modifiers";
+import {
+  CARD_IMPLEMENTATIONS,
+  cardImplementationForDefinitionId,
+} from "../../card-implementations/registry";
+import {
+  ACTION_ASSET_CARD_IDS,
+  COUNTER_ASSET_CARD_IDS,
+  COUNTER_OPERATION_CARD_IDS,
+  OVERADVANCE_AGENDA_CARD_IDS,
+  scoredAgendaCounterCreditPayload,
+  scoredAgendaCounterCreditProfileForDefinition,
+  scoredAgendaCounterCreditProfileForPayload,
+  SCORED_REVEAL_AGENDA_CARD_IDS,
+  SERVER_DIFFICULTY_UPGRADE_CARD_IDS,
+} from "../../mechanics/agenda-scoring";
+import {
+  ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
+  ARTIFICIAL_SECURITY_DIRECTORS_OVERADVANCE_AGENDA_ID,
+  CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
+  EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
+  FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
+  FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID,
+  GENETICS_VISIONARY_ACQUISITION_OVERADVANCE_AGENDA_ID,
+  INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID,
+  MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
+  PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
+  SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
+  SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
+  TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
+  VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
+  VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
+} from "../../mechanics/agenda-operation-effects";
+import {
+  COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
+  DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
+  KRUMZ_TRACE_ASSET_CARD_ID,
+  SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
+  TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
+} from "../../mechanics/asset-node-effects";
+import {
+  ABLATIVE_COUNTER_HARDWARE_CARD_ID,
+  ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
+  DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
+  EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
+  FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID,
+  RUNTIME_DAMAGE_PREVENTION_PROFILES,
+} from "../../mechanics/damage-prevention";
+import {
+  CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
+  CORP_HQ_AGENDA_REVEAL_CARD_ID,
+  CORP_HQ_SHUFFLE_DRAW_CARD_ID,
+  CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
+  COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID,
+  AUJOURD_OUI_RESOURCE_CARD_ID,
+  HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
+  HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS,
+  RUNNER_GRIP_TRASH_EVENT_CARD_ID,
+  RUNNER_STACK_TOP5_EVENT_CARD_ID,
+  SERVER_EXPOSE_PROGRAM_CARD_IDS,
+  SERVER_ICE_SWAP_UPGRADE_CARD_ID,
+  SHORT_CIRCUIT_RESOURCE_CARD_ID,
+  STACK_SEARCH_PROGRAM_CARD_IDS,
+  STACK_TOP_REORDER_RESOURCE_CARD_ID,
+  STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
+} from "../../mechanics/hidden-zone";
+import { NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID } from "../../mechanics/global-modifiers";
+import { COUNTER_UPGRADE_CARD_IDS } from "../../mechanics/hosting-counters";
+import {
+  ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
+  CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
+  EDGERUNNER_TEMPS_INSTALL_OPERATION_ID,
+  FORGED_ACTIVATION_ORDERS_FORCE_REZ_EVENT_ID,
+  JAPANESE_WATER_TORTURE_BREAKER_ID,
+  MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
+  MISC_FOR_SALE_TRASH_INSTALLED_EVENT_ID,
+  OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID,
+  RABBIT_HQ_INTERFACE_PROGRAM_ID,
+  SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
+  SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID,
+  VALU_PAK_SOFTWARE_BUNDLE_INSTALL_EVENT_ID,
+  ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
+} from "../../mechanics/longtail-card-effects";
+import {
+  corpInstalledEconomyActionPayload,
+  corpInstalledEconomyActionProfileForDefinition,
+  corpInstalledEconomyActionProfileForPayload,
+  CORP_RECURRING_ASSET_CARD_IDS,
+  type EconomyActionProfile,
+} from "../../mechanics/payment-costs";
+import {
+  isP358HiddenReplacementCompatibilityChoiceSource,
+} from "../../compatibility/payload-compatibility";
+import {
+  ALL_NIGHTER_ID,
+  ARMADILLO_ARMORED_ROAD_HOME_ID,
+  BIZARRE_ENCRYPTION_SCHEME_ID,
+  BLINK_ID,
+  BODYWEIGHT_DATA_CRECHE_ID,
+  BUTCHER_BOY_ID,
+  CHIMERA_ID,
+  COCKROACH_ID,
+  CODE_VIRAL_CACHE_ID,
+  DANSHIS_SECOND_ID,
+  DEAL_WITH_MILITECH_ID,
+  DRIFTER_MOBILE_ENVIRONMENT_ID,
+  DUPRE_ID,
+  EMPLOYEE_EMPOWERMENT_ID,
+  GRUBB_ID,
+  HELLS_RUN_ID,
+  HUNT_CLUB_BBS_ID,
+  INCUBATOR_ID,
+  JUNKYARD_BBS_ID,
+  MICROTECH_TRODE_SET_ID,
+  MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
+  MYSTERY_BOX_ID,
+  NEVINYRRAL_ID,
+  PATTELS_VIRUS_ID,
+  POX_ID,
+  RONIN_AROUND_ID,
+  SELF_MODIFYING_CODE_ID,
+  SHELL_TRADERS_ID,
+  SKIVVISS_ID,
+  SMARTEYE_ID,
+  SNEAK_PREVIEW_ID,
+  TERRORIST_REPRISAL_ID,
+  TOO_MANY_DOORS_ID,
+} from "../../compatibility/runtime-compatibility";
+import {
+  BOARDWALK_RANDOM_PROGRAM_CARD_ID,
+  QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
+  RUNNER_RANDOM_PROGRAM_CARD_IDS,
+} from "../../mechanics/random-effects";
+import {
+  RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
+  RUN_REPLACEMENT_OVERLAP_EVENT_CARD_ID,
+  TRACE_AWARE_RUN_EVENT_CARD_ID,
+} from "../../mechanics/run-access";
+import {
+  CRYBABY_ACCESS_COST_UPGRADE_ID,
+  DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
+  DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
+  PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
+  TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
+} from "../../mechanics/server-upgrades";
+import {
+  RUN_TAX_UPGRADE_CARD_IDS,
+  TAG_CONDITION_UPGRADE_CARD_IDS,
+} from "../../mechanics/trace-tags";
+import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
+import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
+import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
+import {
+  canPlayPrintedCostOnPlayImplementation,
+  executeCardImplementationLifecycleEffects,
+  executeCardImplementationRunnerRunStartEffects,
+  executeCardImplementationStartOfCorpTurnEffects,
+  executeCardImplementationStartOfRunnerTurnEffects,
+  executeOnPlayCardImplementationAbility,
+  pushActivatedCardImplementationActions,
+  pushActivatedCardImplementationActionsForTiming,
+  pushCardImplementationEndOfRunnerTurnActions,
+  resolveActivatedCardImplementationAbility,
+  resolveCardImplementationEndOfRunnerTurnAction,
+} from "../../ability-engine/card-implementation-runtime";
+import type {
+  ActivatedCardAbilityImplementation,
+  CardCorpUtilityImplementation,
+  CardDamagePreventionSourceImplementation,
+  CardFlatlineReplacementSourceImplementation,
+  CardHiddenReplacementLongtailImplementation,
+  CardRemainingReplacementLongtailImplementation,
+  CardRunnerEventLongtailImplementation,
+  CardRunnerUtilityLongtailImplementation,
+  CardScoredAgendaImplementation,
+  CardTagPreventionSourceImplementation,
+  CardTraceSuccessEffectImplementation,
+  CardTrashPreventionSourceImplementation,
+  CardUniqueDirectLongtailImplementation,
+  CardVariableRezImplementation,
+  CardVirusCounterImplementation,
+  MakeRunEffectImplementation,
+} from "../../ability-engine/definition-types";
+import type { RuntimeDeps } from "./runtime-shared";
+
+export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
+  const {
+    DEFAULT_CONTROLLERS,
+    INITIAL_HAND_SIZE,
+    PROTEUS_ARMAGEDDON_ID,
+    PROTEUS_SCALDAN_ID,
+    PROTEUS_TAXMAN_ID,
+    PROTEUS_VIRAL_PIPELINE_ID,
+    RUNNER_EVENT_RESOLVERS,
+    TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS,
+    abilityMetadata,
+    accessEffectHandlerHost,
+    accessFlow,
+    accessFlowHost,
+    acmeSavingsAndLoanObligationCount,
+    activatedCardImplementationExecutionHost,
+    activeCrashEverettSourceId,
+    addAcmeSavingsAndLoanObligation,
+    addCounterToAllInstalledRunnerIcebreakers,
+    addCurrentRunAccessCount,
+    addHackerTrackerTraceCounters,
+    addVirusCounterWithDisinfectantPrevention,
+    addVisibleCardCounter,
+    advanceableInstalledCardTargets,
+    advancementDistributionOptions,
+    affordableRezzedInstalledIceIdsForRunner,
+    agendaPoints,
+    agendaPointsForScoredCard,
+    appendRegionReplacementTrashEffect,
+    applyActionHostComposition,
+    applyAiBoonRunStart,
+    applyEffectCommands,
+    applyRunnerDrawSummaryPayload,
+    applyRunnerTraceCounterRunStartEffects,
+    applySystematicLayoffsAdvancementPlacement,
+    archivesAccessRequiresDecisionOrEffect,
+    assertBreakSubroutineCostQuoteValid,
+    assertCorpIceInstallCostValid,
+    assertCurrentSubroutineMatchesLegalAction,
+    assertNonNegativeAmount,
+    assertPositiveIntegerAmount,
+    availableRunnerProgramInstallCredits,
+    availableRunnerTagRemovalCredits,
+    awardRunnerEventAgendaPoint,
+    backupProgramsOnMicrotechBeforeTrash,
+    boardStateActionExecutionHost,
+    breachStateHost,
+    breakAbilityForLegalAction,
+    breakSubroutineCostBreakdown,
+    canHostProgramOnDaemon,
+    canInstallCorpRootCardInServer,
+    canInstallRunnerProgramFromZone,
+    canOverlayProgramOnZetatechSoftwareInstaller,
+    canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
+    cardHasSubtype,
+    cardImplementationAgendaPointInstallCost,
+    cardImplementationEffectAdapters,
+    cardImplementationRunnerEventResolver,
+    cardImplementationRuntimeDeps,
+    cardInstallCapabilitiesForDefinition,
+    choiceAction,
+    chooseCorpAgendasForPointCost,
+    citySurveillanceSourceIds,
+    cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay,
+    clearEdgerunnerTempsInstallFlags,
+    clearValuPakProgramInstallFlags,
+    clickCostForAction,
+    closeRunnerCostPenaltySupportWindowForPayment,
+    cockroachCounterTotal,
+    cockroachRandomHqDiscardActive,
+    codeViralCachePurgePreserveTargets,
+    consumeEdgerunnerTempsInstallAction,
+    consumeValuPakProgramInstallAction,
+    continueRun,
+    continueV1921PlayfulAiLoop,
+    corpAgendaCounterOperationTarget,
+    corpAgendaPointTotal,
+    corpIceInstallAdditionalCost,
+    corpIceInstallBaseCost,
+    corpIceInstallTotalCost,
+    corpInstallRezSequenceHandlerHost,
+    corpOperationResolutionHost,
+    corpRegionUpgradeIdsInServer,
+    corpRootAgendaOrNodeCapacityInServer,
+    corpRunnerActionPaidWindowActions,
+    corpScoredAgendaForfeitTargets,
+    corpScoredBlackOpsAgendaLastTurn,
+    corpSpecialDamageAbilityHost,
+    corpTraceDamageAbilityHost,
+    corpTracePaymentDeps,
+    corpUtilityImplementationForCard,
+    corpZoneChoiceHandlerHost,
+    counterLifecycleRuntimeDepsHost,
+    counterUtilityTriggerExecutionHost,
+    creditCostForAction,
+    creditEconomyExecutionHost,
+    creditTextForPrompt,
+    daemonHostedMemoryUsed,
+    daemonHostingCapacity,
+    damageCoreHost,
+    diePromptText,
+    discardChoice,
+    discardRandomCorpHqCards,
+    drawRunnerCard,
+    drawRunnerCards,
+    dupreStrengthCounterBonus,
+    edgerunnerTempsInstallActionsRemaining,
+    effectiveAgendaDifficultyDeps,
+    effectiveSubtypesForCard,
+    emptyRunnerDrawSummary,
+    encounterEntryHostForState,
+    encounterPrintedEffectHostForState,
+    encounterPrintedNonTraceHostForState,
+    encounterResolutionHostForState,
+    encounterSpecialWindowHostForState,
+    encounterTemporaryTraceCreditsAvailable,
+    executeEffectCommands,
+    expireCorporateRetreatInstallCreditAbilities,
+    exposeCorpCardInServer,
+    exposeInstalledCorpCardForImplementation,
+    exposeInstalledCorpCardLabel,
+    exposeInstalledCorpCardTargets,
+    exposeInstalledCorpCardsChoiceOptions,
+    exposeOutermostIceOfEachDataFort,
+    exposedCorpCardInServer,
+    finishRun,
+    forfeitCorpAgendaForPointCost,
+    forfeitRunnerAgendaForPointCost,
+    fortCapacityModifiersForCard,
+    fortPassWindowHostForState,
+    fortRunSideFamiliesHostForState,
+    gameCardImplementationRuntimeDepsHost,
+    hackerTrackerCardIds,
+    hackerTrackerCounterTotal,
+    hackerTrackerCounterType,
+    handForSide,
+    hasCardImplementationMemoryUnitModifier,
+    hasCorpUtilityKind,
+    hasHiddenResourceAccessStartActions,
+    hasInstallCapabilityKindForDefinition,
+    hasInstalledMicrotechTrodeSet,
+    hasInstalledUniqueCardDefinition,
+    hiddenReplacementLongtailForDefinition,
+    hiddenZoneArrangeChoiceHandlerHost,
+    hiddenZoneNonSearchChoiceHandlerHost,
+    hiddenZoneRuntimeDepsHost,
+    hiddenZoneSearchActivationHandlerHost,
+    hiddenZoneSearchActivationTargetHost,
+    hiddenZoneSearchChoiceHandlerHost,
+    hiddenZoneSearchHandlerHostBase,
+    hostedProgramStrengthModifier,
+    huntClubBbsExposeOptionLabel,
+    huntClubBbsExposeTargets,
+    iceChoiceLabelForSide,
+    iceStrengthBonusFor,
+    iceStrengthFor,
+    icebreakerEncounterStrengthBonus,
+    icebreakerHasSpecial,
+    identityDefinition,
+    identityModifierAmount,
+    incubatorCounterTotal,
+    installCardHost,
+    installRezRuntimeDepsHost,
+    installRunnerProgramForFree,
+    installRunnerProgramFromStackWithoutClick,
+    installRunnerProgramFromZoneWithoutClick,
+    installTargetBindingForDefinition,
+    installedAgendaOperationTarget,
+    installedCodeViralCacheIds,
+    installedCorpCardServerContext,
+    installedRunnerConnectionIds,
+    installedRunnerIcebreakerIds,
+    installedRunnerProgramTrashOptionsForInstall,
+    installedRunnerVirusSourceIds,
+    installedVirusCounterTotalForDefinition,
+    isAcmeSavingsAndLoanDefinition,
+    isCitySurveillanceCard,
+    isCorpInstallableCardType,
+    isHackerTrackerCentralCard,
+    isInstalledCorpCardAdvanceable,
+    isInvestmentFirmCard,
+    isRegionUpgrade,
+    isUniqueCard,
+    isV097OrLater,
+    isV099OrLater,
+    isVersionAtLeast,
+    isVisibleVirusCounterCardForRunner,
+    krumzTraceBitCardIds,
+    krumzTraceBitTotal,
+    leavePlayCleanupImplementationsForCard,
+    legalActionHostComposition,
+    mainActionHostComposition,
+    mergeRunnerDrawSummary,
+    microtechBackupDriveIds,
+    microtechTrodeSetBreakAdditionalCost,
+    movableAdvancementSourceIds,
+    moveAdvancementOptions,
+    mustInstallInsideSubsidiaryDataFort,
+    newsgroupTauntingRunStartTax,
+    normalizeSubtypeLabel,
+    openPostMeatDamageReactionWindow,
+    openRunnerCostPenaltySupportWindow,
+    outermostIceExposures,
+    outermostIceIndex,
+    parseAdvancementDistributionValue,
+    parseCodeViralCachePreserveOption,
+    parsePlayfulAiChoiceSource,
+    parsePlayfulAiSplit,
+    parseRunnerInstalledConnectionTrashBadPublicityChoiceSource,
+    passCurrentEncounteredIce,
+    pendingChoiceResolutionHost,
+    permanentIcebreakerStrengthCounterBonus,
+    pickRunnerAgendaForAgendaPointCost,
+    playCardExecutionHost,
+    playfulAiSplitOptions,
+    postMeatDamageHiddenResourceCandidates,
+    powerGridOverloadEligibleHardwareIds,
+    powerGridOverloadLegalActions,
+    powerGridOverloadTrashCountFromChoiceSource,
+    powerGridOverloadTrashCountFromPayload,
+    poxCountersForServer,
+    poxInstallTax,
+    preventOneVirusCounterWithDisinfectant,
+    printedCostCardImplementationMakeRunEffect,
+    privateLookCardIds,
+    publicIcePositionLabelForCard,
+    publicIceSelectionLabelForCard,
+    pumpAbilityForLegalAction,
+    pumpAmountForLegalAction,
+    pumpDurationForLegalAction,
+    pushCorpTraceDamageOrCardImplementationActions,
+    rabbitTraceLimitReductionForIceTrace,
+    randomCorpHqDiscard,
+    recordBartmossEncounterUsage,
+    recordSnowballBreakUsage,
+    refreshRecurringCredits,
+    relativeDamageSubroutineForCurrentEncounter,
+    relativeIceStrengthBonusFor,
+    relativeTraceSubroutinesForCurrentEncounter,
+    remainingReplacementLongtailImplementationForCard,
+    remainingReplacementLongtailImplementationForDefinition,
+    remainingReplacementLongtailKindForCard,
+    remainingReplacementLongtailKindForDefinition,
+    removeAcmeSavingsAndLoanObligation,
+    requireRunnerTagged,
+    requiresDataFortInstallTarget,
+    resolveAgendaCounterOperation,
+    resolveAnonymousTipDerezBlackIceChoice,
+    resolveBlinkBreakSubroutineAction,
+    resolveCardImplementationAccessPaymentChoice,
+    resolveCardImplementationAdvancementDistributionChoice,
+    resolveCardImplementationMoveAdvancementChoice,
+    resolveChimeraDaemonTrashChoice,
+    resolveCodeViralCachePurgeChoice,
+    resolveCoreCommandJettisonIceChoice,
+    resolveCorpInstalledEconomyAction,
+    resolveCrashEverettDrawChoice,
+    resolveDealWithMilitech,
+    resolveDiscardChoice,
+    resolveExposeInstalledCorpCardsChoice,
+    resolveForgedActivationOrdersCorpChoice,
+    resolveForgedActivationOrdersTargetChoice,
+    resolveHuntClubBbsExposeChoice,
+    resolveIncubatorTransformChoice,
+    resolveInvestmentFirmCreditChoice,
+    resolveManagementShakeUpOperation,
+    resolveMitWestTier,
+    resolveMultiBreakSubroutinesAction,
+    resolveOpenEndedMileageProgramReturnChoice,
+    resolveP358HiddenReplacementChoice,
+    resolvePlayfulAiDiceLoopEvent,
+    resolvePostMeatDamageHiddenResourceChoice,
+    resolvePostOnPlayGenericFollowups,
+    resolvePowerGridOverloadChoice,
+    resolvePowerGridOverloadOperation,
+    resolveProteusRunnerProgramReturnChoice,
+    resolveRunnerHostingChoice,
+    resolveRunnerInstalledConnectionTrashBadPublicityChoice,
+    resolveRunnerLastTurnInstalledResourceTargetId,
+    resolveRunnerPrivateLookChoice,
+    resolveRunnerProgramTrashBeforeInstallChoice,
+    resolveRunnerTargetedEventImplementation,
+    resolveSecurityCodeWormChipTrashIceChoice,
+    resolveSetupMulliganChoice,
+    resolveSystematicLayoffsAdvancementChoice,
+    resolveSystematicLayoffsAdvancementOperation,
+    resolveTraceHardwareWreckerSuccess,
+    resolveTraceTrashRunnerResourceSuccess,
+    resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
+    resolveV1911CorporateDownsizing,
+    resolveV1911RunnerHiddenZoneAbility,
+    resolveV1921PlayfulAiChoice,
+    restoreCodeViralCachePreservedCounters,
+    returnRunnerInstalledCardToGrip,
+    returnRunnerInstalledProgramsToGripForAccess,
+    revealCorpRdTop,
+    revealRunnerStackTop,
+    rezActionExecutionHost,
+    rezCardHost,
+    rezzedBlackIceIds,
+    rezzedCorpRootCardIds,
+    rezzedIceOutsideThisIceCount,
+    rezzedInstalledIceIds,
+    rezzedInvestmentFirmIds,
+    rootInstallRezzesOnInstall,
+    runAccessLegalActionHostComposition,
+    runAccessTransitionHost,
+    runBreakSubroutineAdditionalCost,
+    runCardImplementationActionHost,
+    runEndCleanupHost,
+    runFlow,
+    runFortTriggerExecutionHost,
+    runMovementHostForState,
+    runRemainderStrengthBonusForBreaker,
+    runRezWindowHostForState,
+    runStartTaxForServerUpgrades,
+    runnerAccessActionHost,
+    runnerActionsPerTurn,
+    runnerBreakerActionExecutionHost,
+    runnerCanPayInstallCost,
+    runnerCostPenaltySupportCreditCapacity,
+    runnerCounterDisplayName,
+    runnerDrawActionContext,
+    runnerDrawSummaryPublicPayload,
+    runnerEncounterActionHostForState,
+    runnerEventLongtailForDefinition,
+    runnerEventLongtailKindForDefinition,
+    runnerHasInstalledCardDefinition,
+    runnerHasInstalledDefinition,
+    runnerInstallableProgramIdsForValuPak,
+    runnerInstalledCardCountByDefinition,
+    runnerInstalledHardwareTrashTarget,
+    runnerInstalledResourceLastTurn,
+    runnerLastTurnInstalledResourceIds,
+    runnerProgramInstallMemoryReachableAfterTrash,
+    runnerProgramInstallRecurringCreditSourceIds,
+    runnerProgramUsesMemory,
+    runnerRecurringCredits,
+    runnerRunAttemptsLastTurn,
+    runnerRunAttemptsThisGame,
+    runnerSpecialTriggerExecutionHost,
+    runnerStoleAgendaLastTurn,
+    runnerStoleAgendaSubtypeThisTurn,
+    runnerStolenAgendaAdvancementCountersLastTurn,
+    runnerTagRemovalRecurringCreditSourceIds,
+    runnerTagRemovalRecurringCredits,
+    runnerTraceCounterEffectDefinitions,
+    runnerTracePaymentDeps,
+    runnerTrashedNodeLastTurn,
+    runnerUtilityLongtailImplementationForCard,
+    runnerUtilityLongtailKindForCard,
+    runnerUtilityLongtailKindForDefinition,
+    sanitizeId,
+    scoredAgendaAbilityHost,
+    scoredAgendaFlowHost,
+    scoredAgendaImplementationForDefinition,
+    scoredAgendaImplementationForDefinitionId,
+    scoredAgendaKindForDefinition,
+    selectedChoiceCardIds,
+    selectedChoiceCardIdsForChoice,
+    serverDifficultyIncreaseFromFaitAccompli,
+    serverDifficultyReductionFromUpgrades,
+    setupMulliganChoice,
+    shouldOfferRunnerProgramTrashBeforeInstall,
+    shouldOpenInvestmentFirmCreditChoice,
+    shuffleCorpCardIntoRd,
+    shuffleGripTrashAndStackThenDrawForCardImplementation,
+    shuffleRunnerStack,
+    sourcePartsForP334Choice,
+    specialZoneHarnessActions,
+    spendCorpAgendaPointCost,
+    spendEncounterTemporaryTraceCredits,
+    spendHackerTrackerCounters,
+    spendKrumzTraceBits,
+    spendRunnerAccessTrashCredits,
+    spendRunnerInstallCredits,
+    spendRunnerTagRemovalCredits,
+    spendVisibleCardCounter,
+    spyCountersForServer,
+    stableSubtypeList,
+    startAnonymousTipDerezBlackIceChoice,
+    startCardImplementationAdvancementDistributionChoice,
+    startCardImplementationMoveAdvancementChoice,
+    startCodeViralCachePurgeChoice,
+    startCoreCommandJettisonIceChoice,
+    startCrashEverettDrawChoice,
+    startExpertScheduleAnalyzerPostAccessChoice,
+    startExposeInstalledCorpCardsChoice,
+    startForgedActivationOrdersTargetChoice,
+    startHuntClubBbsExposeChoice,
+    startInvestmentFirmCreditChoice,
+    startOpenEndedMileageProgramReturnChoice,
+    startPowerGridOverloadChoice,
+    startRun,
+    startRunActionExecutionHost,
+    startRunnerHostingChoice,
+    startRunnerPrivateLookChoice,
+    startRunnerProgramTrashBeforeInstallChoice,
+    startSecurityCodeWormChipTrashIceChoice,
+    startSelfModifyingCodeFreeMuChoice,
+    startSystematicLayoffsAdvancementChoice,
+    startV1921PlayfulAiChoice,
+    subroutinesForCurrentEncounter,
+    successfulRunInterventionHost,
+    swapCorpHqAndRdTop,
+    systematicLayoffsLegalActions,
+    systematicLayoffsPlacementOptions,
+    takeSetupMulligan,
+    totalCounters,
+    traceCounterEffectDefinitionFor,
+    traceOrchestrationHost,
+    traceRuntimeDepsHost,
+    trashCorpInstalledCardToArchives,
+    trashCorpInstalledCardsInScoredSourceServer,
+    trashOlderRegionUpgradesInServer,
+    trashPowerGridOverloadHardware,
+    trashRunnerInstalledCardToHeap,
+    trashRunnerInstalledProgram,
+    triggerAbilityExecutionHost,
+    turnBasicExecutionHost,
+    uniqueDirectLongtailImplementationForCard,
+    uniqueDirectLongtailImplementationForDefinition,
+    uniqueDirectLongtailKindForCard,
+    uniqueDirectLongtailKindForDefinition,
+    unrezzedInstalledIceIds,
+    v1915InstalledRevealHelperIds,
+    validateAdvancementDistribution,
+    validateCorpInstalledEconomyAction,
+    validateDeckDefinition,
+    valuPakProgramInstallActionsRemaining,
+    valuPakTemporaryProgramInstallCredits,
+    variableRezForDefinition,
+    variableTraceSubroutineForCurrentEncounter,
+    virusCounterImplementationForCard,
+    virusCounterImplementationForDefinition,
+    visibleVirusCounterTargetIds,
+    withoutVariableIceState
+  } = deps;
+
+function resolveOmniscienceFoundationEndTurnTag(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (state.runnerTurnFlags?.runnerReceivedTagThisTurn !== true) return;
+  const sourceIds = rezzedCorpRootCardIds(state)
+    .filter((cardId: CardInstanceId) =>
+      hasCorpUtilityKind(state, cardId, "omniscience_foundation_end_turn_tag"),
+    )
+    .sort();
+  if (sourceIds.length === 0) return;
+  const tagsBefore = state.runner.tags;
+  for (const _sourceId of sourceIds) {
+    addRunnerTagsWithPrevention(state, legalAction, 1, "omniscience_foundation");
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1951CorpUtilityAbility: "omniscience_foundation_end_turn_tag",
+    omniscienceFoundationTagsAdded: Math.max(0, state.runner.tags - tagsBefore),
+    sourceCount: sourceIds.length,
+    runnerTagsAfter: state.runner.tags,
+  };
+}
+
+function resolveFieldReporterEndOfRunnerTurn(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const sourceIds = state.runner.rig.resources
+    .slice()
+    .sort()
+    .filter(
+      (cardId) =>
+        runnerUtilityLongtailKindForCard(state, cardId) ===
+        "field_reporter_end_turn_rezzed_ice_payout",
+    );
+  if (sourceIds.length === 0) return;
+  const rezzedIceCount = Math.max(
+    0,
+    Math.floor(ensureRunnerTurnFlags(state).corpRezzedIceThisTurn ?? 0),
+  );
+  if (rezzedIceCount <= 0) return;
+  let gained = 0;
+  for (const sourceId of sourceIds) {
+    const implementation = runnerUtilityLongtailImplementationForCard(
+      state,
+      sourceId,
+    );
+    if (
+      implementation?.kind !==
+      "field_reporter_end_turn_rezzed_ice_payout"
+    )
+      continue;
+    gained += rezzedIceCount * implementation.amountPerRezzedIce;
+  }
+  if (gained <= 0) return;
+  credits(state, "runner", gained);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    runnerUtilityAbility: "field_reporter_end_turn_rezzed_ice_payout",
+    corpRezzedIceThisTurnCount: rezzedIceCount,
+    gainedCredits: gained,
+    runnerCreditsAfter: state.runner.credits,
+    sourceDefinitionId: definitionFor(state, sourceIds[0]!).id,
+    sourceCount: sourceIds.length,
+  };
+}
+
+function resolvePreyingMantisEndOfRunnerTurnDamage(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const dueSourceIds =
+    ensureRunnerTurnFlags(state).preyingMantisDamageDueSourceIdsThisTurn ?? [];
+  if (dueSourceIds.length === 0) return;
+  const damageSummary = doDamage(state, {
+    damageId: `runner.end.preying_mantis.${state.stateVersion}`,
+    damageType: "core",
+    amount: dueSourceIds.length,
+    source: "runner_end:preying_mantis",
+  });
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    runnerUtilityAbility: "preying_mantis_end_turn_damage",
+    damageCannotBePrevented: true,
+    damageResolved: true,
+    damageType: damageSummary.damageType,
+    damageAmount: damageSummary.amount,
+    cardsTrashed: damageSummary.cardsTrashed,
+    flatline: damageSummary.flatline,
+    sourceDefinitionId: definitionFor(state, dueSourceIds[0]!).id,
+    sourceCount: dueSourceIds.length,
+    ...(damageSummary.coreDamageAfter !== undefined
+      ? { coreDamageAfter: damageSummary.coreDamageAfter }
+      : {}),
+  };
+  ensureRunnerTurnFlags(state).preyingMantisDamageDueSourceIdsThisTurn = [];
+}
+
+function endTurn(
+  state: GameState,
+  side: Side,
+  legalAction: LegalAction,
+): void {
+  if (side === "runner") {
+    resolveCardImplementationEndOfRunnerTurnAction(
+      cardImplementationRuntimeDeps,
+      state,
+      legalAction,
+    );
+    if (state.winner) return;
+    resolveFieldReporterEndOfRunnerTurn(state, legalAction);
+    resolvePreyingMantisEndOfRunnerTurnDamage(state, legalAction);
+    resolveOmniscienceFoundationEndTurnTag(state, legalAction);
+    resolveSneakPreviewTemporaryInstallReturns(state, legalAction);
+    const flags = ensureRunnerTurnFlags(state);
+    flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
+    flags.stolenAgendaAdvancementCountersLastTurn =
+      flags.stolenAgendaAdvancementCountersThisTurn ?? 0;
+    flags.stoleAgendaThisTurn = false;
+    flags.stolenAgendaAdvancementCountersThisTurn = 0;
+    flags.runnerReceivedTagThisTurn = false;
+    flags.stoleResearchAgendaThisTurn = false;
+    flags.stoleGrayOpsAgendaThisTurn = false;
+    flags.stoleBlackOpsAgendaThisTurn = false;
+    flags.runAttemptsLastTurn = flags.runAttemptsThisTurn ?? 0;
+    flags.runAttemptsThisTurn = 0;
+    flags.trashedNodeLastTurn = flags.trashedNodeThisTurn === true;
+    flags.trashedNodeThisTurn = false;
+    flags.trashedAdvertisementThisTurn = false;
+    flags.trashedTransactionsThisTurn = false;
+    flags.prearrangedDropPending = false;
+    flags.installedResourceIdsLastTurn = (
+      flags.installedResourceIdsThisTurn ?? []
+    ).slice();
+    flags.installedResourceIdsThisTurn = [];
+    flags.successfulHqRunThisTurn = false;
+    flags.successfulRunThisTurn = false;
+    delete flags.lastSuccessfulRunServerId;
+    flags.runnerActionsTakenThisTurn = 0;
+    delete flags.lastDamageRunnerActionOrdinal;
+  } else {
+    resolveOmniscienceFoundationEndTurnTag(state, legalAction);
+    const corpFlags = ensureCorpTurnFlags(state);
+    corpFlags.scoredBlackOpsAgendaLastTurn =
+      corpFlags.scoredBlackOpsAgendaThisTurn;
+    corpFlags.scoredBlackOpsAgendaThisTurn = false;
+    resolveAcmeSavingsAndLoanEndOfCorpTurn(state, legalAction);
+    if (state.winner) return;
+    ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
+  }
+  delete state.cancelledDamagePreventionSourceIdsUntilEndOfTurn;
+  startDiscardPhase(state, side, legalAction);
+}
+
+function resolveSneakPreviewTemporaryInstallReturns(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const pending = state.sneakPreviewTemporaryInstalls ?? [];
+  if (pending.length === 0) return;
+  const returnedDefinitionIds: string[] = [];
+  for (const entry of pending) {
+    const cardId = entry.cardId;
+    const instance = state.cardInstances[cardId];
+    if (
+      instance &&
+      state.runner.rig.programs.includes(cardId) &&
+      instance.zone.side === "runner" &&
+      instance.zone.zone === "rig"
+    ) {
+      const definition = definitionFor(state, cardId);
+      removeFromAllZones(state, cardId);
+      state.runner.grip.push(cardId);
+      if (runnerProgramUsesMemory(state, cardId)) {
+        state.runner.memoryUsed = Math.max(
+          0,
+          state.runner.memoryUsed - (definition.memoryCost ?? 0),
+        );
+      }
+      state.cardInstances[cardId] = {
+        ...cardInstanceWithoutCounters(instance),
+        faceup: true,
+        rezzed: true,
+        zone: { side: "runner", zone: "grip" },
+      };
+      returnedDefinitionIds.push(definition.id);
+    }
+  }
+  state.sneakPreviewTemporaryInstalls = [];
+  if (returnedDefinitionIds.length > 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "sneak_preview_end_turn_return",
+      returnedCount: returnedDefinitionIds.length,
+      returnedCardDefinitionIds: returnedDefinitionIds.join(","),
+    };
+  }
+}
+
+function resolveAcmeSavingsAndLoanEndOfCorpTurn(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const obligations = acmeSavingsAndLoanObligationCount(state);
+  if (obligations <= 0) return;
+  const creditsBefore = state.corp.credits;
+  if (creditsBefore < obligations) {
+    state.winner = "runner";
+    state.gameEndReason = "acme_savings_and_loan_unpaid";
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    delete state.pendingChoice;
+    delete state.run;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      acmeSavingsAndLoanAbility: "end_of_turn_payment",
+      acmeSavingsAndLoanObligations: obligations,
+      acmeSavingsAndLoanPaymentDue: obligations,
+      acmeSavingsAndLoanPaymentPaid: 0,
+      acmeSavingsAndLoanPaymentFailed: true,
+      corpCreditsBefore: creditsBefore,
+      corpCreditsAfter: state.corp.credits,
+    };
+    return;
+  }
+  state.corp.credits -= obligations;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    acmeSavingsAndLoanAbility: "end_of_turn_payment",
+    acmeSavingsAndLoanObligations: obligations,
+    acmeSavingsAndLoanPaymentDue: obligations,
+    acmeSavingsAndLoanPaymentPaid: obligations,
+    corpCreditsBefore: creditsBefore,
+    corpCreditsAfter: state.corp.credits,
+  };
+}
+
+function startDiscardPhase(
+  state: GameState,
+  side: Side,
+  legalAction?: LegalAction,
+): void {
+  state.activeSide = side;
+  if (side === "runner") {
+    state.phase = "runner_discard_phase";
+    state.timingPoint = "runner_discard.flatline_check";
+    if (maxHandSize(state, "runner") < 0) {
+      state.winner = "corp";
+      state.gameEndReason = "flatline";
+      state.phase = "game_over";
+      state.timingPoint = "game.checkpoint";
+      delete state.pendingChoice;
+      delete state.run;
+      return;
+    }
+    processDiscardStep(state, "runner", legalAction);
+    return;
+  }
+
+  state.phase = "corp_discard_phase";
+  state.timingPoint = "corp_discard.select_cards";
+  processDiscardStep(state, "corp", legalAction);
+}
+
+function processDiscardStep(
+  state: GameState,
+  side: Side,
+  legalAction?: LegalAction,
+): void {
+  const hand = handForSide(state, side);
+  const requiredDiscardCount = hand.length - maxHandSize(state, side);
+  if (requiredDiscardCount <= 0) {
+    completeDiscardPhase(state, side, legalAction);
+    return;
+  }
+  state.timingPoint =
+    side === "corp"
+      ? "corp_discard.select_cards"
+      : "runner_discard.select_cards";
+  state.pendingChoice = discardChoice(
+    state,
+    side,
+    requiredDiscardCount,
+    state.stateVersion + 1,
+  );
+}
+
+function completeDiscardPhase(
+  state: GameState,
+  side: Side,
+  legalAction?: LegalAction,
+): void {
+  const effects: AutomaticEffectCollector = [];
+  if (side === "runner") {
+    startCorpTurn(state, effects);
+    appendResolvedEffectsToPayload(legalAction, effects);
+    return;
+  }
+  startRunnerTurn(state, effects);
+  appendResolvedEffectsToPayload(legalAction, effects);
+}
+
+function appendResolvedEffectsToPayload(
+  legalAction: LegalAction | undefined,
+  effects: AutomaticEffectCollector,
+): void {
+  if (!legalAction || effects.length === 0) return;
+  legalAction.resolvedEffects = [
+    ...(legalAction.resolvedEffects ?? []),
+    ...effects,
+  ];
+}
+
+function automaticGainCreditsEffect(
+  effectId: string,
+  side: Side,
+  amount: number,
+  sourceDefinitionId: CardDefinitionId,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "gain_credits",
+    visibility: "public",
+    side,
+    amount,
+    reason: "start_of_turn",
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function automaticLoseCreditsEffect(
+  effectId: string,
+  side: Side,
+  amount: number,
+  sourceDefinitionId: CardDefinitionId,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "lose_credits",
+    visibility: "public",
+    side,
+    amount,
+    reason: "start_of_turn",
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function automaticDrawCardsEffect(
+  effectId: string,
+  side: Side,
+  amount: number,
+  sourceDefinitionId: CardDefinitionId,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "draw_cards",
+    visibility: "public",
+    side,
+    amount,
+    reason: "start_of_turn",
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function automaticTagEffect(
+  effectId: string,
+  amount: number,
+  sourceDefinitionId: CardDefinitionId,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "add_tags",
+    visibility: "public",
+    side: "runner",
+    amount,
+    reason: "start_of_turn",
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function automaticTrashCardEffect(
+  effectId: string,
+  side: Side,
+  cardDefinitionId: CardDefinitionId,
+  sourceDefinitionId: CardDefinitionId,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "trash_card",
+    visibility: "public",
+    side,
+    reason: "start_of_turn",
+    cardDefinitionId,
+    cardTitle: publicCardTitle(cardDefinitionId),
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function automaticCounterChangeEffect(
+  effectId: string,
+  side: Side,
+  sourceDefinitionId: CardDefinitionId,
+  counterType: CounterType,
+  remainingCounters: number,
+  addedCounterAmount: number,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "counter_change",
+    visibility: "public",
+    side,
+    amount: remainingCounters,
+    reason: "start_of_turn",
+    counterType,
+    remainingCounters,
+    addedCounterAmount,
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function automaticStealAgendaEffect(
+  effectId: string,
+  cardDefinitionId: CardDefinitionId,
+  sourceDefinitionId: CardDefinitionId,
+  amount: number,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "steal_agenda",
+    visibility: "public",
+    side: "runner",
+    amount,
+    reason: "start_of_turn",
+    cardDefinitionId,
+    cardTitle: publicCardTitle(cardDefinitionId),
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function publicCardTitle(definitionId: CardDefinitionId): string {
+  return DEMO_CARDS_BY_ID[definitionId]?.title ?? definitionId;
+}
+
+function applyRunnerForgoNextAction(state: GameState): void {
+  if (state.runner.clicks > 0) {
+    state.runner.clicks = Math.max(0, state.runner.clicks - 1);
+    return;
+  }
+  addRunnerFutureActionDebt(state, 1);
+}
+
+function addRunnerFutureActionDebt(state: GameState, amount: number): void {
+  if (!Number.isInteger(amount) || amount <= 0) return;
+  const flags = ensureRunnerTurnFlags(state);
+  flags.forgoNextActionsPending =
+    Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + amount;
+}
+
+function consumeRunnerFutureActionDebt(state: GameState): number {
+  const flags = ensureRunnerTurnFlags(state);
+  let pending = Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0));
+  if (flags.forgoNextActionPending === true) pending += 1;
+  flags.forgoNextActionPending = false;
+  if (pending <= 0 || state.runner.clicks <= 0) {
+    flags.forgoNextActionsPending = pending;
+    return 0;
+  }
+  const consumed = Math.min(state.runner.clicks, pending);
+  state.runner.clicks -= consumed;
+  flags.forgoNextActionsPending = pending - consumed;
+  return consumed;
+}
+
+function startCorpTurn(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  state.activeSide = "corp";
+  state.phase = "corp_draw_phase";
+  state.timingPoint = "corp_draw.mandatory_draw";
+  state.corp.clicks = 3;
+  state.runner.clicks = 0;
+  clearValuPakProgramInstallFlags(state);
+  clearRovingSubmarineActivityMarkers(fortRunSideFamiliesHostForState(state));
+  ensureRunnerTurnFlags(state).damagePreventionUsage = {};
+  ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
+  ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
+  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
+  ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds = [];
+  applyCorpStartOfTurnEffects(state, effects);
+}
+
+function startRunnerTurn(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  state.activeSide = "runner";
+  state.phase = "runner_action_phase";
+  state.timingPoint = "runner_action.main";
+  state.runner.clicks = runnerActionsPerTurn(state);
+  if (state.runnerTurnFlags?.questForCattekinPermanentActionGain)
+    state.runner.clicks += 1;
+  state.corp.clicks = 0;
+  clearEdgerunnerTempsInstallFlags(state);
+  const flags = ensureRunnerTurnFlags(state);
+  flags.stoleAgendaThisTurn = false;
+  flags.stoleAgendaLastTurn = false;
+  flags.stolenAgendaAdvancementCountersThisTurn = 0;
+  flags.stolenAgendaAdvancementCountersLastTurn = 0;
+  flags.runnerReceivedTagThisTurn = false;
+  flags.stoleResearchAgendaThisTurn = false;
+  flags.stoleGrayOpsAgendaThisTurn = false;
+  flags.stoleBlackOpsAgendaThisTurn = false;
+  flags.runAttemptsThisTurn = 0;
+  flags.runAttemptsLastTurn = 0;
+  flags.successfulHqRunThisTurn = false;
+  flags.successfulRunThisTurn = false;
+  delete flags.lastSuccessfulRunServerId;
+  flags.trashedAdvertisementThisTurn = false;
+  flags.trashedTransactionsThisTurn = false;
+  flags.prearrangedDropPending = false;
+  flags.damagePreventionUsage = {};
+  flags.brokerActionCardIdsThisTurn = [];
+  flags.startOfTurnFloatingCreditsApplied = false;
+  flags.allNighterBonusRunPending = false;
+  flags.valuPakProgramInstallActionsRemaining = 0;
+  flags.valuPakTemporaryProgramInstallCredits = 0;
+  flags.shellTradersStartTurnResolvedSourceIds = [];
+  flags.bodyweightDataCrecheExtraRunPending = false;
+  flags.bodyweightDataCrecheExtraRunUsedThisTurn = false;
+  flags.startupImmolatorUsedSourceIdsThisTurn = [];
+  flags.preyingMantisUsedSourceIdsThisTurn = [];
+  flags.preyingMantisDamageDueSourceIdsThisTurn = [];
+  flags.corpRezzedIceThisTurn = 0;
+  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
+  delete flags.incubatorPendingTransforms;
+  consumeRunnerFutureActionDebt(state);
+  resolveBizarreEncryptionDelayedAgendas(state, effects);
+  refreshRecurringCredits(state, "runner", effects);
+  untapRunnerCardsAtTurnStart(state);
+  applyRunnerStartOfTurnEffects(state, effects);
+}
+
+function untapRunnerCardsAtTurnStart(state: GameState): void {
+  for (const cardId of runnerInstalledCardIds(state)) {
+    const instance = state.cardInstances[cardId];
+    if (!instance?.tapped) continue;
+    state.cardInstances[cardId] = { ...instance, tapped: false };
+  }
+}
+
+function resolveBizarreEncryptionDelayedAgendas(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  const delayed = state.bizarreEncryptionDelayedAgendas ?? [];
+  if (delayed.length === 0) return;
+  const remaining: NonNullable<GameState["bizarreEncryptionDelayedAgendas"]> =
+    [];
+  for (const entry of delayed) {
+    const instance = state.cardInstances[entry.agendaId];
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === entry.serverId,
+    );
+    if (
+      !instance ||
+      instance.zone.side !== "corp" ||
+      instance.zone.zone !== "serverRoot" ||
+      instance.zone.serverId !== entry.serverId ||
+      !server?.root.includes(entry.agendaId)
+    ) {
+      continue;
+    }
+    const definition = DEMO_CARDS_BY_ID[instance.definitionId];
+    if (!definition || definition.type !== "agenda") {
+      remaining.push(entry);
+      continue;
+    }
+    removeFromAllZones(state, entry.agendaId);
+    state.runner.scoreArea.push(entry.agendaId);
+    state.cardInstances[entry.agendaId] = {
+      ...instance,
+      faceup: true,
+      rezzed: true,
+      zone: { side: "runner", zone: "scoreArea" },
+    };
+    effects?.push(
+      automaticStealAgendaEffect(
+        `runner.start.bizarre_encryption.${entry.agendaId}`,
+        definition.id,
+        BIZARRE_ENCRYPTION_SCHEME_ID,
+        agendaPointsForScoredCard(state, entry.agendaId),
+      ),
+    );
+  }
+  if (remaining.length > 0) state.bizarreEncryptionDelayedAgendas = remaining;
+  else delete state.bizarreEncryptionDelayedAgendas;
+}
+
+function applyCorpStartOfTurnEffects(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  applyProteusPurgeableRunnerVirusCorpStartEffects(state, effects);
+  const skivvissDraws = virusCounterDrawsAtCorpStart(state);
+  if (skivvissDraws > 0) {
+    drawCorpCards(state, skivvissDraws);
+    effects?.push(
+      automaticDrawCardsEffect(
+        "corp.start.skivviss",
+        "corp",
+        skivvissDraws,
+        SKIVVISS_ID,
+      ),
+    );
+  }
+  const cascadeTrash = virusCounterCascadeTrashAtCorpStart(state);
+  if (cascadeTrash.amount > 0) {
+    if (!cascadeTrash.sourceDefinitionId)
+      throw new Error("Cascade-Virus-Quelle fehlt.");
+    const trashed = trashFaceupRdCardsForCascade(state, cascadeTrash.amount);
+    if (trashed.length > 0) {
+      effects?.push({
+        effectId: "corp.start.cascade.trash_faceup_rd",
+        kind: "trash_card",
+        visibility: "hidden_info_barrier",
+        side: "corp",
+        amount: trashed.length,
+        reason: "start_of_turn",
+        sourceDefinitionId: cascadeTrash.sourceDefinitionId,
+        sourceTitle: publicCardTitle(cascadeTrash.sourceDefinitionId),
+        cardDefinitionId: definitionFor(state, trashed[0]!).id,
+        cardTitle: publicCardTitle(definitionFor(state, trashed[0]!).id),
+      });
+    }
+  }
+  executeCardImplementationStartOfCorpTurnEffects(
+    cardImplementationRuntimeDeps,
+    state,
+    effects,
+  );
+  for (const cardId of rezzedCorpRootCardIds(state)) {
+    const definitionId = definitionFor(state, cardId).id;
+    if (
+      (definitionId === KRUMZ_TRACE_ASSET_CARD_ID ||
+        hasCorpUtilityKind(state, cardId, "krumz_trace_bit")) &&
+      cardCounter(state, cardId, "bit") <= 0
+    ) {
+      setCardCounter(state, cardId, "bit", 1);
+      effects?.push(
+        automaticCounterChangeEffect(
+          `corp.start.krumz.${cardId}`,
+          "corp",
+          definitionId,
+          "bit",
+          1,
+          1,
+        ),
+      );
+    }
+    if (isParisTracePoolSource(fortRunSideFamiliesHostForState(state), cardId)) {
+      const capacity = parisTracePoolCapacityForCard(
+        fortRunSideFamiliesHostForState(state),
+        cardId,
+      );
+      if (cardCounter(state, cardId, "bit") < capacity)
+        setCardCounter(state, cardId, "bit", capacity);
+    }
+    if (isInvestmentFirmCard(state, cardId)) {
+      if (cardCounter(state, cardId, "recurring_credit") > 0) {
+        spendCardCounter(state, cardId, "recurring_credit", 1);
+        credits(state, "corp", 1);
+        const remainingCounters = cardCounter(state, cardId, "recurring_credit");
+        effects?.push(
+          automaticGainCreditsEffect(
+            `corp.start.investment_firm.${cardId}`,
+            "corp",
+            1,
+            definitionId,
+          ),
+        );
+        effects?.push({
+          effectId: `corp.start.investment_firm.counter.${cardId}`,
+          kind: "counter_change",
+          visibility: "public",
+          side: "corp",
+          amount: remainingCounters,
+          reason: "start_of_turn",
+          counterType: "recurring_credit",
+          removedCounterAmount: 1,
+          remainingCounters,
+          sourceDefinitionId: definitionId,
+          sourceTitle: publicCardTitle(definitionId),
+        });
+      }
+      continue;
+    }
+    if (CORP_RECURRING_ASSET_CARD_IDS.has(definitionId)) {
+      credits(state, "corp", 1);
+      effects?.push(
+        automaticGainCreditsEffect(
+          `corp.start.recurring_asset.${cardId}`,
+          "corp",
+          1,
+          definitionId,
+        ),
+      );
+    }
+  }
+  if (!state.pendingChoice)
+    startCorporateNegotiatingCenterChoice(
+      corpZoneChoiceHandlerHost(
+        state,
+        { side: "corp", payload: {} } as LegalAction,
+      ),
+    );
+  if (!state.pendingChoice)
+    startEmployeeEmpowermentStartDrawChoice(scoredAgendaFlowHost(state));
+}
+
+function applyProteusPurgeableRunnerVirusCorpStartEffects(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  const corpCounters = state.purgeableRunnerVirusCounters?.corp;
+  const scaldanCounters = purgeableRunnerVirusCounterAmount(
+    corpCounters,
+    "scaldan",
+  );
+  for (let index = 0; index < scaldanCounters; index += 1) {
+    const randomPurpose = `proteus.scaldan.corp_start.${state.stateVersion}.${index}`;
+    const dieRoll = rollDeterministicDie(state, randomPurpose);
+    const badPublicityAdded = dieRoll >= 5 ? 1 : 0;
+    if (badPublicityAdded > 0) state.corp.badPublicity += badPublicityAdded;
+    effects?.push({
+      effectId: `corp.start.proteus.scaldan.${index}`,
+      kind: badPublicityAdded > 0 ? "add_bad_publicity" : "counter_change",
+      visibility: "public",
+      side: "corp",
+      amount: badPublicityAdded,
+      reason: "start_of_turn",
+      counterType: "scaldan",
+      remainingCounters: scaldanCounters,
+      sourceDefinitionId: PROTEUS_SCALDAN_ID,
+      sourceTitle: publicCardTitle(PROTEUS_SCALDAN_ID),
+      randomPurpose,
+      dieSize: 6,
+      dieRoll,
+      randomCounterAfter: state.randomCounter,
+      ...(badPublicityAdded > 0
+        ? {
+            badPublicityAdded,
+            corpBadPublicityAfter: state.corp.badPublicity,
+          }
+        : {}),
+    } as ResolvedGameEffect);
+  }
+  const taxCounters = purgeableRunnerVirusCounterAmount(corpCounters, "tax");
+  const taxLoss = Math.min(state.corp.credits, Math.floor(taxCounters / 2));
+  if (taxLoss > 0) {
+    state.corp.credits -= taxLoss;
+    effects?.push(
+      automaticLoseCreditsEffect(
+        "corp.start.proteus.taxman",
+        "corp",
+        taxLoss,
+        PROTEUS_TAXMAN_ID,
+      ),
+    );
+  }
+
+  const pipeCounters = purgeableRunnerVirusCounterAmount(corpCounters, "pipe");
+  if (pipeCounters <= 0) return;
+  addCorpActionDebt(state, {
+    amount: pipeCounters,
+    reason: "pipe_counter",
+    source: "start_of_turn_effect",
+  });
+  effects?.push({
+    effectId: "corp.start.proteus.viral_pipeline.pipe",
+    kind: "counter_change",
+    visibility: "public",
+    side: "corp",
+    amount: pipeCounters,
+    reason: "start_of_turn",
+    counterType: "pipe",
+    remainingCounters: pipeCounters,
+    sourceDefinitionId: PROTEUS_VIRAL_PIPELINE_ID,
+    sourceTitle: publicCardTitle(PROTEUS_VIRAL_PIPELINE_ID),
+  });
+}
+
+function virusCounterDrawsAtCorpStart(state: GameState): number {
+  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
+    const implementation = virusCounterImplementationForCard(state, cardId);
+    const start = implementation?.startOfCorpTurn;
+    if (start?.kind !== "draw_extra_cards_per_counter") return sum;
+    return sum + cardCounter(state, cardId, "virus") * start.amountPerCounter;
+  }, 0);
+}
+
+function skivvissCounterTotal(state: GameState): number {
+  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
+    if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
+    return sum + cardCounter(state, cardId, "virus");
+  }, 0);
+}
+
+function virusCounterCascadeTrashAtCorpStart(state: GameState): {
+  amount: number;
+  sourceDefinitionId?: CardDefinitionId;
+} {
+  return Object.keys(state.cardInstances).reduce((result, cardId) => {
+    const implementation = virusCounterImplementationForCard(state, cardId);
+    const start = implementation?.startOfCorpTurn;
+    if (start?.kind !== "trash_faceup_rd_cards_per_two_counters") return result;
+    const amount =
+      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
+      start.countPerGroup;
+    return {
+      amount: result.amount + amount,
+      sourceDefinitionId:
+        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
+    };
+  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
+}
+
+function trashFaceupRdCardsForCascade(
+  state: GameState,
+  maxCount: number,
+): CardInstanceId[] {
+  const selected = state.corp.rd
+    .filter((cardId) => state.cardInstances[cardId]?.faceup === true)
+    .slice(0, Math.max(0, Math.floor(maxCount)));
+  for (const cardId of selected) {
+    removeFromAllZones(state, cardId);
+    state.corp.archives.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "archives" },
+    };
+  }
+  return selected;
+}
+
+function applyRunnerStartOfTurnEffects(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  const flags = ensureRunnerTurnFlags(state);
+  for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
+    if (!counterEffect.startOfRunnerTurn) continue;
+    const counterCount = cardCounter(
+      state,
+      state.runner.identity,
+      counterEffect.counterType,
+    );
+    if (counterCount <= 0) continue;
+    const amount = counterCount * counterEffect.startOfRunnerTurn.amountPerCounter;
+    if (counterEffect.startOfRunnerTurn.kind === "add_tags") {
+      state.runner.tags += amount;
+      effects?.push(
+        automaticTagEffect(
+          `runner.start.${counterEffect.counterType}`,
+          amount,
+          counterEffect.sourceDefinitionId,
+        ),
+      );
+    }
+    if (counterEffect.startOfRunnerTurn.kind === "lose_credits") {
+      const lost = Math.min(state.runner.credits, amount);
+      state.runner.credits -= lost;
+      effects?.push(
+        automaticLoseCreditsEffect(
+          `runner.start.${counterEffect.counterType}`,
+          "runner",
+          lost,
+          counterEffect.sourceDefinitionId,
+        ),
+      );
+    }
+  }
+  executeCardImplementationStartOfRunnerTurnEffects(
+    cardImplementationRuntimeDeps,
+    state,
+    effects,
+  );
+  applyQuestForCattekinStartOfTurn(state, effects);
+  if (!flags.startOfTurnFloatingCreditsApplied) {
+    const virusCredits = virusCounterCreditsAtRunnerStart(state);
+    if (virusCredits.amount > 0) {
+      if (!virusCredits.sourceDefinitionId)
+        throw new Error("Virus-Credit-Quelle fehlt.");
+      credits(state, "runner", virusCredits.amount);
+      effects?.push(
+        automaticGainCreditsEffect(
+          "runner.start.virus_counter_credits",
+          "runner",
+          virusCredits.amount,
+          virusCredits.sourceDefinitionId,
+        ),
+      );
+    }
+    flags.startOfTurnFloatingCreditsApplied = true;
+  }
+  applyShellTradersStartOfTurn(
+    runnerSpecialTriggerExecutionHost(state),
+    effects,
+  );
+  if (state.pendingChoice) return;
+  if (queueIncubatorStartOfTurnTransforms(state)) return;
+  if (startVirusCounterRunnerPrivateLookAtStart(state)) return;
+  for (const cardId of state.runner.rig.resources.slice().sort()) {
+    if (state.pendingChoice) break;
+    if (
+      uniqueDirectLongtailKindForCard(state, cardId) ===
+      "smiths_pawnshop_start_turn_trash_for_credits"
+    )
+      startSmithsPawnshopChoice(
+        hiddenZoneNonSearchChoiceHandlerHost(state, {
+          side: "runner",
+          payload: {},
+        } as LegalAction),
+        cardId,
+      );
+  }
+}
+
+function applyQuestForCattekinStartOfTurn(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  const sourceIds = state.runner.rig.resources
+    .slice()
+    .sort()
+    .filter(
+      (cardId) =>
+        runnerUtilityLongtailKindForCard(state, cardId) ===
+        "quest_for_cattekin_start_turn_random_permanent_action",
+    );
+  for (const sourceId of sourceIds) {
+    const sourceDefinitionId = definitionFor(state, sourceId).id;
+    const randomPurpose = `p3_59.die.${sourceDefinitionId}.start_runner_turn.${state.stateVersion}.${sourceId}`;
+    const dieRoll = rollDeterministicDie(state, randomPurpose);
+    let damageSummary: DamageSummary | undefined;
+    if (dieRoll === 6) {
+      ensureRunnerTurnFlags(state).questForCattekinPermanentActionGain = true;
+      state.runner.clicks += 1;
+      trashRunnerInstalledCardToHeap(state, sourceId);
+    } else if (dieRoll === 1) {
+      damageSummary = doDamage(state, {
+        damageId: `runner.start.${sourceDefinitionId}.core.${state.stateVersion}`,
+        damageType: "core",
+        amount: 1,
+        source: `runner_start:${sourceDefinitionId}`,
+      });
+    } else if (dieRoll === 2) {
+      damageSummary = doDamage(state, {
+        damageId: `runner.start.${sourceDefinitionId}.net.${state.stateVersion}`,
+        damageType: "net",
+        amount: 1,
+        source: `runner_start:${sourceDefinitionId}`,
+      });
+    }
+    effects?.push({
+      effectId: `runner.start.quest_for_cattekin.${sourceId}`,
+      kind:
+        dieRoll === 6
+          ? "gain_actions"
+        : dieRoll === 1 || dieRoll === 2
+            ? "damage"
+            : "counter_change",
+      visibility: "public",
+      side: "runner",
+      amount: dieRoll === 6 ? 1 : damageSummary?.amount ?? 0,
+      reason: "start_of_turn",
+      sourceDefinitionId,
+      sourceTitle: publicCardTitle(sourceDefinitionId),
+      v1921DieRoll: dieRoll,
+      questForCattekinOutcome:
+        dieRoll === 6
+          ? "permanent_action"
+          : dieRoll === 1
+            ? "core_damage"
+            : dieRoll === 2
+              ? "net_damage"
+              : "no_effect",
+      randomPurpose,
+      randomCounterAfter: state.randomCounter,
+      ...(dieRoll === 6
+        ? {
+            permanentActionGain: true,
+            sourceTrashed: true,
+            runnerClicksAfter: state.runner.clicks,
+          }
+        : {}),
+      ...(damageSummary
+        ? {
+            damageCannotBePrevented: true,
+            damageType: damageSummary.damageType,
+            cardsTrashed: damageSummary.cardsTrashed,
+            flatline: damageSummary.flatline,
+            ...(damageSummary.coreDamageAfter !== undefined
+              ? { coreDamageAfter: damageSummary.coreDamageAfter }
+              : {}),
+          }
+        : {}),
+    } as ResolvedGameEffect);
+  }
+}
+
+function virusCounterCreditsAtRunnerStart(state: GameState): {
+  amount: number;
+  sourceDefinitionId?: CardDefinitionId;
+} {
+  return Object.keys(state.cardInstances).reduce((result, cardId) => {
+    const implementation = virusCounterImplementationForCard(state, cardId);
+    const start = implementation?.startOfRunnerTurn;
+    if (start?.kind !== "gain_credits_per_two_counters") return result;
+    const amount =
+      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
+      start.amountPerGroup;
+    return {
+      amount: result.amount + amount,
+      sourceDefinitionId:
+        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
+    };
+  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
+}
+
+function startVirusCounterRunnerPrivateLookAtStart(state: GameState): boolean {
+  const boardwalk = Object.keys(state.cardInstances).reduce((result, cardId) => {
+    const implementation = virusCounterImplementationForCard(state, cardId);
+    const start = implementation?.startOfRunnerTurn;
+    if (start?.kind !== "random_reveal_hq_cards_per_two_counters") return result;
+    const amount =
+      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
+      start.countPerGroup;
+    return {
+      amount: result.amount + amount,
+      sourceDefinitionId:
+        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
+    };
+  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
+  if (boardwalk.amount > 0 && state.corp.hq.length > 0) {
+    const selected = randomCorpHqCardsWithoutReplacement(
+      state,
+      Math.min(boardwalk.amount, state.corp.hq.length),
+      `p3_49.random.boardwalk.hq_reveal.${state.stateVersion}`,
+    );
+    return startRunnerPrivateLookAtSpecificCorpCards(
+      state,
+      boardwalk.sourceDefinitionId ?? definitionFor(state, state.runner.identity).id,
+      "hq",
+      selected,
+      "Boardwalk: zufällige HQ-Karten ansehen.",
+    );
+  }
+
+  const deepThoughtSourceCardId = Object.keys(state.cardInstances).find((cardId) => {
+    const implementation = virusCounterImplementationForCard(state, cardId);
+    const start = implementation?.startOfRunnerTurn;
+    return (
+      start?.kind === "private_look_top_rd_at_threshold" &&
+      cardCounter(state, cardId, "virus") >= start.threshold
+    );
+  });
+  if (!deepThoughtSourceCardId || state.corp.rd.length === 0) return false;
+  return startRunnerPrivateLookChoice(
+    state,
+    deepThoughtSourceCardId,
+    definitionFor(state, deepThoughtSourceCardId).id,
+    "rd",
+    1,
+    "ability",
+  );
+}
+
+function randomCorpHqCardsWithoutReplacement(
+  state: GameState,
+  count: number,
+  purpose: string,
+): CardInstanceId[] {
+  const pool = state.corp.hq.slice();
+  const selected: CardInstanceId[] = [];
+  const limit = Math.min(Math.max(0, Math.floor(count)), pool.length);
+  for (let index = 0; index < limit; index += 1) {
+    const value = nextRandom(state, `${purpose}.${index}`);
+    const selectedIndex = Math.floor(value * pool.length);
+    const [cardId] = pool.splice(selectedIndex, 1);
+    if (cardId) selected.push(cardId);
+  }
+  return selected;
+}
+
+function startRunnerPrivateLookAtSpecificCorpCards(
+  state: GameState,
+  sourceDefinitionId: CardDefinitionId,
+  zone: Extract<ServerId, "rd" | "hq">,
+  cardIds: CardInstanceId[],
+  prompt: string,
+): boolean {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const visibleIds = cardIds.filter((cardId) => {
+    const instance = state.cardInstances[cardId];
+    return instance?.owner === "corp";
+  });
+  if (visibleIds.length === 0) return false;
+  state.pendingChoice = {
+    choiceId: `p3_49_virus_private_look_${zone}_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_33.private_look:ability:${sourceDefinitionId}:${zone}:${state.stateVersion + 1}`,
+    prompt,
+    kind: "select_cards",
+    options: [
+      ...visibleIds.map((cardId) => ({
+        id: `card_${cardId}`,
+        label: definitionFor(state, cardId).title,
+        publicLabel: "Verdeckte Korp-Karte",
+        value: cardId,
+        selectable: false,
+      })),
+      { id: "done", label: "Fertig", publicLabel: "Fertig", value: "done" },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  return true;
+}
+
+function queueIncubatorStartOfTurnTransforms(state: GameState): boolean {
+  const flags = ensureRunnerTurnFlags(state);
+  if (flags.incubatorPendingTransforms === undefined) {
+    const counterTotal = incubatorCounterTotal(state);
+    let pending = 0;
+    for (let index = 0; index < counterTotal; index += 1) {
+      const die = rollDeterministicDie(
+        state,
+        `v191.die.${INCUBATOR_ID}.start_of_turn.roll.${state.stateVersion}.${index}`,
+      );
+      if (die === 6) pending += 1;
+    }
+    flags.incubatorPendingTransforms = pending;
+  }
+  if ((flags.incubatorPendingTransforms ?? 0) <= 0) return false;
+  return startIncubatorTransformChoice(state);
+}
+
+function startIncubatorTransformChoice(state: GameState): boolean {
+  const flags = ensureRunnerTurnFlags(state);
+  const pending = Math.max(
+    0,
+    Math.floor(flags.incubatorPendingTransforms ?? 0),
+  );
+  if (pending <= 0) return false;
+
+  const cardTargets = Object.keys(state.cardInstances)
+    .sort()
+    .filter((cardId) => cardCounter(state, cardId, "virus") > 0)
+    .filter((cardId) => isVisibleVirusCounterCardForRunner(state, cardId))
+    .map((cardId) => {
+      const title = definitionFor(state, cardId).title;
+      const amount = cardCounter(state, cardId, "virus");
+      return {
+        id: `card_${cardId}`,
+        label: `${title} (${amount})`,
+        publicLabel: "Virus-Counter",
+        value: `card:${cardId}`,
+      };
+    });
+
+  const poxTargets = state.corp.servers
+    .map((server) => ({
+      serverId: server.id,
+      amount: poxCountersForServer(state, server.id),
+    }))
+    .filter((entry) => entry.amount > 0)
+    .map((entry) => ({
+      id: `pox_${entry.serverId}`,
+      label: `Pox auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
+      publicLabel: "Virus-Counter",
+      value: `pox:${entry.serverId}`,
+    }));
+
+  const faitTargets = state.corp.servers
+    .map((server) => ({
+      serverId: server.id,
+      amount: Math.max(
+        0,
+        Math.floor(state.faitAccompliCountersByServer?.[server.id] ?? 0),
+      ),
+    }))
+    .filter((entry) => entry.amount > 0)
+    .map((entry) => ({
+      id: `fait_${entry.serverId}`,
+      label: `Fait auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
+      publicLabel: "Virus-Counter",
+      value: `fait:${entry.serverId}`,
+    }));
+
+  const options = [...cardTargets, ...poxTargets, ...faitTargets];
+  if (options.length === 0) {
+    flags.incubatorPendingTransforms = 0;
+    return false;
+  }
+
+  state.pendingChoice = {
+    choiceId: `v191_incubator_transform_${state.stateVersion + 1}_${pending}`,
+    side: "runner",
+    source: `v191.incubator_transform:${state.stateVersion + 1}`,
+    prompt: "Incubator: Wähle einen Virus-Counter für die Verdopplung.",
+    kind: "select_option",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  return true;
+}
+
+  return {
+    resolveOmniscienceFoundationEndTurnTag,
+    resolveFieldReporterEndOfRunnerTurn,
+    resolvePreyingMantisEndOfRunnerTurnDamage,
+    endTurn,
+    resolveSneakPreviewTemporaryInstallReturns,
+    resolveAcmeSavingsAndLoanEndOfCorpTurn,
+    startDiscardPhase,
+    processDiscardStep,
+    completeDiscardPhase,
+    appendResolvedEffectsToPayload,
+    automaticGainCreditsEffect,
+    automaticLoseCreditsEffect,
+    automaticDrawCardsEffect,
+    automaticTagEffect,
+    automaticTrashCardEffect,
+    automaticCounterChangeEffect,
+    automaticStealAgendaEffect,
+    publicCardTitle,
+    applyRunnerForgoNextAction,
+    addRunnerFutureActionDebt,
+    consumeRunnerFutureActionDebt,
+    startCorpTurn,
+    startRunnerTurn,
+    untapRunnerCardsAtTurnStart,
+    resolveBizarreEncryptionDelayedAgendas,
+    applyCorpStartOfTurnEffects,
+    applyProteusPurgeableRunnerVirusCorpStartEffects,
+    virusCounterDrawsAtCorpStart,
+    skivvissCounterTotal,
+    virusCounterCascadeTrashAtCorpStart,
+    trashFaceupRdCardsForCascade,
+    applyRunnerStartOfTurnEffects,
+    applyQuestForCattekinStartOfTurn,
+    virusCounterCreditsAtRunnerStart,
+    startVirusCounterRunnerPrivateLookAtStart,
+    randomCorpHqCardsWithoutReplacement,
+    startRunnerPrivateLookAtSpecificCorpCards,
+    queueIncubatorStartOfTurnTransforms,
+    startIncubatorTransformChoice
+  };
+}

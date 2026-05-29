@@ -108,6 +108,8 @@ export type ApiGameResultSummary = {
 };
 
 export type ApiRecentGameResult = {
+  entryType?: "single_game";
+  resultId?: string;
   matchId: string;
   matchStatus: Extract<ApiMatchStatus, "finished">;
   matchMode: ApiMatchMode;
@@ -120,11 +122,13 @@ export type ApiRecentGameResult = {
   runner: {
     displayName: string;
     agendaPoints: number;
+    matchPoints?: number;
     deckName?: string;
   };
   corp: {
     displayName: string;
     agendaPoints: number;
+    matchPoints?: number;
     deckName?: string;
   };
   actionCount: number;
@@ -137,6 +141,53 @@ export type ApiRecentGameResult = {
     status: ApiSeriesStatus;
   };
 };
+
+export type ApiRecentSeriesGameResult = {
+  matchId: string;
+  gameNumber: number;
+  finishedAt: string;
+  winner: Winner;
+  winnerPlayer?: ApiSeriesPlayerSlot;
+  reason: ApiGameResultReason;
+  runnerPlayer: ApiSeriesPlayerSlot;
+  corpPlayer: ApiSeriesPlayerSlot;
+  runnerDisplayName: string;
+  corpDisplayName: string;
+  runnerAgendaPoints: number;
+  corpAgendaPoints: number;
+  runnerMatchPoints: number;
+  corpMatchPoints: number;
+  finalStateHash: string;
+};
+
+export type ApiRecentSeriesResult = {
+  entryType: "series";
+  resultId: string;
+  seriesId: string;
+  mode: "two_game_side_swap";
+  status: ApiSeriesStatus;
+  matchMode: ApiMatchMode;
+  matchFormat: Extract<ApiMatchFormat, "two_game_side_swap">;
+  startedAt: string;
+  finishedAt: string;
+  gamesPlayed: number;
+  gamesPlanned: number;
+  winnerPlayer?: ApiSeriesPlayerSlot;
+  outcome: "player_a" | "player_b" | "draw";
+  decision: "match_points" | "draw";
+  players: Record<
+    ApiSeriesPlayerSlot,
+    {
+      displayName: string;
+      matchPoints: number;
+      agendaPoints: number;
+      wins: number;
+    }
+  >;
+  games: ApiRecentSeriesGameResult[];
+};
+
+export type ApiRecentResultEntry = ApiRecentGameResult | ApiRecentSeriesResult;
 
 export type ApiLifecycleResultSummary = {
   status: Extract<ApiMatchStatus, "cancelled" | "abandoned" | "forfeited" | "finished">;

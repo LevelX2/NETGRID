@@ -100,6 +100,7 @@ export function makeActionId(
   if (payload?.selectedSubtype) parts.push(String(payload.selectedSubtype));
   if (payload?.cardId) parts.push(String(payload.cardId));
   if (payload?.hostOnCardId) parts.push(String(payload.hostOnCardId));
+  if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   if (payload?.runnerProgramTrashBeforeInstall)
     parts.push("runner_program_trash_before_install");
   if (payload?.breakerId) parts.push(String(payload.breakerId));

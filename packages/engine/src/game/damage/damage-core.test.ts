@@ -46,6 +46,8 @@ describe("damage core", () => {
       amount: 1,
       cardsTrashed: 1,
       flatline: false,
+      runnerGripBefore: 1,
+      runnerGripAfter: 0,
     });
     expect(state.runner.grip).toEqual([]);
     expect(state.runner.heap).toEqual([gripCardId]);
