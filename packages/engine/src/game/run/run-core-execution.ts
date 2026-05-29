@@ -37,6 +37,7 @@ export type StartRunOptions = Pick<
   | "runTraceLinkBonus"
   | "runTraceLinkBonusSourceDefinitionId"
   | "runnerRunTemporaryCredits"
+  | "testSpinTemporaryInstall"
   | "unpreventableCoreDamageAtRunEnd"
   | "socialEngineeringAutoPassIceId"
   | "prohibitNoisyIcebreakers"
@@ -201,6 +202,13 @@ export function startRun(
       ? {
           runnerRunTemporaryCredits: {
             ...options.runnerRunTemporaryCredits,
+          },
+        }
+      : {}),
+    ...(options?.testSpinTemporaryInstall
+      ? {
+          testSpinTemporaryInstall: {
+            ...options.testSpinTemporaryInstall,
           },
         }
       : {}),

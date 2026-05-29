@@ -161,6 +161,10 @@ export type RunEndCleanupHost = {
       run: ActiveRun | undefined,
       legalAction?: LegalAction,
     ) => unknown;
+    resolveTestSpinRunEnd: (
+      run: ActiveRun,
+      legalAction?: LegalAction,
+    ) => { handled: boolean; stateChanged?: boolean };
   };
   cleanup: {
     cleanupEmptyRemotes: () => void;
@@ -323,6 +327,7 @@ export function handleRunEndCleanup(
   const bonus = successful ? (run?.pendingSuccessBonusCredits ?? 0) : 0;
   const corpBonus = tokyoChibaUnsuccessfulRunBonus(host, run, successful);
   host.followups.cleanupDelayedSuccessfulRunTemporaryIce(run, legalAction);
+  if (run) host.followups.resolveTestSpinRunEnd(run, legalAction);
   host.credits.gainRunner(bonus);
   host.credits.gainCorp(corpBonus.amount);
   if (run && corpBonus.amount > 0 && legalAction) {

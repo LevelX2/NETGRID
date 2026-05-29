@@ -276,6 +276,7 @@ function makeHost(options: {
       cleanupDelayedSuccessfulRunTemporaryIce: () => {
         cleanupDelayedCount += 1;
       },
+      resolveTestSpinRunEnd: () => ({ handled: false }),
     },
     cleanup: {
       cleanupEmptyRemotes: () => {

@@ -247,6 +247,7 @@ function hostFor(calls: string[]): RunFlowHost {
       traceCounterEffectDefinitionFor: () => undefined,
       installedRunnerVirusSourceIds: () => [],
       virusCounterImplementationForCard: () => undefined,
+      resolveTestSpinRunEnd: () => ({ handled: false }),
     },
   };
 }

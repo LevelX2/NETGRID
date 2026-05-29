@@ -458,6 +458,7 @@ import { proteusDecoySignalImplementation } from "./proteus/runner/events/decoy-
 import { proteusDemolitionRunImplementation } from "./proteus/runner/events/demolition-run";
 import { proteusDisgruntledIceTechnicianImplementation } from "./proteus/runner/events/disgruntled-ice-technician";
 import { proteusDroneForADayImplementation } from "./proteus/runner/events/drone-for-a-day";
+import { proteusHijackImplementation } from "./proteus/runner/events/hijack";
 import { proteusIdentityDonorImplementation } from "./proteus/runner/events/identity-donor";
 import { proteusLiveNewsFeedImplementation } from "./proteus/runner/events/live-news-feed";
 import { proteusOnTheFastTrackImplementation } from "./proteus/runner/events/on-the-fast-track";
@@ -470,6 +471,7 @@ import { proteusRemoteDetonatorImplementation } from "./proteus/runner/events/re
 import { proteusRushHourImplementation } from "./proteus/runner/events/rush-hour";
 import { proteusSenatorialFieldTripImplementation } from "./proteus/runner/events/senatorial-field-trip";
 import { proteusSubliminalCorruptionImplementation } from "./proteus/runner/events/subliminal-corruption";
+import { proteusTestSpinImplementation } from "./proteus/runner/events/test-spin";
 import { proteusWeefleInitiationImplementation } from "./proteus/runner/events/weefle-initiation";
 import { proteusCorticalCybermodemImplementation } from "./proteus/runner/hardware/cortical-cybermodem";
 import { proteusCorticalStimulatorsImplementation } from "./proteus/runner/hardware/cortical-stimulators";
@@ -978,6 +980,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusDemolitionRunImplementation,
   proteusDisgruntledIceTechnicianImplementation,
   proteusDroneForADayImplementation,
+  proteusHijackImplementation,
   proteusIdentityDonorImplementation,
   proteusLiveNewsFeedImplementation,
   proteusOnTheFastTrackImplementation,
@@ -990,6 +993,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusRushHourImplementation,
   proteusSenatorialFieldTripImplementation,
   proteusSubliminalCorruptionImplementation,
+  proteusTestSpinImplementation,
   proteusWeefleInitiationImplementation,
   proteusCorticalCybermodemImplementation,
   proteusCorticalStimulatorsImplementation,

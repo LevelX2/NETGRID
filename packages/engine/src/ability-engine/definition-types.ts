@@ -586,6 +586,20 @@ export type CardRunnerEventLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "grip_install_program_or_hardware_with_temporary_credits";
+      temporaryCredits: 3;
+      allowedTypes: readonly Extract<CardType, "program" | "hardware">[];
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "search_stack_install_program_free_then_run_return_or_penalty";
+      installCost: "free";
+      shuffleAfterwards: true;
+      penaltyBase: 4;
+      penaltyDamageType: Extract<DamageType, "meat">;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
       kind: "trash_installed_runner_connections_then_add_bad_publicity";
       count: 2;
       badPublicity: 1;

@@ -3306,24 +3306,29 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_110_hijack",
+        "coverage": [
+          "runner_prep_play",
+          "hidden_zone_search_install_tutor",
+          "temporary_install_credits"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-pro018-hidden-zone-search-install-tutor"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": [],
+      "notes": "PRO018: Hijack installs a legal Runner program or hardware from Grip with exactly 3 temporary credits restricted to that installation; unspent temporary credits are returned immediately. Grip candidates remain runner-private."
     },
     {
       "cardId": "onr_proteus_111_ice-and-data-special-report",
@@ -3764,24 +3769,31 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
         "ai_supported": false,
         "deck_legal": false,
         "format_legal": false,
-        "blocked": true
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
+        "resolverRef": "engine:onr_proteus_126_test-spin",
+        "coverage": [
+          "runner_prep_play",
+          "hidden_zone_search_install_tutor",
+          "shuffle",
+          "run_followup",
+          "meat_damage"
+        ],
         "aiHintRef": null,
-        "scenarioRefs": []
+        "scenarioRefs": [
+          "proteus-pro018-hidden-zone-search-install-tutor"
+        ]
       },
-      "blockReasons": [
-        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
-      ]
+      "blockReasons": [],
+      "notes": "PRO018: Test Spin installs a Runner program from Stack for free, shuffles deterministically, starts the selected run, then returns the still-installed program to Stack and shuffles; if the same program cannot be returned, Runner pays 4 plus printed install cost and suffers Meat damage for the unpaid rest."
     },
     {
       "cardId": "onr_proteus_127_weefle-initiation",

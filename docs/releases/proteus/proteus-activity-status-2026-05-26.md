@@ -54,7 +54,7 @@ PRO014 ist umgesetzt und PRO014-1 sowie PRO014-2 sind als reine Behavior-Härtun
 
 PRO015 ist umgesetzt und PRO015-1 ist als reine Härtung erledigt: `Frame-Up`, `Identity Donor`, `Live News Feed`, `Senatorial Field Trip` und `Subliminal Corruption` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden run-scoped Bad-Publicity-Aftermath, Run-History-Zähler, Frame-Up-Turn-History, ein Grip-basiertes Meat-Damage-Replacement und eine stale-sichere Last-Rezzed-Black-ICE-Corp-Choice. PRO015-1 engt `Identity Donor` auf echte Korp-Zugphasen ein und härtet die Run-History-Tests über Produktionshooks. Das bestehende Bad-Publicity-7+-Loss-Gate bleibt die einzige Game-End-Autorität. Implementierungszählung bleibt 134/154, 20 fehlend, kein Drift. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
-PRO017 ist umgesetzt und PRO017-1 sowie PRO017-2 sind als reine Behavior-/Test-Härtungen erledigt: `AI Board Member`, `Please Don't Choke Anyone`, `Project Venice`, `Corporate Guard(R) Temps`, `Bargain with Viacox` und `Lucidrine™ Drip Feed` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden generische Action-Economy-Fakten für optionale restricted extra actions, forced runner actions, future action grants und Corp-Credit-Forfeit-Debt. PRO017-1 macht PDCA Choice-basiert statt Auto-Replacement, bindet turn-bound Grants an den aktuellen Zug und löst unmögliche Viacox-forced-Actions deterministisch als "nicht möglich" auf. PRO017-2 restauriert nach PDCA-`pass`/`replace` den ursprünglichen Timing-Kontext, hängt PDCA nach bestehenden Replacement-/Event-Modification-Fenstern konsistent an verbleibenden Corp-Damage und schließt Runner-self-/Core-Damage weiter aus. Implementierungszählung bleibt bei 144/154, 10 fehlend, kein Drift. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
+PRO018 ist umgesetzt: `Hijack` und `Test Spin` sind konkrete CardImplementation-Dateien, registriert und im Manifest engine-/human-playable. Ergänzt wurden enge generische Verträge für runnerprivate Hidden-Zone-Installationschoices, Hijack-temporäre Installationscredits, Test-Spin-Stack-Programmsuche, deterministisches Shuffle, Run-Followup und Return-or-Penalty-Cleanup. Implementierungszählung steigt auf 146/154, 8 fehlend, kein Drift. Keine Decklegalität, Formatlegalität oder AI-Unterstützung.
 
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
 
@@ -77,7 +77,7 @@ Der führende Detailplan `proteus-cardimplementation-detailplan-2026-05-26.md` w
 | PRO015 | umgesetzt; PRO015-1 Nacharbeit erledigt | 5 Bad-Publicity-Run-/Replacement-Karten; Implementierungszählung 134/154. |
 | PRO016 | umgesetzt; PRO016-1 Nacharbeit erledigt | 4 Random-/Dice-/Encounter-Karten; Implementierungszählung nach PRO016: 138/154. |
 | PRO017 | umgesetzt; PRO017-1 und PRO017-2 Nacharbeiten erledigt | 6 Action-Economy-/Action-Debt-Karten; Implementierungszählung bleibt 144/154. |
-| PRO018 | neu zu schneiden | 2 Hidden-Zone-Search-/Install-Tutor-Karten. |
+| PRO018 | umgesetzt | 2 Hidden-Zone-Search-/Install-Tutor-Karten; Implementierungszählung steigt auf 146/154. |
 | PRO019 | neu zu schneiden | 8 regelvertragliche Baseline-/Utility-Karten. |
 | PRO020 | noch nicht ausführbar | Finaler Proteus-Abschluss nach leerer Restliste. |
 
@@ -87,12 +87,12 @@ Geprüft wurden alle Activity-Unterordner unter `docs/activities/`: `inbox/`, `i
 
 | Kategorie | Anzahl | Bedeutung |
 | --- | ---: | --- |
-| `done + implemented/foundation` | 37 | Erledigte Runtime-, Foundation- oder gezielte Härtungsslices; Implementierungsfortschritt wird trotzdem nur über Dateien plus Registry gezählt. |
+| `done + implemented/foundation` | 38 | Erledigte Runtime-, Foundation- oder gezielte Härtungsslices; Implementierungsfortschritt wird trotzdem nur über Dateien plus Registry gezählt. |
 | `done + planning/contract/historical` | 13 | Erledigte Import-, Analyse-, Vertrags-, Harness- oder Planungsactivities ohne direkte CardImplementation-Zählung. |
 | `done + superseded` | 8 | Grobe Phase-Activities, die ersetzt oder aufgeteilt wurden; sie zählen nie als Kartenimplementierung. |
 | `in-progress + blocked/status-reference` | 23 | Offene oder nur noch als Referenz geführte Detail-Activities; resolved-by-done-Umbrellas zählen nicht erneut als Implementierung. |
 | `inbox/open` | 0 | Keine Proteus-Activity liegt aktuell in `docs/activities/inbox/`. |
-| Gesamt | 80 | Proteus-Activity-Dateien im Board. |
+| Gesamt | 81 | Proteus-Activity-Dateien im Board. |
 
 ## Done + implemented/foundation
 
@@ -139,6 +139,7 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-28-proteus-pro016-random-dice-encounter-suite.md` | `done` | PRO016 | 4 Random-/Dice-/Encounter-Karten; neue Implementierungszählung 138/154. |
 | `done/act-2026-05-28-proteus-pro016-1-random-dice-hardening.md` | `done` | PRO016-1 | Executive-Boot-Camp-Run-Credits und Lisa-Blight-Subroutine-Duplikate gehärtet; keine neue Kartenpromotion, Implementierungszählung bleibt 138/154. |
 | `done/act-2026-05-28-proteus-pro017-action-economy-debt-suite.md` | `done` | PRO017 | 6 Action-Economy-/Action-Debt-Karten; neue Implementierungszählung 144/154. |
+| `done/act-2026-05-28-proteus-pro018-hidden-zone-search-install-tutor-suite.md` | `done` | PRO018 | 2 Hidden-Zone-Search-/Install-Tutor-Karten; neue Implementierungszählung 146/154. |
 | `done/act-2026-05-28-proteus-pro017-1-action-economy-hardening.md` | `done` | PRO017-1 | PDCA-Choice, turn-bound Grant-Cleanup und Viacox-"nicht möglich"-Resolve gehärtet; keine neue Kartenpromotion und keine Zähländerung. |
 | `done/act-2026-05-28-proteus-pro017-2-pdca-damage-timing-hardening.md` | `done` | PRO017-2 | PDCA-Return-Kontext und zentrale Corp-Damage-Anbindung nach Replacement-/Event-Modification-Fenstern gehärtet; Runner-self-/Core-Damage bleibt ausgeschlossen; keine neue Kartenpromotion und keine Zähländerung. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
@@ -217,7 +218,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | `in-progress/act-2026-05-24-proteus-phase-6e-runner-agenda-overadvance-events.md` | `done-reference` | Phase 6e | PRO013-Zielkarten sind umgesetzt; alte Umbrella-Activity bleibt Statusreferenz ohne zusätzliche Komplettzählung. | `PRO013` |
 | `in-progress/act-2026-05-24-proteus-phase-9a-random-dice-foundation.md` | `resolved-by-done-activity` | Phase 9a | PRO016 ist in `done/act-2026-05-28-proteus-pro016-random-dice-encounter-suite.md` abgeschlossen; Umbrella bleibt nur Referenz ohne doppelte Zählung. | `PRO016` |
 | `in-progress/act-2026-05-24-proteus-phase-9b-action-economy-debt.md` | `done-reference` | Phase 9b | Durch PRO017 erledigt; bleibt nur als alte Slice-Referenz ohne zusätzliche Kartenzählung. | `PRO017` |
-| `in-progress/act-2026-05-24-proteus-phase-9c-hidden-zone-search-install-tutor.md` | `blocked` | Phase 9c | `Hijack`, `Test Spin`; Hidden-Zone Search/Install Tutor. | `PRO018` |
+| `in-progress/act-2026-05-24-proteus-phase-9c-hidden-zone-search-install-tutor.md` | `resolved-by-done-activity` | Phase 9c | PRO018 ist in `done/act-2026-05-28-proteus-pro018-hidden-zone-search-install-tutor-suite.md` abgeschlossen; Umbrella bleibt nur Referenz ohne doppelte Zählung. | `PRO018` |
 | `in-progress/act-2026-05-24-proteus-phase-9e-rule-blocked-preflight.md` | `blocked` | Phase 9e | `Ice and Data Special Report`; Rule-Blocked Preflight. | `PRO019` |
 
 ## PRO-Referenzabdeckung
@@ -248,7 +249,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | PRO015 | umgesetzt; PRO015-1 Nacharbeit erledigt | Bad-Publicity Run/Replacement Suite mit 5 Karten; PRO015-1 ist reine Härtung ohne Zähländerung. |
 | PRO016 | umgesetzt; PRO016-1 Nacharbeit erledigt | Random/Dice/Encounter Suite mit 4 Karten; Härtung ohne neue Karten- oder Manifestfreigabe. |
 | PRO017 | umgesetzt; PRO017-1 und PRO017-2 Nacharbeiten erledigt | Action Economy/Action Debt Suite mit 6 Karten; Härtungen ohne neue Karten- oder Manifestfreigabe. |
-| PRO018 | neu zu schneiden | Hidden-Zone Search/Install Tutor Suite mit 2 Karten. |
+| PRO018 | umgesetzt | Hidden-Zone Search/Install Tutor Suite mit 2 Karten; Harness 146/154. |
 | PRO019 | neu zu schneiden | Rule-Contract Baseline Utilities mit 8 Karten. |
 | PRO020 | noch nicht ausführbar | Finaler Proteus-Abschluss erst nach leerer Restliste. |
 

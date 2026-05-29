@@ -185,6 +185,12 @@ function pendingChoiceHost(
       resolveRunnerInstalledConnectionTrashBadPublicityChoice: unexpected(
         "resolveRunnerInstalledConnectionTrashBadPublicityChoice",
       ),
+      resolveGripInstallTemporaryCreditChoice: unexpected(
+        "resolveGripInstallTemporaryCreditChoice",
+      ),
+      resolveStackInstallRunCleanupChoice: unexpected(
+        "resolveStackInstallRunCleanupChoice",
+      ),
       resolveOpenEndedMileageProgramReturnChoice: unexpected(
         "resolveOpenEndedMileageProgramReturnChoice",
       ),

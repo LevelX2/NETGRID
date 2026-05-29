@@ -1047,6 +1047,7 @@ const runFlow = createRunFlowAdapters({
     traceCounterEffectDefinitionFor,
     installedRunnerVirusSourceIds,
     virusCounterImplementationForCard,
+    resolveTestSpinRunEnd,
   },
 } satisfies RunFlowHost);
 
@@ -1507,6 +1508,33 @@ function cardImplementationRunnerEventResolver(
           name: "card_implementation_runner_event_playful_ai_dice_loop",
           resolve: (state, legalAction) =>
             resolvePlayfulAiDiceLoopEvent(
+              state,
+              legalAction,
+              definition.id,
+              longtail,
+            ),
+        };
+      case "grip_install_program_or_hardware_with_temporary_credits":
+        return {
+          name: "card_implementation_runner_event_grip_install_with_temporary_credits",
+          canPlay: (state) =>
+            gripInstallTemporaryCreditTargets(state, longtail).length > 0,
+          resolve: (state, legalAction) =>
+            resolveGripInstallTemporaryCreditEvent(
+              state,
+              legalAction,
+              definition.id,
+              longtail,
+            ),
+        };
+      case "search_stack_install_program_free_then_run_return_or_penalty":
+        return {
+          name: "card_implementation_runner_event_stack_install_run_cleanup",
+          requiresServer: true,
+          canPlay: (state) =>
+            testSpinStackInstallTargets(state, longtail).length > 0,
+          resolve: (state, legalAction) =>
+            resolveStackInstallRunCleanupEvent(
               state,
               legalAction,
               definition.id,
@@ -11547,6 +11575,8 @@ function pendingChoiceResolutionHost(
       resolveSecurityCodeWormChipTrashIceChoice,
       resolveV1921PlayfulAiChoice,
       resolveRunnerInstalledConnectionTrashBadPublicityChoice,
+      resolveGripInstallTemporaryCreditChoice,
+      resolveStackInstallRunCleanupChoice,
       resolveOpenEndedMileageProgramReturnChoice,
       resolveRunnerHostingChoice,
       resolveIncubatorTransformChoice,
@@ -12950,6 +12980,525 @@ function selectedChoiceCardIdsForChoice(
       throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
     return option.value as CardInstanceId;
   });
+}
+
+const PRO018_GRIP_INSTALL_CHOICE_SOURCE =
+  "card_implementation.pro018_grip_install_temporary_credits";
+const PRO018_STACK_INSTALL_RUN_CHOICE_SOURCE =
+  "card_implementation.pro018_stack_install_run_cleanup";
+
+type GripInstallTemporaryCreditImplementation = Extract<
+  CardRunnerEventLongtailImplementation,
+  { kind: "grip_install_program_or_hardware_with_temporary_credits" }
+>;
+
+type StackInstallRunCleanupImplementation = Extract<
+  CardRunnerEventLongtailImplementation,
+  { kind: "search_stack_install_program_free_then_run_return_or_penalty" }
+>;
+
+function gripInstallTemporaryCreditTargets(
+  state: GameState,
+  implementation: GripInstallTemporaryCreditImplementation,
+): CardInstanceId[] {
+  return state.runner.grip
+    .filter((cardId) =>
+      canInstallRunnerGripCardWithTemporaryCredits(
+        state,
+        cardId,
+        implementation.allowedTypes,
+        implementation.temporaryCredits,
+      ),
+    )
+    .sort();
+}
+
+function testSpinStackInstallTargets(
+  state: GameState,
+  implementation: StackInstallRunCleanupImplementation,
+): CardInstanceId[] {
+  if (
+    implementation.installCost !== "free" ||
+    implementation.shuffleAfterwards !== true
+  )
+    return [];
+  return state.runner.stack.filter((cardId) =>
+    canInstallRunnerProgramFromZone(state, cardId, "stack", "free"),
+  );
+}
+
+function canInstallRunnerGripCardWithTemporaryCredits(
+  state: GameState,
+  cardId: CardInstanceId,
+  allowedTypes: readonly ("program" | "hardware")[],
+  temporaryCredits: number,
+): boolean {
+  if (!state.runner.grip.includes(cardId)) return false;
+  const definition = definitionFor(state, cardId);
+  if (
+    definition.type !== "program" &&
+    definition.type !== "hardware"
+  )
+    return false;
+  if (!allowedTypes.includes(definition.type)) return false;
+  if (
+    isUniqueCard(definition) &&
+    hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+  )
+    return false;
+  if (
+    definition.type === "program" &&
+    state.runner.memoryUsed + (definition.memoryCost ?? 0) >
+      runnerMemoryLimit(state)
+  )
+    return false;
+  const installCost = definition.installCost ?? 0;
+  const available =
+    definition.type === "program"
+      ? availableRunnerProgramInstallCredits(state) + temporaryCredits
+      : state.runner.credits + temporaryCredits;
+  return available >= installCost;
+}
+
+function resolveGripInstallTemporaryCreditEvent(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceDefinitionId: CardDefinitionId,
+  implementation: CardRunnerEventLongtailImplementation,
+): void {
+  if (
+    implementation.kind !==
+      "grip_install_program_or_hardware_with_temporary_credits" ||
+    implementation.temporaryCredits !== 3 ||
+    implementation.visibility !== "hidden_info_barrier"
+  )
+    throw new Error("Grip-Install-Temporary-Credit-Implementation ist ungueltig.");
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  if (!sourceCardId || !state.runner.heap.includes(sourceCardId))
+    throw new Error("Die Runner-Event-Quelle liegt nicht im Heap.");
+  const targets = gripInstallTemporaryCreditTargets(state, implementation);
+  if (targets.length === 0)
+    throw new Error("Im Grip liegt keine legal installierbare Programm- oder Hardware-Karte.");
+  const choiceStateVersion = state.stateVersion + 1;
+  state.pendingChoice = {
+    choiceId: `pro018_grip_install_${choiceStateVersion}`,
+    side: "runner",
+    source: [
+      PRO018_GRIP_INSTALL_CHOICE_SOURCE,
+      sourceCardId,
+      sourceDefinitionId,
+      String(implementation.temporaryCredits),
+      String(choiceStateVersion),
+    ].join(":"),
+    prompt: "Programm oder Hardware aus dem Grip installieren",
+    kind: "select_cards",
+    options: state.runner.grip.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      const selectable = targets.includes(cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        value: cardId,
+        ...(!selectable ? { selectable: false } : {}),
+      };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: choiceStateVersion,
+    visibility: "hidden_info_barrier",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "pro018_grip_install_temporary_credits",
+    sourceDefinitionId,
+    temporaryCreditsProvided: implementation.temporaryCredits,
+    choiceVisibility: "runner_private",
+  };
+}
+
+function resolveGripInstallTemporaryCreditChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (
+    !choice ||
+    !choice.source.startsWith(`${PRO018_GRIP_INSTALL_CHOICE_SOURCE}:`)
+  )
+    throw new Error("Es ist keine PRO018-Grip-Install-Choice offen.");
+  const [, sourceCardId = "", sourceDefinitionId = "", creditsRaw = ""] =
+    choice.source.split(":");
+  const temporaryCredits = Number(creditsRaw);
+  if (!Number.isInteger(temporaryCredits) || temporaryCredits !== 3)
+    throw new Error("Die temporaeren Installationscredits sind ungueltig.");
+  if (!state.runner.heap.includes(sourceCardId as CardInstanceId))
+    throw new Error("Die Grip-Install-Choice gehoert nicht zur gespielten Karte.");
+  const sourceDefinition = definitionFor(state, sourceCardId as CardInstanceId);
+  const implementation = runnerEventLongtailForDefinition(sourceDefinition);
+  if (
+    sourceDefinition.id !== sourceDefinitionId ||
+    implementation?.kind !==
+      "grip_install_program_or_hardware_with_temporary_credits"
+  )
+    throw new Error("Die Grip-Install-Choice gehoert nicht zur gespielten Karte.");
+  const selectedId = selectedChoiceCardIdsForChoice(choice, playerAction)[0];
+  if (!selectedId)
+    throw new Error("Es wurde keine Programm- oder Hardware-Karte gewaehlt.");
+  if (
+    !canInstallRunnerGripCardWithTemporaryCredits(
+      state,
+      selectedId,
+      implementation.allowedTypes,
+      implementation.temporaryCredits,
+    )
+  )
+    throw new Error("Die gewaehlte Karte ist nicht legal installierbar.");
+  delete state.pendingChoice;
+  const result = installRunnerGripCardWithoutClickWithTemporaryCredits(
+    state,
+    legalAction,
+    selectedId,
+    implementation.temporaryCredits,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "pro018_grip_install_temporary_credits",
+    sourceDefinitionId,
+    installedCardDefinitionId: result.definitionId,
+    installedCardType: result.cardType,
+    temporaryCreditsProvided: implementation.temporaryCredits,
+    temporaryCreditsSpent: result.temporaryCreditsSpent,
+    temporaryCreditsReturned: result.temporaryCreditsReturned,
+    installCostPaid: result.installCostPaid,
+    runnerCreditsAfter: state.runner.credits,
+  };
+}
+
+function resolveStackInstallRunCleanupEvent(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceDefinitionId: CardDefinitionId,
+  implementation: CardRunnerEventLongtailImplementation,
+): void {
+  if (
+    implementation.kind !==
+      "search_stack_install_program_free_then_run_return_or_penalty" ||
+    implementation.installCost !== "free" ||
+    implementation.shuffleAfterwards !== true ||
+    implementation.penaltyBase !== 4 ||
+    implementation.penaltyDamageType !== "meat" ||
+    implementation.visibility !== "hidden_info_barrier"
+  )
+    throw new Error("Stack-Install-Run-Cleanup-Implementation ist ungueltig.");
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
+    ServerId,
+    "new_remote"
+  >;
+  if (!sourceCardId || !state.runner.heap.includes(sourceCardId))
+    throw new Error("Die Runner-Event-Quelle liegt nicht im Heap.");
+  mustServer(state, serverId);
+  const targets = testSpinStackInstallTargets(state, implementation);
+  if (targets.length === 0)
+    throw new Error("Im Stack liegt kein legal installierbares Programm.");
+  const choiceStateVersion = state.stateVersion + 1;
+  state.pendingChoice = {
+    choiceId: `pro018_stack_install_run_${choiceStateVersion}`,
+    side: "runner",
+    source: [
+      PRO018_STACK_INSTALL_RUN_CHOICE_SOURCE,
+      sourceCardId,
+      sourceDefinitionId,
+      serverId,
+      String(choiceStateVersion),
+    ].join(":"),
+    prompt: "Programm aus dem Stack installieren",
+    kind: "select_cards",
+    options: state.runner.stack.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      const selectable = targets.includes(cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        value: cardId,
+        ...(!selectable ? { selectable: false } : {}),
+      };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: choiceStateVersion,
+    visibility: "hidden_info_barrier",
+    cardSearchPresentation: {
+      sourceZone: "stack",
+      selectableFilter: "program",
+      reveal: "public",
+      destination: "install_program",
+      shuffleAfter: true,
+      publicRevealKind: "reveal",
+      showNonMatchingCards: true,
+    },
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "pro018_stack_install_run_cleanup",
+    sourceDefinitionId,
+    searchedZone: "runner_stack",
+    searchDestination: "install_program",
+    choiceVisibility: "runner_private",
+  };
+}
+
+function resolveStackInstallRunCleanupChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (
+    !choice ||
+    !choice.source.startsWith(`${PRO018_STACK_INSTALL_RUN_CHOICE_SOURCE}:`)
+  )
+    throw new Error("Es ist keine PRO018-Stack-Install-Choice offen.");
+  const [
+    ,
+    sourceCardId = "",
+    sourceDefinitionId = "",
+    serverId = "",
+  ] = choice.source.split(":");
+  if (!state.runner.heap.includes(sourceCardId as CardInstanceId))
+    throw new Error("Die Stack-Install-Choice gehoert nicht zur gespielten Karte.");
+  const sourceDefinition = definitionFor(state, sourceCardId as CardInstanceId);
+  const implementation = runnerEventLongtailForDefinition(sourceDefinition);
+  if (
+    sourceDefinition.id !== sourceDefinitionId ||
+    implementation?.kind !==
+      "search_stack_install_program_free_then_run_return_or_penalty"
+  )
+    throw new Error("Die Stack-Install-Choice gehoert nicht zur gespielten Karte.");
+  const selectedId = selectedChoiceCardIdsForChoice(choice, playerAction)[0];
+  if (
+    !selectedId ||
+    !testSpinStackInstallTargets(state, implementation).includes(selectedId)
+  )
+    throw new Error("Das gewaehlte Programm ist nicht legal installierbar.");
+  const installedDefinition = definitionFor(state, selectedId);
+  const installCostPenalty = installedDefinition.installCost ?? 0;
+  const installed = installRunnerProgramFromZoneWithoutClick(
+    state,
+    selectedId,
+    "stack",
+    "free",
+    legalAction,
+  );
+  if (!installed) throw new Error("Das Programm kann nicht installiert werden.");
+  shuffleRunnerStack(state, `pro018.test_spin.after_install.${choice.choiceId}`);
+  delete state.pendingChoice;
+  startRun(
+    state,
+    serverId as Exclude<ServerId, "new_remote">,
+    undefined,
+    1,
+    {
+      testSpinTemporaryInstall: {
+        cardId: selectedId,
+        sourceCardId: sourceCardId as CardInstanceId,
+        sourceDefinitionId: sourceDefinitionId as CardDefinitionId,
+        installCostPenalty,
+      },
+      successfulRunSourceCardId: sourceCardId as CardInstanceId,
+      successfulRunSourceDefinitionId: sourceDefinitionId as CardDefinitionId,
+      successfulRunSourceTitle: sourceDefinition.title,
+    },
+    legalAction,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "pro018_stack_install_run_cleanup",
+    sourceDefinitionId,
+    searchedZone: "runner_stack",
+    publicRevealKind: "reveal",
+    publicRevealDefinitionId: installedDefinition.id,
+    installedCardDefinitionId: installedDefinition.id,
+    installedProgramDefinitionId: installedDefinition.id,
+    installedProgramCount: 1,
+    installCostPaid: 0,
+    shufflePerformed: true,
+    shuffled: true,
+    randomCounterAfter: state.randomCounter,
+    testSpinRunStarted: true,
+    serverId,
+  };
+}
+
+function installRunnerGripCardWithoutClickWithTemporaryCredits(
+  state: GameState,
+  legalAction: LegalAction,
+  cardId: CardInstanceId,
+  temporaryCredits: number,
+): {
+  definitionId: CardDefinitionId;
+  cardType: "program" | "hardware";
+  installCostPaid: number;
+  temporaryCreditsSpent: number;
+  temporaryCreditsReturned: number;
+} {
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "program" && definition.type !== "hardware")
+    throw new Error("Nur Programme oder Hardware koennen installiert werden.");
+  const installCost = definition.installCost ?? 0;
+  const temporaryCreditsSpent = Math.min(temporaryCredits, installCost);
+  const remainingCost = installCost - temporaryCreditsSpent;
+  if (definition.type === "program") {
+    spendRunnerInstallCredits(state, remainingCost, "program");
+  } else {
+    spendCredits(state, "runner", remainingCost);
+  }
+  removeFromAllZones(state, cardId);
+  if (definition.type === "program") {
+    state.runner.rig.programs.push(cardId);
+    state.runner.memoryUsed += definition.memoryCost ?? 0;
+    if (shouldLoadLegacyRecurringCredits(definition))
+      setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
+    if (
+      definition.mechanics.includes("virus") &&
+      definition.id !== BUTCHER_BOY_ID &&
+      definition.id !== SKIVVISS_ID
+    )
+      addCardCounter(state, cardId, "virus", 1);
+  } else {
+    if (isRunnerHardwareDeckDefinition(definition)) {
+      for (const oldDeckId of state.runner.rig.hardware.slice().sort()) {
+        if (isRunnerHardwareDeckDefinition(definitionFor(state, oldDeckId)))
+          trashRunnerInstalledCardToHeap(state, oldDeckId, legalAction);
+      }
+    }
+    state.runner.rig.hardware.push(cardId);
+    if (!hasCardImplementationMemoryUnitModifier(definition)) {
+      if (definition.mechanics.includes("modify_memory_limit"))
+        state.runner.memoryLimit += definition.memoryLimitBonus ?? 1;
+      else if ((definition.memoryLimitBonus ?? 0) > 0)
+        state.runner.memoryLimit += definition.memoryLimitBonus ?? 0;
+    }
+    if (shouldLoadLegacyRecurringCredits(definition))
+      setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
+  }
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "rig" },
+  };
+  executeCardImplementationLifecycleEffects(
+    cardImplementationRuntimeDeps,
+    state,
+    legalAction,
+    definition,
+    cardId,
+    "on_install",
+  );
+  return {
+    definitionId: definition.id,
+    cardType: definition.type,
+    installCostPaid: remainingCost,
+    temporaryCreditsSpent,
+    temporaryCreditsReturned: temporaryCredits - temporaryCreditsSpent,
+  };
+}
+
+function resolveTestSpinRunEnd(
+  state: GameState,
+  run: NonNullable<GameState["run"]>,
+  legalAction?: LegalAction,
+): { handled: boolean; stateChanged?: boolean } {
+  const pending = run.testSpinTemporaryInstall;
+  if (!pending) return { handled: false };
+  const sourceDefinition = DEMO_CARDS_BY_ID[pending.sourceDefinitionId];
+  const instance = state.cardInstances[pending.cardId];
+  if (
+    instance &&
+    state.runner.rig.programs.includes(pending.cardId) &&
+    instance.zone.side === "runner" &&
+    instance.zone.zone === "rig"
+  ) {
+    const definition = definitionFor(state, pending.cardId);
+    removeFromAllZones(state, pending.cardId);
+    state.runner.stack.push(pending.cardId);
+    if (runnerProgramUsesMemory(state, pending.cardId)) {
+      state.runner.memoryUsed = Math.max(
+        0,
+        state.runner.memoryUsed - (definition.memoryCost ?? 0),
+      );
+    }
+    state.cardInstances[pending.cardId] = {
+      ...cardInstanceWithoutCounters(instance),
+      faceup: false,
+      rezzed: false,
+      zone: { side: "runner", zone: "stack" },
+    };
+    shuffleRunnerStack(
+      state,
+      `pro018.test_spin.return_to_stack.${run.runId}.${pending.cardId}`,
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "pro018_test_spin_return_to_stack",
+        sourceDefinitionId: pending.sourceDefinitionId,
+        sourceTitle: sourceDefinition?.title ?? "Test Spin",
+        returnedProgramDefinitionId: definition.id,
+        returnedToStack: true,
+        shufflePerformed: true,
+        shuffled: true,
+        randomCounterAfter: state.randomCounter,
+      };
+    }
+    return { handled: true, stateChanged: true };
+  }
+
+  const penalty = 4 + Math.max(0, Math.floor(pending.installCostPenalty));
+  const paid = Math.min(state.runner.credits, penalty);
+  if (paid > 0) spendCredits(state, "runner", paid);
+  const unpaid = penalty - paid;
+  let damageSummary: DamageSummary | undefined;
+  if (unpaid > 0) {
+    damageSummary = doDamage(state, {
+      damageId: `${run.runId}.${pending.sourceDefinitionId}.test_spin_penalty`,
+      damageType: "meat",
+      amount: unpaid,
+      source: `run_end:${pending.sourceDefinitionId}`,
+    });
+  }
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "pro018_test_spin_penalty",
+      sourceDefinitionId: pending.sourceDefinitionId,
+      sourceTitle: sourceDefinition?.title ?? "Test Spin",
+      returnedToStack: false,
+      penaltyAmount: penalty,
+      penaltyCreditsPaid: paid,
+      runnerCreditsAfter: state.runner.credits,
+      ...(damageSummary
+        ? {
+            damageResolved: true,
+            damageType: damageSummary.damageType,
+            damageAmount: damageSummary.amount,
+            cardsTrashed: damageSummary.cardsTrashed,
+            flatline: damageSummary.flatline,
+          }
+        : {}),
+    };
+  }
+  return { handled: true, stateChanged: true };
 }
 
 function resolveRunnerInstalledConnectionTrashBadPublicityChoice(

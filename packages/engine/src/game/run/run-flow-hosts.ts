@@ -403,6 +403,11 @@ export type RunFlowHost = {
       state: GameState,
       cardId: CardInstanceId,
     ) => CardVirusCounterImplementation | undefined;
+    resolveTestSpinRunEnd: (
+      state: GameState,
+      run: NonNullable<GameState["run"]>,
+      legalAction?: LegalAction,
+    ) => { handled: boolean; stateChanged?: boolean };
   };
 };
 
@@ -1183,6 +1188,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             run,
             legalAction,
           ),
+        resolveTestSpinRunEnd: (run, legalAction) =>
+          host.callbacks.resolveTestSpinRunEnd(state, run, legalAction),
       },
       cleanup: {
         cleanupEmptyRemotes: () => host.zones.cleanupEmptyRemotes(state),

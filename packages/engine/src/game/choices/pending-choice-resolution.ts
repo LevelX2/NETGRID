@@ -40,6 +40,8 @@ export type PendingChoiceResolutionHost = {
     resolveSecurityCodeWormChipTrashIceChoice: HostFn<void>;
     resolveV1921PlayfulAiChoice: HostFn<void>;
     resolveRunnerInstalledConnectionTrashBadPublicityChoice: HostFn<void>;
+    resolveGripInstallTemporaryCreditChoice: HostFn<void>;
+    resolveStackInstallRunCleanupChoice: HostFn<void>;
     resolveOpenEndedMileageProgramReturnChoice: HostFn<void>;
     resolveRunnerHostingChoice: HostFn<void>;
     resolveIncubatorTransformChoice: HostFn<void>;
@@ -152,6 +154,10 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveV1921PlayfulAiChoice;
   const resolveRunnerInstalledConnectionTrashBadPublicityChoice =
     host.hiddenZone.resolveRunnerInstalledConnectionTrashBadPublicityChoice;
+  const resolveGripInstallTemporaryCreditChoice =
+    host.hiddenZone.resolveGripInstallTemporaryCreditChoice;
+  const resolveStackInstallRunCleanupChoice =
+    host.hiddenZone.resolveStackInstallRunCleanupChoice;
   const resolveOpenEndedMileageProgramReturnChoice =
     host.hiddenZone.resolveOpenEndedMileageProgramReturnChoice;
   const resolveRunnerHostingChoice = host.hiddenZone.resolveRunnerHostingChoice;
@@ -407,6 +413,22 @@ export function resolvePendingChoice(
       legalAction,
       playerAction,
     );
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.pro018_grip_install_temporary_credits:",
+    )
+  ) {
+    resolveGripInstallTemporaryCreditChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.pro018_stack_install_run_cleanup:",
+    )
+  ) {
+    resolveStackInstallRunCleanupChoice(state, legalAction, playerAction);
     return;
   }
   if (

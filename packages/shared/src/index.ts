@@ -999,6 +999,12 @@ export type RunState = {
     remaining: number;
     returnUnusedAtRunEnd: true;
   };
+  testSpinTemporaryInstall?: {
+    cardId: CardInstanceId;
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    installCostPenalty: number;
+  };
   corpRunTemporaryCredits?: {
     sourceCardInstanceId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
