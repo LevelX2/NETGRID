@@ -1772,10 +1772,10 @@ describe("CardImplementation coverage and registry invariants", () => {
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
     expect(outsideScopeDefinitionIds).toHaveLength(206);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(486);
-    expect(coverageByStatus.get("implemented")).toBe(486);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(527);
+    expect(coverageByStatus.get("implemented")).toBe(527);
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(93);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(52);
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
     expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);
@@ -2189,6 +2189,47 @@ describe("CardImplementation coverage and registry invariants", () => {
       expect.objectContaining({
         timing: "trace_post_bid_link_window",
         costs: [{ kind: "tap_source", amount: 1 }],
+      }),
+    );
+  });
+
+  it("migrates Proteus PRO013 agenda steal and overadvance suite into CardImplementation coverage", () => {
+    const cases = [
+      "onr_proteus_003_corporate-headhunters",
+      "onr_proteus_004_fetal-ai",
+      "onr_proteus_005_marked-accounts",
+      "onr_proteus_008_project-zurich",
+      "onr_proteus_010_world-domination",
+      "onr_proteus_102_blackmail",
+      "onr_proteus_116_pirate-broadcast",
+      "onr_proteus_119_promises-promises",
+    ] as const;
+
+    for (const definitionId of cases) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_004_fetal-ai")
+        ?.selfStealCosts,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "current_access_self_steal_cost",
+        amount: 2,
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_proteus_116_pirate-broadcast")
+        ?.abilities?.[0]?.effects,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "make_run_each_data_fort_sequence",
+        onAllSuccessful: "gain_runner_event_agenda_point",
+        onAnyUnsuccessful: "forgo_next_action",
       }),
     );
   });

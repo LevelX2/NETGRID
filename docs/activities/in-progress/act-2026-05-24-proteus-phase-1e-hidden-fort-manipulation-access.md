@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-1e-hidden-fort-manipulation-access
-status: blocked
+status: resolved-by-done-activity
 kind: implementation
 area: cards
 priority: normal
@@ -8,15 +8,15 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-29
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1e
 proReferences:
   - PRO019
-blockedBy:
-  - rule-source-clarification-proteus-phase-1e-hidden-fort-and-central-access
+blockedBy: []
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-1e-hidden-fort-manipulation-access.md
+  - docs/activities/done/act-2026-05-29-proteus-pro019-rule-contract-baseline-utilities.md
 checks:
   - Lokale Quellenprüfung `docs/source/Proteusspoiler.txt` und `data/cards/proteus-cards.json` für `Herman Revista`, `Marcel DeSoleil`, `Pavit Bharat` und `Simon Francisco`
 ---
@@ -85,7 +85,11 @@ Die Phase-1-Karten mit Fort-Reorder, verdeckter R&D/HQ-Bewegung oder zentraler A
 
 ## Ergebnisnotiz
 
-Blockiert am 2026-05-24.
+Blockiert am 2026-05-24; durch PRO019 am 2026-05-29 als Statusreferenz aufgelöst.
+
+PRO019 dokumentiert und implementiert die lokalen Verträge für diesen Slice: `Herman Revista` nutzt eine private Korp-Reorder-Choice am Start eines Runs auf dem Fort, `Marcel DeSoleil` zahlt `[2]` plus verdecktes Trashen der obersten zwei R&D-Karten, `Pavit Bharat` ersetzt beim Rezzen die Fort-Karten durch gleich viele legale HQ-Karten mit öffentlicher Count-Redaction, und `Simon Francisco` reduziert nach Zugriff auf Simon eine spätere HQ-/R&D-Access-Queue-Position. Alle vier Karten haben konkrete CardImplementation-Dateien, Registry-/Manifest-/Coverage-Parität und fokussierte LegalAction-/applyAction-Abdeckung. Diese alte Activity bleibt nur als historische Blocker- und Scope-Referenz.
+
+Historischer Blocker:
 
 Der Slice ist als Gesamtpaket nicht legal-action-stabil vollständig umsetzbar, weil zwei Zielkarten vor Codearbeit weitere Regel-/Scope-Entscheidungen brauchen:
 

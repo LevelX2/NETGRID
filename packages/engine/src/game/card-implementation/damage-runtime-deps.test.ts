@@ -88,6 +88,12 @@ function host(input: {
         input.calls?.push({ kind: "modification", value: event.payload });
         return input.eventModificationWindow ?? false;
       },
+      openDamageResolutionWindow: (_state, event) => {
+        input.calls?.push({ kind: "replacement", value: event.payload });
+        if (input.replacementWindow) return true;
+        input.calls?.push({ kind: "modification", value: event.payload });
+        return input.eventModificationWindow ?? false;
+      },
       resolveDamageImminentEvent: (_state, event) => {
         input.calls?.push({ kind: "resolve", value: event.payload });
         return {

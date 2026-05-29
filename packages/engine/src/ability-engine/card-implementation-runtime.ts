@@ -20,6 +20,7 @@ import type {
   Side,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import { printedSubroutinesForCardImplementation } from "./printed-subroutine-implementations";
 import {
   executeCardImplementationEffects,
   type CardEffectDamageResult,
@@ -87,7 +88,7 @@ export type CardImplementationRuntimeDependencies = {
   runnerWasDamagedDuringLastThreeActions: (state: GameState) => boolean;
   runnerMadeSuccessfulRunOnServerThisTurn: (
     state: GameState,
-    server: Extract<ServerId, "hq"> | "any_data_fort",
+    server: Extract<ServerId, "hq" | "rd"> | "any_data_fort",
   ) => boolean;
   runnerLiberatedAgendaSubtypeThisTurn: (
     state: GameState,
@@ -172,6 +173,7 @@ export type CardImplementationRuntimeDependencies = {
     sourceDefinitionId: CardDefinition["id"],
     min: number,
     max: number,
+    scope?: "any_installed" | "single_data_fort",
   ) => CardEffectHiddenInfoResult;
   exposeOutermostIceEachDataFort: (
     state: GameState,
@@ -180,6 +182,7 @@ export type CardImplementationRuntimeDependencies = {
     sourceDefinitionId: CardDefinition["id"],
   ) => CardEffectHiddenInfoResult;
   outermostIceEachDataFortExposeCount: (state: GameState) => number;
+  rezCostForCard: (state: GameState, cardId: CardInstanceId) => number;
   startShowHqAgendasForCreditsChoice: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -333,6 +336,11 @@ export type CardImplementationRuntimeDependencies = {
     legalAction: LegalAction,
     sourceCardId: CardInstanceId,
   ) => CardEffectHiddenInfoResult;
+  startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
   startDerezRezzedBlackIceChoice: (
     state: GameState,
     legalAction: LegalAction,
@@ -428,6 +436,31 @@ export type CardImplementationRuntimeDependencies = {
     state: GameState,
     legalAction: LegalAction,
     subtypeRequired?: "ap",
+  ) => CardEffectHiddenInfoResult;
+  rezInstalledIceWithLifecycleCounters: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    input: {
+      counterType: Extract<CounterType, "kludge" | "term">;
+      amount: number;
+      lifecycle:
+        | "remove_one_counter_start_corp_turn_trash_on_last"
+        | "rent_to_own_start_corp_turn";
+    },
+  ) => CardEffectHiddenInfoResult;
+  replaceFortCardsFromHq: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+  ) => CardEffectHiddenInfoResult;
+  trashTopCorpRdCards: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceDefinitionId: CardDefinition["id"],
+    amount: 2,
   ) => CardEffectHiddenInfoResult;
   startDistributeAdvancementCounters: (
     state: GameState,
@@ -531,6 +564,30 @@ function cardImplementationConditionMet(
         state,
         condition.server,
       );
+    case "runner_made_successful_hq_and_rd_runs_this_turn":
+      return (
+        deps.runnerMadeSuccessfulRunOnServerThisTurn(state, "hq") &&
+        deps.runnerMadeSuccessfulRunOnServerThisTurn(state, "rd")
+      );
+    case "corp_rezzed_black_ice_this_turn": {
+      const target = state.runnerTurnFlags?.lastRezzedBlackIceThisTurn;
+      const instance = target ? state.cardInstances[target.cardId] : undefined;
+      if (
+        !target ||
+        !instance ||
+        instance.zone.side !== "corp" ||
+        instance.zone.zone !== "serverIce" ||
+        instance.zone.serverId !== target.serverId ||
+        instance.rezzed !== true
+      )
+        return false;
+      const definition = deps.definitionFor(state, target.cardId);
+      return (
+        definition.id === target.definitionId &&
+        definition.type === "ice" &&
+        hasNormalizedSubtype(definition.subtypes, "black_ice")
+      );
+    }
     case "current_encounter_ice":
       return (
         state.timingPoint === "run.encounter_ice" &&
@@ -684,6 +741,16 @@ function canResolveActivatedCardImplementationAbility(
       return deps.trashOwnInstalledCardTargetCount(state) >= effect.min;
     if (effect.kind === "trash_cards_from_grip_for_credits")
       return effect.max >= 0;
+    if (effect.kind === "trash_own_rezzed_ice_for_credits")
+      return ownRezzedIceTargetIds(state).length > 0;
+    if (effect.kind === "gain_temporary_trace_credits")
+      return Boolean(state.trace);
+    if (effect.kind === "remove_same_fort_advancement_counters_for_run_credits")
+      return Boolean(state.run);
+    if (effect.kind === "gain_temporary_corp_run_credits")
+      return Boolean(state.run);
+    if (effect.kind === "copy_same_fort_ice_subroutine_for_run")
+      return sameFortSubroutineTargets(deps, state, sourceCardId).length > 0;
     if (effect.kind === "gain_credits_for_runner_trash_history")
       return (
         state.runnerTurnFlags?.trashedAdvertisementThisTurn === true ||
@@ -730,6 +797,12 @@ function assertOnPlayCardImplementationAbilityCanResolve(
     throw new Error(
       "Der Runner hat in diesem Zug keinen passenden erfolgreichen Run gemacht.",
     );
+  if (ability.condition?.kind === "runner_made_successful_hq_and_rd_runs_this_turn")
+    throw new Error(
+      "Der Runner hat in diesem Zug nicht erfolgreich HQ und R&D angegriffen.",
+    );
+  if (ability.condition?.kind === "corp_rezzed_black_ice_this_turn")
+    throw new Error("Die Korp hat in diesem Zug kein Black ICE gerezzt.");
   if (ability.condition?.kind === "runner_liberated_agenda_subtype_this_turn")
     throw new Error(
       "Der Runner hat in diesem Zug keine passende Agenda befreit.",
@@ -822,6 +895,11 @@ export function executeCardImplementationLifecycleEffects(
       sourceCardId: cardId,
       sourceDefinitionId: definition.id,
       sourceTitle: definition.title,
+      ...(typeof legalAction?.payload?.targetCardId === "string"
+        ? { targetCardId: legalAction.payload.targetCardId as CardInstanceId }
+        : {}),
+      xValue: Math.floor(Number(legalAction?.payload?.xValue ?? 0)),
+      targetRezCost: Math.floor(Number(legalAction?.payload?.targetRezCost ?? 0)),
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
@@ -842,6 +920,16 @@ export function executeCardImplementationLifecycleEffects(
           sourceCardId,
           definition.id,
         ),
+      replaceFortCardsFromHq: () => {
+        if (!legalAction)
+          throw new Error("Source-fort replacement braucht eine LegalAction.");
+        return deps.replaceFortCardsFromHq(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+        );
+      },
       ...(reason ? { reason } : {}),
     },
     effects,
@@ -853,6 +941,22 @@ export function executeCardImplementationLifecycleEffects(
     ...result.publicPayload,
   };
   deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
+}
+
+function normalizeSubtypeLabel(subtype: string): string {
+  return subtype
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function hasNormalizedSubtype(
+  subtypes: readonly string[] | undefined,
+  subtype: string,
+): boolean {
+  const target = normalizeSubtypeLabel(subtype);
+  return subtypes?.some((candidate) => normalizeSubtypeLabel(candidate) === target) ??
+    false;
 }
 
 function cardImplementationStartOfCorpTurnAbilities(
@@ -1210,6 +1314,11 @@ export function resolveCardImplementationEndOfRunnerTurnAction(
       sourceCardId: cardId,
       sourceDefinitionId: definition.id,
       sourceTitle: definition.title,
+      ...(typeof legalAction.payload?.targetCardId === "string"
+        ? { targetCardId: legalAction.payload.targetCardId as CardInstanceId }
+        : {}),
+      xValue: Math.floor(Number(legalAction.payload?.xValue ?? 0)),
+      targetRezCost: Math.floor(Number(legalAction.payload?.targetRezCost ?? 0)),
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       reason: "end_of_turn",
       addHostedCredits: (sourceCardId, amount) =>
@@ -1290,6 +1399,16 @@ function activatedAbilityLegalActionCosts(
         throw new Error(
           "Activated CardImplementation tap_source cost amount must be 1.",
         );
+    } else if (cost.kind === "corp_random_discard_hq") {
+      if (cost.amount <= 0)
+        throw new Error(
+          "Activated CardImplementation corp_random_discard_hq cost must be positive.",
+        );
+    } else if (cost.kind === "trash_corp_rd_top") {
+      if (cost.amount !== 2)
+        throw new Error(
+          "Activated CardImplementation trash_corp_rd_top cost amount must be 2.",
+        );
     } else {
       const unknownCost = cost as { kind?: string };
       throw new Error(
@@ -1335,6 +1454,22 @@ function hasTapSourceCostForActivatedAbility(
   return ability.costs.some((cost) => cost.kind === "tap_source");
 }
 
+function randomCorpHqDiscardCostForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): number {
+  return ability.costs
+    .filter((cost) => cost.kind === "corp_random_discard_hq")
+    .reduce((sum, cost) => sum + assertActivatedCostAmount(cost), 0);
+}
+
+function topCorpRdTrashCostForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): number {
+  return ability.costs
+    .filter((cost) => cost.kind === "trash_corp_rd_top")
+    .reduce((sum, cost) => sum + assertActivatedCostAmount(cost), 0);
+}
+
 function validateActivatedAbilityCosts(
   ability: ActivatedCardAbilityImplementation,
   legalAction: LegalAction,
@@ -1361,7 +1496,15 @@ function canPayActivatedCardImplementationCosts(
   const credits = legalCosts[0]?.credits ?? 0;
   if ((side === "corp" ? state.corp.clicks : state.runner.clicks) < clicks)
     return false;
-  if ((side === "corp" ? state.corp.credits : state.runner.credits) < credits)
+  const corpReservedInstallRezCredits = Math.max(
+    0,
+    Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
+  );
+  const corpSpendableCredits = Math.max(
+    0,
+    state.corp.credits - corpReservedInstallRezCredits,
+  );
+  if ((side === "corp" ? corpSpendableCredits : state.runner.credits) < credits)
     return false;
   const advancementCounterCost = advancementCounterCostForActivatedAbility(ability);
   if (advancementCounterCost > 0) {
@@ -1394,12 +1537,22 @@ function canPayActivatedCardImplementationCosts(
     )
       return false;
   }
+  const randomDiscardCost = randomCorpHqDiscardCostForActivatedAbility(ability);
+  if (randomDiscardCost > 0) {
+    if (side !== "corp" || state.corp.hq.length < randomDiscardCost) return false;
+  }
+  const topCorpRdTrashCost = topCorpRdTrashCostForActivatedAbility(ability);
+  if (topCorpRdTrashCost > 0) {
+    if (side !== "corp" || state.corp.rd.length < topCorpRdTrashCost)
+      return false;
+  }
   return true;
 }
 
 function payActivatedCardImplementationCosts(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
+  legalAction: LegalAction,
   side: Side,
   cardId: CardInstanceId,
   ability: ActivatedCardAbilityImplementation,
@@ -1445,6 +1598,41 @@ function payActivatedCardImplementationCosts(
     source.tapped = true;
     publicPayload.cardImplementationTapSourceCost = true;
   }
+  const randomDiscardCost = randomCorpHqDiscardCostForActivatedAbility(ability);
+  if (randomDiscardCost > 0) {
+    if (side !== "corp")
+      throw new Error("Nur die Korp kann zufaellige HQ-Discard-Kosten zahlen.");
+    if (state.corp.hq.length < randomDiscardCost)
+      throw new Error("HQ enthaelt nicht genug Karten fuer den Random-Discard.");
+    Object.assign(
+      publicPayload,
+      deps.corpRandomDiscardFromHq(
+        state,
+        deps.definitionFor(state, cardId).id,
+        randomDiscardCost,
+      ).publicPayload,
+    );
+    publicPayload.cardImplementationRandomHqDiscardCost = randomDiscardCost;
+  }
+  const topCorpRdTrashCost = topCorpRdTrashCostForActivatedAbility(ability);
+  if (topCorpRdTrashCost > 0) {
+    if (side !== "corp")
+      throw new Error("Nur die Korp kann R&D-Trash-Kosten zahlen.");
+    if (topCorpRdTrashCost !== 2)
+      throw new Error("R&D-Trash-Kosten muessen genau zwei Karten trashen.");
+    if (state.corp.rd.length < topCorpRdTrashCost)
+      throw new Error("R&D enthaelt nicht genug Karten fuer diese Kosten.");
+    Object.assign(
+      publicPayload,
+      deps.trashTopCorpRdCards(
+        state,
+        legalAction,
+        deps.definitionFor(state, cardId).id,
+        topCorpRdTrashCost as 2,
+      ).publicPayload,
+    );
+    publicPayload.cardImplementationTopCorpRdTrashCost = topCorpRdTrashCost;
+  }
   return publicPayload;
 }
 
@@ -1478,6 +1666,12 @@ function activatedAbilityPayload(
       : {}),
     ...(hasTapSourceCostForActivatedAbility(ability)
       ? { cardImplementationTapSourceCost: true }
+      : {}),
+    ...(randomCorpHqDiscardCostForActivatedAbility(ability) > 0
+      ? {
+          cardImplementationRandomHqDiscardCost:
+            randomCorpHqDiscardCostForActivatedAbility(ability),
+        }
       : {}),
     ...(ability.timing === "runner_cost_penalty_support" &&
     state?.runnerCostPenaltySupportWindow
@@ -1520,6 +1714,118 @@ function moveTopTrashToGripEffect(
     ability.effects[0]?.kind === "move_top_trash_to_grip"
     ? ability.effects[0]
     : undefined;
+}
+
+function trashOwnRezzedIceForCreditsEffect(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<
+      CardEffectImplementation,
+      { kind: "trash_own_rezzed_ice_for_credits" }
+    >
+  | undefined {
+  return ability.effects.length === 1 &&
+    ability.effects[0]?.kind === "trash_own_rezzed_ice_for_credits"
+    ? ability.effects[0]
+    : undefined;
+}
+
+function copySameFortIceSubroutineEffect(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<
+      CardEffectImplementation,
+      { kind: "copy_same_fort_ice_subroutine_for_run" }
+    >
+  | undefined {
+  return ability.effects.length === 1 &&
+    ability.effects[0]?.kind === "copy_same_fort_ice_subroutine_for_run"
+    ? ability.effects[0]
+    : undefined;
+}
+
+function ownRezzedIceTargetIds(state: GameState): CardInstanceId[] {
+  return state.corp.servers
+    .flatMap((server) => server.ice)
+    .filter((cardId): cardId is CardInstanceId => {
+      const instance = state.cardInstances[cardId];
+      return Boolean(
+        instance &&
+          instance.controller === "corp" &&
+          instance.zone.side === "corp" &&
+          instance.zone.zone === "serverIce" &&
+          instance.rezzed === true,
+      );
+    })
+    .sort();
+}
+
+type SameFortSubroutineTarget = {
+  iceId: CardInstanceId;
+  iceDefinition: CardDefinition;
+  subroutineIndex: number;
+  subroutineId: string;
+  subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
+  amount?: number;
+};
+
+function sourceServerId(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+): Exclude<ServerId, "new_remote"> | undefined {
+  const source = state.cardInstances[sourceCardId];
+  return source?.zone.side === "corp" && source.zone.zone === "serverRoot"
+    ? source.zone.serverId
+    : undefined;
+}
+
+function sameFortSubroutineTargets(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  sourceCardId: CardInstanceId | undefined,
+): SameFortSubroutineTarget[] {
+  if (!sourceCardId || !state.run) return [];
+  const serverId = sourceServerId(state, sourceCardId);
+  if (!serverId || state.run.attackedServerId !== serverId) return [];
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) return [];
+  const targets: SameFortSubroutineTarget[] = [];
+  for (const iceId of server.ice.slice().sort()) {
+    const instance = state.cardInstances[iceId];
+    if (!instance || instance.controller !== "corp") continue;
+    const definition = deps.definitionFor(state, iceId);
+    const subroutines =
+      printedSubroutinesForCardImplementation(definition) ??
+      definition.subroutines ??
+      [];
+    subroutines.forEach((subroutine, subroutineIndex) => {
+      if (
+        subroutine.type !== "end_the_run" &&
+        subroutine.type !== "end_the_run_unless_runner_pays"
+      )
+        return;
+      if (
+        state.run?.encounterAdditionalSubroutines?.some(
+          (record) =>
+            record.sourceCardInstanceId === sourceCardId &&
+            record.targetIceId === iceId &&
+            record.originalSubroutineId === subroutine.id,
+        )
+      )
+        return;
+      targets.push({
+        iceId,
+        iceDefinition: definition,
+        subroutineIndex,
+        subroutineId: subroutine.id,
+        subroutineKind: subroutine.type,
+        ...(subroutine.type === "end_the_run_unless_runner_pays"
+          ? { amount: subroutine.amount }
+          : {}),
+      });
+    });
+  }
+  return targets;
 }
 
 /**
@@ -1619,6 +1925,52 @@ export function pushActivatedCardImplementationActionsForTiming(
           },
         ),
       );
+      continue;
+    }
+    const trashRezzedIceEffect = trashOwnRezzedIceForCreditsEffect(ability);
+    if (trashRezzedIceEffect) {
+      for (const targetCardId of ownRezzedIceTargetIds(state)) {
+        const targetDefinition = deps.definitionFor(state, targetCardId);
+        actions.push(
+          deps.createAction(
+            state,
+            side,
+            "activated_card_ability",
+            `${definition.title}: ${targetDefinition.title} trashen`,
+            sourceCardId,
+            activatedAbilityLegalActionCosts(ability),
+            {
+              ...activatedAbilityPayload(sourceCardId, ability, index),
+              targetCardId,
+              targetDefinitionId: targetDefinition.id,
+              gainedCredits: trashRezzedIceEffect.gainCredits,
+            },
+          ),
+        );
+      }
+      continue;
+    }
+    const copySubroutineEffect = copySameFortIceSubroutineEffect(ability);
+    if (copySubroutineEffect) {
+      for (const target of sameFortSubroutineTargets(deps, state, sourceCardId)) {
+        actions.push(
+          deps.createAction(
+            state,
+            side,
+            "activated_card_ability",
+            `${definition.title}: ${target.iceDefinition.title} Subroutine kopieren`,
+            sourceCardId,
+            activatedAbilityLegalActionCosts(ability),
+            {
+              ...activatedAbilityPayload(sourceCardId, ability, index),
+              targetCardId: target.iceId,
+              targetDefinitionId: target.iceDefinition.id,
+              subroutineIndex: target.subroutineIndex,
+              subroutineId: target.subroutineId,
+            },
+          ),
+        );
+      }
       continue;
     }
     actions.push(
@@ -1811,6 +2163,50 @@ function validateActivatedCardImplementationAbility(
     );
     return;
   }
+  if (ability.timing === "corp_during_run") {
+    if (legalAction.side !== "corp")
+      throw new Error("Nur die Korp darf diese Run-Kartenfaehigkeit nutzen.");
+    if (!state.run)
+      throw new Error("Diese Kartenfaehigkeit ist nur waehrend eines Runs nutzbar.");
+    if (
+      !corpActivatedCardImplementationSourceIsAvailable(
+        deps,
+        state,
+        cardId,
+        match.definition,
+      )
+    )
+      throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
+  if (ability.timing === "corp_trace_window") {
+    if (legalAction.side !== "corp")
+      throw new Error("Nur die Korp darf diese Trace-Kartenfaehigkeit nutzen.");
+    if (!state.trace)
+      throw new Error("Diese Kartenfaehigkeit ist nur waehrend eines Trace nutzbar.");
+    if (
+      !corpActivatedCardImplementationSourceIsAvailable(
+        deps,
+        state,
+        cardId,
+        match.definition,
+      )
+    )
+      throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf diese aktivierte Kartenfaehigkeit nutzen.");
   if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
@@ -1832,6 +2228,42 @@ function validateActivatedCardImplementationAbility(
     ability,
     cardId,
   );
+  const trashRezzedIceEffect = trashOwnRezzedIceForCreditsEffect(ability);
+  if (trashRezzedIceEffect) {
+    const targetCardId = String(legalAction.payload?.targetCardId ?? "");
+    if (!ownRezzedIceTargetIds(state).includes(targetCardId as CardInstanceId))
+      throw new Error("Das zu trashende ICE ist nicht mehr gueltig.");
+  }
+  const copySubroutineEffect = copySameFortIceSubroutineEffect(ability);
+  if (copySubroutineEffect) {
+    const target = sameFortSubroutineTargetForLegalAction(
+      deps,
+      state,
+      cardId,
+      legalAction,
+    );
+    if (!target)
+      throw new Error("Die Ziel-Subroutine ist nicht mehr gueltig.");
+  }
+}
+
+function sameFortSubroutineTargetForLegalAction(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  legalAction: LegalAction,
+): SameFortSubroutineTarget | undefined {
+  const targetCardId = String(legalAction.payload?.targetCardId ?? "");
+  const subroutineIndex = Number(legalAction.payload?.subroutineIndex);
+  const subroutineId = String(legalAction.payload?.subroutineId ?? "");
+  if (!targetCardId || !Number.isInteger(subroutineIndex) || subroutineIndex < 0)
+    return undefined;
+  return sameFortSubroutineTargets(deps, state, sourceCardId).find(
+    (target) =>
+      target.iceId === targetCardId &&
+      target.subroutineIndex === subroutineIndex &&
+      target.subroutineId === subroutineId,
+  );
 }
 
 /**
@@ -1852,6 +2284,7 @@ export function resolveActivatedCardImplementationAbility(
   const costPublicPayload = payActivatedCardImplementationCosts(
     deps,
     state,
+    legalAction,
     legalAction.side,
     match.cardId,
     match.ability,
@@ -1862,6 +2295,11 @@ export function resolveActivatedCardImplementationAbility(
       sourceCardId: match.cardId,
       sourceDefinitionId: match.definition.id,
       sourceTitle: match.definition.title,
+      ...(typeof legalAction.payload?.targetCardId === "string"
+        ? { targetCardId: legalAction.payload.targetCardId as CardInstanceId }
+        : {}),
+      xValue: Math.floor(Number(legalAction.payload?.xValue ?? 0)),
+      targetRezCost: Math.floor(Number(legalAction.payload?.targetRezCost ?? 0)),
       controller: deps.mustInstance(state.cardInstances, match.cardId).controller,
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
@@ -1915,7 +2353,7 @@ export function resolveActivatedCardImplementationAbility(
           String(legalAction.payload?.cardImplementationExposeTargetId ?? ""),
           scope,
         ),
-      startExposeInstalledCards: (min, max) =>
+      startExposeInstalledCards: (min, max, scope) =>
         deps.startExposeInstalledCorpCardsChoice(
           state,
           legalAction,
@@ -1923,6 +2361,7 @@ export function resolveActivatedCardImplementationAbility(
           match.definition.id,
           min,
           max,
+          scope,
         ),
       exposeOutermostIceEachFort: () =>
         deps.exposeOutermostIceEachDataFort(
@@ -2071,10 +2510,57 @@ export function resolveActivatedCardImplementationAbility(
           match.definition.title,
           input,
         ),
+      copySameFortIceSubroutineForRun: () => {
+        const target = sameFortSubroutineTargetForLegalAction(
+          deps,
+          state,
+          match.cardId,
+          legalAction,
+        );
+        if (!target)
+          throw new Error("Die Ziel-Subroutine ist nicht mehr gueltig.");
+        if (!state.run)
+          throw new Error("Subroutine-Copy braucht einen laufenden Run.");
+        state.run.encounterAdditionalSubroutines = [
+          ...(state.run.encounterAdditionalSubroutines ?? []),
+          {
+            sourceCardInstanceId: match.cardId,
+            sourceDefinitionId: match.definition.id,
+            sourceTitle: match.definition.title,
+            targetIceId: target.iceId,
+            originalSubroutineId: target.subroutineId,
+            subroutineKind: target.subroutineKind,
+            ...(target.amount !== undefined ? { amount: target.amount } : {}),
+          },
+        ];
+        return {
+          publicPayload: {
+            copiedSubroutine: true,
+            targetCardDefinitionId: target.iceDefinition.id,
+            subroutineIndex: target.subroutineIndex,
+            subroutineId: target.subroutineId,
+          },
+        };
+      },
       addCurrentRunAccessCount: (server, amount) =>
         deps.addCurrentRunAccessCount(state, server, amount),
       passCurrentEncounteredIce: (subtypeRequired) =>
         deps.passCurrentEncounteredIce(state, legalAction, subtypeRequired),
+      rezInstalledIceWithLifecycleCounters: (input) =>
+        deps.rezInstalledIceWithLifecycleCounters(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          input,
+        ),
+      replaceFortCardsFromHq: () =>
+        deps.replaceFortCardsFromHq(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+        ),
     },
     match.ability.effects,
   );
@@ -2163,7 +2649,7 @@ export function executeOnPlayCardImplementationAbility(
           String(legalAction.payload?.cardImplementationExposeTargetId ?? ""),
           scope,
         ),
-      startExposeInstalledCards: (min, max) =>
+      startExposeInstalledCards: (min, max, scope) =>
         deps.startExposeInstalledCorpCardsChoice(
           state,
           legalAction,
@@ -2171,6 +2657,7 @@ export function executeOnPlayCardImplementationAbility(
           definition.id,
           min,
           max,
+          scope,
         ),
       exposeOutermostIceEachFort: () =>
         deps.exposeOutermostIceEachDataFort(
@@ -2313,6 +2800,12 @@ export function executeOnPlayCardImplementationAbility(
         deps.startTrashUnrezzedIceChoice(state, legalAction, cardId),
       startCorpChoiceRezOrTrashIceChoice: () =>
         deps.startCorpChoiceRezOrTrashIceChoice(state, legalAction, cardId),
+      startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: () =>
+        deps.startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice(
+          state,
+          legalAction,
+          cardId,
+        ),
       startDerezRezzedBlackIceChoice: () =>
         deps.startDerezRezzedBlackIceChoice(state, legalAction, cardId),
       startCorpDiscardHqWithRetainPayment: (retainCostPerCard) =>
@@ -2376,6 +2869,21 @@ export function executeOnPlayCardImplementationAbility(
           definition.id,
           source,
           maxAmount,
+        ),
+      rezInstalledIceWithLifecycleCounters: (input) =>
+        deps.rezInstalledIceWithLifecycleCounters(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          input,
+        ),
+      replaceFortCardsFromHq: () =>
+        deps.replaceFortCardsFromHq(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
         ),
     },
     ability.effects,

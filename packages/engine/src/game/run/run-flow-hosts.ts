@@ -15,7 +15,15 @@ import type {
   TraceSuccessEffect,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
-import { createDamageImminentEvent, doDamage, openEventModificationWindow, openReplacementWindow, resolveDamageImminentEvent, setDamagePayload } from "../damage/damage-core";
+import {
+  createDamageImminentEvent,
+  doDamage,
+  openDamageResolutionWindow,
+  openEventModificationWindow,
+  openReplacementWindow,
+  resolveDamageImminentEvent,
+  setDamagePayload,
+} from "../damage/damage-core";
 import { buildLegalAction as action } from "../turn/action-builders";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
 import {
@@ -137,6 +145,10 @@ export type RunFlowHost = {
     cardImplementationAccessHookKindsForDefinition: (
       definitionId: CardDefinitionId,
     ) => readonly string[];
+    canReplaceFortCardsFromHq: (
+      state: GameState,
+      serverId: Exclude<ServerId, "new_remote">,
+    ) => boolean;
   };
   servers: {
     mustServer: (
@@ -208,6 +220,10 @@ export type RunFlowHost = {
       legalAction?: LegalAction,
     ) => void;
     applyAiBoonRunStart: (state: GameState, legalAction?: LegalAction) => void;
+    openStartOfRunFortUtilityWindow: (
+      state: GameState,
+      legalAction?: LegalAction,
+    ) => boolean;
   };
   trace: {
     calculateRunnerLink: (state: GameState) => number;
@@ -242,11 +258,16 @@ export type RunFlowHost = {
     doDamage: typeof doDamage;
     openEventModificationWindow: typeof openEventModificationWindow;
     openReplacementWindow: typeof openReplacementWindow;
+    openDamageResolutionWindow: typeof openDamageResolutionWindow;
     resolveDamageImminentEvent: typeof resolveDamageImminentEvent;
     setDamagePayload: typeof setDamagePayload;
   };
   payment: {
     spendCredits: (state: GameState, side: Side, amount: number) => void;
+    spendCorpRunTemporaryCreditsForCurrentRunCost: (
+      state: GameState,
+      amount: number,
+    ) => void;
     credits: (state: GameState, side: Side, amount: number) => void;
     rezCostForCard: (state: GameState, cardId: CardInstanceId) => number;
     creditCostForAction: (legalAction: LegalAction) => number;
@@ -368,6 +389,11 @@ export type RunFlowHost = {
       legalAction?: LegalAction,
     ) => void;
     drawCorpCards: (state: GameState, count: number) => void;
+    awardRunnerEventAgendaPoint?: (
+      state: GameState,
+      legalAction: LegalAction,
+      sourceDefinitionId: CardDefinitionId,
+    ) => void;
     acmeSavingsAndLoanObligationCount: (state: GameState) => number;
     addAcmeSavingsAndLoanObligation: (state: GameState, amount: number) => void;
     applyRunnerForgoNextAction: (state: GameState) => void;
@@ -381,6 +407,11 @@ export type RunFlowHost = {
       state: GameState,
       cardId: CardInstanceId,
     ) => CardVirusCounterImplementation | undefined;
+    resolveTestSpinRunEnd: (
+      state: GameState,
+      run: NonNullable<GameState["run"]>,
+      legalAction?: LegalAction,
+    ) => { handled: boolean; stateChanged?: boolean };
   };
 };
 
@@ -475,6 +506,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         applyRunnerTraceCounterRunStartEffects:
           host.run.applyRunnerTraceCounterRunStartEffects,
         applyAiBoonRunStart: host.run.applyAiBoonRunStart,
+        openStartOfRunFortUtilityWindow:
+          host.run.openStartOfRunFortUtilityWindow,
       },
     };
   }
@@ -689,6 +722,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             cardId,
             legalAction,
           ),
+        canReplaceFortCardsFromHq: (serverId) =>
+          host.cards.canReplaceFortCardsFromHq(state, serverId),
         acmeSavingsAndLoanObligationCount: () =>
           host.callbacks.acmeSavingsAndLoanObligationCount(state),
         addAcmeSavingsAndLoanObligation: (amount) =>
@@ -710,7 +745,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         mustServer: (serverId) => host.servers.mustServer(state, serverId),
       },
       payment: {
-        spendCorpCredits: (amount) => host.payment.spendCredits(state, "corp", amount),
+        spendCorpCredits: (amount) =>
+          host.payment.spendCorpRunTemporaryCreditsForCurrentRunCost(
+            state,
+            amount,
+          ),
       },
     };
   }
@@ -744,7 +783,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         spendHostedPaymentCredits: (cardId, amount) =>
           spendHostedPaymentCredits(state, cardId, amount),
         rezCostForCard: (cardId) => host.payment.rezCostForCard(state, cardId),
-        spendCorpCredits: (amount) => host.payment.spendCredits(state, "corp", amount),
+        spendCorpCredits: (amount) =>
+          host.payment.spendCorpRunTemporaryCreditsForCurrentRunCost(
+            state,
+            amount,
+          ),
       },
       breaker: {
         breakAbilityForLegalAction: (legalAction) =>
@@ -781,6 +824,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       callbacks: {
         finishRun: (successful, legalAction) =>
           host.callbacks.finishRun(state, successful, legalAction),
+        continueRun: (legalAction) => continueRun(state, legalAction),
+        rollDie: (purpose) => host.rng.rollDie(state, purpose),
       },
     };
   }
@@ -812,7 +857,13 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         rezCostForCard: (cardId) => host.payment.rezCostForCard(state, cardId),
       },
       credits: {
-        spend: (side, amount) => host.payment.spendCredits(state, side, amount),
+        spend: (side, amount) =>
+          side === "corp"
+            ? host.payment.spendCorpRunTemporaryCreditsForCurrentRunCost(
+                state,
+                amount,
+              )
+            : host.payment.spendCredits(state, side, amount),
         gainRunner: (amount) => host.payment.credits(state, "runner", amount),
       },
       counters: {
@@ -891,7 +942,13 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       quoteIceRezCost: (iceId) => host.payment.rezCostForCard(state, iceId),
       resetBreakerStrength: () => host.ice.resetBreakerStrength(state),
       rollDie: (purpose) => host.rng.rollDie(state, purpose),
-      spendCredits: (side, amount) => host.payment.spendCredits(state, side, amount),
+      spendCredits: (side, amount) =>
+        side === "corp"
+          ? host.payment.spendCorpRunTemporaryCreditsForCurrentRunCost(
+              state,
+              amount,
+            )
+          : host.payment.spendCredits(state, side, amount),
       trashCorpInstalledCard: (cardId) =>
         host.zones.trashCorpInstalledCardToArchives(state, cardId),
     });
@@ -922,6 +979,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         host.damage.openEventModificationWindow(state, event, action),
       openReplacementWindow: (event, action) =>
         host.damage.openReplacementWindow(state, event, action),
+      openDamageResolutionWindow: (event, action) =>
+        host.damage.openDamageResolutionWindow(state, event, action),
       parisCityGridTracePoolSource: () =>
         parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state)),
       rabbitTraceLimitReductionForIceTrace: () =>
@@ -1040,6 +1099,27 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         consumeFutureActionDebt: () => {
           host.turn.consumeRunnerFutureActionDebt(state);
         },
+        awardEventAgendaPoint: (sourceCardId, sourceDefinitionId, legalAction) => {
+          if (!legalAction)
+            throw new Error("Runner-Agenda-Punkt braucht eine LegalAction.");
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            cardId: sourceCardId,
+          };
+          if (!host.callbacks.awardRunnerEventAgendaPoint)
+            throw new Error("Runner-Agenda-Punkt-Callback fehlt.");
+          host.callbacks.awardRunnerEventAgendaPoint(
+            state,
+            legalAction,
+            sourceDefinitionId,
+          );
+        },
+        addFutureActionDebt: (amount) => {
+          const flags = host.turn.ensureRunnerTurnFlags(state);
+          flags.forgoNextActionsPending =
+            Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) +
+            amount;
+        },
       },
       choices: {
         selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
@@ -1114,6 +1194,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             run,
             legalAction,
           ),
+        resolveTestSpinRunEnd: (run, legalAction) =>
+          host.callbacks.resolveTestSpinRunEnd(state, run, legalAction),
       },
       cleanup: {
         cleanupEmptyRemotes: () => host.zones.cleanupEmptyRemotes(state),
@@ -1131,6 +1213,21 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       runner: {
         ensureTurnFlags: () => host.turn.ensureRunnerTurnFlags(state),
+        awardEventAgendaPoint: (sourceCardId, sourceDefinitionId, legalAction) => {
+          if (!legalAction)
+            throw new Error("Runner-Agenda-Punkt braucht eine LegalAction.");
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            cardId: sourceCardId,
+          };
+          if (!host.callbacks.awardRunnerEventAgendaPoint)
+            throw new Error("Runner-Agenda-Punkt-Callback fehlt.");
+          host.callbacks.awardRunnerEventAgendaPoint(
+            state,
+            legalAction,
+            sourceDefinitionId,
+          );
+        },
       },
       draw: {
         drawCorpCards: (count) => host.callbacks.drawCorpCards(state, count),

@@ -543,7 +543,7 @@ function testHost(
     spendRunnerCredits: (targetState, amount) => {
       targetState.runner.credits -= amount;
     },
-    recordWilsonRunCapSpend: () => undefined,
+    recordRunnerRunCreditSpend: () => undefined,
     definitionIdForCard: (targetState, cardId) =>
       targetState.cardInstances[cardId]!.definitionId,
     hellsRunDefinitionId: "hells_run" as CardDefinitionId,

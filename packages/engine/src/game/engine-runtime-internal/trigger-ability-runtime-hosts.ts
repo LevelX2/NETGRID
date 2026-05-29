@@ -719,6 +719,10 @@ export function createTriggerAbilityRuntimeHosts(
     publicCardTitle,
     remainingReplacementLongtailKindForCard,
     removeAcmeSavingsAndLoanObligation,
+    acceptExtraActionOffer,
+    declineExtraActionOffer,
+    resolvePdcaCounterAction,
+    resolveForcedActionNotPossible,
     runnerUtilityLongtailKindForCard,
     spyCountersForServer,
     successfulRunInterventionHost,
@@ -900,6 +904,12 @@ export function createTriggerAbilityRuntimeHosts(
       corp: {
         acmeSavingsAndLoanObligationCount,
         removeAcmeSavingsAndLoanObligation,
+      },
+      actionEconomy: {
+        acceptExtraActionOffer,
+        declineExtraActionOffer,
+        resolvePdcaCounterAction,
+        resolveForcedActionNotPossible,
       },
       runnerSpecial: {
         handleRunnerSpecialTriggerExecution: (legalAction) =>

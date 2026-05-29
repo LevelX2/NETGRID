@@ -103,6 +103,7 @@ function hostFor(calls: string[]): RunFlowHost {
       icebreakerEncounterStrengthBonus: () => 0,
       permanentIcebreakerStrengthCounterBonus: () => 0,
       cardImplementationAccessHookKindsForDefinition: () => [],
+      canReplaceFortCardsFromHq: () => true,
     },
     servers: {
       mustServer: (_state, serverId) => {
@@ -147,6 +148,7 @@ function hostFor(calls: string[]): RunFlowHost {
       applyRunnerTraceCounterRunStartEffects: () =>
         calls.push("traceCounterRunStart"),
       applyAiBoonRunStart: () => calls.push("aiBoonRunStart"),
+      openStartOfRunFortUtilityWindow: () => false,
     },
     trace: {
       calculateRunnerLink: () => 0,
@@ -167,6 +169,7 @@ function hostFor(calls: string[]): RunFlowHost {
         cardsTrashed: 0,
         flatline: false,
       })) as never,
+      openDamageResolutionWindow: (() => false) as never,
       openEventModificationWindow: (() => false) as never,
       openReplacementWindow: (() => false) as never,
       resolveDamageImminentEvent: (() => ({
@@ -179,6 +182,7 @@ function hostFor(calls: string[]): RunFlowHost {
     },
     payment: {
       spendCredits: () => undefined,
+      spendCorpRunTemporaryCreditsForCurrentRunCost: () => undefined,
       credits: () => undefined,
       rezCostForCard: () => 0,
       creditCostForAction: () => 0,
@@ -244,6 +248,7 @@ function hostFor(calls: string[]): RunFlowHost {
       traceCounterEffectDefinitionFor: () => undefined,
       installedRunnerVirusSourceIds: () => [],
       virusCounterImplementationForCard: () => undefined,
+      resolveTestSpinRunEnd: () => ({ handled: false }),
     },
   };
 }

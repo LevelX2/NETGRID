@@ -129,6 +129,7 @@ export function createRunAccessLegalActionHostComposition(
       applyRunnerTraceCounterRunStartEffects:
         run.applyRunnerTraceCounterRunStartEffects,
       applyAiBoonRunStart: run.applyAiBoonRunStart,
+      openStartOfRunFortUtilityWindow: run.openStartOfRunFortUtilityWindow,
     },
     trace: callbacks.trace,
     damage: callbacks.damage,
@@ -137,6 +138,8 @@ export function createRunAccessLegalActionHostComposition(
       credits: payment.credits,
       rezCostForCard: payment.rezCostForCard,
       creditCostForAction: payment.creditCostForAction,
+      spendCorpRunTemporaryCreditsForCurrentRunCost:
+        payment.spendCorpRunTemporaryCreditsForCurrentRunCost,
     },
     counters: callbacks.counters,
     ice: callbacks.ice,

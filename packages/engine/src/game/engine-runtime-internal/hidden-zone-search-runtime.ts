@@ -198,7 +198,7 @@ export function createHiddenZoneSearchRuntime(
     resolveOpenEndedMileageProgramReturnChoice,
     resolveP358HiddenReplacementChoice,
     resolvePlayfulAiDiceLoopEvent,
-    resolveProteusRunnerProgramReturnChoice,
+    resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
     resolveSecurityCodeWormChipTrashIceChoice,

@@ -20,7 +20,12 @@ import {
   corpServerIdForInstalledCard,
   isPublicRezzedCorpRootModifier,
 } from "./card-implementation-modifiers";
-import type { CardStealCostModifierImplementation } from "./definition-types";
+import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import type {
+  CardAccessZone,
+  CardSelfStealCostImplementation,
+  CardStealCostModifierImplementation,
+} from "./definition-types";
 
 export type StealCostModifierQuote = {
   sourceCardInstanceId?: CardInstanceId;
@@ -110,6 +115,52 @@ function persistedStealCostModifiersForAgenda(
     }));
 }
 
+function currentAccessZoneForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): CardAccessZone | undefined {
+  const instance = state.cardInstances[cardId];
+  if (!instance) return undefined;
+  if (instance.zone.side === "corp" && instance.zone.zone === "rd") return "rd";
+  if (instance.zone.side === "corp" && instance.zone.zone === "hq") return "hq";
+  if (instance.zone.side === "corp" && instance.zone.zone === "archives")
+    return "archives";
+  if (instance.zone.side === "corp" && instance.zone.zone === "serverRoot")
+    return "installed";
+  return undefined;
+}
+
+function selfStealCostApplies(
+  modifier: CardSelfStealCostImplementation,
+  accessZone: CardAccessZone,
+): boolean {
+  if (!modifier.sourceZones.includes(accessZone)) return false;
+  if (modifier.ignoreIfAccessedFrom?.includes(accessZone)) return false;
+  return true;
+}
+
+function currentAccessSelfStealCostsForAgenda(
+  state: GameState,
+  agendaDefinition: CardDefinition,
+): StealCostModifierQuote[] {
+  const accessedCardId = state.run?.accessedCardId;
+  if (!accessedCardId) return [];
+  if (state.cardInstances[accessedCardId]?.definitionId !== agendaDefinition.id)
+    return [];
+  const accessZone = currentAccessZoneForCard(state, accessedCardId);
+  if (!accessZone) return [];
+  const implementation = cardImplementationForDefinitionId(agendaDefinition.id);
+  return (implementation?.selfStealCosts ?? [])
+    .filter((modifier) => selfStealCostApplies(modifier, accessZone))
+    .map((modifier) => ({
+      sourceCardInstanceId: accessedCardId,
+      sourceDefinitionId: agendaDefinition.id,
+      sourceTitle: agendaDefinition.title,
+      amount: modifier.amount,
+      persistedForCurrentAccess: false,
+    }));
+}
+
 /**
  * Quotes the current steal cost for an accessed agenda on a server.
  *
@@ -140,7 +191,8 @@ export function quoteStealCostForAccessedAgenda(
     agendaDefinition,
     activeSourceIds,
   );
-  const modifiers = [...active, ...persisted].sort((a, b) =>
+  const self = currentAccessSelfStealCostsForAgenda(state, agendaDefinition);
+  const modifiers = [...active, ...persisted, ...self].sort((a, b) =>
     `${a.sourceDefinitionId}:${a.sourceCardInstanceId ?? ""}`.localeCompare(
       `${b.sourceDefinitionId}:${b.sourceCardInstanceId ?? ""}`,
     ),

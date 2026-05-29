@@ -1,4 +1,9 @@
-import { DEMO_CARDS_BY_ID, type GameState, type LegalAction } from "@netgrid/shared";
+import {
+  DEMO_CARDS_BY_ID,
+  type CardInstanceId,
+  type GameState,
+  type LegalAction,
+} from "@netgrid/shared";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -31,6 +36,7 @@ export type RunnerMainActionGenerationHost = {
   };
   runner: {
     ensureRunnerTurnFlags: HostFn<any>;
+    filterActionsForRestrictedExtraActions?: HostFn<LegalAction[]>;
     availableRunnerTagRemovalCredits: HostFn<number>;
     availableRunnerProgramInstallCredits: HostFn<number>;
     runnerCostPenaltySupportCreditCapacity: HostFn<number>;
@@ -163,6 +169,10 @@ export function buildRunnerMainActions(
   const cardImplementationForDefinitionId =
     host.cardImplementation.cardImplementationForDefinitionId;
   const ensureRunnerTurnFlags = host.runner.ensureRunnerTurnFlags;
+  const filterActionsForRestrictedExtraActions =
+    host.runner.filterActionsForRestrictedExtraActions ??
+    ((_state: GameState, _side: "runner", candidateActions: LegalAction[]) =>
+      candidateActions);
   const availableRunnerTagRemovalCredits =
     host.runner.availableRunnerTagRemovalCredits;
   const availableRunnerProgramInstallCredits =
@@ -259,7 +269,36 @@ export function buildRunnerMainActions(
   const actions: LegalAction[] = [];
   const flags = ensureRunnerTurnFlags(state);
   const hasClicks = state.runner.clicks > 0;
-  const bonusRunPending = flags.allNighterBonusRunPending === true;
+  const pirateBroadcastPending = flags.pirateBroadcastPending;
+  const pirateBroadcastNextServerId =
+    pirateBroadcastPending?.pendingServerIds[0];
+  if (pirateBroadcastPending && pirateBroadcastNextServerId) {
+    const forcedRunActions = buildPirateBroadcastForcedRunActions(host, {
+      pirateBroadcastPending,
+      pirateBroadcastNextServerId,
+      runDurationPaymentHost: runDurationPaymentHost(state),
+    });
+    if (forcedRunActions.length > 0) return forcedRunActions;
+    return [
+      action(
+        state,
+        "runner",
+        "trigger_ability",
+        "Pirate Broadcast: Sequenz scheitert",
+        "game_rule",
+        [],
+        {
+          runnerAbility: "pirate_broadcast_sequence_failed",
+          sourceDefinitionId: pirateBroadcastPending.sourceDefinitionId,
+          pirateBroadcastSequenceFailed: true,
+          actionDebtAdded: 1,
+        },
+      ),
+    ];
+  }
+  const bonusRunPending =
+    flags.allNighterBonusRunPending === true ||
+    pirateBroadcastNextServerId !== undefined;
   if (!hasClicks && !bonusRunPending) {
     pushCardImplementationEndOfRunnerTurnActions(
       cardImplementationRuntimeDeps,
@@ -1134,6 +1173,7 @@ export function buildRunnerMainActions(
     }
     if (
       bonusRunPending &&
+      (!pirateBroadcastNextServerId || pirateBroadcastNextServerId === server.id) &&
       !rovingRunBlocked &&
       (runStartTaxCredits === 0 ||
         availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
@@ -1151,9 +1191,14 @@ export function buildRunnerMainActions(
             ...runPayload,
             bonusRunNoClick: true,
             bonusRunSource:
-              flags.bodyweightDataCrecheExtraRunPending === true
+              pirateBroadcastNextServerId
+                ? pirateBroadcastPending?.sourceDefinitionId
+                : flags.bodyweightDataCrecheExtraRunPending === true
                 ? BODYWEIGHT_DATA_CRECHE_ID
                 : ALL_NIGHTER_ID,
+            ...(pirateBroadcastNextServerId
+              ? { pirateBroadcastRun: true }
+              : {}),
           },
         ),
       );
@@ -1197,14 +1242,89 @@ export function buildRunnerMainActions(
     Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0),
   );
   if (wilsonRestrictedActions > 0 && state.runner.clicks <= wilsonRestrictedActions) {
-    return actions.filter(
+    return filterActionsForRestrictedExtraActions(
+      state,
+      "runner",
+      actions.filter(
       (candidate) =>
         candidate.type === "end_turn" ||
         (candidate.type === "start_run" &&
           candidate.payload?.wilsonRunOnlyAction === true),
+      ),
     );
   }
-  return actions;
+  return filterActionsForRestrictedExtraActions(state, "runner", actions);
+}
+
+function buildPirateBroadcastForcedRunActions(
+  host: RunnerMainActionGenerationHost,
+  input: {
+    pirateBroadcastPending: NonNullable<
+      NonNullable<GameState["runnerTurnFlags"]>["pirateBroadcastPending"]
+    >;
+    pirateBroadcastNextServerId: string;
+    runDurationPaymentHost: unknown;
+  },
+): LegalAction[] {
+  const state = host.state;
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === input.pirateBroadcastNextServerId,
+  );
+  if (!server) return [];
+  if (
+    host.run.isRovingSubmarineRunBlocked(
+      host.run.fortRunSideFamiliesHostForState(state),
+      server.id,
+    )
+  )
+    return [];
+  const upgradeRunStartTax = host.run.runStartTaxForServerUpgrades(
+    state,
+    server.id,
+  );
+  const newsgroupRunTax = host.run.newsgroupTauntingRunStartTax(state);
+  const runStartTaxCredits =
+    upgradeRunStartTax.amount + newsgroupRunTax.amount;
+  if (
+    runStartTaxCredits > 0 &&
+    host.runner.availableRunnerRunStartCredits(input.runDurationPaymentHost) <
+      runStartTaxCredits
+  )
+    return [];
+  const runPayload = {
+    serverId: server.id,
+    ...(upgradeRunStartTax.amount > 0
+      ? {
+          v1918UpgradeAbility: "run_start_tax",
+          runStartTaxCredits: upgradeRunStartTax.amount,
+          runStartTaxSourceDefinitionIds:
+            upgradeRunStartTax.sourceDefinitionIds.join(","),
+        }
+      : {}),
+    ...(newsgroupRunTax.amount > 0
+      ? {
+          v1920AssetAbility: "newsgroup_taunting_run_start_tax",
+          newsgroupTauntingRunStartTaxCredits: newsgroupRunTax.amount,
+          newsgroupTauntingSourceDefinitionIds:
+            newsgroupRunTax.sourceDefinitionIds.join(","),
+        }
+      : {}),
+    ...(runStartTaxCredits > 0 ? { runStartTaxCredits } : {}),
+    bonusRunNoClick: true,
+    bonusRunSource: input.pirateBroadcastPending.sourceDefinitionId,
+    pirateBroadcastRun: true,
+  };
+  return [
+    host.actions.buildLegalAction(
+      state,
+      "runner",
+      "start_run",
+      `Pirate-Broadcast-Run auf ${server.label}`,
+      "game_rule",
+      runStartTaxCredits > 0 ? [{ credits: runStartTaxCredits }] : [],
+      runPayload,
+    ),
+  ];
 }
 
 function installedCorpIceTargetIds(state: GameState): string[] {

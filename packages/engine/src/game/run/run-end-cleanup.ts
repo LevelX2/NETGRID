@@ -91,6 +91,12 @@ export type RunEndCleanupHost = {
   runner: {
     ensureTurnFlags: () => RunnerTurnFlags;
     consumeFutureActionDebt: () => void;
+    awardEventAgendaPoint?: (
+      sourceCardId: CardInstanceId,
+      sourceDefinitionId: CardDefinitionId,
+      legalAction?: LegalAction,
+    ) => void;
+    addFutureActionDebt?: (amount: number) => void;
   };
   choices: {
     selectedChoiceIds: (selectedChoices: PlayerAction["selectedChoices"]) => string[];
@@ -155,6 +161,10 @@ export type RunEndCleanupHost = {
       run: ActiveRun | undefined,
       legalAction?: LegalAction,
     ) => unknown;
+    resolveTestSpinRunEnd: (
+      run: ActiveRun,
+      legalAction?: LegalAction,
+    ) => { handled: boolean; stateChanged?: boolean };
   };
   cleanup: {
     cleanupEmptyRemotes: () => void;
@@ -299,12 +309,25 @@ export function handleRunEndCleanup(
     flags.successfulRunThisTurn = true;
     flags.lastSuccessfulRunServerId = run.attackedServerId;
     if (run.attackedServerId === "hq") flags.successfulHqRunThisTurn = true;
+    if (run.attackedServerId === "rd") flags.successfulRdRunThisTurn = true;
+    if (
+      (run.attackedServerId === "hq" || run.attackedServerId === "rd") &&
+      (Math.max(0, Math.floor(run.liberatedBlackOpsAgendaCount ?? 0)) > 0 ||
+        Math.max(0, Math.floor(run.trashedBlackOpsCount ?? 0)) > 0)
+    ) {
+      flags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn = true;
+    }
   }
+  if (run) applyBadPublicityRunAftermath(host, run, successful, legalAction);
+  const pirateBroadcast = run
+    ? applyPirateBroadcastRunResult(host, run, successful, legalAction)
+    : { handled: false };
   const allNighterBonusRunOnFinish =
     run?.grantAllNighterBonusRunOnFinish === true;
   const bonus = successful ? (run?.pendingSuccessBonusCredits ?? 0) : 0;
   const corpBonus = tokyoChibaUnsuccessfulRunBonus(host, run, successful);
   host.followups.cleanupDelayedSuccessfulRunTemporaryIce(run, legalAction);
+  if (run) host.followups.resolveTestSpinRunEnd(run, legalAction);
   host.credits.gainRunner(bonus);
   host.credits.gainCorp(corpBonus.amount);
   if (run && corpBonus.amount > 0 && legalAction) {
@@ -330,12 +353,16 @@ export function handleRunEndCleanup(
     run,
     legalAction,
   );
+  const spendCapShortfall = run
+    ? applyRunCreditSpendCapShortfall(host, run, legalAction)
+    : { handled: false, lostCredits: 0, shortfall: 0 };
   resetBreakerStrength(host.state);
   delete host.state.run;
   host.state.phase = "runner_action_phase";
   host.state.timingPoint = "runner_action.main";
   host.state.activeSide = "runner";
-  host.runner.consumeFutureActionDebt();
+  if (!pirateBroadcast.deferActionDebtConsumption)
+    host.runner.consumeFutureActionDebt();
   host.cleanup.cleanupEmptyRemotes();
   return {
     handled: true,
@@ -351,6 +378,12 @@ export function handleRunEndCleanup(
     ...(temporary.unpreventableDamage !== undefined
       ? { unpreventableDamage: temporary.unpreventableDamage }
       : {}),
+    ...(spendCapShortfall.handled
+      ? {
+          runCreditSpendCapShortfall: spendCapShortfall.shortfall,
+          lostCredits: spendCapShortfall.lostCredits,
+        }
+      : {}),
     ...(postRunBridge.followupRunChoiceStarted !== undefined
       ? { followupRunChoiceStarted: postRunBridge.followupRunChoiceStarted }
       : {}),
@@ -362,6 +395,177 @@ export function handleRunEndCleanup(
     ...(legalAction?.payload ? { resolvedPayload: legalAction.payload } : {}),
     stateChanged: true,
   };
+}
+
+function applyRunCreditSpendCapShortfall(
+  host: RunEndCleanupHost,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): { handled: boolean; shortfall: number; lostCredits: number } {
+  const cap = run.runCreditSpendCap;
+  if (!cap) return { handled: false, shortfall: 0, lostCredits: 0 };
+  const announced = Math.max(0, Math.floor(cap.announcedSpendCap ?? 0));
+  const spent = Math.max(0, Math.floor(cap.spentDuringRun ?? 0));
+  const shortfall = Math.max(0, announced - spent);
+  const lostCredits = Math.min(shortfall, Math.max(0, host.state.runner.credits));
+  if (lostCredits > 0) host.state.runner.credits -= lostCredits;
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      runCreditSpendCap: announced,
+      runCreditSpentDuringRun: spent,
+      runCreditSpendCapShortfall: shortfall,
+      runnerCreditsLost: lostCredits,
+      runnerCreditsAfter: host.state.runner.credits,
+      sourceDefinitionId: cap.sourceDefinitionId,
+    };
+  }
+  return { handled: true, shortfall, lostCredits };
+}
+
+function applyBadPublicityRunAftermath(
+  host: RunEndCleanupHost,
+  run: ActiveRun,
+  successful: boolean,
+  legalAction?: LegalAction,
+): void {
+  const aftermath = run.badPublicityRunAftermath;
+  if (!aftermath) return;
+  let badPublicityAdded = 0;
+  if (aftermath.kind === "live_news_feed") {
+    if (!successful) return;
+    const tagAmount = 2;
+    host.state.runner.tags += tagAmount;
+    badPublicityAdded =
+      Math.max(0, Math.floor(run.encounteredBlackIceCount ?? 0)) +
+      Math.max(0, Math.floor(run.rezzedBlackOpsCount ?? 0)) +
+      Math.max(0, Math.floor(run.liberatedBlackOpsAgendaCount ?? 0));
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        tagsAdded: tagAmount,
+        runnerTagsAfter: host.state.runner.tags,
+        liveNewsFeedEncounteredBlackIceCount: Math.max(
+          0,
+          Math.floor(run.encounteredBlackIceCount ?? 0),
+        ),
+        liveNewsFeedRezzedBlackOpsCount: Math.max(
+          0,
+          Math.floor(run.rezzedBlackOpsCount ?? 0),
+        ),
+        liveNewsFeedLiberatedBlackOpsAgendaCount: Math.max(
+          0,
+          Math.floor(run.liberatedBlackOpsAgendaCount ?? 0),
+        ),
+      };
+    }
+  } else {
+    badPublicityAdded = Math.max(
+      0,
+      Math.floor(run.trashedAdvertisementCount ?? 0),
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        subliminalCorruptionTrashedAdvertisementCount: badPublicityAdded,
+      };
+    }
+  }
+  if (badPublicityAdded <= 0) return;
+  const before = host.state.corp.badPublicity;
+  host.state.corp.badPublicity += badPublicityAdded;
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      sourceDefinitionId: aftermath.sourceDefinitionId,
+      badPublicityAdded:
+        Math.max(0, Math.floor(Number(legalAction.payload?.badPublicityAdded ?? 0))) +
+        badPublicityAdded,
+      corpBadPublicityBefore:
+        typeof legalAction.payload?.corpBadPublicityBefore === "number"
+          ? legalAction.payload.corpBadPublicityBefore
+          : before,
+      corpBadPublicityAfter: host.state.corp.badPublicity,
+    };
+    legalAction.resolvedEffects = [
+      ...(legalAction.resolvedEffects ?? []),
+      {
+        effectId: `${run.runId}.${aftermath.sourceCardId}.bad_publicity_after_run`,
+        kind: "add_bad_publicity",
+        visibility: "public",
+        side: "corp",
+        amount: badPublicityAdded,
+        reason: aftermath.kind,
+        sourceDefinitionId: aftermath.sourceDefinitionId,
+        sourceTitle: aftermath.sourceTitle,
+      },
+    ];
+  }
+}
+
+function applyPirateBroadcastRunResult(
+  host: RunEndCleanupHost,
+  run: ActiveRun,
+  successful: boolean,
+  legalAction?: LegalAction,
+): { handled: boolean; deferActionDebtConsumption?: boolean } {
+  const sequence = run.pirateBroadcast;
+  if (!sequence) return { handled: false };
+  if (!successful) {
+    if (host.runner.addFutureActionDebt) {
+      host.runner.addFutureActionDebt(1);
+    } else {
+      const flags = host.runner.ensureTurnFlags();
+      flags.forgoNextActionsPending =
+        Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + 1;
+    }
+    delete host.runner.ensureTurnFlags().pirateBroadcastPending;
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        pirateBroadcastFailed: true,
+        actionDebtAdded: 1,
+        sourceDefinitionId: sequence.sourceDefinitionId,
+      };
+    }
+    return { handled: true, deferActionDebtConsumption: true };
+  }
+  const successfulServerIds = [
+    ...sequence.successfulServerIds,
+    run.attackedServerId,
+  ];
+  if (sequence.pendingServerIds.length > 0) {
+    host.runner.ensureTurnFlags().pirateBroadcastPending = {
+      ...sequence,
+      successfulServerIds,
+    };
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        pirateBroadcastRunSuccessful: true,
+        pirateBroadcastPendingServerCount: sequence.pendingServerIds.length,
+        sourceDefinitionId: sequence.sourceDefinitionId,
+      };
+    }
+    return { handled: true, deferActionDebtConsumption: true };
+  }
+  delete host.runner.ensureTurnFlags().pirateBroadcastPending;
+  if (!host.runner.awardEventAgendaPoint)
+    throw new Error("Runner-Agenda-Punkt-Callback fehlt.");
+  host.runner.awardEventAgendaPoint(
+    sequence.sourceCardId,
+    sequence.sourceDefinitionId,
+    legalAction,
+  );
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      pirateBroadcastComplete: true,
+      pirateBroadcastSuccessfulServerCount: successfulServerIds.length,
+      sourceDefinitionId: sequence.sourceDefinitionId,
+    };
+  }
+  return { handled: true };
 }
 
 export function recordDupreBreakUsage(
@@ -442,9 +646,20 @@ function applyRunnerRunTemporaryCreditCleanupAndDamage(
 ): RunTemporaryCreditCleanupResult {
   if (!run) return { handled: false };
   const runTemporaryCredits = run.runnerRunTemporaryCredits;
+  const corpRunTemporaryCredits = run.corpRunTemporaryCredits;
   const unpreventableCoreDamage = run.unpreventableCoreDamageAtRunEnd;
-  if (!runTemporaryCredits && !unpreventableCoreDamage) return { handled: false };
+  if (!runTemporaryCredits && !corpRunTemporaryCredits && !unpreventableCoreDamage)
+    return { handled: false };
   const unusedTemporaryCredits = runTemporaryCredits?.remaining ?? 0;
+  const unusedCorpTemporaryCredits = Math.max(
+    0,
+    Math.floor(corpRunTemporaryCredits?.remaining ?? 0),
+  );
+  if (unusedCorpTemporaryCredits > 0)
+    host.state.corp.credits = Math.max(
+      0,
+      host.state.corp.credits - unusedCorpTemporaryCredits,
+    );
   let damageSummary: RunEndDamageSummary | undefined;
   if (unpreventableCoreDamage && unpreventableCoreDamage.amount > 0) {
     damageSummary = host.damage.dealUnpreventableCoreDamage(
@@ -460,6 +675,13 @@ function applyRunnerRunTemporaryCreditCleanupAndDamage(
         ? {
             temporaryRunCreditsReturned: unusedTemporaryCredits,
             temporaryRunCreditsRemaining: 0,
+          }
+        : {}),
+      ...(corpRunTemporaryCredits
+        ? {
+            corpTemporaryRunCreditsReturned: unusedCorpTemporaryCredits,
+            corpTemporaryRunCreditsRemaining: 0,
+            corpCreditsAfter: host.state.corp.credits,
           }
         : {}),
       ...(damageSummary
@@ -646,7 +868,7 @@ function applyV181SuccessfulRunCounterTriggers(
           ),
           sourceCardDefinitionId: definition.id,
         };
-        appendProteusRunnerVirusCounterEffect(legalAction, {
+        appendRunnerVirusCounterEffect(legalAction, {
           run,
           sourceCardId: cardId,
           sourceDefinitionId: definition.id,
@@ -695,7 +917,7 @@ function applyV181SuccessfulRunCounterTriggers(
               }
             : {}),
         };
-        const socketEffectInput: Parameters<typeof appendProteusRunnerVirusCounterEffect>[1] = {
+        const socketEffectInput: Parameters<typeof appendRunnerVirusCounterEffect>[1] = {
           run,
           sourceCardId: cardId,
           sourceDefinitionId: definition.id,
@@ -711,9 +933,9 @@ function applyV181SuccessfulRunCounterTriggers(
         };
         const socketServerLabel = host.servers.publicServerLabel(run.attackedServerId);
         if (socketServerLabel) socketEffectInput.serverLabel = socketServerLabel;
-        appendProteusRunnerVirusCounterEffect(legalAction, socketEffectInput);
+        appendRunnerVirusCounterEffect(legalAction, socketEffectInput);
         if (pipeCounterAdded > 0) {
-          appendProteusRunnerVirusCounterEffect(legalAction, {
+          appendRunnerVirusCounterEffect(legalAction, {
             run,
             sourceCardId: cardId,
             sourceDefinitionId: definition.id,
@@ -801,7 +1023,7 @@ function applyV181SuccessfulRunCounterTriggers(
   }
 }
 
-function appendProteusRunnerVirusCounterEffect(
+function appendRunnerVirusCounterEffect(
   legalAction: LegalAction,
   input: {
     run: ActiveRun;

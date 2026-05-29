@@ -9,6 +9,14 @@ export function validateChoiceAction(
     return legalAction.type === "resolve_choice"
       ? "Es ist keine Choice offen."
       : undefined;
+  if (
+    choice.side === "corp" &&
+    choice.source.startsWith("trace:") &&
+    legalAction.side === "corp" &&
+    legalAction.type === "activated_card_ability" &&
+    legalAction.payload?.cardImplementationAbilityTiming === "corp_trace_window"
+  )
+    return undefined;
   if (legalAction.type !== "resolve_choice")
     return "Solange eine Choice offen ist, sind keine anderen Aktionen legal.";
   if (playerAction.side !== choice.side)

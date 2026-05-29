@@ -13,7 +13,12 @@ type ScoredAgendaAbilityPayload = Record<string, string | number | boolean>;
 export type ScoredAgendaAbilityHost = {
   state: Pick<
     GameState,
-    "corp" | "cardInstances" | "phase" | "activeSide"
+    | "corp"
+    | "runner"
+    | "cardInstances"
+    | "phase"
+    | "activeSide"
+    | "corpTurnFlags"
   >;
   legalAction?: LegalAction;
   cards: {
@@ -39,7 +44,7 @@ export type ScoredAgendaAbilityHost = {
   counters: {
     cardCounter: (
       cardId: CardInstanceId,
-      counterType: "mark" | "power",
+      counterType: "mark" | "power" | "pdca",
     ) => number;
     spendVisibleCardCounter: (
       cardId: CardInstanceId,
@@ -49,6 +54,16 @@ export type ScoredAgendaAbilityHost = {
   };
   credits: {
     gainCorpCredits: (amount: number) => void;
+  };
+  damage?: {
+    dealRunnerMeatDamage: (
+      sourceCardId: CardInstanceId,
+      amount: number,
+    ) => {
+      damageAmount: number;
+      cardsTrashed: number;
+      flatline: boolean;
+    };
   };
   actionProfiles: {
     scoredAgendaCounterCreditProfileForDefinition: (
@@ -129,6 +144,34 @@ export function buildScoredAgendaAbilityActionsForCard(
   }
   if (
     host.cards.scoredAgendaKindForDefinition(definition) ===
+    "tagged_runner_meat_damage_reduce_hand_size_on_success"
+  ) {
+    if (host.state.runner.tags > 0) {
+      const implementation = host.cards.scoredAgendaForDefinition(definition);
+      const damageAmount =
+        implementation?.kind ===
+        "tagged_runner_meat_damage_reduce_hand_size_on_success"
+          ? implementation.damageAmount
+          : 1;
+      actions.push(
+        host.actions.createLegalAction(
+          "corp",
+          "gain_credit",
+          `${definition.title}: 1 Meat Damage`,
+          agendaId,
+          [{ clicks: 1 }],
+          {
+            cardId: agendaId,
+            agendaAbility: "proteus_corporate_headhunters",
+            damageAmount,
+          },
+        ),
+      );
+    }
+    return { handled: true, actions };
+  }
+  if (
+    host.cards.scoredAgendaKindForDefinition(definition) ===
     "ai_cfo_shuffle_hq_archives_into_rd_draw"
   ) {
     const implementation = host.cards.scoredAgendaForDefinition(definition);
@@ -150,6 +193,38 @@ export function buildScoredAgendaAbilityActionsForCard(
         },
       ),
     );
+    return { handled: true, actions };
+  }
+  if (
+    host.cards.scoredAgendaKindForDefinition(definition) ===
+    "corp_damage_replacement_pdca_action_counter"
+  ) {
+    const alreadyUsed =
+      host.state.corpTurnFlags?.pdcaUsedSourceIdsThisTurn?.includes(agendaId) ===
+      true;
+    if (
+      host.state.phase === "corp_action_phase" &&
+      host.state.activeSide === "corp" &&
+      !alreadyUsed &&
+      host.counters.cardCounter(agendaId, "pdca") > 0
+    ) {
+      actions.push(
+        host.actions.createLegalAction(
+          "corp",
+          "trigger_ability",
+          `${definition.title}: PDCA-Counter fuer 1 Aktion ausgeben`,
+          agendaId,
+          [],
+          {
+            cardId: agendaId,
+            actionEconomyAbility: "pdca_counter_gain_action",
+            sourceDefinitionId: definition.id,
+            counterType: "pdca",
+            removeCounterAmount: 1,
+          },
+        ),
+      );
+    }
     return { handled: true, actions };
   }
   const scoredCounterCreditProfile =
@@ -267,7 +342,60 @@ export function handleScoredAgendaActivatedAbilityAction(
     return resolveScoredAgendaRevealRdTopAction(host);
   if (legalAction.payload?.agendaAbility === "ai_chief_financial_officer")
     return resolveAiChiefFinancialOfficerAction(host);
+  if (legalAction.payload?.agendaAbility === "proteus_corporate_headhunters")
+    return resolveCorporateHeadhuntersAction(host);
   return { handled: false };
+}
+
+function resolveCorporateHeadhuntersAction(
+  host: ScoredAgendaAbilityHost,
+): ScoredAgendaActivatedAbilityHandlerResult {
+  const legalAction = requireLegalAction(host);
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf Corporate Headhunters nutzen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  if (!host.state.corp.scoreArea.includes(sourceCardId))
+    throw new Error("Corporate Headhunters ist nicht gescort.");
+  if (host.state.runner.tags <= 0)
+    throw new Error("Corporate Headhunters braucht einen getaggten Runner.");
+  const definition = host.cards.definitionFor(sourceCardId);
+  const implementation = host.cards.scoredAgendaForDefinition(definition);
+  if (
+    implementation?.kind !==
+    "tagged_runner_meat_damage_reduce_hand_size_on_success"
+  )
+    throw new Error("Die Agenda-Aktion passt nicht zu Corporate Headhunters.");
+  if (!host.damage)
+    throw new Error("Corporate Headhunters braucht Damage-Callbacks.");
+  const summary = host.damage.dealRunnerMeatDamage(
+    sourceCardId,
+    implementation.damageAmount,
+  );
+  let handSizeReduction = 0;
+  if (summary.cardsTrashed > 0) {
+    handSizeReduction = implementation.handSizeReduction;
+    host.state.runner.maxHandSize = Math.max(
+      0,
+      host.state.runner.maxHandSize - handSizeReduction,
+    );
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    damageResolved: true,
+    damageType: "meat",
+    damageAmount: summary.damageAmount,
+    cardsTrashed: summary.cardsTrashed,
+    flatline: summary.flatline,
+    handSizeReduction,
+    runnerMaxHandSizeAfter: host.state.runner.maxHandSize,
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    sourceCardId,
+    sourceDefinitionId: definition.id,
+    resolvedPayload: legalAction.payload as ScoredAgendaAbilityPayload,
+  };
 }
 
 function resolveCorporateRetreatAction(

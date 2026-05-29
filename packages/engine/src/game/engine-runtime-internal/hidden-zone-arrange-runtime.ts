@@ -204,7 +204,7 @@ export function createHiddenZoneArrangeRuntime(
     resolveIncubatorTransformChoice,
     resolveOpenEndedMileageProgramReturnChoice,
     resolvePlayfulAiDiceLoopEvent,
-    resolveProteusRunnerProgramReturnChoice,
+    resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
     resolveSecurityCodeWormChipTrashIceChoice,

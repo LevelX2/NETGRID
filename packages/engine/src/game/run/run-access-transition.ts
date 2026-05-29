@@ -28,6 +28,11 @@ export type RunAccessTransitionHost = {
   };
   runner: {
     ensureTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
+    awardEventAgendaPoint?: (
+      sourceCardId: CardInstanceId,
+      sourceDefinitionId: CardDefinitionId,
+      legalAction?: LegalAction,
+    ) => void;
   };
   draw: {
     drawCorpCards: (count: number) => void;
@@ -153,6 +158,18 @@ export function enterAccessFromSuccessfulRun(
       handled: true,
       accessSkipped: true,
       replacementApplied: "trash_rezzed_ice_on_fort_and_tag_runner",
+      runFinished: true,
+      stateChanged: true,
+      ...resolvedPayloadFor(legalAction),
+    };
+  }
+  if (run.successfulRunAccessReplacement === "runner_gain_agenda_point") {
+    applySuccessfulRunAccessReplacement(host, run, legalAction);
+    host.run.finishRun(true, legalAction);
+    return {
+      handled: true,
+      accessSkipped: true,
+      replacementApplied: "runner_gain_agenda_point",
       runFinished: true,
       stateChanged: true,
       ...resolvedPayloadFor(legalAction),
@@ -459,6 +476,19 @@ function applySuccessfulRunAccessReplacement(
     Math.floor(run.successfulRunRunnerCreditGain ?? 0),
   );
   if (runnerCreditGain > 0) host.state.runner.credits += runnerCreditGain;
+  if (run.successfulRunAccessReplacement === "runner_gain_agenda_point") {
+    const sourceCardId = run.successfulRunSourceCardId;
+    const sourceDefinitionId = run.successfulRunSourceDefinitionId;
+    if (!sourceCardId || !sourceDefinitionId)
+      throw new Error("Runner-Agenda-Punkt-Ersetzung braucht eine Quelle.");
+    if (!host.runner.awardEventAgendaPoint)
+      throw new Error("Runner-Agenda-Punkt-Callback fehlt.");
+    host.runner.awardEventAgendaPoint(
+      sourceCardId,
+      sourceDefinitionId,
+      legalAction,
+    );
+  }
   let trashedRezzedIceCount = 0;
   const trashedRezzedIceDefinitionIds: CardDefinitionId[] = [];
   if (run.successfulRunAccessReplacement === "trash_rezzed_ice_on_fort_and_tag_runner") {
@@ -489,6 +519,7 @@ function applySuccessfulRunAccessReplacement(
         ? { trashedCardDefinitionIds: trashedRezzedIceDefinitionIds.sort().join(",") }
         : {}),
       hiddenZoneBarrier: true,
+      ...sourcePayloadForSuccessfulRunReplacement(run),
     };
   }
 }

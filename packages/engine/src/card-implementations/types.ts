@@ -25,6 +25,7 @@ import type {
   CardRunnerEventLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
   CardScoredAgendaImplementation,
+  CardSelfStealCostImplementation,
   CardSuccessfulRunFollowupImplementation,
   CardTagPreventionSourceImplementation,
   CardTrashPreventionSourceImplementation,
@@ -48,6 +49,7 @@ export type CardImplementationDefinition = {
   hostedProgramCapacity?: HostedProgramCapacityImplementation;
   hostedProgramModifiers?: readonly HostedProgramModifierImplementation[];
   modifiers?: CardModifierImplementation[];
+  selfStealCosts?: readonly CardSelfStealCostImplementation[];
   abilities?: CardAbilityImplementation[];
   accessEffects?: readonly CardAccessEffectImplementation[];
   accessHooks?: readonly CardAccessHookImplementation[];

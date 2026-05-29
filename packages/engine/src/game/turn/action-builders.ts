@@ -130,10 +130,13 @@ export function makeActionId(
     parts.push(String(payload.cardImplementationAbilityIndex));
   if (payload?.cardImplementationLifecycleAction)
     parts.push(String(payload.cardImplementationLifecycleAction));
+  if (payload?.actionEconomyAbility)
+    parts.push(String(payload.actionEconomyAbility));
   if (payload?.cardImplementationLifecycleAbilityIndex !== undefined)
     parts.push(String(payload.cardImplementationLifecycleAbilityIndex));
   if (payload?.iceInstallTotalCost !== undefined)
     parts.push(String(payload.iceInstallTotalCost));
+  if (payload?.xValue !== undefined) parts.push(String(payload.xValue));
   if (payload?.iceInstallReductionSourceDefinitionIds)
     parts.push(String(payload.iceInstallReductionSourceDefinitionIds));
   if (payload?.accessTrashTotalCost !== undefined)

@@ -19,6 +19,7 @@ import {
   type RunnerAccessActionHost,
 } from "./access-actions";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { quoteStealCostForAccessedAgenda } from "../../ability-engine/steal-cost-modifiers";
 import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -113,7 +114,7 @@ export function handleAccessExecution(
     case "access_card":
       return accessCurrentCard(host, legalAction);
     case "steal_agenda": {
-      const paidCredits = legalAction.costs[0]?.credits ?? 0;
+      const paidCredits = revalidateStealAgendaCost(host, legalAction);
       host.payment.spendRunnerCredits(paidCredits);
       const result = stealAgenda(
         host,
@@ -191,6 +192,7 @@ export function accessCurrentCard(
     host.effects.executeAccessEffects(cardId, legalAction);
     const definition = host.cards.definitionFor(cardId);
     applyPrearrangedDropAgendaAccess(host, definition, legalAction);
+    applyPromisesPromisesAgendaAccess(host, cardId, definition, legalAction);
     const freeTrashAccess = canFreeTrashCurrentAccessCard(
       host.accessActions,
       run,
@@ -252,6 +254,7 @@ export function accessCurrentCard(
   host.effects.executeAccessEffects(cardId, legalAction);
   const definition = host.cards.definitionFor(cardId);
   applyPrearrangedDropAgendaAccess(host, definition, legalAction);
+  applyPromisesPromisesAgendaAccess(host, cardId, definition, legalAction);
   const freeTrashAccess = canFreeTrashCurrentAccessCard(
     host.accessActions,
     run,
@@ -298,6 +301,60 @@ function applyPrearrangedDropAgendaAccess(
     gainedCredits: Number(legalAction.payload?.gainedCredits ?? 0) + 6,
     runnerCreditsAfter: host.state.runner.credits,
   };
+}
+
+function applyPromisesPromisesAgendaAccess(
+  host: AccessFlowHost,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  legalAction: LegalAction,
+): void {
+  const flags = host.state.runnerTurnFlags;
+  if (!flags?.promisesPromisesNextAgendaAccess || definition.type !== "agenda")
+    return;
+  flags.promisesPromisesNextAgendaAccess = false;
+  host.state.run = {
+    ...mustRun(host),
+    promisesPromisesAgendaPointBonus: {
+      sourceDefinitionId:
+        flags.promisesPromisesSourceDefinitionId ??
+        ("card_implementation" as CardDefinition["id"]),
+      sourceTitle: flags.promisesPromisesSourceTitle ?? "Promises, Promises",
+      amount: 1,
+      cardId,
+    },
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    promisesPromisesConsumed: true,
+    agendaPointBonusPending: 1,
+  };
+}
+
+function revalidateStealAgendaCost(
+  host: AccessFlowHost,
+  legalAction: LegalAction,
+): number {
+  const run = mustRun(host);
+  const accessedCardId = run.accessedCardId;
+  if (!accessedCardId)
+    throw new Error("Keine aktuell accessete Agenda zum Stehlen.");
+  const definition = host.cards.definitionFor(accessedCardId);
+  if (definition.type !== "agenda")
+    throw new Error("Die aktuell accessete Karte ist keine Agenda.");
+  const accessServerId =
+    run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
+  const quote = quoteStealCostForAccessedAgenda(
+    host.state,
+    accessServerId,
+    definition,
+  );
+  const paidCredits = legalAction.costs[0]?.credits ?? 0;
+  if (paidCredits !== quote.totalCost)
+    throw new Error("Die Steal-Kosten sind nicht mehr gueltig.");
+  if (host.state.runner.credits < paidCredits)
+    throw new Error("Der Runner kann die Steal-Kosten nicht zahlen.");
+  return paidCredits;
 }
 
 export function completeCurrentBreachAccess(
@@ -414,8 +471,16 @@ function stealAgenda(
     flags.stoleResearchAgendaThisTurn = true;
   if (host.cards.cardHasSubtype(definition, "gray_ops"))
     flags.stoleGrayOpsAgendaThisTurn = true;
-  if (host.cards.cardHasSubtype(definition, "black_ops"))
+  if (host.cards.cardHasSubtype(definition, "black_ops")) {
     flags.stoleBlackOpsAgendaThisTurn = true;
+    if (host.state.run)
+      host.state.run.liberatedBlackOpsAgendaCount =
+        Math.max(
+          0,
+          Math.floor(host.state.run.liberatedBlackOpsAgendaCount ?? 0),
+        ) + 1;
+  }
+  applyPendingAgendaPointBonusToStolenAgenda(host, cardId as CardInstanceId, legalAction);
   const agendaPointValue = host.steal.agendaPointsForScoredCard(
     cardId as CardInstanceId,
   );
@@ -489,6 +554,32 @@ function stealAgenda(
     ...resolvedPayloadFor(legalAction),
     stateChanged: true,
   };
+}
+
+function applyPendingAgendaPointBonusToStolenAgenda(
+  host: AccessFlowHost,
+  cardId: CardInstanceId,
+  legalAction?: LegalAction,
+): void {
+  const bonus = host.state.run?.promisesPromisesAgendaPointBonus;
+  if (!bonus || bonus.cardId !== cardId) return;
+  const instance = host.cards.cardInstanceFor(cardId);
+  const existing = Math.max(0, Math.floor(instance.counters?.agenda ?? 0));
+  host.state.cardInstances[cardId] = {
+    ...instance,
+    counters: {
+      ...(instance.counters ?? {}),
+      agenda: existing + bonus.amount,
+    },
+  };
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      promisesPromisesBonusAgendaPoints: bonus.amount,
+      sourceDefinitionId: bonus.sourceDefinitionId,
+      sourceTitle: bonus.sourceTitle,
+    };
+  }
 }
 
 function delayBizarreEncryptionSchemeAgendaScore(
@@ -660,11 +751,18 @@ function trashAccessedCard(
   }
   if (host.cards.cardHasSubtype(definition, "advertisement")) {
     host.runner.ensureTurnFlags().trashedAdvertisementThisTurn = true;
+    if (run)
+      run.trashedAdvertisementCount =
+        Math.max(0, Math.floor(run.trashedAdvertisementCount ?? 0)) + 1;
+  }
+  if (host.cards.cardHasSubtype(definition, "black_ops") && run) {
+    run.trashedBlackOpsCount =
+      Math.max(0, Math.floor(run.trashedBlackOpsCount ?? 0)) + 1;
   }
   if (host.cards.cardHasSubtype(definition, "transactions")) {
     host.runner.ensureTurnFlags().trashedTransactionsThisTurn = true;
   }
-  consumeProteusAccessTrashCounters(host, definition, legalAction);
+  consumeAccessTrashCounters(host, definition, legalAction);
   if (host.state.run?.breach) {
     return {
       ...completeCurrentBreachAccess(host, "trashed", legalAction),
@@ -683,7 +781,7 @@ function trashAccessedCard(
   };
 }
 
-function consumeProteusAccessTrashCounters(
+function consumeAccessTrashCounters(
   host: AccessFlowHost,
   definition: CardDefinition,
   legalAction?: LegalAction,

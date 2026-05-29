@@ -944,7 +944,7 @@ export function createHiddenZoneNonSearchRuntime(
     );
   }
 
-  function resolveProteusRunnerProgramReturnChoice(
+  function resolveRunnerProgramReturnChoice(
     state: GameState,
     legalAction: LegalAction,
     playerAction: PlayerAction,
@@ -1221,7 +1221,7 @@ export function createHiddenZoneNonSearchRuntime(
     resolveForgedActivationOrdersTargetChoice,
     resolveIncubatorTransformChoice,
     resolveOpenEndedMileageProgramReturnChoice,
-    resolveProteusRunnerProgramReturnChoice,
+    resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
     resolveSecurityCodeWormChipTrashIceChoice,

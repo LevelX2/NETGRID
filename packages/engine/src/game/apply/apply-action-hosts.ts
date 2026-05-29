@@ -29,6 +29,7 @@ export type ApplyActionHostCompositionHost = {
       playerAction: PlayerAction,
       options?: ApplyActionOptions,
     ) => EngineResult;
+    afterPerformAction?: (state: GameState, legalAction: LegalAction) => void;
   };
   perform: PerformActionExecutionDependencies;
 };
@@ -59,6 +60,9 @@ export function createApplyActionHostComposition(
     applyActionCoreHost: {
       actions: {
         performAction,
+        ...(host.actions?.afterPerformAction
+          ? { afterPerformAction: host.actions.afterPerformAction }
+          : {}),
       },
     },
     ...(applyGameActionHost ? { applyGameActionHost } : {}),

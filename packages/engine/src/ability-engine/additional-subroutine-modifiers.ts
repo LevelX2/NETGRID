@@ -213,6 +213,7 @@ export function currentEncounterAdditionalSubroutinesForIce(
   const records = run.encounterAdditionalSubroutines ?? [];
   const subroutines: SubroutineDefinition[] = [];
   records.forEach((record, index) => {
+    if (record.originalSubroutineId) return;
     if (record.sourceCardInstanceId !== iceId) return;
     const publicId = `card_implementation.${record.sourceDefinitionId}.current_encounter_additional_subroutine.${index + 1}.${record.subroutineKind}`;
     const dynamicSubroutine: DynamicSubroutineAttribution = {
@@ -246,6 +247,47 @@ export function currentEncounterAdditionalSubroutinesForIce(
     }
   });
   return subroutines;
+}
+
+export function copiedRunSubroutinesForIceAfterOriginal(
+  state: GameState,
+  iceId: CardInstanceId,
+  originalSubroutineId: string,
+): SubroutineDefinition[] {
+  const run = state.run;
+  if (!run) return [];
+  const records = run.encounterAdditionalSubroutines ?? [];
+  return records
+    .filter(
+      (record) =>
+        record.targetIceId === iceId &&
+        record.originalSubroutineId === originalSubroutineId,
+    )
+    .map((record, index) => {
+      const publicId = `card_implementation.${record.sourceDefinitionId}.copied_subroutine.${index + 1}.${record.subroutineKind}`;
+      const dynamicSubroutine: DynamicSubroutineAttribution = {
+        internalId: `${publicId}.${record.sourceCardInstanceId}.${record.targetIceId}.${record.originalSubroutineId}`,
+        publicId,
+        sourceCardInstanceId: record.sourceCardInstanceId,
+        sourceDefinitionId: record.sourceDefinitionId,
+        sourceTitle: record.sourceTitle,
+        modifierKind: "additional_subroutine",
+        subroutineKind: record.subroutineKind,
+      };
+      if (record.subroutineKind === "end_the_run") {
+        return {
+          id: publicId,
+          type: "end_the_run",
+          dynamicSubroutine,
+        };
+      }
+      return {
+        id: publicId,
+        type: "end_the_run_unless_runner_pays",
+        amount: Math.max(0, Math.floor(record.amount ?? 0)),
+        dynamicSubroutine,
+      };
+    });
 }
 
 /**

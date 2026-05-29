@@ -127,6 +127,12 @@ export function createMainActionHostComposition(
           corp.corpInstalledEconomyActionProfileForDefinition,
         corpInstalledEconomyActionPayload:
           corp.corpInstalledEconomyActionPayload,
+        ...(corp.filterActionsForRestrictedExtraActions
+          ? {
+              filterActionsForRestrictedExtraActions:
+                corp.filterActionsForRestrictedExtraActions,
+            }
+          : {}),
       },
       runner: {
         isConcealedRunnerResource: runner.isConcealedRunnerResource,
@@ -137,6 +143,8 @@ export function createMainActionHostComposition(
         corpIceInstallTotalCost: install.corpIceInstallTotalCost,
         canInstallCorpRootCardInServer:
           install.canInstallCorpRootCardInServer,
+        canInstallCorpRootCardInNewRemote:
+          install.canInstallCorpRootCardInNewRemote,
         isRegionUpgrade: install.isRegionUpgrade,
         corpRegionUpgradeIdsInServer: install.corpRegionUpgradeIdsInServer,
         corpRootAgendaOrNodeCapacityInServer:
@@ -224,6 +232,12 @@ export function createMainActionHostComposition(
           runner.runnerUtilityLongtailKindForCard,
         uniqueDirectLongtailImplementationForCard:
           runner.uniqueDirectLongtailImplementationForCard,
+        ...(runner.filterActionsForRestrictedExtraActions
+          ? {
+              filterActionsForRestrictedExtraActions:
+                runner.filterActionsForRestrictedExtraActions,
+            }
+          : {}),
       },
       servers: {
         mustServer: callbacks.mustServer,

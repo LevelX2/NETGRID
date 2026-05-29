@@ -1243,6 +1243,17 @@ describe("V1.0.6 resource and card-display helpers", () => {
         usageHint: "status_marker"
       })
     ).toBe("Pattel Antibody: Jeder Pattel-Counter auf einem Icebreaker reduziert dessen Stärke um 1.");
+    expect(
+      counterDisplayTooltipText({
+        id: "ice_transmutation",
+        amount: 1,
+        displayKind: "generic_counter",
+        label: "Ice Transmutation",
+        ariaLabel: "1 Ice Transmutation",
+        counterType: "mark",
+        usageHint: "status_marker"
+      })
+    ).toBe("Ice Transmutation: Das gewählte ICE hat +1 Stärke. Jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.");
   });
 
   it("keeps advancement counters as separate gems until ten counters", () => {

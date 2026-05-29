@@ -48,6 +48,12 @@ export type TriggerAbilityExecutionHost = {
     acmeSavingsAndLoanObligationCount: (state: GameState) => number;
     removeAcmeSavingsAndLoanObligation: (state: GameState) => void;
   };
+  actionEconomy?: {
+    acceptExtraActionOffer: (state: GameState, legalAction: LegalAction) => void;
+    declineExtraActionOffer: (state: GameState, legalAction: LegalAction) => void;
+    resolvePdcaCounterAction: (state: GameState, legalAction: LegalAction) => void;
+    resolveForcedActionNotPossible: (state: GameState, legalAction: LegalAction) => void;
+  };
   runnerSpecial: {
     handleRunnerSpecialTriggerExecution: (
       legalAction: LegalAction,
@@ -85,6 +91,26 @@ export function handleTriggerAbilityExecution(
   if (legalAction.type !== "trigger_ability") return { handled: false };
 
   const { state } = host;
+  if (legalAction.payload?.actionEconomyAbility === "accept_extra_action_offer") {
+    if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
+    host.actionEconomy.acceptExtraActionOffer(state, legalAction);
+    return handled(legalAction);
+  }
+  if (legalAction.payload?.actionEconomyAbility === "decline_extra_action_offer") {
+    if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
+    host.actionEconomy.declineExtraActionOffer(state, legalAction);
+    return handled(legalAction);
+  }
+  if (legalAction.payload?.actionEconomyAbility === "pdca_counter_gain_action") {
+    if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
+    host.actionEconomy.resolvePdcaCounterAction(state, legalAction);
+    return handled(legalAction);
+  }
+  if (legalAction.payload?.actionEconomyAbility === "forced_action_not_possible") {
+    if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
+    host.actionEconomy.resolveForcedActionNotPossible(state, legalAction);
+    return handled(legalAction);
+  }
   if (host.runnerSpecial.handleRunnerSpecialTriggerExecution(legalAction).handled)
     return handled(legalAction);
   if (legalAction.payload?.corpAbility === "trash_code_viral_cache") {
@@ -116,6 +142,26 @@ export function handleTriggerAbilityExecution(
     return handled(legalAction);
   if (host.hiddenZone.handleHiddenZoneTriggerExecution(legalAction).handled)
     return handled(legalAction);
+  if (legalAction.payload?.runnerAbility === "pirate_broadcast_sequence_failed") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf die Pirate-Broadcast-Sequenz abschließen.");
+    if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
+      throw new Error("Pirate Broadcast kann nur im Runner-Aktionsfenster scheitern.");
+    const flags = host.runner.ensureTurnFlags(state);
+    if (!flags.pirateBroadcastPending)
+      throw new Error("Es ist keine Pirate-Broadcast-Sequenz offen.");
+    delete flags.pirateBroadcastPending;
+    flags.forgoNextActionsPending =
+      Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + 1;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      pirateBroadcastFailed: true,
+      pirateBroadcastSequenceFailed: true,
+      actionDebtAdded: 1,
+      forgoNextActionsPending: flags.forgoNextActionsPending,
+    };
+    return handled(legalAction);
+  }
   if (legalAction.payload?.runnerAbility === "change_icebreaker_subtype") {
     if (legalAction.side !== "runner")
       throw new Error("Nur der Runner darf den Icebreaker-Typ ändern.");

@@ -187,7 +187,7 @@ export function createCorpZoneRuntimeHosts(
     resolveOpenEndedMileageProgramReturnChoice,
     resolveP358HiddenReplacementChoice,
     resolvePlayfulAiDiceLoopEvent,
-    resolveProteusRunnerProgramReturnChoice,
+    resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
     resolveSecurityCodeWormChipTrashIceChoice,
@@ -573,6 +573,41 @@ export function createCorpZoneRuntimeHosts(
     );
   }
 
+  function installedCorpCardIdsInFort(
+    state: GameState,
+    serverId: string,
+  ): CardInstanceId[] {
+    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    if (!server) return [];
+    return [...server.root, ...server.ice]
+      .filter((cardId) =>
+        exposeInstalledCorpCardTargets(state, "any_installed").includes(cardId),
+      )
+      .sort();
+  }
+
+  function dataFortExposeChoiceOptions(state: GameState, serverId: string) {
+    return installedCorpCardIdsInFort(state, serverId).map((cardId) => ({
+      id: `card_${cardId}`,
+      label: exposeInstalledCorpCardLabel(state, cardId),
+      value: cardId,
+    }));
+  }
+
+  function dataFortSelectionOptions(state: GameState) {
+    return [
+      { id: "fort_none", label: "Keine Karten exposen", value: "none" },
+      ...state.corp.servers
+        .filter((server) => installedCorpCardIdsInFort(state, server.id).length > 0)
+        .sort((left, right) => left.id.localeCompare(right.id))
+        .map((server) => ({
+          id: `fort_${server.id}`,
+          label: server.label,
+          value: server.id,
+        })),
+    ];
+  }
+
   function startHuntClubBbsExposeChoice(
     state: GameState,
     legalAction: LegalAction,
@@ -615,9 +650,38 @@ export function createCorpZoneRuntimeHosts(
     sourceDefinitionId: CardDefinition["id"],
     min: number,
     max: number,
+    scope?: string,
   ): { publicPayload: Record<string, string | number | boolean> } {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
+    if (scope === "single_data_fort") {
+      const options = dataFortSelectionOptions(state);
+      if (options.length <= 1)
+        throw new Error("Es gibt keine installierte verdeckte Korp-Karte.");
+      state.pendingChoice = {
+        choiceId: `p3_36_expose_installed_cards_fort_select_${state.stateVersion + 1}`,
+        side: "runner",
+        source: `p3_36.expose_installed_cards_fort_select:${sourceCardId}:${sourceDefinitionId}:${min}:${max}:${state.stateVersion + 1}`,
+        prompt: "Ein Data Fort zum Exposen wählen",
+        kind: "select_option",
+        options,
+        minSelections: 1,
+        maxSelections: 1,
+        stateVersion: state.stateVersion + 1,
+        visibility: "hidden_info_barrier",
+      };
+      const payload = {
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "expose_installed_cards_fort_select",
+        choiceVisibility: "runner_private",
+        sourceDefinitionId,
+      };
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        ...payload,
+      };
+      return { publicPayload: payload };
+    }
     const options = exposeInstalledCorpCardsChoiceOptions(state);
     if (options.length === 0)
       throw new Error("Es gibt keine installierte verdeckte Korp-Karte.");
@@ -686,6 +750,96 @@ export function createCorpZoneRuntimeHosts(
     const choice = state.pendingChoice;
     if (!choice || !choice.source.startsWith("p3_36.expose_installed_cards"))
       throw new Error("Es ist keine Expose-Choice offen.");
+    if (choice.source.startsWith("p3_36.expose_installed_cards_fort_select")) {
+      const [, sourceCardId = "", sourceDefinitionId = "", minText = "0", maxText = "0"] =
+        choice.source.split(":");
+      if (!sourceCardId || !state.cardInstances[sourceCardId])
+        throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
+      const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+      if (selected === "fort_none") {
+        delete state.pendingChoice;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "expose_installed_cards_single_fort",
+          publicRevealKind: "expose",
+          sourceDefinitionId,
+          revealedCount: 0,
+        };
+        return;
+      }
+      const serverId = selected.replace(/^fort_/, "");
+      if (!state.corp.servers.some((server) => server.id === serverId))
+        throw new Error("Dieses Data Fort kann nicht gewählt werden.");
+      const options = dataFortExposeChoiceOptions(state, serverId);
+      if (options.length === 0)
+        throw new Error("Dieses Data Fort enthält keine legalen Expose-Ziele.");
+      const max = Math.max(0, Math.floor(Number(maxText)));
+      const min = Math.max(0, Math.floor(Number(minText)));
+      state.pendingChoice = {
+        choiceId: `p3_36_expose_installed_cards_single_fort_${state.stateVersion + 1}`,
+        side: "runner",
+        source: `p3_36.expose_installed_cards:single_data_fort:${serverId}:${sourceCardId}:${sourceDefinitionId}:${state.stateVersion + 1}`,
+        prompt: "Installierte Korp-Karten in diesem Fort exposen",
+        kind: "select_cards",
+        options,
+        minSelections: Math.min(min, options.length),
+        maxSelections: Math.min(max, options.length),
+        stateVersion: state.stateVersion + 1,
+        visibility: "hidden_info_barrier",
+      };
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "expose_installed_cards_single_fort_choice",
+        choiceVisibility: "runner_private",
+        sourceDefinitionId,
+        serverId,
+      };
+      return;
+    }
+    if (choice.source.startsWith("p3_36.expose_installed_cards:single_data_fort")) {
+      const [, , serverId = "", sourceCardId = "", sourceDefinitionId = ""] =
+        choice.source.split(":");
+      if (!sourceCardId || !state.cardInstances[sourceCardId])
+        throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
+      const sourceDefinition = definitionFor(state, sourceCardId);
+      if (sourceDefinition.id !== sourceDefinitionId)
+        throw new Error("Die Expose-Quelle passt nicht mehr zur Choice.");
+      const selectedIds = selectedChoiceCardIds(choice, playerAction);
+      const legalTargets = new Set(installedCorpCardIdsInFort(state, serverId));
+      for (const cardId of selectedIds) {
+        if (!legalTargets.has(cardId))
+          throw new Error(
+            "Diese installierte Korp-Karte darf in diesem Fort nicht exposed werden.",
+          );
+      }
+      const labels = selectedIds.map((cardId) =>
+        exposeInstalledCorpCardLabel(state, cardId),
+      );
+      const definitions = selectedIds.map((cardId) =>
+        definitionFor(state, cardId),
+      );
+      delete state.pendingChoice;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "expose_installed_cards_single_fort",
+        publicRevealKind: "expose",
+        sourceDefinitionId,
+        sourceTitle: sourceDefinition.title,
+        serverId,
+        revealedCount: selectedIds.length,
+        publicRevealDefinitionIds: definitions
+          .map((definition) => definition.id)
+          .join(","),
+        publicRevealTitles: definitions
+          .map((definition) => definition.title)
+          .join("||"),
+        exposedServerLabels: labels.join(","),
+      };
+      return;
+    }
     const [, sourceCardId = "", sourceDefinitionId = ""] =
       choice.source.split(":");
     if (!sourceCardId || !state.cardInstances[sourceCardId])

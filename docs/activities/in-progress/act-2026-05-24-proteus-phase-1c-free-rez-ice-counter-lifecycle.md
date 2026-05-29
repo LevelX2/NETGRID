@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle
-status: blocked
+status: resolved-by-done-activity
 kind: implementation
 area: cards
 priority: normal
@@ -8,15 +8,15 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-29
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1c
 proReferences:
   - PRO019
-blockedBy:
-  - rule-source-clarification-emergency-rig-x
+blockedBy: []
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-1c-free-rez-ice-counter-lifecycle.md
+  - docs/activities/done/act-2026-05-29-proteus-pro019-rule-contract-baseline-utilities.md
 checks:
   - Lokale Quellenprüfung `data/cards/proteus-cards.json` für `Emergency Rig` und `Rent-to-Own Contract`
 ---
@@ -84,7 +84,11 @@ Die beiden Korp-Operationen `Emergency Rig` und `Rent-to-Own Contract` als gemei
 
 ## Blocker
 
-Blockiert am 2026-05-24.
+Blockiert am 2026-05-24; durch PRO019 am 2026-05-29 als Statusreferenz aufgelöst.
+
+PRO019 dokumentiert und implementiert die lokale Regelentscheidung für `Emergency Rig`: `X` ist positiv und auf `1..max(1, Rez-Kosten des Ziel-ICE)` begrenzt. `Rent-to-Own Contract` nutzt die Rez-Kosten des Ziel-ICE als Term-Counter-Anzahl. Beide Karten haben konkrete CardImplementation-Dateien, Registry-/Manifest-/Coverage-Parität und fokussierte LegalAction-/applyAction-Tests. Diese alte Activity bleibt nur als historische Blocker- und Scope-Referenz.
+
+Historischer Blocker:
 
 `Emergency Rig` kann aus den lokalen Proteus-Quellen nicht legal-action-stabil umgesetzt werden. Der importierte Text lautet: "Rez a piece of ice, at no cost. Put X Kludge counters on that piece of ice; X cannot be 0. At the start of each of your turns, remove a Kludge counter. Trash that piece of ice when the last Kludge counter is removed from it."
 

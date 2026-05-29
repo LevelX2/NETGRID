@@ -131,6 +131,11 @@ export type GameCardImplementationRuntimeDepsHost = {
     revealHiddenRunnerResource?: CardImplementationRuntimeDependencies["revealHiddenRunnerResource"];
     addCurrentRunAccessCount?: CardImplementationRuntimeDependencies["addCurrentRunAccessCount"];
     passCurrentEncounteredIce?: CardImplementationRuntimeDependencies["passCurrentEncounteredIce"];
+    rezInstalledIceWithLifecycleCounters: CardImplementationRuntimeDependencies["rezInstalledIceWithLifecycleCounters"];
+    replaceFortCardsFromHq: CardImplementationRuntimeDependencies["replaceFortCardsFromHq"];
+    trashTopCorpRdCards: CardImplementationRuntimeDependencies["trashTopCorpRdCards"];
+    rezCostForCard: CardImplementationRuntimeDependencies["rezCostForCard"];
+    startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: CardImplementationRuntimeDependencies["startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice"];
     startOpenEndedMileageProgramReturnChoice: (
       state: RuntimeState,
       sourceCardId: CardInstanceId,
@@ -165,6 +170,48 @@ export function createGameCardImplementationRuntimeDeps(
       host.install.runtimeDepsHost,
     ),
     corpHqCardCount: (state) => state.corp.hq.length,
+    runnerRunAttemptsLastTurn: (state) =>
+      Math.max(0, Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0)),
+    runnerRunAttemptsThisGame: (state) =>
+      Math.max(0, Math.floor(state.runnerTurnFlags?.runAttemptsThisGame ?? 0)),
+    runnerTrashedNodeLastTurn: (state) =>
+      state.runnerTurnFlags?.trashedNodeLastTurn === true,
+    runnerTrashedAdvertisementThisTurn: (state) =>
+      state.runnerTurnFlags?.trashedAdvertisementThisTurn === true,
+    runnerTrashedTransactionsThisTurn: (state) =>
+      state.runnerTurnFlags?.trashedTransactionsThisTurn === true,
+    runnerInstalledResourceLastTurn: (state) =>
+      (state.runnerTurnFlags?.installedResourceIdsLastTurn ?? []).some((cardId) =>
+        state.runner.rig.resources.includes(cardId),
+      ),
+    runnerWasDamagedDuringLastThreeActions: (state) => {
+      const current = Math.max(
+        0,
+        Math.floor(state.runnerTurnFlags?.runnerActionsTakenThisTurn ?? 0),
+      );
+      const lastDamage = Math.max(
+        0,
+        Math.floor(state.runnerTurnFlags?.lastDamageRunnerActionOrdinal ?? 0),
+      );
+      return lastDamage > 0 && current - lastDamage <= 3;
+    },
+    runnerMadeSuccessfulRunOnServerThisTurn: (state, server) => {
+      if (server === "hq")
+        return state.runnerTurnFlags?.successfulHqRunThisTurn === true;
+      if (server === "rd")
+        return state.runnerTurnFlags?.successfulRdRunThisTurn === true;
+      return state.runnerTurnFlags?.successfulRunThisTurn === true;
+    },
+    runnerLiberatedAgendaSubtypeThisTurn: (state, subtype) => {
+      if (subtype === "research")
+        return state.runnerTurnFlags?.stoleResearchAgendaThisTurn === true;
+      if (subtype === "gray_ops")
+        return state.runnerTurnFlags?.stoleGrayOpsAgendaThisTurn === true;
+      return state.runnerTurnFlags?.stoleBlackOpsAgendaThisTurn === true;
+    },
+    corpScoredAgendaSubtypeLastTurn: (state, subtype) =>
+      subtype === "black_ops" &&
+      state.corpTurnFlags?.scoredBlackOpsAgendaLastTurn === true,
     startCorpDiscardHqWithRetainPayment:
       host.hiddenZone.startCorpDiscardHqWithRetainPayment,
     shuffleSourceIntoCorpRd: host.callbacks.shuffleSourceIntoCorpRd,
@@ -218,6 +265,13 @@ export function createGameCardImplementationRuntimeDeps(
         subtypeRequired,
       );
     },
+    rezInstalledIceWithLifecycleCounters:
+      host.callbacks.rezInstalledIceWithLifecycleCounters,
+    replaceFortCardsFromHq: host.callbacks.replaceFortCardsFromHq,
+    trashTopCorpRdCards: host.callbacks.trashTopCorpRdCards,
+    rezCostForCard: host.callbacks.rezCostForCard,
+    startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice:
+      host.callbacks.startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice,
     addCurrentEncounterAdditionalSubroutine: (
       state,
       legalAction,
@@ -349,6 +403,23 @@ function startRunForCardImplementation(
             },
           }
         : {}),
+      ...(options.badPublicityRunAftermath !== undefined
+        ? {
+            badPublicityRunAftermath: {
+              kind: options.badPublicityRunAftermath,
+              sourceCardId:
+                sourceCardId ?? ("card_implementation" as CardInstanceId),
+              sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
+              sourceTitle:
+                sourceCardId && sourceDefinitionId
+                  ? host.cards.definitionFor(state, sourceCardId).title
+                  : "Card Implementation",
+            },
+          }
+        : {}),
+      ...(options.pirateBroadcast
+        ? { pirateBroadcast: options.pirateBroadcast }
+        : {}),
       ...(options.runTraceLinkBonus !== undefined && sourceDefinitionId
         ? {
             runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,
@@ -410,6 +481,13 @@ function startRunForCardImplementation(
       : {}),
     ...(options.damagePreventionPool !== undefined
       ? { damagePreventionPool: options.damagePreventionPool }
+      : {}),
+    ...(options.pirateBroadcast
+      ? {
+          pirateBroadcastSequenceActive: true,
+          pirateBroadcastPendingServerCount:
+            options.pirateBroadcast.pendingServerIds.length,
+        }
       : {}),
   };
   return { publicPayload: legalAction.payload ?? {} };

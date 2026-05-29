@@ -9,6 +9,7 @@ import {
 } from "@netgrid/shared";
 import {
   additionalSubroutinesForIce,
+  copiedRunSubroutinesForIceAfterOriginal,
   currentEncounterAdditionalSubroutinesForIce,
   dynamicSubroutineAttributionFor,
 } from "../../ability-engine/additional-subroutine-modifiers";
@@ -29,7 +30,10 @@ export function visibleEffectiveIceRunQuote(
     definition.subroutines ??
     [];
   const subroutines = [
-    ...printedSubroutines,
+    ...printedSubroutines.flatMap((subroutine) => [
+      subroutine,
+      ...copiedRunSubroutinesForIceAfterOriginal(state, iceId, subroutine.id),
+    ]),
     ...runDurationAdditionalSubroutinesForIce(state, iceId),
     ...currentEncounterAdditionalSubroutinesForIce(state, iceId),
     ...additionalSubroutinesForIce(state, iceId),

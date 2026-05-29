@@ -47,6 +47,7 @@ export type CorpMainActionGenerationHost = {
   };
   corp: {
     corpActionDebtPending: HostFn<number>;
+    filterActionsForRestrictedExtraActions?: HostFn<LegalAction[]>;
     acmeSavingsAndLoanObligationCount: HostFn<number>;
     canPlayCorpOperation: HostFn<boolean>;
     cardImplementationOperationLegalActions: HostFn<LegalAction[]>;
@@ -67,6 +68,7 @@ export type CorpMainActionGenerationHost = {
     corpNewDataFortCreationLocked: HostFn<boolean>;
     corpIceInstallTotalCost: HostFn<any>;
     canInstallCorpRootCardInServer: HostFn<boolean>;
+    canInstallCorpRootCardInNewRemote: HostFn<boolean>;
     isRegionUpgrade: HostFn<boolean>;
     corpRegionUpgradeIdsInServer: HostFn<string[]>;
     corpRootAgendaOrNodeCapacityInServer: HostFn<number>;
@@ -156,6 +158,10 @@ export function buildCorpMainActions(
     host.counters.purgeableRunnerVirusCounterTotal;
   const spyCountersForServer = host.counters.spyCountersForServer;
   const corpActionDebtPending = host.corp.corpActionDebtPending;
+  const filterActionsForRestrictedExtraActions =
+    host.corp.filterActionsForRestrictedExtraActions ??
+    ((_state: GameState, _side: "corp", candidateActions: LegalAction[]) =>
+      candidateActions);
   const acmeSavingsAndLoanObligationCount =
     host.corp.acmeSavingsAndLoanObligationCount;
   const canPlayCorpOperation = host.corp.canPlayCorpOperation;
@@ -226,6 +232,41 @@ export function buildCorpMainActions(
     host.constants.SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID;
 
   const actions: LegalAction[] = [];
+  if (state.actionEconomy?.pendingOffer?.side === "corp") {
+    const offer = state.actionEconomy.pendingOffer;
+    return [
+      action(
+        state,
+        "corp",
+        "trigger_ability",
+        "Zusätzliche Aktion annehmen",
+        offer.sourceCardInstanceId,
+        [],
+        {
+          actionEconomyAbility: "accept_extra_action_offer",
+          cardId: offer.sourceCardInstanceId,
+          sourceDefinitionId: offer.sourceDefinitionId,
+          restrictedActionFamily: offer.restriction,
+          ...(offer.dieRoll ? { dieRoll: offer.dieRoll } : {}),
+        },
+      ),
+      action(
+        state,
+        "corp",
+        "trigger_ability",
+        "Zusätzliche Aktion ablehnen",
+        offer.sourceCardInstanceId,
+        [],
+        {
+          actionEconomyAbility: "decline_extra_action_offer",
+          cardId: offer.sourceCardInstanceId,
+          sourceDefinitionId: offer.sourceDefinitionId,
+          restrictedActionFamily: offer.restriction,
+          ...(offer.dieRoll ? { dieRoll: offer.dieRoll } : {}),
+        },
+      ),
+    ];
+  }
   for (const server of state.corp.servers) {
     for (const id of server.root) {
       const definition = definitionFor(state, id);
@@ -487,7 +528,11 @@ export function buildCorpMainActions(
       const regionInstallCost = rootRezOnInstall
         ? rezCostForCard(state, id)
         : 0;
-      if (state.corp.credits >= regionInstallCost && !newDataFortCreationLocked) {
+      if (
+        state.corp.credits >= regionInstallCost &&
+        !newDataFortCreationLocked &&
+        host.install.canInstallCorpRootCardInNewRemote(definition)
+      ) {
         actions.push(
           buildCorpNewRemoteRootInstallAction(state, id, regionInstallCost),
         );
@@ -847,7 +892,10 @@ export function buildCorpMainActions(
   actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(buildCorpEndTurnAction(state));
   if (edgerunnerTempsInstallActionsRemaining(state) > 0) {
-    return actions
+    return filterActionsForRestrictedExtraActions(
+      state,
+      "corp",
+      actions
       .filter(
         (candidate) =>
           candidate.type === "install_card" || candidate.type === "end_turn",
@@ -871,7 +919,8 @@ export function buildCorpMainActions(
               ),
             }
           : candidate,
-      );
+      ),
+    );
   }
-  return actions;
+  return filterActionsForRestrictedExtraActions(state, "corp", actions);
 }

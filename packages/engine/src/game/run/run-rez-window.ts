@@ -70,6 +70,9 @@ export type RunRezWindowHost = {
     selectedChoiceIds: (selectedChoices: PlayerAction["selectedChoices"]) => string[];
   };
   callbacks: {
+    canReplaceFortCardsFromHq: (
+      serverId: Exclude<ServerId, "new_remote">,
+    ) => boolean;
     continueAfterRootRez: (legalAction?: LegalAction) => void;
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
     trashCorpInstalledCardToArchives: (
@@ -184,6 +187,7 @@ export function buildCorpRunRootRezActions(
     if (definition.type !== "asset" && definition.type !== "upgrade") continue;
     const rezCost = rezCostForCard(host.state, cardId);
     if (host.state.corp.credits < rezCost) continue;
+    if (!rootRezLifecycleIsSolvable(host, cardId, definition, server)) continue;
     const rezCostReductionSourceDefinitionIds =
       rezCostReductionSourceDefinitionIdsFor(host.state, cardId, definition);
     actions.push(
@@ -214,6 +218,23 @@ export function buildCorpRunRootRezActions(
   actions.push(...buildSingaporeCityGridRunActions(host.fortPass, run, server));
   actions.push(...buildStartRunIceRepositionActions(host.fortPass, run, server));
   return actions;
+}
+
+function rootRezLifecycleIsSolvable(
+  host: RunRezWindowHost,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  server: CorpServer,
+): boolean {
+  const lifecycle = cardImplementationForDefinitionId(definition.id)?.lifecycle?.on_rez;
+  if (
+    !lifecycle?.some((effect) => effect.kind === "replace_source_fort_cards_from_hq")
+  )
+    return true;
+  const run = host.state.run;
+  if (!run || run.attackedServerId !== server.id || run.position.kind !== "server")
+    return false;
+  return host.callbacks.canReplaceFortCardsFromHq(server.id);
 }
 
 export function buildCorpRunRootRezWindowActions(

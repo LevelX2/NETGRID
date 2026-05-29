@@ -7,6 +7,7 @@ import type { CardImplementationRuntimeDependencies } from "../../ability-engine
 import {
   createDamageImminentEvent,
   doDamage,
+  openDamageResolutionWindow,
   openEventModificationWindow,
   openReplacementWindow,
   resolveDamageImminentEvent,
@@ -61,6 +62,11 @@ export type DamageRuntimeDepsHost = {
       event: ImminentEvent,
       legalAction: RuntimeLegalAction,
     ) => boolean;
+    openDamageResolutionWindow: (
+      state: RuntimeState,
+      event: ImminentEvent,
+      legalAction: RuntimeLegalAction,
+    ) => boolean;
     resolveDamageImminentEvent: (
       state: RuntimeState,
       event: ImminentEvent,
@@ -77,6 +83,7 @@ const defaultDamageRuntimeDepsHost: DamageRuntimeDepsHost = {
     createDamageImminentEvent,
     openReplacementWindow,
     openEventModificationWindow,
+    openDamageResolutionWindow,
     resolveDamageImminentEvent,
     resolveUnpreventableDamage: (state, request) => doDamage(state, request),
   },
@@ -85,6 +92,13 @@ const defaultDamageRuntimeDepsHost: DamageRuntimeDepsHost = {
 export function createDamageCardImplementationRuntimeDeps(
   host: DamageRuntimeDepsHost = defaultDamageRuntimeDepsHost,
 ): DamageCardImplementationRuntimeDeps {
+  host = {
+    damage: {
+      ...defaultDamageRuntimeDepsHost.damage,
+      ...(host.damage ?? {}),
+    },
+  };
+
   function damageRunner(
     state: RuntimeState,
     legalAction: RuntimeLegalAction,
@@ -102,8 +116,7 @@ export function createDamageCardImplementationRuntimeDeps(
     };
     const event = host.damage.createDamageImminentEvent(state, request);
     if (
-      host.damage.openReplacementWindow(state, event, legalAction) ||
-      host.damage.openEventModificationWindow(state, event, legalAction)
+      host.damage.openDamageResolutionWindow(state, event, legalAction)
     ) {
       return {
         resolved: false,

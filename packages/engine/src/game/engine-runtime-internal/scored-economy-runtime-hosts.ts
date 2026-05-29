@@ -215,6 +215,7 @@ import {
   doDamage,
   hiddenRunnerResourceRevealPayload,
   isRunnerHardwareDeckDefinition,
+  openDamageResolutionWindow,
   openEventModificationWindow,
   openReplacementWindow,
   openRunnerInstalledTrashPreventionWindow,
@@ -945,6 +946,32 @@ export function createScoredEconomyRuntimeHosts(deps: RuntimeDeps, runtime: Reco
       },
       credits: {
         gainCorpCredits: (amount) => credits(state, "corp", amount),
+      },
+      damage: {
+        dealRunnerMeatDamage: (sourceCardId, amount) => {
+          const definition = definitionFor(state, sourceCardId);
+          if (!legalAction) throw new Error("Damage-Aktion fehlt.");
+          const event = createDamageImminentEvent(state, {
+            damageId: `corp.scored_agenda.${definition.id}.meat.${state.stateVersion}`,
+            damageType: "meat",
+            amount,
+            source: `scored_agenda:${definition.id}`,
+          });
+          if (openDamageResolutionWindow(state, event, legalAction)) {
+            return {
+              damageAmount: amount,
+              cardsTrashed: 0,
+              flatline: false,
+            };
+          }
+          const summary = resolveDamageImminentEvent(state, event);
+          setDamagePayload(legalAction, summary);
+          return {
+            damageAmount: summary.amount,
+            cardsTrashed: summary.cardsTrashed,
+            flatline: summary.flatline,
+          };
+        },
       },
       actionProfiles: {
         scoredAgendaCounterCreditProfileForDefinition: (definitionId) =>

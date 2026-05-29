@@ -27,6 +27,9 @@ export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
+  targetCardId?: CardInstanceId;
+  xValue?: number;
+  targetRezCost?: number;
   controller: Side;
   reason?: string;
   drawCards?: (
@@ -113,6 +116,7 @@ export type CardEffectExecutionContext = {
   startExposeInstalledCards?: (
     min: number,
     max: number,
+    scope?: "any_installed" | "single_data_fort",
   ) => CardEffectHiddenInfoResult;
   exposeOutermostIceEachFort?: () => CardEffectHiddenInfoResult;
   startShowHqAgendasForCredits?: (
@@ -170,6 +174,7 @@ export type CardEffectExecutionContext = {
   startPayRezCostToTrashRezzedIceChoice?: () => CardEffectHiddenInfoResult;
   startTrashUnrezzedIceChoice?: () => CardEffectHiddenInfoResult;
   startCorpChoiceRezOrTrashIceChoice?: () => CardEffectHiddenInfoResult;
+  startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice?: () => CardEffectHiddenInfoResult;
   startDistributeAdvancementCounters?: (
     amount: number,
     distribution:
@@ -185,6 +190,7 @@ export type CardEffectExecutionContext = {
     subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
     amount?: number;
   }) => CardEffectHiddenInfoResult;
+  copySameFortIceSubroutineForRun?: () => CardEffectHiddenInfoResult;
   addCurrentRunAccessCount?: (
     server: Extract<ServerId, "hq" | "rd">,
     amount: number,
@@ -192,6 +198,14 @@ export type CardEffectExecutionContext = {
   passCurrentEncounteredIce?: (
     subtypeRequired?: "ap",
   ) => CardEffectHiddenInfoResult;
+  rezInstalledIceWithLifecycleCounters?: (input: {
+    counterType: Extract<CounterType, "kludge" | "term">;
+    amount: number;
+    lifecycle:
+      | "remove_one_counter_start_corp_turn_trash_on_last"
+      | "rent_to_own_start_corp_turn";
+  }) => CardEffectHiddenInfoResult;
+  replaceFortCardsFromHq?: () => CardEffectHiddenInfoResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -263,7 +277,8 @@ export type CardEffectMakeRunOptions = {
     | "runner_spend_corp_lose_credits"
     | "private_look_top_rd"
     | "archives_faceup_to_rd"
-    | "trash_rezzed_ice_on_fort_and_tag_runner";
+    | "trash_rezzed_ice_on_fort_and_tag_runner"
+    | "runner_gain_agenda_point";
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunRunnerCreditGain?: number;
@@ -284,6 +299,8 @@ export type CardEffectMakeRunOptions = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
+  badPublicityRunAftermath?: "live_news_feed" | "subliminal_corruption";
+  pirateBroadcast?: NonNullable<GameState["runnerTurnFlags"]>["pirateBroadcastPending"];
 };
 
 export type CardEffectMakeRunResult = {
@@ -302,6 +319,21 @@ export type CardEffectAdvancementChoiceResult = {
   publicPayload?: Record<string, string | number | boolean>;
 };
 
+function dataFortServerIds(
+  state: GameState,
+): Exclude<ServerId, "new_remote">[] {
+  return state.corp.servers
+    .map((server) => server.id)
+    .sort((a, b) => dataFortOrder(a).localeCompare(dataFortOrder(b)));
+}
+
+function dataFortOrder(serverId: Exclude<ServerId, "new_remote">): string {
+  if (serverId === "hq") return "0:hq";
+  if (serverId === "rd") return "1:rd";
+  if (serverId === "archives") return "2:archives";
+  return `3:${serverId}`;
+}
+
 function recipientSide(
   context: CardEffectExecutionContext,
   recipient: "controller" | "runner" | "corp",
@@ -310,8 +342,19 @@ function recipientSide(
 }
 
 function gainCredits(state: GameState, side: Side, amount: number): void {
-  if (side === "corp") state.corp.credits += amount;
-  else state.runner.credits += amount;
+  if (side === "corp") {
+    const debt = state.actionEconomy?.corpCreditForfeitDebt;
+    const forfeited = Math.min(
+      amount,
+      Math.max(0, Math.floor(debt?.remaining ?? 0)),
+    );
+    if (debt) {
+      debt.remaining = Math.max(0, Math.floor(debt.remaining) - forfeited);
+      if (debt.remaining <= 0 && state.actionEconomy)
+        delete state.actionEconomy.corpCreditForfeitDebt;
+    }
+    state.corp.credits += amount - forfeited;
+  } else state.runner.credits += amount;
 }
 
 function creditsForSide(state: GameState, side: Side): number {
@@ -528,6 +571,49 @@ export function executeCardImplementationEffects(
         });
         return;
       }
+      case "add_bad_publicity_from_frame_up_history": {
+        assertPositiveIntegerAmount(
+          "add_bad_publicity_from_frame_up_history",
+          effect.baseAmount,
+        );
+        assertPositiveIntegerAmount(
+          "add_bad_publicity_from_frame_up_history",
+          effect.additionalAmount,
+        );
+        assertPublicVisibility(
+          "add_bad_publicity_from_frame_up_history",
+          effect.visibility,
+        );
+        const additional =
+          state.runnerTurnFlags
+            ?.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn ===
+          true
+            ? effect.additionalAmount
+            : 0;
+        const amount = effect.baseAmount + additional;
+        const before = state.corp.badPublicity;
+        state.corp.badPublicity += amount;
+        publicPayload.badPublicityAdded =
+          Number(publicPayload.badPublicityAdded ?? 0) + amount;
+        publicPayload.frameUpBaseBadPublicity = effect.baseAmount;
+        publicPayload.frameUpAdditionalBadPublicity = additional;
+        if (typeof publicPayload.corpBadPublicityBefore !== "number")
+          publicPayload.corpBadPublicityBefore = before;
+        publicPayload.corpBadPublicityAfter = state.corp.badPublicity;
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "add_bad_publicity"),
+          kind: "add_bad_publicity",
+          visibility: effect.visibility,
+          side: "corp",
+          amount,
+          reason: effectReason(context),
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
       case "gain_credits_per_advancement_counter_on_source": {
         assertPositiveIntegerAmount(
           "gain_credits_per_advancement_counter_on_source",
@@ -725,6 +811,64 @@ export function executeCardImplementationEffects(
             : {}),
         });
         mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
+      case "copy_same_fort_ice_subroutine_for_run": {
+        assertPublicVisibility(
+          "copy_same_fort_ice_subroutine_for_run",
+          effect.visibility,
+        );
+        if (
+          effect.target !== "chosen_same_fort_ice_subroutine" ||
+          effect.append !== "immediately_after_original" ||
+          effect.cleanup !== "run_end"
+        )
+          throw new Error("copy_same_fort_ice_subroutine_for_run profile is invalid.");
+        if (!context.copySameFortIceSubroutineForRun)
+          throw new Error(
+            "copy_same_fort_ice_subroutine_for_run requires a target context.",
+          );
+        mergePublicPayload(
+          publicPayload,
+          context.copySameFortIceSubroutineForRun().publicPayload,
+        );
+        return;
+      }
+      case "free_rez_installed_ice_with_counters": {
+        assertPublicVisibility("free_rez_installed_ice_with_counters", effect.visibility);
+        if (effect.target !== "chosen_installed_ice")
+          throw new Error("free_rez_installed_ice_with_counters target is invalid.");
+        if (!context.rezInstalledIceWithLifecycleCounters)
+          throw new Error(
+            "free_rez_installed_ice_with_counters requires a target context.",
+          );
+        const amount =
+          effect.amount.kind === "bounded_x_by_rez_cost_min_one"
+            ? Math.max(0, Math.floor(Number(context.xValue ?? 0)))
+            : Math.max(0, Math.floor(Number(context.targetRezCost ?? 0)));
+        mergePublicPayload(
+          publicPayload,
+          context.rezInstalledIceWithLifecycleCounters({
+            counterType: effect.counterType,
+            amount,
+            lifecycle: effect.lifecycle,
+          }).publicPayload,
+        );
+        return;
+      }
+      case "replace_source_fort_cards_from_hq": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error("replace_source_fort_cards_from_hq visibility is invalid.");
+        if (effect.include !== "root_and_ice" || effect.installCost !== "free")
+          throw new Error("replace_source_fort_cards_from_hq profile is invalid.");
+        if (!context.replaceFortCardsFromHq)
+          throw new Error(
+            "replace_source_fort_cards_from_hq requires a source-fort context.",
+          );
+        mergePublicPayload(
+          publicPayload,
+          context.replaceFortCardsFromHq().publicPayload,
+        );
         return;
       }
       case "remove_tags": {
@@ -1167,6 +1311,9 @@ export function executeCardImplementationEffects(
           ...(effect.damagePreventionPool !== undefined
             ? { damagePreventionPool: effect.damagePreventionPool }
             : {}),
+          ...(effect.badPublicityRunAftermath !== undefined
+            ? { badPublicityRunAftermath: effect.badPublicityRunAftermath }
+            : {}),
         });
         mergePublicPayload(publicPayload, runResult.publicPayload);
         return;
@@ -1181,6 +1328,56 @@ export function executeCardImplementationEffects(
         mergePublicPayload(publicPayload, {
           prearrangedDropPending: true,
           prearrangedDropCreditGain: effect.amount,
+        });
+        return;
+      }
+      case "mark_next_agenda_access_agenda_point": {
+        assertPublicVisibility("mark_next_agenda_access_agenda_point", effect.visibility);
+        state.runnerTurnFlags ??= {
+          stoleAgendaThisTurn: false,
+          stoleAgendaLastTurn: false,
+        };
+        state.runnerTurnFlags.promisesPromisesNextAgendaAccess = true;
+        if (context.sourceDefinitionId)
+          state.runnerTurnFlags.promisesPromisesSourceDefinitionId =
+            context.sourceDefinitionId;
+        if (context.sourceTitle)
+          state.runnerTurnFlags.promisesPromisesSourceTitle = context.sourceTitle;
+        mergePublicPayload(publicPayload, {
+          promisesPromisesPending: true,
+          agendaPointBonus: effect.amount,
+        });
+        return;
+      }
+      case "make_run_each_data_fort_sequence": {
+        assertPublicVisibility("make_run_each_data_fort_sequence", effect.visibility);
+        if (!context.startRun)
+          throw new Error("make_run_each_data_fort_sequence requires a startRun context.");
+        const serverIds = dataFortServerIds(state);
+        if (serverIds.length === 0) {
+          mergePublicPayload(publicPayload, { pirateBroadcastNoDataForts: true });
+          return;
+        }
+        const [firstServerId, ...pendingServerIds] = serverIds;
+        const flags = (state.runnerTurnFlags ??= {
+          stoleAgendaThisTurn: false,
+          stoleAgendaLastTurn: false,
+        });
+        const sequence = {
+          sourceCardId: context.sourceCardId,
+          sourceDefinitionId: context.sourceDefinitionId ?? "card_implementation",
+          sourceTitle: context.sourceTitle ?? "Pirate Broadcast",
+          pendingServerIds,
+          successfulServerIds: [],
+        };
+        flags.pirateBroadcastPending = sequence;
+        const runResult = context.startRun(firstServerId!, {
+          pirateBroadcast: sequence,
+        });
+        mergePublicPayload(publicPayload, runResult.publicPayload);
+        mergePublicPayload(publicPayload, {
+          pirateBroadcastSequenceStarted: true,
+          pirateBroadcastServerCount: serverIds.length,
         });
         return;
       }
@@ -1222,6 +1419,22 @@ export function executeCardImplementationEffects(
         if (!context.startCorpChoiceRezOrTrashIceChoice)
           throw new Error("corp_choice_rez_or_trash_ice requires a choice context.");
         const result = context.startCorpChoiceRezOrTrashIceChoice();
+        mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
+      case "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity": {
+        assertPublicVisibility(
+          "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity",
+          effect.visibility,
+        );
+        if (effect.badPublicity !== 2)
+          throw new Error("Senatorial Field Trip Bad-Publicity amount is invalid.");
+        if (!context.startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice)
+          throw new Error(
+            "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity requires a choice context.",
+          );
+        const result =
+          context.startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice();
         mergePublicPayload(publicPayload, result.publicPayload);
         return;
       }
@@ -1284,6 +1497,7 @@ export function executeCardImplementationEffects(
         const exposeResult = context.startExposeInstalledCards(
           effect.min,
           effect.max,
+          effect.scope,
         );
         mergePublicPayload(publicPayload, exposeResult.publicPayload);
         return;
@@ -1668,6 +1882,196 @@ export function executeCardImplementationEffects(
           effect.maxAmount,
         );
         mergePublicPayload(publicPayload, choiceResult.publicPayload);
+        return;
+      }
+      case "gain_temporary_corp_credits": {
+        assertPositiveIntegerAmount("gain_temporary_corp_credits", effect.amount);
+        assertPublicVisibility("gain_temporary_corp_credits", effect.visibility);
+        if (effect.recipient !== "corp" || effect.usableFor !== "install_or_rez")
+          throw new Error("gain_temporary_corp_credits profile is invalid.");
+        if (!context.sourceDefinitionId)
+          throw new Error("Temporary Corp Credits brauchen eine Quellenkarte.");
+        state.corp.credits += effect.amount;
+        state.corpTemporaryInstallRezCredits = {
+          sourceCardInstanceId: context.sourceCardId,
+          sourceDefinitionId: context.sourceDefinitionId,
+          remaining:
+            Math.max(
+              0,
+              Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
+            ) + effect.amount,
+          usableFor: "corp_install_or_rez",
+          returnUnusedAtTurnEnd: true,
+        };
+        mergePublicPayload(publicPayload, {
+          temporaryCreditsProvided: effect.amount,
+          temporaryCreditsRemaining:
+            state.corpTemporaryInstallRezCredits.remaining,
+          corpCreditsAfter: state.corp.credits,
+        });
+        return;
+      }
+      case "gain_temporary_corp_run_credits": {
+        assertPositiveIntegerAmount(
+          "gain_temporary_corp_run_credits",
+          effect.amount,
+        );
+        assertPublicVisibility(
+          "gain_temporary_corp_run_credits",
+          effect.visibility,
+        );
+        if (
+          effect.recipient !== "corp" ||
+          effect.usableFor !== "corp_costs_during_this_run" ||
+          effect.cleanup !== "run_end"
+        )
+          throw new Error("gain_temporary_corp_run_credits profile is invalid.");
+        if (!state.run)
+          throw new Error("Run-Credits brauchen einen laufenden Run.");
+        if (!context.sourceDefinitionId)
+          throw new Error("Run-Credits brauchen eine Quellenkarte.");
+        state.corp.credits += effect.amount;
+        state.run.corpRunTemporaryCredits = {
+          sourceCardInstanceId: context.sourceCardId,
+          sourceDefinitionId: context.sourceDefinitionId,
+          remaining:
+            Math.max(
+              0,
+              Math.floor(state.run.corpRunTemporaryCredits?.remaining ?? 0),
+            ) + effect.amount,
+          usableFor: "corp_costs_during_this_run",
+          returnUnusedAtRunEnd: true,
+        };
+        mergePublicPayload(publicPayload, {
+          temporaryRunCredits: effect.amount,
+          temporaryRunCreditsRemaining:
+            state.run.corpRunTemporaryCredits.remaining,
+          corpCreditsAfter: state.corp.credits,
+        });
+        return;
+      }
+      case "gain_temporary_trace_credits": {
+        assertPositiveIntegerAmount("gain_temporary_trace_credits", effect.amount);
+        assertPublicVisibility("gain_temporary_trace_credits", effect.visibility);
+        if (!state.trace)
+          throw new Error("Temporary Trace Credits brauchen einen laufenden Trace.");
+        if (effect.recipient !== "corp" || effect.usableFor !== "current_trace")
+          throw new Error("gain_temporary_trace_credits profile is invalid.");
+        if (!context.sourceDefinitionId)
+          throw new Error("Temporary Trace Credits brauchen eine Quellenkarte.");
+        state.trace.corpTemporaryTraceCredits = {
+          sourceCardInstanceId: context.sourceCardId,
+          sourceDefinitionId: context.sourceDefinitionId,
+          remaining:
+            Math.max(
+              0,
+              Math.floor(state.trace.corpTemporaryTraceCredits?.remaining ?? 0),
+            ) + effect.amount,
+          returnUnusedAtTraceEnd: true,
+        };
+        if (state.pendingChoice?.source === `trace:${state.trace.traceId}`)
+          state.pendingChoice = {
+            ...state.pendingChoice,
+            stateVersion: state.stateVersion + 1,
+          };
+        mergePublicPayload(publicPayload, {
+          temporaryTraceCredits: effect.amount,
+          temporaryTraceCreditsAvailable:
+            state.trace.corpTemporaryTraceCredits.remaining,
+          temporaryTraceCreditsSourceDefinitionId:
+            state.trace.corpTemporaryTraceCredits.sourceDefinitionId,
+        });
+        return;
+      }
+      case "remove_same_fort_advancement_counters_for_run_credits": {
+        assertPublicVisibility(
+          "remove_same_fort_advancement_counters_for_run_credits",
+          effect.visibility,
+        );
+        assertPositiveIntegerAmount(
+          "remove_same_fort_advancement_counters_for_run_credits",
+          effect.creditsPerCounter,
+        );
+        if (!state.run)
+          throw new Error("Run-Credits brauchen einen laufenden Run.");
+        const source = state.cardInstances[context.sourceCardId];
+        const serverId =
+          source?.zone.side === "corp" && source.zone.zone === "serverRoot"
+            ? source.zone.serverId
+            : undefined;
+        if (!serverId)
+          throw new Error("Die Quelle ist nicht in einem Fort installiert.");
+        const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+        if (!server) throw new Error("Das Quellen-Fort existiert nicht mehr.");
+        let removed = 0;
+        for (const cardId of [...server.root, ...server.ice].sort()) {
+          const instance = state.cardInstances[cardId];
+          if (!instance) continue;
+          const amount = Math.max(0, Math.floor(instance.advancementCounters ?? 0));
+          if (amount <= 0) continue;
+          instance.advancementCounters = 0;
+          removed += amount;
+        }
+        if (removed <= 0)
+          throw new Error("In diesem Fort liegen keine Advancement-Counter.");
+        const gained = removed * effect.creditsPerCounter;
+        if (!context.sourceDefinitionId)
+          throw new Error("Run-Credits brauchen eine Quellenkarte.");
+        state.corp.credits += gained;
+        state.run.corpRunTemporaryCredits = {
+          sourceCardInstanceId: context.sourceCardId,
+          sourceDefinitionId: context.sourceDefinitionId,
+          remaining:
+            Math.max(0, Math.floor(state.run.corpRunTemporaryCredits?.remaining ?? 0)) +
+            gained,
+          usableFor: "corp_costs_during_this_run",
+          returnUnusedAtRunEnd: true,
+        };
+        mergePublicPayload(publicPayload, {
+          advancementCounterCount: removed,
+          temporaryRunCredits: gained,
+          temporaryRunCreditsRemaining:
+            state.run.corpRunTemporaryCredits.remaining,
+          corpCreditsAfter: state.corp.credits,
+          serverId,
+        });
+        return;
+      }
+      case "trash_own_rezzed_ice_for_credits": {
+        assertPublicVisibility("trash_own_rezzed_ice_for_credits", effect.visibility);
+        assertPositiveIntegerAmount("trash_own_rezzed_ice_for_credits", effect.gainCredits);
+        const targetCardId = context.targetCardId;
+        const instance = targetCardId ? state.cardInstances[targetCardId] : undefined;
+        if (
+          !targetCardId ||
+          !instance ||
+          instance.controller !== "corp" ||
+          instance.zone.side !== "corp" ||
+          instance.zone.zone !== "serverIce" ||
+          instance.rezzed !== true
+        )
+          throw new Error("Das Ziel ist kein eigenes gerezztes ICE.");
+        const serverId = instance.zone.serverId;
+        const server = state.corp.servers.find(
+          (candidate) => candidate.id === serverId,
+        );
+        if (!server) throw new Error("Das Ziel-Fort existiert nicht mehr.");
+        server.ice = server.ice.filter((id) => id !== targetCardId);
+        state.corp.archives.push(targetCardId);
+        state.cardInstances[targetCardId] = {
+          ...instance,
+          zone: { side: "corp", zone: "archives" },
+          faceup: true,
+          rezzed: true,
+        };
+        state.corp.credits += effect.gainCredits;
+        mergePublicPayload(publicPayload, {
+          targetCardDefinitionId: instance.definitionId,
+          trashedIceCount: 1,
+          gainedCredits: effect.gainCredits,
+          corpCreditsAfter: state.corp.credits,
+          serverId,
+        });
         return;
       }
       case "add_hosted_credits": {

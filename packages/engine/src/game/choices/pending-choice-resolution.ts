@@ -11,6 +11,7 @@ export type PendingChoiceResolutionHost = {
   replacement: {
     resolveReplacementChoice: HostFn<void>;
     resolveEventModificationChoice: HostFn<void>;
+    resolvePdcaDamageReplacementChoice: HostFn<void>;
   };
   trace: {
     resolveTraceChoice: HostFn<void>;
@@ -39,13 +40,18 @@ export type PendingChoiceResolutionHost = {
     resolveSecurityCodeWormChipTrashIceChoice: HostFn<void>;
     resolveV1921PlayfulAiChoice: HostFn<void>;
     resolveRunnerInstalledConnectionTrashBadPublicityChoice: HostFn<void>;
+    resolveGripInstallTemporaryCreditChoice: HostFn<void>;
+    resolveStackInstallRunCleanupChoice: HostFn<void>;
     resolveOpenEndedMileageProgramReturnChoice: HostFn<void>;
     resolveRunnerHostingChoice: HostFn<void>;
     resolveIncubatorTransformChoice: HostFn<void>;
     resolveCodeViralCachePurgeChoice: HostFn<void>;
     resolveChimeraDaemonTrashChoice: HostFn<void>;
-    resolveProteusRunnerProgramReturnChoice: HostFn<void>;
+    resolveRunnerProgramReturnChoice: HostFn<void>;
     resolveRunnerPrivateLookChoice: HostFn<void>;
+    resolveExposePreventionChoice: HostFn<void>;
+    resolveSenatorialFieldTripChoice: HostFn<void>;
+    resolveFortHqReplacementChoice?: HostFn<void>;
   };
   corp: {
     handleCorpInstallRezSequenceChoice: HostFn<{ handled: boolean }>;
@@ -74,6 +80,7 @@ export type PendingChoiceResolutionHost = {
     resolveSuccessfulRunInterventionChoiceInRunModule: HostFn<void>;
     successfulRunInterventionHost: HostFn<unknown>;
     resolvePostMeatDamageHiddenResourceChoice: HostFn<void>;
+    resolveStartOfRunFortUtilityChoice: HostFn<void>;
   };
   access: {
     resolvePriorityWreckSpendChoice: HostFn<void>;
@@ -101,6 +108,8 @@ export function resolvePendingChoice(
   const resolveReplacementChoice = host.replacement.resolveReplacementChoice;
   const resolveEventModificationChoice =
     host.replacement.resolveEventModificationChoice;
+  const resolvePdcaDamageReplacementChoice =
+    host.replacement.resolvePdcaDamageReplacementChoice;
   const resolveTraceChoice = host.trace.resolveTraceChoice;
   const handleHiddenZoneArrangeChoice =
     host.hiddenZone.handleHiddenZoneArrangeChoice;
@@ -146,6 +155,10 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveV1921PlayfulAiChoice;
   const resolveRunnerInstalledConnectionTrashBadPublicityChoice =
     host.hiddenZone.resolveRunnerInstalledConnectionTrashBadPublicityChoice;
+  const resolveGripInstallTemporaryCreditChoice =
+    host.hiddenZone.resolveGripInstallTemporaryCreditChoice;
+  const resolveStackInstallRunCleanupChoice =
+    host.hiddenZone.resolveStackInstallRunCleanupChoice;
   const resolveOpenEndedMileageProgramReturnChoice =
     host.hiddenZone.resolveOpenEndedMileageProgramReturnChoice;
   const resolveRunnerHostingChoice = host.hiddenZone.resolveRunnerHostingChoice;
@@ -155,10 +168,16 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveCodeViralCachePurgeChoice;
   const resolveChimeraDaemonTrashChoice =
     host.hiddenZone.resolveChimeraDaemonTrashChoice;
-  const resolveProteusRunnerProgramReturnChoice =
-    host.hiddenZone.resolveProteusRunnerProgramReturnChoice;
+  const resolveRunnerProgramReturnChoice =
+    host.hiddenZone.resolveRunnerProgramReturnChoice;
   const resolveRunnerPrivateLookChoice =
     host.hiddenZone.resolveRunnerPrivateLookChoice;
+  const resolveExposePreventionChoice =
+    host.hiddenZone.resolveExposePreventionChoice;
+  const resolveSenatorialFieldTripChoice =
+    host.hiddenZone.resolveSenatorialFieldTripChoice;
+  const resolveFortHqReplacementChoice =
+    host.hiddenZone.resolveFortHqReplacementChoice;
   const handleCorpInstallRezSequenceChoice =
     host.corp.handleCorpInstallRezSequenceChoice;
   const corpInstallRezSequenceHandlerHost =
@@ -197,6 +216,8 @@ export function resolvePendingChoice(
   const successfulRunInterventionHost = host.run.successfulRunInterventionHost;
   const resolvePostMeatDamageHiddenResourceChoice =
     host.run.resolvePostMeatDamageHiddenResourceChoice;
+  const resolveStartOfRunFortUtilityChoice =
+    host.run.resolveStartOfRunFortUtilityChoice;
   const resolvePriorityWreckSpendChoice =
     host.access.resolvePriorityWreckSpendChoice;
   const runAccessTransitionHost = host.access.runAccessTransitionHost;
@@ -230,12 +251,20 @@ export function resolvePendingChoice(
     resolveEventModificationChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("proteus.pdca_damage_replacement")) {
+    resolvePdcaDamageReplacementChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.trace) {
     resolveTraceChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("hidden_resource.post_meat_damage")) {
     resolvePostMeatDamageHiddenResourceChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("corp.start_of_run_redirect")) {
+    resolveStartOfRunFortUtilityChoice(state, legalAction, playerAction);
     return;
   }
   const hiddenZoneArrangeChoice = handleHiddenZoneArrangeChoice(
@@ -287,8 +316,29 @@ export function resolvePendingChoice(
     resolveHuntClubBbsExposeChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("corp.expose_prevention")) {
+    resolveExposePreventionChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.derez_last_rezzed_black_ice_or_bad_publicity",
+    )
+  ) {
+    resolveSenatorialFieldTripChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("p3_36.expose_installed_cards")) {
     resolveExposeInstalledCorpCardsChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith("proteus.pavit_bharat_replacement") ||
+    state.pendingChoice.source.startsWith("card_implementation.fort_hq_replacement")
+  ) {
+    if (!resolveFortHqReplacementChoice)
+      throw new Error("Pavit-Bharat-Choice-Resolver fehlt.");
+    resolveFortHqReplacementChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
@@ -375,6 +425,22 @@ export function resolvePendingChoice(
       legalAction,
       playerAction,
     );
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.pro018_grip_install_temporary_credits:",
+    )
+  ) {
+    resolveGripInstallTemporaryCreditChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.pro018_stack_install_run_cleanup:",
+    )
+  ) {
+    resolveStackInstallRunCleanupChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -472,7 +538,7 @@ export function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("proteus.return_runner_programs")) {
-    resolveProteusRunnerProgramReturnChoice(state, legalAction, playerAction);
+    resolveRunnerProgramReturnChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_35.access_payment")) {

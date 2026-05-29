@@ -175,7 +175,11 @@ export type CounterType =
   | "crying"
   | "ablative"
   | "trauma"
-  | "boon";
+  | "boon"
+  | "pdca"
+  | "kludge"
+  | "term"
+  | "drip";
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
@@ -290,6 +294,53 @@ export type CorpActionDebtState = {
   entries: CorpActionDebtEntry[];
 };
 
+export type RestrictedActionFamily =
+  | "corp_install"
+  | "gain_credit"
+  | "draw_card"
+  | "start_run"
+  | "play_or_install_card";
+
+export type TurnBoundExtraActionOffer = {
+  side: Side;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  restriction: RestrictedActionFamily;
+  optional: boolean;
+  dieRoll?: number;
+  randomPurpose?: string;
+  createdAtStateVersion: number;
+  createdDuringTurnSerial?: number;
+};
+
+export type TurnBoundExtraActionGrant = TurnBoundExtraActionOffer & {
+  remaining: number;
+  forced?: boolean;
+  targetServerId?: Exclude<ServerId, "new_remote">;
+  targetCardInstanceId?: CardInstanceId;
+  revealToCorpOnly?: boolean;
+};
+
+export type FutureExtraActionGrant = {
+  side: Side;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  remainingTurns: number;
+  amountPerTurn: number;
+  restriction?: RestrictedActionFamily;
+};
+
+export type ActionEconomyState = {
+  pendingOffer?: TurnBoundExtraActionOffer;
+  grants?: TurnBoundExtraActionGrant[];
+  futureGrants?: FutureExtraActionGrant[];
+  corpCreditForfeitDebt?: {
+    remaining: number;
+    sourceCardInstanceId?: CardInstanceId;
+    sourceDefinitionId?: CardDefinitionId;
+  };
+};
+
 export type RunnerVirusPurgeWindowState = {
   windowId: string;
   timingFamily: "run_special_effect" | "corp_start_of_turn_between_effects";
@@ -398,7 +449,7 @@ export type ImminentEventType =
   | "add_tag"
   | "runner_installed_trash"
   | "test_interrupt";
-export type EventModificationKind = "prevent" | "avoid" | "interrupt";
+export type EventModificationKind = "prevent" | "avoid" | "interrupt" | "increase";
 export type ReplacementEventType = ImminentEventType | "prevent_damage";
 
 export type ImminentEvent = {
@@ -432,6 +483,7 @@ export type EventModificationCandidate = {
   visibility: EventVisibilityClass;
   optional: boolean;
   preventAmount?: number;
+  increaseAmount?: number;
   preventionSourceIndex?: number;
   preventedTags?: number;
   tagPreventionSourceIndex?: number;
@@ -886,7 +938,21 @@ export type RunState = {
     | "runner_spend_corp_lose_credits"
     | "private_look_top_rd"
     | "archives_faceup_to_rd"
-    | "trash_rezzed_ice_on_fort_and_tag_runner";
+    | "trash_rezzed_ice_on_fort_and_tag_runner"
+    | "runner_gain_agenda_point";
+  badPublicityRunAftermath?:
+    | {
+        kind: "live_news_feed";
+        sourceCardId: CardInstanceId;
+        sourceDefinitionId: CardDefinitionId;
+        sourceTitle: string;
+      }
+    | {
+        kind: "subliminal_corruption";
+        sourceCardId: CardInstanceId;
+        sourceDefinitionId: CardDefinitionId;
+        sourceTitle: string;
+      };
   successfulRunSourceCardId?: CardInstanceId;
   successfulRunSourceDefinitionId?: CardDefinitionId;
   successfulRunSourceTitle?: string;
@@ -907,6 +973,11 @@ export type RunState = {
     | { kind: "server"; serverId: Exclude<ServerId, "new_remote"> };
   approachedIceId?: CardInstanceId;
   encounteredIceId?: CardInstanceId;
+  encounteredBlackIceCount?: number;
+  rezzedBlackOpsCount?: number;
+  liberatedBlackOpsAgendaCount?: number;
+  trashedBlackOpsCount?: number;
+  trashedAdvertisementCount?: number;
   approachIceExposeUsedSourceIdsThisRun?: CardInstanceId[];
   approachIceExposeSkippedIceIdsThisRun?: CardInstanceId[];
   approachIceExposeViewingIceId?: CardInstanceId;
@@ -933,6 +1004,19 @@ export type RunState = {
     remaining: number;
     returnUnusedAtRunEnd: true;
   };
+  testSpinTemporaryInstall?: {
+    cardId: CardInstanceId;
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    installCostPenalty: number;
+  };
+  corpRunTemporaryCredits?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    remaining: number;
+    usableFor: "corp_costs_during_this_run";
+    returnUnusedAtRunEnd: true;
+  };
   unpreventableCoreDamageAtRunEnd?: {
     sourceDefinitionId: CardDefinitionId;
     amount: number;
@@ -957,10 +1041,18 @@ export type RunState = {
     remaining: number;
     usableFor: "this_ice_printed_trace_subroutines";
   };
+  encounterTemporaryIceStrengthModifiers?: Array<{
+    sourceIceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    amount: number;
+    expires: "encounter_end";
+  }>;
   encounterAdditionalSubroutines?: Array<{
     sourceCardInstanceId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
     sourceTitle: string;
+    targetIceId?: CardInstanceId;
+    originalSubroutineId?: string;
     subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
     amount?: number;
   }>;
@@ -1054,6 +1146,30 @@ export type RunState = {
     limit: number;
     spent: number;
   };
+  runCreditSpendCap?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    announcedSpendCap: number;
+    spentDuringRun: number;
+  };
+  promisesPromisesAgendaPointBonus?: {
+    sourceDefinitionId: CardDefinitionId;
+    sourceTitle: string;
+    amount: 1;
+    cardId?: CardInstanceId;
+  };
+  pirateBroadcast?: {
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    sourceTitle: string;
+    pendingServerIds: Exclude<ServerId, "new_remote">[];
+    successfulServerIds: Exclude<ServerId, "new_remote">[];
+  };
+  sirenStartRunRedirect?: {
+    originalServerId: Exclude<ServerId, "new_remote">;
+    sourceCardInstanceIds: CardInstanceId[];
+    sourceDefinitionIds: CardDefinitionId[];
+  };
 };
 
 export type AccessQueueEntry = {
@@ -1125,6 +1241,12 @@ export type TraceState = {
   postBidLinkSourceIds?: CardInstanceId[];
   postBidLinkBonus?: number;
   successful?: boolean;
+  corpTemporaryTraceCredits?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    remaining: number;
+    returnUnusedAtTraceEnd: true;
+  };
 };
 
 export type RandomDrawRecord = {
@@ -1151,6 +1273,7 @@ export type GameState = {
   matchId: string;
   baseline: RulesBaseline;
   stateVersion: number;
+  turnSerial?: number;
   seed: string;
   randomCounter: number;
   randomDrawRecords: RandomDrawRecord[];
@@ -1205,6 +1328,20 @@ export type GameState = {
     serverId: Exclude<ServerId, "new_remote">;
   }>;
   acmeSavingsAndLoanObligations?: number;
+  corpTemporaryInstallRezCredits?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    remaining: number;
+    usableFor: "corp_install_or_rez";
+    returnUnusedAtTurnEnd: true;
+  };
+  exposePreventionWindow?: {
+    targetCardId: CardInstanceId;
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    scope: "inside_data_fort" | "any_installed";
+    createdAtStateVersion: number;
+  };
   corpBonusAgendaPoints?: number;
   identityAbilityUsage?: Partial<
     Record<
@@ -1229,11 +1366,23 @@ export type GameState = {
     trashedAdvertisementThisTurn?: boolean;
     trashedTransactionsThisTurn?: boolean;
     prearrangedDropPending?: boolean;
+    promisesPromisesNextAgendaAccess?: boolean;
+    promisesPromisesSourceDefinitionId?: CardDefinitionId;
+    promisesPromisesSourceTitle?: string;
+    pirateBroadcastPending?: {
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      sourceTitle: string;
+      pendingServerIds: Exclude<ServerId, "new_remote">[];
+      successfulServerIds: Exclude<ServerId, "new_remote">[];
+    };
     installedResourceIdsThisTurn?: CardInstanceId[];
     installedResourceIdsLastTurn?: CardInstanceId[];
     successfulHqRunThisTurn?: boolean;
+    successfulRdRunThisTurn?: boolean;
     successfulRunThisTurn?: boolean;
     lastSuccessfulRunServerId?: Exclude<ServerId, "new_remote">;
+    blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn?: boolean;
     damagePreventionUsage?: Record<CardInstanceId, number>;
     runnerActionsTakenThisTurn?: number;
     lastDamageRunnerActionOrdinal?: number;
@@ -1255,6 +1404,11 @@ export type GameState = {
     preyingMantisDamageDueSourceIdsThisTurn?: CardInstanceId[];
     questForCattekinPermanentActionGain?: boolean;
     corpRezzedIceThisTurn?: number;
+    lastRezzedBlackIceThisTurn?: {
+      cardId: CardInstanceId;
+      definitionId: CardDefinitionId;
+      serverId: Exclude<ServerId, "new_remote">;
+    };
     wilsonUsedSourceIdsThisTurn?: CardInstanceId[];
     wilsonRunOnlyActionsRemaining?: number;
   };
@@ -1264,6 +1418,7 @@ export type GameState = {
     edgerunnerTempsInstallActionsRemaining?: number;
     disinfectantUsedSourceIdsThisTurn?: CardInstanceId[];
     employeeEmpowermentStartTurnResolvedSourceIds?: CardInstanceId[];
+    pdcaUsedSourceIdsThisTurn?: CardInstanceId[];
   };
   ambushHarness?: {
     enabled: boolean;
@@ -1278,6 +1433,7 @@ export type GameState = {
   spyCountersByServer?: Partial<Record<Exclude<ServerId, "new_remote">, number>>;
   purgeableRunnerVirusCounters?: PurgeableRunnerVirusCounterState;
   corpActionDebt?: CorpActionDebtState;
+  actionEconomy?: ActionEconomyState;
   runnerVirusPurgeWindow?: RunnerVirusPurgeWindowState;
   runnerAgendaPointsToForfeit?: number;
   cancelledDamagePreventionSourceIdsUntilEndOfTurn?: CardInstanceId[];

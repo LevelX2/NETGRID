@@ -155,6 +155,44 @@ export function consumeRunnerFutureActionDebt(...args: any[]): any {
   )(...args);
 }
 
+export function filterActionsForRestrictedExtraActions(...args: any[]): any {
+  return (
+    runtimeDelegates.turnRuntimeResolvers
+      .filterActionsForRestrictedExtraActions as any
+  )(...args);
+}
+
+export function consumeRestrictedExtraActionForAction(...args: any[]): any {
+  return (
+    runtimeDelegates.turnRuntimeResolvers
+      .consumeRestrictedExtraActionForAction as any
+  )(...args);
+}
+
+export function acceptExtraActionOffer(...args: any[]): any {
+  return (
+    runtimeDelegates.turnRuntimeResolvers.acceptExtraActionOffer as any
+  )(...args);
+}
+
+export function declineExtraActionOffer(...args: any[]): any {
+  return (
+    runtimeDelegates.turnRuntimeResolvers.declineExtraActionOffer as any
+  )(...args);
+}
+
+export function resolvePdcaCounterAction(...args: any[]): any {
+  return (
+    runtimeDelegates.turnRuntimeResolvers.resolvePdcaCounterAction as any
+  )(...args);
+}
+
+export function resolveForcedActionNotPossible(...args: any[]): any {
+  return (
+    runtimeDelegates.turnRuntimeResolvers.resolveForcedActionNotPossible as any
+  )(...args);
+}
+
 export function startCorpTurn(...args: any[]): any {
   return (runtimeDelegates.turnRuntimeResolvers.startCorpTurn as any)(...args);
 }
@@ -184,12 +222,12 @@ export function applyCorpStartOfTurnEffects(...args: any[]): any {
   )(...args);
 }
 
-export function applyProteusPurgeableRunnerVirusCorpStartEffects(
+export function applyPurgeableRunnerVirusCorpStartEffects(
   ...args: any[]
 ): any {
   return (
     runtimeDelegates.turnRuntimeResolvers
-      .applyProteusPurgeableRunnerVirusCorpStartEffects as any
+      .applyPurgeableRunnerVirusCorpStartEffects as any
   )(...args);
 }
 

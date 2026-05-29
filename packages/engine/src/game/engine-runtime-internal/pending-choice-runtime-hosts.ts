@@ -43,6 +43,8 @@ export function createPendingChoiceRuntimeHosts(
     cockroachCounterTotal,
     cockroachRandomHqDiscardActive,
     completeDiscardPhase,
+    continueRun,
+    corpUtilityImplementationForCard,
     corpInstallRezSequenceHandlerHost,
     corpInstalledCardIds,
     corpScoredAgendaForfeitTargets,
@@ -87,7 +89,9 @@ export function createPendingChoiceRuntimeHosts(
     resolveCodeViralCachePurgeChoice,
     resolveCrashEverettDrawChoice,
     resolveEventModificationChoice,
+    resolveFortHqReplacementChoice,
     resolveHammerStealthLossChoice,
+    resolvePdcaDamageReplacementChoice,
     resolveInvestmentFirmCreditChoice,
     resolveMicrotechAiInterfacePreAccessChoice,
     resolvePassRezzedIceProgramTrashChoiceInRunModule,
@@ -98,6 +102,7 @@ export function createPendingChoiceRuntimeHosts(
     resolveReplacementChoice,
     resolveRunnerPrivateLookChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,
+    resolveSenatorialFieldTripChoice,
     resolveSingaporeCityGridSwapChoice,
     resolveSpeedTrapRezInterruptChoice,
     resolveSuccessfulRunInterventionChoiceInRunModule,
@@ -203,7 +208,7 @@ export function createPendingChoiceRuntimeHosts(
     resolveOpenEndedMileageProgramReturnChoice,
     resolveP358HiddenReplacementChoice,
     resolvePlayfulAiDiceLoopEvent,
-    resolveProteusRunnerProgramReturnChoice,
+    resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
     resolveSecurityCodeWormChipTrashIceChoice,
@@ -233,6 +238,298 @@ export function createPendingChoiceRuntimeHosts(
     { get: (_target, property) => runtimeBinding(runtime, property) },
   ) as any;
 
+  function continueRunAfterStartOfRunFortUtility(
+    state: GameState,
+    legalAction?: LegalAction,
+  ): void {
+    const run = state.run;
+    if (run) delete run.sirenStartRunRedirect;
+    state.activeSide = "runner";
+    let advancedFromStart = false;
+    if (run && run.phase === "start") {
+      const server = mustServer(state, run.attackedServerId);
+      if (server.ice.length > 0) {
+        const iceIndex = server.ice.length - 1;
+        run.phase = "approach_ice";
+        run.position = { kind: "ice", serverId: server.id, iceIndex };
+        run.approachedIceId = server.ice[iceIndex];
+      } else {
+        run.phase = "approach_ice";
+        run.position = { kind: "server", serverId: server.id };
+      }
+      advancedFromStart = true;
+    }
+    return;
+  }
+
+  function openRunSpendCapChoice(
+    state: GameState,
+    sourceCardId: CardInstanceId,
+    legalAction?: LegalAction,
+  ): void {
+    const run = state.run;
+    if (!run) throw new Error("Es laeuft kein Run fuer die Spend-Cap-Ansage.");
+    const source = mustInstance(state.cardInstances, sourceCardId);
+    const serverId = source.zone.serverId;
+    if (serverId !== run.attackedServerId)
+      throw new Error("Die Spend-Cap-Quelle liegt nicht auf dem laufenden Fort.");
+    if (
+      source.rezzed !== true ||
+      corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
+        "fort_start_runner_spend_cap"
+    )
+      throw new Error("Die Spend-Cap-Quelle ist nicht legal.");
+    const maxAnnouncement = Math.max(0, Math.floor(state.runner.credits));
+    state.pendingChoice = {
+      choiceId: `runner_run_spend_cap_${state.stateVersion + 1}`,
+      side: "runner",
+      source: `corp.start_of_run_redirect.runner_spend_cap:${run.runId}:${sourceCardId}:${serverId}`,
+      prompt: "Run-Bit-Ausgabe ansagen",
+      kind: "select_option",
+      options: Array.from({ length: maxAnnouncement + 1 }, (_, amount) => ({
+        id: `spend_${amount}`,
+        label: `${amount}`,
+        value: amount,
+      })),
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "public",
+    };
+    state.activeSide = "runner";
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        runCreditSpendCapChoiceOpened: true,
+        sourceDefinitionId: source.definitionId,
+        serverId,
+      };
+    }
+  }
+
+  function resolveStartOfRunFortUtilityChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    const choice = state.pendingChoice;
+    const run = state.run;
+    if (choice?.source.startsWith("corp.start_of_run_redirect.runner_spend_cap")) {
+      if (!run) throw new Error("Es laeuft kein Run fuer die Spend-Cap-Ansage.");
+      const [, runId = "", sourceCardId = "", serverId = ""] =
+        choice.source.split(":");
+      if (run.runId !== runId || run.attackedServerId !== serverId)
+        throw new Error("Die Spend-Cap-Choice passt nicht mehr zum Run.");
+      const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+      const amount = Number(selected.replace(/^spend_/, ""));
+      if (!Number.isInteger(amount) || amount < 0)
+        throw new Error("Die Spend-Cap-Ansage ist ungueltig.");
+      const source = mustInstance(state.cardInstances, sourceCardId);
+      if (
+        source.rezzed !== true ||
+        corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
+          "fort_start_runner_spend_cap"
+      )
+        throw new Error("Die Spend-Cap-Quelle ist nicht mehr legal.");
+      run.runCreditSpendCap = {
+        sourceCardInstanceId: sourceCardId as CardInstanceId,
+        sourceDefinitionId: source.definitionId,
+        announcedSpendCap: amount,
+        spentDuringRun: 0,
+      };
+      delete state.pendingChoice;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        sourceDefinitionId: source.definitionId,
+        runCreditSpendCap: amount,
+        runCreditSpentDuringRun: 0,
+      };
+      continueRunAfterStartOfRunFortUtility(state, legalAction);
+      return;
+    }
+    if (
+      choice?.source.startsWith("corp.start_of_run_redirect") &&
+      !choice.source.startsWith("corp.start_of_run_redirect.herman_reorder") &&
+      run
+    ) {
+      const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+      if (selected === "pass") {
+        delete state.pendingChoice;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          startOfRunRedirectDecision: "pass",
+          originalServerId: run.sirenStartRunRedirect?.originalServerId,
+        };
+        const spendCap = mustServer(state, run.attackedServerId).root
+          .slice()
+          .sort()
+          .find(
+            (cardId) =>
+              state.cardInstances[cardId]?.rezzed === true &&
+              corpUtilityImplementationForCard(state, cardId)?.kind ===
+                "fort_start_runner_spend_cap",
+          );
+        if (spendCap) {
+          openRunSpendCapChoice(state, spendCap as CardInstanceId, legalAction);
+          return;
+        }
+        continueRunAfterStartOfRunFortUtility(state, legalAction);
+        return;
+      }
+      const option = choice.options.find((candidate) => candidate.id === selected);
+      const sourceCardId =
+        typeof option?.value === "string"
+          ? (option.value as CardInstanceId)
+          : undefined;
+      if (!sourceCardId) throw new Error("Die Start-of-run-Auswahl ist ungueltig.");
+      if (selected.startsWith("herman_")) {
+        const server = mustServer(state, run.attackedServerId);
+        const selectedSource = mustInstance(state.cardInstances, sourceCardId);
+        if (
+          selectedSource.rezzed !== true ||
+          corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
+            "fort_start_reorder_ice"
+        )
+          throw new Error("Die Reorder-Quelle ist nicht legal.");
+        if (server.ice.length < 2) {
+          delete state.pendingChoice;
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            hiddenZoneBarrier: true,
+            hiddenZoneAction: "fort_ice_reorder",
+            sourceDefinitionId: selectedSource.definitionId,
+            serverId: server.id,
+            reorderedIceCount: server.ice.length,
+          };
+          continueRunAfterStartOfRunFortUtility(state, legalAction);
+          return;
+        }
+        state.pendingChoice = {
+          choiceId: `fort_ice_reorder_${state.stateVersion + 1}`,
+          side: "corp",
+          source: `corp.start_of_run_redirect.herman_reorder:${run.runId}:${sourceCardId}:${server.id}`,
+          prompt: "ICE auf diesem Fort neu anordnen",
+          kind: "select_cards",
+          options: server.ice.map((cardId, index) => ({
+            id: `card_${cardId}`,
+            label: exposeInstalledCorpCardLabel(state, cardId) || `ICE ${index + 1}`,
+            publicLabel: `ICE ${index + 1}`,
+            value: cardId,
+          })),
+          minSelections: server.ice.length,
+          maxSelections: server.ice.length,
+          stateVersion: state.stateVersion + 1,
+          visibility: "hidden_info_barrier",
+        };
+        state.activeSide = "corp";
+        return;
+      }
+      if (selected.startsWith("obfuscated_rez_")) {
+        const source = mustInstance(state.cardInstances, sourceCardId);
+        const cost = rezCostForCard(state, sourceCardId);
+        if (
+          source.rezzed === true ||
+          corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
+            "fort_start_runner_spend_cap" ||
+          state.corp.credits < cost
+        )
+          throw new Error("Die Spend-Cap-Quelle kann nicht gerezzt werden.");
+        state.corp.credits -= cost;
+        state.cardInstances[sourceCardId] = { ...source, rezzed: true, faceup: true };
+        delete state.pendingChoice;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          startOfRunRez: true,
+          sourceCardId,
+          sourceDefinitionId: source.definitionId,
+          rezCostPaid: cost,
+          corpCreditsAfter: state.corp.credits,
+        };
+        executeCardImplementationLifecycleEffects(
+          cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+          definitionFor(state, sourceCardId),
+          sourceCardId,
+          "on_rez",
+        );
+        openRunSpendCapChoice(state, sourceCardId, legalAction);
+        return;
+      }
+      if (selected.startsWith("obfuscated_")) {
+        delete state.pendingChoice;
+        openRunSpendCapChoice(state, sourceCardId, legalAction);
+        return;
+      }
+      const targetServerId = mustInstance(state.cardInstances, sourceCardId).zone.serverId;
+      const source = mustInstance(state.cardInstances, sourceCardId);
+      if (
+        !targetServerId ||
+        source.rezzed !== true ||
+        corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
+          "siren_start_run_redirect"
+      )
+        throw new Error("Diese Redirect-Quelle ist nicht legal.");
+      const availableCredits = Math.max(
+        0,
+        state.corp.credits -
+          Math.max(0, Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0)),
+      );
+      if (availableCredits < 1) throw new Error("Die Korp kann den Redirect nicht bezahlen.");
+      state.corp.credits -= 1;
+      run.attackedServerId = targetServerId;
+      delete state.pendingChoice;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        startOfRunRedirectDecision: "apply",
+        sourceCardId,
+        sourceDefinitionId: source.definitionId,
+        originalServerId: run.sirenStartRunRedirect?.originalServerId,
+        redirectedServerId: targetServerId,
+        paidCredits: 1,
+        corpCreditsAfter: state.corp.credits,
+      };
+      continueRunAfterStartOfRunFortUtility(state, legalAction);
+      return;
+    }
+    if (choice?.source.startsWith("corp.start_of_run_redirect.herman_reorder")) {
+      if (!run) throw new Error("Es laeuft kein Run fuer Fort-Reorder.");
+      const [, runId = "", sourceCardId = "", serverId = ""] =
+        choice.source.split(":");
+      if (run.runId !== runId || run.attackedServerId !== serverId)
+        throw new Error("Die Reorder-Choice passt nicht mehr zum Run.");
+      const selectedIds = selectedChoiceCardIds(choice, playerAction);
+      const server = mustServer(state, serverId);
+      if (
+        selectedIds.length !== server.ice.length ||
+        new Set(selectedIds).size !== selectedIds.length ||
+        selectedIds.some((cardId) => !server.ice.includes(cardId))
+      )
+        throw new Error("Die Reorder-Auswahl ist nicht legal.");
+      server.ice = selectedIds;
+      for (const cardId of selectedIds) {
+        state.cardInstances[cardId] = {
+          ...mustInstance(state.cardInstances, cardId),
+          zone: { side: "corp", zone: "serverIce", serverId: server.id },
+        };
+      }
+      const source = mustInstance(state.cardInstances, sourceCardId);
+      delete state.pendingChoice;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenOrderChoice: true,
+        hiddenZoneAction: "herman_revista_reorder",
+        sourceDefinitionId: source.definitionId,
+        serverId,
+        reorderedIceCount: selectedIds.length,
+      };
+      continueRunAfterStartOfRunFortUtility(state, legalAction);
+      return;
+    }
+    throw new Error("Es ist kein Start-of-run-Fort-Utility-Fenster offen.");
+  }
+
   function pendingChoiceResolutionHost(
     state: GameState,
   ): PendingChoiceResolutionHost {
@@ -245,6 +542,7 @@ export function createPendingChoiceRuntimeHosts(
       replacement: {
         resolveReplacementChoice,
         resolveEventModificationChoice,
+        resolvePdcaDamageReplacementChoice,
       },
       trace: {
         resolveTraceChoice: (_state, actionToResolve, playerActionToResolve) =>
@@ -283,8 +581,10 @@ export function createPendingChoiceRuntimeHosts(
         resolveIncubatorTransformChoice,
         resolveCodeViralCachePurgeChoice,
         resolveChimeraDaemonTrashChoice,
-        resolveProteusRunnerProgramReturnChoice,
+        resolveRunnerProgramReturnChoice,
         resolveRunnerPrivateLookChoice,
+        resolveSenatorialFieldTripChoice,
+        resolveFortHqReplacementChoice,
       },
       corp: {
         handleCorpInstallRezSequenceChoice,
@@ -313,6 +613,7 @@ export function createPendingChoiceRuntimeHosts(
         resolveSuccessfulRunInterventionChoiceInRunModule,
         successfulRunInterventionHost,
         resolvePostMeatDamageHiddenResourceChoice,
+        resolveStartOfRunFortUtilityChoice,
       },
       access: {
         resolvePriorityWreckSpendChoice,

@@ -118,6 +118,81 @@ export type CardCorpUtilityImplementation =
       amount: 1;
       refresh: "start_of_corp_turn_after_use";
       visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "advance_counter_temporary_install_rez_credits";
+      amount: number;
+      creditsPerCounter: number;
+      cleanup: "end_of_turn";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "advance_counter_temporary_trace_credits";
+      amount: number;
+      creditsPerCounter: number;
+      timing: "during_trace_attempt";
+      cleanup: "trace_end";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corp_run_hq_draw";
+      cost: { kind: "credit"; amount: number };
+      timing: "during_run_on_hq";
+      amount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "same_fort_advancement_counters_to_run_credits";
+      cost: { kind: "tap_source" };
+      creditsPerCounter: number;
+      timing: "during_run";
+      cleanup: "run_end";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "x_future_actions_and_credit_forfeit";
+      costMultiplier: 2;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "siren_start_run_redirect";
+      cost: { kind: "credit"; amount: number };
+      timing: "start_of_run";
+      target: "source_fort";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "fort_start_reorder_ice";
+      cost: { kind: "credit"; amount: 0 };
+      timing: "start_of_run";
+      target: "source_fort";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "fort_start_runner_spend_cap";
+      timing: "start_of_run";
+      target: "source_fort";
+      mayRezAtWindow: true;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "trash_own_rezzed_ice_gain_credits";
+      gainCredits: number;
+      target: "own_rezzed_ice";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "expose_prevention";
+      cost: { kind: "credit"; amount: number };
+      timing: "during_expose_attempt";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "meat_damage_boost";
+      cost: { kind: "advancement_counter"; amount: number };
+      amount: number;
+      timing: "successful_meat_damage";
+      visibility: Extract<EventVisibilityClass, "public">;
     };
 
 export type CardHiddenReplacementLongtailImplementation =
@@ -275,6 +350,12 @@ export type CardAccessEffectStepImplementation =
         kind: "source_advancement_counter_count";
         multiplier: number;
       };
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "reduce_current_access_queue";
+      target: "remaining_stored_cards_in_this_fort";
+      amount: 1;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
@@ -441,7 +522,15 @@ export type CardInstallCapabilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "install_only_in_hq";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "install_only_inside_subsidiary_data_fort";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "install_only_in_hq_or_rd";
       visibility: Extract<EventVisibilityClass, "public">;
     };
 
@@ -519,6 +608,20 @@ export type CardRunnerEventLongtailImplementation =
       dieFaces: 6;
       choiceOn: readonly [1, 2, 3];
       visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "grip_install_program_or_hardware_with_temporary_credits";
+      temporaryCredits: 3;
+      allowedTypes: readonly Extract<CardType, "program" | "hardware">[];
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "search_stack_install_program_free_then_run_return_or_penalty";
+      installCost: "free";
+      shuffleAfterwards: true;
+      penaltyBase: 4;
+      penaltyDamageType: Extract<DamageType, "meat">;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
       kind: "trash_installed_runner_connections_then_add_bad_publicity";
@@ -674,6 +777,38 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "fixed_bonus_agenda_points_on_score";
+      amount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "overadvance_start_of_corp_turn_credits";
+      perExcessAdvancementCounters: number;
+      creditPerGroup: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "overadvance_start_of_corp_turn_actions";
+      perExcessAdvancementCounters: number;
+      actionPerGroup: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corp_start_turn_random_restricted_optional_action";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corp_damage_replacement_pdca_action_counter";
+      counterType: Extract<CounterType, "pdca">;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "tagged_runner_meat_damage_reduce_hand_size_on_success";
+      damageAmount: number;
+      handSizeReduction: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "choose_fort_ice_strength_bonus";
       amount: number;
       visibility: Extract<EventVisibilityClass, "public">;
@@ -759,8 +894,10 @@ export type CardConditionImplementation =
     }
   | {
       kind: "runner_made_successful_run_on_server_this_turn";
-      server: Extract<ServerId, "hq"> | "any_data_fort";
+      server: Extract<ServerId, "hq" | "rd"> | "any_data_fort";
     }
+  | { kind: "runner_made_successful_hq_and_rd_runs_this_turn" }
+  | { kind: "corp_rezzed_black_ice_this_turn" }
   | { kind: "current_encounter_ice" }
   | {
       kind: "current_encounter_ice_subtype";
@@ -780,6 +917,9 @@ export type ActivatedCardAbilityImplementation = {
     | "access_start"
     | "corp_main"
     | "corp_encounter"
+    | "corp_during_run"
+    | "corp_trace_window"
+    | "corp_start_run_window"
     | "trace_base_link_window"
     | "trace_post_bid_link_window"
     | "trace_success_cancel_window";
@@ -835,6 +975,14 @@ export type CardAbilityCostImplementation =
   | {
       kind: "tap_source";
       amount: 1;
+    }
+  | {
+      kind: "corp_random_discard_hq";
+      amount: number;
+    }
+  | {
+      kind: "trash_corp_rd_top";
+      amount: 2;
     };
 
 export type CardUniqueDirectLongtailImplementation =
@@ -853,6 +1001,17 @@ export type CardUniqueDirectLongtailImplementation =
       agendaPointCost: 1;
       gainCredits: 10;
       trashSource: true;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "runner_start_turn_forced_random_action";
+      startsTurnAfterInstall: true;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "runner_start_turn_drip_counter_action_or_core_damage";
+      counterType: Extract<CounterType, "drip">;
+      threshold: 2;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -930,6 +1089,7 @@ export type CardEffectImplementation =
   | GainCreditsEffectImplementation
   | GainCreditsForRunnerTrashHistoryEffectImplementation
   | AddBadPublicityEffectImplementation
+  | AddBadPublicityFromFrameUpHistoryEffectImplementation
   | DrawCardsEffectImplementation
   | LoseCreditsEffectImplementation
   | AddTagsEffectImplementation
@@ -964,11 +1124,14 @@ export type CardEffectImplementation =
   | TrashOwnInstalledCardsForCreditsEffectImplementation
   | TrashCardsFromGripForCreditsEffectImplementation
   | ShuffleGripTrashAndStackThenDrawEffectImplementation
-  | PayRezCostToTrashRezzedIceEffectImplementation
   | MarkPrearrangedDropEffectImplementation
+  | MarkNextAgendaAccessAgendaPointEffectImplementation
+  | MakeRunEachDataFortSequenceEffectImplementation
+  | PayRezCostToTrashRezzedIceEffectImplementation
   | TrashRezzedIceOnLastSuccessfulRunFortEffectImplementation
   | TrashUnrezzedIceEffectImplementation
   | CorpChoiceRezOrTrashIceEffectImplementation
+  | CorpChoiceDerezLastRezzedBlackIceOrBadPublicityEffectImplementation
   | GainCreditsPerAdvancementCounterOnSourceEffectImplementation
   | AddCounterToAllInstalledRunnerIcebreakersEffectImplementation
   | GainRunnerEventAgendaPointEffectImplementation
@@ -983,7 +1146,15 @@ export type CardEffectImplementation =
   | PassCurrentEncounteredIceEffectImplementation
   | StartRunnerProgramInstallActionBundleEffectImplementation
   | DistributeAdvancementCountersEffectImplementation
-  | MoveAdvancementCountersEffectImplementation;
+  | MoveAdvancementCountersEffectImplementation
+  | GainTemporaryCorpCreditsEffectImplementation
+  | GainTemporaryCorpRunCreditsEffectImplementation
+  | GainTemporaryTraceCreditsEffectImplementation
+  | RemoveSameFortAdvancementCountersForRunCreditsEffectImplementation
+  | CopySameFortIceSubroutineForRunEffectImplementation
+  | TrashOwnRezzedIceForCreditsEffectImplementation
+  | FreeRezInstalledIceWithCountersEffectImplementation
+  | ReplaceFortCardsFromHqEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
@@ -1005,6 +1176,13 @@ export type AddBadPublicityEffectImplementation = {
   amount: number;
   visibility: Extract<EventVisibilityClass, "public">;
   sourceVisibility?: "public" | "redacted";
+};
+
+export type AddBadPublicityFromFrameUpHistoryEffectImplementation = {
+  kind: "add_bad_publicity_from_frame_up_history";
+  baseAmount: 1;
+  additionalAmount: 1;
+  visibility: Extract<EventVisibilityClass, "public">;
 };
 
 export type GainCreditsPerAdvancementCounterOnSourceEffectImplementation = {
@@ -1112,6 +1290,76 @@ export type MoveAdvancementCountersEffectImplementation = {
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
+export type GainTemporaryCorpCreditsEffectImplementation = {
+  kind: "gain_temporary_corp_credits";
+  recipient: "corp";
+  amount: number;
+  usableFor: "install_or_rez";
+  cleanup: "end_of_turn";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type GainTemporaryCorpRunCreditsEffectImplementation = {
+  kind: "gain_temporary_corp_run_credits";
+  recipient: "corp";
+  amount: number;
+  usableFor: "corp_costs_during_this_run";
+  cleanup: "run_end";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type GainTemporaryTraceCreditsEffectImplementation = {
+  kind: "gain_temporary_trace_credits";
+  recipient: "corp";
+  amount: number;
+  usableFor: "current_trace";
+  cleanup: "trace_end";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type RemoveSameFortAdvancementCountersForRunCreditsEffectImplementation = {
+  kind: "remove_same_fort_advancement_counters_for_run_credits";
+  creditsPerCounter: number;
+  maxAmount: "all";
+  cleanup: "run_end";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type CopySameFortIceSubroutineForRunEffectImplementation = {
+  kind: "copy_same_fort_ice_subroutine_for_run";
+  target: "chosen_same_fort_ice_subroutine";
+  append: "immediately_after_original";
+  cleanup: "run_end";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type TrashOwnRezzedIceForCreditsEffectImplementation = {
+  kind: "trash_own_rezzed_ice_for_credits";
+  target: "chosen_own_rezzed_ice";
+  gainCredits: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type FreeRezInstalledIceWithCountersEffectImplementation = {
+  kind: "free_rez_installed_ice_with_counters";
+  target: "chosen_installed_ice";
+  counterType: Extract<CounterType, "kludge" | "term">;
+  amount:
+    | { kind: "bounded_x_by_rez_cost_min_one" }
+    | { kind: "target_rez_cost" };
+  lifecycle:
+    | "remove_one_counter_start_corp_turn_trash_on_last"
+    | "rent_to_own_start_corp_turn";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type ReplaceFortCardsFromHqEffectImplementation = {
+  kind: "replace_source_fort_cards_from_hq";
+  include: "root_and_ice";
+  installCost: "free";
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
 export type DrawCardsEffectImplementation = {
   kind: "draw_cards";
   recipient: "controller" | "runner" | "corp";
@@ -1129,6 +1377,7 @@ export type ExposeInstalledCardEffectImplementation = {
 export type ExposeInstalledCardsEffectImplementation = {
   kind: "expose_installed_cards";
   targets: "chosen_installed_corp_cards";
+  scope?: "any_installed" | "single_data_fort";
   min: number;
   max: number;
   visibility: Extract<EventVisibilityClass, "public">;
@@ -1368,7 +1617,8 @@ export type MakeRunEffectImplementation = {
     | "runner_spend_corp_lose_credits"
     | "private_look_top_rd"
     | "archives_faceup_to_rd"
-    | "trash_rezzed_ice_on_fort_and_tag_runner";
+    | "trash_rezzed_ice_on_fort_and_tag_runner"
+    | "runner_gain_agenda_point";
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunRunnerCreditGain?: number;
@@ -1389,6 +1639,7 @@ export type MakeRunEffectImplementation = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
+  badPublicityRunAftermath?: "live_news_feed" | "subliminal_corruption";
   visibility: EventVisibilityClass;
 };
 
@@ -1401,6 +1652,19 @@ export type PayRezCostToTrashRezzedIceEffectImplementation = {
 export type MarkPrearrangedDropEffectImplementation = {
   kind: "mark_next_agenda_access_credit_gain";
   amount: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type MarkNextAgendaAccessAgendaPointEffectImplementation = {
+  kind: "mark_next_agenda_access_agenda_point";
+  amount: 1;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type MakeRunEachDataFortSequenceEffectImplementation = {
+  kind: "make_run_each_data_fort_sequence";
+  onAllSuccessful: "gain_runner_event_agenda_point";
+  onAnyUnsuccessful: "forgo_next_action";
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -1419,6 +1683,12 @@ export type TrashUnrezzedIceEffectImplementation = {
 export type CorpChoiceRezOrTrashIceEffectImplementation = {
   kind: "corp_choice_rez_or_trash_ice";
   target: "chosen_installed_ice";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type CorpChoiceDerezLastRezzedBlackIceOrBadPublicityEffectImplementation = {
+  kind: "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity";
+  badPublicity: 2;
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -1543,6 +1813,14 @@ export type CardStealCostModifierImplementation = {
   };
   sameServerAsSource: true;
   persistsForCurrentAccessIfSourceTrashed: true;
+};
+
+export type CardSelfStealCostImplementation = {
+  kind: "current_access_self_steal_cost";
+  amount: number;
+  sourceZones: readonly CardAccessZone[];
+  ignoreIfAccessedFrom?: readonly CardAccessZone[];
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
 
 export type CardIceStrengthModifierImplementation = {
@@ -1802,6 +2080,14 @@ export type CardFlatlineReplacementSourceImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "damage_replacement_from_grip";
+      replacement: "prevent_meat_damage_add_bad_publicity";
+      damageType: Extract<DamageType, "meat">;
+      activeOnlyDuring: "corp_turn";
+      badPublicity: 2;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "flatline_replacement_installed";
       replacement: "emergency_self_construct";
       cost: { kind: "trash_source" };
@@ -1963,14 +2249,22 @@ export type CardPrintedSubroutineImplementation =
       breakTags?: readonly string[];
     };
 
-export type CardIceEncounterImplementation = {
-  kind: "add_encounter_temporary_credits";
-  side: "corp";
-  amount: number;
-  usableFor: "this_ice_printed_trace_subroutines";
-  returnUnusedAtEncounterEnd: true;
-  visibility: Extract<EventVisibilityClass, "public">;
-};
+export type CardIceEncounterImplementation =
+  | {
+      kind: "add_encounter_temporary_credits";
+      side: "corp";
+      amount: number;
+      usableFor: "this_ice_printed_trace_subroutines";
+      returnUnusedAtEncounterEnd: true;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "roll_die_strength_or_derez_auto_pass";
+      dieFaces: 6;
+      successValue: 6;
+      strengthDuration: "current_encounter";
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
 
 export type RunnerTraceCounterEffectImplementation = {
   counterType: Extract<

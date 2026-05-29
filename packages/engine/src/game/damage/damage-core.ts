@@ -12,8 +12,11 @@ import type {
   ImminentEvent,
   LegalAction,
   PlayerAction,
+  Phase,
   ReplacementCandidate,
   ReplacementWindow,
+  Side,
+  TimingPointId,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
@@ -366,6 +369,169 @@ export function doDamage(
   return summary;
 }
 
+function isCorpDamageSource(source: string): boolean {
+  return (
+    source.includes("corp") ||
+    source.startsWith("scored_agenda:") ||
+    source.startsWith("trace:") ||
+    source.startsWith("subroutine:") ||
+    source.startsWith("ice:") ||
+    source.startsWith("operation:") ||
+    source.startsWith("asset:")
+  );
+}
+
+function scoredPdcaAgendaIds(state: GameState): CardInstanceId[] {
+  return state.corp.scoreArea
+    .slice()
+    .sort()
+    .filter((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return (
+        scoredAgendaKindForDefinition(definition) ===
+        "corp_damage_replacement_pdca_action_counter"
+      );
+    });
+}
+
+function pdcaEventWithReturnContext(
+  state: GameState,
+  event: ImminentEvent,
+): ImminentEvent {
+  return {
+    ...event,
+    modificationWindowId: `proteus_pdca_${event.eventId}`,
+    payload: {
+      ...event.payload,
+      pdcaReturnPhase: state.phase,
+      pdcaReturnTimingPoint: state.timingPoint,
+      pdcaReturnActiveSide: state.activeSide,
+    },
+  };
+}
+
+function restorePdcaReturnContext(state: GameState, event: ImminentEvent): void {
+  if (state.winner || state.phase === "game_over") return;
+  const phase = event.payload.pdcaReturnPhase;
+  const timingPoint = event.payload.pdcaReturnTimingPoint;
+  const activeSide = event.payload.pdcaReturnActiveSide;
+  if (
+    !isPhase(phase) ||
+    !isTimingPointId(timingPoint) ||
+    !isSide(activeSide)
+  )
+    return;
+  state.phase = phase;
+  state.timingPoint = timingPoint;
+  state.activeSide = activeSide;
+}
+
+function isPhase(value: unknown): value is Phase {
+  return (
+    value === "setup" ||
+    value === "corp_draw_phase" ||
+    value === "corp_action_phase" ||
+    value === "corp_discard_phase" ||
+    value === "runner_action_phase" ||
+    value === "runner_discard_phase" ||
+    value === "run" ||
+    value === "game_over"
+  );
+}
+
+function isTimingPointId(value: unknown): value is TimingPointId {
+  return (
+    value === "setup.mulligan.runner" ||
+    value === "setup.mulligan.corp" ||
+    value === "corp_draw.mandatory_draw" ||
+    value === "corp_action.main" ||
+    value === "corp_discard.select_cards" ||
+    value === "corp_discard.complete" ||
+    value === "runner_action.main" ||
+    value === "runner_discard.flatline_check" ||
+    value === "runner_discard.select_cards" ||
+    value === "runner_discard.complete" ||
+    value === "run.approach_ice" ||
+    value === "run.encounter_ice" ||
+    value === "run.jack_out_window" ||
+    value === "access.resolve_card" ||
+    value === "game.checkpoint"
+  );
+}
+
+function isSide(value: unknown): value is Side {
+  return value === "corp" || value === "runner";
+}
+
+export function openPdcaDamageReplacementChoice(
+  state: GameState,
+  event: ImminentEvent,
+  legalAction: LegalAction,
+): boolean {
+  if (
+    event.eventType !== "damage" ||
+    event.affectedSide !== "runner" ||
+    state.pendingChoice ||
+    state.winner
+  )
+    return false;
+  const amount = numberPayload(event, "amount");
+  const source = stringPayload(event, "source");
+  if (amount <= 0 || !isCorpDamageSource(source)) return false;
+  const sourceCardId = scoredPdcaAgendaIds(state)[0];
+  if (!sourceCardId) return false;
+  const definition = definitionFor(state, sourceCardId);
+  state.imminentEvent = pdcaEventWithReturnContext(state, event);
+  state.pendingChoice = {
+    choiceId: `proteus_pdca_${state.stateVersion + 1}_${sourceCardId}`,
+    side: "corp",
+    source: `proteus.pdca_damage_replacement:${sourceCardId}:${event.eventId}`,
+    prompt: "Please Don't Choke Anyone nutzen",
+    kind: "select_option",
+    options: [
+      {
+        id: `replace_${sourceCardId}`,
+        label: "Damage durch PDCA-Counter ersetzen",
+        publicLabel: "PDCA-Entscheidung",
+        value: sourceCardId,
+      },
+      {
+        id: "pass",
+        label: "Damage normal anwenden",
+        publicLabel: "PDCA-Entscheidung",
+      },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  state.activeSide = "corp";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    pdcaDamageReplacementWindowOpened: true,
+    pdcaSourceCardInstanceId: sourceCardId,
+    sourceDefinitionId: definition.id,
+    originalDamageAmount: amount,
+    damageType: damageTypePayload(event),
+    imminentEventId: event.eventId,
+    replacementModel: "all_or_nothing_damage_slice",
+  };
+  return true;
+}
+
+export function openDamageResolutionWindow(
+  state: GameState,
+  event: ImminentEvent,
+  legalAction: LegalAction,
+): boolean {
+  return (
+    openReplacementWindow(state, event, legalAction) ||
+    openEventModificationWindow(state, event, legalAction) ||
+    openPdcaDamageReplacementChoice(state, event, legalAction)
+  );
+}
+
 export function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSummary {
   const first = mustArrayValue(summaries, 0, "Damage-Zusammenfassung fehlt.");
   const lastCoreSummary = summaries
@@ -439,8 +605,7 @@ export function resolveDamageOperation(
     source: `operation:${source}`,
   };
   const event = createDamageImminentEvent(state, request);
-  if (openReplacementWindow(state, event, legalAction)) return;
-  if (openEventModificationWindow(state, event, legalAction)) return;
+  if (openDamageResolutionWindow(state, event, legalAction)) return;
   const summary = resolveDamageImminentEvent(state, event);
   setDamagePayload(legalAction, summary);
   const payload = (legalAction.payload ??= {});
@@ -486,6 +651,54 @@ export function createDamageImminentEvent(
     visibility: "hidden_info_barrier",
     createdAtStateVersion: state.stateVersion + 1,
   };
+}
+
+function cybertechThinkTankBoostCandidates(
+  state: GameState,
+  event: ImminentEvent,
+): EventModificationCandidate[] {
+  if (
+    event.eventType !== "damage" ||
+    event.affectedSide !== "runner" ||
+    damageTypePayload(event) !== "meat"
+  )
+    return [];
+  const candidates: EventModificationCandidate[] = [];
+  for (const server of state.corp.servers.slice().sort((left, right) => left.id.localeCompare(right.id))) {
+    for (const cardId of server.root.slice().sort() as CardInstanceId[]) {
+      const instance = state.cardInstances[cardId];
+      const implementation = instance
+        ? cardImplementationForDefinitionId(instance.definitionId)
+        : undefined;
+      const sourceText = String(event.payload.source ?? "");
+      if (
+        !instance?.rezzed ||
+        instance.controller !== "corp" ||
+        implementation?.corpUtility?.kind !== "meat_damage_boost" ||
+        Math.floor(instance.advancementCounters ?? 0) <= 0 ||
+        sourceText.includes(cardId) ||
+        sourceText.includes(instance.definitionId)
+      )
+        continue;
+      candidates.push({
+        candidateId: `cybertech_meat_damage_boost_${cardId}`,
+        eventId: event.eventId,
+        kind: "increase",
+        controller: "corp",
+        sourceRef: {
+          kind: "card",
+          instanceId: cardId,
+          definitionId: instance.definitionId,
+          label: "Meat-Damage-Boost",
+        },
+        priority: 80,
+        visibility: "public",
+        optional: true,
+        increaseAmount: 1,
+      });
+    }
+  }
+  return candidates;
 }
 
 function corpHasScoredBioweaponsEngineering(state: GameState): boolean {
@@ -621,6 +834,8 @@ function collectEventModificationCandidates(
 ): EventModificationCandidate[] {
   if (event.payload.cannotBePrevented === true) return [];
   if (event.eventType === "damage") {
+    const cybertech = cybertechThinkTankBoostCandidates(state, event);
+    if (cybertech.length > 0) return cybertech;
     const runtime = collectRuntimeDamagePreventionCandidates(state, event);
     const harness = collectHarnessDamagePreventionCandidates(state, event);
     return [...runtime, ...harness];
@@ -1136,6 +1351,44 @@ function collectReplacementCandidates(
   if (event.payload.cannotBePrevented === true) return [];
   const candidates: ReplacementCandidate[] = [];
   const damageAmount = numberPayload(event, "amount");
+  const damageType = damageTypePayload(event);
+  if (
+    event.affectedSide === "runner" &&
+    damageAmount > 0 &&
+    damageType === "meat" &&
+    isCorpTurnDamageWindow(state)
+  ) {
+    const identityDonorId = state.runner.grip.find((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return flatlineReplacementSourcesForDefinition(definition).some(
+        (source) =>
+          source.kind === "damage_replacement_from_grip" &&
+          source.replacement === "prevent_meat_damage_add_bad_publicity" &&
+          source.damageType === "meat" &&
+          source.activeOnlyDuring === "corp_turn" &&
+          source.badPublicity === 2 &&
+          source.visibility === "public",
+      );
+    });
+    if (identityDonorId) {
+      const definition = definitionFor(state, identityDonorId);
+      candidates.push({
+        candidateId: `grip_meat_damage_replacement_${identityDonorId}`,
+        controller: "runner",
+        sourceRef: {
+          kind: "card",
+          instanceId: identityDonorId,
+          definitionId: definition.id,
+          label: "Meat-Damage-Replacement",
+        },
+        replacesEventType: "damage",
+        replacementEventType: "prevent_damage",
+        priority: 81,
+        visibility: "hidden_info_barrier",
+        optional: true,
+      });
+    }
+  }
   if (
     event.affectedSide === "runner" &&
     damageAmount > state.runner.grip.length
@@ -1229,6 +1482,14 @@ function collectReplacementCandidates(
   ];
 }
 
+function isCorpTurnDamageWindow(state: GameState): boolean {
+  return (
+    state.phase === "corp_draw_phase" ||
+    state.phase === "corp_action_phase" ||
+    state.phase === "corp_discard_phase"
+  );
+}
+
 function replacementChoice(
   window: ReplacementWindow,
   event: ImminentEvent,
@@ -1256,7 +1517,9 @@ function replacementChoice(
             : candidate.sourceRef.definitionId ===
                 EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID
               ? "Emergency Self-Construct ausloesen"
-              : `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`,
+              : isIdentityDonorReplacementCandidateForChoice(candidate)
+                ? "Identity Donor spielen"
+                : `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`,
         publicLabel: "Replacement",
       },
     ],
@@ -1265,6 +1528,15 @@ function replacementChoice(
     stateVersion,
     visibility: candidate.visibility,
   };
+}
+
+function isIdentityDonorReplacementCandidateForChoice(
+  candidate: ReplacementCandidate,
+): boolean {
+  return (
+    candidate.replacementEventType === "prevent_damage" &&
+    candidate.candidateId.startsWith("grip_meat_damage_replacement_")
+  );
 }
 
 function eventModificationChoice(
@@ -1324,7 +1596,9 @@ function eventModificationChoice(
           ? "Tag nicht vermeiden"
           : event.eventType === "runner_installed_trash"
             ? "Trash nicht verhindern"
-            : "Nicht verhindern",
+            : window.kind === "increase"
+              ? "Nicht erhöhen"
+              : "Nicht verhindern",
       publicLabel: "Event Modification",
     },
     {
@@ -1336,6 +1610,8 @@ function eventModificationChoice(
             ? `${candidate.sourceRef.label}: ${candidate.preventedTags ?? 1} Tag vermeiden`
             : event.eventType === "runner_installed_trash"
               ? `${candidate.sourceRef.label}: ${candidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
+            : window.kind === "increase"
+              ? `${candidate.sourceRef.label}: Schaden um ${candidate.increaseAmount ?? 1} erhöhen`
               : candidate.sourceRef.kind === "card"
                 ? `${candidate.sourceRef.label}: ${candidate.preventAmount ?? amount} Schaden verhindern`
                 : `${candidate.preventAmount ?? amount} Schaden verhindern`,
@@ -1436,7 +1712,6 @@ export function resolveEventModificationChoice(
         ];
       }
     }
-    const summary = resolveDamageImminentEvent(state, event);
     legalAction.payload = {
       ...basePayload,
       eventModificationDecision: diplomaticImmunityCancel ? "cancel" : "pass",
@@ -1454,8 +1729,10 @@ export function resolveEventModificationChoice(
           }
         : {}),
     };
-    setDamagePayload(legalAction, summary);
     clearEventModificationState(state);
+    if (openPdcaDamageReplacementChoice(state, event, legalAction)) return;
+    const summary = resolveDamageImminentEvent(state, event);
+    setDamagePayload(legalAction, summary);
     return;
   }
   if (selected.startsWith("full_body_conversion_pay_")) {
@@ -1487,10 +1764,10 @@ export function resolveEventModificationChoice(
     spendCredits(state, "corp", bypassPaid);
     const preventedAmount = Math.max(0, originalAmount - bypassPaid);
     const finalAmount = bypassPaid;
-    const summary = resolveDamageImminentEvent(state, {
+    const finalEvent = {
       ...event,
       payload: { ...event.payload, amount: finalAmount },
-    });
+    };
     legalAction.payload = {
       ...basePayload,
       eventModificationDecision: "apply",
@@ -1509,8 +1786,10 @@ export function resolveEventModificationChoice(
       fullBodyConversionCorpBypassPaid: bypassPaid,
       fullBodyConversionBypassCostPerDamage: 1,
     };
-    setDamagePayload(legalAction, summary);
     clearEventModificationState(state);
+    if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
+    const summary = resolveDamageImminentEvent(state, finalEvent);
+    setDamagePayload(legalAction, summary);
     return;
   }
   const candidate = window.candidates.find(
@@ -1522,6 +1801,7 @@ export function resolveEventModificationChoice(
     candidate.eventId !== event.eventId ||
     !(
       candidate.kind === "prevent" ||
+      candidate.kind === "increase" ||
       (event.eventType === "add_tag" && candidate.kind === "avoid")
     )
   )
@@ -1593,6 +1873,63 @@ export function resolveEventModificationChoice(
     clearEventModificationState(state);
     return;
   }
+  if (candidate.kind === "increase") {
+    const sourceId = candidate.sourceRef.instanceId;
+    const source = sourceId ? state.cardInstances[sourceId] : undefined;
+    const implementation = source
+      ? cardImplementationForDefinitionId(source.definitionId)
+      : undefined;
+    if (
+      event.eventType !== "damage" ||
+      event.affectedSide !== "runner" ||
+      damageTypePayload(event) !== "meat" ||
+      implementation?.corpUtility?.kind !== "meat_damage_boost"
+    )
+      throw new Error("Dieser Damage-Boost passt nicht zum Fenster.");
+    if (
+      !sourceId ||
+      !source?.rezzed ||
+      source.controller !== "corp" ||
+      Math.floor(source.advancementCounters ?? 0) <= 0
+    )
+      throw new Error("Cybertech Think Tank ist nicht mehr legal.");
+    source.advancementCounters = Math.max(
+      0,
+      Math.floor(source.advancementCounters ?? 0) - 1,
+    );
+    const originalAmount = numberPayload(event, "amount");
+    const increaseAmount = Math.max(1, Math.floor(candidate.increaseAmount ?? 1));
+    const finalAmount = originalAmount + increaseAmount;
+    const finalEvent = {
+      ...event,
+      payload: {
+        ...event.payload,
+        amount: finalAmount,
+        baseDamageAmount: originalAmount,
+        cybertechThinkTankModifier: increaseAmount,
+        cybertechThinkTankSourceCardId: sourceId,
+        cybertechThinkTankSourceDefinitionId: source.definitionId,
+      },
+    };
+    legalAction.payload = {
+      ...basePayload,
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "increased",
+      candidateId: candidate.candidateId,
+      originalAmount,
+      increaseAmount,
+      finalAmount,
+      sourceKind: candidate.sourceRef.kind,
+      sourceDefinitionId: source.definitionId,
+      sourceCardId: sourceId,
+      remainingCounters: source.advancementCounters,
+    };
+    clearEventModificationState(state);
+    if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
+    const summary = resolveDamageImminentEvent(state, finalEvent);
+    setDamagePayload(legalAction, summary);
+    return;
+  }
   revalidateDamagePreventionCandidateSource(state, candidate);
   const originalAmount = numberPayload(event, "amount");
   const preventedAmount = Math.min(
@@ -1612,10 +1949,10 @@ export function resolveEventModificationChoice(
     candidate,
     preventedAmount,
   );
-  const summary = resolveDamageImminentEvent(state, {
+  const finalEvent = {
     ...event,
     payload: { ...event.payload, amount: finalAmount },
-  });
+  };
   legalAction.payload = {
     ...basePayload,
     eventModificationDecision: "apply",
@@ -1631,8 +1968,10 @@ export function resolveEventModificationChoice(
       : {}),
     ...preventionCostPayload,
   };
-  setDamagePayload(legalAction, summary);
   clearEventModificationState(state);
+  if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
+  const summary = resolveDamageImminentEvent(state, finalEvent);
+  setDamagePayload(legalAction, summary);
 }
 
 export function resolveReplacementChoice(
@@ -1655,15 +1994,16 @@ export function resolveReplacementChoice(
     redactedKind: "replacement",
   };
   if (selected === "pass") {
-    const summary = resolveDamageImminentEvent(state, event);
     legalAction.payload = {
       ...basePayload,
       replacementDecision: "pass",
       replacementOutcome: "original_resolved",
       originalAmount: numberPayload(event, "amount"),
     };
-    setDamagePayload(legalAction, summary);
     clearReplacementState(state);
+    if (openPdcaDamageReplacementChoice(state, event, legalAction)) return;
+    const summary = resolveDamageImminentEvent(state, event);
+    setDamagePayload(legalAction, summary);
     return;
   }
   const candidate = window.candidates.find(
@@ -1693,6 +2033,11 @@ export function resolveReplacementChoice(
     clearReplacementState(state);
     return;
   }
+  if (isIdentityDonorReplacementCandidate(state, candidate)) {
+    resolveIdentityDonorReplacement(state, legalAction, event, candidate);
+    clearReplacementState(state);
+    return;
+  }
   if (
     candidate.replacesEventType !== event.eventType ||
     candidate.replacementEventType !== "add_tag"
@@ -1716,6 +2061,88 @@ export function resolveReplacementChoice(
     sourceKind: candidate.sourceRef.kind,
   };
   clearReplacementState(state);
+}
+
+function isIdentityDonorReplacementCandidate(
+  state: GameState,
+  candidate: ReplacementCandidate,
+): boolean {
+  const cardId = candidate.sourceRef.instanceId;
+  if (!cardId || !state.runner.grip.includes(cardId)) return false;
+  return flatlineReplacementSourcesForDefinition(definitionFor(state, cardId)).some(
+    (source) =>
+      source.kind === "damage_replacement_from_grip" &&
+      source.replacement === "prevent_meat_damage_add_bad_publicity" &&
+      source.damageType === "meat" &&
+      source.activeOnlyDuring === "corp_turn" &&
+      source.badPublicity === 2,
+  );
+}
+
+function resolveIdentityDonorReplacement(
+  state: GameState,
+  legalAction: LegalAction,
+  event: ImminentEvent,
+  candidate: ReplacementCandidate,
+): void {
+  const cardId = candidate.sourceRef.instanceId;
+  if (
+    !cardId ||
+    !state.runner.grip.includes(cardId) ||
+    !isIdentityDonorReplacementCandidate(state, candidate)
+  )
+    throw new Error("Identity Donor ist nicht in der Grip verfuegbar.");
+  if (
+    event.eventType !== "damage" ||
+    event.affectedSide !== "runner" ||
+    damageTypePayload(event) !== "meat" ||
+    !isCorpTurnDamageWindow(state)
+  )
+    throw new Error("Identity Donor passt nicht zu diesem Damage-Event.");
+  windowConsumeReplacementCandidate(state, candidate.candidateId);
+  const originalAmount = numberPayload(event, "amount");
+  const definition = definitionFor(state, cardId);
+  removeFromAllZones(state, cardId);
+  state.runner.heap.push(cardId);
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "heap" },
+  };
+  const before = state.corp.badPublicity;
+  state.corp.badPublicity += 2;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    replacementDecision: "apply",
+    replacementOutcome: "replaced",
+    candidateId: candidate.candidateId,
+    replacementEventId: `replacement_${event.eventId}`,
+    replacementEventType: "prevent_damage",
+    originalAmount,
+    preventedAmount: originalAmount,
+    runnerEventAbility: "grip_meat_damage_replacement",
+    sourceDefinitionId: definition.id,
+    cardDefinitionId: definition.id,
+    trashedCardDefinitionId: definition.id,
+    badPublicityAdded: 2,
+    corpBadPublicityBefore: before,
+    corpBadPublicityAfter: state.corp.badPublicity,
+    sourceKind: "card",
+  };
+  legalAction.resolvedEffects = [
+    ...(legalAction.resolvedEffects ?? []),
+    {
+      effectId: `${event.eventId}.${cardId}.identity_donor_bad_publicity`,
+      kind: "add_bad_publicity",
+      visibility: "public",
+      side: "corp",
+      amount: 2,
+      reason: "identity_donor_replacement",
+      sourceDefinitionId: definition.id,
+      sourceTitle: definition.title,
+    },
+  ];
 }
 
 function resolveArasakaOwnsYouReplacement(
@@ -1853,6 +2280,79 @@ export function resolveDamageImminentEvent(
     amount,
     source: stringPayload(event, "source"),
   });
+}
+
+export function resolvePdcaDamageReplacementChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  const event = state.imminentEvent;
+  if (
+    !choice ||
+    !choice.source.startsWith("proteus.pdca_damage_replacement:") ||
+    !event
+  )
+    throw new Error("Es ist kein PDCA-Damage-Replacement-Fenster offen.");
+  if (choice.side !== "corp" || legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf PDCA-Damage ersetzen.");
+  if (event.eventType !== "damage" || event.affectedSide !== "runner")
+    throw new Error("PDCA passt nicht zu diesem Event.");
+  const amount = numberPayload(event, "amount");
+  if (amount <= 0 || !isCorpDamageSource(stringPayload(event, "source")))
+    throw new Error("PDCA passt nicht zu diesem Damage-Event.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const sourceId = choice.source.split(":")[1] as CardInstanceId | undefined;
+  if (!sourceId || !scoredPdcaAgendaIds(state).includes(sourceId))
+    throw new Error("Die PDCA-Quelle ist nicht mehr gescored.");
+  const source = mustInstance(state.cardInstances, sourceId);
+  const basePayload = {
+    ...(legalAction.payload ?? {}),
+    pdcaDamageReplacementChoiceResolved: true,
+    pdcaSourceCardInstanceId: sourceId,
+    sourceDefinitionId: source.definitionId,
+    originalDamageAmount: amount,
+    damageType: damageTypePayload(event),
+    imminentEventId: event.eventId,
+    replacementModel: "all_or_nothing_damage_slice",
+  };
+  if (selected === "pass") {
+    delete state.pendingChoice;
+    delete state.imminentEvent;
+    const summary = resolveDamageImminentEvent(state, event);
+    legalAction.payload = {
+      ...basePayload,
+      pdcaDecision: "pass",
+      replacementOutcome: "original_resolved",
+    };
+    setDamagePayload(legalAction, summary);
+    restorePdcaReturnContext(state, event);
+    return;
+  }
+  if (selected !== `replace_${sourceId}`)
+    throw new Error("Die PDCA-Auswahl ist nicht legal.");
+  source.counters = {
+    ...(source.counters ?? {}),
+    pdca: Math.max(0, Math.floor(source.counters?.pdca ?? 0)) + amount,
+  };
+  const remainingCounters = Math.max(0, Math.floor(source.counters.pdca ?? 0));
+  delete state.pendingChoice;
+  delete state.imminentEvent;
+  legalAction.payload = {
+    ...basePayload,
+    pdcaDecision: "replace",
+    replacementOutcome: "replaced",
+    preventedAmount: amount,
+    addedCounterAmount: amount,
+    counterType: "pdca",
+    remainingCounters,
+    damageResolved: true,
+    damageAmount: 0,
+    cardsTrashed: 0,
+    flatline: false,
+  };
+  restorePdcaReturnContext(state, event);
 }
 
 function trashTargetIdsFromEvent(event: ImminentEvent): CardInstanceId[] {

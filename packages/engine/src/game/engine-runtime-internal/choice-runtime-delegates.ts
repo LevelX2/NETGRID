@@ -310,10 +310,10 @@ export function resolveCardImplementationAccessPaymentChoice(
   )(...args);
 }
 
-export function resolveProteusRunnerProgramReturnChoice(...args: any[]): any {
+export function resolveRunnerProgramReturnChoice(...args: any[]): any {
   return (
     runtimeDelegates.choiceHiddenZoneRuntime
-      .resolveProteusRunnerProgramReturnChoice as any
+      .resolveRunnerProgramReturnChoice as any
   )(...args);
 }
 

@@ -37,12 +37,15 @@ export type StartRunOptions = Pick<
   | "runTraceLinkBonus"
   | "runTraceLinkBonusSourceDefinitionId"
   | "runnerRunTemporaryCredits"
+  | "testSpinTemporaryInstall"
   | "unpreventableCoreDamageAtRunEnd"
   | "socialEngineeringAutoPassIceId"
   | "prohibitNoisyIcebreakers"
   | "eventApproachIceExposeBeforeRez"
   | "runnerCreditGainOnCorpRez"
   | "damagePreventionPool"
+  | "badPublicityRunAftermath"
+  | "pirateBroadcast"
 >;
 
 export type RunCoreExecutionHost = {
@@ -76,6 +79,10 @@ export type RunCoreExecutionHost = {
       state: GameState,
       legalAction?: LegalAction,
     ) => void;
+    openStartOfRunFortUtilityWindow: (
+      state: GameState,
+      legalAction?: LegalAction,
+    ) => boolean;
   };
 };
 
@@ -198,6 +205,13 @@ export function startRun(
           },
         }
       : {}),
+    ...(options?.testSpinTemporaryInstall
+      ? {
+          testSpinTemporaryInstall: {
+            ...options.testSpinTemporaryInstall,
+          },
+        }
+      : {}),
     ...(options?.unpreventableCoreDamageAtRunEnd
       ? {
           unpreventableCoreDamageAtRunEnd: {
@@ -221,6 +235,12 @@ export function startRun(
     ...(options?.damagePreventionPool
       ? { damagePreventionPool: { ...options.damagePreventionPool } }
       : {}),
+    ...(options?.badPublicityRunAftermath
+      ? { badPublicityRunAftermath: { ...options.badPublicityRunAftermath } }
+      : {}),
+    ...(options?.pirateBroadcast
+      ? { pirateBroadcast: { ...options.pirateBroadcast } }
+      : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };
   host.callbacks.applyRunnerTraceCounterRunStartEffects(state, legalAction);
@@ -241,6 +261,8 @@ export function startRun(
     };
   }
   host.callbacks.applyAiBoonRunStart(state, legalAction);
+  if (host.callbacks.openStartOfRunFortUtilityWindow(state, legalAction))
+    return;
   if (server.ice.length > 0) {
     const iceIndex = outermostIceIndex(server);
     const approachedIceId = mustArrayValue(

@@ -276,6 +276,7 @@ function makeHost(options: {
       cleanupDelayedSuccessfulRunTemporaryIce: () => {
         cleanupDelayedCount += 1;
       },
+      resolveTestSpinRunEnd: () => ({ handled: false }),
     },
     cleanup: {
       cleanupEmptyRemotes: () => {
@@ -292,6 +293,87 @@ function makeHost(options: {
     cleanupDelayedCount: () => cleanupDelayedCount,
   };
 }
+
+describe("Pirate Broadcast run-end cleanup", () => {
+  it("adds one future action debt on an unsuccessful sequence run without consuming it in the same cleanup", () => {
+    const { host, state, legalAction } = makeHost({
+      run: {
+        runId: "run_pirate",
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+        pirateBroadcast: {
+          sourceCardId: "pirate_1" as CardInstanceId,
+          sourceDefinitionId: "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
+          sourceTitle: "Pirate Broadcast",
+          pendingServerIds: ["archives"],
+          successfulServerIds: ["hq"],
+        },
+      } as unknown as NonNullable<GameState["run"]>,
+    });
+    state.runner.clicks = 3;
+    let consumed = 0;
+    host.runner.addFutureActionDebt = (amount) => {
+      const flags = host.runner.ensureTurnFlags();
+      flags.forgoNextActionsPending =
+        Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + amount;
+    };
+    host.runner.consumeFutureActionDebt = () => {
+      consumed += 1;
+    };
+
+    handleRunEndCleanup(host, false, legalAction);
+
+    expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(1);
+    expect(consumed).toBe(0);
+    expect(state.runner.clicks).toBe(3);
+    expect(state.runnerTurnFlags?.pirateBroadcastPending).toBeUndefined();
+    expect(legalAction.payload).toMatchObject({
+      pirateBroadcastFailed: true,
+      actionDebtAdded: 1,
+    });
+  });
+
+  it("keeps the next Pirate Broadcast run pending without consuming existing debt after a successful partial run", () => {
+    const { host, state, legalAction } = makeHost({
+      run: {
+        runId: "run_pirate",
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+        pirateBroadcast: {
+          sourceCardId: "pirate_1" as CardInstanceId,
+          sourceDefinitionId: "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
+          sourceTitle: "Pirate Broadcast",
+          pendingServerIds: ["archives"],
+          successfulServerIds: ["hq"],
+        },
+      } as unknown as NonNullable<GameState["run"]>,
+    });
+    state.runner.clicks = 3;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {}),
+      forgoNextActionsPending: 1,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    let consumed = 0;
+    host.runner.consumeFutureActionDebt = () => {
+      consumed += 1;
+    };
+
+    handleRunEndCleanup(host, true, legalAction);
+
+    expect(consumed).toBe(0);
+    expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(1);
+    expect(state.runnerTurnFlags?.pirateBroadcastPending).toMatchObject({
+      pendingServerIds: ["archives"],
+      successfulServerIds: ["hq", "rd"],
+    });
+    expect(legalAction.payload).toMatchObject({
+      pirateBroadcastRunSuccessful: true,
+      pirateBroadcastPendingServerCount: 1,
+    });
+  });
+});
 
 describe("run end cleanup", () => {
   it("returns run temporary credits and applies Lucidrine-style run-end core damage", () => {

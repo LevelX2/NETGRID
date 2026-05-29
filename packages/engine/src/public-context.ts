@@ -802,11 +802,16 @@ export function publicContextForAction(
       context.iceIndex = legalAction.payload.iceIndex;
     if (typeof legalAction.payload.choiceVisibility === "string")
       context.choiceVisibility = legalAction.payload.choiceVisibility;
+    if (typeof legalAction.payload.candidateCount === "number")
+      context.candidateCount = legalAction.payload.candidateCount;
     if (typeof legalAction.payload.temporaryCreditsProvided === "number")
       context.temporaryCreditsProvided =
         legalAction.payload.temporaryCreditsProvided;
     if (typeof legalAction.payload.temporaryCreditsSpent === "number")
       context.temporaryCreditsSpent = legalAction.payload.temporaryCreditsSpent;
+    if (typeof legalAction.payload.temporaryCreditsReturned === "number")
+      context.temporaryCreditsReturned =
+        legalAction.payload.temporaryCreditsReturned;
     if (typeof legalAction.payload.corpCreditsSpent === "number")
       context.corpCreditsSpent = legalAction.payload.corpCreditsSpent;
     if (
@@ -824,6 +829,12 @@ export function publicContextForAction(
     if (typeof legalAction.payload.temporaryCreditsRemaining === "number")
       context.temporaryCreditsRemaining =
         legalAction.payload.temporaryCreditsRemaining;
+    if (typeof legalAction.payload.corpTemporaryRunCreditsReturned === "number")
+      context.corpTemporaryRunCreditsReturned =
+        legalAction.payload.corpTemporaryRunCreditsReturned;
+    if (typeof legalAction.payload.corpTemporaryRunCreditsRemaining === "number")
+      context.corpTemporaryRunCreditsRemaining =
+        legalAction.payload.corpTemporaryRunCreditsRemaining;
     if (typeof legalAction.payload.rezzedCount === "number")
       context.rezzedCount = legalAction.payload.rezzedCount;
     if (typeof legalAction.payload.rezzedIceCount === "number")
@@ -883,6 +894,27 @@ export function publicContextForAction(
     if (typeof legalAction.payload.installedProgramDefinitionId === "string")
       context.installedProgramDefinitionId =
         legalAction.payload.installedProgramDefinitionId;
+    if (typeof legalAction.payload.installedCardDefinitionId === "string")
+      context.installedCardDefinitionId =
+        legalAction.payload.installedCardDefinitionId;
+    if (typeof legalAction.payload.publicRevealDefinitionId === "string")
+      context.publicRevealDefinitionId =
+        legalAction.payload.publicRevealDefinitionId;
+    if (typeof legalAction.payload.returnedProgramDefinitionId === "string")
+      context.returnedProgramDefinitionId =
+        legalAction.payload.returnedProgramDefinitionId;
+    if (typeof legalAction.payload.serverId === "string")
+      context.serverId = legalAction.payload.serverId;
+    if (typeof legalAction.payload.shufflePerformed === "boolean")
+      context.shufflePerformed = legalAction.payload.shufflePerformed;
+    if (typeof legalAction.payload.testSpinRunStarted === "boolean")
+      context.testSpinRunStarted = legalAction.payload.testSpinRunStarted;
+    if (typeof legalAction.payload.returnedToStack === "boolean")
+      context.returnedToStack = legalAction.payload.returnedToStack;
+    if (typeof legalAction.payload.penaltyAmount === "number")
+      context.penaltyAmount = legalAction.payload.penaltyAmount;
+    if (typeof legalAction.payload.penaltyCreditsPaid === "number")
+      context.penaltyCreditsPaid = legalAction.payload.penaltyCreditsPaid;
     for (const key of [
       "sourceTrashed",
       "shuffled",

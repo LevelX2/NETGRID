@@ -47,6 +47,8 @@ export type CorpOperationResolutionHost = {
   };
   cards: {
     isCorpInstallableCardType: (definition: CardDefinition) => boolean;
+    unrezzedInstalledIceIds?: () => CardInstanceId[];
+    rezCostForCard?: (cardId: CardInstanceId) => number;
   };
   corp: {
     drawCorpCard: () => void;
@@ -63,6 +65,17 @@ export type CorpOperationResolutionHost = {
   };
   economy: {
     gainCorpCredits: (amount: number) => void;
+    addFutureExtraActionGrant?: (input: {
+      sourceCardInstanceId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      remainingTurns: number;
+      amountPerTurn: number;
+    }) => void;
+    addCorpCreditForfeitDebt?: (
+      sourceCardInstanceId: CardInstanceId,
+      sourceDefinitionId: CardDefinitionId,
+      amount: number,
+    ) => number;
   };
   zones: {
     trashRunnerInstalledCardToHeap: (cardId: CardInstanceId) => void;
@@ -385,6 +398,8 @@ export function canPlayCorpUtilityOperation(
       return host.state.corp.hq.some((cardId) =>
         host.cards.isCorpInstallableCardType(definitionFor(host.state, cardId)),
       );
+    case "x_future_actions_and_credit_forfeit":
+      return host.state.corp.credits >= utility.costMultiplier;
     case "corp_archives_to_hq":
       return host.state.corp.archives.some((cardId) => {
         const sourceCardId = host.state.corp.hq.find(
@@ -436,6 +451,39 @@ export function resolveCorpUtilityOperation(
         edgerunnerTempsInstallActionsRemaining:
           flags.edgerunnerTempsInstallActionsRemaining,
         corpClicksAfter: host.state.corp.clicks,
+      };
+      return;
+    }
+    case "x_future_actions_and_credit_forfeit": {
+      const x = Number(legalAction.payload?.xValue ?? 0);
+      if (!Number.isInteger(x) || x <= 0)
+        throw new Error("Future-action X muss positiv sein.");
+      const expectedCost = x * utility.costMultiplier;
+      if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
+        throw new Error("Future-action X-Kosten passen nicht.");
+      const sourceCardId = sourceCardIdFromAction(legalAction);
+      if (
+        !host.economy.addFutureExtraActionGrant ||
+        !host.economy.addCorpCreditForfeitDebt
+      )
+        throw new Error("Future-action economy callbacks fehlen.");
+      host.economy.addFutureExtraActionGrant({
+        sourceCardInstanceId: sourceCardId,
+        sourceDefinitionId: definition.id,
+        remainingTurns: x,
+        amountPerTurn: 1,
+      });
+      const remainingDebt = host.economy.addCorpCreditForfeitDebt(
+        sourceCardId,
+        definition.id,
+        x,
+      );
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        xValue: x,
+        futureActionTurns: x,
+        corpCreditForfeitAdded: x,
+        corpCreditForfeitRemaining: remainingDebt,
       };
       return;
     }
@@ -551,11 +599,87 @@ export function cardImplementationOperationLegalActions(
   cardId: CardInstanceId,
   definition: CardDefinition,
 ): LegalAction[] {
+  const utility = corpUtilityImplementationForDefinition(definition.id);
+  if (utility?.kind === "x_future_actions_and_credit_forfeit") {
+    const maxX = Math.floor(host.state.corp.credits / utility.costMultiplier);
+    const actions: LegalAction[] = [];
+    for (let x = 1; x <= maxX; x += 1) {
+      actions.push(
+        host.actions.buildLegalAction(
+          host.state,
+          "corp",
+          "play_operation",
+          `${definition.title}: X=${x}`,
+          cardId,
+          [{ clicks: 1, credits: x * utility.costMultiplier }],
+          {
+            cardId,
+            xValue: x,
+            corpUtilityAbility: "x_future_actions_and_credit_forfeit",
+          },
+        ),
+      );
+    }
+    return actions;
+  }
   if (!hasPrintedCostOnPlayCardImplementation(definition)) return [];
   const additionalCost =
     onPlayCardImplementationAdditionalOperationCost(definition);
   const totalCost = (definition.cost ?? 0) + additionalCost;
   if (host.state.corp.credits < totalCost) return [];
+  const freeRezEffect = onPlayCardImplementationEffects(definition).find(
+    (effect) => effect.kind === "free_rez_installed_ice_with_counters",
+  ) as
+    | Extract<CardEffectImplementation, { kind: "free_rez_installed_ice_with_counters" }>
+    | undefined;
+  if (freeRezEffect) {
+    const actions: LegalAction[] = [];
+    for (const targetCardId of host.cards.unrezzedInstalledIceIds?.() ?? []) {
+      const targetDefinition = definitionFor(host.state, targetCardId);
+      const targetRezCost = host.cards.rezCostForCard?.(targetCardId) ?? 0;
+      const xUpperBound = Math.max(1, targetRezCost);
+      if (freeRezEffect.counterType === "kludge") {
+        for (let x = 1; x <= xUpperBound; x += 1) {
+          actions.push(
+            host.actions.buildLegalAction(
+              host.state,
+              "corp",
+              "play_operation",
+              `${definition.title}: ${targetDefinition.title} rezzen (X=${x})`,
+              cardId,
+              [{ clicks: 1, credits: totalCost }],
+              {
+                cardId,
+                targetCardId,
+                targetDefinitionId: targetDefinition.id,
+                targetRezCost,
+                xValue: x,
+                xUpperBound,
+              },
+            ),
+          );
+        }
+      } else {
+        actions.push(
+          host.actions.buildLegalAction(
+            host.state,
+            "corp",
+            "play_operation",
+            `${definition.title}: ${targetDefinition.title} rezzen`,
+            cardId,
+            [{ clicks: 1, credits: totalCost }],
+            {
+              cardId,
+              targetCardId,
+              targetDefinitionId: targetDefinition.id,
+              targetRezCost,
+            },
+          ),
+        );
+      }
+    }
+    return actions;
+  }
   const needsResourceTarget =
     onPlayCardImplementationNeedsLastTurnResourceTarget(definition);
   if (!needsResourceTarget && additionalCost === 0) return [];

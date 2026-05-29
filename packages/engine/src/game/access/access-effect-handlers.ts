@@ -884,6 +884,38 @@ function executeCardImplementationAccessEffectStep(
       );
       return;
     }
+    case "reduce_current_access_queue": {
+      const run = host.state.run;
+      const breach = run?.breach;
+      if (
+        !run ||
+        !breach ||
+        run.accessedCardId !== cardId ||
+        step.target !== "remaining_stored_cards_in_this_fort" ||
+        step.amount !== 1
+      )
+        throw new Error("Access-Queue-Reduktion braucht den aktuellen Access.");
+      const serverId = run.accessServerOverride ?? run.attackedServerId;
+      const targetIndex = breach.queue.findIndex((entry, entryIndex) => {
+        if (entryIndex <= breach.currentIndex || entry.status !== "pending")
+          return false;
+        if (serverId !== "hq" && serverId !== "rd") return false;
+        return entry.zone === serverId;
+      });
+      if (targetIndex >= 0) {
+        breach.queue = breach.queue.map((entry, entryIndex) =>
+          entryIndex === targetIndex ? { ...entry, status: "skipped" } : entry,
+        );
+      }
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: step.visibility === "hidden_info_barrier",
+        hiddenZoneAction: "reduce_current_access_queue",
+        sourceDefinitionId: definition.id,
+        reducedAccessCount: targetIndex >= 0 ? 1 : 0,
+      };
+      return;
+    }
     default: {
       const unsupported = step as { kind?: string };
       throw new Error(

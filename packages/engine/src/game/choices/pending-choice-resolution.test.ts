@@ -136,6 +136,7 @@ function pendingChoiceHost(
     replacement: {
       resolveReplacementChoice: unexpected("resolveReplacementChoice"),
       resolveEventModificationChoice: unexpected("resolveEventModificationChoice"),
+      resolvePdcaDamageReplacementChoice: unexpected("resolvePdcaDamageReplacementChoice"),
     },
     trace: {
       resolveTraceChoice: unexpected("resolveTraceChoice"),
@@ -184,6 +185,12 @@ function pendingChoiceHost(
       resolveRunnerInstalledConnectionTrashBadPublicityChoice: unexpected(
         "resolveRunnerInstalledConnectionTrashBadPublicityChoice",
       ),
+      resolveGripInstallTemporaryCreditChoice: unexpected(
+        "resolveGripInstallTemporaryCreditChoice",
+      ),
+      resolveStackInstallRunCleanupChoice: unexpected(
+        "resolveStackInstallRunCleanupChoice",
+      ),
       resolveOpenEndedMileageProgramReturnChoice: unexpected(
         "resolveOpenEndedMileageProgramReturnChoice",
       ),
@@ -193,10 +200,14 @@ function pendingChoiceHost(
         "resolveCodeViralCachePurgeChoice",
       ),
       resolveChimeraDaemonTrashChoice: unexpected("resolveChimeraDaemonTrashChoice"),
-      resolveProteusRunnerProgramReturnChoice: unexpected(
-        "resolveProteusRunnerProgramReturnChoice",
+      resolveRunnerProgramReturnChoice: unexpected(
+        "resolveRunnerProgramReturnChoice",
       ),
       resolveRunnerPrivateLookChoice: unexpected("resolveRunnerPrivateLookChoice"),
+      resolveExposePreventionChoice: unexpected("resolveExposePreventionChoice"),
+      resolveSenatorialFieldTripChoice: unexpected(
+        "resolveSenatorialFieldTripChoice",
+      ),
       ...overrides.hiddenZone,
     },
     corp: {
@@ -243,6 +254,9 @@ function pendingChoiceHost(
       successfulRunInterventionHost: () => ({}),
       resolvePostMeatDamageHiddenResourceChoice: unexpected(
         "resolvePostMeatDamageHiddenResourceChoice",
+      ),
+      resolveStartOfRunFortUtilityChoice: unexpected(
+        "resolveStartOfRunFortUtilityChoice",
       ),
     },
     access: {

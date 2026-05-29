@@ -242,6 +242,7 @@ function hostFor(state: GameState): {
         },
       },
       callbacks: {
+        canReplaceFortCardsFromHq: () => true,
         continueAfterRootRez: (legalAction) => {
           if (legalAction) calls.continued.push(legalAction);
         },

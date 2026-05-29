@@ -220,6 +220,9 @@ function testCorpMainHost(
       canInstallCorpRootCardInServer: unexpected(
         "canInstallCorpRootCardInServer",
       ),
+      canInstallCorpRootCardInNewRemote: unexpected(
+        "canInstallCorpRootCardInNewRemote",
+      ),
       isRegionUpgrade: unexpected("isRegionUpgrade"),
       corpRegionUpgradeIdsInServer: unexpected("corpRegionUpgradeIdsInServer"),
       corpRootAgendaOrNodeCapacityInServer: unexpected(

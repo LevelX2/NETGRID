@@ -785,6 +785,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/ice/mobile-barricade.ts",
   "onr_proteus_034_riddler":
     "packages/engine/src/card-implementations/proteus/corp/ice/riddler.ts",
+  "onr_proteus_035_roadblock":
+    "packages/engine/src/card-implementations/proteus/corp/ice/roadblock.ts",
   "onr_proteus_037_scaffolding":
     "packages/engine/src/card-implementations/proteus/corp/ice/scaffolding.ts",
   "onr_proteus_038_snowbank":
@@ -799,34 +801,60 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/ice/walking-wall.ts",
   "onr_proteus_045_washed-up-solo-construct":
     "packages/engine/src/card-implementations/proteus/corp/ice/washed-up-solo-construct.ts",
+  "onr_proteus_046_corporate-guard-r-temps":
+    "packages/engine/src/card-implementations/proteus/corp/operations/corporate-guard-r-temps.ts",
   "onr_proteus_047_credit-consolidation":
     "packages/engine/src/card-implementations/proteus/corp/operations/credit-consolidation.ts",
   "onr_proteus_048_data-sifters":
     "packages/engine/src/card-implementations/proteus/corp/operations/data-sifters.ts",
+  "onr_proteus_049_emergency-rig":
+    "packages/engine/src/card-implementations/proteus/corp/operations/emergency-rig.ts",
   "onr_proteus_050_manhunt":
     "packages/engine/src/card-implementations/proteus/corp/operations/manhunt.ts",
+  "onr_proteus_051_rent-to-own-contract":
+    "packages/engine/src/card-implementations/proteus/corp/operations/rent-to-own-contract.ts",
   "onr_proteus_052_schlaghund-pointers":
     "packages/engine/src/card-implementations/proteus/corp/operations/schlaghund-pointers.ts",
   "onr_proteus_053_underworld-mole":
     "packages/engine/src/card-implementations/proteus/corp/operations/underworld-mole.ts",
+  "onr_proteus_001_ai-board-member":
+    "packages/engine/src/card-implementations/proteus/corp/agendas/ai-board-member.ts",
+  "onr_proteus_006_please-dont-choke-anyone":
+    "packages/engine/src/card-implementations/proteus/corp/agendas/please-dont-choke-anyone.ts",
+  "onr_proteus_007_project-venice":
+    "packages/engine/src/card-implementations/proteus/corp/agendas/project-venice.ts",
   "onr_proteus_009_viral-breeding-ground":
     "packages/engine/src/card-implementations/proteus/corp/agendas/viral-breeding-ground.ts",
   "onr_proteus_054_bel-digmo-antibody":
     "packages/engine/src/card-implementations/proteus/corp/assets/bel-digmo-antibody.ts",
   "onr_proteus_057_doppelganger-antibody":
     "packages/engine/src/card-implementations/proteus/corp/assets/doppelganger-antibody.ts",
+  "onr_proteus_058_executive-boot-camp":
+    "packages/engine/src/card-implementations/proteus/corp/assets/executive-boot-camp.ts",
   "onr_proteus_068_pattel-antibody":
     "packages/engine/src/card-implementations/proteus/corp/assets/pattel-antibody.ts",
   "onr_proteus_075_stereogram-antibody":
     "packages/engine/src/card-implementations/proteus/corp/assets/stereogram-antibody.ts",
   "onr_proteus_062_lesley-major":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/lesley-major.ts",
+  "onr_proteus_063_lisa-blight":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/lisa-blight.ts",
+  "onr_proteus_060_herman-revista":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/herman-revista.ts",
+  "onr_proteus_064_marcel-desoleil":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/marcel-desoleil.ts",
   "onr_proteus_065_networked-center":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/networked-center.ts",
+  "onr_proteus_066_obfuscated-fortress":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/obfuscated-fortress.ts",
+  "onr_proteus_069_pavit-bharat":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/pavit-bharat.ts",
   "onr_proteus_070_rasmin-bridger":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/rasmin-bridger.ts",
   "onr_proteus_072_research-bunker":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/research-bunker.ts",
+  "onr_proteus_073_simon-francisco":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/simon-francisco.ts",
   "onr_proteus_077_weapons-depot":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/weapons-depot.ts",
   "onr_proteus_078_armageddon":
@@ -845,6 +873,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/crumble.ts",
   "onr_proteus_086_enterprise-inc-shields":
     "packages/engine/src/card-implementations/proteus/runner/programs/enterprise-inc-shields.ts",
+  "onr_proteus_087_forwards-legacy":
+    "packages/engine/src/card-implementations/proteus/runner/programs/forwards-legacy.ts",
   "onr_proteus_088_fubar":
     "packages/engine/src/card-implementations/proteus/runner/programs/fubar.ts",
   "onr_proteus_089_garbage-in":
@@ -873,10 +903,22 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/wrecking-ball.ts",
   "onr_proteus_103_cruising-for-netwatch":
     "packages/engine/src/card-implementations/proteus/runner/events/cruising-for-netwatch.ts",
+  "onr_proteus_109_frame-up":
+    "packages/engine/src/card-implementations/proteus/runner/events/frame-up.ts",
+  "onr_proteus_111_ice-and-data-special-report":
+    "packages/engine/src/card-implementations/proteus/runner/events/ice-and-data-special-report.ts",
+  "onr_proteus_112_identity-donor":
+    "packages/engine/src/card-implementations/proteus/runner/events/identity-donor.ts",
+  "onr_proteus_113_live-news-feed":
+    "packages/engine/src/card-implementations/proteus/runner/events/live-news-feed.ts",
   "onr_proteus_115_personal-touch-the":
     "packages/engine/src/card-implementations/proteus/runner/events/personal-touch-the.ts",
+  "onr_proteus_123_senatorial-field-trip":
+    "packages/engine/src/card-implementations/proteus/runner/events/senatorial-field-trip.ts",
   "onr_proteus_124_stakeout":
     "packages/engine/src/card-implementations/proteus/runner/events/stakeout.ts",
+  "onr_proteus_125_subliminal-corruption":
+    "packages/engine/src/card-implementations/proteus/runner/events/subliminal-corruption.ts",
   "onr_proteus_134_cortical-cybermodem":
     "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-cybermodem.ts",
   "onr_proteus_135_cortical-stimulators":
@@ -885,10 +927,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/hardware/deck-the.ts",
   "onr_proteus_139_eurocorpse-tm-spin-chip":
     "packages/engine/src/card-implementations/proteus/runner/hardware/eurocorpse-tm-spin-chip.ts",
+  "onr_proteus_144_lucidrinetm-drip-feed":
+    "packages/engine/src/card-implementations/proteus/runner/hardware/lucidrinetm-drip-feed.ts",
   "onr_proteus_151_sunburst-cranial-interface":
     "packages/engine/src/card-implementations/proteus/runner/hardware/sunburst-cranial-interface.ts",
   "onr_proteus_128_airport-locker":
     "packages/engine/src/card-implementations/proteus/runner/resources/airport-locker.ts",
+  "onr_proteus_131_bargain-with-viacox":
+    "packages/engine/src/card-implementations/proteus/runner/resources/bargain-with-viacox.ts",
   "onr_proteus_133_chiba-bank-account":
     "packages/engine/src/card-implementations/proteus/runner/resources/chiba-bank-account.ts",
   "onr_proteus_142_hq-mole":

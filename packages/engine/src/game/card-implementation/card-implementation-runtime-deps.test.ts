@@ -245,8 +245,22 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       startMoveAdvancementCounters: () => ({
         publicPayload: { advancementCounterMoveChoiceOpened: true },
       }),
+      rezInstalledIceWithLifecycleCounters: () => ({
+        publicPayload: { freeRez: true },
+      }),
+      replaceFortCardsFromHq: () => ({
+        publicPayload: { replacedFortCards: true },
+      }),
+      trashTopCorpRdCards: () => ({
+        publicPayload: { trashedCardsCount: 2 },
+      }),
+      rezCostForCard: () => 0,
       startOpenEndedMileageProgramReturnChoice: () => {
         calls.push("return_choice");
+      },
+      startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: () => {
+        calls.push("senatorial_field_trip_choice");
+        return { publicPayload: { choiceOpened: true } };
       },
     },
   };
@@ -337,6 +351,11 @@ describe("game card implementation runtime deps root", () => {
         "trashSource",
         "startDistributeAdvancementCounters",
         "startMoveAdvancementCounters",
+        "rezInstalledIceWithLifecycleCounters",
+        "replaceFortCardsFromHq",
+        "trashTopCorpRdCards",
+        "rezCostForCard",
+        "startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice",
         "addCurrentEncounterAdditionalSubroutine",
         "addCurrentRunAccessCount",
         "passCurrentEncounteredIce",

@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-6d-corp-asset-upgrade-utility
-status: blocked
+status: resolved-by-done-activity
 kind: implementation
 area: cards
 priority: normal
@@ -8,20 +8,14 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-28
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 6d
 proReferences:
   - PRO014
-blockedBy:
-  - Cybertech Think Tank needs an advancement-counter payment window that increases another source's successful meat damage; current damage pipelines do not expose a generic source-bound "boost other source damage" reaction.
-  - Department of Misinformation needs rez-during-expose-attempt plus paid expose prevention; no generic expose-attempt prevention/replacement window exists.
-  - Government Contract and LDL Traffic Analyzers need advancement-counter activated temporary credits scoped to install/rez or the current trace attempt with end-of-turn/trace cleanup; current hosted/restricted credit families do not model this corp advancement-counter pool.
-  - Panic Button needs an HQ-only install constraint and an activated draw ability legal only during runs on HQ; current activated timing has no declarative same-server run constraint for this pattern.
-  - Raymond Ellison needs fort-scoped removal of any number of advancement counters from installed cards with temporary run credits and cleanup.
-  - Siren needs rez-on-install plus a start-of-run redirect/replacement effect to force a run target onto Siren's fort.
-  - Syd Meyer Superstores needs a corp activated ability that targets and trashes one rezzed ICE, then pays credits.
+blockedBy: []
 resultArtifacts:
+  - docs/activities/done/act-2026-05-28-proteus-pro014-corp-asset-upgrade-utility-suite.md
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-6d-corp-asset-upgrade-utility.md
   - docs/releases/proteus/README.md
 checks:
@@ -73,14 +67,6 @@ Die Proteus-Corp-Assets und Upgrades mit Rez-, Aktivierungs-, Access-Trash- und 
 
 ## Ergebnisnotiz
 
-Blockiert. Der Slice benoetigt mehrere neue generische Asset-/Upgrade-Utility-Bausteine:
+PRO014 ist über die neue Done-Activity `act-2026-05-28-proteus-pro014-corp-asset-upgrade-utility-suite` abgeschlossen. Diese Umbrella-Activity bleibt als historische Phase-6d-Referenz bestehen und zählt keine Karten zusätzlich.
 
-- `Cybertech Think Tank` braucht eine advancement-counter-basierte Reaktion, die Meat damage einer anderen Quelle erhoeht.
-- `Department of Misinformation` braucht ein Expose-Attempt-Fenster mit optionalem Rez und bezahlter Expose-Verhinderung.
-- `Government Contract` und `LDL Traffic Analyzers` brauchen advancement-counter-aktivierte temporaere Credits mit enger Verwendungsbindung und Cleanup am Turn- beziehungsweise Trace-Ende.
-- `Panic Button` braucht HQ-Installbindung und eine Run-on-HQ-aktivierte Draw-Faehigkeit.
-- `Raymond Ellison` braucht eine fortweite Advancement-Counter-Entnahme mit temporaeren Run-Credits.
-- `Siren` braucht einen Start-of-run-Redirect auf den installierten Fort.
-- `Syd Meyer Superstores` braucht ein Corp-Zielfenster fuer eigenes rezzed ICE trashen plus Credit-Gain.
-
-Keine CardImplementation wurde fuer 6d angelegt und keine Manifest-/Coverage-Promotion vorgenommen.
+Umgesetzt wurden acht CardImplementation-Dateien, Registry-/Coverage-/Manifest-Promotion und die generischen Bausteine für HQ-/Remote-Installbindung, temporäre Corp-Credit-Pools, Corp-Run-/Trace-Aktivierungsfenster, Start-of-run-Redirect und eigenes rezzed ICE als Corp-Ziel.

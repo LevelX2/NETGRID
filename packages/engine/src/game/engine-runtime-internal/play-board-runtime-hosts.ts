@@ -811,6 +811,17 @@ export function createPlayBoardRuntimeHosts(deps: RuntimeDeps, runtime: Record<s
       },
       cards: {
         isCorpInstallableCardType,
+        unrezzedInstalledIceIds: () =>
+          Object.entries(state.cardInstances)
+            .filter(
+              ([cardId, instance]: any) =>
+                instance?.controller === "corp" &&
+                instance.zone?.zone === "serverIce" &&
+                instance.rezzed !== true &&
+                definitionFor(state, cardId).type === "ice",
+            )
+            .map(([cardId]) => cardId),
+        rezCostForCard: (cardId) => rezCostForCard(state, cardId),
       },
       corp: {
         drawCorpCard: () => drawCorpCard(state),
@@ -830,6 +841,30 @@ export function createPlayBoardRuntimeHosts(deps: RuntimeDeps, runtime: Record<s
       },
       economy: {
         gainCorpCredits: (amount) => credits(state, "corp", amount),
+        addFutureExtraActionGrant: (input) => {
+          const economy = (state.actionEconomy ??= {});
+          economy.futureGrants = [
+            ...(economy.futureGrants ?? []),
+            { side: "corp", ...input },
+          ];
+        },
+        addCorpCreditForfeitDebt: (
+          sourceCardInstanceId,
+          sourceDefinitionId,
+          amount,
+        ) => {
+          const economy = (state.actionEconomy ??= {});
+          economy.corpCreditForfeitDebt = {
+            remaining:
+              Math.max(
+                0,
+                Math.floor(economy.corpCreditForfeitDebt?.remaining ?? 0),
+              ) + amount,
+            sourceCardInstanceId,
+            sourceDefinitionId,
+          };
+          return economy.corpCreditForfeitDebt.remaining;
+        },
       },
       zones: {
         trashRunnerInstalledCardToHeap: (cardId) =>
