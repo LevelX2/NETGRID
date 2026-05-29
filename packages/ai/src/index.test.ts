@@ -12737,6 +12737,205 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(hqRunCost.reasons).not.toContain("known_full_path_no_access");
   });
 
+  it("does not choose a known unbreakable remote Data Wall run to reach BBS trash", () => {
+    const input = knownRemoteDataWallBbsInput(
+      "ai-v144-known-remote-data-wall-bbs-no-coverage",
+      {
+        runnerCredits: 6,
+        installWallBreaker: false,
+        rezzedIce: true,
+        knownRoot: true,
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing known unbreakable remote fixture actions");
+
+    const contestCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate)
+      throw new Error("Missing known unbreakable remote contest candidate");
+    const runCost = estimateRunCost(input, contestCandidate);
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, gain],
+    });
+
+    expect(runCost.reasons).toContain(
+      "visible_ice_unbreakable_missing_coverage",
+    );
+    expect(runCost.evidence).toContain(
+      "known_path_no_access_reason:missing_breaker_coverage",
+    );
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.actionId).not.toBe(remoteRun.actionId);
+  });
+
+  it("keeps a known unbreakable remote repeat run below economy when nothing changed", () => {
+    const input = knownRemoteDataWallBbsInput(
+      "ai-v144-known-remote-data-wall-bbs-repeat",
+      {
+        runnerCredits: 6,
+        installWallBreaker: false,
+        rezzedIce: true,
+        knownRoot: true,
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing known unbreakable repeat fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      eventTail: [
+        ...input.eventTail,
+        {
+          eventId: "ai-v144-known-remote-repeat-started",
+          type: "run_started",
+          stateVersionBefore: input.playerView.stateVersion - 1,
+          stateVersionAfter: input.playerView.stateVersion,
+          stateHashAfter: "fnv1a:v144knownremote",
+          visibilityClass: "public",
+          publicPayload: { actionType: "start_run", serverId: "remote_1" },
+        } satisfies PublicGameEvent,
+      ],
+      legalActions: [remoteRun, gain],
+    });
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.actionId).not.toBe(remoteRun.actionId);
+  });
+
+  it("allows remote BBS contest after wall coverage is installed", () => {
+    const input = knownRemoteDataWallBbsInput(
+      "ai-v144-known-remote-data-wall-bbs-with-coverage",
+      {
+        runnerCredits: 8,
+        installWallBreaker: true,
+        rezzedIce: true,
+        knownRoot: true,
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing reachable remote fixture actions");
+
+    const contestCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate)
+      throw new Error("Missing reachable remote contest candidate");
+    const runCost = estimateRunCost(input, contestCandidate);
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, gain],
+    });
+
+    expect(runCost.reasons).not.toContain(
+      "visible_ice_unbreakable_missing_coverage",
+    );
+    expect(decision.actionId).toBe(remoteRun.actionId);
+  });
+
+  it("keeps first probe on unrezzed remote ICE available without known-unbreakable classification", () => {
+    const input = knownRemoteDataWallBbsInput(
+      "ai-v144-unrezzed-remote-data-wall-probe",
+      {
+        runnerCredits: 6,
+        installWallBreaker: false,
+        rezzedIce: false,
+        knownRoot: false,
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing unrezzed probe fixture actions");
+
+    const probeCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.legalActionIds.includes(remoteRun.actionId),
+    );
+    expect(probeCandidate).toBeDefined();
+    if (!probeCandidate) throw new Error("Missing remote probe candidate");
+    const runCost = estimateRunCost(input, probeCandidate);
+
+    expect(runCost.reasons).not.toContain(
+      "visible_ice_unbreakable_missing_coverage",
+    );
+    expect(runCost.evidence).not.toContain(
+      "known_path_no_access_reason:missing_breaker_coverage",
+    );
+  });
+
+  it("prefers visible wall coverage repair over a known bad remote run", () => {
+    const input = knownRemoteDataWallBbsInput(
+      "ai-v144-known-remote-data-wall-bbs-repair",
+      {
+        runnerCredits: 8,
+        installWallBreaker: false,
+        wallBreakerInGrip: true,
+        rezzedIce: true,
+        knownRoot: true,
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const install = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_037_japanese-water-torture",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(install).toBeDefined();
+    if (!remoteRun || !install)
+      throw new Error("Missing coverage repair fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, install],
+    });
+
+    expect(decision.actionId).toBe(install.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+  });
+
   it("installs a central interface when it creates a near-term pressure line", () => {
     const input = runnerActionPhaseInput(
       "ai-v142-central-install-interface-before-pressure",
@@ -21684,6 +21883,79 @@ function krashDataWallBbsRemoteInput(
     rezzed: bbsKnown,
   };
   state.runner.credits = runnerCredits;
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.1-normal",
+  });
+}
+
+function knownRemoteDataWallBbsInput(
+  seed: string,
+  options: {
+    runnerCredits: number;
+    installWallBreaker: boolean;
+    rezzedIce: boolean;
+    knownRoot: boolean;
+    wallBreakerInGrip?: boolean;
+  },
+): ReturnType<typeof buildAiDecisionInput> {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        id: "ai_runner_known_remote_data_wall_bbs",
+        name: "AI Runner Known Remote Data Wall BBS",
+        side: "runner",
+        identity: "runner_identity_001",
+        cards: [
+          { id: "onr_v1_037_japanese-water-torture", quantity: 3 },
+          { id: "simple_economy_event", quantity: 8 },
+        ],
+      },
+      corpDeck: {
+        id: "ai_corp_known_remote_data_wall_bbs",
+        name: "AI Corp Known Remote Data Wall BBS",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_237_data-wall", quantity: 2 },
+          { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+          { id: "simple_agenda", quantity: 4 },
+          { id: "simple_economy_operation", quantity: 8 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = options.runnerCredits;
+  state.corp.credits = 10;
+  if (options.installWallBreaker) {
+    moveRunnerProgramToRig(state, "onr_v1_037_japanese-water-torture");
+  } else if (options.wallBreakerInGrip) {
+    moveRunnerCardToGrip(state, "onr_v1_037_japanese-water-torture");
+  }
+  moveRunnerCardToGrip(state, "simple_economy_event");
+  ensureRemoteServer(state, "remote_1");
+  const dataWallId = putCorpIceOnServer(
+    state,
+    "remote_1",
+    "onr_v1_237_data-wall",
+  );
+  state.cardInstances[dataWallId] = {
+    ...state.cardInstances[dataWallId]!,
+    faceup: true,
+    rezzed: options.rezzedIce,
+  };
+  const bbsId = putCorpRootInRemote(
+    state,
+    "onr_v1_309_bbs-whispering-campaign",
+    0,
+  );
+  state.cardInstances[bbsId] = {
+    ...state.cardInstances[bbsId]!,
+    faceup: options.knownRoot,
+    rezzed: options.knownRoot,
+  };
   return buildAiDecisionInput(state, "runner", {
     difficulty: "normal",
     profileId: "runner-ai-v1.4.1-normal",

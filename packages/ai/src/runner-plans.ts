@@ -5996,14 +5996,14 @@ function actionPriority(
       kind === "safe_probe_run") &&
     action.type === "start_run"
   ) {
+    const features = extractRunnerFeatures(input);
+    if (runnerRunActionIsKnownNoAccess(input, action, features)) return -9000;
     const target =
       typeof action.payload?.serverId === "string"
         ? action.payload.serverId
         : "";
     if (target === "hq" || target === "rd" || target === "archives") {
       const beliefState = reconstructBeliefState(input);
-      const features = extractRunnerFeatures(input);
-      if (runnerRunActionIsKnownNoAccess(input, action, features)) return -9000;
       const goodTarget = centralPressureTargetIsGood(
         input,
         target,

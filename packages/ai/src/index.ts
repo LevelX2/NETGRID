@@ -1654,6 +1654,18 @@ export type AiMatchProgressionMetrics = {
   runnerRunStartedAgainstKnownUnbreakablePath: number;
   runnerRunStartedAgainstKnownUnbreakableCentralPath: number;
   runnerRunStartedAgainstKnownUnbreakableRemotePath: number;
+  runnerKnownUnbreakableRemoteTraceSampled: number;
+  runnerKnownUnbreakableRemoteTrueBug: number;
+  runnerKnownUnbreakableRemoteForceRezOrProbeMisclassified: number;
+  runnerKnownUnbreakableRemoteStateChanged: number;
+  runnerKnownUnbreakableRemoteCoverageRepairMissing: number;
+  runnerKnownUnbreakableRemoteMetricArtifact: number;
+  runnerKnownUnbreakableRemoteUnclassified: number;
+  runnerKnownUnbreakableRemoteRunSuppressed: number;
+  runnerKnownUnbreakableRemoteRunPenalized: number;
+  runnerKnownUnbreakableRemoteCoverageRepairTaken: number;
+  runnerKnownUnbreakableRemoteCoverageRepairAvailable: number;
+  runnerKnownUnbreakableRemoteRunTakenDespiteGate: number;
   runnerMultiaccessValueAvailable: number;
   runnerMultiaccessValueUsed: number;
   runnerMultiaccessValueSuppressedNoAccess: number;
@@ -2745,6 +2757,18 @@ export type AiSimulationSummary = {
     runnerRunStartedAgainstKnownUnbreakablePath?: boolean;
     runnerRunStartedAgainstKnownUnbreakableCentralPath?: boolean;
     runnerRunStartedAgainstKnownUnbreakableRemotePath?: boolean;
+    runnerKnownUnbreakableRemoteTraceSampled?: boolean;
+    runnerKnownUnbreakableRemoteTrueBug?: boolean;
+    runnerKnownUnbreakableRemoteForceRezOrProbeMisclassified?: boolean;
+    runnerKnownUnbreakableRemoteStateChanged?: boolean;
+    runnerKnownUnbreakableRemoteCoverageRepairMissing?: boolean;
+    runnerKnownUnbreakableRemoteMetricArtifact?: boolean;
+    runnerKnownUnbreakableRemoteUnclassified?: boolean;
+    runnerKnownUnbreakableRemoteRunSuppressed?: boolean;
+    runnerKnownUnbreakableRemoteRunPenalized?: boolean;
+    runnerKnownUnbreakableRemoteCoverageRepairTaken?: boolean;
+    runnerKnownUnbreakableRemoteCoverageRepairAvailable?: boolean;
+    runnerKnownUnbreakableRemoteRunTakenDespiteGate?: boolean;
     runnerMultiaccessValueAvailable?: boolean;
     runnerMultiaccessValueUsed?: boolean;
     runnerMultiaccessValueSuppressedNoAccess?: boolean;
@@ -12671,6 +12695,18 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "runnerRunStartedAgainstKnownUnbreakablePath",
   "runnerRunStartedAgainstKnownUnbreakableCentralPath",
   "runnerRunStartedAgainstKnownUnbreakableRemotePath",
+  "runnerKnownUnbreakableRemoteTraceSampled",
+  "runnerKnownUnbreakableRemoteTrueBug",
+  "runnerKnownUnbreakableRemoteForceRezOrProbeMisclassified",
+  "runnerKnownUnbreakableRemoteStateChanged",
+  "runnerKnownUnbreakableRemoteCoverageRepairMissing",
+  "runnerKnownUnbreakableRemoteMetricArtifact",
+  "runnerKnownUnbreakableRemoteUnclassified",
+  "runnerKnownUnbreakableRemoteRunSuppressed",
+  "runnerKnownUnbreakableRemoteRunPenalized",
+  "runnerKnownUnbreakableRemoteCoverageRepairTaken",
+  "runnerKnownUnbreakableRemoteCoverageRepairAvailable",
+  "runnerKnownUnbreakableRemoteRunTakenDespiteGate",
   "runnerMultiaccessValueAvailable",
   "runnerMultiaccessValueUsed",
   "runnerMultiaccessValueSuppressedNoAccess",
@@ -14466,6 +14502,47 @@ export function summarizeMatchProgressionMetrics(
     runnerRunStartedAgainstKnownUnbreakableRemotePath: runnerRuns.filter(
       (entry) =>
         entry.runnerRunStartedAgainstKnownUnbreakableRemotePath === true,
+    ).length,
+    runnerKnownUnbreakableRemoteTraceSampled: actionSequence.filter(
+      (entry) => entry.runnerKnownUnbreakableRemoteTraceSampled === true,
+    ).length,
+    runnerKnownUnbreakableRemoteTrueBug: actionSequence.filter(
+      (entry) => entry.runnerKnownUnbreakableRemoteTrueBug === true,
+    ).length,
+    runnerKnownUnbreakableRemoteForceRezOrProbeMisclassified:
+      actionSequence.filter(
+        (entry) =>
+          entry.runnerKnownUnbreakableRemoteForceRezOrProbeMisclassified ===
+          true,
+      ).length,
+    runnerKnownUnbreakableRemoteStateChanged: actionSequence.filter(
+      (entry) => entry.runnerKnownUnbreakableRemoteStateChanged === true,
+    ).length,
+    runnerKnownUnbreakableRemoteCoverageRepairMissing: actionSequence.filter(
+      (entry) =>
+        entry.runnerKnownUnbreakableRemoteCoverageRepairMissing === true,
+    ).length,
+    runnerKnownUnbreakableRemoteMetricArtifact: actionSequence.filter(
+      (entry) => entry.runnerKnownUnbreakableRemoteMetricArtifact === true,
+    ).length,
+    runnerKnownUnbreakableRemoteUnclassified: actionSequence.filter(
+      (entry) => entry.runnerKnownUnbreakableRemoteUnclassified === true,
+    ).length,
+    runnerKnownUnbreakableRemoteRunSuppressed: actionSequence.filter(
+      (entry) => entry.runnerKnownUnbreakableRemoteRunSuppressed === true,
+    ).length,
+    runnerKnownUnbreakableRemoteRunPenalized: actionSequence.filter(
+      (entry) => entry.runnerKnownUnbreakableRemoteRunPenalized === true,
+    ).length,
+    runnerKnownUnbreakableRemoteCoverageRepairTaken: actionSequence.filter(
+      (entry) => entry.runnerKnownUnbreakableRemoteCoverageRepairTaken === true,
+    ).length,
+    runnerKnownUnbreakableRemoteCoverageRepairAvailable: actionSequence.filter(
+      (entry) =>
+        entry.runnerKnownUnbreakableRemoteCoverageRepairAvailable === true,
+    ).length,
+    runnerKnownUnbreakableRemoteRunTakenDespiteGate: runnerRuns.filter(
+      (entry) => entry.runnerKnownUnbreakableRemoteRunTakenDespiteGate === true,
     ).length,
     runnerMultiaccessValueAvailable: runnerRuns.filter(
       (entry) =>
@@ -25905,6 +25982,18 @@ function runnerKnownPathDiagnosticsForAction(
       suppressedServerId === "hq" ||
       suppressedServerId === "rd" ||
       suppressedServerId === "archives";
+    const suppressedRemote =
+      suppressedServerId !== undefined &&
+      isRemoteServerTarget(suppressedServerId);
+    const selectedRemoteCoverageRepair =
+      suppressedRemote &&
+      (selectedCoverageRepair.runnerCoverageRepairIntentSearchTaken === true ||
+        selectedCoverageRepair.runnerCoverageRepairIntentRecoveryTaken ===
+          true ||
+        selectedCoverageRepair.runnerCoverageRepairIntentInstallTaken ===
+          true ||
+        selectedCoverageRepair.runnerCoverageRepairIntentDrawOrEconomyTaken ===
+          true);
     return {
       ...(suppressedKnownNoAccess
         ? {
@@ -25935,6 +26024,19 @@ function runnerKnownPathDiagnosticsForAction(
             runnerCentralPressureSuppressedNoAccess: true,
             runnerMultiaccessValueSuppressedNoAccess: true,
           }
+        : {}),
+      ...(suppressedRemote
+        ? {
+            runnerKnownUnbreakableRemoteRunSuppressed: true,
+            runnerKnownUnbreakableRemoteTraceSampled: true,
+          }
+        : {}),
+      ...(suppressedRemote &&
+      selectedCoverageRepair.runnerCoverageRepairIntentCandidates === true
+        ? { runnerKnownUnbreakableRemoteCoverageRepairAvailable: true }
+        : {}),
+      ...(selectedRemoteCoverageRepair
+        ? { runnerKnownUnbreakableRemoteCoverageRepairTaken: true }
         : {}),
       ...(suppressedServerId === "hq"
         ? { runnerHqInterfaceSuppressedNoAccess: true }
@@ -26053,7 +26155,12 @@ function runnerKnownPathDiagnosticsForAction(
       : {}),
     ...(knownNoAccess && remote
       ? knownUnbreakableNoAccess
-        ? { runnerRunStartedAgainstKnownUnbreakableRemotePath: true }
+        ? {
+            runnerRunStartedAgainstKnownUnbreakableRemotePath: true,
+            runnerKnownUnbreakableRemoteTraceSampled: true,
+            runnerKnownUnbreakableRemoteTrueBug: true,
+            runnerKnownUnbreakableRemoteRunTakenDespiteGate: true,
+          }
         : { runnerRunStartedAgainstKnownUnpayableRemotePath: true }
       : {}),
     ...(knownNoAccess && central
@@ -26117,7 +26224,10 @@ function runnerKnownPathDiagnosticsForAction(
     ...(knownUnbreakableNoAccess &&
     remote &&
     runnerHasRecentRunOnServer(input, targetServerId)
-      ? { runnerRepeatKnownUnbreakableRemoteRunSuppressed: true }
+      ? {
+          runnerRepeatKnownUnbreakableRemoteRunSuppressed: true,
+          runnerKnownUnbreakableRemoteRunPenalized: true,
+        }
       : {}),
     ...(knownUnbreakableNoAccess &&
     targetServerId === "hq" &&
