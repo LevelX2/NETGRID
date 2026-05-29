@@ -305,6 +305,10 @@ type RunnerRemoteContestProfile = {
 type RunnerCentralPressureOpportunity = {
   targetServerId?: "hq" | "rd" | "archives";
   pathBlocked: boolean;
+  pathBlockedByUnbreakableIce: boolean;
+  pathBlockedByMissingCoverage: boolean;
+  pathBlockedByKnownEtr: boolean;
+  accessReachable: boolean;
   visibleBreakCost: number;
   creditsAfterPath: number;
   reserveTarget: number;
@@ -439,7 +443,9 @@ function runnerRunActionIsKnownNoAccess(
   );
   if (!assessment || assessment.canReachAccess) return false;
   if (assessment.assessedKnownIceCount <= 0) return false;
-  if (!runnerKnownPathAssessmentIsCostNoAccess(assessment)) return false;
+  if (!runnerKnownPathAssessmentIsKnownNoAccess(assessment)) return false;
+  if (runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment))
+    return action.payload?.bypass !== true;
   return !runnerRunActionHasExplicitProbeValue(input, action);
 }
 
@@ -449,6 +455,25 @@ function runnerKnownPathAssessmentIsCostNoAccess(
   return (
     assessment.unpayableReason === "ice_unaffordable" ||
     assessment.unpayableReason === "later_ice_unaffordable_after_prior_ice_cost"
+  );
+}
+
+function runnerKnownPathAssessmentIsUnbreakableNoAccess(
+  assessment: KnownRezzedIcePathAssessment,
+): boolean {
+  return (
+    assessment.unpayableReason === "ice_unbreakable" ||
+    assessment.knownPathBlockedByUnbreakableIce === true ||
+    assessment.knownPathBlockedByMissingCoverage === true
+  );
+}
+
+function runnerKnownPathAssessmentIsKnownNoAccess(
+  assessment: KnownRezzedIcePathAssessment,
+): boolean {
+  return (
+    runnerKnownPathAssessmentIsCostNoAccess(assessment) ||
+    runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment)
   );
 }
 
@@ -1948,11 +1973,15 @@ function evaluateRunnerCentralPressureDiscipline(
       };
     }
     if (opportunity.pathBlocked) {
-      score -= 360;
+      score -= opportunity.pathBlockedByUnbreakableIce ? 1900 : 560;
       reasons.push("central_pressure_path_blocked");
+      if (opportunity.pathBlockedByUnbreakableIce) {
+        reasons.push("central_pressure_known_unbreakable_no_access");
+      }
     }
     if (
       opportunity.matchingInterfaceInstalled &&
+      opportunity.accessReachable &&
       opportunity.preservesReserve
     ) {
       score += opportunity.targetServerId === "rd" ? 300 : 280;
@@ -1963,6 +1992,7 @@ function evaluateRunnerCentralPressureDiscipline(
       );
     } else if (
       opportunity.anyInterfaceInstalled &&
+      opportunity.accessReachable &&
       opportunity.preservesReserve
     ) {
       score += 110;
@@ -1974,6 +2004,7 @@ function evaluateRunnerCentralPressureDiscipline(
     }
     if (
       opportunity.centralPressureClear &&
+      opportunity.accessReachable &&
       opportunity.remoteThreatLessValuable &&
       (opportunity.matchingInterfaceInstalled ||
         opportunity.anyInterfaceInstalled ||
@@ -1983,7 +2014,7 @@ function evaluateRunnerCentralPressureDiscipline(
       score += 120;
       reasons.push("central_pressure_if_remote_low_threat");
     }
-    if (opportunity.repeatedFreshValue) {
+    if (opportunity.repeatedFreshValue && opportunity.accessReachable) {
       score += opportunity.closeoutOpportunity ? 110 : 75;
       reasons.push("central_pressure_with_fresh_value");
     }
@@ -2047,6 +2078,10 @@ function evaluateRunnerCentralPressureDiscipline(
     evidence: [
       `central_pressure_target:${opportunity.targetServerId ?? "none"}`,
       `central_pressure_path_blocked:${opportunity.pathBlocked}`,
+      `central_pressure_access_reachable:${opportunity.accessReachable}`,
+      `central_pressure_unbreakable_no_access:${opportunity.pathBlockedByUnbreakableIce}`,
+      `central_pressure_missing_coverage:${opportunity.pathBlockedByMissingCoverage}`,
+      `central_pressure_known_etr_block:${opportunity.pathBlockedByKnownEtr}`,
       `central_pressure_break_cost:${opportunity.visibleBreakCost}`,
       `central_pressure_credits_after_path:${opportunity.creditsAfterPath}`,
       `central_pressure_reserve_target:${opportunity.reserveTarget}`,
@@ -2055,6 +2090,7 @@ function evaluateRunnerCentralPressureDiscipline(
       `central_pressure_interface_installed:${opportunity.anyInterfaceInstalled}`,
       `central_pressure_matching_interface_installed:${opportunity.matchingInterfaceInstalled}`,
       `central_pressure_multiaccess_installed:${opportunity.multiaccessInstalled}`,
+      `central_pressure_multiaccess_suppressed_no_access:${opportunity.multiaccessInstalled && !opportunity.accessReachable}`,
       `central_pressure_install_opportunities:${opportunity.matchingPressureInstallActions}`,
       `central_pressure_run_events:${opportunity.matchingRunEvents}`,
       `central_pressure_run_event_good_target:${opportunity.runEventHasGoodTarget}`,
@@ -2766,8 +2802,12 @@ function runnerKnownPathEstimate(
       creditsAfterPath: number;
       blocked: boolean;
       canReachAccess: boolean;
+      knownPathBlockedByUnbreakableIce: boolean;
+      knownPathBlockedByMissingCoverage: boolean;
+      knownPathBlockedByEtr: boolean;
       canBreakNextIceButNotFullPath: boolean;
       unpayableReason?: KnownRezzedIcePathAssessment["unpayableReason"];
+      noAccessReason?: KnownRezzedIcePathAssessment["noAccessReason"];
       creditsSpentBeforeUnpayableIce: number;
       remoteScoreThreat: boolean;
     }
@@ -2792,9 +2832,17 @@ function runnerKnownPathEstimate(
     blocked: assessment.blocked || features.blockedRunServers.has(serverId),
     canReachAccess:
       assessment.canReachAccess && !features.blockedRunServers.has(serverId),
+    knownPathBlockedByUnbreakableIce:
+      assessment.knownPathBlockedByUnbreakableIce,
+    knownPathBlockedByMissingCoverage:
+      assessment.knownPathBlockedByMissingCoverage,
+    knownPathBlockedByEtr: assessment.knownPathBlockedByEtr,
     canBreakNextIceButNotFullPath: assessment.canBreakNextIceButNotFullPath,
     ...(assessment.unpayableReason
       ? { unpayableReason: assessment.unpayableReason }
+      : {}),
+    ...(assessment.noAccessReason
+      ? { noAccessReason: assessment.noAccessReason }
       : {}),
     creditsSpentBeforeUnpayableIce: assessment.creditsSpentBeforeUnpayableIce,
     remoteScoreThreat:
@@ -3575,6 +3623,9 @@ export function estimateRunCost(
   const knownNoAccess =
     fullPathAssessment?.canReachAccess === false &&
     fullPathAssessment.assessedKnownIceCount > 0;
+  const knownUnbreakableNoAccess =
+    knownNoAccess &&
+    runnerKnownPathAssessmentIsUnbreakableNoAccess(fullPathAssessment);
   const knownUnrezzedIceAdjustment = knownUnrezzedIceCostAdjustment(
     input,
     target,
@@ -3611,8 +3662,13 @@ export function estimateRunCost(
     reasons: blocked
       ? [
           "run_blocked_by_visible_rezzed_ice",
-          "visible_ice_unaffordable_to_break",
+          knownUnbreakableNoAccess
+            ? "visible_ice_unbreakable_missing_coverage"
+            : "visible_ice_unaffordable_to_break",
           ...(knownNoAccess ? ["known_full_path_no_access"] : []),
+          ...(knownUnbreakableNoAccess
+            ? ["known_unbreakable_path_no_access"]
+            : []),
           ...(fullPathAssessment?.canBreakNextIceButNotFullPath
             ? ["can_break_next_ice_but_not_full_path"]
             : []),
@@ -3627,6 +3683,8 @@ export function estimateRunCost(
       `known_path_can_reach_access:${fullPathAssessment?.canReachAccess ?? "unknown"}`,
       `known_path_credits_after_full_path:${fullPathAssessment?.creditsAfterPath ?? "unknown"}`,
       `known_path_unpayable_reason:${fullPathAssessment?.unpayableReason ?? "none"}`,
+      `known_path_no_access_reason:${fullPathAssessment?.noAccessReason ?? "none"}`,
+      `known_path_missing_coverage:${fullPathAssessment?.missingCoverage?.join("|") ?? "none"}`,
       `known_path_can_break_next_not_full:${fullPathAssessment?.canBreakNextIceButNotFullPath ?? false}`,
       ...knownUnrezzedIceAdjustment.evidence,
     ],
@@ -6322,6 +6380,7 @@ function runnerCentralPressureOpportunity(
   const creditsAfterPath =
     estimate?.creditsAfterPath ??
     input.playerView.own.credits - visibleBreakCost;
+  const accessReachable = estimate?.canReachAccess !== false;
   const reserveTarget = runnerCreditReserveTargetForPlanInput(input, features);
   const installedCards = input.playerView.own.rig ?? [];
   const matchingInterfaceInstalled =
@@ -6368,21 +6427,22 @@ function runnerCentralPressureOpportunity(
   });
   const closeout = target
     ? runnerCentralCloseoutProfile(input, target, beliefState, {
-        matchingInterfaceInstalled,
-        anyInterfaceInstalled,
-        multiaccessInstalled,
-        matchingRunEvents,
-        runEventHasGoodTarget,
+        matchingInterfaceInstalled:
+          accessReachable && matchingInterfaceInstalled,
+        anyInterfaceInstalled: accessReachable && anyInterfaceInstalled,
+        multiaccessInstalled: accessReachable && multiaccessInstalled,
+        matchingRunEvents: accessReachable ? matchingRunEvents : 0,
+        runEventHasGoodTarget: accessReachable && runEventHasGoodTarget,
         remoteThreatLessValuable: true,
       })
     : { opportunity: false, reasons: [] };
   const repeatedFreshValue =
     target !== undefined &&
     centralRepeatHasFreshValue(input, target, beliefState, {
-      matchingInterfaceInstalled,
-      anyInterfaceInstalled,
-      multiaccessInstalled,
-      runEventHasGoodTarget,
+      matchingInterfaceInstalled: accessReachable && matchingInterfaceInstalled,
+      anyInterfaceInstalled: accessReachable && anyInterfaceInstalled,
+      multiaccessInstalled: accessReachable && multiaccessInstalled,
+      runEventHasGoodTarget: accessReachable && runEventHasGoodTarget,
       closeoutOpportunity: closeout.opportunity,
     });
   const repeatedLowValue =
@@ -6431,11 +6491,12 @@ function runnerCentralPressureOpportunity(
       target,
       beliefState,
       {
-        matchingInterfaceInstalled,
-        anyInterfaceInstalled,
-        multiaccessInstalled,
+        matchingInterfaceInstalled:
+          accessReachable && matchingInterfaceInstalled,
+        anyInterfaceInstalled: accessReachable && anyInterfaceInstalled,
+        multiaccessInstalled: accessReachable && multiaccessInstalled,
         matchingRunEvents,
-        runEventHasGoodTarget,
+        runEventHasGoodTarget: accessReachable && runEventHasGoodTarget,
         remoteThreatLessValuable,
       },
     );
@@ -6445,12 +6506,19 @@ function runnerCentralPressureOpportunity(
   const centralPressureClear =
     target !== undefined &&
     !estimate?.blocked &&
+    accessReachable &&
     openOrCheap &&
     preservesReserve &&
     centralPressureTargetIsGood(input, target, features, beliefState);
   return {
     ...(target ? { targetServerId: target } : {}),
     pathBlocked: estimate?.blocked === true,
+    pathBlockedByUnbreakableIce:
+      estimate?.unpayableReason === "ice_unbreakable",
+    pathBlockedByMissingCoverage:
+      estimate?.knownPathBlockedByMissingCoverage === true,
+    pathBlockedByKnownEtr: estimate?.knownPathBlockedByEtr === true,
+    accessReachable,
     visibleBreakCost,
     creditsAfterPath,
     reserveTarget,
@@ -6755,15 +6823,22 @@ function bestCentralPressureTargetForVisibleBoard(
   beliefState: BeliefState,
 ): "hq" | "rd" | "archives" | undefined {
   const targets = (["rd", "hq", "archives"] as const)
-    .map((target) => ({
-      target,
-      score:
-        (centralPressureTargetIsGood(input, target, features, beliefState)
-          ? 100
-          : 0) +
-        (features.blockedRunServers.has(target) ? -200 : 0) +
-        ((features.visibleRunBreakCosts.get(target) ?? 0) <= 1 ? 30 : 0),
-    }))
+    .map((target) => {
+      const estimate = runnerKnownPathEstimate(input, target, features);
+      return {
+        target,
+        score:
+          (centralPressureTargetIsGood(input, target, features, beliefState)
+            ? 100
+            : 0) +
+          (estimate?.canReachAccess === false
+            ? estimate.unpayableReason === "ice_unbreakable"
+              ? -1200
+              : -500
+            : 0) +
+          ((features.visibleRunBreakCosts.get(target) ?? 0) <= 1 ? 30 : 0),
+      };
+    })
     .sort(
       (left, right) =>
         right.score - left.score || left.target.localeCompare(right.target),
@@ -7278,13 +7353,14 @@ function remoteServerHasKnownRelevantTrashTarget(
     (candidate) => candidate.id === serverId,
   );
   if (!server) return false;
-  const visibleBreakCost =
-    assessKnownRezzedIcePath(
-      server.ice,
-      input.playerView.own.rig ?? [],
-      input.playerView.own.credits,
-      server.root,
-    ).visibleBreakCost ?? 0;
+  const assessment = assessKnownRezzedIcePath(
+    server.ice,
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+    server.root,
+  );
+  if (!assessment.canReachAccess) return false;
+  const visibleBreakCost = assessment.visibleBreakCost ?? 0;
   const creditsAfterIce = input.playerView.own.credits - visibleBreakCost;
   return server.root.some((card) => {
     if (!card.known) return false;

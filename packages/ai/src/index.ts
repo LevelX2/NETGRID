@@ -1643,6 +1643,39 @@ export type AiMatchProgressionMetrics = {
   runnerRunStartedAgainstKnownUnpayableFullPath: number;
   runnerRunStartedAgainstKnownUnpayableRemotePath: number;
   runnerRunStartedAgainstKnownUnpayableCentralPath: number;
+  runnerKnownPathAccessReachable: number;
+  runnerKnownPathAccessNotReachable: number;
+  runnerKnownPathBlockedByUnbreakableIce: number;
+  runnerKnownPathBlockedByMissingCoverage: number;
+  runnerKnownPathBlockedByKnownEtr: number;
+  runnerKnownPathBlockedByWall: number;
+  runnerKnownPathBlockedByCodeGate: number;
+  runnerKnownPathBlockedBySentry: number;
+  runnerRunStartedAgainstKnownUnbreakablePath: number;
+  runnerRunStartedAgainstKnownUnbreakableCentralPath: number;
+  runnerRunStartedAgainstKnownUnbreakableRemotePath: number;
+  runnerMultiaccessValueAvailable: number;
+  runnerMultiaccessValueUsed: number;
+  runnerMultiaccessValueSuppressedNoAccess: number;
+  runnerCentralPressureSuppressedNoAccess: number;
+  runnerHqInterfaceSuppressedNoAccess: number;
+  runnerRndInterfaceSuppressedNoAccess: number;
+  runnerRepeatKnownUnbreakableRunSuppressed: number;
+  runnerRepeatKnownUnbreakableRunPenalized: number;
+  runnerRepeatKnownUnbreakableCentralRunSuppressed: number;
+  runnerRepeatKnownUnbreakableRemoteRunSuppressed: number;
+  runnerRepeatKnownUnbreakableRunTakenDespiteSuppression: number;
+  runnerCoverageRepairIntentCandidates: number;
+  runnerCoverageRepairIntentSearchTaken: number;
+  runnerCoverageRepairIntentRecoveryTaken: number;
+  runnerCoverageRepairIntentInstallTaken: number;
+  runnerCoverageRepairIntentDrawOrEconomyTaken: number;
+  runnerCoverageRepairIntentSatisfied: number;
+  runnerCoverageRepairIntentNoFollowup: number;
+  runnerCoverageRepairIntentBlockedByHiddenTargetUncertain: number;
+  runnerDataWallHqNoAccessSuppressed: number;
+  runnerDataWallHqRepeatSuppressed: number;
+  runnerHqInterfaceDataWallValueSuppressed: number;
   runnerKnownPathCanReachAccessFalse: number;
   runnerKnownPathCanBreakNextIceButNotFullPath: number;
   runnerRunAbortedAfterKnownUnpayableLaterIce: number;
@@ -2701,6 +2734,39 @@ export type AiSimulationSummary = {
     runnerRunStartedAgainstKnownUnpayableFullPath?: boolean;
     runnerRunStartedAgainstKnownUnpayableRemotePath?: boolean;
     runnerRunStartedAgainstKnownUnpayableCentralPath?: boolean;
+    runnerKnownPathAccessReachable?: boolean;
+    runnerKnownPathAccessNotReachable?: boolean;
+    runnerKnownPathBlockedByUnbreakableIce?: boolean;
+    runnerKnownPathBlockedByMissingCoverage?: boolean;
+    runnerKnownPathBlockedByKnownEtr?: boolean;
+    runnerKnownPathBlockedByWall?: boolean;
+    runnerKnownPathBlockedByCodeGate?: boolean;
+    runnerKnownPathBlockedBySentry?: boolean;
+    runnerRunStartedAgainstKnownUnbreakablePath?: boolean;
+    runnerRunStartedAgainstKnownUnbreakableCentralPath?: boolean;
+    runnerRunStartedAgainstKnownUnbreakableRemotePath?: boolean;
+    runnerMultiaccessValueAvailable?: boolean;
+    runnerMultiaccessValueUsed?: boolean;
+    runnerMultiaccessValueSuppressedNoAccess?: boolean;
+    runnerCentralPressureSuppressedNoAccess?: boolean;
+    runnerHqInterfaceSuppressedNoAccess?: boolean;
+    runnerRndInterfaceSuppressedNoAccess?: boolean;
+    runnerRepeatKnownUnbreakableRunSuppressed?: boolean;
+    runnerRepeatKnownUnbreakableRunPenalized?: boolean;
+    runnerRepeatKnownUnbreakableCentralRunSuppressed?: boolean;
+    runnerRepeatKnownUnbreakableRemoteRunSuppressed?: boolean;
+    runnerRepeatKnownUnbreakableRunTakenDespiteSuppression?: boolean;
+    runnerCoverageRepairIntentCandidates?: boolean;
+    runnerCoverageRepairIntentSearchTaken?: boolean;
+    runnerCoverageRepairIntentRecoveryTaken?: boolean;
+    runnerCoverageRepairIntentInstallTaken?: boolean;
+    runnerCoverageRepairIntentDrawOrEconomyTaken?: boolean;
+    runnerCoverageRepairIntentSatisfied?: boolean;
+    runnerCoverageRepairIntentNoFollowup?: boolean;
+    runnerCoverageRepairIntentBlockedByHiddenTargetUncertain?: boolean;
+    runnerDataWallHqNoAccessSuppressed?: boolean;
+    runnerDataWallHqRepeatSuppressed?: boolean;
+    runnerHqInterfaceDataWallValueSuppressed?: boolean;
     runnerKnownPathCanReachAccessFalse?: boolean;
     runnerKnownPathCanBreakNextIceButNotFullPath?: boolean;
     runnerRunAbortedAfterKnownUnpayableLaterIce?: boolean;
@@ -8953,8 +9019,15 @@ function extractAiFeatures(input: AiDecisionInput): AiFeatures {
   );
   const blockedRunServers = new Set(
     input.playerView.servers
-      .filter((server) =>
-        isBlockedByKnownRezzedIce(server.ice.at(-1), rigDefinitionIds),
+      .filter(
+        (server) =>
+          assessKnownRezzedIcePath(
+            server.ice,
+            input.playerView.own.rig ?? [],
+            input.playerView.own.credits,
+            server.root,
+          ).canReachAccess === false ||
+          isBlockedByKnownRezzedIce(server.ice.at(-1), rigDefinitionIds),
       )
       .map((server) => server.id),
   );
@@ -10415,7 +10488,7 @@ function scoreRunTarget(
   }
   if (serverId === "rd") score += 45;
   if (server?.iceCount) score -= Math.min(server.iceCount, 3) * 25;
-  if (features.blockedRunServers.has(serverId)) score -= 430;
+  if (features.blockedRunServers.has(serverId)) score -= 2000;
   if (features.credits < 3) score -= 140;
   if (features.rigRoles.size === 0 && difficulty !== "hard") score -= 60;
   score -= staleCentralRepeatPenalty;
@@ -12587,6 +12660,39 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "runnerRunStartedAgainstKnownUnpayableFullPath",
   "runnerRunStartedAgainstKnownUnpayableRemotePath",
   "runnerRunStartedAgainstKnownUnpayableCentralPath",
+  "runnerKnownPathAccessReachable",
+  "runnerKnownPathAccessNotReachable",
+  "runnerKnownPathBlockedByUnbreakableIce",
+  "runnerKnownPathBlockedByMissingCoverage",
+  "runnerKnownPathBlockedByKnownEtr",
+  "runnerKnownPathBlockedByWall",
+  "runnerKnownPathBlockedByCodeGate",
+  "runnerKnownPathBlockedBySentry",
+  "runnerRunStartedAgainstKnownUnbreakablePath",
+  "runnerRunStartedAgainstKnownUnbreakableCentralPath",
+  "runnerRunStartedAgainstKnownUnbreakableRemotePath",
+  "runnerMultiaccessValueAvailable",
+  "runnerMultiaccessValueUsed",
+  "runnerMultiaccessValueSuppressedNoAccess",
+  "runnerCentralPressureSuppressedNoAccess",
+  "runnerHqInterfaceSuppressedNoAccess",
+  "runnerRndInterfaceSuppressedNoAccess",
+  "runnerRepeatKnownUnbreakableRunSuppressed",
+  "runnerRepeatKnownUnbreakableRunPenalized",
+  "runnerRepeatKnownUnbreakableCentralRunSuppressed",
+  "runnerRepeatKnownUnbreakableRemoteRunSuppressed",
+  "runnerRepeatKnownUnbreakableRunTakenDespiteSuppression",
+  "runnerCoverageRepairIntentCandidates",
+  "runnerCoverageRepairIntentSearchTaken",
+  "runnerCoverageRepairIntentRecoveryTaken",
+  "runnerCoverageRepairIntentInstallTaken",
+  "runnerCoverageRepairIntentDrawOrEconomyTaken",
+  "runnerCoverageRepairIntentSatisfied",
+  "runnerCoverageRepairIntentNoFollowup",
+  "runnerCoverageRepairIntentBlockedByHiddenTargetUncertain",
+  "runnerDataWallHqNoAccessSuppressed",
+  "runnerDataWallHqRepeatSuppressed",
+  "runnerHqInterfaceDataWallValueSuppressed",
   "runnerKnownPathCanReachAccessFalse",
   "runnerKnownPathCanBreakNextIceButNotFullPath",
   "runnerRunAbortedAfterKnownUnpayableLaterIce",
@@ -14325,6 +14431,118 @@ export function summarizeMatchProgressionMetrics(
     runnerRunStartedAgainstKnownUnpayableCentralPath: runnerRuns.filter(
       (entry) =>
         entry.runnerRunStartedAgainstKnownUnpayableCentralPath === true,
+    ).length,
+    runnerKnownPathAccessReachable: actionSequence.filter(
+      (entry) => entry.runnerKnownPathAccessReachable === true,
+    ).length,
+    runnerKnownPathAccessNotReachable: actionSequence.filter(
+      (entry) => entry.runnerKnownPathAccessNotReachable === true,
+    ).length,
+    runnerKnownPathBlockedByUnbreakableIce: actionSequence.filter(
+      (entry) => entry.runnerKnownPathBlockedByUnbreakableIce === true,
+    ).length,
+    runnerKnownPathBlockedByMissingCoverage: actionSequence.filter(
+      (entry) => entry.runnerKnownPathBlockedByMissingCoverage === true,
+    ).length,
+    runnerKnownPathBlockedByKnownEtr: actionSequence.filter(
+      (entry) => entry.runnerKnownPathBlockedByKnownEtr === true,
+    ).length,
+    runnerKnownPathBlockedByWall: actionSequence.filter(
+      (entry) => entry.runnerKnownPathBlockedByWall === true,
+    ).length,
+    runnerKnownPathBlockedByCodeGate: actionSequence.filter(
+      (entry) => entry.runnerKnownPathBlockedByCodeGate === true,
+    ).length,
+    runnerKnownPathBlockedBySentry: actionSequence.filter(
+      (entry) => entry.runnerKnownPathBlockedBySentry === true,
+    ).length,
+    runnerRunStartedAgainstKnownUnbreakablePath: runnerRuns.filter(
+      (entry) => entry.runnerRunStartedAgainstKnownUnbreakablePath === true,
+    ).length,
+    runnerRunStartedAgainstKnownUnbreakableCentralPath: runnerRuns.filter(
+      (entry) =>
+        entry.runnerRunStartedAgainstKnownUnbreakableCentralPath === true,
+    ).length,
+    runnerRunStartedAgainstKnownUnbreakableRemotePath: runnerRuns.filter(
+      (entry) =>
+        entry.runnerRunStartedAgainstKnownUnbreakableRemotePath === true,
+    ).length,
+    runnerMultiaccessValueAvailable: runnerRuns.filter(
+      (entry) =>
+        entry.runnerCentralRunWithInterfaceInstalled === true ||
+        entry.runnerHqRunWithHqInterface === true ||
+        entry.runnerRndRunWithRndInterface === true,
+    ).length,
+    runnerMultiaccessValueUsed: runnerRuns.filter(
+      (entry) =>
+        (entry.runnerHqRunWithHqInterface === true ||
+          entry.runnerRndRunWithRndInterface === true) &&
+        entry.runnerMultiaccessValueSuppressedNoAccess !== true,
+    ).length,
+    runnerMultiaccessValueSuppressedNoAccess: actionSequence.filter(
+      (entry) => entry.runnerMultiaccessValueSuppressedNoAccess === true,
+    ).length,
+    runnerCentralPressureSuppressedNoAccess: actionSequence.filter(
+      (entry) => entry.runnerCentralPressureSuppressedNoAccess === true,
+    ).length,
+    runnerHqInterfaceSuppressedNoAccess: actionSequence.filter(
+      (entry) => entry.runnerHqInterfaceSuppressedNoAccess === true,
+    ).length,
+    runnerRndInterfaceSuppressedNoAccess: actionSequence.filter(
+      (entry) => entry.runnerRndInterfaceSuppressedNoAccess === true,
+    ).length,
+    runnerRepeatKnownUnbreakableRunSuppressed: actionSequence.filter(
+      (entry) => entry.runnerRepeatKnownUnbreakableRunSuppressed === true,
+    ).length,
+    runnerRepeatKnownUnbreakableRunPenalized: actionSequence.filter(
+      (entry) => entry.runnerRepeatKnownUnbreakableRunPenalized === true,
+    ).length,
+    runnerRepeatKnownUnbreakableCentralRunSuppressed: actionSequence.filter(
+      (entry) =>
+        entry.runnerRepeatKnownUnbreakableCentralRunSuppressed === true,
+    ).length,
+    runnerRepeatKnownUnbreakableRemoteRunSuppressed: actionSequence.filter(
+      (entry) => entry.runnerRepeatKnownUnbreakableRemoteRunSuppressed === true,
+    ).length,
+    runnerRepeatKnownUnbreakableRunTakenDespiteSuppression: runnerRuns.filter(
+      (entry) =>
+        entry.runnerRepeatKnownUnbreakableRunTakenDespiteSuppression === true,
+    ).length,
+    runnerCoverageRepairIntentCandidates: actionSequence.filter(
+      (entry) => entry.runnerCoverageRepairIntentCandidates === true,
+    ).length,
+    runnerCoverageRepairIntentSearchTaken: actionSequence.filter(
+      (entry) => entry.runnerCoverageRepairIntentSearchTaken === true,
+    ).length,
+    runnerCoverageRepairIntentRecoveryTaken: actionSequence.filter(
+      (entry) => entry.runnerCoverageRepairIntentRecoveryTaken === true,
+    ).length,
+    runnerCoverageRepairIntentInstallTaken: actionSequence.filter(
+      (entry) => entry.runnerCoverageRepairIntentInstallTaken === true,
+    ).length,
+    runnerCoverageRepairIntentDrawOrEconomyTaken: actionSequence.filter(
+      (entry) => entry.runnerCoverageRepairIntentDrawOrEconomyTaken === true,
+    ).length,
+    runnerCoverageRepairIntentSatisfied: actionSequence.filter(
+      (entry) => entry.runnerCoverageRepairIntentSatisfied === true,
+    ).length,
+    runnerCoverageRepairIntentNoFollowup: actionSequence.filter(
+      (entry) => entry.runnerCoverageRepairIntentNoFollowup === true,
+    ).length,
+    runnerCoverageRepairIntentBlockedByHiddenTargetUncertain:
+      actionSequence.filter(
+        (entry) =>
+          entry.runnerCoverageRepairIntentBlockedByHiddenTargetUncertain ===
+          true,
+      ).length,
+    runnerDataWallHqNoAccessSuppressed: actionSequence.filter(
+      (entry) => entry.runnerDataWallHqNoAccessSuppressed === true,
+    ).length,
+    runnerDataWallHqRepeatSuppressed: actionSequence.filter(
+      (entry) => entry.runnerDataWallHqRepeatSuppressed === true,
+    ).length,
+    runnerHqInterfaceDataWallValueSuppressed: actionSequence.filter(
+      (entry) => entry.runnerHqInterfaceDataWallValueSuppressed === true,
     ).length,
     runnerKnownPathCanReachAccessFalse: actionSequence.filter(
       (entry) => entry.runnerKnownPathCanReachAccessFalse === true,
@@ -25673,12 +25891,74 @@ function runnerKnownPathDiagnosticsForAction(
     }
     return {};
   }
-  if (action.type !== "start_run" || !targetServerId)
+  if (action.type !== "start_run" || !targetServerId) {
+    const selectedCoverageRepair = runnerCoverageRepairDiagnostic(
+      input,
+      action,
+    );
+    const suppressedUnbreakableTarget = legalKnownNoAccessTargets.find(
+      (target) =>
+        runnerKnownPathAssessmentIsUnbreakableNoAccess(target.assessment),
+    );
+    const suppressedServerId = suppressedUnbreakableTarget?.serverId;
+    const suppressedCentral =
+      suppressedServerId === "hq" ||
+      suppressedServerId === "rd" ||
+      suppressedServerId === "archives";
     return {
       ...(suppressedKnownNoAccess
-        ? { runnerRunSuppressedAsKnownNoAccess: true }
+        ? {
+            runnerRunSuppressedAsKnownNoAccess: true,
+          }
         : {}),
+      ...(suppressedUnbreakableTarget
+        ? {
+            runnerRepeatKnownUnbreakableRunSuppressed: true,
+            runnerKnownPathAccessNotReachable: true,
+            runnerKnownPathBlockedByUnbreakableIce: true,
+          }
+        : {}),
+      ...(suppressedUnbreakableTarget?.assessment
+        .knownPathBlockedByMissingCoverage
+        ? { runnerKnownPathBlockedByMissingCoverage: true }
+        : {}),
+      ...(suppressedUnbreakableTarget?.assessment.knownPathBlockedByEtr
+        ? { runnerKnownPathBlockedByKnownEtr: true }
+        : {}),
+      ...(suppressedUnbreakableTarget?.assessment.missingCoverage?.includes(
+        "wall",
+      )
+        ? { runnerKnownPathBlockedByWall: true }
+        : {}),
+      ...(suppressedCentral
+        ? {
+            runnerCentralPressureSuppressedNoAccess: true,
+            runnerMultiaccessValueSuppressedNoAccess: true,
+          }
+        : {}),
+      ...(suppressedServerId === "hq"
+        ? { runnerHqInterfaceSuppressedNoAccess: true }
+        : {}),
+      ...(suppressedServerId === "rd"
+        ? { runnerRndInterfaceSuppressedNoAccess: true }
+        : {}),
+      ...(suppressedServerId === "hq" &&
+      suppressedUnbreakableTarget?.assessment.unbreakableIceTitle ===
+        "Data Wall"
+        ? {
+            runnerDataWallHqNoAccessSuppressed: true,
+            runnerHqInterfaceDataWallValueSuppressed: true,
+          }
+        : {}),
+      ...(suppressedServerId === "hq" &&
+      suppressedUnbreakableTarget?.assessment.unbreakableIceTitle ===
+        "Data Wall" &&
+      runnerHasRecentRunOnServer(input, suppressedServerId)
+        ? { runnerDataWallHqRepeatSuppressed: true }
+        : {}),
+      ...selectedCoverageRepair,
     };
+  }
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === targetServerId,
   );
@@ -25720,7 +26000,9 @@ function runnerKnownPathDiagnosticsForAction(
   const knownNoAccess =
     assessment.canReachAccess === false &&
     assessment.assessedKnownIceCount > 0 &&
-    runnerKnownPathAssessmentIsCostNoAccess(assessment);
+    runnerKnownPathAssessmentIsKnownNoAccess(assessment);
+  const knownUnbreakableNoAccess =
+    knownNoAccess && runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment);
   const canBreakNextButNotFull =
     assessment.canBreakNextIceButNotFullPath === true;
   const insufficientReserve =
@@ -25758,15 +26040,90 @@ function runnerKnownPathDiagnosticsForAction(
       : {}),
     ...(knownNoAccess
       ? {
-          runnerRunStartedAgainstKnownUnpayableFullPath: true,
           runnerKnownPathCanReachAccessFalse: true,
         }
       : {}),
+    ...(assessment.canReachAccess
+      ? { runnerKnownPathAccessReachable: true }
+      : assessment.assessedKnownIceCount > 0
+        ? { runnerKnownPathAccessNotReachable: true }
+        : {}),
+    ...(knownNoAccess && !knownUnbreakableNoAccess
+      ? { runnerRunStartedAgainstKnownUnpayableFullPath: true }
+      : {}),
     ...(knownNoAccess && remote
-      ? { runnerRunStartedAgainstKnownUnpayableRemotePath: true }
+      ? knownUnbreakableNoAccess
+        ? { runnerRunStartedAgainstKnownUnbreakableRemotePath: true }
+        : { runnerRunStartedAgainstKnownUnpayableRemotePath: true }
       : {}),
     ...(knownNoAccess && central
-      ? { runnerRunStartedAgainstKnownUnpayableCentralPath: true }
+      ? knownUnbreakableNoAccess
+        ? { runnerRunStartedAgainstKnownUnbreakableCentralPath: true }
+        : { runnerRunStartedAgainstKnownUnpayableCentralPath: true }
+      : {}),
+    ...(knownUnbreakableNoAccess
+      ? {
+          runnerKnownPathBlockedByUnbreakableIce: true,
+          runnerRunStartedAgainstKnownUnbreakablePath: true,
+        }
+      : {}),
+    ...(assessment.knownPathBlockedByMissingCoverage
+      ? { runnerKnownPathBlockedByMissingCoverage: true }
+      : {}),
+    ...(assessment.knownPathBlockedByEtr
+      ? { runnerKnownPathBlockedByKnownEtr: true }
+      : {}),
+    ...(assessment.missingCoverage?.includes("wall")
+      ? { runnerKnownPathBlockedByWall: true }
+      : {}),
+    ...(assessment.missingCoverage?.includes("code_gate")
+      ? { runnerKnownPathBlockedByCodeGate: true }
+      : {}),
+    ...(assessment.missingCoverage?.includes("sentry")
+      ? { runnerKnownPathBlockedBySentry: true }
+      : {}),
+    ...(knownUnbreakableNoAccess && central && targetServerId === "hq"
+      ? { runnerHqInterfaceSuppressedNoAccess: true }
+      : {}),
+    ...(knownUnbreakableNoAccess && central && targetServerId === "rd"
+      ? { runnerRndInterfaceSuppressedNoAccess: true }
+      : {}),
+    ...(knownUnbreakableNoAccess && central
+      ? {
+          runnerMultiaccessValueSuppressedNoAccess: true,
+          runnerCentralPressureSuppressedNoAccess: true,
+        }
+      : {}),
+    ...(knownUnbreakableNoAccess &&
+    targetServerId === "hq" &&
+    assessment.unbreakableIceTitle === "Data Wall"
+      ? {
+          runnerDataWallHqNoAccessSuppressed: true,
+          runnerHqInterfaceDataWallValueSuppressed: true,
+        }
+      : {}),
+    ...(knownUnbreakableNoAccess &&
+    runnerHasRecentRunOnServer(input, targetServerId)
+      ? {
+          runnerRepeatKnownUnbreakableRunTakenDespiteSuppression: true,
+          runnerRepeatKnownUnbreakableRunPenalized: true,
+        }
+      : {}),
+    ...(knownUnbreakableNoAccess &&
+    central &&
+    runnerHasRecentRunOnServer(input, targetServerId)
+      ? { runnerRepeatKnownUnbreakableCentralRunSuppressed: true }
+      : {}),
+    ...(knownUnbreakableNoAccess &&
+    remote &&
+    runnerHasRecentRunOnServer(input, targetServerId)
+      ? { runnerRepeatKnownUnbreakableRemoteRunSuppressed: true }
+      : {}),
+    ...(knownUnbreakableNoAccess &&
+    targetServerId === "hq" &&
+    assessment.unbreakableIceTitle === "Data Wall" &&
+    runnerHasRecentRunOnServer(input, targetServerId)
+      ? { runnerDataWallHqRepeatSuppressed: true }
       : {}),
     ...(canBreakNextButNotFull
       ? { runnerKnownPathCanBreakNextIceButNotFullPath: true }
@@ -25831,7 +26188,7 @@ function runnerKnownNoAccessLegalRunTargets(
       if (
         assessment.canReachAccess ||
         assessment.assessedKnownIceCount <= 0 ||
-        !runnerKnownPathAssessmentIsCostNoAccess(assessment) ||
+        !runnerKnownPathAssessmentIsKnownNoAccess(assessment) ||
         runnerRunTargetHasOnlyUnknownOrUnrezzedIce(input, serverId)
       )
         return undefined;
@@ -25854,6 +26211,68 @@ function runnerKnownPathAssessmentIsCostNoAccess(
     assessment.unpayableReason === "ice_unaffordable" ||
     assessment.unpayableReason === "later_ice_unaffordable_after_prior_ice_cost"
   );
+}
+
+function runnerKnownPathAssessmentIsUnbreakableNoAccess(
+  assessment: KnownRezzedIcePathAssessment,
+): boolean {
+  return (
+    assessment.unpayableReason === "ice_unbreakable" ||
+    assessment.knownPathBlockedByUnbreakableIce === true ||
+    assessment.knownPathBlockedByMissingCoverage === true
+  );
+}
+
+function runnerKnownPathAssessmentIsKnownNoAccess(
+  assessment: KnownRezzedIcePathAssessment,
+): boolean {
+  return (
+    runnerKnownPathAssessmentIsCostNoAccess(assessment) ||
+    runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment)
+  );
+}
+
+function runnerCoverageRepairDiagnostic(
+  input: AiDecisionInput,
+  action: LegalAction,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  if (runnerKnownNoAccessLegalRunTargets(input).length === 0) return {};
+  const definitionId =
+    typeof action.source === "string"
+      ? findVisibleCard(input, action.source)?.definitionId
+      : undefined;
+  const roles = definitionId ? rolesForCardId(definitionId) : [];
+  const actionKind = action.type;
+  const isSearchOrRecovery =
+    roles.some(
+      (role) =>
+        role.includes("search") ||
+        role.includes("tutor") ||
+        role.includes("recovery") ||
+        role.includes("trash_recovery"),
+    ) || actionKind === "resolve_choice";
+  const isRecovery = roles.some(
+    (role) => role.includes("recovery") || role.includes("trash_recovery"),
+  );
+  const isInstall = actionKind === "install_card";
+  const isDrawOrEconomy =
+    actionKind === "draw_card" ||
+    actionKind === "gain_credit" ||
+    (actionKind === "play_event" && roles.some((role) => role === "economy"));
+  return {
+    runnerCoverageRepairIntentCandidates: true,
+    ...(isSearchOrRecovery && !isRecovery
+      ? { runnerCoverageRepairIntentSearchTaken: true }
+      : {}),
+    ...(isRecovery ? { runnerCoverageRepairIntentRecoveryTaken: true } : {}),
+    ...(isInstall ? { runnerCoverageRepairIntentInstallTaken: true } : {}),
+    ...(isDrawOrEconomy
+      ? { runnerCoverageRepairIntentDrawOrEconomyTaken: true }
+      : {}),
+    ...(isSearchOrRecovery || isInstall || isDrawOrEconomy
+      ? { runnerCoverageRepairIntentSatisfied: true }
+      : { runnerCoverageRepairIntentNoFollowup: true }),
+  };
 }
 
 function runnerRunTargetHasOnlyUnknownOrUnrezzedIce(

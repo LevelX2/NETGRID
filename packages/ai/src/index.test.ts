@@ -734,8 +734,13 @@ describe("MVP 0.3 AI controller contract", () => {
       blocked: false,
       visibleBreakCost: 3,
       canReachAccess: true,
+      knownPathBlockedByUnbreakableIce: false,
+      knownPathBlockedByMissingCoverage: false,
+      knownPathBlockedByEtr: false,
       creditsAfterPath: 1,
       canBreakNextIceButNotFullPath: false,
+      hasBypassOrSpecialAccessPlan: false,
+      reachableAccessReason: "known_path_reachable",
       creditsSpentBeforeUnpayableIce: 0,
       assessedKnownIceCount: 1,
     });
@@ -743,8 +748,13 @@ describe("MVP 0.3 AI controller contract", () => {
       blocked: false,
       visibleBreakCost: 2,
       canReachAccess: true,
+      knownPathBlockedByUnbreakableIce: false,
+      knownPathBlockedByMissingCoverage: false,
+      knownPathBlockedByEtr: false,
       creditsAfterPath: 2,
       canBreakNextIceButNotFullPath: false,
+      hasBypassOrSpecialAccessPlan: false,
+      reachableAccessReason: "known_path_reachable",
       creditsSpentBeforeUnpayableIce: 0,
       assessedKnownIceCount: 1,
     });
@@ -758,12 +768,35 @@ describe("MVP 0.3 AI controller contract", () => {
       blocked: true,
       visibleBreakCost: 5,
       canReachAccess: false,
+      knownPathBlockedByUnbreakableIce: false,
+      knownPathBlockedByMissingCoverage: false,
+      knownPathBlockedByEtr: true,
       creditsAfterPath: -1,
       canBreakNextIceButNotFullPath: true,
       unpayableIceIndex: 0,
+      hasBypassOrSpecialAccessPlan: false,
+      noAccessReason: "known_path_unpayable",
       creditsSpentBeforeUnpayableIce: 3,
       assessedKnownIceCount: 2,
       unpayableReason: "later_ice_unaffordable_after_prior_ice_cost",
+    });
+  });
+
+  it("classifies known rezzed ETR ICE without breaker coverage as unbreakable no-access", () => {
+    const cardsById = createRuntimeCardsById();
+    const dataWall = runtimeVisibleIce(cardsById["onr_v1_237_data-wall"]);
+
+    expect(assessKnownRezzedIcePath([dataWall], [], 6)).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      knownPathBlockedByUnbreakableIce: true,
+      knownPathBlockedByMissingCoverage: true,
+      knownPathBlockedByEtr: true,
+      unpayableReason: "ice_unbreakable",
+      noAccessReason: "missing_breaker_coverage",
+      unbreakableIceIndex: 0,
+      unbreakableIceTitle: "Data Wall",
+      missingCoverage: ["wall"],
     });
   });
 
@@ -2866,8 +2899,10 @@ describe("MVP 0.3 Runner AI", () => {
     });
 
     expect(emptyOnly.reasonCode).toBe("runner.plan.safe_probe_run");
-    expect(emptyOnly.evidence).toContain("ice_count:1");
-    expect(emptyOnly.evidence).toContain("root_count:0");
+    expect(emptyOnly.evidence).toContain("target:remote_1");
+    expect((emptyOnly.evidence ?? []).join("|")).toContain(
+      "known_path_target:remote_1",
+    );
     expect(betterTarget.actionId).toBe(rdRun.actionId);
   });
 
@@ -2898,7 +2933,9 @@ describe("MVP 0.3 Runner AI", () => {
       aiLevel: 2,
       planKind: "contest_remote",
     });
-    expect(decision.evidence).toContain("root_count:2");
+    expect((decision.evidence ?? []).join("|")).toContain(
+      "affordable_remote_contest:true",
+    );
     expect(serializedDecision).not.toContain("Simple Agenda");
     expect(serializedDecision).not.toContain("Simple Economy Asset");
     expect(assertAiInputIsSideSafe(input)).toBe(true);
@@ -3470,7 +3507,9 @@ describe("MVP 0.3 Runner AI", () => {
       legalActions: [remoteRun, gain],
     });
 
-    expect(runCost.reasons).toContain("visible_ice_unaffordable_to_break");
+    expect(runCost.reasons).toContain(
+      "visible_ice_unbreakable_missing_coverage",
+    );
     expect(runCost.evidence).toContain("visible_etr_break_cost:unavailable");
     expect(access.reasons).toContain("visible_run_path_blocked");
     expect(remoteThreat.reasons).toContain(
@@ -12552,6 +12591,150 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(decision.evidence).toContain(
       "central_pressure_matching_interface_installed:true",
     );
+  });
+
+  it("suppresses HQ Interface value when known Data Wall blocks HQ access", () => {
+    const input = runnerActionPhaseInput(
+      "ai-v143-hq-interface-data-wall-no-access",
+      (state) => {
+        state.runner.credits = 6;
+        moveRunnerHardwareToRig(state, "onr_v1_129_hq-interface");
+        moveRunnerCardToGrip(state, "simple_economy_event");
+        const dataWallId = putCorpIceOnServer(
+          state,
+          "hq",
+          "onr_v1_237_data-wall",
+        );
+        state.cardInstances[dataWallId] = {
+          ...state.cardInstances[dataWallId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      {
+        ...runnerCentralPressureDeckConfig("hq-data-wall"),
+        corpDeck: {
+          ...runnerCentralPressureDeckConfig("hq-data-wall").corpDeck!,
+          cards: [
+            ...runnerCentralPressureDeckConfig("hq-data-wall").corpDeck!.cards,
+            { id: "onr_v1_237_data-wall", quantity: 1 },
+          ],
+        },
+      },
+    );
+    const hqRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+    expect(hqRun).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!hqRun || !economy) throw new Error("Missing Data Wall HQ fixture");
+
+    const pressureCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "pressure_hq",
+    );
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate) throw new Error("Missing pressure_hq candidate");
+    const runCost = estimateRunCost(input, pressureCandidate);
+    const pressure = evaluateRunnerPlan(input, pressureCandidate);
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [hqRun, economy],
+    });
+
+    expect(runCost.reasons).toContain(
+      "visible_ice_unbreakable_missing_coverage",
+    );
+    expect(runCost.evidence).toContain(
+      "known_path_no_access_reason:missing_breaker_coverage",
+    );
+    expect(pressure.reasons).toContain(
+      "central_pressure_known_unbreakable_no_access",
+    );
+    expect(pressure.evidence).toContain(
+      "central_pressure_multiaccess_suppressed_no_access:true",
+    );
+    expect(decision.actionId).toBe(economy.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
+  it("allows HQ Interface pressure after wall coverage is installed", () => {
+    const coveredConfig = runnerCentralPressureDeckConfig(
+      "hq-data-wall-covered",
+    );
+    const input = runnerActionPhaseInput(
+      "ai-v143-hq-interface-data-wall-covered",
+      (state) => {
+        state.runner.credits = 7;
+        moveRunnerHardwareToRig(state, "onr_v1_129_hq-interface");
+        moveRunnerProgramToRig(state, "onr_v1_037_japanese-water-torture");
+        moveRunnerCardToGrip(state, "simple_economy_event");
+        const dataWallId = putCorpIceOnServer(
+          state,
+          "hq",
+          "onr_v1_237_data-wall",
+        );
+        state.cardInstances[dataWallId] = {
+          ...state.cardInstances[dataWallId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      {
+        ...coveredConfig,
+        runnerDeck: {
+          ...coveredConfig.runnerDeck!,
+          cards: [
+            ...coveredConfig.runnerDeck!.cards,
+            { id: "onr_v1_037_japanese-water-torture", quantity: 3 },
+          ],
+        },
+        corpDeck: {
+          ...coveredConfig.corpDeck!,
+          cards: [
+            ...coveredConfig.corpDeck!.cards,
+            { id: "onr_v1_237_data-wall", quantity: 1 },
+          ],
+        },
+      },
+    );
+    const hqRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const economy = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionFromInput(input, action) === "simple_economy_event",
+    );
+    expect(hqRun).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!hqRun || !economy)
+      throw new Error("Missing covered Data Wall HQ fixture");
+    const hqCandidate = generateRunnerPlanCandidates(input).find((candidate) =>
+      candidate.legalActionIds.includes(hqRun.actionId),
+    );
+    expect(hqCandidate).toBeDefined();
+    if (!hqCandidate)
+      throw new Error("Missing covered Data Wall HQ run candidate");
+    const hqRunCost = estimateRunCost(input, hqCandidate);
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [hqRun],
+    });
+
+    expect(decision.actionId).toBe(hqRun.actionId);
+    expect(hqRunCost.evidence).toContain("blocked:false");
+    expect(hqRunCost.reasons).not.toContain(
+      "visible_ice_unbreakable_missing_coverage",
+    );
+    expect(hqRunCost.reasons).not.toContain("known_full_path_no_access");
   });
 
   it("installs a central interface when it creates a near-term pressure line", () => {
