@@ -807,8 +807,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/operations/credit-consolidation.ts",
   "onr_proteus_048_data-sifters":
     "packages/engine/src/card-implementations/proteus/corp/operations/data-sifters.ts",
+  "onr_proteus_049_emergency-rig":
+    "packages/engine/src/card-implementations/proteus/corp/operations/emergency-rig.ts",
   "onr_proteus_050_manhunt":
     "packages/engine/src/card-implementations/proteus/corp/operations/manhunt.ts",
+  "onr_proteus_051_rent-to-own-contract":
+    "packages/engine/src/card-implementations/proteus/corp/operations/rent-to-own-contract.ts",
   "onr_proteus_052_schlaghund-pointers":
     "packages/engine/src/card-implementations/proteus/corp/operations/schlaghund-pointers.ts",
   "onr_proteus_053_underworld-mole":
@@ -835,12 +839,22 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/upgrades/lesley-major.ts",
   "onr_proteus_063_lisa-blight":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/lisa-blight.ts",
+  "onr_proteus_060_herman-revista":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/herman-revista.ts",
+  "onr_proteus_064_marcel-desoleil":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/marcel-desoleil.ts",
   "onr_proteus_065_networked-center":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/networked-center.ts",
+  "onr_proteus_066_obfuscated-fortress":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/obfuscated-fortress.ts",
+  "onr_proteus_069_pavit-bharat":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/pavit-bharat.ts",
   "onr_proteus_070_rasmin-bridger":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/rasmin-bridger.ts",
   "onr_proteus_072_research-bunker":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/research-bunker.ts",
+  "onr_proteus_073_simon-francisco":
+    "packages/engine/src/card-implementations/proteus/corp/upgrades/simon-francisco.ts",
   "onr_proteus_077_weapons-depot":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/weapons-depot.ts",
   "onr_proteus_078_armageddon":
@@ -891,6 +905,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/events/cruising-for-netwatch.ts",
   "onr_proteus_109_frame-up":
     "packages/engine/src/card-implementations/proteus/runner/events/frame-up.ts",
+  "onr_proteus_111_ice-and-data-special-report":
+    "packages/engine/src/card-implementations/proteus/runner/events/ice-and-data-special-report.ts",
   "onr_proteus_112_identity-donor":
     "packages/engine/src/card-implementations/proteus/runner/events/identity-donor.ts",
   "onr_proteus_113_live-news-feed":

@@ -353,6 +353,9 @@ export function handleRunEndCleanup(
     run,
     legalAction,
   );
+  const spendCapShortfall = run
+    ? applyRunCreditSpendCapShortfall(host, run, legalAction)
+    : { handled: false, lostCredits: 0, shortfall: 0 };
   resetBreakerStrength(host.state);
   delete host.state.run;
   host.state.phase = "runner_action_phase";
@@ -375,6 +378,12 @@ export function handleRunEndCleanup(
     ...(temporary.unpreventableDamage !== undefined
       ? { unpreventableDamage: temporary.unpreventableDamage }
       : {}),
+    ...(spendCapShortfall.handled
+      ? {
+          runCreditSpendCapShortfall: spendCapShortfall.shortfall,
+          lostCredits: spendCapShortfall.lostCredits,
+        }
+      : {}),
     ...(postRunBridge.followupRunChoiceStarted !== undefined
       ? { followupRunChoiceStarted: postRunBridge.followupRunChoiceStarted }
       : {}),
@@ -386,6 +395,32 @@ export function handleRunEndCleanup(
     ...(legalAction?.payload ? { resolvedPayload: legalAction.payload } : {}),
     stateChanged: true,
   };
+}
+
+function applyRunCreditSpendCapShortfall(
+  host: RunEndCleanupHost,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): { handled: boolean; shortfall: number; lostCredits: number } {
+  const cap = run.runCreditSpendCap;
+  if (!cap) return { handled: false, shortfall: 0, lostCredits: 0 };
+  const announced = Math.max(0, Math.floor(cap.announcedSpendCap ?? 0));
+  const spent = Math.max(0, Math.floor(cap.spentDuringRun ?? 0));
+  const shortfall = Math.max(0, announced - spent);
+  const lostCredits = Math.min(shortfall, Math.max(0, host.state.runner.credits));
+  if (lostCredits > 0) host.state.runner.credits -= lostCredits;
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      runCreditSpendCap: announced,
+      runCreditSpentDuringRun: spent,
+      runCreditSpendCapShortfall: shortfall,
+      runnerCreditsLost: lostCredits,
+      runnerCreditsAfter: host.state.runner.credits,
+      sourceDefinitionId: cap.sourceDefinitionId,
+    };
+  }
+  return { handled: true, shortfall, lostCredits };
 }
 
 function applyBadPublicityRunAftermath(

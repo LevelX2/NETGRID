@@ -28,6 +28,8 @@ export type CardEffectExecutionContext = {
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
   targetCardId?: CardInstanceId;
+  xValue?: number;
+  targetRezCost?: number;
   controller: Side;
   reason?: string;
   drawCards?: (
@@ -114,6 +116,7 @@ export type CardEffectExecutionContext = {
   startExposeInstalledCards?: (
     min: number,
     max: number,
+    scope?: "any_installed" | "single_data_fort",
   ) => CardEffectHiddenInfoResult;
   exposeOutermostIceEachFort?: () => CardEffectHiddenInfoResult;
   startShowHqAgendasForCredits?: (
@@ -195,6 +198,14 @@ export type CardEffectExecutionContext = {
   passCurrentEncounteredIce?: (
     subtypeRequired?: "ap",
   ) => CardEffectHiddenInfoResult;
+  freeRezInstalledIceWithCounters?: (input: {
+    counterType: Extract<CounterType, "kludge" | "term">;
+    amount: number;
+    lifecycle:
+      | "remove_one_counter_start_corp_turn_trash_on_last"
+      | "rent_to_own_start_corp_turn";
+  }) => CardEffectHiddenInfoResult;
+  replaceSourceFortCardsFromHq?: () => CardEffectHiddenInfoResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -820,6 +831,43 @@ export function executeCardImplementationEffects(
         mergePublicPayload(
           publicPayload,
           context.copySameFortIceSubroutineForRun().publicPayload,
+        );
+        return;
+      }
+      case "free_rez_installed_ice_with_counters": {
+        assertPublicVisibility("free_rez_installed_ice_with_counters", effect.visibility);
+        if (effect.target !== "chosen_installed_ice")
+          throw new Error("free_rez_installed_ice_with_counters target is invalid.");
+        if (!context.freeRezInstalledIceWithCounters)
+          throw new Error(
+            "free_rez_installed_ice_with_counters requires a target context.",
+          );
+        const amount =
+          effect.amount.kind === "bounded_x_by_rez_cost_min_one"
+            ? Math.max(0, Math.floor(Number(context.xValue ?? 0)))
+            : Math.max(0, Math.floor(Number(context.targetRezCost ?? 0)));
+        mergePublicPayload(
+          publicPayload,
+          context.freeRezInstalledIceWithCounters({
+            counterType: effect.counterType,
+            amount,
+            lifecycle: effect.lifecycle,
+          }).publicPayload,
+        );
+        return;
+      }
+      case "replace_source_fort_cards_from_hq": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error("replace_source_fort_cards_from_hq visibility is invalid.");
+        if (effect.include !== "root_and_ice" || effect.installCost !== "free")
+          throw new Error("replace_source_fort_cards_from_hq profile is invalid.");
+        if (!context.replaceSourceFortCardsFromHq)
+          throw new Error(
+            "replace_source_fort_cards_from_hq requires a source-fort context.",
+          );
+        mergePublicPayload(
+          publicPayload,
+          context.replaceSourceFortCardsFromHq().publicPayload,
         );
         return;
       }
@@ -1449,6 +1497,7 @@ export function executeCardImplementationEffects(
         const exposeResult = context.startExposeInstalledCards(
           effect.min,
           effect.max,
+          effect.scope,
         );
         mergePublicPayload(publicPayload, exposeResult.publicPayload);
         return;

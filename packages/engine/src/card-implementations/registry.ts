@@ -406,7 +406,9 @@ import { proteusCoyoteImplementation } from "./proteus/corp/ice/coyote";
 import { proteusCorporateGuardRTempsImplementation } from "./proteus/corp/operations/corporate-guard-r-temps";
 import { proteusCreditConsolidationImplementation } from "./proteus/corp/operations/credit-consolidation";
 import { proteusDataSiftersImplementation } from "./proteus/corp/operations/data-sifters";
+import { proteusEmergencyRigImplementation } from "./proteus/corp/operations/emergency-rig";
 import { proteusManhuntImplementation } from "./proteus/corp/operations/manhunt";
+import { proteusRentToOwnContractImplementation } from "./proteus/corp/operations/rent-to-own-contract";
 import { proteusSchlaghundPointersImplementation } from "./proteus/corp/operations/schlaghund-pointers";
 import { proteusUnderworldMoleImplementation } from "./proteus/corp/operations/underworld-mole";
 import { proteusBugZapperImplementation } from "./proteus/corp/ice/bug-zapper";
@@ -441,13 +443,18 @@ import { proteusWalkingWallImplementation } from "./proteus/corp/ice/walking-wal
 import { proteusWashedUpSoloConstructImplementation } from "./proteus/corp/ice/washed-up-solo-construct";
 import { proteusMinotaurImplementation } from "./proteus/corp/ice/minotaur";
 import { proteusRiddlerImplementation } from "./proteus/corp/ice/riddler";
+import { proteusHermanRevistaImplementation } from "./proteus/corp/upgrades/herman-revista";
 import { proteusLesleyMajorImplementation } from "./proteus/corp/upgrades/lesley-major";
 import { proteusLisaBlightImplementation } from "./proteus/corp/upgrades/lisa-blight";
+import { proteusMarcelDesoleilImplementation } from "./proteus/corp/upgrades/marcel-desoleil";
 import { proteusNetworkedCenterImplementation } from "./proteus/corp/upgrades/networked-center";
+import { proteusObfuscatedFortressImplementation } from "./proteus/corp/upgrades/obfuscated-fortress";
 import { proteusPanicButtonImplementation } from "./proteus/corp/upgrades/panic-button";
+import { proteusPavitBharatImplementation } from "./proteus/corp/upgrades/pavit-bharat";
 import { proteusRaymondEllisonImplementation } from "./proteus/corp/upgrades/raymond-ellison";
 import { proteusRasminBridgerImplementation } from "./proteus/corp/upgrades/rasmin-bridger";
 import { proteusResearchBunkerImplementation } from "./proteus/corp/upgrades/research-bunker";
+import { proteusSimonFranciscoImplementation } from "./proteus/corp/upgrades/simon-francisco";
 import { proteusWeaponsDepotImplementation } from "./proteus/corp/upgrades/weapons-depot";
 import { proteusFakedHitImplementation } from "./proteus/runner/events/faked-hit";
 import { proteusFrameUpImplementation } from "./proteus/runner/events/frame-up";
@@ -459,6 +466,7 @@ import { proteusDemolitionRunImplementation } from "./proteus/runner/events/demo
 import { proteusDisgruntledIceTechnicianImplementation } from "./proteus/runner/events/disgruntled-ice-technician";
 import { proteusDroneForADayImplementation } from "./proteus/runner/events/drone-for-a-day";
 import { proteusHijackImplementation } from "./proteus/runner/events/hijack";
+import { proteusIceAndDataSpecialReportImplementation } from "./proteus/runner/events/ice-and-data-special-report";
 import { proteusIdentityDonorImplementation } from "./proteus/runner/events/identity-donor";
 import { proteusLiveNewsFeedImplementation } from "./proteus/runner/events/live-news-feed";
 import { proteusOnTheFastTrackImplementation } from "./proteus/runner/events/on-the-fast-track";
@@ -907,7 +915,9 @@ export const CARD_IMPLEMENTATIONS = [
   proteusCorporateGuardRTempsImplementation,
   proteusCreditConsolidationImplementation,
   proteusDataSiftersImplementation,
+  proteusEmergencyRigImplementation,
   proteusManhuntImplementation,
+  proteusRentToOwnContractImplementation,
   proteusSchlaghundPointersImplementation,
   proteusUnderworldMoleImplementation,
   proteusToughoniumWallImplementation,
@@ -942,6 +952,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusWashedUpSoloConstructImplementation,
   proteusMinotaurImplementation,
   proteusRiddlerImplementation,
+  proteusHermanRevistaImplementation,
   proteusCybertechThinkTankImplementation,
   proteusDepartmentOfMisinformationImplementation,
   proteusGovernmentContractImplementation,
@@ -949,11 +960,15 @@ export const CARD_IMPLEMENTATIONS = [
   proteusLdlTrafficAnalyzersImplementation,
   proteusLesleyMajorImplementation,
   proteusLisaBlightImplementation,
+  proteusMarcelDesoleilImplementation,
   proteusNetworkedCenterImplementation,
+  proteusObfuscatedFortressImplementation,
   proteusPanicButtonImplementation,
+  proteusPavitBharatImplementation,
   proteusRaymondEllisonImplementation,
   proteusRasminBridgerImplementation,
   proteusResearchBunkerImplementation,
+  proteusSimonFranciscoImplementation,
   proteusSirenImplementation,
   proteusSydMeyerSuperstoresImplementation,
   proteusWeaponsDepotImplementation,
@@ -981,6 +996,7 @@ export const CARD_IMPLEMENTATIONS = [
   proteusDisgruntledIceTechnicianImplementation,
   proteusDroneForADayImplementation,
   proteusHijackImplementation,
+  proteusIceAndDataSpecialReportImplementation,
   proteusIdentityDonorImplementation,
   proteusLiveNewsFeedImplementation,
   proteusOnTheFastTrackImplementation,

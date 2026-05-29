@@ -173,6 +173,7 @@ export type CardImplementationRuntimeDependencies = {
     sourceDefinitionId: CardDefinition["id"],
     min: number,
     max: number,
+    scope?: "any_installed" | "single_data_fort",
   ) => CardEffectHiddenInfoResult;
   exposeOutermostIceEachDataFort: (
     state: GameState,
@@ -181,6 +182,7 @@ export type CardImplementationRuntimeDependencies = {
     sourceDefinitionId: CardDefinition["id"],
   ) => CardEffectHiddenInfoResult;
   outermostIceEachDataFortExposeCount: (state: GameState) => number;
+  rezCostForCard: (state: GameState, cardId: CardInstanceId) => number;
   startShowHqAgendasForCreditsChoice: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -434,6 +436,31 @@ export type CardImplementationRuntimeDependencies = {
     state: GameState,
     legalAction: LegalAction,
     subtypeRequired?: "ap",
+  ) => CardEffectHiddenInfoResult;
+  freeRezInstalledIceWithCounters: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    input: {
+      counterType: Extract<CounterType, "kludge" | "term">;
+      amount: number;
+      lifecycle:
+        | "remove_one_counter_start_corp_turn_trash_on_last"
+        | "rent_to_own_start_corp_turn";
+    },
+  ) => CardEffectHiddenInfoResult;
+  replaceSourceFortCardsFromHq: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+  ) => CardEffectHiddenInfoResult;
+  trashTopCorpRdCards: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceDefinitionId: CardDefinition["id"],
+    amount: 2,
   ) => CardEffectHiddenInfoResult;
   startDistributeAdvancementCounters: (
     state: GameState,
@@ -868,6 +895,11 @@ export function executeCardImplementationLifecycleEffects(
       sourceCardId: cardId,
       sourceDefinitionId: definition.id,
       sourceTitle: definition.title,
+      ...(typeof legalAction?.payload?.targetCardId === "string"
+        ? { targetCardId: legalAction.payload.targetCardId as CardInstanceId }
+        : {}),
+      xValue: Math.floor(Number(legalAction?.payload?.xValue ?? 0)),
+      targetRezCost: Math.floor(Number(legalAction?.payload?.targetRezCost ?? 0)),
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
@@ -888,6 +920,16 @@ export function executeCardImplementationLifecycleEffects(
           sourceCardId,
           definition.id,
         ),
+      replaceSourceFortCardsFromHq: () => {
+        if (!legalAction)
+          throw new Error("Source-fort replacement braucht eine LegalAction.");
+        return deps.replaceSourceFortCardsFromHq(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+        );
+      },
       ...(reason ? { reason } : {}),
     },
     effects,
@@ -1272,6 +1314,11 @@ export function resolveCardImplementationEndOfRunnerTurnAction(
       sourceCardId: cardId,
       sourceDefinitionId: definition.id,
       sourceTitle: definition.title,
+      ...(typeof legalAction.payload?.targetCardId === "string"
+        ? { targetCardId: legalAction.payload.targetCardId as CardInstanceId }
+        : {}),
+      xValue: Math.floor(Number(legalAction.payload?.xValue ?? 0)),
+      targetRezCost: Math.floor(Number(legalAction.payload?.targetRezCost ?? 0)),
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       reason: "end_of_turn",
       addHostedCredits: (sourceCardId, amount) =>
@@ -1357,6 +1404,11 @@ function activatedAbilityLegalActionCosts(
         throw new Error(
           "Activated CardImplementation corp_random_discard_hq cost must be positive.",
         );
+    } else if (cost.kind === "trash_corp_rd_top") {
+      if (cost.amount !== 2)
+        throw new Error(
+          "Activated CardImplementation trash_corp_rd_top cost amount must be 2.",
+        );
     } else {
       const unknownCost = cost as { kind?: string };
       throw new Error(
@@ -1407,6 +1459,14 @@ function randomCorpHqDiscardCostForActivatedAbility(
 ): number {
   return ability.costs
     .filter((cost) => cost.kind === "corp_random_discard_hq")
+    .reduce((sum, cost) => sum + assertActivatedCostAmount(cost), 0);
+}
+
+function topCorpRdTrashCostForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): number {
+  return ability.costs
+    .filter((cost) => cost.kind === "trash_corp_rd_top")
     .reduce((sum, cost) => sum + assertActivatedCostAmount(cost), 0);
 }
 
@@ -1481,12 +1541,18 @@ function canPayActivatedCardImplementationCosts(
   if (randomDiscardCost > 0) {
     if (side !== "corp" || state.corp.hq.length < randomDiscardCost) return false;
   }
+  const topCorpRdTrashCost = topCorpRdTrashCostForActivatedAbility(ability);
+  if (topCorpRdTrashCost > 0) {
+    if (side !== "corp" || state.corp.rd.length < topCorpRdTrashCost)
+      return false;
+  }
   return true;
 }
 
 function payActivatedCardImplementationCosts(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
+  legalAction: LegalAction,
   side: Side,
   cardId: CardInstanceId,
   ability: ActivatedCardAbilityImplementation,
@@ -1547,6 +1613,25 @@ function payActivatedCardImplementationCosts(
       ).publicPayload,
     );
     publicPayload.cardImplementationRandomHqDiscardCost = randomDiscardCost;
+  }
+  const topCorpRdTrashCost = topCorpRdTrashCostForActivatedAbility(ability);
+  if (topCorpRdTrashCost > 0) {
+    if (side !== "corp")
+      throw new Error("Nur die Korp kann R&D-Trash-Kosten zahlen.");
+    if (topCorpRdTrashCost !== 2)
+      throw new Error("R&D-Trash-Kosten muessen genau zwei Karten trashen.");
+    if (state.corp.rd.length < topCorpRdTrashCost)
+      throw new Error("R&D enthaelt nicht genug Karten fuer diese Kosten.");
+    Object.assign(
+      publicPayload,
+      deps.trashTopCorpRdCards(
+        state,
+        legalAction,
+        deps.definitionFor(state, cardId).id,
+        topCorpRdTrashCost as 2,
+      ).publicPayload,
+    );
+    publicPayload.cardImplementationTopCorpRdTrashCost = topCorpRdTrashCost;
   }
   return publicPayload;
 }
@@ -2199,6 +2284,7 @@ export function resolveActivatedCardImplementationAbility(
   const costPublicPayload = payActivatedCardImplementationCosts(
     deps,
     state,
+    legalAction,
     legalAction.side,
     match.cardId,
     match.ability,
@@ -2212,6 +2298,8 @@ export function resolveActivatedCardImplementationAbility(
       ...(typeof legalAction.payload?.targetCardId === "string"
         ? { targetCardId: legalAction.payload.targetCardId as CardInstanceId }
         : {}),
+      xValue: Math.floor(Number(legalAction.payload?.xValue ?? 0)),
+      targetRezCost: Math.floor(Number(legalAction.payload?.targetRezCost ?? 0)),
       controller: deps.mustInstance(state.cardInstances, match.cardId).controller,
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
@@ -2265,7 +2353,7 @@ export function resolveActivatedCardImplementationAbility(
           String(legalAction.payload?.cardImplementationExposeTargetId ?? ""),
           scope,
         ),
-      startExposeInstalledCards: (min, max) =>
+      startExposeInstalledCards: (min, max, scope) =>
         deps.startExposeInstalledCorpCardsChoice(
           state,
           legalAction,
@@ -2273,6 +2361,7 @@ export function resolveActivatedCardImplementationAbility(
           match.definition.id,
           min,
           max,
+          scope,
         ),
       exposeOutermostIceEachFort: () =>
         deps.exposeOutermostIceEachDataFort(
@@ -2457,6 +2546,21 @@ export function resolveActivatedCardImplementationAbility(
         deps.addCurrentRunAccessCount(state, server, amount),
       passCurrentEncounteredIce: (subtypeRequired) =>
         deps.passCurrentEncounteredIce(state, legalAction, subtypeRequired),
+      freeRezInstalledIceWithCounters: (input) =>
+        deps.freeRezInstalledIceWithCounters(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          input,
+        ),
+      replaceSourceFortCardsFromHq: () =>
+        deps.replaceSourceFortCardsFromHq(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+        ),
     },
     match.ability.effects,
   );
@@ -2545,7 +2649,7 @@ export function executeOnPlayCardImplementationAbility(
           String(legalAction.payload?.cardImplementationExposeTargetId ?? ""),
           scope,
         ),
-      startExposeInstalledCards: (min, max) =>
+      startExposeInstalledCards: (min, max, scope) =>
         deps.startExposeInstalledCorpCardsChoice(
           state,
           legalAction,
@@ -2553,6 +2657,7 @@ export function executeOnPlayCardImplementationAbility(
           definition.id,
           min,
           max,
+          scope,
         ),
       exposeOutermostIceEachFort: () =>
         deps.exposeOutermostIceEachDataFort(
@@ -2764,6 +2869,21 @@ export function executeOnPlayCardImplementationAbility(
           definition.id,
           source,
           maxAmount,
+        ),
+      freeRezInstalledIceWithCounters: (input) =>
+        deps.freeRezInstalledIceWithCounters(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          input,
+        ),
+      replaceSourceFortCardsFromHq: () =>
+        deps.replaceSourceFortCardsFromHq(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
         ),
     },
     ability.effects,

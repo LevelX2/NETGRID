@@ -1,14 +1,14 @@
 # Proteus CardImplementation Detailplan
 
-Stand: 2026-05-28
+Stand: 2026-05-29
 
 Dieser Plan ist der führende Zuschnitt für die weitere Proteus-CardImplementation-Arbeit. Er bündelt die Restarbeit ab `PRO010` bewusst in größere Mechanikfamilien, damit ein Umsetzungspaket mehrere fachlich nahe Karten und die dafür ohnehin nötigen generischen Engine-Bausteine zusammen liefert.
 
 ## Ausgangslage
 
 - Proteus-Gesamtbasis: 154 Karten in `data/cards/proteus-cards.json`.
-- Aktueller Stand nach `PRO018`: 146 konkrete Proteus-CardImplementation-Dateien.
-- Fehlende konkrete CardImplementation-Dateien: 8.
+- Aktueller Stand nach `PRO019`: 154 konkrete Proteus-CardImplementation-Dateien.
+- Fehlende konkrete CardImplementation-Dateien: 0.
 - Führende Zählweise bleibt Datei plus Registry plus Manifest-Driftprüfung.
 - Keine Proteus-Karte wird durch diesen Plan `deck_legal`, `format_legal` oder `ai_supported`.
 
@@ -56,16 +56,16 @@ Jedes Umsetzungspaket muss vor Abschluss nachweisen:
 | PRO016 | Random/Dice/Encounter Suite | `Forward's Legacy`, `Roadblock`, `Executive Boot Camp`, `Lisa Blight` | Erledigt und mit PRO016-1 gehärtet: Forward's Legacy nutzt deterministische Run-Start-d6-Strength, Roadblock nutzt Encounter-d6 mit Strength 1-5 oder Derez plus automatischem Passieren auf 6, Executive Boot Camp nutzt bewusst breite `corp_costs_during_this_run`-Credits für Korp-Run-Kosten bis Run-Ende, Lisa Blight kopiert eine Subroutine auf ICE im selben Fort bis Run-Ende und bietet dieselbe Quellen-/Ziel-/Subroutine-Kombination im Run nicht doppelt an. | Vier Dateien; RandomDrawRecords, RandomCounter, Replay, Hidden-Info-Redaction, Run-Credit-Cleanup, Lisa-Duplikat-Revalidierung und Harness 154/138/16 ohne Drift. |
 | PRO017 | Action Economy/Action Debt Suite | `Lucidrine™ Drip Feed`, `AI Board Member`, `Please Don't Choke Anyone`, `Project Venice`, `Corporate Guard(R) Temps`, `Bargain with Viacox` | Erledigt und mit PRO017-1 sowie PRO017-2 gehärtet: generische Action-Economy-Fakten für optionale restricted extra actions, forced runner actions, future action grants, Choice-basiertes PDCA-Replacement, turn-bound Grant-Ablauf, deterministische Viacox-"nicht möglich"-Auflösung und PDCA-Damage-Timing-Härtung. PDCA restauriert nach `pass`/`replace` den ursprünglichen Timing-Kontext, greift nach bestehenden Replacement-/Event-Modification-Fenstern für verbleibenden Corp-Damage und schließt Runner-self-/Core-Damage weiter aus. | Sechs Dateien; Action-Ledger, forced-action-Revalidierung, PDCA-Choice, Return-Kontext, Corp-Damage-Hook, Turn-Bound-Cleanup, Replay und Harness 154/144/10 ohne Drift. |
 | PRO018 | Hidden-Zone Search/Install Tutor Suite | `Hijack`, `Test Spin` | Erledigt: enger generischer Vertrag für runnerprivate Grip-Installationschoice mit genau drei temporären Installationscredits sowie Stack-Programmsuche, kostenlose Installation, deterministisches Shuffle, Run-Followup und Return-or-Penalty-Cleanup. | Zwei Dateien; runnerprivate Hidden-Zone-Auswahl, PublicPayload-Redaction, wrong-side-/stale-action-/illegal-choice-, Shuffle-/Penalty- und Replay-/StateHash-Tests; Harness 154/146/8 ohne Drift. |
-| PRO019 | Rule-Contract Baseline Utilities | `Emergency Rig`, `Ice and Data Special Report`, `Obfuscated Fortress`, `Pavit Bharat`, `Simon Francisco`, `Herman Revista`, `Marcel DeSoleil`, `Rent-to-Own Contract` | Die noch offenen Regel-/Vertragskarten gemeinsam entscheiden und umsetzen: unbegrenztes X, Kostenzeile `3 (0)`, Run-Payment-Source, Hidden-HQ-to-Fort-Install und Central-Access-Reihenfolge. | Acht Dateien oder dokumentierte Einzel-Rückstellungen mit konkreter Regelentscheidung; keine stillen Annahmen. |
-| PRO020 | Finaler Proteus-Abschluss | Alle Proteus-Karten, Manifest, Registry, Coverage, Activities | Restliste muss leer sein; Board- und Statusartefakte auf den finalen Datei-/Registry-Stand bringen. | 154 konkrete Dateien, 154 Registry-Einträge, Manifest ohne Drift, vollständiger Verify-Lauf grün. |
+| PRO019 | Rule-Contract Baseline Utilities | `Emergency Rig`, `Ice and Data Special Report`, `Obfuscated Fortress`, `Pavit Bharat`, `Simon Francisco`, `Herman Revista`, `Marcel DeSoleil`, `Rent-to-Own Contract` | Erledigt: bounded Emergency-Rig-X `1..max(1, Rez-Kosten)`, Ice-and-Data-Play-Cost 3, rungebundenes Obfuscated-Fortress-Spend-Ledger, Pavit-HQ-to-Fort-Replacement, Simon-Access-Queue-Reduktion, Start-of-run-Fort-Reorder und Top-R&D-Trash-Kosten umgesetzt. | Acht Dateien; Manifest/Registry/Coverage ohne Drift; fokussierte PRO019-Tests für LegalAction-/applyAction-Pfade. |
+| PRO020 | Finaler Proteus-Abschluss | Alle Proteus-Karten, Manifest, Registry, Coverage, Activities | Restliste ist nach PRO019 leer; Board- und Statusartefakte auf finalen Datei-/Registry-Stand bringen. | 154 konkrete Dateien, 154 Registry-Einträge, Manifest ohne Drift, vollständiger Verify-Lauf grün. |
 
 ## Empfohlene Reihenfolge
 
 1. PRO007 bis PRO010 zuerst: sichtbare Operation-, Runner-Event-, Icebreaker- und ICE-Familien liefern viel Abdeckung und bauen wiederverwendbare Kernbausteine.
 2. PRO011 und PRO012 danach: Hidden-Resource-Arbeit in zwei größere, aber fachlich saubere Pakete bündeln.
 3. PRO013 bis PRO017: Agenda, Corp-Utility, Bad-Publicity, Random und Action-Economy als größere Mechanikfamilien schließen.
-4. PRO018 und PRO019 zuletzt vor dem Abschluss: Hidden-Zone-Tutor und die regelvertraglichen Sonderfälle.
-5. PRO020 erst, wenn der Verify-Harness keine fehlenden CardImplementation-Dateien mehr ausweist.
+4. PRO018 und PRO019 sind erledigt: Hidden-Zone-Tutor und regelvertragliche Sonderfälle sind umgesetzt.
+5. PRO020 ist der finale Abschluss-/Verify-Slice nach leerer Restliste.
 
 ## Umsetzungshinweis für Activities
 

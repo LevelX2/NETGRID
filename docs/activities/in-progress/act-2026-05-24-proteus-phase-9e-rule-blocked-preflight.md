@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-9e-rule-blocked-preflight
-status: blocked
+status: resolved-by-done-activity
 kind: research
 area: cards
 priority: normal
@@ -8,15 +8,15 @@ primaryAgent: release-implementation-agent
 requiresImplementation: false
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-29
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 9e
 proReferences:
   - PRO019
-blockedBy:
-  - ice_and_data_special_report_cost_3_0_rule_clarification
+blockedBy: []
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-9e-rule-blocked-preflight.md
+  - docs/activities/done/act-2026-05-29-proteus-pro019-rule-contract-baseline-utilities.md
   - docs/releases/proteus/README.md
   - docs/releases/proteus/detailed-phase-slice-plan-2026-05-24.md
 checks:
@@ -69,4 +69,6 @@ Blocker: Es braucht eine dokumentierte Quellen-/Regelentscheidung zur Kostenanga
 
 ## Ergebnisnotiz
 
-Blockiert dokumentiert. Keine Runtime-Änderung, keine Manifest-Promotion und keine Deck-/AI-Freigabe.
+Blockiert am 2026-05-24; durch PRO019 am 2026-05-29 als Statusreferenz aufgelöst.
+
+PRO019 dokumentiert und implementiert die lokale Regelentscheidung: `Ice and Data Special Report` hat Play-Cost 3; die Klammerangabe `(0)` wird als Quellen-/Druckartefakt behandelt und nicht als alternativer Kostenpfad. Der Effekt nutzt eine runnerprivate Expose-Choice für bis zu fünf installierte Korp-Karten in oder auf einem einzelnen Data Fort. Die Karte hat eine konkrete CardImplementation-Datei, Registry-/Manifest-/Coverage-Parität und fokussierte LegalAction-/applyAction-/Replay-Abdeckung. Keine Decklegalität, Formatlegalität oder AI-Freigabe.

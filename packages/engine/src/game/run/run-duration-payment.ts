@@ -284,6 +284,14 @@ export function spendRunnerRunCredits(
     throw new Error("Der Runner kann die Run-Kosten nicht bezahlen.");
   if (breakerId) recordWilsonRunCapSpend(host, amount);
   const run = mustRun(host.state);
+  if (run.runCreditSpendCap) {
+    const nextSpent =
+      Math.max(0, Math.floor(run.runCreditSpendCap.spentDuringRun ?? 0)) +
+      amount;
+    if (nextSpent > run.runCreditSpendCap.announcedSpendCap)
+      throw new Error("Der Runner darf in diesem Run nicht mehr Bits ausgeben.");
+    run.runCreditSpendCap.spentDuringRun = nextSpent;
+  }
   let remaining = amount;
   const fromBadPublicity = Math.min(run.badPublicityCredits ?? 0, remaining);
   if (fromBadPublicity > 0) {
@@ -327,6 +335,12 @@ export function spendRunnerRunCredits(
       ? { remainingTemporaryRunCredits: runTemporaryCredits.remaining }
       : {}),
     ...(breakerId ? { runSpendingCapUsed: amount } : {}),
+    ...(run.runCreditSpendCap
+      ? {
+          runCreditSpendCap: run.runCreditSpendCap.announcedSpendCap,
+          runCreditSpentDuringRun: run.runCreditSpendCap.spentDuringRun,
+        }
+      : {}),
     stateChanged: true,
   };
 }

@@ -884,13 +884,17 @@ function gameCardImplementationRuntimeDepsHost(): GameCardImplementationRuntimeD
       startDistributeAdvancementCounters:
         startCardImplementationAdvancementDistributionChoice,
       startMoveAdvancementCounters: startCardImplementationMoveAdvancementChoice,
-    revealHiddenRunnerResource: (state, sourceCardId) =>
-      hiddenRunnerResourceRevealPayload(state, sourceCardId),
-    addCurrentRunAccessCount,
-    passCurrentEncounteredIce,
-    startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice,
-    startOpenEndedMileageProgramReturnChoice,
-  },
+      revealHiddenRunnerResource: (state, sourceCardId) =>
+        hiddenRunnerResourceRevealPayload(state, sourceCardId),
+      addCurrentRunAccessCount,
+      passCurrentEncounteredIce,
+      freeRezInstalledIceWithCounters,
+      replaceSourceFortCardsFromHq,
+      trashTopCorpRdCards,
+      rezCostForCard: (state, cardId) => rezCostForCard(state, cardId),
+      startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice,
+      startOpenEndedMileageProgramReturnChoice,
+    },
   };
 }
 
@@ -3564,6 +3568,13 @@ function mustInstallInHq(definition: CardDefinition): boolean {
   return hasInstallCapabilityKindForDefinition(definition.id, "install_only_in_hq");
 }
 
+function mustInstallInHqOrRd(definition: CardDefinition): boolean {
+  return hasInstallCapabilityKindForDefinition(
+    definition.id,
+    "install_only_in_hq_or_rd",
+  );
+}
+
 function fortCapacityModifiersForCard(
   state: GameState,
   cardId: CardInstanceId,
@@ -5446,6 +5457,8 @@ function canInstallCorpRootCardInServer(
   server: CorpServer,
 ): boolean {
   if (mustInstallInHq(definition) && server.id !== "hq") return false;
+  if (mustInstallInHqOrRd(definition) && server.id !== "hq" && server.id !== "rd")
+    return false;
   if (mustInstallInsideSubsidiaryDataFort(definition) && server.kind !== "remote")
     return false;
   if (definition.type === "upgrade") return server.kind !== "archives";
@@ -5465,6 +5478,7 @@ function canInstallCorpRootCardInServer(
 
 function canInstallCorpRootCardInNewRemote(definition: CardDefinition): boolean {
   if (mustInstallInHq(definition)) return false;
+  if (mustInstallInHqOrRd(definition)) return false;
   if (definition.type === "upgrade") return true;
   return definition.type === "agenda" || definition.type === "asset";
 }
@@ -5805,6 +5819,49 @@ function sirenRedirectSourceIds(
     );
 }
 
+function rezzedFortStartUtilitySourceIds(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+  kind: Extract<
+    CardCorpUtilityImplementation["kind"],
+    "fort_start_reorder_ice" | "fort_start_runner_spend_cap"
+  >,
+): CardInstanceId[] {
+  const server = mustServer(state, serverId);
+  return server.root
+    .slice()
+    .sort()
+    .filter((cardId): cardId is CardInstanceId => {
+      const instance = state.cardInstances[cardId];
+      return Boolean(
+        instance?.controller === "corp" &&
+          instance.rezzed === true &&
+          corpUtilityImplementationForDefinition(instance.definitionId)?.kind ===
+            kind,
+      );
+    });
+}
+
+function unrezzedObfuscatedFortressSourceIds(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): CardInstanceId[] {
+  const server = mustServer(state, serverId);
+  return server.root
+    .slice()
+    .sort()
+    .filter((cardId): cardId is CardInstanceId => {
+      const instance = state.cardInstances[cardId];
+      return Boolean(
+        instance?.controller === "corp" &&
+          instance.rezzed !== true &&
+          corpUtilityImplementationForDefinition(instance.definitionId)?.kind ===
+            "fort_start_runner_spend_cap" &&
+          state.corp.credits >= rezCostForCard(state, cardId),
+      );
+    });
+}
+
 function openCorpStartOfRunRedirectWindow(
   state: GameState,
   legalAction?: LegalAction,
@@ -5815,10 +5872,44 @@ function openCorpStartOfRunRedirectWindow(
     state.corp.credits -
       Math.max(0, Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0)),
   );
-  if (!run || state.pendingChoice || availableCredits < 1) return false;
+  if (!run || state.pendingChoice) return false;
   const originalServerId = run.attackedServerId;
-  const sourceCardInstanceIds = sirenRedirectSourceIds(state, originalServerId);
-  if (sourceCardInstanceIds.length === 0) return false;
+  const sourceCardInstanceIds =
+    availableCredits >= 1 ? sirenRedirectSourceIds(state, originalServerId) : [];
+  const hermanSourceIds = rezzedFortStartUtilitySourceIds(
+    state,
+    originalServerId,
+    "fort_start_reorder_ice",
+  );
+  const rezzedObfuscatedSourceIds = rezzedFortStartUtilitySourceIds(
+    state,
+    originalServerId,
+    "fort_start_runner_spend_cap",
+  );
+  const unrezzedObfuscatedSourceIds = unrezzedObfuscatedFortressSourceIds(
+    state,
+    originalServerId,
+  );
+  if (
+    sourceCardInstanceIds.length === 0 &&
+    hermanSourceIds.length === 0 &&
+    rezzedObfuscatedSourceIds.length === 0 &&
+    unrezzedObfuscatedSourceIds.length === 0
+  )
+    return false;
+  if (
+    sourceCardInstanceIds.length === 0 &&
+    hermanSourceIds.length === 0 &&
+    unrezzedObfuscatedSourceIds.length === 0 &&
+    rezzedObfuscatedSourceIds.length > 0
+  ) {
+    openRunnerSpendCapAnnouncementChoice(
+      state,
+      rezzedObfuscatedSourceIds[0]!,
+      legalAction,
+    );
+    return true;
+  }
   run.sirenStartRunRedirect = {
     originalServerId,
     sourceCardInstanceIds,
@@ -5844,6 +5935,27 @@ function openCorpStartOfRunRedirectWindow(
           serverId,
         };
       }),
+      ...hermanSourceIds.map((cardId) => ({
+        id: `herman_${cardId}`,
+        label: `${definitionFor(state, cardId).title}: ICE neu anordnen`,
+        publicLabel: "Start-of-run Fort-Utility",
+        value: cardId,
+        serverId: originalServerId,
+      })),
+      ...rezzedObfuscatedSourceIds.map((cardId) => ({
+        id: `obfuscated_${cardId}`,
+        label: `${definitionFor(state, cardId).title}: Ansage erzwingen`,
+        publicLabel: "Start-of-run Spend-Cap",
+        value: cardId,
+        serverId: originalServerId,
+      })),
+      ...unrezzedObfuscatedSourceIds.map((cardId) => ({
+        id: `obfuscated_rez_${cardId}`,
+        label: `${definitionFor(state, cardId).title}: rezzen und Ansage erzwingen`,
+        publicLabel: "Start-of-run Rez",
+        value: cardId,
+        serverId: originalServerId,
+      })),
     ],
     minSelections: 1,
     maxSelections: 1,
@@ -5887,6 +5999,99 @@ function continueRunAfterStartOfRunRedirect(
   enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction);
 }
 
+function openRunnerSpendCapAnnouncementChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  legalAction?: LegalAction,
+): void {
+  const run = mustRun(state);
+  const serverId = corpServerIdForInstalledCard(state, sourceCardId);
+  if (serverId !== run.attackedServerId)
+    throw new Error("Obfuscated Fortress liegt nicht auf dem laufenden Fort.");
+  const source = mustInstance(state.cardInstances, sourceCardId);
+  if (
+    !source.rezzed ||
+    corpUtilityImplementationForDefinition(source.definitionId)?.kind !==
+      "fort_start_runner_spend_cap"
+  )
+    throw new Error("Obfuscated Fortress ist nicht rezzed.");
+  const maxAnnouncement = Math.max(0, Math.floor(state.runner.credits));
+  state.pendingChoice = {
+    choiceId: `runner_run_spend_cap_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `corp.start_of_run_redirect.runner_spend_cap:${run.runId}:${sourceCardId}:${serverId}`,
+    prompt: "Run-Bit-Ausgabe ansagen",
+    kind: "select_option",
+    options: Array.from({ length: maxAnnouncement + 1 }, (_, amount) => ({
+      id: `spend_${amount}`,
+      label: `${amount}`,
+      value: amount,
+    })),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  state.activeSide = "runner";
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      runCreditSpendCapChoiceOpened: true,
+      sourceDefinitionId: source.definitionId,
+      serverId,
+    };
+  }
+}
+
+function openHermanRevistaReorderChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  legalAction: LegalAction,
+): void {
+  const run = mustRun(state);
+  const serverId = corpServerIdForInstalledCard(state, sourceCardId);
+  if (serverId !== run.attackedServerId)
+    throw new Error("Herman Revista liegt nicht auf dem laufenden Fort.");
+  const source = mustInstance(state.cardInstances, sourceCardId);
+  if (
+    !source.rezzed ||
+    corpUtilityImplementationForDefinition(source.definitionId)?.kind !==
+      "fort_start_reorder_ice"
+  )
+    throw new Error("Herman Revista ist nicht rezzed.");
+  const server = mustServer(state, serverId);
+  if (server.ice.length < 2) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "herman_revista_reorder",
+      sourceDefinitionId: source.definitionId,
+      serverId,
+      reorderedIceCount: server.ice.length,
+    };
+    continueRunAfterStartOfRunRedirect(state, legalAction);
+    return;
+  }
+  state.pendingChoice = {
+    choiceId: `herman_revista_reorder_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `corp.start_of_run_redirect.herman_reorder:${run.runId}:${sourceCardId}:${serverId}`,
+    prompt: "ICE auf diesem Fort neu anordnen",
+    kind: "select_cards",
+    options: server.ice.map((cardId, index) => ({
+      id: `card_${cardId}`,
+      label: exposeInstalledCorpCardLabel(state, cardId) || `ICE ${index + 1}`,
+      publicLabel: `ICE ${index + 1}`,
+      value: cardId,
+    })),
+    minSelections: server.ice.length,
+    maxSelections: server.ice.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  state.activeSide = "corp";
+}
+
 function resolveSirenStartRunRedirectChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -5894,6 +6099,74 @@ function resolveSirenStartRunRedirectChoice(
 ): void {
   const choice = state.pendingChoice;
   const run = state.run;
+  if (choice?.source.startsWith("corp.start_of_run_redirect.runner_spend_cap")) {
+    if (!run) throw new Error("Es laeuft kein Run fuer die Spend-Cap-Ansage.");
+    const [, runId = "", sourceCardId = "", serverId = ""] =
+      choice.source.split(":");
+    if (run.runId !== runId || run.attackedServerId !== serverId)
+      throw new Error("Die Spend-Cap-Choice passt nicht mehr zum Run.");
+    const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+    const amount = Number(selected.replace(/^spend_/, ""));
+    if (!Number.isInteger(amount) || amount < 0)
+      throw new Error("Die Spend-Cap-Ansage ist ungueltig.");
+    const source = mustInstance(state.cardInstances, sourceCardId);
+    if (
+      !source.rezzed ||
+      corpUtilityImplementationForDefinition(source.definitionId)?.kind !==
+        "fort_start_runner_spend_cap"
+    )
+      throw new Error("Obfuscated Fortress ist nicht mehr legal.");
+    run.runCreditSpendCap = {
+      sourceCardInstanceId: sourceCardId as CardInstanceId,
+      sourceDefinitionId: source.definitionId,
+      announcedSpendCap: amount,
+      spentDuringRun: 0,
+    };
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      sourceDefinitionId: source.definitionId,
+      runCreditSpendCap: amount,
+      runCreditSpentDuringRun: 0,
+    };
+    continueRunAfterStartOfRunRedirect(state, legalAction);
+    return;
+  }
+  if (choice?.source.startsWith("corp.start_of_run_redirect.herman_reorder")) {
+    if (!run) throw new Error("Es laeuft kein Run fuer Herman Revista.");
+    const [, runId = "", sourceCardId = "", serverId = ""] =
+      choice.source.split(":");
+    if (run.runId !== runId || run.attackedServerId !== serverId)
+      throw new Error("Die Herman-Choice passt nicht mehr zum Run.");
+    const selectedIds = selectedChoiceCardIds(choice, playerAction);
+    const server = mustServer(state, serverId);
+    if (
+      selectedIds.length !== server.ice.length ||
+      new Set(selectedIds).size !== selectedIds.length ||
+      selectedIds.some((cardId) => !server.ice.includes(cardId))
+    )
+      throw new Error("Die Herman-Reorder-Auswahl ist nicht legal.");
+    server.ice = selectedIds;
+    for (const cardId of selectedIds) {
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        zone: { side: "corp", zone: "serverIce", serverId: server.id },
+      };
+    }
+    const source = mustInstance(state.cardInstances, sourceCardId);
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenOrderChoice: true,
+      hiddenZoneAction: "herman_revista_reorder",
+      sourceDefinitionId: source.definitionId,
+      serverId,
+      reorderedIceCount: selectedIds.length,
+    };
+    continueRunAfterStartOfRunRedirect(state, legalAction);
+    return;
+  }
   if (
     !choice ||
     !choice.source.startsWith("corp.start_of_run_redirect") ||
@@ -5908,6 +6181,15 @@ function resolveSirenStartRunRedirectChoice(
       startOfRunRedirectDecision: "pass",
       originalServerId: run.sirenStartRunRedirect.originalServerId,
     };
+    const obfuscated = rezzedFortStartUtilitySourceIds(
+      state,
+      run.attackedServerId,
+      "fort_start_runner_spend_cap",
+    )[0];
+    if (obfuscated) {
+      openRunnerSpendCapAnnouncementChoice(state, obfuscated, legalAction);
+      return;
+    }
     continueRunAfterStartOfRunRedirect(state, legalAction);
     return;
   }
@@ -5916,6 +6198,58 @@ function resolveSirenStartRunRedirectChoice(
     typeof option?.value === "string"
       ? (option.value as CardInstanceId)
       : undefined;
+  if (selected.startsWith("herman_")) {
+    if (!sourceCardId) throw new Error("Herman Revista hat keine gueltige Quelle.");
+    delete state.pendingChoice;
+    openHermanRevistaReorderChoice(state, sourceCardId, legalAction);
+    return;
+  }
+  if (selected.startsWith("obfuscated_rez_")) {
+    if (!sourceCardId)
+      throw new Error("Obfuscated Fortress hat keine gueltige Quelle.");
+    const source = mustInstance(state.cardInstances, sourceCardId);
+    const cost = rezCostForCard(state, sourceCardId);
+    if (
+      source.rezzed === true ||
+      source.controller !== "corp" ||
+      corpUtilityImplementationForDefinition(source.definitionId)?.kind !==
+        "fort_start_runner_spend_cap" ||
+      state.corp.credits < cost
+    )
+      throw new Error("Obfuscated Fortress kann nicht gerezzt werden.");
+    state.corp.credits -= cost;
+    state.cardInstances[sourceCardId] = {
+      ...source,
+      rezzed: true,
+      faceup: true,
+    };
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      startOfRunRez: true,
+      sourceCardId,
+      sourceDefinitionId: source.definitionId,
+      rezCostPaid: cost,
+      corpCreditsAfter: state.corp.credits,
+    };
+    executeCardImplementationLifecycleEffects(
+      cardImplementationRuntimeDeps,
+      state,
+      legalAction,
+      definitionFor(state, sourceCardId),
+      sourceCardId,
+      "on_rez",
+    );
+    openRunnerSpendCapAnnouncementChoice(state, sourceCardId, legalAction);
+    return;
+  }
+  if (selected.startsWith("obfuscated_")) {
+    if (!sourceCardId)
+      throw new Error("Obfuscated Fortress hat keine gueltige Quelle.");
+    delete state.pendingChoice;
+    openRunnerSpendCapAnnouncementChoice(state, sourceCardId, legalAction);
+    return;
+  }
   if (
     !sourceCardId ||
     !run.sirenStartRunRedirect.sourceCardInstanceIds.includes(sourceCardId)
@@ -7849,8 +8183,35 @@ function startCorpTurn(
   ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds = [];
   ensureCorpTurnFlags(state).pdcaUsedSourceIdsThisTurn = [];
   applyFutureExtraActionGrantsAtTurnStart(state, "corp", effects);
+  applyProteusNamedIceCounterLifecycle(state);
   applyCorpStartOfTurnEffects(state, effects);
   openCorpStartTurnRandomRestrictedActionOffers(state, effects);
+}
+
+function applyProteusNamedIceCounterLifecycle(
+  state: GameState,
+): void {
+  for (const server of state.corp.servers) {
+    for (const iceId of server.ice.slice().sort()) {
+      const instance = state.cardInstances[iceId];
+      if (!instance || instance.controller !== "corp") continue;
+      const kludge = cardCounter(state, iceId, "kludge");
+      if (kludge > 0) {
+        const remaining = kludge - 1;
+        setCardCounter(state, iceId, "kludge", remaining);
+        if (remaining <= 0) trashCorpInstalledCardToArchives(state, iceId);
+      }
+      const term = cardCounter(state, iceId, "term");
+      if (term > 0) {
+        if (state.corp.credits >= 2) {
+          state.corp.credits -= 2;
+          setCardCounter(state, iceId, "term", term - 1);
+        } else {
+          addCardCounter(state, iceId, "term", 1);
+        }
+      }
+    }
+  }
 }
 
 function startRunnerTurn(
@@ -14492,6 +14853,7 @@ function startExposeInstalledCorpCardsChoice(
   sourceDefinitionId: CardDefinition["id"],
   min: number,
   max: number,
+  scope: "any_installed" | "single_data_fort" = "any_installed",
 ): { publicPayload: Record<string, string | number | boolean> } {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const options = exposeInstalledCorpCardsChoiceOptions(state);
@@ -14500,8 +14862,8 @@ function startExposeInstalledCorpCardsChoice(
   state.pendingChoice = {
     choiceId: `p3_36_expose_installed_cards_${state.stateVersion + 1}`,
     side: "runner",
-    source: `p3_36.expose_installed_cards:${sourceCardId}:${sourceDefinitionId}:${state.stateVersion + 1}`,
-    prompt: "Bis zu drei installierte Korp-Karten exposen",
+    source: `p3_36.expose_installed_cards:${sourceCardId}:${sourceDefinitionId}:${scope}:${state.stateVersion + 1}`,
+    prompt: "Installierte Korp-Karten exposen",
     kind: "select_cards",
     options,
     minSelections: Math.min(min, options.length),
@@ -14514,6 +14876,7 @@ function startExposeInstalledCorpCardsChoice(
     hiddenZoneAction: "hunt_club_bbs_expose_choice",
     choiceVisibility: "runner_private",
     sourceDefinitionId,
+    exposeScope: scope,
   };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -14560,7 +14923,8 @@ function resolveExposeInstalledCorpCardsChoice(
   const choice = state.pendingChoice;
   if (!choice || !choice.source.startsWith("p3_36.expose_installed_cards"))
     throw new Error("Es ist keine Expose-Choice offen.");
-  const [, sourceCardId = "", sourceDefinitionId = ""] = choice.source.split(":");
+  const [, sourceCardId = "", sourceDefinitionId = "", scope = "any_installed"] =
+    choice.source.split(":");
   if (!sourceCardId || !state.cardInstances[sourceCardId])
     throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
   const sourceDefinition = definitionFor(state, sourceCardId);
@@ -14571,6 +14935,13 @@ function resolveExposeInstalledCorpCardsChoice(
   for (const cardId of selectedIds) {
     if (!legalTargets.has(cardId))
       throw new Error("Diese installierte Korp-Karte darf nicht exposed werden.");
+  }
+  if (scope === "single_data_fort") {
+    const serverIds = new Set(
+      selectedIds.map((cardId) => corpServerIdForInstalledCard(state, cardId)),
+    );
+    if (serverIds.size > 1 || [...serverIds].some((serverId) => !serverId))
+      throw new Error("Alle Expose-Ziele muessen in oder auf demselben Data Fort liegen.");
   }
   const labels = selectedIds.map((cardId) =>
     exposeInstalledCorpCardLabel(state, cardId),
@@ -16346,6 +16717,59 @@ function cardImplementationOperationLegalActions(
     onPlayCardImplementationAdditionalOperationCost(definition);
   const totalCost = (definition.cost ?? 0) + additionalCost;
   if (state.corp.credits < totalCost) return [];
+  const freeRezEffect = onPlayCardImplementationEffects(definition).find(
+    (effect) => effect.kind === "free_rez_installed_ice_with_counters",
+  ) as
+    | Extract<CardEffectImplementation, { kind: "free_rez_installed_ice_with_counters" }>
+    | undefined;
+  if (freeRezEffect) {
+    const actions: LegalAction[] = [];
+    for (const targetCardId of unrezzedInstalledIceIds(state)) {
+      const targetDefinition = definitionFor(state, targetCardId);
+      const targetRezCost = rezCostForCard(state, targetCardId);
+      const xUpperBound = Math.max(1, targetRezCost);
+      if (freeRezEffect.counterType === "kludge") {
+        for (let x = 1; x <= xUpperBound; x += 1) {
+          actions.push(
+            action(
+              state,
+              "corp",
+              "play_operation",
+              `${definition.title}: ${targetDefinition.title} rezzen (X=${x})`,
+              cardId,
+              [{ clicks: 1, credits: totalCost }],
+              {
+                cardId,
+                targetCardId,
+                targetDefinitionId: targetDefinition.id,
+                targetRezCost,
+                xValue: x,
+                xUpperBound,
+              },
+            ),
+          );
+        }
+      } else {
+        actions.push(
+          action(
+            state,
+            "corp",
+            "play_operation",
+            `${definition.title}: ${targetDefinition.title} rezzen`,
+            cardId,
+            [{ clicks: 1, credits: totalCost }],
+            {
+              cardId,
+              targetCardId,
+              targetDefinitionId: targetDefinition.id,
+              targetRezCost,
+            },
+          ),
+        );
+      }
+    }
+    return actions;
+  }
   const needsResourceTarget =
     onPlayCardImplementationNeedsLastTurnResourceTarget(definition);
   if (!needsResourceTarget && additionalCost === 0) return [];
@@ -16405,6 +16829,11 @@ function onPlayCardImplementationChoicesAreAvailable(
       ).length === 0
     )
       return false;
+    if (
+      effect.kind === "free_rez_installed_ice_with_counters" &&
+      unrezzedInstalledIceIds(state).length === 0
+    )
+      return false;
   }
   return true;
 }
@@ -16461,6 +16890,196 @@ function uninstallCorpInstalledCardToHq(
     rezzed: false,
     zone: { side: "corp", zone: "hq" },
   };
+}
+
+function trashTopCorpRdCards(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceDefinitionId: CardDefinitionId,
+  amount: 2,
+): { publicPayload: Record<string, string | number | boolean> } {
+  if (amount !== 2 || state.corp.rd.length < amount)
+    throw new Error("R&D enthaelt nicht genug Karten fuer diese Kosten.");
+  const trashed = state.corp.rd.slice(0, amount);
+  for (const cardId of trashed) {
+    removeFromAllZones(state, cardId);
+    state.corp.archives.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "archives" },
+    };
+  }
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "trash_top_corp_rd",
+    sourceDefinitionId,
+    trashedCardsCount: trashed.length,
+  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+  return { publicPayload: payload };
+}
+
+function freeRezInstalledIceWithCounters(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+  input: {
+    counterType: Extract<CounterType, "kludge" | "term">;
+    amount: number;
+    lifecycle:
+      | "remove_one_counter_start_corp_turn_trash_on_last"
+      | "rent_to_own_start_corp_turn";
+  },
+): { publicPayload: Record<string, string | number | boolean> } {
+  void sourceCardId;
+  const targetCardId = String(legalAction.payload?.targetCardId ?? "") as
+    | CardInstanceId
+    | "";
+  const target = targetCardId ? state.cardInstances[targetCardId] : undefined;
+  const definition = targetCardId ? definitionFor(state, targetCardId) : undefined;
+  if (
+    !target ||
+    !definition ||
+    target.controller !== "corp" ||
+    target.zone.side !== "corp" ||
+    target.zone.zone !== "serverIce" ||
+    definition.type !== "ice" ||
+    target.rezzed === true
+  )
+    throw new Error("Das Free-Rez-Ziel ist nicht legal.");
+  const targetRezCost = rezCostForCard(state, targetCardId);
+  if (Number(legalAction.payload?.targetRezCost) !== targetRezCost)
+    throw new Error("Die gebundene Rez-Kostenangabe ist nicht mehr gueltig.");
+  let counterAmount = Math.max(0, Math.floor(input.amount));
+  if (input.counterType === "kludge") {
+    counterAmount = Math.max(0, Math.floor(Number(legalAction.payload?.xValue ?? 0)));
+    const upperBound = Math.max(1, targetRezCost);
+    if (
+      Number(legalAction.payload?.xUpperBound) !== upperBound ||
+      counterAmount < 1 ||
+      counterAmount > upperBound
+    )
+      throw new Error("Emergency-Rig-X ist nicht legal.");
+  } else {
+    counterAmount = targetRezCost;
+  }
+  state.cardInstances[targetCardId] = {
+    ...target,
+    rezzed: true,
+    faceup: true,
+  };
+  if (counterAmount > 0)
+    addCardCounter(state, targetCardId, input.counterType, counterAmount);
+  const payload = {
+    sourceDefinitionId,
+    targetCardId,
+    targetDefinitionId: definition.id,
+    targetRezCost,
+    freeRez: true,
+    counterType: input.counterType,
+    addedCounterAmount: counterAmount,
+    remainingCounters: cardCounter(state, targetCardId, input.counterType),
+  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+  executeCardImplementationLifecycleEffects(
+    cardImplementationRuntimeDeps,
+    state,
+    legalAction,
+    definition,
+    targetCardId,
+    "on_rez",
+  );
+  return { publicPayload: payload };
+}
+
+function replaceSourceFortCardsFromHq(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+): { publicPayload: Record<string, string | number | boolean> } {
+  const source = mustInstance(state.cardInstances, sourceCardId);
+  if (
+    source.controller !== "corp" ||
+    source.zone.side !== "corp" ||
+    source.zone.zone !== "serverRoot"
+  )
+    throw new Error("Pavit Bharat muss in einem Remote-Root installiert sein.");
+  const server = mustServer(state, source.zone.serverId);
+  if (server.kind !== "remote")
+    throw new Error("Pavit Bharat darf nur in einem subsidiary data fort ausloesen.");
+  if (state.run?.attackedServerId !== server.id || state.run.position.kind !== "server")
+    throw new Error("Pavit Bharat darf nur nach der letzten ICE dieses Forts rezzen.");
+  const removedIce = server.ice.slice();
+  const removedRoot = server.root.slice();
+  const removedCount = removedIce.length + removedRoot.length;
+  const hqSelection = String(legalAction.payload?.pavitReplacementHqCardIds ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean) as CardInstanceId[];
+  const selected =
+    hqSelection.length > 0
+      ? hqSelection
+      : state.corp.hq
+          .filter((cardId) => {
+            const definition = definitionFor(state, cardId);
+            return definition.type === "ice" || definition.type === "upgrade";
+          })
+          .slice(0, removedCount);
+  if (selected.length !== removedCount)
+    throw new Error("Pavit Bharat braucht exakt gleich viele HQ-Ersatzkarten.");
+  if (new Set(selected).size !== selected.length)
+    throw new Error("Die Pavit-Bharat-Auswahl enthaelt Duplikate.");
+  for (const cardId of selected) {
+    if (!state.corp.hq.includes(cardId))
+      throw new Error("Eine Pavit-Bharat-Ersatzkarte liegt nicht mehr in HQ.");
+  }
+  for (const cardId of [...removedIce, ...removedRoot]) {
+    uninstallCorpInstalledCardToHq(state, cardId);
+  }
+  server.ice = [];
+  server.root = [];
+  for (const cardId of selected) {
+    const definition = definitionFor(state, cardId);
+    if (definition.type === "ice") {
+      removeFromAllZones(state, cardId);
+      server.ice.push(cardId);
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        faceup: false,
+        rezzed: false,
+        zone: { side: "corp", zone: "serverIce", serverId: server.id },
+      };
+    } else if (definition.type === "upgrade") {
+      if (!canInstallCorpRootCardInServer(state, definition, server))
+        throw new Error("Eine Pavit-Bharat-Root-Ersatzkarte ist nicht legal.");
+      removeFromAllZones(state, cardId);
+      server.root.push(cardId);
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        faceup: false,
+        rezzed: false,
+        zone: { side: "corp", zone: "serverRoot", serverId: server.id },
+      };
+    } else {
+      throw new Error("Pavit Bharat kann diese HQ-Karte nicht in das Fort installieren.");
+    }
+  }
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "pavit_bharat_hq_to_fort_replacement",
+    sourceDefinitionId,
+    serverId: server.id,
+    uninstalledCardsCount: removedCount,
+    installedCardsCount: selected.length,
+    installedIceCount: server.ice.length,
+    installedRootCount: server.root.length,
+  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+  return { publicPayload: payload };
 }
 
 function ensureSpecialZones(state: GameState): SpecialZoneState {

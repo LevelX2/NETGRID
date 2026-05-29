@@ -174,6 +174,8 @@ export type CounterType =
   | "trauma"
   | "boon"
   | "pdca"
+  | "kludge"
+  | "term"
   | "drip";
 
 export type TraceSuccessEffect =
@@ -1140,6 +1142,12 @@ export type RunState = {
     sourceCardInstanceId: CardInstanceId;
     limit: number;
     spent: number;
+  };
+  runCreditSpendCap?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    announcedSpendCap: number;
+    spentDuringRun: number;
   };
   promisesPromisesAgendaPointBonus?: {
     sourceDefinitionId: CardDefinitionId;

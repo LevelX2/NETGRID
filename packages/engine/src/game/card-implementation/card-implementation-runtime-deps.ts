@@ -131,6 +131,10 @@ export type GameCardImplementationRuntimeDepsHost = {
     revealHiddenRunnerResource?: CardImplementationRuntimeDependencies["revealHiddenRunnerResource"];
     addCurrentRunAccessCount?: CardImplementationRuntimeDependencies["addCurrentRunAccessCount"];
     passCurrentEncounteredIce?: CardImplementationRuntimeDependencies["passCurrentEncounteredIce"];
+    freeRezInstalledIceWithCounters: CardImplementationRuntimeDependencies["freeRezInstalledIceWithCounters"];
+    replaceSourceFortCardsFromHq: CardImplementationRuntimeDependencies["replaceSourceFortCardsFromHq"];
+    trashTopCorpRdCards: CardImplementationRuntimeDependencies["trashTopCorpRdCards"];
+    rezCostForCard: CardImplementationRuntimeDependencies["rezCostForCard"];
     startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: CardImplementationRuntimeDependencies["startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice"];
     startOpenEndedMileageProgramReturnChoice: (
       state: RuntimeState,
@@ -261,6 +265,11 @@ export function createGameCardImplementationRuntimeDeps(
         subtypeRequired,
       );
     },
+    freeRezInstalledIceWithCounters:
+      host.callbacks.freeRezInstalledIceWithCounters,
+    replaceSourceFortCardsFromHq: host.callbacks.replaceSourceFortCardsFromHq,
+    trashTopCorpRdCards: host.callbacks.trashTopCorpRdCards,
+    rezCostForCard: host.callbacks.rezCostForCard,
     startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice:
       host.callbacks.startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice,
     addCurrentEncounterAdditionalSubroutine: (

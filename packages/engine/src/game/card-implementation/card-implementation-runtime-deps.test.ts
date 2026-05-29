@@ -245,6 +245,16 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       startMoveAdvancementCounters: () => ({
         publicPayload: { advancementCounterMoveChoiceOpened: true },
       }),
+      freeRezInstalledIceWithCounters: () => ({
+        publicPayload: { freeRez: true },
+      }),
+      replaceSourceFortCardsFromHq: () => ({
+        publicPayload: { replacedFortCards: true },
+      }),
+      trashTopCorpRdCards: () => ({
+        publicPayload: { trashedCardsCount: 2 },
+      }),
+      rezCostForCard: () => 0,
       startOpenEndedMileageProgramReturnChoice: () => {
         calls.push("return_choice");
       },
@@ -341,6 +351,10 @@ describe("game card implementation runtime deps root", () => {
         "trashSource",
         "startDistributeAdvancementCounters",
         "startMoveAdvancementCounters",
+        "freeRezInstalledIceWithCounters",
+        "replaceSourceFortCardsFromHq",
+        "trashTopCorpRdCards",
+        "rezCostForCard",
         "startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice",
         "addCurrentEncounterAdditionalSubroutine",
         "addCurrentRunAccessCount",

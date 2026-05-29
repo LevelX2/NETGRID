@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-24-proteus-phase-1f-run-spend-cap
-status: blocked
+status: resolved-by-done-activity
 kind: implementation
 area: cards
 priority: normal
@@ -8,15 +8,15 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-24
 startedAt: 2026-05-24
-completedAt:
+completedAt: 2026-05-29
 branch: codex/proteus-card-implementation
 releaseTarget: Proteus Phase 1f
 proReferences:
   - PRO019
-blockedBy:
-  - payment-source-contract-obfuscated-fortress-run-spend-cap
+blockedBy: []
 resultArtifacts:
   - docs/activities/in-progress/act-2026-05-24-proteus-phase-1f-run-spend-cap.md
+  - docs/activities/done/act-2026-05-29-proteus-pro019-rule-contract-baseline-utilities.md
 checks:
   - Lokale Quellenprüfung `data/cards/proteus-cards.json` für `Obfuscated Fortress`
   - Codepfadprüfung `packages/engine/src/game/run/run-duration-payment.ts` und `packages/shared/src/index.ts` für bestehende Run-Zahlungsquellen
@@ -78,7 +78,11 @@ checks:
 
 ## Ergebnisnotiz
 
-Blockiert am 2026-05-24.
+Blockiert am 2026-05-24; durch PRO019 am 2026-05-29 als Statusreferenz aufgelöst.
+
+PRO019 dokumentiert und implementiert den lokalen Zahlungsquellenvertrag: Alle Runner-Credit-Zahlungen, die während des Runs über `spendRunnerRunCredits` abgewickelt werden, zählen gegen die Ansage. Der Ledger begrenzt Zahlungen vor der Ausgabe und die Run-Ende-Abrechnung zieht die nicht ausgegebene Differenz von normalen Runner-Credits ab, gedeckelt durch den aktuellen Creditstand. `Obfuscated Fortress` hat eine konkrete CardImplementation-Datei, Registry-/Manifest-/Coverage-Parität und Regressionen für den zentralen Run-Payment- und Cleanup-Pfad. Diese alte Activity bleibt nur als historische Blocker- und Scope-Referenz.
+
+Historischer Blocker:
 
 `Obfuscated Fortress` kann nicht legal-action-stabil vollständig umgesetzt werden, solange der Run-weite Zahlungsquellenvertrag offen ist. Der lokale Text verlangt, dass Runner die Anzahl der Bits ansagt, die während des Runs ausgegeben werden, danach nicht mehr ausgeben darf und am Run-Ende die nicht ausgegebene Differenz verliert. Der aktuelle Engine-Pfad zählt und validiert Runner-Run-Zahlungen aber über mehrere Quellen: normale Runner-Credits, Bad-Publicity-Run-Credits, temporäre Run-Credits, Hosted-/Recurring-Credits und Stealth-/zweckgebundene Bits. Die Activity verlangt ausdrücklich, diese Quellen vor Codearbeit einzuschließen oder auszunehmen.
 

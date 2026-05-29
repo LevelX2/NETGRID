@@ -159,6 +159,7 @@ export function createHiddenZoneCardImplementationRuntimeDeps(
       sourceDefinitionId,
       min,
       max,
+      scope,
     ) =>
       host.callbacks.startExposeInstalledCorpCardsChoice(
         state,
@@ -167,6 +168,7 @@ export function createHiddenZoneCardImplementationRuntimeDeps(
         sourceDefinitionId,
         min,
         max,
+        scope,
       ),
     exposeOutermostIceEachDataFort: (
       state,

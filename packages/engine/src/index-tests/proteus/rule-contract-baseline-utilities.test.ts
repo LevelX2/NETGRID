@@ -1,0 +1,534 @@
+import { describe, expect, it } from "vitest";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+  hashState,
+  replayEvents,
+} from "../../index";
+import {
+  ONR_V1_1_2K_CORP_DECK,
+  ONR_V1_1_2K_RUNNER_DECK,
+  apply,
+  applyChoice,
+  applyChoices,
+  mustAction,
+} from "../../test-fixtures/mechanic-smoke-fixtures";
+import { CARD_IMPLEMENTATIONS } from "../../card-implementations/registry";
+import {
+  CURRENT_RULES_BASELINE,
+  type CardDefinitionId,
+  type CardInstanceId,
+  type GameState,
+  type ServerId,
+} from "@netgrid/shared";
+
+const EMERGENCY_RIG = "onr_proteus_049_emergency-rig";
+const RENT_TO_OWN = "onr_proteus_051_rent-to-own-contract";
+const ICE_AND_DATA = "onr_proteus_111_ice-and-data-special-report";
+const HERMAN = "onr_proteus_060_herman-revista";
+const MARCEL = "onr_proteus_064_marcel-desoleil";
+const OBFUSCATED = "onr_proteus_066_obfuscated-fortress";
+const PAVIT = "onr_proteus_069_pavit-bharat";
+const SIMON = "onr_proteus_073_simon-francisco";
+const WALL = "onr_v1_279_wall-of-static";
+const DATAPACKER = "onr_v1_296_datapacker";
+
+const PRO019_IDS = [
+  EMERGENCY_RIG,
+  RENT_TO_OWN,
+  HERMAN,
+  MARCEL,
+  OBFUSCATED,
+  PAVIT,
+  SIMON,
+  ICE_AND_DATA,
+] as const;
+
+function corpActionState(seed: string): GameState {
+  const state = createGameAfterSetup({
+    seed,
+    baseline: CURRENT_RULES_BASELINE,
+    agendaPointsToWin: 7,
+    runnerDeck: {
+      ...ONR_V1_1_2K_RUNNER_DECK,
+      id: `${seed}_runner`,
+      cards: [...ONR_V1_1_2K_RUNNER_DECK.cards],
+    },
+    corpDeck: {
+      ...ONR_V1_1_2K_CORP_DECK,
+      id: `${seed}_corp`,
+      cards: [...ONR_V1_1_2K_CORP_DECK.cards],
+    },
+  });
+  state.activeSide = "corp";
+  state.phase = "corp_action_phase";
+  state.timingPoint = "corp_action.main";
+  state.corp.clicks = 3;
+  state.corp.credits = 20;
+  state.runner.credits = 20;
+  return state;
+}
+
+function removeEverywhere(state: GameState, cardId: CardInstanceId): void {
+  state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
+  state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
+  state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
+  for (const server of state.corp.servers) {
+    server.ice = server.ice.filter((id) => id !== cardId);
+    server.root = server.root.filter((id) => id !== cardId);
+  }
+  state.runner.grip = state.runner.grip.filter((id) => id !== cardId);
+}
+
+function addCorpHq(
+  state: GameState,
+  definitionId: string,
+  id: string,
+): CardInstanceId {
+  const cardId = id as CardInstanceId;
+  removeEverywhere(state, cardId);
+  state.corp.hq.unshift(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId: definitionId as CardDefinitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "hq" },
+    faceup: false,
+    rezzed: false,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
+}
+
+function addRunnerGrip(
+  state: GameState,
+  definitionId: string,
+  id: string,
+): CardInstanceId {
+  const cardId = id as CardInstanceId;
+  removeEverywhere(state, cardId);
+  state.runner.grip.unshift(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId: definitionId as CardDefinitionId,
+    owner: "runner",
+    controller: "runner",
+    zone: { side: "runner", zone: "grip" },
+    faceup: true,
+    rezzed: true,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
+}
+
+function addCorpIce(
+  state: GameState,
+  definitionId: string,
+  id: string,
+  serverId: Exclude<ServerId, "new_remote">,
+  rezzed = false,
+): CardInstanceId {
+  const cardId = id as CardInstanceId;
+  removeEverywhere(state, cardId);
+  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) {
+    server = { id: serverId, kind: "remote", label: "Remote 1", ice: [], root: [] };
+    state.corp.servers.push(server);
+  }
+  server.ice.push(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId: definitionId as CardDefinitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "serverIce", serverId },
+    faceup: rezzed,
+    rezzed,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
+}
+
+function addCorpRoot(
+  state: GameState,
+  definitionId: string,
+  id: string,
+  serverId: Exclude<ServerId, "new_remote">,
+  rezzed = true,
+): CardInstanceId {
+  const cardId = id as CardInstanceId;
+  removeEverywhere(state, cardId);
+  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) {
+    server = { id: serverId, kind: "remote", label: "Remote 1", ice: [], root: [] };
+    state.corp.servers.push(server);
+  }
+  server.root.push(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId: definitionId as CardDefinitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "serverRoot", serverId },
+    faceup: rezzed,
+    rezzed,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
+}
+
+function addCorpRd(
+  state: GameState,
+  definitionId: string,
+  id: string,
+): CardInstanceId {
+  const cardId = id as CardInstanceId;
+  removeEverywhere(state, cardId);
+  state.corp.rd.unshift(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId: definitionId as CardDefinitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "rd" },
+    faceup: false,
+    rezzed: false,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
+}
+
+function applySelected(state: GameState, side: "corp" | "runner", actionId: string): GameState {
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey: `${side}-${state.stateVersion}-${actionId}`,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
+}
+
+describe("PRO019 rule-contract baseline utilities", () => {
+  it("registers exactly the eight PRO019 CardImplementation definitions", () => {
+    const implementations = new Map(
+      CARD_IMPLEMENTATIONS.map((implementation) => [
+        implementation.cardDefinitionId,
+        implementation,
+      ]),
+    );
+    for (const cardDefinitionId of PRO019_IDS)
+      expect(implementations.get(cardDefinitionId)).toBeDefined();
+  });
+
+  it("plays Emergency Rig through LegalActions with bounded nonzero X", () => {
+    let state = corpActionState("pro019-emergency");
+    addCorpHq(state, EMERGENCY_RIG, "emergency_1");
+    const iceId = addCorpIce(state, WALL, "wall_1", "remote_1");
+
+    const actions = getLegalActions(state, "corp").filter(
+      (action) => action.type === "play_operation" && action.payload?.cardId === "emergency_1",
+    );
+    expect(actions.length).toBeGreaterThan(0);
+    expect(actions.some((action) => action.payload?.xValue === 0)).toBe(false);
+    expect(actions.every((action) => Number(action.payload?.xValue) >= 1)).toBe(true);
+
+    const selected = actions.find((action) => action.payload?.xValue === 1);
+    expect(selected).toBeDefined();
+    state = applySelected(state, "corp", selected!.actionId);
+
+    expect(state.cardInstances[iceId]?.rezzed).toBe(true);
+    expect(state.cardInstances[iceId]?.counters?.kludge).toBe(1);
+    expect(hashState(state)).toMatch(/^fnv1a:/);
+  });
+
+  it("removes Kludge counters at Corp turn start and trashes ICE on the last counter", () => {
+    let state = corpActionState("pro019-emergency-lifecycle");
+    addCorpHq(state, EMERGENCY_RIG, "emergency_lifecycle");
+    const iceId = addCorpIce(state, WALL, "wall_kludge", "remote_1");
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        action.payload?.cardId === "emergency_lifecycle" &&
+        action.payload?.xValue === 1,
+    );
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    expect(state.cardInstances[iceId]?.zone.zone).toBe("archives");
+    expect(state.corp.archives).toContain(iceId);
+  });
+
+  it("plays Rent-to-Own Contract and binds Term counters to target rez cost", () => {
+    let state = corpActionState("pro019-rent");
+    addCorpHq(state, RENT_TO_OWN, "rent_1");
+    const iceId = addCorpIce(state, WALL, "wall_2", "remote_1");
+
+    const selected = getLegalActions(state, "corp").find(
+      (action) => action.type === "play_operation" && action.payload?.cardId === "rent_1",
+    );
+    expect(selected?.payload?.targetRezCost).toBeGreaterThan(0);
+    state = applySelected(state, "corp", selected!.actionId);
+
+    expect(state.cardInstances[iceId]?.rezzed).toBe(true);
+    expect(state.cardInstances[iceId]?.counters?.term).toBe(
+      selected!.payload?.targetRezCost,
+    );
+  });
+
+  it("ticks Rent-to-Own Term counters according to Corp credits", () => {
+    let payState = corpActionState("pro019-rent-pay");
+    addCorpHq(payState, RENT_TO_OWN, "rent_pay");
+    const payIce = addCorpIce(payState, WALL, "wall_term_pay", "remote_1");
+    payState = apply(
+      payState,
+      "corp",
+      (action) => action.type === "play_operation" && action.payload?.cardId === "rent_pay",
+    );
+    const startingTerm = payState.cardInstances[payIce]?.counters?.term ?? 0;
+    payState.corp.credits = 2;
+    payState = apply(payState, "corp", (action) => action.type === "end_turn");
+    payState = apply(payState, "runner", (action) => action.type === "end_turn");
+    expect(payState.corp.credits).toBe(0);
+    expect(payState.cardInstances[payIce]?.counters?.term).toBe(startingTerm - 1);
+    expect(payState.cardInstances[payIce]?.rezzed).toBe(true);
+
+    let growState = corpActionState("pro019-rent-grow");
+    addCorpHq(growState, RENT_TO_OWN, "rent_grow");
+    const growIce = addCorpIce(growState, WALL, "wall_term_grow", "remote_1");
+    growState = apply(
+      growState,
+      "corp",
+      (action) =>
+        action.type === "play_operation" && action.payload?.cardId === "rent_grow",
+    );
+    const growStartingTerm = growState.cardInstances[growIce]?.counters?.term ?? 0;
+    growState.corp.credits = 1;
+    growState = apply(growState, "corp", (action) => action.type === "end_turn");
+    growState = apply(growState, "runner", (action) => action.type === "end_turn");
+    expect(growState.corp.credits).toBe(1);
+    expect(growState.cardInstances[growIce]?.counters?.term).toBe(growStartingTerm + 1);
+  });
+
+  it("offers Herman Revista only at start of run on its fort and reorders ICE privately", () => {
+    let state = corpActionState("pro019-herman");
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 4;
+    addCorpRoot(state, HERMAN, "herman_1", "remote_1", true);
+    const outerIce = addCorpIce(state, WALL, "herman_outer", "remote_1", true);
+    const innerIce = addCorpIce(state, DATAPACKER, "herman_inner", "remote_1", true);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(state.pendingChoice?.source).toContain("corp.start_of_run_redirect");
+    expect(state.pendingChoice?.options.some((option) => option.id === "herman_herman_1")).toBe(
+      true,
+    );
+    state = applyChoice(state, "corp", "herman_herman_1");
+    expect(state.pendingChoice?.source).toContain("herman_reorder");
+    state = applyChoices(state, "corp", [`card_${innerIce}`, `card_${outerIce}`]);
+    expect(state.corp.servers.find((server) => server.id === "remote_1")?.ice).toEqual([
+      innerIce,
+      outerIce,
+    ]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "herman_revista_reorder",
+    });
+
+    const wrongFort = corpActionState("pro019-herman-wrong-fort");
+    wrongFort.activeSide = "runner";
+    wrongFort.phase = "runner_action_phase";
+    wrongFort.timingPoint = "runner_action.main";
+    wrongFort.runner.clicks = 4;
+    addCorpRoot(wrongFort, HERMAN, "herman_wrong", "remote_1", true);
+    const hqRun = apply(
+      wrongFort,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    expect(hqRun.pendingChoice?.source ?? "").not.toContain("corp.start_of_run_redirect");
+  });
+
+  it("gates Marcel DeSoleil on run timing and top-two-R&D costs", () => {
+    let state = corpActionState("pro019-marcel");
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 4;
+    const marcelId = addCorpRoot(state, MARCEL, "marcel_1", "remote_1", true);
+    addCorpIce(state, WALL, "marcel_wall", "remote_1", true);
+    addCorpRd(state, WALL, "marcel_rd_1");
+    addCorpRd(state, DATAPACKER, "marcel_rd_2");
+
+    expect(getLegalActions(state, "corp").some((action) => action.source === marcelId)).toBe(
+      false,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    if (state.pendingChoice?.side === "corp") state = applyChoice(state, "corp", "pass");
+    state.timingPoint = "run.jack_out_window";
+    const selected = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "activated_card_ability" && action.source === marcelId,
+    );
+    const beforeRd = state.corp.rd.length;
+    state = applySelected(state, "corp", selected.actionId);
+    expect(state.corp.credits).toBe(18);
+    expect(state.corp.rd.length).toBe(beforeRd - 2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "trash_top_corp_rd",
+    });
+
+    const shortRd = corpActionState("pro019-marcel-short-rd");
+    shortRd.activeSide = "runner";
+    shortRd.phase = "runner_action_phase";
+    shortRd.timingPoint = "runner_action.main";
+    shortRd.runner.clicks = 4;
+    const shortMarcel = addCorpRoot(shortRd, MARCEL, "marcel_short", "remote_1", true);
+    addCorpIce(shortRd, WALL, "marcel_short_wall", "remote_1", true);
+    const keptRd = shortRd.corp.rd.slice(0, 1);
+    const movedRd = shortRd.corp.rd.slice(1);
+    shortRd.corp.rd = keptRd;
+    for (const cardId of movedRd) {
+      shortRd.corp.archives.push(cardId);
+      shortRd.cardInstances[cardId] = {
+        ...shortRd.cardInstances[cardId]!,
+        zone: { side: "corp", zone: "archives" },
+      };
+    }
+    const shortRun = apply(
+      shortRd,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(getLegalActions(shortRun, "corp").some((action) => action.source === shortMarcel)).toBe(
+      false,
+    );
+  });
+
+  it("opens Obfuscated Fortress spend declaration and applies run-end shortfall", () => {
+    let state = corpActionState("pro019-obfuscated");
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 4;
+    addCorpRoot(state, OBFUSCATED, "obfuscated_1", "remote_1", true);
+    addCorpIce(state, WALL, "obfuscated_wall", "remote_1", true);
+    state.runner.credits = 5;
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(state.pendingChoice?.source).toContain("runner_spend_cap");
+    state = applyChoice(state, "runner", "spend_3");
+    expect(state.run?.runCreditSpendCap?.announcedSpendCap).toBe(3);
+    expect(state.run?.runCreditSpendCap?.spentDuringRun).toBe(0);
+    state.timingPoint = "run.jack_out_window";
+    state = apply(state, "runner", (action) => action.type === "jack_out");
+    expect(state.runner.credits).toBe(2);
+  });
+
+  it("scopes Simon Francisco and Pavit Bharat install actions to legal forts", () => {
+    let simonState = corpActionState("pro019-simon-install");
+    addCorpHq(simonState, SIMON, "simon_install");
+    const simonServers = getLegalActions(simonState, "corp")
+      .filter((action) => action.type === "install_card" && action.payload?.cardId === "simon_install")
+      .map((action) => action.payload?.serverId);
+    expect(simonServers).toEqual(["hq", "rd"]);
+
+    let pavitState = corpActionState("pro019-pavit-install");
+    addCorpHq(pavitState, PAVIT, "pavit_install");
+    const pavitServers = getLegalActions(pavitState, "corp")
+      .filter((action) => action.type === "install_card" && action.payload?.cardId === "pavit_install")
+      .map((action) => action.payload?.serverId);
+    expect(pavitServers).toContain("new_remote");
+    expect(pavitServers).not.toContain("hq");
+    expect(pavitServers).not.toContain("rd");
+  });
+
+  it("plays Ice and Data Special Report for cost 3 and opens a private expose choice", () => {
+    let state = corpActionState("pro019-ice-data");
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 4;
+    addRunnerGrip(state, ICE_AND_DATA, "ice_data_1");
+    addCorpIce(state, WALL, "wall_3", "remote_1");
+    const replayStart = structuredClone(state);
+    const replayStartIndex = state.eventLog.length;
+
+    const selected = getLegalActions(state, "runner").find(
+      (action) => action.type === "play_event" && action.payload?.cardId === "ice_data_1",
+    );
+    expect(selected?.costs[0]?.credits).toBe(3);
+    state = applySelected(state, "runner", selected!.actionId);
+
+    expect(state.pendingChoice?.source).toContain("single_data_fort");
+    expect(state.pendingChoice?.maxSelections).toBe(1);
+    expect(hashState(state)).toMatch(/^fnv1a:/);
+
+    const replay = replayEvents(
+      replayStart,
+      state.eventLog.slice(replayStartIndex),
+    );
+    expect(replay.ok).toBe(true);
+  });
+
+  it("rejects Ice and Data selections across multiple forts and allows zero selections", () => {
+    let state = corpActionState("pro019-ice-data-fort-scope");
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 4;
+    addRunnerGrip(state, ICE_AND_DATA, "ice_data_scope");
+    const remoteIce = addCorpIce(state, WALL, "ice_data_remote", "remote_1");
+    const hqIce = addCorpIce(state, WALL, "ice_data_hq", "hq");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "play_event" && action.payload?.cardId === "ice_data_scope",
+    );
+    const invalid = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: mustAction(state, "runner", (action) => action.type === "resolve_choice")
+        .actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${remoteIce}`, `card_${hqIce}`],
+      },
+      idempotencyKey: "ice-data-cross-fort",
+    });
+    expect(invalid.ok).toBe(false);
+
+    state = applyChoices(state, "runner", []);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(hashState(state)).toMatch(/^fnv1a:/);
+  });
+});

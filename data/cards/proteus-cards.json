@@ -3560,7 +3560,7 @@
       "type": "event",
       "subtypes": [],
       "numeric": {
-        "cost": null,
+        "cost": 3,
         "installCost": null,
         "memoryCost": null,
         "strength": null,
