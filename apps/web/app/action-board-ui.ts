@@ -282,6 +282,10 @@ export function counterDisplayTooltipText(display: NonNullable<VisibleCard["coun
       return `Doppelganger Antibody: Zu Beginn jedes Runner-Zugs verliert der Runner pro Doppelganger-Counter 1 Credit. Der Runner kann 1 Aktion nehmen und 4 Credits zahlen, um 1 Doppelganger-Counter zu entfernen.`;
     case "pattel_antibody":
       return `Pattel Antibody: Jeder Pattel-Counter auf einem Icebreaker reduziert dessen Stärke um 1.`;
+    case "mark":
+      if (display.id === "ice_transmutation")
+        return `Ice Transmutation: Das gewählte ICE hat +1 Stärke. Jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.`;
+      return display.ariaLabel;
     case "bad_publicity":
       return `Bad Publicity: Jede Bad Publicity gibt dem Runner zu Beginn eines Runs 1 temporären Credit. Bei 7 Bad Publicity verliert die Korp.`;
     default:

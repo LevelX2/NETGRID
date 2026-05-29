@@ -377,6 +377,9 @@ describe("scored agenda flow", () => {
     scoreAgenda(host, "transmutation_agenda" as CardInstanceId);
     const choice = host.state.pendingChoice!;
     expect(choice.source).toContain("v1920.ice_transmutation");
+    expect(choice.prompt).toBe(
+      "Ice Transmutation: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
+    );
 
     const result = handleScoredAgendaFlowChoice({
       ...host,
