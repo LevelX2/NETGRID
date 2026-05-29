@@ -10,13 +10,11 @@ const REPO_ROOT = path.resolve(
 );
 const ACTIVE_HINTS_PATH = "data/ai/ai-card-hints-active.json";
 const DERIVED_FACTS_REPORT_PATH =
-  "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json";
+  "docs/reviews/ai/aufgabe-042-full-compiled-hint-coverage-report-2026-05-25.json";
 const OVERLAY_ROOT = "data/ai/hints/overlays";
-const RUNTIME_PILOT_CARDS_PATH =
-  "data/ai/ai-compiled-hint-runtime-pilot-cards-2026-05-25.json";
 const COMPILED_HINTS_PATH = "data/ai/ai-card-hints-compiled.json";
 const REPORT_PATH =
-  "docs/reviews/ai/aufgabe-041-compiled-hint-runtime-pilot-report-2026-05-25.json";
+  "docs/reviews/ai/aufgabe-042-compiled-hint-runtime-full-report-2026-05-25.json";
 const GENERATED_AT = "2026-05-25";
 
 const LEGACY_FIELDS = [
@@ -40,6 +38,8 @@ const OVERLAY_FIELDS = [
   "quality",
   "manualNotes",
   "strategicNotes",
+  "descriptorGaps",
+  "opponentSignals",
 ];
 const HIDDEN_INFO_FIELDS = new Set([
   "opponentDeckList",
@@ -298,7 +298,9 @@ function clone(value) {
 function generatedFactsFrom(derivedFacts = {}) {
   return Object.fromEntries(
     MECHANICAL_FIELDS.flatMap((field) =>
-      isMeaningful(derivedFacts[field]) ? [[field, stableValue(derivedFacts[field])]] : [],
+      isMeaningful(derivedFacts[field])
+        ? [[field, stableValue(derivedFacts[field])]]
+        : [],
     ),
   );
 }
@@ -306,7 +308,9 @@ function generatedFactsFrom(derivedFacts = {}) {
 function overlayFieldsFrom(overlay = {}) {
   return Object.fromEntries(
     OVERLAY_FIELDS.flatMap((field) =>
-      isMeaningful(overlay[field]) ? [[field, stableValue(overlay[field])]] : [],
+      isMeaningful(overlay[field])
+        ? [[field, stableValue(overlay[field])]]
+        : [],
     ),
   );
 }
@@ -314,13 +318,9 @@ function overlayFieldsFrom(overlay = {}) {
 export function buildCompiledHintsArtifact() {
   const activeHints = readJson(ACTIVE_HINTS_PATH);
   const derivedReport = readJson(DERIVED_FACTS_REPORT_PATH);
-  const runtimePilotCards = readJson(RUNTIME_PILOT_CARDS_PATH);
   const overlaysByCard = readOverlayByCard();
   const derivedByCard = new Map(
     (derivedReport.cards ?? []).map((card) => [card.cardId, card]),
-  );
-  const runtimePilotIds = new Set(
-    (runtimePilotCards.cards ?? []).map((card) => card.cardId),
   );
   const cards = (activeHints.cards ?? []).map((activeHint) => {
     const compiled = clone(activeHint);
@@ -333,21 +333,17 @@ export function buildCompiledHintsArtifact() {
     for (const [field, value] of Object.entries(overlay)) {
       compiled[field] = value;
     }
-    if (runtimePilotIds.has(activeHint.cardId)) {
-      compiled.runtimeCompiledHintPilot = true;
-    }
     return compiled;
   });
   return {
-    schemaVersion: "ai-card-hints-compiled-v1",
-    taskId: "Aufgabe 041",
+    schemaVersion: "ai-card-hints-compiled-v2",
+    taskId: "Aufgabe 042",
     generatedAt: GENERATED_AT,
     source: {
       activeHintsPath: ACTIVE_HINTS_PATH,
       derivedFactsReportPath: DERIVED_FACTS_REPORT_PATH,
       manualOverlayRoot: OVERLAY_ROOT,
-      runtimePilotCardsPath: RUNTIME_PILOT_CARDS_PATH,
-      mode: "active legacy hints plus generated mechanical facts plus optional manual overlays; hints do not create LegalActions",
+      mode: "full active legacy hints plus generated mechanical facts plus optional manual overlays; hints do not create LegalActions",
     },
     cards,
   };
@@ -386,10 +382,11 @@ function uniqueBySerialized(values) {
   });
 }
 
-export function buildCompiledHintsReport(artifact = buildCompiledHintsArtifact()) {
+export function buildCompiledHintsReport(
+  artifact = buildCompiledHintsArtifact(),
+) {
   const activeHints = readJson(ACTIVE_HINTS_PATH);
   const derivedReport = readJson(DERIVED_FACTS_REPORT_PATH);
-  const runtimePilotCards = readJson(RUNTIME_PILOT_CARDS_PATH);
   const overlaysByCard = readOverlayByCard();
   const activeByCard = new Map(
     (activeHints.cards ?? []).map((hint) => [hint.cardId, hint]),
@@ -399,45 +396,36 @@ export function buildCompiledHintsReport(artifact = buildCompiledHintsArtifact()
   );
   const generatedFactCardIds = new Set(
     (derivedReport.cards ?? [])
-      .filter((card) => Object.keys(generatedFactsFrom(card.derivedFacts)).length > 0)
+      .filter(
+        (card) => Object.keys(generatedFactsFrom(card.derivedFacts)).length > 0,
+      )
       .map((card) => card.cardId),
-  );
-  const runtimePilotIds = new Set(
-    (runtimePilotCards.cards ?? []).map((card) => card.cardId),
   );
   const errors = validateCompiledArtifact({
     activeHints,
     artifact,
-    runtimePilotCards,
   });
   return {
-    schemaVersion: "aufgabe-041-compiled-hint-runtime-pilot-report-v1",
-    taskId: "Aufgabe 041",
+    schemaVersion: "aufgabe-042-compiled-hint-runtime-full-report-v1",
+    taskId: "Aufgabe 042",
     generatedAt: GENERATED_AT,
     activeHintCount: activeHints.cards?.length ?? 0,
     compiledHintCount: artifact.cards?.length ?? 0,
-    runtimePilotCardCount: runtimePilotIds.size,
     generatedFactsCardCount: generatedFactCardIds.size,
-    legacyFallbackOnlyCount: (activeHints.cards ?? []).filter(
-      (hint) => !generatedFactCardIds.has(hint.cardId),
-    ).length,
+    legacyFallbackOnlyCount:
+      derivedReport.legacyFallbackOnlyCount ??
+      (activeHints.cards ?? []).filter(
+        (hint) => !generatedFactCardIds.has(hint.cardId),
+      ).length,
     manualOverlayCardCount: overlaysByCard.size,
+    descriptorOrSchemaGapCount: derivedReport.descriptorOrSchemaGapCount ?? 0,
+    manualOverlayRequiredCount: derivedReport.manualOverlayRequiredCount ?? 0,
+    blockedMissingImplementationCount:
+      derivedReport.blockedMissingImplementationCount ?? 0,
+    coverageClassCounts: derivedReport.coverageClassCounts ?? {},
+    coverageBySideCardType: derivedReport.coverageBySideCardType ?? {},
+    warningCount: derivedReport.warningCount ?? 0,
     hardErrorCount: errors.length,
-    warningCount: 0,
-    runtimePilotCards: [...runtimePilotIds].sort().map((cardId) => {
-      const compiled = compiledByCard.get(cardId);
-      return {
-        cardId,
-        side: compiled?.side ?? null,
-        cardType: compiled?.cardType ?? null,
-        generatedFields: MECHANICAL_FIELDS.filter((field) =>
-          isMeaningful(compiled?.[field]),
-        ),
-        manualOverlayFields: OVERLAY_FIELDS.filter((field) =>
-          isMeaningful(compiled?.[field]),
-        ),
-      };
-    }),
     legacyCompatibility: {
       legacyFieldsChecked: LEGACY_FIELDS,
       allActiveHintsPresent: (activeHints.cards ?? []).every((hint) =>
@@ -464,14 +452,13 @@ export function buildCompiledHintsReport(artifact = buildCompiledHintsArtifact()
   };
 }
 
-function validateCompiledArtifact({ activeHints, artifact, runtimePilotCards }) {
+function validateCompiledArtifact({ activeHints, artifact }) {
   const errors = [];
   const activeCards = activeHints.cards ?? [];
   const compiledCards = artifact.cards ?? [];
   const activeByCard = new Map(activeCards.map((hint) => [hint.cardId, hint]));
-  const compiledByCard = new Map(compiledCards.map((hint) => [hint.cardId, hint]));
-  const runtimePilotIds = new Set(
-    (runtimePilotCards.cards ?? []).map((card) => card.cardId),
+  const compiledByCard = new Map(
+    compiledCards.map((hint) => [hint.cardId, hint]),
   );
 
   if (compiledCards.length !== activeCards.length) {
@@ -497,7 +484,9 @@ function validateCompiledArtifact({ activeHints, artifact, runtimePilotCards }) 
       continue;
     }
     for (const field of LEGACY_FIELDS) {
-      if (JSON.stringify(activeHint[field]) !== JSON.stringify(compiled[field])) {
+      if (
+        JSON.stringify(activeHint[field]) !== JSON.stringify(compiled[field])
+      ) {
         errors.push({
           kind: "legacy_field_drift",
           cardId: activeHint.cardId,
@@ -519,18 +508,6 @@ function validateCompiledArtifact({ activeHints, artifact, runtimePilotCards }) 
       }
     }
   }
-  for (const cardId of runtimePilotIds) {
-    const compiled = compiledByCard.get(cardId);
-    if (!compiled) continue;
-    if (compiled.runtimeCompiledHintPilot !== true) {
-      errors.push({
-        kind: "runtime_pilot_flag_missing",
-        cardId,
-        message: "Runtime pilot card lacks runtimeCompiledHintPilot=true.",
-      });
-    }
-  }
-
   for (const compiled of compiledCards) {
     validateNoForbiddenFields(compiled, compiled.cardId, errors);
     validateKnownOntology(compiled, errors);
@@ -594,7 +571,9 @@ function validateKnownOntology(hint, errors) {
       });
     }
   }
-  for (const [index, coverage] of (hint.breakerProfile?.coverage ?? []).entries()) {
+  for (const [index, coverage] of (
+    hint.breakerProfile?.coverage ?? []
+  ).entries()) {
     if (!KNOWN_BREAKER_COVERAGES.has(coverage)) {
       errors.push({
         kind: "unknown_breaker_coverage",
@@ -612,11 +591,29 @@ function validateKnownOntology(hint, errors) {
       message: `Unknown remote role ${String(hint.remoteRole.kind)}.`,
     });
   }
+  if (hint.opponentSignals !== undefined) {
+    for (const [index, signal] of hint.opponentSignals.entries()) {
+      if (signal?.visibleEvidenceOnly !== true) {
+        errors.push({
+          kind: "opponent_signal_without_visible_evidence_only",
+          cardId: hint.cardId,
+          field: `opponentSignals[${index}].visibleEvidenceOnly`,
+          message: "Opponent signals must set visibleEvidenceOnly=true.",
+        });
+      }
+    }
+  }
 }
 
 function validatePilotSpecificGuards(compiledByCard, errors) {
-  const selfModifyingCode = compiledByCard.get("onr_v1_059_self-modifying-code");
-  if (selfModifyingCode?.effects?.some((effect) => effect.kind === "install_discount")) {
+  const selfModifyingCode = compiledByCard.get(
+    "onr_v1_059_self-modifying-code",
+  );
+  if (
+    selfModifyingCode?.effects?.some(
+      (effect) => effect.kind === "install_discount",
+    )
+  ) {
     errors.push({
       kind: "self_modifying_code_install_discount",
       cardId: "onr_v1_059_self-modifying-code",
@@ -628,7 +625,8 @@ function validatePilotSpecificGuards(compiledByCard, errors) {
     errors.push({
       kind: "bbs_remaining_pool_static_fact",
       cardId: "onr_v1_309_bbs-whispering-campaign",
-      message: "BBS Whispering Campaign must not compile current remaining pool.",
+      message:
+        "BBS Whispering Campaign must not compile current remaining pool.",
     });
   }
   for (const cardId of [
@@ -636,7 +634,9 @@ function validatePilotSpecificGuards(compiledByCard, errors) {
     "onr_v1_225_canis-major",
   ]) {
     const hint = compiledByCard.get(cardId);
-    const effectKinds = new Set((hint?.effects ?? []).map((effect) => effect.kind));
+    const effectKinds = new Set(
+      (hint?.effects ?? []).map((effect) => effect.kind),
+    );
     const conditionKinds = new Set(
       (hint?.conditions ?? []).map((condition) => condition.kind),
     );
@@ -679,12 +679,17 @@ export function runCli(argv = process.argv.slice(2)) {
   }
   if (options.check) {
     if (!fs.existsSync(repoPath(COMPILED_HINTS_PATH))) {
-      throw new Error(`Compiled hints artifact is missing: ${COMPILED_HINTS_PATH}`);
+      throw new Error(
+        `Compiled hints artifact is missing: ${COMPILED_HINTS_PATH}`,
+      );
     }
     if (!fs.existsSync(repoPath(REPORT_PATH))) {
       throw new Error(`Compiled hints report is missing: ${REPORT_PATH}`);
     }
-    if (fs.readFileSync(repoPath(COMPILED_HINTS_PATH), "utf8") !== serializedArtifact) {
+    if (
+      fs.readFileSync(repoPath(COMPILED_HINTS_PATH), "utf8") !==
+      serializedArtifact
+    ) {
       throw new Error(
         `Generated compiled hints differ from committed ${COMPILED_HINTS_PATH}. Run corepack pnpm build:ai-compiled-hints.`,
       );
@@ -700,7 +705,7 @@ export function runCli(argv = process.argv.slice(2)) {
     process.stdout.write(serializedReport);
   } else {
     process.stdout.write(
-      `AI_COMPILED_HINTS ${report.hardErrorCount === 0 ? "OK" : "FAIL"} cards=${report.compiledHintCount} pilot=${report.runtimePilotCardCount} generated=${report.generatedFactsCardCount} fallback=${report.legacyFallbackOnlyCount} errors=${report.hardErrorCount}\n`,
+      `AI_COMPILED_HINTS ${report.hardErrorCount === 0 ? "OK" : "FAIL"} cards=${report.compiledHintCount} generated=${report.generatedFactsCardCount} overlays=${report.manualOverlayCardCount} fallback=${report.legacyFallbackOnlyCount} errors=${report.hardErrorCount} warnings=${report.warningCount}\n`,
     );
   }
   if (report.hardErrorCount > 0) process.exitCode = 1;

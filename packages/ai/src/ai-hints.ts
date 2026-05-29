@@ -20,9 +20,12 @@ export type AiCardHint = AiHintOntologyExtension & {
   planRoles: string[];
   aiSupportStatus: "none" | "hinted_only" | "scenario_ready" | "ai_supported";
   valueHints?: Record<string, number>;
-  runtimeCompiledHintPilot?: true;
   manualNotes?: string[];
   strategicNotes?: string[];
+  descriptorGaps?: string[];
+  opponentSignals?: Array<
+    Record<string, unknown> & { visibleEvidenceOnly: true }
+  >;
 };
 
 export const CARD_ROLES_BY_CARD = new Map(

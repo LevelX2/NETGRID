@@ -326,7 +326,7 @@ export function buildDerivedFactsReport(options = {}) {
       ...derivedFacts.needsManualOverlayReasons,
     ].sort();
 
-    if (!implementationFound) {
+    if (!implementationFound && !options.allowMissingImplementation) {
       hardErrors.push({
         kind: "missing_implementation",
         cardId: pilotCard.cardId,
@@ -2124,10 +2124,9 @@ function deriveFromImplementation(card, implementationText, hint) {
       source: "implementation.printedSubroutines.run_duration",
     });
     if (
-      [
-        "onr_v1_222_ball-and-chain",
-        "onr_v1_225_canis-major",
-      ].includes(card.cardId)
+      ["onr_v1_222_ball-and-chain", "onr_v1_225_canis-major"].includes(
+        card.cardId,
+      )
     ) {
       addEffect(facts, {
         kind: "future_encounter_effect",

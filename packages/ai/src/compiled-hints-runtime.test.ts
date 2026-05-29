@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import compiledAiHintsData from "../../../data/ai/ai-card-hints-compiled.json";
+import fullCoverageReport from "../../../docs/reviews/ai/aufgabe-042-full-compiled-hint-coverage-report-2026-05-25.json";
 import {
   classifyCorpFutureRunIceDefinitionId,
   getStructuredBreakerProfileForCard,
@@ -22,18 +23,32 @@ const PILOT_IDS = [
   "onr_v1_366_red-herrings",
 ] as const;
 
-describe("compiled AI hints runtime pilot", () => {
-  it("loads the 410-card compiled hint artifact at runtime", () => {
+const MECHANICAL_OVERLAY_FIELDS = [
+  "effects",
+  "conditions",
+  "costProfile",
+  "breakerProfile",
+  "remoteRole",
+  "targetProfiles",
+  "aiSupportStatus",
+  "roles",
+  "planRoles",
+] as const;
+
+describe("compiled AI hints runtime full coverage", () => {
+  it("loads the 410-card full compiled hint artifact at runtime", () => {
     const hints = createAiHintsByCard();
+    expect(compiledAiHintsData.taskId).toBe("Aufgabe 042");
     expect(compiledAiHintsData.cards).toHaveLength(410);
     expect(hints.size).toBe(410);
     expect(activeAiHintsData.cards).toHaveLength(410);
-    for (const cardId of PILOT_IDS) {
-      expect(hints.get(cardId)?.runtimeCompiledHintPilot).toBe(true);
-    }
+    expect(fullCoverageReport.activeHintCount).toBe(410);
+    expect(fullCoverageReport.generatedFactsCardCount).toBeGreaterThanOrEqual(
+      305,
+    );
   });
 
-  it("keeps non-pilot legacy fallback entries bit-identical", () => {
+  it("keeps non-generated legacy fallback entries bit-identical", () => {
     const active = activeAiHintsData.cards.find(
       (hint) => hint.cardId === "corp_identity_001",
     );
@@ -43,7 +58,19 @@ describe("compiled AI hints runtime pilot", () => {
     expect(compiled).toEqual(active);
   });
 
-  it("keeps pilot legacy fields stable while adding generated facts", () => {
+  it("does not drift aiSupportStatus for any active hint", () => {
+    const activeByCard = new Map(
+      activeAiHintsData.cards.map((hint) => [
+        hint.cardId,
+        hint.aiSupportStatus,
+      ]),
+    );
+    for (const compiled of compiledAiHintsData.cards) {
+      expect(compiled.aiSupportStatus).toBe(activeByCard.get(compiled.cardId));
+    }
+  });
+
+  it("keeps generated-card legacy fields stable while adding structured facts", () => {
     const activeByCard = new Map(
       activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
     );
@@ -61,12 +88,39 @@ describe("compiled AI hints runtime pilot", () => {
       expect(
         Boolean(
           compiled?.effects?.length ||
-            compiled?.conditions?.length ||
-            compiled?.breakerProfile ||
-            compiled?.remoteRole ||
-            compiled?.targetProfiles?.length,
+          compiled?.conditions?.length ||
+          compiled?.breakerProfile ||
+          compiled?.remoteRole ||
+          compiled?.targetProfiles?.length,
         ),
       ).toBe(true);
+    }
+  });
+
+  it("reports full-coverage classes and leaves remaining fallback cards explicit", () => {
+    expect(fullCoverageReport.hardErrorCount).toBe(0);
+    expect(fullCoverageReport.generatedFactsCardCount).toBe(305);
+    expect(fullCoverageReport.legacyFallbackOnlyCount).toBe(68);
+    expect(fullCoverageReport.blockedMissingImplementationCount).toBe(37);
+    expect(fullCoverageReport.coverageClassCounts).toEqual(
+      expect.objectContaining({
+        generated_mechanical_clean: 60,
+        generated_plus_overlay: 6,
+        descriptor_or_schema_gap: 239,
+        legacy_fallback_only: 68,
+        blocked_missing_implementation: 37,
+      }),
+    );
+  });
+
+  it("copies overlay fields while keeping overlays free of mechanical fields", () => {
+    const redHerrings = createAiHintsByCard().get("onr_v1_366_red-herrings");
+    expect(redHerrings?.strategicNotes).toEqual(
+      expect.arrayContaining([expect.any(String)]),
+    );
+    const serializedOverlays = JSON.stringify(redHerrings);
+    for (const field of MECHANICAL_OVERLAY_FIELDS) {
+      expect(serializedOverlays).not.toContain(`"overlay.${field}"`);
     }
   });
 
@@ -141,12 +195,21 @@ describe("compiled AI hints runtime pilot", () => {
         requiresRunnerTagged: true,
       }),
     );
+    const scorchedEarth = createAiHintsByCard().get(
+      "onr_v1_302_scorched-earth",
+    );
+    expect(scorchedEarth?.effects).toContainEqual(
+      expect.objectContaining({ kind: "tag_punish_payoff" }),
+    );
+    expect(scorchedEarth?.conditions).toContainEqual(
+      expect.objectContaining({ kind: "requires_runner_tagged" }),
+    );
   });
 
   it("serves compiled future-encounter facts to ICE-ordering classification", () => {
-    expect(classifyCorpFutureRunIceDefinitionId("onr_v1_222_ball-and-chain")).toBe(
-      "ball_and_chain",
-    );
+    expect(
+      classifyCorpFutureRunIceDefinitionId("onr_v1_222_ball-and-chain"),
+    ).toBe("ball_and_chain");
     expect(classifyCorpFutureRunIceDefinitionId("onr_v1_225_canis-major")).toBe(
       "canis",
     );
@@ -179,6 +242,30 @@ describe("compiled AI hints runtime pilot", () => {
       "actionId",
     ]) {
       expect(serialized).not.toContain(`"${field}"`);
+    }
+  });
+
+  it("keeps expose, topdeck, HQ, and R&D info facts free of hidden-zone identities", () => {
+    const infoCards = compiledAiHintsData.cards.filter((hint) =>
+      (hint.effects ?? []).some((effect) =>
+        ["expose_info", "topdeck_info", "hq_info"].includes(effect.kind),
+      ),
+    );
+    expect(infoCards.length).toBeGreaterThan(0);
+    for (const hint of infoCards) {
+      const serialized = JSON.stringify(hint);
+      expect(serialized).not.toContain("actualRndOrder");
+      expect(serialized).not.toContain("actualStackOrder");
+      expect(serialized).not.toContain("hiddenHqCards");
+      expect(serialized).not.toContain("cardInstances");
+    }
+  });
+
+  it("requires opponentSignals to be visible-evidence-only", () => {
+    for (const hint of createAiHintsByCard().values()) {
+      for (const signal of hint.opponentSignals ?? []) {
+        expect(signal.visibleEvidenceOnly).toBe(true);
+      }
     }
   });
 });

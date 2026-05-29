@@ -1,13 +1,12 @@
 {
-  "schemaVersion": "ai-card-hints-compiled-v1",
-  "taskId": "Aufgabe 041",
+  "schemaVersion": "ai-card-hints-compiled-v2",
+  "taskId": "Aufgabe 042",
   "generatedAt": "2026-05-25",
   "source": {
     "activeHintsPath": "data/ai/ai-card-hints-active.json",
-    "derivedFactsReportPath": "docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json",
+    "derivedFactsReportPath": "docs/reviews/ai/aufgabe-042-full-compiled-hint-coverage-report-2026-05-25.json",
     "manualOverlayRoot": "data/ai/hints/overlays",
-    "runtimePilotCardsPath": "data/ai/ai-compiled-hint-runtime-pilot-cards-2026-05-25.json",
-    "mode": "active legacy hints plus generated mechanical facts plus optional manual overlays; hints do not create LegalActions"
+    "mode": "full active legacy hints plus generated mechanical facts plus optional manual overlays; hints do not create LegalActions"
   },
   "cards": [
     {
@@ -208,6 +207,34 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "base_link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 1,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 1,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
       ]
     },
     {
@@ -633,12 +660,18 @@
       },
       "effects": [
         {
-          "kind": "economy",
-          "timing": "during_run",
-          "scope": "runner",
-          "resource": "credits",
           "amount": 3,
-          "repeatable": true
+          "kind": "economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "during_run"
+        },
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
         }
       ],
       "costProfile": {
@@ -687,6 +720,20 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "remote_protection",
+          "resource": "strength",
+          "scope": "ice",
+          "timing": "persistent"
+        }
+      ],
+      "remoteRole": {
+        "kind": "ice_modifier",
+        "serverScope": "server",
+        "threatLevel": "medium"
       }
     },
     {
@@ -833,6 +880,19 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "sentry"
+        ]
       }
     },
     {
@@ -1008,7 +1068,21 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v195-v198-smokes.json#runner_v198_dogcatcher_and_dropp_breakers"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "watchdog"
+        ],
+        "pumpCost": 1
+      }
     },
     {
       "cardId": "onr_v1_019_dropp",
@@ -1106,7 +1180,21 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_access_tools"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "code_gate"
+        ],
+        "pumpCost": 2
+      }
     },
     {
       "cardId": "onr_v1_021_dwarf",
@@ -1147,6 +1235,20 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "wall"
+        ],
+        "pumpCost": 1
       }
     },
     {
@@ -1461,7 +1563,21 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "ap"
+        ],
+        "pumpCost": 1
+      }
     },
     {
       "cardId": "onr_v1_028_force-shield",
@@ -1609,7 +1725,21 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#runner_v191_counter_random_and_scaling_programs"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "wall"
+        ],
+        "pumpCost": 2
+      }
     },
     {
       "cardId": "onr_v1_031_hammer",
@@ -1641,7 +1771,24 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "wall"
+        ],
+        "pumpCost": 1,
+        "sideEffects": [
+          "stealth_loss"
+        ]
+      }
     },
     {
       "cardId": "onr_v1_032_i-spy",
@@ -1779,6 +1926,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
+      ],
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -1815,7 +1970,24 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_stealth_noisy_credit_gate"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 0,
+        "coverage": [
+          "wall"
+        ],
+        "pumpCost": 1,
+        "sideEffects": [
+          "stealth_loss"
+        ]
+      }
     },
     {
       "cardId": "onr_v1_037_japanese-water-torture",
@@ -2008,8 +2180,7 @@
       },
       "lineSupport": [
         "rig_first"
-      ],
-      "runtimeCompiledHintPilot": true
+      ]
     },
     {
       "cardId": "onr_v1_040_loony-goon",
@@ -2073,8 +2244,7 @@
       },
       "lineSupport": [
         "rig_first"
-      ],
-      "runtimeCompiledHintPilot": true
+      ]
     },
     {
       "cardId": "onr_v1_041_microtech-ai-interface",
@@ -2282,8 +2452,7 @@
       ],
       "manualNotes": [
         "The once-per-run limit is represented mechanically as targetProfiles.oncePerRun; search and install target profile stay generated."
-      ],
-      "runtimeCompiledHintPilot": true
+      ]
     },
     {
       "cardId": "onr_v1_044_netspace-inverter",
@@ -2817,7 +2986,24 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_trace_link_tools"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 2,
+        "coverage": [
+          "wall"
+        ],
+        "pumpCost": 1,
+        "sideEffects": [
+          "stealth_loss"
+        ]
+      }
     },
     {
       "cardId": "onr_v1_054_raptor",
@@ -3093,8 +3279,7 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      },
-      "runtimeCompiledHintPilot": true
+      }
     },
     {
       "cardId": "onr_v1_058_seeya",
@@ -3216,8 +3401,7 @@
       ],
       "manualNotes": [
         "The install target profile is mechanical; any install-discount mismatch belongs in hint cleanup, not in this overlay."
-      ],
-      "runtimeCompiledHintPilot": true
+      ]
     },
     {
       "cardId": "onr_v1_060_shaka",
@@ -3566,6 +3750,23 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "sentry"
+        ],
+        "pumpCost": 1,
+        "sideEffects": [
+          "temporary_strength"
+        ]
       }
     },
     {
@@ -3796,12 +3997,18 @@
       },
       "effects": [
         {
-          "kind": "economy",
-          "timing": "during_run",
-          "scope": "runner",
-          "resource": "credits",
           "amount": 2,
-          "repeatable": true
+          "kind": "economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "during_run"
+        },
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
         }
       ],
       "costProfile": {
@@ -4052,12 +4259,18 @@
       },
       "effects": [
         {
-          "kind": "install_discount",
-          "timing": "action",
-          "scope": "installed_card",
-          "resource": "credits",
           "amount": 2,
-          "repeatable": true
+          "kind": "install_discount",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "installed_card",
+          "timing": "action"
+        },
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
         }
       ],
       "costProfile": {
@@ -4170,6 +4383,28 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#runner_v1919_agenda_counter"
+      ],
+      "effects": [
+        {
+          "kind": "flatline_prevention",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "flatline_replacement"
+        },
+        {
+          "kind": "prevention_replacement",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "flatline_replacement"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_flatline"
+        },
+        {
+          "kind": "requires_prevention_window"
+        }
       ]
     },
     {
@@ -5333,6 +5568,19 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ],
+      "effects": [
+        {
+          "kind": "survival_payoff",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_runner_tagged"
+        }
       ]
     },
     {
@@ -5443,6 +5691,18 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_events"
+      ],
+      "effects": [
+        {
+          "kind": "access_replacement",
+          "scope": "hq",
+          "timing": "successful_run"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
       ]
     },
     {
@@ -5999,6 +6259,18 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_run_event_pressure"
+      ],
+      "effects": [
+        {
+          "kind": "access_replacement",
+          "scope": "hq",
+          "timing": "successful_run"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
       ]
     },
     {
@@ -6035,6 +6307,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ],
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -6070,7 +6350,48 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "amount": 3,
+          "damageTypes": [
+            "meat"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 2,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 3,
+          "kind": "meat_damage_prevention",
+          "perTurnLimit": 2,
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_meat_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_121_armored-fridge",
@@ -6107,7 +6428,42 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "damageTypes": [
+            "meat"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 7,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "meat_damage_prevention",
+          "perTurnLimit": 7,
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_meat_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_122_artemis-2020",
@@ -6145,6 +6501,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ],
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -6205,6 +6569,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ],
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -6233,6 +6605,41 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_damage_prevention_tools"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "damageTypes": [
+            "meat"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "meat_damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_meat_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
       ]
     },
     {
@@ -6260,6 +6667,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
+      ],
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -6288,6 +6703,37 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
+      ],
+      "effects": [
+        {
+          "damageTypes": [
+            "meat"
+          ],
+          "kind": "damage_prevention",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "meat_damage_prevention",
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_meat_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
       ]
     },
     {
@@ -6324,7 +6770,42 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "damageTypes": [
+            "net"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "net_damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "net_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_net_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_129_hq-interface",
@@ -6393,6 +6874,48 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "damageTypes": [
+            "brain"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "brain_damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "brain_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 2,
+          "kind": "draw",
+          "resource": "cards",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_brain_damage"
+        },
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
       ]
     },
     {
@@ -6650,6 +7173,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ],
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -6680,6 +7211,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ],
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -6713,6 +7252,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ],
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -6781,7 +7328,48 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "damageTypes": [
+            "net"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "net_damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "net_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_net_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_141_raven-microcyb-owl",
@@ -6813,7 +7401,15 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_142_record-reconstructor",
@@ -6839,6 +7435,18 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_access_tools"
+      ],
+      "effects": [
+        {
+          "kind": "access_replacement",
+          "scope": "archives",
+          "timing": "successful_run"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
       ]
     },
     {
@@ -6874,6 +7482,47 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "damageTypes": [
+            "meat"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "meat_damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_meat_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
       ]
     },
     {
@@ -7023,6 +7672,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ],
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -7051,6 +7708,27 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
+      ],
+      "effects": [
+        {
+          "amount": 9,
+          "kind": "base_link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 9,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
       ]
     },
     {
@@ -7085,7 +7763,35 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 4,
+          "kind": "base_link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 4,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_150_access-to-kiribati",
@@ -7112,6 +7818,34 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "base_link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 1,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 1,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
       ]
     },
     {
@@ -7180,7 +7914,35 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 2,
+          "kind": "base_link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 2,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_153_back-door-to-orbital-air",
@@ -7207,6 +7969,34 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 2,
+          "kind": "base_link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 2,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
       ]
     },
     {
@@ -7337,6 +8127,22 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "advancement_counters",
+          "scope": "corp",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "score_acceleration",
+          "resource": "advancement_counters",
+          "scope": "corp",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -7409,6 +8215,19 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
+      ],
+      "effects": [
+        {
+          "kind": "survival_payoff",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_runner_tagged"
+        }
       ]
     },
     {
@@ -7469,6 +8288,37 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
+      ],
+      "effects": [
+        {
+          "damageTypes": [
+            "meat"
+          ],
+          "kind": "damage_prevention",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "meat_damage_prevention",
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_meat_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
       ]
     },
     {
@@ -7572,6 +8422,15 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_start_of_turn_economy"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "action"
+        }
       ]
     },
     {
@@ -7608,6 +8467,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_trace_link_tools"
+      ],
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -7698,6 +8565,48 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "damageTypes": [
+            "meat"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "meat_damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "tag_prevention",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_meat_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
       ]
     },
     {
@@ -7855,6 +8764,29 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "tag_prevention",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "survival_payoff",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_runner_tagged"
+        }
       ]
     },
     {
@@ -7950,12 +8882,19 @@
       ],
       "effects": [
         {
-          "kind": "run_tax",
-          "timing": "persistent",
-          "scope": "remote",
-          "resource": "credits",
           "amount": 2,
-          "repeatable": true
+          "kind": "run_tax",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "remote",
+          "timing": "persistent"
+        },
+        {
+          "amount": 2,
+          "kind": "install_discount",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "persistent"
         }
       ],
       "conditions": [
@@ -8011,7 +8950,16 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "counter_economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_175_ronin-around",
@@ -8042,6 +8990,13 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_installed_hidden_zone_helpers"
+      ],
+      "effects": [
+        {
+          "kind": "expose_info",
+          "scope": "installed_card",
+          "timing": "action"
+        }
       ]
     },
     {
@@ -8278,6 +9233,22 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "draw",
+          "resource": "cards",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 1,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "action"
+        }
       ]
     },
     {
@@ -8352,6 +9323,27 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_trace_link_tools"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 1,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
       ]
     },
     {
@@ -8381,6 +9373,34 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 4,
+          "kind": "base_link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 4,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
       ]
     },
     {
@@ -8445,7 +9465,16 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_185_trauma-team",
@@ -8476,6 +9505,41 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "damageTypes": [
+            "meat"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 2,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "meat_damage_prevention",
+          "perTurnLimit": 2,
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_meat_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
       ]
     },
     {
@@ -8504,6 +9568,24 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
+      ],
+      "effects": [
+        {
+          "kind": "program_trash_prevention",
+          "scope": "installed_program",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_installed_program"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_program_trash"
+        }
       ]
     },
     {
@@ -8549,7 +9631,47 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "tag_prevention",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "damageTypes": [
+            "meat"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "meat_damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_meat_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_188_ai-chief-financial-officer",
@@ -9702,6 +10824,15 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
+      ],
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "remote_protection",
+          "resource": "cards",
+          "scope": "corp",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -10431,6 +11562,11 @@
       "lineSupport": [
         "fast_advance_or_counter_ops",
         "score_closeout"
+      ],
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        }
       ]
     },
     {
@@ -10990,8 +12126,7 @@
       "lineSupport": [
         "ice_tax_glacier",
         "central_stabilize"
-      ],
-      "runtimeCompiledHintPilot": true
+      ]
     },
     {
       "cardId": "onr_v1_223_banpei",
@@ -11232,8 +12367,7 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      },
-      "runtimeCompiledHintPilot": true
+      }
     },
     {
       "cardId": "onr_v1_226_canis-minor",
@@ -11548,6 +12682,33 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_core_damage_ice_pressure"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -11585,7 +12746,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_231_cortical-scrub",
@@ -11701,7 +12882,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_233_d-arc-knight",
@@ -11734,6 +12935,31 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_program_trash_ice"
+      ],
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "program_trash",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -11992,13 +13218,26 @@
       "effects": [
         {
           "kind": "remote_protection",
-          "timing": "encounter",
-          "scope": "run_path"
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
         }
       ],
       "lineSupport": [
         "central_stabilize",
         "remote_scoring_build"
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -12036,7 +13275,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_239_endless-corridor",
@@ -12073,7 +13332,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_240_fang",
@@ -12390,7 +13669,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_245_fire-wall",
@@ -12427,7 +13726,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_246_fragmentation-storm",
@@ -12538,7 +13857,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_248_homewrecker",
@@ -12738,6 +14077,31 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1911-smokes.json#corp_v1911_rd_reveal_and_reorder"
+      ],
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "program_trash",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -12849,7 +14213,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_253_laser-wire",
@@ -12882,6 +14266,33 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#corp_legacy_damage_ice_pressure"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -12916,6 +14327,33 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_core_damage_ice_pressure"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -13034,6 +14472,26 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#corp_legacy_simple_ice_defense"
+      ],
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -13067,6 +14525,33 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#corp_legacy_damage_ice_pressure"
+      ],
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -13187,7 +14672,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_260_pocket-virtual-reality",
@@ -13287,7 +14792,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_262_razor-wire",
@@ -13320,6 +14845,33 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#corp_legacy_damage_ice_pressure"
+      ],
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -13357,7 +14909,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_264_rex",
@@ -13387,6 +14959,40 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#corp_v1914_trace_ice"
+      ],
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "run_lock",
+          "resource": "actions",
+          "scope": "runner",
+          "timing": "trace_success"
+        },
+        {
+          "kind": "trace",
+          "scope": "corp",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_trace_success"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -13424,7 +15030,27 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_266_scramble",
@@ -13454,6 +15080,26 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#corp_legacy_simple_ice_defense"
+      ],
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -13491,13 +15137,18 @@
       "effects": [
         {
           "kind": "program_trash",
-          "timing": "encounter",
-          "scope": "runner"
+          "scope": "runner",
+          "timing": "encounter"
         },
         {
           "kind": "remote_protection",
-          "timing": "encounter",
-          "scope": "run_path"
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
         }
       ],
       "lineSupport": [
@@ -13512,7 +15163,15 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_268_shock-r",
@@ -13621,6 +15280,33 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#corp_legacy_damage_ice_pressure"
+      ],
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -13651,6 +15337,26 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#corp_legacy_simple_ice_defense"
+      ],
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -13686,6 +15392,26 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#corp_v193_trace_tag_and_run_lock_windows"
+      ],
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -13723,6 +15449,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1911-smokes.json#corp_v1911_rd_reveal_and_reorder"
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -13756,6 +15490,31 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_program_trash_ice"
+      ],
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "program_trash",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -13860,7 +15619,15 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_276_viral-15",
@@ -14060,22 +15827,42 @@
       },
       "effects": [
         {
+          "amount": 4,
           "kind": "damage",
-          "timing": "encounter",
-          "scope": "runner",
           "resource": "damage",
-          "amount": 4
+          "scope": "runner",
+          "timing": "encounter"
         },
         {
           "kind": "remote_protection",
-          "timing": "encounter",
-          "scope": "run_path"
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "amount": 2,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
         }
       ],
       "lineSupport": [
         "ice_tax_glacier",
         "central_stabilize",
         "remote_scoring_build"
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -14119,13 +15906,26 @@
       "effects": [
         {
           "kind": "remote_protection",
-          "timing": "encounter",
-          "scope": "run_path"
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
         }
       ],
       "lineSupport": [
         "central_stabilize",
         "remote_scoring_build"
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -14157,6 +15957,33 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_ice_longtail"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
       ]
     },
     {
@@ -14194,12 +16021,19 @@
       },
       "effects": [
         {
-          "kind": "economy",
-          "timing": "action",
-          "scope": "corp",
-          "resource": "credits",
           "amount": 9,
-          "finite": true
+          "finite": true,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        },
+        {
+          "amount": 9,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
         }
       ],
       "costProfile": {
@@ -14245,12 +16079,19 @@
       },
       "effects": [
         {
-          "kind": "draw",
-          "timing": "action",
-          "scope": "corp",
-          "resource": "cards",
           "amount": 3,
-          "finite": true
+          "finite": true,
+          "kind": "draw",
+          "resource": "cards",
+          "scope": "corp",
+          "timing": "action"
+        },
+        {
+          "amount": 3,
+          "kind": "draw",
+          "resource": "cards",
+          "scope": "corp",
+          "timing": "action"
         }
       ],
       "costProfile": {
@@ -14679,20 +16520,34 @@
       ],
       "effects": [
         {
-          "kind": "draw",
-          "timing": "action",
-          "scope": "corp",
-          "resource": "cards",
           "amount": 2,
-          "finite": true
+          "finite": true,
+          "kind": "draw",
+          "resource": "cards",
+          "scope": "corp",
+          "timing": "action"
         },
         {
-          "kind": "economy",
-          "timing": "action",
-          "scope": "corp",
-          "resource": "credits",
           "amount": 1,
-          "finite": true
+          "finite": true,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        },
+        {
+          "amount": 1,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        },
+        {
+          "amount": 2,
+          "kind": "draw",
+          "resource": "cards",
+          "scope": "corp",
+          "timing": "action"
         }
       ],
       "costProfile": {
@@ -14779,12 +16634,19 @@
       },
       "effects": [
         {
-          "kind": "economy",
-          "timing": "action",
-          "scope": "corp",
-          "resource": "credits",
           "amount": 3,
-          "finite": true
+          "finite": true,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        },
+        {
+          "amount": 3,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
         }
       ],
       "costProfile": {
@@ -14852,7 +16714,22 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
-      ]
+      ],
+      "effects": [
+        {
+          "amount": 3,
+          "kind": "score_acceleration",
+          "resource": "advancement_counters",
+          "scope": "installed_card",
+          "timing": "action"
+        }
+      ],
+      "costProfile": {},
+      "remoteRole": {
+        "kind": "asset_economy",
+        "serverScope": "remote",
+        "threatLevel": "medium"
+      }
     },
     {
       "cardId": "onr_v1_293_netwatch-credit-voucher",
@@ -15510,8 +17387,7 @@
       },
       "lineSupport": [
         "tag_trace_punish"
-      ],
-      "runtimeCompiledHintPilot": true
+      ]
     },
     {
       "cardId": "onr_v1_303_silver-lining-recovery-protocol",
@@ -15997,8 +17873,7 @@
       },
       "lineSupport": [
         "economy_rez_reserve"
-      ],
-      "runtimeCompiledHintPilot": true
+      ]
     },
     {
       "cardId": "onr_v1_310_blood-cat",
@@ -16577,6 +18452,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_access_ambush"
+      ],
+      "effects": [
+        {
+          "kind": "counter_economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        }
       ]
     },
     {
@@ -16639,7 +18522,39 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_global_modifier_assets"
-      ]
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "rez_discount",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "rez_discount",
+          "resource": "credits",
+          "scope": "ice",
+          "timing": "persistent"
+        },
+        {
+          "kind": "future_encounter_effect",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "resource": "subroutines",
+          "scope": "fort",
+          "timing": "persistent"
+        }
+      ],
+      "remoteRole": {
+        "kind": "scoring_protection",
+        "serverScope": "fort",
+        "threatLevel": "high"
+      }
     },
     {
       "cardId": "onr_v1_321_esa-contract",
@@ -17230,6 +19145,15 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "extra_action",
+          "resource": "actions",
+          "scope": "corp",
+          "timing": "action"
+        }
       ]
     },
     {
@@ -17759,6 +19683,22 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_global_modifier_assets"
+      ],
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "rez_discount",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "persistent"
+        },
+        {
+          "amount": 2,
+          "kind": "rez_discount",
+          "resource": "credits",
+          "scope": "ice",
+          "timing": "persistent"
+        }
       ]
     },
     {
@@ -17989,6 +19929,34 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_access_ambush"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "tag_source",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 3,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 3,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "on_access"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
       ]
     },
     {
@@ -18085,6 +20053,20 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_asset_agenda_support"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_advancement_counter"
+        }
       ]
     },
     {
@@ -18117,6 +20099,22 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_asset_agenda_support"
+      ],
+      "effects": [
+        {
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "on_access"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        },
+        {
+          "kind": "requires_advancement_counter"
+        }
       ]
     },
     {
@@ -18336,6 +20334,11 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v199-smokes.json#runner_v199_chimera_daemon_choice"
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
       ]
     },
     {
@@ -18518,6 +20521,36 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_access_ambush"
+      ],
+      "effects": [
+        {
+          "amount": 3,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 3,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "on_access"
+        },
+        {
+          "kind": "tag_punish_payoff",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        },
+        {
+          "kind": "requires_runner_tagged"
+        }
       ]
     },
     {
@@ -18548,6 +20581,27 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_access_ambush"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "on_access"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
       ]
     },
     {
@@ -19101,8 +21155,7 @@
       ],
       "strategicNotes": [
         "Remote protection is context-dependent strategic overlay; agenda steal tax and access condition stay mechanical."
-      ],
-      "runtimeCompiledHintPilot": true
+      ]
     },
     {
       "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
@@ -19402,6 +21455,28 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_access_ambush"
+      ],
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "tag_source",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "trace_success"
+        },
+        {
+          "kind": "trace",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        },
+        {
+          "kind": "requires_trace_success"
+        }
       ]
     },
     {
@@ -19470,7 +21545,23 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "advancement_counters",
+          "scope": "corp",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "score_acceleration",
+          "resource": "advancement_counters",
+          "scope": "corp",
+          "timing": "persistent"
+        }
+      ]
     },
     {
       "cardId": "runner_identity_001",
