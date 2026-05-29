@@ -9768,6 +9768,8 @@ function OverflowAwareActionButton({
 }
 
 function ActionLeadIcon({ action, size = 15 }: { action: LegalAction; size?: number }) {
+  if (action.type === "jack_out") return <X size={size} aria-hidden="true" />;
+  if (action.type === "continue_run") return <Route size={size} aria-hidden="true" />;
   return actionConsumesClick(action) ? <Play size={size} aria-hidden="true" /> : <Zap size={size} aria-hidden="true" />;
 }
 

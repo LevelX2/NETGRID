@@ -208,8 +208,8 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(runCurrentIceLabel(running)).toBe("ICE 3");
     expect(runPositionStatusLabel(running)).toBe("Aktuell: vor ICE 3 (1 von 3)");
     expect(runWindowStatusLabel(running)).toBe("ICE 3 (1 von 3)");
-    expect(runAwareActionButtonLabel(running, legalAction("runner", "jack_out", "game_rule", "Jack-out", undefined, "run.jack_out_window"))).toBe("Run abbrechen an ICE 3");
-    expect(runAwareActionButtonLabel(running, legalAction("runner", "continue_run", "game_rule", "Run fortsetzen", undefined, "run.jack_out_window"))).toBe("Run fortsetzen zu ICE 3");
+    expect(runAwareActionButtonLabel(running, legalAction("runner", "jack_out", "game_rule", "Jack-out", undefined, "run.jack_out_window"))).toBe("Jack-out: an ICE 3 abbrechen");
+    expect(runAwareActionButtonLabel(running, legalAction("runner", "continue_run", "game_rule", "Run fortsetzen", undefined, "run.jack_out_window"))).toBe("Weiterlaufen: zu ICE 3");
     expect(serverDisplayLabel("rd")).toBe("R&D");
     expect(serverDisplayLabel("archives")).toBe("Archive");
     expect(serverDisplayLabel("remote_2")).toBe("Remote 2");
