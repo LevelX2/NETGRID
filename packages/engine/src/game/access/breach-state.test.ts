@@ -168,6 +168,35 @@ describe("breach state builder", () => {
     ]);
   });
 
+  it("queues R&D root upgrades before stored R&D access without revealing stored cards", () => {
+    const host = makeHost();
+    const server = host.servers.mustServer("rd");
+    server.root.push("rd_upgrade" as CardInstanceId);
+    host.state.cardInstances["rd_upgrade"] = instance(
+      "rd_upgrade",
+      "upgrade_def",
+      { side: "corp", zone: "serverRoot", serverId: "rd" } as CardInstance["zone"],
+      true,
+      true,
+    );
+
+    const breach = buildBreachState(host, {
+      runId: "run_rd_root_policy",
+      attackedServerId: "rd",
+      accessCount: 1,
+    } as NonNullable<GameState["run"]>);
+
+    expect(breach.queue.map((entry) => entry.cardInstanceId)).toEqual([
+      "rd_upgrade",
+      "rd_top",
+    ]);
+    expect(breach.queue.map((entry) => entry.zone)).toEqual([
+      "remote_root",
+      "rd",
+    ]);
+    expect(breach.queue.map((entry) => entry.hiddenInfo)).toEqual([false, true]);
+  });
+
   it("applies Proteus Highlighter and Vienna counters with central roots outside stored-card count", () => {
     const host = makeHost();
     host.state.purgeableRunnerVirusCounters = {

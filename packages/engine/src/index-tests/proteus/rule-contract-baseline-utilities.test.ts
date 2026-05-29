@@ -3,6 +3,7 @@ import {
   applyAction,
   createGameAfterSetup,
   getLegalActions,
+  getPlayerView,
   hashState,
   replayEvents,
 } from "../../index";
@@ -33,7 +34,9 @@ const PAVIT = "onr_proteus_069_pavit-bharat";
 const SIMON = "onr_proteus_073_simon-francisco";
 const WALL = "onr_v1_279_wall-of-static";
 const CHIHUAHUA = "onr_proteus_014_chihuahua";
-const ACME = "onr_v1_308_acme-savings-and-loan";
+const SIMPLE_ASSET = "simple_economy_asset";
+const SIMPLE_AGENDA = "simple_agenda";
+const SIMPLE_UPGRADE = "simple_upgrade";
 
 const PRO019_IDS = [
   EMERGENCY_RIG,
@@ -204,6 +207,23 @@ function addCorpRd(
     strengthModifier: 0,
   };
   return cardId;
+}
+
+function clearCorpHq(state: GameState): void {
+  for (const cardId of state.corp.hq) {
+    if (!state.corp.archives.includes(cardId)) state.corp.archives.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustExistingInstance(state, cardId),
+      zone: { side: "corp", zone: "archives" },
+    };
+  }
+  state.corp.hq = [];
+}
+
+function mustExistingInstance(state: GameState, cardId: CardInstanceId) {
+  const instance = state.cardInstances[cardId];
+  if (!instance) throw new Error(`Missing instance ${cardId}`);
+  return instance;
 }
 
 function applySelected(state: GameState, side: "corp" | "runner", actionId: string): GameState {
@@ -587,7 +607,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     const oldIce = addCorpIce(state, CHIHUAHUA, "pavit_old_ice", "remote_1", true);
     const pavitId = addCorpRoot(state, PAVIT, "pavit_source", "remote_1", false);
     const newIce = addCorpHq(state, WALL, "pavit_new_ice");
-    const newRoot = addCorpHq(state, ACME, "pavit_new_root");
+    const newRoot = addCorpHq(state, SIMPLE_UPGRADE, "pavit_new_root");
     addCorpHq(state, CHIHUAHUA, "pavit_extra_ice");
     forceRunAtServer(state, "remote_1");
 
@@ -630,6 +650,93 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(state.cardInstances[newRoot]?.zone).toMatchObject({ zone: "serverRoot", serverId: "remote_1" });
     expect(state.cardInstances[newIce]?.rezzed).toBe(false);
     expect(state.cardInstances[newRoot]?.rezzed).toBe(false);
+  });
+
+  it("does not offer Pavit when only individually plausible HQ cards form no legal set", () => {
+    const state = corpActionState("pro019-pavit-no-joint-set");
+    clearCorpHq(state);
+    addCorpIce(state, CHIHUAHUA, "pavit_blocked_old_ice", "remote_1", true);
+    const pavitId = addCorpRoot(state, PAVIT, "pavit_blocked_source", "remote_1", false);
+    addCorpHq(state, SIMPLE_ASSET, "pavit_blocked_asset");
+    addCorpHq(state, SIMPLE_AGENDA, "pavit_blocked_agenda");
+    forceRunAtServer(state, "remote_1");
+
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.type === "rez_ice" && action.payload?.cardId === pavitId,
+      ),
+    ).toBe(false);
+  });
+
+  it("allows Pavit to replace a fort with a jointly legal ICE and upgrade mix", () => {
+    let state = corpActionState("pro019-pavit-joint-ice-upgrade");
+    clearCorpHq(state);
+    const oldIce = addCorpIce(state, CHIHUAHUA, "pavit_mix_old_ice", "remote_1", true);
+    const pavitId = addCorpRoot(state, PAVIT, "pavit_mix_source", "remote_1", false);
+    const newIce = addCorpHq(state, WALL, "pavit_mix_new_ice");
+    const newUpgrade = addCorpHq(state, SIMPLE_UPGRADE, "pavit_mix_new_upgrade");
+    forceRunAtServer(state, "remote_1");
+    const replayStart = structuredClone(state);
+    const replayStartIndex = state.eventLog.length;
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.payload?.cardId === pavitId,
+    );
+
+    const server = remoteServer(state, "remote_1");
+    expect(server.ice).toEqual([newIce]);
+    expect(server.root).toEqual([newUpgrade]);
+    expect(state.corp.hq).toEqual(expect.arrayContaining([oldIce, pavitId]));
+    expect(hashState(state)).toMatch(/^fnv1a:/);
+    expect(replayEvents(replayStart, state.eventLog.slice(replayStartIndex)).ok).toBe(
+      true,
+    );
+  });
+
+  it("rejects a Pavit choice that is individually plausible but jointly illegal without leaking HQ cards", () => {
+    let state = corpActionState("pro019-pavit-invalid-joint-choice");
+    clearCorpHq(state);
+    addCorpIce(state, CHIHUAHUA, "pavit_invalid_old_ice", "remote_1", true);
+    const pavitId = addCorpRoot(state, PAVIT, "pavit_invalid_source", "remote_1", false);
+    addCorpHq(state, WALL, "pavit_invalid_new_ice");
+    addCorpHq(state, SIMPLE_UPGRADE, "pavit_invalid_upgrade");
+    const assetId = addCorpHq(state, SIMPLE_ASSET, "pavit_invalid_asset");
+    const agendaId = addCorpHq(state, SIMPLE_AGENDA, "pavit_invalid_agenda");
+    forceRunAtServer(state, "remote_1");
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.payload?.cardId === pavitId,
+    );
+    const beforeInvalidHash = hashState(state);
+    const beforeInvalidEventCount = state.eventLog.length;
+    const invalid = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: mustAction(state, "corp", (action) => action.type === "resolve_choice")
+        .actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${assetId}`, `card_${agendaId}`],
+      },
+      idempotencyKey: "pavit-invalid-joint-set",
+    });
+
+    expect(invalid.ok).toBe(false);
+    if (invalid.ok) throw new Error("Expected Pavit choice rejection.");
+    expect(invalid.error.message).not.toContain(String(assetId));
+    expect(invalid.error.message).not.toContain(String(agendaId));
+    expect(invalid.error.message).not.toContain(SIMPLE_ASSET);
+    expect(invalid.error.message).not.toContain(SIMPLE_AGENDA);
+    expect(hashState(invalid.state)).toBe(beforeInvalidHash);
+    expect(invalid.state.eventLog).toHaveLength(beforeInvalidEventCount);
+    const runnerView = JSON.stringify(getPlayerView(invalid.state, "runner"));
+    expect(runnerView).not.toContain(String(assetId));
+    expect(runnerView).not.toContain(String(agendaId));
   });
 
   it("counts Obfuscated Fortress run cap across trace/link payments", () => {

@@ -70,6 +70,9 @@ export type RunRezWindowHost = {
     selectedChoiceIds: (selectedChoices: PlayerAction["selectedChoices"]) => string[];
   };
   callbacks: {
+    canReplaceFortCardsFromHq: (
+      serverId: Exclude<ServerId, "new_remote">,
+    ) => boolean;
     continueAfterRootRez: (legalAction?: LegalAction) => void;
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
     trashCorpInstalledCardToArchives: (
@@ -231,19 +234,7 @@ function rootRezLifecycleIsSolvable(
   const run = host.state.run;
   if (!run || run.attackedServerId !== server.id || run.position.kind !== "server")
     return false;
-  const removedCount = server.ice.length + server.root.length;
-  const candidates = host.state.corp.hq.filter((hqCardId) => {
-    const hqDefinition = host.cards.definitionFor(hqCardId);
-    if (hqDefinition.type === "ice") return true;
-    return (
-      hqDefinition.side === "corp" &&
-      (hqDefinition.type === "asset" ||
-        hqDefinition.type === "agenda" ||
-        hqDefinition.type === "upgrade")
-    );
-  });
-  if (removedCount === 0) return true;
-  return candidates.length >= removedCount;
+  return host.callbacks.canReplaceFortCardsFromHq(server.id);
 }
 
 export function buildCorpRunRootRezWindowActions(

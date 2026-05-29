@@ -60,6 +60,8 @@ PRO019 ist umgesetzt: `Emergency Rig`, `Rent-to-Own Contract`, `Herman Revista`,
 
 PRO019-1 ist als reine Rule-Contract-Härtung für den bereits umgesetzten PRO019-Scope erledigt. Simon wird in zentralen HQ-/R&D-Root-Queues tatsächlich accessed und reduziert nur spätere gespeicherte Access-Positionen; Pavit-Rez ist auf das konkrete Serverzugangsfenster und eine Korp-private HQ-Ersatzkartenchoice mit Resolve-Revalidierung eingegrenzt; Obfuscated Fortress zählt Runner-Trace-/Link- und Access-Trash-Zahlungen während des Runs gegen die Ansage; Ice and Data nutzt eine fortgebundene zweistufige Choice. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung.
 
+PRO019-2 ist als finales Follow-up zur PRO019-1-Härtung erledigt. Pavit-Rez-LegalActions entstehen nur noch, wenn eine gemeinsam legal installierbare HQ-Ersatzmenge existiert; Resolve revalidiert dieselbe Kombinationslegalität inklusive Root-Kapazität, Typregeln und Installationsreihenfolge. Die zentrale Access-Policy ist bewusst abgesichert: HQ-/R&D-Root-Upgrades werden vor gespeicherten HQ-/R&D-Kartenzugriffen queued, Simon reduziert danach nur spätere gespeicherte Zugriffe. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung.
+
 Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
 
 ## PRO-Restzuschnitt
@@ -82,7 +84,7 @@ Der führende Detailplan `proteus-cardimplementation-detailplan-2026-05-26.md` w
 | PRO016 | umgesetzt; PRO016-1 Nacharbeit erledigt | 4 Random-/Dice-/Encounter-Karten; Implementierungszählung nach PRO016: 138/154. |
 | PRO017 | umgesetzt; PRO017-1 und PRO017-2 Nacharbeiten erledigt | 6 Action-Economy-/Action-Debt-Karten; Implementierungszählung bleibt 144/154. |
 | PRO018 | umgesetzt | 2 Hidden-Zone-Search-/Install-Tutor-Karten; Implementierungszählung steigt auf 146/154. |
-| PRO019 | umgesetzt; PRO019-1 Nacharbeit erledigt | 8 regelvertragliche Baseline-/Utility-Karten; Implementierungszählung steigt auf 154/154. |
+| PRO019 | umgesetzt; PRO019-1 und PRO019-2 Nacharbeiten erledigt | 8 regelvertragliche Baseline-/Utility-Karten; Implementierungszählung steigt auf 154/154. |
 | PRO020 | ausführbar | Finaler Proteus-Abschluss nach leerer Restliste. |
 
 ## Geprüfte Activity-Menge
@@ -91,12 +93,12 @@ Geprüft wurden alle Activity-Unterordner unter `docs/activities/`: `inbox/`, `i
 
 | Kategorie | Anzahl | Bedeutung |
 | --- | ---: | --- |
-| `done + implemented/foundation` | 39 | Erledigte Runtime-, Foundation- oder gezielte Härtungsslices; Implementierungsfortschritt wird trotzdem nur über Dateien plus Registry gezählt. |
+| `done + implemented/foundation` | 40 | Erledigte Runtime-, Foundation- oder gezielte Härtungsslices; Implementierungsfortschritt wird trotzdem nur über Dateien plus Registry gezählt. |
 | `done + planning/contract/historical` | 13 | Erledigte Import-, Analyse-, Vertrags-, Harness- oder Planungsactivities ohne direkte CardImplementation-Zählung. |
 | `done + superseded` | 8 | Grobe Phase-Activities, die ersetzt oder aufgeteilt wurden; sie zählen nie als Kartenimplementierung. |
 | `in-progress + blocked/status-reference` | 23 | Offene oder nur noch als Referenz geführte Detail-Activities; resolved-by-done-Umbrellas zählen nicht erneut als Implementierung. |
 | `inbox/open` | 0 | Keine Proteus-Activity liegt aktuell in `docs/activities/inbox/`. |
-| Gesamt | 82 | Proteus-Activity-Dateien im Board. |
+| Gesamt | 83 | Proteus-Activity-Dateien im Board. |
 
 ## Done + implemented/foundation
 
@@ -146,6 +148,7 @@ Diese Activities sind erledigt, aber die Kartenzahl wird nur aus konkreten Datei
 | `done/act-2026-05-28-proteus-pro018-hidden-zone-search-install-tutor-suite.md` | `done` | PRO018 | 2 Hidden-Zone-Search-/Install-Tutor-Karten; neue Implementierungszählung 146/154. |
 | `done/act-2026-05-29-proteus-pro019-rule-contract-baseline-utilities.md` | `done` | PRO019 | 8 regelvertragliche Baseline-/Utility-Karten; neue Implementierungszählung 154/154. |
 | `done/act-2026-05-29-proteus-pro019-1-rule-contract-hardening.md` | `done` | PRO019-1 | Review-Härtung für Simon, Pavit, Obfuscated Fortress und Ice and Data; keine neue Kartenpromotion und keine Zähländerung. |
+| `done/act-2026-05-29-proteus-pro019-2-rule-contract-final-hardening.md` | `done` | PRO019-2 | Finale Review-Härtung für Pavit-Kombinationslegalität und zentrale Root-vor-stored-card-Access-Policy; keine neue Kartenpromotion und keine Zähländerung. |
 | `done/act-2026-05-28-proteus-pro017-1-action-economy-hardening.md` | `done` | PRO017-1 | PDCA-Choice, turn-bound Grant-Cleanup und Viacox-"nicht möglich"-Resolve gehärtet; keine neue Kartenpromotion und keine Zähländerung. |
 | `done/act-2026-05-28-proteus-pro017-2-pdca-damage-timing-hardening.md` | `done` | PRO017-2 | PDCA-Return-Kontext und zentrale Corp-Damage-Anbindung nach Replacement-/Event-Modification-Fenstern gehärtet; Runner-self-/Core-Damage bleibt ausgeschlossen; keine neue Kartenpromotion und keine Zähländerung. |
 | `done/act-2026-05-24-proteus-phase-5b-runner-protection-programs.md` | `done` | Phase 5b | 2 Karten: `Enterprise, Inc., Shields`, `Skullcap`. |
@@ -256,7 +259,7 @@ Diese Activities sind offen und bleiben blockiert. Die PRO-Referenzen stehen jet
 | PRO016 | umgesetzt; PRO016-1 Nacharbeit erledigt | Random/Dice/Encounter Suite mit 4 Karten; Härtung ohne neue Karten- oder Manifestfreigabe. |
 | PRO017 | umgesetzt; PRO017-1 und PRO017-2 Nacharbeiten erledigt | Action Economy/Action Debt Suite mit 6 Karten; Härtungen ohne neue Karten- oder Manifestfreigabe. |
 | PRO018 | umgesetzt | Hidden-Zone Search/Install Tutor Suite mit 2 Karten; Harness 146/154. |
-| PRO019 | umgesetzt; PRO019-1 Nacharbeit erledigt | Rule-Contract Baseline Utilities mit 8 Karten; Harness 154/154. PRO019-1 härtet zentrale Simon-Access-Queues, Pavit-Rez-/HQ-Choice-Revalidierung, Obfuscated-Fortress-Run-Zahlungszählung und Ice-and-Data-Fortbindung ohne neue Promotion. |
+| PRO019 | umgesetzt; PRO019-1 und PRO019-2 Nacharbeiten erledigt | Rule-Contract Baseline Utilities mit 8 Karten; Harness 154/154. PRO019-1 härtet zentrale Simon-Access-Queues, Pavit-Rez-/HQ-Choice-Revalidierung, Obfuscated-Fortress-Run-Zahlungszählung und Ice-and-Data-Fortbindung ohne neue Promotion. PRO019-2 härtet Pavit-Kombinationslegalität und bestätigt die zentrale Root-vor-stored-card-Access-Policy. |
 | PRO020 | ausführbar | Finaler Proteus-Abschluss nach leerer Restliste. |
 
 ## Arbeitsregel ab PRO002

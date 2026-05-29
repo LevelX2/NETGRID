@@ -145,6 +145,10 @@ export type RunFlowHost = {
     cardImplementationAccessHookKindsForDefinition: (
       definitionId: CardDefinitionId,
     ) => readonly string[];
+    canReplaceFortCardsFromHq: (
+      state: GameState,
+      serverId: Exclude<ServerId, "new_remote">,
+    ) => boolean;
   };
   servers: {
     mustServer: (
@@ -718,6 +722,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             cardId,
             legalAction,
           ),
+        canReplaceFortCardsFromHq: (serverId) =>
+          host.cards.canReplaceFortCardsFromHq(state, serverId),
         acmeSavingsAndLoanObligationCount: () =>
           host.callbacks.acmeSavingsAndLoanObligationCount(state),
         addAcmeSavingsAndLoanObligation: (amount) =>

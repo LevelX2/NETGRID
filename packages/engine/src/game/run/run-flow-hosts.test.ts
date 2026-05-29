@@ -103,6 +103,7 @@ function hostFor(calls: string[]): RunFlowHost {
       icebreakerEncounterStrengthBonus: () => 0,
       permanentIcebreakerStrengthCounterBonus: () => 0,
       cardImplementationAccessHookKindsForDefinition: () => [],
+      canReplaceFortCardsFromHq: () => true,
     },
     servers: {
       mustServer: (_state, serverId) => {

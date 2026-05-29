@@ -919,6 +919,7 @@ const runFlow = createRunFlowAdapters({
       cardImplementationForDefinitionId(definitionId)?.accessHooks?.map(
         (hook) => hook.kind,
       ) ?? [],
+    canReplaceFortCardsFromHq,
   },
   servers: {
     mustServer,
@@ -17185,12 +17186,19 @@ function replaceSourceFortCardsFromHq(
     if (!legalCandidates.includes(cardId))
       throw new Error("Eine Pavit-Bharat-Ersatzkarte ist nicht installierbar.");
   }
+  const validInstallOrder = validPavitReplacementInstallOrder(
+    state,
+    server,
+    selected,
+  );
+  if (!validInstallOrder)
+    throw new Error("Die Pavit-Bharat-Ersatzkarten sind gemeinsam nicht installierbar.");
   for (const cardId of [...removedIce, ...removedRoot]) {
     uninstallCorpInstalledCardToHq(state, cardId);
   }
   server.ice = [];
   server.root = [];
-  for (const cardId of selected) {
+  for (const cardId of validInstallOrder) {
     const definition = definitionFor(state, cardId);
     if (definition.type === "ice") {
       removeFromAllZones(state, cardId);
@@ -17239,6 +17247,9 @@ function legalPavitReplacementHqCardIds(
   server: CorpServer,
   removedCount: number,
 ): CardInstanceId[] {
+  if (removedCount <= 0) return [];
+  if (!hasLegalPavitReplacementHqCombination(state, server, removedCount))
+    return [];
   const serverAfterRemoval: CorpServer = {
     ...server,
     ice: [],
@@ -17248,17 +17259,126 @@ function legalPavitReplacementHqCardIds(
     .filter((cardId) => {
       const definition = definitionFor(state, cardId);
       if (definition.type === "ice") return true;
-      if (
-        definition.type !== "asset" &&
-        definition.type !== "agenda" &&
-        definition.type !== "upgrade"
-      )
-        return false;
+      if (!isPavitInstallableCandidateDefinition(definition)) return false;
       return canInstallCorpRootCardInServer(state, definition, serverAfterRemoval);
     })
-    .slice()
-    .sort()
-    .slice(0, Math.max(removedCount, state.corp.hq.length));
+    .sort();
+}
+
+function canReplaceFortCardsFromHq(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): boolean {
+  const server = mustServer(state, serverId);
+  const removedCount = server.ice.length + server.root.length;
+  if (removedCount === 0) return true;
+  return hasLegalPavitReplacementHqCombination(state, server, removedCount);
+}
+
+function hasLegalPavitReplacementHqCombination(
+  state: GameState,
+  server: CorpServer,
+  count: number,
+): boolean {
+  const candidates = state.corp.hq
+    .filter((cardId) => isPavitInstallableCandidateDefinition(definitionFor(state, cardId)))
+    .sort();
+  const visit = (startIndex: number, selected: CardInstanceId[]): boolean => {
+    if (selected.length === count) {
+      return Boolean(validPavitReplacementInstallOrder(state, server, selected));
+    }
+    for (let index = startIndex; index < candidates.length; index += 1) {
+      selected.push(candidates[index]!);
+      if (visit(index + 1, selected)) return true;
+      selected.pop();
+    }
+    return false;
+  };
+  return visit(0, []);
+}
+
+function validPavitReplacementInstallOrder(
+  state: GameState,
+  server: CorpServer,
+  selected: CardInstanceId[],
+): CardInstanceId[] | undefined {
+  if (new Set(selected).size !== selected.length) return undefined;
+  if (selected.some((cardId) => !state.corp.hq.includes(cardId))) return undefined;
+  if (
+    selected.some(
+      (cardId) => !isPavitInstallableCandidateDefinition(definitionFor(state, cardId)),
+    )
+  )
+    return undefined;
+  return firstValidPavitInstallPermutation(state, server, selected, []);
+}
+
+function firstValidPavitInstallPermutation(
+  state: GameState,
+  server: CorpServer,
+  remaining: CardInstanceId[],
+  prefix: CardInstanceId[],
+): CardInstanceId[] | undefined {
+  if (remaining.length === 0)
+    return pavitInstallOrderIsLegal(state, server, prefix) ? prefix : undefined;
+  for (let index = 0; index < remaining.length; index += 1) {
+    const next = remaining[index]!;
+    const result = firstValidPavitInstallPermutation(
+      state,
+      server,
+      remaining.filter((_, candidateIndex) => candidateIndex !== index),
+      [...prefix, next],
+    );
+    if (result) return result;
+  }
+  return undefined;
+}
+
+function pavitInstallOrderIsLegal(
+  state: GameState,
+  server: CorpServer,
+  order: CardInstanceId[],
+): boolean {
+  const testState = cloneState(state);
+  const testServer = mustServer(testState, server.id);
+  testServer.ice = [];
+  testServer.root = [];
+  for (const cardId of order) {
+    const definition = definitionFor(testState, cardId);
+    if (definition.type === "ice") {
+      removeFromAllZones(testState, cardId);
+      testServer.ice.push(cardId);
+      testState.cardInstances[cardId] = {
+        ...mustInstance(testState.cardInstances, cardId),
+        zone: { side: "corp", zone: "serverIce", serverId: testServer.id },
+      };
+      continue;
+    }
+    if (!canInstallCorpRootCardInServer(testState, definition, testServer))
+      return false;
+    removeFromAllZones(testState, cardId);
+    testServer.root.push(cardId);
+    testState.cardInstances[cardId] = {
+      ...mustInstance(testState.cardInstances, cardId),
+      zone: { side: "corp", zone: "serverRoot", serverId: testServer.id },
+    };
+    if (
+      corpRootMainCardIdsInServer(testState, testServer).length >
+      corpRootAgendaOrNodeCapacityInServer(testState, testServer)
+    )
+      return false;
+  }
+  return true;
+}
+
+function isPavitInstallableCandidateDefinition(definition: CardDefinition): boolean {
+  return (
+    definition.side === "corp" &&
+    (definition.type === "ice" ||
+      definition.type === "asset" ||
+      definition.type === "agenda" ||
+      definition.type === "upgrade")
+  );
 }
 
 function openPavitBharatReplacementChoice(
