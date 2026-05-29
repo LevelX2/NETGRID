@@ -14,6 +14,8 @@ export type OpponentActionCue = {
   actionType: string;
   title: string;
   description?: string;
+  cardDefinitionId?: string;
+  cardTitle?: string;
   visibility: ChronicleVisibility;
   importance: ChronicleImportance;
   highlight?: BoardHighlight;
@@ -135,6 +137,8 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
       actionType,
       title: item.title,
       ...(item.description ? { description: item.description } : {}),
+      ...(item.cardDefinitionId ? { cardDefinitionId: item.cardDefinitionId } : {}),
+      ...(item.cardTitle ? { cardTitle: item.cardTitle } : {}),
       visibility,
       importance: item.importance,
       ...(highlight ? { highlight } : {}),
@@ -159,6 +163,8 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
         actionType,
         title: effectItem.title,
         ...(effectItem.description ? { description: effectItem.description } : {}),
+        ...(effectItem.cardDefinitionId ? { cardDefinitionId: effectItem.cardDefinitionId } : {}),
+        ...(effectItem.cardTitle ? { cardTitle: effectItem.cardTitle } : {}),
         visibility: effectItem.visibility,
         importance: effectItem.importance,
         ...(relatedCard ? { relatedCard } : {}),

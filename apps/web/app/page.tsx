@@ -5562,6 +5562,7 @@ export default function Page() {
         canAdvanceAi={Boolean(aiTurnPresentation?.canAdvanceAi && connection === "online")}
         onPosition={setCuePosition}
         onDismiss={() => setCurrentActionCue(null)}
+        onFocusCard={focusCard}
         onAdvanceAi={() => {
           setCurrentActionCue(null);
           advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
@@ -8020,6 +8021,7 @@ function OpponentActionOverlay({
   canAdvanceAi = false,
   onPosition,
   onDismiss,
+  onFocusCard,
   onAdvanceAi
 }: {
   cue: OpponentActionCue | null;
@@ -8030,6 +8032,7 @@ function OpponentActionOverlay({
   canAdvanceAi?: boolean;
   onPosition(position: CuePositionPreference): void;
   onDismiss(): void;
+  onFocusCard(card: DisplayVisibleCard): void;
   onAdvanceAi?(): void;
 }) {
   const overlayRef = useRef<HTMLElement | null>(null);
@@ -8037,6 +8040,8 @@ function OpponentActionOverlay({
   if (!cue) return null;
 
   const relatedCard = cue.relatedCard ? enrichVisibleCard(cue.relatedCard, cardDetailsById) : null;
+  const titleCard = cue.cardDefinitionId ? (cardDetailsById[cue.cardDefinitionId] ?? null) : null;
+  const titlePreviewCard = titleCard ? visibleCardFromCatalogDetail(titleCard) : null;
   const cueCardDisplayMode: CardDisplayMode = displayMode === "placeholder" ? displayMode : "placeholder";
   const showHiddenCardBack = cue.visibility === "redacted" && cue.actionType === "install_card";
   const showAiAdvanceButton = Boolean(cue.source === "ai" && canAdvanceAi && onAdvanceAi);
@@ -8114,7 +8119,15 @@ function OpponentActionOverlay({
           </div>
         ) : null}
         <div className="opponentCueText">
-          <strong>{cue.title}</strong>
+          <strong>
+            <OpponentCueTitle
+              cue={cue}
+              card={titleCard}
+              previewCard={titlePreviewCard}
+              displayMode={displayMode}
+              onFocusCard={onFocusCard}
+            />
+          </strong>
           {cue.description ? <p>{cue.description}</p> : null}
         </div>
       </div>
@@ -8126,6 +8139,55 @@ function OpponentActionOverlay({
         </button>
       </div>
     </aside>
+  );
+}
+
+function OpponentCueTitle({
+  cue,
+  card,
+  previewCard,
+  displayMode,
+  onFocusCard
+}: {
+  cue: OpponentActionCue;
+  card: CatalogCardDetail | null;
+  previewCard: DisplayVisibleCard | null;
+  displayMode: CardDisplayMode;
+  onFocusCard(card: DisplayVisibleCard): void;
+}) {
+  if (!cue.cardTitle) return <>{cue.title}</>;
+  const index = cue.title.indexOf(cue.cardTitle);
+  if (index < 0) return <>{cue.title}</>;
+  const item: ChronicleItem = {
+    id: cue.eventId,
+    category: cue.actionType === "continue_run" ? "run" : "card",
+    importance: cue.importance,
+    visibility: cue.visibility,
+    ...(cue.actor ? { actor: cue.actor } : {}),
+    title: cue.title,
+    ...(cue.description ? { description: cue.description } : {}),
+    chips: [],
+    ...(cue.cardDefinitionId ? { cardDefinitionId: cue.cardDefinitionId } : {}),
+    cardTitle: cue.cardTitle,
+    cardDetailLines: [],
+    groupLabel: cue.actorLabel
+  };
+  return (
+    <>
+      {cue.title.slice(0, index)}
+      <ChronicleCardTrigger
+        className={`chronicleCardName ${previewCard ? "hasDetail" : ""}`}
+        card={card}
+        item={item}
+        displayMode={displayMode}
+        disabled={!previewCard}
+        title={cue.cardTitle}
+        onClick={() => previewCard && onFocusCard(previewCard)}
+      >
+        {cue.cardTitle}
+      </ChronicleCardTrigger>
+      {cue.title.slice(index + cue.cardTitle.length)}
+    </>
   );
 }
 

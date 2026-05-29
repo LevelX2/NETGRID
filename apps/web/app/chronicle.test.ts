@@ -858,8 +858,10 @@ describe("formatChronicleEvent", () => {
       "runner"
     );
 
-    expect(item.title).toBe("Du hast simple_barrier_ice passiert und Rio de Janeiro City Grid würfelt eine 1.");
+    expect(item.title).toBe("Du hast Simple Barrier ICE passiert und Rio de Janeiro City Grid würfelt eine 1.");
     expect(item.description).toBe("Der Run endet durch Rio de Janeiro City Grid.");
+    expect(item.cardDefinitionId).toBe("simple_barrier_ice");
+    expect(item.cardTitle).toBe("Simple Barrier ICE");
     expect(item.chips).toEqual(expect.arrayContaining(["Rio", "Remote 1", "Wurf 1", "Run endet"]));
   });
 

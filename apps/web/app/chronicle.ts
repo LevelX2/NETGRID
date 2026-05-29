@@ -1153,12 +1153,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       if (abilityId === "rio_de_janeiro_passed_ice") {
         const dieRoll = payloadRandomRoll(payload);
         const runEnded = payload.rioRunEnded === true;
-        const passedIce = stringValue(payload.passedIceDefinitionId) ?? "ein gerezztes ICE";
+        const passedIceDefinitionId = stringValue(payload.passedIceDefinitionId);
+        const passedIce = titleForDefinitionId(passedIceDefinitionId) ?? passedIceDefinitionId ?? "ein gerezztes ICE";
         category = "run";
         importance = runEnded ? "critical" : "important";
         title = phrase(subject, `${passedIce} passiert und Rio de Janeiro City Grid würfelt${dieRoll !== undefined ? ` eine ${dieRoll}` : ""}`);
         description = runEnded ? "Der Run endet durch Rio de Janeiro City Grid." : "Der Run läuft weiter.";
-        cardDefinitionId = cardDefinitionId ?? stringValue(payload.sourceDefinitionId);
+        cardDefinitionId = passedIceDefinitionId ?? cardDefinitionId ?? stringValue(payload.sourceDefinitionId);
+        cardTitle = passedIceDefinitionId ? passedIce : cardTitle;
         chips.push("Rio", ...(serverLabel ? [serverLabel] : []), ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), runEnded ? "Run endet" : "Weiter");
         break;
       }

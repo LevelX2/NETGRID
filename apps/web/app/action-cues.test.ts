@@ -99,8 +99,10 @@ describe("deriveOpponentActionCues", () => {
     expect(corpCues).toHaveLength(1);
     expect(runnerCues[0]?.source).toBe("system");
     expect(runnerCues[0]?.actorLabel).toBe("Spiel");
-    expect(runnerCues[0]?.title).toBe("Du hast simple_barrier_ice passiert und Rio de Janeiro City Grid würfelt eine 1.");
-    expect(corpCues[0]?.title).toBe("Der Runner hat simple_barrier_ice passiert und Rio de Janeiro City Grid würfelt eine 1.");
+    expect(runnerCues[0]?.title).toBe("Du hast Simple Barrier ICE passiert und Rio de Janeiro City Grid würfelt eine 1.");
+    expect(corpCues[0]?.title).toBe("Der Runner hat Simple Barrier ICE passiert und Rio de Janeiro City Grid würfelt eine 1.");
+    expect(runnerCues[0]?.cardDefinitionId).toBe("simple_barrier_ice");
+    expect(runnerCues[0]?.cardTitle).toBe("Simple Barrier ICE");
     expect(runnerCues[0]?.description).toBe("Der Run endet durch Rio de Janeiro City Grid.");
     expect(runnerCues[0]?.highlight).toEqual({ kind: "run", serverLabel: "Remote 1" });
     expect(runnerCues[0]?.sound).toBe("run");
