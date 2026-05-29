@@ -51,6 +51,7 @@ export type PendingChoiceResolutionHost = {
     resolveRunnerPrivateLookChoice: HostFn<void>;
     resolveExposePreventionChoice: HostFn<void>;
     resolveSenatorialFieldTripChoice: HostFn<void>;
+    resolvePavitBharatReplacementChoice?: HostFn<void>;
   };
   corp: {
     handleCorpInstallRezSequenceChoice: HostFn<{ handled: boolean }>;
@@ -175,6 +176,8 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveExposePreventionChoice;
   const resolveSenatorialFieldTripChoice =
     host.hiddenZone.resolveSenatorialFieldTripChoice;
+  const resolvePavitBharatReplacementChoice =
+    host.hiddenZone.resolvePavitBharatReplacementChoice;
   const handleCorpInstallRezSequenceChoice =
     host.corp.handleCorpInstallRezSequenceChoice;
   const corpInstallRezSequenceHandlerHost =
@@ -327,6 +330,12 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("p3_36.expose_installed_cards")) {
     resolveExposeInstalledCorpCardsChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("proteus.pavit_bharat_replacement")) {
+    if (!resolvePavitBharatReplacementChoice)
+      throw new Error("Pavit-Bharat-Choice-Resolver fehlt.");
+    resolvePavitBharatReplacementChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {

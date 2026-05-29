@@ -152,7 +152,7 @@ describe("breach state builder", () => {
     expect(breach.queue.every((entry) => entry.hiddenInfo)).toBe(true);
   });
 
-  it("uses deterministic HQ selection and appends HQ root upgrades", () => {
+  it("queues HQ root upgrades before deterministic HQ stored-card access", () => {
     const host = makeHost();
     const server = host.servers.mustServer("hq");
     const queue = accessQueueEntries(
@@ -163,12 +163,12 @@ describe("breach state builder", () => {
     );
 
     expect(queue).toEqual([
-      { cardInstanceId: "hq_card_b", zone: "hq" },
       { cardInstanceId: "hq_upgrade", zone: "remote_root" },
+      { cardInstanceId: "hq_card_b", zone: "hq" },
     ]);
   });
 
-  it("applies Proteus Highlighter and Vienna counters without counting central roots", () => {
+  it("applies Proteus Highlighter and Vienna counters with central roots outside stored-card count", () => {
     const host = makeHost();
     host.state.purgeableRunnerVirusCounters = {
       corp: { highlighter: 3, vienna: 1 },
@@ -190,9 +190,9 @@ describe("breach state builder", () => {
 
     expect(rd.queue.map((entry) => entry.zone)).toEqual(["rd", "rd"]);
     expect(hq.queue.map((entry) => entry.zone)).toEqual([
-      "hq",
-      "hq",
       "remote_root",
+      "hq",
+      "hq",
     ]);
   });
 

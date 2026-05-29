@@ -184,6 +184,7 @@ export function buildCorpRunRootRezActions(
     if (definition.type !== "asset" && definition.type !== "upgrade") continue;
     const rezCost = rezCostForCard(host.state, cardId);
     if (host.state.corp.credits < rezCost) continue;
+    if (!rootRezLifecycleIsSolvable(host, cardId, definition, server)) continue;
     const rezCostReductionSourceDefinitionIds =
       rezCostReductionSourceDefinitionIdsFor(host.state, cardId, definition);
     actions.push(
@@ -214,6 +215,35 @@ export function buildCorpRunRootRezActions(
   actions.push(...buildSingaporeCityGridRunActions(host.fortPass, run, server));
   actions.push(...buildStartRunIceRepositionActions(host.fortPass, run, server));
   return actions;
+}
+
+function rootRezLifecycleIsSolvable(
+  host: RunRezWindowHost,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  server: CorpServer,
+): boolean {
+  const lifecycle = cardImplementationForDefinitionId(definition.id)?.lifecycle?.on_rez;
+  if (
+    !lifecycle?.some((effect) => effect.kind === "replace_source_fort_cards_from_hq")
+  )
+    return true;
+  const run = host.state.run;
+  if (!run || run.attackedServerId !== server.id || run.position.kind !== "server")
+    return false;
+  const removedCount = server.ice.length + server.root.length;
+  const candidates = host.state.corp.hq.filter((hqCardId) => {
+    const hqDefinition = host.cards.definitionFor(hqCardId);
+    if (hqDefinition.type === "ice") return true;
+    return (
+      hqDefinition.side === "corp" &&
+      (hqDefinition.type === "asset" ||
+        hqDefinition.type === "agenda" ||
+        hqDefinition.type === "upgrade")
+    );
+  });
+  if (removedCount === 0) return true;
+  return candidates.length >= removedCount;
 }
 
 export function buildCorpRunRootRezWindowActions(

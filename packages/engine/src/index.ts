@@ -329,10 +329,12 @@ import {
 } from "./game/run/run-end-cleanup";
 import {
   activeWilsonSourceIds,
+  availableRunnerRunCredits,
   availableRunnerRunStartCredits,
   hostedPaymentCredits,
   isRestrictedHostedCreditSource,
   payRunStartTaxCredits,
+  recordRunnerRunCreditSpend,
   recordWilsonRunCapSpend,
   restrictedHostedCreditSourceForDefinition,
   restrictedHostedCreditSourceIds,
@@ -4473,6 +4475,7 @@ function spendRunnerAccessTrashCredits(
   const host = runnerAccessActionHost(state);
   if (availableRunnerAccessTrashCredits(host, accessedCardId) < amount)
     throw new Error("Der Runner kann die Trashkosten nicht bezahlen.");
+  if (state.run) recordRunnerRunCreditSpend(runDurationPaymentHost(state), amount);
   let remaining = amount;
   let recurringSpent = 0;
   for (const cardId of runnerAccessTrashRecurringCreditSourceIds(host, accessedCardId)) {
@@ -6015,7 +6018,10 @@ function openRunnerSpendCapAnnouncementChoice(
       "fort_start_runner_spend_cap"
   )
     throw new Error("Obfuscated Fortress ist nicht rezzed.");
-  const maxAnnouncement = Math.max(0, Math.floor(state.runner.credits));
+  const maxAnnouncement = Math.max(
+    0,
+    Math.floor(availableRunnerRunCredits(runDurationPaymentHost(state))),
+  );
   state.pendingChoice = {
     choiceId: `runner_run_spend_cap_${state.stateVersion + 1}`,
     side: "runner",
@@ -11947,6 +11953,7 @@ function pendingChoiceResolutionHost(
       resolveRunnerPrivateLookChoice,
       resolveExposePreventionChoice,
       resolveSenatorialFieldTripChoice,
+      resolvePavitBharatReplacementChoice,
     },
     corp: {
       handleCorpInstallRezSequenceChoice,
@@ -14814,6 +14821,19 @@ function exposeInstalledCorpCardsChoiceOptions(state: GameState) {
   }));
 }
 
+function exposeInstalledCorpCardsChoiceOptionsForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+) {
+  return exposeInstalledCorpCardTargets(state, "any_installed")
+    .filter((cardId) => corpServerIdForInstalledCard(state, cardId) === serverId)
+    .map((cardId) => ({
+      id: `card_${cardId}`,
+      label: exposeInstalledCorpCardLabel(state, cardId),
+      value: cardId,
+    }));
+}
+
 function startHuntClubBbsExposeChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -14856,6 +14876,52 @@ function startExposeInstalledCorpCardsChoice(
   scope: "any_installed" | "single_data_fort" = "any_installed",
 ): { publicPayload: Record<string, string | number | boolean> } {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (scope === "single_data_fort") {
+    const servers = state.corp.servers
+      .filter((server) => exposeInstalledCorpCardsChoiceOptionsForServer(state, server.id).length > 0)
+      .sort((left, right) => left.id.localeCompare(right.id));
+    if (servers.length === 0)
+      throw new Error("Es gibt keine installierte verdeckte Korp-Karte.");
+    state.pendingChoice = {
+      choiceId: `p3_36_expose_installed_cards_fort_${state.stateVersion + 1}`,
+      side: "runner",
+      source: `p3_36.expose_installed_cards_fort_select:${sourceCardId}:${sourceDefinitionId}:${min}:${max}:${state.stateVersion + 1}`,
+      prompt: "Data Fort zum Exposen wählen",
+      kind: "select_option",
+      options: [
+        {
+          id: "fort_none",
+          label: "Keine Karten exposen",
+          publicLabel: "Keine Karten exposen",
+          value: "none",
+        },
+        ...servers.map((server) => ({
+          id: `fort_${server.id}`,
+          label: server.label,
+          publicLabel: server.label,
+          value: server.id,
+        })),
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+    const payload = {
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "hunt_club_bbs_expose_choice",
+      choiceVisibility: "runner_private",
+      sourceDefinitionId,
+      exposeScope: scope,
+      fortChoice: true,
+      eligibleFortCount: servers.length,
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...payload,
+    };
+    return { publicPayload: payload };
+  }
   const options = exposeInstalledCorpCardsChoiceOptions(state);
   if (options.length === 0)
     throw new Error("Es gibt keine installierte verdeckte Korp-Karte.");
@@ -14923,7 +14989,59 @@ function resolveExposeInstalledCorpCardsChoice(
   const choice = state.pendingChoice;
   if (!choice || !choice.source.startsWith("p3_36.expose_installed_cards"))
     throw new Error("Es ist keine Expose-Choice offen.");
-  const [, sourceCardId = "", sourceDefinitionId = "", scope = "any_installed"] =
+  if (choice.source.startsWith("p3_36.expose_installed_cards_fort_select")) {
+    const [, sourceCardId = "", sourceDefinitionId = "", minRaw = "0", maxRaw = "5"] =
+      choice.source.split(":");
+    const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+    if (selected === "fort_none") {
+      delete state.pendingChoice;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "hunt_club_bbs_expose",
+        publicRevealKind: "expose",
+        sourceDefinitionId,
+        revealedCount: 0,
+      };
+      return;
+    }
+    const serverId = selected.replace(/^fort_/, "") as Exclude<ServerId, "new_remote">;
+    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    if (!server) throw new Error("Dieses Data Fort ist nicht legal.");
+    const options = exposeInstalledCorpCardsChoiceOptionsForServer(state, serverId);
+    if (options.length === 0)
+      throw new Error("Dieses Data Fort hat keine legalen Expose-Ziele.");
+    state.pendingChoice = {
+      choiceId: `p3_36_expose_installed_cards_${state.stateVersion + 1}`,
+      side: "runner",
+      source: `p3_36.expose_installed_cards:${sourceCardId}:${sourceDefinitionId}:single_data_fort:${serverId}:${state.stateVersion + 1}`,
+      prompt: `${server.label}: installierte Korp-Karten exposen`,
+      kind: "select_cards",
+      options,
+      minSelections: Math.min(Number(minRaw), options.length),
+      maxSelections: Math.min(Number(maxRaw), options.length),
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+    state.activeSide = "runner";
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "hunt_club_bbs_expose_fort_selected",
+      sourceDefinitionId,
+      serverId,
+      serverLabel: server.label,
+      eligibleCardCount: options.length,
+    };
+    return;
+  }
+  const [
+    ,
+    sourceCardId = "",
+    sourceDefinitionId = "",
+    scope = "any_installed",
+    boundServerId = "",
+  ] =
     choice.source.split(":");
   if (!sourceCardId || !state.cardInstances[sourceCardId])
     throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
@@ -14935,6 +15053,12 @@ function resolveExposeInstalledCorpCardsChoice(
   for (const cardId of selectedIds) {
     if (!legalTargets.has(cardId))
       throw new Error("Diese installierte Korp-Karte darf nicht exposed werden.");
+    if (
+      scope === "single_data_fort" &&
+      boundServerId &&
+      corpServerIdForInstalledCard(state, cardId) !== boundServerId
+    )
+      throw new Error("Diese Expose-Choice ist an ein anderes Fort gebunden.");
   }
   if (scope === "single_data_fort") {
     const serverIds = new Set(
@@ -15210,7 +15334,10 @@ const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
   hostedPaymentCredits,
   spendHostedPaymentCredits,
   runnerCreditsAvailable: (state) => state.runner.credits,
-  spendRunnerCredits: (state, amount) => spendCredits(state, "runner", amount),
+  spendRunnerCredits: (state, amount) => {
+    if (state.run) recordRunnerRunCreditSpend(runDurationPaymentHost(state), amount);
+    spendCredits(state, "runner", amount);
+  },
   recordWilsonRunCapSpend: (state, amount) =>
     recordWilsonRunCapSpend(runDurationPaymentHost(state), amount),
   definitionIdForCard: (state, cardId) => definitionFor(state, cardId).id,
@@ -17016,19 +17143,38 @@ function replaceSourceFortCardsFromHq(
   const removedIce = server.ice.slice();
   const removedRoot = server.root.slice();
   const removedCount = removedIce.length + removedRoot.length;
+  const legalCandidates = legalPavitReplacementHqCardIds(state, server, removedCount);
+  if (legalCandidates.length < removedCount)
+    throw new Error("Pavit Bharat hat nicht genug legale HQ-Ersatzkarten.");
   const hqSelection = String(legalAction.payload?.pavitReplacementHqCardIds ?? "")
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean) as CardInstanceId[];
+  if (hqSelection.length === 0 && legalCandidates.length > removedCount) {
+    openPavitBharatReplacementChoice(
+      state,
+      sourceCardId,
+      sourceDefinitionId,
+      server,
+      removedCount,
+      legalCandidates,
+    );
+    const payload = {
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "pavit_bharat_hq_to_fort_replacement_choice",
+      sourceDefinitionId,
+      serverId: server.id,
+      serverLabel: server.label,
+      replacementCount: removedCount,
+      hqCandidateCount: legalCandidates.length,
+    };
+    legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+    return { publicPayload: payload };
+  }
   const selected =
     hqSelection.length > 0
       ? hqSelection
-      : state.corp.hq
-          .filter((cardId) => {
-            const definition = definitionFor(state, cardId);
-            return definition.type === "ice" || definition.type === "upgrade";
-          })
-          .slice(0, removedCount);
+      : legalCandidates.slice(0, removedCount);
   if (selected.length !== removedCount)
     throw new Error("Pavit Bharat braucht exakt gleich viele HQ-Ersatzkarten.");
   if (new Set(selected).size !== selected.length)
@@ -17036,6 +17182,8 @@ function replaceSourceFortCardsFromHq(
   for (const cardId of selected) {
     if (!state.corp.hq.includes(cardId))
       throw new Error("Eine Pavit-Bharat-Ersatzkarte liegt nicht mehr in HQ.");
+    if (!legalCandidates.includes(cardId))
+      throw new Error("Eine Pavit-Bharat-Ersatzkarte ist nicht installierbar.");
   }
   for (const cardId of [...removedIce, ...removedRoot]) {
     uninstallCorpInstalledCardToHq(state, cardId);
@@ -17053,7 +17201,11 @@ function replaceSourceFortCardsFromHq(
         rezzed: false,
         zone: { side: "corp", zone: "serverIce", serverId: server.id },
       };
-    } else if (definition.type === "upgrade") {
+    } else if (
+      definition.type === "asset" ||
+      definition.type === "agenda" ||
+      definition.type === "upgrade"
+    ) {
       if (!canInstallCorpRootCardInServer(state, definition, server))
         throw new Error("Eine Pavit-Bharat-Root-Ersatzkarte ist nicht legal.");
       removeFromAllZones(state, cardId);
@@ -17080,6 +17232,88 @@ function replaceSourceFortCardsFromHq(
   };
   legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
   return { publicPayload: payload };
+}
+
+function legalPavitReplacementHqCardIds(
+  state: GameState,
+  server: CorpServer,
+  removedCount: number,
+): CardInstanceId[] {
+  const serverAfterRemoval: CorpServer = {
+    ...server,
+    ice: [],
+    root: [],
+  };
+  return state.corp.hq
+    .filter((cardId) => {
+      const definition = definitionFor(state, cardId);
+      if (definition.type === "ice") return true;
+      if (
+        definition.type !== "asset" &&
+        definition.type !== "agenda" &&
+        definition.type !== "upgrade"
+      )
+        return false;
+      return canInstallCorpRootCardInServer(state, definition, serverAfterRemoval);
+    })
+    .slice()
+    .sort()
+    .slice(0, Math.max(removedCount, state.corp.hq.length));
+}
+
+function openPavitBharatReplacementChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+  server: CorpServer,
+  replacementCount: number,
+  legalCandidates: CardInstanceId[],
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  state.pendingChoice = {
+    choiceId: `pavit_bharat_replacement_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `proteus.pavit_bharat_replacement:${sourceCardId}:${sourceDefinitionId}:${server.id}:${replacementCount}:${state.stateVersion + 1}`,
+    prompt: "Pavit Bharat: HQ-Ersatzkarten wählen",
+    kind: "select_cards",
+    options: legalCandidates.map((cardId) => ({
+      id: `card_${cardId}`,
+      label: definitionFor(state, cardId).title,
+      publicLabel: "HQ-Karte",
+      value: cardId,
+    })),
+    minSelections: replacementCount,
+    maxSelections: replacementCount,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  state.activeSide = "corp";
+}
+
+function resolvePavitBharatReplacementChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice?.source.startsWith("proteus.pavit_bharat_replacement"))
+    throw new Error("Es ist keine Pavit-Bharat-Choice offen.");
+  const [, sourceCardId = "", sourceDefinitionId = "", serverId = "", count = ""] =
+    choice.source.split(":");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  if (selectedIds.length !== Number(count))
+    throw new Error("Pavit Bharat braucht exakt die geforderte Ersatzkartenzahl.");
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    pavitReplacementHqCardIds: selectedIds.join(","),
+  };
+  replaceSourceFortCardsFromHq(
+    state,
+    legalAction,
+    sourceCardId as CardInstanceId,
+    sourceDefinitionId as CardDefinitionId,
+  );
 }
 
 function ensureSpecialZones(state: GameState): SpecialZoneState {

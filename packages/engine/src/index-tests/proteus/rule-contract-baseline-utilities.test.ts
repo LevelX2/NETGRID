@@ -32,7 +32,8 @@ const OBFUSCATED = "onr_proteus_066_obfuscated-fortress";
 const PAVIT = "onr_proteus_069_pavit-bharat";
 const SIMON = "onr_proteus_073_simon-francisco";
 const WALL = "onr_v1_279_wall-of-static";
-const DATAPACKER = "onr_v1_296_datapacker";
+const CHIHUAHUA = "onr_proteus_014_chihuahua";
+const ACME = "onr_v1_308_acme-savings-and-loan";
 
 const PRO019_IDS = [
   EMERGENCY_RIG,
@@ -217,6 +218,31 @@ function applySelected(state: GameState, side: "corp" | "runner", actionId: stri
   return result.state;
 }
 
+function remoteServer(state: GameState, serverId: Exclude<ServerId, "new_remote">) {
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) throw new Error(`Missing server ${serverId}`);
+  return server;
+}
+
+function forceRunAtServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): void {
+  state.run = {
+    runId: `${state.matchId}_${serverId}_forced_run`,
+    attackedServerId: serverId,
+    phase: "movement",
+    position: { kind: "server", serverId },
+    brokenSubroutineIndexes: [],
+    resolvedSubroutineIndexes: [],
+    successful: false,
+    accessCount: 2,
+  };
+  state.phase = "run";
+  state.timingPoint = "run.jack_out_window";
+  state.activeSide = "corp";
+}
+
 describe("PRO019 rule-contract baseline utilities", () => {
   it("registers exactly the eight PRO019 CardImplementation definitions", () => {
     const implementations = new Map(
@@ -329,7 +355,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state.runner.clicks = 4;
     addCorpRoot(state, HERMAN, "herman_1", "remote_1", true);
     const outerIce = addCorpIce(state, WALL, "herman_outer", "remote_1", true);
-    const innerIce = addCorpIce(state, DATAPACKER, "herman_inner", "remote_1", true);
+    const innerIce = addCorpIce(state, CHIHUAHUA, "herman_inner", "remote_1", true);
 
     state = apply(
       state,
@@ -375,7 +401,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     const marcelId = addCorpRoot(state, MARCEL, "marcel_1", "remote_1", true);
     addCorpIce(state, WALL, "marcel_wall", "remote_1", true);
     addCorpRd(state, WALL, "marcel_rd_1");
-    addCorpRd(state, DATAPACKER, "marcel_rd_2");
+    addCorpRd(state, CHIHUAHUA, "marcel_rd_2");
 
     expect(getLegalActions(state, "corp").some((action) => action.source === marcelId)).toBe(
       false,
@@ -470,6 +496,212 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(pavitServers).not.toContain("rd");
   });
 
+  it("accesses Simon from HQ and reduces one later HQ stored-card access only", () => {
+    let state = corpActionState("pro019-simon-hq-access");
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 4;
+    state.purgeableRunnerVirusCounters = { corp: { vienna: 1 } };
+    addCorpRoot(state, SIMON, "simon_hq_root", "hq", true);
+    addCorpHq(state, WALL, "simon_hq_stored_1");
+    addCorpHq(state, CHIHUAHUA, "simon_hq_stored_2");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.run?.accessedCardId).toBe("simon_hq_root");
+    const queue = state.run?.breach?.queue ?? [];
+    expect(queue[0]).toMatchObject({
+      cardInstanceId: "simon_hq_root",
+      zone: "remote_root",
+      status: "accessed",
+    });
+    expect(queue.filter((entry) => entry.zone === "hq" && entry.status === "skipped")).toHaveLength(1);
+    expect(queue.filter((entry) => entry.zone === "hq" && entry.status === "pending")).toHaveLength(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "reduce_current_access_queue",
+    });
+  });
+
+  it("accesses Simon from R&D and is stable when no later stored-card access remains", () => {
+    let state = corpActionState("pro019-simon-rd-access");
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 4;
+    addCorpRoot(state, SIMON, "simon_rd_root", "rd", true);
+    for (const cardId of state.corp.rd.slice()) {
+      state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
+      state.corp.archives.push(cardId);
+      state.cardInstances[cardId] = {
+        ...state.cardInstances[cardId]!,
+        zone: { side: "corp", zone: "archives" },
+      };
+    }
+
+    const replayStart = structuredClone(state);
+    const replayStartIndex = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.run?.accessedCardId).toBe("simon_rd_root");
+    expect(state.run?.breach?.queue).toHaveLength(1);
+    expect(state.run?.breach?.queue.some((entry) => entry.status === "skipped")).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+    });
+    expect(hashState(state)).toMatch(/^fnv1a:/);
+    expect(replayEvents(replayStart, state.eventLog.slice(replayStartIndex)).ok).toBe(true);
+  });
+
+  it("offers Pavit only at server approach and replaces fort cards through a redacted HQ choice", () => {
+    let beforeServer = corpActionState("pro019-pavit-before-server");
+    addCorpRoot(beforeServer, PAVIT, "pavit_before", "remote_1", false);
+    addCorpIce(beforeServer, WALL, "pavit_before_ice", "remote_1", true);
+    beforeServer.run = {
+      runId: "pavit_before_run",
+      attackedServerId: "remote_1",
+      phase: "approach_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      approachedIceId: "pavit_before_ice" as CardInstanceId,
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: false,
+      accessCount: 1,
+    };
+    beforeServer.phase = "run";
+    beforeServer.timingPoint = "run.jack_out_window";
+    expect(getLegalActions(beforeServer, "corp").some((action) => action.payload?.cardId === "pavit_before")).toBe(false);
+
+    let state = corpActionState("pro019-pavit-choice");
+    const oldIce = addCorpIce(state, CHIHUAHUA, "pavit_old_ice", "remote_1", true);
+    const pavitId = addCorpRoot(state, PAVIT, "pavit_source", "remote_1", false);
+    const newIce = addCorpHq(state, WALL, "pavit_new_ice");
+    const newRoot = addCorpHq(state, ACME, "pavit_new_root");
+    addCorpHq(state, CHIHUAHUA, "pavit_extra_ice");
+    forceRunAtServer(state, "remote_1");
+
+    const rezAction = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.payload?.cardId === pavitId,
+    );
+    state = applySelected(state, "corp", rezAction.actionId);
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      visibility: "hidden_info_barrier",
+      minSelections: 2,
+      maxSelections: 2,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "pavit_bharat_hq_to_fort_replacement_choice",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(String(newIce));
+    const invalid = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: mustAction(state, "corp", (action) => action.type === "resolve_choice").actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${newIce}`, `card_${newIce}`],
+      },
+      idempotencyKey: "pavit-invalid-duplicate",
+    });
+    expect(invalid.ok).toBe(false);
+
+    state = applyChoices(state, "corp", [`card_${newIce}`, `card_${newRoot}`]);
+    const server = remoteServer(state, "remote_1");
+    expect(server.ice).toEqual([newIce]);
+    expect(server.root).toEqual([newRoot]);
+    expect(state.corp.hq).toEqual(expect.arrayContaining([oldIce, pavitId]));
+    expect(state.cardInstances[newIce]?.zone).toMatchObject({ zone: "serverIce", serverId: "remote_1" });
+    expect(state.cardInstances[newRoot]?.zone).toMatchObject({ zone: "serverRoot", serverId: "remote_1" });
+    expect(state.cardInstances[newIce]?.rezzed).toBe(false);
+    expect(state.cardInstances[newRoot]?.rezzed).toBe(false);
+  });
+
+  it("counts Obfuscated Fortress run cap across trace/link payments", () => {
+    let state = corpActionState("pro019-obfuscated-trace-cap");
+    const sourceIce = addCorpIce(state, WALL, "obfuscated_trace_source", "remote_1", true);
+    state.runner.credits = 5;
+    state.run = {
+      runId: "obfuscated_trace_run",
+      attackedServerId: "remote_1",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      approachedIceId: sourceIce,
+      encounteredIceId: sourceIce,
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: false,
+      accessCount: 1,
+      runCreditSpendCap: {
+        sourceCardInstanceId: "obfuscated_trace" as CardInstanceId,
+        sourceDefinitionId: OBFUSCATED as CardDefinitionId,
+        announcedSpendCap: 1,
+        spentDuringRun: 0,
+      },
+    };
+    state.trace = {
+      traceId: "obfuscated_trace",
+      sourceCardInstanceId: sourceIce,
+      sourceDefinitionId: WALL as CardDefinitionId,
+      baseTraceStrength: 1,
+      corpBidMax: 0,
+      corpBid: 0,
+      traceStrength: 1,
+      runnerLink: 0,
+      status: "runner_bid",
+      successEffect: { type: "add_tag", amount: 1 },
+      returnPhase: state.phase,
+      returnTimingPoint: state.timingPoint,
+      returnActiveSide: state.activeSide,
+    };
+    state.pendingChoice = {
+      choiceId: "obfuscated_trace.runner.bid",
+      side: "runner",
+      source: "trace:obfuscated_trace",
+      prompt: "Runner Link-Bid wählen",
+      kind: "bid_amount",
+      options: [
+        { id: "bid_0", label: "0 Credits", publicLabel: "0 Credits", value: 0 },
+        { id: "bid_1", label: "1 Credit", publicLabel: "1 Credit", value: 1 },
+        { id: "bid_2", label: "2 Credits", publicLabel: "2 Credits", value: 2 },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion,
+      visibility: "public",
+    };
+    state.activeSide = "runner";
+    const tooMuch = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: mustAction(state, "runner", (action) => action.type === "resolve_choice").actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: ["bid_2"],
+      },
+      idempotencyKey: "obfuscated-trace-too-much",
+    });
+    expect(tooMuch.ok).toBe(false);
+    state = applyChoice(state, "runner", "bid_1");
+    expect(state.run?.runCreditSpendCap?.spentDuringRun).toBe(1);
+  });
+
   it("plays Ice and Data Special Report for cost 3 and opens a private expose choice", () => {
     let state = corpActionState("pro019-ice-data");
     state.activeSide = "runner";
@@ -487,7 +719,11 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(selected?.costs[0]?.credits).toBe(3);
     state = applySelected(state, "runner", selected!.actionId);
 
-    expect(state.pendingChoice?.source).toContain("single_data_fort");
+    expect(state.pendingChoice?.source).toContain("expose_installed_cards_fort_select");
+    expect(state.pendingChoice?.maxSelections).toBe(1);
+    state = applyChoice(state, "runner", "fort_remote_1");
+    expect(state.pendingChoice?.source).toContain("single_data_fort:remote_1");
+    expect(state.pendingChoice?.minSelections).toBe(0);
     expect(state.pendingChoice?.maxSelections).toBe(1);
     expect(hashState(state)).toMatch(/^fnv1a:/);
 
@@ -527,7 +763,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     });
     expect(invalid.ok).toBe(false);
 
-    state = applyChoices(state, "runner", []);
+    state = applyChoice(state, "runner", "fort_none");
     expect(state.pendingChoice).toBeUndefined();
     expect(hashState(state)).toMatch(/^fnv1a:/);
   });

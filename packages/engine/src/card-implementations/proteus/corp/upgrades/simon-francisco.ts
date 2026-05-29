@@ -13,7 +13,7 @@ export const proteusSimonFranciscoImplementation: CardImplementationDefinition =
   accessEffects: [
     {
       kind: "on_access",
-      sourceZones: ["installed"],
+      sourceZones: ["installed", "hq", "rd"],
       effects: [
         {
           kind: "reduce_current_access_queue",

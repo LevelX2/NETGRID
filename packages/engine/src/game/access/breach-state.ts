@@ -75,15 +75,7 @@ export function accessQueueEntries(
   accessCount: number,
 ): AccessQueueEntryBuild[] {
   if (server.id === "rd")
-    return host.state.corp.rd
-      .slice(0, Math.min(accessCount, host.state.corp.rd.length))
-      .map((cardInstanceId) => ({ cardInstanceId, zone: "rd" as const }));
-  if (server.id === "hq") {
-    const bonus = runnerHqAccessBonus(host);
     return [
-      ...randomHqAccessQueue(host, run.runId, accessCount + bonus).map(
-        (cardInstanceId) => ({ cardInstanceId, zone: "hq" as const }),
-      ),
       ...server.root
         .filter(
           (cardInstanceId) =>
@@ -93,6 +85,25 @@ export function accessQueueEntries(
           cardInstanceId,
           zone: "remote_root" as const,
         })),
+      ...host.state.corp.rd
+        .slice(0, Math.min(accessCount, host.state.corp.rd.length))
+        .map((cardInstanceId) => ({ cardInstanceId, zone: "rd" as const })),
+    ];
+  if (server.id === "hq") {
+    const bonus = runnerHqAccessBonus(host);
+    return [
+      ...server.root
+        .filter(
+          (cardInstanceId) =>
+            host.cards.definitionFor(cardInstanceId).type === "upgrade",
+        )
+        .map((cardInstanceId) => ({
+          cardInstanceId,
+          zone: "remote_root" as const,
+        })),
+      ...randomHqAccessQueue(host, run.runId, accessCount + bonus).map(
+        (cardInstanceId) => ({ cardInstanceId, zone: "hq" as const }),
+      ),
     ];
   }
   if (server.id === "archives")
