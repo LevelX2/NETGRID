@@ -655,7 +655,8 @@ function startIceTransmutationChoice(
     choiceId: `v1920_ice_transmutation_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `v1920.ice_transmutation:${agendaId}:${host.state.stateVersion + 1}`,
-    prompt: "Ice Transmutation: Rezzed ICE wählen",
+    prompt:
+      "Ice Transmutation: Rezzed ICE wählen. Das gewählte ICE bekommt +1 Stärke; jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
     kind: "select_cards",
     options: targets.map((cardId) => {
       const definition = host.cards.definitionFor(cardId);
