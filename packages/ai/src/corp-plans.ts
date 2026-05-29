@@ -464,6 +464,88 @@ type CorpHqAgendaDensityContext = {
   noSafeRemote: boolean;
 };
 
+export type CorpIcePortfolioActionFamily =
+  | "install_ice"
+  | "economy"
+  | "install_remote"
+  | "agenda_install"
+  | "advance"
+  | "score"
+  | "draw"
+  | "end_turn"
+  | "other";
+
+export type CorpIcePortfolioPressureLevel = "low" | "medium" | "high";
+export type CorpIcePortfolioAgendaFloodLevel = "low" | "medium" | "high";
+
+export type CorpIcePortfolioActionAssessment = {
+  serverId?: string;
+  chosenActionFamily: CorpIcePortfolioActionFamily;
+  chosenServer?: string;
+  hqIceCountBefore: number;
+  rndIceCountBefore: number;
+  archivesIceCountBefore: number;
+  remoteIceCountBefore: number;
+  hqUnrezzedIceCountBefore: number;
+  rndUnrezzedIceCountBefore: number;
+  centralIceCountBefore: number;
+  centralUnrezzedIceCountBefore: number;
+  corpCredits: number;
+  cheapestCentralRezCost: number;
+  cheapestRemoteRezCost: number;
+  estimatedCentralRezNeed: number;
+  rezReserveDeficit: number;
+  canRezAtLeastOneCentralIce: boolean;
+  canRezAtLeastOneRemoteIce: boolean;
+  cannotRezNewlyInstalledIce: boolean;
+  creditsBelowCheapestRelevantRez: boolean;
+  creditsBelowEstimatedCentralRezNeed: boolean;
+  runnerHqPressure: CorpIcePortfolioPressureLevel;
+  runnerRndPressure: CorpIcePortfolioPressureLevel;
+  agendaFlood: CorpIcePortfolioAgendaFloodLevel;
+  readyRemoteExists: boolean;
+  agendaInHq: boolean;
+  agendaInHqWithReadyRemote: boolean;
+  agendaInHqWithoutReadyRemote: boolean;
+  hqOverIced: boolean;
+  rndOverIced: boolean;
+  centralOverIced: boolean;
+  centralOverIcedWithoutPressure: boolean;
+  centralOverIcedWithLowRezReserve: boolean;
+  hqFifthIceInstalled: boolean;
+  centralIceDiminishingReturnInstall: boolean;
+  centralIceInstallSuppressedByDiminishingReturns: boolean;
+  centralIceInstallPenalizedByDiminishingReturns: boolean;
+  installedIceWithoutRezReserve: boolean;
+  installedCentralIceWithoutRezReserve: boolean;
+  installedRemoteIceWithoutRezReserve: boolean;
+  hqProtectionJustifiedByAgendaFlood: boolean;
+  hqProtectionJustifiedByRunnerPressure: boolean;
+  rndProtectionJustifiedByRunnerPressure: boolean;
+  centralOverIceBlockedByRunnerPressure: boolean;
+  centralOverIceBlockedByAgendaFlood: boolean;
+  centralOverIceBlockedByNoRemotePlan: boolean;
+  centralOverIceBlockedByEmergencyProtection: boolean;
+  remoteScoringUnderbuiltWhileCentralsOverIced: boolean;
+  extraCentralIceChosenOverReadyRemoteBuild: boolean;
+  extraCentralIceChosenOverEconomy: boolean;
+  extraCentralIceChosenOverRezReserve: boolean;
+  extraCentralIceChosenOverAgendaInstall: boolean;
+  extraCentralIceChosenOverAdvanceOrScore: boolean;
+  fixGateEligible: boolean;
+  fixGateSuspiciousCentralOverIce: boolean;
+  fixGateBlockedByAgendaFlood: boolean;
+  fixGateBlockedByRunnerCentralPressure: boolean;
+  fixGateBlockedByNoRemotePlan: boolean;
+  fixGateBlockedByEmergencyProtection: boolean;
+  alternativeFamiliesLegal: CorpIcePortfolioActionFamily[];
+  classification:
+    | "corpCentralOverIcedWithLowRezReserve"
+    | "corpCentralOverIcedBlocked"
+    | "corpCentralIcePortfolioStable";
+  evidence: string[];
+};
+
 export type CorpEvaluationContext = {
   beliefState: BeliefState;
   remoteRootSecurityByActionId: Map<string, number>;
@@ -867,6 +949,11 @@ export function evaluateCorpPlan(
     candidate,
     context,
   );
+  const centralIcePortfolio = evaluateCorpCentralIcePortfolio(
+    input,
+    candidate,
+    context,
+  );
   const hqDensity = evaluateCorpHqAgendaDensity(input, candidate, context);
   const outcomeFollowup = evaluateCorpOutcomeFollowup(
     input,
@@ -899,6 +986,7 @@ export function evaluateCorpPlan(
     protectionToScore.score +
     scoreWindowCompression.score +
     remotePortfolio.score +
+    centralIcePortfolio.score +
     hqDensity.score +
     outcomeFollowup.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
@@ -944,6 +1032,7 @@ export function evaluateCorpPlan(
     ...remoteRezReserve.evidence,
     ...remoteIntent.evidence,
     ...remotePortfolio.evidence,
+    ...centralIcePortfolio.evidence,
     ...hqDensity.evidence,
     `belief_version:${beliefState.version}`,
     ...(beliefState.corpOpponentModel
@@ -1106,6 +1195,13 @@ export function evaluateCorpPlan(
         firstReason(remotePortfolio.reasons),
       ],
       [
+        "centralIcePortfolio",
+        "Central-ICE-Portfolio",
+        centralIcePortfolio.score,
+        1,
+        firstReason(centralIcePortfolio.reasons),
+      ],
+      [
         "hqDensity",
         "HQ-Dichte",
         hqDensity.score,
@@ -1157,6 +1253,7 @@ export function evaluateCorpPlan(
       ...scoreConversion.reasons,
       ...protectionToScore.reasons,
       ...scoreWindowCompression.reasons,
+      ...centralIcePortfolio.reasons,
     ]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence),
   };
@@ -2843,6 +2940,676 @@ function corpHqAgendaDensityContext(
     drawActionIds,
     noSafeRemote,
   };
+}
+
+function evaluateCorpCentralIcePortfolio(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+  context: CorpEvaluationContext,
+): CorpPlanEvaluatorResult {
+  const assessments = actionsForCandidate(input, candidate)
+    .map((action) => assessCorpIcePortfolioAction(input, action, context))
+    .sort(
+      (left, right) =>
+        Number(right.fixGateSuspiciousCentralOverIce) -
+          Number(left.fixGateSuspiciousCentralOverIce) ||
+        Number(right.centralIceInstallSuppressedByDiminishingReturns) -
+          Number(left.centralIceInstallSuppressedByDiminishingReturns) ||
+        right.rezReserveDeficit - left.rezReserveDeficit,
+    );
+  const best = assessments[0];
+  if (!best)
+    return {
+      score: 0,
+      reasons: [],
+      evidence: ["corp_ice_portfolio:none"],
+    };
+
+  const centralProtection =
+    candidate.kind === "protect_hq" || candidate.kind === "protect_rnd";
+  const centralInstallPenalty =
+    centralProtection && best.centralIceInstallPenalizedByDiminishingReturns
+      ? 330 + Math.min(160, best.rezReserveDeficit * 28)
+      : 0;
+  const legitimateCentralDefenseBonus =
+    centralProtection &&
+    (best.centralOverIceBlockedByAgendaFlood ||
+      best.centralOverIceBlockedByRunnerPressure ||
+      (best.centralOverIceBlockedByEmergencyProtection &&
+        (best.hqProtectionJustifiedByRunnerPressure ||
+          best.rndProtectionJustifiedByRunnerPressure)))
+      ? 60
+      : 0;
+  const reserveRecoveryBonus =
+    candidate.kind === "recover_economy" &&
+    best.centralIceInstallSuppressedByDiminishingReturns
+      ? 175 + Math.min(120, best.rezReserveDeficit * 24)
+      : 0;
+  const remoteOrScoreBonus =
+    (candidate.kind === "build_scoring_remote" ||
+      candidate.kind === "score_next_turn" ||
+      candidate.kind === "score_now") &&
+    best.centralIceInstallSuppressedByDiminishingReturns
+      ? best.remoteScoringUnderbuiltWhileCentralsOverIced
+        ? 145
+        : 80
+      : 0;
+
+  const score =
+    -centralInstallPenalty +
+    legitimateCentralDefenseBonus +
+    reserveRecoveryBonus +
+    remoteOrScoreBonus;
+  return {
+    score,
+    reasons: sortedUnique([
+      ...(best.fixGateSuspiciousCentralOverIce
+        ? ["corp_central_overice_low_rez_reserve"]
+        : []),
+      ...(best.centralIceInstallPenalizedByDiminishingReturns
+        ? ["central_ice_diminishing_return_penalty"]
+        : []),
+      ...(best.centralIceInstallSuppressedByDiminishingReturns
+        ? ["central_ice_diminishing_return_suppressed"]
+        : []),
+      ...(best.centralOverIceBlockedByAgendaFlood
+        ? ["central_overice_blocked_by_agenda_flood"]
+        : []),
+      ...(best.centralOverIceBlockedByRunnerPressure
+        ? ["central_overice_blocked_by_runner_pressure"]
+        : []),
+      ...(best.centralOverIceBlockedByNoRemotePlan
+        ? ["central_overice_blocked_by_no_remote_plan"]
+        : []),
+      ...(best.centralOverIceBlockedByEmergencyProtection
+        ? ["central_overice_blocked_by_emergency_protection"]
+        : []),
+      ...(best.remoteScoringUnderbuiltWhileCentralsOverIced
+        ? ["remote_scoring_underbuilt_while_central_overiced"]
+        : []),
+    ]),
+    evidence: best.evidence,
+  };
+}
+
+export function assessCorpIcePortfolioAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  contextOrBelief: BeliefState | CorpEvaluationContext = reconstructBeliefState(
+    input,
+  ),
+): CorpIcePortfolioActionAssessment {
+  const context = corpEvaluationContext(input, contextOrBelief);
+  const features = extractCorpPlanFeatures(input);
+  const hq = input.playerView.servers.find((server) => server.id === "hq");
+  const rnd = input.playerView.servers.find((server) => server.id === "rd");
+  const archives = input.playerView.servers.find(
+    (server) => server.id === "archives",
+  );
+  const remotes = input.playerView.servers.filter((server) =>
+    server.id.startsWith("remote_"),
+  );
+  const hqIceCountBefore = hq?.ice.length ?? 0;
+  const rndIceCountBefore = rnd?.ice.length ?? 0;
+  const archivesIceCountBefore = archives?.ice.length ?? 0;
+  const remoteIceCountBefore = remotes.reduce(
+    (sum, server) => sum + server.ice.length,
+    0,
+  );
+  const hqUnrezzedIceCountBefore =
+    hq?.ice.filter((ice) => ice.rezzed !== true).length ?? 0;
+  const rndUnrezzedIceCountBefore =
+    rnd?.ice.filter((ice) => ice.rezzed !== true).length ?? 0;
+  const archivesUnrezzedIceCount =
+    archives?.ice.filter((ice) => ice.rezzed !== true).length ?? 0;
+  const remoteUnrezzedIceCount = remotes.reduce(
+    (sum, server) =>
+      sum + server.ice.filter((ice) => ice.rezzed !== true).length,
+    0,
+  );
+  const centralIceCountBefore =
+    hqIceCountBefore + rndIceCountBefore + archivesIceCountBefore;
+  const centralUnrezzedIceCountBefore =
+    hqUnrezzedIceCountBefore +
+    rndUnrezzedIceCountBefore +
+    archivesUnrezzedIceCount;
+  const centralUnrezzedIce = [hq, rnd, archives]
+    .flatMap((server) => server?.ice ?? [])
+    .filter((ice) => ice.rezzed !== true);
+  const remoteUnrezzedIce = remotes
+    .flatMap((server) => server.ice)
+    .filter((ice) => ice.rezzed !== true);
+  const centralRezCosts = centralUnrezzedIce
+    .map((ice) => rezCostForVisibleCard(ice))
+    .filter((cost) => cost >= 0)
+    .sort((left, right) => left - right);
+  const remoteRezCosts = remoteUnrezzedIce
+    .map((ice) => rezCostForVisibleCard(ice))
+    .filter((cost) => cost >= 0)
+    .sort((left, right) => left - right);
+  const cheapestCentralRezCost = firstPositiveCost(centralRezCosts);
+  const cheapestRemoteRezCost = firstPositiveCost(remoteRezCosts);
+  const estimatedCentralRezNeed = centralRezCosts
+    .filter((cost) => cost > 0)
+    .slice(0, 2)
+    .reduce((sum, cost) => sum + cost, 0);
+  const corpCredits = features.credits;
+  const chosenActionFamily = corpIcePortfolioActionFamily(
+    input,
+    action,
+    context,
+  );
+  const chosenServer =
+    typeof action.payload?.serverId === "string"
+      ? action.payload.serverId
+      : remoteServerIdForAction(input, action);
+  const centralInstallServer =
+    chosenActionFamily === "install_ice" && isCentralServerId(chosenServer)
+      ? chosenServer
+      : undefined;
+  const targetIceCountBefore = centralInstallServer
+    ? iceCountBeforeForCentralServer(
+        centralInstallServer,
+        hqIceCountBefore,
+        rndIceCountBefore,
+        archivesIceCountBefore,
+      )
+    : 0;
+  const targetUnrezzedIceCountBefore = centralInstallServer
+    ? unrezzedIceCountBeforeForCentralServer(
+        centralInstallServer,
+        hqUnrezzedIceCountBefore,
+        rndUnrezzedIceCountBefore,
+        archivesUnrezzedIceCount,
+      )
+    : 0;
+  const relevantRezCost =
+    centralInstallServer === "hq"
+      ? cheapestRezCostForServer(hq)
+      : centralInstallServer === "rd"
+        ? cheapestRezCostForServer(rnd)
+        : centralInstallServer === "archives"
+          ? cheapestRezCostForServer(archives)
+          : cheapestCentralRezCost || cheapestRemoteRezCost;
+  const rezReserveDeficit = Math.max(
+    0,
+    Math.max(relevantRezCost, estimatedCentralRezNeed) - corpCredits,
+  );
+  const canRezAtLeastOneCentralIce = centralRezCosts.some(
+    (cost) => cost <= corpCredits,
+  );
+  const canRezAtLeastOneRemoteIce = remoteRezCosts.some(
+    (cost) => cost <= corpCredits,
+  );
+  const creditsAfterInstallCosts = Math.max(
+    0,
+    corpCredits - actionCreditCost(action),
+  );
+  const sourceRezCost = rezCostForActionSource(input, action);
+  const cannotRezNewlyInstalledIce =
+    chosenActionFamily === "install_ice" &&
+    sourceRezCost > 0 &&
+    sourceRezCost > creditsAfterInstallCosts;
+  const creditsBelowCheapestRelevantRez =
+    relevantRezCost > 0 && corpCredits < relevantRezCost;
+  const creditsBelowEstimatedCentralRezNeed =
+    estimatedCentralRezNeed > 0 && corpCredits < estimatedCentralRezNeed;
+  const hqPressure = centralPressureLevel(input, context, "hq");
+  const rndPressure = centralPressureLevel(input, context, "rd");
+  const hqDensity = corpHqAgendaDensityContext(input, context);
+  const agendaFlood = hqAgendaFloodLevel(hqDensity);
+  const readyRemoteExists = corpReadyRemoteExists(input, context);
+  const agendaInHq = features.ownAgendaCount > 0;
+  const alternativeFamiliesLegal = corpIcePortfolioAlternativeFamilies(
+    input,
+    action,
+    context,
+  );
+  const hqOverIced =
+    hqIceCountBefore >= 4 ||
+    (hqIceCountBefore >= 3 && hqUnrezzedIceCountBefore >= 2);
+  const rndOverIced =
+    rndIceCountBefore >= 4 ||
+    (rndIceCountBefore >= 3 && rndUnrezzedIceCountBefore >= 2);
+  const centralOverIced =
+    hqOverIced ||
+    rndOverIced ||
+    (centralIceCountBefore >= 6 && centralUnrezzedIceCountBefore >= 3);
+  const selectedCentralDiminishingReturn =
+    Boolean(centralInstallServer) &&
+    targetIceCountBefore >= 3 &&
+    (targetUnrezzedIceCountBefore >= 2 ||
+      targetUnrezzedIceCountBefore >= Math.ceil(targetIceCountBefore / 2));
+  const legalCentralDiminishingReturn = input.legalActions.some((legalAction) =>
+    corpCentralIceInstallNeedsDiminishingGuard(
+      legalAction,
+      hqIceCountBefore,
+      rndIceCountBefore,
+      archivesIceCountBefore,
+      hqUnrezzedIceCountBefore,
+      rndUnrezzedIceCountBefore,
+      archivesUnrezzedIceCount,
+    ),
+  );
+  const lowRezReserve =
+    corpCredits < 5 ||
+    creditsBelowCheapestRelevantRez ||
+    creditsBelowEstimatedCentralRezNeed ||
+    cannotRezNewlyInstalledIce;
+  const runnerPressureBlocks =
+    (centralInstallServer === "hq" && hqPressure !== "low") ||
+    (centralInstallServer === "rd" && rndPressure !== "low") ||
+    (!centralInstallServer &&
+      legalCentralDiminishingReturn &&
+      (hqPressure === "high" || rndPressure === "high"));
+  const agendaFloodBlocks =
+    (centralInstallServer === "hq" || !centralInstallServer) &&
+    agendaFlood !== "low";
+  const chosenRemoteOrScorePlan =
+    chosenActionFamily === "install_remote" ||
+    chosenActionFamily === "agenda_install" ||
+    chosenActionFamily === "advance" ||
+    chosenActionFamily === "score";
+  const hasRemoteOrScorePlan =
+    readyRemoteExists ||
+    chosenRemoteOrScorePlan ||
+    alternativeFamiliesLegal.some(
+      (family) =>
+        family === "install_remote" ||
+        family === "agenda_install" ||
+        family === "advance" ||
+        family === "score",
+    );
+  const hasEconomyLine =
+    chosenActionFamily === "economy" ||
+    alternativeFamiliesLegal.includes("economy");
+  const noRemotePlanBlock = !hasRemoteOrScorePlan && !hasEconomyLine;
+  const emergencyProtectionBlock =
+    Boolean(centralInstallServer) && targetIceCountBefore <= 1;
+  const fixGateEligible =
+    legalCentralDiminishingReturn &&
+    centralOverIced &&
+    lowRezReserve &&
+    !emergencyProtectionBlock;
+  const fixGateBlockedByAgendaFlood = fixGateEligible && agendaFloodBlocks;
+  const fixGateBlockedByRunnerCentralPressure =
+    fixGateEligible && runnerPressureBlocks;
+  const fixGateBlockedByNoRemotePlan = fixGateEligible && noRemotePlanBlock;
+  const fixGateBlockedByEmergencyProtection =
+    Boolean(centralInstallServer) && targetIceCountBefore <= 1;
+  const fixGateSuspiciousCentralOverIce =
+    fixGateEligible &&
+    !fixGateBlockedByAgendaFlood &&
+    !fixGateBlockedByRunnerCentralPressure &&
+    !fixGateBlockedByNoRemotePlan &&
+    !fixGateBlockedByEmergencyProtection;
+  const centralIceInstallPenalizedByDiminishingReturns =
+    selectedCentralDiminishingReturn && fixGateSuspiciousCentralOverIce;
+  const centralIceInstallSuppressedByDiminishingReturns =
+    chosenActionFamily !== "install_ice" && fixGateSuspiciousCentralOverIce;
+  const installedIceWithoutRezReserve =
+    chosenActionFamily === "install_ice" &&
+    (cannotRezNewlyInstalledIce || creditsBelowCheapestRelevantRez);
+  const installedCentralIceWithoutRezReserve =
+    Boolean(centralInstallServer) && installedIceWithoutRezReserve;
+  const installedRemoteIceWithoutRezReserve =
+    chosenActionFamily === "install_ice" &&
+    isRemoteServerId(chosenServer) &&
+    installedIceWithoutRezReserve;
+  const remoteScoringUnderbuiltWhileCentralsOverIced =
+    centralOverIced &&
+    !readyRemoteExists &&
+    agendaInHq &&
+    (chosenActionFamily === "install_remote" ||
+      chosenActionFamily === "agenda_install" ||
+      chosenActionFamily === "economy" ||
+      alternativeFamiliesLegal.includes("install_remote") ||
+      alternativeFamiliesLegal.includes("agenda_install") ||
+      alternativeFamiliesLegal.includes("economy"));
+  const extraCentralIceChosen =
+    Boolean(centralInstallServer) && fixGateSuspiciousCentralOverIce;
+  const classification = fixGateSuspiciousCentralOverIce
+    ? "corpCentralOverIcedWithLowRezReserve"
+    : fixGateEligible
+      ? "corpCentralOverIcedBlocked"
+      : "corpCentralIcePortfolioStable";
+  const evidenceObject = {
+    serverId: publicPortfolioServerLabel(centralInstallServer ?? chosenServer),
+    chosenActionFamily,
+    chosenServer: publicPortfolioServerLabel(chosenServer),
+    hqIceCountBefore,
+    hqUnrezzedIceCountBefore,
+    corpCredits,
+    canRezAnyHqIce:
+      hq?.ice
+        .filter((ice) => ice.rezzed !== true)
+        .some((ice) => rezCostForVisibleCard(ice) <= corpCredits) ?? false,
+    runnerHqPressure: hqPressure,
+    runnerRndPressure: rndPressure,
+    agendaFlood,
+    readyRemoteExists,
+    agendaInHq,
+    alternativeFamiliesLegal,
+    classification,
+  };
+  return {
+    ...(centralInstallServer ? { serverId: centralInstallServer } : {}),
+    chosenActionFamily,
+    ...(chosenServer ? { chosenServer } : {}),
+    hqIceCountBefore,
+    rndIceCountBefore,
+    archivesIceCountBefore,
+    remoteIceCountBefore,
+    hqUnrezzedIceCountBefore,
+    rndUnrezzedIceCountBefore,
+    centralIceCountBefore,
+    centralUnrezzedIceCountBefore,
+    corpCredits,
+    cheapestCentralRezCost,
+    cheapestRemoteRezCost,
+    estimatedCentralRezNeed,
+    rezReserveDeficit,
+    canRezAtLeastOneCentralIce,
+    canRezAtLeastOneRemoteIce,
+    cannotRezNewlyInstalledIce,
+    creditsBelowCheapestRelevantRez,
+    creditsBelowEstimatedCentralRezNeed,
+    runnerHqPressure: hqPressure,
+    runnerRndPressure: rndPressure,
+    agendaFlood,
+    readyRemoteExists,
+    agendaInHq,
+    agendaInHqWithReadyRemote: agendaInHq && readyRemoteExists,
+    agendaInHqWithoutReadyRemote: agendaInHq && !readyRemoteExists,
+    hqOverIced,
+    rndOverIced,
+    centralOverIced,
+    centralOverIcedWithoutPressure:
+      centralOverIced && hqPressure === "low" && rndPressure === "low",
+    centralOverIcedWithLowRezReserve: centralOverIced && lowRezReserve,
+    hqFifthIceInstalled: centralInstallServer === "hq" && hqIceCountBefore >= 4,
+    centralIceDiminishingReturnInstall: selectedCentralDiminishingReturn,
+    centralIceInstallSuppressedByDiminishingReturns,
+    centralIceInstallPenalizedByDiminishingReturns,
+    installedIceWithoutRezReserve,
+    installedCentralIceWithoutRezReserve,
+    installedRemoteIceWithoutRezReserve,
+    hqProtectionJustifiedByAgendaFlood:
+      centralInstallServer === "hq" && agendaFlood !== "low",
+    hqProtectionJustifiedByRunnerPressure:
+      centralInstallServer === "hq" && hqPressure !== "low",
+    rndProtectionJustifiedByRunnerPressure:
+      centralInstallServer === "rd" && rndPressure !== "low",
+    centralOverIceBlockedByRunnerPressure:
+      fixGateBlockedByRunnerCentralPressure,
+    centralOverIceBlockedByAgendaFlood: fixGateBlockedByAgendaFlood,
+    centralOverIceBlockedByNoRemotePlan: fixGateBlockedByNoRemotePlan,
+    centralOverIceBlockedByEmergencyProtection:
+      fixGateBlockedByEmergencyProtection,
+    remoteScoringUnderbuiltWhileCentralsOverIced,
+    extraCentralIceChosenOverReadyRemoteBuild:
+      extraCentralIceChosen &&
+      (readyRemoteExists ||
+        alternativeFamiliesLegal.includes("install_remote")),
+    extraCentralIceChosenOverEconomy:
+      extraCentralIceChosen && alternativeFamiliesLegal.includes("economy"),
+    extraCentralIceChosenOverRezReserve:
+      extraCentralIceChosen &&
+      rezReserveDeficit > 0 &&
+      alternativeFamiliesLegal.includes("economy"),
+    extraCentralIceChosenOverAgendaInstall:
+      extraCentralIceChosen &&
+      alternativeFamiliesLegal.includes("agenda_install"),
+    extraCentralIceChosenOverAdvanceOrScore:
+      extraCentralIceChosen &&
+      (alternativeFamiliesLegal.includes("advance") ||
+        alternativeFamiliesLegal.includes("score")),
+    fixGateEligible,
+    fixGateSuspiciousCentralOverIce,
+    fixGateBlockedByAgendaFlood,
+    fixGateBlockedByRunnerCentralPressure,
+    fixGateBlockedByNoRemotePlan,
+    fixGateBlockedByEmergencyProtection,
+    alternativeFamiliesLegal,
+    classification,
+    evidence: [
+      `corp_hq_ice_count:${hqIceCountBefore}`,
+      `corp_rnd_ice_count:${rndIceCountBefore}`,
+      `corp_archives_ice_count:${archivesIceCountBefore}`,
+      `corp_remote_ice_count:${remoteIceCountBefore}`,
+      `corp_hq_unrezzed_ice_count:${hqUnrezzedIceCountBefore}`,
+      `corp_rnd_unrezzed_ice_count:${rndUnrezzedIceCountBefore}`,
+      `corp_central_ice_count:${centralIceCountBefore}`,
+      `corp_central_unrezzed_ice_count:${centralUnrezzedIceCountBefore}`,
+      `corp_rez_reserve_credits:${corpCredits}`,
+      `corp_rez_reserve_deficit:${rezReserveDeficit}`,
+      `corp_can_rez_at_least_one_central_ice:${canRezAtLeastOneCentralIce}`,
+      `corp_can_rez_at_least_one_remote_ice:${canRezAtLeastOneRemoteIce}`,
+      `corp_central_over_iced:${centralOverIced}`,
+      `corp_central_over_iced_with_low_rez_reserve:${
+        centralOverIced && lowRezReserve
+      }`,
+      `corp_central_ice_diminishing_return_install:${selectedCentralDiminishingReturn}`,
+      `corp_central_ice_install_suppressed_by_diminishing_returns:${centralIceInstallSuppressedByDiminishingReturns}`,
+      `corp_central_ice_install_penalized_by_diminishing_returns:${centralIceInstallPenalizedByDiminishingReturns}`,
+      `corp_hq_protection_justified_by_agenda_flood:${
+        centralInstallServer === "hq" && agendaFlood !== "low"
+      }`,
+      `corp_hq_protection_justified_by_runner_pressure:${
+        centralInstallServer === "hq" && hqPressure !== "low"
+      }`,
+      `corp_rnd_protection_justified_by_runner_pressure:${
+        centralInstallServer === "rd" && rndPressure !== "low"
+      }`,
+      `corp_remote_scoring_underbuilt_while_centrals_overiced:${remoteScoringUnderbuiltWhileCentralsOverIced}`,
+      `corp_ice_portfolio_fix_gate_eligible:${fixGateEligible}`,
+      `corp_ice_portfolio_fix_gate_suspicious_central_over_ice:${fixGateSuspiciousCentralOverIce}`,
+      `corp_ice_portfolio_fix_gate_blocked_by_agenda_flood:${fixGateBlockedByAgendaFlood}`,
+      `corp_ice_portfolio_fix_gate_blocked_by_runner_central_pressure:${fixGateBlockedByRunnerCentralPressure}`,
+      `corp_ice_portfolio_fix_gate_blocked_by_no_remote_plan:${fixGateBlockedByNoRemotePlan}`,
+      `corp_ice_portfolio_fix_gate_blocked_by_emergency_protection:${fixGateBlockedByEmergencyProtection}`,
+      `corp_ice_portfolio:${JSON.stringify(evidenceObject)}`,
+    ],
+  };
+}
+
+function corpIcePortfolioActionFamily(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+): CorpIcePortfolioActionFamily {
+  if (action.type === "score_agenda") return "score";
+  if (
+    action.type === "advance_card" ||
+    isAdvancementCounterScoreSetupAction(input, action, context)
+  )
+    return "advance";
+  if (action.type === "gain_credit") return "economy";
+  if (
+    action.type === "play_operation" &&
+    rolesForAction(input, action).some(
+      (role) => role.includes("economy") || role.includes("draw"),
+    )
+  )
+    return "economy";
+  if (
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability"
+  ) {
+    if (
+      classifyCorpInstalledEconomyAction(input, action) ||
+      classifyCorpScoredAgendaAbility(input, action)
+    )
+      return "economy";
+  }
+  if (action.type === "draw_card") return "draw";
+  if (action.type === "end_turn") return "end_turn";
+  if (action.type !== "install_card") return "other";
+  if (action.payload?.placement === "ice") return "install_ice";
+  if (rolesForAction(input, action).some(isAgendaRole)) return "agenda_install";
+  if (isRemoteServerId(action.payload?.serverId)) return "install_remote";
+  return "other";
+}
+
+function corpIcePortfolioAlternativeFamilies(
+  input: AiDecisionInput,
+  chosenAction: LegalAction,
+  context: CorpEvaluationContext,
+): CorpIcePortfolioActionFamily[] {
+  return sortedUnique(
+    input.legalActions
+      .filter((action) => action.actionId !== chosenAction.actionId)
+      .map((action) => corpIcePortfolioActionFamily(input, action, context))
+      .filter(
+        (family) =>
+          family === "economy" ||
+          family === "install_remote" ||
+          family === "agenda_install" ||
+          family === "advance" ||
+          family === "score",
+      ),
+  ) as CorpIcePortfolioActionFamily[];
+}
+
+function corpCentralIceInstallNeedsDiminishingGuard(
+  action: LegalAction,
+  hqIceCount: number,
+  rndIceCount: number,
+  archivesIceCount: number,
+  hqUnrezzedIceCount: number,
+  rndUnrezzedIceCount: number,
+  archivesUnrezzedIceCount: number,
+): boolean {
+  if (
+    action.type !== "install_card" ||
+    action.payload?.placement !== "ice" ||
+    typeof action.payload.serverId !== "string" ||
+    !isCentralServerId(action.payload.serverId)
+  )
+    return false;
+  const iceCount = iceCountBeforeForCentralServer(
+    action.payload.serverId,
+    hqIceCount,
+    rndIceCount,
+    archivesIceCount,
+  );
+  const unrezzedIceCount = unrezzedIceCountBeforeForCentralServer(
+    action.payload.serverId,
+    hqUnrezzedIceCount,
+    rndUnrezzedIceCount,
+    archivesUnrezzedIceCount,
+  );
+  return (
+    iceCount >= 3 &&
+    (unrezzedIceCount >= 2 || unrezzedIceCount >= Math.ceil(iceCount / 2))
+  );
+}
+
+function centralPressureLevel(
+  input: AiDecisionInput,
+  context: CorpEvaluationContext,
+  serverId: "hq" | "rd",
+): CorpIcePortfolioPressureLevel {
+  const memory = evaluateRemoteIntentMemory(input, context.beliefState);
+  const recentPressure = input.eventTail.filter(
+    (event) =>
+      serverIdFromEvent(event) === serverId &&
+      (event.type.includes("run") ||
+        event.type.includes("access") ||
+        event.type.includes("breach")),
+  ).length;
+  const rigPressure = (input.playerView.opponent.rig ?? []).some((card) =>
+    rolesForCardId(card.definitionId).some((role) =>
+      serverId === "hq"
+        ? role.includes("hq_pressure") ||
+          role.includes("pressure_hq") ||
+          role.includes("multiaccess_hq")
+        : role.includes("rd_multiaccess") ||
+          role.includes("pressure_rnd") ||
+          role.includes("rnd_pressure"),
+    ),
+  );
+  const signal =
+    memory.centralRunSignals[serverId] + recentPressure + (rigPressure ? 2 : 0);
+  if (signal >= 3 || (rigPressure && recentPressure > 0)) return "high";
+  if (signal > 0 || rigPressure) return "medium";
+  return "low";
+}
+
+function hqAgendaFloodLevel(
+  density: CorpHqAgendaDensityContext,
+): CorpIcePortfolioAgendaFloodLevel {
+  if (density.hqAgendaCount >= 3 || density.hqAgendaDensity >= 0.6)
+    return "high";
+  if (density.agendaFloodRisk || density.hqKnownAgendaThreat) return "medium";
+  return "low";
+}
+
+function corpReadyRemoteExists(
+  input: AiDecisionInput,
+  context: CorpEvaluationContext,
+): boolean {
+  return input.playerView.servers
+    .filter((server) => server.id.startsWith("remote_"))
+    .some((server) => {
+      const safety = assessCorpEffectiveRemoteSafety(input, server.id, context);
+      return (
+        safety.effectivelyProtected &&
+        !safety.cheaplyContestable &&
+        (server.ice.length > 0 || safety.rootProtectionCount > 0)
+      );
+    });
+}
+
+function firstPositiveCost(costs: number[]): number {
+  return costs.find((cost) => cost > 0) ?? 0;
+}
+
+function cheapestRezCostForServer(
+  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
+): number {
+  return firstPositiveCost(
+    (server?.ice ?? [])
+      .filter((ice) => ice.rezzed !== true)
+      .map((ice) => rezCostForVisibleCard(ice))
+      .filter((cost) => cost >= 0)
+      .sort((left, right) => left - right),
+  );
+}
+
+function isCentralServerId(
+  serverId: string | undefined,
+): serverId is "hq" | "rd" | "archives" {
+  return serverId === "hq" || serverId === "rd" || serverId === "archives";
+}
+
+function iceCountBeforeForCentralServer(
+  serverId: "hq" | "rd" | "archives",
+  hqIceCount: number,
+  rndIceCount: number,
+  archivesIceCount: number,
+): number {
+  if (serverId === "hq") return hqIceCount;
+  if (serverId === "rd") return rndIceCount;
+  return archivesIceCount;
+}
+
+function unrezzedIceCountBeforeForCentralServer(
+  serverId: "hq" | "rd" | "archives",
+  hqUnrezzedIceCount: number,
+  rndUnrezzedIceCount: number,
+  archivesUnrezzedIceCount: number,
+): number {
+  if (serverId === "hq") return hqUnrezzedIceCount;
+  if (serverId === "rd") return rndUnrezzedIceCount;
+  return archivesUnrezzedIceCount;
+}
+
+function publicPortfolioServerLabel(serverId: string | undefined): string {
+  if (!serverId) return "none";
+  if (serverId.startsWith("remote_") || serverId === "new_remote")
+    return "remote";
+  return serverId;
 }
 
 function newRemoteActionHasPayloadPlan(
@@ -7015,7 +7782,11 @@ function actionPriority(
     action.type === "install_card" &&
     action.payload?.placement === "ice"
   )
-    return 85 + corpFutureRunIceOrderingActionBonus(input, action);
+    return (
+      85 +
+      corpFutureRunIceOrderingActionBonus(input, action) +
+      corpCentralIcePortfolioActionPriorityBonus(input, action, context)
+    );
   if (
     kind === "recover_economy" &&
     extraActionOperation?.basicCreditFollowupOnly &&
@@ -7064,7 +7835,8 @@ function actionPriority(
   )
     return (
       corpInstalledEconomyPriority(input, action) +
-      corpScoreTerminalActionPriorityBonus(input, action, context)
+      corpScoreTerminalActionPriorityBonus(input, action, context) +
+      corpIcePortfolioEconomyPriorityBonus(input, action, context)
     );
   if (kind === "recover_economy") {
     const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
@@ -7078,7 +7850,11 @@ function actionPriority(
     }
   }
   if (kind === "recover_economy" && action.type === "gain_credit")
-    return 65 + corpScoreTerminalActionPriorityBonus(input, action, context);
+    return (
+      65 +
+      corpScoreTerminalActionPriorityBonus(input, action, context) +
+      corpIcePortfolioEconomyPriorityBonus(input, action, context)
+    );
   if (
     kind === "build_scoring_remote" &&
     action.type === "install_card" &&
@@ -7090,6 +7866,7 @@ function actionPriority(
       corpFutureRunIceOrderingActionBonus(input, action) +
       corpScoreTerminalActionPriorityBonus(input, action, context) +
       corpRemotePortfolioActionPriorityBonus(input, action, context) +
+      corpIcePortfolioRemotePriorityBonus(input, action, context) +
       (hasRiskyAdvanceWindowForServer(
         input,
         String(action.payload.serverId),
@@ -7180,6 +7957,50 @@ function corpRemotePortfolioActionPriorityBonus(
     );
   if (portfolio.newRemoteWithPlanActionIds.includes(action.actionId)) return 12;
   return 0;
+}
+
+function corpCentralIcePortfolioActionPriorityBonus(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+): number {
+  const assessment = assessCorpIcePortfolioAction(input, action, context);
+  if (assessment.centralIceInstallPenalizedByDiminishingReturns)
+    return -170 - Math.min(150, assessment.rezReserveDeficit * 25);
+  if (
+    assessment.centralOverIceBlockedByAgendaFlood ||
+    assessment.centralOverIceBlockedByRunnerPressure ||
+    assessment.centralOverIceBlockedByEmergencyProtection
+  )
+    return 38;
+  if (assessment.serverId && assessment.serverId !== "archives") {
+    const currentIce =
+      assessment.serverId === "hq"
+        ? assessment.hqIceCountBefore
+        : assessment.rndIceCountBefore;
+    if (currentIce <= 1) return 28;
+  }
+  return 0;
+}
+
+function corpIcePortfolioEconomyPriorityBonus(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+): number {
+  const assessment = assessCorpIcePortfolioAction(input, action, context);
+  if (!assessment.centralIceInstallSuppressedByDiminishingReturns) return 0;
+  return 42 + Math.min(90, assessment.rezReserveDeficit * 18);
+}
+
+function corpIcePortfolioRemotePriorityBonus(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+): number {
+  const assessment = assessCorpIcePortfolioAction(input, action, context);
+  if (!assessment.centralIceInstallSuppressedByDiminishingReturns) return 0;
+  return assessment.remoteScoringUnderbuiltWhileCentralsOverIced ? 32 : 14;
 }
 
 function shouldCorpDrawForScoring(input: AiDecisionInput): boolean {

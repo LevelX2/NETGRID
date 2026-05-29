@@ -30,6 +30,7 @@ import deckSnapshots08Data from "../../../data/decks/deck-snapshots-0.8.json";
 import exploitFixtures143Data from "../../../data/scenarios/ai-v143-exploit-regression-fixtures.json";
 import {
   assessCorpFutureRunIcePlacement,
+  assessCorpIcePortfolioAction,
   assessCorpScoreTerminalWindow,
   chooseCorpPlanAction,
   classifyCorpScoredAgendaAbility,
@@ -120,6 +121,7 @@ export {
   chooseCorpPlanAction,
   chooseCorpPlanDecision,
   assessCorpFutureRunIcePlacement,
+  assessCorpIcePortfolioAction,
   assessCorpScoreTerminalWindow,
   classifyCorpScoredAgendaAbility,
   classifyCorpFutureRunIceDefinitionId,
@@ -147,6 +149,7 @@ export type {
   CorpPlanKind,
   CorpPlanScore,
   CorpPlanStep,
+  CorpIcePortfolioActionAssessment,
   RemoteScoreHorizon,
   RunnerContestCapacity,
 } from "./corp-plans";
@@ -547,6 +550,59 @@ export type AiMatchProgressionMetrics = {
   corpScoreLineContinuedWhenRemoteEffectivelyProtected: number;
   corpSameTurnScoreAllowedDespiteCheapContest: number;
   corpBaitRemoteNotCountedAsScoringProtection: number;
+  corpHqIceCount: number;
+  corpRndIceCount: number;
+  corpArchivesIceCount: number;
+  corpRemoteIceCount: number;
+  corpHqUnrezzedIceCount: number;
+  corpRndUnrezzedIceCount: number;
+  corpCentralIceCount: number;
+  corpCentralUnrezzedIceCount: number;
+  corpCentralIceInstalled: number;
+  corpHqIceInstalled: number;
+  corpRndIceInstalled: number;
+  corpArchivesIceInstalled: number;
+  corpRemoteIceInstalled: number;
+  corpHqOverIced: number;
+  corpRndOverIced: number;
+  corpCentralOverIced: number;
+  corpCentralOverIcedWithoutPressure: number;
+  corpCentralOverIcedWithLowRezReserve: number;
+  corpHqFifthIceInstalled: number;
+  corpCentralIceDiminishingReturnInstall: number;
+  corpCentralIceInstallSuppressedByDiminishingReturns: number;
+  corpCentralIceInstallPenalizedByDiminishingReturns: number;
+  corpRezReserveCredits: number;
+  corpRezReserveDeficit: number;
+  corpInstalledIceWithoutRezReserve: number;
+  corpInstalledCentralIceWithoutRezReserve: number;
+  corpInstalledRemoteIceWithoutRezReserve: number;
+  corpCanRezAtLeastOneCentralIce: number;
+  corpCanRezAtLeastOneRemoteIce: number;
+  corpCannotRezAnyNewlyInstalledIce: number;
+  corpCreditsBelowCheapestRelevantRez: number;
+  corpCreditsBelowEstimatedCentralRezNeed: number;
+  corpHqProtectionJustifiedByAgendaFlood: number;
+  corpHqProtectionJustifiedByRunnerPressure: number;
+  corpRndProtectionJustifiedByRunnerPressure: number;
+  corpCentralOverIceBlockedByRunnerPressure: number;
+  corpCentralOverIceBlockedByAgendaFlood: number;
+  corpCentralOverIceBlockedByNoRemotePlan: number;
+  corpRemoteScoringUnderbuiltWhileCentralsOverIced: number;
+  corpReadyRemoteExists: number;
+  corpAgendaInHqWithReadyRemote: number;
+  corpAgendaInHqWithoutReadyRemote: number;
+  corpExtraCentralIceChosenOverReadyRemoteBuild: number;
+  corpExtraCentralIceChosenOverEconomy: number;
+  corpExtraCentralIceChosenOverRezReserve: number;
+  corpExtraCentralIceChosenOverAgendaInstall: number;
+  corpExtraCentralIceChosenOverAdvanceOrScore: number;
+  corpIcePortfolioFixGateEligible: number;
+  corpIcePortfolioFixGateSuspiciousCentralOverIce: number;
+  corpIcePortfolioFixGateBlockedByAgendaFlood: number;
+  corpIcePortfolioFixGateBlockedByRunnerCentralPressure: number;
+  corpIcePortfolioFixGateBlockedByNoRemotePlan: number;
+  corpIcePortfolioFixGateBlockedByEmergencyProtection: number;
   corpUnsafeScoringRemoteDetected: number;
   corpUnsafeScoringRemoteAlternativeChosen: number;
   corpUnsafeScoringRemoteStalled: number;
@@ -2330,6 +2386,60 @@ export type AiSimulationSummary = {
     corpBallAndChainInstalledWithLaterIce?: boolean;
     corpCanisInstalledWithoutLaterIce?: boolean;
     corpBolterOrDataDartsInstalledWithoutNextIce?: boolean;
+    corpHqIceCount?: number;
+    corpRndIceCount?: number;
+    corpArchivesIceCount?: number;
+    corpRemoteIceCount?: number;
+    corpHqUnrezzedIceCount?: number;
+    corpRndUnrezzedIceCount?: number;
+    corpCentralIceCount?: number;
+    corpCentralUnrezzedIceCount?: number;
+    corpCentralIceInstalled?: boolean;
+    corpHqIceInstalled?: boolean;
+    corpRndIceInstalled?: boolean;
+    corpArchivesIceInstalled?: boolean;
+    corpRemoteIceInstalled?: boolean;
+    corpHqOverIced?: boolean;
+    corpRndOverIced?: boolean;
+    corpCentralOverIced?: boolean;
+    corpCentralOverIcedWithoutPressure?: boolean;
+    corpCentralOverIcedWithLowRezReserve?: boolean;
+    corpHqFifthIceInstalled?: boolean;
+    corpCentralIceDiminishingReturnInstall?: boolean;
+    corpCentralIceInstallSuppressedByDiminishingReturns?: boolean;
+    corpCentralIceInstallPenalizedByDiminishingReturns?: boolean;
+    corpRezReserveCredits?: number;
+    corpRezReserveDeficit?: number;
+    corpInstalledIceWithoutRezReserve?: boolean;
+    corpInstalledCentralIceWithoutRezReserve?: boolean;
+    corpInstalledRemoteIceWithoutRezReserve?: boolean;
+    corpCanRezAtLeastOneCentralIce?: boolean;
+    corpCanRezAtLeastOneRemoteIce?: boolean;
+    corpCannotRezAnyNewlyInstalledIce?: boolean;
+    corpCreditsBelowCheapestRelevantRez?: boolean;
+    corpCreditsBelowEstimatedCentralRezNeed?: boolean;
+    corpHqProtectionJustifiedByAgendaFlood?: boolean;
+    corpHqProtectionJustifiedByRunnerPressure?: boolean;
+    corpRndProtectionJustifiedByRunnerPressure?: boolean;
+    corpCentralOverIceBlockedByRunnerPressure?: boolean;
+    corpCentralOverIceBlockedByAgendaFlood?: boolean;
+    corpCentralOverIceBlockedByNoRemotePlan?: boolean;
+    corpRemoteScoringUnderbuiltWhileCentralsOverIced?: boolean;
+    corpReadyRemoteExists?: boolean;
+    corpAgendaInHqWithReadyRemote?: boolean;
+    corpAgendaInHqWithoutReadyRemote?: boolean;
+    corpExtraCentralIceChosenOverReadyRemoteBuild?: boolean;
+    corpExtraCentralIceChosenOverEconomy?: boolean;
+    corpExtraCentralIceChosenOverRezReserve?: boolean;
+    corpExtraCentralIceChosenOverAgendaInstall?: boolean;
+    corpExtraCentralIceChosenOverAdvanceOrScore?: boolean;
+    corpIcePortfolioFixGateEligible?: boolean;
+    corpIcePortfolioFixGateSuspiciousCentralOverIce?: boolean;
+    corpIcePortfolioFixGateBlockedByAgendaFlood?: boolean;
+    corpIcePortfolioFixGateBlockedByRunnerCentralPressure?: boolean;
+    corpIcePortfolioFixGateBlockedByNoRemotePlan?: boolean;
+    corpIcePortfolioFixGateBlockedByEmergencyProtection?: boolean;
+    corpIcePortfolioEvidence?: string[];
     advancementCountersAdded?: number;
     scoreActionsAvailable?: number;
     targetCardType?: ProgressionCardTargetType;
@@ -3416,6 +3526,10 @@ export function simulateAiGame(
       input,
       action,
     );
+    const corpIcePortfolio = corpIcePortfolioDiagnosticsForSimulationAction(
+      input,
+      action,
+    );
     const corpScoreTerminal = corpScoreTerminalDiagnosticsForSimulationAction(
       input,
       action,
@@ -3470,6 +3584,7 @@ export function simulateAiGame(
       ...runnerEconomySetup,
       ...tagPunishDiagnostics,
       ...corpFutureRunIce,
+      ...corpIcePortfolio,
       ...corpScoreTerminal,
       ...corpEconomyBeforeScore,
       ...(typeof action.payload?.placement === "string"
@@ -11658,6 +11773,59 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpScoreLineContinuedWhenRemoteEffectivelyProtected",
   "corpSameTurnScoreAllowedDespiteCheapContest",
   "corpBaitRemoteNotCountedAsScoringProtection",
+  "corpHqIceCount",
+  "corpRndIceCount",
+  "corpArchivesIceCount",
+  "corpRemoteIceCount",
+  "corpHqUnrezzedIceCount",
+  "corpRndUnrezzedIceCount",
+  "corpCentralIceCount",
+  "corpCentralUnrezzedIceCount",
+  "corpCentralIceInstalled",
+  "corpHqIceInstalled",
+  "corpRndIceInstalled",
+  "corpArchivesIceInstalled",
+  "corpRemoteIceInstalled",
+  "corpHqOverIced",
+  "corpRndOverIced",
+  "corpCentralOverIced",
+  "corpCentralOverIcedWithoutPressure",
+  "corpCentralOverIcedWithLowRezReserve",
+  "corpHqFifthIceInstalled",
+  "corpCentralIceDiminishingReturnInstall",
+  "corpCentralIceInstallSuppressedByDiminishingReturns",
+  "corpCentralIceInstallPenalizedByDiminishingReturns",
+  "corpRezReserveCredits",
+  "corpRezReserveDeficit",
+  "corpInstalledIceWithoutRezReserve",
+  "corpInstalledCentralIceWithoutRezReserve",
+  "corpInstalledRemoteIceWithoutRezReserve",
+  "corpCanRezAtLeastOneCentralIce",
+  "corpCanRezAtLeastOneRemoteIce",
+  "corpCannotRezAnyNewlyInstalledIce",
+  "corpCreditsBelowCheapestRelevantRez",
+  "corpCreditsBelowEstimatedCentralRezNeed",
+  "corpHqProtectionJustifiedByAgendaFlood",
+  "corpHqProtectionJustifiedByRunnerPressure",
+  "corpRndProtectionJustifiedByRunnerPressure",
+  "corpCentralOverIceBlockedByRunnerPressure",
+  "corpCentralOverIceBlockedByAgendaFlood",
+  "corpCentralOverIceBlockedByNoRemotePlan",
+  "corpRemoteScoringUnderbuiltWhileCentralsOverIced",
+  "corpReadyRemoteExists",
+  "corpAgendaInHqWithReadyRemote",
+  "corpAgendaInHqWithoutReadyRemote",
+  "corpExtraCentralIceChosenOverReadyRemoteBuild",
+  "corpExtraCentralIceChosenOverEconomy",
+  "corpExtraCentralIceChosenOverRezReserve",
+  "corpExtraCentralIceChosenOverAgendaInstall",
+  "corpExtraCentralIceChosenOverAdvanceOrScore",
+  "corpIcePortfolioFixGateEligible",
+  "corpIcePortfolioFixGateSuspiciousCentralOverIce",
+  "corpIcePortfolioFixGateBlockedByAgendaFlood",
+  "corpIcePortfolioFixGateBlockedByRunnerCentralPressure",
+  "corpIcePortfolioFixGateBlockedByNoRemotePlan",
+  "corpIcePortfolioFixGateBlockedByEmergencyProtection",
   "corpUnsafeScoringRemoteDetected",
   "corpUnsafeScoringRemoteAlternativeChosen",
   "corpUnsafeScoringRemoteStalled",
@@ -13017,6 +13185,7 @@ export function summarizeMatchProgressionMetrics(
     summarizeCorpEffectiveRemoteSafetyMetrics(summaries);
   const corpScoreConversionMetrics =
     summarizeCorpUnsafeRemoteScoreConversionMetrics(summaries);
+  const corpIcePortfolioMetrics = summarizeCorpIcePortfolioMetrics(summaries);
   const actionLimitEndgameMetrics =
     summarizeActionLimitEndgameMetrics(summaries);
   const tagPunishWindowMetrics = summarizeTagPunishWindowMetrics(summaries);
@@ -13099,6 +13268,7 @@ export function summarizeMatchProgressionMetrics(
     ...strategicLineMetrics,
     ...corpEffectiveRemoteSafetyMetrics,
     ...corpScoreConversionMetrics,
+    ...corpIcePortfolioMetrics,
     ...actionLimitEndgameMetrics,
     ...tagPunishWindowMetrics,
     ...breakerOntologyMetrics,
@@ -20386,6 +20556,196 @@ function isTerminalDamageOrEconomicPunish(kind: CorpPunishKind | undefined) {
   );
 }
 
+type CorpIcePortfolioMetricKey =
+  | "corpHqIceCount"
+  | "corpRndIceCount"
+  | "corpArchivesIceCount"
+  | "corpRemoteIceCount"
+  | "corpHqUnrezzedIceCount"
+  | "corpRndUnrezzedIceCount"
+  | "corpCentralIceCount"
+  | "corpCentralUnrezzedIceCount"
+  | "corpCentralIceInstalled"
+  | "corpHqIceInstalled"
+  | "corpRndIceInstalled"
+  | "corpArchivesIceInstalled"
+  | "corpRemoteIceInstalled"
+  | "corpHqOverIced"
+  | "corpRndOverIced"
+  | "corpCentralOverIced"
+  | "corpCentralOverIcedWithoutPressure"
+  | "corpCentralOverIcedWithLowRezReserve"
+  | "corpHqFifthIceInstalled"
+  | "corpCentralIceDiminishingReturnInstall"
+  | "corpCentralIceInstallSuppressedByDiminishingReturns"
+  | "corpCentralIceInstallPenalizedByDiminishingReturns"
+  | "corpRezReserveCredits"
+  | "corpRezReserveDeficit"
+  | "corpInstalledIceWithoutRezReserve"
+  | "corpInstalledCentralIceWithoutRezReserve"
+  | "corpInstalledRemoteIceWithoutRezReserve"
+  | "corpCanRezAtLeastOneCentralIce"
+  | "corpCanRezAtLeastOneRemoteIce"
+  | "corpCannotRezAnyNewlyInstalledIce"
+  | "corpCreditsBelowCheapestRelevantRez"
+  | "corpCreditsBelowEstimatedCentralRezNeed"
+  | "corpHqProtectionJustifiedByAgendaFlood"
+  | "corpHqProtectionJustifiedByRunnerPressure"
+  | "corpRndProtectionJustifiedByRunnerPressure"
+  | "corpCentralOverIceBlockedByRunnerPressure"
+  | "corpCentralOverIceBlockedByAgendaFlood"
+  | "corpCentralOverIceBlockedByNoRemotePlan"
+  | "corpRemoteScoringUnderbuiltWhileCentralsOverIced"
+  | "corpReadyRemoteExists"
+  | "corpAgendaInHqWithReadyRemote"
+  | "corpAgendaInHqWithoutReadyRemote"
+  | "corpExtraCentralIceChosenOverReadyRemoteBuild"
+  | "corpExtraCentralIceChosenOverEconomy"
+  | "corpExtraCentralIceChosenOverRezReserve"
+  | "corpExtraCentralIceChosenOverAgendaInstall"
+  | "corpExtraCentralIceChosenOverAdvanceOrScore"
+  | "corpIcePortfolioFixGateEligible"
+  | "corpIcePortfolioFixGateSuspiciousCentralOverIce"
+  | "corpIcePortfolioFixGateBlockedByAgendaFlood"
+  | "corpIcePortfolioFixGateBlockedByRunnerCentralPressure"
+  | "corpIcePortfolioFixGateBlockedByNoRemotePlan"
+  | "corpIcePortfolioFixGateBlockedByEmergencyProtection";
+
+function summarizeCorpIcePortfolioMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<AiMatchProgressionMetrics, CorpIcePortfolioMetricKey> {
+  const entries = summaries.flatMap((summary) => summary.actionSequence);
+  const numericValues = (
+    key: keyof AiSimulationSummary["actionSequence"][number],
+  ): number[] =>
+    entries
+      .map((entry) => entry[key])
+      .filter((value): value is number => typeof value === "number");
+  const maxNumber = (
+    key: keyof AiSimulationSummary["actionSequence"][number],
+  ): number => {
+    const values = numericValues(key);
+    return values.length > 0 ? Math.max(...values) : 0;
+  };
+  const averageMetric = (
+    key: keyof AiSimulationSummary["actionSequence"][number],
+  ): number => averageNumber(numericValues(key));
+  const count = (
+    key: keyof AiSimulationSummary["actionSequence"][number],
+  ): number => entries.filter((entry) => entry[key] === true).length;
+  return {
+    corpHqIceCount: maxNumber("corpHqIceCount"),
+    corpRndIceCount: maxNumber("corpRndIceCount"),
+    corpArchivesIceCount: maxNumber("corpArchivesIceCount"),
+    corpRemoteIceCount: maxNumber("corpRemoteIceCount"),
+    corpHqUnrezzedIceCount: maxNumber("corpHqUnrezzedIceCount"),
+    corpRndUnrezzedIceCount: maxNumber("corpRndUnrezzedIceCount"),
+    corpCentralIceCount: maxNumber("corpCentralIceCount"),
+    corpCentralUnrezzedIceCount: maxNumber("corpCentralUnrezzedIceCount"),
+    corpCentralIceInstalled: count("corpCentralIceInstalled"),
+    corpHqIceInstalled: count("corpHqIceInstalled"),
+    corpRndIceInstalled: count("corpRndIceInstalled"),
+    corpArchivesIceInstalled: count("corpArchivesIceInstalled"),
+    corpRemoteIceInstalled: count("corpRemoteIceInstalled"),
+    corpHqOverIced: count("corpHqOverIced"),
+    corpRndOverIced: count("corpRndOverIced"),
+    corpCentralOverIced: count("corpCentralOverIced"),
+    corpCentralOverIcedWithoutPressure: count(
+      "corpCentralOverIcedWithoutPressure",
+    ),
+    corpCentralOverIcedWithLowRezReserve: count(
+      "corpCentralOverIcedWithLowRezReserve",
+    ),
+    corpHqFifthIceInstalled: count("corpHqFifthIceInstalled"),
+    corpCentralIceDiminishingReturnInstall: count(
+      "corpCentralIceDiminishingReturnInstall",
+    ),
+    corpCentralIceInstallSuppressedByDiminishingReturns: count(
+      "corpCentralIceInstallSuppressedByDiminishingReturns",
+    ),
+    corpCentralIceInstallPenalizedByDiminishingReturns: count(
+      "corpCentralIceInstallPenalizedByDiminishingReturns",
+    ),
+    corpRezReserveCredits: averageMetric("corpRezReserveCredits"),
+    corpRezReserveDeficit: maxNumber("corpRezReserveDeficit"),
+    corpInstalledIceWithoutRezReserve: count(
+      "corpInstalledIceWithoutRezReserve",
+    ),
+    corpInstalledCentralIceWithoutRezReserve: count(
+      "corpInstalledCentralIceWithoutRezReserve",
+    ),
+    corpInstalledRemoteIceWithoutRezReserve: count(
+      "corpInstalledRemoteIceWithoutRezReserve",
+    ),
+    corpCanRezAtLeastOneCentralIce: count("corpCanRezAtLeastOneCentralIce"),
+    corpCanRezAtLeastOneRemoteIce: count("corpCanRezAtLeastOneRemoteIce"),
+    corpCannotRezAnyNewlyInstalledIce: count(
+      "corpCannotRezAnyNewlyInstalledIce",
+    ),
+    corpCreditsBelowCheapestRelevantRez: count(
+      "corpCreditsBelowCheapestRelevantRez",
+    ),
+    corpCreditsBelowEstimatedCentralRezNeed: count(
+      "corpCreditsBelowEstimatedCentralRezNeed",
+    ),
+    corpHqProtectionJustifiedByAgendaFlood: count(
+      "corpHqProtectionJustifiedByAgendaFlood",
+    ),
+    corpHqProtectionJustifiedByRunnerPressure: count(
+      "corpHqProtectionJustifiedByRunnerPressure",
+    ),
+    corpRndProtectionJustifiedByRunnerPressure: count(
+      "corpRndProtectionJustifiedByRunnerPressure",
+    ),
+    corpCentralOverIceBlockedByRunnerPressure: count(
+      "corpCentralOverIceBlockedByRunnerPressure",
+    ),
+    corpCentralOverIceBlockedByAgendaFlood: count(
+      "corpCentralOverIceBlockedByAgendaFlood",
+    ),
+    corpCentralOverIceBlockedByNoRemotePlan: count(
+      "corpCentralOverIceBlockedByNoRemotePlan",
+    ),
+    corpRemoteScoringUnderbuiltWhileCentralsOverIced: count(
+      "corpRemoteScoringUnderbuiltWhileCentralsOverIced",
+    ),
+    corpReadyRemoteExists: count("corpReadyRemoteExists"),
+    corpAgendaInHqWithReadyRemote: count("corpAgendaInHqWithReadyRemote"),
+    corpAgendaInHqWithoutReadyRemote: count("corpAgendaInHqWithoutReadyRemote"),
+    corpExtraCentralIceChosenOverReadyRemoteBuild: count(
+      "corpExtraCentralIceChosenOverReadyRemoteBuild",
+    ),
+    corpExtraCentralIceChosenOverEconomy: count(
+      "corpExtraCentralIceChosenOverEconomy",
+    ),
+    corpExtraCentralIceChosenOverRezReserve: count(
+      "corpExtraCentralIceChosenOverRezReserve",
+    ),
+    corpExtraCentralIceChosenOverAgendaInstall: count(
+      "corpExtraCentralIceChosenOverAgendaInstall",
+    ),
+    corpExtraCentralIceChosenOverAdvanceOrScore: count(
+      "corpExtraCentralIceChosenOverAdvanceOrScore",
+    ),
+    corpIcePortfolioFixGateEligible: count("corpIcePortfolioFixGateEligible"),
+    corpIcePortfolioFixGateSuspiciousCentralOverIce: count(
+      "corpIcePortfolioFixGateSuspiciousCentralOverIce",
+    ),
+    corpIcePortfolioFixGateBlockedByAgendaFlood: count(
+      "corpIcePortfolioFixGateBlockedByAgendaFlood",
+    ),
+    corpIcePortfolioFixGateBlockedByRunnerCentralPressure: count(
+      "corpIcePortfolioFixGateBlockedByRunnerCentralPressure",
+    ),
+    corpIcePortfolioFixGateBlockedByNoRemotePlan: count(
+      "corpIcePortfolioFixGateBlockedByNoRemotePlan",
+    ),
+    corpIcePortfolioFixGateBlockedByEmergencyProtection: count(
+      "corpIcePortfolioFixGateBlockedByEmergencyProtection",
+    ),
+  };
+}
+
 function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   summaries: AiSimulationSummary[],
 ): Pick<
@@ -22461,6 +22821,155 @@ type RunnerPressureReadyForMetrics = {
     | "no_valuable_target"
   >;
 };
+
+function corpIcePortfolioDiagnosticsForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  if (input.side !== "corp" || action.side !== "corp") return {};
+  const assessment = assessCorpIcePortfolioAction(input, action);
+  const centralInstall =
+    action.type === "install_card" &&
+    action.payload?.placement === "ice" &&
+    (assessment.serverId === "hq" ||
+      assessment.serverId === "rd" ||
+      assessment.serverId === "archives");
+  const remoteInstall =
+    action.type === "install_card" &&
+    action.payload?.placement === "ice" &&
+    typeof action.payload.serverId === "string" &&
+    isRemoteServerTarget(action.payload.serverId);
+  return {
+    corpHqIceCount: assessment.hqIceCountBefore,
+    corpRndIceCount: assessment.rndIceCountBefore,
+    corpArchivesIceCount: assessment.archivesIceCountBefore,
+    corpRemoteIceCount: assessment.remoteIceCountBefore,
+    corpHqUnrezzedIceCount: assessment.hqUnrezzedIceCountBefore,
+    corpRndUnrezzedIceCount: assessment.rndUnrezzedIceCountBefore,
+    corpCentralIceCount: assessment.centralIceCountBefore,
+    corpCentralUnrezzedIceCount: assessment.centralUnrezzedIceCountBefore,
+    ...(centralInstall ? { corpCentralIceInstalled: true } : {}),
+    ...(assessment.serverId === "hq" && centralInstall
+      ? { corpHqIceInstalled: true }
+      : {}),
+    ...(assessment.serverId === "rd" && centralInstall
+      ? { corpRndIceInstalled: true }
+      : {}),
+    ...(assessment.serverId === "archives" && centralInstall
+      ? { corpArchivesIceInstalled: true }
+      : {}),
+    ...(remoteInstall ? { corpRemoteIceInstalled: true } : {}),
+    ...(assessment.hqOverIced ? { corpHqOverIced: true } : {}),
+    ...(assessment.rndOverIced ? { corpRndOverIced: true } : {}),
+    ...(assessment.centralOverIced ? { corpCentralOverIced: true } : {}),
+    ...(assessment.centralOverIcedWithoutPressure
+      ? { corpCentralOverIcedWithoutPressure: true }
+      : {}),
+    ...(assessment.centralOverIcedWithLowRezReserve
+      ? { corpCentralOverIcedWithLowRezReserve: true }
+      : {}),
+    ...(assessment.hqFifthIceInstalled
+      ? { corpHqFifthIceInstalled: true }
+      : {}),
+    ...(assessment.centralIceDiminishingReturnInstall
+      ? { corpCentralIceDiminishingReturnInstall: true }
+      : {}),
+    ...(assessment.centralIceInstallSuppressedByDiminishingReturns
+      ? { corpCentralIceInstallSuppressedByDiminishingReturns: true }
+      : {}),
+    ...(assessment.centralIceInstallPenalizedByDiminishingReturns
+      ? { corpCentralIceInstallPenalizedByDiminishingReturns: true }
+      : {}),
+    corpRezReserveCredits: assessment.corpCredits,
+    corpRezReserveDeficit: assessment.rezReserveDeficit,
+    ...(assessment.installedIceWithoutRezReserve
+      ? { corpInstalledIceWithoutRezReserve: true }
+      : {}),
+    ...(assessment.installedCentralIceWithoutRezReserve
+      ? { corpInstalledCentralIceWithoutRezReserve: true }
+      : {}),
+    ...(assessment.installedRemoteIceWithoutRezReserve
+      ? { corpInstalledRemoteIceWithoutRezReserve: true }
+      : {}),
+    ...(assessment.canRezAtLeastOneCentralIce
+      ? { corpCanRezAtLeastOneCentralIce: true }
+      : {}),
+    ...(assessment.canRezAtLeastOneRemoteIce
+      ? { corpCanRezAtLeastOneRemoteIce: true }
+      : {}),
+    ...(assessment.cannotRezNewlyInstalledIce
+      ? { corpCannotRezAnyNewlyInstalledIce: true }
+      : {}),
+    ...(assessment.creditsBelowCheapestRelevantRez
+      ? { corpCreditsBelowCheapestRelevantRez: true }
+      : {}),
+    ...(assessment.creditsBelowEstimatedCentralRezNeed
+      ? { corpCreditsBelowEstimatedCentralRezNeed: true }
+      : {}),
+    ...(assessment.hqProtectionJustifiedByAgendaFlood
+      ? { corpHqProtectionJustifiedByAgendaFlood: true }
+      : {}),
+    ...(assessment.hqProtectionJustifiedByRunnerPressure
+      ? { corpHqProtectionJustifiedByRunnerPressure: true }
+      : {}),
+    ...(assessment.rndProtectionJustifiedByRunnerPressure
+      ? { corpRndProtectionJustifiedByRunnerPressure: true }
+      : {}),
+    ...(assessment.centralOverIceBlockedByRunnerPressure
+      ? { corpCentralOverIceBlockedByRunnerPressure: true }
+      : {}),
+    ...(assessment.centralOverIceBlockedByAgendaFlood
+      ? { corpCentralOverIceBlockedByAgendaFlood: true }
+      : {}),
+    ...(assessment.centralOverIceBlockedByNoRemotePlan
+      ? { corpCentralOverIceBlockedByNoRemotePlan: true }
+      : {}),
+    ...(assessment.remoteScoringUnderbuiltWhileCentralsOverIced
+      ? { corpRemoteScoringUnderbuiltWhileCentralsOverIced: true }
+      : {}),
+    ...(assessment.readyRemoteExists ? { corpReadyRemoteExists: true } : {}),
+    ...(assessment.agendaInHqWithReadyRemote
+      ? { corpAgendaInHqWithReadyRemote: true }
+      : {}),
+    ...(assessment.agendaInHqWithoutReadyRemote
+      ? { corpAgendaInHqWithoutReadyRemote: true }
+      : {}),
+    ...(assessment.extraCentralIceChosenOverReadyRemoteBuild
+      ? { corpExtraCentralIceChosenOverReadyRemoteBuild: true }
+      : {}),
+    ...(assessment.extraCentralIceChosenOverEconomy
+      ? { corpExtraCentralIceChosenOverEconomy: true }
+      : {}),
+    ...(assessment.extraCentralIceChosenOverRezReserve
+      ? { corpExtraCentralIceChosenOverRezReserve: true }
+      : {}),
+    ...(assessment.extraCentralIceChosenOverAgendaInstall
+      ? { corpExtraCentralIceChosenOverAgendaInstall: true }
+      : {}),
+    ...(assessment.extraCentralIceChosenOverAdvanceOrScore
+      ? { corpExtraCentralIceChosenOverAdvanceOrScore: true }
+      : {}),
+    ...(assessment.fixGateEligible
+      ? { corpIcePortfolioFixGateEligible: true }
+      : {}),
+    ...(assessment.fixGateSuspiciousCentralOverIce
+      ? { corpIcePortfolioFixGateSuspiciousCentralOverIce: true }
+      : {}),
+    ...(assessment.fixGateBlockedByAgendaFlood
+      ? { corpIcePortfolioFixGateBlockedByAgendaFlood: true }
+      : {}),
+    ...(assessment.fixGateBlockedByRunnerCentralPressure
+      ? { corpIcePortfolioFixGateBlockedByRunnerCentralPressure: true }
+      : {}),
+    ...(assessment.fixGateBlockedByNoRemotePlan
+      ? { corpIcePortfolioFixGateBlockedByNoRemotePlan: true }
+      : {}),
+    ...(assessment.fixGateBlockedByEmergencyProtection
+      ? { corpIcePortfolioFixGateBlockedByEmergencyProtection: true }
+      : {}),
+    corpIcePortfolioEvidence: assessment.evidence,
+  };
+}
 
 function corpFutureRunIceDiagnosticsForSimulationAction(
   input: AiDecisionInput,

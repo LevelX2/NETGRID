@@ -32,6 +32,7 @@ import {
   buildAiDecisionInput,
   assessCorpScoreTerminalWindow,
   assessCorpFutureRunIcePlacement,
+  assessCorpIcePortfolioAction,
   chooseAiAction,
   chooseCorpBaselineAction,
   chooseCorpAction,
@@ -4956,6 +4957,350 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
     expect(decision.debug.planKind).toBe("recover_economy");
     expect(decision.selectedActionId).toBe(gain.actionId);
+  });
+
+  it("suppresses fifth HQ ICE when four HQ ICE are unrezzed and reserve is low", () => {
+    const input = corpActionPhaseInput(
+      "ai-v140-corp-hq-fifth-ice-low-reserve",
+      (state) => {
+        state.corp.credits = 4;
+        addCorpIceToServerForTest(state, "hq", "simple_barrier_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_code_gate_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_sentry_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_tag_ice");
+        addCorpCardToHqForTest(state, "simple_taxing_barrier_ice");
+      },
+    );
+    const hqIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(hqIce).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!hqIce || !gain) throw new Error("Missing HQ over-ice fixture actions");
+
+    const assessment = assessCorpIcePortfolioAction(input, hqIce);
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [hqIce, gain],
+    });
+
+    expect(assessment.hqFifthIceInstalled).toBe(true);
+    expect(assessment.fixGateSuspiciousCentralOverIce).toBe(true);
+    expect(assessment.centralIceInstallPenalizedByDiminishingReturns).toBe(
+      true,
+    );
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(gain.actionId);
+    expect(decision.debug.evidence).toContain(
+      "corp_central_over_iced_with_low_rez_reserve:true",
+    );
+  });
+
+  it("keeps HQ protection available when agenda flood justifies over-icing", () => {
+    const input = corpActionPhaseInput(
+      "ai-v140-corp-hq-agenda-flood-overice",
+      (state) => {
+        state.corp.credits = 4;
+        addCorpIceToServerForTest(state, "hq", "simple_barrier_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_code_gate_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_sentry_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_tag_ice");
+        addCorpCardToHqForTest(state, "simple_agenda");
+        addCorpCardToHqForTest(state, "simple_agenda");
+        addCorpCardToHqForTest(state, "simple_agenda");
+        addCorpCardToHqForTest(state, "simple_agenda");
+        addCorpCardToHqForTest(state, "simple_taxing_barrier_ice");
+      },
+    );
+    const hqIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq",
+    );
+
+    expect(hqIce).toBeDefined();
+    if (!hqIce) throw new Error("Missing HQ agenda-flood ICE action");
+
+    const assessment = assessCorpIcePortfolioAction(input, hqIce);
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [hqIce],
+    });
+
+    expect(assessment.fixGateBlockedByAgendaFlood).toBe(true);
+    expect(assessment.hqProtectionJustifiedByAgendaFlood).toBe(true);
+    expect(assessment.centralIceInstallPenalizedByDiminishingReturns).toBe(
+      false,
+    );
+    expect(decision.selectedActionId).toBe(hqIce.actionId);
+  });
+
+  it("keeps R&D protection available under visible R&D Interface pressure", () => {
+    const input = corpActionPhaseInput(
+      "ai-v140-corp-rnd-interface-pressure",
+      (state) => {
+        state.corp.credits = 3;
+        addRunnerHardwareToRigForTest(state, "onr_v1_139_r-and-d-interface");
+        addCorpIceToServerForTest(state, "rd", "simple_barrier_ice");
+        addCorpIceToServerForTest(state, "rd", "simple_code_gate_ice");
+        addCorpIceToServerForTest(state, "rd", "simple_sentry_ice");
+        addCorpCardToHqForTest(state, "simple_tag_ice");
+      },
+    );
+    const rdIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "rd",
+    );
+
+    expect(rdIce).toBeDefined();
+    if (!rdIce) throw new Error("Missing R&D pressure ICE action");
+
+    const assessment = assessCorpIcePortfolioAction(input, rdIce);
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [rdIce],
+    });
+
+    expect(assessment.fixGateBlockedByRunnerCentralPressure).toBe(true);
+    expect(assessment.rndProtectionJustifiedByRunnerPressure).toBe(true);
+    expect(assessment.centralIceInstallPenalizedByDiminishingReturns).toBe(
+      false,
+    );
+    expect(decision.selectedActionId).toBe(rdIce.actionId);
+  });
+
+  it("prefers remote or reserve plan when centrals are overiced and remote scoring is underbuilt", () => {
+    const input = corpActionPhaseInput(
+      "ai-v140-corp-overiced-centrals-underbuilt-remote",
+      (state) => {
+        state.corp.credits = 3;
+        addCorpIceToServerForTest(state, "hq", "simple_barrier_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_code_gate_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_sentry_ice");
+        addCorpIceToServerForTest(state, "rd", "simple_tag_ice");
+        addCorpCardToHqForTest(state, "simple_taxing_barrier_ice");
+        addCorpCardToHqForTest(state, "simple_agenda");
+      },
+    );
+    const hqIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq",
+    );
+    const agendaInstall = input.legalActions.find((action) => {
+      const source = input.playerView.own.gripOrHq.find(
+        (card) => card.instanceId === action.source,
+      );
+      return (
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        source?.definitionId === "simple_agenda"
+      );
+    });
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(hqIce).toBeDefined();
+    expect(agendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!hqIce || !agendaInstall || !gain)
+      throw new Error("Missing remote-underbuilt fixture actions");
+
+    const assessment = assessCorpIcePortfolioAction(input, hqIce);
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [hqIce, agendaInstall, gain],
+    });
+
+    expect(assessment.remoteScoringUnderbuiltWhileCentralsOverIced).toBe(true);
+    expect(assessment.centralIceInstallPenalizedByDiminishingReturns).toBe(
+      true,
+    );
+    expect(decision.selectedActionId).not.toBe(hqIce.actionId);
+  });
+
+  it("scores rez-reserve recovery above extra central ICE with many unrezzed ICE", () => {
+    const input = corpActionPhaseInput(
+      "ai-v140-corp-rez-reserve-deficit",
+      (state) => {
+        state.corp.credits = 3;
+        addCorpIceToServerForTest(state, "hq", "simple_barrier_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_code_gate_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_sentry_ice");
+        addCorpCardToHqForTest(state, "simple_tag_ice");
+      },
+    );
+    const hqIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(hqIce).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!hqIce || !gain) throw new Error("Missing rez-reserve fixture actions");
+
+    const candidates = generateCorpPlanCandidates({
+      ...input,
+      legalActions: [hqIce, gain],
+    });
+    const protect = candidates.find(
+      (candidate) => candidate.kind === "protect_hq",
+    );
+    const economy = candidates.find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+
+    expect(protect).toBeDefined();
+    expect(economy).toBeDefined();
+    if (!protect || !economy)
+      throw new Error("Missing rez-reserve fixture candidates");
+
+    expect(
+      assessCorpIcePortfolioAction(input, hqIce).rezReserveDeficit,
+    ).toBeGreaterThan(0);
+    expect(evaluateCorpPlan(input, economy).score).toBeGreaterThan(
+      evaluateCorpPlan(input, protect).score,
+    );
+  });
+
+  it("does not apply the over-ice malus to emergency central protection", () => {
+    const input = withPublicServerEventTail(
+      corpActionPhaseInput(
+        "ai-v140-corp-emergency-central-protection",
+        (state) => {
+          state.corp.credits = 1;
+          addCorpCardToHqForTest(state, "simple_barrier_ice");
+        },
+      ),
+      ["hq", "hq"],
+    );
+    const hqIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq",
+    );
+
+    expect(hqIce).toBeDefined();
+    if (!hqIce) throw new Error("Missing emergency HQ ICE action");
+
+    const assessment = assessCorpIcePortfolioAction(input, hqIce);
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [hqIce],
+    });
+
+    expect(assessment.centralOverIceBlockedByEmergencyProtection).toBe(true);
+    expect(assessment.centralIceInstallPenalizedByDiminishingReturns).toBe(
+      false,
+    );
+    expect(decision.selectedActionId).toBe(hqIce.actionId);
+  });
+
+  it("does not over-penalize remote ICE that protects a scoring plan", () => {
+    const input = corpActionPhaseInput(
+      "ai-v140-corp-remote-ice-score-plan",
+      (state) => {
+        state.corp.credits = 5;
+        ensureRemoteServer(state, "remote_1");
+        addCorpCardToHqForTest(state, "simple_barrier_ice");
+        addCorpCardToHqForTest(state, "simple_agenda");
+      },
+    );
+    const remoteIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1",
+    );
+
+    expect(remoteIce).toBeDefined();
+    if (!remoteIce) throw new Error("Missing remote ICE fixture action");
+
+    const assessment = assessCorpIcePortfolioAction(input, remoteIce);
+    const decision = chooseCorpPlanDecision({
+      ...input,
+      legalActions: [remoteIce],
+    });
+
+    expect(assessment.centralIceInstallPenalizedByDiminishingReturns).toBe(
+      false,
+    );
+    expect(assessment.installedRemoteIceWithoutRezReserve).toBe(false);
+    expect(decision.selectedActionId).toBe(remoteIce.actionId);
+  });
+
+  it("keeps central portfolio decisions invariant to runner hidden zones and sanitized", () => {
+    const buildInput = (seed: string, runnerHiddenCard: string) =>
+      corpActionPhaseInput(seed, (state) => {
+        state.corp.credits = 4;
+        addCorpIceToServerForTest(state, "hq", "simple_barrier_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_code_gate_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_sentry_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_tag_ice");
+        addCorpCardToHqForTest(state, "simple_taxing_barrier_ice");
+        moveRunnerCardToGrip(state, runnerHiddenCard);
+      });
+    const economyHidden = buildInput(
+      "ai-v140-corp-hidden-runner-invariance",
+      "simple_economy_event",
+    );
+    const runHidden = buildInput(
+      "ai-v140-corp-hidden-runner-invariance",
+      "simple_run_event",
+    );
+    const chooseScoped = (input: AiDecisionInput) => {
+      const hqIce = input.legalActions.find(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.placement === "ice" &&
+          action.payload?.serverId === "hq",
+      );
+      const gain = input.legalActions.find(
+        (action) => action.type === "gain_credit",
+      );
+      expect(hqIce).toBeDefined();
+      expect(gain).toBeDefined();
+      if (!hqIce || !gain) throw new Error("Missing hidden-invariance actions");
+      return chooseCorpPlanDecision({ ...input, legalActions: [hqIce, gain] });
+    };
+
+    const economyDecision = chooseScoped(economyHidden);
+    const runDecision = chooseScoped(runHidden);
+    const serialized = JSON.stringify(economyDecision.debug);
+
+    expect(economyDecision.selectedActionType).toBe(
+      runDecision.selectedActionType,
+    );
+    expect(economyDecision.debug.planKind).toBe(runDecision.debug.planKind);
+    expect(serialized).toContain("corp_ice_portfolio_fix_gate_eligible:true");
+    expect(serialized).not.toMatch(
+      /cardInstances|fullGameState|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash/,
+    );
+    expect(
+      JSON.stringify(
+        economyDecision.debug.evidence.filter((entry) =>
+          entry.startsWith("corp_ice_portfolio"),
+        ),
+      ),
+    ).not.toContain("simple_taxing_barrier_ice");
   });
 
   it("builds deterministic deck doctrine profiles without raw private card state", () => {
@@ -22324,6 +22669,33 @@ function putCorpIceOnServer(
   return id;
 }
 
+function addCorpIceToServerForTest(
+  state: GameState,
+  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  definitionId: string,
+): CardInstanceId {
+  const id =
+    `test_corp_ice_${serverId}_${definitionId}_${Object.keys(state.cardInstances).length}` as CardInstanceId;
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  expect(server).toBeDefined();
+  if (!server) throw new Error("Missing server");
+  server.ice.push(id);
+  state.cardInstances[id] = {
+    instanceId: id,
+    definitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "serverIce", serverId },
+    faceup: false,
+    rezzed: false,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return id;
+}
+
 function putUnusedCorpIceOnServer(
   state: GameState,
   serverId: "hq" | "rd" | "archives" | `remote_${number}`,
@@ -22425,6 +22797,27 @@ function moveRunnerHardwareToRig(
     zone: { side: "runner", zone: "rig" },
     faceup: true,
     rezzed: true,
+  };
+  return id;
+}
+
+function addRunnerHardwareToRigForTest(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
+  const id =
+    `test_runner_hardware_${definitionId}_${Object.keys(state.cardInstances).length}` as CardInstanceId;
+  state.runner.rig.hardware.unshift(id);
+  state.cardInstances[id] = {
+    instanceId: id,
+    definitionId,
+    owner: "runner",
+    controller: "runner",
+    zone: { side: "runner", zone: "rig" },
+    faceup: true,
+    rezzed: true,
+    advancementCounters: 0,
+    strengthModifier: 0,
   };
   return id;
 }
@@ -22533,6 +22926,27 @@ function moveCorpCardToHq(
     zone: { side: "corp", zone: "hq" },
     faceup: false,
     rezzed: false,
+  };
+  return id;
+}
+
+function addCorpCardToHqForTest(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
+  const id =
+    `test_corp_hq_${definitionId}_${Object.keys(state.cardInstances).length}` as CardInstanceId;
+  state.corp.hq.unshift(id);
+  state.cardInstances[id] = {
+    instanceId: id,
+    definitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "hq" },
+    faceup: false,
+    rezzed: false,
+    advancementCounters: 0,
+    strengthModifier: 0,
   };
   return id;
 }
