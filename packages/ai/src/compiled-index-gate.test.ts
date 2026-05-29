@@ -244,9 +244,13 @@ describe("compiled hint index pilot report", () => {
     expect(crystalPalace?.conflicts).toEqual([]);
   });
 
-  it("does not wire the compiled index into AI runtime modules", () => {
+  it("keeps the historical compiled-index check separate from the runtime compiled artifact", () => {
+    const aiHintsSource = fs.readFileSync(
+      path.join(repoRoot, "packages/ai/src/ai-hints.ts"),
+      "utf8",
+    );
+    expect(aiHintsSource).toContain("ai-card-hints-compiled.json");
     for (const relativePath of [
-      "packages/ai/src/ai-hints.ts",
       "packages/ai/src/deck-doctrine.ts",
       "packages/ai/src/corp-plans.ts",
       "packages/ai/src/runner-plans.ts",

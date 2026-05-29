@@ -2123,6 +2123,24 @@ function deriveFromImplementation(card, implementationText, hint) {
       kind: "requires_during_run",
       source: "implementation.printedSubroutines.run_duration",
     });
+    if (
+      [
+        "onr_v1_222_ball-and-chain",
+        "onr_v1_225_canis-major",
+      ].includes(card.cardId)
+    ) {
+      addEffect(facts, {
+        kind: "future_encounter_effect",
+        timing: "encounter",
+        scope: "run_path",
+        confidence: "medium",
+        source: "implementation.printedSubroutines.run_duration.future_ice",
+      });
+      addCondition(facts, {
+        kind: "requires_remaining_ice",
+        source: "implementation.printedSubroutines.run_duration.future_ice",
+      });
+    }
     if (/run_duration_break_subroutine_cost/.test(implementationText)) {
       addEffect(facts, {
         kind: "run_tax",

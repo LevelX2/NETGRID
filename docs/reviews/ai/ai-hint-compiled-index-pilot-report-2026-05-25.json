@@ -4590,7 +4590,9 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ]
     },
     {
@@ -4624,7 +4626,9 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ]
     },
     {
@@ -6443,7 +6447,9 @@
       "mechanicalFactsFromGenerated": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ]
@@ -6483,7 +6489,9 @@
       "mechanicalFactsFromGenerated": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ]
@@ -8192,7 +8200,9 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ]
     },
     {
@@ -8226,7 +8236,9 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ]
     },
     {
@@ -18442,7 +18454,9 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_222_ball-and-chain",
@@ -18459,6 +18473,13 @@
             "resource": "credits",
             "scope": "run_path",
             "source": "implementation.printedSubroutines.run_duration_encounter_cost_or_end_run",
+            "timing": "encounter"
+          },
+          {
+            "confidence": "medium",
+            "kind": "future_encounter_effect",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration.future_ice",
             "timing": "encounter"
           },
           {
@@ -18482,6 +18503,11 @@
           },
           {
             "confidence": "high",
+            "kind": "requires_remaining_ice",
+            "source": "implementation.printedSubroutines.run_duration.future_ice"
+          },
+          {
+            "confidence": "high",
             "kind": "requires_unbroken_subroutine",
             "source": "implementation.printedSubroutines"
           }
@@ -18490,7 +18516,9 @@
       "mechanicalFactsFromGenerated": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ],
@@ -18809,7 +18837,9 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_225_canis-major",
@@ -18826,6 +18856,13 @@
             "resource": "strength",
             "scope": "run_path",
             "source": "implementation.printedSubroutines.run_duration_ice_strength",
+            "timing": "encounter"
+          },
+          {
+            "confidence": "medium",
+            "kind": "future_encounter_effect",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration.future_ice",
             "timing": "encounter"
           },
           {
@@ -18849,6 +18886,11 @@
           },
           {
             "confidence": "high",
+            "kind": "requires_remaining_ice",
+            "source": "implementation.printedSubroutines.run_duration.future_ice"
+          },
+          {
+            "confidence": "high",
             "kind": "requires_unbroken_subroutine",
             "source": "implementation.printedSubroutines"
           }
@@ -18857,7 +18899,9 @@
       "mechanicalFactsFromGenerated": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ],

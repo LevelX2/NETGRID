@@ -4385,7 +4385,9 @@
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ],
@@ -4521,7 +4523,9 @@
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ],

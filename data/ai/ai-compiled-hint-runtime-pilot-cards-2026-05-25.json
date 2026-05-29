@@ -1,0 +1,226 @@
+{
+  "schemaVersion": "ai-compiled-hint-runtime-pilot-cards-v1",
+  "taskId": "Aufgabe 041",
+  "cards": [
+    {
+      "cardId": "onr_v1_040_loony-goon",
+      "title": "Loony Goon",
+      "runtimeCompiledHintPilot": true,
+      "expectedGeneratedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "breakerProfile",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "expectedConsumerAreas": [
+        "runner_breaker",
+        "runner_search",
+        "runner_remote_trash",
+        "corp_ice_ordering",
+        "corp_tag_punish",
+        "runner_remote_access"
+      ],
+      "notes": "Sentry breaker profile pilot card for runner breaker ontology consumption."
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "runtimeCompiledHintPilot": true,
+      "expectedGeneratedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "breakerProfile",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "expectedConsumerAreas": [
+        "runner_breaker",
+        "runner_search",
+        "runner_remote_trash",
+        "corp_ice_ordering",
+        "corp_tag_punish",
+        "runner_remote_access"
+      ],
+      "notes": "Universal breaker profile pilot card for runner breaker ontology consumption."
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "runtimeCompiledHintPilot": true,
+      "expectedGeneratedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "breakerProfile",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "expectedConsumerAreas": [
+        "runner_breaker",
+        "runner_search",
+        "runner_remote_trash",
+        "corp_ice_ordering",
+        "corp_tag_punish",
+        "runner_remote_access"
+      ],
+      "notes": "During-run stack search and normal-cost install target profile pilot card."
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "runtimeCompiledHintPilot": true,
+      "expectedGeneratedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "breakerProfile",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "expectedConsumerAreas": [
+        "runner_breaker",
+        "runner_search",
+        "runner_remote_trash",
+        "corp_ice_ordering",
+        "corp_tag_punish",
+        "runner_remote_access"
+      ],
+      "notes": "Once-per-run top-of-stack search, public reveal and free install target profile pilot card."
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "runtimeCompiledHintPilot": true,
+      "expectedGeneratedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "breakerProfile",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "expectedConsumerAreas": [
+        "runner_breaker",
+        "runner_search",
+        "runner_remote_trash",
+        "corp_ice_ordering",
+        "corp_tag_punish",
+        "runner_remote_access"
+      ],
+      "notes": "Dedicated trash-credit pilot card for runner remote trash and access valuation."
+    },
+    {
+      "cardId": "onr_v1_309_bbs-whispering-campaign",
+      "title": "BBS Whispering Campaign",
+      "runtimeCompiledHintPilot": true,
+      "expectedGeneratedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "breakerProfile",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "expectedConsumerAreas": [
+        "runner_breaker",
+        "runner_search",
+        "runner_remote_trash",
+        "corp_ice_ordering",
+        "corp_tag_punish",
+        "runner_remote_access"
+      ],
+      "notes": "Finite economy pool and asset-economy remote-role pilot card; current pool remains board state."
+    },
+    {
+      "cardId": "onr_v1_222_ball-and-chain",
+      "title": "Ball and Chain",
+      "runtimeCompiledHintPilot": true,
+      "expectedGeneratedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "breakerProfile",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "expectedConsumerAreas": [
+        "runner_breaker",
+        "runner_search",
+        "runner_remote_trash",
+        "corp_ice_ordering",
+        "corp_tag_punish",
+        "runner_remote_access"
+      ],
+      "notes": "Future encounter and remaining-ICE context pilot card for ICE ordering diagnostics."
+    },
+    {
+      "cardId": "onr_v1_225_canis-major",
+      "title": "Canis Major",
+      "runtimeCompiledHintPilot": true,
+      "expectedGeneratedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "breakerProfile",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "expectedConsumerAreas": [
+        "runner_breaker",
+        "runner_search",
+        "runner_remote_trash",
+        "corp_ice_ordering",
+        "corp_tag_punish",
+        "runner_remote_access"
+      ],
+      "notes": "Future encounter strength-modifier context pilot card for ICE ordering diagnostics."
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "runtimeCompiledHintPilot": true,
+      "expectedGeneratedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "breakerProfile",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "expectedConsumerAreas": [
+        "runner_breaker",
+        "runner_search",
+        "runner_remote_trash",
+        "corp_ice_ordering",
+        "corp_tag_punish",
+        "runner_remote_access"
+      ],
+      "notes": "Tagged-runner damage payoff pilot card for tag-punish consumers."
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "title": "Red Herrings",
+      "runtimeCompiledHintPilot": true,
+      "expectedGeneratedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "breakerProfile",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "expectedConsumerAreas": [
+        "runner_breaker",
+        "runner_search",
+        "runner_remote_trash",
+        "corp_ice_ordering",
+        "corp_tag_punish",
+        "runner_remote_access"
+      ],
+      "notes": "Agenda steal tax remote-role pilot card for remote role and access consumers."
+    }
+  ]
+}

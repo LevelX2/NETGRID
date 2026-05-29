@@ -390,7 +390,7 @@
   "sourceSummary": {
     "derivedFacts": {
       "hardErrorCount": 0,
-      "warningCount": 1017,
+      "warningCount": 1021,
       "cardsNeedingManualOverlay": 131
     },
     "compiledIndex": {
