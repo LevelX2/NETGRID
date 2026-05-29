@@ -3019,6 +3019,13 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("enforces the selected match card pool for Proteus playtest snapshots", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "mp-proteus-card-pool" });
+    const cardsById = createRuntimeCardsById();
+    expect(cardsById["onr_proteus_001_ai-board-member"]?.statuses).toMatchObject({
+      human_playable: true,
+      deck_legal: true,
+      format_legal: true,
+      ai_supported: false
+    });
 
     await expect(
       service.createMatch({
@@ -3043,6 +3050,24 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(created)).not.toContain("onr_proteus_084_crumble");
     const record = await service.loadForTest(created.matchId);
     expect(record?.match.settings.cardPool).toBe("originalset_proteus");
+
+    await expect(
+      service.createMatch({
+        hostSide: "corp",
+        mode: "human_corp_vs_runner_ai",
+        seed: "mp-proteus-ai-blocked",
+        participantADecks: {
+          runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
+          corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
+        },
+        participantBDecks: {
+          runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+          corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25"
+        },
+        aiDeckPolicy: "selected",
+        settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_proteus" }
+      })
+    ).rejects.toThrow("ai_deck_snapshot_not_supported");
   });
 
   it("handles V1.1.1 Discard and Core-Damage status through side-safe multiplayer payloads", async () => {

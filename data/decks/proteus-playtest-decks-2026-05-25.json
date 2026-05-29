@@ -1,12 +1,12 @@
 {
   "schemaVersion": "proteus-playtest-decks-v0.1",
   "id": "proteus-playtest-decks-2026-05-25",
-  "status": "playtest_format_legal_when_originalset_proteus_selected",
+  "status": "human_vs_human_deck_legal_proteus_playtest",
   "generatedAt": "2026-05-25",
   "copyrightNote": "Lokale Playtest-Decklisten aus vorhandenen NETGRID-Kartendaten; keine offiziellen Artworks, Logos, Frames oder Card Backs.",
   "gateNotes": [
-    "Proteus hat im aktuellen Workspace keine globalen deck_legal, format_legal oder ai_supported Flags.",
-    "Im Matchstart-Kartenpool Originalset & Protheus sind Protheus-Karten über das private Formatprofil netgrid_private_local_proteus_playtest_v1 legal.",
+    "Proteus ist nach PRO020 als Human-vs-Human-Playtest deck_legal und format_legal, bleibt aber nicht ai_supported.",
+    "Im Matchstart-Kartenpool Originalset & Protheus sind Protheus-Karten über das private Formatprofil netgrid_private_local_proteus_playtest_v1 legal; das Profil verlangt jetzt deck_legal und human_playable.",
     "Die Originalset-Füllkarten sind zur Spielbarkeit enthalten: Runner brauchen Breaker und Economy, Korp-Decks brauchen Economy und Draw."
   ],
   "sourceDocuments": [
@@ -34,31 +34,97 @@
       "originalsetCards": 17,
       "legalities": {
         "appMatchstartLegal": true,
-        "reason": "Legal im Kartenpool Originalset & Protheus über netgrid_private_local_proteus_playtest_v1."
+        "reason": "Legal im Human-vs-Human-Kartenpool Originalset & Protheus über deck_legal und netgrid_private_local_proteus_playtest_v1."
       },
       "cards": [
-        { "id": "onr_proteus_084_crumble", "quantity": 3 },
-        { "id": "onr_proteus_085_disintegrator", "quantity": 2 },
-        { "id": "onr_proteus_089_garbage-in", "quantity": 2 },
-        { "id": "onr_proteus_090_highlighter", "quantity": 2 },
-        { "id": "onr_proteus_097_taxman", "quantity": 3 },
-        { "id": "onr_proteus_098_vienna-22", "quantity": 3 },
-        { "id": "onr_proteus_099_viral-pipeline", "quantity": 2 },
-        { "id": "onr_proteus_134_cortical-cybermodem", "quantity": 2 },
-        { "id": "onr_proteus_135_cortical-stimulators", "quantity": 2 },
-        { "id": "onr_proteus_138_deck-the", "quantity": 1 },
-        { "id": "onr_proteus_146_precision-bribery", "quantity": 2 },
-        { "id": "onr_proteus_150_streetware-distributor", "quantity": 3 },
-        { "id": "onr_proteus_151_sunburst-cranial-interface", "quantity": 1 },
-        { "id": "onr_v1_014_codecracker", "quantity": 2 },
-        { "id": "onr_v1_021_dwarf", "quantity": 2 },
-        { "id": "onr_v1_039_krash", "quantity": 1 },
-        { "id": "onr_v1_040_loony-goon", "quantity": 2 },
-        { "id": "onr_v1_075_zetatech-software-installer", "quantity": 1 },
-        { "id": "onr_v1_079_bodyweight-synthetic-blood", "quantity": 2 },
-        { "id": "onr_v1_097_livewires-contacts", "quantity": 3 },
-        { "id": "onr_v1_108_score", "quantity": 3 },
-        { "id": "onr_v1_145_wutech-mem-chip", "quantity": 1 }
+        {
+          "id": "onr_proteus_084_crumble",
+          "quantity": 3
+        },
+        {
+          "id": "onr_proteus_085_disintegrator",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_089_garbage-in",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_090_highlighter",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_097_taxman",
+          "quantity": 3
+        },
+        {
+          "id": "onr_proteus_098_vienna-22",
+          "quantity": 3
+        },
+        {
+          "id": "onr_proteus_099_viral-pipeline",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_134_cortical-cybermodem",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_135_cortical-stimulators",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_138_deck-the",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_146_precision-bribery",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_150_streetware-distributor",
+          "quantity": 3
+        },
+        {
+          "id": "onr_proteus_151_sunburst-cranial-interface",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_014_codecracker",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_021_dwarf",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_039_krash",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_040_loony-goon",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_075_zetatech-software-installer",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_079_bodyweight-synthetic-blood",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_097_livewires-contacts",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_108_score",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_145_wutech-mem-chip",
+          "quantity": 1
+        }
       ],
       "playNotes": [
         "Früh Economy und mindestens zwei Breaker finden, dann wiederholt HQ anlaufen.",
@@ -77,33 +143,105 @@
       "originalsetCards": 16,
       "legalities": {
         "appMatchstartLegal": true,
-        "reason": "Legal im Kartenpool Originalset & Protheus über netgrid_private_local_proteus_playtest_v1."
+        "reason": "Legal im Human-vs-Human-Kartenpool Originalset & Protheus über deck_legal und netgrid_private_local_proteus_playtest_v1."
       },
       "cards": [
-        { "id": "onr_proteus_084_crumble", "quantity": 2 },
-        { "id": "onr_proteus_085_disintegrator", "quantity": 1 },
-        { "id": "onr_proteus_089_garbage-in", "quantity": 3 },
-        { "id": "onr_proteus_090_highlighter", "quantity": 3 },
-        { "id": "onr_proteus_097_taxman", "quantity": 2 },
-        { "id": "onr_proteus_098_vienna-22", "quantity": 2 },
-        { "id": "onr_proteus_099_viral-pipeline", "quantity": 3 },
-        { "id": "onr_proteus_108_faked-hit", "quantity": 2 },
-        { "id": "onr_proteus_117_poisoned-water-supply", "quantity": 2 },
-        { "id": "onr_proteus_134_cortical-cybermodem", "quantity": 1 },
-        { "id": "onr_proteus_135_cortical-stimulators", "quantity": 2 },
-        { "id": "onr_proteus_138_deck-the", "quantity": 2 },
-        { "id": "onr_proteus_146_precision-bribery", "quantity": 1 },
-        { "id": "onr_proteus_150_streetware-distributor", "quantity": 2 },
-        { "id": "onr_proteus_151_sunburst-cranial-interface", "quantity": 1 },
-        { "id": "onr_v1_014_codecracker", "quantity": 2 },
-        { "id": "onr_v1_021_dwarf", "quantity": 2 },
-        { "id": "onr_v1_040_loony-goon", "quantity": 1 },
-        { "id": "onr_v1_151_aujourdoui", "quantity": 2 },
-        { "id": "onr_v1_154_broker", "quantity": 2 },
-        { "id": "onr_v1_157_crash-everett-inventive-fixer", "quantity": 2 },
-        { "id": "onr_v1_166_karl-de-veres-corporate-stooge", "quantity": 2 },
-        { "id": "onr_v1_177_the-short-circuit", "quantity": 2 },
-        { "id": "onr_v1_108_score", "quantity": 1 }
+        {
+          "id": "onr_proteus_084_crumble",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_085_disintegrator",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_089_garbage-in",
+          "quantity": 3
+        },
+        {
+          "id": "onr_proteus_090_highlighter",
+          "quantity": 3
+        },
+        {
+          "id": "onr_proteus_097_taxman",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_098_vienna-22",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_099_viral-pipeline",
+          "quantity": 3
+        },
+        {
+          "id": "onr_proteus_108_faked-hit",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_117_poisoned-water-supply",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_134_cortical-cybermodem",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_135_cortical-stimulators",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_138_deck-the",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_146_precision-bribery",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_150_streetware-distributor",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_151_sunburst-cranial-interface",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_014_codecracker",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_021_dwarf",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_040_loony-goon",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_151_aujourdoui",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_154_broker",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_157_crash-everett-inventive-fixer",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_177_the-short-circuit",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_108_score",
+          "quantity": 1
+        }
       ],
       "playNotes": [
         "Die Connection-Dichte ist absichtlich hoch, damit Poisoned Water Supply nicht nur Text bleibt.",
@@ -123,35 +261,113 @@
       "agendaPoints": 16,
       "legalities": {
         "appMatchstartLegal": true,
-        "reason": "Legal im Kartenpool Originalset & Protheus über netgrid_private_local_proteus_playtest_v1."
+        "reason": "Legal im Human-vs-Human-Kartenpool Originalset & Protheus über deck_legal und netgrid_private_local_proteus_playtest_v1."
       },
       "cards": [
-        { "id": "onr_proteus_001_ai-board-member", "quantity": 1 },
-        { "id": "onr_proteus_002_charity-takeover", "quantity": 2 },
-        { "id": "onr_proteus_007_project-venice", "quantity": 2 },
-        { "id": "onr_proteus_008_project-zurich", "quantity": 2 },
-        { "id": "onr_proteus_010_world-domination", "quantity": 1 },
-        { "id": "onr_proteus_013_caryatid", "quantity": 1 },
-        { "id": "onr_proteus_017_credit-blocks", "quantity": 1 },
-        { "id": "onr_proteus_023_galatea", "quantity": 2 },
-        { "id": "onr_proteus_024_gatekeeper", "quantity": 2 },
-        { "id": "onr_proteus_031_minotaur", "quantity": 1 },
-        { "id": "onr_proteus_033_mobile-barricade", "quantity": 2 },
-        { "id": "onr_proteus_034_riddler", "quantity": 2 },
-        { "id": "onr_proteus_036_sandstorm", "quantity": 2 },
-        { "id": "onr_proteus_041_toughoniumtm-wall", "quantity": 1 },
-        { "id": "onr_proteus_044_walking-wall", "quantity": 2 },
-        { "id": "onr_proteus_062_lesley-major", "quantity": 1 },
-        { "id": "onr_proteus_065_networked-center", "quantity": 2 },
-        { "id": "onr_proteus_070_rasmin-bridger", "quantity": 1 },
-        { "id": "onr_proteus_072_research-bunker", "quantity": 2 },
-        { "id": "onr_proteus_077_weapons-depot", "quantity": 1 },
-        { "id": "onr_v1_281_accounts-receivable", "quantity": 3 },
-        { "id": "onr_v1_282_annual-reviews", "quantity": 2 },
-        { "id": "onr_v1_288_day-shift", "quantity": 2 },
-        { "id": "onr_v1_290_efficiency-experts", "quantity": 3 },
-        { "id": "onr_v1_297_overtime-incentives", "quantity": 2 },
-        { "id": "onr_v1_309_bbs-whispering-campaign", "quantity": 2 }
+        {
+          "id": "onr_proteus_001_ai-board-member",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_002_charity-takeover",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_007_project-venice",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_008_project-zurich",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_010_world-domination",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_013_caryatid",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_017_credit-blocks",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_023_galatea",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_024_gatekeeper",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_031_minotaur",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_033_mobile-barricade",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_034_riddler",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_036_sandstorm",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_041_toughoniumtm-wall",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_044_walking-wall",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_062_lesley-major",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_065_networked-center",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_070_rasmin-bridger",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_072_research-bunker",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_077_weapons-depot",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_281_accounts-receivable",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_282_annual-reviews",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_288_day-shift",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_290_efficiency-experts",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_297_overtime-incentives",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_309_bbs-whispering-campaign",
+          "quantity": 2
+        }
       ],
       "playNotes": [
         "Ein geschützter Remote mit passender Region ist der Standardplan.",
@@ -171,37 +387,121 @@
       "agendaPoints": 17,
       "legalities": {
         "appMatchstartLegal": true,
-        "reason": "Legal im Kartenpool Originalset & Protheus über netgrid_private_local_proteus_playtest_v1."
+        "reason": "Legal im Human-vs-Human-Kartenpool Originalset & Protheus über deck_legal und netgrid_private_local_proteus_playtest_v1."
       },
       "cards": [
-        { "id": "onr_proteus_003_corporate-headhunters", "quantity": 1 },
-        { "id": "onr_proteus_004_fetal-ai", "quantity": 2 },
-        { "id": "onr_proteus_005_marked-accounts", "quantity": 2 },
-        { "id": "onr_proteus_006_please-dont-choke-anyone", "quantity": 1 },
-        { "id": "onr_proteus_009_viral-breeding-ground", "quantity": 1 },
-        { "id": "onr_proteus_012_bug-zapper", "quantity": 2 },
-        { "id": "onr_proteus_017_credit-blocks", "quantity": 1 },
-        { "id": "onr_proteus_020_digiconda", "quantity": 1 },
-        { "id": "onr_proteus_021_dog-pile", "quantity": 2 },
-        { "id": "onr_proteus_022_food-fight", "quantity": 1 },
-        { "id": "onr_proteus_025_homing-missile", "quantity": 2 },
-        { "id": "onr_proteus_026_hunting-pack", "quantity": 2 },
-        { "id": "onr_proteus_028_lesser-arcana", "quantity": 1 },
-        { "id": "onr_proteus_030_mastermind", "quantity": 1 },
-        { "id": "onr_proteus_039_sphinx-2006", "quantity": 1 },
-        { "id": "onr_proteus_040_sumo-2008", "quantity": 1 },
-        { "id": "onr_proteus_054_bel-digmo-antibody", "quantity": 3 },
-        { "id": "onr_proteus_057_doppelganger-antibody", "quantity": 2 },
-        { "id": "onr_proteus_068_pattel-antibody", "quantity": 2 },
-        { "id": "onr_proteus_070_rasmin-bridger", "quantity": 1 },
-        { "id": "onr_proteus_075_stereogram-antibody", "quantity": 2 },
-        { "id": "onr_v1_281_accounts-receivable", "quantity": 2 },
-        { "id": "onr_v1_282_annual-reviews", "quantity": 2 },
-        { "id": "onr_v1_287_datapool-by-zetatech", "quantity": 1 },
-        { "id": "onr_v1_290_efficiency-experts", "quantity": 2 },
-        { "id": "onr_v1_293_netwatch-credit-voucher", "quantity": 2 },
-        { "id": "onr_v1_295_night-shift", "quantity": 2 },
-        { "id": "onr_v1_309_bbs-whispering-campaign", "quantity": 2 }
+        {
+          "id": "onr_proteus_003_corporate-headhunters",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_004_fetal-ai",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_005_marked-accounts",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_006_please-dont-choke-anyone",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_009_viral-breeding-ground",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_012_bug-zapper",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_017_credit-blocks",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_020_digiconda",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_021_dog-pile",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_022_food-fight",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_025_homing-missile",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_026_hunting-pack",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_028_lesser-arcana",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_030_mastermind",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_039_sphinx-2006",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_040_sumo-2008",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_054_bel-digmo-antibody",
+          "quantity": 3
+        },
+        {
+          "id": "onr_proteus_057_doppelganger-antibody",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_068_pattel-antibody",
+          "quantity": 2
+        },
+        {
+          "id": "onr_proteus_070_rasmin-bridger",
+          "quantity": 1
+        },
+        {
+          "id": "onr_proteus_075_stereogram-antibody",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_281_accounts-receivable",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_282_annual-reviews",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_287_datapool-by-zetatech",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_290_efficiency-experts",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_293_netwatch-credit-voucher",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_295_night-shift",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_309_bbs-whispering-campaign",
+          "quantity": 2
+        }
       ],
       "playNotes": [
         "Die Korp baut nicht nur einen Remote, sondern streut Zugriffskosten in R&D und HQ.",

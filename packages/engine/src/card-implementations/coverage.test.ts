@@ -95,7 +95,8 @@ type ProteusCoverageReport = {
   manifestMissingImplementedForFile: string[];
   manifestStatusDrift: string[];
   manifestResolverDrift: string[];
-  manifestLegalFlagDrift: string[];
+  manifestHumanVsHumanFlagDrift: string[];
+  manifestAiSupportDrift: string[];
 };
 
 function buildProteusCoverageReport(): ProteusCoverageReport {
@@ -182,16 +183,13 @@ function buildProteusCoverageReport(): ProteusCoverageReport {
 
   const manifestStatusDrift: string[] = [];
   const manifestResolverDrift: string[] = [];
-  const manifestLegalFlagDrift: string[] = [];
+  const manifestHumanVsHumanFlagDrift: string[] = [];
+  const manifestAiSupportDrift: string[] = [];
 
   for (const card of manifest.cards) {
     const isImplementedByFile = uniqueFileDefinitionIdSet.has(card.cardId);
-    if (
-      card.statuses.ai_supported ||
-      card.statuses.deck_legal ||
-      card.statuses.format_legal
-    ) {
-      manifestLegalFlagDrift.push(card.cardId);
+    if (card.statuses.ai_supported) {
+      manifestAiSupportDrift.push(card.cardId);
     }
 
     if (isImplementedByFile) {
@@ -200,6 +198,8 @@ function buildProteusCoverageReport(): ProteusCoverageReport {
         !card.statuses.engine_supported ||
         !card.statuses.playable ||
         !card.statuses.human_playable ||
+        !card.statuses.deck_legal ||
+        !card.statuses.format_legal ||
         card.statuses.blocked
       ) {
         manifestStatusDrift.push(card.cardId);
@@ -213,6 +213,8 @@ function buildProteusCoverageReport(): ProteusCoverageReport {
         card.statuses.engine_supported ||
         card.statuses.playable ||
         card.statuses.human_playable ||
+        card.statuses.deck_legal ||
+        card.statuses.format_legal ||
         !card.statuses.blocked
       ) {
         manifestStatusDrift.push(card.cardId);
@@ -220,6 +222,10 @@ function buildProteusCoverageReport(): ProteusCoverageReport {
       if (card.support.resolverRef !== null) {
         manifestResolverDrift.push(card.cardId);
       }
+    }
+
+    if (card.statuses.format_legal !== card.statuses.deck_legal) {
+      manifestHumanVsHumanFlagDrift.push(card.cardId);
     }
   }
 
@@ -249,7 +255,8 @@ function buildProteusCoverageReport(): ProteusCoverageReport {
       .sort(),
     manifestStatusDrift: manifestStatusDrift.sort(),
     manifestResolverDrift: manifestResolverDrift.sort(),
-    manifestLegalFlagDrift: manifestLegalFlagDrift.sort(),
+    manifestHumanVsHumanFlagDrift: manifestHumanVsHumanFlagDrift.sort(),
+    manifestAiSupportDrift: manifestAiSupportDrift.sort(),
   };
 }
 
@@ -267,7 +274,8 @@ function formatProteusCoverageReport(report: ProteusCoverageReport): string {
     `- manifest missing-implemented-for-file drift: ${report.manifestMissingImplementedForFile.length}`,
     `- manifest status drift: ${report.manifestStatusDrift.length}`,
     `- manifest resolverRef drift: ${report.manifestResolverDrift.length}`,
-    `- manifest deck_legal/format_legal/ai_supported drift: ${report.manifestLegalFlagDrift.length}`,
+    `- manifest deck_legal/format_legal drift: ${report.manifestHumanVsHumanFlagDrift.length}`,
+    `- manifest ai_supported drift: ${report.manifestAiSupportDrift.length}`,
     "Missing Proteus CardImplementation files:",
     ...report.missingCards.map(
       (card) => `- ${card.cardDefinitionId} :: ${card.title}`,
@@ -1659,7 +1667,8 @@ describe("CardImplementation coverage and registry invariants", () => {
     expect(report.manifestMissingImplementedForFile).toEqual([]);
     expect(report.manifestStatusDrift).toEqual([]);
     expect(report.manifestResolverDrift).toEqual([]);
-    expect(report.manifestLegalFlagDrift).toEqual([]);
+    expect(report.manifestHumanVsHumanFlagDrift).toEqual([]);
+    expect(report.manifestAiSupportDrift).toEqual([]);
 
     for (const row of report.implementationRows) {
       expect(row.cardDefinitionId, row.filePath).toMatch(/^onr_proteus_/);
@@ -1674,8 +1683,6 @@ describe("CardImplementation coverage and registry invariants", () => {
       );
       expect(card.setId, card.cardId).toBe("proteus");
       expect(card.statuses.ai_supported, card.cardId).toBe(false);
-      expect(card.statuses.deck_legal, card.cardId).toBe(false);
-      expect(card.statuses.format_legal, card.cardId).toBe(false);
 
       if (isImplemented) {
         expect(card.statuses, card.cardId).toMatchObject({
@@ -1683,6 +1690,8 @@ describe("CardImplementation coverage and registry invariants", () => {
           engine_supported: true,
           playable: true,
           human_playable: true,
+          deck_legal: true,
+          format_legal: true,
           blocked: false,
         });
         expect(card.support.resolverRef, card.cardId).toBe(
@@ -1694,6 +1703,8 @@ describe("CardImplementation coverage and registry invariants", () => {
           engine_supported: false,
           playable: false,
           human_playable: false,
+          deck_legal: false,
+          format_legal: false,
           blocked: true,
         });
         expect(card.support.resolverRef, card.cardId).toBeNull();

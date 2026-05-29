@@ -13,7 +13,7 @@ Implementierungsfortschritt wird aus der konkreten File- und Registry-Wahrheit g
 3. Jede Datei braucht genau eine eindeutige `cardDefinitionId` aus `data/cards/proteus-cards.json`.
 4. Jede Datei muss in `packages/engine/src/card-implementations/registry.ts` registriert sein.
 5. `data/manifests/proteus-card-support.json` muss zur Datei- und Registry-Wahrheit passen. Das Manifest ist Driftprüfung, nicht die führende Implementierungsquelle.
-6. `deck_legal`, `format_legal` und `ai_supported` bleiben für Proteus-Karten `false`, solange kein separates Gate diese Flags explizit freigibt.
+6. Freigabe-Flags folgen separaten Gates: Nach dem Human-vs-Human-Decklegal-Gate sind `deck_legal` und `format_legal` für alle implementierten Proteus-Karten erlaubt; `ai_supported` bleibt ohne separates AI-Gate `false`.
 
 `docs/activities/` bleibt Arbeits- und Planungsstatus. Ordnerpositionen, `done`-Status oder `superseded`-Status zählen nicht als Implementierungsnachweis.
 
@@ -87,7 +87,7 @@ proReferences:
 - Jede Datei hat genau eine eindeutige `cardDefinitionId` aus `data/cards/proteus-cards.json`.
 - Jede Datei ist in `packages/engine/src/card-implementations/registry.ts` registriert.
 - `data/manifests/proteus-card-support.json` passt zur Datei- und Registry-Wahrheit.
-- `deck_legal`, `format_legal` und `ai_supported` bleiben ohne separates Gate `false`.
+- `deck_legal`, `format_legal` und `ai_supported` entsprechen dem jeweils aktuellen Gate-Stand; ohne AI-Gate bleibt `ai_supported` `false`.
 - Der Proteus-Verify-Harness läuft grün; die Restliste darf nur die noch nicht umgesetzten Karten enthalten.
 ```
 
@@ -111,9 +111,9 @@ Der Testlauf weist mindestens aus:
 - Registrierte Proteus-Implementierungen ohne Datei.
 - Doppelte `cardDefinitionId`-Werte in Dateien oder Registry.
 - Manifest-Drift gegenüber Datei- und Registry-Wahrheit.
-- Versehentliche `deck_legal`-, `format_legal`- oder `ai_supported`-Freigaben.
+- Drift bei `deck_legal`, `format_legal` oder `ai_supported` gegenüber dem aktuellen Gate-Stand.
 
-Fehlende CardImplementation-Dateien sind im laufenden Restplan informativ und schlagen den Test nicht fehl. Der Test schlägt bei Konsistenzfehlern fehl, insbesondere bei fehlender oder falscher `cardDefinitionId`, unbekannten Proteus-IDs, Registry-/Datei-Drift, doppelten IDs, Manifest-Status-/`resolverRef`-Drift und verbotenen Freigabe-Flags.
+Fehlende CardImplementation-Dateien sind im laufenden Restplan informativ und schlagen den Test nicht fehl. Der Test schlägt bei Konsistenzfehlern fehl, insbesondere bei fehlender oder falscher `cardDefinitionId`, unbekannten Proteus-IDs, Registry-/Datei-Drift, doppelten IDs, Manifest-Status-/`resolverRef`-Drift und Freigabe-Flag-Drift gegenüber dem aktuellen Gate-Stand.
 
 ## PRO003-Ergebnisstand
 

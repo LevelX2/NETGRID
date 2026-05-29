@@ -7,10 +7,10 @@ Dieser Plan ist der führende Zuschnitt für die weitere Proteus-CardImplementat
 ## Ausgangslage
 
 - Proteus-Gesamtbasis: 154 Karten in `data/cards/proteus-cards.json`.
-- Aktueller Stand nach `PRO019`: 154 konkrete Proteus-CardImplementation-Dateien.
+- Aktueller Stand nach `PRO020`: 154 konkrete Proteus-CardImplementation-Dateien.
 - Fehlende konkrete CardImplementation-Dateien: 0.
 - Führende Zählweise bleibt Datei plus Registry plus Manifest-Driftprüfung.
-- Keine Proteus-Karte wird durch diesen Plan `deck_legal`, `format_legal` oder `ai_supported`.
+- Der spätere Human-vs-Human-Decklegal-Gate-Beschluss setzt für alle 154 Proteus-Karten `deck_legal` und `format_legal`; `ai_supported` bleibt für alle Proteus-Karten `false`.
 
 ## Verbindliche Paket-Gates
 

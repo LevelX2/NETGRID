@@ -129,7 +129,9 @@
         "rules-baseline-mvp-0.94"
       ],
       "allowedCardStatuses": [
-        "catalog_ready"
+        "playable",
+        "human_playable",
+        "deck_legal"
       ],
       "maxCopiesPerCard": 3,
       "copyLimit": {
@@ -198,8 +200,8 @@
       },
       "formatLegal": {
         "privateLocalOnly": true,
-        "requiresDeckLegal": false,
-        "requiresHumanPlayable": false
+        "requiresDeckLegal": true,
+        "requiresHumanPlayable": true
       },
       "ai": {
         "requireAiSupportedForAiDecks": true
@@ -225,8 +227,8 @@
         "account_system",
         "ranked_play",
         "ai_playability",
+        "proteus_ai_support",
         "official_asset_usage",
-        "proteus_deck_legal_promotion",
         "card_text_parser"
       ]
     }

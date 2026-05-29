@@ -18,7 +18,7 @@ Führend ist die eindeutige CardImplementation-Abdeckung:
 
 PRO001 hat dafür bereits den Guard in `packages/engine/src/card-implementations/coverage.test.ts` ergänzt: `reconciles Proteus manifest support against concrete files and registry`. Dieser Guard prüft 154 Karten in `data/cards/proteus-cards.json`, 154 Manifest-Einträge, eindeutige CardImplementation-Dateien, Registry-Parität, `implemented`-Manifestparität, `resolverRef = engine:<cardId>` für implementierte Karten und `resolverRef = null` für nicht implementierte Karten. PRO002 etabliert keine zweite konkurrierende Zählweise.
 
-Aktueller Stand nach PRO019:
+Aktueller Stand nach PRO020 und dem Human-vs-Human-Decklegal-Gate:
 
 | Kennzahl | Wert | Führende Quelle |
 | --- | ---: | --- |
@@ -27,6 +27,10 @@ Aktueller Stand nach PRO019:
 | Registry-paritätische Implementierungen | 154 | `coverage.test.ts`-Guard gegen Registry |
 | Fehlende konkrete CardImplementation-Dateien | 0 | Gesamtbasis minus konkrete Dateien |
 | Manifest-`implemented`-Einträge | 154 | Driftprüfung in `data/manifests/proteus-card-support.json` |
+| Manifest-`deck_legal`-/`format_legal`-Einträge | 154 | Human-vs-Human-Gate für `originalset_proteus` |
+| Manifest-`ai_supported`-Einträge | 0 | separates AI-Gate bleibt geschlossen |
+
+Aktueller Gate-Stand: Alle 154 Proteus-Karten sind für Human-vs-Human im expliziten Kartenpool `Originalset & Protheus` `deck_legal` und `format_legal`. `ai_supported` bleibt für alle Proteus-Karten `false`, bis separate AI-Hints, SzenarioRefs und AI-Smokes vorliegen. Ältere PRO-Zeilen mit "keine Decklegalität" beschreiben den damaligen Paketabschluss und werden durch dieses spätere Gate überholt.
 
 PRO006-1 ist ausschließlich Test- und Typ-Härtung für den bereits umgesetzten PRO006-Scope. Es setzt keine neue Proteus-Karte um, ändert keine Manifest-Freigaben und zieht keine PRO010-Mechaniken vor. `trash_program` bleibt für PRO006 ein automatischer Printed-Subroutine-Effekt; Payment- und Zielwahlvarianten gehören zu PRO010.
 
@@ -62,9 +66,9 @@ PRO019-1 ist als reine Rule-Contract-Härtung für den bereits umgesetzten PRO01
 
 PRO019-2 ist als finales Follow-up zur PRO019-1-Härtung erledigt. Pavit-Rez-LegalActions entstehen nur noch, wenn eine gemeinsam legal installierbare HQ-Ersatzmenge existiert; Resolve revalidiert dieselbe Kombinationslegalität inklusive Root-Kapazität, Typregeln und Installationsreihenfolge. Die zentrale Access-Policy ist bewusst abgesichert: HQ-/R&D-Root-Upgrades werden vor gespeicherten HQ-/R&D-Kartenzugriffen queued, Simon reduziert danach nur spätere gespeicherte Zugriffe. Keine neue CardImplementation, keine Manifest-Freigabe und keine Zähländerung.
 
-PRO020 ist als finaler Abschluss-/Verify-Slice erledigt. Der Datei-/Registry-/Manifest-Audit bestätigt 154 Proteus-Karten, 154 konkrete CardImplementation-Dateien, 154 eindeutige `cardDefinitionId`-Werte, 154 Registry-paritätische Implementierungen, 154 Manifest-`implemented`-Einträge, 0 fehlende Dateien und 0 Drift. Activity-Altlasten bleiben ausschließlich Statusreferenzen; sie erzeugen keine konkurrierende Implementierungszählung. Keine neue CardImplementation, keine Manifest-Freigabe und keine Decklegalität, Formatlegalität oder AI-Unterstützung.
+PRO020 ist als finaler Abschluss-/Verify-Slice erledigt. Der Datei-/Registry-/Manifest-Audit bestätigt 154 Proteus-Karten, 154 konkrete CardImplementation-Dateien, 154 eindeutige `cardDefinitionId`-Werte, 154 Registry-paritätische Implementierungen, 154 Manifest-`implemented`-Einträge, 0 fehlende Dateien und 0 Drift. Activity-Altlasten bleiben ausschließlich Statusreferenzen; sie erzeugen keine konkurrierende Implementierungszählung. Die spätere Human-vs-Human-Gate-Entscheidung setzt für alle 154 Proteus-Karten `deck_legal` und `format_legal`; `ai_supported` bleibt geschlossen.
 
-Keine Proteus-Karte wird durch dieses Artefakt `deck_legal`, `format_legal` oder `ai_supported`.
+Dieses Artefakt dokumentiert jetzt den aktuellen Gate-Stand: 154 Proteus-Karten sind Human-vs-Human deck- und formatlegal, 0 Proteus-Karten sind AI-unterstützt.
 
 ## PRO-Restzuschnitt
 
@@ -87,7 +91,7 @@ Der führende Detailplan `proteus-cardimplementation-detailplan-2026-05-26.md` w
 | PRO017 | umgesetzt; PRO017-1 und PRO017-2 Nacharbeiten erledigt | 6 Action-Economy-/Action-Debt-Karten; Implementierungszählung bleibt 144/154. |
 | PRO018 | umgesetzt | 2 Hidden-Zone-Search-/Install-Tutor-Karten; Implementierungszählung steigt auf 146/154. |
 | PRO019 | umgesetzt; PRO019-1 und PRO019-2 Nacharbeiten erledigt | 8 regelvertragliche Baseline-/Utility-Karten; Implementierungszählung steigt auf 154/154. |
-| PRO020 | abgeschlossen | Finaler Proteus-Abschluss nach leerer Restliste; Harness 154/154/0 ohne Drift. |
+| PRO020 | abgeschlossen | Finaler Proteus-Abschluss nach leerer Restliste; Harness 154/154/0 ohne Drift. Danach: Human-vs-Human-Decklegal-Gate setzt 154/154 `deck_legal` und `format_legal`, AI bleibt 0/154. |
 
 ## Geprüfte Activity-Menge
 
